@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.0.0" date="2024-12-19"/>
   <release version="1.0.26" date="2024-12-19">
     <description>
       <p>
@@ -242,8 +243,8 @@
         Initiale Veröffentlichung von GOnnect.
       </p>
       <ul>
-        <li>Renamed from internal code name &#39;GOsSIP&#39;</li>
-        <li xml:lang="de">Umbenannt vom internen Code-Namen &#39;GOsSIP&#39;</li>
+        <li>Renamed from internal code name 'GOsSIP'</li>
+        <li xml:lang="de">Umbenannt vom internen Code-Namen 'GOsSIP'</li>
       </ul>
     </description>
   </release>
