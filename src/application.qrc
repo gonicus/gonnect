@@ -1,0 +1,99 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/">
+        <file>qtquickcontrols2.conf</file>
+    </qresource>
+    <qresource prefix="/audio">
+        <file compress-algo="none" alias="phone-incoming-call.oga">../resources/sounds/phone-incoming-call.oga</file>
+    </qresource>
+    <qresource prefix="/emblems">
+        <file compress-algo="none" alias="call-missed.png">../resources/artwork/emblems/call-missed.png</file>
+        <file compress-algo="none" alias="call-incoming.png">../resources/artwork/emblems/call-incoming.png</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file alias="gonnect.svg">../resources/artwork/gonnect.svg</file>
+        <file alias="gonnect_light.svg">../resources/artwork/gonnect_light.svg</file>
+        <file alias="gonnect_dark.svg">../resources/artwork/gonnect_dark.svg</file>
+        <file alias="gonnect_ring.svg">../resources/artwork/gonnect_ring.svg</file>
+        <file alias="gonnect_line.svg">../resources/artwork/gonnect_line.svg</file>
+        <file alias="jitsi.svg">../resources/artwork/jitsi.svg</file>
+        <file alias="actor.svg">../resources/artwork/icons/actor.svg</file>
+        <file alias="application-menu.svg">../resources/artwork/icons/application-menu.svg</file>
+        <file alias="audio-input-microphone.svg">../resources/artwork/icons/audio-input-microphone.svg</file>
+        <file alias="audio-volume-high.svg">../resources/artwork/icons/audio-volume-high.svg</file>
+        <file alias="audio-volume-low.svg">../resources/artwork/icons/audio-volume-low.svg</file>
+        <file alias="audio-volume-medium.svg">../resources/artwork/icons/audio-volume-medium.svg</file>
+        <file alias="audio-volume-muted.svg">../resources/artwork/icons/audio-volume-muted.svg</file>
+        <file alias="call-incoming.svg">../resources/artwork/icons/call-incoming.svg</file>
+        <file alias="call-missed.svg">../resources/artwork/icons/call-missed.svg</file>
+        <file alias="call-outgoing.svg">../resources/artwork/icons/call-outgoing.svg</file>
+        <file alias="call-start.svg">../resources/artwork/icons/call-start.svg</file>
+        <file alias="call-stop.svg">../resources/artwork/icons/call-stop.svg</file>
+        <file alias="checkbox.svg">../resources/artwork/icons/checkbox.svg</file>
+        <file alias="dialog-cancel.svg">../resources/artwork/icons/dialog-cancel.svg</file>
+        <file alias="document-save.svg">../resources/artwork/icons/document-save.svg</file>
+        <file alias="edit-clear.svg">../resources/artwork/icons/edit-clear.svg</file>
+        <file alias="edit-copy.svg">../resources/artwork/icons/edit-copy.svg</file>
+        <file alias="edit-delete.svg">../resources/artwork/icons/edit-delete.svg</file>
+        <file alias="folder-open.svg">../resources/artwork/icons/folder-open.svg</file>
+        <file alias="go-down.svg">../resources/artwork/icons/go-down.svg</file>
+        <file alias="go-home.svg">../resources/artwork/icons/go-home.svg</file>
+        <file alias="list-add.svg">../resources/artwork/icons/list-add.svg</file>
+        <file alias="media-playback-pause.svg">../resources/artwork/icons/media-playback-pause.svg</file>
+        <file alias="media-playback-start.svg">../resources/artwork/icons/media-playback-start.svg</file>
+        <file alias="microphone-sensitivity-muted.svg">../resources/artwork/icons/microphone-sensitivity-muted.svg</file>
+        <file alias="mobile-close-app.svg">../resources/artwork/icons/mobile-close-app.svg</file>
+        <file alias="object-select-symbolic.svg">../resources/artwork/icons/object-select-symbolic.svg</file>
+        <file alias="settings-configure.svg">../resources/artwork/icons/settings-configure.svg</file>
+        <file alias="showinfo.svg">../resources/artwork/icons/showinfo.svg</file>
+        <file alias="smartphone.svg">../resources/artwork/icons/smartphone.svg</file>
+        <file alias="system-search.svg">../resources/artwork/icons/system-search.svg</file>
+        <file alias="avatar-default.svg">../resources/artwork/icons/avatar-default.svg</file>
+        <file alias="user-home.svg">../resources/artwork/icons/user-home.svg</file>
+        <file alias="user-group-new.svg">../resources/artwork/icons/user-group-new.svg</file>
+        <file alias="view-refresh.svg">../resources/artwork/icons/view-refresh.svg</file>
+        <file alias="preferences-system-network.svg">../resources/artwork/icons/preferences-system-network.svg</file>
+        <file alias="data-success.svg">../resources/artwork/icons/data-success.svg</file>
+    </qresource>
+    <qresource prefix="/icons/dark">
+        <file alias="gonnect.svg">../resources/artwork/gonnect.svg</file>
+        <file alias="jitsi.svg">../resources/artwork/jitsi.svg</file>
+        <file alias="actor.svg">../resources/artwork/icons/dark/actor.svg</file>
+        <file alias="application-menu.svg">../resources/artwork/icons/dark/application-menu.svg</file>
+        <file alias="audio-input-microphone.svg">../resources/artwork/icons/dark/audio-input-microphone.svg</file>
+        <file alias="audio-volume-high.svg">../resources/artwork/icons/dark/audio-volume-high.svg</file>
+        <file alias="audio-volume-low.svg">../resources/artwork/icons/dark/audio-volume-low.svg</file>
+        <file alias="audio-volume-medium.svg">../resources/artwork/icons/dark/audio-volume-medium.svg</file>
+        <file alias="audio-volume-muted.svg">../resources/artwork/icons/dark/audio-volume-muted.svg</file>
+        <file alias="call-incoming.svg">../resources/artwork/icons/dark/call-incoming.svg</file>
+        <file alias="call-missed.svg">../resources/artwork/icons/dark/call-missed.svg</file>
+        <file alias="call-outgoing.svg">../resources/artwork/icons/dark/call-outgoing.svg</file>
+        <file alias="call-start.svg">../resources/artwork/icons/dark/call-start.svg</file>
+        <file alias="call-stop.svg">../resources/artwork/icons/dark/call-stop.svg</file>
+        <file alias="checkbox.svg">../resources/artwork/icons/dark/checkbox.svg</file>
+        <file alias="dialog-cancel.svg">../resources/artwork/icons/dark/dialog-cancel.svg</file>
+        <file alias="document-save.svg">../resources/artwork/icons/dark/document-save.svg</file>
+        <file alias="edit-clear.svg">../resources/artwork/icons/dark/edit-clear.svg</file>
+        <file alias="edit-copy.svg">../resources/artwork/icons/dark/edit-copy.svg</file>
+        <file alias="edit-delete.svg">../resources/artwork/icons/dark/edit-delete.svg</file>
+        <file alias="folder-open.svg">../resources/artwork/icons/dark/folder-open.svg</file>
+        <file alias="go-down.svg">../resources/artwork/icons/dark/go-down.svg</file>
+        <file alias="go-home.svg">../resources/artwork/icons/dark/go-home.svg</file>
+        <file alias="list-add.svg">../resources/artwork/icons/dark/list-add.svg</file>
+        <file alias="media-playback-pause.svg">../resources/artwork/icons/dark/media-playback-pause.svg</file>
+        <file alias="media-playback-start.svg">../resources/artwork/icons/dark/media-playback-start.svg</file>
+        <file alias="microphone-sensitivity-muted.svg">../resources/artwork/icons/dark/microphone-sensitivity-muted.svg</file>
+        <file alias="mobile-close-app.svg">../resources/artwork/icons/dark/mobile-close-app.svg</file>
+        <file alias="object-select-symbolic.svg">../resources/artwork/icons/dark/object-select-symbolic.svg</file>
+        <file alias="settings-configure.svg">../resources/artwork/icons/dark/settings-configure.svg</file>
+        <file alias="showinfo.svg">../resources/artwork/icons/dark/showinfo.svg</file>
+        <file alias="smartphone.svg">../resources/artwork/icons/dark/smartphone.svg</file>
+        <file alias="system-search.svg">../resources/artwork/icons/dark/system-search.svg</file>
+        <file alias="avatar-default.svg">../resources/artwork/icons/dark/avatar-default.svg</file>
+        <file alias="user-home.svg">../resources/artwork/icons/dark/user-home.svg</file>
+        <file alias="user-group-new.svg">../resources/artwork/icons/dark/user-group-new.svg</file>
+        <file alias="view-refresh.svg">../resources/artwork/icons/dark/view-refresh.svg</file>
+        <file alias="preferences-system-network.svg">../resources/artwork/icons/preferences-system-network.svg</file>
+        <file alias="data-success.svg">../resources/artwork/icons/data-success.svg</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,1040 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QPH>
+<QPH sourcelanguage="en_US" language="de_DE">
+  <phrase>
+    <source>Ascension Island</source>
+    <target>Ascension</target>
+  </phrase>
+  <phrase>
+    <source>Andorra</source>
+    <target>Andorra</target>
+  </phrase>
+  <phrase>
+    <source>United Arab Emirates</source>
+    <target>Vereinigte Arabische Emirate</target>
+  </phrase>
+  <phrase>
+    <source>Afghanistan</source>
+    <target>Afghanistan</target>
+  </phrase>
+  <phrase>
+    <source>Antigua &amp; Barbuda</source>
+    <target>Antigua und Barbuda</target>
+  </phrase>
+  <phrase>
+    <source>Anguilla</source>
+    <target>Anguilla</target>
+  </phrase>
+  <phrase>
+    <source>Albania</source>
+    <target>Albanien</target>
+  </phrase>
+  <phrase>
+    <source>Armenia</source>
+    <target>Armenien</target>
+  </phrase>
+  <phrase>
+    <source>Netherlands Antilles</source>
+    <target>Niederländische Antillen</target>
+  </phrase>
+  <phrase>
+    <source>Angola</source>
+    <target>Angola</target>
+  </phrase>
+  <phrase>
+    <source>Antarctica</source>
+    <target>Antarktis</target>
+  </phrase>
+  <phrase>
+    <source>Argentina</source>
+    <target>Argentinien</target>
+  </phrase>
+  <phrase>
+    <source>American Samoa</source>
+    <target>Amerikanisch-Samoa</target>
+  </phrase>
+  <phrase>
+    <source>Austria</source>
+    <target>Österreich</target>
+  </phrase>
+  <phrase>
+    <source>Australia</source>
+    <target>Australien</target>
+  </phrase>
+  <phrase>
+    <source>Aruba</source>
+    <target>Aruba</target>
+  </phrase>
+  <phrase>
+    <source>Åland Islands</source>
+    <target>Åland-Inseln</target>
+  </phrase>
+  <phrase>
+    <source>Azerbaijan</source>
+    <target>Aserbaidschan</target>
+  </phrase>
+  <phrase>
+    <source>Bosnia &amp; Herzegovina</source>
+    <target>Bosnien und Herzegowina</target>
+  </phrase>
+  <phrase>
+    <source>Barbados</source>
+    <target>Barbados</target>
+  </phrase>
+  <phrase>
+    <source>Bangladesh</source>
+    <target>Bangladesch</target>
+  </phrase>
+  <phrase>
+    <source>Belgium</source>
+    <target>Belgien</target>
+  </phrase>
+  <phrase>
+    <source>Burkina Faso</source>
+    <target>Burkina Faso</target>
+  </phrase>
+  <phrase>
+    <source>Bulgaria</source>
+    <target>Bulgarien</target>
+  </phrase>
+  <phrase>
+    <source>Bahrain</source>
+    <target>Bahrain</target>
+  </phrase>
+  <phrase>
+    <source>Burundi</source>
+    <target>Burundi</target>
+  </phrase>
+  <phrase>
+    <source>Benin</source>
+    <target>Benin</target>
+  </phrase>
+  <phrase>
+    <source>St. Barthélemy</source>
+    <target>St. Barthélemy</target>
+  </phrase>
+  <phrase>
+    <source>Bermuda</source>
+    <target>Bermuda</target>
+  </phrase>
+  <phrase>
+    <source>Brunei</source>
+    <target>Brunei Darussalam</target>
+  </phrase>
+  <phrase>
+    <source>Bolivia</source>
+    <target>Bolivien</target>
+  </phrase>
+  <phrase>
+    <source>Caribbean Netherlands</source>
+    <target>Karibische Niederlande</target>
+  </phrase>
+  <phrase>
+    <source>Brazil</source>
+    <target>Brasilien</target>
+  </phrase>
+  <phrase>
+    <source>Bahamas</source>
+    <target>Bahamas</target>
+  </phrase>
+  <phrase>
+    <source>Bhutan</source>
+    <target>Bhutan</target>
+  </phrase>
+  <phrase>
+    <source>Bouvet Island</source>
+    <target>Bouvetinsel</target>
+  </phrase>
+  <phrase>
+    <source>Botswana</source>
+    <target>Botsuana</target>
+  </phrase>
+  <phrase>
+    <source>Belarus</source>
+    <target>Belarus</target>
+  </phrase>
+  <phrase>
+    <source>Belize</source>
+    <target>Belize</target>
+  </phrase>
+  <phrase>
+    <source>Canada</source>
+    <target>Kanada</target>
+  </phrase>
+  <phrase>
+    <source>Cocos (Keeling) Islands</source>
+    <target>Kokosinseln</target>
+  </phrase>
+  <phrase>
+    <source>Congo - Kinshasa</source>
+    <target>Kongo-Kinshasa</target>
+  </phrase>
+  <phrase>
+    <source>Central African Republic</source>
+    <target>Zentralafrikanische Republik</target>
+  </phrase>
+  <phrase>
+    <source>Congo - Brazzaville</source>
+    <target>Kongo-Brazzaville</target>
+  </phrase>
+  <phrase>
+    <source>Switzerland</source>
+    <target>Schweiz</target>
+  </phrase>
+  <phrase>
+    <source>Côte d’Ivoire</source>
+    <target>Côte d’Ivoire</target>
+  </phrase>
+  <phrase>
+    <source>Cook Islands</source>
+    <target>Cookinseln</target>
+  </phrase>
+  <phrase>
+    <source>Chile</source>
+    <target>Chile</target>
+  </phrase>
+  <phrase>
+    <source>Cameroon</source>
+    <target>Kamerun</target>
+  </phrase>
+  <phrase>
+    <source>China</source>
+    <target>China</target>
+  </phrase>
+  <phrase>
+    <source>Colombia</source>
+    <target>Kolumbien</target>
+  </phrase>
+  <phrase>
+    <source>Clipperton Island</source>
+    <target>Clipperton-Insel</target>
+  </phrase>
+  <phrase>
+    <source>Costa Rica</source>
+    <target>Costa Rica</target>
+  </phrase>
+  <phrase>
+    <source>Cuba</source>
+    <target>Kuba</target>
+  </phrase>
+  <phrase>
+    <source>Cape Verde</source>
+    <target>Kap Verde</target>
+  </phrase>
+  <phrase>
+    <source>Curaçao</source>
+    <target>Curaçao</target>
+  </phrase>
+  <phrase>
+    <source>Christmas Island</source>
+    <target>Weihnachtsinsel</target>
+  </phrase>
+  <phrase>
+    <source>Cyprus</source>
+    <target>Zypern</target>
+  </phrase>
+  <phrase>
+    <source>Czech Republic</source>
+    <target>Tschechische Republik</target>
+  </phrase>
+  <phrase>
+    <source>Germany</source>
+    <target>Deutschland</target>
+  </phrase>
+  <phrase>
+    <source>Diego Garcia</source>
+    <target>Diego Garcia</target>
+  </phrase>
+  <phrase>
+    <source>Djibouti</source>
+    <target>Dschibuti</target>
+  </phrase>
+  <phrase>
+    <source>Denmark</source>
+    <target>Dänemark</target>
+  </phrase>
+  <phrase>
+    <source>Dominica</source>
+    <target>Dominica</target>
+  </phrase>
+  <phrase>
+    <source>Dominican Republic</source>
+    <target>Dominikanische Republik</target>
+  </phrase>
+  <phrase>
+    <source>Algeria</source>
+    <target>Algerien</target>
+  </phrase>
+  <phrase>
+    <source>Ceuta &amp; Melilla</source>
+    <target>Ceuta und Melilla</target>
+  </phrase>
+  <phrase>
+    <source>Ecuador</source>
+    <target>Ecuador</target>
+  </phrase>
+  <phrase>
+    <source>Estonia</source>
+    <target>Estland</target>
+  </phrase>
+  <phrase>
+    <source>Egypt</source>
+    <target>Ägypten</target>
+  </phrase>
+  <phrase>
+    <source>Western Sahara</source>
+    <target>Westsahara</target>
+  </phrase>
+  <phrase>
+    <source>Eritrea</source>
+    <target>Eritrea</target>
+  </phrase>
+  <phrase>
+    <source>Spain</source>
+    <target>Spanien</target>
+  </phrase>
+  <phrase>
+    <source>Ethiopia</source>
+    <target>Äthiopien</target>
+  </phrase>
+  <phrase>
+    <source>European Union</source>
+    <target>Europäische Union</target>
+  </phrase>
+  <phrase>
+    <source>Finland</source>
+    <target>Finnland</target>
+  </phrase>
+  <phrase>
+    <source>Fiji</source>
+    <target>Fidschi</target>
+  </phrase>
+  <phrase>
+    <source>Falkland Islands</source>
+    <target>Falklandinseln</target>
+  </phrase>
+  <phrase>
+    <source>Micronesia</source>
+    <target>Mikronesien</target>
+  </phrase>
+  <phrase>
+    <source>Faroe Islands</source>
+    <target>Färöer</target>
+  </phrase>
+  <phrase>
+    <source>France</source>
+    <target>Frankreich</target>
+  </phrase>
+  <phrase>
+    <source>Gabon</source>
+    <target>Gabun</target>
+  </phrase>
+  <phrase>
+    <source>United Kingdom</source>
+    <target>Vereinigtes Königreich</target>
+  </phrase>
+  <phrase>
+    <source>Grenada</source>
+    <target>Grenada</target>
+  </phrase>
+  <phrase>
+    <source>Georgia</source>
+    <target>Georgien</target>
+  </phrase>
+  <phrase>
+    <source>French Guiana</source>
+    <target>Französisch-Guayana</target>
+  </phrase>
+  <phrase>
+    <source>Guernsey</source>
+    <target>Guernsey</target>
+  </phrase>
+  <phrase>
+    <source>Ghana</source>
+    <target>Ghana</target>
+  </phrase>
+  <phrase>
+    <source>Gibraltar</source>
+    <target>Gibraltar</target>
+  </phrase>
+  <phrase>
+    <source>Greenland</source>
+    <target>Grönland</target>
+  </phrase>
+  <phrase>
+    <source>Gambia</source>
+    <target>Gambia</target>
+  </phrase>
+  <phrase>
+    <source>Guinea</source>
+    <target>Guinea</target>
+  </phrase>
+  <phrase>
+    <source>Guadeloupe</source>
+    <target>Guadeloupe</target>
+  </phrase>
+  <phrase>
+    <source>Equatorial Guinea</source>
+    <target>Äquatorialguinea</target>
+  </phrase>
+  <phrase>
+    <source>Greece</source>
+    <target>Griechenland</target>
+  </phrase>
+  <phrase>
+    <source>South Georgia &amp; South Sandwich Islands</source>
+    <target>Südgeorgien und die Südlichen Sandwichinseln</target>
+  </phrase>
+  <phrase>
+    <source>Guatemala</source>
+    <target>Guatemala</target>
+  </phrase>
+  <phrase>
+    <source>Guam</source>
+    <target>Guam</target>
+  </phrase>
+  <phrase>
+    <source>Guinea-Bissau</source>
+    <target>Guinea-Bissau</target>
+  </phrase>
+  <phrase>
+    <source>Guyana</source>
+    <target>Guyana</target>
+  </phrase>
+  <phrase>
+    <source>Hong Kong SAR China</source>
+    <target>Sonderverwaltungszone Hongkong</target>
+  </phrase>
+  <phrase>
+    <source>Heard &amp; McDonald Islands</source>
+    <target>Heard- und McDonald-Inseln</target>
+  </phrase>
+  <phrase>
+    <source>Honduras</source>
+    <target>Honduras</target>
+  </phrase>
+  <phrase>
+    <source>Croatia</source>
+    <target>Kroatien</target>
+  </phrase>
+  <phrase>
+    <source>Haiti</source>
+    <target>Haiti</target>
+  </phrase>
+  <phrase>
+    <source>Hungary</source>
+    <target>Ungarn</target>
+  </phrase>
+  <phrase>
+    <source>Canary Islands</source>
+    <target>Kanarische Inseln</target>
+  </phrase>
+  <phrase>
+    <source>Indonesia</source>
+    <target>Indonesien</target>
+  </phrase>
+  <phrase>
+    <source>Ireland</source>
+    <target>Irland</target>
+  </phrase>
+  <phrase>
+    <source>Israel</source>
+    <target>Israel</target>
+  </phrase>
+  <phrase>
+    <source>Isle of Man</source>
+    <target>Isle of Man</target>
+  </phrase>
+  <phrase>
+    <source>India</source>
+    <target>Indien</target>
+  </phrase>
+  <phrase>
+    <source>British Indian Ocean Territory</source>
+    <target>Britisches Territorium im Indischen Ozean</target>
+  </phrase>
+  <phrase>
+    <source>Iraq</source>
+    <target>Irak</target>
+  </phrase>
+  <phrase>
+    <source>Iran</source>
+    <target>Iran</target>
+  </phrase>
+  <phrase>
+    <source>Iceland</source>
+    <target>Island</target>
+  </phrase>
+  <phrase>
+    <source>Italy</source>
+    <target>Italien</target>
+  </phrase>
+  <phrase>
+    <source>Jersey</source>
+    <target>Jersey</target>
+  </phrase>
+  <phrase>
+    <source>Jamaica</source>
+    <target>Jamaika</target>
+  </phrase>
+  <phrase>
+    <source>Jordan</source>
+    <target>Jordanien</target>
+  </phrase>
+  <phrase>
+    <source>Japan</source>
+    <target>Japan</target>
+  </phrase>
+  <phrase>
+    <source>Kenya</source>
+    <target>Kenia</target>
+  </phrase>
+  <phrase>
+    <source>Kyrgyzstan</source>
+    <target>Kirgisistan</target>
+  </phrase>
+  <phrase>
+    <source>Cambodia</source>
+    <target>Kambodscha</target>
+  </phrase>
+  <phrase>
+    <source>Kiribati</source>
+    <target>Kiribati</target>
+  </phrase>
+  <phrase>
+    <source>Comoros</source>
+    <target>Komoren</target>
+  </phrase>
+  <phrase>
+    <source>St. Kitts &amp; Nevis</source>
+    <target>St. Kitts und Nevis</target>
+  </phrase>
+  <phrase>
+    <source>North Korea</source>
+    <target>Demokratische Volksrepublik Korea</target>
+  </phrase>
+  <phrase>
+    <source>South Korea</source>
+    <target>Republik Korea</target>
+  </phrase>
+  <phrase>
+    <source>Kuwait</source>
+    <target>Kuwait</target>
+  </phrase>
+  <phrase>
+    <source>Cayman Islands</source>
+    <target>Kaimaninseln</target>
+  </phrase>
+  <phrase>
+    <source>Kazakhstan</source>
+    <target>Kasachstan</target>
+  </phrase>
+  <phrase>
+    <source>Laos</source>
+    <target>Laos</target>
+  </phrase>
+  <phrase>
+    <source>Lebanon</source>
+    <target>Libanon</target>
+  </phrase>
+  <phrase>
+    <source>St. Lucia</source>
+    <target>St. Lucia</target>
+  </phrase>
+  <phrase>
+    <source>Liechtenstein</source>
+    <target>Liechtenstein</target>
+  </phrase>
+  <phrase>
+    <source>Sri Lanka</source>
+    <target>Sri Lanka</target>
+  </phrase>
+  <phrase>
+    <source>Liberia</source>
+    <target>Liberia</target>
+  </phrase>
+  <phrase>
+    <source>Lesotho</source>
+    <target>Lesotho</target>
+  </phrase>
+  <phrase>
+    <source>Lithuania</source>
+    <target>Litauen</target>
+  </phrase>
+  <phrase>
+    <source>Luxembourg</source>
+    <target>Luxemburg</target>
+  </phrase>
+  <phrase>
+    <source>Latvia</source>
+    <target>Lettland</target>
+  </phrase>
+  <phrase>
+    <source>Libya</source>
+    <target>Libyen</target>
+  </phrase>
+  <phrase>
+    <source>Morocco</source>
+    <target>Marokko</target>
+  </phrase>
+  <phrase>
+    <source>Monaco</source>
+    <target>Monaco</target>
+  </phrase>
+  <phrase>
+    <source>Moldova</source>
+    <target>Republik Moldau</target>
+  </phrase>
+  <phrase>
+    <source>Montenegro</source>
+    <target>Montenegro</target>
+  </phrase>
+  <phrase>
+    <source>St. Martin</source>
+    <target>St. Martin</target>
+  </phrase>
+  <phrase>
+    <source>Madagascar</source>
+    <target>Madagaskar</target>
+  </phrase>
+  <phrase>
+    <source>Marshall Islands</source>
+    <target>Marshallinseln</target>
+  </phrase>
+  <phrase>
+    <source>Macedonia</source>
+    <target>Mazedonien</target>
+  </phrase>
+  <phrase>
+    <source>Mali</source>
+    <target>Mali</target>
+  </phrase>
+  <phrase>
+    <source>Myanmar (Burma)</source>
+    <target>Myanmar</target>
+  </phrase>
+  <phrase>
+    <source>Mongolia</source>
+    <target>Mongolei</target>
+  </phrase>
+  <phrase>
+    <source>Macau SAR China</source>
+    <target>Sonderverwaltungsregion Macau</target>
+  </phrase>
+  <phrase>
+    <source>Northern Mariana Islands</source>
+    <target>Nördliche Marianen</target>
+  </phrase>
+  <phrase>
+    <source>Martinique</source>
+    <target>Martinique</target>
+  </phrase>
+  <phrase>
+    <source>Mauritania</source>
+    <target>Mauretanien</target>
+  </phrase>
+  <phrase>
+    <source>Montserrat</source>
+    <target>Montserrat</target>
+  </phrase>
+  <phrase>
+    <source>Malta</source>
+    <target>Malta</target>
+  </phrase>
+  <phrase>
+    <source>Mauritius</source>
+    <target>Mauritius</target>
+  </phrase>
+  <phrase>
+    <source>Maldives</source>
+    <target>Malediven</target>
+  </phrase>
+  <phrase>
+    <source>Malawi</source>
+    <target>Malawi</target>
+  </phrase>
+  <phrase>
+    <source>Mexico</source>
+    <target>Mexiko</target>
+  </phrase>
+  <phrase>
+    <source>Malaysia</source>
+    <target>Malaysia</target>
+  </phrase>
+  <phrase>
+    <source>Mozambique</source>
+    <target>Mosambik</target>
+  </phrase>
+  <phrase>
+    <source>Namibia</source>
+    <target>Namibia</target>
+  </phrase>
+  <phrase>
+    <source>New Caledonia</source>
+    <target>Neukaledonien</target>
+  </phrase>
+  <phrase>
+    <source>Niger</source>
+    <target>Niger</target>
+  </phrase>
+  <phrase>
+    <source>Norfolk Island</source>
+    <target>Norfolkinsel</target>
+  </phrase>
+  <phrase>
+    <source>Nigeria</source>
+    <target>Nigeria</target>
+  </phrase>
+  <phrase>
+    <source>Nicaragua</source>
+    <target>Nicaragua</target>
+  </phrase>
+  <phrase>
+    <source>Netherlands</source>
+    <target>Niederlande</target>
+  </phrase>
+  <phrase>
+    <source>Norway</source>
+    <target>Norwegen</target>
+  </phrase>
+  <phrase>
+    <source>Nepal</source>
+    <target>Nepal</target>
+  </phrase>
+  <phrase>
+    <source>Nauru</source>
+    <target>Nauru</target>
+  </phrase>
+  <phrase>
+    <source>Niue</source>
+    <target>Niue</target>
+  </phrase>
+  <phrase>
+    <source>New Zealand</source>
+    <target>Neuseeland</target>
+  </phrase>
+  <phrase>
+    <source>Oman</source>
+    <target>Oman</target>
+  </phrase>
+  <phrase>
+    <source>Panama</source>
+    <target>Panama</target>
+  </phrase>
+  <phrase>
+    <source>Peru</source>
+    <target>Peru</target>
+  </phrase>
+  <phrase>
+    <source>French Polynesia</source>
+    <target>Französisch-Polynesien</target>
+  </phrase>
+  <phrase>
+    <source>Papua New Guinea</source>
+    <target>Papua-Neuguinea</target>
+  </phrase>
+  <phrase>
+    <source>Philippines</source>
+    <target>Philippinen</target>
+  </phrase>
+  <phrase>
+    <source>Pakistan</source>
+    <target>Pakistan</target>
+  </phrase>
+  <phrase>
+    <source>Poland</source>
+    <target>Polen</target>
+  </phrase>
+  <phrase>
+    <source>St. Pierre &amp; Miquelon</source>
+    <target>St. Pierre und Miquelon</target>
+  </phrase>
+  <phrase>
+    <source>Pitcairn Islands</source>
+    <target>Pitcairninseln</target>
+  </phrase>
+  <phrase>
+    <source>Puerto Rico</source>
+    <target>Puerto Rico</target>
+  </phrase>
+  <phrase>
+    <source>Palestinian Territories</source>
+    <target>Palästinensische Autonomiegebiete</target>
+  </phrase>
+  <phrase>
+    <source>Portugal</source>
+    <target>Portugal</target>
+  </phrase>
+  <phrase>
+    <source>Palau</source>
+    <target>Palau</target>
+  </phrase>
+  <phrase>
+    <source>Paraguay</source>
+    <target>Paraguay</target>
+  </phrase>
+  <phrase>
+    <source>Qatar</source>
+    <target>Katar</target>
+  </phrase>
+  <phrase>
+    <source>Outlying Oceania</source>
+    <target>Äußeres Ozeanien</target>
+  </phrase>
+  <phrase>
+    <source>Réunion</source>
+    <target>Réunion</target>
+  </phrase>
+  <phrase>
+    <source>Romania</source>
+    <target>Rumänien</target>
+  </phrase>
+  <phrase>
+    <source>Serbia</source>
+    <target>Serbien</target>
+  </phrase>
+  <phrase>
+    <source>Russia</source>
+    <target>Russische Föderation</target>
+  </phrase>
+  <phrase>
+    <source>Rwanda</source>
+    <target>Ruanda</target>
+  </phrase>
+  <phrase>
+    <source>Saudi Arabia</source>
+    <target>Saudi-Arabien</target>
+  </phrase>
+  <phrase>
+    <source>Solomon Islands</source>
+    <target>Salomonen</target>
+  </phrase>
+  <phrase>
+    <source>Seychelles</source>
+    <target>Seychellen</target>
+  </phrase>
+  <phrase>
+    <source>Sudan</source>
+    <target>Sudan</target>
+  </phrase>
+  <phrase>
+    <source>Sweden</source>
+    <target>Schweden</target>
+  </phrase>
+  <phrase>
+    <source>Singapore</source>
+    <target>Singapur</target>
+  </phrase>
+  <phrase>
+    <source>St. Helena</source>
+    <target>St. Helena</target>
+  </phrase>
+  <phrase>
+    <source>Slovenia</source>
+    <target>Slowenien</target>
+  </phrase>
+  <phrase>
+    <source>Svalbard &amp; Jan Mayen</source>
+    <target>Svalbard und Jan Mayen</target>
+  </phrase>
+  <phrase>
+    <source>Slovakia</source>
+    <target>Slowakei</target>
+  </phrase>
+  <phrase>
+    <source>Sierra Leone</source>
+    <target>Sierra Leone</target>
+  </phrase>
+  <phrase>
+    <source>San Marino</source>
+    <target>San Marino</target>
+  </phrase>
+  <phrase>
+    <source>Senegal</source>
+    <target>Senegal</target>
+  </phrase>
+  <phrase>
+    <source>Somalia</source>
+    <target>Somalia</target>
+  </phrase>
+  <phrase>
+    <source>Suriname</source>
+    <target>Suriname</target>
+  </phrase>
+  <phrase>
+    <source>South Sudan</source>
+    <target>Südsudan</target>
+  </phrase>
+  <phrase>
+    <source>São Tomé &amp; Príncipe</source>
+    <target>São Tomé und Príncipe</target>
+  </phrase>
+  <phrase>
+    <source>El Salvador</source>
+    <target>El Salvador</target>
+  </phrase>
+  <phrase>
+    <source>Saint Martin</source>
+    <target>Sint Maarten</target>
+  </phrase>
+  <phrase>
+    <source>Syria</source>
+    <target>Syrien</target>
+  </phrase>
+  <phrase>
+    <source>Swaziland</source>
+    <target>Swasiland</target>
+  </phrase>
+  <phrase>
+    <source>Tristan da Cunha</source>
+    <target>Tristan da Cunha</target>
+  </phrase>
+  <phrase>
+    <source>Turks &amp; Caicos Islands</source>
+    <target>Turks- und Caicosinseln</target>
+  </phrase>
+  <phrase>
+    <source>Chad</source>
+    <target>Tschad</target>
+  </phrase>
+  <phrase>
+    <source>French Southern Territories</source>
+    <target>Französische Süd- und Antarktisgebiete</target>
+  </phrase>
+  <phrase>
+    <source>Togo</source>
+    <target>Togo</target>
+  </phrase>
+  <phrase>
+    <source>Thailand</source>
+    <target>Thailand</target>
+  </phrase>
+  <phrase>
+    <source>Tajikistan</source>
+    <target>Tadschikistan</target>
+  </phrase>
+  <phrase>
+    <source>Tokelau</source>
+    <target>Tokelau</target>
+  </phrase>
+  <phrase>
+    <source>Timor-Leste</source>
+    <target>Timor-Leste</target>
+  </phrase>
+  <phrase>
+    <source>Turkmenistan</source>
+    <target>Turkmenistan</target>
+  </phrase>
+  <phrase>
+    <source>Tunisia</source>
+    <target>Tunesien</target>
+  </phrase>
+  <phrase>
+    <source>Tonga</source>
+    <target>Tonga</target>
+  </phrase>
+  <phrase>
+    <source>Turkey</source>
+    <target>Türkei</target>
+  </phrase>
+  <phrase>
+    <source>Trinidad &amp; Tobago</source>
+    <target>Trinidad und Tobago</target>
+  </phrase>
+  <phrase>
+    <source>Tuvalu</source>
+    <target>Tuvalu</target>
+  </phrase>
+  <phrase>
+    <source>Taiwan</source>
+    <target>Taiwan</target>
+  </phrase>
+  <phrase>
+    <source>Tanzania</source>
+    <target>Tansania</target>
+  </phrase>
+  <phrase>
+    <source>Ukraine</source>
+    <target>Ukraine</target>
+  </phrase>
+  <phrase>
+    <source>Uganda</source>
+    <target>Uganda</target>
+  </phrase>
+  <phrase>
+    <source>U.S. Outlying Islands</source>
+    <target>Amerikanisch-Ozeanien</target>
+  </phrase>
+  <phrase>
+    <source>United States</source>
+    <target>Vereinigte Staaten</target>
+  </phrase>
+  <phrase>
+    <source>Uruguay</source>
+    <target>Uruguay</target>
+  </phrase>
+  <phrase>
+    <source>Uzbekistan</source>
+    <target>Usbekistan</target>
+  </phrase>
+  <phrase>
+    <source>Vatican City</source>
+    <target>Vatikanstadt</target>
+  </phrase>
+  <phrase>
+    <source>St. Vincent &amp; Grenadines</source>
+    <target>St. Vincent und die Grenadinen</target>
+  </phrase>
+  <phrase>
+    <source>Venezuela</source>
+    <target>Venezuela</target>
+  </phrase>
+  <phrase>
+    <source>British Virgin Islands</source>
+    <target>Britische Jungferninseln</target>
+  </phrase>
+  <phrase>
+    <source>U.S. Virgin Islands</source>
+    <target>Amerikanische Jungferninseln</target>
+  </phrase>
+  <phrase>
+    <source>Vietnam</source>
+    <target>Vietnam</target>
+  </phrase>
+  <phrase>
+    <source>Vanuatu</source>
+    <target>Vanuatu</target>
+  </phrase>
+  <phrase>
+    <source>Wallis &amp; Futuna</source>
+    <target>Wallis und Futuna</target>
+  </phrase>
+  <phrase>
+    <source>Samoa</source>
+    <target>Samoa</target>
+  </phrase>
+  <phrase>
+    <source>Kosovo</source>
+    <target>Kosovo</target>
+  </phrase>
+  <phrase>
+    <source>Yemen</source>
+    <target>Jemen</target>
+  </phrase>
+  <phrase>
+    <source>Mayotte</source>
+    <target>Mayotte</target>
+  </phrase>
+  <phrase>
+    <source>South Africa</source>
+    <target>Südafrika</target>
+  </phrase>
+  <phrase>
+    <source>Zambia</source>
+    <target>Sambia</target>
+  </phrase>
+  <phrase>
+    <source>Zimbabwe</source>
+    <target>Simbabwe</target>
+  </phrase>
+</QPH>

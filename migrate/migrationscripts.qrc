@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/migrate/scripts">
+        <file>callhistory/001.sql</file>
+        <file>callhistory/002.sql</file>
+        <file>callhistory/003.sql</file>
+        <file>callhistory/004.sql</file>
+        <file>callhistory/005.sql</file>
+    </qresource>
+</RCC>

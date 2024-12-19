@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>de.gonicus.gonnect</id>
+  <name>GOnnect</name>
+  <project_license>GPL-2.0-or-later</project_license>
+  <metadata_license>MIT</metadata_license>
+
+  <summary>Simple, integrated SIP client</summary>
+  <summary xml:lang="de">Einfacher integrierter SIP Client</summary>
+  <developer id="de.gonicus">
+    <name>GONICUS GmbH</name>
+  </developer>
+  <content_rating type="oars-1.1" />
+  <description>
+    <p>
+      GOnnect is an opinionated, simple, easy to use VoIP client, designed for
+      Flatpak based installations. What is special about GOnnect is that is
+      meant to be provisioned.
+    </p>
+    <p xml:lang="de">
+      GOnnect is an opinionated, simple, easy to use VoIP client, designed for
+      Flatpak based installations. What is special about GOnnect is that is
+      meant to be provisioned.
+    </p>
+    <p>
+      For that reason it has no configuration wizard or settings dialog and
+      requires a working configuration file in place.
+    </p>
+    <p xml:lang="de">
+      For that reason it has no configuration wizard or settings dialog and
+      requires a working configuration file in place.
+    </p>
+    <p>
+      Here's a short feature list:
+    </p>
+    <p xml:lang="de">
+      Here's a short feature list:
+    </p>
+    <ul>
+      <li>Call forwarding</li>
+      <li xml:lang="de">Call forwarding</li>
+      <li>Conference calls with three parties</li>
+      <li xml:lang="de">Conference calls with three parties</li>
+      <li>LDAP address sources</li>
+      <li xml:lang="de">LDAP address sources</li>
+      <li>Busy state for supported sources</li>
+      <li xml:lang="de">Busy state for supported sources</li>
+      <li>Configurable identities for outgoing calls</li>
+      <li xml:lang="de">Configurable identities for outgoing calls</li>
+      <li>Configurable busy on active call</li>
+      <li xml:lang="de">Configurable busy on active call</li>
+      <li>Configurable Togglers (i.e. for call queues, CFNL, etc.)</li>
+      <li xml:lang="de">Configurable Togglers (i.e. for call queues, CFNL, etc.)</li>
+      <li>Custom audio device profiles or managed by your system</li>
+      <li xml:lang="de">Custom audio device profiles or managed by your system</li>
+      <li>System Tray integration for most common functions / favorites / most frequent calls</li>
+      <li xml:lang="de">System Tray integration for most common functions / favorites / most frequent calls</li>
+      <li>mpris for stopping other audio sources on incoming calls</li>
+      <li xml:lang="de">mpris for stopping other audio sources on incoming calls</li>
+      <li>GNOME Search-Provider support</li>
+      <li xml:lang="de">GNOME Search-Provider support</li>
+      <li>KRunner search plugin (requires next generation flatpak)</li>
+      <li xml:lang="de">KRunner search plugin (requires next generation flatpak)</li>
+      <li>Desktop Actions / Autostart</li>
+      <li xml:lang="de">Desktop Actions / Autostart</li>
+      <li>Global Keyboard Shortcuts (if supported by your Desktop environment)</li>
+      <li xml:lang="de">Global Keyboard Shortcuts (if supported by your Desktop environment)</li>
+      <li>Keeping the screensaver from droppin' in while on the phone</li>
+      <li xml:lang="de">Keeping the screensaver from droppin' in while on the phone</li>
+      <li>Mime-Type registration for `tel:` / `sip:` URLs</li>
+      <li xml:lang="de">Mime-Type registration for `tel:` / `sip:` URLs</li>
+      <li>Light/Dark mode</li>
+      <li xml:lang="de">Light/Dark mode</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">de.gonicus.gonnect.desktop</launchable>
+
+  <categories>
+    <category>Utility</category>
+  </categories>
+
+  <keywords>
+      <keyword>VoIP</keyword>
+      <keyword>SIP</keyword>
+      <keyword>GOnnect</keyword>
+      <keyword>phone</keyword>
+  </keywords>
+
+  <url type="homepage">https://www.gonicus.de</url>
+  <url type="bugtracker">https://www.gonicus.de</url>
+  <url type="help">https://www.gonicus.de</url>
+
+  <provides>
+    <binary>gonnect</binary>
+  </provides>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/gonicus/gonnect/blob/main/media/main-screen.png</image>
+      <caption>Main window, latest history and favorites</caption>
+      <caption xml:lang="de">Hauptfenster, aktueller Verlauf und Favoriten</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/gonicus/gonnect/blob/main/media/call-screen.png</image>
+      <caption>Call window</caption>
+      <caption xml:lang="de">Anruffenster</caption>
+    </screenshot>
+  </screenshots>
+
+  <releases type="external"/>
+
+</component>

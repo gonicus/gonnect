@@ -1,0 +1,15 @@
+{
+    $schema: "https://docs.renovatebot.com/renovate-schema.json",
+    onboarding: false,
+    requireConfig: "ignored",
+    platform: "github",
+    repositories: [
+        "gonicus/gonnect"
+    ],
+    prConcurrentLimit: 0,
+    prHourlyLimit: 5,
+    semanticCommits: "enabled",
+    enabledManagers: [
+        "github-actions",
+    ],
+}

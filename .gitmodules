@@ -1,0 +1,3 @@
+[submodule "external/qca"]
+	path = external/qca
+	url = https://invent.kde.org/libraries/qca.git

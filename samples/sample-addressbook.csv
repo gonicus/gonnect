@@ -1,0 +1,8 @@
+# Name ; Company ; Business Phone Number ; Business Phone Number SIP Subscriptable ; Mobile Phone Number ; Mobile Phone Number SIP Subscriptable ; Home Phone Number ; Home Phone Number SIP Subscriptable
+Juan Pérez;ACME Ltd.;+496990009872;false;;false;;false
+Fulano de Tal;ACME Ltd.;+496990009871;false;;false;;false
+Max Mustermann;Tuna Inc.;+492214712337;true;+4915228817386;false;+494066961337;true
+Erika Mustermann;Tuna Inc.;+492214712345;false;;false;;false
+Pinco Pallino;ACME Ltd.;+496990009876;false;;false;;false
+Jan Kowalski;Tuna Inc.;+492214712347;false;;false;;false
+Kari Nordmann;Tuna Inc.;+492214712345;false;;false;;false

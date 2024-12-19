@@ -1,0 +1,6 @@
+hid-rp/hid/page/
+x64
+Debug
+Release
+.vs*
+build*

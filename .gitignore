@@ -1,0 +1,60 @@
+samples/callhistory.db
+
+
+# Used https://www.toptal.com/developers/gitignore/api/qtcreator,vim
+# as a starting point.
+
+### Qt Creator
+
+build/
+repo/
+.flatpak-builder/
+
+# CMake
+CMakeLists.txt.user*
+
+# A listing of all the files included in the project
+*.files
+
+# Include directories
+*.includes
+
+# Project configuration settings like predefined Macros
+*.config
+
+# Qt Creator settings
+*.creator
+
+# User project settings
+*.creator.user*
+
+# Qt Creator backups
+*.autosave
+
+# Flags for Clang Code Model
+*.cxxflags
+*.cflags
+
+
+### Vim
+
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+*~
+
+# Auto-generated tag files
+tags
+
+# Persistent undo
+[._]*.un~

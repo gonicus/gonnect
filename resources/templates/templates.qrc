@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/templates">
+        <file>sample.conf</file>
+    </qresource>
+</RCC>

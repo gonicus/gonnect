@@ -1,0 +1,119 @@
+name: 'Gossip prepare action'
+description: 'Recurring tasks for CI jobs'
+inputs:
+  qt-version:
+    description: 'QT version'
+    required: true
+    default: '6.8.0'
+  qt-only:
+    description: 'Install Qt only, skip other steps'
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: 'latest'
+            
+    - name: Install dependencies
+      shell: bash
+      if: inputs.qt-only == 'false'
+      run: |
+        sudo apt-get update
+        sudo apt install -y libusb-1.0-0-dev uuid-dev libldap-dev libssl-dev libudev-dev ninja-build llvm llvm-dev
+        sudo snap install yq
+    
+    - name: Install git lfs
+      shell: bash
+      run: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ inputs.qt-version }}
+        host: 'linux'
+        target: 'desktop'
+        modules: 'qt5compat qtmultimedia'
+        arch: 'linux_gcc_64'
+        cache: true
+    
+    - name: Get hashes
+      id: hashes
+      shell: bash
+      if: inputs.qt-only == 'false'
+      run: |
+        echo "QCA_HASH=$(git submodule status external/qca | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "HIDAPI_TAG=$(yq '.. | select(has("name")) | select(.name == "hidapi") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
+        echo "PJSIP_TAG=$(yq '.. | select(has("name")) | select(.name == "pjsip") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
+
+    - name: Cache hidapi
+      id: cache-hidapi
+      if: inputs.qt-only == 'false'
+      uses: actions/cache@v4
+      with:
+        path: hidapi
+        key: ${{ steps.hashes.outputs.HIDAPI_TAG }}-hidapi
+
+    - name: Build hidapi
+      shell: bash
+      if: ${{ inputs.qt-only == 'false' && steps.cache-hidapi.outputs.cache-hit != 'true' }}
+      run: |
+        git clone https://github.com/libusb/hidapi.git
+        cd hidapi
+        git checkout ${{ steps.hashes.outputs.HIDAPI_TAG }}
+        mkdir -p build
+        cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+        make
+
+    - name: Install hidapi
+      shell: bash
+      if: inputs.qt-only == 'false'
+      run: |
+        cd hidapi/build
+        sudo make install
+
+    - name: Cache pjsip
+      id: cache-pjsip
+      if: inputs.qt-only == 'false'
+      uses: actions/cache@v4
+      with:
+        path: ${{github.workspace}}/pjproject
+        key: ${{ steps.hashes.outputs.PJSIP_TAG }}-pjsip
+
+    - name: Install pjsip
+      shell: bash
+      if: ${{ inputs.qt-only == 'false' && steps.cache-pjsip.outputs.cache-hit != 'true' }}
+      run: |
+        git clone https://github.com/pjsip/pjproject.git pj-clone
+        cd pj-clone
+        git checkout ${{ steps.hashes.outputs.PJSIP_TAG }}
+        # use config-opts from flatpak manifest
+        echo -n "./configure --prefix=${{github.workspace}}/pjproject " > c
+        yq '.. | select(has("name")) | select(.name == "pjsip") | .config-opts[]' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml | sed -r 's/^([A-Z_]+)=(.+)$/\1="\2"/g' | tr '\n' ' ' >> c
+        bash c
+        cat c
+        make
+        make install
+
+    - name: Cache qca
+      id: cache-qca
+      if: inputs.qt-only == 'false'
+      uses: actions/cache@v4
+      with:
+        path: ${{github.workspace}}/qca
+        key: ${{ steps.hashes.outputs.QCA_HASH }}-qca
+
+    - name: Install qca
+      shell: bash
+      if: ${{ inputs.qt-only == 'false' && steps.cache-qca.outputs.cache-hit != 'true' }}
+      run: |
+        cd external/qca
+        mkdir -p build
+        cd build
+        ${QT_ROOT_DIR}/bin/qt-cmake .. -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/qca -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
+        make 
+        make install
