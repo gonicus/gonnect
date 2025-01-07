@@ -22,10 +22,10 @@ command -v npx >/dev/null 2>&1 || show_error 2 "npx command is missing!"
 # help shows the usage information.
 function help {
     cat <<HELP
-Usage: prepare_new_version.sh <new version> [<commits as JSON>] [options]
+Usage: prepare_new_version.sh <new version> [<commits as Base64 encoded JSON>] [options]
 
 <new version> is a string that conforms to the rules of semantic versioning. E.g.: 1.2.3
-<commits as JSON> contains the commits as JSON object.
+<commits as Base64 encoded JSON> contains the commits as Base64 encoded JSON object.
 
 Options:
     -h  --help  Show this help
@@ -83,7 +83,7 @@ function update_cmakelists {
 
 function create_release_notes {
     # Extract messages
-    MSG=$(jq -rc '.[].message' <<< "$1")
+    MSG=$(base64 -d <<< "$1" | jq -rc '.[].subject')
 
     # Parse messages
     local COMMITS

@@ -6,7 +6,7 @@ plugins:
   - "@semantic-release/github"
   - 
     - "@semantic-release/exec"
-    - prepareCmd: ./scripts/prepare-new-version.sh ${nextRelease.version} '${JSON.stringify(commits)}'
+    - prepareCmd: ./scripts/prepare-new-version.sh ${nextRelease.version} '${Buffer.from(JSON.stringify(commits)).toString('base64')}'
   - "@semantic-release/changelog"
   - 
     - "@semantic-release/git"
