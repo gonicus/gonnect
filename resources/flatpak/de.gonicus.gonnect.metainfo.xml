@@ -97,12 +97,12 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/gonicus/gonnect/blob/main/media/main-screen.png</image>
+      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/main/media/main-screen.png</image>
       <caption>Main window, latest history and favorites</caption>
       <caption xml:lang="de">Hauptfenster, aktueller Verlauf und Favoriten</caption>
     </screenshot>
     <screenshot>
-      <image>https://github.com/gonicus/gonnect/blob/main/media/call-screen.png</image>
+      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/main/media/call-screen.png</image>
       <caption>Call window</caption>
       <caption xml:lang="de">Anruffenster</caption>
     </screenshot>
