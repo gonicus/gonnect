@@ -18,59 +18,62 @@
       meant to be provisioned.
     </p>
     <p xml:lang="de">
-      GOnnect is an opinionated, simple, easy to use VoIP client, designed for
-      Flatpak based installations. What is special about GOnnect is that is
-      meant to be provisioned.
+      GOnnect ist ein eigenständiger, einfacher, leicht zu bedienender VoIP-Client,
+      der für Flatpak-basierte Installationen konzipiert wurde. Das Besondere an
+      GOnnect ist, dass es für Provisionierungen optimiert ist.
     </p>
     <p>
-      For that reason it has no configuration wizard or settings dialog and
-      requires a working configuration file in place.
+      For that reason it has no configuration wizard or SIP settings dialog and
+      requires a working configuration file in place. To assist you in getting
+      started, there are a couple of prepared templates to choose from.
     </p>
     <p xml:lang="de">
-      For that reason it has no configuration wizard or settings dialog and
-      requires a working configuration file in place.
+      Aus diesem Grund gibt es keinen Konfigurationsassistenten oder
+      SIP-Einstellungsdialog. Eine funktionierende Konfigurationsdatei ist
+      erforderlich, um die App zu starten. Um den Einstieg zu erleichtern
+      gibt es eine Reihe von vorbereiteten Vorlagen, aus denen gewählt werden kann.
     </p>
     <p>
       Here's a short feature list:
     </p>
     <p xml:lang="de">
-      Here's a short feature list:
+      Hier ist eine kurze Feature-Liste:
     </p>
     <ul>
       <li>Call forwarding</li>
-      <li xml:lang="de">Call forwarding</li>
+      <li xml:lang="de">Anrufweiterleitung</li>
       <li>Conference calls with three parties</li>
-      <li xml:lang="de">Conference calls with three parties</li>
+      <li xml:lang="de">Konferenzen mit drei Teilnehmern</li>
       <li>LDAP address sources</li>
-      <li xml:lang="de">LDAP address sources</li>
+      <li xml:lang="de">LDAP Adress-Quelle</li>
       <li>Busy state for supported sources</li>
-      <li xml:lang="de">Busy state for supported sources</li>
+      <li xml:lang="de">Besetztstatus für unterstützte Quellen</li>
       <li>Configurable identities for outgoing calls</li>
-      <li xml:lang="de">Configurable identities for outgoing calls</li>
-      <li>Configurable busy on active call</li>
-      <li xml:lang="de">Configurable busy on active call</li>
+      <li xml:lang="de">Konfigurierbare Identitäten für ausgehende Anrufe</li>
+      <li>Configurable "busy on active call"</li>
+      <li xml:lang="de">Konfigurierbares "Besetzt bei aktivem Anruf"</li>
       <li>Configurable Togglers (i.e. for call queues, CFNL, etc.)</li>
-      <li xml:lang="de">Configurable Togglers (i.e. for call queues, CFNL, etc.)</li>
+      <li xml:lang="de">Konfigurierbare Umschalter (z.B. für Anrufwarteschlangen, CFNL, etc.)</li>
       <li>Custom audio device profiles or managed by your system</li>
-      <li xml:lang="de">Custom audio device profiles or managed by your system</li>
+      <li xml:lang="de">Benutzerdefinierte oder vom System verwaltete Audiogeräteprofile</li>
       <li>System Tray integration for most common functions / favorites / most frequent calls</li>
-      <li xml:lang="de">System Tray integration for most common functions / favorites / most frequent calls</li>
-      <li>mpris for stopping other audio sources on incoming calls</li>
-      <li xml:lang="de">mpris for stopping other audio sources on incoming calls</li>
+      <li xml:lang="de">System Tray Integration für die häufigsten Funktionen / Favoriten / häufigsten Aufrufe</li>
+      <li>Stopping other audio sources on incoming calls</li>
+      <li xml:lang="de">Anhalten anderer Audioquellen bei eingehenden Anrufen</li>
       <li>GNOME Search-Provider support</li>
-      <li xml:lang="de">GNOME Search-Provider support</li>
-      <li>KRunner search plugin (requires next generation flatpak)</li>
-      <li xml:lang="de">KRunner search plugin (requires next generation flatpak)</li>
+      <li xml:lang="de">Unterstützung des GNOME Search-Provider</li>
+      <li>KRunner search plugin (requires latest flatpak version)</li>
+      <li xml:lang="de">KRunner Such-Plugin (erfordert die neueste flatpak-Version)</li>
       <li>Desktop Actions / Autostart</li>
-      <li xml:lang="de">Desktop Actions / Autostart</li>
+      <li xml:lang="de">Desktop Aktionen / Autostart</li>
       <li>Global Keyboard Shortcuts (if supported by your Desktop environment)</li>
-      <li xml:lang="de">Global Keyboard Shortcuts (if supported by your Desktop environment)</li>
-      <li>Keeping the screensaver from droppin' in while on the phone</li>
-      <li xml:lang="de">Keeping the screensaver from droppin' in while on the phone</li>
+      <li xml:lang="de">Globale Tastaturkürzel (falls von der Desktop-Umgebung unterstützt)</li>
+      <li>Do not activate the screensaver when using the phone</li>
+      <li xml:lang="de">Aktiviert den Bildschirmschoner nicht, wenn das Telefon benutzt wird</li>
       <li>Mime-Type registration for `tel:` / `sip:` URLs</li>
-      <li xml:lang="de">Mime-Type registration for `tel:` / `sip:` URLs</li>
+      <li xml:lang="de">Mime-Type Registrierung für `tel:` / `sip:` URLs</li>
       <li>Light/Dark mode</li>
-      <li xml:lang="de">Light/Dark mode</li>
+      <li xml:lang="de">Light/Dark Modus</li>
     </ul>
   </description>
 
