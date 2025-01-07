@@ -74,7 +74,13 @@ void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,
 
 QString AvatarManager::avatarPathFor(const QString &id)
 {
-    return QString("%1/%2.jpg").arg(m_avatarImageDirPath, id);
+    QString res = QString("%1/%2.jpg").arg(m_avatarImageDirPath, id);
+
+    if (!res.isEmpty() && !QFile::exists(res)) {
+        return "";
+    }
+
+    return res;
 }
 
 void AvatarManager::clearCStringlist(char **attrs) const
