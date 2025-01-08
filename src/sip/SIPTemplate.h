@@ -21,6 +21,7 @@ public:
 
 private:
     QString i18nValue(const QString &item);
+    bool isFileField(const QString &key) const;
 
     QString m_id;
     QString m_name;

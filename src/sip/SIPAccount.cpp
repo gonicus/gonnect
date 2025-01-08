@@ -190,10 +190,10 @@ bool SIPAccount::initialize()
                 SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TLS6,
                                                                   m_transportConfig);
             } else if (m_transportType == TRANSPORT_TYPE::TCP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TCP,
+                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TCP6,
                                                                   m_transportConfig);
             } else if (m_transportType == TRANSPORT_TYPE::UDP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_UDP,
+                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_UDP6,
                                                                   m_transportConfig);
             }
         }
