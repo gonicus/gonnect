@@ -47,8 +47,16 @@ target_include_directories(GOnnectVersion PUBLIC
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
 
-
 if(${BUILD_TESTING})
     add_subdirectory(tests)
     add_definitions(-DAPP_TESTS)
 endif()
+
+install(FILES resources/flatpak/de.gonicus.gonnect.svg DESTINATION share/icons/hicolor/scalable/apps)
+install(FILES resources/flatpak/de.gonicus.gonnect.desktop DESTINATION share/applications)
+install(FILES resources/flatpak/de.gonicus.gonnect.krunner.desktop DESTINATION share/krunner/dbusplugins)
+install(FILES resources/flatpak/de.gonicus.gonnect.metainfo.xml DESTINATION share/metainfo)
+install(FILES resources/flatpak/de.gonicus.gonnect.releases.xml DESTINATION share/metainfo/releases)
+install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
+install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
+

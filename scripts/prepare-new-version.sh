@@ -99,7 +99,7 @@ function create_release_notes {
         COMMITS+=$COMMIT
     done < <(echo "$MSG")
 
-    NOTES=$(echo "$COMMITS" | npx --packages=conventional-changelog-writer conventional-changelog-writer -o "$SCRIPT_DIR/release_notes_options.js")
+    NOTES=$(echo "$COMMITS" | npx --packages=conventional-changelog-writer conventional-changelog-writer -o "$SCRIPT_DIR/release-notes-options.js")
 }
 
 # update_flatpak sets the new version and notes in the Flatpak metainfo

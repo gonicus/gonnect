@@ -54,6 +54,7 @@
         <file alias="view-refresh.svg">../resources/artwork/icons/view-refresh.svg</file>
         <file alias="preferences-system-network.svg">../resources/artwork/icons/preferences-system-network.svg</file>
         <file alias="data-success.svg">../resources/artwork/icons/data-success.svg</file>
+        <file alias="data-error.svg">../resources/artwork/icons/data-error.svg</file>
     </qresource>
     <qresource prefix="/icons/dark">
         <file alias="gonnect.svg">../resources/artwork/gonnect.svg</file>
@@ -95,5 +96,6 @@
         <file alias="view-refresh.svg">../resources/artwork/icons/dark/view-refresh.svg</file>
         <file alias="preferences-system-network.svg">../resources/artwork/icons/preferences-system-network.svg</file>
         <file alias="data-success.svg">../resources/artwork/icons/data-success.svg</file>
+        <file alias="data-error.svg">../resources/artwork/icons/data-error.svg</file>
     </qresource>
 </RCC>

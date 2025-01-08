@@ -49,28 +49,56 @@ SIPTemplate::SIPTemplate(const QString &path, QObject *parent) : QObject(parent)
     }
 }
 
-QString SIPTemplate::save(const QVariantMap &values) const
+QVariantMap SIPTemplate::save(const QVariantMap &values) const
 {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/"
+    QString basePath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/"
             + QCoreApplication::organizationName();
 
-    QDir dir(path);
+    QDir dir(basePath);
     if (!dir.exists()) {
         dir.mkpath(".");
     }
 
-    path += "/99-user.conf";
+    QString path = basePath + "/99-user.conf";
     if (QFile::exists(path)) {
         if (!QFile::remove(path)) {
-            return tr("Error: failed to write to %1").arg(path);
+            return { { "error", tr("Failed to write to %1").arg(path) } };
         }
     }
 
     if (m_plain) {
         if (!QFile::copy(m_id, path)) {
-            return tr("Error: failed to write to %1").arg(path);
+            return { { "error", tr("Failed to write to %1").arg(path) } };
         }
     } else {
+        // Copy over type "File" into our configuration directory and
+        // adjust the path accordingly.
+        QVariantMap cfgValues;
+        static QRegularExpression fileRegex("^file:/+");
+        for (auto it = values.constBegin(); it != values.constEnd(); ++it) {
+            if (isFileField(it.key())) {
+                QString preProcessFilename = it.value().toString().replace(fileRegex, "/");
+                QFileInfo sourceInfo(preProcessFilename);
+                QString filename = sourceInfo.absoluteFilePath();
+
+                if (QFile::exists(filename)) {
+                    QString target = basePath + "/" + sourceInfo.fileName();
+                    if (!QFile::copy(filename, target)) {
+                        return { { "error",
+                                   tr("Failed to copy %1 to the config space").arg(filename) } };
+                    }
+
+                    cfgValues.insert(it.key(), target);
+                } else {
+                    return { { "error", tr("Source file %1 does not exist").arg(filename) } };
+                }
+
+            } else {
+                cfgValues.insert(it.key(), it.value());
+            }
+        }
+
+        // Replace placeholders
         const QSettings source(m_id, QSettings::Format::IniFormat);
         QSettings destination(path, QSettings::Format::IniFormat);
 
@@ -82,7 +110,7 @@ QString SIPTemplate::save(const QVariantMap &values) const
                 continue;
             }
 
-            for (auto it = values.constBegin(); it != values.constEnd(); ++it) {
+            for (auto it = cfgValues.constBegin(); it != cfgValues.constEnd(); ++it) {
                 QString sourcePattern = "%TPL[" + it.key() + "]%";
                 targetValue.replace(sourcePattern, it.value().toString());
             }
@@ -101,7 +129,18 @@ QString SIPTemplate::save(const QVariantMap &values) const
                 + "/99-user.conf";
     }
 
-    return path;
+    return { { "path", path } };
+}
+
+bool SIPTemplate::isFileField(const QString &key) const
+{
+    for (auto field : std::as_const(m_fields)) {
+        if (field->target == key && field->type == SIPTemplateField::TemplateFieldType::File) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 QString SIPTemplate::i18nValue(const QString &item)

@@ -22,7 +22,17 @@ BaseWindow {
     maximumHeight: control.height
 
     function finishWizard() {
-        configPathLabel.text = sipTemplateController.createConfig(templateModel.templateId, control.values)
+        const result = sipTemplateController.createConfig(templateModel.templateId, control.values)
+
+        if (result.error) {
+            wizardInstallationLabel.text = qsTr("Error: %1").arg(result.error)
+            wizardStatusImage.source = "qrc:/icons/data-error.svg"
+            wizardInstallationSaveLabel.visible = false
+            wizardInstallItem.visible = false
+            wizardFinishButton.enabled = false
+        } else {
+            configPathLabel.text = result.path
+        }
     }
 
     property var values: ({})
@@ -288,6 +298,7 @@ BaseWindow {
             }
 
             Image {
+                id: wizardStatusImage
                 source: "qrc:/icons/data-success.svg"
                 sourceSize.width: 128
                 sourceSize.height: 128
@@ -295,6 +306,7 @@ BaseWindow {
             }
 
             Label {
+                id: wizardInstallationLabel
                 text: qsTr("We have created a configuration file for you. Please check if any changes are required to meet your needs and restart GOnnect to activate them.")
                 wrapMode: Label.Wrap
                 anchors {
@@ -304,6 +316,7 @@ BaseWindow {
             }
 
             Label {
+                id: wizardInstallationSaveLabel
                 text: qsTr("The configuration has been saved to:")
                 wrapMode: Label.Wrap
                 anchors {
@@ -313,6 +326,7 @@ BaseWindow {
             }
 
             Item {
+                id: wizardInstallItem
                 implicitHeight: configPathLabel.implicitHeight
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: configPathLabel.width + clipboardButton.width
@@ -335,6 +349,7 @@ BaseWindow {
         }
 
         Button {
+            id: wizardFinishButton
             text: qsTr("Finish")
             highlighted: true
             anchors {
