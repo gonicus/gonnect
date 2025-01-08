@@ -1,3 +1,12 @@
+## [1.0.2](https://github.com/gonicus/gonnect/compare/v1.0.1...v1.0.2) (2025-01-08)
+
+
+### Bug Fixes
+
+* add workaround for KDE tray ([46a5b50](https://github.com/gonicus/gonnect/commit/46a5b504c6801c0e35432798c10cd8473e175ea6))
+* enable sample template ([00f5481](https://github.com/gonicus/gonnect/commit/00f54813147aab9e6911b3d01451fd028be5876d))
+* properly show errors on template copy ([ff4bcb5](https://github.com/gonicus/gonnect/commit/ff4bcb5ada56c0091d366ef2873e196fa033dcc6))
+
 ## [1.0.1](https://github.com/gonicus/gonnect/compare/v1.0.0...v1.0.1) (2025-01-07)
 
 

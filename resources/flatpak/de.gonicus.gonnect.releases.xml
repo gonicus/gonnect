@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.0.2" date="2025-01-08">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>add workaround for KDE tray</li>
+        <li>enable sample template</li>
+        <li>properly show errors on template copy</li>
+      </ul>
+      <p>Maintenance:</p>
+      <ul>
+        <li>avoid double install of resources</li>
+        <li>install meta data from CMake</li>
+      </ul>
+      <p>Continuous Integration:</p>
+      <ul>
+        <li>fix path for release note options</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.0.1" date="2025-01-07"/>
   <release version="1.0.0" date="2024-12-19"/>
 </releases>
