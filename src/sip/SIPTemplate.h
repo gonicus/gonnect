@@ -17,7 +17,7 @@ public:
     QString name() const { return m_name; }
     QList<SIPTemplateField *> fields() const { return m_fields; }
 
-    QString save(const QVariantMap &values) const;
+    QVariantMap save(const QVariantMap &values) const;
 
 private:
     QString i18nValue(const QString &item);

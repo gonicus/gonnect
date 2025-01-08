@@ -6,8 +6,8 @@ Q_LOGGING_CATEGORY(lcSIPTemplateController, "gonnect.sip.templates.controller")
 
 SIPTemplateController::SIPTemplateController(QObject *parent) : QObject{ parent } { }
 
-QString SIPTemplateController::createConfig(const QString &templateId,
-                                            const QVariantMap &values) const
+QVariantMap SIPTemplateController::createConfig(const QString &templateId,
+                                                const QVariantMap &values) const
 {
     const auto templ = SIPTemplates::instance().templateById(templateId);
     Q_CHECK_PTR(templ);

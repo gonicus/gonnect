@@ -101,17 +101,17 @@
 <context>
     <name>AvatarManager</name>
     <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="260"/>
+        <location filename="../src/contacts/AvatarManager.cpp" line="266"/>
         <source>Failed to initialize LDAP connection: %1</source>
         <translation>Kann die LDAP-Verbindung nicht initialisieren: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="273"/>
+        <location filename="../src/contacts/AvatarManager.cpp" line="279"/>
         <source>LDAP error: %1</source>
         <translation>LDAP-Fehler: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="352"/>
+        <location filename="../src/contacts/AvatarManager.cpp" line="358"/>
         <source>Parse error: %1</source>
         <translation>Syntaxfehler: %1</translation>
     </message>
@@ -2067,7 +2067,7 @@
         <translation>Aktiver Anruf mit %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="500"/>
+        <location filename="../src/sip/SIPCall.cpp" line="499"/>
         <source>Hang up</source>
         <translation>Auflegen</translation>
     </message>
@@ -2120,8 +2120,18 @@
     <message>
         <location filename="../src/sip/SIPTemplate.cpp" line="65"/>
         <location filename="../src/sip/SIPTemplate.cpp" line="71"/>
-        <source>Error: failed to write to %1</source>
-        <translation>Fehler: %1 konnte nicht geschrieben werden</translation>
+        <source>Failed to write to %1</source>
+        <translation>Fehler beim Schreiben von %1</translation>
+    </message>
+    <message>
+        <location filename="../src/sip/SIPTemplate.cpp" line="88"/>
+        <source>Failed to copy %1 to the config space</source>
+        <translation>Fehler beim Kopieren von %1 in das Konfigurationsverzeichnis</translation>
+    </message>
+    <message>
+        <location filename="../src/sip/SIPTemplate.cpp" line="93"/>
+        <source>Source file %1 does not exist</source>
+        <translation>Quelldatei %1 existiert nicht</translation>
     </message>
 </context>
 <context>
@@ -2158,42 +2168,42 @@
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="113"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="118"/>
         <source>Enable USB headset driver [%1]</source>
         <translation>USB Headset-Treiber aktivieren [%1]</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="113"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="118"/>
         <source>not detected</source>
         <translation>nicht erkannt</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="123"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="128"/>
         <source>Show dial window on USB headset pick up</source>
         <translation>Zeige Wählfenster wenn USB Headset abgenommen wird</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="139"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="144"/>
         <source>Color scheme</source>
         <translation>Farbschema</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="158"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="163"/>
         <source>System default</source>
         <translation>Systemvorgabe</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="161"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="166"/>
         <source>Light</source>
         <translation>Hell</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="164"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="169"/>
         <source>Dark</source>
         <translation>Dunkel</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="100"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="105"/>
         <source>Inverse Accept / Reject buttons</source>
         <translation>Inverse Schaltflächen für Annehmen / Ablehnen</translation>
     </message>
@@ -2203,119 +2213,119 @@
         <translation>Dunkles Systemtray-Icon benutzen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="188"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="193"/>
         <source>Reload contacts from LDAP</source>
         <translation>LDAP Kontakte neu laden</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="194"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="199"/>
         <source>Phoning</source>
         <translation>Telefonieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="202"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="207"/>
         <source>Signalling busy when a call is active</source>
         <translation>Bei aktivem Anruf Besetzt signalisieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="288"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="293"/>
         <source>Rules for telephone number transmission</source>
         <translation>Regeln zur Rufnummernübermittlung</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="302"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="307"/>
         <source>Standard preferred identity</source>
         <translation>Bevorzugte Identität</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="322"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="717"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="327"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="722"/>
         <source>Default</source>
         <translation>Vorgabe</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="325"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="461"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="330"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="466"/>
         <source>Auto</source>
         <translation>Auto</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="380"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="385"/>
         <source>No preferred identities yet.</source>
         <translation>Keine bevorzugten Identitäten.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="449"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="454"/>
         <source>Standard</source>
         <translation>Vorgabe</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="489"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="494"/>
         <source>Add identity</source>
         <translation>Identität hinzufügen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="507"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="512"/>
         <source>Audio settings</source>
         <translation>Audio-Einstellungen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="521"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="526"/>
         <source>Input device</source>
         <translation>Eingangsgerät</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="573"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="578"/>
         <source>Output device</source>
         <translation>Ausgangsgerät</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="625"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="630"/>
         <source>Output device for ring tone</source>
         <translation>Ausgabegerät für Klingeltöne</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="678"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="683"/>
         <source>Ring tone</source>
         <translation>Klingelton</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="688"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="693"/>
         <source>Prefer USB headset ring sound if available</source>
         <translation>Nutze den Klingelton des USB Headsets wenn verfügbar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="790"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="795"/>
         <source>Ring tone volume</source>
         <translation>Klingelton-Lautstärke</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="825"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="830"/>
         <source>%1 %</source>
         <translation>%1 %</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="843"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="848"/>
         <source>Pause between ring tones [s]</source>
         <translation>Pause zwischen den Klingeltönen [s]</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="887"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="892"/>
         <source>Debugging</source>
         <translation>Fehlersuche</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="895"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="900"/>
         <source>Use this button to start a debug run. The App will restart and then begin to record additional information that can be useful for debugging purposes. During this run, come back here to download the information. A debug run is limited to 5 minutes, after which the App will automatically restart again in normal mode.</source>
         <translation>Verwende diese Schaltfläche, um einen Lauf zur Fehlersuche zu starten. Die App wird neu gestartet und beginnt dann, zusätzliche Informationen aufzuzeichnen, die für die Fehlersuche nützlich sein können. Während dieses Laufs kannst Du hierher zurückkehren, um die Informationen herunterzuladen. Ein Lauf zur Fehlersuche ist auf 5 Minuten begrenzt. Danach wird die App automatisch im normalen Modus neu gestartet.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="908"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="913"/>
         <source>Start debug run (restart app)</source>
         <translation>Lauf zur Fehlersuche starten (App neustarten)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="918"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="923"/>
         <source>Download debug information</source>
         <translation>Informationen zur Fehlersuche herunterladen</translation>
     </message>
@@ -2336,38 +2346,43 @@
         <translation>Initiale Konfiguration</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="102"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="28"/>
+        <source>Error: %1</source>
+        <translation>Fehler: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="112"/>
         <source>GOnnect cannot find a SIP configuration. To get started, pick one of the templates below and modify the resulting configuration file if required.</source>
         <translation>GOnnect kann keine SIP-Konfiguration finden. Um zu starten, wähle unten eine der Vorlagen aus, und modifiziere bei Bedarf die erstellte Konfigurationsdatei.</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="111"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="121"/>
         <source>Please pick:</source>
         <translation>Bitte wählen:</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="134"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="144"/>
         <source>Next</source>
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="253"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="263"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="263"/>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="338"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="273"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="353"/>
         <source>Finish</source>
         <translation>Abschließen</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="298"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="310"/>
         <source>We have created a configuration file for you. Please check if any changes are required to meet your needs and restart GOnnect to activate them.</source>
         <translation>Wir haben eine Konfigurationsdatei für Dich erstellt. Bitte prüfe ob für Deine Zwecke irgendwelche Änderungen notwendig sind, und starte GOnnect neu, um sie zu aktivieren.</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="307"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="320"/>
         <source>The configuration has been saved to:</source>
         <translation>Die Konfiguration wurde hier gespeichert:</translation>
     </message>

@@ -11,5 +11,5 @@ class SIPTemplateController : public QObject
 public:
     explicit SIPTemplateController(QObject *parent = nullptr);
 
-    Q_INVOKABLE QString createConfig(const QString &templateId, const QVariantMap &values) const;
+    Q_INVOKABLE QVariantMap createConfig(const QString &templateId, const QVariantMap &values) const;
 };

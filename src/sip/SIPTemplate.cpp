@@ -49,7 +49,7 @@ SIPTemplate::SIPTemplate(const QString &path, QObject *parent) : QObject(parent)
     }
 }
 
-QString SIPTemplate::save(const QVariantMap &values) const
+QVariantMap SIPTemplate::save(const QVariantMap &values) const
 {
     QString basePath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/"
             + QCoreApplication::organizationName();
@@ -62,13 +62,13 @@ QString SIPTemplate::save(const QVariantMap &values) const
     QString path = basePath + "/99-user.conf";
     if (QFile::exists(path)) {
         if (!QFile::remove(path)) {
-            return tr("Error: failed to write to %1").arg(path);
+            return { { "error", tr("Failed to write to %1").arg(path) } };
         }
     }
 
     if (m_plain) {
         if (!QFile::copy(m_id, path)) {
-            return tr("Error: failed to write to %1").arg(path);
+            return { { "error", tr("Failed to write to %1").arg(path) } };
         }
     } else {
         // Copy over type "File" into our configuration directory and
@@ -84,12 +84,13 @@ QString SIPTemplate::save(const QVariantMap &values) const
                 if (QFile::exists(filename)) {
                     QString target = basePath + "/" + sourceInfo.fileName();
                     if (!QFile::copy(filename, target)) {
-                        return tr("Error: failed to copy %1 to the config space").arg(filename);
+                        return { { "error",
+                                   tr("Failed to copy %1 to the config space").arg(filename) } };
                     }
 
                     cfgValues.insert(it.key(), target);
                 } else {
-                    return tr("Error: source file %1 does not exist").arg(filename);
+                    return { { "error", tr("Source file %1 does not exist").arg(filename) } };
                 }
 
             } else {
@@ -128,7 +129,7 @@ QString SIPTemplate::save(const QVariantMap &values) const
                 + "/99-user.conf";
     }
 
-    return path;
+    return { { "path", path } };
 }
 
 bool SIPTemplate::isFileField(const QString &key) const
