@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/gonicus/gonnect/compare/v1.0.3...v1.0.4) (2025-01-13)
+
+
+### Bug Fixes
+
+* adjust file permissions of initial config ([e6beb1c](https://github.com/gonicus/gonnect/commit/e6beb1c060394550561a96aafc455756563c40f4))
+
 ## [1.0.3](https://github.com/gonicus/gonnect/compare/v1.0.2...v1.0.3) (2025-01-13)
 
 

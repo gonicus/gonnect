@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.0.4" date="2025-01-13">
+    <description>
+      <p>Maintenance:</p>
+      <ul>
+        <li>shrink icon by some more pixels</li>
+      </ul>
+      <p>Continuous Integration:</p>
+      <ul>
+        <li>make use of Semantic Release app</li>
+      </ul>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>adjust file permissions of initial config</li>
+      </ul>
+      <p>Build System:</p>
+      <ul>
+        <li>speed up Distrobox starts after initialization</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.0.3" date="2025-01-13">
     <description>
       <p>Maintenance:</p>
