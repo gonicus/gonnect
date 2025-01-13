@@ -45,6 +45,7 @@ runs:
       shell: bash
       if: inputs.qt-only == 'false'
       run: |
+        echo "CMAKE_VERSION=$(cmake --version | head -n 1 | awk '{print $3}')" >> $GITHUB_OUTPUT
         echo "QCA_HASH=$(git submodule status external/qca | awk '{print $1}')" >> $GITHUB_OUTPUT
         echo "HIDAPI_TAG=$(yq '.. | select(has("name")) | select(.name == "hidapi") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
         echo "PJSIP_TAG=$(yq '.. | select(has("name")) | select(.name == "pjsip") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
@@ -55,7 +56,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: hidapi
-        key: ${{ steps.hashes.outputs.HIDAPI_TAG }}-hidapi
+        key: ${{ steps.hashes.outputs.HIDAPI_TAG }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-hidapi
 
     - name: Build hidapi
       shell: bash

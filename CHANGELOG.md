@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/gonicus/gonnect/compare/v1.0.2...v1.0.3) (2025-01-13)
+
+
+### Bug Fixes
+
+* adjust branding and icon size ([440d934](https://github.com/gonicus/gonnect/commit/440d934192f54c46c09c4e980d0086623d7ab04f))
+
 ## [1.0.2](https://github.com/gonicus/gonnect/compare/v1.0.1...v1.0.2) (2025-01-08)
 
 

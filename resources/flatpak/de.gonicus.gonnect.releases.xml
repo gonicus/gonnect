@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.0.3" date="2025-01-13">
+    <description>
+      <p>Maintenance:</p>
+      <ul>
+        <li>include cmake version for hidapi cache key</li>
+        <li>revert wrong change in tag reading</li>
+      </ul>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>adjust branding and icon size</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.0.2" date="2025-01-08">
     <description>
       <p>Bug Fixes:</p>
