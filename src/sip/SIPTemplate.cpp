@@ -70,6 +70,8 @@ QVariantMap SIPTemplate::save(const QVariantMap &values) const
         if (!QFile::copy(m_id, path)) {
             return { { "error", tr("Failed to write to %1").arg(path) } };
         }
+
+        QFile::setPermissions(path, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
     } else {
         // Copy over type "File" into our configuration directory and
         // adjust the path accordingly.
