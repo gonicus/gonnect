@@ -163,10 +163,17 @@ jobs:
       issues: write         # to be able to comment on released issues
       pull-requests: write  # to be able to comment on released pull requests
     steps:
+      - name: Get token
+        id: get_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.get_token.outputs.token }}
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -177,5 +184,5 @@ jobs:
           sudo apt install -y xmlstarlet jq
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
         run: npx --package=semantic-release --package=@semantic-release/changelog --package=@semantic-release/git --package=@semantic-release/exec -- semantic-release
