@@ -48,7 +48,9 @@ public:
         StatusCode,
         IsFinished,
         HasCapabilityJitsi,
-        HasIncomingAudioLevel
+        HasIncomingAudioLevel,
+        HasAvatar,
+        AvatarPath
     };
 
     explicit CallsModel(QObject *parent = nullptr);

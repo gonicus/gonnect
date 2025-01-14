@@ -5,8 +5,8 @@
   <project_license>GPL-2.0-or-later</project_license>
   <metadata_license>MIT</metadata_license>
 
-  <summary>Simple, integrated SIP client</summary>
-  <summary xml:lang="de">Einfacher integrierter SIP Client</summary>
+  <summary>Simple, integrated telephony app</summary>
+  <summary xml:lang="de">Einfache integrierte Telefonie-App</summary>
   <developer id="de.gonicus">
     <name>GONICUS GmbH</name>
   </developer>
@@ -99,7 +99,7 @@
   </provides>
 
   <branding>
-    <color type="primary" scheme_preference="light">#f6f5f4</color>
+    <color type="primary" scheme_preference="light">#99c1f1</color>
     <color type="primary" scheme_preference="dark">#241f31</color>
   </branding>
 

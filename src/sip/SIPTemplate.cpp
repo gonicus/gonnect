@@ -59,7 +59,7 @@ QVariantMap SIPTemplate::save(const QVariantMap &values) const
         dir.mkpath(".");
     }
 
-    QString path = basePath + "/99-user.conf";
+    QString path = basePath + "/01-sip.conf";
     if (QFile::exists(path)) {
         if (!QFile::remove(path)) {
             return { { "error", tr("Failed to write to %1").arg(path) } };
@@ -128,7 +128,7 @@ QVariantMap SIPTemplate::save(const QVariantMap &values) const
     // the user to find it. Adjust it here.
     if (qEnvironmentVariable("container") == "flatpak") {
         path = qEnvironmentVariable("XDG_CONFIG_HOME") + "/" + QCoreApplication::organizationName()
-                + "/99-user.conf";
+                + "/01-sip.conf";
     }
 
     return { { "path", path } };

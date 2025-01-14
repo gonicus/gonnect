@@ -9,7 +9,7 @@
 </p>
 
 ---
-[![GOnnect workflow](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml/badge.svg)](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml)
+[![GOnnect workflow](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml/badge.svg)](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml) ![Flathub Version](https://img.shields.io/flathub/v/de.gonicus.gonnect)
 
 # Overview
 
@@ -50,10 +50,8 @@ Here's a short feature list:
 # Installing _GOnnect_
 
 _GOnnect_ is distributed via Flathub only. To install it, either visit the
-[Flathub page](https://flathub.org) or search for _GOnnect_ in _GNOME-Software_
+[Flathub page](https://flathub.org/apps/de.gonicus.gonnect), search for _GOnnect_ in _GNOME-Software_
 or KDE's _discover_.
-
-TODO: flathub link
 
 After you have installed _GOnnect_, either adjust the provided
 `sample.conf` and place it in `~/.var/app/de.gonicus.gonnect/config/gonnect/99-user.conf`,
@@ -64,7 +62,7 @@ or head over to [the documentation](https://github.com/gonicus/gonnect/wiki).
 _GOnnect_ is licensed unter the terms of the GNU GENERAL PUBLIC LICENSE
 Version 2, or at your opinion any later version.
 
-See `LICENSE` for the full content of the license.
+See [LICENSE](LICENSE) for the full content of the license.
 
 # Development
 

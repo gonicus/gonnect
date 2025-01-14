@@ -124,6 +124,9 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::IsFinished), "isFinished" },
         { static_cast<int>(Roles::HasCapabilityJitsi), "hasCapabilityJitsi" },
         { static_cast<int>(Roles::HasIncomingAudioLevel), "hasIncomingAudioLevel" },
+        { static_cast<int>(Roles::HasAvatar), "hasAvatar" },
+        { static_cast<int>(Roles::AvatarPath), "avatarPath" },
+
     };
 }
 
@@ -258,6 +261,14 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::HasCapabilityJitsi):
         return callInfo->hasCapabilityJitsi;
+
+    case static_cast<int>(Roles::HasAvatar):
+        return callInfo->contactInfo.contact ? callInfo->contactInfo.contact->hasAvatar() : false;
+
+    case static_cast<int>(Roles::AvatarPath):
+        return callInfo->contactInfo.contact && callInfo->contactInfo.contact->hasAvatar()
+                ? callInfo->contactInfo.contact->avatarPath()
+                : "";
 
     case static_cast<int>(Roles::HasIncomingAudioLevel):
         return callInfo->incomingAudioLevel > 0.3;
