@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.0.5" date="2025-01-14">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>trigger build</li>
+      </ul>
+      <p>Continuous Integration:</p>
+      <ul>
+        <li>add another screenshot</li>
+        <li>remove flatpak updater</li>
+        <li>trigger build</li>
+        <li>updated images [skip ci]</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.0.4" date="2025-01-13">
     <description>
       <p>Maintenance:</p>

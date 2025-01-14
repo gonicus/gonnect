@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/gonicus/gonnect/compare/v1.0.4...v1.0.5) (2025-01-14)
+
+
+### Bug Fixes
+
+* trigger build ([272b1e6](https://github.com/gonicus/gonnect/commit/272b1e674c951bf3ad40682820fbbc2aa0086551))
+
 ## [1.0.4](https://github.com/gonicus/gonnect/compare/v1.0.3...v1.0.4) (2025-01-13)
 
 
