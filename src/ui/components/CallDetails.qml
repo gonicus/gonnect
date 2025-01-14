@@ -80,10 +80,25 @@ Item {
         }
     }
 
+    AvatarImage {
+        id: avatarImage
+        size: 120
+        initials: ViewHelper.initials(control.callItem?.name || control.callItem?.phoneNumber || "")
+        source: control.callItem?.hasAvatar ? ("file://" + control.callItem.avatarPath) : ""
+        anchors {
+            centerIn: parent
+            verticalCenterOffset: -25
+        }
+    }
+
     Label {
         id: elapsedTimeLabel
         font.pixelSize: 22
-        anchors.centerIn: parent
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: avatarImage.bottom
+            topMargin: 25
+        }
         text: internal.niceStatusCodes.includes(control.statusCode)
               ? EnumTranslation.sipStatusCode(control.statusCode)
               : ("🕓  " + ViewHelper.secondsToNiceText(internal.elapsedSeconds))

@@ -42,18 +42,23 @@ def fill_database(con):
     cur.execute("""
         INSERT INTO contactflags VALUES
             ('+496990009872', 5, 1, 0),
-            ('+4915228817386', 17, 0, 0),
+            ('+496990009871', 17, 0, 0),
             ('+496990009876', 42, 1, 0),
-            ('+496990009871', 3, 0, 0)
+            ('+492214712345', 2, 1, 0)
     """)
     con.commit()
 
     timestamp = int(time.time())
     cur.execute(f"""
         INSERT INTO history VALUES
-            (1, {timestamp - 400 - (24 * 60 * 60)}, '+4915228817386', 'account0', 1, 589, '', NULL),
-            (2, {timestamp - 300}, '"Juan Pérez" <sip:+496990009872@foo.org>', 'account0', 1, 129, '', NULL),
-            (3, {timestamp - 60}, '"Juan Pérez" <sip:+496990009872@foo.org>', 'account0', 1, 58, '', NULL)
+            (1, {timestamp - 380 - (3 * 24 * 60 * 60)}, '"Erika Mustermann" <sip:+492214712345@bar.org>', 'account0', 1, 211, '', NULL),
+            (2, {timestamp - 12 - (3 * 24 * 60 * 60)}, '"Anonymous" <sip:anonymous@foo.org>', 'account0', 0, 30, '', NULL),
+            (3, {timestamp - 120 - (2 * 24 * 60 * 60)}, '"Erika Mustermann" <sip:+492214712345@bar.org>', 'account0', 1, 266, '', NULL),
+            (4, {timestamp - 2200 - (24 * 60 * 60)}, '"Pinco Pallino" <sip:+496990009876@foo.org>', 'account0', 0, 199, '', NULL),
+            (5, {timestamp - 480 - (24 * 60 * 60)}, '"Erika Mustermann" <sip:+492214712345@bar.org>', 'account0', 1, 183, '', NULL),
+            (6, {timestamp + 3100 - (24 * 60 * 60)}, '"Fulano de Tal" <sip:+496990009871@bar.org>', 'account0', 0, 589, '', NULL),
+            (7, {timestamp - 300}, '"Juan Pérez" <sip:+496990009872@foo.org>', 'account0', 1, 129, '', NULL),
+            (8, {timestamp - 60}, '"Juan Pérez" <sip:+496990009872@foo.org>', 'account0', 1, 58, '', NULL)
     """)
     con.commit()
 

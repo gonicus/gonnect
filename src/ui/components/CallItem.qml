@@ -29,6 +29,8 @@ Rectangle {
     required property bool hasCapabilityJitsi
     required property int statusCode
     required property bool hasIncomingAudioLevel
+    required property bool hasAvatar
+    required property string avatarPath
 
     property bool selected: false
     property bool interactive: true
