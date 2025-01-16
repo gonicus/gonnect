@@ -5,8 +5,8 @@
   <project_license>GPL-2.0-or-later</project_license>
   <metadata_license>MIT</metadata_license>
 
-  <summary>Simple, integrated telephony app</summary>
-  <summary xml:lang="de">Einfache integrierte Telefonie-App</summary>
+  <summary>Make SIP calls</summary>
+  <summary xml:lang="de">Sip-Anrufe tätigen</summary>
   <developer id="de.gonicus">
     <name>GONICUS GmbH</name>
   </developer>
