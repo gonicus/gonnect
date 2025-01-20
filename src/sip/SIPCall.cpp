@@ -115,6 +115,23 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                                 << statusCode << ") "
                                 << " last reason " << ci.lastReason << " contactId " << m_contactId;
 
+    // Check if instant messaging is allowed (will be used later for capabilities check)
+    const auto thisData = QString::fromStdString(prm.e.body.tsxState.src.tdata.wholeMsg);
+    const auto otherData = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
+    const bool thisAllow = hasAllow(thisData);
+    const bool otherAllow = hasAllow(otherData);
+
+    if (thisAllow || otherAllow) {
+        if (thisAllow) {
+            m_isMessageAllowed = hasAllowGrant(thisData, "MESSAGE");
+        } else {
+            m_isMessageAllowed = hasAllowGrant(otherData, "MESSAGE");
+        }
+
+        qCInfo(lcSIPCall) << "Found 'Allow:' in header, 'MESSAGE' is contained:"
+                          << m_isMessageAllowed;
+    }
+
     switch (ci.state) {
     case PJSIP_INV_STATE_NULL:
         if (!m_isSilent) {
@@ -160,8 +177,10 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             m_earlyMediaActive = false;
             emit earlyMediaActiveChanged();
 
-            if (!m_imHandler->capabilitiesSent()) {
-                QTimer::singleShot(2s, this, [this]() { m_imHandler->sendCapabilities(); });
+            if (m_isMessageAllowed) {
+                if (!m_imHandler->capabilitiesSent()) {
+                    QTimer::singleShot(2s, this, [this]() { m_imHandler->sendCapabilities(); });
+                }
             }
 
             createOngoingCallNotification();
@@ -265,7 +284,7 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*sniffer));
                     connect(sniffer, &Sniffer::audioLevelChanged, this, [this, sniffer]() {
                         emit SIPCallManager::instance().audioLevelChanged(this,
-                                                                          sniffer -> audioLevel());
+                                                                          sniffer->audioLevel());
                     });
                 }
 
@@ -434,7 +453,10 @@ bool SIPCall::hasCapability(const QString &capability) const
 
 bool SIPCall::triggerCapability(const QString &capability) const
 {
-    return m_imHandler->triggerCapability(capability);
+    if (m_isMessageAllowed) {
+        return m_imHandler->triggerCapability(capability);
+    }
+    return false;
 }
 
 bool SIPCall::isEmergencyCall() const
@@ -508,4 +530,22 @@ void SIPCall::createOngoingCallNotification()
             hangup(prm);
         }
     });
+}
+
+bool SIPCall::hasAllow(const QString &header) const
+{
+    return header.contains("Allow:");
+}
+
+bool SIPCall::hasAllowGrant(const QString &header, const QString &grant) const
+{
+    static const QRegularExpression regex("Allow: (?<grants>.*?)(\\r\\n?|\\n)");
+
+    const auto matchResult = regex.match(header);
+    if (matchResult.hasMatch()) {
+        const auto grants = matchResult.captured("grants").split(", ");
+        return grants.contains(grant);
+    }
+
+    return false;
 }
