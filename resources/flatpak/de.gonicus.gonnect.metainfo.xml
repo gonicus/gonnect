@@ -99,8 +99,8 @@
   </provides>
 
   <branding>
-    <color type="primary" scheme_preference="light">#99c1f1</color>
-    <color type="primary" scheme_preference="dark">#241f31</color>
+    <color type="primary" scheme_preference="light">#b4bed5</color>
+    <color type="primary" scheme_preference="dark">#707e99</color>
   </branding>
 
   <screenshots>

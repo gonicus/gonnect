@@ -1,3 +1,11 @@
+## [1.0.6](https://github.com/gonicus/gonnect/compare/v1.0.5...v1.0.6) (2025-01-16)
+
+
+### Bug Fixes
+
+* adjust screenshot shadow ([b934e09](https://github.com/gonicus/gonnect/commit/b934e096a1116bd956400045b8d71577a6ff7c74))
+* remove "app" from summary ([81eb4b7](https://github.com/gonicus/gonnect/commit/81eb4b76e16a87f3331a0c512b24ab9ee830d7bb))
+
 ## [1.0.5](https://github.com/gonicus/gonnect/compare/v1.0.4...v1.0.5) (2025-01-14)
 
 

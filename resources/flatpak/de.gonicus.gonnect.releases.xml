@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.0.6" date="2025-01-16">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>adjust screenshot shadow</li>
+        <li>remove "app" from summary</li>
+      </ul>
+      <p>Maintenance:</p>
+      <ul>
+        <li>updated screenshots</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.0.5" date="2025-01-14">
     <description>
       <p>Bug Fixes:</p>
