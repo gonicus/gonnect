@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/gonicus/gonnect/compare/v1.0.6...v1.0.7) (2025-01-20)
+
+
+### Bug Fixes
+
+* only use IM if allowed with SIP partner ([c183fe6](https://github.com/gonicus/gonnect/commit/c183fe60415623a3f5be1e11782af82b9f08fa00))
+
 ## [1.0.6](https://github.com/gonicus/gonnect/compare/v1.0.5...v1.0.6) (2025-01-16)
 
 

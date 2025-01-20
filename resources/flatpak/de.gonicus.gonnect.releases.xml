@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.0.7" date="2025-01-20">
+    <description>
+      <p>Maintenance:</p>
+      <ul>
+        <li>update code formatting broken by merge</li>
+        <li>update renovatebot/github-action action to v41.0.9</li>
+        <li>adjust brand colors</li>
+      </ul>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>only use IM if allowed with SIP partner</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.0.6" date="2025-01-16">
     <description>
       <p>Bug Fixes:</p>
