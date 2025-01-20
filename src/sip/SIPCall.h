@@ -76,6 +76,8 @@ private:
     void setIsBlocked(bool value);
     void setContactInfo(const QString &sipUrl, bool isIncoming = true);
     void createOngoingCallNotification();
+    bool hasAllow(const QString &header) const;
+    bool hasAllowGrant(const QString &header, const QString &grant) const;
 
     SIPAccount *m_account = nullptr;
     QPointer<CallHistoryItem> m_historyItem;
@@ -94,6 +96,7 @@ private:
     bool m_isSilent = false;
     bool m_isBlocked = false;
     bool m_isEmergencyCall = false;
+    bool m_isMessageAllowed = false;
 
     QString m_sipUrl;
     QString m_contactId;
