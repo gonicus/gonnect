@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Quick QuickControls2 Multimedia Sql Core5Compat)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Quick QuickControls2 Multimedia Sql Core5Compat Xml)
 find_package(Qca-qt6 REQUIRED)
 
 include(FindPkgConfig)
@@ -86,6 +86,35 @@ set(gonnect_qml_singletons
 )
 set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
+if(BUILD_DEPENDENCIES)
+    include(ExternalProject)
+
+    ExternalProject_Add(qtwebdav
+        GIT_REPOSITORY https://github.com/PikachuHy/QtWebDAV.git
+        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/qtwebdav-cmake.patch"
+        UPDATE_DISCONNECTED TRUE
+    )
+    ExternalProject_Get_Property(qtwebdav INSTALL_DIR)
+    target_include_directories(gonnect SYSTEM PRIVATE ${INSTALL_DIR}/include)
+    target_link_directories(gonnect PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
+
+    ExternalProject_Add(vcard
+        GIT_REPOSITORY https://github.com/ivanenko/vCard.git
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/vcard-cmake.patch"
+        UPDATE_DISCONNECTED TRUE
+    )
+    ExternalProject_Get_Property(vcard INSTALL_DIR)
+    target_include_directories(gonnect SYSTEM PRIVATE ${INSTALL_DIR}/include)
+    target_link_directories(gonnect PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
+
+    add_dependencies(gonnect vcard qtwebdav)
+else()
+    find_package(QtWebDAV REQUIRED)
+    find_package(vCard REQUIRED)
+endif()
+
 
 qt_add_qml_module(gonnect
     URI base
@@ -107,7 +136,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/SearchDial.qml
         ui/components/controls/Switch.qml
 
-        ui/components/dialogs/AccountCredentialsDialog.qml
+        ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
         ui/components/dialogs/InfoDialog.qml
@@ -245,6 +274,8 @@ qt_add_qml_module(gonnect
         contacts/AddressBookManager.h
         contacts/AvatarManager.cpp
         contacts/AvatarManager.h
+        contacts/CardDAVAddressBookFeeder.h
+        contacts/CardDAVAddressBookFeeder.cpp
         contacts/Contact.cpp
         contacts/Contact.h
         contacts/ContactSerializer.cpp
@@ -345,6 +376,7 @@ target_link_libraries(gonnect
         Qt6::Multimedia
         Qt6::Sql
         Qt6::Core5Compat
+        Qt6::Xml
         ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
@@ -352,6 +384,8 @@ target_link_libraries(gonnect
         GOnnectVersion
         qca-qt6
         hid-rp
+        vCard
+        QtWebDAV
 )
 
 target_include_directories(gonnect

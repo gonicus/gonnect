@@ -28,7 +28,7 @@ Here's a short feature list:
 
  * Call forwarding
  * Conference calls with three parties
- * LDAP address sources
+ * LDAP/CardDAV address sources
  * Busy state for supported sources
  * Configurable identities for outgoing calls
  * Configurable busy on active call

@@ -70,6 +70,7 @@ bool AudioPort::initFmt()
     }
 
     m_pj_fmt.init(formatID, clockRate, channelCount, frameTimeUsec, bitsPerSample);
+    m_pj_fmt.type = PJMEDIA_TYPE_AUDIO;
     m_audioFormat = format;
 
     return true;
@@ -259,9 +260,7 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
         return;
     }
 
-    if (frame.size) {
-        m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);
-    }
+    m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);
 
     // Auto destroy sink after timeout
     emit startIdleTimer();

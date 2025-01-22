@@ -22,11 +22,14 @@ public:
 
     QString avatarPathFor(const QString &id);
 
+    void addExternalImage(const QString &id, const QByteArray &data, const QDateTime &modified);
+
 private:
     void clearCStringlist(char **attrs) const;
     void createFile(const QString &id, const QByteArray &data) const;
     void addIdsToDb(QHash<QString, QDateTime> &idTimeMap) const;
     void updateAvatarModifiedTime(const QString &id, const QDateTime &modified) const;
+    QDateTime modifiedTimeInDb(const QString &id) const;
     QHash<QString, QDateTime> readIdsFromDb() const;
     void loadAvatars(const QList<const Contact *> &contacts, const QString &ldapUrl,
                      const QString &ldapBase, const QString &ldapFilter);

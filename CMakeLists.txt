@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+option(BUILD_DEPENDENCIES "Build dependencies" OFF)
+
 if(NOT LINUX)
     message(FATAL_ERROR "GOnnect only works for Linux/Flatpack targets")
 endif()

@@ -19,9 +19,9 @@ public:
         return *_instance;
     };
 
-    void addContact(const QString &dn, const QString &name, const QString &company,
-                    const QString &mail, const QDateTime &lastModified,
-                    const QList<Contact::PhoneNumber> &phoneNumbers);
+    Contact *addContact(const QString &dn, const QString &name, const QString &company,
+                        const QString &mail, const QDateTime &lastModified,
+                        const QList<Contact::PhoneNumber> &phoneNumbers);
 
     void addContact(Contact *contact);
 

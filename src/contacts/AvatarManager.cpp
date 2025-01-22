@@ -83,6 +83,26 @@ QString AvatarManager::avatarPathFor(const QString &id)
     return res;
 }
 
+void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
+                                     const QDateTime &modified)
+{
+    const auto dbModified = modifiedTimeInDb(id);
+
+    if (dbModified.isValid() && dbModified < modified) {
+        createFile(id, data);
+        updateAvatarModifiedTime(id, modified);
+    } else if (dbModified.isNull()) {
+        createFile(id, data);
+        QHash<QString, QDateTime> tmp;
+        tmp.insert(id, modified);
+        addIdsToDb(tmp);
+    }
+
+    if (auto contact = AddressBook::instance().lookupByContactId(id)) {
+        contact->setHasAvatar(true);
+    }
+}
+
 void AvatarManager::clearCStringlist(char **attrs) const
 {
     char **p;
@@ -141,7 +161,7 @@ void AvatarManager::updateAvatarModifiedTime(const QString &id, const QDateTime 
     auto db = QSqlDatabase::database();
 
     if (!db.open()) {
-        qCCritical(lcAvatarManager) << "Unable to open avatars databse:" << db.lastError().text();
+        qCCritical(lcAvatarManager) << "Unable to open avatars database:" << db.lastError().text();
     } else {
         qCInfo(lcAvatarManager) << "Successfully opened avatars database";
 
@@ -159,13 +179,42 @@ void AvatarManager::updateAvatarModifiedTime(const QString &id, const QDateTime 
     }
 }
 
+QDateTime AvatarManager::modifiedTimeInDb(const QString &id) const
+{
+    auto db = QSqlDatabase::database();
+    if (!db.open()) {
+        qCCritical(lcAvatarManager) << "Unable to open avatars database:" << db.lastError().text();
+        return QDateTime();
+    } else {
+        QSqlQuery query(db);
+        query.prepare("SELECT lastModified FROM avatars WHERE id = :id;");
+        query.bindValue(":id", id);
+
+        if (!query.exec()) {
+            qCCritical(lcAvatarManager)
+                    << "Error on executing SQL query:" << query.lastError().text();
+            return QDateTime();
+        } else {
+            if (query.size() > 1) {
+                qCCritical(lcAvatarManager) << "Error: id" << id << "is ambigous";
+                return QDateTime();
+            } else {
+                query.next();
+                return QDateTime::fromSecsSinceEpoch(query.value("lastModified").toLongLong());
+            }
+        }
+    }
+
+    return QDateTime();
+}
+
 QHash<QString, QDateTime> AvatarManager::readIdsFromDb() const
 {
     QHash<QString, QDateTime> result;
     auto db = QSqlDatabase::database();
 
     if (!db.open()) {
-        qCCritical(lcAvatarManager) << "Unable to open avatars databse:" << db.lastError().text();
+        qCCritical(lcAvatarManager) << "Unable to open avatars database:" << db.lastError().text();
     } else {
         qCInfo(lcAvatarManager) << "Successfully opened avatars database";
 
