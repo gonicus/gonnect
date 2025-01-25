@@ -64,6 +64,25 @@ Version 2, or at your opinion any later version.
 
 See [LICENSE](LICENSE) for the full content of the license.
 
+# Non-goals
+
+Like every other software, _GOnnect_ cannot be an all-purpose silver bullet. Here are some 
+deliberately chosen non-goals, so things that will not be implemented into _GOnnect_:
+
+* **Full SIP configuration**: Most SIP clients provide a plethora of options to configure
+every single bit of the SIP connection. That includes many audio codecs of which most are 
+obsolete or rarely used. _GOnnect_ strives to be simple and therefore allows only the most
+common and important options. This will exclude some exotic ones.
+* **PIM/contact management**: This should be done via dedicated PIM services as opposed to 
+implementing the nth place to store contacts.
+* **Speech-to-text transcription and audio recording**: Apart from some technical insufficiencies
+this bears some critical questions about data privacy. 
+* **Conferences with more than three participants**: Ad-hoc conferences are implemented such
+that the initializing participant will be a router for the audio streams of the others. In
+our experience, having more than three endpoints will produce bad sound quality, delays and
+other performance issues. Bigger conferences would require a specific configuration on the 
+SIP server or another platform (like [Jitsi Meet](https://meet.jit.si/)).
+
 # Development
 
 _GOnnect_ is based on Qt / C++ and requires a set of libraries to be buildable.
