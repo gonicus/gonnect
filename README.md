@@ -1,7 +1,7 @@
 <p align="center">
   <img src="media/logo.png" width="410" height="509" alt="GOnnect">
 </p>
-<!--- TODO: badges --->
+
 <p align="center">
   <a href="https://github.com/gonicus/gonnect/wiki">Documentation</a> |
   <a href="https://github.com/gonicus/gonnect/issues">Issues</a> |
@@ -47,6 +47,31 @@ Here's a short feature list:
  * Mime-Type registration for `tel:` / `sip:` URLs
  * Light/Dark mode
 
+# Headsets known to be supported
+
+GOnnect supports some generic USB headset features to make your calls easier.
+Here is the current list in combination
+
+| Feature                                  | Key |
+| ---------------------------------------- | --- |
+| Answering the call via handset off-hook  | A   |
+| End call by hanging up the handset       | E   |
+| Mute control                             | M   |
+| LED state visualization                  | S   |
+| Busy light support (additional hardware) | L   |
+| Open GOnnect via handset off-hook        | O   |
+| Ringing via headset base station         | R   |
+
+In theory, Teams certified Headsets may work, but you never know... Here is a
+list of tested headsets. Please feel free to report any working combinations to
+make this list more complete by opening an [issue](https://github.com/gonicus/gonnect/issues).
+
+| Manufacturer  | Model         | Features        |
+| ------------- | ------------- | --------------- |
+| Jabra         | EVOLVE LINK   | AEMS            |
+| Yealink       | WH62          | AEMSLOR         |
+
+
 # Installing _GOnnect_
 
 _GOnnect_ is distributed via Flathub only. To install it, either visit the
@@ -56,13 +81,6 @@ or KDE's _discover_.
 After you have installed _GOnnect_, either adjust the provided
 `sample.conf` and place it in `~/.var/app/de.gonicus.gonnect/config/gonnect/99-user.conf`,
 or head over to [the documentation](https://github.com/gonicus/gonnect/wiki).
-
-# License
-
-_GOnnect_ is licensed unter the terms of the GNU GENERAL PUBLIC LICENSE
-Version 2, or at your opinion any later version.
-
-See [LICENSE](LICENSE) for the full content of the license.
 
 # Non-goals
 
@@ -141,5 +159,10 @@ flatpak --user remote-add --no-gpg-verify gonnect-repo repo
 flatpak --user install gonnect-repo de.gonicus.gonnect
 ```
 
-Make sure to cleanup `repo`, `build` and `.flatpak-builder` to make QtCreator not eat
-up your CPU, memory and the whole computer as a desert.
+# License
+
+_GOnnect_ is licensed unter the terms of the GNU GENERAL PUBLIC LICENSE
+Version 2, or at your opinion any later version.
+
+See [LICENSE](LICENSE) for the full content of the license.
+
