@@ -48,6 +48,22 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
 {
     Q_ASSERT(!m_addressBook.isNull());
 
+    // Check vCard version first - only 3.0 is supported atm
+    static const QRegularExpression versionRegExp("VERSION:(?<version>[0-9.]+?)(\\r\\n?|\\n)");
+
+    const auto matchResult = versionRegExp.match(data);
+    if (!matchResult.hasMatch()) {
+        qCritical() << "Cannot parse version from vCard - ignoring";
+        return;
+    }
+    const auto version = matchResult.captured("version");
+    if (version != "3.0") {
+        qCritical() << "Only vCard version 3.0 is supported at the moment but found" << version
+                    << "- ignoring";
+        return;
+    }
+
+    // Process vcard
     std::istringstream stringStream(data.toStdString());
     TextReader reader(stringStream);
     auto cards = reader.parseCards();
@@ -76,8 +92,25 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
             } else if (propName == "TEL") {
                 phoneNumbers.append({ Contact::NumberType::Unknown,
                                       QString::fromStdString(prop.getValue()), false });
-            } else if (propName == "PHOTO" || propName.starts_with("PHOTO:data:image/jpeg")) {
-                photoData = QByteArray::fromStdString(prop.getValue());
+            } else if (propName == "PHOTO") {
+
+                auto propParams = prop.params();
+                const auto end = propParams.end();
+
+                bool isBase64 = false;
+                bool isJpeg = false;
+
+                for (auto it = propParams.begin(); it != end; ++it) {
+                    if (it->first == "ENCODING" && it->second == "b") {
+                        isBase64 = true;
+                    } else if (it->first == "TYPE" && it->second == "JPEG") {
+                        isJpeg = true;
+                    }
+                }
+
+                if (isBase64 && isJpeg) {
+                    photoData = QByteArray::fromStdString(prop.getValue());
+                }
             }
         }
 
@@ -165,44 +198,8 @@ QString CardDAVAddressBookFeeder::cacheFilePath(const size_t hash, bool createPa
 void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QByteArray &data,
                                                     const QDateTime &modifiedDate) const
 {
-
-    // Detect vCard version
-    // 2.1: PHOTO;JPEG;ENCODING=BASE64:[base64-data]
-    // 3.0: PHOTO;TYPE=JPEG;ENCODING=b:[base64-data]
-    // 4.0: PHOTO:data:image/jpeg;base64,[base64-data]
-
-    const auto splitted = data.split(':');
-    if (splitted.size() != 2) {
-        return;
-    }
-
-    // Checking vCard 2.1 and 3.0
-    const auto head = splitted.at(0).split(';');
-    QByteArray base64Str;
-    bool isJpeg = false;
-    bool isBase64 = false;
-
-    for (const auto &part : head) {
-        if (part == "TYPE=JPEG" || part == "JPEG") {
-            isJpeg = true;
-        } else if (part == "ENCODING=b" || part == "ENCODING=BASE64") {
-            isBase64 = true;
-        }
-    }
-
-    if (isJpeg && isBase64) {
-        base64Str = splitted.at(1);
-    } else if (data.startsWith("base64,")) {
-        // Must be vCard 4.0
-        base64Str = data.sliced(7);
-    }
-
-    if (base64Str.isEmpty()) {
-        return;
-    }
-
     // Convert base64 data to image
-    const QByteArray decoded = QByteArray::fromBase64(base64Str);
+    const QByteArray decoded = QByteArray::fromBase64(data);
     AvatarManager::instance().addExternalImage(id, decoded, modifiedDate);
 }
 
