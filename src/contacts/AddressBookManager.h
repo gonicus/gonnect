@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QHash>
 
 class AddressBookManager : public QObject
 {
@@ -25,7 +26,10 @@ private:
     void processAddressBookQueue();
     bool processLDAPAddressBookConfig(const QString &group);
     bool processCSVAddressBookConfig(const QString &group);
+    bool processCardDAVAddressBookConfig(const QString &group);
+    void processCardDAVAddressBookConfigImpl(const QString &group, const QString &password);
 
     QStringList m_addressBookConfigs;
     QStringList m_addressBookQueue;
+    QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
 };

@@ -71,12 +71,18 @@ Item {
                 viewHelperConnections.emergencyWindow = null
             }
         }
+
+        function onCardDavPasswordRequested(id : string, host : string) {
+            const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for %1:").arg(host) })
+            dialog.onPasswordAccepted.connect(pw => ViewHelper.respondCardDavPassword(id, pw))
+        }
     }
 
     Connections {
         target: SIPAccountManager
         function onAuthorizationFailed(accountId : string) {
-            DialogFactory.createDialog("AccountCredentialsDialog.qml", { accountId })
+            const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for the SIP account:") })
+            dialog.onPasswordAccepted.connect(pw => SIPAccountManager.setAccountCredentials(accountId, pw))
         }
     }
 

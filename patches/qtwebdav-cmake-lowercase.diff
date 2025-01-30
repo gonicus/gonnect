@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6883604..c410318 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,15 +5,15 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Network Xml REQUIRED)
+ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+ add_library(QtWebDAV SHARED
+-        QNaturalSort.cpp
+-        QNaturalSort.h
+-        QWebDAV.cpp
+-        QWebDAV.h
+-        QWebDAV_global.h
+-        QWebDAVDirParser.cpp
+-        QWebDAVDirParser.h
+-        QWebDAVItem.cpp
+-        QWebDAVItem.h
++        qnaturalsort.cpp
++        qnaturalsort.h
++        qwebdav.cpp
++        qwebdav.h
++        qwebdav_global.h
++        qwebdavdirparser.cpp
++        qwebdavdirparser.h
++        qwebdavitem.cpp
++        qwebdavitem.h
+         )
+
+ target_link_libraries(QtWebDAV PUBLIC
+

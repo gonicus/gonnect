@@ -26,6 +26,7 @@ public:
         bool operator!=(const PhoneNumber &other) const;
     };
 
+    explicit Contact(QObject *parent = nullptr);
     explicit Contact(const QString &id, const QString &dn, const QString &name,
                      QObject *parent = nullptr);
     explicit Contact(const QString &id, const QString &dn, const QString &name,

@@ -7,14 +7,15 @@ import base
 
 BaseDialog {
     id: control
-
     title: qsTr("Authentication failed")
 
-    required property string accountId
+    signal passwordAccepted(string password)
+
+    property alias text: contentLabel.text
 
     Label {
         id: contentLabel
-        text: qsTr("Please enter the password for the SIP account:")
+        text: qsTr("Please enter the password:")
         elide: Label.ElideRight
         wrapMode: Label.WordWrap
         anchors {
@@ -52,7 +53,8 @@ BaseDialog {
         }
 
         onClicked: () => {
-            SIPAccountManager.setAccountCredentials(control.accountId, passwordField.text)
+            okButton.enabled = false
+            control.passwordAccepted(passwordField.text)
             control.close()
         }
     }

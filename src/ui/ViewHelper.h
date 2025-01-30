@@ -72,6 +72,9 @@ public:
 
     Q_INVOKABLE QString encryptSecret(const QString &secret) const;
 
+    void requestCardDavPassword(const QString &id, const QString &host);
+    Q_INVOKABLE void respondCardDavPassword(const QString &id, const QString password);
+
 public slots:
     Q_INVOKABLE void quitApplication();
 
@@ -91,6 +94,9 @@ signals:
     void showQuitConfirm();
     void showEmergency(QString accountId, int callId, QString displayName);
     void hideEmergency();
+
+    void cardDavPasswordRequested(QString id, QString host);
+    void cardDavPasswordResponded(QString id, QString password);
 };
 
 class ViewHelperWrapper

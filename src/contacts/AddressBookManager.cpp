@@ -3,8 +3,12 @@
 #include "NetworkHelper.h"
 #include "AddressBook.h"
 #include "LDAPAddressBookFeeder.h"
+#include "CardDAVAddressBookFeeder.h"
 #include "CsvFileAddressBookFeeder.h"
 #include "AvatarManager.h"
+#include "ViewHelper.h"
+#include "SecretPortal.h"
+#include "KeychainSettings.h"
 
 #include <QTimer>
 #include <QUrl>
@@ -22,12 +26,14 @@ void AddressBookManager::initAddressBookConfigs()
 {
     static QRegularExpression ldapGroupRegex = QRegularExpression("^ldap[0-9]+$");
     static QRegularExpression csvGroupRegex = QRegularExpression("^csv[0-9]+$");
+    static QRegularExpression carddavGroupRegex = QRegularExpression("^carddav[0-9]+$");
 
     ReadOnlyConfdSettings settings;
     const QStringList groups = settings.childGroups();
 
     for (const auto &group : groups) {
-        if (ldapGroupRegex.match(group).hasMatch() || csvGroupRegex.match(group).hasMatch()) {
+        if (ldapGroupRegex.match(group).hasMatch() || csvGroupRegex.match(group).hasMatch()
+            || carddavGroupRegex.match(group).hasMatch()) {
             m_addressBookConfigs.push_back(group);
         }
     }
@@ -44,6 +50,7 @@ void AddressBookManager::processAddressBookQueue()
 {
     static QRegularExpression ldapGroupRegex = QRegularExpression("^ldap[0-9]+$");
     static QRegularExpression csvGroupRegex = QRegularExpression("^csv[0-9]+$");
+    static QRegularExpression carddavGroupRegex = QRegularExpression("^carddav[0-9]+$");
 
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {
@@ -55,6 +62,10 @@ void AddressBookManager::processAddressBookQueue()
             }
         } else if (csvGroupRegex.match(group).hasMatch()) {
             if (processCSVAddressBookConfig(group)) {
+                it.remove();
+            }
+        } else if (carddavGroupRegex.match(group).hasMatch()) {
+            if (processCardDAVAddressBookConfig(group)) {
                 it.remove();
             }
         }
@@ -110,4 +121,83 @@ bool AddressBookManager::processCSVAddressBookConfig(const QString &group)
     settings.endGroup();
 
     return true;
+}
+
+bool AddressBookManager::processCardDAVAddressBookConfig(const QString &group)
+{
+
+    KeychainSettings keychainSettings;
+    keychainSettings.beginGroup(group);
+    const QString secret = keychainSettings.value("secret", "").toString();
+    keychainSettings.endGroup();
+
+    if (secret.isEmpty()) {
+        auto &viewHelper = ViewHelper::instance();
+        auto conn = connect(&viewHelper, &ViewHelper::cardDavPasswordResponded, this,
+                            [group, this](const QString &id, const QString &password) {
+                                if (id == group) {
+                                    QObject::disconnect(m_viewHelperConnections.value(group));
+                                    m_viewHelperConnections.remove(group);
+
+                                    auto &secretPortal = SecretPortal::instance();
+                                    if (secretPortal.isValid()) {
+                                        KeychainSettings settings;
+                                        settings.beginGroup(group);
+                                        const auto secret = secretPortal.encrypt(password);
+                                        settings.setValue("secret", secret);
+                                        settings.endGroup();
+                                    }
+
+                                    processCardDAVAddressBookConfigImpl(group, password);
+                                }
+                            });
+
+        m_viewHelperConnections.insert(group, conn);
+
+        ReadOnlyConfdSettings settings;
+        settings.beginGroup(group);
+        viewHelper.requestCardDavPassword(group, settings.value("host", "").toString());
+        settings.endGroup();
+
+    } else {
+        auto &secretPortal = SecretPortal::instance();
+        if (secretPortal.isValid()) {
+            if (secretPortal.isInitialized()) {
+                processCardDAVAddressBookConfigImpl(group, secretPortal.decrypt(secret));
+            } else {
+                connect(&secretPortal, &SecretPortal::initializedChanged, this,
+                        [this, group, secret]() {
+                            processCardDAVAddressBookConfigImpl(
+                                    group, SecretPortal::instance().decrypt(secret));
+                        });
+            }
+        }
+    }
+
+    return true;
+}
+
+void AddressBookManager::processCardDAVAddressBookConfigImpl(const QString &group,
+                                                             const QString &password)
+{
+    ReadOnlyConfdSettings settings;
+    settings.beginGroup(group);
+
+    QHash<QString, QString> settingsHash;
+    const auto keys = settings.allKeys();
+    for (const auto &key : keys) {
+        qCritical() << key << settings.value(key);
+        settingsHash.insert(key, settings.value(key, "").toString());
+    }
+    const auto controlHash = qHash(settingsHash);
+
+    const bool useSSL = settings.value("useSSL", true).toBool();
+
+    auto feeder = new CardDAVAddressBookFeeder(
+            controlHash, settings.value("host", "").toString(),
+            settings.value("path", "").toString(), settings.value("user", "").toString(), password,
+            settings.value("port", useSSL ? 443 : 80).toInt(), useSSL, this);
+    feeder->feedAddressBook(AddressBook::instance());
+    Q_UNUSED(feeder)
+    settings.endGroup();
 }
