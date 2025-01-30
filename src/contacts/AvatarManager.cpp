@@ -9,6 +9,7 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QMimeDatabase>
 
 Q_LOGGING_CATEGORY(lcAvatarManager, "gonnect.app.AvatarManager")
 
@@ -74,7 +75,11 @@ void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,
 
 QString AvatarManager::avatarPathFor(const QString &id)
 {
-    QString res = QString("%1/%2.jpg").arg(m_avatarImageDirPath, id);
+    if (id.contains("3F-61F51480-A3-C282F80")) {
+        qCritical() << "so";
+    }
+
+    QString res = QString("%1/%2").arg(m_avatarImageDirPath, id);
 
     if (!res.isEmpty() && !QFile::exists(res)) {
         return "";
@@ -116,11 +121,11 @@ void AvatarManager::clearCStringlist(char **attrs) const
 
 void AvatarManager::createFile(const QString &id, const QByteArray &data) const
 {
-    QFile file(QString("%1/%2.jpg").arg(m_avatarImageDirPath, id));
+    QFile file(QString("%1/%2").arg(m_avatarImageDirPath, id));
 
     if (!file.open(QIODevice::WriteOnly)) {
         qCCritical(lcAvatarManager)
-                << "Cannot open file" << QString("%1/%2.jpg").arg(m_avatarImageDirPath, id);
+                << "Cannot open file" << QString("%1/%2").arg(m_avatarImageDirPath, id);
         return;
     }
 
@@ -255,17 +260,19 @@ void AvatarManager::loadAvatars(const QList<const Contact *> &contacts, const QS
 
 QStringList AvatarManager::readContactIdsFromDir() const
 {
+    QMimeDatabase db;
+
     QDir avatarDir(m_avatarImageDirPath);
-    const auto fileList = avatarDir.entryList(
-            { "*.jpg" }, QDir::Files | QDir::Readable | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+    const auto fileList = avatarDir.entryList(QDir::Files | QDir::Readable | QDir::NoDotAndDotDot
+                                              | QDir::NoSymLinks);
 
     QStringList resultList;
 
-    for (const auto &fileInfo : fileList) {
-        const auto fileName = fileInfo;
+    for (const auto &fileName : fileList) {
 
-        if (fileName.length() == 64 + 4) { // File name scheme: uuid (64 chars) + ".jpg"
-            resultList.append(fileName.left(64));
+        QMimeType mime = db.mimeTypeForFile(m_avatarImageDirPath + "/" + fileName);
+        if (mime.inherits("image/jpeg") || mime.inherits("image/png")) {
+            resultList.append(fileName);
         }
     }
 

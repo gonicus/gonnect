@@ -199,8 +199,10 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
                                                     const QDateTime &modifiedDate) const
 {
     // Convert base64 data to image
-    const QByteArray decoded = QByteArray::fromBase64(data);
-    AvatarManager::instance().addExternalImage(id, decoded, modifiedDate);
+    if (data.size()) {
+        const QByteArray decoded = QByteArray::fromBase64(data);
+        AvatarManager::instance().addExternalImage(id, decoded, modifiedDate);
+    }
 }
 
 void CardDAVAddressBookFeeder::onError(QString error) const
