@@ -5,6 +5,7 @@
 #include "AvatarManager.h"
 #include "NumberStats.h"
 #include "SIPCallManager.h"
+#include "AddressBook.h"
 
 HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -31,6 +32,8 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&numStats, &NumberStats::favoriteAdded, this, &HistoryModel::handleFavoriteToggle);
     connect(&numStats, &NumberStats::favoriteRemoved, this, &HistoryModel::handleFavoriteToggle);
     connect(&numStats, &NumberStats::modelReset, this, &HistoryModel::resetModel);
+
+    connect(&AddressBook::instance(), &AddressBook::contactsReady, this, &HistoryModel::resetModel);
 
     connect(this, &HistoryModel::limitChanged, this, &HistoryModel::resetModel);
 }

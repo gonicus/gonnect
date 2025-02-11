@@ -273,6 +273,8 @@ void CardDAVAddressBookFeeder::flushCachImpl()
     qCInfo(lcCardDAVAddressBookFeeder)
             << m_cachedContacts.size() << "contacts written to CardDAV cache with hash"
             << m_settingsHash;
+
+    AddressBook::instance().contactsReady();
 }
 
 #undef CARDDAV_MAGIC
