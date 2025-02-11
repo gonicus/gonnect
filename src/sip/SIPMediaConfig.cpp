@@ -20,7 +20,9 @@ void SIPMediaConfig::applyConfig(pj::EpConfig &epConfig)
 
     bool noVad = settings.value("media/noVad", false).toBool();
     epConfig.medConfig.noVad = noVad;
-    epConfig.medConfig.sndUseSwClock = true;
+
+    bool useSoftwareClock = settings.value("media/softwareClock", true).toBool();
+    epConfig.medConfig.sndUseSwClock = useSoftwareClock;
 
     unsigned clockRate = settings.value("media/clockRate", PJSUA_DEFAULT_CLOCK_RATE).toUInt(&ok);
     if (ok) {
