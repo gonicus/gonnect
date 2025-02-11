@@ -26,8 +26,13 @@ public:
 
     virtual void onIncomingCall(pj::OnIncomingCallParam &prm) override;
     virtual void onRegState(pj::OnRegStateParam &prm) override;
+    virtual void onSendRequest(pj::OnSendRequestParam &prm) override;
 
     bool isRegistered() const { return m_isRegistered; }
+    bool isInstantMessagingAllowed() const
+    {
+        return m_shallNegotiateCapabilities && m_isInstantMessagingAllowed;
+    }
 
     void call(const QString &number, const QString &contactId = "",
               const QString &preferredIdentity = "auto", bool silent = false);
@@ -54,15 +59,19 @@ public:
 private:
     void generatePreferredIdentityHeader(const QString &var, const QString &preferredIdentity,
                                          pj::CallOpParam &prm);
+    bool hasAllowGrant(const QString &header, const QString &grant) const;
 
     QString addTransport(const QString &uri);
 
     QList<SIPCall *> m_calls;
     QList<SIPBuddy *> m_buddies;
     bool m_isRegistered = false;
+    bool m_isInstantMessagingAllowed = false;
+    bool m_shallNegotiateCapabilities = true;
 
     QString m_account;
     QString m_domain;
+    QByteArray m_optionsRequestUuid;
     pj::AccountConfig m_accountConfig;
     pj::TransportConfig m_transportConfig;
 
