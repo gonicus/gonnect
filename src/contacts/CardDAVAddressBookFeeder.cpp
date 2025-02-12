@@ -261,7 +261,6 @@ void CardDAVAddressBookFeeder::flushCachImpl()
     out << quint8(CARDDAV_VERSION);
     out << m_ignoredIds;
     out << m_cachedContacts.size();
-
     QHashIterator it(std::as_const(m_cachedContacts));
     while (it.hasNext()) {
         it.next();

@@ -42,4 +42,5 @@ private:
 
 signals:
     void avatarsLoaded();
+    void avatarAdded(QString contactId);
 };

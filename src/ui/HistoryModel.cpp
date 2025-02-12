@@ -24,6 +24,13 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
+    connect(&AvatarManager::instance(), &AvatarManager::avatarAdded, this, [this](QString) {
+        const auto startIndex = createIndex(0, 0);
+        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        emit dataChanged(
+                startIndex, endIndex,
+                { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+    });
 
     connect(&SIPCallManager::instance(), &SIPCallManager::blocksChanged, this,
             &HistoryModel::resetModel);

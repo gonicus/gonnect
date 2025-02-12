@@ -106,6 +106,8 @@ void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
     if (auto contact = AddressBook::instance().lookupByContactId(id)) {
         contact->setHasAvatar(true);
     }
+
+    emit avatarAdded(id);
 }
 
 void AvatarManager::clearCStringlist(char **attrs) const
