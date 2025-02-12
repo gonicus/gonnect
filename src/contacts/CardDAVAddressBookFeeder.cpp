@@ -71,7 +71,6 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
     for (auto &card : cards) {
         auto &props = card.properties();
 
-        QString uid;
         QString name;
         QString org;
         QString email;
@@ -81,9 +80,7 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
         for (auto &prop : props) {
             const auto propName = prop.getName();
 
-            if (propName == "UID") {
-                uid = QString::fromStdString(prop.getValue());
-            } else if (propName == "FN") {
+            if (propName == "FN") {
                 name = QString::fromStdString(prop.getValue());
             } else if (propName == "ORG") {
                 org = QString::fromStdString(prop.getValue());
@@ -116,10 +113,10 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
 
         if (!uuid.isEmpty() && !name.isEmpty() && !phoneNumbers.isEmpty()) {
             Contact *contact =
-                    m_addressBook->addContact(uid, name, org, email, modifiedDate, phoneNumbers);
+                    m_addressBook->addContact(uuid, name, org, email, modifiedDate, phoneNumbers);
             m_cachedContacts.insert(uuid, contact);
 
-            processPhotoProperty(uid, photoData, modifiedDate);
+            processPhotoProperty(contact->id(), photoData, modifiedDate);
 
         } else if (!uuid.isEmpty()) {
             m_ignoredIds.insert(uuid, modifiedDate);
@@ -273,7 +270,7 @@ void CardDAVAddressBookFeeder::flushCachImpl()
             << m_cachedContacts.size() << "contacts written to CardDAV cache with hash"
             << m_settingsHash;
 
-    AddressBook::instance().contactsReady();
+    emit AddressBook::instance().contactsReady();
 }
 
 #undef CARDDAV_MAGIC
