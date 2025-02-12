@@ -1,5 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.1.0" date="2025-02-12">
+    <description>
+      <p>Continuous Integration:</p>
+      <ul>
+        <li>make analyzer work again</li>
+        <li>try to fix static analyzer (again)</li>
+      </ul>
+      <p>Maintenance:</p>
+      <ul>
+        <li>Added headset description</li>
+        <li>fixed parsing of photo data in CardDAV feeder</li>
+        <li>remove debug info</li>
+        <li>use proper logging channel</li>
+        <li>update renovatebot/github-action action to v41.0.10</li>
+        <li>update renovatebot/github-action action to v41.0.11</li>
+        <li>update renovatebot/github-action action to v41.0.13</li>
+        <li>non-goals paragraph in README</li>
+      </ul>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>load avatars of contacts that are created later</li>
+        <li>remove direct jpeg deps</li>
+        <li>send refresh signals after carddav contacts loaded</li>
+        <li>send update signals when adding avatar via CardDAV</li>
+      </ul>
+      <p>Code Refactoring:</p>
+      <ul>
+        <li>use better approach to check if MESSAGING is allowed</li>
+        <li>use correct id for CardDAV-loaded contacts</li>
+      </ul>
+      <p>Features:</p>
+      <ul>
+        <li>CardDAV contact support</li>
+        <li>move to software clock by default and make it configurable</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.0.7" date="2025-01-20">
     <description>
       <p>Maintenance:</p>
