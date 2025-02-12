@@ -24,6 +24,8 @@ def get_plist_with_content(dir):
             except FileNotFoundError as err:
                 print(err)
                 exit()
+            except:
+                pass
             if pl['diagnostics']:
                 plist_list.append(pl)
     if not plist_list:
