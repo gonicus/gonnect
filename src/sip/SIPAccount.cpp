@@ -10,6 +10,8 @@
 #include "SecretPortal.h"
 #include "KeychainSettings.h"
 
+#include <QUuid>
+
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
 
 SIPAccount::SIPAccount(const QString &group, QObject *parent)
@@ -23,6 +25,8 @@ bool SIPAccount::initialize()
     static QRegularExpression sipURI = QRegularExpression("^(sips?):([^@]+)(?:@(.+))?$");
 
     m_settings.beginGroup(m_account);
+
+    m_shallNegotiateCapabilities = m_settings.value("negotiateCapabilities", true).toBool();
 
     QString transport = m_settings.value("transport", "tls").toString();
     if (transport == "tls") {
@@ -502,6 +506,21 @@ void SIPAccount::generatePreferredIdentityHeader(const QString &var,
     }
 }
 
+bool SIPAccount::hasAllowGrant(const QString &header, const QString &grant) const
+{
+
+    // return header.contains("Allow:");
+    static const QRegularExpression regex("Allow: (?<grants>.*?)(\\r\\n?|\\n)");
+
+    const auto matchResult = regex.match(header);
+    if (matchResult.hasMatch()) {
+        const auto grants = matchResult.captured("grants").split(", ");
+        return grants.contains(grant);
+    }
+
+    return false;
+}
+
 SIPCall *SIPAccount::getCallById(const int callId)
 {
     for (auto call : std::as_const(m_calls)) {
@@ -593,6 +612,39 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
 
     if (prm.code == PJSIP_SC_UNAUTHORIZED) {
         emit authorizationFailed();
+    }
+
+    if (m_isRegistered && m_shallNegotiateCapabilities) {
+        pj::SipHeaderVector headers;
+        pj::SipHeader contactHeader;
+        contactHeader.hName = "Contact";
+        contactHeader.hValue = "<"
+                + addTransport(QString::fromStdString(m_accountConfig.idUri)).toStdString() + ">";
+        headers.push_back(contactHeader);
+
+        pj::SipTxOption opt;
+        opt.targetUri = m_accountConfig.regConfig.registrarUri;
+        opt.headers = headers;
+
+        m_optionsRequestUuid = QUuid::createUuid().toByteArray();
+
+        pj::SendRequestParam prm;
+        prm.method = "OPTIONS";
+        prm.txOption = opt;
+        prm.userData = m_optionsRequestUuid.data();
+
+        sendRequest(prm);
+    }
+}
+
+void SIPAccount::onSendRequest(pj::OnSendRequestParam &prm)
+{
+    const QByteArray uuid(static_cast<char *>(prm.userData));
+
+    if (uuid == m_optionsRequestUuid) {
+        m_optionsRequestUuid.clear();
+        const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
+        m_isInstantMessagingAllowed = hasAllowGrant(header, "MESSAGE");
     }
 }
 
