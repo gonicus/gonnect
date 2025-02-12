@@ -9,8 +9,11 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QMimeDatabase>
 
 Q_LOGGING_CATEGORY(lcAvatarManager, "gonnect.app.AvatarManager")
+
+using namespace std::chrono_literals;
 
 AvatarManager::AvatarManager(QObject *parent) : QObject{ parent }
 {
@@ -22,6 +25,36 @@ AvatarManager::AvatarManager(QObject *parent) : QObject{ parent }
         baseDir.mkpath("avatars");
         qCInfo(lcAvatarManager) << "Created avatar image directory" << m_avatarImageDirPath;
     }
+
+    m_updateContactsTimer.setSingleShot(true);
+    m_updateContactsTimer.setInterval(5ms);
+    m_updateContactsTimer.callOnTimeout(this, &AvatarManager::updateContacts);
+
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this, [this](Contact *contact) {
+        m_contactsWithPendingUpdates.append(contact);
+
+        if (!m_updateContactsTimer.isActive()) {
+            m_updateContactsTimer.start();
+        }
+    });
+}
+
+void AvatarManager::updateContacts()
+{
+    if (m_contactsWithPendingUpdates.isEmpty()) {
+        return;
+    }
+
+    const auto contactIds = readContactIdsFromDir();
+
+    for (auto contactPtr : std::as_const(m_contactsWithPendingUpdates)) {
+        if (contactPtr && contactIds.contains(contactPtr->id())) {
+            contactPtr->setHasAvatar(true);
+        }
+    }
+
+    m_contactsWithPendingUpdates.clear();
+    emit avatarsLoaded();
 }
 
 void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,
@@ -74,13 +107,35 @@ void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,
 
 QString AvatarManager::avatarPathFor(const QString &id)
 {
-    QString res = QString("%1/%2.jpg").arg(m_avatarImageDirPath, id);
+    QString res = QString("%1/%2").arg(m_avatarImageDirPath, id);
 
     if (!res.isEmpty() && !QFile::exists(res)) {
         return "";
     }
 
     return res;
+}
+
+void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
+                                     const QDateTime &modified)
+{
+    const auto dbModified = modifiedTimeInDb(id);
+
+    if (dbModified.isValid() && dbModified < modified) {
+        createFile(id, data);
+        updateAvatarModifiedTime(id, modified);
+    } else if (dbModified.isNull()) {
+        createFile(id, data);
+        QHash<QString, QDateTime> tmp;
+        tmp.insert(id, modified);
+        addIdsToDb(tmp);
+    }
+
+    if (auto contact = AddressBook::instance().lookupByContactId(id)) {
+        contact->setHasAvatar(true);
+    }
+
+    emit avatarAdded(id);
 }
 
 void AvatarManager::clearCStringlist(char **attrs) const
@@ -96,11 +151,11 @@ void AvatarManager::clearCStringlist(char **attrs) const
 
 void AvatarManager::createFile(const QString &id, const QByteArray &data) const
 {
-    QFile file(QString("%1/%2.jpg").arg(m_avatarImageDirPath, id));
+    QFile file(QString("%1/%2").arg(m_avatarImageDirPath, id));
 
     if (!file.open(QIODevice::WriteOnly)) {
         qCCritical(lcAvatarManager)
-                << "Cannot open file" << QString("%1/%2.jpg").arg(m_avatarImageDirPath, id);
+                << "Cannot open file" << QString("%1/%2").arg(m_avatarImageDirPath, id);
         return;
     }
 
@@ -141,7 +196,7 @@ void AvatarManager::updateAvatarModifiedTime(const QString &id, const QDateTime 
     auto db = QSqlDatabase::database();
 
     if (!db.open()) {
-        qCCritical(lcAvatarManager) << "Unable to open avatars databse:" << db.lastError().text();
+        qCCritical(lcAvatarManager) << "Unable to open avatars database:" << db.lastError().text();
     } else {
         qCInfo(lcAvatarManager) << "Successfully opened avatars database";
 
@@ -159,13 +214,42 @@ void AvatarManager::updateAvatarModifiedTime(const QString &id, const QDateTime 
     }
 }
 
+QDateTime AvatarManager::modifiedTimeInDb(const QString &id) const
+{
+    auto db = QSqlDatabase::database();
+    if (!db.open()) {
+        qCCritical(lcAvatarManager) << "Unable to open avatars database:" << db.lastError().text();
+        return QDateTime();
+    } else {
+        QSqlQuery query(db);
+        query.prepare("SELECT lastModified FROM avatars WHERE id = :id;");
+        query.bindValue(":id", id);
+
+        if (!query.exec()) {
+            qCCritical(lcAvatarManager)
+                    << "Error on executing SQL query:" << query.lastError().text();
+            return QDateTime();
+        } else {
+            if (query.size() > 1) {
+                qCCritical(lcAvatarManager) << "Error: id" << id << "is ambigous";
+                return QDateTime();
+            } else {
+                query.next();
+                return QDateTime::fromSecsSinceEpoch(query.value("lastModified").toLongLong());
+            }
+        }
+    }
+
+    return QDateTime();
+}
+
 QHash<QString, QDateTime> AvatarManager::readIdsFromDb() const
 {
     QHash<QString, QDateTime> result;
     auto db = QSqlDatabase::database();
 
     if (!db.open()) {
-        qCCritical(lcAvatarManager) << "Unable to open avatars databse:" << db.lastError().text();
+        qCCritical(lcAvatarManager) << "Unable to open avatars database:" << db.lastError().text();
     } else {
         qCInfo(lcAvatarManager) << "Successfully opened avatars database";
 
@@ -206,17 +290,19 @@ void AvatarManager::loadAvatars(const QList<const Contact *> &contacts, const QS
 
 QStringList AvatarManager::readContactIdsFromDir() const
 {
+    QMimeDatabase db;
+
     QDir avatarDir(m_avatarImageDirPath);
-    const auto fileList = avatarDir.entryList(
-            { "*.jpg" }, QDir::Files | QDir::Readable | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+    const auto fileList = avatarDir.entryList(QDir::Files | QDir::Readable | QDir::NoDotAndDotDot
+                                              | QDir::NoSymLinks);
 
     QStringList resultList;
 
-    for (const auto &fileInfo : fileList) {
-        const auto fileName = fileInfo;
+    for (const auto &fileName : fileList) {
 
-        if (fileName.length() == 64 + 4) { // File name scheme: uuid (64 chars) + ".jpg"
-            resultList.append(fileName.left(64));
+        QMimeType mime = db.mimeTypeForFile(m_avatarImageDirPath + "/" + fileName);
+        if (mime.inherits("image/jpeg") || mime.inherits("image/png")) {
+            resultList.append(fileName);
         }
     }
 

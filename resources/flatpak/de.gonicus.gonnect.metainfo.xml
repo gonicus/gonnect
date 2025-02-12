@@ -90,9 +90,10 @@
       <keyword>phone</keyword>
   </keywords>
 
-  <url type="homepage">https://www.gonicus.de</url>
-  <url type="bugtracker">https://www.gonicus.de</url>
-  <url type="help">https://www.gonicus.de</url>
+  <url type="homepage">https://github.com/gonicus/gonnect</url>
+  <url type="bugtracker">https://github.com/gonicus/gonnect/issues</url>
+  <url type="help">https://github.com/gonicus/gonnect/wiki</url>
+  <url type="contact">https://www.gonicus.de</url>
 
   <provides>
     <binary>gonnect</binary>

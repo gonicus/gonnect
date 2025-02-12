@@ -188,3 +188,13 @@ QString ViewHelper::encryptSecret(const QString &secret) const
     Q_ASSERT(sp.isValid());
     return sp.encrypt(secret);
 }
+
+void ViewHelper::requestCardDavPassword(const QString &id, const QString &host)
+{
+    emit cardDavPasswordRequested(id, host);
+}
+
+void ViewHelper::respondCardDavPassword(const QString &id, const QString password)
+{
+    emit cardDavPasswordResponded(id, password);
+}

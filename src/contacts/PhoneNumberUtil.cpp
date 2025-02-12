@@ -194,6 +194,8 @@ PhoneNumberUtil::PhoneNumberUtil() : QObject()
 {
     connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
             [this]() { m_contactInfoCache.clear(); });
+    connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
+            [this]() { m_contactInfoCache.clear(); });
 
 #ifndef APP_TESTS
     connect(&AvatarManager::instance(), &AvatarManager::avatarsLoaded, this,

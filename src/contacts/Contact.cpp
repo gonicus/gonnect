@@ -7,6 +7,8 @@
 #endif
 #include <QMetaEnum>
 
+Contact::Contact(QObject *parent) : QObject{ parent } { }
+
 Contact::Contact(const QString &id, const QString &dn, const QString &name, QObject *parent)
     : QObject{ parent }, m_id{ id }, m_dn{ dn }, m_name{ name }
 {

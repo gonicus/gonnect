@@ -13,9 +13,9 @@ QString AddressBook::hashifyCn(const QString &cn) const
     return QCryptographicHash::hash(cn.toUtf8(), QCryptographicHash::Sha256).toHex();
 }
 
-void AddressBook::addContact(const QString &dn, const QString &name, const QString &company,
-                             const QString &mail, const QDateTime &lastModified,
-                             const QList<Contact::PhoneNumber> &phoneNumbers)
+Contact *AddressBook::addContact(const QString &dn, const QString &name, const QString &company,
+                                 const QString &mail, const QDateTime &lastModified,
+                                 const QList<Contact::PhoneNumber> &phoneNumbers)
 {
 
     const auto hid = hashifyCn(dn);
@@ -30,6 +30,10 @@ void AddressBook::addContact(const QString &dn, const QString &name, const QStri
     contact->setMail(mail);
     contact->setLastModified(lastModified);
     contact->addPhoneNumbers(phoneNumbers);
+
+    emit contactAdded(contact);
+
+    return contact;
 }
 
 void AddressBook::addContact(Contact *contact)
@@ -37,6 +41,8 @@ void AddressBook::addContact(Contact *contact)
     if (contact != nullptr && !m_contacts.contains(contact->id())) {
         contact->setParent(this);
         m_contacts.insert(contact->id(), contact);
+
+        emit contactAdded(contact);
     }
 }
 
