@@ -58,8 +58,9 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
     }
     const auto version = matchResult.captured("version");
     if (version != "3.0") {
-        qCCritical(lcCardDAVAddressBookFeeder) << "Only vCard version 3.0 is supported at the moment but found" << version
-                    << "- ignoring";
+        qCCritical(lcCardDAVAddressBookFeeder)
+                << "Only vCard version 3.0 is supported at the moment but found" << version
+                << "- ignoring";
         return;
     }
 

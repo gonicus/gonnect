@@ -11,7 +11,7 @@ rm -rf build; mkdir build; cd build
 export CC=/usr/bin/clang
 export CXX=/usr/bin/clang++
 
-cmake -DBUILD_TESTING=OFF -DENABLE_QASSERT=ON -DCMAKE_PREFIX_PATH="$EXT_BASE/pjproject;$EXT_BASE/qca/lib/cmake" ..
+cmake -DBUILD_TESTING=OFF -DBUILD_DEPENDENCIES=ON -DENABLE_QASSERT=ON -DCMAKE_PREFIX_PATH="$EXT_BASE/pjproject;$EXT_BASE/qca/lib/cmake" ..
 
 set -eo pipefail
 intercept-build make -j$(nproc --all) 2>&1 | tee /tmp/build.log
