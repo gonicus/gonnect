@@ -107,10 +107,6 @@ void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,
 
 QString AvatarManager::avatarPathFor(const QString &id)
 {
-    if (id.contains("3F-61F51480-A3-C282F80")) {
-        qCritical() << "so";
-    }
-
     QString res = QString("%1/%2").arg(m_avatarImageDirPath, id);
 
     if (!res.isEmpty() && !QFile::exists(res)) {
