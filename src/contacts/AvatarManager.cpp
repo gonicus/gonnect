@@ -13,6 +13,8 @@
 
 Q_LOGGING_CATEGORY(lcAvatarManager, "gonnect.app.AvatarManager")
 
+using namespace std::chrono_literals;
+
 AvatarManager::AvatarManager(QObject *parent) : QObject{ parent }
 {
     const auto baseDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -23,6 +25,36 @@ AvatarManager::AvatarManager(QObject *parent) : QObject{ parent }
         baseDir.mkpath("avatars");
         qCInfo(lcAvatarManager) << "Created avatar image directory" << m_avatarImageDirPath;
     }
+
+    m_updateContactsTimer.setSingleShot(true);
+    m_updateContactsTimer.setInterval(5ms);
+    m_updateContactsTimer.callOnTimeout(this, &AvatarManager::updateContacts);
+
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this, [this](Contact *contact) {
+        m_contactsWithPendingUpdates.append(contact);
+
+        if (!m_updateContactsTimer.isActive()) {
+            m_updateContactsTimer.start();
+        }
+    });
+}
+
+void AvatarManager::updateContacts()
+{
+    if (m_contactsWithPendingUpdates.isEmpty()) {
+        return;
+    }
+
+    const auto contactIds = readContactIdsFromDir();
+
+    for (auto contactPtr : std::as_const(m_contactsWithPendingUpdates)) {
+        if (contactPtr && contactIds.contains(contactPtr->id())) {
+            contactPtr->setHasAvatar(true);
+        }
+    }
+
+    m_contactsWithPendingUpdates.clear();
+    emit avatarsLoaded();
 }
 
 void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,

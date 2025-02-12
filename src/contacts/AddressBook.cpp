@@ -31,6 +31,8 @@ Contact *AddressBook::addContact(const QString &dn, const QString &name, const Q
     contact->setLastModified(lastModified);
     contact->addPhoneNumbers(phoneNumbers);
 
+    emit contactAdded(contact);
+
     return contact;
 }
 
@@ -39,6 +41,8 @@ void AddressBook::addContact(Contact *contact)
     if (contact != nullptr && !m_contacts.contains(contact->id())) {
         contact->setParent(this);
         m_contacts.insert(contact->id(), contact);
+
+        emit contactAdded(contact);
     }
 }
 

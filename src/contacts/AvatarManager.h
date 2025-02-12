@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QObject>
-
-class Contact;
+#include <QTimer>
+#include "Contact.h"
 
 class AvatarManager : public QObject
 {
@@ -39,6 +39,11 @@ private:
     explicit AvatarManager(QObject *parent = nullptr);
 
     QString m_avatarImageDirPath;
+    QTimer m_updateContactsTimer;
+    QList<QPointer<Contact>> m_contactsWithPendingUpdates;
+
+private slots:
+    void updateContacts();
 
 signals:
     void avatarsLoaded();

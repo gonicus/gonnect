@@ -42,6 +42,7 @@ private:
     QHash<QString, Contact *> m_contacts;
 
 signals:
+    void contactAdded(Contact *contact);
     void contactsCleared();
     void contactsReady();
 };
