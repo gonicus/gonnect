@@ -1,3 +1,19 @@
+# [1.1.0](https://github.com/gonicus/gonnect/compare/v1.0.7...v1.1.0) (2025-02-12)
+
+
+### Bug Fixes
+
+* load avatars of contacts that are created later ([76f63ea](https://github.com/gonicus/gonnect/commit/76f63ea46db020277906935d5b5cc580000b3e04)), closes [#11](https://github.com/gonicus/gonnect/issues/11)
+* remove direct jpeg deps ([41ff744](https://github.com/gonicus/gonnect/commit/41ff7440fee25a05c4b71e8c7dc8fe5b9ba802f3))
+* send refresh signals after carddav contacts loaded ([f8a6f8f](https://github.com/gonicus/gonnect/commit/f8a6f8f9d23529864afd1e0fd374f57c45a09e3a)), closes [#11](https://github.com/gonicus/gonnect/issues/11)
+* **ui:** send update signals when adding avatar via CardDAV ([87d5f8f](https://github.com/gonicus/gonnect/commit/87d5f8fdd7019d84fa2a154e4eab20d87acb82e4)), closes [#11](https://github.com/gonicus/gonnect/issues/11)
+
+
+### Features
+
+* CardDAV contact support ([b848a10](https://github.com/gonicus/gonnect/commit/b848a10e17b57de3b107caf2889fcea0c7976060)), closes [#11](https://github.com/gonicus/gonnect/issues/11)
+* move to software clock by default and make it configurable ([690a04c](https://github.com/gonicus/gonnect/commit/690a04cee61cb3095596f8c62cff066f1779472b))
+
 ## [1.0.7](https://github.com/gonicus/gonnect/compare/v1.0.6...v1.0.7) (2025-01-20)
 
 
