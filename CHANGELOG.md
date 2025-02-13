@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/gonicus/gonnect/compare/v1.1.0...v1.1.1) (2025-02-13)
+
+
+### Bug Fixes
+
+* re-read avatars after file names change ([41ed506](https://github.com/gonicus/gonnect/commit/41ed506e04b2fc153d11f8a6efc2d1a7f8cb9d17)), closes [#15](https://github.com/gonicus/gonnect/issues/15)
+
 # [1.1.0](https://github.com/gonicus/gonnect/compare/v1.0.7...v1.1.0) (2025-02-12)
 
 

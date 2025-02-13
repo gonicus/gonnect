@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.1.1" date="2025-02-13">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>re-read avatars after file names change</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.1.0" date="2025-02-12">
     <description>
       <p>Continuous Integration:</p>
