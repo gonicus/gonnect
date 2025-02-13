@@ -96,8 +96,8 @@ void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,
             if (auto contact = addressBook.lookupByContactId(contactId)) {
                 contact->setHasAvatar(true);
             } else {
-                qCCritical(lcAvatarManager) << "Found avatar for contact id" << contactId
-                                            << "but no contact for it - ignoring";
+                qCDebug(lcAvatarManager) << "Found avatar for contact id" << contactId
+                                         << "but no contact for it - ignoring";
             }
         }
     }
