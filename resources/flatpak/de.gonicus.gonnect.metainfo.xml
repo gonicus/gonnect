@@ -54,6 +54,8 @@
       <li xml:lang="de">Konfigurierbare Identitäten für ausgehende Anrufe</li>
       <li>Configurable togglers (i.e. for call queues, CFNL, etc.)</li>
       <li xml:lang="de">Konfigurierbare Schalter (z.B. für Anrufwarteschlangen, CFNL, etc.)</li>
+      <li>Upgrade call to Jitsi Meet session</li>
+      <li xml:lang="de">Anruf in Jitsi Meet weiterführen</li>
       <li>Support for various hardware headsets (i.e. Yealink, Jabra)</li>
       <li xml:lang="de">Unterstützung für diverse Headsets (z.B. Yealink, Jabra)</li>
       <li>Custom audio device profiles or managed by your system</li>

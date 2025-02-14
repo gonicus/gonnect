@@ -33,6 +33,7 @@ Here's a short feature list:
  * LDAP/CardDAV address sources
  * Configurable identities for outgoing calls
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
+ * Upgrade call to Jitsi Meet session
  * Support for various hardware headsets (i.e. Yealink, Jabra)
  * Custom audio device profiles or managed by your system
  * [mpris](https://specifications.freedesktop.org/mpris-spec/latest/) for
