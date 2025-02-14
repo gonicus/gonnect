@@ -344,6 +344,15 @@ qt_add_qml_module(gonnect
         usb/ReportDescriptorParser.cpp
         usb/ReportDescriptorStructs.h
         usb/ReportDescriptorStructs.cpp
+
+        usb/busylight/IBusylightDevice.h
+        usb/busylight/IBusylightDevice.cpp
+        usb/busylight/BusylightDeviceManager.h
+        usb/busylight/BusylightDeviceManager.cpp
+        usb/busylight/KuandoOmega.h
+        usb/busylight/KuandoOmega.cpp
+        usb/busylight/LuxaforFlag.h
+        usb/busylight/LuxaforFlag.cpp
 )
 
 set_target_properties(gonnect PROPERTIES
@@ -396,6 +405,7 @@ target_include_directories(gonnect
     contacts
     ui
     usb
+    usb/busylight
     media
     ${PJSIP_STATIC_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}

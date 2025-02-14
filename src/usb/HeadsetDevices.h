@@ -30,7 +30,7 @@ public:
     int hotplugHandler(libusb_context *ctx, libusb_device *device, libusb_hotplug_event event,
                        void *user_data);
 
-    QList<HeadsetDevice *> devices() const { return m_devices; }
+    QList<HeadsetDevice *> headsetDevices() const { return m_headsetDevices; }
 
     HeadsetDeviceProxy *getProxy();
 
@@ -46,6 +46,7 @@ private:
     explicit HeadsetDevices(QObject *parent = nullptr);
 
     void refresh();
+    void clearDevices();
 
     HeadsetDevice *parseReportDescriptor(const hid_device_info *deviceInfo);
     HeadsetDevice *parseReportDescriptor(const hid_device_info *deviceInfo,
@@ -54,7 +55,7 @@ private:
     QTimer m_refreshTicker;
     QTimer m_refreshDebouncer;
 
-    QList<HeadsetDevice *> m_devices;
+    QList<HeadsetDevice *> m_headsetDevices;
     HeadsetDeviceProxy *m_proxy = nullptr;
     libusb_context *m_ctx = nullptr;
 
