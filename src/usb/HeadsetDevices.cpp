@@ -9,6 +9,8 @@
 #include "HeadsetDevices.h"
 #include "HeadsetDevice.h"
 #include "HeadsetDeviceProxy.h"
+#include "BusylightDeviceManager.h"
+#include "IBusylightDevice.h"
 
 Q_LOGGING_CATEGORY(lcHeadsets, "gonnect.usb.headsets")
 
@@ -107,8 +109,7 @@ void HeadsetDevices::shutdown()
         m_proxy = nullptr;
     }
 
-    qDeleteAll(m_devices);
-    m_devices.clear();
+    clearDevices();
 }
 
 int HeadsetDevices::hotplugHandler(libusb_context *, libusb_device *device,
@@ -144,32 +145,42 @@ void HeadsetDevices::refresh()
 {
     QMutexLocker lock(&s_enumerateMutex);
     QString lastPath;
+    auto &busylightDeviceManager = BusylightDeviceManager::instance();
 
-    qDeleteAll(m_devices);
-    m_devices.clear();
+    clearDevices();
 
-    struct hid_device_info *devs, *dp;
+    struct hid_device_info *devs, *deviceInfo;
 
-    dp = devs = hid_enumerate(0, 0);
+    deviceInfo = devs = hid_enumerate(0, 0);
 
-    for (; dp; dp = dp->next) {
+    for (; deviceInfo; deviceInfo = deviceInfo->next) {
 
-        QString path = dp->path;
+        QString path = deviceInfo->path;
         if (path == lastPath) {
             continue;
         }
 
         lastPath = path;
 
-        HeadsetDevice *hd = parseReportDescriptor(dp);
-        if (hd) {
-            m_devices.push_back(hd);
+        if (!busylightDeviceManager.createBusylightDevice(*deviceInfo)) {
+            HeadsetDevice *hd = parseReportDescriptor(deviceInfo);
+            if (hd) {
+                m_headsetDevices.push_back(hd);
+            }
         }
     }
 
     hid_free_enumeration(devs);
 
     emit devicesChanged();
+}
+
+void HeadsetDevices::clearDevices()
+{
+    qDeleteAll(m_headsetDevices);
+    m_headsetDevices.clear();
+
+    BusylightDeviceManager::instance().clearDevices();
 }
 
 HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *deviceInfo)
@@ -206,6 +217,8 @@ HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *devi
         return nullptr;
     }
 
+    qCritical() << "====>" << appCollection.get();
+
     if (!appCollection) {
         return nullptr;
     }
@@ -220,6 +233,7 @@ HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *devi
         UsageId::LED_Mute,
         UsageId::LED_Ring,
         UsageId::LED_Hold,
+        UsageId::Vendor_LEDCommand,
     };
 
     QHash<UsageId, UsageInfo> usageInfos;

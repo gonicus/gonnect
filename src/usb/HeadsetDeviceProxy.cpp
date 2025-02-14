@@ -24,7 +24,7 @@ HeadsetDeviceProxy::~HeadsetDeviceProxy()
 
 bool HeadsetDeviceProxy::refreshDevice()
 {
-    auto devs = HeadsetDevices::instance().devices();
+    auto devs = HeadsetDevices::instance().headsetDevices();
 
     if (m_device) {
         m_device = nullptr;
