@@ -73,6 +73,7 @@ std::shared_ptr<ApplicationCollection> ReportDescriptorParser::parse(QByteArray 
         } else if (isGlobal && it->global_tag() == GlobalTag::USAGE_PAGE) {
             itemStateTable.usagePage = val;
         } else if (isMain && it->main_tag() == MainTag::COLLECTION) {
+
             if (!collectionLevel && val == 0x01 // Main level application collection
                 && itemStateTable.usagePage == 0x0B // Usage Page Telephony
                 && itemStateTable.usageId == 0x05 // Usage Headset
