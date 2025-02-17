@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     Application app(argc, argv);
     if (!app.isFirstInstance()) {
         qInfo() << "another instance is running - sending args and exit";
+        app.sendArguments();
         return 2;
     }
 
