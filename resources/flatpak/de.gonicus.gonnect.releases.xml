@@ -1,5 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.1.2" date="2025-02-17">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>address theoretical counter issue</li>
+        <li>really send call parameters to the main app</li>
+      </ul>
+      <p>Continuous Integration:</p>
+      <ul>
+        <li>checkout submodules</li>
+        <li>create codeql.yml</li>
+        <li>next iteration to fight the ci mills</li>
+        <li>remove unused file</li>
+        <li>try to fix build</li>
+      </ul>
+      <p>Maintenance:</p>
+      <ul>
+        <li>sync flatpak recipe with upstream</li>
+      </ul>
+      <p>Documentation:</p>
+      <ul>
+        <li>add information about call transfer to Jitsi Meet</li>
+        <li>streamline feature lists</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.1.1" date="2025-02-13">
     <description>
       <p>Bug Fixes:</p>

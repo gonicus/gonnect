@@ -1,3 +1,11 @@
+## [1.1.2](https://github.com/gonicus/gonnect/compare/v1.1.1...v1.1.2) (2025-02-17)
+
+
+### Bug Fixes
+
+* address theoretical counter issue ([3f61bd5](https://github.com/gonicus/gonnect/commit/3f61bd508bf4bac0d698265f5668d6eb416f2285))
+* really send call parameters to the main app ([abc1f43](https://github.com/gonicus/gonnect/commit/abc1f4341adbc79825b09df9541c95fb9ffc69f4))
+
 ## [1.1.1](https://github.com/gonicus/gonnect/compare/v1.1.0...v1.1.1) (2025-02-13)
 
 
