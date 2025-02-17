@@ -146,7 +146,7 @@ QStringList NumberStats::mostCalled(quint8 limit, bool includeFavorites) const
     result.reserve(limit);
     quint8 count = 0;
 
-    for (quint8 i = 0; count < limit && i < copy.size(); ++i) {
+    for (qsizetype i = 0, s = copy.size(); count < limit && i < s; ++i) {
         const auto item = copy.at(i);
         if (includeFavorites || !item->isFavorite) {
             result.append(item->phoneNumber);
