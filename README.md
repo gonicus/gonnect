@@ -28,18 +28,19 @@ Here's a short feature list:
 
  * Call forwarding
  * Conference calls with three parties
- * LDAP/CardDAV address sources
  * Busy state for supported sources
- * Configurable identities for outgoing calls
  * Configurable busy on active call
+ * LDAP/CardDAV address sources
+ * Configurable identities for outgoing calls
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
+ * Upgrade call to Jitsi Meet session
+ * Support for various hardware headsets (i.e. Yealink, Jabra)
  * Custom audio device profiles or managed by your system
- * System Tray integration for most common functions / favorites / most frequent
-   calls
  * [mpris](https://specifications.freedesktop.org/mpris-spec/latest/) for
    stopping other audio sources on incoming calls
+ * System Tray integration for most common functions / favorites / most frequent
+   calls
  * GNOME Search-Provider support
- * Support for various hardware headsets (i.e. Yealink, Jabra)
  * KRunner search plugin (requires next generation flatpak)
  * Desktop Actions / Autostart
  * Global Keyboard Shortcuts (if supported by your Desktop environment)

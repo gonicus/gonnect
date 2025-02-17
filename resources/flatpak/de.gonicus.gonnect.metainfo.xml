@@ -43,37 +43,41 @@
       <li>Call forwarding</li>
       <li xml:lang="de">Anrufweiterleitung</li>
       <li>Conference calls with three parties</li>
-      <li xml:lang="de">Konferenzen mit drei Teilnehmern</li>
-      <li>LDAP address sources</li>
-      <li xml:lang="de">LDAP Adress-Quelle</li>
+      <li xml:lang="de">Telefonkonferenzen mit drei Teilnehmern</li>
       <li>Busy state for supported sources</li>
       <li xml:lang="de">Besetztstatus für unterstützte Quellen</li>
-      <li>Configurable identities for outgoing calls</li>
-      <li xml:lang="de">Konfigurierbare Identitäten für ausgehende Anrufe</li>
       <li>Configurable "busy on active call"</li>
       <li xml:lang="de">Konfigurierbares "Besetzt bei aktivem Anruf"</li>
-      <li>Configurable Togglers (i.e. for call queues, CFNL, etc.)</li>
-      <li xml:lang="de">Konfigurierbare Umschalter (z.B. für Anrufwarteschlangen, CFNL, etc.)</li>
+      <li>LDAP/CardDAV address sources</li>
+      <li xml:lang="de">LDAP/CardDAV Adressbuch-Quelle</li>
+      <li>Configurable identities for outgoing calls</li>
+      <li xml:lang="de">Konfigurierbare Identitäten für ausgehende Anrufe</li>
+      <li>Configurable togglers (i.e. for call queues, CFNL, etc.)</li>
+      <li xml:lang="de">Konfigurierbare Schalter (z.B. für Anrufwarteschlangen, CFNL, etc.)</li>
+      <li>Upgrade call to Jitsi Meet session</li>
+      <li xml:lang="de">Anruf in Jitsi Meet weiterführen</li>
+      <li>Support for various hardware headsets (i.e. Yealink, Jabra)</li>
+      <li xml:lang="de">Unterstützung für diverse Headsets (z.B. Yealink, Jabra)</li>
       <li>Custom audio device profiles or managed by your system</li>
       <li xml:lang="de">Benutzerdefinierte oder vom System verwaltete Audiogeräteprofile</li>
+      <li>Stopping other audio sources on incoming calls</li>
+      <li xml:lang="de">Anhalten der Wiedergabe anderer Audioquellen bei eingehenden Anrufen</li>
       <li>System Tray integration for most common functions / favorites / most frequent calls</li>
       <li xml:lang="de">System Tray Integration für die häufigsten Funktionen / Favoriten / häufigsten Aufrufe</li>
-      <li>Stopping other audio sources on incoming calls</li>
-      <li xml:lang="de">Anhalten anderer Audioquellen bei eingehenden Anrufen</li>
       <li>GNOME Search-Provider support</li>
-      <li xml:lang="de">Unterstützung des GNOME Search-Provider</li>
+      <li xml:lang="de">GNOME Such-Provider Unterstützung</li>
       <li>KRunner search plugin (requires latest flatpak version)</li>
-      <li xml:lang="de">KRunner Such-Plugin (erfordert die neueste flatpak-Version)</li>
+      <li xml:lang="de">KRunner Such-Plugin</li>
       <li>Desktop Actions / Autostart</li>
-      <li xml:lang="de">Desktop Aktionen / Autostart</li>
+      <li xml:lang="de">Desktop-Aktionen / Autostart</li>
       <li>Global Keyboard Shortcuts (if supported by your Desktop environment)</li>
-      <li xml:lang="de">Globale Tastaturkürzel (falls von der Desktop-Umgebung unterstützt)</li>
+      <li xml:lang="de">Globale Tatstatur-Kurzbefehle (wenn diese vom Desktop unterstützt werden)</li>
       <li>Do not activate the screensaver when using the phone</li>
-      <li xml:lang="de">Aktiviert den Bildschirmschoner nicht, wenn das Telefon benutzt wird</li>
+      <li xml:lang="de">Verhindert, dass sich der Bildschirmschoner während eines Gesprächs aktiviert</li>
       <li>Mime-Type registration for `tel:` / `sip:` URLs</li>
       <li xml:lang="de">Mime-Type Registrierung für `tel:` / `sip:` URLs</li>
       <li>Light/Dark mode</li>
-      <li xml:lang="de">Light/Dark Modus</li>
+      <li xml:lang="de">Hell/Dunkel Modus</li>
     </ul>
   </description>
 
