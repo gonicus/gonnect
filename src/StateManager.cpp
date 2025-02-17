@@ -198,7 +198,15 @@ void StateManager::ActivateAction(const QString &action_name, const QVariantList
     }
 }
 
-void StateManager::Open(const QStringList &, const QVariantMap &)
+void StateManager::Open(const QStringList &args, const QVariantMap &)
 {
-    qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+    if (args.length()) {
+        QVariantList vArgs;
+        for (auto& arg : std::as_const(args)) {
+            vArgs.push_back(arg);
+        }
+        ActivateAction("invoke", vArgs, {});
+    } else {
+        qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+    }
 }
