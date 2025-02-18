@@ -51,8 +51,6 @@ jobs:
         include:
         - language: c-cpp
           build-mode: manual
-        - language: javascript-typescript
-          build-mode: none
         - language: python
           build-mode: none
         - language: actions
