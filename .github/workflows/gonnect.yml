@@ -15,6 +15,7 @@ on:
       - 'scripts/**'
       - 'specs/**'
       - 'src/**'
+      - '.github/workflows/gonnect.yml'
   # Use the main branch workflow/actions definitions rather the pull_request definitions
   pull_request_target:
     branches: [ "main" ]
@@ -27,6 +28,7 @@ on:
       - 'scripts/**'
       - 'specs/**'
       - 'src/**'
+      - '.github/workflows/gonnect.yml'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
