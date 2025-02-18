@@ -72,6 +72,9 @@ public:
 
     Q_INVOKABLE QString encryptSecret(const QString &secret) const;
 
+    void requestLdapPassword(const QString &id, const QString &host);
+    Q_INVOKABLE void respondLdapPassword(const QString &id, const QString password);
+
     void requestCardDavPassword(const QString &id, const QString &host);
     Q_INVOKABLE void respondCardDavPassword(const QString &id, const QString password);
 
@@ -94,6 +97,9 @@ signals:
     void showQuitConfirm();
     void showEmergency(QString accountId, int callId, QString displayName);
     void hideEmergency();
+
+    void ldapPasswordRequested(QString id, QString host);
+    void ldapPasswordResponded(QString id, QString password);
 
     void cardDavPasswordRequested(QString id, QString host);
     void cardDavPasswordResponded(QString id, QString password);
