@@ -16,5 +16,5 @@
     enabledManagers: [
         "github-actions",
     ],
-    dependencyDashboard: true
+    dependencyDashboard: false
 }
