@@ -1,5 +1,9 @@
 {
     $schema: "https://docs.renovatebot.com/renovate-schema.json",
+    extends: [
+        "config:base",
+        "helpers:pinGitHubActionDigests"
+    ],
     onboarding: false,
     requireConfig: "ignored",
     platform: "github",
@@ -12,8 +16,5 @@
     enabledManagers: [
         "github-actions",
     ],
-    extends: [
-        "config:base",
-        "helpers:pinGitHubActionDigests"
-    ]
+    dependencyDashboard: true
 }
