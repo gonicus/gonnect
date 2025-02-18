@@ -122,11 +122,11 @@ bool AddressBookManager::processLDAPAddressBookConfig(const QString &group)
         auto &secretPortal = SecretPortal::instance();
         if (secretPortal.isValid()) {
             if (secretPortal.isInitialized()) {
-                processLdapAddressBookConfigImpl(group, secretPortal.decrypt(secret));
+                processLDAPAddressBookConfigImpl(group, secretPortal.decrypt(secret));
             } else {
                 connect(&secretPortal, &SecretPortal::initializedChanged, this,
                         [this, group, secret]() {
-                            processLdapAddressBookConfigImpl(
+                            processLDAPAddressBookConfigImpl(
                                     group, SecretPortal::instance().decrypt(secret));
                         });
             }
@@ -161,7 +161,7 @@ bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group, 
 
         LDAPAddressBookFeeder feeder(
                 url, settings.value("base", "").toString(), settings.value("filter", "").toString(),
-                bindMethod, settings.value("bindDn", "").toString(),
+                bindMethod, settings.value("bindDn", "").toString(), password,
                 scriptableAttributes.isEmpty() ? QStringList()
                                                : scriptableAttributes.split(QChar(',')),
                 settings.value("baseNumber", "").toString());
