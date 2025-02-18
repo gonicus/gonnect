@@ -76,6 +76,11 @@ Item {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for %1:").arg(host) })
             dialog.onPasswordAccepted.connect(pw => ViewHelper.respondCardDavPassword(id, pw))
         }
+
+        function onLdapPasswordRequested(id : string, host : string) {
+            const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for %1:").arg(host) })
+            dialog.onPasswordAccepted.connect(pw => ViewHelper.respondLdapPassword(id, pw))
+        }
     }
 
     Connections {

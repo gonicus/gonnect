@@ -9,10 +9,13 @@
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
 LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &ldapUrl, const QString &ldapBase,
-                                             const QString &ldapFilter,
+                                             const QString &ldapFilter, const BindMethod bindMethod, const QString &bindDn, const QString &bindPassword,
                                              QStringList sipStatusSubscriptableAttributes,
                                              const QString &baseNumber, QObject *parent)
     : QObject{ parent },
+      m_bindMethod{ bindMethod },
+      m_bindDn{ bindDn },
+      m_bindPassword{ bindPassword },
       m_ldapUrl{ ldapUrl },
       m_ldapBase{ ldapBase },
       m_ldapFilter{ ldapFilter },
@@ -70,6 +73,15 @@ void LDAPAddressBookFeeder::feedAddressBook(AddressBook &addressBook)
                 tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
         clearCStringlist(attrs);
         return;
+    }
+
+    // LDAP bind
+    if (m_bindMethod == BindMethod::Simple) {
+        berval cred;
+        cred.bv_val = (char*) m_bindPassword.toStdString().c_str();
+        cred.bv_len = m_bindPassword.length();
+
+        ldap_sasl_bind_s(ldap, m_bindDn.toStdString().c_str(), LDAP_SASL_SIMPLE, &cred, NULL, NULL, NULL);
     }
 
     timeval timeout;
