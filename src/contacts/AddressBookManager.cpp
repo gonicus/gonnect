@@ -22,6 +22,13 @@ Q_LOGGING_CATEGORY(lcAddressBookManager, "gonnect.app.addressbook")
 
 AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent } { }
 
+QString AddressBookManager::secret(const QString &group) const
+{
+    KeychainSettings keychainSettings;
+    keychainSettings.beginGroup(group);
+    return keychainSettings.value("secret", "").toString();
+}
+
 void AddressBookManager::initAddressBookConfigs()
 {
     static QRegularExpression ldapGroupRegex = QRegularExpression("^ldap[0-9]+$");
@@ -81,6 +88,56 @@ void AddressBookManager::processAddressBookQueue()
 
 bool AddressBookManager::processLDAPAddressBookConfig(const QString &group)
 {
+    const QString secret = this->secret(group);
+
+    if (secret.isEmpty()) {
+        auto &viewHelper = ViewHelper::instance();
+        auto conn = connect(&viewHelper, &ViewHelper::ldapPasswordResponded, this,
+                            [group, this](const QString &id, const QString &password) {
+                                if (id == group) {
+                                    QObject::disconnect(m_viewHelperConnections.value(group));
+                                    m_viewHelperConnections.remove(group);
+
+                                    auto &secretPortal = SecretPortal::instance();
+                                    if (secretPortal.isValid()) {
+                                        KeychainSettings settings;
+                                        settings.beginGroup(group);
+                                        const auto secret = secretPortal.encrypt(password);
+                                        settings.setValue("secret", secret);
+                                        settings.endGroup();
+                                    }
+
+                                    processLDAPAddressBookConfigImpl(group, password);
+                                }
+                            });
+
+        m_viewHelperConnections.insert(group, conn);
+
+        ReadOnlyConfdSettings settings;
+        settings.beginGroup(group);
+        viewHelper.requestLdapPassword(group, settings.value("host", "").toString());
+        settings.endGroup();
+
+    } else {
+        auto &secretPortal = SecretPortal::instance();
+        if (secretPortal.isValid()) {
+            if (secretPortal.isInitialized()) {
+                processLdapAddressBookConfigImpl(group, secretPortal.decrypt(secret));
+            } else {
+                connect(&secretPortal, &SecretPortal::initializedChanged, this,
+                        [this, group, secret]() {
+                            processLdapAddressBookConfigImpl(
+                                    group, SecretPortal::instance().decrypt(secret));
+                        });
+            }
+        }
+    }
+
+    return true;
+}
+
+bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group, const QString &password)
+{
     auto &nh = NetworkHelper::instance();
     ReadOnlyConfdSettings settings;
 
@@ -90,8 +147,21 @@ bool AddressBookManager::processLDAPAddressBookConfig(const QString &group)
         const auto scriptableAttributes =
                 settings.value("sipStatusSubscriptableAttributes", "").toString();
 
+        const auto bindMethodStr = settings.value("bindMethod", "none").toString();
+        LDAPAddressBookFeeder::BindMethod bindMethod;
+
+        if (bindMethodStr == "None") {
+            bindMethod = LDAPAddressBookFeeder::BindMethod::None;
+        } else if (bindMethodStr == "simple") {
+            bindMethod = LDAPAddressBookFeeder::BindMethod::Simple;
+        } else {
+            qCCritical(lcAddressBookManager).nospace() << "Unknown LDAP bind method '" << bindMethodStr << "' - initialization of LDAP account will be aborted.";
+            return false;
+        }
+
         LDAPAddressBookFeeder feeder(
                 url, settings.value("base", "").toString(), settings.value("filter", "").toString(),
+                bindMethod, settings.value("bindDn", "").toString(),
                 scriptableAttributes.isEmpty() ? QStringList()
                                                : scriptableAttributes.split(QChar(',')),
                 settings.value("baseNumber", "").toString());
@@ -125,11 +195,7 @@ bool AddressBookManager::processCSVAddressBookConfig(const QString &group)
 
 bool AddressBookManager::processCardDAVAddressBookConfig(const QString &group)
 {
-
-    KeychainSettings keychainSettings;
-    keychainSettings.beginGroup(group);
-    const QString secret = keychainSettings.value("secret", "").toString();
-    keychainSettings.endGroup();
+    const QString secret = this->secret(group);
 
     if (secret.isEmpty()) {
         auto &viewHelper = ViewHelper::instance();

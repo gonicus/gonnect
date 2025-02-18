@@ -189,6 +189,16 @@ QString ViewHelper::encryptSecret(const QString &secret) const
     return sp.encrypt(secret);
 }
 
+void ViewHelper::requestLdapPassword(const QString &id, const QString &host)
+{
+    emit ldapPasswordRequested(id, host);
+}
+
+void ViewHelper::respondLdapPassword(const QString &id, const QString password)
+{
+    emit ldapPasswordResponded(id, password);
+}
+
 void ViewHelper::requestCardDavPassword(const QString &id, const QString &host)
 {
     emit cardDavPasswordRequested(id, host);
