@@ -9,7 +9,8 @@
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
 LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &ldapUrl, const QString &ldapBase,
-                                             const QString &ldapFilter, const BindMethod bindMethod, const QString &bindDn, const QString &bindPassword,
+                                             const QString &ldapFilter, const BindMethod bindMethod,
+                                             const QString &bindDn, const QString &bindPassword,
                                              QStringList sipStatusSubscriptableAttributes,
                                              const QString &baseNumber, QObject *parent)
     : QObject{ parent },
@@ -78,10 +79,20 @@ void LDAPAddressBookFeeder::feedAddressBook(AddressBook &addressBook)
     // LDAP bind
     if (m_bindMethod == BindMethod::Simple) {
         berval cred;
-        cred.bv_val = (char*) m_bindPassword.toStdString().c_str();
+        const std::string pw = m_bindPassword.toStdString();
+        cred.bv_val = (char *)pw.c_str();
         cred.bv_len = m_bindPassword.length();
 
-        ldap_sasl_bind_s(ldap, m_bindDn.toStdString().c_str(), LDAP_SASL_SIMPLE, &cred, NULL, NULL, NULL);
+        result = ldap_sasl_bind_s(ldap, m_bindDn.toStdString().c_str(), LDAP_SASL_SIMPLE, &cred,
+                                  NULL, NULL, NULL);
+
+        if (result != LDAP_SUCCESS) {
+            qCCritical(lcLDAPAddressBookFeeder)
+                    << "Error on LDAP bind: " << ldap_err2string(result);
+            ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(result)));
+            clearCStringlist(attrs);
+            return;
+        }
     }
 
     timeval timeout;
