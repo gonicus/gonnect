@@ -14,7 +14,7 @@ runs:
   steps:
 
     - name: Setup cmake
-      uses: jwlawson/actions-setup-cmake@v2
+      uses: jwlawson/actions-setup-cmake@802fa1a2c4e212495c05bf94dba2704a92a472be # v2
       with:
         cmake-version: 'latest'
             
@@ -53,7 +53,7 @@ runs:
     - name: Cache hidapi
       id: cache-hidapi
       if: inputs.qt-only == 'false'
-      uses: actions/cache@v4
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
       with:
         path: hidapi
         key: ${{ steps.hashes.outputs.HIDAPI_TAG }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-hidapi
@@ -80,7 +80,7 @@ runs:
     - name: Cache pjsip
       id: cache-pjsip
       if: inputs.qt-only == 'false'
-      uses: actions/cache@v4
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
       with:
         path: ${{github.workspace}}/pjproject
         key: ${{ steps.hashes.outputs.PJSIP_TAG }}-pjsip
@@ -103,7 +103,7 @@ runs:
     - name: Cache qca
       id: cache-qca
       if: inputs.qt-only == 'false'
-      uses: actions/cache@v4
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
       with:
         path: ${{github.workspace}}/qca
         key: ${{ steps.hashes.outputs.QCA_HASH }}-qca
