@@ -19,6 +19,7 @@
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "AvatarManager.h"
+#include "BusylightDeviceManager.h"
 
 #include "pjsua-lib/pjsua.h"
 
@@ -156,6 +157,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             emit establishedChanged();
 
             m_proxy->setBusyLine(true);
+            BusylightDeviceManager::instance().switchOn(Qt::GlobalColor::red);
 
             m_earlyMediaActive = false;
             emit earlyMediaActiveChanged();
@@ -186,6 +188,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
         if (m_isEstablished && SIPCallManager::instance().calls().count() == 1) {
             m_proxy->setIdle();
+            BusylightDeviceManager::instance().switchOff();
         }
 
         qCInfo(lcSIPCall).nospace() << "Call state disconnected, reason: " << ci.lastReason << ", "

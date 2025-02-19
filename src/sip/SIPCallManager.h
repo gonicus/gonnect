@@ -78,6 +78,7 @@ public:
     bool isConferenceMode() const { return m_isConferenceMode; }
 
     void toggleHold();
+    bool isOneCallOnHold() const;
 
     Q_INVOKABLE void sendDtmf(const QString &accountId, const int callId, const QString &digit);
     Q_INVOKABLE void resetMissedCalls();
@@ -122,6 +123,7 @@ private slots:
     void dispatchDtmfBuffer();
     void cleanupBlocks();
     void updateBlockTimerRunning();
+    void updateBusylightState();
 
 private:
     SIPCallManager(QObject *parent = nullptr);

@@ -4,6 +4,7 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPAccountManager.h"
+#include "SIPAudioManager.h"
 #include "ExternalMediaManager.h"
 #include "Notification.h"
 #include "NotificationManager.h"
@@ -19,6 +20,7 @@
 #include "HeadsetDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "AddressBook.h"
+#include "BusylightDeviceManager.h"
 
 Q_LOGGING_CATEGORY(lcSIPCallManager, "gonnect.sip.callmanager")
 
@@ -28,6 +30,8 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
 {
     connect(this, &SIPCallManager::incomingCall, this, &SIPCallManager::onIncomingCall);
     connect(this, &SIPCallManager::incomingCall, this, &SIPCallManager::updateCallCount);
+    connect(this, &SIPCallManager::isHoldingChanged, this, &SIPCallManager::updateBusylightState);
+    connect(&SIPAudioManager::instance(), &SIPAudioManager::isAudioCaptureMutedChanged, this, &SIPCallManager::updateBusylightState);
 
     m_dtmfTimer.setInterval(PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT + 10);
     m_dtmfTimer.callOnTimeout(this, &SIPCallManager::dispatchDtmfBuffer);
@@ -170,6 +174,10 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
 
         auto ringer = new Ringer(n);
         ringer->start();
+
+        BusylightDeviceManager::instance().startBlinking(Qt::GlobalColor::green);
+        connect(n, &QObject::destroyed, this,
+                []() { BusylightDeviceManager::instance().stopBlinking(); });
 
         pj::CallOpParam prm;
         prm.statusCode = PJSIP_SC_RINGING;
@@ -559,6 +567,16 @@ void SIPCallManager::toggleHold()
     }
 }
 
+bool SIPCallManager::isOneCallOnHold() const
+{
+    for (const auto call : std::as_const(m_calls)) {
+        if (call->isHolding()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void SIPCallManager::addCall(SIPCall *call)
 {
     m_calls.push_back(call);
@@ -842,5 +860,21 @@ void SIPCallManager::updateBlockTimerRunning()
     } else if (!m_blockCleanTimer.isActive()
                && (m_tempBlockedContacts.size() || m_tempBlockedNumbers.size())) {
         m_blockCleanTimer.start();
+    }
+}
+
+void SIPCallManager::updateBusylightState()
+{
+    auto& busylightDevManager = BusylightDeviceManager::instance();
+
+    QColor color(Qt::GlobalColor::red);
+    if (SIPAudioManager::instance().isAudioCaptureMuted()) {
+        color.setRgb(255, 165, 0);
+    }
+
+    if (isOneCallOnHold()) {
+        busylightDevManager.startBlinking(color);
+    } else {
+        busylightDevManager.switchOn(color);
     }
 }
