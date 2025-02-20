@@ -11,8 +11,7 @@ class LuxaforFlag : public IBusylightDevice
 
 public:
     LuxaforFlag(const hid_device_info &deviceInfo, QObject *parent = nullptr)
-        : IBusylightDevice{ deviceInfo, parent } {
-    };
+        : IBusylightDevice{ deviceInfo, parent } {};
 
 protected:
     virtual void send(bool on) override;
