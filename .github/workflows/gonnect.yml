@@ -82,7 +82,6 @@ jobs:
 
   clang:
     runs-on: ubuntu-24.04
-    needs: build
     name: "Static Code Analyzer"    
 
     steps:
