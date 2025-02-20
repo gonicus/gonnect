@@ -139,7 +139,7 @@ and start the ordinary _CMake_ build:
 ```bash
 distrobox enter gonnect
 mkdir build && cd build
-cmake -GNinja ..
+cmake -GNinja -DBUILD_DEPENDENCIES=ON ..
 cmake --build . --parallel $(nproc --all)
 ```
 
