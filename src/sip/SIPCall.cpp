@@ -15,7 +15,7 @@
 #include "media/Sniffer.h"
 #include "ViewHelper.h"
 #include "HeadsetDeviceProxy.h"
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "AvatarManager.h"
@@ -44,7 +44,7 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         emit SIPCallManager::instance().meetingRequested(accountId, callId);
     });
 
-    m_proxy = HeadsetDevices::instance().getProxy();
+    m_proxy = USBDevices::instance().getHeadsetDeviceProxy();
 
     // Initialize basic call info
     // This can only be done here for incoming calls, because an outgoing call has its infos not set

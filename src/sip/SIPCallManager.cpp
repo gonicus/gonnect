@@ -17,7 +17,7 @@
 #include "StateManager.h"
 #include "ViewHelper.h"
 #include "AvatarManager.h"
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "AddressBook.h"
 #include "BusylightDeviceManager.h"
@@ -45,8 +45,8 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
     });
 
     // React on Headset events
-    auto &hds = HeadsetDevices::instance();
-    auto dev = hds.getProxy();
+    auto &hds = USBDevices::instance();
+    auto dev = hds.getHeadsetDeviceProxy();
     connect(dev, &HeadsetDeviceProxy::hookSwitch, this, [dev, this]() {
         // Were're busy with one call -> end call
         if (!dev->getHookSwitch() && m_calls.count() == 1) {

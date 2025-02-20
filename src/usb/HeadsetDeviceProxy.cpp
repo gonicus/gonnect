@@ -1,6 +1,6 @@
 #include <QDebug>
 #include <QLoggingCategory>
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 #include "HeadsetDevice.h"
 #include "HeadsetDeviceProxy.h"
 
@@ -10,8 +10,8 @@ using namespace std::chrono_literals;
 
 HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
 {
-    auto &devs = HeadsetDevices::instance();
-    connect(&devs, &HeadsetDevices::devicesChanged, this, &HeadsetDeviceProxy::refreshDevice);
+    auto &devs = USBDevices::instance();
+    connect(&devs, &USBDevices::devicesChanged, this, &HeadsetDeviceProxy::refreshDevice);
 
     refreshDevice();
     open();
@@ -24,7 +24,7 @@ HeadsetDeviceProxy::~HeadsetDeviceProxy()
 
 bool HeadsetDeviceProxy::refreshDevice()
 {
-    auto devs = HeadsetDevices::instance().headsetDevices();
+    auto devs = USBDevices::instance().headsetDevices();
 
     if (m_device) {
         m_device = nullptr;

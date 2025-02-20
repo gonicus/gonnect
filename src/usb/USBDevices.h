@@ -7,17 +7,17 @@
 class HeadsetDevice;
 class HeadsetDeviceProxy;
 
-class HeadsetDevices : public QObject
+class USBDevices : public QObject
 {
     Q_OBJECT
 
 public:
-    static HeadsetDevices &instance()
+    static USBDevices &instance()
     {
-        static HeadsetDevices *_instance = nullptr;
+        static USBDevices *_instance = nullptr;
 
         if (_instance == nullptr) {
-            _instance = new HeadsetDevices();
+            _instance = new USBDevices();
             _instance->initialize();
         }
 
@@ -32,9 +32,9 @@ public:
 
     QList<HeadsetDevice *> headsetDevices() const { return m_headsetDevices; }
 
-    HeadsetDeviceProxy *getProxy();
+    HeadsetDeviceProxy *getHeadsetDeviceProxy();
 
-    ~HeadsetDevices() { shutdown(); }
+    ~USBDevices() { shutdown(); }
 
 signals:
     void devicesChanged();
@@ -43,7 +43,7 @@ private slots:
     void processUsbEvents();
 
 private:
-    explicit HeadsetDevices(QObject *parent = nullptr);
+    explicit USBDevices(QObject *parent = nullptr);
 
     void refresh();
     void clearDevices();

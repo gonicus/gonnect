@@ -6,7 +6,7 @@
 #include "SIPAudioManager.h"
 #include "Ringer.h"
 #include "AppSettings.h"
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "SystemTrayMenu.h"
 
@@ -32,7 +32,7 @@ void Ringer::start(qreal customVolume)
     // Prefer headset ringer?
     if (settings.value(QString("audio%1/preferExternalRinger").arg(currentProfile), false)
                 .toBool()) {
-        auto proxy = HeadsetDevices::instance().getProxy();
+        auto proxy = USBDevices::instance().getHeadsetDeviceProxy();
         if (proxy->available()) {
             proxy->setRing(true);
             return;
@@ -116,7 +116,7 @@ void Ringer::playbackStateChanged(QMediaPlayer::PlaybackState state)
 
 void Ringer::stop()
 {
-    auto proxy = HeadsetDevices::instance().getProxy();
+    auto proxy = USBDevices::instance().getHeadsetDeviceProxy();
     proxy->setRing(false);
 
     SystemTrayMenu::instance().setRinging(false);

@@ -336,8 +336,8 @@ qt_add_qml_module(gonnect
         usb/HeadsetDevice.h
         usb/HeadsetDeviceProxy.cpp
         usb/HeadsetDeviceProxy.h
-        usb/HeadsetDevices.cpp
-        usb/HeadsetDevices.h
+        usb/USBDevices.cpp
+        usb/USBDevices.h
         usb/ReportDescriptorEnums.h
         usb/ReportDescriptorEnums.cpp
         usb/ReportDescriptorParser.h
