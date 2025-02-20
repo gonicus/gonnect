@@ -33,7 +33,11 @@ int Application::s_sigtermFd[2];
 Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 {
     qCCritical(lcApplication) << "Constructing app, version" << getVersion();
-    connect(this, &Application::aboutToQuit, this, &Application::shutdown);
+    connect(this, &Application::aboutToQuit
+    ,
+    this, &Application::shutdown)
+    
+    ;
 
     setApplicationName("GOnnect");
     setOrganizationName("gonnect");
