@@ -6,7 +6,8 @@ Q_LOGGING_CATEGORY(lcKuandoOmega, "gonnect.usb.busylight.KuandoOmega")
 
 using namespace std::chrono_literals;
 
-KuandoOmega::KuandoOmega(const hid_device_info &deviceInfo, QObject *parent) : IBusylightDevice{ deviceInfo, parent }
+KuandoOmega::KuandoOmega(const hid_device_info &deviceInfo, QObject *parent)
+    : IBusylightDevice{ deviceInfo, parent }
 {
     m_keepAliveTimer.setInterval(10s);
     m_keepAliveTimer.callOnTimeout(this, &KuandoOmega::sendKeepAlive);

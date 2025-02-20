@@ -12,7 +12,6 @@ class KuandoOmega : public IBusylightDevice
 public:
     explicit KuandoOmega(const hid_device_info &deviceInfo, QObject *parent = nullptr);
 
-
 protected:
     virtual void send(bool on) override;
 

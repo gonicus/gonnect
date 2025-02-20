@@ -202,7 +202,7 @@ void StateManager::Open(const QStringList &args, const QVariantMap &)
 {
     if (args.length()) {
         QVariantList vArgs;
-        for (auto& arg : std::as_const(args)) {
+        for (auto &arg : std::as_const(args)) {
             vArgs.push_back(arg);
         }
         ActivateAction("invoke", vArgs, {});

@@ -112,8 +112,8 @@ void USBDevices::shutdown()
     clearDevices();
 }
 
-int USBDevices::hotplugHandler(libusb_context *, libusb_device *device,
-                                   libusb_hotplug_event event, void *)
+int USBDevices::hotplugHandler(libusb_context *, libusb_device *device, libusb_hotplug_event event,
+                               void *)
 {
     quint8 bus = libusb_get_bus_number(device);
 
@@ -200,7 +200,7 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
 }
 
 HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceInfo,
-                                                     unsigned char *descriptor, int len)
+                                                 unsigned char *descriptor, int len)
 {
     const auto byteArr = QByteArray::fromRawData(reinterpret_cast<const char *>(descriptor), len);
 

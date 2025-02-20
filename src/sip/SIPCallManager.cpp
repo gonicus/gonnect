@@ -31,7 +31,8 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
     connect(this, &SIPCallManager::incomingCall, this, &SIPCallManager::onIncomingCall);
     connect(this, &SIPCallManager::incomingCall, this, &SIPCallManager::updateCallCount);
     connect(this, &SIPCallManager::isHoldingChanged, this, &SIPCallManager::updateBusylightState);
-    connect(&SIPAudioManager::instance(), &SIPAudioManager::isAudioCaptureMutedChanged, this, &SIPCallManager::updateBusylightState);
+    connect(&SIPAudioManager::instance(), &SIPAudioManager::isAudioCaptureMutedChanged, this,
+            &SIPCallManager::updateBusylightState);
 
     m_dtmfTimer.setInterval(PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT + 10);
     m_dtmfTimer.callOnTimeout(this, &SIPCallManager::dispatchDtmfBuffer);
@@ -865,7 +866,7 @@ void SIPCallManager::updateBlockTimerRunning()
 
 void SIPCallManager::updateBusylightState()
 {
-    auto& busylightDevManager = BusylightDeviceManager::instance();
+    auto &busylightDevManager = BusylightDeviceManager::instance();
 
     QColor color(Qt::GlobalColor::red);
     if (SIPAudioManager::instance().isAudioCaptureMuted()) {
