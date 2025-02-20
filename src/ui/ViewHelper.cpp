@@ -6,7 +6,7 @@
 #include "NumberStats.h"
 #include "Ringer.h"
 #include "SIPCallManager.h"
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "SecretPortal.h"
 #include "SystemTrayMenu.h"
@@ -179,7 +179,7 @@ void ViewHelper::testPlayRingTone(qreal volume)
 
 HeadsetDeviceProxy *ViewHelper::headsetDeviceProxy() const
 {
-    return HeadsetDevices::instance().getProxy();
+    return USBDevices::instance().getHeadsetDeviceProxy();
 }
 
 QString ViewHelper::encryptSecret(const QString &secret) const

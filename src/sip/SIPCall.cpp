@@ -15,10 +15,11 @@
 #include "media/Sniffer.h"
 #include "ViewHelper.h"
 #include "HeadsetDeviceProxy.h"
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "AvatarManager.h"
+#include "BusylightDeviceManager.h"
 
 #include "pjsua-lib/pjsua.h"
 
@@ -43,7 +44,7 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         emit SIPCallManager::instance().meetingRequested(accountId, callId);
     });
 
-    m_proxy = HeadsetDevices::instance().getProxy();
+    m_proxy = USBDevices::instance().getHeadsetDeviceProxy();
 
     // Initialize basic call info
     // This can only be done here for incoming calls, because an outgoing call has its infos not set
@@ -156,6 +157,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             emit establishedChanged();
 
             m_proxy->setBusyLine(true);
+            BusylightDeviceManager::instance().switchOn(Qt::GlobalColor::red);
 
             m_earlyMediaActive = false;
             emit earlyMediaActiveChanged();
@@ -186,6 +188,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
         if (m_isEstablished && SIPCallManager::instance().calls().count() == 1) {
             m_proxy->setIdle();
+            BusylightDeviceManager::instance().switchOff();
         }
 
         qCInfo(lcSIPCall).nospace() << "Call state disconnected, reason: " << ci.lastReason << ", "

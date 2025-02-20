@@ -35,6 +35,7 @@ Here's a short feature list:
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
  * Upgrade call to Jitsi Meet session
  * Support for various hardware headsets (i.e. Yealink, Jabra)
+ * Support for various busylights
  * Custom audio device profiles or managed by your system
  * [mpris](https://specifications.freedesktop.org/mpris-spec/latest/) for
    stopping other audio sources on incoming calls
@@ -72,6 +73,12 @@ make this list more complete by opening an [issue](https://github.com/gonicus/go
 | Jabra         | EVOLVE LINK   | AEMS            |
 | Yealink       | WH62          | AEMSLOR         |
 
+# Busylights known to be supported
+
+| Manufacturer | Model              |
+| ------------ | ------------------ |
+| Luxafor      | Flag               |
+| kuando       | Busylight UC Omega |
 
 # Installing _GOnnect_
 
