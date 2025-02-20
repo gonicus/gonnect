@@ -48,7 +48,6 @@ BraceWrapping:
     BeforeCatch: false
     BeforeElse: false
     IndentBraces: false
-    SplitEmptyFunction: false
 
 # When constructor initializers do not fit on one line, put them each on a new line.
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
