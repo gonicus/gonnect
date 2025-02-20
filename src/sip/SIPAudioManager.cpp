@@ -10,7 +10,7 @@
 #include "media/AudioPort.h"
 
 #include "HeadsetDeviceProxy.h"
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 
 Q_LOGGING_CATEGORY(lcSIPAudioManager, "gonnect.sip.audio")
 
@@ -44,14 +44,14 @@ SIPAudioManager::SIPAudioManager(QObject *parent) : QObject(parent)
         }
 
         // Headset device mute handling
-        auto &hds = HeadsetDevices::instance();
-        auto dev = hds.getProxy();
+        auto &hds = USBDevices::instance();
+        auto dev = hds.getHeadsetDeviceProxy();
         dev->setMute(m_isAudioCaptureMuted);
     });
 
     // Headset device mute handling
-    auto &hds = HeadsetDevices::instance();
-    auto dev = hds.getProxy();
+    auto &hds = USBDevices::instance();
+    auto dev = hds.getHeadsetDeviceProxy();
     connect(dev, &HeadsetDeviceProxy::mute, this,
             [this, dev]() { setProperty("isAudioCaptureMuted", dev->getMute()); });
 }

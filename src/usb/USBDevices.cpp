@@ -6,9 +6,11 @@
 #include "ReportDescriptorParser.h"
 #include "ReportDescriptorEnums.h"
 #include "ReportDescriptorStructs.h"
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 #include "HeadsetDevice.h"
 #include "HeadsetDeviceProxy.h"
+#include "BusylightDeviceManager.h"
+#include "IBusylightDevice.h"
 
 Q_LOGGING_CATEGORY(lcHeadsets, "gonnect.usb.headsets")
 
@@ -20,22 +22,22 @@ static libusb_hotplug_callback_handle s_hotplugHandle;
 static int LIBUSB_CALL hotplugCallback(libusb_context *ctx, libusb_device *device,
                                        libusb_hotplug_event event, void *user_data)
 {
-    return HeadsetDevices::instance().hotplugHandler(ctx, device, event, user_data);
+    return USBDevices::instance().hotplugHandler(ctx, device, event, user_data);
 }
 
-HeadsetDevices::HeadsetDevices(QObject *parent) : QObject(parent)
+USBDevices::USBDevices(QObject *parent) : QObject(parent)
 {
     QThread *t = new QThread(this);
 
     m_refreshDebouncer.setSingleShot(true);
     m_refreshDebouncer.setInterval(2s);
-    connect(&m_refreshDebouncer, &QTimer::timeout, this, &HeadsetDevices::refresh);
+    connect(&m_refreshDebouncer, &QTimer::timeout, this, &USBDevices::refresh);
 
     m_refreshTicker.setInterval(250ms);
     m_refreshTicker.moveToThread(t);
     m_refreshTicker.connect(t, SIGNAL(started()), SLOT(start()));
     m_refreshTicker.connect(t, SIGNAL(finished()), SLOT(stop()));
-    connect(&m_refreshTicker, &QTimer::timeout, this, &HeadsetDevices::processUsbEvents);
+    connect(&m_refreshTicker, &QTimer::timeout, this, &USBDevices::processUsbEvents);
 
     int res = libusb_init(&m_ctx);
     if (res < 0) {
@@ -67,7 +69,7 @@ HeadsetDevices::HeadsetDevices(QObject *parent) : QObject(parent)
     }
 }
 
-void HeadsetDevices::processUsbEvents()
+void USBDevices::processUsbEvents()
 {
     if (m_hotplugSupported) {
         timeval t = { 0, 0 };
@@ -75,7 +77,7 @@ void HeadsetDevices::processUsbEvents()
     }
 }
 
-void HeadsetDevices::initialize()
+void USBDevices::initialize()
 {
     if (!m_initialized) {
         refresh();
@@ -83,7 +85,7 @@ void HeadsetDevices::initialize()
     }
 }
 
-void HeadsetDevices::shutdown()
+void USBDevices::shutdown()
 {
     if (!m_ctx) {
         return;
@@ -107,11 +109,10 @@ void HeadsetDevices::shutdown()
         m_proxy = nullptr;
     }
 
-    qDeleteAll(m_devices);
-    m_devices.clear();
+    clearDevices();
 }
 
-int HeadsetDevices::hotplugHandler(libusb_context *, libusb_device *device,
+int USBDevices::hotplugHandler(libusb_context *, libusb_device *device,
                                    libusb_hotplug_event event, void *)
 {
     quint8 bus = libusb_get_bus_number(device);
@@ -140,30 +141,32 @@ int HeadsetDevices::hotplugHandler(libusb_context *, libusb_device *device,
     return 0;
 };
 
-void HeadsetDevices::refresh()
+void USBDevices::refresh()
 {
     QMutexLocker lock(&s_enumerateMutex);
     QString lastPath;
+    auto &busylightDeviceManager = BusylightDeviceManager::instance();
 
-    qDeleteAll(m_devices);
-    m_devices.clear();
+    clearDevices();
 
-    struct hid_device_info *devs, *dp;
+    struct hid_device_info *devs, *deviceInfo;
 
-    dp = devs = hid_enumerate(0, 0);
+    deviceInfo = devs = hid_enumerate(0, 0);
 
-    for (; dp; dp = dp->next) {
+    for (; deviceInfo; deviceInfo = deviceInfo->next) {
 
-        QString path = dp->path;
+        QString path = deviceInfo->path;
         if (path == lastPath) {
             continue;
         }
 
         lastPath = path;
 
-        HeadsetDevice *hd = parseReportDescriptor(dp);
-        if (hd) {
-            m_devices.push_back(hd);
+        if (!busylightDeviceManager.createBusylightDevice(*deviceInfo)) {
+            HeadsetDevice *hd = parseReportDescriptor(deviceInfo);
+            if (hd) {
+                m_headsetDevices.push_back(hd);
+            }
         }
     }
 
@@ -172,7 +175,15 @@ void HeadsetDevices::refresh()
     emit devicesChanged();
 }
 
-HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *deviceInfo)
+void USBDevices::clearDevices()
+{
+    qDeleteAll(m_headsetDevices);
+    m_headsetDevices.clear();
+
+    BusylightDeviceManager::instance().clearDevices();
+}
+
+HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceInfo)
 {
     unsigned char descriptor[HID_API_MAX_REPORT_DESCRIPTOR_SIZE];
     hid_device *device = hid_open_path(deviceInfo->path);
@@ -188,7 +199,7 @@ HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *devi
     return hd;
 }
 
-HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *deviceInfo,
+HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceInfo,
                                                      unsigned char *descriptor, int len)
 {
     const auto byteArr = QByteArray::fromRawData(reinterpret_cast<const char *>(descriptor), len);
@@ -206,6 +217,8 @@ HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *devi
         return nullptr;
     }
 
+    qCritical() << "====>" << appCollection.get();
+
     if (!appCollection) {
         return nullptr;
     }
@@ -220,6 +233,7 @@ HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *devi
         UsageId::LED_Mute,
         UsageId::LED_Ring,
         UsageId::LED_Hold,
+        UsageId::Vendor_LEDCommand,
     };
 
     QHash<UsageId, UsageInfo> usageInfos;
@@ -245,7 +259,7 @@ HeadsetDevice *HeadsetDevices::parseReportDescriptor(const hid_device_info *devi
     return hd;
 }
 
-HeadsetDeviceProxy *HeadsetDevices::getProxy()
+HeadsetDeviceProxy *USBDevices::getHeadsetDeviceProxy()
 {
     if (!m_proxy) {
         m_proxy = new HeadsetDeviceProxy(this);
