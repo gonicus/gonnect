@@ -7,7 +7,7 @@
 #include "SIPCallManager.h"
 #include "SystemTrayMenu.h"
 #include "AddressBookManager.h"
-#include "HeadsetDevices.h"
+#include "USBDevices.h"
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -46,7 +46,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     setQuitOnLastWindowClosed(false);
 
-    HeadsetDevices::instance().initialize();
+    USBDevices::instance().initialize();
 
     StateManager::instance().setParent(this);
     SearchProvider::instance().setParent(this);
@@ -185,7 +185,7 @@ Application::~Application()
 void Application::shutdown()
 {
     NotificationManager::instance().shutdown();
-    HeadsetDevices::instance().shutdown();
+    USBDevices::instance().shutdown();
 
     if (m_initialized) {
         SIPManager::instance().shutdown();

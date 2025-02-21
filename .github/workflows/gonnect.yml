@@ -15,9 +15,9 @@ on:
       - 'scripts/**'
       - 'specs/**'
       - 'src/**'
-      - '.github/workflows/gonnect.yml'
+      - '.github/**'
   # Use the main branch workflow/actions definitions rather the pull_request definitions
-  pull_request_target:
+  pull_request:
     branches: [ "main" ]
     paths:
       - 'CMakeList.txt'
@@ -28,7 +28,7 @@ on:
       - 'scripts/**'
       - 'specs/**'
       - 'src/**'
-      - '.github/workflows/gonnect.yml'
+      - '.github/**'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -72,7 +72,6 @@ jobs:
   format:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
-    needs: build
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Run clang-format style check for C/C++/Protobuf programs.
@@ -83,7 +82,6 @@ jobs:
 
   clang:
     runs-on: ubuntu-24.04
-    needs: build
     name: "Static Code Analyzer"    
 
     steps:

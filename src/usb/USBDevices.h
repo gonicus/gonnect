@@ -7,17 +7,17 @@
 class HeadsetDevice;
 class HeadsetDeviceProxy;
 
-class HeadsetDevices : public QObject
+class USBDevices : public QObject
 {
     Q_OBJECT
 
 public:
-    static HeadsetDevices &instance()
+    static USBDevices &instance()
     {
-        static HeadsetDevices *_instance = nullptr;
+        static USBDevices *_instance = nullptr;
 
         if (_instance == nullptr) {
-            _instance = new HeadsetDevices();
+            _instance = new USBDevices();
             _instance->initialize();
         }
 
@@ -30,11 +30,11 @@ public:
     int hotplugHandler(libusb_context *ctx, libusb_device *device, libusb_hotplug_event event,
                        void *user_data);
 
-    QList<HeadsetDevice *> devices() const { return m_devices; }
+    QList<HeadsetDevice *> headsetDevices() const { return m_headsetDevices; }
 
-    HeadsetDeviceProxy *getProxy();
+    HeadsetDeviceProxy *getHeadsetDeviceProxy();
 
-    ~HeadsetDevices() { shutdown(); }
+    ~USBDevices() { shutdown(); }
 
 signals:
     void devicesChanged();
@@ -43,9 +43,10 @@ private slots:
     void processUsbEvents();
 
 private:
-    explicit HeadsetDevices(QObject *parent = nullptr);
+    explicit USBDevices(QObject *parent = nullptr);
 
     void refresh();
+    void clearDevices();
 
     HeadsetDevice *parseReportDescriptor(const hid_device_info *deviceInfo);
     HeadsetDevice *parseReportDescriptor(const hid_device_info *deviceInfo,
@@ -54,7 +55,7 @@ private:
     QTimer m_refreshTicker;
     QTimer m_refreshDebouncer;
 
-    QList<HeadsetDevice *> m_devices;
+    QList<HeadsetDevice *> m_headsetDevices;
     HeadsetDeviceProxy *m_proxy = nullptr;
     libusb_context *m_ctx = nullptr;
 

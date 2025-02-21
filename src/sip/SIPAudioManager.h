@@ -77,6 +77,8 @@ public:
     qreal playbackAudioVolume() const;
     void setPlaybackAudioVolume(qreal volume);
 
+    bool isAudioCaptureMuted() const { return m_isAudioCaptureMuted; }
+
     unsigned currentProfile() const { return m_currentAudioProfile; }
 
     ~SIPAudioManager() = default;

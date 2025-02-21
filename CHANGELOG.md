@@ -1,3 +1,17 @@
+# [1.2.0](https://github.com/gonicus/gonnect/compare/v1.1.2...v1.2.0) (2025-02-20)
+
+
+### Bug Fixes
+
+* make mime-type based calls work again ([fed10c5](https://github.com/gonicus/gonnect/commit/fed10c51b2a68644cceb7f0886cdd66fa8bb86b2))
+* make mime-type based calls work again ([56edb2c](https://github.com/gonicus/gonnect/commit/56edb2c9d21b24928e1f61ce2b6f5a56aee0cb31))
+
+
+### Features
+
+* support for usb busylights ([70da1ef](https://github.com/gonicus/gonnect/commit/70da1ef1a0130d8e478911171cbad19ed4d2aba1))
+* support for usb busylights ([c5088c6](https://github.com/gonicus/gonnect/commit/c5088c6fabf00d3c0a03dc4c3da2bd9cf7580c4a))
+
 ## [1.1.2](https://github.com/gonicus/gonnect/compare/v1.1.1...v1.1.2) (2025-02-17)
 
 
