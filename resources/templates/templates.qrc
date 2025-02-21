@@ -2,5 +2,6 @@
 <RCC>
     <qresource prefix="/templates">
         <file>sample.conf</file>
+        <file>sipgate.conf</file>
     </qresource>
 </RCC>
