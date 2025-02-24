@@ -6,6 +6,7 @@
 #include "SIPManager.h"
 #include "ReadOnlyConfdSettings.h"
 #include "appversion.h"
+#include "NetworkHelper.h"
 
 Q_LOGGING_CATEGORY(lcSIPUserAgentConfig, "gonnect.sip.config.ua")
 
@@ -71,7 +72,9 @@ void SIPUserAgentConfig::applyConfig(pj::EpConfig &epConfig)
     }
     epConfig.uaConfig.stunServer = cnvStunServers;
 
-    QStringList nameservers = settings.value("ua/nameservers", {}).toStringList();
+    QStringList nameservers =
+            settings.value("ua/nameservers", NetworkHelper::instance().nameservers())
+                    .toStringList();
     std::vector<std::string> cnvNameServers;
     for (auto iter = nameservers.constBegin(); iter != nameservers.constEnd(); ++iter) {
         cnvNameServers.push_back(iter->toStdString());
