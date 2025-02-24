@@ -3,5 +3,6 @@
     <qresource prefix="/templates">
         <file>sample.conf</file>
         <file>sipgate.conf</file>
+        <file>fritzbox.conf</file>
     </qresource>
 </RCC>
