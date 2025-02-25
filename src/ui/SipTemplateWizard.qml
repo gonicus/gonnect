@@ -238,6 +238,10 @@ BaseWindow {
                         const item = widgetLoader.item
                         if (item && item.hasOwnProperty("text") && delg.preset) {
                             item.text = delg.preset
+
+                            const val = {}
+                            val[delg.target] = item.value
+                            control.values = Object.assign(control.values, val)
                         }
                     }
 
