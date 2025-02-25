@@ -26,6 +26,7 @@ SIPTemplate::SIPTemplate(const QString &path, QObject *parent) : QObject(parent)
 
             field->name = i18nValue(key + "/name");
             field->description = i18nValue(key + "/description");
+            field->preset = i18nValue(key + "/preset");
             field->target = m_settings->value(key + "/target").toString();
             field->mimeType = m_settings->value(key + "/mimeType").toString();
             field->required = m_settings->value(key + "/required", true).toBool();

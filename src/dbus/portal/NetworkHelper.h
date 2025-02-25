@@ -39,6 +39,8 @@ public:
 
     bool isReachable(const QUrl &url);
 
+    QStringList nameservers() const;
+
     ~NetworkHelper() = default;
 
 signals:

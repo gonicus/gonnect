@@ -176,6 +176,7 @@ BaseWindow {
 
                 required property string name
                 required property string description
+                required property string preset
                 required property string target
                 required property list<string> fileSuffixes
                 required property var regex
@@ -231,6 +232,17 @@ BaseWindow {
 
                         console.error("Error: Unknown template field type:", delg.type)
                         return ""
+                    }
+
+                    onItemChanged: () => {
+                        const item = widgetLoader.item
+                        if (item && item.hasOwnProperty("text") && delg.preset) {
+                            item.text = delg.preset
+
+                            const val = {}
+                            val[delg.target] = item.value
+                            control.values = Object.assign(control.values, val)
+                        }
                     }
 
                     Binding {
