@@ -11,15 +11,21 @@ public:
 
     enum class BindMethod {
         None,
-        Simple
+        Simple,
+        GSSAPI
     };
     Q_ENUM(BindMethod)
 
-    explicit LDAPAddressBookFeeder(const QString &ldapUrl, const QString &ldapBase,
+    explicit LDAPAddressBookFeeder(bool useSSL,
+                                   const QString &ldapUrl,
+                                   const QString &ldapBase,
                                    const QString &ldapFilter,
                                    const BindMethod bindMethod,
                                    const QString& bindDn,
                                    const QString& bindPassword,
+                                   const QString& saslRealm,
+                                   const QString& saslAuthcid,
+                                   const QString& saslAuthzid,
                                    QStringList sipStatusSubscriptableAttributes,
                                    const QString &baseNumber = "", QObject *parent = nullptr);
 
@@ -28,6 +34,7 @@ public:
 private:
     void clearCStringlist(char **attrs) const;
 
+    bool m_useSSL = true;
     BindMethod m_bindMethod = BindMethod::None;
     QString m_bindDn;
     QString m_bindPassword;
@@ -35,6 +42,9 @@ private:
     QString m_ldapBase;
     QString m_ldapFilter;
     QString m_baseNumber;
+    QString m_saslRealm;
+    QString m_saslAuthcid;
+    QString m_saslAuthzid;
 
     QStringList m_sipStatusSubscriptableAttributes;
 };
