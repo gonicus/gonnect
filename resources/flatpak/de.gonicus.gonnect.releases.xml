@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.2.0" date="2025-02-20">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>make mime-type based calls work again</li>
+        <li>make mime-type based calls work again</li>
+      </ul>
+      <p>Features:</p>
+      <ul>
+        <li>support for usb busylights</li>
+        <li>support for usb busylights</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.1.2" date="2025-02-17">
     <description>
       <p>Bug Fixes:</p>

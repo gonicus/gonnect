@@ -58,6 +58,8 @@
       <li xml:lang="de">Anruf in Jitsi Meet weiterführen</li>
       <li>Support for various hardware headsets (i.e. Yealink, Jabra)</li>
       <li xml:lang="de">Unterstützung für diverse Headsets (z.B. Yealink, Jabra)</li>
+      <li>Support for various busylights</li>
+      <li xml:lang="de">Unterstützung für diverse Busylights</li>
       <li>Custom audio device profiles or managed by your system</li>
       <li xml:lang="de">Benutzerdefinierte oder vom System verwaltete Audiogeräteprofile</li>
       <li>Stopping other audio sources on incoming calls</li>

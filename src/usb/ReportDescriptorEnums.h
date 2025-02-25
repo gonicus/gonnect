@@ -28,6 +28,8 @@ public:
         LED_Microphone = 0x0821,
 
         Button_Primary = 0x0901,
+
+        Vendor_LEDCommand = 0xFF01,
     };
     Q_ENUM(UsageId)
 
