@@ -77,7 +77,9 @@ void SIPUserAgentConfig::applyConfig(pj::EpConfig &epConfig)
                     .toStringList();
     std::vector<std::string> cnvNameServers;
     for (auto iter = nameservers.constBegin(); iter != nameservers.constEnd(); ++iter) {
-        cnvNameServers.push_back(iter->toStdString());
+        if (!iter->isEmpty()) {
+            cnvNameServers.push_back(iter->toStdString());
+        }
     }
     epConfig.uaConfig.nameserver = cnvNameServers;
 }
