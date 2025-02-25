@@ -17,6 +17,7 @@ public:
     enum class Roles {
         Name = Qt::UserRole + 1,
         Description,
+        Preset,
         Target,
         Type,
         Regex,

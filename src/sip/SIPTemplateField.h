@@ -18,6 +18,7 @@ public:
 
     QString name;
     QString description;
+    QString preset;
     QString target;
     QString mimeType;
     TemplateFieldType type = SIPTemplateField::TemplateFieldType::Invalid;

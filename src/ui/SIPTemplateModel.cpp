@@ -12,6 +12,7 @@ QHash<int, QByteArray> SIPTemplateModel::roleNames() const
     return {
         { static_cast<int>(Roles::Name), "name" },
         { static_cast<int>(Roles::Description), "description" },
+        { static_cast<int>(Roles::Preset), "preset" },
         { static_cast<int>(Roles::Target), "target" },
         { static_cast<int>(Roles::Type), "type" },
         { static_cast<int>(Roles::Regex), "regex" },
@@ -34,6 +35,8 @@ QVariant SIPTemplateModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case static_cast<int>(Roles::Description):
         return field->description;
+    case static_cast<int>(Roles::Preset):
+        return field->preset;
     case static_cast<int>(Roles::Target):
         return field->target;
     case static_cast<int>(Roles::Type):
