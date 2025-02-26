@@ -9,12 +9,12 @@
 
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
-LDAPAddressBookFeeder::LDAPAddressBookFeeder(bool useSSL, const QString &ldapUrl, const QString &ldapBase,
-                                             const QString &ldapFilter, const BindMethod bindMethod,
-                                             const QString &bindDn, const QString &bindPassword,
-                                             const QString& saslRealm,
-                                             const QString& saslAuthcid,
-                                             const QString& saslAuthzid,
+LDAPAddressBookFeeder::LDAPAddressBookFeeder(bool useSSL, const QString &ldapUrl,
+                                             const QString &ldapBase, const QString &ldapFilter,
+                                             const BindMethod bindMethod, const QString &bindDn,
+                                             const QString &bindPassword, const QString &saslRealm,
+                                             const QString &saslAuthcid, const QString &saslAuthzid,
+                                             const QString &caFilePath,
                                              QStringList sipStatusSubscriptableAttributes,
                                              const QString &baseNumber, QObject *parent)
     : QObject{ parent },
@@ -29,6 +29,7 @@ LDAPAddressBookFeeder::LDAPAddressBookFeeder(bool useSSL, const QString &ldapUrl
       m_saslRealm{ saslRealm },
       m_saslAuthcid{ saslAuthcid },
       m_saslAuthzid{ saslAuthzid },
+      m_caFilePath{ caFilePath },
       m_sipStatusSubscriptableAttributes{ sipStatusSubscriptableAttributes }
 {
 }
@@ -95,7 +96,8 @@ static int interact(LDAP *ld, unsigned flags, void *defaults, void *sasl_interac
     data->result = malloc(data->len * sizeof(char));
     strlcpy(const_cast<char *>(static_cast<const char *>(data->result)), cstr, data->len);
 
-    qCDebug(lcLDAPAddressBookFeeder) << "SASL interactive method response:" << data->id << resultStr;
+    qCDebug(lcLDAPAddressBookFeeder)
+            << "SASL interactive method response:" << data->id << resultStr;
 
     return LDAP_SUCCESS;
 }
@@ -134,6 +136,11 @@ void LDAPAddressBookFeeder::feedAddressBook(AddressBook &addressBook)
     // const int dbgLvl = 0xFFFF;
     // ldap_set_option(ldap, LDAP_OPT_DEBUG_LEVEL, &dbgLvl);
 
+    if (!m_caFilePath.isEmpty()) {
+        qCInfo(lcLDAPAddressBookFeeder) << "Setting custom TLS file for LDAP:" << m_caFilePath;
+        ldap_set_option(ldap, LDAP_OPT_X_TLS_CACERTFILE, m_caFilePath.toStdString().c_str());
+    }
+
     result = ldap_initialize(&ldap, m_ldapUrl.toStdString().c_str());
     if (result != LDAP_SUCCESS) {
         qCCritical(lcLDAPAddressBookFeeder)
@@ -150,18 +157,19 @@ void LDAPAddressBookFeeder::feedAddressBook(AddressBook &addressBook)
 
     // Use TLS
     if (m_useSSL) {
+        result = ldap_start_tls_s(ldap, NULL, NULL);
 
-    result = ldap_start_tls_s(ldap, NULL, NULL);
-    if (result != LDAP_SUCCESS) {
-        qCCritical(lcLDAPAddressBookFeeder)
-                << "Could not start TLS for LDAP:" << ldap_err2string(result);
-        ErrorBus::instance().addError(
-                tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
-        clearCStringlist(attrs);
-        return;
-    }
+        if (result != LDAP_SUCCESS) {
+            qCCritical(lcLDAPAddressBookFeeder)
+                    << "Could not start TLS for LDAP:" << ldap_err2string(result);
+            ErrorBus::instance().addError(
+                    tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
+            clearCStringlist(attrs);
+            return;
+        }
 
-    qCDebug(lcLDAPAddressBookFeeder) << "TLS installed on LDAP handle:" << ldap_tls_inplace(ldap);
+        qCDebug(lcLDAPAddressBookFeeder)
+                << "TLS installed on LDAP handle:" << ldap_tls_inplace(ldap);
     }
 
     // LDAP bind

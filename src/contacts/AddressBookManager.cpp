@@ -194,6 +194,7 @@ bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group,
                 bindMethod, settings.value("bindDn", "").toString(), password,
                 settings.value("realm", "").toString(), settings.value("authcid", "").toString(),
                 settings.value("authzid", "").toString(),
+                settings.value("caFile", "").toString(),
                 scriptableAttributes.isEmpty() ? QStringList()
                                                : scriptableAttributes.split(QChar(',')),
                 settings.value("baseNumber", "").toString());
