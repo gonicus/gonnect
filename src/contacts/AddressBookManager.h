@@ -23,8 +23,12 @@ public:
 private:
     explicit AddressBookManager(QObject *parent = nullptr);
 
+    QString secret(const QString &group) const;
+    QString hashForSettingsGroup(const QString &group) const;
+
     void processAddressBookQueue();
     bool processLDAPAddressBookConfig(const QString &group);
+    bool processLDAPAddressBookConfigImpl(const QString &group, const QString &password);
     bool processCSVAddressBookConfig(const QString &group);
     bool processCardDAVAddressBookConfig(const QString &group);
     void processCardDAVAddressBookConfigImpl(const QString &group, const QString &password);
