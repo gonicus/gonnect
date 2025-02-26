@@ -8,24 +8,14 @@ class LDAPAddressBookFeeder : public QObject, public IAddressBookFeeder
     Q_OBJECT
 
 public:
-
-    enum class BindMethod {
-        None,
-        Simple,
-        GSSAPI
-    };
+    enum class BindMethod { None, Simple, GSSAPI };
     Q_ENUM(BindMethod)
 
-    explicit LDAPAddressBookFeeder(bool useSSL,
-                                   const QString &ldapUrl,
-                                   const QString &ldapBase,
-                                   const QString &ldapFilter,
-                                   const BindMethod bindMethod,
-                                   const QString& bindDn,
-                                   const QString& bindPassword,
-                                   const QString& saslRealm,
-                                   const QString& saslAuthcid,
-                                   const QString& saslAuthzid,
+    explicit LDAPAddressBookFeeder(bool useSSL, const QString &ldapUrl, const QString &ldapBase,
+                                   const QString &ldapFilter, const BindMethod bindMethod,
+                                   const QString &bindDn, const QString &bindPassword,
+                                   const QString &saslRealm, const QString &saslAuthcid,
+                                   const QString &saslAuthzid, const QString &caFilePath,
                                    QStringList sipStatusSubscriptableAttributes,
                                    const QString &baseNumber = "", QObject *parent = nullptr);
 
@@ -45,6 +35,7 @@ private:
     QString m_saslRealm;
     QString m_saslAuthcid;
     QString m_saslAuthzid;
+    QString m_caFilePath;
 
     QStringList m_sipStatusSubscriptableAttributes;
 };
