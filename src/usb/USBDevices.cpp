@@ -217,8 +217,6 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
         return nullptr;
     }
 
-    qCritical() << "====>" << appCollection.get();
-
     if (!appCollection) {
         return nullptr;
     }

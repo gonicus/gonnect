@@ -21,13 +21,13 @@ def get_plist_with_content(dir):
             try:
                 with open(dir+'/'+plist, 'rb') as fp:
                     pl = plistlib.load(fp)
+                    if pl['diagnostics']:
+                        plist_list.append(pl)
             except FileNotFoundError as err:
                 print(err)
                 exit()
             except:
                 pass
-            if pl['diagnostics']:
-                plist_list.append(pl)
     if not plist_list:
         print('in %s are no .plist files or there is no \
               content in the .plist files' % dir)

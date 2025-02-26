@@ -1,4 +1,5 @@
 #include <netdb.h>
+#include <qhostaddress.h>
 #include "NetworkHelper.h"
 #include "NetworkMonitor.h"
 
@@ -96,4 +97,31 @@ bool NetworkHelper::isReachable(const QUrl &url)
     }
 
     return reply.value();
+}
+
+QStringList NetworkHelper::nameservers() const
+{
+    QStringList servers;
+    QFile resolvconf;
+    resolvconf.setFileName("/etc/resolv.conf");
+
+    if (!resolvconf.open(QIODevice::ReadOnly)) {
+        return servers;
+    }
+
+    while (!resolvconf.atEnd()) {
+        const QByteArray lineArray = resolvconf.readLine();
+        QByteArrayView line = QByteArrayView(lineArray).trimmed();
+
+        constexpr QByteArrayView nameserverWithSpace = "nameserver ";
+        if (line.startsWith(nameserverWithSpace)) {
+            auto entry = line.mid(nameserverWithSpace.size()).trimmed().toByteArray();
+            QHostAddress address(entry);
+            if (!address.isNull()) {
+                servers.push_back(entry);
+            }
+        }
+    }
+
+    return servers;
 }

@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.2.1" date="2025-02-25">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>add FRITZ!Box template</li>
+        <li>add sipgate template</li>
+        <li>added presets</li>
+        <li>allow setting of empty ua/nameservers</li>
+        <li>avoid blocking mpris calls</li>
+        <li>re-enable "finish" button with preset values</li>
+        <li>remove debug output</li>
+        <li>remove Telekom template, as is not read yet</li>
+        <li>use local nameservers by default</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.2.0" date="2025-02-20">
     <description>
       <p>Bug Fixes:</p>

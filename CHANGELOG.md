@@ -1,3 +1,18 @@
+## [1.2.1](https://github.com/gonicus/gonnect/compare/v1.2.0...v1.2.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* add FRITZ!Box template ([82d92fb](https://github.com/gonicus/gonnect/commit/82d92fb85f1f583efdf1a396a091302003e6a3b2))
+* add sipgate template ([f662df0](https://github.com/gonicus/gonnect/commit/f662df06418ecc9c0b3c2771b5a21a32025a3846))
+* added presets ([d1a5bbc](https://github.com/gonicus/gonnect/commit/d1a5bbc06eadd86747b99b922113338f019aa9e3))
+* allow setting of empty ua/nameservers ([45a4618](https://github.com/gonicus/gonnect/commit/45a46185575477bc7889cf054baf95b7cccdeb1f))
+* avoid blocking mpris calls ([811d3f1](https://github.com/gonicus/gonnect/commit/811d3f1dafc03fdf0376e72bb88a61998401b2b2))
+* re-enable "finish" button with preset values ([2f841c0](https://github.com/gonicus/gonnect/commit/2f841c0676de09518a9808af79acc480f22cf062))
+* remove debug output ([925e0a2](https://github.com/gonicus/gonnect/commit/925e0a2f13460413c863c1ead1ece6ed786048a2))
+* remove Telekom template, as is not read yet ([00fc066](https://github.com/gonicus/gonnect/commit/00fc066477d684dafe7286ef359e33e895c56407))
+* use local nameservers by default ([22532dd](https://github.com/gonicus/gonnect/commit/22532dd29abf543deed6e416c404b262e376cc3e))
+
 # [1.2.0](https://github.com/gonicus/gonnect/compare/v1.1.2...v1.2.0) (2025-02-20)
 
 

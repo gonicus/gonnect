@@ -1,8 +1,9 @@
 {
     $schema: "https://docs.renovatebot.com/renovate-schema.json",
     extends: [
-        "config:base",
-        "helpers:pinGitHubActionDigests"
+        "config:recommended",
+        "helpers:pinGitHubActionDigests",
+        ":disableDependencyDashboard"
     ],
     onboarding: false,
     requireConfig: "ignored",
@@ -15,6 +16,5 @@
     semanticCommits: "enabled",
     enabledManagers: [
         "github-actions",
-    ],
-    dependencyDashboard: false
+    ]
 }
