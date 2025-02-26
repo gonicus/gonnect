@@ -23,8 +23,8 @@ public:
 private:
     explicit AddressBookManager(QObject *parent = nullptr);
 
-    QString secret(const QString& group) const;
-    QString hashForSettingsGroup(const QString& group) const;
+    QString secret(const QString &group) const;
+    QString hashForSettingsGroup(const QString &group) const;
 
     void processAddressBookQueue();
     bool processLDAPAddressBookConfig(const QString &group);

@@ -189,12 +189,11 @@ bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group,
         }
 
         LDAPAddressBookFeeder feeder(
-                settings.value("useSSL", true).toBool(),
-                url, settings.value("base", "").toString(), settings.value("filter", "").toString(),
-                bindMethod, settings.value("bindDn", "").toString(), password,
+                settings.value("useSSL", true).toBool(), url, settings.value("base", "").toString(),
+                settings.value("filter", "").toString(), bindMethod,
+                settings.value("bindDn", "").toString(), password,
                 settings.value("realm", "").toString(), settings.value("authcid", "").toString(),
-                settings.value("authzid", "").toString(),
-                settings.value("caFile", "").toString(),
+                settings.value("authzid", "").toString(), settings.value("caFile", "").toString(),
                 scriptableAttributes.isEmpty() ? QStringList()
                                                : scriptableAttributes.split(QChar(',')),
                 settings.value("baseNumber", "").toString());
@@ -274,7 +273,6 @@ bool AddressBookManager::processCardDAVAddressBookConfig(const QString &group)
             }
         }
     }
-
 
     return true;
 }
