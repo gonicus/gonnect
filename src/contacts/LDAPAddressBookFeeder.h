@@ -26,6 +26,7 @@ public:
                                    const QString& saslRealm,
                                    const QString& saslAuthcid,
                                    const QString& saslAuthzid,
+                                   const QString& caFilePath,
                                    QStringList sipStatusSubscriptableAttributes,
                                    const QString &baseNumber = "", QObject *parent = nullptr);
 
@@ -45,6 +46,7 @@ private:
     QString m_saslRealm;
     QString m_saslAuthcid;
     QString m_saslAuthzid;
+    QString m_caFilePath;
 
     QStringList m_sipStatusSubscriptableAttributes;
 };
