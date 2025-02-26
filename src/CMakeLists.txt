@@ -6,7 +6,8 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /opt/pjsip) # Temporary add /usr/local
 pkg_check_modules(PJSIP REQUIRED libpjproject)
-pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber libsasl2 ldap)
+pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
+pkg_check_modules(SASL2 REQUIRED IMPORTED_TARGET libsasl2)
 pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
 pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
 
@@ -373,6 +374,7 @@ target_link_directories(gonnect PRIVATE
 target_link_libraries(gonnect
     PRIVATE
         PkgConfig::OPENLDAP
+        PkgConfig::SASL2
         Qt6::Core
         Qt6::CorePrivate
         Qt6::Gui
