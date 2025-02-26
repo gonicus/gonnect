@@ -19,12 +19,13 @@ public:
                      const QString &contactId = "", bool silent = false);
     virtual ~SIPCall();
 
-    virtual void onCallState(pj::OnCallStateParam &prm);
-    virtual void onCallTransferRequest(pj::OnCallTransferRequestParam &prm);
-    virtual void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm);
-    virtual void onCallMediaState(pj::OnCallMediaStateParam &prm);
-    virtual void onInstantMessage(pj::OnInstantMessageParam &prm);
-    virtual void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm);
+    virtual void onCallState(pj::OnCallStateParam &prm) override;
+    virtual void onCallTransferRequest(pj::OnCallTransferRequestParam &prm) override;
+    virtual void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm) override;
+    virtual void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
+    virtual void onInstantMessage(pj::OnInstantMessageParam &prm) override;
+    virtual void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
+    virtual void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
 
     SIPAccount *account() const { return m_account; };
     pj::AudioMedia *audioMedia() const;

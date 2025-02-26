@@ -310,6 +310,23 @@ pj::AudioMedia *SIPCall::audioMedia() const
     return nullptr;
 }
 
+void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
+{
+    const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
+
+    if (header.startsWith("UPDATE")) {
+        static const QRegularExpression regex("P-Asserted-Identity: (?<identity>.*?)(\\r\\n?|\\n)");
+
+        const auto matchResult = regex.match(header);
+        if (matchResult.hasMatch()) {
+            const QString newIdentity = matchResult.captured("identity");
+            const pj::CallInfo ci = getInfo();
+            setContactInfo(newIdentity, ci.role != PJSIP_ROLE_UAC);
+            qCDebug(lcSIPCall) << "New call participant identity found:" << newIdentity;
+        }
+    }
+}
+
 bool SIPCall::hold()
 {
     pj::CallOpParam op(true);
