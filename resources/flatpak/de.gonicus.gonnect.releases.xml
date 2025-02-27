@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.3.0" date="2025-02-27">
+    <description>
+      <p>Features:</p>
+      <ul>
+        <li>custom CA file for LDAP TLS</li>
+        <li>sasl/gssapi bind for ldap</li>
+        <li>simple bind for ldap addressbook feeder</li>
+        <li>show identity of forwarded participant</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.2.1" date="2025-02-25">
     <description>
       <p>Bug Fixes:</p>
