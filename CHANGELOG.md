@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/gonicus/gonnect/compare/v1.3.0...v1.3.1) (2025-02-27)
+
+
+### Bug Fixes
+
+* **ui:** default to non-ssl LDAP connections ([5dbd0be](https://github.com/gonicus/gonnect/commit/5dbd0bebff0bb21f5cace50e24bf2525020b567b))
+
 # [1.3.0](https://github.com/gonicus/gonnect/compare/v1.2.1...v1.3.0) (2025-02-27)
 
 
