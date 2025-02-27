@@ -189,9 +189,9 @@ bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group,
         }
 
         LDAPAddressBookFeeder feeder(
-                settings.value("useSSL", true).toBool(), url, settings.value("base", "").toString(),
-                settings.value("filter", "").toString(), bindMethod,
-                settings.value("bindDn", "").toString(), password,
+                settings.value("useSSL", false).toBool(), url,
+                settings.value("base", "").toString(), settings.value("filter", "").toString(),
+                bindMethod, settings.value("bindDn", "").toString(), password,
                 settings.value("realm", "").toString(), settings.value("authcid", "").toString(),
                 settings.value("authzid", "").toString(), settings.value("caFile", "").toString(),
                 scriptableAttributes.isEmpty() ? QStringList()
@@ -291,7 +291,7 @@ void AddressBookManager::processCardDAVAddressBookConfigImpl(const QString &grou
     }
     const auto controlHash = qHash(settingsHash);
 
-    const bool useSSL = settings.value("useSSL", true).toBool();
+    const bool useSSL = settings.value("useSSL", false).toBool();
 
     auto feeder = new CardDAVAddressBookFeeder(
             controlHash, settings.value("host", "").toString(),

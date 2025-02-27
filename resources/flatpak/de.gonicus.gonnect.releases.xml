@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.3.1" date="2025-02-27">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>default to non-ssl LDAP connections</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.3.0" date="2025-02-27">
     <description>
       <p>Features:</p>
