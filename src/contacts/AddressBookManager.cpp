@@ -210,8 +210,7 @@ bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group,
 
         feeder.feedAddressBook(AddressBook::instance());
 
-        AvatarManager::instance().initialLoad(url, settings.value("base", "").toString(),
-                                              settings.value("filter", "").toString());
+        AvatarManager::instance().initialLoad(ldapConfig);
 
         settings.endGroup();
 
