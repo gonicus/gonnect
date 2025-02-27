@@ -9,11 +9,20 @@
 
 Q_LOGGING_CATEGORY(lcNumberStats, "gonnect.app.NumberSTats")
 
+using namespace std::chrono_literals;
+
 NumberStats::NumberStats(QObject *parent) : QObject{ parent }
 {
     CallHistory::instance(); // Ensure database is properly set up which happens in CallHistory ctor
 
-    connect(&AddressBook::instance(), &AddressBook::contactsReady, this, &NumberStats::initialRead);
+    m_debounceAddressBookUpdateTimer.setSingleShot(true);
+    m_debounceAddressBookUpdateTimer.setInterval(5ms);
+    m_debounceAddressBookUpdateTimer.callOnTimeout(this, &NumberStats::initialRead);
+
+    connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
+            [this]() { m_debounceAddressBookUpdateTimer.start(); });
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this,
+            [this]() { m_debounceAddressBookUpdateTimer.start(); });
 
     initialRead();
 }
