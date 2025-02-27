@@ -455,5 +455,5 @@ void AvatarManager::loadAll(const LDAPInitializer::Config &ldapConfig)
 
     qCInfo(lcAvatarManager) << "Loaded" << count << "avatars";
 
-    ldap_unbind_ext(ldap, NULL, NULL);
+    LDAPInitializer::freeLDAPHandle(ldap);
 }
