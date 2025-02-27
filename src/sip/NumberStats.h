@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QTimer>
 
 class Contact;
 
@@ -63,6 +64,7 @@ private:
     QHash<QString, NumberStat *> m_statItemsLookup;
     QHash<QString, NumberStat *> m_favoriteLookup;
     QList<NumberStat *> m_statItems;
+    QTimer m_debounceAddressBookUpdateTimer;
 
 signals:
     void countChanged(qsizetype index);
