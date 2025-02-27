@@ -1,3 +1,13 @@
+# [1.3.0](https://github.com/gonicus/gonnect/compare/v1.2.1...v1.3.0) (2025-02-27)
+
+
+### Features
+
+* custom CA file for LDAP TLS ([7a55040](https://github.com/gonicus/gonnect/commit/7a55040a4de7f02b34e3703f53390ce834a2881b)), closes [#21](https://github.com/gonicus/gonnect/issues/21)
+* sasl/gssapi bind for ldap ([92eb024](https://github.com/gonicus/gonnect/commit/92eb02471051a54cb314b7c478bfadb195ab7e82)), closes [#21](https://github.com/gonicus/gonnect/issues/21)
+* simple bind for ldap addressbook feeder ([07896ad](https://github.com/gonicus/gonnect/commit/07896ad0428b1de5acc5a8e5164fc2bcda8e200e)), closes [#21](https://github.com/gonicus/gonnect/issues/21)
+* **ui:** show identity of forwarded participant ([f5d2474](https://github.com/gonicus/gonnect/commit/f5d2474f486eecb574dea564a16b6bf835f923a4))
+
 ## [1.2.1](https://github.com/gonicus/gonnect/compare/v1.2.0...v1.2.1) (2025-02-25)
 
 

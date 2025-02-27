@@ -1,4 +1,5 @@
 #include <ldap.h>
+#include <sasl/sasl.h>
 #include <QDebug>
 #include <QLoggingCategory>
 
@@ -8,15 +9,27 @@
 
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
-LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &ldapUrl, const QString &ldapBase,
-                                             const QString &ldapFilter,
+LDAPAddressBookFeeder::LDAPAddressBookFeeder(bool useSSL, const QString &ldapUrl,
+                                             const QString &ldapBase, const QString &ldapFilter,
+                                             const BindMethod bindMethod, const QString &bindDn,
+                                             const QString &bindPassword, const QString &saslRealm,
+                                             const QString &saslAuthcid, const QString &saslAuthzid,
+                                             const QString &caFilePath,
                                              QStringList sipStatusSubscriptableAttributes,
                                              const QString &baseNumber, QObject *parent)
     : QObject{ parent },
+      m_useSSL{ useSSL },
+      m_bindMethod{ bindMethod },
+      m_bindDn{ bindDn },
+      m_bindPassword{ bindPassword },
       m_ldapUrl{ ldapUrl },
       m_ldapBase{ ldapBase },
       m_ldapFilter{ ldapFilter },
       m_baseNumber{ baseNumber },
+      m_saslRealm{ saslRealm },
+      m_saslAuthcid{ saslAuthcid },
+      m_saslAuthzid{ saslAuthzid },
+      m_caFilePath{ caFilePath },
       m_sipStatusSubscriptableAttributes{ sipStatusSubscriptableAttributes }
 {
 }
@@ -30,6 +43,63 @@ void LDAPAddressBookFeeder::clearCStringlist(char **attrs) const
     }
 
     free(attrs);
+}
+
+struct SaslDefaults
+{
+    LDAP *ldap = nullptr;
+    QString mech;
+    QString realm;
+    QString authcid;
+    QString passwd;
+    QString authzid;
+};
+
+static int interact(LDAP *ld, unsigned flags, void *defaults, void *sasl_interact)
+{
+    Q_UNUSED(ld)
+    Q_UNUSED(flags)
+
+    const auto saslDefaults = static_cast<SaslDefaults *>(defaults);
+    auto data = static_cast<sasl_interact_t *>(sasl_interact);
+
+    std::string resultStr;
+
+    switch (data->id) {
+    case SASL_CB_GETREALM:
+        resultStr = saslDefaults->realm.toStdString();
+        break;
+
+    case SASL_CB_AUTHNAME:
+        resultStr = saslDefaults->authcid.toStdString();
+        break;
+
+    case SASL_CB_PASS:
+        resultStr = saslDefaults->passwd.toStdString();
+        break;
+
+    case SASL_CB_USER: {
+        resultStr = saslDefaults->authzid.toStdString();
+        break;
+    }
+
+    // Do nothing
+    case SASL_CB_NOECHOPROMPT:
+    case SASL_CB_ECHOPROMPT:
+    case SASL_CB_LIST_END:
+    default:
+        break;
+    }
+
+    const char *cstr = resultStr.c_str();
+    data->len = strlen(cstr);
+    data->result = malloc(data->len * sizeof(char));
+    strlcpy(const_cast<char *>(static_cast<const char *>(data->result)), cstr, data->len);
+
+    qCDebug(lcLDAPAddressBookFeeder)
+            << "SASL interactive method response:" << data->id << resultStr;
+
+    return LDAP_SUCCESS;
 }
 
 void LDAPAddressBookFeeder::feedAddressBook(AddressBook &addressBook)
@@ -62,6 +132,15 @@ void LDAPAddressBookFeeder::feedAddressBook(AddressBook &addressBook)
 
     qCInfo(lcLDAPAddressBookFeeder) << "Connecting to LDAP service";
 
+    // LDAP debug level
+    // const int dbgLvl = 0xFFFF;
+    // ldap_set_option(ldap, LDAP_OPT_DEBUG_LEVEL, &dbgLvl);
+
+    if (!m_caFilePath.isEmpty()) {
+        qCInfo(lcLDAPAddressBookFeeder) << "Setting custom TLS file for LDAP:" << m_caFilePath;
+        ldap_set_option(ldap, LDAP_OPT_X_TLS_CACERTFILE, m_caFilePath.toStdString().c_str());
+    }
+
     result = ldap_initialize(&ldap, m_ldapUrl.toStdString().c_str());
     if (result != LDAP_SUCCESS) {
         qCCritical(lcLDAPAddressBookFeeder)
@@ -70,6 +149,64 @@ void LDAPAddressBookFeeder::feedAddressBook(AddressBook &addressBook)
                 tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
         clearCStringlist(attrs);
         return;
+    }
+
+    // Use LDAP version 3
+    int version = 3;
+    ldap_set_option(ldap, LDAP_OPT_PROTOCOL_VERSION, &version);
+
+    // Use TLS
+    if (m_useSSL) {
+        result = ldap_start_tls_s(ldap, NULL, NULL);
+
+        if (result != LDAP_SUCCESS) {
+            qCCritical(lcLDAPAddressBookFeeder)
+                    << "Could not start TLS for LDAP:" << ldap_err2string(result);
+            ErrorBus::instance().addError(
+                    tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
+            clearCStringlist(attrs);
+            return;
+        }
+
+        qCDebug(lcLDAPAddressBookFeeder)
+                << "TLS installed on LDAP handle:" << ldap_tls_inplace(ldap);
+    }
+
+    // LDAP bind
+    if (m_bindMethod != BindMethod::None) {
+        if (m_bindMethod == BindMethod::Simple) {
+            berval cred;
+            const std::string pw = m_bindPassword.toStdString();
+            cred.bv_val = (char *)pw.c_str();
+            cred.bv_len = m_bindPassword.length();
+
+            qCDebug(lcLDAPAddressBookFeeder)
+                    << "LDAP simple bind vs." << m_ldapUrl << "with" << m_bindDn;
+
+            result = ldap_sasl_bind_s(ldap, m_bindDn.toStdString().c_str(), LDAP_SASL_SIMPLE, &cred,
+                                      NULL, NULL, NULL);
+
+        } else if (m_bindMethod == BindMethod::GSSAPI) {
+            SaslDefaults defaults;
+            defaults.ldap = ldap;
+            defaults.mech = "GSSAPI";
+            defaults.realm = m_saslRealm;
+            defaults.authcid = m_saslAuthcid;
+            defaults.passwd = m_bindPassword;
+            defaults.authzid = m_saslAuthzid;
+            result = ldap_sasl_interactive_bind_s(ldap, m_bindDn.toStdString().c_str(), "GSSAPI",
+                                                  NULL, NULL, LDAP_SASL_INTERACTIVE, &interact,
+                                                  &defaults);
+        }
+
+        if (result != LDAP_SUCCESS) {
+            qCCritical(lcLDAPAddressBookFeeder) << "Error on LDAP bind:" << ldap_err2string(result);
+            ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(result)));
+            clearCStringlist(attrs);
+            return;
+        }
+
+        qCDebug(lcLDAPAddressBookFeeder) << "LDAP bind successful";
     }
 
     timeval timeout;
