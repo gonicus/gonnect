@@ -40,11 +40,9 @@
       <p>Bug Fixes:</p>
       <ul>
         <li>make mime-type based calls work again</li>
-        <li>make mime-type based calls work again</li>
       </ul>
       <p>Features:</p>
       <ul>
-        <li>support for usb busylights</li>
         <li>support for usb busylights</li>
       </ul>
     </description>
@@ -55,23 +53,6 @@
       <ul>
         <li>address theoretical counter issue</li>
         <li>really send call parameters to the main app</li>
-      </ul>
-      <p>Continuous Integration:</p>
-      <ul>
-        <li>checkout submodules</li>
-        <li>create codeql.yml</li>
-        <li>next iteration to fight the ci mills</li>
-        <li>remove unused file</li>
-        <li>try to fix build</li>
-      </ul>
-      <p>Maintenance:</p>
-      <ul>
-        <li>sync flatpak recipe with upstream</li>
-      </ul>
-      <p>Documentation:</p>
-      <ul>
-        <li>add information about call transfer to Jitsi Meet</li>
-        <li>streamline feature lists</li>
       </ul>
     </description>
   </release>
@@ -85,33 +66,12 @@
   </release>
   <release version="1.1.0" date="2025-02-12">
     <description>
-      <p>Continuous Integration:</p>
-      <ul>
-        <li>make analyzer work again</li>
-        <li>try to fix static analyzer (again)</li>
-      </ul>
-      <p>Maintenance:</p>
-      <ul>
-        <li>Added headset description</li>
-        <li>fixed parsing of photo data in CardDAV feeder</li>
-        <li>remove debug info</li>
-        <li>use proper logging channel</li>
-        <li>update renovatebot/github-action action to v41.0.10</li>
-        <li>update renovatebot/github-action action to v41.0.11</li>
-        <li>update renovatebot/github-action action to v41.0.13</li>
-        <li>non-goals paragraph in README</li>
-      </ul>
       <p>Bug Fixes:</p>
       <ul>
         <li>load avatars of contacts that are created later</li>
         <li>remove direct jpeg deps</li>
         <li>send refresh signals after carddav contacts loaded</li>
         <li>send update signals when adding avatar via CardDAV</li>
-      </ul>
-      <p>Code Refactoring:</p>
-      <ul>
-        <li>use better approach to check if MESSAGING is allowed</li>
-        <li>use correct id for CardDAV-loaded contacts</li>
       </ul>
       <p>Features:</p>
       <ul>
@@ -122,12 +82,6 @@
   </release>
   <release version="1.0.7" date="2025-01-20">
     <description>
-      <p>Maintenance:</p>
-      <ul>
-        <li>update code formatting broken by merge</li>
-        <li>update renovatebot/github-action action to v41.0.9</li>
-        <li>adjust brand colors</li>
-      </ul>
       <p>Bug Fixes:</p>
       <ul>
         <li>only use IM if allowed with SIP partner</li>
@@ -141,10 +95,6 @@
         <li>adjust screenshot shadow</li>
         <li>remove "app" from summary</li>
       </ul>
-      <p>Maintenance:</p>
-      <ul>
-        <li>updated screenshots</li>
-      </ul>
     </description>
   </release>
   <release version="1.0.5" date="2025-01-14">
@@ -153,42 +103,18 @@
       <ul>
         <li>trigger build</li>
       </ul>
-      <p>Continuous Integration:</p>
-      <ul>
-        <li>add another screenshot</li>
-        <li>remove flatpak updater</li>
-        <li>trigger build</li>
-        <li>updated images [skip ci]</li>
-      </ul>
     </description>
   </release>
   <release version="1.0.4" date="2025-01-13">
     <description>
-      <p>Maintenance:</p>
-      <ul>
-        <li>shrink icon by some more pixels</li>
-      </ul>
-      <p>Continuous Integration:</p>
-      <ul>
-        <li>make use of Semantic Release app</li>
-      </ul>
       <p>Bug Fixes:</p>
       <ul>
         <li>adjust file permissions of initial config</li>
-      </ul>
-      <p>Build System:</p>
-      <ul>
-        <li>speed up Distrobox starts after initialization</li>
       </ul>
     </description>
   </release>
   <release version="1.0.3" date="2025-01-13">
     <description>
-      <p>Maintenance:</p>
-      <ul>
-        <li>include cmake version for hidapi cache key</li>
-        <li>revert wrong change in tag reading</li>
-      </ul>
       <p>Bug Fixes:</p>
       <ul>
         <li>adjust branding and icon size</li>
@@ -202,15 +128,6 @@
         <li>add workaround for KDE tray</li>
         <li>enable sample template</li>
         <li>properly show errors on template copy</li>
-      </ul>
-      <p>Maintenance:</p>
-      <ul>
-        <li>avoid double install of resources</li>
-        <li>install meta data from CMake</li>
-      </ul>
-      <p>Continuous Integration:</p>
-      <ul>
-        <li>fix path for release note options</li>
       </ul>
     </description>
   </release>
