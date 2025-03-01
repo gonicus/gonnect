@@ -1,5 +1,6 @@
 #include "BusylightDeviceManager.h"
 
+#include "LitraBeamLX.h"
 #include "LuxaforFlag.h"
 #include "KuandoOmega.h"
 
@@ -16,6 +17,9 @@ bool BusylightDeviceManager::createBusylightDevice(const hid_device_info &device
 
     } else if (vendor == 0x27BB && (product == 0x3BCD || product == 0x3BCF)) {
         device = new KuandoOmega(deviceInfo, this);
+
+    } else if (vendor == 0x046D && product == 0xC903) {
+        device = new LitraBeamLX(deviceInfo, this);
     }
 
     if (device) {
