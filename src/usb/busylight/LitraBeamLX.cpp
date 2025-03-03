@@ -4,9 +4,11 @@
 #define REPORT_ID 0x11
 #define DEVICE_ID 0xFF
 #define SOFTWARE_ID 0x0A
-#define SET_ILLUMINATION 0x40
+#define SET_ILLUMINATION 0x10
+#define SET_ILLUMINATION_RGB 0x40
 #define SET_INDIVITUAL_RGB_ZONES 0x10
 #define FRAME_END 0x70
+#define FEATURE_ILLUMINATION 0x06
 #define FEATURE_BRIGHTNESS_CONTROL 0x0A
 #define FEATURE_PREKEY_LIGHTING 0x0C
 
@@ -22,10 +24,28 @@ QSet<IBusylightDevice::SupportedCommands> LitraBeamLX::supportedCommands()
     return _commands;
 }
 
-void LitraBeamLX::switchStreamlight(bool ok)
+void LitraBeamLX::switchStreamlight(bool on)
 {
-    Q_UNUSED(ok);
-    // TODO: implement me
+    if (!m_device) {
+        qCCritical(lcLitraBeamLX) << "Error: trying to send data while the USB device is not open";
+        return;
+    }
+
+    unsigned char buf[20];
+
+    // TODO: Make a hid++ support library and do this in a non hardcoded way
+    //       because index and feature versions are not guaranteed to stay this
+    //       way.
+
+    // Switch on or off
+    memset(buf, 0, sizeof(buf));
+    buf[0] = REPORT_ID;
+    buf[1] = DEVICE_ID;
+    buf[2] = FEATURE_ILLUMINATION;
+    buf[3] = SET_ILLUMINATION | SOFTWARE_ID;
+    buf[4] = on ? 1 : 0;
+
+    hid_write(m_device, buf, sizeof(buf));
 }
 
 void LitraBeamLX::send(bool on)
@@ -46,7 +66,7 @@ void LitraBeamLX::send(bool on)
     buf[0] = REPORT_ID;
     buf[1] = DEVICE_ID;
     buf[2] = FEATURE_BRIGHTNESS_CONTROL;
-    buf[3] = SET_ILLUMINATION | SOFTWARE_ID;
+    buf[3] = SET_ILLUMINATION_RGB | SOFTWARE_ID;
     buf[4] = on ? 1 : 0;
 
     hid_write(m_device, buf, sizeof(buf));

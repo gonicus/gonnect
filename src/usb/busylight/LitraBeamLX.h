@@ -14,7 +14,7 @@ public:
         : IBusylightDevice{ deviceInfo, parent } { };
 
     virtual QSet<SupportedCommands> supportedCommands() override;
-    virtual void switchStreamlight(bool ok) override;
+    virtual void switchStreamlight(bool on) override;
 
 protected:
     virtual void send(bool on) override;
