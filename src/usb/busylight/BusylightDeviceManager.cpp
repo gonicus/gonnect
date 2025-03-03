@@ -82,7 +82,7 @@ void BusylightDeviceManager::switchStreamlightOn() const
     for (auto device : std::as_const(m_devices)) {
         if (device->supportedCommands().contains(
                     IBusylightDevice::SupportedCommands::StreamlightOnOff)) {
-            device->switchStreamlightOn();
+            device->switchStreamlight(true);
         }
     }
 }
@@ -92,7 +92,7 @@ void BusylightDeviceManager::switchStreamlightOff() const
     for (auto device : std::as_const(m_devices)) {
         if (device->supportedCommands().contains(
                     IBusylightDevice::SupportedCommands::StreamlightOnOff)) {
-            device->switchStreamlightOff();
+            device->switchStreamlight(false);
         }
     }
 }
