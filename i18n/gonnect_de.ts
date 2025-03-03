@@ -43,29 +43,6 @@
     </message>
 </context>
 <context>
-    <name>AccountCredentialsDialog</name>
-    <message>
-        <location filename="../src/ui/components/dialogs/AccountCredentialsDialog.qml" line="11"/>
-        <source>Authentication failed</source>
-        <translation>Authentifizierung fehlgeschlagen</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/dialogs/AccountCredentialsDialog.qml" line="17"/>
-        <source>Please enter the password for the SIP account:</source>
-        <translation>Bitte gib das Passwort für den SIP-Account ein:</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/dialogs/AccountCredentialsDialog.qml" line="30"/>
-        <source>Password</source>
-        <translation>Passwort</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/dialogs/AccountCredentialsDialog.qml" line="45"/>
-        <source>Ok</source>
-        <translation>Ok</translation>
-    </message>
-</context>
-<context>
     <name>AudioEnvWindow</name>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="11"/>
@@ -101,17 +78,17 @@
 <context>
     <name>AvatarManager</name>
     <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="266"/>
+        <location filename="../src/contacts/AvatarManager.cpp" line="350"/>
         <source>Failed to initialize LDAP connection: %1</source>
         <translation>Kann die LDAP-Verbindung nicht initialisieren: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="279"/>
+        <location filename="../src/contacts/AvatarManager.cpp" line="363"/>
         <source>LDAP error: %1</source>
         <translation>LDAP-Fehler: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="358"/>
+        <location filename="../src/contacts/AvatarManager.cpp" line="442"/>
         <source>Parse error: %1</source>
         <translation>Syntaxfehler: %1</translation>
     </message>
@@ -135,17 +112,17 @@
 <context>
     <name>CallDetails</name>
     <message>
-        <location filename="../src/ui/components/CallDetails.qml" line="160"/>
+        <location filename="../src/ui/components/CallDetails.qml" line="175"/>
         <source>Jitsi Meet</source>
         <translation>Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallDetails.qml" line="177"/>
+        <location filename="../src/ui/components/CallDetails.qml" line="192"/>
         <source>Unhold</source>
         <translation>Sprechen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallDetails.qml" line="177"/>
+        <location filename="../src/ui/components/CallDetails.qml" line="192"/>
         <source>Hold</source>
         <translation>Halten</translation>
     </message>
@@ -171,7 +148,7 @@
 <context>
     <name>CallsModel</name>
     <message>
-        <location filename="../src/ui/CallsModel.cpp" line="243"/>
+        <location filename="../src/ui/CallsModel.cpp" line="246"/>
         <source>unknown number</source>
         <translation>unbekannte Nummer</translation>
     </message>
@@ -241,6 +218,29 @@
         <location filename="../src/ui/components/dialogs/ConfirmDialog.qml" line="15"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
+    </message>
+</context>
+<context>
+    <name>CredentialsDialog</name>
+    <message>
+        <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="10"/>
+        <source>Authentication failed</source>
+        <translation>Authentifizierung fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="18"/>
+        <source>Please enter the password:</source>
+        <translation>Bitte geben Sie das Passwort ein:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="31"/>
+        <source>Password</source>
+        <translation>Passwort</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="46"/>
+        <source>Ok</source>
+        <translation>Ok</translation>
     </message>
 </context>
 <context>
@@ -608,17 +608,17 @@
 <context>
     <name>LDAPAddressBookFeeder</name>
     <message>
-        <location filename="../src/contacts/LDAPAddressBookFeeder.cpp" line="70"/>
-        <source>Failed to initialize LDAP connection: %1</source>
-        <translation>Kann die LDAP-Verbindung nicht initialisieren: %1</translation>
+        <location filename="../src/contacts/LDAPAddressBookFeeder.cpp" line="64"/>
+        <source>Failed to initialize LDAP connection</source>
+        <translation>LDAP-Verbindung konnte nicht initialisiert werden</translation>
     </message>
     <message>
-        <location filename="../src/contacts/LDAPAddressBookFeeder.cpp" line="88"/>
+        <location filename="../src/contacts/LDAPAddressBookFeeder.cpp" line="82"/>
         <source>LDAP error: %1</source>
         <translation>LDAP-Fehler: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/LDAPAddressBookFeeder.cpp" line="186"/>
+        <location filename="../src/contacts/LDAPAddressBookFeeder.cpp" line="180"/>
         <source>Parse error: %1</source>
         <translation>Syntaxfehler: %1</translation>
     </message>
@@ -641,32 +641,43 @@
         <translation>Es sind noch aktive Anrufe vorhanden. Möchtest Du wirklich beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="127"/>
+        <location filename="../src/Main.qml" line="76"/>
+        <location filename="../src/Main.qml" line="81"/>
+        <source>Please enter the password for %1:</source>
+        <translation>Bitte geben Sie das Passwort für %1 ein:</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="89"/>
+        <source>Please enter the password for the SIP account:</source>
+        <translation>Bitte gib das Passwort für den SIP-Account ein:</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="138"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="196"/>
+        <location filename="../src/Main.qml" line="207"/>
         <source>Current Calls</source>
         <translation>Aktive Anrufe</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="208"/>
+        <location filename="../src/Main.qml" line="219"/>
         <source>End all calls</source>
         <translation>Alle Anrufe beenden</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="209"/>
+        <location filename="../src/Main.qml" line="220"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
         <translation>Möchtest Du das Fenster schliessen und alle aktiven Anrufe beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="256"/>
+        <location filename="../src/Main.qml" line="267"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="262"/>
+        <location filename="../src/Main.qml" line="273"/>
         <source>Fatal Error</source>
         <translation>Fataler Fehler</translation>
     </message>
@@ -2008,32 +2019,32 @@
 <context>
     <name>SIPAccount</name>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="56"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="60"/>
         <source>&apos;userUri&apos; is no valid SIP URI: %1</source>
         <translation>&apos;userUri&apos; ist keine gültige SIP URI: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="63"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="67"/>
         <source>&apos;userUri&apos; is required</source>
         <translation>&apos;userUri&apos; ist erforderlich</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="74"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="78"/>
         <source>&apos;registrarUri&apos; is no valid SIP URI: %1</source>
         <translation>&apos;registrarUri&apos; ist keine gültige SIP URI: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="84"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="88"/>
         <source>&apos;registrarUri&apos; is required</source>
         <translation>&apos;registrarUri&apos; ist erforderlich</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="94"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="98"/>
         <source>&apos;proxies&apos; contains invalid SIP URI entry: %1</source>
         <translation>&apos;proxies&apos; enthält eine ungültige SIP URI: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="348"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="352"/>
         <source>Failed to create %1: %2</source>
         <translation>Fehler beim Erzeugen von %1: %2</translation>
     </message>
@@ -2062,12 +2073,12 @@
 <context>
     <name>SIPCall</name>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="470"/>
+        <location filename="../src/sip/SIPCall.cpp" line="495"/>
         <source>Active call with %1</source>
         <translation>Aktiver Anruf mit %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="499"/>
+        <location filename="../src/sip/SIPCall.cpp" line="524"/>
         <source>Hang up</source>
         <translation>Auflegen</translation>
     </message>
@@ -2075,34 +2086,34 @@
 <context>
     <name>SIPCallManager</name>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="115"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="120"/>
         <source>%1 is calling</source>
         <translation>Anruf von %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="117"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="122"/>
         <source>%1 (%2) is calling</source>
         <translation>Anruf von %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="144"/>
-        <location filename="../src/sip/SIPCallManager.cpp" line="146"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="149"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="151"/>
         <source>Accept</source>
         <translation>Annehmen</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="627"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="646"/>
         <source>Call back</source>
         <translation>Zurückrufen</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="143"/>
-        <location filename="../src/sip/SIPCallManager.cpp" line="147"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="148"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="152"/>
         <source>Reject</source>
         <translation>Ablehnen</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="593"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="612"/>
         <source>Missed call from %1</source>
         <translation>Verpasster Anruf von %1</translation>
     </message>
@@ -2118,18 +2129,18 @@
 <context>
     <name>SIPTemplate</name>
     <message>
-        <location filename="../src/sip/SIPTemplate.cpp" line="65"/>
-        <location filename="../src/sip/SIPTemplate.cpp" line="71"/>
+        <location filename="../src/sip/SIPTemplate.cpp" line="66"/>
+        <location filename="../src/sip/SIPTemplate.cpp" line="72"/>
         <source>Failed to write to %1</source>
         <translation>Fehler beim Schreiben von %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPTemplate.cpp" line="88"/>
+        <location filename="../src/sip/SIPTemplate.cpp" line="91"/>
         <source>Failed to copy %1 to the config space</source>
         <translation>Fehler beim Kopieren von %1 in das Konfigurationsverzeichnis</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPTemplate.cpp" line="93"/>
+        <location filename="../src/sip/SIPTemplate.cpp" line="96"/>
         <source>Source file %1 does not exist</source>
         <translation>Quelldatei %1 existiert nicht</translation>
     </message>
@@ -2366,23 +2377,23 @@
         <translation>Weiter</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="263"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="275"/>
         <source>Back</source>
         <translation>Zurück</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="273"/>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="353"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="285"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="365"/>
         <source>Finish</source>
         <translation>Abschließen</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="310"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="322"/>
         <source>We have created a configuration file for you. Please check if any changes are required to meet your needs and restart GOnnect to activate them.</source>
         <translation>Wir haben eine Konfigurationsdatei für Dich erstellt. Bitte prüfe ob für Deine Zwecke irgendwelche Änderungen notwendig sind, und starte GOnnect neu, um sie zu aktivieren.</translation>
     </message>
     <message>
-        <location filename="../src/ui/SipTemplateWizard.qml" line="320"/>
+        <location filename="../src/ui/SipTemplateWizard.qml" line="332"/>
         <source>The configuration has been saved to:</source>
         <translation>Die Konfiguration wurde hier gespeichert:</translation>
     </message>

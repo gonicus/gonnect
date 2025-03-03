@@ -2,6 +2,7 @@
 #include "ReadOnlyConfdSettings.h"
 #include "NetworkHelper.h"
 #include "AddressBook.h"
+#include "LDAPInitializer.h"
 #include "LDAPAddressBookFeeder.h"
 #include "CardDAVAddressBookFeeder.h"
 #include "CsvFileAddressBookFeeder.h"
@@ -171,12 +172,12 @@ bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group,
                 settings.value("sipStatusSubscriptableAttributes", "").toString();
 
         const auto bindMethodStr = settings.value("bindMethod", "none").toString();
-        LDAPAddressBookFeeder::BindMethod bindMethod;
+        LDAPInitializer::BindMethod bindMethod;
 
-        static const QHash<QString, LDAPAddressBookFeeder::BindMethod> s_bindMethods = {
-            { "none", LDAPAddressBookFeeder::BindMethod::None },
-            { "simple", LDAPAddressBookFeeder::BindMethod::Simple },
-            { "gssapi", LDAPAddressBookFeeder::BindMethod::GSSAPI },
+        static const QHash<QString, LDAPInitializer::BindMethod> s_bindMethods = {
+            { "none", LDAPInitializer::BindMethod::None },
+            { "simple", LDAPInitializer::BindMethod::Simple },
+            { "gssapi", LDAPInitializer::BindMethod::GSSAPI },
         };
 
         if (s_bindMethods.contains(bindMethodStr)) {
@@ -188,20 +189,28 @@ bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group,
             return false;
         }
 
-        LDAPAddressBookFeeder feeder(
-                settings.value("useSSL", false).toBool(), url,
-                settings.value("base", "").toString(), settings.value("filter", "").toString(),
-                bindMethod, settings.value("bindDn", "").toString(), password,
-                settings.value("realm", "").toString(), settings.value("authcid", "").toString(),
-                settings.value("authzid", "").toString(), settings.value("caFile", "").toString(),
-                scriptableAttributes.isEmpty() ? QStringList()
-                                               : scriptableAttributes.split(QChar(',')),
-                settings.value("baseNumber", "").toString());
+        LDAPInitializer::Config ldapConfig;
+        ldapConfig.useSSL = settings.value("useSSL", false).toBool();
+        ldapConfig.bindMethod = bindMethod;
+        ldapConfig.caFilePath = settings.value("caFile", "").toString();
+        ldapConfig.ldapUrl = url;
+        ldapConfig.ldapBase = settings.value("base", "").toString();
+        ldapConfig.ldapFilter = settings.value("filter", "").toString();
+        ldapConfig.bindDn = settings.value("bindDn", "").toString();
+        ldapConfig.bindPassword = password;
+        ldapConfig.saslRealm = settings.value("realm", "").toString();
+        ldapConfig.saslAuthcid = settings.value("authcid", "").toString();
+        ldapConfig.saslAuthzid = settings.value("authzid", "").toString();
+
+        LDAPAddressBookFeeder feeder(ldapConfig,
+                                     scriptableAttributes.isEmpty()
+                                             ? QStringList()
+                                             : scriptableAttributes.split(QChar(',')),
+                                     settings.value("baseNumber", "").toString());
 
         feeder.feedAddressBook(AddressBook::instance());
 
-        AvatarManager::instance().initialLoad(url, settings.value("base", "").toString(),
-                                              settings.value("filter", "").toString());
+        AvatarManager::instance().initialLoad(ldapConfig);
 
         settings.endGroup();
 

@@ -57,14 +57,13 @@ void AvatarManager::updateContacts()
     emit avatarsLoaded();
 }
 
-void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,
-                                const QString &ldapFilter)
+void AvatarManager::initialLoad(const LDAPInitializer::Config &ldapConfig)
 {
     QDir avatarDir(m_avatarImageDirPath);
     if (avatarDir.isEmpty()) {
         qCInfo(lcAvatarManager)
                 << "Avatar image directory is empty - triggering initial load of all images";
-        loadAll(ldapUrl, ldapBase, ldapFilter);
+        loadAll(ldapConfig);
     } else {
         // Do not load avatars from LDAP, but read existing avatars from directory
         auto &addressBook = AddressBook::instance();
@@ -82,7 +81,7 @@ void AvatarManager::initialLoad(const QString &ldapUrl, const QString &ldapBase,
         }
 
         if (dirtyContacts.size()) {
-            loadAvatars(dirtyContacts, ldapUrl, ldapBase, ldapFilter);
+            loadAvatars(dirtyContacts, ldapConfig);
 
             for (const Contact *contact : std::as_const(dirtyContacts)) {
                 updateAvatarModifiedTime(contact->id(), contact->lastModified());
@@ -274,8 +273,8 @@ QHash<QString, QDateTime> AvatarManager::readIdsFromDb() const
     return result;
 }
 
-void AvatarManager::loadAvatars(const QList<const Contact *> &contacts, const QString &ldapUrl,
-                                const QString &ldapBase, const QString &ldapFilter)
+void AvatarManager::loadAvatars(const QList<const Contact *> &contacts,
+                                const LDAPInitializer::Config &ldapConfig)
 {
     QStringList filterList;
     filterList.reserve(contacts.size());
@@ -284,8 +283,10 @@ void AvatarManager::loadAvatars(const QList<const Contact *> &contacts, const QS
         filterList.append(QString("(cn=%1)").arg(contact->name()));
     }
 
-    const auto filter = QString("(& %1 (| %2))").arg(ldapFilter, filterList.join(' '));
-    loadAll(ldapUrl, ldapBase, filter);
+    LDAPInitializer::Config newConfig(ldapConfig);
+    newConfig.ldapFilter =
+            QString("(& %1 (| %2))").arg(ldapConfig.ldapFilter, filterList.join(' '));
+    loadAll(newConfig);
 }
 
 QStringList AvatarManager::readContactIdsFromDir() const
@@ -309,8 +310,7 @@ QStringList AvatarManager::readContactIdsFromDir() const
     return resultList;
 }
 
-void AvatarManager::loadAll(const QString &ldapUrl, const QString &ldapBase,
-                            const QString &ldapFilter)
+void AvatarManager::loadAll(const LDAPInitializer::Config &ldapConfig)
 {
     char *a = nullptr;
     char *dnTemp = nullptr;
@@ -340,12 +340,10 @@ void AvatarManager::loadAll(const QString &ldapUrl, const QString &ldapBase,
     QHash<QString, QDateTime> ids;
     int count = 0;
 
-    qCInfo(lcAvatarManager) << "Connecting to LDAP service";
-    qCInfo(lcAvatarManager) << "LDAP url:" << ldapUrl << "base:" << ldapBase
-                            << "ldapFilter:" << ldapFilter;
+    qCInfo(lcAvatarManager) << "Connecting to LDAP service" << ldapConfig.ldapUrl;
 
-    result = ldap_initialize(&ldap, ldapUrl.toStdString().c_str());
-    if (result != LDAP_SUCCESS) {
+    ldap = LDAPInitializer::initialize(ldapConfig);
+    if (!ldap) {
         qCCritical(lcAvatarManager)
                 << "Could not initialize LDAP handle from uri:" << ldap_err2string(result);
         ErrorBus::instance().addError(
@@ -354,9 +352,9 @@ void AvatarManager::loadAll(const QString &ldapUrl, const QString &ldapBase,
         return;
     }
 
-    result = ldap_search_ext_s(ldap, ldapBase.toLocal8Bit().data(), LDAP_SCOPE_SUBTREE,
-                               ldapFilter.toStdString().c_str(), attrs, false, NULL, NULL, NULL,
-                               LDAP_NO_LIMIT, &msg);
+    result = ldap_search_ext_s(ldap, ldapConfig.ldapBase.toLocal8Bit().data(), LDAP_SCOPE_SUBTREE,
+                               ldapConfig.ldapFilter.toStdString().c_str(), attrs, false, NULL,
+                               NULL, NULL, LDAP_NO_LIMIT, &msg);
 
     clearCStringlist(attrs);
 
@@ -457,5 +455,5 @@ void AvatarManager::loadAll(const QString &ldapUrl, const QString &ldapBase,
 
     qCInfo(lcAvatarManager) << "Loaded" << count << "avatars";
 
-    ldap_unbind_ext(ldap, NULL, NULL);
+    LDAPInitializer::freeLDAPHandle(ldap);
 }

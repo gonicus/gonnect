@@ -1,3 +1,11 @@
+## [1.3.2](https://github.com/gonicus/gonnect/compare/v1.3.1...v1.3.2) (2025-02-28)
+
+
+### Bug Fixes
+
+* **ui:** re-evaluate number stats after contact added ([592636c](https://github.com/gonicus/gonnect/commit/592636c06bbb981fee0b62ccffaa285768afcdaf))
+* use LDAP bind also for avatars ([5b58c0a](https://github.com/gonicus/gonnect/commit/5b58c0a00344225d6b73c3b833c0064422bba2cd)), closes [#43](https://github.com/gonicus/gonnect/issues/43)
+
 ## [1.3.1](https://github.com/gonicus/gonnect/compare/v1.3.0...v1.3.1) (2025-02-27)
 
 
