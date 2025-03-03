@@ -286,6 +286,8 @@ qt_add_qml_module(gonnect
         contacts/IAddressBookFeeder.h
         contacts/LDAPAddressBookFeeder.cpp
         contacts/LDAPAddressBookFeeder.h
+        contacts/LDAPInitializer.h
+        contacts/LDAPInitializer.cpp
         contacts/PhoneCodeLookup.h
         contacts/PhoneCodeLookup.cpp
         contacts/PhoneNumberUtil.cpp
