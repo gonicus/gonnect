@@ -121,6 +121,10 @@ Item {
                         right: parent.right
 
                     }
+
+                    onCheckedChanged: () => {
+                        genericSettings.sync()
+                    }
                 }
 
                 CheckBox {

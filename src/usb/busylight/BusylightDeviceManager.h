@@ -29,6 +29,9 @@ public:
     void startBlinking(QColor color) const;
     void stopBlinking() const;
 
+    void switchStreamlightOn() const;
+    void switchStreamlightOff() const;
+
 private:
     explicit BusylightDeviceManager(QObject *parent = nullptr);
 

@@ -13,6 +13,15 @@ KuandoOmega::KuandoOmega(const hid_device_info &deviceInfo, QObject *parent)
     m_keepAliveTimer.callOnTimeout(this, &KuandoOmega::sendKeepAlive);
 }
 
+QSet<IBusylightDevice::SupportedCommands> KuandoOmega::supportedCommands()
+{
+    static QSet<IBusylightDevice::SupportedCommands> _commands = {
+        IBusylightDevice::SupportedCommands::BusylightOnOff,
+        IBusylightDevice::SupportedCommands::BusylightColor,
+    };
+    return _commands;
+}
+
 void KuandoOmega::send(bool on)
 {
     if (!on) {

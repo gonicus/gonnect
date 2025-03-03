@@ -3,7 +3,11 @@
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
 #include <QRandomGenerator>
-#include <private/qgenericunixservices_p.h>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#  include <private/qdesktopunixservices_p.h>
+#else
+#  include <private/qgenericunixservices_p.h>
+#endif
 #include <private/qguiapplication_p.h>
 #include <qpa/qplatformintegration.h>
 #include "AbstractPortal.h"
@@ -103,9 +107,13 @@ QString AbstractPortal::parentId() const
 {
     QString parentId;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    auto unixServices = dynamic_cast<QDesktopUnixServices *>(
+            QGuiApplicationPrivate::platformIntegration()->services());
+#else
     auto unixServices = dynamic_cast<QGenericUnixServices *>(
             QGuiApplicationPrivate::platformIntegration()->services());
-
+#endif
     auto rootWindow = qobject_cast<Application *>(qGuiApp)->rootWindow();
     if (rootWindow && unixServices) {
         parentId = unixServices->portalWindowIdentifier(rootWindow);
