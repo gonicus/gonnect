@@ -11,6 +11,11 @@ class IBusylightDevice : public QObject
     Q_OBJECT
 
 public:
+    enum class SupportedCommands { BusylightOnOff, BusylightColor, StreamlightOnOff };
+    Q_ENUM(SupportedCommands)
+
+    virtual QSet<SupportedCommands> supportedCommands() = 0;
+
     explicit IBusylightDevice(const hid_device_info &deviceInfo, QObject *parent = nullptr);
     virtual ~IBusylightDevice();
 
@@ -19,6 +24,8 @@ public:
 
     void switchOn(QColor color);
     void switchOff();
+    virtual void switchStreamlightOn() {};
+    virtual void switchStreamlightOff() {};
     void startBlinking(QColor color);
     void stopBlinking();
 

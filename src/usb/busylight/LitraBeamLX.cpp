@@ -12,6 +12,26 @@
 
 Q_LOGGING_CATEGORY(lcLitraBeamLX, "gonnect.usb.busylight.LitraBeamLX")
 
+QSet<IBusylightDevice::SupportedCommands> LitraBeamLX::supportedCommands()
+{
+    static QSet<IBusylightDevice::SupportedCommands> _commands = {
+        IBusylightDevice::SupportedCommands::BusylightOnOff,
+        IBusylightDevice::SupportedCommands::BusylightColor,
+        IBusylightDevice::SupportedCommands::StreamlightOnOff,
+    };
+    return _commands;
+}
+
+void LitraBeamLX::switchStreamlightOn()
+{
+    // TODO: implement me
+}
+
+void LitraBeamLX::switchStreamlightOff()
+{
+    // TODO: implement me
+}
+
 void LitraBeamLX::send(bool on)
 {
     if (!m_device) {
