@@ -24,8 +24,7 @@ public:
 
     void switchOn(QColor color);
     void switchOff();
-    virtual void switchStreamlightOn() {};
-    virtual void switchStreamlightOff() {};
+    virtual void switchStreamlight(bool on) { Q_UNUSED(on); };
     void startBlinking(QColor color);
     void stopBlinking();
 

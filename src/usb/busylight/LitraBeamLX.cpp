@@ -22,13 +22,9 @@ QSet<IBusylightDevice::SupportedCommands> LitraBeamLX::supportedCommands()
     return _commands;
 }
 
-void LitraBeamLX::switchStreamlightOn()
+void LitraBeamLX::switchStreamlight(bool ok)
 {
-    // TODO: implement me
-}
-
-void LitraBeamLX::switchStreamlightOff()
-{
+    Q_UNUSED(ok);
     // TODO: implement me
 }
 
