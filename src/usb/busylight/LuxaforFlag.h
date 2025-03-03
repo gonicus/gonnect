@@ -13,6 +13,8 @@ public:
     LuxaforFlag(const hid_device_info &deviceInfo, QObject *parent = nullptr)
         : IBusylightDevice{ deviceInfo, parent } { };
 
+    virtual QSet<SupportedCommands> supportedCommands() override;
+
 protected:
     virtual void send(bool on) override;
 };

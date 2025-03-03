@@ -4,6 +4,8 @@
 #include "LuxaforFlag.h"
 #include "KuandoOmega.h"
 
+#include <QSet>
+
 BusylightDeviceManager::BusylightDeviceManager(QObject *parent) : QObject{ parent } { }
 
 bool BusylightDeviceManager::createBusylightDevice(const hid_device_info &deviceInfo)
@@ -38,27 +40,59 @@ void BusylightDeviceManager::clearDevices()
 void BusylightDeviceManager::switchOn(QColor color) const
 {
     for (auto device : std::as_const(m_devices)) {
-        device->switchOn(color);
+        if (device->supportedCommands().contains(
+                    IBusylightDevice::SupportedCommands::BusylightOnOff)) {
+            device->switchOn(color);
+        }
     }
 }
 
 void BusylightDeviceManager::switchOff() const
 {
     for (auto device : std::as_const(m_devices)) {
-        device->switchOff();
+        if (device->supportedCommands().contains(
+                    IBusylightDevice::SupportedCommands::BusylightOnOff)) {
+            device->switchOff();
+        }
     }
 }
 
 void BusylightDeviceManager::startBlinking(QColor color) const
 {
     for (auto device : std::as_const(m_devices)) {
-        device->startBlinking(color);
+        if (device->supportedCommands().contains(
+                    IBusylightDevice::SupportedCommands::BusylightOnOff)) {
+            device->startBlinking(color);
+        }
     }
 }
 
 void BusylightDeviceManager::stopBlinking() const
 {
     for (auto device : std::as_const(m_devices)) {
-        device->stopBlinking();
+        if (device->supportedCommands().contains(
+                    IBusylightDevice::SupportedCommands::BusylightOnOff)) {
+            device->stopBlinking();
+        }
+    }
+}
+
+void BusylightDeviceManager::switchStreamlightOn() const
+{
+    for (auto device : std::as_const(m_devices)) {
+        if (device->supportedCommands().contains(
+                    IBusylightDevice::SupportedCommands::StreamlightOnOff)) {
+            device->switchStreamlightOn();
+        }
+    }
+}
+
+void BusylightDeviceManager::switchStreamlightOff() const
+{
+    for (auto device : std::as_const(m_devices)) {
+        if (device->supportedCommands().contains(
+                    IBusylightDevice::SupportedCommands::StreamlightOnOff)) {
+            device->switchStreamlightOff();
+        }
     }
 }
