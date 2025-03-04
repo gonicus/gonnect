@@ -4,6 +4,15 @@
 
 Q_LOGGING_CATEGORY(lcLuxaforFlag, "gonnect.usb.busylight.LuxaforFlag")
 
+QSet<IBusylightDevice::SupportedCommands> LuxaforFlag::supportedCommands()
+{
+    static QSet<IBusylightDevice::SupportedCommands> _commands = {
+        IBusylightDevice::SupportedCommands::BusylightOnOff,
+        IBusylightDevice::SupportedCommands::BusylightColor,
+    };
+    return _commands;
+}
+
 void LuxaforFlag::send(bool on)
 {
     if (!m_device) {
