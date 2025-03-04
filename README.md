@@ -77,8 +77,9 @@ make this list more complete by opening an [issue](https://github.com/gonicus/go
 
 | Manufacturer | Model              |
 | ------------ | ------------------ |
-| Luxafor      | Flag               |
 | kuando       | Busylight UC Omega |
+| Logitech G   | Litra Beam LX      |
+| Luxafor      | Flag               |
 
 # Installing _GOnnect_
 
