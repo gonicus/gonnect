@@ -9,7 +9,7 @@
 </p>
 
 ---
-[![GOnnect workflow](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml/badge.svg)](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml) ![Flathub Version](https://img.shields.io/flathub/v/de.gonicus.gonnect)
+[![GOnnect workflow](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml/badge.svg)](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml) [![Flathub Version](https://img.shields.io/flathub/v/de.gonicus.gonnect)](https://flathub.org/apps/de.gonicus.gonnect)
 
 # Overview
 
@@ -77,8 +77,9 @@ make this list more complete by opening an [issue](https://github.com/gonicus/go
 
 | Manufacturer | Model              |
 | ------------ | ------------------ |
-| Luxafor      | Flag               |
 | kuando       | Busylight UC Omega |
+| Logitech G   | Litra Beam LX      |
+| Luxafor      | Flag               |
 
 # Installing _GOnnect_
 
