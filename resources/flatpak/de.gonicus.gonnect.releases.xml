@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.3.3" date="2025-03-04">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>add implementation for streaming light switch</li>
+        <li>add template for Telekom Magenta SIP (#49)</li>
+        <li>added litra beam LX as busy light</li>
+        <li>added litra beam LX as busy light</li>
+        <li>debounce hid writes on litra beam</li>
+        <li>re-evaluate number stats after contact added</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.3.2" date="2025-02-28">
     <description>
       <p>Bug Fixes:</p>

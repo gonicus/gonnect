@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(GOnnect VERSION 1.3.2 LANGUAGES CXX)
+project(GOnnect VERSION 1.3.3 LANGUAGES CXX)
 
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_STANDARD 20)

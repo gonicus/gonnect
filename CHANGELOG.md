@@ -1,3 +1,15 @@
+## [1.3.3](https://github.com/gonicus/gonnect/compare/v1.3.2...v1.3.3) (2025-03-04)
+
+
+### Bug Fixes
+
+* add implementation for streaming light switch ([f5fa143](https://github.com/gonicus/gonnect/commit/f5fa143047910325590363349361f9226aafa4a1))
+* add template for Telekom Magenta SIP ([#49](https://github.com/gonicus/gonnect/issues/49)) ([c84b42e](https://github.com/gonicus/gonnect/commit/c84b42ecf4dd65dc6e2fae0438de8ae546805d3c))
+* added litra beam LX as busy light ([b0874d6](https://github.com/gonicus/gonnect/commit/b0874d65584cd5a6bc43dddbbcde88df961f332b))
+* added litra beam LX as busy light ([9acc0f0](https://github.com/gonicus/gonnect/commit/9acc0f004019ec74abc9b0bc07027846283ace24))
+* debounce hid writes on litra beam ([3c0e973](https://github.com/gonicus/gonnect/commit/3c0e973b9d8799a39d79ac5e2286b250c5d6b2a0))
+* **ui:** re-evaluate number stats after contact added ([0e2d147](https://github.com/gonicus/gonnect/commit/0e2d1478228add1665c6c0660b30fd467766e917))
+
 ## [1.3.2](https://github.com/gonicus/gonnect/compare/v1.3.1...v1.3.2) (2025-02-28)
 
 
