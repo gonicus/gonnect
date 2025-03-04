@@ -82,8 +82,8 @@ function update_cmakelists {
 }
 
 function create_release_notes {
-    # Extract messages
-    MSG=$(base64 -d <<< "$1" | jq -rc '.[].subject')
+    # Extract messages and remove duplicate entries
+    MSG=$(base64 -d <<< "$1" | jq -rc 'map(.subject) | unique | .[]')
 
     # Parse messages
     local COMMITS
