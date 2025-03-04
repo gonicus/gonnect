@@ -4,5 +4,6 @@
         <file>sample.conf</file>
         <file>sipgate.conf</file>
         <file>fritzbox.conf</file>
+        <file>telekom.conf</file>
     </qresource>
 </RCC>
