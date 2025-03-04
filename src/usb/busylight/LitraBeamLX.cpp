@@ -71,6 +71,8 @@ void LitraBeamLX::send(bool on)
 
     hid_write(m_device, buf, sizeof(buf));
 
+    hid_read_timeout(m_device, buf, 20, 1000);
+
     if (on) {
         // rgb values
         memset(buf, 0, sizeof(buf));
@@ -86,6 +88,7 @@ void LitraBeamLX::send(bool on)
         }
 
         hid_write(m_device, buf, sizeof(buf));
+        hid_read_timeout(m_device, buf, 20, 1000);
 
         memset(buf, 0, sizeof(buf));
         buf[0] = REPORT_ID;
@@ -100,6 +103,7 @@ void LitraBeamLX::send(bool on)
         }
 
         hid_write(m_device, buf, sizeof(buf));
+        hid_read_timeout(m_device, buf, 20, 1000);
 
         // Flush
         memset(buf, 0, sizeof(buf));
@@ -110,5 +114,6 @@ void LitraBeamLX::send(bool on)
         buf[4] = 1; // Persist
 
         hid_write(m_device, buf, sizeof(buf));
+        hid_read_timeout(m_device, buf, 20, 1000);
     }
 }
