@@ -67,7 +67,8 @@ void HeadsetDevice::send(quint8 reportId, unsigned data)
     buf[0] = reportId;
     buf[1] = data;
 
-    qCDebug(lcHeadset) << "Sending report" << QString::asprintf("0x%02X", reportId) << "with data" << QString::asprintf("0x%08X", data);
+    qCDebug(lcHeadset) << "Sending report" << QString::asprintf("0x%02X", reportId) << "with data"
+                       << QString::asprintf("0x%08X", data);
 
     hid_write(m_device, buf, sizeof(buf));
 }
