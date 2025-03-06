@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/gonicus/gonnect/compare/v1.3.3...v1.3.4) (2025-03-06)
+
+
+### Bug Fixes
+
+* only set hold LED, not hook on headsets ([#52](https://github.com/gonicus/gonnect/issues/52)) ([ca432d4](https://github.com/gonicus/gonnect/commit/ca432d4ea38dce9f13fb71c7553536775ecffee6))
+
 ## [1.3.3](https://github.com/gonicus/gonnect/compare/v1.3.2...v1.3.3) (2025-03-04)
 
 
