@@ -67,6 +67,9 @@ void HeadsetDevice::send(quint8 reportId, unsigned data)
     buf[0] = reportId;
     buf[1] = data;
 
+    qCDebug(lcHeadset) << "Sending report" << QString::asprintf("0x%02X", reportId) << "with data"
+                       << QString::asprintf("0x%08X", data);
+
     hid_write(m_device, buf, sizeof(buf));
 }
 
@@ -186,33 +189,22 @@ void HeadsetDevice::setRing(bool flag)
 
 void HeadsetDevice::setHold(bool flag)
 {
-    if (!m_hidUsages.contains(UsageId::LED_Hold) || !m_hidUsages.contains(UsageId::LED_OffHook)) {
+    if (!m_hidUsages.contains(UsageId::LED_Hold)) {
         qCInfo(lcHeadset) << "Hold is not supported by this device";
         return;
     }
 
     const auto &usageHold = m_hidUsages.value(UsageId::LED_Hold);
-    const auto &usageHook = m_hidUsages.value(UsageId::LED_OffHook);
-
-    if (usageHold.reportId != usageHook.reportId) {
-        qCInfo(lcHeadset) << "Hold usages have different report ids, which is not supported";
-        return;
-    }
-
-    m_hold = flag;
-
     const unsigned holdValue = 1 << usageHold.bitPosition;
-    const unsigned hookValue = 1 << usageHook.bitPosition;
     unsigned value = currentFlags(usageHold.reportId);
 
     if (flag) {
         value |= holdValue;
-        value &= ~hookValue;
     } else {
-        value |= hookValue;
         value &= ~holdValue;
     }
 
+    m_hold = flag;
     send(usageHold.reportId, value);
 }
 
@@ -244,6 +236,8 @@ unsigned HeadsetDevice::currentFlags(const quint32 reportId) const
             value |= 1 << u.bitPosition;
         }
     }
+
+    qCDebug(lcHeadset) << "Current flags" << QString::asprintf("0x%08X", value);
 
     return value;
 }
