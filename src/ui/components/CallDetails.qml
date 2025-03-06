@@ -9,6 +9,7 @@ Item {
     property CallItem callItem
 
     readonly property int callId: control.callItem?.callId ?? -1
+    readonly property string contactName: control.callItem?.contactName ?? ""
     readonly property string accountId: control.callItem?.accountId ?? ""
     readonly property bool isEstablished: control.callItem?.isEstablished ?? false
     readonly property date establishedTime: control.callItem?.establishedTime ?? new Date()
@@ -83,7 +84,7 @@ Item {
     AvatarImage {
         id: avatarImage
         size: 120
-        initials: ViewHelper.initials(control.callItem?.name || control.callItem?.phoneNumber || "")
+        initials: ViewHelper.initials(control.contactName)
         source: control.callItem?.hasAvatar ? ("file://" + control.callItem.avatarPath) : ""
         anchors {
             centerIn: parent
