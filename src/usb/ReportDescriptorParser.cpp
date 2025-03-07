@@ -51,7 +51,7 @@ std::shared_ptr<ApplicationCollection> ReportDescriptorParser::parse(QByteArray 
         const bool isLocal = it->type() == hid::rdf::item_type::LOCAL;
         const quint32 val = it->value_unsigned();
 
-        if (!appColl && collectionLevel && (!isMain || it->main_tag() != MainTag::END_COLLECTION)) {
+        if (!appColl && collectionLevel && !isGlobal && (!isMain || it->main_tag() != MainTag::END_COLLECTION)) {
             // Inside a different collection - do not care
             continue;
         }
@@ -170,7 +170,7 @@ std::shared_ptr<ApplicationCollection> ReportDescriptorParser::parse(QByteArray 
 
             pendingUsages.clear();
         } else {
-            qCCritical(lcParser).noquote().nospace()
+            qCDebug(lcParser).noquote().nospace()
                     << "Unhandled item (index " << itemCount << ": " << itemToString(it) << ", 0x"
                     << QString::number(val, 16).toUpper() << ")";
         }
