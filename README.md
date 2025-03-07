@@ -68,10 +68,13 @@ In theory, Teams certified Headsets may work, but you never know... Here is a
 list of tested headsets. Please feel free to report any working combinations to
 make this list more complete by opening an [issue](https://github.com/gonicus/gonnect/issues).
 
-| Manufacturer  | Model         | Features        |
-| ------------- | ------------- | --------------- |
-| Jabra         | EVOLVE LINK   | AEMS            |
-| Yealink       | WH62          | AEMSLOR         |
+| Manufacturer     | Model               | Features        |
+| ---------------- | ------------------- | --------------- |
+| Jabra            | EVOLVE LINK         | AEMSO           |
+| Plantronics/Poly | Voyager Focus BT600 | AEMSO           |
+| Poly             | Blackwire C5220     | AEMSO           |
+| Sennheiser       | SC 660 ANC USB      | AEM             |
+| Yealink          | WH62                | AEMSLOR         |
 
 # Busylights known to be supported
 

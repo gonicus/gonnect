@@ -249,7 +249,7 @@ void HeadsetDevice::processEvents()
 
     auto len = hid_read_timeout(m_device, data, sizeof(data), 10);
 
-    if (len > 2 && m_inputReportIds.contains(data[0])) {
+    if (len >= 2 && m_inputReportIds.contains(data[0])) {
         quint8 reportId = data[0];
         unsigned value = data[1];
         qCInfo(lcHeadset).noquote().nospace()
