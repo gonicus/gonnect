@@ -1,3 +1,13 @@
+## [1.3.5](https://github.com/gonicus/gonnect/compare/v1.3.4...v1.3.5) (2025-03-07)
+
+
+### Bug Fixes
+
+* **hid:** take global type into account ([34ba99e](https://github.com/gonicus/gonnect/commit/34ba99e50982a94474d55fcc16ec625db9e6a755))
+* read smaller HID events ([829713d](https://github.com/gonicus/gonnect/commit/829713ddefc1981ac0429fccea23f76fcd987675))
+* support more headset devices ([879db54](https://github.com/gonicus/gonnect/commit/879db543b44e4cb26b9a7ea420b1753096329206))
+* **ui:** use same source for avatar initials in call screen ([#53](https://github.com/gonicus/gonnect/issues/53)) ([099a4f4](https://github.com/gonicus/gonnect/commit/099a4f4c24e33fd23781e748b26b76e7274f236e))
+
 ## [1.3.4](https://github.com/gonicus/gonnect/compare/v1.3.3...v1.3.4) (2025-03-06)
 
 
