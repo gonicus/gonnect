@@ -24,6 +24,11 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
     m_ringerTimer.setSingleShot(true);
     m_ringerTimer.setInterval(3s);
     m_ringerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayRingTone);
+
+    // React on Teams button
+    auto &hds = USBDevices::instance();
+    auto dev = hds.getHeadsetDeviceProxy();
+    connect(dev, &HeadsetDeviceProxy::teamsButton, this, &ViewHelper::activateSearch);
 }
 
 bool ViewHelper::isSystrayAvailable() const

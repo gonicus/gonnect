@@ -10,7 +10,6 @@
 #include "HeadsetDevice.h"
 #include "HeadsetDeviceProxy.h"
 #include "BusylightDeviceManager.h"
-#include "IBusylightDevice.h"
 
 Q_LOGGING_CATEGORY(lcHeadsets, "gonnect.usb.headsets")
 
@@ -105,6 +104,7 @@ void USBDevices::shutdown()
     m_ctx = nullptr;
 
     if (m_proxy) {
+        m_proxy->setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon::Offline);
         m_proxy->close();
         m_proxy = nullptr;
     }
@@ -207,6 +207,7 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
     ReportDescriptorParser parser;
 
     std::shared_ptr<ApplicationCollection> appCollection;
+    QHash<UsageId, quint16> teamsUsageMapping;
 
     try {
         appCollection = parser.parse(byteArr);
@@ -219,6 +220,14 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
 
     if (!appCollection) {
         return nullptr;
+    }
+
+    try {
+        teamsUsageMapping = parser.parseTeamsReportIDs(byteArr);
+    } catch (...) {
+        QString ps = QString::fromWCharArray(deviceInfo->product_string);
+        qCWarning(lcHeadsets, "no Microsoft Teams related usage found for %s [%s]",
+                  deviceInfo->path, ps.toStdString().c_str());
     }
 
     static const QList<UsageId> usageIdsOfInterest = {
@@ -238,6 +247,9 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
 
     QString ps = QString::fromWCharArray(deviceInfo->product_string);
     qCDebug(lcHeadsets, "HID headset %s [%s] found:", deviceInfo->path, ps.toStdString().c_str());
+    if (!teamsUsageMapping.isEmpty()) {
+        qCDebug(lcHeadsets, "  Teams support enabled");
+    }
 
     for (const auto usageId : usageIdsOfInterest) {
         const auto res = appCollection->findUsage(usageId);
@@ -254,6 +266,8 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
 
     HeadsetDevice *hd = new HeadsetDevice(deviceInfo, this);
     hd->setUsageInfos(usageInfos);
+    hd->setTeamsUsageMapping(teamsUsageMapping);
+
     return hd;
 }
 

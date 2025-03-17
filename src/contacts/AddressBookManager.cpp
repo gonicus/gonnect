@@ -40,7 +40,7 @@ QString AddressBookManager::hashForSettingsGroup(const QString &group) const
     auto childKeys = settings.childKeys();
     std::sort(childKeys.begin(), childKeys.end());
 
-    for (const auto &key : childKeys) {
+    for (const auto &key : std::as_const(childKeys)) {
         groupSettingsStr.append(key);
         groupSettingsStr.append(settings.value(key, "").toString());
     }

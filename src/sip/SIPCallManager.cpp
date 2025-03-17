@@ -116,6 +116,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
     }
 
     QString title;
+
     if (numberType == Contact::NumberType::Unknown) {
         title = tr("%1 is calling").arg(displayName);
     } else {

@@ -1,7 +1,6 @@
 #pragma once
 #include <QObject>
 
-class AccountPortal;
 class SIPCall;
 
 class IMHandler : public QObject
@@ -35,16 +34,14 @@ signals:
     void meetingRequested(const QString &accountId, int callId);
 
 private:
-    void acquireDisplayName(std::function<void(const QString &displayName)> callback);
+    void openMeetingImpl(const QString &meetingId, const QString &displayName, bool hangup = false);
     bool requestMeeting();
 
-    AccountPortal *m_accountPortal = nullptr;
     SIPCall *m_call = nullptr;
 
     QStringList m_capabilities;
     QStringList m_ownCapabilities;
     QString m_jitsiBaseURL;
-    QString m_jitsiDisplayName;
     QString m_jistiRequestedMeetingId;
 
     unsigned m_capabilitySendingTries = 3;

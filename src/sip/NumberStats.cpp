@@ -7,7 +7,7 @@
 #include <QSqlQuery>
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(lcNumberStats, "gonnect.app.NumberSTats")
+Q_LOGGING_CATEGORY(lcNumberStats, "gonnect.app.NumberStats")
 
 using namespace std::chrono_literals;
 

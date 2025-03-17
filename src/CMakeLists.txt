@@ -92,7 +92,7 @@ if(BUILD_DEPENDENCIES)
 
     ExternalProject_Add(qtwebdav
         GIT_REPOSITORY https://github.com/PikachuHy/QtWebDAV.git
-        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/qtwebdav-cmake.patch"
         UPDATE_DISCONNECTED TRUE
     )
@@ -334,6 +334,7 @@ qt_add_qml_module(gonnect
         ui/TogglerProxyModel.cpp
         ui/ViewHelper.h
         ui/ViewHelper.cpp
+
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp
         usb/HeadsetDevice.h
@@ -358,6 +359,9 @@ qt_add_qml_module(gonnect
         usb/busylight/LuxaforFlag.cpp
         usb/busylight/LitraBeamLX.h
         usb/busylight/LitraBeamLX.cpp
+
+        platform/UserInfo.h
+        platform/UserInfo.cpp
 )
 
 set_target_properties(gonnect PROPERTIES
@@ -391,7 +395,6 @@ target_link_libraries(gonnect
         Qt6::Multimedia
         Qt6::Sql
         Qt6::Core5Compat
-        Qt6::Xml
         ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
@@ -401,6 +404,7 @@ target_link_libraries(gonnect
         hid-rp
         vCard
         QtWebDAV
+        Qt6::Xml
 )
 
 target_include_directories(gonnect
@@ -413,6 +417,7 @@ target_include_directories(gonnect
     usb
     usb/busylight
     media
+    platform
     ${PJSIP_STATIC_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )

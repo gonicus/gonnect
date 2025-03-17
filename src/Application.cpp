@@ -114,7 +114,7 @@ void Application::initialize()
             });
 
     auto &sp = SecretPortal::instance();
-    if (sp.isValid()) {
+    if (sp.isValid() && Application::isFlatpak()) {
         connect(&sp, &SecretPortal::initializedChanged, this, [this]() { initializeSIP(); });
 
         sp.initialize();
@@ -214,8 +214,10 @@ void Application::fileMessageHandler(QtMsgType type, const QMessageLogContext &c
     const QString message = qFormatLogMessage(type, context, msg);
 
     static FILE *f = fopen(Application::logFilePath().toLatin1(), "a");
-    fprintf(f, "%s\n", qPrintable(message));
-    fflush(f);
+    if (f) {
+        fprintf(f, "%s\n", qPrintable(message));
+        fflush(f);
+    }
 
     if (s_originalMessageHandler) {
         s_originalMessageHandler(type, context, msg);
@@ -236,4 +238,9 @@ void Application::initDebugRun()
             StateManager::instance().restart();
         });
     }
+}
+
+bool Application::isFlatpak()
+{
+    return qEnvironmentVariable("container") == "flatpak";
 }

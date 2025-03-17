@@ -1,13 +1,14 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
 #include <QUrl>
+#include <QUuid>
 #include <QDesktopServices>
 #include <pjsua-lib/pjsua.h>
+#include <qurlquery.h>
 
-#include "AppSettings.h"
 #include "SIPCall.h"
 #include "SIPAccount.h"
-#include "AccountPortal.h"
+#include "UserInfo.h"
 #include "IMHandler.h"
 
 Q_LOGGING_CATEGORY(lcIMHandler, "gonnect.sip.im")
@@ -17,43 +18,13 @@ IMHandler::IMHandler(SIPCall *parent) : QObject(parent), m_call(parent)
     ReadOnlyConfdSettings settings;
 
     if (settings.contains("jitsi/url")) {
-        m_accountPortal = new AccountPortal(this);
 
         settings.beginGroup("jitsi");
         m_jitsiBaseURL = settings.value("url", "").toString();
         m_jitsiPreconfig = settings.value("preconfig", false).toBool();
-        m_jitsiDisplayName = settings.value("displayName", "").toString();
 
         settings.endGroup();
     }
-}
-
-void IMHandler::acquireDisplayName(std::function<void(const QString &displayName)> callback)
-{
-    if (m_jitsiDisplayName.isEmpty()) {
-        m_accountPortal->GetUserInformation(
-                tr("The VoIP phone wants to use your name to pre set the display name in Jitsi."),
-                [this, callback](uint code, const QVariantMap &response) {
-                    QString username;
-
-                    if (code == 0) {
-                        username = response.value("name", "").toString();
-                        m_jitsiDisplayName = username;
-                        if (!username.isEmpty()) {
-                            AppSettings settings;
-                            settings.setValue("jitsi/displayName", username);
-                        }
-                    } else {
-                        m_jitsiPreconfig = false;
-                    }
-
-                    callback(m_jitsiDisplayName);
-                });
-
-        return;
-    }
-
-    callback(m_jitsiDisplayName);
 }
 
 bool IMHandler::process(const QString &contentType, const QString &message)
@@ -117,23 +88,38 @@ bool IMHandler::process(const QString &contentType, const QString &message)
 
 void IMHandler::openMeeting(const QString &meetingId, bool hangup)
 {
-    acquireDisplayName([this, meetingId, hangup](const QString &displayName) {
-        QUrlQuery q;
-        q.addQueryItem("userInfo.displayName", displayName);
-        q.addQueryItem("config.prejoinConfig.enabled", m_jitsiPreconfig ? "true" : "false");
+    auto &ui = UserInfo::instance();
+    QString displayName = ui.getDisplayName();
 
-        QUrl jitsiUrl(m_jitsiBaseURL);
-        jitsiUrl.setPath("/" + meetingId);
-        jitsiUrl.setQuery(q);
+    if (displayName.isEmpty()) {
+        connect(
+                &ui, &UserInfo::displayNameChanged, this,
+                [this, meetingId, hangup]() {
+                    openMeetingImpl(meetingId, UserInfo::instance().getDisplayName(), hangup);
+                },
+                Qt::SingleShotConnection);
+    } else {
+        openMeetingImpl(meetingId, displayName, hangup);
+    }
+}
 
-        // For whatever reason this needs to be decoupled to make QDesktopServices work
-        QTimer::singleShot(0, this, [this, hangup, jitsiUrl]() {
-            QDesktopServices::openUrl(jitsiUrl);
+void IMHandler::openMeetingImpl(const QString &meetingId, const QString &displayName, bool hangup)
+{
+    QUrlQuery q;
+    q.addQueryItem("userInfo.displayName", displayName);
+    q.addQueryItem("config.prejoinConfig.enabled", m_jitsiPreconfig ? "true" : "false");
 
-            if (hangup) {
-                m_call->account()->hangup(m_call->getId());
-            }
-        });
+    QUrl jitsiUrl(m_jitsiBaseURL);
+    jitsiUrl.setPath("/" + meetingId);
+    jitsiUrl.setQuery(q);
+
+    // For whatever reason this needs to be decoupled to make QDesktopServices work
+    QTimer::singleShot(0, this, [this, hangup, jitsiUrl]() {
+        QDesktopServices::openUrl(jitsiUrl);
+
+        if (hangup) {
+            m_call->account()->hangup(m_call->getId());
+        }
     });
 }
 

@@ -36,6 +36,17 @@ public:
 
     virtual void setIdle();
 
+    virtual void syncDateAndTime();
+    virtual void setLocalUserName(const QString &name);
+    virtual void setLocalUserNumber(const QString &number);
+    virtual void setLocalUserStatus(const QString &status);
+    virtual void setOtherUserName(const QString &name);
+    virtual void setOtherUserNumber(const QString &number);
+    virtual void setSubject(const QString &subject);
+    virtual void selectScreen(ReportDescriptorEnums::TeamsScreenSelect screen, bool clear = false,
+                              bool backlight = true);
+    virtual void setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon icon);
+
     bool available() const { return !!m_device; }
 
     ~HeadsetDeviceProxy();

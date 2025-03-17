@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QLoggingCategory>
+#include "UserInfo.h"
 #include "USBDevices.h"
 #include "HeadsetDevice.h"
 #include "HeadsetDeviceProxy.h"
@@ -51,6 +52,11 @@ bool HeadsetDeviceProxy::refreshDevice()
         connect(m_device, &HeadsetDevice::flash, this, [this]() {
             if (isEnabled()) {
                 emit flash();
+            }
+        });
+        connect(m_device, &HeadsetDevice::teamsButton, this, [this]() {
+            if (isEnabled()) {
+                emit teamsButton();
             }
         });
 
@@ -113,6 +119,29 @@ bool HeadsetDeviceProxy::open()
         if (m_device->open()) {
             qCInfo(lcHeadsetProxy) << "Using USB headset:" << HeadsetDeviceProxy::name();
             m_device->setIdle();
+            m_device->syncDateAndTime();
+
+            auto &ui = UserInfo::instance();
+            QString displayName = ui.getDisplayName();
+
+            if (displayName.isEmpty()) {
+                connect(
+                        &ui, &UserInfo::displayNameChanged, this,
+                        [this]() {
+                            m_device->setLocalUserName(UserInfo::instance().getDisplayName());
+                        },
+                        Qt::SingleShotConnection);
+            } else {
+                m_device->setLocalUserName(displayName);
+            }
+
+            // Test --->
+            // m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
+            // m_device->setOtherUserName("Max Mustermann");
+            // m_device->setOtherUserNumber("+4912345678");
+            // m_device->setSubject("Meeting XYZ");
+            // Additional icons -> FWD, Mute, Speaker, Missed Call, Voice Mail
+            // <---
             return true;
         }
     }
@@ -131,6 +160,70 @@ void HeadsetDeviceProxy::setIdle()
 {
     if (m_device) {
         m_device->setIdle();
+    }
+}
+
+void HeadsetDeviceProxy::syncDateAndTime()
+{
+    if (m_device) {
+        m_device->syncDateAndTime();
+    }
+}
+
+void HeadsetDeviceProxy::setLocalUserName(const QString &name)
+{
+    if (m_device) {
+        m_device->setLocalUserName(name);
+    }
+}
+
+void HeadsetDeviceProxy::setLocalUserNumber(const QString &number)
+{
+    if (m_device) {
+        m_device->setLocalUserNumber(number);
+    }
+}
+
+void HeadsetDeviceProxy::setLocalUserStatus(const QString &status)
+{
+    if (m_device) {
+        m_device->setLocalUserStatus(status);
+    }
+}
+
+void HeadsetDeviceProxy::setOtherUserName(const QString &name)
+{
+    if (m_device) {
+        m_device->setOtherUserName(name);
+    }
+}
+
+void HeadsetDeviceProxy::setOtherUserNumber(const QString &number)
+{
+    if (m_device) {
+        m_device->setOtherUserNumber(number);
+    }
+}
+
+void HeadsetDeviceProxy::setSubject(const QString &subject)
+{
+    if (m_device) {
+        m_device->setSubject(subject);
+    }
+}
+
+void HeadsetDeviceProxy::selectScreen(ReportDescriptorEnums::TeamsScreenSelect screen, bool clear,
+                                      bool backlight)
+{
+    if (m_device) {
+        m_device->selectScreen(screen, clear, backlight);
+    }
+}
+
+void HeadsetDeviceProxy::setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon icon)
+{
+    if (m_device) {
+        m_device->setPresenceIcon(icon);
     }
 }
 

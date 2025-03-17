@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include "ReportDescriptorEnums.h"
 
 class IHeadsetDevice : public QObject
 {
@@ -27,6 +28,17 @@ public:
 
     virtual void setIdle() = 0;
 
+    virtual void syncDateAndTime() = 0;
+    virtual void setLocalUserName(const QString &name) = 0;
+    virtual void setLocalUserNumber(const QString &number) = 0;
+    virtual void setLocalUserStatus(const QString &status) = 0;
+    virtual void setOtherUserName(const QString &name) = 0;
+    virtual void setOtherUserNumber(const QString &number) = 0;
+    virtual void setSubject(const QString &subject) = 0;
+    virtual void selectScreen(ReportDescriptorEnums::TeamsScreenSelect screen, bool clear = false,
+                              bool backlight = true) = 0;
+    virtual void setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon) = 0;
+
     ~IHeadsetDevice() = default;
 
 signals:
@@ -34,4 +46,5 @@ signals:
     void mute();
     void busyLine();
     void flash();
+    void teamsButton();
 };

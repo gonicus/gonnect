@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QMutexLocker>
 #include <QLoggingCategory>
+#include <QDateTime>
 #include <libusb.h>
 #include "HeadsetDevice.h"
 
@@ -37,6 +38,39 @@ bool HeadsetDevice::open()
         m_device = device;
         m_eventHandler.start();
         m_isOpen = true;
+
+        // Read Teams info if available
+        if (m_teamsUsageMapping.contains(UsageId::Teams_VendorExtension)) {
+            unsigned char buf[256];
+            memset(buf, 0, sizeof(buf));
+
+            // Read vendor extension from device
+            buf[0] = m_teamsUsageMapping[UsageId::Teams_VendorExtension];
+            auto res = hid_get_feature_report(device, buf, sizeof(buf));
+            if (res >= 5) {
+                quint32 vendorId = buf[1] + (buf[2] << 8);
+                quint32 version = buf[3] + (buf[4] << 8);
+                m_displaySupported = vendorId == 0x045e && version == 0x0200;
+            }
+
+            // If we've display support, read the display configuration from device
+            if (m_displaySupported
+                && m_teamsUsageMapping.contains(UsageId::Teams_DisplayAttributes)) {
+                memset(buf, 0, sizeof(buf));
+                buf[0] = m_teamsUsageMapping[UsageId::Teams_DisplayAttributes];
+                auto res = hid_get_feature_report(device, buf, sizeof(buf));
+                if (res >= 5) {
+                    m_displayRows = buf[1];
+                    m_displayCols = buf[2];
+                    m_displayFieldSupportIndex = buf[3] + (buf[4] << 8);
+                }
+            }
+
+            // No idea what that means, but it enables the Teams button on the device.
+            // Sadly the ASP documentation is only available for Microsoft partners.
+            sendASP(0);
+            sendASP(0x10);
+        }
     } else {
         qCCritical(lcHeadset) << "failed to open headset device";
     }
@@ -96,6 +130,8 @@ void HeadsetDevice::setIdle()
 
 void HeadsetDevice::setUsageInfos(const QHash<UsageId, UsageInfo> &infos)
 {
+    m_inputReportIds.clear();
+
     for (const auto &usageInfo : infos) {
         m_inputReportIds.insert(usageInfo.reportId);
     }
@@ -242,15 +278,20 @@ unsigned HeadsetDevice::currentFlags(const quint32 reportId) const
     return value;
 }
 
+void HeadsetDevice::setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMapping)
+{
+    m_teamsUsageMapping = teamsUsageMapping;
+}
+
 void HeadsetDevice::processEvents()
 {
     unsigned char data[64];
     memset(data, 0, sizeof(data));
 
     auto len = hid_read_timeout(m_device, data, sizeof(data), 10);
+    quint8 reportId = data[0];
 
-    if (len >= 2 && m_inputReportIds.contains(data[0])) {
-        quint8 reportId = data[0];
+    if (len >= 2 && m_inputReportIds.contains(reportId)) {
         unsigned value = data[1];
         qCInfo(lcHeadset).noquote().nospace()
                 << "Found releveant report with report id 0x" << QString::number(reportId, 16);
@@ -299,5 +340,165 @@ void HeadsetDevice::processEvents()
                 }
             }
         }
+    }
+
+    // Teams button
+    if (reportId == 0x9B && data[1] == 1) {
+        emit teamsButton();
+    }
+}
+
+bool HeadsetDevice::displayFieldSupported(ReportDescriptorEnums::TeamsDisplayFieldSupport field)
+{
+    quint8 zeroIndexBitNumber = (quint8)field - 1;
+    return m_displayFieldSupportIndex & (1 << zeroIndexBitNumber);
+}
+
+void HeadsetDevice::setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport field,
+                                    const QString &text)
+{
+    if (!m_device) {
+        qCCritical(lcHeadset) << "device not open during attempt to send data";
+        return;
+    }
+
+    if (displayFieldSupported(field)
+        && m_teamsUsageMapping.contains(UsageId::Teams_CharacterAttributes)
+        && m_teamsUsageMapping.contains(UsageId::Teams_CharacterReport)) {
+
+        unsigned char buf[18];
+        buf[0] = m_teamsUsageMapping[UsageId::Teams_CharacterAttributes];
+        buf[1] = (quint8)field;
+        buf[2] = text.length() ? 0x80 : 0;
+        hid_write(m_device, buf, 3);
+
+        auto chunks = makeChunks(text, 8);
+        for (auto i = 0; i < chunks.length(); i++) {
+            memset(buf, 0, sizeof(buf));
+            buf[0] = m_teamsUsageMapping[UsageId::Teams_CharacterReport];
+            buf[1] = i == chunks.length() - 1 ? 0x80 : 0;
+
+            QString chunk = chunks[i];
+            auto utf16Chunk = chunk.utf16();
+            qsizetype dataIndex = 2;
+
+            for (auto c = 0; c < chunk.length(); c++) {
+                ushort ch = utf16Chunk[c];
+                buf[dataIndex++] = ch & 0x00FF;
+                buf[dataIndex++] = ch >> 8;
+            }
+
+            hid_write(m_device, buf, sizeof(buf));
+        }
+    }
+}
+
+QStringList HeadsetDevice::makeChunks(const QString &text, qsizetype chunkSize)
+{
+    QStringList res;
+
+    qsizetype count = text.length() / chunkSize;
+    qsizetype remainder = text.length() % chunkSize;
+
+    for (auto c = 0; c < count; c++) {
+        res.push_back(text.mid(c * chunkSize, chunkSize));
+    }
+
+    if (remainder) {
+        res.push_back(text.right(remainder));
+    }
+
+    return res;
+}
+
+void HeadsetDevice::syncDateAndTime()
+{
+    QLocale locale;
+
+    auto now = QDateTime::currentDateTime();
+    now.toString();
+
+    setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::Date,
+                    locale.toString(now, tr("MMMM dd")));
+    setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::Time,
+                    now.toString(tr("h:mm ap")).toUpper());
+}
+
+void HeadsetDevice::setLocalUserName(const QString &name)
+{
+    setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::LocalUserName, name);
+}
+
+void HeadsetDevice::setLocalUserNumber(const QString &number)
+{
+    setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::Number, number);
+}
+
+void HeadsetDevice::setLocalUserStatus(const QString &status)
+{
+    setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::LocalUserStatus, status);
+}
+
+void HeadsetDevice::setOtherUserName(const QString &name)
+{
+    setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::OtherPartyName, name);
+}
+
+void HeadsetDevice::setOtherUserNumber(const QString &number)
+{
+    setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::OtherPartyNumber, number);
+}
+
+void HeadsetDevice::setSubject(const QString &subject)
+{
+    setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::Subject, subject);
+}
+
+void HeadsetDevice::selectScreen(ReportDescriptorEnums::TeamsScreenSelect screen, bool clear,
+                                 bool backlight)
+{
+    if (!m_device) {
+        qCCritical(lcHeadset) << "device not open during attempt to send data";
+        return;
+    }
+
+    if (m_teamsUsageMapping.contains(UsageId::Teams_DisplayControl)) {
+        unsigned char buf[2];
+        buf[0] = m_teamsUsageMapping[UsageId::Teams_DisplayControl];
+        buf[1] = (((quint8)screen & 0b1111) << 3) + (backlight ? 4 : 0) + (clear ? 2 : 0)
+                + 1; // 1 for enable
+        hid_write(m_device, buf, sizeof(buf));
+    }
+}
+
+void HeadsetDevice::setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon icon)
+{
+    if (!m_device) {
+        qCCritical(lcHeadset) << "device not open during attempt to send data";
+        return;
+    }
+
+    if (m_teamsUsageMapping.contains(UsageId::Teams_IconsControl)) {
+        unsigned char buf[3];
+        buf[0] = m_teamsUsageMapping[UsageId::Teams_IconsControl];
+        buf[1] = (quint8)icon & 0b1111;
+        buf[2] = 0;
+        hid_write(m_device, buf, sizeof(buf));
+    }
+}
+
+void HeadsetDevice::sendASP(quint8 cmd)
+{
+    if (!m_device) {
+        qCCritical(lcHeadset) << "device not open during attempt to send data";
+        return;
+    }
+
+    if (m_teamsUsageMapping.contains(UsageId::Teams_ASPNotification)) {
+        unsigned char buf[64];
+        memset(buf, 0, sizeof(buf));
+        buf[0] = m_teamsUsageMapping[UsageId::Teams_ASPNotification];
+        buf[1] = cmd; // 0x00, 0x10 and 0x40 have been captured
+        hid_write(m_device, buf, sizeof(buf));
     }
 }
