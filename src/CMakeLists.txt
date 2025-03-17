@@ -92,6 +92,8 @@ if(BUILD_DEPENDENCIES)
 
     ExternalProject_Add(qtwebdav
         GIT_REPOSITORY https://github.com/PikachuHy/QtWebDAV.git
+        # renovate-commit: packageName=https://github.com/PikachuHy/QtWebDAV.git
+        GIT_TAG 2bc51e8f9999b4de952723e1f917ed7bd63b232d
         CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/qtwebdav-cmake.patch"
         UPDATE_DISCONNECTED TRUE
@@ -102,6 +104,8 @@ if(BUILD_DEPENDENCIES)
 
     ExternalProject_Add(vcard
         GIT_REPOSITORY https://github.com/ivanenko/vCard.git
+        # renovate-commit: packageName=https://github.com/ivanenko/vCard.git
+        GIT_TAG 733afa9571a728548106c5131c48895bd932e881
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/vcard-cmake.patch"
         UPDATE_DISCONNECTED TRUE
