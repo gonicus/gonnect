@@ -15,6 +15,20 @@
     prHourlyLimit: 5,
     semanticCommits: "enabled",
     enabledManagers: [
-        "github-actions",
+        "github-actions", "custom.regex"
+    ],
+    customManagers: [
+        {
+            customType: "regex",
+            fileMatch: [
+                "^src/CMakeLists.txt$"
+            ],
+            matchStrings: [
+                "# renovate-commit: packageName=(?<packageName>.*?)\\n\\s*GIT_TAG (?<currentDigest>.*?)\\n"
+            ],
+	        versioningTemplate: "git",
+            currentValueTemplate: "master",
+	        datasourceTemplate: "git-refs"
+        }
     ]
 }
