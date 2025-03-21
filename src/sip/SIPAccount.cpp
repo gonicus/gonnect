@@ -27,6 +27,8 @@ bool SIPAccount::initialize()
     m_settings.beginGroup(m_account);
 
     m_shallNegotiateCapabilities = m_settings.value("negotiateCapabilities", true).toBool();
+    m_useInstantMessagingWithoutCheck =
+            m_settings.value("useInstantMessagingWithoutCheck", false).toBool();
 
     QString transport = m_settings.value("transport", "tls").toString();
     if (transport == "tls") {
@@ -614,7 +616,7 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         emit authorizationFailed();
     }
 
-    if (m_isRegistered && m_shallNegotiateCapabilities) {
+    if (!m_useInstantMessagingWithoutCheck && m_isRegistered && m_shallNegotiateCapabilities) {
         pj::SipHeaderVector headers;
         pj::SipHeader contactHeader;
         contactHeader.hName = "Contact";
@@ -646,6 +648,14 @@ void SIPAccount::onSendRequest(pj::OnSendRequestParam &prm)
         const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
         m_isInstantMessagingAllowed = hasAllowGrant(header, "MESSAGE");
     }
+}
+
+bool SIPAccount::isInstantMessagingAllowed() const
+{
+    if (m_useInstantMessagingWithoutCheck) {
+        return true;
+    }
+    return m_shallNegotiateCapabilities && m_isInstantMessagingAllowed;
 }
 
 QString SIPAccount::addTransport(const QString &in)
