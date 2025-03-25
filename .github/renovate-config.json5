@@ -17,7 +17,7 @@
     packageRules: [
         {
             groupName: "github actions",
-            matchPackagesNames: [
+            matchPackageNames: [
                 "actions/**",
                 "github/codeql-action",
                 "renovatebot/github-action"
