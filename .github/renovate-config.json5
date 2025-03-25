@@ -14,6 +14,16 @@
     prConcurrentLimit: 0,
     prHourlyLimit: 5,
     semanticCommits: "enabled",
+    packageRules: [
+        {
+            groupName: "github actions",
+            matchPackagesNames: [
+                "actions/**",
+                "github/codeql-action",
+                "renovatebot/github-action"
+            ]
+        }
+    ],
     enabledManagers: [
         "github-actions", "custom.regex"
     ],
