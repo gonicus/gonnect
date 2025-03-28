@@ -2,8 +2,8 @@
 
 #include <QObject>
 #include <IAddressBookFeeder.h>
-#include <qwebdav.h>
-#include <qwebdavdirparser.h>
+#include <QtWebDAV/qwebdav.h>
+#include <QtWebDAV/qwebdavdirparser.h>
 
 #include "Contact.h"
 
