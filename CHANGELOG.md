@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/gonicus/gonnect/compare/v1.3.5...v1.3.6) (2025-03-21)
+
+
+### Bug Fixes
+
+* trigger patch release ([42ac7dd](https://github.com/gonicus/gonnect/commit/42ac7ddb9fa53cd1cdb6ac1fedfa6af3b54244d1)), closes [#65](https://github.com/gonicus/gonnect/issues/65)
+
 ## [1.3.5](https://github.com/gonicus/gonnect/compare/v1.3.4...v1.3.5) (2025-03-07)
 
 

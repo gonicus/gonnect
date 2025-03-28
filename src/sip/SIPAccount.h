@@ -29,10 +29,7 @@ public:
     virtual void onSendRequest(pj::OnSendRequestParam &prm) override;
 
     bool isRegistered() const { return m_isRegistered; }
-    bool isInstantMessagingAllowed() const
-    {
-        return m_shallNegotiateCapabilities && m_isInstantMessagingAllowed;
-    }
+    bool isInstantMessagingAllowed() const;
 
     void call(const QString &number, const QString &contactId = "",
               const QString &preferredIdentity = "auto", bool silent = false);
@@ -68,6 +65,7 @@ private:
     bool m_isRegistered = false;
     bool m_isInstantMessagingAllowed = false;
     bool m_shallNegotiateCapabilities = true;
+    bool m_useInstantMessagingWithoutCheck = true;
 
     QString m_account;
     QString m_domain;
