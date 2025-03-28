@@ -93,8 +93,8 @@ if(BUILD_DEPENDENCIES)
     ExternalProject_Add(qtwebdav
         GIT_REPOSITORY https://github.com/PikachuHy/QtWebDAV.git
         # renovate-commit: packageName=https://github.com/PikachuHy/QtWebDAV.git
-        GIT_TAG 4739a0f09cd005b9584f740637882be41ec0f062
-        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        GIT_TAG ac39687b8ae16118d385d3694e900becd108a0f2
+        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/qtwebdav-cmake.patch"
         UPDATE_DISCONNECTED TRUE
     )
@@ -395,7 +395,6 @@ target_link_libraries(gonnect
         Qt6::Multimedia
         Qt6::Sql
         Qt6::Core5Compat
-        Qt6::Xml
         ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
@@ -405,6 +404,7 @@ target_link_libraries(gonnect
         hid-rp
         vCard
         QtWebDAV
+        Qt6::Xml
 )
 
 target_include_directories(gonnect

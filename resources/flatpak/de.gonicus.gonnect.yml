@@ -80,7 +80,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/PikachuHy/QtWebDAV.git
-        commit: 4739a0f09cd005b9584f740637882be41ec0f062
+        commit: ac39687b8ae16118d385d3694e900becd108a0f2
       - type: patch
         path: patches/qtwebdav-cmake.patch
 
