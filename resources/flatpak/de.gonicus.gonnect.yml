@@ -77,6 +77,8 @@ modules:
 
   - name: qtwebdav
     buildsystem: cmake-ninja
+    config-opts:
+    - -DBUILD_WITH_QT6=ON
     sources:
       - type: git
         url: https://github.com/PikachuHy/QtWebDAV.git
