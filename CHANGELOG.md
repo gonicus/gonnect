@@ -1,3 +1,10 @@
+## [1.3.7](https://github.com/gonicus/gonnect/compare/v1.3.6...v1.3.7) (2025-03-31)
+
+
+### Bug Fixes
+
+* DBus initialization issues ([4991894](https://github.com/gonicus/gonnect/commit/4991894ca09750b0a04f37dac82a691c59e0fe4c))
+
 ## [1.3.6](https://github.com/gonicus/gonnect/compare/v1.3.5...v1.3.6) (2025-03-21)
 
 

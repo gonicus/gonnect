@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.3.7" date="2025-03-31">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>DBus initialization issues</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.3.6" date="2025-03-21">
     <description>
       <p>Bug Fixes:</p>
