@@ -16,6 +16,10 @@
         <file alias="gonnect_dark.svg">../resources/artwork/gonnect_dark.svg</file>
         <file alias="gonnect_ring.svg">../resources/artwork/gonnect_ring.svg</file>
         <file alias="gonnect_line.svg">../resources/artwork/gonnect_line.svg</file>
+        <file alias="gonnect_dark_note.svg">../resources/artwork/gonnect_dark_note.svg</file>
+        <file alias="gonnect_light_note.svg">../resources/artwork/gonnect_light_note.svg</file>
+        <file alias="gonnect_line_note.svg">../resources/artwork/gonnect_line_note.svg</file>
+        <file alias="gonnect_ring_note.svg">../resources/artwork/gonnect_ring_note.svg</file>
         <file alias="jitsi.svg">../resources/artwork/jitsi.svg</file>
         <file alias="actor.svg">../resources/artwork/icons/actor.svg</file>
         <file alias="application-menu.svg">../resources/artwork/icons/application-menu.svg</file>
