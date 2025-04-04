@@ -25,6 +25,7 @@ public:
         return *_instance;
     }
 
+    void setBadgeNumber(unsigned number);
     void resetTrayIcon();
     void setRinging(bool flag);
 
@@ -73,6 +74,8 @@ private:
     QHash<QString, QAction *> m_mostCalledActions;
 
     AppSettings m_settings;
+
+    unsigned m_missedCallsCount = 0;
 
     bool m_ringingState = false;
     bool m_hasEstablishedCalls = false;

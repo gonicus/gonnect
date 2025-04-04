@@ -413,9 +413,12 @@ void SystemTrayMenu::setRinging(bool flag)
 
 void SystemTrayMenu::ringTimerCallback()
 {
+    QString noteDot = m_missedCallsCount ? "_note" : "";
+
     m_ringingState = !m_ringingState;
+
     if (m_ringingState) {
-        m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring.svg"));
+        m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring" + noteDot + ".svg"));
     } else {
         resetTrayIcon();
     }
@@ -423,13 +426,21 @@ void SystemTrayMenu::ringTimerCallback()
 
 void SystemTrayMenu::resetTrayIcon()
 {
+    QString noteDot = m_missedCallsCount ? "_note" : "";
+
     if (m_hasEstablishedCalls) {
-        m_trayIcon->setIcon(QIcon(":/icons/gonnect_line.svg"));
+        m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
     } else {
         if (m_settings.value("generic/trayIconDark", false).toBool()) {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark.svg"));
+            m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
         } else {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_light.svg"));
+            m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
         }
     }
+}
+
+void SystemTrayMenu::setBadgeNumber(unsigned number)
+{
+    m_missedCallsCount = number;
+    resetTrayIcon();
 }
