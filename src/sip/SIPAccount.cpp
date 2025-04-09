@@ -146,6 +146,27 @@ bool SIPAccount::initialize()
     bool lockCodecEnabled = m_settings.value("lockCodecEnabled").toBool();
     m_accountConfig.mediaConfig.lockCodecEnabled = lockCodecEnabled;
 
+    int rtpPort = m_settings.value("rtpPort", 0).toInt(&ok);
+    if (!ok) {
+        qCCritical(lcSIPAccount) << "invalid value for 'rtpPort':" << rtpPort;
+        return false;
+    }
+    if (rtpPort != 0) {
+        m_accountConfig.mediaConfig.transportConfig.port = rtpPort;
+    }
+
+    int rtpPortRange = m_settings.value("rtpPortRange", 0).toInt(&ok);
+    if (!ok) {
+        qCCritical(lcSIPAccount) << "invalid value for 'rtpPortRange':" << rtpPort;
+        return false;
+    }
+    if (rtpPortRange != 0) {
+        m_accountConfig.mediaConfig.transportConfig.portRange = rtpPortRange;
+    }
+
+    m_accountConfig.mediaConfig.transportConfig.randomizePort =
+            m_settings.value("randomizeRtpPorts", false).toBool();
+
     // Transport
     int port = m_settings.value("port", 5061).toInt(&ok);
     if (!ok) {
@@ -154,12 +175,14 @@ bool SIPAccount::initialize()
     }
     m_transportConfig.port = port;
 
-    int portRange = m_settings.value("portRange", 0).toInt(&ok);
+    int portRange = m_settings.value("portRange", 10).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'portRange':" << portRange;
         return false;
     }
     m_transportConfig.portRange = portRange;
+
+    m_transportConfig.randomizePort = m_settings.value("randomizePorts", false).toBool();
 
     QString caListFile = m_settings.value("caListFile").toString();
     if (!caListFile.isEmpty()) {
