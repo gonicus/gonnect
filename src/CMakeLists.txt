@@ -105,7 +105,7 @@ if(BUILD_DEPENDENCIES)
     ExternalProject_Add(vcard
         GIT_REPOSITORY https://github.com/ivanenko/vCard.git
         # renovate-commit: packageName=https://github.com/ivanenko/vCard.git
-        GIT_TAG 733afa9571a728548106c5131c48895bd932e881
+        GIT_TAG 9e6a5349d27733c931815b2e236807f3414ab251
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/vcard-cmake.patch"
         UPDATE_DISCONNECTED TRUE
