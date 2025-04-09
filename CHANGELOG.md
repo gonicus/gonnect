@@ -1,3 +1,11 @@
+## [1.3.8](https://github.com/gonicus/gonnect/compare/v1.3.7...v1.3.8) (2025-04-09)
+
+
+### Bug Fixes
+
+* allow configuration of RTP port range ([#74](https://github.com/gonicus/gonnect/issues/74)) ([762e45a](https://github.com/gonicus/gonnect/commit/762e45a6175c7b6eb32d4ad4ebdd3c8be062ed8e))
+* show missed calls in tray icon ([#71](https://github.com/gonicus/gonnect/issues/71)) ([40e541a](https://github.com/gonicus/gonnect/commit/40e541abdfe614890e67cd676d34b4d6cb114879))
+
 ## [1.3.7](https://github.com/gonicus/gonnect/compare/v1.3.6...v1.3.7) (2025-03-31)
 
 
