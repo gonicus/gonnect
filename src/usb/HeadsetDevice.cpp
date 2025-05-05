@@ -28,6 +28,10 @@ HeadsetDevice::~HeadsetDevice()
 
 bool HeadsetDevice::open()
 {
+    if (!useHeadset()) {
+        return false;
+    }
+
     if (m_device) {
         return true;
     }
@@ -58,6 +62,10 @@ void HeadsetDevice::close()
 
 void HeadsetDevice::send(quint8 reportId, unsigned data)
 {
+    if (!useHeadset()) {
+        return;
+    }
+
     if (!m_device) {
         qCCritical(lcHeadset) << "device not open during attempt to send data";
         return;
