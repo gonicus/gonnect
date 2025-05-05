@@ -2,6 +2,7 @@
 #include <hidapi.h>
 #include <QObject>
 #include <QTimer>
+#include "AppSettings.h"
 #include "IHeadsetDevice.h"
 #include "ReportDescriptorStructs.h"
 
@@ -46,7 +47,9 @@ private:
     void send(quint8 reportId, unsigned data);
     void processEvents();
     unsigned currentFlags(const quint32 reportId) const;
+    bool useHeadset() { return m_appSettings.value("generic/useHeadset", false).toBool(); }
 
+    AppSettings m_appSettings;
     QTimer m_eventHandler;
     QHash<UsageId, UsageInfo> m_hidUsages;
 
