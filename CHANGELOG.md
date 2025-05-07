@@ -1,3 +1,10 @@
+## [1.3.9](https://github.com/gonicus/gonnect/compare/v1.3.8...v1.3.9) (2025-05-07)
+
+
+### Bug Fixes
+
+* do not send data to headset device if option is diabled ([e150c62](https://github.com/gonicus/gonnect/commit/e150c62b428fb65e6c900791a577ebe922ab6941))
+
 ## [1.3.8](https://github.com/gonicus/gonnect/compare/v1.3.7...v1.3.8) (2025-04-09)
 
 
