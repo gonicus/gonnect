@@ -149,9 +149,7 @@ and start the ordinary _CMake_ build:
 
 ```bash
 distrobox enter gonnect
-mkdir build && cd build
-cmake -GNinja -DBUILD_DEPENDENCIES=ON ..
-cmake --build . --parallel $(nproc --all)
+cmake --workflow --preset --default
 ```
 
 Alternatively you can simply run `qtcreator` inside the _distrobox_ and open the
