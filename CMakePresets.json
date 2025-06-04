@@ -1,13 +1,28 @@
 {
-    "version": 9,
+    "version": 10,
     "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        },
         {
             "name": "default",
             "displayName": "Default",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build",
+            "inherits": "base",
             "cacheVariables": {
                 "BUILD_DEPENDENCIES": "ON"
+            }
+        },
+        {
+            "name": "unity",
+            "displayName": "Unity Build",
+            "inherits": "default",
+            "cacheVariables": {
+                "ENABLE_PCH": "ON",
+                "CMAKE_OPTIMIZE_DEPENDENCIES": "ON",
+                "CMAKE_UNITY_BUILD": "ON"
             }
         }
     ],
@@ -16,6 +31,12 @@
             "name": "default",
             "displayName": "Default",
             "configurePreset": "default"
+        },
+        {
+            "name": "unity",
+            "displayName": "Unity Build",
+            "configurePreset": "unity",
+            "configuration": "Release"
         }
     ],
     "workflowPresets": [
@@ -30,6 +51,20 @@
                 {
                     "type": "build",
                     "name": "default"
+                }
+            ]
+        },
+        {
+            "name": "unity",
+            "displayName": "Unity Build",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "unity"
+                },
+                {
+                    "type": "build",
+                    "name": "unity"
                 }
             ]
         }
