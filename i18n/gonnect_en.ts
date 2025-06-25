@@ -17,7 +17,7 @@
     <message numerus="yes">
         <location filename="../../../src/ui/DialWindow.qml" line="303"/>
         <source>Cannot connect to SIP server, retrying in %n second(s)...</source>
-        <translation>
+        <translation type="unfinished">
             <numerusform>Cannot connect to SIP server, retrying in %n second...</numerusform>
             <numerusform>Cannot connect to SIP server, retrying in %n seconds...</numerusform>
         </translation>
