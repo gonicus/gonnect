@@ -9,7 +9,7 @@
 </p>
 
 ---
-[![GOnnect workflow](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml/badge.svg)](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml) [![Flathub Version](https://img.shields.io/flathub/v/de.gonicus.gonnect)](https://flathub.org/apps/de.gonicus.gonnect)
+[![GOnnect workflow](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml/badge.svg)](https://github.com/gonicus/gonnect/actions/workflows/gonnect.yml) [![Flathub Version](https://img.shields.io/flathub/v/de.gonicus.gonnect)](https://flathub.org/apps/de.gonicus.gonnect) [![Translations](https://hosted.weblate.org/widget/gonnect/svg-badge.svg)](https://hosted.weblate.org/engage/gonnect/)
 
 # Overview
 

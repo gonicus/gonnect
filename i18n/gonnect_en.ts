@@ -4,7 +4,7 @@
 <context>
     <name>CompleteHistoryWindow</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/components/CompleteHistoryWindow.qml" line="263"/>
+        <location filename="../../src/ui/components/CompleteHistoryWindow.qml" line="263"/>
         <source>%n entries found</source>
         <translation>
             <numerusform>%n entry found</numerusform>
@@ -15,7 +15,7 @@
 <context>
     <name>DialWindow</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/DialWindow.qml" line="303"/>
+        <location filename="../../src/ui/DialWindow.qml" line="303"/>
         <source>Cannot connect to SIP server, retrying in %n second(s)...</source>
         <translation>
             <numerusform>Cannot connect to SIP server, retrying in %n second...</numerusform>
@@ -26,7 +26,7 @@
 <context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../../../src/StateManager.cpp" line="137"/>
+        <location filename="../../src/StateManager.cpp" line="137"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>
