@@ -163,7 +163,7 @@
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="63"/>
         <source>Start conference...</source>
-        <translation>Konferenz starten...</translation>
+        <translation>Konferenz starten…</translation>
     </message>
 </context>
 <context>
@@ -248,22 +248,22 @@
     <message>
         <location filename="../src/ui/DialWindow.qml" line="109"/>
         <source>History...</source>
-        <translation>Verlauf...</translation>
+        <translation>Verlauf…</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="113"/>
         <source>Settings...</source>
-        <translation>Einstellungen...</translation>
+        <translation>Einstellungen…</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="117"/>
         <source>Shortcuts...</source>
-        <translation>Tastaturkürzel...</translation>
+        <translation>Tastaturkürzel…</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="130"/>
         <source>About...</source>
-        <translation>Über...</translation>
+        <translation>Über…</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="134"/>
@@ -273,14 +273,14 @@
     <message>
         <location filename="../src/ui/DialWindow.qml" line="199"/>
         <source>Show complete history...</source>
-        <translation>Kompletten Verlauf zeigen...</translation>
+        <translation>Kompletten Verlauf zeigen…</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/DialWindow.qml" line="303"/>
         <source>Cannot connect to SIP server, retrying in %n second(s)...</source>
         <translation>
-            <numerusform>Keine Verbindung zum SIP-Server, versuche in %n Sekunde erneut...</numerusform>
-            <numerusform>Keine Verbindung zum SIP-Server, versuche in %n Sekunden erneut...</numerusform>
+            <numerusform>Keine Verbindung zum SIP-Server, versuche in %n Sekunde erneut…</numerusform>
+            <numerusform>Keine Verbindung zum SIP-Server, versuche in %n Sekunden erneut…</numerusform>
         </translation>
     </message>
 </context>
@@ -2412,12 +2412,12 @@
         <location filename="../src/ui/SystemTrayMenu.cpp" line="74"/>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="89"/>
         <source>Dial...</source>
-        <translation>Wählen...</translation>
+        <translation>Wählen…</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="74"/>
         <source>Not registered...</source>
-        <translation>Nicht registriert...</translation>
+        <translation>Nicht registriert…</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="99"/>
@@ -2460,7 +2460,7 @@
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldFile.qml" line="26"/>
         <source>Choose...</source>
-        <translation>Wählen...</translation>
+        <translation>Wählen…</translation>
     </message>
     <message>
         <location filename="../src/ui/components/templatefields/TemplateFieldFile.qml" line="36"/>
