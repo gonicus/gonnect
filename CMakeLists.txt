@@ -26,7 +26,7 @@ add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-gnu-zero-variadic-macr
 find_package(Qt6 REQUIRED COMPONENTS Gui DBus Qml Quick QuickControls2 LinguistTools)
 qt_standard_project_setup(REQUIRES 6.7
     I18N_SOURCE_LANGUAGE en
-    I18N_TRANSLATED_LANGUAGES de
+    I18N_TRANSLATED_LANGUAGES de es
 )
 
 # Adjust target path for qm files
