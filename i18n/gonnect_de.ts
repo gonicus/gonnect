@@ -98,7 +98,7 @@
     <message>
         <location filename="../src/dbus/portal/BackgroundPortal.cpp" line="27"/>
         <source>Don&apos;t miss any calls by automatically starting GOnnect on session start.</source>
-        <translation>Verpasse keine Anruf, indem Du GOnnect automatisch in Deiner Sitzung startest.</translation>
+        <translation>Verpasse keine Anrufe, indem Du GOnnect automatisch in Deiner Sitzung startest.</translation>
     </message>
 </context>
 <context>
