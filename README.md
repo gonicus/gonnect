@@ -91,7 +91,7 @@ _GOnnect_ is distributed via Flathub only. To install it, either visit the
 or KDE's _discover_.
 
 After you have installed _GOnnect_, either adjust the provided
-`sample.conf` and place it in `~/.var/app/de.gonicus.gonnect/config/gonnect/99-user.conf`,
+`docs/modules/ROOT/examples/sample.conf` and place it in `~/.var/app/de.gonicus.gonnect/config/gonnect/99-user.conf`,
 or head over to [the documentation](https://github.com/gonicus/gonnect/wiki).
 
 # Non-goals
