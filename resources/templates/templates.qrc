@@ -5,5 +5,7 @@
         <file>sipgate.conf</file>
         <file>fritzbox.conf</file>
         <file>telekom.conf</file>
+        <file>easybell_phoneline.conf</file>
+        <file>easybell_pbx.conf</file>
     </qresource>
 </RCC>
