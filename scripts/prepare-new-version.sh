@@ -81,6 +81,21 @@ function update_cmakelists {
     sed -i -r -e "s/^(project.*VERSION\s)\S*/\1$1/g" "$CMAKELISTS_FILE"
 }
 
+# update_antora_module sets the given version in the Antora module description docs/antora.yml
+# Arguments:
+# 1 - the version number to set
+function update_antora_module {
+    local ANTORA_FILE
+    ANTORA_FILE="$SCRIPT_DIR/../docs/antora.yml"
+
+    if [ ! -f "$ANTORA_FILE" ]; then
+        show_error 1 "docs/antora.yml not found!"
+    fi
+
+    # inline update the version number using sed
+    sed -i -r -e "s/^(version: )\S*/\1$1/g" "$ANTORA_FILE"
+}
+
 function create_release_notes {
     # Extract messages and remove duplicate entries
     MSG=$(base64 -d <<< "$1" | jq -rc 'map(.subject) | unique | .[]')
@@ -169,3 +184,6 @@ if [ -n "$COMMITS" ]; then
 fi
 echo "Updating Flatpak metainfo"
 update_flatpak "$VERSION" "$NOTES"
+
+echo "Updating Antora module"
+update_antora_module "$VERSION"
