@@ -1,3 +1,11 @@
+## [1.3.10](https://github.com/gonicus/gonnect/compare/v1.3.9...v1.3.10) (2025-07-03)
+
+
+### Bug Fixes
+
+* add templates for easybell cloud pbx and trunk extensions ([#102](https://github.com/gonicus/gonnect/issues/102)) ([67f75ae](https://github.com/gonicus/gonnect/commit/67f75ae6241bd7729ab375a1e31b164b3b870f33))
+* **deps:** updated hidapi ([#103](https://github.com/gonicus/gonnect/issues/103)) ([127995c](https://github.com/gonicus/gonnect/commit/127995c0661a1323dcc2dea521adade5b8bd6409))
+
 ## [1.3.9](https://github.com/gonicus/gonnect/compare/v1.3.8...v1.3.9) (2025-05-07)
 
 

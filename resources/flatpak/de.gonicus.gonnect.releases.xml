@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="1.3.10" date="2025-07-03">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>add templates for easybell cloud pbx and trunk extensions (#102)</li>
+        <li>updated hidapi (#103)</li>
+      </ul>
+    </description>
+  </release>
   <release version="1.3.9" date="2025-05-07">
     <description>
       <p>Bug Fixes:</p>
