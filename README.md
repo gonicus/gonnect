@@ -149,7 +149,7 @@ and start the ordinary _CMake_ build:
 
 ```bash
 distrobox enter gonnect
-cmake --workflow --preset --default
+cmake --workflow --preset default
 ```
 
 Alternatively you can simply run `qtcreator` inside the _distrobox_ and open the
