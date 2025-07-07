@@ -3,23 +3,24 @@
 #include <QAbstractListModel>
 #include <QQmlEngine>
 
-#include "IConferenceConnector.h"
+#include "IChatRoom.h"
 
 class ChatModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_ELEMENT
 
-    Q_PROPERTY(IConferenceConnector *iConferenceConnector MEMBER m_iConferenceConnector NOTIFY
-                       iConferenceConnectorChanged FINAL)
+    Q_PROPERTY(IChatRoom *chatRoom MEMBER m_chatRoom NOTIFY chatRoomChanged FINAL)
     Q_PROPERTY(uint realMessagesCount READ realMessagesCount NOTIFY realMessagesCountChanged FINAL)
 
 public:
     enum class Roles {
-        FromId = Qt::UserRole + 1,
+        EventId = Qt::UserRole + 1,
+        FromId,
+        Timestamp,
         NickName,
         Message,
-        Timestamp,
+        ImageUrl,
         IsPrivateMessage,
         IsOwnMessage,
         IsSystemMessage
@@ -33,17 +34,17 @@ public:
     uint realMessagesCount() const { return m_realMessagesCount; }
 
 private slots:
-    void onIConferenceConnectorChanged();
+    void onChatRoomChanged();
     void updateRealMessagesCount();
 
 private:
     QString addLinkTags(const QString &orig) const;
 
-    IConferenceConnector *m_iConferenceConnector = nullptr;
-    QObject *m_iConferenceConnectorContext = nullptr;
+    IChatRoom *m_chatRoom = nullptr;
+    QObject *m_chatRoomContext = nullptr;
     uint m_realMessagesCount = 0;
 
 signals:
-    void iConferenceConnectorChanged();
+    void chatRoomChanged();
     void realMessagesCountChanged();
 };

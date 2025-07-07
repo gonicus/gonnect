@@ -77,6 +77,11 @@ Item {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for %1:").arg(host) })
             dialog.onPasswordAccepted.connect(pw => ViewHelper.respondPassword(id, pw))
         }
+
+        function onRecoveryKeyRequested(id : string, displayName : string) {
+            const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the recovery key for %1:").arg(displayName) })
+            dialog.onPasswordAccepted.connect(key => ViewHelper.respondRecoveryKey(id, key))
+        }
     }
 
     GonnectWindow {

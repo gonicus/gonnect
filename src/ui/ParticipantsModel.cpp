@@ -5,8 +5,8 @@
 ParticipantsModel::ParticipantsModel(QObject *parent) : QAbstractListModel{ parent }
 {
 
-    connect(this, &ParticipantsModel::iConferenceConnectorChanged, this,
-            &ParticipantsModel::onIConferenceConnectorChanged);
+    connect(this, &ParticipantsModel::conferenceConnectorChanged, this,
+            &ParticipantsModel::onConferenceConnectorChanged);
 }
 
 QHash<int, QByteArray> ParticipantsModel::roleNames() const
@@ -20,16 +20,16 @@ QHash<int, QByteArray> ParticipantsModel::roleNames() const
 
 int ParticipantsModel::rowCount(const QModelIndex &) const
 {
-    return m_iConferenceConnector ? m_iConferenceConnector->participants().size() : 0;
+    return m_conferenceConnector ? m_conferenceConnector->participants().size() : 0;
 }
 
 QVariant ParticipantsModel::data(const QModelIndex &index, int role) const
 {
-    if (!m_iConferenceConnector || !index.isValid()) {
+    if (!m_conferenceConnector || !index.isValid()) {
         return QVariant();
     }
 
-    const auto participant = m_iConferenceConnector->participants().at(index.row());
+    const auto participant = m_conferenceConnector->participants().at(index.row());
 
     switch (role) {
     case static_cast<int>(Roles::Id):
@@ -44,7 +44,7 @@ QVariant ParticipantsModel::data(const QModelIndex &index, int role) const
     }
 }
 
-void ParticipantsModel::onIConferenceConnectorChanged()
+void ParticipantsModel::onConferenceConnectorChanged()
 {
     beginResetModel();
 
@@ -53,27 +53,27 @@ void ParticipantsModel::onIConferenceConnectorChanged()
         m_jistiConnectorContext = nullptr;
     }
 
-    if (m_iConferenceConnector) {
+    if (m_conferenceConnector) {
         m_jistiConnectorContext = new QObject(this);
 
-        connect(m_iConferenceConnector, &IConferenceConnector::participantsCleared, this, [this]() {
+        connect(m_conferenceConnector, &IConferenceConnector::participantsCleared, this, [this]() {
             beginResetModel();
             endResetModel();
         });
 
-        connect(m_iConferenceConnector, &IConferenceConnector::participantAdded, this,
+        connect(m_conferenceConnector, &IConferenceConnector::participantAdded, this,
                 [this](qsizetype index, ConferenceParticipant *) {
                     beginInsertRows(QModelIndex(), index, index);
                     endInsertRows();
                 });
 
-        connect(m_iConferenceConnector, &IConferenceConnector::participantRemoved, this,
+        connect(m_conferenceConnector, &IConferenceConnector::participantRemoved, this,
                 [this](qsizetype index, ConferenceParticipant *) {
                     beginRemoveRows(QModelIndex(), index, index);
                     endRemoveRows();
                 });
 
-        connect(m_iConferenceConnector, &IConferenceConnector::participantRoleChanged, this,
+        connect(m_conferenceConnector, &IConferenceConnector::participantRoleChanged, this,
                 [this](qsizetype index, ConferenceParticipant *, ConferenceParticipant::Role) {
                     const auto modelIndex = createIndex(index, 0);
                     emit dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::Role) });

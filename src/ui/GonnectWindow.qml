@@ -49,6 +49,7 @@ BaseWindow {
         Calls,
         Call,
         Conference,
+        Chats,
         Settings
     }
 
@@ -192,6 +193,23 @@ BaseWindow {
                 bottom: parent.bottom
             }
 
+            onSelectedPageChanged: () => {
+                // Forward attached data from MainTabBar element
+                const page = pageStack.selectedPage
+                if (page && page.hasOwnProperty("attachedData")) {
+                    page.attachedData = mainTabBar.attachedData
+                }
+            }
+
+            readonly property Item selectedPage: {
+                for (const child of pageStack.children) {
+                    if (child.visible) {
+                        return child
+                    }
+                }
+                return null
+            }
+
             states: [
                 State {
                     when: mainTabBar.selectedPageId < 0
@@ -228,6 +246,12 @@ BaseWindow {
                     PropertyChanges {
                         conferencePage.visible: true
                     }
+                },
+                State {
+                    when: mainTabBar.selectedPageId === GonnectWindow.PageId.Chats
+                    PropertyChanges {
+                        chatsPage.visible: true
+                    }
                 }
             ]
 
@@ -256,6 +280,11 @@ BaseWindow {
             }
             Conference {
                 id: conferencePage
+                visible: false
+                anchors.fill: parent
+            }
+            Chats {
+                id: chatsPage
                 visible: false
                 anchors.fill: parent
             }
