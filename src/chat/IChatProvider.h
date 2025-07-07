@@ -19,6 +19,8 @@ public:
     virtual QList<IChatRoom *> chatRooms() = 0;
     virtual qsizetype indexOf(IChatRoom *chatRoom) const = 0;
 
+    virtual void resetUnreadCount(const QString &roomId) = 0;
+
 protected:
     void setIsConnected(bool value);
 

@@ -260,7 +260,8 @@ Item {
                     }
                     profile {
                         offTheRecord: false
-                        storageName: "gonnect_jitsi_meet"
+                        // This line let's the app crash all of a sudden...
+                        // storageName: "gonnect_jitsi_meet"
                     }
                     webChannel: WebChannel {
                         registeredObjects: [ confConn ]
@@ -679,7 +680,7 @@ Item {
             anchors.fill: parent
             chatAvailable: confConn.hasCapability(IConferenceConnector.Capability.ChatInCall)
             personsAvailable: confConn.hasCapability(IConferenceConnector.Capability.ParticipantRoles)
-            iConferenceConnector: confConn
+            conferenceConnector: confConn
 
             Connections {
                 target: confConn
