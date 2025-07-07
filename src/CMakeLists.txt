@@ -195,6 +195,12 @@ qt_add_qml_module(gonnect
 
         ${gonnect_qml_singletons}
 
+        ui/components/chat/MatrixMessageBox.qml
+        ui/components/chat/MatrixMessageList.qml
+        ui/components/chat/MatrixMessageListItem.qml
+        ui/components/chat/MatrixRoomList.qml
+        ui/components/chat/MatrixRoomListItem.qml
+
         ui/components/controls/AudioLevelButton.qml
         ui/components/controls/BarButton.qml
         ui/components/controls/Button.qml
@@ -407,9 +413,36 @@ qt_add_qml_module(gonnect
         chat/IChatProvider.cpp
         chat/IChatRoom.h
         chat/IChatRoom.cpp
+        chat/ChatMessage.h
+        chat/ChatMessage.cpp
+        chat/ChatModel.h
+        chat/ChatModel.cpp
+        chat/ChatProxyModel.h
+        chat/ChatProxyModel.cpp
+        chat/ChatRoomModel.h
+        chat/ChatRoomModel.cpp
+        chat/ChatRoomProxyModel.h
+        chat/ChatRoomProxyModel.cpp
+        chat/ConferenceChatRoom.h
+        chat/ConferenceChatRoom.cpp
+        chat/MatrixChatRoom.h
+        chat/MatrixChatRoom.cpp
+        chat/MatrixConnector.h
+        chat/MatrixConnector.cpp
+        chat/MatrixConnectorConfig.h
+        chat/MatrixConnectorManager.h
+        chat/MatrixConnectorManager.cpp
+        chat/MatrixEvent.h
+        chat/MatrixEvent.cpp
+        chat/MatrixImageEvent.h
+        chat/MatrixImageEvent.cpp
+        chat/MatrixMessageEvent.h
+        chat/MatrixMessageEvent.cpp
+        chat/MatrixRoom.h
+        chat/MatrixRoom.cpp
+        chat/MatrixUser.h
+        chat/MatrixUser.cpp
 
-        conference/ConferenceChatMessage.h
-        conference/ConferenceChatMessage.cpp
         conference/ConferenceParticipant.h
         conference/ConferenceParticipant.cpp
         conference/IConferenceConnector.h
@@ -488,8 +521,6 @@ qt_add_qml_module(gonnect
 
         ui/CallsModel.h
         ui/CallsModel.cpp
-        ui/ChatModel.h
-        ui/ChatModel.cpp
         ui/DateEventsModel.h
         ui/DateEventsModel.cpp
         ui/EmojiInfo.h
