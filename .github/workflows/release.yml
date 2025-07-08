@@ -13,8 +13,8 @@ jobs:
   semantic-release:
     runs-on: ubuntu-24.04
     name: Semantic Release
-    # A release will only be triggered on the main branch.
-    if: github.ref == 'refs/heads/main'
+    # A release will only be triggered on the release, freeze and hotfix branches.
+    if: contains(fromJSON('["refs/heads/release", "refs/heads/freeze", "refs/heads/hotfix"]'), github.ref)
     permissions:
       contents: write       # to be able to publish a GitHub release
       issues: write         # to be able to comment on released issues
