@@ -5,11 +5,14 @@
 
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
 
+#define NH_CALL_TIMEOUT 500
+
 NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 {
     m_portal = new OrgFreedesktopPortalNetworkMonitorInterface("org.freedesktop.portal.Desktop",
                                                                "/org/freedesktop/portal/desktop",
                                                                QDBusConnection::sessionBus(), this);
+    m_portal->setTimeout(NH_CALL_TIMEOUT);
 
     connect(m_portal, &OrgFreedesktopPortalNetworkMonitorInterface::changed, this,
             &NetworkHelper::updateNetworkState);

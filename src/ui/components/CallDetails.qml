@@ -49,7 +49,6 @@ Item {
             const callItem = control.callItem
             if (callItem) {
                 internal.elapsedSeconds = ViewHelper.secondsDelta(callItem.establishedTime, new Date())
-                ViewHelper.secondsToNiceText(ViewHelper.secondsDelta(callItem.establishedTime, new Date()))
             } else {
                 internal.elapsedSeconds = 0
             }
@@ -120,10 +119,10 @@ Item {
     AudioLevelButton {
         id: micLevel
         showMuteButton: true
-        isMuted: SIPAudioManager.isAudioCaptureMuted
+        isMuted: AudioManager.isAudioCaptureMuted
         iconSource: micLevel.isMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
-        incomingVolume: SIPAudioManager.captureAudioVolume
-        hasAudioLevel: SIPAudioManager.hasCaptureAudioLevel
+        incomingVolume: AudioManager.captureAudioVolume
+        hasAudioLevel: AudioManager.hasCaptureAudioLevel
         anchors {
             top: parent.top
             topMargin: 15
@@ -131,14 +130,14 @@ Item {
             rightMargin: 15
         }
 
-        onVolumeChanged: (volume) => SIPAudioManager.captureAudioVolume = volume
-        onMuteToggled: () => SIPAudioManager.isAudioCaptureMuted = !SIPAudioManager.isAudioCaptureMuted
+        onVolumeChanged: (volume) => AudioManager.captureAudioVolume = volume
+        onMuteToggled: () => AudioManager.isAudioCaptureMuted = !AudioManager.isAudioCaptureMuted
     }
 
     AudioLevelButton {
         id: outputLevel
         iconSource: Icons.audioVolumeHigh
-        incomingVolume: SIPAudioManager.playbackAudioVolume
+        incomingVolume: AudioManager.playbackAudioVolume
         hasAudioLevel: control.hasIncomingAudioLevel
         anchors {
             top: micLevel.top
@@ -146,7 +145,7 @@ Item {
             rightMargin: 15
         }
 
-        onVolumeChanged: (volume) => SIPAudioManager.playbackAudioVolume = volume
+        onVolumeChanged: (volume) => AudioManager.playbackAudioVolume = volume
     }
 
     Rectangle {

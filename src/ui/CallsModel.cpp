@@ -4,6 +4,11 @@
 #include "PhoneNumberUtil.h"
 #include "Application.h"
 
+// --- DEV ---
+#include "AddressBook.h"
+#include "Contact.h"
+// --- DEV ---
+
 #include <QRegularExpression>
 #include <QTimer>
 #include <QtAudio>
@@ -27,6 +32,17 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                                      static_cast<int>(Roles::EstablishedTime),
                                      static_cast<int>(Roles::HasCapabilityJitsi),
                              });
+        }
+    });
+
+    connect(&callManager, &SIPCallManager::metadataChanged, this, [this](SIPCall *call) {
+        auto callInfo = m_callsHash.value(call->getId());
+        const auto index = m_calls.indexOf(callInfo);
+        if (index >= 0) {
+            callInfo->hasMetadata = call->hasMetadata();
+
+            auto idx = createIndex(index, 0);
+            emit dataChanged(idx, idx, { static_cast<int>(Roles::HasMetadata) });
         }
     });
 
@@ -94,6 +110,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
 
     connect(&callManager, &SIPCallManager::activeCallsChanged, this, &CallsModel::updateCalls);
     connect(&callManager, &SIPCallManager::callContactChanged, this, &CallsModel::updateCalls);
+    connect(&AddressBook::instance(), &AddressBook::contactsReady, this, &CallsModel::updateCalls);
     updateCalls();
 }
 
@@ -124,14 +141,17 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::IsFinished), "isFinished" },
         { static_cast<int>(Roles::HasCapabilityJitsi), "hasCapabilityJitsi" },
         { static_cast<int>(Roles::HasIncomingAudioLevel), "hasIncomingAudioLevel" },
+        { static_cast<int>(Roles::HasMetadata), "hasMetadata" },
         { static_cast<int>(Roles::HasAvatar), "hasAvatar" },
         { static_cast<int>(Roles::AvatarPath), "avatarPath" },
-
     };
 }
 
 void CallsModel::updateCalls()
 {
+
+    const auto oldCount = m_calls.size();
+
     beginResetModel();
     const auto calls = SIPCallManager::instance().calls();
 
@@ -165,6 +185,7 @@ void CallsModel::updateCalls()
         callInfo->contactInfo =
                 PhoneNumberUtil::instance().contactInfoBySipUrl(callInfo->remoteUri);
         callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && call->isEstablished();
+        callInfo->hasMetadata = call->hasMetadata();
 
         if (!exists) {
             m_calls.append(callInfo);
@@ -173,6 +194,36 @@ void CallsModel::updateCalls()
 
         removedCallIds.removeOne(callId);
     }
+
+    // // --- DEV ---
+    // CallInfo* devCallInfo = new CallInfo {
+    //     0,
+    //     "0",
+    //     "sip:123@gonicus.de",
+    //     true,
+    //     false,
+    //     true,
+    //     false,
+    //     false,
+    //     0.0,
+    //     QDateTime::currentDateTime().addSecs(-10),
+    //     {
+    //         "sip:123@gonicus.de",
+    //         "123",
+    //         "Cajus Pollmeier",
+    //         Contact::NumberType::Commercial,
+    //         "Weilheim",
+    //         { "Deutschland" },
+    //         false,
+    //         false,
+    //         AddressBook::instance().lookupByNumber("123")
+    //     },
+    // };
+
+    // m_calls.append(devCallInfo);
+    // m_callsHash.insert(0, devCallInfo);
+
+    // // --- DEV ---
 
     // Kill timer for removed calls
     for (const int callId : std::as_const(removedCallIds)) {
@@ -185,6 +236,8 @@ void CallsModel::updateCalls()
                 m_calls.removeAt(idx);
                 delete callInfo;
                 endRemoveRows();
+
+                emit countChanged();
             }
         });
 
@@ -201,6 +254,10 @@ void CallsModel::updateCalls()
     }
 
     endResetModel();
+
+    if (oldCount != m_calls.size()) {
+        emit countChanged();
+    }
 }
 
 int CallsModel::rowCount(const QModelIndex &parent) const
@@ -272,6 +329,9 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::HasIncomingAudioLevel):
         return callInfo->incomingAudioLevel > 0.3;
+
+    case static_cast<int>(Roles::HasMetadata):
+        return callInfo->hasMetadata;
 
     case static_cast<int>(Roles::RemoteUri):
     default:

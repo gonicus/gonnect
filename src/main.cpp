@@ -2,10 +2,10 @@
 #include <QDBusConnection>
 #include <QQuickWindow>
 #include <QDBusMetaType>
+#include <QtWebEngineQuick>
 
 #include <signal.h>
 #include "Application.h"
-#include "ErrorBus.h"
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -43,12 +43,15 @@ int main(int argc, char *argv[])
             "depth=3}%{endif}%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
     setup_unix_signal_handlers();
 
+    QtWebEngineQuick::initialize();
+
     qDBusRegisterMetaType<QList<QVariantMap>>();
     qDBusRegisterMetaType<QPair<QString, QVariantMap>>();
     qDBusRegisterMetaType<QList<QPair<QString, QVariantMap>>>();
 
     qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", "7000"); // Workaround bad scrolling
-    qputenv("XDG_CURRENT_DESKTOP", "gnome"); // Workaround for QTBUG-126179
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS",
+            "--use-fake-ui-for-media-stream"); // Workaround for QTBUG-134637
 
     int exitCode = 0;
 
@@ -57,6 +60,20 @@ int main(int argc, char *argv[])
         qInfo() << "another instance is running - sending args and exit";
         app.sendArguments();
         return 2;
+    }
+
+    // Fonts
+    const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
+
+    for (const QString &fontPath : fontPaths) {
+        const int fontId = QFontDatabase::addApplicationFont(fontPath);
+        if (fontId >= 0) {
+            const auto fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
+            QFontDatabase::addApplicationEmojiFontFamily(fontFamily);
+            qInfo() << "Loaded font" << fontFamily;
+        } else {
+            qWarning() << "Custom font could not be loaded";
+        }
     }
 
     QQmlApplicationEngine engine;
@@ -68,9 +85,9 @@ int main(int argc, char *argv[])
     const auto &objs = engine.rootObjects();
     const auto &itemObjs = objs.first();
 
-    QQuickWindow *dialWindow = itemObjs->findChild<QQuickWindow *>("dialWindow");
-    if (dialWindow) {
-        app.setRootWindow(dialWindow);
+    QQuickWindow *mainWindow = itemObjs->findChild<QQuickWindow *>("gonnectWindow");
+    if (mainWindow) {
+        app.setRootWindow(mainWindow);
     }
 
     exitCode = app.exec();

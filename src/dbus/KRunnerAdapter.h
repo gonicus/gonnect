@@ -15,7 +15,7 @@
 
 #include <QtCore/QObject>
 #include <QtDBus/QtDBus>
-#include "QObject"
+#include <QObject>
 #include <QtCore/qcontainerfwd.h>
 
 // HAND-EDIT - added missing include

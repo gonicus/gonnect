@@ -10,7 +10,7 @@ Item {
     id: control
 
     property alias limit: historyModel.limit
-    property bool showScrollBar: false
+    property int rightPadding: 0
 
     readonly property alias count: list.count
     readonly property bool hasPastCalls: list.count > 0
@@ -33,9 +33,7 @@ Item {
 
         ScrollBar.vertical: ScrollBar {
             id: verticalScrollBar
-            visible: control.showScrollBar
             width: 10
-            policy: ScrollBar.AlwaysOn
         }
 
         model: HistoryProxyModel {
@@ -55,7 +53,7 @@ Item {
             anchors {
                 left: parent?.left
                 right: parent?.right
-                rightMargin: control.showScrollBar ? 20 : 0
+                rightMargin: control.rightPadding
             }
 
             required property date section
@@ -68,12 +66,12 @@ Item {
 
         delegate: Item {
             id: delg
-
+            enabled: ViewHelper.isJitsiAvailable || !delg.isJitsiMeetCall
             height: 50
             anchors {
                 left: parent?.left
                 right: parent?.right
-                rightMargin: control.showScrollBar ? 20 : 0
+                rightMargin: control.rightPadding
             }
 
             required property int id
@@ -96,11 +94,13 @@ Item {
             required property string avatarPath
 
             property int buddyStatus: SIPBuddyState.UNKNOWN
-            property bool isBusy: false
+            readonly property bool isReady: delg.buddyStatus === SIPBuddyState.READY
+
+            readonly property bool isJitsiMeetCall: delg.type & CallHistoryItem.Type.JitsiMeetCall
+            readonly property bool isSIPCall: delg.type & CallHistoryItem.Type.SIPCall
 
             function updateBuddyStatus() {
                 delg.buddyStatus = delg.hasBuddyState ? SIPManager.buddyStatus(delg.remoteUrl) : SIPBuddyState.UNKNOWN
-                delg.isBusy = (delg.buddyStatus === SIPBuddyState.BUSY)
             }
 
             Component.onCompleted: () => delg.updateBuddyStatus()
@@ -161,9 +161,20 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
-                            verticalCenter: !companyLabel.visible ? parent.verticalCenter : undefined
-                            bottom: companyLabel.visible ? parent.verticalCenter : undefined
+                            verticalCenter: parent.verticalCenter
                         }
+                        states: [
+                            State {
+                                when: companyLabel.visible
+                                AnchorChanges {
+                                    target: contactNameLabel
+                                    anchors {
+                                        verticalCenter: undefined
+                                        bottom: contactNameLabel.parent?.verticalCenter
+                                    }
+                                }
+                            }
+                        ]
                     }
 
                     Label {
@@ -180,24 +191,35 @@ Item {
                     }
                 }
 
-
                 Item {
                     id: phoneNumberLocationContainer
-                    Layout.preferredWidth: contactNameLabel.width
+                    Layout.preferredWidth: nameCompanyContainer.Layout.preferredWidth
                     Layout.alignment: Qt.AlignVCenter
-                    implicitHeight: contactNameLabel.implicitHeight
-                    implicitWidth: Math.max(contactNameLabel.implicitWidth, companyLabel.implicitWidth)
+                    implicitHeight: phoneNumberLabel.implicitHeight
+                    implicitWidth: Math.max(phoneNumberLabel.implicitWidth, locationLabel.implicitWidth)
 
                     Label {
                         id: phoneNumberLabel
-                        text: delg.remotePhoneNumber
                         elide: Label.ElideRight
+                        text: delg.remotePhoneNumber
                         anchors {
                             left: parent.left
                             right: parent.right
-                            bottom: locationLabel.visible ? parent.verticalCenter : undefined
-                            verticalCenter: !locationLabel.visible ? parent.verticalCenter : undefined
+                            bottom: parent.verticalCenter
                         }
+
+                        states: [
+                            State {
+                                when: !locationLabel.visible
+                                AnchorChanges {
+                                    target: phoneNumberLabel
+                                    anchors {
+                                        bottom: undefined
+                                        verticalCenter: phoneNumberLocationContainer.verticalCenter
+                                    }
+                                }
+                            }
+                        ]
                     }
 
                     Label {
@@ -227,11 +249,21 @@ Item {
                         icon {
                             width: 20
                             height: 20
-                            source: delg.type === CallHistoryItem.Type.IncomingBlocked
-                                    ? Icons.dialogCancel
-                                    : (delg.type === CallHistoryItem.Type.Incoming
-                                       ? (delg.wasEstablished ? Icons.callIncoming : Icons.callMissed)
-                                       : Icons.callOutgoing)
+                            source: {
+                                if (delg.type & CallHistoryItem.Type.JitsiMeetCall && !(delg.type & CallHistoryItem.Type.SIPCall)) {
+                                    return Icons.videoCall
+                                }
+                                if (delg.type & CallHistoryItem.Type.IncomingBlocked) {
+                                    return Icons.dialogCancel
+                                }
+                                if (delg.type & CallHistoryItem.Type.Outgoing) {
+                                    return Icons.callOutgoing
+                                }
+                                if (delg.wasEstablished) {
+                                    return Icons.callIncoming
+                                }
+                                return Icons.callMissed
+                            }
                         }
                     }
                 }
@@ -239,7 +271,7 @@ Item {
                 Item {
                     id: timesContainer
                     implicitHeight: timeLabel.implicitHeight
-                    Layout.preferredWidth: 60
+                    Layout.preferredWidth: 70
                     Layout.rightMargin: 10
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
@@ -249,9 +281,20 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
-                            verticalCenter: !durationLabel.visible ? parent.verticalCenter : undefined
-                            bottom: durationLabel.visible ? parent.verticalCenter : undefined
+                            verticalCenter: parent.verticalCenter
                         }
+                        states: [
+                            State {
+                                when: durationLabel.visible
+                                AnchorChanges {
+                                    target: timeLabel
+                                    anchors {
+                                        verticalCenter: undefined
+                                        bottom: timeLabel.parent?.verticalCenter
+                                    }
+                                }
+                            }
+                        ]
 
                         Label {
                             id: timeIconLabel
@@ -314,17 +357,35 @@ Item {
                 }
             }
 
-            HistoryListContextMenu {
-                id: rowContextMenu
-                phoneNumber: delg.remotePhoneNumber
-                isFavorite: delg.isFavorite
-                isAnonymous: delg.isAnonymous
-                isBusy: delg.isBusy
-                isBlocked: delg.isBlocked
-                width: 230
-                onCallClicked: () => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
-                onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
-                onBlockTemporarilyClicked: () => SIPCallManager.toggleTemporaryBlock(delg.contactId, delg.remotePhoneNumber)
+            Component {
+                id: historyListContextMenuComponent
+
+                HistoryListContextMenu {
+                    id: rowContextMenu
+                    phoneNumber: delg.remotePhoneNumber
+                    isFavorite: delg.isFavorite
+                    isAnonymous: delg.isAnonymous
+                    isBlocked: delg.isBlocked
+                    isSipSubscriptable: delg.hasBuddyState
+                    isReady: delg.isReady
+                    width: 230
+                    onCallClicked: () => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
+                    onCallAsClicked: (identityId) => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId, identityId)
+                    onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
+                    onBlockTemporarilyClicked: () => SIPCallManager.toggleTemporaryBlock(delg.contactId, delg.remotePhoneNumber)
+                }
+            }
+
+            Component {
+                id: jitsiHistoryListContextMenuComponent
+
+                JitsiHistoryListContextMenu {
+                    id: rowJitsiContextMenu
+                    isFavorite: delg.isFavorite
+                    roomName: delg.remotePhoneNumber
+                    width: 230
+                    onCallClicked: () => ViewHelper.requestMeeting(delg.remoteUrl)
+                }
             }
 
             TapHandler {
@@ -333,10 +394,20 @@ Item {
                 grabPermissions: PointerHandler.ApprovesTakeOverByAnything
                 exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onDoubleTapped: () => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
+                onDoubleTapped: () => {
+                    if (delg.isSIPCall) {
+                        SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
+                    } else if (delg.isJitsiMeetCall && !ViewHelper.isActiveVideoCall) {
+                        ViewHelper.requestMeeting(delg.remoteUrl)
+                    }
+                }
                 onTapped: (_, mouseButton) => {
                     if (mouseButton === Qt.RightButton) {
-                        rowContextMenu.popup()
+                        if (delg.isSIPCall) {
+                            historyListContextMenuComponent.createObject(delg).popup()
+                        } else if (delg.isJitsiMeetCall) {
+                            jitsiHistoryListContextMenuComponent.createObject(delg).popup()
+                        }
                     }
                 }
             }

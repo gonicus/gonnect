@@ -1,14 +1,29 @@
 #include <QRegularExpression>
 #include <QLoggingCategory>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include "ReadOnlyConfdSettings.h"
 #include "PhoneNumberUtil.h"
 #include "PhoneCodeLookup.h"
 #include "AddressBook.h"
+
 #ifndef APP_TESTS
 #  include "AvatarManager.h"
 #endif
 
 Q_LOGGING_CATEGORY(lcPhoneNumberUtil, "gonnect.app.contacts.PhoneNumberUtil")
+
+QString ContactInfo::toString() const
+{
+    QJsonObject request{ { "$schema", "request.schema.json" },
+                         { "sipURI", sipUrl },
+                         { "name", contact ? contact->name() : displayName },
+                         { "company", contact ? contact->company() : "" },
+                         { "email", contact ? contact->mail() : "" } };
+
+    QJsonDocument doc(request);
+    return doc.toJson(QJsonDocument::JsonFormat::Compact);
+}
 
 QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
 {
@@ -92,19 +107,7 @@ ContactInfo PhoneNumberUtil::contactInfoBySipUrl(const QString &sipUrl)
     info.contact = AddressBook::instance().lookupByNumber(phoneNumber);
     info.countries = PhoneCodeLookup::countryNameFromPhoneNumber(phoneNumber);
     info.city = PhoneCodeLookup::cityNameFromPhoneNumber(phoneNumber);
-
-    // Regular expression to match anonmyous SIP url
-    const QString anonymousRegexString = settings.value("generic/anonymousRegex", "").toString();
-    if (!anonymousRegexString.isEmpty()) {
-        static const QRegularExpression anonymousRegex(anonymousRegexString);
-        if (!anonymousRegex.isValid()) {
-            qCCritical(lcPhoneNumberUtil) << "Found regular expression string for anonymous sip "
-                                             "url, but it is invalid and will be ignored:"
-                                          << anonymousRegex.errorString();
-        } else {
-            info.isAnonymous = anonymousRegex.match(sipUrl).hasMatch();
-        }
-    }
+    info.isAnonymous = isNumberAnonymous(sipUrl);
 
     // Display name
     if (info.isAnonymous) {
@@ -190,6 +193,36 @@ bool PhoneNumberUtil::isEmergencyCallUrl(const QString &sipUrl)
     return false;
 }
 
+bool PhoneNumberUtil::isNumberAnonymous(const QString &sipUrl)
+{
+    static bool _initialized = false;
+    static bool _hasValidRegex = false;
+    static QRegularExpression anonymousRegex;
+
+    if (!_initialized) {
+        _initialized = true;
+
+        ReadOnlyConfdSettings settings;
+        const QString anonymousRegexString =
+                settings.value("generic/anonymousRegex", "").toString();
+
+        if (!anonymousRegexString.isEmpty()) {
+            anonymousRegex.setPattern(anonymousRegexString);
+
+            if (anonymousRegex.isValid()) {
+                _hasValidRegex = true;
+            } else {
+                qCCritical(lcPhoneNumberUtil)
+                        << "Found regular expression string for anonymous sip "
+                           "url, but it is invalid and will be ignored:"
+                        << anonymousRegex.errorString();
+            }
+        }
+    }
+
+    return _hasValidRegex ? anonymousRegex.match(sipUrl).hasMatch() : false;
+}
+
 PhoneNumberUtil::PhoneNumberUtil() : QObject()
 {
     connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
@@ -208,40 +241,40 @@ QString PhoneNumberUtil::clearInternationalChars(const QString &str)
     auto s = str; // Ensure copy of str
 
     static QList<std::pair<const QRegularExpression, const QString>> replacements = {
-        { QRegularExpression("ä"), "ae" },
-        { QRegularExpression("Ä"), "Ae" },
-        { QRegularExpression("ö|ø"), "oe" },
-        { QRegularExpression("Ö|Ø"), "Oe" },
-        { QRegularExpression("ü"), "ue" },
-        { QRegularExpression("Ü"), "Ue" },
-        { QRegularExpression("ß"), "ss" },
-        { QRegularExpression("ẞ"), "Ss" },
-        { QRegularExpression("à|á|â|ã|ä|å|æ|ā|ă|ą"), "a" },
-        { QRegularExpression("À|Á|Â|Ã|Ä|Å|Æ|Ā|Ă|Ą"), "A" },
-        { QRegularExpression("ç|ć|ĉ|ċ|č"), "c" },
-        { QRegularExpression("Ç|Ć|Ĉ|Ċ|Č"), "C" },
-        { QRegularExpression("è|é|ê|ë|ē|ĕ|ė|ę|ě"), "e" },
-        { QRegularExpression("È|É|Ê|Ë|Ē|Ĕ|Ė|Ę|Ě"), "E" },
-        { QRegularExpression("ì|í|î|ï|ĩ|ī|ĭ|į|ı"), "i" },
-        { QRegularExpression("Ì|Í|Î|Ï|Ĩ|Ī|Ĭ|Į|I"), "I" },
-        { QRegularExpression("ĵ"), "j" },
-        { QRegularExpression("Ĵ"), "J" },
-        { QRegularExpression("ł"), "l" },
-        { QRegularExpression("Ł"), "L" },
-        { QRegularExpression("ñ|ń|ņ|ň "), "n" },
-        { QRegularExpression("Ñ|Ń|Ņ|Ň"), "N" },
-        { QRegularExpression("ò|ó|ô|õ|ō|ŏ|ő "), "o" },
-        { QRegularExpression("Ò|Ó|Ô|Õ|Ō|Ŏ|Ő"), "O" },
-        { QRegularExpression("ś|ŝ|ş|š "), "s" },
-        { QRegularExpression("Ś|Ŝ|Ş|Š"), "S" },
-        { QRegularExpression("ù|ú|û|ũ|ū|ŭ|ů|ű|ų "), "u" },
-        { QRegularExpression("Ù|Ú|Û|Ũ|Ū|Ŭ|Ů|Ű|Ų"), "U" },
-        { QRegularExpression("ŵ"), "w" },
-        { QRegularExpression("Ŵ"), "W" },
-        { QRegularExpression("ý|ÿ|ŷ"), "y" },
-        { QRegularExpression("Ý|Ÿ|Ŷ"), "Y" },
-        { QRegularExpression("ź|ż|ž"), "z" },
-        { QRegularExpression("Ź|Ż|Ž"), "Z" },
+        { QRegularExpression("��"), "ae" },
+        { QRegularExpression("��"), "Ae" },
+        { QRegularExpression("��|��"), "oe" },
+        { QRegularExpression("��|��"), "Oe" },
+        { QRegularExpression("��"), "ue" },
+        { QRegularExpression("��"), "Ue" },
+        { QRegularExpression("��"), "ss" },
+        { QRegularExpression("���"), "Ss" },
+        { QRegularExpression("��|��|��|��|��|��|��|��|��|��"), "a" },
+        { QRegularExpression("��|��|��|��|��|��|��|��|��|��"), "A" },
+        { QRegularExpression("��|��|��|��|��"), "c" },
+        { QRegularExpression("��|��|��|��|��"), "C" },
+        { QRegularExpression("��|��|��|��|��|��|��|��|��"), "e" },
+        { QRegularExpression("��|��|��|��|��|��|��|��|��"), "E" },
+        { QRegularExpression("��|��|��|��|��|��|��|��|��"), "i" },
+        { QRegularExpression("��|��|��|��|��|��|��|��|I"), "I" },
+        { QRegularExpression("��"), "j" },
+        { QRegularExpression("��"), "J" },
+        { QRegularExpression("��"), "l" },
+        { QRegularExpression("��"), "L" },
+        { QRegularExpression("��|��|��|�� "), "n" },
+        { QRegularExpression("��|��|��|��"), "N" },
+        { QRegularExpression("��|��|��|��|��|��|�� "), "o" },
+        { QRegularExpression("��|��|��|��|��|��|��"), "O" },
+        { QRegularExpression("��|��|��|�� "), "s" },
+        { QRegularExpression("��|��|��|��"), "S" },
+        { QRegularExpression("��|��|��|��|��|��|��|��|�� "), "u" },
+        { QRegularExpression("��|��|��|��|��|��|��|��|��"), "U" },
+        { QRegularExpression("��"), "w" },
+        { QRegularExpression("��"), "W" },
+        { QRegularExpression("��|��|��"), "y" },
+        { QRegularExpression("��|��|��"), "Y" },
+        { QRegularExpression("��|��|��"), "z" },
+        { QRegularExpression("��|��|��"), "Z" },
     };
 
     for (const auto &pair : std::as_const(replacements)) {

@@ -4,11 +4,9 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPAccountManager.h"
-#include "SIPAudioManager.h"
 #include "ExternalMediaManager.h"
 #include "Notification.h"
 #include "NotificationManager.h"
-#include "Ringer.h"
 #include "RingToneFactory.h"
 #include "RingTone.h"
 #include "PhoneNumberUtil.h"
@@ -20,7 +18,8 @@
 #include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "AddressBook.h"
-#include "BusylightDeviceManager.h"
+#include "GlobalCallState.h"
+#include "Application.h"
 
 Q_LOGGING_CATEGORY(lcSIPCallManager, "gonnect.sip.callmanager")
 
@@ -30,9 +29,6 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
 {
     connect(this, &SIPCallManager::incomingCall, this, &SIPCallManager::onIncomingCall);
     connect(this, &SIPCallManager::incomingCall, this, &SIPCallManager::updateCallCount);
-    connect(this, &SIPCallManager::isHoldingChanged, this, &SIPCallManager::updateBusylightState);
-    connect(&SIPAudioManager::instance(), &SIPAudioManager::isAudioCaptureMutedChanged, this,
-            &SIPCallManager::updateBusylightState);
 
     m_dtmfTimer.setInterval(PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT + 10);
     m_dtmfTimer.callOnTimeout(this, &SIPCallManager::dispatchDtmfBuffer);
@@ -48,6 +44,25 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
     // React on Headset events
     auto &hds = USBDevices::instance();
     auto dev = hds.getHeadsetDeviceProxy();
+    connect(dev, &HeadsetDeviceProxy::flash, this, [dev, this]() {
+        for (auto call : std::as_const(m_calls)) {
+            if (call->isActive()) {
+                if (dev->getFlash()) {
+                    call->hold();
+                } else {
+                    call->unhold();
+                }
+            }
+        }
+    });
+    connect(dev, &HeadsetDeviceProxy::programmableButton, this, [this]() {
+        for (auto call : std::as_const(m_calls)) {
+            if (!call->isEstablished() && call->isIncoming()) {
+                rejectCall(call);
+                break;
+            }
+        }
+    });
     connect(dev, &HeadsetDeviceProxy::hookSwitch, this, [dev, this]() {
         // Were're busy with one call -> end call
         if (!dev->getHookSwitch() && m_calls.count() == 1) {
@@ -55,6 +70,36 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
             if (call->isEstablished() || !call->isIncoming()) {
                 endCall(call);
             }
+            return;
+        }
+
+        // Were're busy with one call and there's one incoming -> end call active call and pick
+        // incoming one
+        if (!dev->getHookSwitch() && m_calls.count() == 2) {
+            SIPCall *_activeCall = nullptr;
+            SIPCall *_incomingCall = nullptr;
+
+            for (auto call : std::as_const(m_calls)) {
+                if (_activeCall && _incomingCall) {
+                    break;
+                }
+
+                if (call->isEstablished() && call->isActive()) {
+                    _activeCall = call;
+                    continue;
+                }
+
+                if (!call->isEstablished() && call->isIncoming()) {
+                    _incomingCall = call;
+                    continue;
+                }
+            }
+
+            if (_activeCall && _incomingCall) {
+                endCall(_activeCall);
+                _incomingCall->accept();
+            }
+
             return;
         }
 
@@ -76,6 +121,13 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
         }
     });
 
+    connect(dev, &HeadsetDeviceProxy::dial, this, [this](const QString &number) {
+        if (m_calls.count() == 0) {
+            qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+            call(number);
+        }
+    });
+
     m_blockCleanTimer.setInterval(1min);
     m_blockCleanTimer.callOnTimeout(this, &SIPCallManager::cleanupBlocks);
 
@@ -91,8 +143,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
     initBridge();
 
     // Send BUSY_HERE if we're on the phone
-    if (!isEmergency && hasEstablishedCalls()
-        && m_settings.value("generic/busyOnBusy", false).toBool()) {
+    if (!isEmergency && beBusyOnNextIncomingCall()) {
         pj::CallOpParam prm;
         prm.statusCode = PJSIP_SC_BUSY_HERE;
         call->answer(prm);
@@ -116,6 +167,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
     }
 
     QString title;
+
     if (numberType == Contact::NumberType::Unknown) {
         title = tr("%1 is calling").arg(displayName);
     } else {
@@ -166,24 +218,9 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
     n->setCategory("call.incoming");
     n->setDisplayHint(Notification::tray | Notification::hideContentOnLockScreen);
 
-    // If we've no call ongoing, pause external media - even if we're just ringing the bell
-    if (!isEmergency && hasEstablishedCalls()) {
-        RingToneFactory::instance().zipTone()->start();
-    } else {
-        ExternalMediaManager::instance().pause();
-        StateManager::instance().inhibitScreenSaver();
-
-        auto ringer = new Ringer(n);
-        ringer->start();
-
-        BusylightDeviceManager::instance().startBlinking(Qt::GlobalColor::green);
-        connect(n, &QObject::destroyed, this,
-                []() { BusylightDeviceManager::instance().stopBlinking(); });
-
-        pj::CallOpParam prm;
-        prm.statusCode = PJSIP_SC_RINGING;
-        call->answer(prm);
-    }
+    pj::CallOpParam prm;
+    prm.statusCode = PJSIP_SC_RINGING;
+    call->answer(prm);
 
     connect(n, &Notification::actionInvoked, call, [this, call](QString action, QVariantList) {
         if (action == "accept") {
@@ -211,23 +248,20 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
 void SIPCallManager::updateCallCount()
 {
     quint8 establishedCallsCount = 0;
-    bool earlyMediaActive = false;
+    bool earlyCallState = false;
 
     if (m_calls.length() != m_activeCalls) {
         m_activeCalls = m_calls.length();
         emit activeCallsChanged();
     }
 
-    if (m_activeCalls == 0) {
-        ExternalMediaManager::instance().resume();
-        StateManager::instance().releaseScreenSaver();
-    } else {
+    if (m_activeCalls != 0) {
         for (auto call : std::as_const(m_calls)) {
             if (call->isEstablished()) {
                 ++establishedCallsCount;
             }
-            if (call->earlyMediaActive()) {
-                earlyMediaActive = true;
+            if (call->earlyCallState()) {
+                earlyCallState = true;
             }
         }
     }
@@ -243,26 +277,26 @@ void SIPCallManager::updateCallCount()
 
     if ((establishedCallsCount > 0) != m_hasEstablishedCalls) {
         m_hasEstablishedCalls = establishedCallsCount > 0;
-        emit hasEstablishedCallsChanged();
     }
 
-    if (m_earlyMediaActive != earlyMediaActive) {
-        m_earlyMediaActive = earlyMediaActive;
-        emit earlyMediaActiveChanged();
+    if (m_earlyCallState != earlyCallState) {
+        m_earlyCallState = earlyCallState;
+        emit earlyCallStateChanged();
     }
 }
 
-void SIPCallManager::call(const QString &number, bool silent)
+QString SIPCallManager::call(const QString &number, bool silent)
 {
     const auto &accounts = SIPAccountManager::instance().accounts();
     if (!accounts.isEmpty()) {
         const auto phoneNumber = PhoneNumberUtil::isSipUri(number)
                 ? number
                 : PhoneNumberUtil::cleanPhoneNumber(number);
-        call(accounts.first()->id(), phoneNumber, "", "", silent);
-    } else {
-        qCCritical(lcSIPCallManager) << "no accounts to start call with";
+        return call(accounts.first()->id(), phoneNumber, "", "", silent);
     }
+
+    qCCritical(lcSIPCallManager) << "no accounts to start call with";
+    return "";
 }
 
 void SIPCallManager::initBridge()
@@ -275,10 +309,10 @@ void SIPCallManager::initBridge()
     }
 }
 
-void SIPCallManager::call(const QString &accountId, const QString &number, const QString &contactId,
-                          const QString &preferredIdentity, bool silent)
+QString SIPCallManager::call(const QString &accountId, const QString &number,
+                             const QString &contactId, const QString &preferredIdentity,
+                             bool silent)
 {
-
     initBridge();
 
     // Check if there is already a call for that target number
@@ -288,7 +322,7 @@ void SIPCallManager::call(const QString &accountId, const QString &number, const
         if (number == callRemoteNumber) {
             qCInfo(lcSIPCallManager) << "skipping additional call to already connected URI"
                                      << call->getInfo().remoteUri;
-            return;
+            return "";
         }
     }
 
@@ -300,21 +334,42 @@ void SIPCallManager::call(const QString &accountId, const QString &number, const
     auto account = SIPAccountManager::instance().getAccount(accountId);
 
     if (account) {
-        if (!silent) {
-            ExternalMediaManager::instance().pause();
-            StateManager::instance().inhibitScreenSaver();
-        }
-
-        account->call(number, contactId, preferredIdentity, silent);
-    } else {
-        qCCritical(lcSIPCallManager) << "not starting call - unknown account:" << accountId;
+        return account->call(number, contactId, preferredIdentity, silent);
     }
+
+    qCCritical(lcSIPCallManager) << "not starting call - unknown account:" << accountId;
+    return "";
+}
+
+QStringList SIPCallManager::callIds() const
+{
+    QStringList res;
+
+    for (auto call : std::as_const(m_calls)) {
+        res.push_back(call->uuid());
+    }
+
+    return res;
 }
 
 void SIPCallManager::endAllCalls()
 {
     for (auto call : std::as_const(m_calls)) {
         call->account()->hangup(call->getId());
+    }
+}
+
+void SIPCallManager::endCall(QString id)
+{
+    if (auto call = findCallById(id)) {
+        call->account()->hangup(call->getId());
+    }
+}
+
+void SIPCallManager::addMetadata(const QString &id, const QString &data)
+{
+    if (auto call = findCallById(id)) {
+        call->addMetadata(data);
     }
 }
 
@@ -398,7 +453,7 @@ void SIPCallManager::acceptCall(SIPCall *call)
 {
     Q_CHECK_PTR(call);
 
-    if (hasActiveCalls()) {
+    if (m_activeCalls) {
         RingToneFactory::instance().zipTone()->stop();
     }
 
@@ -420,7 +475,7 @@ void SIPCallManager::rejectCall(SIPCall *call)
 {
     Q_CHECK_PTR(call);
 
-    if (hasActiveCalls()) {
+    if (m_activeCalls) {
         RingToneFactory::instance().zipTone()->stop();
     }
 
@@ -488,6 +543,16 @@ SIPCall *SIPCallManager::findCall(const QString &remoteUri) const
     return nullptr;
 }
 
+SIPCall *SIPCallManager::findCallById(const QString &id) const
+{
+    for (auto call : std::as_const(m_calls)) {
+        if (call->uuid() == id) {
+            return call;
+        }
+    }
+    return nullptr;
+}
+
 void SIPCallManager::triggerCapability(const QString &accountId, const int callId,
                                        const QString &capability) const
 {
@@ -538,6 +603,7 @@ void SIPCallManager::startConference()
             }
 
             m_isConferenceMode = true;
+            GlobalCallState::instance().setIsPhoneConference(true);
             emit isConferenceModeChanged();
         });
     } else {
@@ -550,6 +616,7 @@ void SIPCallManager::endConference()
     if (m_isConferenceMode) {
         endAllCalls();
         m_isConferenceMode = false;
+        GlobalCallState::instance().setIsPhoneConference(false);
         emit isConferenceModeChanged();
     } else {
         qCWarning(lcSIPCallManager) << "Not in conference mode";
@@ -581,7 +648,7 @@ bool SIPCallManager::isOneCallOnHold() const
 void SIPCallManager::addCall(SIPCall *call)
 {
     m_calls.push_back(call);
-    connect(call, &SIPCall::earlyMediaActiveChanged, this, &SIPCallManager::updateCallCount);
+    connect(call, &SIPCall::earlyCallStateChanged, this, &SIPCallManager::updateCallCount);
     connect(call, &SIPCall::establishedChanged, this, &SIPCallManager::updateCallCount);
     connect(call, &SIPCall::establishedChanged, this,
             [call, this]() { emit establishedChanged(call); });
@@ -591,6 +658,7 @@ void SIPCallManager::addCall(SIPCall *call)
             [call, this]() { emit capabilitiesChanged(call); });
     connect(call, &SIPCall::contactChanged, this,
             [call, this]() { emit callContactChanged(call); });
+    connect(call, &SIPCall::metadataChanged, this, [call, this]() { emit metadataChanged(call); });
 
     connect(call, &SIPCall::missed, this, [this, call]() {
         if (call->isBlocked()) {
@@ -657,15 +725,35 @@ void SIPCallManager::addCall(SIPCall *call)
                 });
     });
 
+    emit callAdded(call->account()->id(), call->getId());
     emit callsChanged();
 }
 
 void SIPCallManager::removeCall(SIPCall *call)
 {
+    const auto oldCount = m_calls.size();
+
     m_calls.removeAll(call);
     emit callsChanged();
 
+    // Automatically unhold last remaining call
+    if (oldCount > 1 && m_calls.size() == 1 && m_calls.at(0)->isHolding()) {
+        m_calls.at(0)->unhold();
+    }
+
     updateCallCount();
+
+    // Adjust global contact information to contain the next
+    // active call.
+    auto &gc = GlobalCallState::instance();
+    for (auto call : std::as_const(m_calls)) {
+        if (call->isActive()) {
+            const auto contactInfo =
+                    PhoneNumberUtil::instance().contactInfoBySipUrl(call->sipUrl());
+            gc.setRemoteContactInfo(contactInfo);
+            break;
+        }
+    }
 }
 
 void SIPCallManager::resetMissedCalls()
@@ -753,6 +841,12 @@ bool SIPCallManager::isPhoneNumberBlocked(const QString &phoneNumber) const
     }
 
     return false;
+}
+
+bool SIPCallManager::beBusyOnNextIncomingCall() const
+{
+    return (GlobalCallState::instance().globalCallState() & ICallState::State::CallActive)
+            && (isConferenceMode() || m_settings.value("generic/busyOnBusy", false).toBool());
 }
 
 void SIPCallManager::sendDtmf(const QString &accountId, const int callId, const QString &digit)
@@ -861,21 +955,5 @@ void SIPCallManager::updateBlockTimerRunning()
     } else if (!m_blockCleanTimer.isActive()
                && (m_tempBlockedContacts.size() || m_tempBlockedNumbers.size())) {
         m_blockCleanTimer.start();
-    }
-}
-
-void SIPCallManager::updateBusylightState()
-{
-    auto &busylightDevManager = BusylightDeviceManager::instance();
-
-    QColor color(Qt::GlobalColor::red);
-    if (SIPAudioManager::instance().isAudioCaptureMuted()) {
-        color.setRgb(255, 165, 0);
-    }
-
-    if (isOneCallOnHold()) {
-        busylightDevManager.startBlinking(color);
-    } else {
-        busylightDevManager.switchOn(color);
     }
 }

@@ -13,10 +13,6 @@ class SIPCallManager : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool isConferenceMode READ isConferenceMode NOTIFY isConferenceModeChanged FINAL)
-    Q_PROPERTY(bool hasActiveCalls READ hasActiveCalls NOTIFY activeCallsChanged FINAL)
-    Q_PROPERTY(bool hasEstablishedCalls READ hasEstablishedCalls NOTIFY hasEstablishedCallsChanged
-                       FINAL)
-    Q_PROPERTY(bool earlyMediaActive READ isEarlyMediaActive NOTIFY earlyMediaActiveChanged FINAL)
     Q_PROPERTY(quint8 establishedCallsCount READ establishedCallsCount NOTIFY
                        establishedCallsCountChanged FINAL)
     Q_PROPERTY(unsigned missedCalls READ missedCalls NOTIFY missedCallsChanged FINAL)
@@ -37,21 +33,24 @@ public:
     void initialize();
     void initBridge();
 
+    void addMetadata(const QString &id, const QString &data);
+
     quint8 establishedCallsCount() const { return m_establishedCallsCount; }
     bool hasEstablishedCalls() const { return m_hasEstablishedCalls; }
-    bool hasActiveCalls() const { return !!m_activeCalls; }
     unsigned activeCalls() const { return m_activeCalls; }
 
-    bool isEarlyMediaActive() const { return m_earlyMediaActive; }
+    bool isEarlyCallState() const { return m_earlyCallState; }
 
     unsigned missedCalls() const { return m_missedCalls; }
 
-    Q_INVOKABLE void call(const QString &number, bool silent = false);
-    Q_INVOKABLE void call(const QString &accountId, const QString &number,
-                          const QString &contactId = "", const QString &preferredIdentity = "auto",
-                          bool silent = false);
+    QStringList callIds() const;
+    Q_INVOKABLE QString call(const QString &number, bool silent = false);
+    Q_INVOKABLE QString call(const QString &accountId, const QString &number,
+                             const QString &contactId = "",
+                             const QString &preferredIdentity = "auto", bool silent = false);
     Q_INVOKABLE void endCall(const QString &accountId, const int callId);
     Q_INVOKABLE void endCall(SIPCall *call);
+    Q_INVOKABLE void endCall(QString id);
     Q_INVOKABLE void endAllCalls();
     void holdOtherCalls(const SIPCall *call);
     void holdAllCalls() const;
@@ -70,6 +69,7 @@ public:
 
     SIPCall *findCall(const QString &accountId, int callId) const;
     SIPCall *findCall(const QString &remoteUri) const;
+    SIPCall *findCallById(const QString &id) const;
 
     Q_INVOKABLE void triggerCapability(const QString &accountId, const int callId,
                                        const QString &capability) const;
@@ -90,6 +90,7 @@ public:
 
     bool isContactBlocked(const QString &contactId) const;
     bool isPhoneNumberBlocked(const QString &phoneNumber) const;
+    bool beBusyOnNextIncomingCall() const;
 
     void addCall(SIPCall *call);
     void removeCall(SIPCall *call);
@@ -102,19 +103,19 @@ public:
 signals:
     void incomingCall(SIPCall *call);
     void callsChanged();
+    void callAdded(QString accountId, int callId);
     void callState(int callId, int statusCode);
     void establishedCallsCountChanged();
-    void hasEstablishedCallsChanged();
     void activeCallsChanged();
     void missedCallsChanged();
-    void earlyMediaActiveChanged();
+    void earlyCallStateChanged();
     void establishedChanged(SIPCall *call);
     void isHoldingChanged(SIPCall *call);
     void isConferenceModeChanged();
     void callContactChanged(SIPCall *call);
+    void metadataChanged(SIPCall *call);
     void capabilitiesChanged(SIPCall *call);
     void audioLevelChanged(SIPCall *call, qreal level);
-    void meetingRequested(const QString &accountId, int callId);
     void showCallWindow();
     void blocksChanged();
     void isBlockedChanged(SIPCall *call);
@@ -123,7 +124,6 @@ private slots:
     void dispatchDtmfBuffer();
     void cleanupBlocks();
     void updateBlockTimerRunning();
-    void updateBusylightState();
 
 private:
     SIPCallManager(QObject *parent = nullptr);
@@ -148,7 +148,7 @@ private:
 
     bool m_isConferenceMode = false;
     bool m_hasEstablishedCalls = false;
-    bool m_earlyMediaActive = false;
+    bool m_earlyCallState = false;
     bool m_bridgeConfigured = false;
 };
 

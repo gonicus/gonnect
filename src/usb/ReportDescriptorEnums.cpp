@@ -6,6 +6,21 @@ QString ReportDescriptorEnums::toString(const UsageId id)
     return QMetaEnum::fromType<UsageId>().valueToKey(static_cast<int>(id));
 }
 
+QString ReportDescriptorEnums::toString(const TeamsDisplayFieldSupport id)
+{
+    return QMetaEnum::fromType<TeamsDisplayFieldSupport>().valueToKey(static_cast<int>(id));
+}
+
+QString ReportDescriptorEnums::toString(const TeamsScreenSelect id)
+{
+    return QMetaEnum::fromType<TeamsScreenSelect>().valueToKey(static_cast<int>(id));
+}
+
+QString ReportDescriptorEnums::toString(const TeamsPresenceIcon id)
+{
+    return QMetaEnum::fromType<TeamsPresenceIcon>().valueToKey(static_cast<int>(id));
+}
+
 ReportDescriptorEnums::UsageId ReportDescriptorEnums::intToUsageId(const quint32 id)
 {
     const auto metaEnum = QMetaEnum::fromType<UsageId>();

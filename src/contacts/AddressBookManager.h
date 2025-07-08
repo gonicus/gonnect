@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QHash>
 
+class IAddressBookFeeder;
+
 class AddressBookManager : public QObject
 {
     Q_OBJECT
@@ -20,18 +22,18 @@ public:
     void initAddressBookConfigs();
     void reloadAddressBook();
 
+    static QString hashForSettingsGroup(const QString &group);
+
+    void acquireSecret(const QString &group, std::function<void(const QString &secret)> callback);
+
 private:
     explicit AddressBookManager(QObject *parent = nullptr);
 
     QString secret(const QString &group) const;
-    QString hashForSettingsGroup(const QString &group) const;
 
     void processAddressBookQueue();
-    bool processLDAPAddressBookConfig(const QString &group);
-    bool processLDAPAddressBookConfigImpl(const QString &group, const QString &password);
-    bool processCSVAddressBookConfig(const QString &group);
-    bool processCardDAVAddressBookConfig(const QString &group);
-    void processCardDAVAddressBookConfigImpl(const QString &group, const QString &password);
+
+    QHash<QString, IAddressBookFeeder *> m_addressBookFeeders;
 
     QStringList m_addressBookConfigs;
     QStringList m_addressBookQueue;

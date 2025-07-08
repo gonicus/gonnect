@@ -4,8 +4,10 @@
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
 #include "InhibitPortal.h"
+#include "ICallState.h"
 
 class DBusActivationAdapter;
+class GOnnectDBusAPI;
 class GlobalShortcutPortal;
 class OrgFreedesktopScreenSaverInterface;
 
@@ -32,6 +34,8 @@ public:
     bool globalShortcutsSupported() const;
     QVariantMap globalShortcuts() const;
 
+    GOnnectDBusAPI *apiEndpoint() { return m_apiEndpoint; }
+
     void sendArguments(const QStringList &args);
     Q_INVOKABLE void restart();
 
@@ -56,12 +60,16 @@ private:
     explicit StateManager(QObject *parent = nullptr);
 
     void sessionStateChanged(bool screensaverActive, InhibitPortal::InhibitState state);
+    void updateInhibitState();
 
     GlobalShortcutPortal *m_globalShortcutPortal = nullptr;
     InhibitPortal *m_inhibitPortal = nullptr;
     OrgFreedesktopScreenSaverInterface *m_screenSaverInterface = nullptr;
 
     DBusActivationAdapter *m_activationAdapter = nullptr;
+    GOnnectDBusAPI *m_apiEndpoint = nullptr;
+
+    ICallState::States m_oldCallState = ICallState::State::Idle;
 
     unsigned m_screenSaverCookie = 0;
 

@@ -12,6 +12,12 @@ class Contact : public QObject
     QML_ELEMENT
     QML_UNCREATABLE("")
 
+    Q_PROPERTY(QString name READ name CONSTANT FINAL)
+    Q_PROPERTY(bool hasAvatar READ hasAvatar CONSTANT FINAL)
+    Q_PROPERTY(QString avatarPath READ avatarPath CONSTANT FINAL)
+    Q_PROPERTY(bool hasBuddyState READ sipStatusSubscriptable CONSTANT FINAL)
+    Q_PROPERTY(QString subscriptableNumber READ subscriptableNumber CONSTANT FINAL)
+
 public:
     enum class NumberType { Unknown, Commercial, Home, Mobile };
     Q_ENUM(NumberType)
@@ -26,19 +32,33 @@ public:
         bool operator!=(const PhoneNumber &other) const;
     };
 
-    explicit Contact(QObject *parent = nullptr);
-    explicit Contact(const QString &id, const QString &dn, const QString &name,
+    struct ContactSourceInfo
+    {
+        unsigned prio = 0;
+        QString displayName;
+
+        bool operator==(const ContactSourceInfo &other) const;
+        bool operator!=(const ContactSourceInfo &other) const;
+    };
+
+    explicit Contact(const QString &id, const QString &dn, const QString &sourceUid,
+                     const ContactSourceInfo &contactSourceInfo, const QString &name,
                      QObject *parent = nullptr);
-    explicit Contact(const QString &id, const QString &dn, const QString &name,
+    explicit Contact(const QString &id, const QString &dn, const QString &sourceUid,
+                     const ContactSourceInfo &contactSourceInfo, const QString &name,
                      const QString &company, const QString &mail, const QDateTime &lastModified,
                      const QList<Contact::PhoneNumber> &phoneNumbers, QObject *parent = nullptr);
+
+    explicit Contact(QObject *parent = nullptr);
     explicit Contact(const Contact &other);
 
     Contact &operator=(const Contact &other);
 
     QString id() const;
     QString dn() const;
+    QString sourceUid() const;
     QString name() const;
+    const ContactSourceInfo &contactSourceInfo() const;
     QString company() const;
     QString mail() const;
     bool hasAvatar() const;
@@ -48,13 +68,18 @@ public:
     bool sipStatusSubscriptable() const;
     QString subscriptableNumber() const;
 
+    void setDisplayName(const QString &dn);
+    void setName(const QString &name);
     void setCompany(const QString &company);
     void setMail(const QString &mail);
     void setLastModified(const QDateTime &lastModified);
+    void setContactSourceInfo(const ContactSourceInfo &contactSourceInfo);
     void setHasAvatar(bool hasAvatar);
     void addPhoneNumber(const Contact::NumberType type, const QString &phoneNumber,
                         bool isSipStatusSubscriptable);
     void addPhoneNumbers(const QList<Contact::PhoneNumber> &phoneNumbers);
+
+    void clearPhoneNumbers();
 
     Contact::PhoneNumber phoneNumberObject(const QString &phoneNumber) const;
 
@@ -68,7 +93,9 @@ private:
     bool m_hasAvatar = false;
     QString m_id;
     QString m_dn;
+    QString m_sourceUid;
     QString m_name;
+    ContactSourceInfo m_contactSourceInfo;
     QString m_company;
     QString m_mail;
     QDateTime m_lastModified;

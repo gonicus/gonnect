@@ -1,4 +1,17 @@
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Quick QuickControls2 Multimedia Sql Core5Compat Xml)
+find_package(Qt6 REQUIRED COMPONENTS
+    Core
+    Core5Compat
+    Widgets
+    Quick
+    QuickControls2
+    Multimedia
+    Sql
+    Network
+    NetworkAuth
+    WebEngineCore
+    WebEngineQuick
+    Xml
+)
 find_package(Qca-qt6 REQUIRED)
 
 include(FindPkgConfig)
@@ -10,6 +23,8 @@ pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
 pkg_check_modules(SASL2 REQUIRED IMPORTED_TARGET libsasl2)
 pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
 pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
+pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
+pkg_check_modules(LIBICAL REQUIRED libical IMPORTED_TARGET)
 
 add_definitions(${PJSIP_STATIC_CFLAGS} -DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
 
@@ -19,6 +34,12 @@ qt_add_dbus_adaptor(DBUS_SOURCES ../specs/org.freedesktop.application.xml
     ""
     DBusActivationAdapter
     DBusActivationAdapter
+)
+qt_add_dbus_adaptor(DBUS_SOURCES ../specs/de.gonicus.gonnect.api.xml
+    QObject
+    ""
+    GOnnectDBusAPIAdaptor
+    GOnnectDBusAPIAdaptor
 )
 qt_add_dbus_adaptor(DBUS_SOURCES ../specs/org.gnome.ShellSearchProvider2.xml
     QObject
@@ -73,7 +94,7 @@ qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Secret.xml
 )
 
 set(APP_SOURCES main.cpp)
-qt_add_resources(APP_SOURCES application.qrc)
+qt_add_big_resources(APP_SOURCES application.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
 qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
 
@@ -87,6 +108,18 @@ set(gonnect_qml_singletons
 )
 set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
+add_subdirectory(contacts/ldap)
+add_subdirectory(contacts/carddav)
+add_subdirectory(contacts/csv)
+add_subdirectory(contacts/eds)
+add_subdirectory(calendar/caldav)
+add_subdirectory(calendar/eds)
+
+# Disabled, because akonadi doesn't provide a reliable way to be used
+# within flatpaks.
+#add_subdirectory(contacts/akonadi)
+#add_subdirectory(calendar/akonadi)
+
 if(BUILD_DEPENDENCIES)
     include(ExternalProject)
 
@@ -99,7 +132,11 @@ if(BUILD_DEPENDENCIES)
         UPDATE_DISCONNECTED TRUE
     )
     ExternalProject_Get_Property(qtwebdav INSTALL_DIR)
-    target_include_directories(gonnect SYSTEM PRIVATE ${INSTALL_DIR}/include)
+    target_include_directories(CardDAVAddressBookFactory SYSTEM PRIVATE ${INSTALL_DIR}/include)
+    target_link_directories(CardDAVAddressBookFactory PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
+    target_include_directories(CalDAVEventFeederFactory SYSTEM PRIVATE ${INSTALL_DIR}/include)
+    target_link_directories(CalDAVEventFeederFactory PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
+    target_include_directories(gonnect PRIVATE ${INSTALL_DIR}/include)
     target_link_directories(gonnect PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
 
     ExternalProject_Add(vcard
@@ -111,15 +148,30 @@ if(BUILD_DEPENDENCIES)
         UPDATE_DISCONNECTED TRUE
     )
     ExternalProject_Get_Property(vcard INSTALL_DIR)
-    target_include_directories(gonnect SYSTEM PRIVATE ${INSTALL_DIR}/include)
+    target_include_directories(CardDAVAddressBookFactory SYSTEM PRIVATE ${INSTALL_DIR}/include)
+    target_link_directories(CardDAVAddressBookFactory PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
     target_link_directories(gonnect PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
 
-    add_dependencies(gonnect vcard qtwebdav)
+    ExternalProject_Add(qca
+        GIT_REPOSITORY https://github.com/KDE/qca.git
+        GIT_TAG v2.3.9
+        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON
+        UPDATE_DISCONNECTED TRUE
+    )
+    ExternalProject_Get_Property(qca INSTALL_DIR)
+    include_directories("${INSTALL_DIR}/include/Qca-qt6/QtCrypto")
+    link_directories("${INSTALL_DIR}/lib")
+
+    add_dependencies(gonnect qca)
+    add_dependencies(CardDAVAddressBookFactory vcard qtwebdav)
+    add_dependencies(CalDAVEventFeederFactory qtwebdav)
 else()
     find_package(QtWebDAV REQUIRED)
     find_package(vCard REQUIRED)
+    find_package(Qca-qt6 QUIET)
 endif()
 
+set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
 
 qt_add_qml_module(gonnect
     URI base
@@ -130,51 +182,96 @@ qt_add_qml_module(gonnect
         ${gonnect_qml_singletons}
 
         ui/components/controls/AudioLevelButton.qml
+        ui/components/controls/BarButton.qml
         ui/components/controls/Button.qml
         ui/components/controls/CheckBox.qml
         ui/components/controls/ClipboardButton.qml
+        ui/components/controls/ControlBar.qml
         ui/components/controls/DtmfDialer.qml
+        ui/components/controls/EmojiButton.qml
+        ui/components/controls/EmojiPicker.qml
         ui/components/controls/FavIcon.qml
+        ui/components/controls/FavoriteListItemBig.qml
+        ui/components/controls/FavoriteListItemSmall.qml
+        ui/components/controls/FirstAidButton.qml
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/Label.qml
         ui/components/controls/MenuContactInfo.qml
         ui/components/controls/SearchDial.qml
+        ui/components/controls/SearchField.qml
         ui/components/controls/Switch.qml
+        ui/components/controls/TabBar.qml
+        ui/components/controls/TabButton.qml
 
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
         ui/components/dialogs/InfoDialog.qml
-        ui/components/dialogs/JitsiUpgradeDialog.qml
 
+        ui/components/pages/Activity.qml
+        ui/components/pages/Chats.qml
+        ui/components/pages/Call.qml
+        ui/components/pages/Calls.qml
+        ui/components/pages/Conference.qml
+        ui/components/pages/Default.qml
+
+        ui/components/popups/AudioDeviceMenu.qml
+        ui/components/popups/BurgerMenu.qml
+        ui/components/popups/FirstAid.qml
         ui/components/popups/HistoryListContextMenu.qml
+        ui/components/popups/JitsiDeviceMenu.qml
+        ui/components/popups/JitsiHistoryListContextMenu.qml
+        ui/components/popups/Menu.qml
         ui/components/popups/SearchResultPopup.qml
+        ui/components/popups/VideoDeviceMenu.qml
+        ui/components/popups/VolumePopup.qml
+
+        ui/components/search/IdentitySelector.qml
+        ui/components/search/KeyNavigator.qml
+        ui/components/search/SearchCategoryItem.qml
+        ui/components/search/SearchCategoryList.qml
+        ui/components/search/SearchResultCategory.qml
+        ui/components/search/SearchResultItem.qml
+        ui/components/search/SearchResultNumberItem.qml
 
         ui/components/templatefields/TemplateFieldText.qml
         ui/components/templatefields/TemplateFieldSecret.qml
         ui/components/templatefields/TemplateFieldFile.qml
 
+        ui/components/AdditionalInfo.qml
         ui/components/AvatarImage.qml
         ui/components/Badge.qml
         ui/components/BottomStatusBar.qml
         ui/components/BuddyStatusIndicator.qml
+        ui/components/CallButtonBar.qml
         ui/components/CallDetails.qml
+        ui/components/CallerBigAvatar.qml
         ui/components/CallItem.qml
         ui/components/CallList.qml
+        ui/components/CallSideBar.qml
+        ui/components/Card.qml
+        ui/components/CardHeading.qml
         ui/components/CardList.qml
-        ui/components/CompleteHistoryWindow.qml
+        ui/components/ChatSideBar.qml
+        ui/components/ConferenceButtonBar.qml
+        ui/components/CustomWindowHeader.qml
+        ui/components/DateEventsList.qml
         ui/components/FavoritesList.qml
         ui/components/HistoryList.qml
+        ui/components/MainTabBar.qml
+        ui/components/ParticipantsList.qml
         ui/components/SearchBox.qml
         ui/components/SettingsPage.qml
+        ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
+
+        ui/scripts/util.js
 
         ui/AboutWindow.qml
         ui/AudioEnvWindow.qml
         ui/BaseWindow.qml
-        ui/CallsWindow.qml
-        ui/DialWindow.qml
+        ui/GonnectWindow.qml
         ui/EmergencyCallIncomingWindow.qml
         ui/PreferredIdentityEditWindow.qml
         ui/ShortcutsWindow.qml
@@ -182,18 +279,30 @@ qt_add_qml_module(gonnect
 
     DEPENDENCIES
         QtQml.Models
+
     SOURCES
         Application.cpp
         Application.h
+        AppSettings.h
+        AuthManager.cpp
+        AuthManager.h
         ErrorBus.h
         ErrorBus.cpp
-        StateManager.cpp
-        StateManager.h
-        AppSettings.h
+        GlobalCallState.h
+        GlobalCallState.cpp
+        GlobalInfo.h
+        GlobalInfo.cpp
+        GlobalMuteState.h
+        GlobalMuteState.cpp
+        ICallState.h
+        ICallState.cpp
         ReadOnlyConfdSettings.cpp
         ReadOnlyConfdSettings.h
-        dbus/ExternalMediaManager.cpp
-        dbus/ExternalMediaManager.h
+        KeychainSettings.cpp
+        KeychainSettings.h
+        StateManager.cpp
+        StateManager.h
+
         dbus/portal/AbstractPortal.h
         dbus/portal/AbstractPortal.cpp
         dbus/portal/AccountPortal.h
@@ -210,6 +319,11 @@ qt_add_qml_module(gonnect
         dbus/portal/SecretPortal.cpp
         dbus/portal/NetworkHelper.h
         dbus/portal/NetworkHelper.cpp
+
+        dbus/ExternalMediaManager.cpp
+        dbus/ExternalMediaManager.h
+        dbus/GOnnectDBusAPI.h
+        dbus/GOnnectDBusAPI.cpp
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
         dbus/Notification.h
@@ -220,6 +334,7 @@ qt_add_qml_module(gonnect
         dbus/NotificationManager.cpp
         dbus/SearchProvider.h
         dbus/SearchProvider.cpp
+
         sip/CallHistory.h
         sip/CallHistory.cpp
         sip/CallHistoryItem.h
@@ -228,7 +343,7 @@ qt_add_qml_module(gonnect
         sip/DtmfGenerator.cpp
         sip/IMHandler.h
         sip/IMHandler.cpp
-        sip/KeychainSettings.h
+        sip/NumberStat.h
         sip/NumberStats.h
         sip/NumberStats.cpp
         sip/SIPAccount.h
@@ -237,8 +352,6 @@ qt_add_qml_module(gonnect
         sip/SIPAccountManager.cpp
         sip/SIPAudioDevice.h
         sip/SIPAudioDevice.cpp
-        sip/SIPAudioManager.h
-        sip/SIPAudioManager.cpp
         sip/SIPBuddy.h
         sip/SIPBuddy.cpp
         sip/SIPCall.h
@@ -273,14 +386,27 @@ qt_add_qml_module(gonnect
         sip/Toggler.cpp
         sip/TogglerManager.h
         sip/TogglerManager.cpp
+
+        calendar/DateEvent.h
+        calendar/DateEvent.cpp
+        calendar/DateEventFeederManager.h
+        calendar/DateEventFeederManager.cpp
+        calendar/DateEventManager.h
+        calendar/DateEventManager.cpp
+        calendar/IDateEventFeeder.h
+        calendar/IDateEventFeederFactory.h
+
+        chat/IChatProvider.h
+        chat/IChatProvider.cpp
+        chat/IChatRoom.h
+        chat/IChatRoom.cpp
+
         contacts/AddressBook.cpp
         contacts/AddressBook.h
         contacts/AddressBookManager.cpp
         contacts/AddressBookManager.h
         contacts/AvatarManager.cpp
         contacts/AvatarManager.h
-        contacts/CardDAVAddressBookFeeder.h
-        contacts/CardDAVAddressBookFeeder.cpp
         contacts/Contact.cpp
         contacts/Contact.h
         contacts/ContactSerializer.cpp
@@ -288,42 +414,92 @@ qt_add_qml_module(gonnect
         contacts/FuzzyCompare.cpp
         contacts/FuzzyCompare.h
         contacts/IAddressBookFeeder.h
-        contacts/LDAPAddressBookFeeder.cpp
-        contacts/LDAPAddressBookFeeder.h
-        contacts/LDAPInitializer.h
-        contacts/LDAPInitializer.cpp
         contacts/PhoneCodeLookup.h
         contacts/PhoneCodeLookup.cpp
         contacts/PhoneNumberUtil.cpp
         contacts/PhoneNumberUtil.h
-        contacts/CsvFileAddressBookFeeder.h
-        contacts/CsvFileAddressBookFeeder.cpp
+        contacts/ResponseLoader.h
+        contacts/ResponseLoader.cpp
+        contacts/ResponseItem.h
+        contacts/ResponseItem.cpp
+        contacts/ResponseTreeItem.h
+        contacts/ResponseTreeItem.cpp
+        contacts/ResponseTreeModel.h
+        contacts/ResponseTreeModel.cpp
+        contacts/LDAPInitializer.h
+        contacts/LDAPInitializer.cpp
+        contacts/IAddressBookFactory.h
+
+        media/AudioManager.h
+        media/AudioManager.cpp
         media/AudioPort.h
         media/AudioPort.cpp
         media/Sniffer.h
         media/Sniffer.cpp
+        media/VideoManager.h
+        media/VideoManager.cpp
+
+        platform/UserInfo.h
+        platform/UserInfo.cpp
+
         ui/CallsModel.h
         ui/CallsModel.cpp
+        ui/ChatModel.h
+        ui/ChatModel.cpp
+        ui/DateEventsModel.h
+        ui/DateEventsModel.cpp
+        ui/EmojiInfo.h
+        ui/EmojiInfo.cpp
+        ui/EmojiGroupsModel.h
+        ui/EmojiGroupsModel.cpp
+        ui/EmojiModel.h
+        ui/EmojiModel.cpp
+        ui/EmojiResolver.h
+        ui/EmojiResolver.cpp
+        ui/EmojiProxyModel.h
+        ui/EmojiProxyModel.cpp
         ui/CallsProxyModel.h
         ui/CallsProxyModel.cpp
+        ui/ContactSourceInfoModel.h
+        ui/ContactSourceInfoModel.cpp
         ui/EnumTranslation.h
         ui/EnumTranslation.cpp
         ui/FavoritesModel.h
         ui/FavoritesModel.cpp
+        ui/FavoritesProxyModel.h
+        ui/FavoritesProxyModel.cpp
+        ui/HistoryContactSearchModel.h
+        ui/HistoryContactSearchModel.cpp
+        ui/HistoryContactSearchProxyModel.h
+        ui/HistoryContactSearchProxyModel.cpp
         ui/HistoryModel.h
         ui/HistoryModel.cpp
         ui/HistoryProxyModel.h
         ui/HistoryProxyModel.cpp
         ui/Icons.h
         ui/Icons.cpp
+        ui/JitsiConnector.h
+        ui/JitsiConnector.cpp
+        ui/JitsiDevicesModel.h
+        ui/JitsiDevicesModel.cpp
+        ui/JitsiMediaDevice.h
+        ui/JitsiMediaDevice.cpp
         ui/MostCalledModel.h
         ui/MostCalledModel.cpp
         ui/NumberStatsModel.h
         ui/NumberStatsModel.cpp
         ui/NumberStatsProxyModel.h
         ui/NumberStatsProxyModel.cpp
+        ui/RandomRoomNameGenerator.h
+        ui/RandomRoomNameGenerator.cpp
+        ui/ParticipantsModel.h
+        ui/ParticipantsModel.cpp
         ui/SearchListModel.h
         ui/SearchListModel.cpp
+        ui/SearchListProxyModel.h
+        ui/SearchListProxyModel.cpp
+        ui/SimpleSortProxyModel.h
+        ui/SimpleSortProxyModel.cpp
         ui/SIPTemplateModel.h
         ui/SIPTemplateModel.cpp
         ui/SIPTemplatesModel.h
@@ -338,6 +514,7 @@ qt_add_qml_module(gonnect
         ui/TogglerProxyModel.cpp
         ui/ViewHelper.h
         ui/ViewHelper.cpp
+
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp
         usb/HeadsetDevice.h
@@ -360,13 +537,15 @@ qt_add_qml_module(gonnect
         usb/busylight/KuandoOmega.cpp
         usb/busylight/LuxaforFlag.h
         usb/busylight/LuxaforFlag.cpp
-        usb/busylight/LitraBeamLX.h
-        usb/busylight/LitraBeamLX.cpp
+#        usb/busylight/LitraBeamLX.h
+#        usb/busylight/LitraBeamLX.cpp
+        usb/busylight/LitraGlow.h
+        usb/busylight/LitraGlow.cpp
 )
 
 set_target_properties(gonnect PROPERTIES
-    #QT_QMLCACHEGEN_DIRECT_CALLS ON
-    QT_QMLCACHEGEN_ARGUMENTS "--verbose"
+    QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
+    LINK_FLAGS_RELEASE -s
 )
 
 qt_extract_metatypes(gonnect)
@@ -378,6 +557,10 @@ qt_add_translations(gonnect
 target_link_directories(gonnect PRIVATE
     ${PJSIP_STATIC_LIBRARY_DIRS}
 )
+
+if(ENABLE_PCH)
+    target_precompile_headers(gonnect PRIVATE pch.h)
+endif()
 
 target_link_libraries(gonnect
     PRIVATE
@@ -394,32 +577,61 @@ target_link_libraries(gonnect
         Qt6::DBus
         Qt6::Multimedia
         Qt6::Sql
+        Qt6::Network
+        Qt6::NetworkAuth
+        Qt6::WebEngineCore
+        Qt6::WebEngineQuick
         Qt6::Core5Compat
         ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI
+        PkgConfig::LIBPULSE
+        PkgConfig::LIBICAL
         GOnnectVersion
         qca-qt6
         hid-rp
-        vCard
         QtWebDAV
         Qt6::Xml
+        ${AKONADI_CONTACT_FACTORY}
+        ${AKONADI_CALENDAR_FACTORY}
+        LDAPAddressBookFactory
+        CardDAVAddressBookFactory
+        CSVAddressBookFactory
+        CalDAVEventFeederFactory
+        ${EDS_ADDRESSBOOK_LIBRARIES}
+        ${EDS_CALENDAR_LIBRARIES}
 )
+
+qt_import_plugins(gonnect INCLUDE
+     ${AKONADI_CONTACT_FACTORY}
+     ${AKONADI_CALENDAR_FACTORY}
+     LDAPAddressBookFactory
+     CardDAVAddressBookFactory
+     CSVAddressBookFactory
+     CalDAVEventFeederFactory
+     ${EDS_ADDRESSBOOK_FACTORY}
+     ${EDS_CALENDAR_FACTORY})
 
 target_include_directories(gonnect
     PRIVATE
+    chat
     dbus
     dbus/portal
     sip
+    calendar
     contacts
     ui
+    ui/chat
     usb
     usb/busylight
     media
+    platform
     ${PJSIP_STATIC_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+target_compile_definitions(gonnect PRIVATE QT_DISABLE_DEPRECATED_BEFORE=0x060900)
 
 # Add hid-rp header only stuff as "isystem" so that we have a chance
 # to ignore the warnings their code issues.

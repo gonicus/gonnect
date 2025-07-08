@@ -10,7 +10,6 @@
 #include "HeadsetDevice.h"
 #include "HeadsetDeviceProxy.h"
 #include "BusylightDeviceManager.h"
-#include "IBusylightDevice.h"
 
 Q_LOGGING_CATEGORY(lcHeadsets, "gonnect.usb.headsets")
 
@@ -105,6 +104,7 @@ void USBDevices::shutdown()
     m_ctx = nullptr;
 
     if (m_proxy) {
+        m_proxy->setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon::Offline);
         m_proxy->close();
         m_proxy = nullptr;
     }
@@ -207,6 +207,7 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
     ReportDescriptorParser parser;
 
     std::shared_ptr<ApplicationCollection> appCollection;
+    QHash<UsageId, quint16> teamsUsageMapping;
 
     try {
         appCollection = parser.parse(byteArr);
@@ -221,12 +222,22 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
         return nullptr;
     }
 
+    try {
+        teamsUsageMapping = parser.parseTeamsReportIDs(byteArr);
+    } catch (...) {
+        QString ps = QString::fromWCharArray(deviceInfo->product_string);
+        qCWarning(lcHeadsets, "no Microsoft Teams related usage found for %s [%s]",
+                  deviceInfo->path, ps.toStdString().c_str());
+    }
+
     static const QList<UsageId> usageIdsOfInterest = {
         UsageId::Telephony_HookSwitch,
         UsageId::Telephony_PhoneMute,
         UsageId::Telephony_LineBusyTone,
         UsageId::Telephony_Flash,
+        UsageId::Telephony_ProgrammableButton,
         UsageId::Telephony_Ringer,
+        UsageId::Telephony_TelephonyKeyPad,
         UsageId::LED_OffHook,
         UsageId::LED_Mute,
         UsageId::LED_Ring,
@@ -238,22 +249,29 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
 
     QString ps = QString::fromWCharArray(deviceInfo->product_string);
     qCDebug(lcHeadsets, "HID headset %s [%s] found:", deviceInfo->path, ps.toStdString().c_str());
+    if (!teamsUsageMapping.isEmpty()) {
+        qCDebug(lcHeadsets, "  Teams support enabled");
+    }
 
     for (const auto usageId : usageIdsOfInterest) {
         const auto res = appCollection->findUsage(usageId);
         if (res.isValid()) {
             qCDebug(lcHeadsets).noquote()
-                    << QString("  %1 (bit position %2, report id 0x%3)")
+                    << QString("  %1 (bit position %2, report id 0x%3, %4)")
                                .arg(ReportDescriptorEnums::toString(res.usage->id))
                                .arg(res.bitPositionInReport)
-                               .arg(res.report->id, 2, 16, QChar('0'));
+                               .arg(res.report->id, 2, 16, QChar('0'))
+                               .arg(ReportDescriptorEnums::toString(res.usage->type));
             usageInfos.insert(usageId,
-                              { res.bitPositionInReport, static_cast<quint8>(res.report->id) });
+                              { res.bitPositionInReport, res.usage->size,
+                                static_cast<quint8>(res.report->id) });
         }
     }
 
     HeadsetDevice *hd = new HeadsetDevice(deviceInfo, this);
     hd->setUsageInfos(usageInfos);
+    hd->setTeamsUsageMapping(teamsUsageMapping);
+
     return hd;
 }
 

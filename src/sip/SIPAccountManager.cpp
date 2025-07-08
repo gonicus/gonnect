@@ -1,6 +1,9 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
+#include "HeadsetDeviceProxy.h"
+#include "USBDevices.h"
+#include "ReportDescriptorEnums.h"
 #include "SIPAccountManager.h"
 
 Q_LOGGING_CATEGORY(lcSIPAccountManager, "gonnect.sip.accounts")
@@ -11,6 +14,11 @@ void SIPAccountManager::setSipRegistered(bool value)
 {
     if (m_sipRegistered != value) {
         m_sipRegistered = value;
+
+        USBDevices::instance().getHeadsetDeviceProxy()->setPresenceIcon(
+                value ? ReportDescriptorEnums::TeamsPresenceIcon::Online
+                      : ReportDescriptorEnums::TeamsPresenceIcon::Offline);
+
         emit sipRegisteredChanged();
     }
 }
@@ -23,6 +31,7 @@ void SIPAccountManager::updateSipRegistered()
             return;
         }
     }
+
     setSipRegistered(false);
 }
 
