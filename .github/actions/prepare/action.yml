@@ -23,7 +23,7 @@ runs:
       if: inputs.qt-only == 'false'
       run: |
         sudo apt-get update
-        sudo apt install -y libusb-1.0-0-dev uuid-dev libldap-dev libssl-dev libudev-dev ninja-build llvm llvm-dev libsasl2-dev
+        sudo apt install -y libusb-1.0-0-dev uuid-dev libldap-dev libssl-dev libudev-dev ninja-build llvm llvm-dev libsasl2-dev libical-dev libsecret-1-dev evolution-data-server-dev
         sudo snap install yq
     
     - name: Install git lfs
