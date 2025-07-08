@@ -4,7 +4,7 @@ inputs:
   qt-version:
     description: 'QT version'
     required: true
-    default: '6.8.0'
+    default: '6.9.1'
   qt-only:
     description: 'Install Qt only, skip other steps'
     default: 'false'
@@ -36,7 +36,7 @@ runs:
         version: ${{ inputs.qt-version }}
         host: 'linux'
         target: 'desktop'
-        modules: 'qt5compat qtmultimedia'
+        modules: 'qt5compat qtmultimedia qtwebengine'
         arch: 'linux_gcc_64'
         cache: true
     
