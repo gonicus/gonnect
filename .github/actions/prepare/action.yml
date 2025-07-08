@@ -36,7 +36,7 @@ runs:
         version: ${{ inputs.qt-version }}
         host: 'linux'
         target: 'desktop'
-        modules: 'qt5compat qtmultimedia qtwebengine qtnetworkauth'
+        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth'
         arch: 'linux_gcc_64'
         cache: true
     
