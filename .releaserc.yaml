@@ -1,5 +1,12 @@
 branches: 
-  - main
+  - name: release
+    channel: flathub
+  - name: freeze/**
+    channel: gonihub
+    prerelease: beta
+  - name: hotfix/**
+    channel: gonihub
+    prerelease: "${name.split('/').slice(0, 2).join('-').toLowerCase()}"
 plugins:
   - "@semantic-release/commit-analyzer"
   - "@semantic-release/release-notes-generator"
