@@ -154,7 +154,7 @@ if(BUILD_DEPENDENCIES)
 
     ExternalProject_Add(qca
         GIT_REPOSITORY https://github.com/KDE/qca.git
-        GIT_TAG v2.3.9
+        GIT_TAG v2.3.10
         CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON
         PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/qca-cmake.patch"
         UPDATE_DISCONNECTED TRUE
