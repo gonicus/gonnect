@@ -650,10 +650,3 @@ UsageInfo::UsageInfo(qsizetype bitPosition, quint32 size, quint8 reportId)
     this->size = size;
     this->reportId = reportId;
 }
-
-UsageInfo::UsageInfo(const UsageInfo &other)
-{
-    bitPosition = other.bitPosition;
-    size = other.size;
-    reportId = other.reportId;
-}

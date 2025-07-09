@@ -10,7 +10,6 @@ struct UsageInfo
 {
     UsageInfo() { }
     UsageInfo(qsizetype bitPosition, quint32 size, quint8 reportId);
-    UsageInfo(const UsageInfo &other);
 
     qsizetype bitPosition = 0;
     quint32 size = 0;
