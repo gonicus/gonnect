@@ -13,16 +13,20 @@ name: "CodeQL Advanced"
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - release
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches: 
+      - release
+      - main
   schedule:
     - cron: '18 19 * * 5'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  QT_VERSION: '6.8.2'
+  QT_VERSION: '6.9.1'
   EXT_BASE: ${{github.workspace}}
 
 jobs:

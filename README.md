@@ -113,6 +113,17 @@ our experience, having more than three endpoints will produce bad sound quality,
 other performance issues. Bigger conferences would require a specific configuration on the 
 SIP server or another platform (like [Jitsi Meet](https://meet.jit.si/)).
 
+# Translations
+
+We are using [Weblate](https://hosted.weblate.org/engage/gonnect/) to translate GOnnect
+in various languages. This hosted service is provided us for free as GOnnect is an Open Source
+project. Many thanks to the Weblate team for this!.
+
+Everyone is invited to contribute to the translations. Just head over to our 
+[Weblate project](https://hosted.weblate.org/engage/gonnect/) and start translating.
+If you miss a language request a new one at Weblate or 
+[create an issue at GitHub](https://github.com/gonicus/gonnect/issues/new/choose).
+
 # Development
 
 _GOnnect_ is based on Qt / C++ and requires a set of libraries to be buildable.
