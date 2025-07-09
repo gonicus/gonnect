@@ -90,7 +90,7 @@
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="442"/>
         <source>Parse error: %1</source>
-        <translation>Error de parásito: %1</translation>
+        <translation>Error de análisis: %1</translation>
     </message>
 </context>
 <context>
@@ -98,7 +98,7 @@
     <message>
         <location filename="../src/dbus/portal/BackgroundPortal.cpp" line="27"/>
         <source>Don&apos;t miss any calls by automatically starting GOnnect on session start.</source>
-        <translation type="unfinished"></translation>
+        <translation>No te pierdas ninguna llamada iniciando automáticamente GOnnect en el inicio de sesión.</translation>
     </message>
 </context>
 <context>
@@ -106,7 +106,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/BaseDialog.qml" line="13"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Diálogo</translation>
     </message>
 </context>
 <context>
