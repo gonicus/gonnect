@@ -90,7 +90,7 @@
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="442"/>
         <source>Parse error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error de parásito: %1</translation>
     </message>
 </context>
 <context>
