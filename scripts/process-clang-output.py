@@ -97,7 +97,7 @@ if __name__ == '__main__':
     print("Found %d clang messages" % count)
     if count > 0:
 
-        server_url = os.environ["CI_SERVER_URL"]
+        server_url = os.environ.get("CI_SERVER_URL")
         if server_url:
             gl = gitlab.Gitlab('https://gitlab.intranet.gonicus.de', private_token=args.token)
             project = gl.projects.get(os.environ["CI_MERGE_REQUEST_PROJECT_ID"])
