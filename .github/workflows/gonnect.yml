@@ -2,35 +2,16 @@ name: GOnnect Build
 
 on:
   workflow_dispatch:  # can be manually dispatched under GitHub's "Actions" tab
-  # Run the build only, if the branch is release or a PR with release as target is used
-  # Also run only, if files were changed, which result in a changed build.
+  # Run the build only, if the branch is release or main or a PR with release or main as target is used
   push:
     branches:
       - release
-    paths:
-      - 'CMakeList.txt'
-      - 'resources/**'
-      - 'media/**'
-      - 'migrate/**'
-      - 'i18n/*'
-      - 'scripts/**'
-      - 'specs/**'
-      - 'src/**'
-      - '.github/**'
-  # Use the release branch workflow/actions definitions rather the pull_request definitions
+      - main
+  # Use the release/main branch workflow/actions definitions rather the definitions in the pull_request
   pull_request:
     branches:
       - release
-    paths:
-      - 'CMakeList.txt'
-      - 'resources/**'
-      - 'media/**'
-      - 'migrate/**'
-      - 'i18n/*'
-      - 'scripts/**'
-      - 'specs/**'
-      - 'src/**'
-      - '.github/**'
+      - main
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
