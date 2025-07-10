@@ -248,27 +248,27 @@
     <message>
         <location filename="../src/ui/DialWindow.qml" line="109"/>
         <source>History...</source>
-        <translation type="unfinished"></translation>
+        <translation>Historia...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="113"/>
         <source>Settings...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustes...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="117"/>
         <source>Shortcuts...</source>
-        <translation type="unfinished"></translation>
+        <translation>Atajos...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="130"/>
         <source>About...</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="134"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Quit</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="199"/>
