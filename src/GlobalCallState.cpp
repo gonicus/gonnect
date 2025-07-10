@@ -191,7 +191,8 @@ void GlobalCallState::updateRemoteContactInfo()
 
     ICallState *callObj = nullptr;
 
-    const auto ringingCalls = filteredCallStateObjected(State::RingingIncoming | State::RingingOutgoing);
+    const auto ringingCalls =
+            filteredCallStateObjected(State::RingingIncoming | State::RingingOutgoing);
     const auto activeCalls = filteredCallStateObjected(State::CallActive);
     const auto activeCallsWithAudio =
             filteredCallStateObjected(State::CallActive | State::AudioActive);

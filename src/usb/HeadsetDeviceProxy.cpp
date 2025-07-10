@@ -20,7 +20,7 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
     refreshDevice();
 
     connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
-            [this](){ updateDeviceState(); });
+            [this]() { updateDeviceState(); });
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
             [this](const bool value, const QString tag) {
@@ -52,7 +52,8 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
     using State = ICallState::State;
 
     const auto state = GlobalCallState::instance().globalCallState();
-    const auto changeMask = refreshAll ? ICallState::States::fromInt((1 << 9) - 1) : (m_oldCallState ^ state);
+    const auto changeMask =
+            refreshAll ? ICallState::States::fromInt((1 << 9) - 1) : (m_oldCallState ^ state);
 
     m_oldCallState = state;
     if (changeMask & State::RingingIncoming) {
