@@ -25,6 +25,24 @@ QString ContactInfo::toString() const
     return doc.toJson(QJsonDocument::JsonFormat::Compact);
 }
 
+bool ContactInfo::operator==(const ContactInfo &other)
+{
+    return (sipUrl == other.sipUrl) && (phoneNumber == other.phoneNumber)
+            && (displayName == other.displayName) && (numberType == other.numberType)
+            && (city == other.city) && (countries == other.countries)
+            && (isAnonymous == other.isAnonymous)
+            && (isSipSubscriptable == other.isSipSubscriptable) && (contact == other.contact);
+}
+
+bool ContactInfo::operator!=(const ContactInfo &other)
+{
+    return (sipUrl != other.sipUrl) || (phoneNumber != other.phoneNumber)
+            || (displayName != other.displayName) || (numberType != other.numberType)
+            || (city != other.city) || (countries != other.countries)
+            || (isAnonymous != other.isAnonymous)
+            || (isSipSubscriptable != other.isSipSubscriptable) || (contact != other.contact);
+}
+
 QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
 {
     QString result(number);

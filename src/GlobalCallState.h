@@ -34,7 +34,6 @@ public:
     void setIsPhoneConference(bool flag);
     bool isPhoneConference() const { return m_isPhoneConference; }
 
-    void setRemoteContactInfo(const ContactInfo &info);
     ContactInfo remoteContactInfo() const { return m_remoteContactInfo; }
 
     const QSet<ICallState *> &globalCallStateObjects() const { return m_globalCallStateObjects; }
@@ -45,10 +44,13 @@ private slots:
     void updateGlobalCallState();
     void updateRinger();
     void onCallInForegroundChanged();
+    void updateRemoteContactInfo();
 
 private:
     explicit GlobalCallState(QObject *parent = nullptr);
     void setGlobalCallState(const ICallState::States state);
+    void setRemoteContactInfo(const ContactInfo &info);
+    QSet<ICallState *> filteredCallStateObjected(const ICallState::States filter) const;
 
     ICallState::States m_globalCallState = ICallState::State::Idle;
     QSet<ICallState *> m_globalCallStateObjects;

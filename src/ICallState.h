@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <qqmlintegration.h>
+#include "PhoneNumberUtil.h"
 
 class ICallState : public QObject
 {
@@ -39,6 +40,8 @@ public:
     const ICallState::States callState() const { return m_callState; }
 
     void toggleHold();
+
+    virtual ContactInfo remoteContactInfo() const = 0;
 
 protected:
     void setCallState(const ICallState::States &callState);

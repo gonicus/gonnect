@@ -742,18 +742,6 @@ void SIPCallManager::removeCall(SIPCall *call)
     }
 
     updateCallCount();
-
-    // Adjust global contact information to contain the next
-    // active call.
-    auto &gc = GlobalCallState::instance();
-    for (auto call : std::as_const(m_calls)) {
-        if (call->isActive()) {
-            const auto contactInfo =
-                    PhoneNumberUtil::instance().contactInfoBySipUrl(call->sipUrl());
-            gc.setRemoteContactInfo(contactInfo);
-            break;
-        }
-    }
 }
 
 void SIPCallManager::resetMissedCalls()

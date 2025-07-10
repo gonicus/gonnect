@@ -10,6 +10,8 @@ GlobalCallState::GlobalCallState(QObject *parent) : QObject{ parent }
     connect(this, &GlobalCallState::globalCallStateChanged, this, &GlobalCallState::updateRinger);
     connect(this, &GlobalCallState::callInForegroundChanged, this,
             &GlobalCallState::onCallInForegroundChanged);
+    connect(this, &GlobalCallState::callInForegroundChanged, this,
+            &GlobalCallState::updateRemoteContactInfo);
 }
 
 void GlobalCallState::setGlobalCallState(const ICallState::States state)
@@ -23,6 +25,19 @@ void GlobalCallState::setGlobalCallState(const ICallState::States state)
                 << "Global call state changed to: "
                 << ICallState::statesAsStrings(m_globalCallState).join(", ");
     }
+}
+
+QSet<ICallState *> GlobalCallState::filteredCallStateObjected(const ICallState::States filter) const
+{
+    QSet<ICallState *> result;
+
+    for (auto stateObj : std::as_const(m_globalCallStateObjects)) {
+        if (stateObj->callState() & filter) {
+            result.insert(stateObj);
+        }
+    }
+
+    return result;
 }
 
 bool GlobalCallState::registerCallStateObject(ICallState *callStateObject)
@@ -73,6 +88,7 @@ void GlobalCallState::updateGlobalCallState()
     }
 
     setGlobalCallState(globalState);
+    updateRemoteContactInfo();
 }
 
 void GlobalCallState::setIsPhoneConference(bool flag)
@@ -85,8 +101,10 @@ void GlobalCallState::setIsPhoneConference(bool flag)
 
 void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
 {
-    m_remoteContactInfo = info;
-    emit remoteContactInfoChanged();
+    if (m_remoteContactInfo != info) {
+        m_remoteContactInfo = info;
+        emit remoteContactInfoChanged();
+    }
 }
 
 void GlobalCallState::triggerHold()
@@ -165,4 +183,44 @@ void GlobalCallState::onCallInForegroundChanged()
         connect(m_callInForeground, &QObject::destroyed, m_foregroundCallContext,
                 [this]() { setProperty("callInForeground", QVariant::fromValue(nullptr)); });
     }
+}
+
+void GlobalCallState::updateRemoteContactInfo()
+{
+    using State = ICallState::State;
+
+    ICallState *callObj = nullptr;
+
+    const auto activeCalls = filteredCallStateObjected(State::CallActive);
+    const auto activeCallsWithAudio =
+            filteredCallStateObjected(State::CallActive | State::AudioActive);
+    const auto activeCallsOnHold = filteredCallStateObjected(State::CallActive | State::OnHold);
+
+    const auto reallyActiveCalls = activeCalls - activeCallsOnHold;
+
+    if (!reallyActiveCalls.isEmpty()) {
+        if (m_callInForeground && reallyActiveCalls.contains(m_callInForeground)) {
+            callObj = m_callInForeground;
+        } else {
+            callObj = *reallyActiveCalls.constBegin();
+        }
+    }
+
+    if (!callObj && !activeCallsWithAudio.isEmpty()) {
+        if (m_callInForeground && activeCallsWithAudio.contains(m_callInForeground)) {
+            callObj = m_callInForeground;
+        } else {
+            callObj = *activeCallsWithAudio.constBegin();
+        }
+    }
+
+    if (!callObj && !activeCalls.isEmpty()) {
+        if (m_callInForeground && activeCalls.contains(m_callInForeground)) {
+            callObj = m_callInForeground;
+        } else {
+            callObj = *activeCalls.constBegin();
+        }
+    }
+
+    setRemoteContactInfo(callObj ? callObj->remoteContactInfo() : ContactInfo());
 }

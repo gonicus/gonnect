@@ -66,6 +66,8 @@ public:
 
     bool earlyCallState() const { return m_earlyCallState; }
 
+    virtual ContactInfo remoteContactInfo() const override { return m_contactInfo; }
+
 protected:
     virtual void toggleHoldImpl() override;
 
@@ -90,6 +92,7 @@ private:
     void setContactInfo(const QString &sipUrl, bool isIncoming = true);
     void createOngoingCallNotification();
 
+    ContactInfo m_contactInfo;
     SIPAccount *m_account = nullptr;
     QPointer<CallHistoryItem> m_historyItem;
     QDateTime m_establishedTime;
