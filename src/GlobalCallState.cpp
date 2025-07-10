@@ -191,6 +191,7 @@ void GlobalCallState::updateRemoteContactInfo()
 
     ICallState *callObj = nullptr;
 
+    const auto ringingCalls = filteredCallStateObjected(State::RingingIncoming | State::RingingOutgoing);
     const auto activeCalls = filteredCallStateObjected(State::CallActive);
     const auto activeCallsWithAudio =
             filteredCallStateObjected(State::CallActive | State::AudioActive);
@@ -198,7 +199,15 @@ void GlobalCallState::updateRemoteContactInfo()
 
     const auto reallyActiveCalls = activeCalls - activeCallsOnHold;
 
-    if (!reallyActiveCalls.isEmpty()) {
+    if (!callObj && !ringingCalls.isEmpty()) {
+        if (m_callInForeground && ringingCalls.contains(m_callInForeground)) {
+            callObj = m_callInForeground;
+        } else {
+            callObj = *ringingCalls.constBegin();
+        }
+    }
+
+    if (!callObj && !reallyActiveCalls.isEmpty()) {
         if (m_callInForeground && reallyActiveCalls.contains(m_callInForeground)) {
             callObj = m_callInForeground;
         } else {
