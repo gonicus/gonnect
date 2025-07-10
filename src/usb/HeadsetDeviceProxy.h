@@ -55,7 +55,7 @@ signals:
     void nameChanged();
 
 protected slots:
-    void updateDeviceState();
+    void updateDeviceState(bool refreshAll = false);
     void updateRemoteContactInfo();
 
 private:
