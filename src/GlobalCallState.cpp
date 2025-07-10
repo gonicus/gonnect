@@ -32,7 +32,7 @@ QSet<ICallState *> GlobalCallState::filteredCallStateObjected(const ICallState::
     QSet<ICallState *> result;
 
     for (auto stateObj : std::as_const(m_globalCallStateObjects)) {
-        if (stateObj->callState() & filter) {
+        if ((stateObj->callState() & filter) == filter) {
             result.insert(stateObj);
         }
     }
@@ -196,7 +196,6 @@ void GlobalCallState::updateRemoteContactInfo()
     const auto activeCallsWithAudio =
             filteredCallStateObjected(State::CallActive | State::AudioActive);
     const auto activeCallsOnHold = filteredCallStateObjected(State::CallActive | State::OnHold);
-
     const auto reallyActiveCalls = activeCalls - activeCallsOnHold;
 
     if (!callObj && !ringingCalls.isEmpty()) {
@@ -231,5 +230,9 @@ void GlobalCallState::updateRemoteContactInfo()
         }
     }
 
-    setRemoteContactInfo(callObj ? callObj->remoteContactInfo() : ContactInfo());
+    const auto contactInfo = callObj ? callObj->remoteContactInfo() : ContactInfo();
+
+    qCInfo(lcGlobalCallState) << "Updating global contact info to" << contactInfo;
+
+    setRemoteContactInfo(contactInfo);
 }

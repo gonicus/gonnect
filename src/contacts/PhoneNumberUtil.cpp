@@ -77,6 +77,7 @@ QDebug operator<<(QDebug debug, const ContactInfo &contactInfo)
     QDebugStateSaver saver(debug);
     debug.nospace() << "ContactInfo("
                     << "SIP url: " << contactInfo.sipUrl << ", "
+                    << "Display name: " << contactInfo.displayName << ", "
                     << "Phone number: " << contactInfo.phoneNumber << ", "
                     << "City: " << contactInfo.city << ", "
                     << "Countries: " << contactInfo.countries.join(", ");

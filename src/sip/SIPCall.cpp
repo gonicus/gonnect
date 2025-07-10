@@ -471,7 +471,7 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
             m_historyItem->endCall();
         }
 
-        const auto m_contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(sipUrl);
+        m_contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(sipUrl);
         m_isEmergencyCall = PhoneNumberUtil::isEmergencyCallUrl(sipUrl);
         m_contactId = m_contactInfo.contact ? m_contactInfo.contact->id() : "";
 
