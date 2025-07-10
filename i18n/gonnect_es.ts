@@ -235,12 +235,12 @@
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="31"/>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Contraseña</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="46"/>
         <source>Ok</source>
-        <translation type="unfinished"></translation>
+        <translation>Ok</translation>
     </message>
 </context>
 <context>
