@@ -15,6 +15,7 @@ class GlobalCallState : public QObject
                        FINAL)
     Q_PROPERTY(ICallState *callInForeground MEMBER m_callInForeground NOTIFY callInForegroundChanged
                        FINAL)
+    Q_PROPERTY(qsizetype callsCount READ callsCount NOTIFY globalCallStateObjectsChanged FINAL)
 
 public:
     static GlobalCallState &instance()
@@ -37,6 +38,7 @@ public:
     ContactInfo remoteContactInfo() const { return m_remoteContactInfo; }
 
     const QSet<ICallState *> &globalCallStateObjects() const { return m_globalCallStateObjects; }
+    qsizetype callsCount() const { return m_globalCallStateObjects.size(); }
 
     Q_INVOKABLE void triggerHold();
 

@@ -403,6 +403,11 @@ void SIPCall::accept()
         return;
     }
 
+    if (m_hasRejected) {
+        qCWarning(lcSIPCall) << "Call has already been rejected";
+        return;
+    }
+
     m_hasAccepted = true;
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_OK;
@@ -413,6 +418,11 @@ void SIPCall::reject()
 {
     if (isEstablished()) {
         qCCritical(lcSIPCall) << "Cannot reject call that is already established";
+        return;
+    }
+
+    if (m_hasAccepted) {
+        qCWarning(lcSIPCall) << "Call has already been accepted";
         return;
     }
 
