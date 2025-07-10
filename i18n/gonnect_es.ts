@@ -137,7 +137,7 @@
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="77"/>
         <source>Failed to open call history database: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error de abrir el historial de llamadas: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="102"/>
@@ -158,12 +158,12 @@
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="44"/>
         <source>Conference active</source>
-        <translation>Conferencias activas</translation>
+        <translation>Conferencia activa</translation>
     </message>
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="63"/>
         <source>Start conference...</source>
-        <translation>Comienza la conferencia...</translation>
+        <translation>Iniciar conferencia...</translation>
     </message>
 </context>
 <context>
@@ -201,14 +201,14 @@
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="169"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="208"/>
         <source>Missed</source>
-        <translation>Desaparecido</translation>
+        <translation>Perdido</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="263"/>
         <source>%n entries found</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n Inscripcioń encontrada</numerusform>
+            <numerusform>%n Inscripciones encontradas</numerusform>
         </translation>
     </message>
 </context>
@@ -230,7 +230,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="18"/>
         <source>Please enter the password:</source>
-        <translation>Introduzca la contraseña:</translation>
+        <translation>Por favor introduzca la contraseña:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="31"/>
@@ -240,7 +240,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="46"/>
         <source>Ok</source>
-        <translation>Ok</translation>
+        <translation>OK</translation>
     </message>
 </context>
 <context>
@@ -268,7 +268,7 @@
     <message>
         <location filename="../src/ui/DialWindow.qml" line="134"/>
         <source>Quit</source>
-        <translation>Quit</translation>
+        <translation>Finalizar</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="199"/>
