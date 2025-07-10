@@ -163,7 +163,7 @@
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="63"/>
         <source>Start conference...</source>
-        <translation type="unfinished"></translation>
+        <translation>Comienza la conferencia...</translation>
     </message>
 </context>
 <context>
