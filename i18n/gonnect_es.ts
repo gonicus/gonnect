@@ -171,37 +171,37 @@
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="13"/>
         <source>History</source>
-        <translation type="unfinished"></translation>
+        <translation>Historia</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="59"/>
         <source>Number or contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Número o contacto</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="163"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="176"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="196"/>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="165"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="200"/>
         <source>Incoming</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrando</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="167"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="204"/>
         <source>Outgoing</source>
-        <translation type="unfinished"></translation>
+        <translation>Saliendo</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="169"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="208"/>
         <source>Missed</source>
-        <translation type="unfinished"></translation>
+        <translation>Desaparecido</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="263"/>
