@@ -426,12 +426,6 @@ void JitsiConnector::enterRoom(const QString &roomName, const QString &displayNa
             m_isToggleScreenSharePending = true;
         }
     }
-
-    // Maintain fake call info
-    ContactInfo contactInfo;
-    contactInfo.displayName = displayName.isEmpty() ? roomName : displayName;
-
-    GlobalCallState::instance().setRemoteContactInfo(contactInfo);
 }
 
 void JitsiConnector::leaveRoom()
@@ -1173,4 +1167,11 @@ void JitsiConnector::setDisplayName(const QString &name)
         m_displayName = name;
         emit displayNameChanged();
     }
+}
+
+ContactInfo JitsiConnector::remoteContactInfo() const
+{
+    ContactInfo contactInfo;
+    contactInfo.displayName = m_displayName.isEmpty() ? m_roomName : m_displayName;
+    return contactInfo;
 }

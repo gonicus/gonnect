@@ -15,6 +15,7 @@ class GlobalCallState : public QObject
                        FINAL)
     Q_PROPERTY(ICallState *callInForeground MEMBER m_callInForeground NOTIFY callInForegroundChanged
                        FINAL)
+    Q_PROPERTY(qsizetype callsCount READ callsCount NOTIFY globalCallStateObjectsChanged FINAL)
 
 public:
     static GlobalCallState &instance()
@@ -34,10 +35,10 @@ public:
     void setIsPhoneConference(bool flag);
     bool isPhoneConference() const { return m_isPhoneConference; }
 
-    void setRemoteContactInfo(const ContactInfo &info);
     ContactInfo remoteContactInfo() const { return m_remoteContactInfo; }
 
     const QSet<ICallState *> &globalCallStateObjects() const { return m_globalCallStateObjects; }
+    qsizetype callsCount() const { return m_globalCallStateObjects.size(); }
 
     Q_INVOKABLE void triggerHold();
 
@@ -45,10 +46,13 @@ private slots:
     void updateGlobalCallState();
     void updateRinger();
     void onCallInForegroundChanged();
+    void updateRemoteContactInfo();
 
 private:
     explicit GlobalCallState(QObject *parent = nullptr);
     void setGlobalCallState(const ICallState::States state);
+    void setRemoteContactInfo(const ContactInfo &info);
+    QSet<ICallState *> filteredCallStateObjected(const ICallState::States filter) const;
 
     ICallState::States m_globalCallState = ICallState::State::Idle;
     QSet<ICallState *> m_globalCallStateObjects;

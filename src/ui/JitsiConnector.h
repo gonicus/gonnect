@@ -95,6 +95,8 @@ public:
     Q_INVOKABLE void
     setCallHistoryItem(QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>());
 
+    virtual ContactInfo remoteContactInfo() const override;
+
     // Should be called by the JS code once when all initialization is done
     Q_INVOKABLE void apiLoadingFinished();
 

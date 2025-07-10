@@ -403,6 +403,11 @@ void SIPCall::accept()
         return;
     }
 
+    if (m_hasRejected) {
+        qCWarning(lcSIPCall) << "Call has already been rejected";
+        return;
+    }
+
     m_hasAccepted = true;
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_OK;
@@ -413,6 +418,11 @@ void SIPCall::reject()
 {
     if (isEstablished()) {
         qCCritical(lcSIPCall) << "Cannot reject call that is already established";
+        return;
+    }
+
+    if (m_hasAccepted) {
+        qCWarning(lcSIPCall) << "Call has already been accepted";
         return;
     }
 
@@ -461,12 +471,12 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
             m_historyItem->endCall();
         }
 
-        const auto contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(sipUrl);
+        m_contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(sipUrl);
         m_isEmergencyCall = PhoneNumberUtil::isEmergencyCallUrl(sipUrl);
-        m_contactId = contactInfo.contact ? contactInfo.contact->id() : "";
+        m_contactId = m_contactInfo.contact ? m_contactInfo.contact->id() : "";
 
-        if (!contactInfo.isAnonymous) {
-            NumberStats::instance().incrementCallCount(contactInfo.phoneNumber);
+        if (!m_contactInfo.isAnonymous) {
+            NumberStats::instance().incrementCallCount(m_contactInfo.phoneNumber);
         }
 
         updateIsBlocked();
@@ -480,13 +490,11 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
             historyType |= Type::Outgoing;
         }
 
-        m_historyItem = CallHistory::instance().addHistoryItem(
-                historyType, m_account->id(), sipUrl, m_contactId, contactInfo.isSipSubscriptable);
+        m_historyItem = CallHistory::instance().addHistoryItem(historyType, m_account->id(), sipUrl,
+                                                               m_contactId,
+                                                               m_contactInfo.isSipSubscriptable);
 
         emit contactChanged();
-
-        auto &gc = GlobalCallState::instance();
-        gc.setRemoteContactInfo(contactInfo);
     }
 }
 

@@ -19,6 +19,9 @@ struct ContactInfo
     QPointer<Contact> contact = nullptr;
 
     QString toString() const;
+
+    bool operator==(const ContactInfo &other);
+    bool operator!=(const ContactInfo &other);
 };
 
 QDebug operator<<(QDebug debug, const ContactInfo &contactInfo);
