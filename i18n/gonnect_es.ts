@@ -273,7 +273,7 @@
     <message>
         <location filename="../src/ui/DialWindow.qml" line="199"/>
         <source>Show complete history...</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar historia completa...</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/DialWindow.qml" line="303"/>
