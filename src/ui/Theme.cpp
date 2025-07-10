@@ -127,6 +127,7 @@ void Theme::updateColorPalette()
         m_primaryTextColor = QColor(248, 248, 248);
         m_foregroundHeaderIcons = QColor(238, 238, 236);
         m_foregroundHeaderIconsInactive = QColor(157, 157, 156);
+        m_secondaryInactiveTextColor = QColor(108, 108, 108);
         m_backgroundColor = QColor(53, 53, 53);
         m_borderColor = QColor(33, 33, 33);
         m_borderHeaderIconHovered = QColor(28, 28, 28);
