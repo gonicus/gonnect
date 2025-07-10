@@ -142,7 +142,7 @@
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="102"/>
         <source>Call history database is inconsistent. Please remove %1 and restart the App to re-initialize the database.</source>
-        <translation type="unfinished"></translation>
+        <translation>La base de datos de historia de llamadas es inconsistente. Retirar %1 y reiniciar la aplicación para reiniciar la base de datos.</translation>
     </message>
 </context>
 <context>
@@ -150,7 +150,7 @@
     <message>
         <location filename="../src/ui/CallsModel.cpp" line="246"/>
         <source>unknown number</source>
-        <translation type="unfinished"></translation>
+        <translation>número desconocido</translation>
     </message>
 </context>
 <context>
@@ -158,7 +158,7 @@
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="44"/>
         <source>Conference active</source>
-        <translation type="unfinished"></translation>
+        <translation>Conferencias activas</translation>
     </message>
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="63"/>
