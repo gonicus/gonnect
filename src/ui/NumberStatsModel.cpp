@@ -1,5 +1,6 @@
 #include "NumberStatsModel.h"
 #include "NumberStats.h"
+#include "NumberStat.h"
 
 NumberStatsModel::NumberStatsModel(QObject *parent) : QAbstractListModel{ parent }
 {

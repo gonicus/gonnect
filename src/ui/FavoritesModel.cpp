@@ -1,5 +1,6 @@
 #include "FavoritesModel.h"
 #include "NumberStats.h"
+#include "NumberStat.h"
 #include "Contact.h"
 #include "PhoneNumberUtil.h"
 #include "SIPCallManager.h"
@@ -23,12 +24,14 @@ QHash<int, QByteArray> FavoritesModel::roleNames() const
         { static_cast<int>(Roles::PhoneNumber), "phoneNumber" },
         { static_cast<int>(Roles::ContactId), "contactId" },
         { static_cast<int>(Roles::Name), "name" },
+        { static_cast<int>(Roles::Company), "company" },
         { static_cast<int>(Roles::HasBuddyState), "hasBuddyState" },
         { static_cast<int>(Roles::HasAvatar), "hasAvatar" },
         { static_cast<int>(Roles::AvatarPath), "avatarPath" },
         { static_cast<int>(Roles::IsAnonymous), "isAnonymous" },
         { static_cast<int>(Roles::IsBlocked), "isBlocked" },
         { static_cast<int>(Roles::NumberType), "numberType" },
+        { static_cast<int>(Roles::ContactType), "contactType" },
     };
 }
 
@@ -53,8 +56,8 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::PhoneNumber):
         return item->phoneNumber;
 
-    case static_cast<int>(Roles::ContactId):
-        return item->contact ? item->contact->id() : "";
+    case static_cast<int>(Roles::Company):
+        return item->contact ? item->contact->company() : "";
 
     case static_cast<int>(Roles::HasBuddyState):
         return item->contact
@@ -83,6 +86,9 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
         }
         return SIPCallManager::instance().isPhoneNumberBlocked(item->phoneNumber);
     }
+
+    case static_cast<int>(Roles::ContactType):
+        return static_cast<int>(item->contactType);
 
     case static_cast<int>(Roles::Name):
     default:

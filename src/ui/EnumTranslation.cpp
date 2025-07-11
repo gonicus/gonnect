@@ -205,6 +205,10 @@ QString EnumTranslation::callType(const CallHistoryItem::Type callType) const
         return tr("Outgoing");
     case CallHistoryItem::Type::IncomingBlocked:
         return tr("Blocked");
+    case CallHistoryItem::Type::SIPCall:
+        return tr("SIP");
+    case CallHistoryItem::Type::JitsiMeetCall:
+        return tr("Jitsi Meet");
     }
 
     qCWarning(lcEnumTranslation) << "Unknown call type:" << callType;

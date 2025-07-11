@@ -25,7 +25,9 @@ public:
         SubscriptableNumber,
         Numbers,
         NumbersCount,
-        NumbersIndexOffset
+        NumbersIndexOffset,
+        SourceDisplayName,
+        SourcePriority
     };
 
     explicit SearchListModel(QObject *parent = nullptr);

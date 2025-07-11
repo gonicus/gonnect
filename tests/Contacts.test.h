@@ -2,10 +2,11 @@
 
 #include <QObject>
 
-class ContactsTest : public QObject {
+class ContactsTest : public QObject
+{
     Q_OBJECT
 public:
-    explicit ContactsTest(QObject* parent = nullptr);
+    explicit ContactsTest(QObject *parent = nullptr);
 
 private slots:
     void testCleanPhoneNumber();

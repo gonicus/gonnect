@@ -37,6 +37,14 @@ AvatarManager::AvatarManager(QObject *parent) : QObject{ parent }
             m_updateContactsTimer.start();
         }
     });
+    connect(&AddressBook::instance(), &AddressBook::contactModified, this,
+            [this](Contact *contact) {
+                m_contactsWithPendingUpdates.append(contact);
+
+                if (!m_updateContactsTimer.isActive()) {
+                    m_updateContactsTimer.start();
+                }
+            });
 }
 
 void AvatarManager::updateContacts()
@@ -94,9 +102,6 @@ void AvatarManager::initialLoad(const LDAPInitializer::Config &ldapConfig)
         for (const auto &contactId : contactIds) {
             if (auto contact = addressBook.lookupByContactId(contactId)) {
                 contact->setHasAvatar(true);
-            } else {
-                qCDebug(lcAvatarManager) << "Found avatar for contact id" << contactId
-                                         << "but no contact for it - ignoring";
             }
         }
     }
@@ -122,7 +127,14 @@ void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
 
     if (dbModified.isValid() && dbModified < modified) {
         createFile(id, data);
-        updateAvatarModifiedTime(id, modified);
+        if (dbModified == QDateTime::fromMSecsSinceEpoch(0)) {
+            // Record does not exist, got UNIX epoch
+            QHash<QString, QDateTime> tmp;
+            tmp.insert(id, modified);
+            addIdsToDb(tmp);
+        } else {
+            updateAvatarModifiedTime(id, modified);
+        }
     } else if (dbModified.isNull()) {
         createFile(id, data);
         QHash<QString, QDateTime> tmp;
@@ -135,6 +147,20 @@ void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
     }
 
     emit avatarAdded(id);
+}
+
+void AvatarManager::removeExternalImage(const QString &id)
+{
+    removeFile(id);
+    QList<QString> tmp;
+    tmp.append(id);
+    removeIdsFromDb(tmp);
+
+    if (auto contact = AddressBook::instance().lookupByContactId(id)) {
+        contact->setHasAvatar(false);
+    }
+
+    emit avatarRemoved(id);
 }
 
 void AvatarManager::clearCStringlist(char **attrs) const
@@ -161,6 +187,16 @@ void AvatarManager::createFile(const QString &id, const QByteArray &data) const
     file.write(data);
 }
 
+void AvatarManager::removeFile(const QString &id) const
+{
+    QString file = QString("%1/%2").arg(m_avatarImageDirPath, id);
+
+    if (!QFile::remove(file)) {
+        qCCritical(lcAvatarManager)
+                << "Cannot remove file" << QString("%1/%2").arg(m_avatarImageDirPath, id);
+    }
+}
+
 void AvatarManager::addIdsToDb(QHash<QString, QDateTime> &idTimeMap) const
 {
     auto db = QSqlDatabase::database();
@@ -181,6 +217,30 @@ void AvatarManager::addIdsToDb(QHash<QString, QDateTime> &idTimeMap) const
 
             query.bindValue(":id", it.key());
             query.bindValue(":lastModified", it.value().toSecsSinceEpoch());
+
+            if (!query.exec()) {
+                qCCritical(lcAvatarManager)
+                        << "Error on executing SQL query:" << query.lastError().text();
+            }
+        }
+    }
+}
+
+void AvatarManager::removeIdsFromDb(QList<QString> &idList) const
+{
+    auto db = QSqlDatabase::database();
+
+    if (!db.open()) {
+        qCCritical(lcAvatarManager) << "Unable to open avatars databse:" << db.lastError().text();
+    } else {
+        qCInfo(lcAvatarManager) << "Successfully opened avatars database";
+
+        qCInfo(lcAvatarManager) << "Removing avatars item from database";
+        QSqlQuery query(db);
+        query.prepare("DELETE FROM avatars WHERE id = :id;");
+
+        for (const auto &id : idList) {
+            query.bindValue(":id", id);
 
             if (!query.exec()) {
                 qCCritical(lcAvatarManager)

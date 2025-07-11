@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls.Material
 import QtQuick.Controls.impl
 import base
 
@@ -41,7 +40,7 @@ Item {
         id: hoverHandler
     }
     TapHandler {
-        enabled: control.active
+        enabled: control.enabled
         onTapped: () => control.clicked()
     }
 }

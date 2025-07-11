@@ -2,36 +2,63 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>CompleteHistoryWindow</name>
+    <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../../src/ui/components/CompleteHistoryWindow.qml" line="263"/>
-        <source>%n entries found</source>
+        <location filename="../../../src/ui/components/CallSideBar.qml" line="204"/>
+        <source>Person(s)</source>
         <translation>
-            <numerusform>%n entry found</numerusform>
-            <numerusform>%n entries found</numerusform>
+            <numerusform>Person</numerusform>
+            <numerusform>Persons</numerusform>
         </translation>
     </message>
 </context>
 <context>
-    <name>DialWindow</name>
+    <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../../src/ui/DialWindow.qml" line="303"/>
-        <source>Cannot connect to SIP server, retrying in %n second(s)...</source>
+        <location filename="../../../src/ui/components/ConferenceButtonBar.qml" line="99"/>
+        <source>%n minutes left</source>
         <translation>
-            <numerusform>Cannot connect to SIP server, retrying in %n second...</numerusform>
-            <numerusform>Cannot connect to SIP server, retrying in %n seconds...</numerusform>
+            <numerusform>%n minute left</numerusform>
+            <numerusform>%n minutes left</numerusform>
         </translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../../src/StateManager.cpp" line="137"/>
+        <location filename="../../../src/StateManager.cpp" line="144"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>
             <numerusform>There is one active call.</numerusform>
             <numerusform>There are %n active calls.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>ViewHelper</name>
+    <message numerus="yes">
+        <location filename="../../../src/ui/ViewHelper.cpp" line="103"/>
+        <source>%n minute(s)</source>
+        <translation>
+            <numerusform>%n Minute</numerusform>
+            <numerusform>%n Minutes</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../src/ui/ViewHelper.cpp" line="106"/>
+        <source>1 hour and %n minute(s)</source>
+        <translation>
+            <numerusform>1 Stunde und %n Minute</numerusform>
+            <numerusform>1 Stunde und %n Minuten</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../src/ui/ViewHelper.cpp" line="108"/>
+        <source>%n hour(s)</source>
+        <translation>
+            <numerusform>eine Stunde</numerusform>
+            <numerusform>%n Stunden</numerusform>
         </translation>
     </message>
 </context>

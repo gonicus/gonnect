@@ -8,14 +8,18 @@ Menu {
     id: control
 
     signal callClicked
+    signal callAsClicked(string id)
     signal notifyWhenAvailableClicked
     signal blockTemporarilyClicked
+
+    property bool favoriteAvailable: true
 
     property string phoneNumber
     property bool isFavorite
     property bool isAnonymous
-    property bool isBusy
+    property bool isReady
     property bool isBlocked
+    property bool isSipSubscriptable
 
     Action {
         text: qsTr('Call')
@@ -26,13 +30,14 @@ Menu {
         onTriggered: () => ViewHelper.copyToClipboard(control.phoneNumber)
     }
     Action {
+        id: favToggleAction
         text: control.isFavorite ? qsTr('Remove favorite') : qsTr('Add favorite')
         enabled: !control.isAnonymous
-        onTriggered: () => ViewHelper.toggleFavorite(control.phoneNumber)
+        onTriggered: () => ViewHelper.toggleFavorite(control.phoneNumber, NumberStats.ContactType.PhoneNumber)
     }
     Action {
         text: qsTr('Remind when available')
-        enabled: control.isBusy
+        enabled: control.isSipSubscriptable && !control.isReady
         onTriggered: () => control.notifyWhenAvailableClicked()
     }
     Action {

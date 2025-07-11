@@ -3,23 +3,21 @@
 #include <QObject>
 #include <QHash>
 #include <QTimer>
+#include <qqmlintegration.h>
 
-class Contact;
-
-struct NumberStat
-{
-    QString phoneNumber;
-    quint32 callCount = 0;
-    bool isFavorite = false;
-    bool isBlocked = false;
-    Contact *contact = nullptr;
-};
+struct NumberStat;
 
 class NumberStats : public QObject
 {
     Q_OBJECT
+    Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
+    QML_ELEMENT
+    QML_UNCREATABLE("")
 
 public:
+    enum class ContactType { PhoneNumber, JitsiMeetUrl };
+    Q_ENUM(ContactType)
+
     virtual ~NumberStats();
 
     static NumberStats &instance()
@@ -42,7 +40,7 @@ public:
     {
         return m_favoriteLookup.contains(phoneNumber);
     }
-    void toggleFavorite(const QString &phoneNumber);
+    void toggleFavorite(const QString &phoneNumber, const NumberStats::ContactType contactType);
 
     const NumberStat *numberStat(const QString &phoneNumber) const
     {
@@ -57,9 +55,12 @@ private:
      * @brief ensureFlaggedNumberExists creates a new entry in flagged table in database, if it does
      * not exist already.
      * @param phoneNumber
+     * @param contactType
      * @return Whether an appropriate line exists in the database afterwards
      */
-    bool ensureFlaggedNumberExists(const QString &phoneNumber);
+    bool ensureFlaggedNumberExists(
+            const QString &phoneNumber,
+            const NumberStats::ContactType contactType = NumberStats::ContactType::PhoneNumber);
 
     QHash<QString, NumberStat *> m_statItemsLookup;
     QHash<QString, NumberStat *> m_favoriteLookup;

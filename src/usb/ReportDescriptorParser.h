@@ -11,7 +11,8 @@ class ReportDescriptorParser : public QObject
 public:
     explicit ReportDescriptorParser(QObject *parent = nullptr);
 
-    std::shared_ptr<ApplicationCollection> parse(QByteArray data);
+    std::shared_ptr<ApplicationCollection> parse(const QByteArray &data);
+    QHash<ReportDescriptorEnums::UsageId, quint16> parseTeamsReportIDs(const QByteArray &data);
 
 private:
     QString usagePageToString(quint16 page);
