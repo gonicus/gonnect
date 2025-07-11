@@ -321,7 +321,7 @@ void ViewHelper::respondUserVerification(const QString &id, bool isAccepted)
 
 bool ViewHelper::isPhoneNumber(const QString &number) const
 {
-    static const QRegularExpression numberRegEx(R"(^[+#0-9]\d+$)");
+    static const QRegularExpression numberRegEx(R"(^[+#0-9][\d ]+$)");
     return numberRegEx.match(number).hasMatch();
 }
 

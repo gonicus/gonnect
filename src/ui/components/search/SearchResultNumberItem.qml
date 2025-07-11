@@ -17,7 +17,7 @@ Rectangle {
     required property string number
     required property bool isSipStatusSubscriptable
     required property bool isFavorite
-    required property int contactId
+    required property string contactId
 
     readonly property string typeIcon: {
         switch (control.type) {
