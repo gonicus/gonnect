@@ -67,7 +67,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
         auto callsCount = GlobalCallState::instance().callsCount();
 
         // Were're busy with one call -> end call
-        if (!dev->getHookSwitch() && callsCount == 1) {
+        if (!dev->getHookSwitch() && callsCount == 1 && !m_calls.isEmpty()) {
             auto call = m_calls.first();
             if (call->isEstablished() || !call->isIncoming()) {
                 endCall(call);
@@ -106,7 +106,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
         }
 
         // If we're not busy -> accept call
-        if (dev->getHookSwitch() && callsCount == 1) {
+        if (dev->getHookSwitch() && callsCount == 1 && !m_calls.isEmpty()) {
             auto call = m_calls.first();
             if (!call->isEstablished() && call->isIncoming()) {
                 call->accept();
