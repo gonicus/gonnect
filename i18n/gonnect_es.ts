@@ -90,7 +90,7 @@
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="442"/>
         <source>Parse error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error de análisis: %1</translation>
     </message>
 </context>
 <context>
@@ -98,7 +98,7 @@
     <message>
         <location filename="../src/dbus/portal/BackgroundPortal.cpp" line="27"/>
         <source>Don&apos;t miss any calls by automatically starting GOnnect on session start.</source>
-        <translation type="unfinished"></translation>
+        <translation>No te pierdas ninguna llamada iniciando automáticamente GOnnect en el inicio de sesión.</translation>
     </message>
 </context>
 <context>
@@ -106,7 +106,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/BaseDialog.qml" line="13"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Diálogo</translation>
     </message>
 </context>
 <context>
@@ -137,12 +137,12 @@
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="77"/>
         <source>Failed to open call history database: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error de abrir el historial de llamadas: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="102"/>
         <source>Call history database is inconsistent. Please remove %1 and restart the App to re-initialize the database.</source>
-        <translation type="unfinished"></translation>
+        <translation>La base de datos de historia de llamadas es inconsistente. Retirar %1 y reiniciar la aplicación para reiniciar la base de datos.</translation>
     </message>
 </context>
 <context>
@@ -150,7 +150,7 @@
     <message>
         <location filename="../src/ui/CallsModel.cpp" line="246"/>
         <source>unknown number</source>
-        <translation type="unfinished"></translation>
+        <translation>número desconocido</translation>
     </message>
 </context>
 <context>
@@ -158,12 +158,12 @@
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="44"/>
         <source>Conference active</source>
-        <translation type="unfinished"></translation>
+        <translation>Conferencia activa</translation>
     </message>
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="63"/>
         <source>Start conference...</source>
-        <translation type="unfinished"></translation>
+        <translation>Iniciar conferencia...</translation>
     </message>
 </context>
 <context>
@@ -171,44 +171,44 @@
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="13"/>
         <source>History</source>
-        <translation type="unfinished"></translation>
+        <translation>Historia</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="59"/>
         <source>Number or contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Número o contacto</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="163"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="176"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="196"/>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="165"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="200"/>
         <source>Incoming</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrando</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="167"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="204"/>
         <source>Outgoing</source>
-        <translation type="unfinished"></translation>
+        <translation>Saliendo</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="169"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="208"/>
         <source>Missed</source>
-        <translation type="unfinished"></translation>
+        <translation>Perdido</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="263"/>
         <source>%n entries found</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n Inscripcioń encontrada</numerusform>
+            <numerusform>%n Inscripciones encontradas</numerusform>
         </translation>
     </message>
 </context>
@@ -217,7 +217,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/ConfirmDialog.qml" line="15"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
 </context>
 <context>
@@ -225,22 +225,22 @@
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="10"/>
         <source>Authentication failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falló la autenticación</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="18"/>
         <source>Please enter the password:</source>
-        <translation type="unfinished"></translation>
+        <translation>Por favor introduzca la contraseña:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="31"/>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Contraseña</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="46"/>
         <source>Ok</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
 </context>
 <context>
@@ -248,32 +248,32 @@
     <message>
         <location filename="../src/ui/DialWindow.qml" line="109"/>
         <source>History...</source>
-        <translation type="unfinished"></translation>
+        <translation>Historia...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="113"/>
         <source>Settings...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustes...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="117"/>
         <source>Shortcuts...</source>
-        <translation type="unfinished"></translation>
+        <translation>Atajos...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="130"/>
         <source>About...</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="134"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Finalizar</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="199"/>
         <source>Show complete history...</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar historia completa...</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/DialWindow.qml" line="303"/>
