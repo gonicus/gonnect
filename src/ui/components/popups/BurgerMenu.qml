@@ -14,6 +14,11 @@ Menu {
     }
 
     Action {
+        text: qsTr("Toggle fullscreen")
+        onTriggered: () => ViewHelper.toggleFullscreen()
+    }
+
+    Action {
         text: qsTr("Shortcuts...")
         enabled: SM.globalShortcutsSupported
         onTriggered: () => ViewHelper.showShortcuts()

@@ -117,6 +117,8 @@ public:
     Q_INVOKABLE bool hasOngoingDateEventByRoomName(const QString &roomName) const;
     Q_INVOKABLE QDateTime endTimeForOngoingDateEventByRoomName(const QString &roomName) const;
 
+    Q_INVOKABLE void toggleFullscreen();
+
 public slots:
     Q_INVOKABLE void quitApplicationNoConfirm() const;
     Q_INVOKABLE void quitApplication();
@@ -156,6 +158,7 @@ signals:
     void showEmergency(QString accountId, int callId, QString displayName);
     void hideEmergency();
     void showConferenceChat();
+    void fullscreenToggle();
 
     void openMeetingRequested(QString meetingId, QString displayName,
                               JitsiConnector::MeetingStartFlags startFlags,

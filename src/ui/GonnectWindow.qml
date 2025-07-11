@@ -91,6 +91,13 @@ BaseWindow {
     Item {
         anchors.fill: parent
 
+        Keys.onPressed: keyEvent => {
+            if (keyEvent.key === Qt.Key_F11 || (keyEvent.key === Qt.Key_Escape && control.visibility === Window.FullScreen)) {
+                keyEvent.accepted = true
+                ViewHelper.toggleFullscreen()
+            }
+        }
+
         Drawer {
             id: topDrawer
             edge: Qt.TopEdge
@@ -263,6 +270,13 @@ BaseWindow {
         function onShowConferenceChat() {
             control.ensureVisible()
             control.showPage(GonnectWindow.PageId.Conference)
+        }
+        function onFullscreenToggle() {
+            if (control.visibility === Window.FullScreen) {
+                control.showNormal()
+            } else {
+                control.showFullScreen()
+            }
         }
     }
 

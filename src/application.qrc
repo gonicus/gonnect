@@ -78,6 +78,7 @@
         <file alias="user-home.svg">../resources/artwork/icons/user-home.svg</file>
         <file alias="user-group-new.svg">../resources/artwork/icons/user-group-new.svg</file>
         <file alias="view-refresh.svg">../resources/artwork/icons/view-refresh.svg</file>
+        <file alias="view-fullscreen.svg">../resources/artwork/icons/view-fullscreen.svg</file>
         <file alias="view-grid.svg">../resources/artwork/icons/view-grid.svg</file>
         <file alias="view-left-new.svg">../resources/artwork/icons/view-left-new.svg</file>
         <file alias="preferences-system-network.svg">../resources/artwork/icons/preferences-system-network.svg</file>
@@ -136,6 +137,7 @@
         <file alias="user-home.svg">../resources/artwork/icons/dark/user-home.svg</file>
         <file alias="user-group-new.svg">../resources/artwork/icons/dark/user-group-new.svg</file>
         <file alias="view-refresh.svg">../resources/artwork/icons/dark/view-refresh.svg</file>
+        <file alias="view-fullscreen.svg">../resources/artwork/icons/dark/view-fullscreen.svg</file>
         <file alias="view-grid.svg">../resources/artwork/icons/dark/view-grid.svg</file>
         <file alias="view-left-new.svg">../resources/artwork/icons/dark/view-left-new.svg</file>
         <file alias="preferences-system-network.svg">../resources/artwork/icons/preferences-system-network.svg</file>

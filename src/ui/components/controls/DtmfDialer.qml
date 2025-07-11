@@ -57,6 +57,7 @@ Item {
         anchors.centerIn: parent
 
         Keys.onPressed: event => {
+            event.accepted = true
             control.buttonPressed(event.text)
         }
 

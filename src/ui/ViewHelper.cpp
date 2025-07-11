@@ -369,3 +369,8 @@ QDateTime ViewHelper::endTimeForOngoingDateEventByRoomName(const QString &roomNa
     }
     return QDateTime();
 }
+
+void ViewHelper::toggleFullscreen()
+{
+    emit fullscreenToggle();
+}
