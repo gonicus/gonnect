@@ -52,7 +52,9 @@ private:
     explicit GlobalCallState(QObject *parent = nullptr);
     void setGlobalCallState(const ICallState::States state);
     void setRemoteContactInfo(const ContactInfo &info);
-    QSet<ICallState *> filteredCallStateObjected(const ICallState::States filter) const;
+    QSet<ICallState *> filteredCallStateObjected(
+            const ICallState::States mustFulfilAll = ICallState::States::fromInt(0),
+            const ICallState::States mustFulfilOne = ICallState::States::fromInt(0)) const;
 
     ICallState::States m_globalCallState = ICallState::State::Idle;
     QSet<ICallState *> m_globalCallStateObjects;

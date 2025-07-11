@@ -27,12 +27,15 @@ void GlobalCallState::setGlobalCallState(const ICallState::States state)
     }
 }
 
-QSet<ICallState *> GlobalCallState::filteredCallStateObjected(const ICallState::States filter) const
+QSet<ICallState *>
+GlobalCallState::filteredCallStateObjected(const ICallState::States mustFulfilAll,
+                                           const ICallState::States mustFulfilOne) const
 {
     QSet<ICallState *> result;
 
     for (auto stateObj : std::as_const(m_globalCallStateObjects)) {
-        if ((stateObj->callState() & filter) == filter) {
+        if ((!mustFulfilAll.toInt() || ((stateObj->callState() & mustFulfilAll) == mustFulfilAll))
+            && (!mustFulfilOne.toInt() || (stateObj->callState() & mustFulfilOne).toInt())) {
             result.insert(stateObj);
         }
     }
@@ -188,10 +191,13 @@ void GlobalCallState::onCallInForegroundChanged()
 void GlobalCallState::updateRemoteContactInfo()
 {
     using State = ICallState::State;
+    using States = ICallState::States;
 
     ICallState *callObj = nullptr;
 
-    const auto ringingCalls = filteredCallStateObjected(State::RingingIncoming | State::RingingOutgoing);
+    const auto ringingCalls = filteredCallStateObjected(
+            States::fromInt(0),
+            State::RingingIncoming | State::RingingOutgoing | State::KnockingIncoming);
     const auto activeCalls = filteredCallStateObjected(State::CallActive);
     const auto activeCallsWithAudio =
             filteredCallStateObjected(State::CallActive | State::AudioActive);
