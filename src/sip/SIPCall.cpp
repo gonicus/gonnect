@@ -198,6 +198,14 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             }
 
             createOngoingCallNotification();
+
+            // Propagate already existing hold state that was set during ringing phase.
+            // For some reason, a direct hold() produces a pjsip error, hence the timer.
+            QTimer::singleShot(1s, this, [this]() {
+                if (isHolding()) {
+                    hold();
+                }
+            });
         }
 
         // Send DTMF post tasks if present
@@ -362,14 +370,14 @@ bool SIPCall::hold()
 {
     pj::CallOpParam op(true);
 
+    setIsHolding(true);
+
     try {
         setHold(op);
     } catch (pj::Error &err) {
         qCWarning(lcSIPCall) << "failed to hold call:" << err.info();
         return false;
     }
-
-    setIsHolding(true);
 
     return true;
 }

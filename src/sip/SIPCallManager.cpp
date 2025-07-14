@@ -461,6 +461,8 @@ void SIPCallManager::acceptCall(SIPCall *call)
 
     if (call->isEmergencyCall()) {
         terminateAllNonEmergencyCalls();
+    } else if (call->isHolding()) {
+        call->hold();
     } else {
         holdOtherCalls(call);
     }
