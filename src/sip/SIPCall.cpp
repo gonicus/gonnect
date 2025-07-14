@@ -201,7 +201,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
             // Propagate already existing hold state that was set during ringing phase.
             // For some reason, a direct hold() produces a pjsip error, hence the timer.
-            QTimer::singleShot(1s, this, [this]() {
+            QTimer::singleShot(1ms, this, [this]() {
                 if (isHolding()) {
                     hold();
                 }
