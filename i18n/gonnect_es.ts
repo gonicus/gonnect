@@ -408,12 +408,12 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="144"/>
         <source>Service unavailable</source>
-        <translation type="unfinished"></translation>
+        <translation>Servicio no disponible</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="146"/>
         <source>Server timeout</source>
-        <translation type="unfinished"></translation>
+        <translation>Tiempo del servidor</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="156"/>
