@@ -403,7 +403,7 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="142"/>
         <source>Bad gateway</source>
-        <translation type="unfinished"></translation>
+        <translation>Puerta de enlace incorrecta</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="144"/>
@@ -413,22 +413,22 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="146"/>
         <source>Server timeout</source>
-        <translation>Tiempo del servidor</translation>
+        <translation>Agotamiento del tiempo de espera del servidor</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="156"/>
         <source>Busy everywhere</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocupado en todas líneas</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="158"/>
         <source>Decline</source>
-        <translation type="unfinished"></translation>
+        <translation>Rechazado</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="160"/>
         <source>Does not exist anywhere</source>
-        <translation type="unfinished"></translation>
+        <translation>Participante desconocido</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="162"/>
