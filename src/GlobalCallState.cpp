@@ -102,6 +102,17 @@ void GlobalCallState::setIsPhoneConference(bool flag)
     }
 }
 
+qsizetype GlobalCallState::callsCount() const
+{
+    qsizetype count = 0;
+    for (const auto callObj : std::as_const(m_globalCallStateObjects)) {
+        if (callObj->callState() & ICallState::State::CallActive) {
+            ++count;
+        }
+    }
+    return count;
+}
+
 void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
 {
     if (m_remoteContactInfo != info) {
