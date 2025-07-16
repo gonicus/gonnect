@@ -476,7 +476,7 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="207"/>
         <source>Blocked</source>
-        <translation>Bloqueados</translation>
+        <translation>Bloqueado</translation>
     </message>
 </context>
 <context>
