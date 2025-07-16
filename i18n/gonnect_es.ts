@@ -484,7 +484,7 @@
     <message>
         <location filename="../src/ui/components/FavoritesList.qml" line="24"/>
         <source>Favorites</source>
-        <translation type="unfinished"></translation>
+        <translation>Favoritos</translation>
     </message>
 </context>
 <context>
