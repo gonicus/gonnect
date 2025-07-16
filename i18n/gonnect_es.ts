@@ -428,7 +428,7 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="160"/>
         <source>Does not exist anywhere</source>
-        <translation>Participante desconocido</translation>
+        <translation>No existe en ningún lugar</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="162"/>
@@ -466,17 +466,17 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="203"/>
         <source>Incoming</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrando</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="205"/>
         <source>Outgoing</source>
-        <translation type="unfinished"></translation>
+        <translation>Saliendo</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="207"/>
         <source>Blocked</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloqueados</translation>
     </message>
 </context>
 <context>
