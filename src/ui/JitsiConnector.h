@@ -24,6 +24,7 @@ class JitsiConnector : public ICallState
     Q_PROPERTY(bool isTileView READ isTileView NOTIFY isTileViewChanged FINAL)
     Q_PROPERTY(bool isHandRaised READ isHandRaised NOTIFY isHandRaisedChanged FINAL)
     Q_PROPERTY(bool isNoiseSupression READ isNoiseSupression NOTIFY isNoiseSupressionChanged FINAL)
+    Q_PROPERTY(bool isSubtitles READ isSubtitles NOTIFY isSubtitlesChanged FINAL)
     Q_PROPERTY(
             bool isPasswordRequired READ isPasswordRequired NOTIFY isPasswordRequiredChanged FINAL)
     Q_PROPERTY(bool isPasswordEntryRequired READ isPasswordEntryRequired NOTIFY
@@ -164,6 +165,9 @@ public:
     Q_INVOKABLE void toggleNoiseSupression();
     bool isNoiseSupression() const { return m_isNoiseSupression; }
 
+    Q_INVOKABLE void toggleSubtitles();
+    bool isSubtitles() const { return m_isSubtitles; }
+
     /// Whether the room is protected by a password.
     bool isPasswordRequired() const { return m_isPasswordRequired; }
     /// Whether this client must enter a password in order to enter the room.
@@ -261,6 +265,7 @@ private:
     bool m_isOnHold = false;
     bool m_wasVideoMutedBeforeHold = false;
     bool m_isNoiseSupression = false;
+    bool m_isSubtitles = false;
     bool m_passwordAlreadyRequested = false;
     bool m_isPasswordRequired = false;
     bool m_isPasswordEntryRequired = false;
@@ -321,6 +326,7 @@ signals:
     void executeToggleShareScreenCommand();
     void executeToggleTileViewCommand();
     void executeToggleRaiseHandCommand();
+    void executeToggleSubtitlesCommand();
     void executeSetAudioInputDeviceCommand(QString devicId);
     void executeSetAudioOutputDeviceCommand(QString devicId);
     void executeSetVideoInputDeviceCommand(QString devicId);
@@ -341,6 +347,7 @@ signals:
     void isTileViewChanged();
     void isHandRaisedChanged();
     void isNoiseSupressionChanged();
+    void isSubtitlesChanged();
     void isPasswordRequiredChanged();
     void isPasswordEntryRequiredChanged();
 };

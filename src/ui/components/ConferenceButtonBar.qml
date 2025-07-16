@@ -286,6 +286,12 @@ Item {
                     }
 
                     MenuItem {
+                        text: qsTr("Toggle subtitles")
+                        icon.source: control.jitsiConnector.isSubtitles ? Icons.checkbox : ""
+                        onClicked: () => control.jitsiConnector.toggleSubtitles()
+                    }
+
+                    MenuItem {
                         text: qsTr("Video quality...")
                         onClicked: () => control.openVideoQualityDialog()
                     }

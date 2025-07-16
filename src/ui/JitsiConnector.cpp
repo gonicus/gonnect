@@ -263,6 +263,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("toggleRaiseHand")
     })
 
+    jitsiConn.executeToggleSubtitlesCommand.connect(() => {
+        api.executeCommand("toggleSubtitles")
+    })
+
     jitsiConn.executeSetNoiseSupressionCommand.connect((value) => {
         api.executeCommand("setNoiseSuppressionEnabled", { enabled: value })
     })
@@ -719,6 +723,13 @@ void JitsiConnector::toggleNoiseSupression()
     m_isNoiseSupression = !m_isNoiseSupression;
     emit executeSetNoiseSupressionCommand(m_isNoiseSupression);
     emit isNoiseSupressionChanged();
+}
+
+void JitsiConnector::toggleSubtitles()
+{
+    m_isSubtitles = !m_isSubtitles;
+    emit executeToggleSubtitlesCommand();
+    emit isSubtitlesChanged();
 }
 
 void JitsiConnector::passwordEntered(const QString &password, bool shouldRemember)
