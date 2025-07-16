@@ -80,7 +80,9 @@ Item {
 
     Column {
         id: timeLabelContainer
-        width: Math.max(elapsedTimeLabel.implicitWidth, remainingTimeLabel.implicitWidth)
+        width: remainingTimeLabel.visible
+               ? Math.max(elapsedTimeLabel.implicitWidth, remainingTimeLabel.implicitWidth)
+               : elapsedTimeLabel.implicitWidth
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
@@ -124,7 +126,7 @@ Item {
 
     Flickable {
         id: rowFlickable
-        width: Math.min(buttonRow.implicitWidth, control.width - (roomNameLabel.x + roomNameLabel.width))
+        width: Math.min(buttonRow.implicitWidth, control.width - (roomNameColumn.x + roomNameColumn.width))
         contentWidth: buttonRow.implicitWidth
         clip: true
         anchors {
