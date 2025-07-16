@@ -9,6 +9,7 @@
 #include "ErrorBus.h"
 #include "SecretPortal.h"
 #include "KeychainSettings.h"
+#include "NetworkHelper.h"
 
 #include <QUuid>
 
@@ -378,6 +379,9 @@ bool SIPAccount::initialize()
                         .arg(m_account, QString::fromLocal8Bit(err.info(false))));
         return false;
     }
+
+    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
+            []() { pj::Endpoint::instance().handleIpChange(pj::IpChangeParam()); });
 
     return true;
 }
