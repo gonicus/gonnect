@@ -380,9 +380,8 @@ bool SIPAccount::initialize()
         return false;
     }
 
-    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, [](){
-        pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
-    });
+    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
+            []() { pj::Endpoint::instance().handleIpChange(pj::IpChangeParam()); });
 
     return true;
 }
