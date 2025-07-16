@@ -6,5 +6,7 @@
         <file>callhistory/004.sql</file>
         <file>callhistory/005.sql</file>
         <file>callhistory/006.sql</file>
+        <file>callhistory/007.sql</file>
+        <file>callhistory/008.sql</file>
     </qresource>
 </RCC>

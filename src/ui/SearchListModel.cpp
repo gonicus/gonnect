@@ -2,6 +2,9 @@
 #include "AddressBook.h"
 #include "Contact.h"
 #include "NumberStats.h"
+#include "NumberStat.h"
+
+#include <QRegularExpression>
 
 SearchListModel::SearchListModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -69,6 +72,8 @@ QHash<int, QByteArray> SearchListModel::roleNames() const
         { static_cast<int>(Roles::Numbers), "numbers" },
         { static_cast<int>(Roles::NumbersCount), "numbersCount" },
         { static_cast<int>(Roles::NumbersIndexOffset), "numbersIndexOffset" },
+        { static_cast<int>(Roles::SourcePriority), "sourcePriority" },
+        { static_cast<int>(Roles::SourceDisplayName), "sourceDisplayName" },
     };
 }
 
@@ -154,6 +159,12 @@ QVariant SearchListModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::NumbersIndexOffset):
         return m_numberIndexOffsets.at(row);
+
+    case static_cast<int>(Roles::SourcePriority):
+        return contact->contactSourceInfo().prio;
+
+    case static_cast<int>(Roles::SourceDisplayName):
+        return contact->contactSourceInfo().displayName;
 
     default:
         return contact->name();

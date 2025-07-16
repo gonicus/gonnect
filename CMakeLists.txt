@@ -1,14 +1,26 @@
-cmake_minimum_required(VERSION 3.20)
-
-project(GOnnect VERSION 1.3.10 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.26)
+project(GOnnect VERSION 2.0.0 LANGUAGES CXX)
+include(cmake/CCache.cmake)
+useCompilerCache()
 
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_UNITY_BUILD_BATCH_SIZE 10)
 
 option(BUILD_DEPENDENCIES "Build dependencies" OFF)
+option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
+option(ENABLE_PCH "Enable precompiled headers" OFF)
+
+# Adjust flatpak base if desired
+if(NOT FLATPAK_APP_ID)
+    set(FLATPAK_APP_ID "de.gonicus.gonnect")
+endif()
+string(REPLACE "." "/" FLATPAK_APP_PATH ${FLATPAK_APP_ID})
+add_definitions(-DFLATPAK_APP_ID="${FLATPAK_APP_ID}")
+add_definitions(-DFLATPAK_APP_PATH="/${FLATPAK_APP_PATH}")
 
 if(NOT LINUX)
     message(FATAL_ERROR "GOnnect only works for Linux/Flatpack targets")
@@ -24,7 +36,7 @@ endif()
 add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-gnu-zero-variadic-macro-arguments)
 
 find_package(Qt6 REQUIRED COMPONENTS Gui DBus Qml Quick QuickControls2 LinguistTools)
-qt_standard_project_setup(REQUIRES 6.7
+qt_standard_project_setup(REQUIRES 6.9
     I18N_SOURCE_LANGUAGE en
     I18N_TRANSLATED_LANGUAGES de es it
 )
@@ -46,6 +58,7 @@ target_include_directories(GOnnectVersion PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
+add_subdirectory(emoji)
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
 
@@ -61,4 +74,3 @@ install(FILES resources/flatpak/de.gonicus.gonnect.metainfo.xml DESTINATION shar
 install(FILES resources/flatpak/de.gonicus.gonnect.releases.xml DESTINATION share/metainfo/releases)
 install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
 install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
-

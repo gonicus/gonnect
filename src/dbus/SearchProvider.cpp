@@ -17,8 +17,8 @@ SearchProvider::SearchProvider(QObject *parent) : QObject(parent)
 
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
-        m_isRegistered = con.registerObject("/de/gonicus/gonnect/SearchProvider", this)
-                && con.registerService("de.gonicus.gonnect");
+        m_isRegistered = con.registerObject(QString(FLATPAK_APP_PATH) + "/SearchProvider", this)
+                && con.registerService(FLATPAK_APP_ID);
     }
 }
 
@@ -26,8 +26,9 @@ SearchProvider::~SearchProvider()
 {
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
-        con.unregisterObject("/de/gonicus/gonnect/SearchProvider", QDBusConnection::UnregisterTree);
-        con.unregisterService("de.gonicus.gonnect");
+        con.unregisterObject(QString(FLATPAK_APP_ID) + "/SearchProvider",
+                             QDBusConnection::UnregisterTree);
+        con.unregisterService(FLATPAK_APP_ID);
     }
 
     qDeleteAll(m_searchResults);

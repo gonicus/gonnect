@@ -6,6 +6,7 @@ HistoryProxyModel::HistoryProxyModel(QObject *parent) : QSortFilterProxyModel{ p
 {
     connect(this, &HistoryProxyModel::filterTextChanged, this, [this]() { invalidateFilter(); });
     connect(this, &HistoryProxyModel::typeFilterChanged, this, [this]() { invalidateFilter(); });
+    connect(this, &HistoryProxyModel::mediumFilterChanged, this, [this]() { invalidateFilter(); });
 }
 
 bool HistoryProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
@@ -16,20 +17,27 @@ bool HistoryProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourc
     }
 
     const auto index = model->index(sourceRow, 0, sourceParent);
-    const auto type = static_cast<CallHistoryItem::Type>(
+    const auto type = static_cast<CallHistoryItem::Types>(
             model->data(index, static_cast<int>(HistoryModel::Roles::Type)).toInt());
     const bool wasEstablished =
             model->data(index, static_cast<int>(HistoryModel::Roles::WasEstablished)).toBool();
 
-    if (m_typeFilter == TypeFilter::INCOMING && type != CallHistoryItem::Type::Incoming
-        && type != CallHistoryItem::Type::IncomingBlocked) {
+    if (m_typeFilter == TypeFilter::INCOMING && (type & CallHistoryItem::Type::Outgoing)) {
         return false;
     }
-    if (m_typeFilter == TypeFilter::OUTGOING && type != CallHistoryItem::Type::Outgoing) {
+    if (m_typeFilter == TypeFilter::OUTGOING && !(type & CallHistoryItem::Type::Outgoing)) {
         return false;
     }
     if (m_typeFilter == TypeFilter::MISSED
-        && (wasEstablished || type == CallHistoryItem::Type::Outgoing)) {
+        && (wasEstablished || (type & CallHistoryItem::Type::Outgoing))) {
+        return false;
+    }
+
+    if (m_mediumFilter == MediumFilter::SIPCALL && !(type & CallHistoryItem::Type::SIPCall)) {
+        return false;
+    }
+    if (m_mediumFilter == MediumFilter::JITSIMEET
+        && !(type & CallHistoryItem::Type::JitsiMeetCall)) {
         return false;
     }
 

@@ -3,11 +3,9 @@
 #include <QAudioOutput>
 #include <QAudioDevice>
 
-#include "SIPAudioManager.h"
+#include "AudioManager.h"
 #include "Ringer.h"
 #include "AppSettings.h"
-#include "USBDevices.h"
-#include "HeadsetDeviceProxy.h"
 #include "SystemTrayMenu.h"
 
 Q_LOGGING_CATEGORY(lcRinger, "gonnect.sip.ringer")
@@ -25,19 +23,13 @@ Ringer::Ringer(QObject *parent) : QObject(parent)
 void Ringer::start(qreal customVolume)
 {
     AppSettings settings;
-    auto currentProfile = SIPAudioManager::instance().currentProfile();
+    auto currentProfile = AudioManager::instance().currentProfile();
 
     SystemTrayMenu::instance().setRinging(true);
 
     // Prefer headset ringer?
     if (settings.value(QString("audio%1/preferExternalRinger").arg(currentProfile), false)
-                .toBool()) {
-        auto proxy = USBDevices::instance().getHeadsetDeviceProxy();
-        if (proxy->available()) {
-            proxy->setRing(true);
-            return;
-        }
-    }
+                .toBool()) { }
 
     if (!m_player) {
         m_player = new QMediaPlayer(this);
@@ -116,9 +108,6 @@ void Ringer::playbackStateChanged(QMediaPlayer::PlaybackState state)
 
 void Ringer::stop()
 {
-    auto proxy = USBDevices::instance().getHeadsetDeviceProxy();
-    proxy->setRing(false);
-
     SystemTrayMenu::instance().setRinging(false);
 
     m_delayer.stop();

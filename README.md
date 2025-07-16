@@ -63,6 +63,7 @@ Here is the current list in combination
 | Busy light support (additional hardware) | L   |
 | Open GOnnect via handset off-hook        | O   |
 | Ringing via headset base station         | R   |
+| Headset screen support                   | D   |
 
 In theory, Teams certified Headsets may work, but you never know... Here is a
 list of tested headsets. Please feel free to report any working combinations to
@@ -75,13 +76,13 @@ make this list more complete by opening an [issue](https://github.com/gonicus/go
 | Poly             | Blackwire C5220     | AEMSO           |
 | Sennheiser       | SC 660 ANC USB      | AEM             |
 | Yealink          | WH62                | AEMSLOR         |
+| Yealink          | WH66/WH67           | AEMSLORD        |
 
 # Busylights known to be supported
 
 | Manufacturer | Model              |
 | ------------ | ------------------ |
 | kuando       | Busylight UC Omega |
-| Logitech G   | Litra Beam LX      |
 | Luxafor      | Flag               |
 
 # Installing _GOnnect_

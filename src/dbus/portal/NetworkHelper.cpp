@@ -5,11 +5,14 @@
 
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
 
+#define NH_CALL_TIMEOUT 500
+
 NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 {
     m_portal = new OrgFreedesktopPortalNetworkMonitorInterface("org.freedesktop.portal.Desktop",
                                                                "/org/freedesktop/portal/desktop",
                                                                QDBusConnection::sessionBus(), this);
+    m_portal->setTimeout(NH_CALL_TIMEOUT);
 
     connect(m_portal, &OrgFreedesktopPortalNetworkMonitorInterface::changed, this,
             &NetworkHelper::updateNetworkState);
@@ -52,18 +55,22 @@ void NetworkHelper::updateNetworkState()
     if (localNetwork != m_localNetwork) {
         m_localNetwork = localNetwork;
         emit localNetworkAvailableChanged();
+        qCDebug(lcNetwork) << "local network available changed to" << localNetwork;
     }
     if (limitedNetwork != m_limitedNetwork) {
         m_limitedNetwork = limitedNetwork;
         emit limitedNetworkAvailableChanged();
+        qCDebug(lcNetwork) << "limited network available changed to" << limitedNetwork;
     }
     if (captiveNetwork != m_captiveNetwork) {
         m_captiveNetwork = captiveNetwork;
         emit captiveNetworkAvailableChanged();
+        qCDebug(lcNetwork) << "captive network available changed to" << captiveNetwork;
     }
     if (fullNetwork != m_fullNetwork) {
         m_fullNetwork = fullNetwork;
         emit fullNetworkAvailableChanged();
+        qCDebug(lcNetwork) << "full network available changed to" << fullNetwork;
     }
 
     emit connectivityChanged();

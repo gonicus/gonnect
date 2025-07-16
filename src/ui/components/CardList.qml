@@ -1,8 +1,6 @@
 pragma ComponentBehavior: Bound
 
-import QtCore
 import QtQuick
-import Qt5Compat.GraphicalEffects
 import base
 
 Item {
@@ -15,10 +13,8 @@ Item {
 
     default property alias content: col.children
 
-    Rectangle {
+    Card {
         id: background
-        color: Theme.backgroundColor
-        radius: 12
         anchors {
             top: label.bottom
             topMargin: 10
@@ -26,15 +22,6 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
-    }
-
-    DropShadow {
-        anchors.fill: background
-        horizontalOffset: 3
-        verticalOffset: 4
-        radius: 6.0
-        color: Theme.shadowColor
-        source: background
     }
 
     Label {

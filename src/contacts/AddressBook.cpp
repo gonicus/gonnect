@@ -6,30 +6,79 @@
 #include <QCryptographicHash>
 #include <QRegularExpression>
 
-AddressBook::AddressBook(QObject *parent) : QObject{ parent } { }
+AddressBook::AddressBook(QObject *parent) : QObject{ parent }
+{
+    connect(this, &AddressBook::contactAdded, this, &AddressBook::updateSourceInfos);
+    connect(this, &AddressBook::contactsCleared, this, [this]() {
+        if (m_contactSourceInfos.size()) {
+            m_contactSourceInfos.clear();
+            emit contactSourceInfosChanged();
+        }
+    });
+}
+
+void AddressBook::updateSourceInfos(const Contact *contact)
+{
+    if (!contact) {
+        return;
+    }
+
+    bool exists = false;
+    for (const auto &info : std::as_const(m_contactSourceInfos)) {
+        if (info == contact->contactSourceInfo()) {
+            exists = true;
+            break;
+        }
+    }
+
+    if (!exists) {
+        m_contactSourceInfos.append(contact->contactSourceInfo());
+        std::sort(m_contactSourceInfos.begin(), m_contactSourceInfos.end(),
+                  [](const Contact::ContactSourceInfo &left,
+                     const Contact::ContactSourceInfo &right) {
+                      if (left.prio == right.prio) {
+                          return left.displayName.localeAwareCompare(right.displayName) < 0;
+                      }
+                      return left.prio > right.prio;
+                  });
+        emit contactSourceInfosChanged();
+    }
+}
 
 QString AddressBook::hashifyCn(const QString &cn) const
 {
     return QCryptographicHash::hash(cn.toUtf8(), QCryptographicHash::Sha256).toHex();
 }
 
-Contact *AddressBook::addContact(const QString &dn, const QString &name, const QString &company,
-                                 const QString &mail, const QDateTime &lastModified,
+Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
+                                 const Contact::ContactSourceInfo &contactSourceInfo,
+                                 const QString &name, const QString &company, const QString &mail,
+                                 const QDateTime &lastModified,
                                  const QList<Contact::PhoneNumber> &phoneNumbers)
 {
 
     const auto hid = hashifyCn(dn);
 
+    bool newContactCreated = false;
     Contact *contact = m_contacts.value(hid, nullptr);
     if (!contact) {
-        contact = new Contact(hid, dn, name, this);
+        newContactCreated = true;
+        contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, this);
         m_contacts.insert(hid, contact);
+        m_contactsBySourceId.insert(sourceUid, contact);
     }
 
     contact->setCompany(company);
     contact->setMail(mail);
     contact->setLastModified(lastModified);
     contact->addPhoneNumbers(phoneNumbers);
+
+    if (!newContactCreated) {
+        const auto &oldSourceInfo = contact->contactSourceInfo();
+        if (oldSourceInfo != contactSourceInfo && contactSourceInfo.prio > oldSourceInfo.prio) {
+            contact->setContactSourceInfo(contactSourceInfo);
+        }
+    }
 
     emit contactAdded(contact);
 
@@ -41,8 +90,43 @@ void AddressBook::addContact(Contact *contact)
     if (contact != nullptr && !m_contacts.contains(contact->id())) {
         contact->setParent(this);
         m_contacts.insert(contact->id(), contact);
+        m_contactsBySourceId.insert(contact->sourceUid(), contact);
 
         emit contactAdded(contact);
+    }
+}
+
+Contact *AddressBook::modifyContact(const QString &dn, const QString &sourceUid,
+                                    const QString &name, const QString &company,
+                                    const QString &mail, const QDateTime &lastModified,
+                                    const QList<Contact::PhoneNumber> &phoneNumbers)
+{
+    auto contact = lookupBySourceUid(sourceUid);
+    if (contact) {
+        contact->setDisplayName(dn);
+        contact->setName(name);
+        contact->setCompany(company);
+        contact->setMail(mail);
+        contact->setLastModified(lastModified);
+        contact->clearPhoneNumbers();
+        contact->addPhoneNumbers(phoneNumbers);
+
+        emit contactModified(contact);
+
+        return contact;
+    }
+
+    return nullptr;
+}
+
+void AddressBook::removeContact(const QString &sourceUid)
+{
+    auto contact = lookupBySourceUid(sourceUid);
+    if (contact) {
+        m_contacts.remove(contact->id());
+        m_contactsBySourceId.remove(contact->sourceUid());
+
+        emit contactRemoved(sourceUid);
     }
 }
 
@@ -54,6 +138,7 @@ QHash<QString, Contact *> AddressBook::contacts() const
 void AddressBook::reserve(qsizetype size)
 {
     m_contacts.reserve(size);
+    m_contactsBySourceId.reserve(size);
 }
 
 QList<Contact *> AddressBook::search(const QString &searchString) const
@@ -116,6 +201,11 @@ Contact *AddressBook::lookupByNumber(const QString &number) const
 Contact *AddressBook::lookupByContactId(const QString &contactId) const
 {
     return m_contacts.value(contactId, nullptr);
+}
+
+Contact *AddressBook::lookupBySourceUid(const QString &sourceUid) const
+{
+    return m_contactsBySourceId.value(sourceUid, nullptr);
 }
 
 void AddressBook::clear()

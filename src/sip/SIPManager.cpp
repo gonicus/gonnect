@@ -10,7 +10,8 @@
 #include "SIPMediaConfig.h"
 #include "SIPUserAgentConfig.h"
 #include "SIPAccountManager.h"
-#include "SIPAudioManager.h"
+#include "AudioManager.h"
+#include "VideoManager.h"
 #include "TogglerManager.h"
 
 Q_LOGGING_CATEGORY(lcSIPManager, "gonnect.sip.manager")
@@ -68,6 +69,16 @@ void SIPManager::initialize()
         epConfig.logConfig.level = m_settings->value("logging/level", 1).toUInt();
     }
 
+    if (epConfig.logConfig.level >= 4) {
+        QLoggingCategory::setFilterRules(QStringLiteral("gonnect.*=true\n"
+                                                        "*.warning=true\n"
+                                                        "*.critical=true"));
+    } else if (epConfig.logConfig.level >= 2) {
+        QLoggingCategory::setFilterRules(QStringLiteral("gonnect.info=true\n"
+                                                        "*.warning=true\n"
+                                                        "*.critical=true"));
+    }
+
     m_mediaConfig = new SIPMediaConfig(this);
     m_mediaConfig->applyConfig(epConfig);
 
@@ -105,7 +116,8 @@ void SIPManager::initialize()
     m_ev = new SIPEventLoop(this);
 
     // Get audio on the road
-    SIPAudioManager::instance().initialize();
+    AudioManager::instance().initialize();
+    VideoManager::instance().updateDevices();
 
     m_defaultPreferredIdentity = m_settings->value("generic/preferredIdentity", "auto").toString();
     emit defaultPreferredIdentityChanged();

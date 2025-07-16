@@ -7,27 +7,35 @@
 #endif
 #include <QMetaEnum>
 
-Contact::Contact(QObject *parent) : QObject{ parent } { }
-
-Contact::Contact(const QString &id, const QString &dn, const QString &name, QObject *parent)
-    : QObject{ parent }, m_id{ id }, m_dn{ dn }, m_name{ name }
+Contact::Contact(const QString &id, const QString &dn, const QString &sourceUid,
+                 const ContactSourceInfo &contactSourceInfo, const QString &name, QObject *parent)
+    : QObject{ parent },
+      m_id{ id },
+      m_dn{ dn },
+      m_sourceUid{ sourceUid },
+      m_name{ name },
+      m_contactSourceInfo{ contactSourceInfo }
 {
     init();
 }
 
-Contact::Contact(const QString &id, const QString &dn, const QString &name, const QString &company,
-                 const QString &mail, const QDateTime &lastModified,
+Contact::Contact(QObject *parent) : QObject{ parent } { }
+
+Contact::Contact(const QString &id, const QString &dn, const QString &sourceUid,
+                 const ContactSourceInfo &contactSourceInfo, const QString &name,
+                 const QString &company, const QString &mail, const QDateTime &lastModified,
                  const QList<Contact::PhoneNumber> &phoneNumbers, QObject *parent)
     : QObject{ parent },
       m_id{ id },
       m_dn{ dn },
+      m_sourceUid{ sourceUid },
       m_name{ name },
+      m_contactSourceInfo{ contactSourceInfo },
       m_company{ company },
       m_mail{ mail },
       m_lastModified{ lastModified },
       m_phoneNumbers{ phoneNumbers }
 {
-
     init();
 }
 
@@ -35,7 +43,9 @@ Contact::Contact(const Contact &other) : QObject{ other.parent() }
 {
     m_id = other.m_id;
     m_dn = other.m_dn;
+    m_sourceUid = other.m_sourceUid;
     m_name = other.m_name;
+    m_contactSourceInfo = other.m_contactSourceInfo;
     m_company = other.m_company;
     m_phoneNumbers = other.m_phoneNumbers;
     m_mail = other.m_mail;
@@ -48,7 +58,9 @@ Contact &Contact::operator=(const Contact &other)
 {
     m_id = other.m_id;
     m_dn = other.m_dn;
+    m_sourceUid = other.m_sourceUid;
     m_name = other.m_name;
+    m_contactSourceInfo = other.m_contactSourceInfo;
     m_company = other.m_company;
     m_phoneNumbers = other.m_phoneNumbers;
     m_mail = other.m_mail;
@@ -68,9 +80,19 @@ QString Contact::dn() const
     return m_dn;
 }
 
+QString Contact::sourceUid() const
+{
+    return m_sourceUid;
+}
+
 QString Contact::name() const
 {
     return m_name;
+}
+
+const Contact::ContactSourceInfo &Contact::contactSourceInfo() const
+{
+    return m_contactSourceInfo;
 }
 
 QString Contact::company() const
@@ -123,6 +145,11 @@ void Contact::addPhoneNumbers(const QList<PhoneNumber> &phoneNumbers)
     }
 
     updateSipStatusSubscriptable();
+}
+
+void Contact::clearPhoneNumbers()
+{
+    m_phoneNumbers.clear();
 }
 
 Contact::PhoneNumber Contact::phoneNumberObject(const QString &phoneNumber) const
@@ -231,6 +258,16 @@ QString Contact::subscriptableNumber() const
     return "";
 }
 
+void Contact::setDisplayName(const QString &dn)
+{
+    m_dn = dn;
+}
+
+void Contact::setName(const QString &name)
+{
+    m_name = name;
+}
+
 void Contact::setCompany(const QString &company)
 {
     m_company = company;
@@ -246,6 +283,11 @@ void Contact::setLastModified(const QDateTime &lastModified)
     m_lastModified = lastModified;
 }
 
+void Contact::setContactSourceInfo(const ContactSourceInfo &contactSourceInfo)
+{
+    m_contactSourceInfo = contactSourceInfo;
+}
+
 void Contact::setHasAvatar(bool hasAvatar)
 {
     if (m_hasAvatar != hasAvatar) {
@@ -256,8 +298,12 @@ void Contact::setHasAvatar(bool hasAvatar)
 
 QDataStream &operator<<(QDataStream &out, const Contact &contact)
 {
-    out << contact.id() << contact.dn() << contact.name() << contact.company() << contact.mail()
-        << contact.lastModified() << contact.sipStatusSubscriptable() << contact.phoneNumbers();
+    const auto &contactSourceInfo = contact.contactSourceInfo();
+
+    out << contact.id() << contact.dn() << contact.sourceUid() << contact.name()
+        << contactSourceInfo.prio << contactSourceInfo.displayName << contact.company()
+        << contact.mail() << contact.lastModified() << contact.sipStatusSubscriptable()
+        << contact.phoneNumbers();
     return out;
 }
 
@@ -265,16 +311,20 @@ QDataStream &operator>>(QDataStream &in, Contact &contact)
 {
     QString id;
     QString dn;
+    QString sourceUid;
     QString name;
+    unsigned prio;
+    QString displayName;
     QString company;
     QString mail;
     QDateTime lastModified;
     bool sipStatusSubscriptable;
     QList<Contact::PhoneNumber> phoneNumbers;
 
-    in >> id >> dn >> name >> company >> mail >> lastModified >> sipStatusSubscriptable
-            >> phoneNumbers;
-    contact = Contact(id, dn, name, company, mail, lastModified, phoneNumbers);
+    in >> id >> dn >> sourceUid >> name >> prio >> displayName >> company >> mail >> lastModified
+            >> sipStatusSubscriptable >> phoneNumbers;
+    contact = Contact(id, dn, sourceUid, { prio, displayName }, name, company, mail, lastModified,
+                      phoneNumbers);
 
     return in;
 }
@@ -330,4 +380,14 @@ bool Contact::PhoneNumber::operator!=(const PhoneNumber &other) const
 {
     return type != other.type || number != other.number
             || isSipSubscriptable != other.isSipSubscriptable;
+}
+
+bool Contact::ContactSourceInfo::operator==(const ContactSourceInfo &other) const
+{
+    return !(*this != other);
+}
+
+bool Contact::ContactSourceInfo::operator!=(const ContactSourceInfo &other) const
+{
+    return this->prio != other.prio || this->displayName != other.displayName;
 }

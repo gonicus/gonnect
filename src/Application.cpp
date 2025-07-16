@@ -8,6 +8,9 @@
 #include "SystemTrayMenu.h"
 #include "AddressBookManager.h"
 #include "USBDevices.h"
+#include "SecretPortal.h"
+#include "AppSettings.h"
+#include "DateEventFeederManager.h"
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -17,9 +20,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QDesktopServices>
-
-#include "SecretPortal.h"
-#include "AppSettings.h"
+#include <QtWebEngineQuick>
 
 using namespace std::chrono_literals;
 
@@ -38,11 +39,15 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setApplicationName("GOnnect");
     setOrganizationName("gonnect");
     setOrganizationDomain("gonicus.de");
-    setDesktopFileName("de.gonicus.gonnect");
+    setDesktopFileName(FLATPAK_APP_ID);
     setApplicationVersion(QString::fromStdString(getVersion()));
 
+    installTranslations();
+
     initDebugRun();
+
     AddressBookManager::instance().initAddressBookConfigs();
+    DateEventFeederManager::instance().initFeederConfigs();
 
     setQuitOnLastWindowClosed(false);
 
@@ -63,8 +68,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     connect(m_hupNotifier, SIGNAL(activated(QSocketDescriptor)), this, SLOT(handleSigHup()));
     m_termNotifier = new QSocketNotifier(s_sigtermFd[1], QSocketNotifier::Read, this);
     connect(m_termNotifier, SIGNAL(activated(QSocketDescriptor)), this, SLOT(handleSigTerm()));
-
-    installTranslations();
 
     // Take care for running "initialize" after exec() is called
     QTimer::singleShot(0, this, &Application::initialize);
@@ -90,6 +93,7 @@ void Application::installTranslations()
 void Application::initialize()
 {
     AddressBookManager::instance().reloadAddressBook();
+    DateEventFeederManager::instance().reload();
     SystemTrayMenu::instance(); // Ensure singleton is created
 
     AppSettings settings;
@@ -217,8 +221,10 @@ void Application::fileMessageHandler(QtMsgType type, const QMessageLogContext &c
     const QString message = qFormatLogMessage(type, context, msg);
 
     static FILE *f = fopen(Application::logFilePath().toLatin1(), "a");
-    fprintf(f, "%s\n", qPrintable(message));
-    fflush(f);
+    if (f) {
+        fprintf(f, "%s\n", qPrintable(message));
+        fflush(f);
+    }
 
     if (s_originalMessageHandler) {
         s_originalMessageHandler(type, context, msg);
@@ -239,4 +245,9 @@ void Application::initDebugRun()
             StateManager::instance().restart();
         });
     }
+}
+
+bool Application::isFlatpak()
+{
+    return qEnvironmentVariable("container") == "flatpak";
 }

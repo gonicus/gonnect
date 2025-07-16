@@ -1,10 +1,8 @@
 pragma ComponentBehavior: Bound
 
-import QtCore
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls.Material
-import QtQuick.Controls.impl
 import base
 
 BaseWindow {

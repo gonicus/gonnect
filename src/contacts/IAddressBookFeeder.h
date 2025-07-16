@@ -1,10 +1,14 @@
 #pragma once
-
-class AddressBook;
+#include <QString>
+#include <QUrl>
 
 class IAddressBookFeeder
 {
-
 public:
-    virtual void feedAddressBook(AddressBook &addressBook) = 0;
+    virtual void process() = 0;
+    virtual QUrl networkCheckURL() const { return QUrl(); }
+
+protected:
+    QString m_displayName;
+    unsigned m_priority = 0;
 };

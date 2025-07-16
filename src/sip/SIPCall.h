@@ -4,12 +4,15 @@
 #include <QDateTime>
 #include <pjsua2.hpp>
 
+#include "ICallState.h"
+#include "ResponseItem.h"
+
 class SIPAccount;
 class CallHistoryItem;
 class IMHandler;
 class HeadsetDeviceProxy;
 
-class SIPCall : public QObject, public pj::Call
+class SIPCall : public ICallState, public pj::Call
 {
     Q_OBJECT
     Q_DISABLE_COPY(SIPCall)
@@ -31,7 +34,7 @@ public:
     pj::AudioMedia *audioMedia() const;
 
     bool hasCapability(const QString &capability) const;
-    bool triggerCapability(const QString &capability) const;
+    bool triggerCapability(const QString &capability);
 
     QString notificationRef() { return m_notificationRef; }
     void setNotificationRef(const QString &ref) { m_notificationRef = ref; }
@@ -42,6 +45,10 @@ public:
     bool isIncoming() const { return m_incoming; }
 
     void call(const QString &dst_uri, const pj::CallOpParam &prm);
+
+    void addMetadata(const QString &data);
+    bool hasMetadata() const { return m_hasMetadata; }
+    QList<ResponseItem *> metadata() { return m_metadata; };
 
     bool hold();
     bool unhold();
@@ -57,20 +64,27 @@ public:
     /// The time when the call was established (i.e. answered); invalid QDateTime if not established
     QDateTime establishedTime() const { return m_establishedTime; }
 
-    bool earlyMediaActive() const { return m_earlyMediaActive; }
+    bool earlyCallState() const { return m_earlyCallState; }
+
+    virtual ContactInfo remoteContactInfo() const override { return m_contactInfo; }
+
+protected:
+    virtual void toggleHoldImpl() override;
 
 signals:
     void missed();
     void ringing();
     void establishedChanged();
-    void earlyMediaActiveChanged();
+    void earlyCallStateChanged();
     void isHoldingChanged();
     void isBlockedChanged();
     void capabilitiesChanged();
     void contactChanged();
+    void metadataChanged();
 
 private slots:
     void updateIsBlocked();
+    void updateMutedState();
 
 private:
     void setIsHolding(bool value);
@@ -78,23 +92,28 @@ private:
     void setContactInfo(const QString &sipUrl, bool isIncoming = true);
     void createOngoingCallNotification();
 
+    ContactInfo m_contactInfo;
     SIPAccount *m_account = nullptr;
     QPointer<CallHistoryItem> m_historyItem;
     QDateTime m_establishedTime;
 
+    QList<ResponseItem *> m_metadata;
+
     pj::AudioMedia *m_aud_med = NULL;
     IMHandler *m_imHandler = nullptr;
-    HeadsetDeviceProxy *m_proxy = nullptr;
 
     bool m_incoming = false;
     bool m_isEstablished = false;
     bool m_wasEstablished = false;
     bool m_managerNotified = false;
     bool m_isHolding = false;
-    bool m_earlyMediaActive = false;
+    bool m_earlyCallState = false;
     bool m_isSilent = false;
     bool m_isBlocked = false;
     bool m_isEmergencyCall = false;
+    bool m_hasMetadata = false;
+    bool m_hasAccepted = false;
+    bool m_hasRejected = false;
 
     QString m_sipUrl;
     QString m_contactId;

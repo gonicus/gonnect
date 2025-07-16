@@ -21,14 +21,11 @@ public:
     }
 
     CallHistoryItem *addHistoryItem(CallHistoryItem *item);
-    CallHistoryItem *addHistoryItem(CallHistoryItem::Type type, const QString &account,
+    CallHistoryItem *addHistoryItem(CallHistoryItem::Types type, const QString &account,
                                     const QString &remoteUrl, const QString &contactId = "",
                                     bool isSipSubscriptable = false);
     QList<CallHistoryItem *> historyItems() const { return m_historyItems; };
-    qsizetype indexOfItem(const CallHistoryItem *item) const
-    {
-        return m_historyItems.indexOf(item);
-    }
+    qsizetype indexOfItem(const CallHistoryItem *item) const;
 
     void writeToDatabase(CallHistoryItem &item);
     void readFromDatabase();

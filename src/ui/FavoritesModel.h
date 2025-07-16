@@ -16,12 +16,14 @@ public:
         PhoneNumber = Qt::UserRole + 1,
         ContactId,
         Name,
+        Company,
         HasBuddyState,
         HasAvatar,
         AvatarPath,
         IsAnonymous,
         IsBlocked,
-        NumberType
+        NumberType,
+        ContactType
     };
 
     explicit FavoritesModel(QObject *parent = nullptr);
