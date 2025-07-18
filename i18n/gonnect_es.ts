@@ -528,12 +528,12 @@
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="21"/>
         <source>Call</source>
-        <translation type="unfinished"></translation>
+        <translation>Llamar</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="25"/>
         <source>Copy number</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar el número</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="29"/>
@@ -620,7 +620,7 @@
     <message>
         <location filename="../src/contacts/LDAPAddressBookFeeder.cpp" line="180"/>
         <source>Parse error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error de sintaxis: %1</translation>
     </message>
 </context>
 <context>
@@ -644,7 +644,7 @@
         <location filename="../src/Main.qml" line="76"/>
         <location filename="../src/Main.qml" line="81"/>
         <source>Please enter the password for %1:</source>
-        <translation>Introduzca la contraseña para %1:</translation>
+        <translation>Por favor introduzca la contraseña para %1:</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="138"/>
