@@ -674,12 +674,12 @@
     <message>
         <location filename="../src/Main.qml" line="267"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Error</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="273"/>
         <source>Fatal Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Error final</translation>
     </message>
 </context>
 <context>
