@@ -669,7 +669,7 @@
     <message>
         <location filename="../src/Main.qml" line="89"/>
         <source>Please enter the password for the SIP account:</source>
-        <translation>Introduzca la contraseña para la cuenta SIP:</translation>
+        <translation>Por favor introduzca la contraseña para la cuenta SIP:</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="267"/>
@@ -679,7 +679,7 @@
     <message>
         <location filename="../src/Main.qml" line="273"/>
         <source>Fatal Error</source>
-        <translation>Error final</translation>
+        <translation>Error fatal</translation>
     </message>
 </context>
 <context>
