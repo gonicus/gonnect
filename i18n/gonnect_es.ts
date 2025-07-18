@@ -649,7 +649,7 @@
     <message>
         <location filename="../src/Main.qml" line="138"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustes</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="207"/>
