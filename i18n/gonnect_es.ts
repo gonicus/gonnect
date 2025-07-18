@@ -515,12 +515,12 @@
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="24"/>
         <source>No past calls</source>
-        <translation type="unfinished"></translation>
+        <translation>No hay llamadas pasadas</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="270"/>
         <source>hh:mm</source>
-        <translation type="unfinished"></translation>
+        <translation>hh:mm</translation>
     </message>
 </context>
 <context>
@@ -538,27 +538,27 @@
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="29"/>
         <source>Remove favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Quitar favorito</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="29"/>
         <source>Add favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Añadir favorito</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="34"/>
         <source>Remind when available</source>
-        <translation type="unfinished"></translation>
+        <translation>Recordar cuando esté disponible</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="39"/>
         <source>Unblock</source>
-        <translation type="unfinished"></translation>
+        <translation>Desbloqueo</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="39"/>
         <source>Block for 8 hours</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloqueo por 8 horas</translation>
     </message>
 </context>
 <context>
@@ -628,7 +628,7 @@
     <message>
         <location filename="../src/Main.qml" line="32"/>
         <source>No system tray available</source>
-        <translation type="unfinished"></translation>
+        <translation>No hay bandeja de sistema disponible</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="33"/>
@@ -644,7 +644,7 @@
         <location filename="../src/Main.qml" line="76"/>
         <location filename="../src/Main.qml" line="81"/>
         <source>Please enter the password for %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Introduzca la contraseña para %1:</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="138"/>
