@@ -664,12 +664,12 @@
     <message>
         <location filename="../src/Main.qml" line="220"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿De verdad quieres cerrar esta ventana y terminar todas las llamadas en curso?</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="89"/>
         <source>Please enter the password for the SIP account:</source>
-        <translation type="unfinished"></translation>
+        <translation>Introduzca la contraseña para la cuenta SIP:</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="267"/>
