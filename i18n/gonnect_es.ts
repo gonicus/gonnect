@@ -687,12 +687,12 @@
     <message>
         <location filename="../src/ui/components/controls/MenuContactInfo.qml" line="18"/>
         <source>Commercial</source>
-        <translation type="unfinished"></translation>
+        <translation>Comercial</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/MenuContactInfo.qml" line="20"/>
         <source>Mobile</source>
-        <translation type="unfinished"></translation>
+        <translation>Móvil</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/MenuContactInfo.qml" line="22"/>
