@@ -90,7 +90,7 @@
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="442"/>
         <source>Parse error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error de análisis: %1</translation>
     </message>
 </context>
 <context>
@@ -98,7 +98,7 @@
     <message>
         <location filename="../src/dbus/portal/BackgroundPortal.cpp" line="27"/>
         <source>Don&apos;t miss any calls by automatically starting GOnnect on session start.</source>
-        <translation type="unfinished"></translation>
+        <translation>No te pierdas ninguna llamada iniciando automáticamente GOnnect en el inicio de sesión.</translation>
     </message>
 </context>
 <context>
@@ -106,7 +106,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/BaseDialog.qml" line="13"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Diálogo</translation>
     </message>
 </context>
 <context>
@@ -137,12 +137,12 @@
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="77"/>
         <source>Failed to open call history database: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error de abrir el historial de llamadas: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="102"/>
         <source>Call history database is inconsistent. Please remove %1 and restart the App to re-initialize the database.</source>
-        <translation type="unfinished"></translation>
+        <translation>La base de datos de historia de llamadas es inconsistente. Retirar %1 y reiniciar la aplicación para reiniciar la base de datos.</translation>
     </message>
 </context>
 <context>
@@ -150,7 +150,7 @@
     <message>
         <location filename="../src/ui/CallsModel.cpp" line="246"/>
         <source>unknown number</source>
-        <translation type="unfinished"></translation>
+        <translation>número desconocido</translation>
     </message>
 </context>
 <context>
@@ -158,12 +158,12 @@
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="44"/>
         <source>Conference active</source>
-        <translation type="unfinished"></translation>
+        <translation>Conferencia activa</translation>
     </message>
     <message>
         <location filename="../src/ui/CallsWindow.qml" line="63"/>
         <source>Start conference...</source>
-        <translation type="unfinished"></translation>
+        <translation>Iniciar conferencia...</translation>
     </message>
 </context>
 <context>
@@ -171,44 +171,44 @@
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="13"/>
         <source>History</source>
-        <translation type="unfinished"></translation>
+        <translation>Historia</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="59"/>
         <source>Number or contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Número o contacto</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="163"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="176"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="196"/>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Todos</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="165"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="200"/>
         <source>Incoming</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrando</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="167"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="204"/>
         <source>Outgoing</source>
-        <translation type="unfinished"></translation>
+        <translation>Saliendo</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="169"/>
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="208"/>
         <source>Missed</source>
-        <translation type="unfinished"></translation>
+        <translation>Perdido</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/CompleteHistoryWindow.qml" line="263"/>
         <source>%n entries found</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n Inscripcioń encontrada</numerusform>
+            <numerusform>%n Inscripciones encontradas</numerusform>
         </translation>
     </message>
 </context>
@@ -217,7 +217,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/ConfirmDialog.qml" line="15"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
 </context>
 <context>
@@ -225,22 +225,22 @@
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="10"/>
         <source>Authentication failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falló la autenticación</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="18"/>
         <source>Please enter the password:</source>
-        <translation type="unfinished"></translation>
+        <translation>Por favor introduzca la contraseña:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="31"/>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Contraseña</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="46"/>
         <source>Ok</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
 </context>
 <context>
@@ -248,32 +248,32 @@
     <message>
         <location filename="../src/ui/DialWindow.qml" line="109"/>
         <source>History...</source>
-        <translation type="unfinished"></translation>
+        <translation>Historia...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="113"/>
         <source>Settings...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustes...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="117"/>
         <source>Shortcuts...</source>
-        <translation type="unfinished"></translation>
+        <translation>Atajos...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="130"/>
         <source>About...</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre...</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="134"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Finalizar</translation>
     </message>
     <message>
         <location filename="../src/ui/DialWindow.qml" line="199"/>
         <source>Show complete history...</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar historia completa...</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/DialWindow.qml" line="303"/>
@@ -403,32 +403,32 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="142"/>
         <source>Bad gateway</source>
-        <translation type="unfinished"></translation>
+        <translation>Puerta de enlace incorrecta</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="144"/>
         <source>Service unavailable</source>
-        <translation type="unfinished"></translation>
+        <translation>Servicio no disponible</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="146"/>
         <source>Server timeout</source>
-        <translation type="unfinished"></translation>
+        <translation>Agotamiento del tiempo de espera del servidor</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="156"/>
         <source>Busy everywhere</source>
-        <translation type="unfinished"></translation>
+        <translation>Ocupado en todas líneas</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="158"/>
         <source>Decline</source>
-        <translation type="unfinished"></translation>
+        <translation>Rechazado</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="160"/>
         <source>Does not exist anywhere</source>
-        <translation type="unfinished"></translation>
+        <translation>No existe en ningún lugar</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="162"/>
@@ -466,17 +466,17 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="203"/>
         <source>Incoming</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrando</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="205"/>
         <source>Outgoing</source>
-        <translation type="unfinished"></translation>
+        <translation>Saliendo</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="207"/>
         <source>Blocked</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloqueado</translation>
     </message>
 </context>
 <context>
@@ -484,7 +484,7 @@
     <message>
         <location filename="../src/ui/components/FavoritesList.qml" line="24"/>
         <source>Favorites</source>
-        <translation type="unfinished"></translation>
+        <translation>Favoritos</translation>
     </message>
 </context>
 <context>
@@ -515,12 +515,12 @@
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="24"/>
         <source>No past calls</source>
-        <translation type="unfinished"></translation>
+        <translation>No hay llamadas pasadas</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="270"/>
         <source>hh:mm</source>
-        <translation type="unfinished"></translation>
+        <translation>hh:mm</translation>
     </message>
 </context>
 <context>
@@ -528,37 +528,37 @@
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="21"/>
         <source>Call</source>
-        <translation type="unfinished"></translation>
+        <translation>Llamar</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="25"/>
         <source>Copy number</source>
-        <translation type="unfinished"></translation>
+        <translation>Copiar el número</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="29"/>
         <source>Remove favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Quitar favorito</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="29"/>
         <source>Add favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Añadir favorito</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="34"/>
         <source>Remind when available</source>
-        <translation type="unfinished"></translation>
+        <translation>Recordar cuando esté disponible</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="39"/>
         <source>Unblock</source>
-        <translation type="unfinished"></translation>
+        <translation>Desbloqueo</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="39"/>
         <source>Block for 8 hours</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloqueo por 8 horas</translation>
     </message>
 </context>
 <context>
@@ -620,7 +620,7 @@
     <message>
         <location filename="../src/contacts/LDAPAddressBookFeeder.cpp" line="180"/>
         <source>Parse error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error de sintaxis: %1</translation>
     </message>
 </context>
 <context>
@@ -628,7 +628,7 @@
     <message>
         <location filename="../src/Main.qml" line="32"/>
         <source>No system tray available</source>
-        <translation type="unfinished"></translation>
+        <translation>No hay bandeja de sistema disponible</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="33"/>
@@ -644,12 +644,12 @@
         <location filename="../src/Main.qml" line="76"/>
         <location filename="../src/Main.qml" line="81"/>
         <source>Please enter the password for %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Por favor introduzca la contraseña para %1:</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="138"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajustes</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="207"/>
@@ -664,22 +664,22 @@
     <message>
         <location filename="../src/Main.qml" line="220"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
-        <translation type="unfinished"></translation>
+        <translation>¿De verdad quieres cerrar esta ventana y terminar todas las llamadas en curso?</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="89"/>
         <source>Please enter the password for the SIP account:</source>
-        <translation type="unfinished"></translation>
+        <translation>Por favor introduzca la contraseña para la cuenta SIP:</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="267"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Error</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="273"/>
         <source>Fatal Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Error fatal</translation>
     </message>
 </context>
 <context>
@@ -687,12 +687,12 @@
     <message>
         <location filename="../src/ui/components/controls/MenuContactInfo.qml" line="18"/>
         <source>Commercial</source>
-        <translation type="unfinished"></translation>
+        <translation>Comercial</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/MenuContactInfo.qml" line="20"/>
         <source>Mobile</source>
-        <translation type="unfinished"></translation>
+        <translation>Móvil</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/MenuContactInfo.qml" line="22"/>
