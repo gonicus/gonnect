@@ -743,7 +743,7 @@
     <message>
         <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="161"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Borrar</translation>
     </message>
     <message>
         <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="184"/>
@@ -885,7 +885,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="36"/>
         <source>Saint Barthelemy</source>
-        <translation type="unfinished"></translation>
+        <translation>San Bartolomé</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="37"/>
