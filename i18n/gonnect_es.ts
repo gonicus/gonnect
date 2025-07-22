@@ -748,7 +748,7 @@
     <message>
         <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="184"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Guardar</translation>
     </message>
 </context>
 <context>
@@ -757,9 +757,9 @@
         <location filename="../src/StateManager.cpp" line="137"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Hay %n llamada activa.</numerusform>
+            <numerusform>Hay %n llamadas activas.</numerusform>
         </translation>
     </message>
     <message>
@@ -830,7 +830,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="25"/>
         <source>Aland Islands</source>
-        <translation type="unfinished"></translation>
+        <translation>Islas Aland</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="26"/>
@@ -840,7 +840,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="27"/>
         <source>Bosnia and Herzegovina</source>
-        <translation type="unfinished"></translation>
+        <translation>Bosnia y Herzegovina</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="28"/>
@@ -905,7 +905,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="40"/>
         <source>Bonaire, Saint Eustatius and Saba</source>
-        <translation type="unfinished"></translation>
+        <translation>Bonaire, San Eustaquio y Saba</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="41"/>
@@ -945,12 +945,12 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="48"/>
         <source>Cocos Islands</source>
-        <translation type="unfinished"></translation>
+        <translation>Islas Cocos</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="49"/>
         <source>Democratic Republic of the Congo</source>
-        <translation type="unfinished"></translation>
+        <translation>República Democrática del Congo</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="50"/>
@@ -1645,7 +1645,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="188"/>
         <source>Saint Pierre and Miquelon</source>
-        <translation type="unfinished"></translation>
+        <translation>Saint Pierre and Miquelon</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="189"/>
