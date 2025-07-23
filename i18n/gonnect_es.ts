@@ -1650,7 +1650,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="189"/>
         <source>Pitcairn</source>
-        <translation type="unfinished"></translation>
+        <translation>Pitcairn</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="190"/>
@@ -1660,7 +1660,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="191"/>
         <source>Palestinian Territory</source>
-        <translation type="unfinished"></translation>
+        <translation>Territorio Palestino</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="192"/>
@@ -1685,7 +1685,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="196"/>
         <source>Reunion</source>
-        <translation type="unfinished"></translation>
+        <translation>Reunión</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="197"/>
@@ -1740,7 +1740,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="207"/>
         <source>Saint Helena</source>
-        <translation type="unfinished"></translation>
+        <translation>Santa Elena</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="208"/>
@@ -1750,7 +1750,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="209"/>
         <source>Svalbard and Jan Mayen</source>
-        <translation type="unfinished"></translation>
+        <translation>Svalbard y Jan Mayen</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="210"/>
@@ -1790,7 +1790,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="217"/>
         <source>Sao Tome and Principe</source>
-        <translation type="unfinished"></translation>
+        <translation>Santo Tomé y Príncipe</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="218"/>
