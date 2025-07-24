@@ -1,3 +1,10 @@
+## [1.3.11](https://github.com/gonicus/gonnect/compare/v1.3.10...v1.3.11) (2025-07-16)
+
+
+### Bug Fixes
+
+* handle network changes by SIP stack ([#111](https://github.com/gonicus/gonnect/issues/111)) ([2437925](https://github.com/gonicus/gonnect/commit/2437925e964b33b63fd12873973204ab2c0f3a31))
+
 ## [1.3.10](https://github.com/gonicus/gonnect/compare/v1.3.9...v1.3.10) (2025-07-03)
 
 
