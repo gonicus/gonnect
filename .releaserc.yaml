@@ -21,5 +21,6 @@ plugins:
       - CMakeLists.txt
       - CHANGELOG.md
       - resources/flatpak/de.gonicus.gonnect.releases.xml
+      - docs/antora.yml
       message: "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
   
