@@ -104,6 +104,11 @@ void EmojiResolver::fillData()
         m_groupIndexes.append(std::make_pair(idx, m_emojiInfos.value(hex, nullptr)));
     }
     groupsFile.close();
+
+    qCInfo(lcEmojiResolver).noquote().nospace()
+            << "Loaded " << m_emojiInfos.size() << " emojis, " << m_shortcodes.size()
+            << " short codes, " << m_tags.size() << " tags and " << m_groupIndexes.size()
+            << " groups";
 }
 
 void EmojiResolver::addManualMappings()

@@ -53,9 +53,7 @@ void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &sour
         '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
     */
     m_calendarRefreshTimer.setInterval(m_interval);
-    connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() {
-        process();
-    });
+    connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
     m_calendarRefreshTimer.start();
 }
 
