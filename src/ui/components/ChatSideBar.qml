@@ -140,7 +140,7 @@ Item {
                 ClipboardButton {
                     id: clipboardButton
                     visible: chatMessageHoverHandler.hovered
-                    text: delg.message
+                    text: delg.message.replace(/<.+?>/gm, "")
                     anchors {
                         verticalCenter: messageBackground.verticalCenter
                         left: messageBackground.right
