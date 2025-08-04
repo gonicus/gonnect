@@ -41,7 +41,6 @@ public:
 
 signals:
     void hookSwitch();
-    void hookSwitchTrigger();
     void mute();
     void busyLine();
     void flash();
