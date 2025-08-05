@@ -1,6 +1,10 @@
 #include "SIPTemplateModel.h"
 #include "SIPTemplates.h"
 
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcSIPTemplateModel, "gonnect.sip.template.model")
+
 SIPTemplateModel::SIPTemplateModel(QObject *parent) : QAbstractListModel{ parent }
 {
     connect(this, &SIPTemplateModel::templateIdChanged, this,
@@ -75,11 +79,16 @@ void SIPTemplateModel::onTemplateIdChanged()
         }
     }
 
-    connect(m_template, &QObject::destroyed, this, [this]() {
-        beginResetModel();
-        m_template = nullptr;
-        endResetModel();
-    });
+    if (m_template) {
+        connect(m_template, &QObject::destroyed, this, [this]() {
+            beginResetModel();
+            m_template = nullptr;
+            endResetModel();
+        });
+    } else if (!m_templateId.isEmpty()) {
+        qCWarning(lcSIPTemplateModel) << "Unable to find template object for id" << m_templateId
+                                      << "- SIPTemplateModel will be empty";
+    }
 
     endResetModel();
 }
