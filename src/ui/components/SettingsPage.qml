@@ -33,6 +33,7 @@ Item {
         location: ViewHelper.userConfigPath
         category: "generic"
 
+        property alias showMainWindowOnStart: startInBackgroundCheckBox.checked
         property alias busyOnBusy: busyOnBusyCheckBox.checked
         property alias inverseAcceptReject: inverseAcceptRejectCheckBox.checked
         property alias headsetHookOff: headsetHookOffCheckBox.checked
@@ -141,6 +142,16 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
+                        }
+
+                        CheckBox {
+                            id: startInBackgroundCheckBox
+                            text: qsTr('Show main window on startup')
+                            checked: true  // default value
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
                         }
 
                         CheckBox {
