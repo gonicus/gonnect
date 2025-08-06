@@ -144,29 +144,6 @@ Item {
                         }
 
                         CheckBox {
-                            id: trayIconDark
-                            text: qsTr('Use dark tray icon')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            property bool initialized: false
-
-                            Component.onCompleted: () => {
-                                trayIconDark.checked = genericSettings.value('trayIconDark', false)
-                                trayIconDark.initialized = true
-                            }
-
-                            onCheckedChanged: () => {
-                                if (trayIconDark.initialized) {
-                                    genericSettings.setValue('trayIconDark', trayIconDark.checked)
-                                    ViewHelper.resetTrayIcon()
-                                }
-                            }
-                        }
-
-                        CheckBox {
                             id: inverseAcceptRejectCheckBox
                             text: qsTr('Inverse Accept / Reject buttons')
                             anchors {
@@ -224,7 +201,6 @@ Item {
 
                 CardList {
                     title: qsTr('Appearance')
-                    spacing: 20
                     anchors {
                         left: parent.left
                         right: parent.right
@@ -250,7 +226,31 @@ Item {
                         }
                     }
 
+                    CheckBox {
+                        id: trayIconDark
+                        text: qsTr('Use dark tray icon')
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        property bool initialized: false
+
+                        Component.onCompleted: () => {
+                            trayIconDark.checked = genericSettings.value('trayIconDark', false)
+                            trayIconDark.initialized = true
+                        }
+
+                        onCheckedChanged: () => {
+                            if (trayIconDark.initialized) {
+                                genericSettings.setValue('trayIconDark', trayIconDark.checked)
+                                ViewHelper.resetTrayIcon()
+                            }
+                        }
+                    }
+
                     Column {
+                        topPadding: 20
                         anchors {
                             left: parent.left
                             right: parent.right
