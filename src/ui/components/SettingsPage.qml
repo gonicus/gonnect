@@ -483,17 +483,6 @@ Item {
                         }
                     }
 
-                    CheckBox {
-                        id: externalRingerCheckbox
-                        text: qsTr('Prefer USB headset ring sound if available')
-                        enabled: headsetCheckBox.checked
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-
-                        }
-                    }
-
                     Rectangle {
                         color: Theme.backgroundOffsetColor
                         radius: 12
@@ -663,6 +652,17 @@ Item {
                         left: parent?.left
                         right: parent?.right
                         margins: 20
+                    }
+
+                    CheckBox {
+                        id: externalRingerCheckbox
+                        text: qsTr('Prefer USB headset ring sound if available')
+                        enabled: headsetCheckBox.checked
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+
+                        }
                     }
 
                     Column {
