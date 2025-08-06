@@ -40,7 +40,7 @@ Item {
     function startConference(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
         jitsiConn.setCallHistoryItem(callHistoryItem)
 
-        if (AuthManager.isJitsiRoomAuthenticated(meetingId)) {
+        if (!AuthManager.isJitsiAuthRequired || AuthManager.isJitsiRoomAuthenticated(meetingId)) {
             jitsiConn.enterRoom(meetingId, displayName, startFlags)
         } else {
             authConn.enabled = true
@@ -78,13 +78,16 @@ Item {
     Loader {
         id: contentLoader
         sourceComponent: {
+            if (!AuthManager.isAuthManagerInitialized) {
+                return undefined
+            }
             if (jitsiConn.isInRoom) {
                 return jitsiViewComponent
             }
-            if (AuthManager.isWaitingForAuth) {
+            if (AuthManager.isJitsiAuthRequired && AuthManager.isWaitingForAuth) {
                 return waitingForAuthComponent
             }
-            if (AuthManager.isOAuthAuthenticated) {
+            if (!AuthManager.isJitsiAuthRequired || AuthManager.isOAuthAuthenticated) {
                 return loggedInComponent
             }
             return loginComponent
