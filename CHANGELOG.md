@@ -1,3 +1,10 @@
+## [1.3.12](https://github.com/gonicus/gonnect/compare/v1.3.11...v1.3.12) (2025-08-07)
+
+
+### Bug Fixes
+
+* only call handelIpChange when there is no active call ([1693600](https://github.com/gonicus/gonnect/commit/16936004748514a7b973e7f6b5f937381316cd24))
+
 ## [1.3.11](https://github.com/gonicus/gonnect/compare/v1.3.10...v1.3.11) (2025-07-16)
 
 
