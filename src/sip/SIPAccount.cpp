@@ -381,7 +381,8 @@ bool SIPAccount::initialize()
     }
 
     connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
-        if (NetworkHelper::instance().hasConnectivity() && !SIPCallManager::instance().hasActiveCalls()) {
+        if (NetworkHelper::instance().hasConnectivity()
+            && !SIPCallManager::instance().hasActiveCalls()) {
             try {
                 pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
             } catch (pj::Error &err) {
