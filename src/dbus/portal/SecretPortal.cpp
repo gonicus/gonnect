@@ -41,14 +41,28 @@ void SecretPortal::initialize()
     QCA::Initializer init;
     m_supported = QCA::isSupported("aes256-cbc-pkcs7");
 
+    if (!m_supported) {
+        qCCritical(lcSecretPortal) << "QCA does not support aes256-cbc-pkcs7!";
+        return;
+    }
+
     RetrieveSecret([this](uint code, const QVariantMap &response) {
         if (code == 0) {
             m_instanceSecret = response.value("secret").toByteArray();
+            m_initialized = true;
         } else {
-            qCCritical(lcSecretPortal) << "failed to retrieve instance secret:" << code;
+            const auto errorMsg = response.value("error").toString();
+
+            if (!errorMsg.isEmpty()) {
+                qCCritical(lcSecretPortal).noquote().nospace()
+                        << "failed to retrieve instance secret, error: " << errorMsg
+                        << " (error code " << code << ")";
+            } else {
+                qCCritical(lcSecretPortal).noquote().nospace()
+                        << "failed to retrieve instance secret (error code " << code << ")";
+            }
         }
 
-        m_initialized = true;
         emit initializedChanged();
     });
 }
