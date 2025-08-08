@@ -35,7 +35,6 @@ Item {
 
     HoverHandler {
         id: favHoverHandler
-        enabled: !delg.isAnonymous
         blocking: true
     }
 }

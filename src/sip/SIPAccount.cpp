@@ -15,6 +15,8 @@
 
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
 
+long SIPAccount::runningMessageIndex = 0;
+
 SIPAccount::SIPAccount(const QString &group, QObject *parent)
     : QObject(parent), Account(), m_account(group)
 {
@@ -123,7 +125,28 @@ bool SIPAccount::initialize()
     }
     m_accountConfig.mediaConfig.srtpUse = srtpUseValue;
 
-    // Tewak IPv6 account settings
+    int rtpPort = m_settings.value("rtpPort", 0).toInt(&ok);
+    if (!ok) {
+        qCCritical(lcSIPAccount) << "invalid value for 'rtpPort':" << rtpPort;
+        return false;
+    }
+    if (rtpPort != 0) {
+        m_accountConfig.mediaConfig.transportConfig.port = rtpPort;
+    }
+
+    int rtpPortRange = m_settings.value("rtpPortRange", 0).toInt(&ok);
+    if (!ok) {
+        qCCritical(lcSIPAccount) << "invalid value for 'rtpPortRange':" << rtpPort;
+        return false;
+    }
+    if (rtpPortRange != 0) {
+        m_accountConfig.mediaConfig.transportConfig.portRange = rtpPortRange;
+    }
+
+    m_accountConfig.mediaConfig.transportConfig.randomizePort =
+            m_settings.value("randomizeRtpPorts", false).toBool();
+
+    // Tweak IPv6 account settings
     if (m_transportNet == TRANSPORT_NET::IPv4) {
         m_accountConfig.sipConfig.ipv6Use = PJSUA_IPV6_DISABLED;
         m_accountConfig.mediaConfig.ipv6Use = PJSUA_IPV6_DISABLED;
@@ -146,27 +169,6 @@ bool SIPAccount::initialize()
 
     bool lockCodecEnabled = m_settings.value("lockCodecEnabled").toBool();
     m_accountConfig.mediaConfig.lockCodecEnabled = lockCodecEnabled;
-
-    int rtpPort = m_settings.value("rtpPort", 0).toInt(&ok);
-    if (!ok) {
-        qCCritical(lcSIPAccount) << "invalid value for 'rtpPort':" << rtpPort;
-        return false;
-    }
-    if (rtpPort != 0) {
-        m_accountConfig.mediaConfig.transportConfig.port = rtpPort;
-    }
-
-    int rtpPortRange = m_settings.value("rtpPortRange", 0).toInt(&ok);
-    if (!ok) {
-        qCCritical(lcSIPAccount) << "invalid value for 'rtpPortRange':" << rtpPort;
-        return false;
-    }
-    if (rtpPortRange != 0) {
-        m_accountConfig.mediaConfig.transportConfig.portRange = rtpPortRange;
-    }
-
-    m_accountConfig.mediaConfig.transportConfig.randomizePort =
-            m_settings.value("randomizeRtpPorts", false).toBool();
 
     // Transport
     int port = m_settings.value("port", 5061).toInt(&ok);
@@ -386,14 +388,14 @@ bool SIPAccount::initialize()
     return true;
 }
 
-void SIPAccount::call(const QString &number, const QString &contactId,
-                      const QString &preferredIdentity, bool silent)
+QString SIPAccount::call(const QString &number, const QString &contactId,
+                         const QString &preferredIdentity, bool silent)
 {
     QString sipUrl = toSipUri(number);
 
     qCInfo(lcSIPAccount) << "DIAL" << sipUrl;
 
-    // Creat call
+    // Create call
     SIPCall *call = new SIPCall(this, PJSUA_INVALID_ID, contactId, silent);
 
     pj::CallOpParam prm(true);
@@ -405,10 +407,56 @@ void SIPAccount::call(const QString &number, const QString &contactId,
     try {
         call->call(sipUrl, prm);
         m_calls.push_back(call);
+        return call->uuid();
     } catch (pj::Error &err) {
         qCCritical(lcSIPAccount) << "Dialing failed:" << err.info();
         delete call;
     }
+
+    return "";
+}
+
+long SIPAccount::sendMessage(const QString &recipient, const QString &message,
+                             const QString &mimeType)
+{
+    long id = SIPAccount::runningMessageIndex++;
+    QString sipUrl = toSipUri(recipient);
+    SIPBuddy *foundBuddy = nullptr;
+
+    for (const auto buddy : std::as_const(m_buddies)) {
+        if (buddy->uri() == sipUrl) {
+            foundBuddy = buddy;
+        }
+    }
+
+    if (foundBuddy) {
+        pj::SendInstantMessageParam msg;
+        msg.contentType = mimeType.toStdString();
+        msg.content = message.toStdString();
+        msg.userData = (void *)id;
+
+        try {
+            foundBuddy->sendInstantMessage(msg);
+        } catch (pj::Error &err) {
+            qCWarning(lcSIPAccount) << "failed to send message:" << err.info();
+        }
+    } else {
+        qCWarning(lcSIPAccount) << "failed to send message: unknown SIP buddy";
+    }
+
+    return id;
+}
+
+void SIPAccount::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
+{
+    qCDebug(lcSIPAccount) << "sent message to " << prm.toUri << ", status: " << prm.code
+                          << prm.reason << (long)prm.userData;
+}
+
+void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
+{
+    qCDebug(lcSIPAccount) << "received message from " << prm.fromUri << ":" << prm.msgBody;
+    emit messageReceived(prm.fromUri.c_str(), prm.msgBody.c_str(), prm.contentType.c_str());
 }
 
 SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)

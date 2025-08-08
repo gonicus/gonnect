@@ -22,6 +22,7 @@ public:
     void onFrameReceived(pj::MediaFrame &frame) override;
 
     QString getDeviceID() const;
+    QString getSystemDeviceID() const;
 
     void setAudioDevice(QAudioDevice device);
     QAudioDevice audioDevice() { return m_device; }

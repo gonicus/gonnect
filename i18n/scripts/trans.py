@@ -1,7 +1,7 @@
 import yaml
 from lxml import etree
 
-lang = "de_DE"
+lang = "it_IT"
 
 en = dict()
 other = dict()
@@ -31,7 +31,7 @@ for key in en:
     source = etree.SubElement(phrase, "source")
     source.text = en[key]
     target = etree.SubElement(phrase, "target")
-    target.text = other[key]
+    target.text = other[key] if key in other else ""
 
 f = open('example.xml', 'wb')
 f.write(etree.tostring(root, encoding="UTF-8",

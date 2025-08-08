@@ -1,3 +1,4 @@
+#pragma once
 #include <QTimer>
 #include <QObject>
 

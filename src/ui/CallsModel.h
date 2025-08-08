@@ -13,6 +13,8 @@ class CallsModel : public QAbstractListModel
     Q_OBJECT
     QML_ELEMENT
 
+    Q_PROPERTY(int count READ count NOTIFY countChanged FINAL)
+
 public:
     struct CallInfo
     {
@@ -26,6 +28,7 @@ public:
         bool isFinished = false;
         bool hasCapabilityJitsi = false;
         qreal incomingAudioLevel = 0.0;
+        bool hasMetadata = false;
         QDateTime established;
         ContactInfo contactInfo;
         pjsip_status_code statusCode = PJSIP_SC_NULL;
@@ -49,6 +52,7 @@ public:
         IsFinished,
         HasCapabilityJitsi,
         HasIncomingAudioLevel,
+        HasMetadata,
         HasAvatar,
         AvatarPath
     };
@@ -56,9 +60,13 @@ public:
     explicit CallsModel(QObject *parent = nullptr);
     virtual ~CallsModel();
 
+    qsizetype count() const { return m_calls.size(); }
     virtual int rowCount(const QModelIndex &parent) const override;
     virtual QVariant data(const QModelIndex &index, int role) const override;
     virtual QHash<int, QByteArray> roleNames() const override;
+
+signals:
+    void countChanged();
 
 private slots:
     void updateCalls();

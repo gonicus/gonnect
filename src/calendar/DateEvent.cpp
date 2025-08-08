@@ -1,0 +1,64 @@
+#include "DateEvent.h"
+
+DateEvent::DateEvent(const QString &id, const QString &source, const QDateTime &start,
+                     const QDateTime &end, const QString &summary, const QString &roomName,
+                     bool isConfirmed, QObject *parent)
+    : QObject{ parent },
+      m_id{ id },
+      m_source{ source },
+      m_start{ start },
+      m_end{ end },
+      m_summary{ summary },
+      m_roomName{ roomName },
+      m_isConfirmed{ isConfirmed }
+{
+}
+
+void DateEvent::setId(const QString &id)
+{
+    m_id = id;
+}
+
+void DateEvent::setSource(const QString &source)
+{
+    m_source = source;
+}
+
+void DateEvent::setStart(const QDateTime &start)
+{
+    m_start = start;
+}
+
+void DateEvent::setEnd(const QDateTime &end)
+{
+    m_end = end;
+}
+
+void DateEvent::setSummary(const QString &summary)
+{
+    m_summary = summary;
+}
+
+void DateEvent::setRoomName(const QString &roomName)
+{
+    m_roomName = roomName;
+}
+
+void DateEvent::setIsConfirmed(bool isConfirmed)
+{
+    m_isConfirmed = isConfirmed;
+}
+
+QDebug operator<<(QDebug debug, const DateEvent &dateEvent)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace().noquote() << "DateEvent("
+                              << "id=" << dateEvent.id() << ","
+                              << "start=" << dateEvent.start() << ","
+                              << "end=" << dateEvent.end() << ","
+                              << "roomName=" << dateEvent.roomName() << ","
+                              << "summary=" << dateEvent.summary() << ","
+                              << "isConfirmed=" << dateEvent.isConfirmed() << ","
+                              << "source=" << dateEvent.source() << ")";
+    return debug;
+}

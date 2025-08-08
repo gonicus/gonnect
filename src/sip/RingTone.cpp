@@ -1,10 +1,10 @@
 #include "RingTone.h"
-#include "SIPAudioManager.h"
+#include "AudioManager.h"
 
 RingTone::RingTone(quint16 frequency1, quint16 frequency2, QList<QPair<quint16, quint16>> intervals,
                    qint8 loopIndex, QObject *parent)
     : QObject(parent),
-      m_mediaSink(SIPAudioManager::instance().getPlaybackDevMedia()),
+      m_mediaSink(AudioManager::instance().getPlaybackDevMedia()),
       m_frequency1(frequency1),
       m_frequency2(frequency2),
       m_loopIndex(loopIndex),

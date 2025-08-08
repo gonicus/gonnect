@@ -8,9 +8,15 @@
 
 struct UsageInfo
 {
+    UsageInfo() { }
+    UsageInfo(qsizetype bitPosition, quint32 size, quint8 reportId);
+
     qsizetype bitPosition = 0;
+    quint32 size = 0;
     quint8 reportId = 0;
 };
+
+QDebug operator<<(QDebug debug, const UsageInfo &usageInfo);
 
 class HeadsetDevice final : public IHeadsetDevice
 {
@@ -39,30 +45,56 @@ public:
 
     void setIdle();
 
+    void syncDateAndTime();
+    void setLocalUserName(const QString &name);
+    void setLocalUserNumber(const QString &number);
+    void setLocalUserStatus(const QString &status);
+    void setOtherUserName(const QString &name);
+    void setOtherUserNumber(const QString &number);
+    void setSubject(const QString &subject);
+    void selectScreen(ReportDescriptorEnums::TeamsScreenSelect screen, bool clear = false,
+                      bool backlight = true);
+    void setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon icon);
+    void setCallStatus(const QString &state);
+
     void setUsageInfos(const QHash<UsageId, UsageInfo> &infos);
+    void setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMapping);
 
     ~HeadsetDevice();
 
 private:
+    bool displayFieldSupported(ReportDescriptorEnums::TeamsDisplayFieldSupport field);
+    void setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport field,
+                         const QString &text);
+    void sendASP(quint8 cmd);
+
     void send(quint8 reportId, unsigned data);
     void processEvents();
     unsigned currentFlags(const quint32 reportId) const;
-    bool useHeadset() { return m_appSettings.value("generic/useHeadset", false).toBool(); }
+    bool useHeadset() { return m_appSettings.value("generic/useHeadset", true).toBool(); }
+
+    QStringList makeChunks(const QString &text, qsizetype chunkSize);
 
     AppSettings m_appSettings;
     QTimer m_eventHandler;
     QHash<UsageId, UsageInfo> m_hidUsages;
+    QHash<UsageId, quint16> m_teamsUsageMapping;
 
     QString m_path;
     QString m_productName;
 
     hid_device *m_device = nullptr;
 
-    // TODO: features, etc.
+    quint32 m_displayRows = 0;
+    quint32 m_displayCols = 0;
+    quint32 m_displayFieldSupportIndex = 0;
 
     quint8 m_bus = 0;
     quint8 m_port = 0;
     QSet<quint8> m_inputReportIds;
+
+    ReportDescriptorEnums::TeamsPresenceIcon m_presenceIcon =
+            ReportDescriptorEnums::TeamsPresenceIcon::Offline;
 
     bool m_hookSwitch = false;
     bool m_line = false;
@@ -71,4 +103,7 @@ private:
     bool m_hold = false;
     bool m_ringing = false;
     bool m_isOpen = false;
+
+    bool m_ignoreNextMuteUpdate = false;
+    bool m_displaySupported = false;
 };

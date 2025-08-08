@@ -63,10 +63,10 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
-                    model: SIPAudioManager.devices.filter(device => device.isInput)
+                    model: AudioManager.devices.filter(device => device.isInput)
 
                     function updateSelectedAudioDeviceFromModel() {
-                        const deviceId = SIPAudioManager.captureDeviceId
+                        const deviceId = AudioManager.captureDeviceId
                         const model = inputAudioSelector.model
 
                         for (let i = 0; i < model.length; ++i) {
@@ -78,12 +78,12 @@ BaseWindow {
                         inputAudioSelector.currentIndex = 0
                     }
 
-                    onActivated: () => SIPAudioManager.captureDeviceId = inputAudioSelector.currentValue
+                    onActivated: () => AudioManager.captureDeviceId = inputAudioSelector.currentValue
 
                     Component.onCompleted: () => inputAudioSelector.updateSelectedAudioDeviceFromModel()
 
                     Connections {
-                        target: SIPAudioManager
+                        target: AudioManager
                         function onCaptureDeviceIdChanged() { inputAudioSelector.updateSelectedAudioDeviceFromModel() }
                     }
                 }
@@ -112,10 +112,10 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
-                    model: SIPAudioManager.devices.filter(device => device.isOutput)
+                    model: AudioManager.devices.filter(device => device.isOutput)
 
                     function updateSelectedAudioDeviceFromModel() {
-                        const deviceId = SIPAudioManager.playbackDeviceId
+                        const deviceId = AudioManager.playbackDeviceId
                         const model = outputAudioSelector.model
 
                         for (let i = 0; i < model.length; ++i) {
@@ -127,12 +127,12 @@ BaseWindow {
                         outputAudioSelector.currentIndex = 0
                     }
 
-                    onActivated: () => SIPAudioManager.playbackDeviceId = outputAudioSelector.currentValue
+                    onActivated: () => AudioManager.playbackDeviceId = outputAudioSelector.currentValue
 
                     Component.onCompleted: () => outputAudioSelector.updateSelectedAudioDeviceFromModel()
 
                     Connections {
-                        target: SIPAudioManager
+                        target: AudioManager
                         function onPlaybackDeviceIdChanged() { outputAudioSelector.updateSelectedAudioDeviceFromModel() }
                     }
                 }
@@ -161,11 +161,11 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
-                    model: SIPAudioManager.devices.filter(device => device.isOutput)
+                    model: AudioManager.devices.filter(device => device.isOutput)
 
 
                     function updateSelectedAudioDeviceFromModel() {
-                        const deviceId = SIPAudioManager.ringDeviceId
+                        const deviceId = AudioManager.ringDeviceId
                         const model = outputRingToneAudioSelector.model
 
                         for (let i = 0; i < model.length; ++i) {
@@ -177,12 +177,12 @@ BaseWindow {
                         outputRingToneAudioSelector.currentIndex = 0
                     }
 
-                    onActivated: () => SIPAudioManager.ringDeviceId = outputRingToneAudioSelector.currentValue
+                    onActivated: () => AudioManager.ringDeviceId = outputRingToneAudioSelector.currentValue
 
                     Component.onCompleted: () => outputRingToneAudioSelector.updateSelectedAudioDeviceFromModel()
 
                     Connections {
-                        target: SIPAudioManager
+                        target: AudioManager
                         function onRingDeviceIdChanged() { outputRingToneAudioSelector.updateSelectedAudioDeviceFromModel() }
                     }
                 }

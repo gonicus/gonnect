@@ -30,6 +30,7 @@ Rectangle {
     required property int statusCode
     required property bool hasIncomingAudioLevel
     required property bool hasAvatar
+    required property bool hasMetadata
     required property string avatarPath
 
     property bool selected: false
