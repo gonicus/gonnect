@@ -13,7 +13,7 @@
 
 # Overview
 
-_GOnnect_ is an opinionated, simple, easy to use VoIP client, designed for
+_GOnnect_ is a simple, easy to use UC client, designed for
 Linux / _Flatpak_ based installations. It makes use of various Flatpak
 portals and is meant to integrate well into modern Desktop Environments
 like _KDE_ or _GNOME_.
@@ -30,11 +30,14 @@ Here's a short feature list:
  * Conference calls with three parties
  * Busy state for supported sources
  * Configurable busy on active call
- * LDAP/CardDAV address sources
+ * address sources
+   * LDAP
+   * CardDAV
+   * CSV
  * Configurable identities for outgoing calls
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
- * Upgrade call to Jitsi Meet session
- * Support for various hardware headsets (i.e. Yealink, Jabra)
+ * **Jitsi Meet Integration: Upgrade call to Videoconference**
+ * **Support for various hardware headsets (i.e. Yealink, Jabra)**
  * Support for various busylights
  * Custom audio device profiles or managed by your system
  * [mpris](https://specifications.freedesktop.org/mpris-spec/latest/) for
