@@ -793,7 +793,7 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="160"/>
         <source>Does not exist anywhere</source>
-        <translation>Unbekannter Teilnehmer</translation>
+        <translation>Existiert nirgendwo</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="162"/>
