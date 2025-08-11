@@ -1,0 +1,31 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name='de.gonicus.gonnect.api'>
+    <method name='CallIds'>
+      <arg type='av' name='ids' direction='out'/>
+    </method>
+    <method name='Call'>
+      <arg type='s' name='uri' direction='in'/>
+      <arg type='s' name='id' direction='out'/>
+    </method>
+    <method name='HangupCall'>
+      <arg type='s' name='id' direction='in'/>
+    </method>
+    <method name='HangupAllCalls'/>
+    <method name='AddMetaData'>
+      <arg type='s' name='Id' direction='in'/>
+      <arg type='s' name='Data' direction='in'/>
+    </method>
+    <signal name="Ringing">
+      <arg name="Id" type="s"/>
+      <arg name="Data" type="s"/>
+    </signal>
+    <signal name="CallAnswered">
+      <arg name="Id" type="s"/>
+    </signal>
+    <signal name="CallEnded">
+      <arg name="Id" type="s"/>
+    </signal>
+    <property name="version" type="u" access="read"/>
+  </interface>
+</node>

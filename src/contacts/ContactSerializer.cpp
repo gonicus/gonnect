@@ -76,7 +76,10 @@ void ContactSerializer::loadAddressBook(AddressBook &addressBook)
         for (qsizetype i = 0; i < numberOfContacts; ++i) {
             QString id;
             QString dn;
+            QString sourceUid;
             QString name;
+            unsigned prio;
+            QString displayName;
             QString company;
             QString mail;
             QDateTime lastModified;
@@ -85,6 +88,9 @@ void ContactSerializer::loadAddressBook(AddressBook &addressBook)
 
             in >> id;
             in >> dn;
+            in >> sourceUid;
+            in >> prio;
+            in >> displayName;
             in >> name;
             in >> company;
             in >> mail;
@@ -92,8 +98,8 @@ void ContactSerializer::loadAddressBook(AddressBook &addressBook)
             in >> sipStatusSubscriptable;
             in >> phoneNumbers;
 
-            Contact *contact = new Contact(id, dn, name, company, mail, lastModified, phoneNumbers,
-                                           &addressBook);
+            Contact *contact = new Contact(id, dn, sourceUid, { prio, displayName }, name, company,
+                                           mail, lastModified, phoneNumbers, &addressBook);
             addressBook.addContact(contact);
         }
 

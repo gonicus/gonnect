@@ -13,6 +13,10 @@ ReportDescriptorParser::ReportDescriptorParser(QObject *parent) : QObject(parent
 
 using desc_view = hid::rdf::ce_descriptor_view;
 
+typedef hid::rdf::global::tag GlobalTag;
+typedef hid::rdf::main::tag MainTag;
+typedef hid::rdf::local::tag LocalTag;
+
 class Parser : public hid::rdf::parser<desc_view::iterator>
 {
 public:
@@ -22,15 +26,11 @@ public:
     }
 };
 
-std::shared_ptr<ApplicationCollection> ReportDescriptorParser::parse(QByteArray data)
+std::shared_ptr<ApplicationCollection> ReportDescriptorParser::parse(const QByteArray &data)
 {
     const hid::rdf::descriptor_view descView(
             reinterpret_cast<const unsigned char *>(data.constData()), data.size());
     const Parser p(descView);
-
-    typedef hid::rdf::global::tag GlobalTag;
-    typedef hid::rdf::main::tag MainTag;
-    typedef hid::rdf::local::tag LocalTag;
 
     static const QList<hid::rdf::main::tag> usageTypeTags = { MainTag::INPUT, MainTag::OUTPUT,
                                                               MainTag::FEATURE };
@@ -180,6 +180,107 @@ std::shared_ptr<ApplicationCollection> ReportDescriptorParser::parse(QByteArray 
     }
 
     return appColl;
+}
+
+QHash<ReportDescriptorEnums::UsageId, quint16>
+ReportDescriptorParser::parseTeamsReportIDs(const QByteArray &data)
+{
+    QHash<ReportDescriptorEnums::UsageId, quint16> info;
+
+    // We only need to extract the rtportId / usage mapping - or maybe we don't
+    // even need that, but as it can be done by linear parsing, just do it...
+    const hid::rdf::descriptor_view descView(
+            reinterpret_cast<const unsigned char *>(data.constData()), data.size());
+    const Parser p(descView);
+
+    bool inTeamsPage = false;
+    quint8 uCDisplayCollectionLevel = 0xFF;
+    quint8 collectionLevel = 0;
+    quint32 usage = 0;
+
+    // Find Collection with teams usage page 0xFF99
+    for (auto it = descView.begin(); it != descView.end(); ++it) {
+        const bool isGlobal = it->type() == hid::rdf::item_type::GLOBAL;
+        const bool isMain = it->type() == hid::rdf::item_type::MAIN;
+        const bool isLocal = it->type() == hid::rdf::item_type::LOCAL;
+        const quint32 val = it->value_unsigned();
+
+        if (isGlobal && it->global_tag() == GlobalTag::USAGE_PAGE) {
+            if (val == 0xFF99) {
+                inTeamsPage = true;
+            } else {
+                inTeamsPage = false;
+            }
+
+            continue;
+        }
+
+        if (isLocal && it->local_tag() == LocalTag::USAGE) {
+            usage = val;
+        }
+
+        if (!inTeamsPage) {
+            continue;
+        }
+
+        if (isMain && it->main_tag() == MainTag::COLLECTION && uCDisplayCollectionLevel == 0xFF) {
+            ++collectionLevel;
+
+            // Application Collection and UC Display?
+            if (val == 0x01 && usage == (quint16)ReportDescriptorEnums::UsageId::Teams_UCDISPLAY) {
+                uCDisplayCollectionLevel = collectionLevel;
+                continue;
+            }
+        }
+
+        if (uCDisplayCollectionLevel == 0xFF) {
+            continue;
+        }
+
+        if (isMain && it->main_tag() == MainTag::COLLECTION) {
+            ++collectionLevel;
+            continue;
+        }
+
+        if (isMain && it->main_tag() == MainTag::END_COLLECTION) {
+            --collectionLevel;
+
+            // If we drop down the uCDisplayCollectionLevel, we're ready
+            if (collectionLevel < uCDisplayCollectionLevel) {
+                uCDisplayCollectionLevel = 0xFF;
+            }
+
+            continue;
+        }
+
+        // Memorize supported usage/reportId mapping
+        if (isGlobal && it->global_tag() == GlobalTag::REPORT_ID) {
+
+            if (usage == (quint16)ReportDescriptorEnums::UsageId::Teams_VendorExtension) {
+                info.insert(ReportDescriptorEnums::UsageId::Teams_VendorExtension, val);
+            } else if (usage == (quint16)ReportDescriptorEnums::UsageId::Teams_DisplayAttributes) {
+                info.insert(ReportDescriptorEnums::UsageId::Teams_DisplayAttributes, val);
+            } else if (usage == (quint16)ReportDescriptorEnums::UsageId::Teams_DisplayControl) {
+                info.insert(ReportDescriptorEnums::UsageId::Teams_DisplayControl, val);
+            } else if (usage
+                       == (quint16)ReportDescriptorEnums::UsageId::Teams_CharacterAttributes) {
+                info.insert(ReportDescriptorEnums::UsageId::Teams_CharacterAttributes, val);
+            } else if (usage == (quint16)ReportDescriptorEnums::UsageId::Teams_CharacterReport) {
+                info.insert(ReportDescriptorEnums::UsageId::Teams_CharacterReport, val);
+
+            } else if (usage == (quint16)ReportDescriptorEnums::UsageId::Teams_IconsControl) {
+                info.insert(ReportDescriptorEnums::UsageId::Teams_IconsControl, val);
+
+            } else if (usage == (quint16)ReportDescriptorEnums::UsageId::Teams_Button) {
+                info.insert(ReportDescriptorEnums::UsageId::Teams_Button, val);
+
+            } else if (usage == (quint16)ReportDescriptorEnums::UsageId::Teams_ASPNotification) {
+                info.insert(ReportDescriptorEnums::UsageId::Teams_ASPNotification, val);
+            }
+        }
+    }
+
+    return info;
 }
 
 QString ReportDescriptorParser::itemToString(hid::rdf::reinterpret_iterator &it) const

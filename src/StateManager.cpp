@@ -2,6 +2,7 @@
 
 #include "DBusActivationAdapter.h"
 #include "DBusActivationInterface.h"
+#include "GOnnectDBusAPI.h"
 #include "GlobalShortcutPortal.h"
 #include "StateManager.h"
 #include "SIPCallManager.h"
@@ -9,17 +10,20 @@
 #include "Application.h"
 #include "CallHistory.h"
 #include "ScreenSaverInterface.h"
+#include "GlobalCallState.h"
+#include "ExternalMediaManager.h"
 
 Q_LOGGING_CATEGORY(lcStateHandling, "gonnect.state")
 
 StateManager::StateManager(QObject *parent) : QObject(parent)
 {
     m_activationAdapter = new DBusActivationAdapter(this);
+    m_apiEndpoint = new GOnnectDBusAPI(this);
 
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
-        m_isFirstInstance = con.registerObject("/de/gonicus/gonnect", this)
-                && con.registerService("de.gonicus.gonnect");
+        m_isFirstInstance =
+                con.registerObject(FLATPAK_APP_PATH, this) && con.registerService(FLATPAK_APP_ID);
     }
 
     m_inhibitPortal = new InhibitPortal(this);
@@ -32,6 +36,9 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
             m_inhibitPortal->release();
         }
     });
+
+    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
+            &StateManager::updateInhibitState);
 
     m_screenSaverInterface = new OrgFreedesktopScreenSaverInterface("org.freedesktop.ScreenSaver",
                                                                     "/org/freedesktop/ScreenSaver",
@@ -91,8 +98,8 @@ StateManager::~StateManager()
 {
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
-        con.unregisterObject("/de/gonicus/gonnect", QDBusConnection::UnregisterTree);
-        con.unregisterService("de.gonicus.gonnect");
+        con.unregisterObject(FLATPAK_APP_PATH, QDBusConnection::UnregisterTree);
+        con.unregisterService(FLATPAK_APP_ID);
     }
 
     if (SIPCallManager::instance().activeCalls() == 0) {
@@ -156,8 +163,8 @@ void StateManager::sendArguments(const QStringList &args)
             vlArgs << arg;
         }
 
-        OrgFreedesktopApplicationInterface actionInterface("de.gonicus.gonnect",
-                                                           "/de/gonicus/gonnect", con, this);
+        OrgFreedesktopApplicationInterface actionInterface(FLATPAK_APP_ID, FLATPAK_APP_PATH, con,
+                                                           this);
 
         actionInterface.ActivateAction("invoke", vlArgs, {});
     }
@@ -195,6 +202,41 @@ void StateManager::ActivateAction(const QString &action_name, const QVariantList
         SIPManager::instance().initializePreferredIdentities();
     } else {
         qCWarning(lcStateHandling) << "unknown activation action" << action_name;
+    }
+}
+
+void StateManager::updateInhibitState()
+{
+    typedef ICallState::State State;
+
+    const auto state = GlobalCallState::instance().globalCallState();
+    const auto changeMask = m_oldCallState ^ state;
+
+    m_oldCallState = state;
+    if (changeMask & State::RingingIncoming) {
+        if (state & State::RingingIncoming) {
+            qCInfo(lcStateHandling) << "ringing - pausing external media";
+            ExternalMediaManager::instance().pause();
+        }
+    }
+
+    if (changeMask & State::RingingOutgoing) {
+        if (state & State::RingingOutgoing) {
+            qCInfo(lcStateHandling) << "ringing - pausing external media";
+            ExternalMediaManager::instance().pause();
+        }
+    }
+
+    if (changeMask & State::CallActive) {
+        if (state & State::CallActive) {
+            qCInfo(lcStateHandling) << "call active - inhibit screensaver, pausing external media";
+            inhibitScreenSaver();
+            ExternalMediaManager::instance().pause();
+        } else {
+            qCInfo(lcStateHandling) << "call ended - release screensaver, resuming external media";
+            releaseScreenSaver();
+            ExternalMediaManager::instance().resume();
+        }
     }
 }
 

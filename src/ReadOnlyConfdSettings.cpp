@@ -2,6 +2,7 @@
 #include <QStandardPaths>
 #include <QRegularExpression>
 #include <QLoggingCategory>
+#include <QCryptographicHash>
 #include <unistd.h>
 #include <grp.h>
 #include "ReadOnlyConfdSettings.h"
@@ -97,4 +98,22 @@ void ReadOnlyConfdSettings::readConfd()
             }
         }
     }
+}
+
+QString ReadOnlyConfdSettings::hashForSettingsGroup(const QString &group)
+{
+    beginGroup(group);
+
+    QString groupSettingsStr;
+    auto ck = childKeys();
+    std::sort(ck.begin(), ck.end());
+
+    for (const auto &key : std::as_const(ck)) {
+        groupSettingsStr.append(key);
+        groupSettingsStr.append(value(key, "").toString());
+    }
+
+    endGroup();
+
+    return QCryptographicHash::hash(groupSettingsStr.toUtf8(), QCryptographicHash::Md5).toHex();
 }

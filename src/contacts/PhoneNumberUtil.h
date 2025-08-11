@@ -17,6 +17,11 @@ struct ContactInfo
     bool isAnonymous = false;
     bool isSipSubscriptable = false;
     QPointer<Contact> contact = nullptr;
+
+    QString toString() const;
+
+    bool operator==(const ContactInfo &other);
+    bool operator!=(const ContactInfo &other);
 };
 
 QDebug operator<<(QDebug debug, const ContactInfo &contactInfo);
@@ -42,6 +47,7 @@ public:
     static bool isSipUri(const QString &str);
     static QString numberFromSipUrl(const QString &sipUrl);
     static bool isEmergencyCallUrl(const QString &sipUrl);
+    static bool isNumberAnonymous(const QString &sipUrl);
 
 private:
     PhoneNumberUtil();

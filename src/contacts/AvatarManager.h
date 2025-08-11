@@ -24,11 +24,14 @@ public:
     QString avatarPathFor(const QString &id);
 
     void addExternalImage(const QString &id, const QByteArray &data, const QDateTime &modified);
+    void removeExternalImage(const QString &id);
 
 private:
     void clearCStringlist(char **attrs) const;
     void createFile(const QString &id, const QByteArray &data) const;
+    void removeFile(const QString &id) const;
     void addIdsToDb(QHash<QString, QDateTime> &idTimeMap) const;
+    void removeIdsFromDb(QList<QString> &idList) const;
     void updateAvatarModifiedTime(const QString &id, const QDateTime &modified) const;
     QDateTime modifiedTimeInDb(const QString &id) const;
     QHash<QString, QDateTime> readIdsFromDb() const;
@@ -49,4 +52,5 @@ private slots:
 signals:
     void avatarsLoaded();
     void avatarAdded(QString contactId);
+    void avatarRemoved(QString contactId);
 };

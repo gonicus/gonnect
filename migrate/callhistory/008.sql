@@ -1,0 +1,2 @@
+ALTER TABLE contactflags
+ADD COLUMN type INTEGER DEFAULT 0;

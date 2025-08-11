@@ -1,0 +1,12 @@
+diff --git a/texttranslator/translator/plugins/google/googleengineplugin.cpp b/texttranslator/translator/plugins/google/googleengineplugin.cpp
+index f7400dd3..6874eff4 100644
+--- a/texttranslator/translator/plugins/google/googleengineplugin.cpp
++++ b/texttranslator/translator/plugins/google/googleengineplugin.cpp
+@@ -10,6 +10,7 @@
+ #include <QJsonDocument>
+ #include <QJsonParseError>
+ #include <QNetworkAccessManager>
++#include <QRegularExpression>
+ #include <QNetworkReply>
+ #include <QNetworkRequest>
+ #include <QUrlQuery>

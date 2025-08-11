@@ -1,16 +1,16 @@
 #include "LitraBeamLX.h"
 #include <QLoggingCategory>
 
-#define REPORT_ID 0x11
-#define DEVICE_ID 0xFF
-#define SOFTWARE_ID 0x0A
-#define SET_ILLUMINATION 0x10
-#define SET_ILLUMINATION_RGB 0x40
-#define SET_INDIVITUAL_RGB_ZONES 0x10
-#define FRAME_END 0x70
-#define FEATURE_ILLUMINATION 0x06
-#define FEATURE_BRIGHTNESS_CONTROL 0x0A
-#define FEATURE_PREKEY_LIGHTING 0x0C
+#define LX_REPORT_ID 0x11
+#define LX_DEVICE_ID 0xFF
+#define LX_SOFTWARE_ID 0x0A
+#define LX_SET_ILLUMINATION 0x10
+#define LX_SET_ILLUMINATION_RGB 0x40
+#define LX_SET_INDIVITUAL_RGB_ZONES 0x10
+#define LX_FRAME_END 0x70
+#define LX_FEATURE_ILLUMINATION 0x06
+#define LX_FEATURE_BRIGHTNESS_CONTROL 0x0A
+#define LX_FEATURE_PREKEY_LIGHTING 0x0C
 
 Q_LOGGING_CATEGORY(lcLitraBeamLX, "gonnect.usb.busylight.LitraBeamLX")
 
@@ -39,10 +39,10 @@ void LitraBeamLX::switchStreamlight(bool on)
 
     // Switch on or off
     memset(buf, 0, sizeof(buf));
-    buf[0] = REPORT_ID;
-    buf[1] = DEVICE_ID;
-    buf[2] = FEATURE_ILLUMINATION;
-    buf[3] = SET_ILLUMINATION | SOFTWARE_ID;
+    buf[0] = LX_REPORT_ID;
+    buf[1] = LX_DEVICE_ID;
+    buf[2] = LX_FEATURE_ILLUMINATION;
+    buf[3] = LX_SET_ILLUMINATION | LX_SOFTWARE_ID;
     buf[4] = on ? 1 : 0;
 
     hid_write(m_device, buf, sizeof(buf));
@@ -63,10 +63,10 @@ void LitraBeamLX::send(bool on)
 
     // Switch on or off
     memset(buf, 0, sizeof(buf));
-    buf[0] = REPORT_ID;
-    buf[1] = DEVICE_ID;
-    buf[2] = FEATURE_BRIGHTNESS_CONTROL;
-    buf[3] = SET_ILLUMINATION_RGB | SOFTWARE_ID;
+    buf[0] = LX_REPORT_ID;
+    buf[1] = LX_DEVICE_ID;
+    buf[2] = LX_FEATURE_BRIGHTNESS_CONTROL;
+    buf[3] = LX_SET_ILLUMINATION_RGB | LX_SOFTWARE_ID;
     buf[4] = on ? 1 : 0;
 
     hid_write(m_device, buf, sizeof(buf));
@@ -76,10 +76,10 @@ void LitraBeamLX::send(bool on)
     if (on) {
         // rgb values
         memset(buf, 0, sizeof(buf));
-        buf[0] = REPORT_ID;
-        buf[1] = DEVICE_ID;
-        buf[2] = FEATURE_PREKEY_LIGHTING;
-        buf[3] = SET_INDIVITUAL_RGB_ZONES | SOFTWARE_ID;
+        buf[0] = LX_REPORT_ID;
+        buf[1] = LX_DEVICE_ID;
+        buf[2] = LX_FEATURE_PREKEY_LIGHTING;
+        buf[3] = LX_SET_INDIVITUAL_RGB_ZONES | LX_SOFTWARE_ID;
         for (auto i = 0; i < 4; ++i) {
             buf[4 + i * 4] = i + 1; // Zone number
             buf[5 + i * 4] = m_color.red();
@@ -91,10 +91,10 @@ void LitraBeamLX::send(bool on)
         hid_read_timeout(m_device, buf, 20, 1000);
 
         memset(buf, 0, sizeof(buf));
-        buf[0] = REPORT_ID;
-        buf[1] = DEVICE_ID;
-        buf[2] = FEATURE_PREKEY_LIGHTING;
-        buf[3] = SET_INDIVITUAL_RGB_ZONES | SOFTWARE_ID;
+        buf[0] = LX_REPORT_ID;
+        buf[1] = LX_DEVICE_ID;
+        buf[2] = LX_FEATURE_PREKEY_LIGHTING;
+        buf[3] = LX_SET_INDIVITUAL_RGB_ZONES | LX_SOFTWARE_ID;
         for (auto i = 0; i < 4; ++i) {
             buf[4 + i * 4] = i + 5;
             buf[5 + i * 4] = m_color.red();
@@ -107,10 +107,10 @@ void LitraBeamLX::send(bool on)
 
         // Flush
         memset(buf, 0, sizeof(buf));
-        buf[0] = REPORT_ID;
-        buf[1] = DEVICE_ID;
-        buf[2] = FEATURE_PREKEY_LIGHTING;
-        buf[3] = FRAME_END | SOFTWARE_ID;
+        buf[0] = LX_REPORT_ID;
+        buf[1] = LX_DEVICE_ID;
+        buf[2] = LX_FEATURE_PREKEY_LIGHTING;
+        buf[3] = LX_FRAME_END | LX_SOFTWARE_ID;
         buf[4] = 1; // Persist
 
         hid_write(m_device, buf, sizeof(buf));

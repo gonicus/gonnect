@@ -1,0 +1,311 @@
+#!/bin/bash
+
+# This script demonstrates how to configure GOnnect on system start.
+# It uses a set of config files as preset and queries a LDAP server
+# for the user's name and number.
+
+# CONFIG_DIR is the place where the GOnnect config is stored. The default
+# is set to the Flatpak's location.
+: "${CONFIG_DIR:=$HOME/.var/app/de.gonicus.gonnect/config/gonnect}"
+
+# DATA_DIR is the place where the GOnnect stores some data like the call history.
+# The default is set to the Flatpak's location.
+: "${DATA_DIR:=$HOME/.var/app/de.gonicus.gonnect/data/gonnect/GOnnect}"
+
+# PRESET_DIR is the place where this script finds the preset configuration files.
+# This folder contains the following types of files:
+# *.conf               - Files, which will be copied over to the user config dir.
+# *.conf.in            - Files, which will be copied over only if the destination does not exists.
+# *-<group>.conf.group - Files, which will be copied over if the user is in the group.
+# *.conf.rm            - Files, which will be deleted in the user config dir.
+: "${PRESET_DIR:=/etc/gonnect}"
+
+# show_error prints an error message and exits the script.
+# Arguments:
+# 1 - the exit code
+# 2 - the error message
+function show_error {
+    echo >&2 "$2"
+    exit "$1"
+}
+
+# Check for needed tools
+command -v sed >/dev/null 2>&1 || show_error 2 "sed command is missing!"
+command -v ldapwhoami >/dev/null 2>&1 || show_error 2 "ldapwhoami command is missing!"
+command -v ldapsearch >/dev/null 2>&1 || show_error 2 "ldapsearch command is missing!"
+command -v grep >/dev/null 2>&1 || show_error 2 "grep command is missing!"
+command -v getent >/dev/null 2>&1 || show_error 2 "getent command is missing!"
+command -v gdbus >/dev/null 2>&1 || show_error 2 "gdbus command is missing!"
+
+# help - shows the usage information.
+function help {
+    cat <<HELP
+Usage: gonnect-user-setup [options]
+
+gonnect-user-setup prepares the GOnnect configuration directory depending on the files
+in the prepare directory. The file are handled by it's extension
+
+*.conf                files are just copied over
+*.conf.in             files are only copied over, if the destination file does not exist
+*.conf.rm             the destination file by the name without ".rm" is deleted.
+*-<group>.conf.group  the file is copied over, if the user belongs to the <group>.
+
+After copying the files, the following variables will be replaced by the user's values:
+
+%NUMBER%        the full phone number of the user
+%EXTENSION%     the extension part of the phone number
+%DISPLAY_NAME%  the full name of the user
+
+Options:
+    -h  --help      Show this help
+    -c  --config    The folder to place the files in. Defaults to $HOME/.var/app/de.gonicus.gonnect/config/gonnect
+    -p  --preset    The folder to find the prepared configuration. Defaults to /etc/gonnect
+    -N  --no-notify Do not notify GOnnect about reloading it's configuration
+    -v  --verbose   Enable verbose printing
+HELP
+}
+
+VERBOSE=false
+NOTIFY=true
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -c|--config)
+            CONFIG_DIR=$2
+            shift
+            shift
+            ;;
+        -p|--preset)
+            PRESET_DIR=$2
+            shift
+            shift
+            ;;
+        -N|--no-notify)
+            NOTIFY=false
+            shift
+            ;;
+        -h|--help)
+            help
+            exit 0
+            ;;
+        *)
+            echo "Unknown parameter \"$1\""
+            help
+            exit 1
+            ;;
+    esac
+done
+
+# verbose - print verbose information 
+function verbose {
+    if [ "$VERBOSE" == "true" ]; then
+        echo "$@"
+    fi
+}
+
+# copy_statics - copy all *.conf files to the user config dir.
+function copy_statics {
+    verbose "* copying static files:"
+    
+    local src
+    local none
+    none="  none"
+
+    for f in "$PRESET_DIR"/*.conf; do
+        src=$(basename "$f")
+        verbose "  - $src"
+        cp "$f" "$CONFIG_DIR/$src"
+        none=
+    done
+
+    # Show, if no files were handled
+    if [ -n "$none" ]; then
+        verbose "$none"
+    fi
+}
+
+# copy_missing - copy all *.conf.in files to the user config dir, if they does not exists.
+function copy_missing {
+    verbose "* copying missing files:"
+    
+    local none
+    none="  none"
+    local name
+    local dest
+
+    for f in "$PRESET_DIR"/*.conf.in; do
+        name=$(basename "$f")
+        # strip off the ".in" part
+        name=${name/%.in/}
+        dest=$CONFIG_DIR/$name
+
+        if [ ! -f "$dest" ]; then
+            verbose "  - $name"
+            cp "$f" "$dest"
+            none=
+        fi
+    done
+
+    # Show, if no files were handled
+    if [ -n "$none" ]; then
+        verbose "$none"
+    fi
+}
+
+# copy_group - copy all *-<group>.conf.group files to the user config dir, if the user is in the group.
+# Be aware of the surrounding dash and dot. This is because the config filename is not allowed to have 
+# separating dot in the filename (only - and _ are allowed)
+function copy_group {
+    verbose "* copying group files:"
+    
+    local none
+    none="  none"
+    local name
+    local dest
+
+    for f in "$PRESET_DIR"/*.conf.group; do
+        name=$(basename "$f")
+        # strip off the ".group" part
+        name=${name/%.group/}
+        # extract group name (the word before the ".conf" separated by a dash)
+        group=$(echo "$name" | sed -r 's/.*-([^.]+)\.conf/\1/')
+
+        if getent group "$group" | grep -q "$(id -un)"; then
+            verbose "  - user in group $group, copy $name"
+            
+            dest=$CONFIG_DIR/$name
+            cp "$f" "$dest"
+        else
+            verbose "  - user not in group $group, skipping"
+        fi
+
+        none=
+    done
+
+    # Show, if no files were handled
+    if [ -n "$none" ]; then
+        verbose "$none"
+    fi
+}
+
+# remove_unwanted - remove files in the config dir by looking at filenames ending on .rm in the prepare dir.
+function remove_unwanted {
+    verbose "* removing unwanted files:"
+    
+    local none
+    none="  none"
+    local name
+    local dest
+
+    for f in "$PRESET_DIR"/*.conf.rm; do
+        name=$(basename "$f")
+        # strip off the ".rm" part
+        name=${name/%.rm/}
+        dest=$CONFIG_DIR/$name
+
+        if [ -f "$dest" ]; then
+            verbose "  - $name"
+            rm "$dest"
+        fi
+    done
+
+    # Show, if no files were handled
+    if [ -n "$none" ]; then
+        verbose "$none"
+    fi
+}
+
+# get_user_information - get the phone number and the display name of the current user
+# Results:
+# NUMBER       - The phone number of the user
+# EXTENSION    - The extension number of the user
+# DISPLAY_NAME - The full name of the user
+function get_user_information {
+    verbose "* getting current user information"
+    
+    local DN
+    if ! DN=$(ldapwhoami -Q); then
+        return 1
+    fi
+
+    if [ -n "$DN" ]; then
+        verbose "  - getting more information on ${DN/#dn: /}"
+        local USER_DATA
+        # remove a leading "dn: " in variable $DN
+        if ! USER_DATA=$(ldapsearch -Q -LLL -b "${DN/#dn: /}" telephoneNumber displayName); then
+            return 1
+        fi
+
+        NUMBER=$(echo "$USER_DATA" | sed -n "s/^telephoneNumber: *//p")
+        EXTENSION=$(echo -n "$NUMBER" | tr -d ' ' | sed 's/^\+492932916//g')
+
+        DISPLAY_NAME=$(echo "$USER_DATA" | sed -n "s/^displayName: *//p")
+
+        return 0
+    fi
+
+    verbose "  - user not found"
+    return 1
+}
+
+# replace_conf_vars - replaces a string in all config files
+# Arguments:
+# 1 - The string which should be replaced, e.g. %NUMBER%
+# 2 - The value to replace the string with, e.g. 123
+function replace_conf_vars {
+    if [ -z "$2" ]; then
+        return
+    fi
+
+    verbose "* replacing $1 by $2:"
+    local none
+    none="  none"
+
+    while IFS= read -r f
+    do
+        # shellcheck disable=SC2046
+        verbose "  -" $(basename "$f")
+        sed -i -e "s|$1|$2|g" "$f"
+        none=
+    done < <(grep -l "$1" "$CONFIG_DIR"/*.conf)
+
+    # Show, if no files were handled
+    if [ -n "$none" ]; then
+        verbose "$none"
+    fi
+}
+
+# notify_gonnect sends a message via dbus to inform GOnnect to reload it's configuration
+function notify_gonnect {
+    verbose "* sending reload command to GOnnect"
+    gdbus call --session \
+        --dest de.gonicus.gonnect \
+        --object-path /de/gonicus/gonnect \
+        --method org.freedesktop.Application.ActivateAction \
+        refreshIdentities '[]' '{}' > /dev/null
+}
+
+########
+# Main
+
+if ! get_user_information; then
+    show_error 1 "Could not get user information"
+fi
+
+copy_statics
+copy_missing
+copy_group
+
+replace_conf_vars %NUMBER% "$NUMBER"
+replace_conf_vars %EXTENSION% "$EXTENSION"
+replace_conf_vars %DISPLAY_NAME% "$DISPLAY_NAME"
+
+remove_unwanted
+
+if [ "$NOTIFY" == "true" ]; then
+    notify_gonnect
+fi

@@ -4,7 +4,8 @@
 #include "SIPCall.h"
 #include "SIPCallManager.h"
 #include "SIPAccount.h"
-#include "SIPAudioManager.h"
+#include "AudioManager.h"
+#include "ResponseLoader.h"
 #include "RingToneFactory.h"
 #include "RingTone.h"
 #include "EnumTranslation.h"
@@ -14,12 +15,10 @@
 #include "IMHandler.h"
 #include "media/Sniffer.h"
 #include "ViewHelper.h"
-#include "HeadsetDeviceProxy.h"
-#include "USBDevices.h"
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "AvatarManager.h"
-#include "BusylightDeviceManager.h"
+#include "GlobalCallState.h"
 
 #include "pjsua-lib/pjsua.h"
 
@@ -28,23 +27,20 @@ Q_LOGGING_CATEGORY(lcSIPCall, "gonnect.sip.call")
 using namespace std::chrono_literals;
 
 SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool silent)
-    : QObject(account),
+    : ICallState(account),
       pj::Call(*account, callId),
       m_account(account),
       m_isSilent(silent),
       m_contactId(contactId)
 {
-
     auto &sipCallManager = SIPCallManager::instance();
     sipCallManager.addCall(this);
 
     m_imHandler = new IMHandler(this);
     connect(m_imHandler, &IMHandler::capabilitiesChanged, this, &SIPCall::capabilitiesChanged);
     connect(m_imHandler, &IMHandler::meetingRequested, [](const QString &accountId, int callId) {
-        emit SIPCallManager::instance().meetingRequested(accountId, callId);
+        SIPCallManager::instance().triggerCapability(accountId, callId, "jitsi:openMeeting");
     });
-
-    m_proxy = USBDevices::instance().getHeadsetDeviceProxy();
 
     // Initialize basic call info
     // This can only be done here for incoming calls, because an outgoing call has its infos not set
@@ -62,6 +58,11 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     connect(this, &SIPCall::isBlockedChanged, this,
             [this]() { emit SIPCallManager::instance().isBlockedChanged(this); });
     connect(&sipCallManager, &SIPCallManager::blocksChanged, this, &SIPCall::updateIsBlocked);
+
+    // Forward muted state to ICallState
+    connect(&AudioManager::instance(), &AudioManager::isAudioCaptureMutedChanged, this,
+            &SIPCall::updateMutedState);
+    updateMutedState();
 }
 
 SIPCall::~SIPCall()
@@ -70,14 +71,19 @@ SIPCall::~SIPCall()
         emit ViewHelper::instance().hideEmergency();
     }
 
-    if (!m_incoming) {
-        auto &ringToneFactory = RingToneFactory::instance();
+    auto &ringToneFactory = RingToneFactory::instance();
+    if (m_incoming) {
+        ringToneFactory.zipTone()->stop();
+    } else {
         ringToneFactory.ringingTone()->stop();
     }
 
     if (m_historyItem && m_wasEstablished) {
         m_historyItem->endCall();
     }
+
+    qDeleteAll(m_metadata);
+    m_metadata.clear();
 
     SIPCallManager::instance().removeCall(this);
 }
@@ -119,7 +125,9 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     switch (ci.state) {
     case PJSIP_INV_STATE_NULL:
         if (!m_isSilent) {
+            setCallState(ICallState::State::Idle);
             ringToneFactory.ringingTone()->stop();
+            ringToneFactory.zipTone()->stop();
         }
         break;
 
@@ -127,26 +135,50 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     case PJSIP_INV_STATE_CALLING:
         if (!m_isSilent && !m_incoming) {
             ringToneFactory.ringingTone()->start();
+            addCallState(ICallState::State::RingingOutgoing);
         }
         break;
 
     case PJSIP_INV_STATE_INCOMING:
         if (!m_isSilent && !m_incoming) {
-            ringToneFactory.ringingTone()->start();
+            if (!isEmergencyCall()
+                && (GlobalCallState::instance().globalCallState()
+                    & ICallState::State::CallActive)) {
+                addCallState(ICallState::State::KnockingIncoming);
+                ringToneFactory.zipTone()->start();
+            } else {
+                addCallState(ICallState::State::RingingIncoming);
+                ringToneFactory.ringingTone()->start();
+            }
         }
         break;
 
     case PJSIP_INV_STATE_EARLY:
+        if (m_incoming) {
+            if (GlobalCallState::instance().globalCallState() & ICallState::State::CallActive) {
+                addCallState(ICallState::State::KnockingIncoming);
+                ringToneFactory.zipTone()->start();
+            } else {
+                addCallState(ICallState::State::RingingIncoming);
+            }
+        }
         if (!m_isSilent && !m_incoming) {
             m_wasEstablished = true;
-            m_earlyMediaActive = true;
-            emit earlyMediaActiveChanged();
+            m_earlyCallState = true;
+            emit earlyCallStateChanged();
         }
         break;
 
     case PJSIP_INV_STATE_CONFIRMED:
         if (!m_isSilent) {
+            removeCallState(ICallState::State::RingingIncoming
+                            | ICallState::State::KnockingIncoming);
+            removeCallState(ICallState::State::RingingOutgoing);
+            addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
+
             ringToneFactory.ringingTone()->stop();
+            ringToneFactory.zipTone()->stop();
+
             m_isEstablished = true;
             m_wasEstablished = true;
             m_establishedTime = QDateTime::currentDateTime();
@@ -156,11 +188,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             }
             emit establishedChanged();
 
-            m_proxy->setBusyLine(true);
-            BusylightDeviceManager::instance().switchOn(Qt::GlobalColor::red);
-
-            m_earlyMediaActive = false;
-            emit earlyMediaActiveChanged();
+            m_earlyCallState = false;
+            emit earlyCallStateChanged();
 
             if (m_account && m_account->isInstantMessagingAllowed()) {
                 if (!m_imHandler->capabilitiesSent()) {
@@ -169,6 +198,14 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             }
 
             createOngoingCallNotification();
+
+            // Propagate already existing hold state that was set during ringing phase.
+            // For some reason, a direct hold() produces a pjsip error, hence the timer.
+            QTimer::singleShot(1ms, this, [this]() {
+                if (isHolding()) {
+                    hold();
+                }
+            });
         }
 
         // Send DTMF post tasks if present
@@ -186,18 +223,16 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             emit missed();
         }
 
-        if (m_isEstablished && SIPCallManager::instance().calls().count() == 1) {
-            m_proxy->setIdle();
-            BusylightDeviceManager::instance().switchOff();
-        }
-
         qCInfo(lcSIPCall).nospace() << "Call state disconnected, reason: " << ci.lastReason << ", "
                                     << EnumTranslation::instance().sipStatusCode(statusCode) << " ("
                                     << statusCode << ")";
 
+        ringToneFactory.zipTone()->stop();
         ringToneFactory.ringingTone()->stop();
 
         if (!m_isSilent) {
+            setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
+
             if (m_isEstablished) {
                 ringToneFactory.endTone()->start();
             }
@@ -217,7 +252,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
         m_account->removeCall(this);
         m_isEstablished = false;
-        m_earlyMediaActive = false;
+        m_earlyCallState = false;
 
         break;
 
@@ -233,7 +268,7 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 {
     Q_UNUSED(prm);
 
-    auto &audManager = SIPAudioManager::instance();
+    auto &audManager = AudioManager::instance();
 
     pj::CallInfo ci = getInfo();
     pj::AudioMedia aud_med;
@@ -258,7 +293,11 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
             case PJSUA_CALL_MEDIA_ACTIVE:
             case PJSUA_CALL_MEDIA_REMOTE_HOLD: {
                 if (!m_isSilent) {
+                    addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
+                    removeCallState(ICallState::State::RingingIncoming
+                                    | ICallState::State::KnockingIncoming);
                     RingToneFactory::instance().ringingTone()->stop();
+                    RingToneFactory::instance().zipTone()->stop();
 
                     qCInfo(lcSIPCall) << "Found media, index" << i << "of" << ci.media.size();
                     aud_med = getAudioMedia(i);
@@ -331,6 +370,8 @@ bool SIPCall::hold()
 {
     pj::CallOpParam op(true);
 
+    setIsHolding(true);
+
     try {
         setHold(op);
     } catch (pj::Error &err) {
@@ -338,7 +379,6 @@ bool SIPCall::hold()
         return false;
     }
 
-    setIsHolding(true);
     return true;
 }
 
@@ -355,6 +395,7 @@ bool SIPCall::unhold()
     }
 
     setIsHolding(false);
+
     return true;
 }
 
@@ -365,6 +406,17 @@ void SIPCall::accept()
         return;
     }
 
+    if (m_hasAccepted) {
+        qCWarning(lcSIPCall) << "Call has already been accepted";
+        return;
+    }
+
+    if (m_hasRejected) {
+        qCWarning(lcSIPCall) << "Call has already been rejected";
+        return;
+    }
+
+    m_hasAccepted = true;
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_OK;
     answer(prm);
@@ -377,16 +429,35 @@ void SIPCall::reject()
         return;
     }
 
+    if (m_hasAccepted) {
+        qCWarning(lcSIPCall) << "Call has already been accepted";
+        return;
+    }
+
+    if (m_hasRejected) {
+        qCWarning(lcSIPCall) << "Call has already been rejected";
+        return;
+    }
+
+    m_hasRejected = true;
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_DECLINE;
     answer(prm);
+}
+
+void SIPCall::toggleHoldImpl()
+{
+    if (m_isHolding) {
+        unhold();
+    } else {
+        hold();
+    }
 }
 
 void SIPCall::setIsHolding(bool value)
 {
     if (m_isHolding != value) {
         m_isHolding = value;
-        m_proxy->setHold(value);
         emit isHoldingChanged();
     }
 }
@@ -408,21 +479,28 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
             m_historyItem->endCall();
         }
 
-        const auto contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(sipUrl);
+        m_contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(sipUrl);
         m_isEmergencyCall = PhoneNumberUtil::isEmergencyCallUrl(sipUrl);
-        m_contactId = contactInfo.contact ? contactInfo.contact->id() : "";
+        m_contactId = m_contactInfo.contact ? m_contactInfo.contact->id() : "";
 
-        if (!contactInfo.isAnonymous) {
-            NumberStats::instance().incrementCallCount(contactInfo.phoneNumber);
+        if (!m_contactInfo.isAnonymous) {
+            NumberStats::instance().incrementCallCount(m_contactInfo.phoneNumber);
         }
 
         updateIsBlocked();
 
-        m_historyItem = CallHistory::instance().addHistoryItem(
-                isBlocked() ? CallHistoryItem::Type::IncomingBlocked
-                            : (isIncoming ? CallHistoryItem::Type::Incoming
-                                          : CallHistoryItem::Type::Outgoing),
-                m_account->id(), sipUrl, m_contactId, contactInfo.isSipSubscriptable);
+        typedef CallHistoryItem::Type Type;
+
+        CallHistoryItem::Types historyType = Type::SIPCall;
+        if (isBlocked()) {
+            historyType |= Type::IncomingBlocked;
+        } else if (!isIncoming) {
+            historyType |= Type::Outgoing;
+        }
+
+        m_historyItem = CallHistory::instance().addHistoryItem(historyType, m_account->id(), sipUrl,
+                                                               m_contactId,
+                                                               m_contactInfo.isSipSubscriptable);
 
         emit contactChanged();
     }
@@ -449,15 +527,23 @@ void SIPCall::updateIsBlocked()
     setIsBlocked(isBlocked);
 }
 
+void SIPCall::updateMutedState()
+{
+    qt_noop();
+}
+
 bool SIPCall::hasCapability(const QString &capability) const
 {
     return m_imHandler->hasCapability(capability);
 }
 
-bool SIPCall::triggerCapability(const QString &capability) const
+bool SIPCall::triggerCapability(const QString &capability)
 {
     if (m_account && m_account->isInstantMessagingAllowed()) {
-        return m_imHandler->triggerCapability(capability);
+        if (capability.startsWith("jitsi")) {
+            addCallState(ICallState::State::Migrating);
+        }
+        return m_imHandler->triggerCapability(capability, m_historyItem);
     }
     return false;
 }
@@ -533,4 +619,15 @@ void SIPCall::createOngoingCallNotification()
             hangup(prm);
         }
     });
+}
+
+void SIPCall::addMetadata(const QString &data)
+{
+    ResponseLoader loader(data);
+    m_metadata = loader.loadResponse();
+    if (!m_metadata.empty()) {
+        m_hasMetadata = true;
+    }
+
+    emit metadataChanged();
 }

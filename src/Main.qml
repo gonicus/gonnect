@@ -2,8 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtCore
-import QtQml.Models
-import QtQuick.Controls.Material
 import base
 
 Item {
@@ -16,16 +14,12 @@ Item {
 
         property bool showCallWindowOnStartup: false
         property bool showTrayDialog: true
-        property alias dialWindowWidth: dialWindow.width
-        property alias dialWindowHeight: dialWindow.height
     }
 
     Component.onCompleted: () => {
         DialogFactory.rootItem = baseItem
 
-        if (settings.showCallWindowOnStartup) {
-            dialWindow.show()
-        }
+        gonnectWindow.show()
 
         if (!ViewHelper.isSystrayAvailable() && settings.showTrayDialog) {
             const item = DialogFactory.createInfoDialog({
@@ -43,18 +37,15 @@ Item {
         property EmergencyCallIncomingWindow emergencyWindow: null
 
         function onActivateSearch() {
-            dialWindow.show()
-            dialWindow.raise()
-            dialWindow.requestActivate()
-            dialWindow.activateSearch()
+            gonnectWindow.ensureVisible()
+            gonnectWindow.focusSearchBox()
         }
-        function onShowSettingsWindow() {
-            settingsWindow.show()
+        function onShowSettings() {
+            gonnectWindow.showPage(GonnectWindow.PageId.Settings)
+            gonnectWindow.ensureVisible()
         }
-        function onShowAboutWindow() {
-            const item = aboutWindowComponent.createObject(baseItem)
-            item.show()
-        }
+        function onShowShortcuts() { shortcutsWindowComponent.createObject(baseItem).show() }
+        function onShowAbout() { aboutWindowComponent.createObject(baseItem).show() }
         function onShowQuitConfirm() {
             const item = DialogFactory.createConfirmDialog({ text: qsTr("There are still phone calls going on, do you really want to quit?") })
             item.accepted.connect(() => ViewHelper.quitApplicationNoConfirm())
@@ -72,14 +63,40 @@ Item {
             }
         }
 
-        function onCardDavPasswordRequested(id : string, host : string) {
-            const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for %1:").arg(host) })
-            dialog.onPasswordAccepted.connect(pw => ViewHelper.respondCardDavPassword(id, pw))
+        function onOpenMeetingRequested(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
+            gonnectWindow.ensureVisible()
+
+            Qt.callLater(() => {
+                gonnectWindow.openMeeting(meetingId, displayName, startFlags, callHistoryItem)
+            })
         }
 
-        function onLdapPasswordRequested(id : string, host : string) {
+        function onPasswordRequested(id : string, host : string) {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for %1:").arg(host) })
-            dialog.onPasswordAccepted.connect(pw => ViewHelper.respondLdapPassword(id, pw))
+            dialog.onPasswordAccepted.connect(pw => ViewHelper.respondPassword(id, pw))
+        }
+    }
+
+    GonnectWindow {
+        id: gonnectWindow
+
+        onClosing: closeEvent => {
+            closeEvent.accepted = false
+
+            if (GlobalCallState.globalCallState & (ICallState.State.CallActive
+                                                   | ICallState.State.RingingIncoming
+                                                   | ICallState.State.RingingOutgoing)) {
+                const item = DialogFactory.createConfirmDialog({
+                                                                   title: qsTr("End all calls"),
+                                                                   text: qsTr("Do you really want to close this window and terminate all ongoing calls?")
+                                                               })
+                item.accepted.connect(() => {
+                                          SIPCallManager.endAllCalls()
+                                          gonnectWindow.hide()
+                                      })
+            } else {
+                gonnectWindow.hide()
+            }
         }
     }
 
@@ -91,21 +108,13 @@ Item {
         }
     }
 
-    DialWindow {
-        id: dialWindow
-        objectName: "dialWindow"
-        visible: false
-
-        onShowHistory: () => historyWindow.show()
-        onShowSettings: () => settingsWindow.show()
-        onShowCalls: () => callsWindow.show()
-        onShowShortcuts: () => {
-                             const item = shortcutsWindowComponent.createObject(baseItem)
-                             item.show()
-                         }
-        onShowAbout: () => {
-            const item = aboutWindowComponent.createObject(baseItem)
-            item.show()
+    Connections {
+        target: SIPCallManager
+        function onCallAdded(accountId : string, callId : int) {
+            if (!ViewHelper.isBusyOnBusy() || !(GlobalCallState.globalCallState & ICallState.State.CallActive)) {
+                gonnectWindow.ensureVisible()
+                gonnectWindow.showPage(GonnectWindow.PageId.Call)
+            }
         }
     }
 
@@ -129,62 +138,12 @@ Item {
         SipTemplateWizard {}
     }
 
-    BaseWindow {
-        id: settingsWindow
-        objectName: "settingsWindow"
-        width: 610
-        height: 910
-        visible: true
-        title: qsTr("Settings")
-
-        minimumWidth: settingsWindow.width
-        minimumHeight: settingsWindow.height
-        maximumWidth: settingsWindow.width
-        maximumHeight: settingsWindow.height
-
-        readonly property Connections viewHelperConnections: Connections {
-            target: ViewHelper
-            function onShowAudioSettings() {
-                settingsWindow.show()
-                settingsPage.scrollToAudio()
-            }
-        }
-
-        SettingsPage {
-            id: settingsPage
-            anchors.fill: parent
-        }
-    }
-
     Connections {
-        target: SIPCallManager
+        target: GlobalCallState
 
-        function onHasEstablishedCallsChanged() {
-            if (SIPCallManager.hasEstablishedCalls) {
-                if (callsWindow.visibility === Window.Hidden) {
-                    callsWindow.show()
-                }
-            }
-        }
-
-        function onEarlyMediaActiveChanged() {
-            if (SIPCallManager.earlyMediaActive) {
-                if (callsWindow.visibility === Window.Hidden) {
-                    callsWindow.show()
-                }
-            }
-        }
-
-        function onMeetingRequested(accountId, callId) {
-            const item = DialogFactory.createDialog("JitsiUpgradeDialog.qml")
-            item.accepted.connect((continueCall) => {
-                SIPCallManager.triggerCapability(accountId, callId, continueCall ? "jitsi:openMeeting" : "jitsi:openMeeting:hangup")
-            })
-        }
-
-        function onShowCallWindow() {
-            if (callsWindow.visibility === Window.Hidden) {
-                callsWindow.show()
+        function onGlobalCallStateChanged() {
+            if (GlobalCallState.globalCallState & (ICallState.State.CallActive | ICallState.State.RingingIncoming)) {
+                gonnectWindow.ensureVisible()
             }
         }
     }
@@ -198,58 +157,11 @@ Item {
         }
     }
 
-    BaseWindow {
-        id: callsWindow
-        objectName: "callsWindow"
-        width: 710
-        height: 410
-        visible: true
-        title: qsTr("Current Calls")
-
-        minimumWidth: callsWindow.width
-        minimumHeight: callsWindow.height
-        maximumWidth: callsWindow.width
-        maximumHeight: callsWindow.height
-
-        onClosing: closeEvent => {
-            closeEvent.accepted = false
-
-            if (SIPCallManager.hasActiveCalls) {
-                const item = DialogFactory.createConfirmDialog({
-                                                                   title: qsTr("End all calls"),
-                                                                   text: qsTr("Do you really want to close this window and terminate all ongoing calls?")
-                                                               })
-                item.accepted.connect(() => {
-                                          SIPCallManager.endAllCalls()
-                                          callsWindow.hide()
-                                      })
-            } else {
-                callsWindow.hide()
-            }
-        }
-
-        CallsWindow {
-            id: callsWindowItem
-            anchors.fill: parent
-
-            onCountChanged: () => {
-                                if (!callsWindowItem.count) {
-                                    callsWindow.hide()
-                                }
-                            }
-        }
-    }
-
-    CompleteHistoryWindow {
-        id: historyWindow
-    }
-
-
     AudioEnvWindow {
         id: configureUnknownAudioEnvWindow
 
         readonly property Connections audioManagerConnections: Connections {
-            target: SIPAudioManager
+            target: AudioManager
             function onNoMatchingAudioProfile() {
                 configureUnknownAudioEnvWindow.show()
             }

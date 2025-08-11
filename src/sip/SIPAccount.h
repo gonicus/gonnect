@@ -27,12 +27,14 @@ public:
     virtual void onIncomingCall(pj::OnIncomingCallParam &prm) override;
     virtual void onRegState(pj::OnRegStateParam &prm) override;
     virtual void onSendRequest(pj::OnSendRequestParam &prm) override;
+    virtual void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
+    virtual void onInstantMessage(pj::OnInstantMessageParam &prm) override;
 
     bool isRegistered() const { return m_isRegistered; }
     bool isInstantMessagingAllowed() const;
 
-    void call(const QString &number, const QString &contactId = "",
-              const QString &preferredIdentity = "auto", bool silent = false);
+    QString call(const QString &number, const QString &contactId = "",
+                 const QString &preferredIdentity = "auto", bool silent = false);
     void hangup(const int callId);
     void hold(const int callId);
     void unhold(const int callId);
@@ -47,9 +49,14 @@ public:
     QString domain() const { return m_domain; }
     uint retryInterval() const;
 
+    long sendMessage(const QString &recipient, const QString &message,
+                     const QString &mimeType = "text/plain");
+
     SIPBuddyState::STATUS buddyStatus(const QString &var);
 
     void setCredentials(const QString &password);
+
+    static long runningMessageIndex;
 
     ~SIPAccount();
 
@@ -81,4 +88,5 @@ private:
 signals:
     void isRegisteredChanged();
     void authorizationFailed();
+    void messageReceived(const QString &sender, const QString &message, const QString &mimeType);
 };

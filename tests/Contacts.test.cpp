@@ -4,10 +4,10 @@
 
 #include <QTest>
 
-ContactsTest::ContactsTest(QObject* parent) : QObject{parent}
-{}
+ContactsTest::ContactsTest(QObject *parent) : QObject{ parent } { }
 
-void ContactsTest::testCleanPhoneNumber() {
+void ContactsTest::testCleanPhoneNumber()
+{
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber(""), QString(""));
 
     // Strip whitespace and -
@@ -28,7 +28,8 @@ void ContactsTest::testCleanPhoneNumber() {
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("123"), QString("123"));
 }
 
-void ContactsTest::testLevenshteinDistance() {
+void ContactsTest::testLevenshteinDistance()
+{
     QCOMPARE(FuzzyCompare::levenshteinDistance("", ""), 0);
     QCOMPARE(FuzzyCompare::levenshteinDistance("uniformed", "uninformed"), 1);
     QCOMPARE(FuzzyCompare::levenshteinDistance("kitten", "sitten"), 1);
@@ -36,12 +37,14 @@ void ContactsTest::testLevenshteinDistance() {
     QCOMPARE(FuzzyCompare::levenshteinDistance("kitten", "sitting"), 3);
 }
 
-void ContactsTest::testJaroWinklerDistance() {
+void ContactsTest::testJaroWinklerDistance()
+{
     QVERIFY(FuzzyCompare::jaroWinklerDistance("developer", "developes") - 0.955556 < 0.00001);
     QVERIFY(FuzzyCompare::jaroWinklerDistance("developer", "seveloper") - 0.925926 < 0.00001);
 }
 
-void ContactsTest::testSortListByWeight() {
+void ContactsTest::testSortListByWeight()
+{
     QList<QString> list = { "Two", "Four", "One", "Three" };
     const QList<QString> targetList = { "One", "Two", "Three", "Four" };
     const QList<qreal> weightList = { 4, 8, 2, 6 };
@@ -50,6 +53,5 @@ void ContactsTest::testSortListByWeight() {
 
     QCOMPARE(list, targetList);
 }
-
 
 QTEST_GUILESS_MAIN(ContactsTest)

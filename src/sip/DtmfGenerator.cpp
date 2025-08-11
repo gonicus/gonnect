@@ -1,11 +1,11 @@
 #include "DtmfGenerator.h"
 #include <QLoggingCategory>
-#include "SIPAudioManager.h"
+#include "AudioManager.h"
 
 Q_LOGGING_CATEGORY(lcDtmfGenerator, "gonnect.sip.dtmfgenerator")
 
 DtmfGenerator::DtmfGenerator(QObject *parent)
-    : QObject{ parent }, m_mediaSink(SIPAudioManager::instance().getPlaybackDevMedia())
+    : QObject{ parent }, m_mediaSink(AudioManager::instance().getPlaybackDevMedia())
 {
 
     m_toneGen.createToneGenerator();

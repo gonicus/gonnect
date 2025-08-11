@@ -1,14 +1,16 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
 #include <QUrl>
+#include <QUuid>
 #include <QDesktopServices>
 #include <pjsua-lib/pjsua.h>
+#include <qurlquery.h>
 
-#include "AppSettings.h"
 #include "SIPCall.h"
 #include "SIPAccount.h"
-#include "AccountPortal.h"
+#include "UserInfo.h"
 #include "IMHandler.h"
+#include "ViewHelper.h"
 
 Q_LOGGING_CATEGORY(lcIMHandler, "gonnect.sip.im")
 
@@ -17,43 +19,13 @@ IMHandler::IMHandler(SIPCall *parent) : QObject(parent), m_call(parent)
     ReadOnlyConfdSettings settings;
 
     if (settings.contains("jitsi/url")) {
-        m_accountPortal = new AccountPortal(this);
 
         settings.beginGroup("jitsi");
         m_jitsiBaseURL = settings.value("url", "").toString();
         m_jitsiPreconfig = settings.value("preconfig", false).toBool();
-        m_jitsiDisplayName = settings.value("displayName", "").toString();
 
         settings.endGroup();
     }
-}
-
-void IMHandler::acquireDisplayName(std::function<void(const QString &displayName)> callback)
-{
-    if (m_jitsiDisplayName.isEmpty()) {
-        m_accountPortal->GetUserInformation(
-                tr("The VoIP phone wants to use your name to pre set the display name in Jitsi."),
-                [this, callback](uint code, const QVariantMap &response) {
-                    QString username;
-
-                    if (code == 0) {
-                        username = response.value("name", "").toString();
-                        m_jitsiDisplayName = username;
-                        if (!username.isEmpty()) {
-                            AppSettings settings;
-                            settings.setValue("jitsi/displayName", username);
-                        }
-                    } else {
-                        m_jitsiPreconfig = false;
-                    }
-
-                    callback(m_jitsiDisplayName);
-                });
-
-        return;
-    }
-
-    callback(m_jitsiDisplayName);
 }
 
 bool IMHandler::process(const QString &contentType, const QString &message)
@@ -92,12 +64,16 @@ bool IMHandler::process(const QString &contentType, const QString &message)
     // Jitsi handler
     else if (path == "jitsi" && jitsiEnabled()) {
         QString meetingId;
+        QString displayName;
         QUrlQuery q(callUrl);
         auto qitems = q.queryItems();
 
         for (auto &qi : std::as_const(qitems)) {
             if (qi.first == "meetingId") {
                 meetingId = qi.second;
+            }
+            if (qi.first == "displayName") {
+                displayName = qi.second;
             }
         }
 
@@ -115,29 +91,21 @@ bool IMHandler::process(const QString &contentType, const QString &message)
     return false;
 }
 
-void IMHandler::openMeeting(const QString &meetingId, bool hangup)
+void IMHandler::openMeeting(const QString &meetingId, const QString &displayName, bool hangup,
+                            QPointer<CallHistoryItem> callHistoryItem)
 {
-    acquireDisplayName([this, meetingId, hangup](const QString &displayName) {
-        QUrlQuery q;
-        q.addQueryItem("userInfo.displayName", displayName);
-        q.addQueryItem("config.prejoinConfig.enabled", m_jitsiPreconfig ? "true" : "false");
+    // For whatever reason this needs to be decoupled to make QDesktopServices work
+    QTimer::singleShot(0, this, [this, hangup, meetingId, callHistoryItem, displayName]() {
+        ViewHelper::instance().requestMeeting(meetingId, callHistoryItem, displayName);
 
-        QUrl jitsiUrl(m_jitsiBaseURL);
-        jitsiUrl.setPath("/" + meetingId);
-        jitsiUrl.setQuery(q);
-
-        // For whatever reason this needs to be decoupled to make QDesktopServices work
-        QTimer::singleShot(0, this, [this, hangup, jitsiUrl]() {
-            QDesktopServices::openUrl(jitsiUrl);
-
-            if (hangup) {
-                m_call->account()->hangup(m_call->getId());
-            }
-        });
+        if (hangup) {
+            QTimer::singleShot(200, this, [this]() { m_call->account()->hangup(m_call->getId()); });
+        }
     });
 }
 
-bool IMHandler::requestMeeting()
+bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistoryItem,
+                               const QString &displayName)
 {
     if (!m_capabilities.contains("jitsi")) {
         return false;
@@ -149,6 +117,7 @@ bool IMHandler::requestMeeting()
     QString meetingId = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QUrlQuery q;
     q.addQueryItem("meetingId", meetingId);
+    q.addQueryItem("displayName", displayName);
 
     QUrl jitsiUrl("gonnect:");
     jitsiUrl.setPath("jitsi");
@@ -162,7 +131,7 @@ bool IMHandler::requestMeeting()
         return false;
     }
 
-    openMeeting(meetingId);
+    openMeeting(meetingId, displayName, hangup, callHistoryItem);
 
     return true;
 }
@@ -201,19 +170,18 @@ bool IMHandler::sendCapabilities()
     return true;
 }
 
-bool IMHandler::triggerCapability(const QString &capability)
+bool IMHandler::triggerCapability(const QString &capability,
+                                  QPointer<CallHistoryItem> callHistoryItem)
 {
-    if (capability == "jitsi") {
-        return requestMeeting();
-    }
-
-    else if (capability == "jitsi:openMeeting") {
-        openMeeting(m_jistiRequestedMeetingId);
+    if (capability == "jitsi:hangup") {
+        return requestMeeting(true, callHistoryItem, tr("Ad hoc conference"));
+    } else if (capability == "jitsi") {
+        return requestMeeting(false, callHistoryItem, tr("Ad hoc conference"));
+    } else if (capability == "jitsi:openMeeting") {
+        openMeeting(m_jistiRequestedMeetingId, tr("Ad hoc conference"), false, callHistoryItem);
         return true;
-    }
-
-    else if (capability == "jitsi:openMeeting:hangup") {
-        openMeeting(m_jistiRequestedMeetingId, true);
+    } else if (capability == "jitsi:openMeeting:hangup") {
+        openMeeting(m_jistiRequestedMeetingId, tr("Ad hoc conference"), true, callHistoryItem);
         return true;
     }
 
