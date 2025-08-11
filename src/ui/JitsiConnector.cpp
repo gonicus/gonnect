@@ -163,7 +163,7 @@ QString JitsiConnector::jitsiJavascript()
 {
     const auto currentUser = ViewHelper::instance().currentUser();
     const auto defaultName = tr("Unnamed participant");
-    auto& authManager = AuthManager::instance();
+    auto &authManager = AuthManager::instance();
 
     return QString(R"""(
 const options = {
@@ -391,7 +391,8 @@ api.addListener("passwordRequired", data => {
 
 )""")
             .arg(GlobalInfo::instance().jitsiUrl(), // %1
-                 authManager.isJitsiAuthRequired() ? authManager.jitsiTokenForRoom(m_roomName) : "", // %2
+                 authManager.isJitsiAuthRequired() ? authManager.jitsiTokenForRoom(m_roomName)
+                                                   : "", // %2
                  currentUser ? currentUser->name() : "", // %3
                  Theme::instance().backgroundColor().name(), // %4
                  m_roomName, // %5

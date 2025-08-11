@@ -10,8 +10,10 @@ class QOAuth2AuthorizationCodeFlow;
 class AuthManager : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool isAuthManagerInitialized READ isAuthManagerInitialized NOTIFY isAuthManagerInitializedChanged FINAL)
-    Q_PROPERTY(bool isJitsiAuthRequired READ isJitsiAuthRequired NOTIFY isAuthManagerInitializedChanged FINAL)
+    Q_PROPERTY(bool isAuthManagerInitialized READ isAuthManagerInitialized NOTIFY
+                       isAuthManagerInitializedChanged FINAL)
+    Q_PROPERTY(bool isJitsiAuthRequired READ isJitsiAuthRequired NOTIFY
+                       isAuthManagerInitializedChanged FINAL)
     Q_PROPERTY(bool isWaitingForAuth READ isWaitingForAuth NOTIFY isWaitingForAuthChanged FINAL)
     Q_PROPERTY(bool isOAuthAuthenticated READ isOAuthAuthenticated NOTIFY oAuthReady FINAL)
 
