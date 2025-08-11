@@ -34,8 +34,7 @@ void AuthManager::init()
     settings.beginGroup("jitsi");
 
     // Use this when other auth types for Jitsi Meet are implemented
-    // m_isJitsiAuthRequired = settings.value("authorizationMode", "none").toString() != "none";
-    m_isJitsiAuthRequired = true;
+    m_isJitsiAuthRequired = settings.value("authorizationMode", "none").toString() != "none";
     if (!m_isJitsiAuthRequired) {
         emit isAuthManagerInitializedChanged();
         return;
