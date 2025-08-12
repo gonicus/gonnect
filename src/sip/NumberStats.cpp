@@ -1,13 +1,14 @@
 #include "NumberStats.h"
 #include "CallHistory.h"
 #include "AddressBook.h"
+#include "NumberStat.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(lcNumberStats, "gonnect.app.NumberSTats")
+Q_LOGGING_CATEGORY(lcNumberStats, "gonnect.app.NumberStats")
 
 using namespace std::chrono_literals;
 
@@ -22,6 +23,8 @@ NumberStats::NumberStats(QObject *parent) : QObject{ parent }
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
             [this]() { m_debounceAddressBookUpdateTimer.start(); });
     connect(&AddressBook::instance(), &AddressBook::contactAdded, this,
+            [this]() { m_debounceAddressBookUpdateTimer.start(); });
+    connect(&AddressBook::instance(), &AddressBook::contactModified, this,
             [this]() { m_debounceAddressBookUpdateTimer.start(); });
 
     initialRead();
@@ -57,6 +60,8 @@ void NumberStats::initialRead()
                 item->callCount = query.value("callcount").toUInt();
                 item->isBlocked = query.value("isBlocked").toBool();
                 item->isFavorite = query.value("isFavorite").toBool();
+                item->contactType =
+                        static_cast<NumberStats::ContactType>(query.value("type").toUInt());
                 item->contact = AddressBook::instance().lookupByNumber(item->phoneNumber);
 
                 m_statItemsLookup.insert(item->phoneNumber, item);
@@ -165,9 +170,10 @@ QStringList NumberStats::mostCalled(quint8 limit, bool includeFavorites) const
     return result;
 }
 
-void NumberStats::toggleFavorite(const QString &phoneNumber)
+void NumberStats::toggleFavorite(const QString &phoneNumber,
+                                 const NumberStats::ContactType contactType)
 {
-    ensureFlaggedNumberExists(phoneNumber);
+    ensureFlaggedNumberExists(phoneNumber, contactType);
 
     auto item = m_statItemsLookup.value(phoneNumber);
     if (item->isFavorite) {
@@ -205,7 +211,8 @@ void NumberStats::toggleFavorite(const QString &phoneNumber)
     }
 }
 
-bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber)
+bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,
+                                            const NumberStats::ContactType contactType)
 {
     if (m_statItemsLookup.contains(phoneNumber)) {
         return true;
@@ -222,9 +229,11 @@ bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber)
         qCInfo(lcNumberStats) << "Successfully opened history database";
 
         QSqlQuery query(db);
-        query.prepare("INSERT INTO contactflags (phonenumber, callcount, isFavorite, isBlocked) "
-                      "VALUES (:phoneNumber, 0, 0, 0);");
+        query.prepare(
+                "INSERT INTO contactflags (phonenumber, callcount, isFavorite, isBlocked, type) "
+                "VALUES (:phoneNumber, 0, 0, 0, :type);");
         query.bindValue(":phoneNumber", phoneNumber);
+        query.bindValue(":type", static_cast<int>(contactType));
 
         if (!query.exec()) {
             qCCritical(lcNumberStats)
@@ -234,6 +243,7 @@ bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber)
 
         auto statItem = new NumberStat;
         statItem->phoneNumber = phoneNumber;
+        statItem->contactType = contactType;
         statItem->contact = AddressBook::instance().lookupByNumber(phoneNumber);
         m_statItems.append(statItem);
         m_statItemsLookup.insert(phoneNumber, statItem);

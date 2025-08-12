@@ -4,7 +4,7 @@ inputs:
   qt-version:
     description: 'QT version'
     required: true
-    default: '6.8.0'
+    default: '6.9.1'
   qt-only:
     description: 'Install Qt only, skip other steps'
     default: 'false'
@@ -23,7 +23,7 @@ runs:
       if: inputs.qt-only == 'false'
       run: |
         sudo apt-get update
-        sudo apt install -y libusb-1.0-0-dev uuid-dev libldap-dev libssl-dev libudev-dev ninja-build llvm llvm-dev libsasl2-dev
+        sudo apt install -y libusb-1.0-0-dev uuid-dev libldap-dev libssl-dev libudev-dev ninja-build llvm llvm-dev libsasl2-dev libical-dev libsecret-1-dev evolution-data-server-dev
         sudo snap install yq
     
     - name: Install git lfs
@@ -36,7 +36,7 @@ runs:
         version: ${{ inputs.qt-version }}
         host: 'linux'
         target: 'desktop'
-        modules: 'qt5compat qtmultimedia'
+        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets'
         arch: 'linux_gcc_64'
         cache: true
     
@@ -53,7 +53,7 @@ runs:
     - name: Cache hidapi
       id: cache-hidapi
       if: inputs.qt-only == 'false'
-      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
       with:
         path: hidapi
         key: ${{ steps.hashes.outputs.HIDAPI_TAG }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-hidapi
@@ -80,7 +80,7 @@ runs:
     - name: Cache pjsip
       id: cache-pjsip
       if: inputs.qt-only == 'false'
-      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
       with:
         path: ${{github.workspace}}/pjproject
         key: ${{ steps.hashes.outputs.PJSIP_TAG }}-pjsip
@@ -103,7 +103,7 @@ runs:
     - name: Cache qca
       id: cache-qca
       if: inputs.qt-only == 'false'
-      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
       with:
         path: ${{github.workspace}}/qca
         key: ${{ steps.hashes.outputs.QCA_HASH }}-qca

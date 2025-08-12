@@ -14,17 +14,25 @@ class CallHistoryItem : public QObject
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
 
 public:
-    enum class Type { Incoming, Outgoing, IncomingBlocked };
+    enum class Type {
+        Incoming = 0,
+        Outgoing = 1 << 0,
+        IncomingBlocked = 1 << 1,
+        SIPCall = 1 << 2,
+        JitsiMeetCall = 1 << 3
+    };
     Q_ENUM(Type)
+    Q_DECLARE_FLAGS(Types, Type)
+    Q_FLAG(Types)
 
     explicit CallHistoryItem(const QDateTime &time, const QString &remoteUrl,
                              const QString &account, const QString &contactId,
                              bool isSipSubscriptable, qint64 dataBaseId, quint16 durationSeconds,
-                             CallHistoryItem::Type type, CallHistory *parent);
+                             CallHistoryItem::Types type, CallHistory *parent);
 
     explicit CallHistoryItem(const QString &remoteUrl, const QString &account,
                              const QString &contactId, bool isSipSubscriptable,
-                             CallHistoryItem::Type type, CallHistory *parent);
+                             CallHistoryItem::Types type, CallHistory *parent);
 
     CallHistory *callHistory() const;
 
@@ -36,7 +44,8 @@ public:
     QString contactId() const { return m_contactId; }
     quint16 durationSeconds() const { return m_durationSeconds; }
     bool isSipSubscriptable() const { return m_isSipSubscriptable; }
-    CallHistoryItem::Type type() const { return m_type; }
+    CallHistoryItem::Types type() const { return m_type; }
+    void addFlags(Types flags);
 
     void setContactId(const QString &contactId);
 
@@ -52,7 +61,7 @@ private:
     QString m_account;
     QString m_contactId;
     bool m_isSipSubscriptable = false;
-    CallHistoryItem::Type m_type = Type::Incoming;
+    CallHistoryItem::Types m_type = Type::Incoming;
 };
 
 QDebug operator<<(QDebug debug, const CallHistoryItem &historyItem);

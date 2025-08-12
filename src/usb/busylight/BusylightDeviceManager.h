@@ -32,6 +32,9 @@ public:
     void switchStreamlightOn() const;
     void switchStreamlightOff() const;
 
+private slots:
+    void updateBusylightState();
+
 private:
     explicit BusylightDeviceManager(QObject *parent = nullptr);
 

@@ -1,9 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls.Material
 import QtQuick.Controls.impl
-import QtQuick.Layouts
 import base
 
 /// Colored circle showing the status of a SIP buddy
@@ -22,13 +20,25 @@ Rectangle {
 
     property bool isBlocked: false
 
-    SequentialAnimation on color {
+    SequentialAnimation {
         id: ringingAnimation
         running: false
         loops: Animation.Infinite
 
-        ColorAnimation { from: 'transparent'; to: Theme.greenColor; duration: 1000 }
-        ColorAnimation { from: Theme.greenColor; to: 'transparent'; duration: 1000 }
+        ColorAnimation {
+            target: control
+            property: "color"
+            from: 'transparent'
+            to: Theme.greenColor
+            duration: 1000
+        }
+        ColorAnimation {
+            target: control
+            property: "color"
+            from: Theme.greenColor
+            to: 'transparent'
+            duration: 1000
+        }
     }
 
     IconLabel {

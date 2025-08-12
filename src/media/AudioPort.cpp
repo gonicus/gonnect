@@ -4,7 +4,6 @@
 #include <SIPAudioDevice.h>
 #include <pjmedia/port.h>
 #include "AudioPort.h"
-
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
 using namespace std::chrono_literals;
@@ -212,6 +211,11 @@ void AudioPort::stopSourceIO()
 QString AudioPort::getDeviceID() const
 {
     return SIPAudioDevice::makeHash(m_device.description(), false);
+}
+
+QString AudioPort::getSystemDeviceID() const
+{
+    return m_device.id();
 }
 
 void AudioPort::onFrameRequested(pj::MediaFrame &frame)

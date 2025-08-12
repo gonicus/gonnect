@@ -1,21 +1,18 @@
 #include "AddressBookManager.h"
 #include "ReadOnlyConfdSettings.h"
-#include "NetworkHelper.h"
 #include "AddressBook.h"
-#include "LDAPInitializer.h"
-#include "LDAPAddressBookFeeder.h"
-#include "CardDAVAddressBookFeeder.h"
-#include "CsvFileAddressBookFeeder.h"
-#include "AvatarManager.h"
-#include "ViewHelper.h"
-#include "SecretPortal.h"
 #include "KeychainSettings.h"
+#include "IAddressBookFactory.h"
+#include "SecretPortal.h"
+#include "ViewHelper.h"
+#include "NetworkHelper.h"
 
 #include <QTimer>
 #include <QUrl>
 #include <QRegularExpression>
 #include <QLoggingCategory>
 #include <QCryptographicHash>
+#include <QPluginLoader>
 
 using namespace std::chrono_literals;
 using namespace Qt::Literals::StringLiterals;
@@ -31,7 +28,7 @@ QString AddressBookManager::secret(const QString &group) const
     return keychainSettings.value("secret", "").toString();
 }
 
-QString AddressBookManager::hashForSettingsGroup(const QString &group) const
+QString AddressBookManager::hashForSettingsGroup(const QString &group)
 {
     ReadOnlyConfdSettings settings;
     settings.beginGroup(group);
@@ -40,7 +37,7 @@ QString AddressBookManager::hashForSettingsGroup(const QString &group) const
     auto childKeys = settings.childKeys();
     std::sort(childKeys.begin(), childKeys.end());
 
-    for (const auto &key : childKeys) {
+    for (const auto &key : std::as_const(childKeys)) {
         groupSettingsStr.append(key);
         groupSettingsStr.append(settings.value(key, "").toString());
     }
@@ -52,17 +49,21 @@ QString AddressBookManager::hashForSettingsGroup(const QString &group) const
 
 void AddressBookManager::initAddressBookConfigs()
 {
-    static QRegularExpression ldapGroupRegex = QRegularExpression("^ldap[0-9]+$");
-    static QRegularExpression csvGroupRegex = QRegularExpression("^csv[0-9]+$");
-    static QRegularExpression carddavGroupRegex = QRegularExpression("^carddav[0-9]+$");
-
     ReadOnlyConfdSettings settings;
-    const QStringList groups = settings.childGroups();
 
-    for (const auto &group : groups) {
-        if (ldapGroupRegex.match(group).hasMatch() || csvGroupRegex.match(group).hasMatch()
-            || carddavGroupRegex.match(group).hasMatch()) {
-            m_addressBookConfigs.push_back(group);
+    const QObjectList &staticPlugins = QPluginLoader::staticInstances();
+
+    for (QObject *obj : std::as_const(staticPlugins)) {
+        if (IAddressBookFactory *addrPlugin = qobject_cast<IAddressBookFactory *>(obj)) {
+            auto const configs = addrPlugin->configurations();
+            qCInfo(lcAddressBookManager)
+                    << "Found" << configs.length()
+                    << "active configurations for address book plugin" << addrPlugin->name();
+
+            for (auto &cfg : std::as_const(configs)) {
+                m_addressBookFeeders.insert(cfg, addrPlugin->createFeeder(cfg, this));
+                m_addressBookConfigs.push_back(cfg);
+            }
         }
     }
 }
@@ -76,237 +77,110 @@ void AddressBookManager::reloadAddressBook()
 
 void AddressBookManager::processAddressBookQueue()
 {
-    static QRegularExpression ldapGroupRegex = QRegularExpression("^ldap[0-9]+$");
-    static QRegularExpression csvGroupRegex = QRegularExpression("^csv[0-9]+$");
-    static QRegularExpression carddavGroupRegex = QRegularExpression("^carddav[0-9]+$");
+    bool changed = false;
+    bool networkAvailable = true;
+    auto &nh = NetworkHelper::instance();
 
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {
         QString group = it.next();
 
-        if (ldapGroupRegex.match(group).hasMatch()) {
-            if (processLDAPAddressBookConfig(group)) {
-                it.remove();
+        if (auto feeder = m_addressBookFeeders.value(group, nullptr)) {
+
+            // If the plugin requires network access, check the connectivity with
+            // the network helper / portal. If we've no connectivity, trigger on
+            // connectivityChanged signal to recheck again.
+            QUrl checkURL = feeder->networkCheckURL();
+            if (!checkURL.isEmpty()) {
+                if (!networkAvailable) {
+                    continue;
+                }
+
+                if (!nh.hasConnectivity()) {
+                    qCWarning(lcAddressBookManager) << "no connectivity state yet - trying later";
+
+                    networkAvailable = false;
+                    connect(
+                            &nh, &NetworkHelper::connectivityChanged, this,
+                            [this]() { processAddressBookQueue(); },
+                            Qt::ConnectionType::SingleShotConnection);
+                    continue;
+                }
+
+                if (!nh.isReachable(checkURL)) {
+                    qCWarning(lcAddressBookManager) << checkURL << "is not reachable";
+                    connect(
+                            &nh, &NetworkHelper::connectivityChanged, this,
+                            [this]() { processAddressBookQueue(); },
+                            Qt::ConnectionType::SingleShotConnection);
+                    continue;
+                }
             }
-        } else if (csvGroupRegex.match(group).hasMatch()) {
-            if (processCSVAddressBookConfig(group)) {
-                it.remove();
-            }
-        } else if (carddavGroupRegex.match(group).hasMatch()) {
-            if (processCardDAVAddressBookConfig(group)) {
-                it.remove();
-            }
+
+            feeder->process();
+            it.remove();
+            changed = true;
         }
     }
 
-    if (!m_addressBookQueue.isEmpty()) {
-        qCCritical(lcAddressBookManager) << "Queue not empty - retrying in 30s";
-        QTimer::singleShot(30s, this, &AddressBookManager::processAddressBookQueue);
-    } else {
+    if (changed) {
         emit AddressBook::instance().contactsReady();
     }
 }
 
-bool AddressBookManager::processLDAPAddressBookConfig(const QString &group)
+void AddressBookManager::acquireSecret(const QString &group,
+                                       std::function<void(const QString &secret)> callback)
 {
-    const auto groupHash = hashForSettingsGroup(group);
-    const auto secretKey = QString("%1_%2").arg(group, groupHash);
-    const QString secret = this->secret(secretKey);
-
-    ReadOnlyConfdSettings settings;
-    settings.beginGroup(group);
-    const auto bindMethodStr = settings.value("bindMethod", "none").toString();
-
-    if (bindMethodStr == "simple" && secret.isEmpty()) {
-        auto &viewHelper = ViewHelper::instance();
-        auto conn = connect(&viewHelper, &ViewHelper::ldapPasswordResponded, this,
-                            [group, secretKey, this](const QString &id, const QString &password) {
-                                if (id == group) {
-                                    QObject::disconnect(m_viewHelperConnections.value(group));
-                                    m_viewHelperConnections.remove(group);
-
-                                    auto &secretPortal = SecretPortal::instance();
-                                    if (secretPortal.isValid()) {
-                                        KeychainSettings settings;
-                                        settings.beginGroup(secretKey);
-                                        const auto secret = secretPortal.encrypt(password);
-                                        settings.setValue("secret", secret);
-                                        settings.endGroup();
-                                    }
-
-                                    processLDAPAddressBookConfigImpl(group, password);
-                                }
-                            });
-
-        m_viewHelperConnections.insert(group, conn);
-        viewHelper.requestLdapPassword(group, settings.value("host", "").toString());
-
-    } else {
-        auto &secretPortal = SecretPortal::instance();
-        if (secretPortal.isValid()) {
-            if (secretPortal.isInitialized()) {
-                processLDAPAddressBookConfigImpl(group, secretPortal.decrypt(secret));
-            } else {
-                connect(&secretPortal, &SecretPortal::initializedChanged, this,
-                        [this, group, secret]() {
-                            processLDAPAddressBookConfigImpl(
-                                    group, SecretPortal::instance().decrypt(secret));
-                        });
-            }
-        }
+    auto &secretPortal = SecretPortal::instance();
+    if (!secretPortal.isValid()) {
+        qCWarning(lcAddressBookManager)
+                << "Secrets portal is not available - unable to retrieve passwords";
+        callback("");
+        return;
     }
 
-    return true;
-}
+    // Retry after we're initialized
+    if (!secretPortal.isInitialized()) {
+        connect(
+                &secretPortal, &SecretPortal::initializedChanged, this,
+                [this, group, callback]() { acquireSecret(group, callback); },
+                Qt::ConnectionType::SingleShotConnection);
 
-bool AddressBookManager::processLDAPAddressBookConfigImpl(const QString &group,
-                                                          const QString &password)
-{
-    auto &nh = NetworkHelper::instance();
-    ReadOnlyConfdSettings settings;
-
-    QString url = settings.value(group + "/url", "").toString();
-    if (nh.isReachable(url)) {
-        settings.beginGroup(group);
-        const auto scriptableAttributes =
-                settings.value("sipStatusSubscriptableAttributes", "").toString();
-
-        const auto bindMethodStr = settings.value("bindMethod", "none").toString();
-        LDAPInitializer::BindMethod bindMethod;
-
-        static const QHash<QString, LDAPInitializer::BindMethod> s_bindMethods = {
-            { "none", LDAPInitializer::BindMethod::None },
-            { "simple", LDAPInitializer::BindMethod::Simple },
-            { "gssapi", LDAPInitializer::BindMethod::GSSAPI },
-        };
-
-        if (s_bindMethods.contains(bindMethodStr)) {
-            bindMethod = s_bindMethods.value(bindMethodStr);
-        } else {
-            qCCritical(lcAddressBookManager).nospace()
-                    << "Unknown LDAP bind method '" << bindMethodStr
-                    << "' - initialization of LDAP account will be aborted.";
-            return false;
-        }
-
-        LDAPInitializer::Config ldapConfig;
-        ldapConfig.useSSL = settings.value("useSSL", false).toBool();
-        ldapConfig.bindMethod = bindMethod;
-        ldapConfig.caFilePath = settings.value("caFile", "").toString();
-        ldapConfig.ldapUrl = url;
-        ldapConfig.ldapBase = settings.value("base", "").toString();
-        ldapConfig.ldapFilter = settings.value("filter", "").toString();
-        ldapConfig.bindDn = settings.value("bindDn", "").toString();
-        ldapConfig.bindPassword = password;
-        ldapConfig.saslRealm = settings.value("realm", "").toString();
-        ldapConfig.saslAuthcid = settings.value("authcid", "").toString();
-        ldapConfig.saslAuthzid = settings.value("authzid", "").toString();
-
-        LDAPAddressBookFeeder feeder(ldapConfig,
-                                     scriptableAttributes.isEmpty()
-                                             ? QStringList()
-                                             : scriptableAttributes.split(QChar(',')),
-                                     settings.value("baseNumber", "").toString());
-
-        feeder.feedAddressBook(AddressBook::instance());
-
-        AvatarManager::instance().initialLoad(ldapConfig);
-
-        settings.endGroup();
-
-        return true;
+        return;
     }
 
-    qCWarning(lcAddressBookManager).nospace()
-            << "Failed to load LDAP source " << qPrintable(url) << ": not reachable";
-    return false;
-}
-
-bool AddressBookManager::processCSVAddressBookConfig(const QString &group)
-{
     ReadOnlyConfdSettings settings;
 
-    settings.beginGroup(group);
-    CsvFileAddressBookFeeder feeder(settings.value("path", "").toString());
-    feeder.feedAddressBook(AddressBook::instance());
-    settings.endGroup();
-
-    return true;
-}
-
-bool AddressBookManager::processCardDAVAddressBookConfig(const QString &group)
-{
-    const auto groupHash = hashForSettingsGroup(group);
+    const auto groupHash = settings.hashForSettingsGroup(group);
     const auto secretKey = QString("%1_%2").arg(group, groupHash);
-    const QString secret = this->secret(secretKey);
+    const QString secret = KeychainSettings::secret(secretKey);
 
     if (secret.isEmpty()) {
         auto &viewHelper = ViewHelper::instance();
-        auto conn = connect(&viewHelper, &ViewHelper::cardDavPasswordResponded, this,
-                            [group, secretKey, this](const QString &id, const QString &password) {
-                                if (id == group) {
-                                    QObject::disconnect(m_viewHelperConnections.value(group));
-                                    m_viewHelperConnections.remove(group);
+        auto conn = connect(
+                &viewHelper, &ViewHelper::passwordResponded, this,
+                [secretKey, group, callback, this](const QString &id, const QString &password) {
+                    if (id == group) {
+                        QObject::disconnect(m_viewHelperConnections.value(group));
+                        m_viewHelperConnections.remove(group);
 
-                                    auto &secretPortal = SecretPortal::instance();
-                                    if (secretPortal.isValid()) {
-                                        KeychainSettings settings;
-                                        settings.beginGroup(secretKey);
-                                        const auto secret = secretPortal.encrypt(password);
-                                        settings.setValue("secret", secret);
-                                        settings.endGroup();
-                                    }
+                        auto &secretPortal = SecretPortal::instance();
+                        if (secretPortal.isValid()) {
+                            KeychainSettings settings;
+                            settings.beginGroup(secretKey);
+                            const auto secret = secretPortal.encrypt(password);
+                            settings.setValue("secret", secret);
+                            settings.endGroup();
+                        }
 
-                                    processCardDAVAddressBookConfigImpl(group, password);
-                                }
-                            });
+                        callback(password);
+                    }
+                });
 
         m_viewHelperConnections.insert(group, conn);
-
-        ReadOnlyConfdSettings settings;
-        settings.beginGroup(group);
-        viewHelper.requestCardDavPassword(group, settings.value("host", "").toString());
-        settings.endGroup();
+        viewHelper.requestPassword(group, settings.value("host", "").toString());
 
     } else {
-        auto &secretPortal = SecretPortal::instance();
-        if (secretPortal.isValid()) {
-            if (secretPortal.isInitialized()) {
-                processCardDAVAddressBookConfigImpl(group, secretPortal.decrypt(secret));
-            } else {
-                connect(&secretPortal, &SecretPortal::initializedChanged, this,
-                        [this, group, secret]() {
-                            processCardDAVAddressBookConfigImpl(
-                                    group, SecretPortal::instance().decrypt(secret));
-                        });
-            }
-        }
+        callback(secretPortal.decrypt(secret));
     }
-
-    return true;
-}
-
-void AddressBookManager::processCardDAVAddressBookConfigImpl(const QString &group,
-                                                             const QString &password)
-{
-    ReadOnlyConfdSettings settings;
-    settings.beginGroup(group);
-
-    QHash<QString, QString> settingsHash;
-    const auto keys = settings.allKeys();
-    for (const auto &key : keys) {
-        qCritical() << key << settings.value(key);
-        settingsHash.insert(key, settings.value(key, "").toString());
-    }
-    const auto controlHash = qHash(settingsHash);
-
-    const bool useSSL = settings.value("useSSL", false).toBool();
-
-    auto feeder = new CardDAVAddressBookFeeder(
-            controlHash, settings.value("host", "").toString(),
-            settings.value("path", "").toString(), settings.value("user", "").toString(), password,
-            settings.value("port", useSSL ? 443 : 80).toInt(), useSSL, this);
-    feeder->feedAddressBook(AddressBook::instance());
-    Q_UNUSED(feeder)
-    settings.endGroup();
 }

@@ -2,40 +2,21 @@ name: GOnnect Build
 
 on:
   workflow_dispatch:  # can be manually dispatched under GitHub's "Actions" tab
-  # Run the build only, if the branch is release or a PR with release as target is used
-  # Also run only, if files were changed, which result in a changed build.
+  # Run the build only, if the branch is release or main or a PR with release or main as target is used
   push:
     branches:
       - release
-    paths:
-      - 'CMakeList.txt'
-      - 'resources/**'
-      - 'media/**'
-      - 'migrate/**'
-      - 'i18n/*'
-      - 'scripts/**'
-      - 'specs/**'
-      - 'src/**'
-      - '.github/**'
-  # Use the release branch workflow/actions definitions rather the pull_request definitions
+      - main
+  # Use the release/main branch workflow/actions definitions rather the definitions in the pull_request
   pull_request:
     branches:
       - release
-    paths:
-      - 'CMakeList.txt'
-      - 'resources/**'
-      - 'media/**'
-      - 'migrate/**'
-      - 'i18n/*'
-      - 'scripts/**'
-      - 'specs/**'
-      - 'src/**'
-      - '.github/**'
+      - main
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  QT_VERSION: '6.8.2'
+  QT_VERSION: '6.9.1'
   EXT_BASE: ${{github.workspace}}
 
 permissions:
@@ -48,7 +29,7 @@ jobs:
     name: "Build GOnnect"
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           submodules: 'recursive'
 
@@ -75,7 +56,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Run clang-format style check for C/C++/Protobuf programs.
         uses: jidicula/clang-format-action@4726374d1aa3c6aecf132e5197e498979588ebc8 # v4.15.0
         with:
@@ -87,7 +68,7 @@ jobs:
     name: "Static Code Analyzer"    
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           submodules: 'recursive'
           
@@ -139,7 +120,7 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Prepare
         uses: ./.github/actions/prepare
@@ -148,7 +129,7 @@ jobs:
           qt-only: 'true'
 
       - name: Download Test artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: gonnect-tests
 

@@ -125,7 +125,7 @@ void CallHistory::ensureDatabaseVersion()
     }
 
     // Update scheme to latest version
-    if (latestVersionNumber != currentVersionNumber) {
+    if (currentVersionNumber < latestVersionNumber) {
         qCInfo(lcCallHistory) << "Migrating database scheme from" << currentVersionNumber << "to"
                               << latestVersionNumber;
 
@@ -240,13 +240,20 @@ void CallHistory::readFromDatabase()
                     << "Error on executing SQL query:" << query.lastError().text();
         } else {
             while (query.next()) {
+                auto type = static_cast<CallHistoryItem::Types>(query.value("type").toInt());
+
+                // SIPCall flag was introduced later, so set it for legacy call history items
+                if (!(type & CallHistoryItem::Type::SIPCall)
+                    && !(type & CallHistoryItem::Type::JitsiMeetCall)) {
+                    type |= CallHistoryItem::Type::SIPCall;
+                }
+
                 auto item = new CallHistoryItem(
                         QDateTime::fromSecsSinceEpoch(query.value("time").toLongLong()),
                         query.value("remoteUrl").toString(), query.value("account").toString(),
                         query.value("contactId").toString(),
                         query.value("isSipSubscriptable").toBool(), query.value("id").toLongLong(),
-                        query.value("durationSeconds").toUInt(),
-                        static_cast<CallHistoryItem::Type>(query.value("type").toInt()), this);
+                        query.value("durationSeconds").toUInt(), type, this);
 
                 m_historyItems.push_back(item);
             }
@@ -281,7 +288,7 @@ CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem *item)
     return item;
 }
 
-CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem::Type type, const QString &account,
+CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem::Types type, const QString &account,
                                              const QString &remoteUrl, const QString &contactId,
                                              bool isSipSubscriptable)
 {
@@ -290,6 +297,11 @@ CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem::Type type, const Q
     const auto index = insertItemAtCorrectPosition(item);
     emit itemAdded(index, item);
     return item;
+}
+
+qsizetype CallHistory::indexOfItem(const CallHistoryItem *item) const
+{
+    return m_historyItems.indexOf(item);
 }
 
 QDebug operator<<(QDebug debug, const CallHistory &history)

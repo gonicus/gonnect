@@ -35,6 +35,8 @@ public:
     static QString logFilePath();
     static QString logFileName();
 
+    static bool isFlatpak();
+
 public slots:
     void handleSigHup();
     void handleSigTerm();

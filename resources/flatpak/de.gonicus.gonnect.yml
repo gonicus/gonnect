@@ -1,23 +1,41 @@
 id: de.gonicus.gonnect
 runtime: org.kde.Platform
-runtime-version: '6.8'
+runtime-version: '6.9'
 sdk: org.kde.Sdk
+base: io.qt.qtwebengine.BaseApp
+base-version: '6.9'
 command: gonnect
 
 finish-args:
+  - --env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess
   - --device=all
   - --socket=wayland
   - --socket=fallback-x11
   - --socket=pcsc
   - --socket=pulseaudio
-  - --talk-name=org.freedesktop.ScreenSaver
-  - --talk-name=org.mpris.MediaPlayer2.*
-  - --talk-name=org.kde.StatusNotifierWatcher
-  - --filesystem=xdg-music:ro
-  - --filesystem=xdg-download:rw
-  - --filesystem=/run/.heim_org.h5l.kcm-socket
   - --share=network
   - --share=ipc
+  # Lock screensaver while on the phone/in a conference
+  - --talk-name=org.freedesktop.ScreenSaver
+  # MPRIS media control
+  - --talk-name=org.mpris.MediaPlayer2.*
+  # KDE Systray Icon/Menu
+  - --talk-name=org.kde.StatusNotifierWatcher
+  # Evolution Dataserver contact source
+  - --talk-name=org.gnome.evolution.dataserver.AddressBook10
+  - --talk-name=org.gnome.evolution.dataserver.Calendar8
+  - --talk-name=org.gnome.evolution.dataserver.Sources5
+  - --talk-name=org.gnome.evolution.dataserver.Subprocess.Backend.*
+  # Access for the default avatars
+  - --filesystem=xdg-data/pixmaps/faces:create
+  # Access for evolution-data-server avatars
+  - --filesystem=xdg-cache/evolution/addressbook:ro
+  # Access to music folder for ring tones
+  - --filesystem=xdg-music:ro
+  # Place to save download chat attachments
+  - --filesystem=xdg-download:rw
+  # Kerberos socket
+  - --filesystem=/run/.heim_org.h5l.kcm-socket
 
 modules:
   - name: kerberos
@@ -50,6 +68,7 @@ modules:
     config-opts:
       - --disable-video
       - --enable-ext-sound
+      - --with-opus
       - CFLAGS=-fPIC -DPJ_HAS_IPV6=1
     sources:
       - type: git
@@ -86,6 +105,78 @@ modules:
       - type: patch
         path: patches/qtwebdav-cmake.patch
 
+  - name: libsecret
+    buildsystem: meson
+    config-opts:
+    - -Dmanpage=false
+    - -Dvapi=false
+    - -Dgtk_doc=false
+    - -Dintrospection=false
+    sources:
+    - type: archive
+      url: https://download.gnome.org/sources/libsecret/0.21/libsecret-0.21.4.tar.xz
+      sha256: 163d08d783be6d4ab9a979ceb5a4fecbc1d9660d3c34168c581301cd53912b20
+      x-checker-data:
+        type: gnome
+        name: libsecret
+        stable-only: true
+
+  - name: libical
+    cleanup:
+      - /lib/cmake
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_LIBDIR=lib
+      - -DBUILD_SHARED_LIBS:BOOL=ON
+      - -DICAL_GLIB=true
+      - -DGOBJECT_INTROSPECTION=true
+      - -DICAL_GLIB_VAPI=false
+      - -DICAL_BUILD_DOCS=false
+    sources:
+      - type: archive
+        url: https://github.com/libical/libical/releases/download/v3.0.20/libical-3.0.20.tar.gz
+        sha256: e73de92f5a6ce84c1b00306446b290a2b08cdf0a80988eca0a2c9d5c3510b4c2
+        x-checker-data:
+          type: anitya
+          project-id: 1637
+          url-template: https://github.com/libical/libical/releases/download/v$version/libical-$version.tar.gz
+
+  - name: evolution-data-server
+    cleanup:
+      - /lib/cmake
+      - /lib/evolution-data-server/*-backends
+      - /libexec
+      - /share/dbus-1/services
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DENABLE_GTK=OFF
+      - -DENABLE_GTK4=OFF
+      - -DENABLE_GOA=OFF
+      - -DENABLE_UOA=OFF
+      - -DENABLE_GOOGLE_AUTH=OFF
+      - -DENABLE_GOOGLE=OFF
+      - -DENABLE_WITH_PHONENUMBER=OFF
+      - -DENABLE_VALA_BINDINGS=OFF
+      - -DENABLE_WEATHER=OFF
+      - -DWITH_OPENLDAP=OFF
+      - -DWITH_LIBDB=OFF
+      - -DENABLE_INTROSPECTION=ON
+      - -DENABLE_INSTALLED_TESTS=OFF
+      - -DENABLE_GTK_DOC=OFF
+      - -DENABLE_EXAMPLES=OFF
+      - -DENABLE_CANBERRA=OFF
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/evolution-data-server/3.56/evolution-data-server-3.56.0.tar.xz
+        sha256: 7ae5482aa4ee2894467716c5be982500e1d511dddf4ab29b68fdb107d7f8a8ff
+        x-checker-data:
+          type: gnome
+          name: evolution-data-server
+    modules:
+      - shared-modules/intltool/intltool-0.51.json
+
   - name: vcard
     buildsystem: cmake-ninja
     sources:
@@ -114,6 +205,14 @@ modules:
     - -DCMAKE_MODULE_PATH=/app/lib/${FLATPAK_ARCH}-linux-gnu/cmake/Qt6
     - -DCMAKE_LIBRARY_PATH=/usr/lib
     - -DCMAKE_INSTALL_RPATH=/usr/lib
+    - -DCMAKE_UNITY_BUILD=ON
+    - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
+    - -DENABLE_PCH=ON
     sources:
     - type: dir
       path: ../..
+    cleanup:
+    - rm /app/bin/update-emojis
+
+cleanup-commands:
+  - /app/cleanup-BaseApp.sh

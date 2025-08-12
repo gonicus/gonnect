@@ -4,17 +4,18 @@ import QtCore
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls.Material
-import QtQuick.Controls.impl
 import base
 
 BaseWindow {
     id: control
     objectName: "aboutWindow"
+    title: qsTr("About")
     width: 600
-    height: 310
+    height: 380
     visible: true
     resizable: false
-    title: qsTr("About")
+    showMinimizeButton: false
+    showMaximizeButton: false
 
     minimumWidth: control.width
     minimumHeight: control.height

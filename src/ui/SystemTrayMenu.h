@@ -44,7 +44,7 @@ private:
         QString remoteUri;
         bool isFinished = false;
         bool isEstablished = false;
-        bool isEarlyMediaActive = false;
+        bool isEarlyCallState = false;
     };
 
     explicit SystemTrayMenu(QObject *parent = nullptr);
@@ -60,7 +60,7 @@ private:
     QSystemTrayIcon *m_trayIcon = nullptr;
     QMenu *m_trayIconMenu = nullptr;
 
-    QAction *m_dialWindowAction = nullptr;
+    QAction *m_mainWindowAction = nullptr;
     QAction *m_settingsWindowAction = nullptr;
     QAction *m_activeCallsSeparator = nullptr;
     QAction *m_mostCalledSeparator = nullptr;

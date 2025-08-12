@@ -9,6 +9,8 @@ public:
     explicit ReadOnlyConfdSettings(QObject *parent = nullptr);
     ~ReadOnlyConfdSettings() = default;
 
+    QString hashForSettingsGroup(const QString &group);
+
 private:
     QString gidToName(gid_t gid);
     QStringList getUserGroups();

@@ -1,4 +1,5 @@
 #include "SystemTrayMenu.h"
+#include "NumberStat.h"
 #include "ViewHelper.h"
 #include "NumberStats.h"
 #include "Contact.h"
@@ -47,7 +48,7 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateCalls);
     connect(&SIPCallManager::instance(), &SIPCallManager::establishedCallsCountChanged, this,
             &SystemTrayMenu::updateCalls);
-    connect(&SIPCallManager::instance(), &SIPCallManager::earlyMediaActiveChanged, this,
+    connect(&SIPCallManager::instance(), &SIPCallManager::earlyCallStateChanged, this,
             &SystemTrayMenu::updateCalls);
     connect(&SIPCallManager::instance(), &SIPCallManager::isConferenceModeChanged, this,
             &SystemTrayMenu::updateCalls);
@@ -71,8 +72,8 @@ void SystemTrayMenu::updateMenu()
 
     const auto sipReg = SIPAccountManager::instance().sipRegistered();
     m_settingsWindowAction->setVisible(sipReg);
-    m_dialWindowAction->setText(sipReg ? tr("Dial...") : tr("Not registered..."));
-    m_dialWindowAction->setIcon(sipReg ? QIcon::fromTheme("call-start-symbolic")
+    m_mainWindowAction->setText(sipReg ? tr("Dial...") : tr("Not registered..."));
+    m_mainWindowAction->setIcon(sipReg ? QIcon::fromTheme("call-start-symbolic")
                                        : QIcon::fromTheme("view-refresh-symbolic"));
 
     updateCalls();
@@ -85,7 +86,7 @@ void SystemTrayMenu::initMenu()
     m_trayIconMenu = new QMenu;
 
     QAction *action = nullptr;
-    m_dialWindowAction = action =
+    m_mainWindowAction = action =
             m_trayIconMenu->addAction(QIcon::fromTheme("call-start-symbolic"), tr("Dial..."));
     connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::activateSearch);
 
@@ -97,10 +98,10 @@ void SystemTrayMenu::initMenu()
 
     m_settingsWindowAction = action = m_trayIconMenu->addAction(
             QIcon::fromTheme("applications-system-symbolic"), tr("Settings"));
-    connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::showSettingsWindow);
+    connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::showSettings);
 
     action = m_trayIconMenu->addAction(QIcon::fromTheme("help-about-symbolic"), tr("About"));
-    connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::showAboutWindow);
+    connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::showAbout);
 
     action = m_trayIconMenu->addAction(QIcon::fromTheme("application-exit-symbolic"), tr("Quit"));
     connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::quitApplication);
@@ -113,7 +114,7 @@ QString SystemTrayMenu::contactText(const NumberStat &numberStat) const
     QString stateChar = "⚫";
     const auto contact = numberStat.contact;
 
-    if (contact) {
+    if (contact && numberStat.contactType == NumberStats::ContactType::PhoneNumber) {
         const auto phoneNumberObject = contact->phoneNumberObject(numberStat.phoneNumber);
         if (phoneNumberObject.isSipSubscriptable) {
             switch (SIPManager::instance().buddyStatus(numberStat.phoneNumber)) {
@@ -142,7 +143,9 @@ QString SystemTrayMenu::contactText(const NumberStat &numberStat) const
 
 QString SystemTrayMenu::contactIcon(const NumberStat &numberStat) const
 {
-    if (numberStat.contact) {
+    if (numberStat.contactType == NumberStats::ContactType::JitsiMeetUrl) {
+        return "videochat-symbolic";
+    } else if (numberStat.contact) {
         const auto phoneNumberObject =
                 numberStat.contact->phoneNumberObject(numberStat.phoneNumber);
 
@@ -194,7 +197,7 @@ void SystemTrayMenu::updateCalls()
         }
 
         entry->isEstablished = call->isEstablished();
-        entry->isEarlyMediaActive = call->earlyMediaActive();
+        entry->isEarlyCallState = call->earlyCallState();
 
         if (call->isEstablished()) {
             m_hasEstablishedCalls = true;
@@ -272,7 +275,7 @@ void SystemTrayMenu::updateCalls()
                     m_trayIconMenu->insertAction(m_activeCallsSeparator, action);
                     m_activeCallsActions.append(action);
 
-                } else if (!callEntry.isEstablished && !callEntry.isEarlyMediaActive) {
+                } else if (!callEntry.isEstablished && !callEntry.isEarlyCallState) {
                     auto action = new QAction(QIcon::fromTheme("call-start-symbolic"),
                                               tr("Accept call with %1").arg(contactLabel),
                                               m_trayIconMenu);
@@ -290,7 +293,7 @@ void SystemTrayMenu::updateCalls()
                     m_activeCallsActions.append(action);
 
                     connect(action, &QAction::triggered, this, [call]() {
-                        if (call->isEstablished() || call->earlyMediaActive()) {
+                        if (call->isEstablished() || call->earlyCallState()) {
                             SIPCallManager::instance().endCall(call);
                         } else {
                             SIPCallManager::instance().rejectCall(call);
@@ -325,8 +328,14 @@ void SystemTrayMenu::updateFavorites()
                                       m_trayIconMenu);
             m_trayIconMenu->insertAction(m_favoritesSeparator, action);
             m_favoriteActions.insert(number, action);
-            connect(action, &QAction::triggered, this,
-                    [number]() { SIPCallManager::instance().call(number); });
+            const bool isJitsiMeet = item->contactType == NumberStats::ContactType::JitsiMeetUrl;
+            connect(action, &QAction::triggered, this, [number, isJitsiMeet]() {
+                if (isJitsiMeet) {
+                    ViewHelper::instance().requestMeeting(number);
+                } else {
+                    SIPCallManager::instance().call(number);
+                }
+            });
         }
     }
 

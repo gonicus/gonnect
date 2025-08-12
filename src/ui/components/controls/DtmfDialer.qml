@@ -4,18 +4,12 @@ import QtQuick
 import QtQuick.Layouts
 import base
 
-BaseWindow {
+Item {
     id: control
-
-    width: 410
-    height: 554
-    minimumWidth: control.width
-    minimumHeight: control.height
-    maximumWidth: control.width
-    maximumHeight: control.height
+    implicitWidth: 410
+    implicitHeight: 554
 
     signal buttonPressed(string button)
-
     signal dialed(string button)
 
     component DialButton : Item {
@@ -60,8 +54,10 @@ BaseWindow {
     GridLayout {
         columns: 3
         focus: true
+        anchors.centerIn: parent
 
         Keys.onPressed: event => {
+            event.accepted = true
             control.buttonPressed(event.text)
         }
 

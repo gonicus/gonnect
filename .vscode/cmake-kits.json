@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Qt-6.9.0-linux-g++",
+    "isTrusted": true,
+    "preferredGenerator": {
+      "name": "Ninja"
+    },
+    "cmakeSettings": {
+      "QT_QML_GENERATE_QMLLS_INI": "ON",
+      "CMAKE_CXX_FLAGS_DEBUG_INIT": "-DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG",
+      "CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT": "-DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG"
+    },
+    "toolchainFile": "/usr/lib64/cmake/Qt6/qt.toolchain.cmake",
+    "environmentVariables": {
+      "VSCODE_QT_QTPATHS_EXE": "/usr/bin/qmake",
+      "PATH": "/usr:/usr/lib64/qt6:/usr/share/qt6:/usr/share/doc/qt6:/usr/include/qt6:/usr/lib64:/usr/lib64/qt6/libexec:/usr/lib64/qt6/bin:/usr/tests:/usr/lib64/qt6/plugins:/usr/lib64/qt6/qml:/usr/share/qt6/translations:/usr/lib64/qt6/examples:${env:PATH}"
+    }
+  }
+]
