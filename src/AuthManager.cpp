@@ -28,8 +28,17 @@ AuthManager::AuthManager(QObject *parent) : QObject{ parent }
 
 void AuthManager::init()
 {
+    m_isAuthManagerInitialized = true;
+
     ReadOnlyConfdSettings settings;
     settings.beginGroup("jitsi");
+
+    // Use this when other auth types for Jitsi Meet are implemented
+    m_isJitsiAuthRequired = settings.value("authorizationMode", "none").toString() != "none";
+    if (!m_isJitsiAuthRequired) {
+        emit isAuthManagerInitializedChanged();
+        return;
+    }
 
     QSslConfiguration sslConfig;
     sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
@@ -95,6 +104,8 @@ void AuthManager::init()
     m_authFlow->setSslConfiguration(sslConfig);
 
     settings.endGroup();
+
+    emit isAuthManagerInitializedChanged();
 }
 
 const QString AuthManager::storedRefreshToken() const

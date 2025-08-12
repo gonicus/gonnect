@@ -40,14 +40,14 @@ JitsiConnector::JitsiConnector(QObject *parent) : ICallState{ parent }
     connect(this, &JitsiConnector::largeVideoParticipantIdChanged, this,
             [this]() { emit executeSetLargeVideoParticipant(m_largeVideoParticipantId); });
 
-    auto &AudioManager = AudioManager::instance();
-    connect(&AudioManager, &AudioManager::captureDeviceIdChanged, this,
+    auto &audioManager = AudioManager::instance();
+    connect(&audioManager, &AudioManager::captureDeviceIdChanged, this,
             &JitsiConnector::transferAudioManagerDevicesToJitsi);
-    connect(&AudioManager, &AudioManager::playbackDeviceIdChanged, this,
+    connect(&audioManager, &AudioManager::playbackDeviceIdChanged, this,
             &JitsiConnector::transferAudioManagerDevicesToJitsi);
 
-    auto &VideoManager = VideoManager::instance();
-    connect(&VideoManager, &VideoManager::selectedDeviceIdChanged, this,
+    auto &videoManager = VideoManager::instance();
+    connect(&videoManager, &VideoManager::selectedDeviceIdChanged, this,
             &JitsiConnector::transferVideoManagerDeviceToJitsi);
 
     auto headsetProxy = USBDevices::instance().getHeadsetDeviceProxy();
@@ -163,6 +163,7 @@ QString JitsiConnector::jitsiJavascript()
 {
     const auto currentUser = ViewHelper::instance().currentUser();
     const auto defaultName = tr("Unnamed participant");
+    auto &authManager = AuthManager::instance();
 
     return QString(R"""(
 const options = {
@@ -223,7 +224,6 @@ let jitsiConn = null
 
 new QWebChannel(qt.webChannelTransport, function(channel) {
     jitsiConn = channel.objects.jitsiConn
-
 
     // Listeners to JitsiConnector
 
@@ -391,7 +391,8 @@ api.addListener("passwordRequired", data => {
 
 )""")
             .arg(GlobalInfo::instance().jitsiUrl(), // %1
-                 AuthManager::instance().jitsiTokenForRoom(m_roomName), // %2
+                 authManager.isJitsiAuthRequired() ? authManager.jitsiTokenForRoom(m_roomName)
+                                                   : "", // %2
                  currentUser ? currentUser->name() : "", // %3
                  Theme::instance().backgroundColor().name(), // %4
                  m_roomName, // %5
