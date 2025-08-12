@@ -10,8 +10,12 @@ class QOAuth2AuthorizationCodeFlow;
 class AuthManager : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool isWaitingForAuth READ isWaitingForAuth NOTIFY isWaitingForAuthChanged)
-    Q_PROPERTY(bool isOAuthAuthenticated READ isOAuthAuthenticated NOTIFY oAuthReady)
+    Q_PROPERTY(bool isAuthManagerInitialized READ isAuthManagerInitialized NOTIFY
+                       isAuthManagerInitializedChanged FINAL)
+    Q_PROPERTY(bool isJitsiAuthRequired READ isJitsiAuthRequired NOTIFY
+                       isAuthManagerInitializedChanged FINAL)
+    Q_PROPERTY(bool isWaitingForAuth READ isWaitingForAuth NOTIFY isWaitingForAuthChanged FINAL)
+    Q_PROPERTY(bool isOAuthAuthenticated READ isOAuthAuthenticated NOTIFY oAuthReady FINAL)
 
 private:
     struct Token
@@ -29,6 +33,9 @@ public:
         }
         return *_instance;
     }
+
+    bool isAuthManagerInitialized() const { return m_isAuthManagerInitialized; }
+    bool isJitsiAuthRequired() const { return m_isJitsiAuthRequired; }
 
     Q_INVOKABLE void authenticateJitsiRoom(const QString &roomName);
 
@@ -76,6 +83,8 @@ private:
     void setIsWaitingForAuth(bool value);
     QDateTime tokenExpiry(const QString &token) const;
 
+    bool m_isAuthManagerInitialized = false;
+    bool m_isJitsiAuthRequired = false;
     bool m_isWaitingForAuth = false;
     QString m_oauthToken;
     QString m_jitsiRoomWaitingForAuth;
@@ -89,6 +98,7 @@ private:
     QNetworkRequestFactory m_reqFactory;
 
 signals:
+    void isAuthManagerInitializedChanged();
     void oAuthReady();
     void jitsiRoomAuthenticated(QString roomName);
     void authenticatedJitsiRoomChanged();
