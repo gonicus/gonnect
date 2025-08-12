@@ -38,6 +38,7 @@ public:
     quint8 establishedCallsCount() const { return m_establishedCallsCount; }
     bool hasEstablishedCalls() const { return m_hasEstablishedCalls; }
     unsigned activeCalls() const { return m_activeCalls; }
+    bool hasActiveCalls() const { return !!m_activeCalls; }
 
     bool isEarlyCallState() const { return m_earlyCallState; }
 
