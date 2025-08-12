@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/gonicus/gonnect/compare/v1.3.12...v2.0.0) (2025-08-12)
+
+
+### Features
+
+* integration of Jitsi Meet and new single window design ([baf87f8](https://github.com/gonicus/gonnect/commit/baf87f821482b3d7383119410c8d370b16d0bbd3))
+
+
+### BREAKING CHANGES
+
+* Jitsi Meet session are now integrated. Upgrade seamlessly from a SIP call to a video conference.
+
 ## [1.3.12](https://github.com/gonicus/gonnect/compare/v1.3.11...v1.3.12) (2025-08-07)
 
 
