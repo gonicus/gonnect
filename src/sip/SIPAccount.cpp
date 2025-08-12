@@ -382,8 +382,17 @@ bool SIPAccount::initialize()
         return false;
     }
 
-    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
-            []() { pj::Endpoint::instance().handleIpChange(pj::IpChangeParam()); });
+    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
+        if (NetworkHelper::instance().hasConnectivity()
+            && !SIPCallManager::instance().hasActiveCalls()) {
+            try {
+                pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
+            } catch (pj::Error &err) {
+                qCCritical(lcSIPAccount) << "Ignoring pjsip error on handle ip change:"
+                                         << QString::fromLocal8Bit(err.info(false));
+            }
+        }
+    });
 
     return true;
 }
