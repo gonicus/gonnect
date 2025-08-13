@@ -161,11 +161,6 @@ bool HeadsetDeviceProxy::refreshDevice()
                 emit hookSwitch();
             }
         });
-        connect(m_device, &HeadsetDevice::hookSwitchTrigger, this, [this]() {
-            if (isEnabled()) {
-                emit hookSwitchTrigger();
-            }
-        });
         connect(m_device, &HeadsetDevice::mute, this, [this]() {
             if (isEnabled()) {
                 emit mute();

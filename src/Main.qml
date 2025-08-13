@@ -12,14 +12,16 @@ Item {
         location: ViewHelper.userConfigPath
         category: "generic"
 
-        property bool showCallWindowOnStartup: false
+        property bool showMainWindowOnStart: true
         property bool showTrayDialog: true
     }
 
     Component.onCompleted: () => {
         DialogFactory.rootItem = baseItem
 
-        gonnectWindow.show()
+        if (settings.showMainWindowOnStart) {
+            gonnectWindow.show()
+        }
 
         if (!ViewHelper.isSystrayAvailable() && settings.showTrayDialog) {
             const item = DialogFactory.createInfoDialog({

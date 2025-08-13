@@ -20,7 +20,7 @@ public:
     ~CalDAVEventFeeder();
 
     void init(const QString &settingsGroupId, const QString &source, const QString &host,
-              const QString &path, const QString &user, int port, bool useSSL,
+              const QString &path, const QString &user, int port, bool useSSL, int interval,
               const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd);
 
     virtual void process() override;
@@ -49,6 +49,7 @@ private:
     QString m_user;
     int m_port = 0;
     bool m_useSSL = true;
+    int m_interval = 300000;
 
     QTimer m_calendarRefreshTimer;
 

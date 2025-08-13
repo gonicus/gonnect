@@ -22,7 +22,7 @@ CalDAVEventFeeder::~CalDAVEventFeeder()
 
 void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &source,
                              const QString &host, const QString &path, const QString &user,
-                             int port, bool useSSL, const QDateTime &timeRangeStart,
+                             int port, bool useSSL, int interval, const QDateTime &timeRangeStart,
                              const QDateTime &timeRangeEnd)
 {
     m_settingsGroupId = settingsGroupId;
@@ -31,6 +31,7 @@ void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &sour
     m_user = user;
     m_port = port;
     m_useSSL = useSSL;
+    m_interval = interval;
 
     m_source = source;
     m_timeRangeStart = timeRangeStart;
@@ -51,7 +52,7 @@ void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &sour
         Kopano saves every VEVENT wrapped in a VCALENDAR entry in separate '.ics' files in
         '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
     */
-    m_calendarRefreshTimer.setInterval(60s);
+    m_calendarRefreshTimer.setInterval(m_interval);
     connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
     m_calendarRefreshTimer.start();
 }

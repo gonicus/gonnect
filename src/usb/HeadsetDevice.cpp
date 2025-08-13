@@ -380,10 +380,6 @@ void HeadsetDevice::processEvents()
                         emit hookSwitch();
                         qCDebug(lcHeadset) << "  Hook switch changed to" << m_hookSwitch;
                     }
-                    if (_hookSwitch) {
-                        qCDebug(lcHeadset) << "  Hook switch trigger";
-                        emit hookSwitchTrigger();
-                    }
                 }
             }
 
