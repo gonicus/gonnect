@@ -33,6 +33,7 @@ Item {
         location: ViewHelper.userConfigPath
         category: "generic"
 
+        property alias showMainWindowOnStart: startInBackgroundCheckBox.checked
         property alias busyOnBusy: busyOnBusyCheckBox.checked
         property alias inverseAcceptReject: inverseAcceptRejectCheckBox.checked
         property alias headsetHookOff: headsetHookOffCheckBox.checked
@@ -144,25 +145,12 @@ Item {
                         }
 
                         CheckBox {
-                            id: trayIconDark
-                            text: qsTr('Use dark tray icon')
+                            id: startInBackgroundCheckBox
+                            text: qsTr('Show main window on startup')
+                            checked: true  // default value
                             anchors {
                                 left: parent.left
                                 right: parent.right
-                            }
-
-                            property bool initialized: false
-
-                            Component.onCompleted: () => {
-                                trayIconDark.checked = genericSettings.value('trayIconDark', false)
-                                trayIconDark.initialized = true
-                            }
-
-                            onCheckedChanged: () => {
-                                if (trayIconDark.initialized) {
-                                    genericSettings.setValue('trayIconDark', trayIconDark.checked)
-                                    ViewHelper.resetTrayIcon()
-                                }
                             }
                         }
 
@@ -224,7 +212,6 @@ Item {
 
                 CardList {
                     title: qsTr('Appearance')
-                    spacing: 20
                     anchors {
                         left: parent.left
                         right: parent.right
@@ -250,7 +237,31 @@ Item {
                         }
                     }
 
+                    CheckBox {
+                        id: trayIconDark
+                        text: qsTr('Use dark tray icon')
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        property bool initialized: false
+
+                        Component.onCompleted: () => {
+                            trayIconDark.checked = genericSettings.value('trayIconDark', false)
+                            trayIconDark.initialized = true
+                        }
+
+                        onCheckedChanged: () => {
+                            if (trayIconDark.initialized) {
+                                genericSettings.setValue('trayIconDark', trayIconDark.checked)
+                                ViewHelper.resetTrayIcon()
+                            }
+                        }
+                    }
+
                     Column {
+                        topPadding: 20
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -472,17 +483,6 @@ Item {
                         }
                     }
 
-                    CheckBox {
-                        id: externalRingerCheckbox
-                        text: qsTr('Prefer USB headset ring sound if available')
-                        enabled: headsetCheckBox.checked
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-
-                        }
-                    }
-
                     Rectangle {
                         color: Theme.backgroundOffsetColor
                         radius: 12
@@ -652,6 +652,17 @@ Item {
                         left: parent?.left
                         right: parent?.right
                         margins: 20
+                    }
+
+                    CheckBox {
+                        id: externalRingerCheckbox
+                        text: qsTr('Prefer USB headset ring sound if available')
+                        enabled: headsetCheckBox.checked
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+
+                        }
                     }
 
                     Column {

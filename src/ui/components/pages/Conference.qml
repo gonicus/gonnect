@@ -256,15 +256,18 @@ Item {
                         localStorageEnabled: true
                         screenCaptureEnabled: true
                     }
+                    profile {
+                        offTheRecord: false
+                        storageName: "gonnect_jitsi_meet"
+                    }
+                    webChannel: WebChannel {
+                        registeredObjects: [ jitsiConn ]
+                    }
                     anchors {
                         top: topBar.bottom
                         bottom: parent.bottom
                         left: parent.left
                         right: parent.right
-                    }
-
-                    webChannel: WebChannel {
-                        registeredObjects: [ jitsiConn ]
                     }
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {

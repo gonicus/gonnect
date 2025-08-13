@@ -66,6 +66,14 @@ int main(int argc, char *argv[])
     const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
 
     for (const QString &fontPath : fontPaths) {
+
+        QFileInfo fontFileInfo(fontPath);
+        fontFileInfo.makeAbsolute();
+        qInfo().noquote().nospace()
+                << "Trying to load font from file " << fontFileInfo.absoluteFilePath()
+                << " (exists: " << fontFileInfo.exists()
+                << ", readable: " << fontFileInfo.isReadable() << ")";
+
         const int fontId = QFontDatabase::addApplicationFont(fontPath);
         if (fontId >= 0) {
             const auto fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
