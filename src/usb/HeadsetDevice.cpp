@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <libusb.h>
 #include "HeadsetDevice.h"
+#include "GlobalInfo.h"
 
 Q_LOGGING_CATEGORY(lcHeadset, "gonnect.usb.headset")
 
@@ -184,7 +185,9 @@ void HeadsetDevice::setUsageInfos(const QHash<UsageId, UsageInfo> &infos)
 
 void HeadsetDevice::setBusyLine(bool flag)
 {
-    m_ignoreHookTimer.start();
+    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_001)) {
+        m_ignoreHookTimer.start();
+    }
 
     if (!m_hidUsages.contains(UsageId::LED_OffHook)) {
         qCInfo(lcHeadset) << "Busy line is not supported by this device";
@@ -377,7 +380,8 @@ void HeadsetDevice::processEvents()
 
             // Hook switch
             if (m_hidUsages.contains(UsageId::Telephony_HookSwitch)) {
-                if (m_ignoreHookTimer.isActive()) {
+                if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_001)
+                    && m_ignoreHookTimer.isActive()) {
                     m_ignoreHookTimer.stop();
                 } else {
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_HookSwitch);
