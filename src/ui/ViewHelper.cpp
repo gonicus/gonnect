@@ -350,6 +350,19 @@ void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
                 QVariant::fromValue(SIPCallManager::instance().findCall(accountId, callId)));
 }
 
+bool ViewHelper::hasNonSilentCall() const
+{
+    const auto globalStateObject = GlobalCallState::instance().globalCallStateObjects();
+    for (const auto stateObj : globalStateObject) {
+        const auto callObj = qobject_cast<const SIPCall *>(stateObj);
+        if (!callObj || !callObj->isSilent()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool ViewHelper::isBusyOnBusy() const
 {
     ReadOnlyConfdSettings settings;
