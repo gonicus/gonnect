@@ -113,7 +113,7 @@ Item {
     Connections {
         target: SIPCallManager
         function onCallAdded(accountId : string, callId : int) {
-            if (!ViewHelper.isBusyOnBusy() || !(GlobalCallState.globalCallState & ICallState.State.CallActive)) {
+            if (ViewHelper.hasNonSilentCall() && (!ViewHelper.isBusyOnBusy() || !(GlobalCallState.globalCallState & ICallState.State.CallActive))) {
                 gonnectWindow.ensureVisible()
                 gonnectWindow.showPage(GonnectWindow.PageId.Call)
             }
