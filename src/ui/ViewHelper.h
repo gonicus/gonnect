@@ -111,6 +111,7 @@ public:
     Q_INVOKABLE void setCallInForegroundByIds(const QString &accountId, int callId);
 
     bool isActiveVideoCall() const { return m_isActiveVideoCall; }
+    Q_INVOKABLE bool hasNonSilentCall() const;
 
     Q_INVOKABLE bool isBusyOnBusy() const;
 

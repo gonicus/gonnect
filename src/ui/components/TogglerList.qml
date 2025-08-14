@@ -32,16 +32,6 @@ ListView {
 
         onToggled: () => TogglerManager.toggleToggler(delg.id)
 
-        states: [
-            State {
-                when: delg.isBusy
-                PropertyChanges {
-                    busyIndicatorItem.visible: true
-                    idleIndicatorItem.visible: false
-                }
-            }
-        ]
-
         Rectangle {
             id: idleIndicatorItem
             implicitWidth: 36
@@ -49,6 +39,7 @@ ListView {
             x: delg.leftPadding
             y: parent?.height / 2 - height / 2
             radius: 13
+            visible: !delg.isBusy
             color: delg.checked ? Theme.accentColor : Theme.backgroundColor
             border.color: delg.checked ? Theme.accentColor : Theme.borderColor
 
@@ -72,7 +63,7 @@ ListView {
             id: busyIndicatorItem
             implicitWidth: 36
             implicitHeight: 20
-            visible: false
+            visible: delg.isBusy
             x: delg.leftPadding
             y: parent ? (parent.height / 2 - height / 2) : 0
 
