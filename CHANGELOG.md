@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/gonicus/gonnect/compare/v2.0.0...v2.0.1) (2025-08-14)
+
+
+### Bug Fixes
+
+* togglers are working again (regression fix) ([#136](https://github.com/gonicus/gonnect/issues/136)) ([30fe9db](https://github.com/gonicus/gonnect/commit/30fe9db56cac40154ae1bf842a4ffcaeb382cf19))
+
 # [2.0.0](https://github.com/gonicus/gonnect/compare/v1.3.12...v2.0.0) (2025-08-12)
 
 

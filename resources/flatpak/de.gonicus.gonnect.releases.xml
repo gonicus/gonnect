@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.0.1" date="2025-08-14">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>togglers are working again (regression fix) (#136)</li>
+      </ul>
+    </description>
+  </release>
   <release version="2.0.0" date="2025-08-12">
     <description>
       <p>Features:</p>
