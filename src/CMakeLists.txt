@@ -12,6 +12,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineQuick
     Xml
 )
+find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qca-qt6 REQUIRED)
 
 include(FindPkgConfig)
@@ -411,6 +412,10 @@ qt_add_qml_module(gonnect
         contacts/Contact.h
         contacts/ContactSerializer.cpp
         contacts/ContactSerializer.h
+        contacts/EmergencyContact.h
+        contacts/EmergencyContact.cpp
+        contacts/EmergencyContactsModel.h
+        contacts/EmergencyContactsModel.cpp
         contacts/FuzzyCompare.cpp
         contacts/FuzzyCompare.h
         contacts/IAddressBookFeeder.h
@@ -602,6 +607,7 @@ target_link_libraries(gonnect
         ${EDS_ADDRESSBOOK_LIBRARIES}
         ${EDS_CALENDAR_LIBRARIES}
 )
+target_link_libraries(gonnect PRIVATE Qt6::Core)
 
 qt_import_plugins(gonnect INCLUDE
      ${AKONADI_CONTACT_FACTORY}
