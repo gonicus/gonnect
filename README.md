@@ -33,7 +33,6 @@ Here's a short feature list:
  * address sources
    * LDAP
    * CardDAV
-   * CSV
  * Configurable identities for outgoing calls
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
  * **Jitsi Meet Integration: Upgrade call to Videoconference**
