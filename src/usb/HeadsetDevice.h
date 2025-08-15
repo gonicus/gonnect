@@ -77,6 +77,7 @@ private:
 
     AppSettings m_appSettings;
     QTimer m_eventHandler;
+    QTimer m_ignoreHookTimer;
     QHash<UsageId, UsageInfo> m_hidUsages;
     QHash<UsageId, quint16> m_teamsUsageMapping;
 
