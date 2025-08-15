@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.0.2" date="2025-08-15">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>trigger new release</li>
+      </ul>
+    </description>
+  </release>
   <release version="2.0.1" date="2025-08-14">
     <description>
       <p>Bug Fixes:</p>
