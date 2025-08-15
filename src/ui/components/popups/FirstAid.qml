@@ -44,29 +44,36 @@ Item {
                 }
             }
 
-            Button {
-                text: qsTr("Fire and rescue service")
-                anchors.horizontalCenter: parent.horizontalCenter
-                highlighted: true
-                Material.accent: Theme.redColor
-                onClicked: () => console.log('TODO: Call 112')
-            }
+            Repeater {
+                model: EmergencyContactsModel {}
+                delegate: Button {
+                    id: delg
+                    text: delg.displayName
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    highlighted: true
+                    Material.accent: Theme.redColor
 
-            Button {
-                text: qsTr("Police")
-                anchors.horizontalCenter: parent.horizontalCenter
-                highlighted: true
-                Material.accent: Theme.redColor
-                onClicked: () => console.log('TODO: Call 112')
-            }
+                    onClicked: () => {
+                        SIPCallManager.endAllCalls()
+                        SIPCallManager.call(delg.number)
+                        control.StackView.view.popCurrentItem(StackView.Immediate)
+                    }
 
-            Button {
-                text: qsTr("First responder")
-                anchors.horizontalCenter: parent.horizontalCenter
-                highlighted: true
-                Material.accent: Theme.redColor
-                onClicked: () => console.log('TODO: Call 911')
+                    required property string number
+                    required property string displayName
+                }
             }
         }
+    }
+
+    HeaderIconButton {
+        id: closeButton
+        iconSource: Icons.mobileCloseApp
+        anchors {
+            top: parent.top
+            right: parent.right
+        }
+
+        onClicked: () => control.StackView.view.popCurrentItem(StackView.Immediate)
     }
 }
