@@ -15,7 +15,7 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/components/ConferenceButtonBar.qml" line="99"/>
+        <location filename="../../../src/ui/components/ConferenceButtonBar.qml" line="101"/>
         <source>%n minutes left</source>
         <translation>
             <numerusform>%n minute left</numerusform>
