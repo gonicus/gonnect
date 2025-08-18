@@ -34,7 +34,7 @@ Item {
         State {  // Hovered
             when: control.enabled && buttonHoverHandler.hovered
             PropertyChanges {
-                buttonLabel.color: Theme.foregroundHeaderIcons
+                buttonLabel.color: Theme.primaryTextColor
             }
         }
     ]
@@ -50,7 +50,7 @@ Item {
 
         Label {
             id: buttonLabel
-            color: Theme.inactiveTextColor
+            color: Theme.isDarkMode ? Theme.secondaryTextColor : Theme.inactiveTextColor
             font.pixelSize: 11
             horizontalAlignment: Label.AlignHCenter
             anchors {
