@@ -13,31 +13,32 @@
   <content_rating type="oars-1.1" />
   <description>
     <p>
-      GOnnect is an opinionated, simple, easy to use VoIP client, designed for
-      Flatpak based installations. What is special about GOnnect is that is
-      meant to be provisioned.
+      GOnnect is a UC client designed for Linux / Flatpak -based installations.
+      It makes use of various Flatpak portals and is meant to integrate well with
+      modern desktop environments like KDE or GNOME.
     </p>
     <p xml:lang="de">
-      GOnnect ist ein eigenständiger, einfacher, leicht zu bedienender VoIP-Client,
-      der für Flatpak-basierte Installationen konzipiert wurde. Das Besondere an
-      GOnnect ist, dass es für Provisionierungen optimiert ist.
+      GOnnect ist UC-Client, der für Flatpak-basierte Installationen konzipiert wurde.
+      Er benutzt diverse Flatpak-Portale und integriert sich gut in moderne Desktops
+      wie KDE oder GNOME.
     </p>
     <p>
-      For that reason it has no configuration wizard or SIP settings dialog and
-      requires a working configuration file in place. To assist you in getting
-      started, there are a couple of prepared templates to choose from.
+      With GOnnect, you can make VoIP calls from your workplace, transfer calls,
+      make enquiries and hold conferences with up to three parties. Video conferences
+      can be started as easily as a phone call. It also includes functions that support
+      your work with telephony.
     </p>
     <p xml:lang="de">
-      Aus diesem Grund gibt es keinen Konfigurationsassistenten oder
-      SIP-Einstellungsdialog. Eine funktionierende Konfigurationsdatei ist
-      erforderlich, um die App zu starten. Um den Einstieg zu erleichtern
-      gibt es eine Reihe von vorbereiteten Vorlagen, aus denen gewählt werden kann.
+      Mit GOnnect kannst du VoIP Anrufe von deinem Arbeitsplatz starten, Anrufe weiterleiten,
+      Rückfragen machen und Konferenzen mit drei Teilnehmern durchführen. Videokonferenzen
+      können genau so leicht gestartet werden, wie ein Telefonanruf. Es sind Funktionen
+      enthalten, welche dir die Arbeit bei der Komunikation erleichtern.
     </p>
     <p>
-      Here's a short feature list:
+      These include:
     </p>
     <p xml:lang="de">
-      Hier ist eine kurze Feature-Liste:
+      Das sind zum Beispiel:
     </p>
     <ul>
       <li>Call forwarding</li>
@@ -94,12 +95,13 @@
       <keyword>SIP</keyword>
       <keyword>GOnnect</keyword>
       <keyword>phone</keyword>
+      <keyword>Videokonference</keyword>
   </keywords>
 
   <url type="homepage">https://github.com/gonicus/gonnect</url>
   <url type="bugtracker">https://github.com/gonicus/gonnect/issues</url>
-  <url type="help">https://github.com/gonicus/gonnect/wiki</url>
-  <url type="contact">https://www.gonicus.de</url>
+  <url type="help">https://docs.gonicus.de/gonnect/v2.x</url>
+  <url type="contact">https://gonnect-project.org</url>
 
   <provides>
     <binary>gonnect</binary>
@@ -112,13 +114,13 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/main/media/main-screen.png</image>
-      <caption>Main window, latest history and favorites</caption>
+      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/release/media/main-screen.png</image>
+      <caption>Main screen, history and favorites</caption>
       <caption xml:lang="de">Hauptfenster, aktueller Verlauf und Favoriten</caption>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/main/media/call-screen.png</image>
-      <caption>Call window</caption>
+      <image>https://raw.githubusercontent.com/gonicus/gonnect/refs/heads/release/media/call-screen.png</image>
+      <caption>Call screen</caption>
       <caption xml:lang="de">Anruffenster</caption>
     </screenshot>
   </screenshots>
