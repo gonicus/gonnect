@@ -152,9 +152,12 @@ void GlobalCallState::triggerHold()
     }
 
     // n calls, 1 active - hold active call, unhold next
-    if (callsNotOnHold.size()) {
+    if (!callsNotOnHold.isEmpty()) {
         (*activeCalls.cbegin())->toggleHold();
-        (*callsOnHold.cbegin())->toggleHold();
+
+        if (!callsOnHold.isEmpty()) {
+            (*callsOnHold.cbegin())->toggleHold();
+        }
         return;
     }
 

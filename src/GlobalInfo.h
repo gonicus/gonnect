@@ -3,9 +3,12 @@
 #include <QObject>
 #include <QQmlEngine>
 
+class EmergencyContact;
+
 class GlobalInfo : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool hasEmergencyNumbers READ hasEmergencyNumbers CONSTANT FINAL)
 
 public:
     static GlobalInfo &instance()
@@ -19,11 +22,17 @@ public:
 
     Q_INVOKABLE QString jitsiUrl();
 
+    bool hasEmergencyNumbers();
+    const QList<EmergencyContact *> &emergencyContacts();
+
 private:
     explicit GlobalInfo(QObject *parent = nullptr);
+    void initEmergencyContacts();
 
     bool m_isJitsiUrlInitialized = false;
+    bool m_hasEmergencyNumbersInitialized = false;
     QString m_jitsiUrl;
+    QList<EmergencyContact *> m_emergencyContacts;
 };
 
 class GlobalInfoWrapper
