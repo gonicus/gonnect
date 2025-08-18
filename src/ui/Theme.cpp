@@ -125,6 +125,7 @@ void Theme::updateColorPalette()
     // Dark mode overrides
     if (m_isDarkMode) {
         m_primaryTextColor = QColor(248, 248, 248);
+        m_secondaryTextColor = QColor(190, 190, 190);
         m_foregroundHeaderIcons = QColor(238, 238, 236);
         m_foregroundHeaderIconsInactive = QColor(157, 157, 156);
         m_secondaryInactiveTextColor = QColor(108, 108, 108);
