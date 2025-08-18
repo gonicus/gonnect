@@ -248,11 +248,16 @@ Item {
                         property bool initialized: false
 
                         Component.onCompleted: () => {
-                            trayIconDark.checked = genericSettings.value('trayIconDark', false)
+                            let val = genericSettings.value('trayIconDark', false)
+                            if (typeof val === "string") {  // Value read from settings seems to be a string sometimes...
+                                val = val === "true"
+                            }
+
+                            trayIconDark.checked = val
                             trayIconDark.initialized = true
                         }
 
-                        onCheckedChanged: () => {
+                        onToggled: () => {
                             if (trayIconDark.initialized) {
                                 genericSettings.setValue('trayIconDark', trayIconDark.checked)
                                 ViewHelper.resetTrayIcon()
