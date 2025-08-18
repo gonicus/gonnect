@@ -1,4 +1,4 @@
-# [2.1.0](https://github.com/gonicus/gonnect/compare/v2.0.2...v2.1.0) (2025-08-18)
+# [2.0.3](https://github.com/gonicus/gonnect/compare/v2.0.2...v2.1.3) (2025-08-18)
 
 
 ### Bug Fixes
