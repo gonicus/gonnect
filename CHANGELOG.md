@@ -1,3 +1,18 @@
+# [2.1.0](https://github.com/gonicus/gonnect/compare/v2.0.2...v2.1.0) (2025-08-18)
+
+
+### Bug Fixes
+
+* read settings value for dark tray icon correctly ([#141](https://github.com/gonicus/gonnect/issues/141)) ([a5c044c](https://github.com/gonicus/gonnect/commit/a5c044cf0c73470f6600c04853441a2fb8d2a997))
+* revert evolution-data-server back to 3.56.0 ([bf15fe4](https://github.com/gonicus/gonnect/commit/bf15fe4914ecb474dd4376c3249223c3dc2911ee))
+* segfault happend in certain hold states ([#142](https://github.com/gonicus/gonnect/issues/142)) ([8199174](https://github.com/gonicus/gonnect/commit/81991741d8d906680dc5842c697c036d6cf71c11))
+* **ui:** better color for button bar labels in dark mode ([#143](https://github.com/gonicus/gonnect/issues/143)) ([420db09](https://github.com/gonicus/gonnect/commit/420db09c57d39fac40f3ae9534be338465b2ec28))
+
+
+### Features
+
+* emergency numbers are now configurable ([#140](https://github.com/gonicus/gonnect/issues/140)) ([5ec7e42](https://github.com/gonicus/gonnect/commit/5ec7e4246ebc6a615f72a249b93df7faf926f292))
+
 ## [2.0.2](https://github.com/gonicus/gonnect/compare/v2.0.1...v2.0.2) (2025-08-15)
 
 
