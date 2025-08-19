@@ -110,13 +110,7 @@ Item {
             iconPath: control.isHolding ? Icons.mediaPlaybackStart : Icons.mediaPlaybackPause
             enabled: control.isEstablished && !control.isFinished
             visible: control.showHoldButton && control.isEstablished
-            onClicked: () => {
-                if (control.isHolding) {
-                    SIPCallManager.unholdCall(control.accountId, control.callId)
-                } else {
-                    SIPCallManager.holdCall(control.accountId, control.callId)
-                }
-            }
+            onClicked: () => GlobalCallState.triggerHold()
         }
 
         Rectangle {

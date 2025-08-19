@@ -346,8 +346,8 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
 {
-    setProperty("callInForeground",
-                QVariant::fromValue(SIPCallManager::instance().findCall(accountId, callId)));
+    GlobalCallState::instance().setCallInForeground(
+            SIPCallManager::instance().findCall(accountId, callId));
 }
 
 bool ViewHelper::hasNonSilentCall() const

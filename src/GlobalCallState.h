@@ -13,8 +13,8 @@ class GlobalCallState : public QObject
     Q_OBJECT
     Q_PROPERTY(ICallState::States globalCallState READ globalCallState NOTIFY globalCallStateChanged
                        FINAL)
-    Q_PROPERTY(ICallState *callInForeground MEMBER m_callInForeground NOTIFY callInForegroundChanged
-                       FINAL)
+    Q_PROPERTY(ICallState *callInForeground READ callInForeground WRITE setCallInForeground NOTIFY
+                       callInForegroundChanged FINAL)
 
 public:
     static GlobalCallState &instance()
@@ -39,7 +39,12 @@ public:
     const QSet<ICallState *> &globalCallStateObjects() const { return m_globalCallStateObjects; }
     qsizetype callsCount() const;
 
+    void setCallInForeground(ICallState *call);
+    ICallState *callInForeground() const { return m_callInForeground; }
+
     Q_INVOKABLE void triggerHold();
+    Q_INVOKABLE void holdAllCalls(const ICallState *stateObjectToSkip = nullptr) const;
+    Q_INVOKABLE void unholdOtherCall() const;
 
 private slots:
     void updateGlobalCallState();

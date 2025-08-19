@@ -81,7 +81,7 @@ BaseWindow {
         if (mainTabBar.selectedPageId === GonnectWindow.PageId.Conference) {
             GlobalCallState.callInForeground = conferencePage.jitsiConnector
         } else if (mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
-            const selectedCallItem = callsPage.selectedCallItem
+            const selectedCallItem = callPage.selectedCallItem
             if (selectedCallItem) {
                 ViewHelper.setCallInForegroundByIds(selectedCallItem.accountId, selectedCallItem.callId)
             }
