@@ -14,8 +14,8 @@ class GlobalCallState : public QObject
     Q_OBJECT
     Q_PROPERTY(ICallState::States globalCallState READ globalCallState NOTIFY globalCallStateChanged
                        FINAL)
-    Q_PROPERTY(ICallState *callInForeground READ callInForeground WRITE setCallInForeground NOTIFY
-                       callInForegroundChanged FINAL)
+    Q_PROPERTY(ICallState *callInForeground MEMBER m_callInForeground NOTIFY callInForegroundChanged
+                       FINAL)
     Q_PROPERTY(
             qsizetype activeCallsCount READ activeCallsCount NOTIFY activeCallsCountChanged FINAL)
 
@@ -43,8 +43,6 @@ public:
     qsizetype activeCallsCount() const;
 
     Q_INVOKABLE void triggerHold();
-    Q_INVOKABLE void holdAllCalls(const ICallState *stateObjectToSkip = nullptr) const;
-    Q_INVOKABLE void unholdOtherCall() const;
     Q_INVOKABLE bool wasLastAddedConference() const;
 
 private slots:
