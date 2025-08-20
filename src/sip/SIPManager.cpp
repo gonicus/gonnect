@@ -175,7 +175,7 @@ PreferredIdentity *SIPManager::addEmptyPreferredIdentity()
     auto identity =
             new PreferredIdentity(this, QString::asprintf("preferred_identity_%u", maxId + 1));
     identity->setDisplayName(tr("New Identity"));
-    identity->setIdentity("+4929329160");
+    identity->setIdentity("+49221123456789");
     identity->setPrefix("");
     identity->setEnabled(true);
     identity->setAutomatic(true);
