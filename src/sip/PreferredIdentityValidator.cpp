@@ -24,6 +24,6 @@ bool PreferredIdentityValidator::isIdentityNumberValid(const QString &identityNu
 
 bool PreferredIdentityValidator::isPrefixValid(const QString &prefix) const
 {
-    static const QRegularExpression mulitNumberMatch("^(\\+[0-9]+)(,\\+[0-9]+)*$");
-    return prefix.isEmpty() || mulitNumberMatch.match(prefix).hasMatch();
+    Q_UNUSED(prefix)
+    return true;
 }
