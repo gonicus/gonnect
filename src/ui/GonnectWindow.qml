@@ -59,7 +59,7 @@ BaseWindow {
             if (callsModel.count && ![GonnectWindow.PageId.Call, GonnectWindow.PageId.Conference].includes(mainTabBar.selectedPageId)) {
                 control.showPage(GonnectWindow.PageId.Call)
             } else if (!callsModel.count && mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
-                if (conferencePage.jitsiConnector.isInRoom) {
+                if (conferencePage.iConferenceConnector.isInConference) {
                     control.showPage(GonnectWindow.PageId.Conference)
                 } else {
                     control.showPage(GonnectWindow.PageId.Calls)
@@ -79,7 +79,7 @@ BaseWindow {
 
     function updateCallInForeground() {
         if (mainTabBar.selectedPageId === GonnectWindow.PageId.Conference) {
-            GlobalCallState.callInForeground = conferencePage.jitsiConnector
+            GlobalCallState.callInForeground = conferencePage.iConferenceConnector
         } else if (mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
             const selectedCallItem = callsPage.selectedCallItem
             if (selectedCallItem) {
@@ -154,7 +154,7 @@ BaseWindow {
             id: mainTabBar
             selectedPageId: GonnectWindow.PageId.Calls
             hasActiveCall: callsModel.count > 0
-            hasActiveConference: conferencePage.jitsiConnector.isInRoom
+            hasActiveConference: conferencePage.iConferenceConnector.isInConference
             anchors {
                 left: parent.left
                 top: parent.top
@@ -280,10 +280,10 @@ BaseWindow {
         }
     }
 
-    readonly property Connections jitsiConnectorConnections: Connections {
-        target: conferencePage.jitsiConnector
-        function onIsInRoomChanged() {
-            if (!conferencePage.jitsiConnector.isInRoom) {
+    readonly property Connections iConferenceConnectorConnections: Connections {
+        target: conferencePage.iConferenceConnector
+        function onIsInConferenceChanged() {
+            if (!conferencePage.iConferenceConnector.isInConference) {
                 control.showPage(GonnectWindow.PageId.Calls)
             }
         }

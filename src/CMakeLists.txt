@@ -12,7 +12,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineQuick
     Xml
 )
-find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qca-qt6 REQUIRED)
 
 include(FindPkgConfig)
@@ -220,7 +219,6 @@ qt_add_qml_module(gonnect
         ui/components/popups/BurgerMenu.qml
         ui/components/popups/FirstAid.qml
         ui/components/popups/HistoryListContextMenu.qml
-        ui/components/popups/JitsiDeviceMenu.qml
         ui/components/popups/JitsiHistoryListContextMenu.qml
         ui/components/popups/Menu.qml
         ui/components/popups/SearchResultPopup.qml
@@ -402,6 +400,12 @@ qt_add_qml_module(gonnect
         chat/IChatRoom.h
         chat/IChatRoom.cpp
 
+        conference/ConferenceChatMessage.h
+        conference/ConferenceChatMessage.cpp
+        conference/ConferenceParticipant.h
+        conference/ConferenceParticipant.cpp
+        conference/IConferenceConnector.h
+
         contacts/AddressBook.cpp
         contacts/AddressBook.h
         contacts/AddressBookManager.cpp
@@ -485,8 +489,6 @@ qt_add_qml_module(gonnect
         ui/Icons.cpp
         ui/JitsiConnector.h
         ui/JitsiConnector.cpp
-        ui/JitsiDevicesModel.h
-        ui/JitsiDevicesModel.cpp
         ui/JitsiMediaDevice.h
         ui/JitsiMediaDevice.cpp
         ui/MostCalledModel.h
@@ -627,6 +629,7 @@ target_include_directories(gonnect
     sip
     calendar
     contacts
+    conference
     ui
     ui/chat
     usb

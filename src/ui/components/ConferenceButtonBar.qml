@@ -14,17 +14,17 @@ Item {
     property bool isSharingScreen: false
     property bool isTileView: false
     property bool isHandRaised: false
-    property JitsiConnector jitsiConnector
+    property IConferenceConnector iConferenceConnector
 
     property alias videoMuteButtonVisible: videoDeviceButton.visible
 
-    signal toggleHold
-    signal toggleMute
-    signal toggleVideoMute
-    signal toggleVirtualBackgroundDialog
-    signal toggleScreenShare
-    signal toggleTileView
-    signal toggleRaiseHand
+    signal setOnHold(value : bool)
+    signal setAudioMuted(value : bool)
+    signal setVideoMuted(value : bool)
+    signal setScreenShare(value : bool)
+    signal setTileView(value : bool)
+    signal setRaiseHand(value : bool)
+    signal showVirtualBackgroundDialog
     signal openSetPasswordDialog
     signal openVideoQualityDialog
     signal hangup
@@ -38,7 +38,7 @@ Item {
         property int minutesRemaining
 
         function updateElapsedTime() {
-            const jitsiConn = control.jitsiConnector
+            const jitsiConn = control.iConferenceConnector
 
             if (jitsiConn) {
                 internal.elapsedSeconds = ViewHelper.secondsDelta(jitsiConn.establishedDateTime(), new Date())
@@ -60,7 +60,7 @@ Item {
         Component.onCompleted: () => internal.updateElapsedTime()
 
         readonly property Timer elapsedTimeTimer: Timer {
-            running: control.jitsiConnector?.isInRoom ?? false
+            running: control.iConferenceConnector?.isInConference ?? false
             repeat: true
             interval: 100
             onTriggered: () => internal.updateElapsedTime()
@@ -119,7 +119,7 @@ Item {
 
         Label {
             id: roomNameLabel
-            text: control.jitsiConnector.displayName || control.jitsiConnector.roomName
+            text: control.iConferenceConnector.displayName || control.iConferenceConnector.conferenceName
             anchors.left: parent.left
         }
     }
@@ -162,15 +162,15 @@ Item {
 
                     MenuItem {
                         text: qsTr("Copy room name")
-                        onTriggered: () => ViewHelper.copyToClipboard(control.jitsiConnector.roomName)
+                        onTriggered: () => ViewHelper.copyToClipboard(control.iConferenceConnector.conferenceName)
                     }
                     MenuItem {
                         text: qsTr("Copy room link")
-                        onTriggered: () => ViewHelper.copyToClipboard(control.jitsiConnector.roomUrl)
+                        onTriggered: () => ViewHelper.copyToClipboard(control.iConferenceConnector.conferenceUrl)
                     }
                     MenuItem {
                         text: qsTr("Open in browser")
-                        onTriggered: () => Qt.openUrlExternally(control.jitsiConnector.roomUrl)
+                        onTriggered: () => Qt.openUrlExternally(control.iConferenceConnector.conferenceUrl)
                     }
 
                     // MenuItem {
@@ -186,14 +186,14 @@ Item {
                 text: qsTr("Raise")
                 iconPath: Icons.transformBrowse
                 iconText: control.isHandRaised ? "!" : ""
-                onClicked: () => control.toggleRaiseHand()
+                onClicked: () => control.setRaiseHand(!control.isHandRaised)
             }
 
             BarButton {
                 id: holdButton
                 text: control.isOnHold ? qsTr("Resume") : qsTr("Hold")
                 iconPath: control.isOnHold ? Icons.mediaPlaybackStart : Icons.mediaPlaybackPause
-                onClicked: () => control.toggleHold()
+                onClicked: () => control.setOnHold(!control.isOnHold)
             }
 
             BarButton {
@@ -201,7 +201,7 @@ Item {
                 enabled: !control.isOnHold
                 text: qsTr("View")
                 iconPath: control.isTileView ? Icons.viewLeftNew : Icons.viewGrid
-                onClicked: () => control.toggleTileView()
+                onClicked: () => control.setTileView(!control.isTileView)
             }
 
             BarButton {
@@ -209,7 +209,7 @@ Item {
                 enabled: !control.isOnHold
                 text: qsTr("Screen")
                 iconPath: control.isSharingScreen ? Icons.mediaPlaybackStopped : Icons.inputTouchscreen
-                onClicked: () => control.toggleScreenShare()
+                onClicked: () => control.setScreenShare(!control.isSharingScreen)
             }
 
             BarButton {
@@ -218,14 +218,14 @@ Item {
                 text: qsTr("Camera")
                 iconPath: control.isVideoMuted ? Icons.cameraOff : Icons.cameraOn
                 showDropdownButton: true
-                onClicked: () => control.toggleVideoMute()
+                onClicked: () => control.setVideoMuted(!control.isVideoMuted)
                 onDropDownClicked: () => videoDeviceMenu.popup(videoDeviceButton, -videoDeviceMenu.width + videoDeviceButton.width, videoDeviceButton.height)
 
                 VideoDeviceMenu {
                     id: videoDeviceMenu
                     selectedDeviceId: VideoManager.selectedDeviceId
                     onDeviceSelected: deviceId => VideoManager.selectedDeviceId = deviceId
-                    onVirtualBackgroundButtonClicked: () => control.toggleVirtualBackgroundDialog()
+                    onVirtualBackgroundButtonClicked: () => control.showVirtualBackgroundDialog()
                 }
             }
 
@@ -235,7 +235,7 @@ Item {
                 text: qsTr("Micro")
                 iconPath: control.isMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
                 showDropdownButton: true
-                onClicked: () => control.toggleMute()
+                onClicked: () => control.setAudioMuted(!control.isMuted)
                 onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
 
 
@@ -281,14 +281,14 @@ Item {
                     MenuItem {
                         id: noiseSuppressionMenuItem
                         text: qsTr("Noise supression")
-                        icon.source: control.jitsiConnector.isNoiseSupression ? Icons.checkbox : ""
-                        onClicked: () => control.jitsiConnector.toggleNoiseSupression()
+                        icon.source: control.iConferenceConnector.isNoiseSuppressionEnabled ? Icons.checkbox : ""
+                        onClicked: () => control.iConferenceConnector.setNoiseSuppressionEnabled(!control.iConferenceConnector.isNoiseSuppressionEnabled)
                     }
 
                     MenuItem {
                         text: qsTr("Toggle subtitles")
-                        icon.source: control.jitsiConnector.isSubtitles ? Icons.checkbox : ""
-                        onClicked: () => control.jitsiConnector.toggleSubtitles()
+                        icon.source: control.iConferenceConnector.isSubtitlesEnabled ? Icons.checkbox : ""
+                        onClicked: () => control.iConferenceConnector.setSubtitlesEnabled(!control.iConferenceConnector.isSubtitlesEnabled)
                     }
 
                     MenuItem {
@@ -298,15 +298,15 @@ Item {
 
                     MenuItem {
                         id: setPasswordMenuItem
-                        visible: control.jitsiConnector.isModerator
+                        visible: control.iConferenceConnector.ownRole === ConferenceParticipant.Role.Moderator
                         text: qsTr("Set room password...")
                         onClicked: () => control.openSetPasswordDialog()
                     }
 
                     MenuItem {
-                        visible: control.jitsiConnector.isModerator
+                        visible: control.iConferenceConnector.ownRole === ConferenceParticipant.Role.Moderator
                         text: qsTr("Mute everyone")
-                        onClicked: () => control.jitsiConnector.muteAll()
+                        onClicked: () => control.iConferenceConnector.muteAll()
                     }
                 }
             }
@@ -340,7 +340,9 @@ Item {
                 }
 
                 onClicked: () => {
-                    if (control.jitsiConnector.isModerator && control.jitsiConnector.numberOfParticipants > 1) {
+                    const conn = control.iConferenceConnector
+
+                    if (conn.ownRole === ConferenceParticipant.Role.Moderator && conn.numberOfParticipants > 1) {
                         leaveMenu.popup(hangupButton, -leaveMenu.width + hangupButton.width, hangupButton.height)
                     } else {
                         hangupButton.enabled = false

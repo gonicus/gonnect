@@ -3,15 +3,15 @@
 #include <QAbstractListModel>
 #include <QQmlEngine>
 
-#include "JitsiConnector.h"
+#include "IConferenceConnector.h"
 
 class ChatModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_ELEMENT
 
-    Q_PROPERTY(JitsiConnector *jitsiConnector MEMBER m_jitsiConnector NOTIFY jitsiConnectorChanged
-                       FINAL)
+    Q_PROPERTY(IConferenceConnector *iConferenceConnector MEMBER m_iConferenceConnector NOTIFY
+                       iConferenceConnectorChanged FINAL)
     Q_PROPERTY(uint realMessagesCount READ realMessagesCount NOTIFY realMessagesCountChanged FINAL)
 
 public:
@@ -33,17 +33,17 @@ public:
     uint realMessagesCount() const { return m_realMessagesCount; }
 
 private slots:
-    void onJitsiConnectorChanged();
+    void onIConferenceConnectorChanged();
     void updateRealMessagesCount();
 
 private:
     QString addLinkTags(const QString &orig) const;
 
-    JitsiConnector *m_jitsiConnector = nullptr;
-    QObject *m_jitsiConnectorContext = nullptr;
+    IConferenceConnector *m_iConferenceConnector = nullptr;
+    QObject *m_iConferenceConnectorContext = nullptr;
     uint m_realMessagesCount = 0;
 
 signals:
-    void jitsiConnectorChanged();
+    void iConferenceConnectorChanged();
     void realMessagesCountChanged();
 };

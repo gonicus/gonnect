@@ -12,33 +12,30 @@
 #include "AudioManager.h"
 #include "VideoManager.h"
 #include "SIPAudioDevice.h"
-#include "GlobalCallState.h"
 #include "GlobalMuteState.h"
 #include "FuzzyCompare.h"
 #include "NotificationManager.h"
 #include "SecretPortal.h"
 #include "KeychainSettings.h"
 #include "GlobalInfo.h"
+#include "ConferenceParticipant.h"
 
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
 
-QString JitsiConnector::participantRoleToString(const ParticipantRole role)
+JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 {
-    return QMetaEnum::fromType<ParticipantRole>().valueToKey(static_cast<int>(role));
-}
-
-JitsiConnector::JitsiConnector(QObject *parent) : ICallState{ parent }
-{
-    connect(this, &JitsiConnector::isInRoomChanged, this, [this]() {
-        if (isInRoom()) {
+    connect(this, &JitsiConnector::isInConferenceChanged, this, [this]() {
+        if (isInConference()) {
             m_establishedDateTime = QDateTime::currentDateTime();
         }
     });
 
-    connect(this, &JitsiConnector::largeVideoParticipantIdChanged, this,
-            [this]() { emit executeSetLargeVideoParticipant(m_largeVideoParticipantId); });
+    connect(this, &IConferenceConnector::largeVideoParticipantChanged, this, [this]() {
+        emit executeSetLargeVideoParticipant(m_largeVideoParticipant ? m_largeVideoParticipant->id()
+                                                                     : "");
+    });
 
     auto &audioManager = AudioManager::instance();
     connect(&audioManager, &AudioManager::captureDeviceIdChanged, this,
@@ -80,7 +77,7 @@ void JitsiConnector::setJitsiId(QString id)
             addParticipant(id, jitsiDisplayName());
         }
 
-        emit jitsiIdChanged();
+        emit ownIdChanged();
     }
 }
 
@@ -89,14 +86,16 @@ void JitsiConnector::setCallHistoryItem(QPointer<CallHistoryItem> callHistoryIte
     m_callHistoryItem = callHistoryItem;
 }
 
-void JitsiConnector::apiLoadingFinished()
+void JitsiConnector::apiLoadingFinishedInternal()
 {
     m_isApiLoadingFinished = true;
 
     if (m_isToggleScreenSharePending) {
         m_isToggleScreenSharePending = false;
-        toggleScreenShare();
+        setSharingScreen(true);
     }
+
+    emit isInitializedChanged();
 }
 
 void JitsiConnector::addError(QString type, QString name, QString message, bool isFatal,
@@ -113,8 +112,10 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
                              << "from" << fromId << nickName << "at" << stamp
                              << "as private message:" << isPrivateMessage << ":" << message;
 
-    m_messages.append({ fromId, nickName, message, stamp, isPrivateMessage });
-    emit messageAdded(m_messages.size() - 1);
+    auto msgObj = new ConferenceChatMessage(fromId, nickName, message, stamp, isPrivateMessage,
+                                            false, this);
+    m_messages.append(msgObj);
+    emit chatMessageAdded(m_messages.size() - 1, msgObj);
 
     // System notification
     AppSettings settings;
@@ -129,7 +130,7 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     }
 }
 
-QString JitsiConnector::jitsiHtml()
+QString JitsiConnector::jitsiHtmlInternal()
 {
     return QString(R"""(
 <!DOCTYPE html>
@@ -159,7 +160,7 @@ QString JitsiConnector::jitsiHtml()
             .arg(GlobalInfo::instance().jitsiUrl());
 }
 
-QString JitsiConnector::jitsiJavascript()
+QString JitsiConnector::jitsiJavascriptInternal()
 {
     const auto currentUser = ViewHelper::instance().currentUser();
     const auto defaultName = tr("Unnamed participant");
@@ -314,10 +315,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
     // Initial function calls on API
 
     api.isVideoAvailable().then(available => {
-        jitsiConn.setIsVideoAvailable(available)
+        jitsiConn.setVideoAvailableInternal(available)
     })
 
-    jitsiConn.apiLoadingFinished()
+    jitsiConn.apiLoadingFinishedInternal()
 })
 
 api.addListener("videoConferenceJoined", data => {
@@ -337,32 +338,32 @@ api.addListener("videoConferenceJoined", data => {
 })
 
 api.addListener("videoConferenceLeft", () => {
-    jitsiConn.leaveRoom()
+    jitsiConn.leaveConference()
 })
 
 api.addListener("audioMuteStatusChanged", data => {
-    jitsiConn.setIsMuted(data.muted)
+    jitsiConn.setAudioMuted(data.muted)
 })
 
 api.addListener("videoAvailabilityChanged", data => {
-    jitsiConn.setIsVideoAvailable(data.available)
+    jitsiConn.setVideoAvailableInternal(data.available)
 })
 
 api.addListener("videoMuteStatusChanged", data => {
-    jitsiConn.setIsVideoMuted(data.muted)
+    jitsiConn.setVideoMuted(data.muted)
 })
 
 api.addListener("screenSharingStatusChanged", data => {
-    jitsiConn.setIsSharingScreen(data.on)
+    jitsiConn.setIsSharingScreenInternal(data.on)
 })
 
 api.addListener("tileViewChanged", data => {
-    jitsiConn.setIsTileView(data.enabled)
+    jitsiConn.setIsTileViewInternal(data.enabled)
 })
 
 api.addListener("deviceListChanged", data => {
-    Promise.all([api.getAvailableDevices(), api.getCurrentDevices()]).then(([availableDevices, currentDevices]) => {
-        jitsiConn.setJitsiDevices(availableDevices, currentDevices)
+    api.getAvailableDevices().then(availableDevices => {
+        jitsiConn.setJitsiDevices(availableDevices)
     })
 })
 
@@ -401,92 +402,43 @@ api.addListener("passwordRequired", data => {
             .arg(!m_startWithVideo); // %7
 }
 
-void JitsiConnector::enterRoom(const QString &roomName, const QString &displayName,
-                               JitsiConnector::MeetingStartFlags startFlags)
-{
-    qCInfo(lcJitsiConnector).nospace().noquote()
-            << "Entering room " << roomName << " (" << displayName << ") with flags:" << startFlags;
-
-    m_startWithVideo = startFlags & JitsiConnector::MeetingStartFlag::VideoActive;
-
-    if (m_callHistoryItem) {
-        m_callHistoryItem->addFlags(CallHistoryItem::Type::JitsiMeetCall);
-    } else {
-        m_callHistoryItem = CallHistory::instance().addHistoryItem(
-                CallHistoryItem::Type::JitsiMeetCall, "", roomName);
-    }
-
-    setRoomName(roomName);
-    setDisplayName(displayName);
-    setIsInRoom(true);
-
-    if (m_startWithVideo) {
-        toggleVideoMute();
-    }
-
-    if (startFlags & JitsiConnector::MeetingStartFlag::ScreenShareActive) {
-        if (m_isApiLoadingFinished) {
-            toggleScreenShare();
-        } else {
-            m_isToggleScreenSharePending = true;
-        }
-    }
-}
-
-void JitsiConnector::leaveRoom()
-{
-    if (m_callHistoryItem) {
-        m_callHistoryItem->endCall();
-        m_callHistoryItem.clear();
-    }
-
-    emit executeLeaveRoomCommand();
-    setRoomName("");
-    setDisplayName("");
-    setIsInRoom(false);
-}
-
-void JitsiConnector::terminateRoom()
-{
-    if (m_callHistoryItem) {
-        m_callHistoryItem->endCall();
-        m_callHistoryItem.clear();
-    }
-
-    emit executeEndConferenceCommand();
-    setRoomName("");
-    setDisplayName("");
-    setIsInRoom(false);
-}
-
-QUrl JitsiConnector::roomUrl()
-{
-    return QUrl(QString("%1/%2").arg(GlobalInfo::instance().jitsiUrl(), roomName()));
-}
-
 void JitsiConnector::toggleMute()
 {
     emit executeToggleAudioCommand();
 }
 
-void JitsiConnector::sendMessage(QString message)
+void JitsiConnector::setLargeVideoParticipantById(const QString &id)
 {
-    m_messages.append(
-            { m_jitsiId, jitsiDisplayName(), message, QDateTime::currentDateTime(), false });
-    emit messageAdded(m_messages.size() - 1);
-    emit messageSent(message);
+    for (const auto participant : std::as_const(m_participants)) {
+        if (participant->id() == id) {
+            setLargeVideoParticipant(participant);
+            return;
+        }
+    }
+    setLargeVideoParticipant(nullptr);
 }
 
-void JitsiConnector::setIsInRoom(bool value)
+ConferenceChatMessage *JitsiConnector::sendMessage(const QString &message)
 {
-    if (m_isInRoom != value) {
-        m_isInRoom = value;
-        emit isInRoomChanged();
+    auto chatMessage = new ConferenceChatMessage(m_jitsiId, jitsiDisplayName(), message,
+                                                 QDateTime::currentDateTime(), false, false, this);
+    m_messages.append(chatMessage);
+    emit chatMessageAdded(m_messages.size() - 1, chatMessage);
+    emit messageSent(message);
+
+    return chatMessage;
+}
+
+void JitsiConnector::setIsInConference(bool value)
+{
+    if (m_isInConference != value) {
+        m_isInConference = value;
+        emit isInConferenceChanged();
 
         if (value) {
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
             auto &globalMute = GlobalMuteState::instance();
-            if (m_isMuted != globalMute.isMuted()) {
+            if (m_isAudioMuted != globalMute.isMuted()) {
                 m_muteTag = QUuid::createUuid().toString();
                 globalMute.toggleMute(m_muteTag);
             }
@@ -498,38 +450,11 @@ void JitsiConnector::setIsInRoom(bool value)
             qDeleteAll(m_chatNotifications);
             m_chatNotifications.clear();
             m_messages.clear();
-            emit messagesReset();
+            emit chatMessagesReset();
 
             m_participants.clear();
             emit participantsCleared();
         }
-    }
-}
-
-void JitsiConnector::setIsOnHold(bool value)
-{
-    if (m_isOnHold != value) {
-
-        if (value) {
-            m_wasVideoMutedBeforeHold = isVideoMuted();
-
-            if (!isMuted()) {
-                toggleMute();
-            }
-            if (!isVideoMuted()) {
-                toggleVideoMute();
-            }
-        } else {
-            if (isMuted() != GlobalMuteState::instance().isMuted()) {
-                toggleMute();
-            }
-            if (isVideoMuted() != m_wasVideoMutedBeforeHold) {
-                toggleVideoMute();
-            }
-        }
-
-        m_isOnHold = value;
-        emit isOnHoldChanged();
     }
 }
 
@@ -541,17 +466,9 @@ void JitsiConnector::setIsPasswordRequired(bool value)
     }
 }
 
-void JitsiConnector::setIsPasswordEntryRequired(bool value)
-{
-    if (m_isPasswordEntryRequired != value) {
-        m_isPasswordEntryRequired = value;
-        emit isPasswordEntryRequiredChanged();
-    }
-}
-
 void JitsiConnector::setRoomPassword(QString value)
 {
-    if (!isModerator()) {
+    if (ownRole() != ConferenceParticipant::Role::Moderator) {
         qCWarning(lcJitsiConnector)
                 << "Cannot set room password because only moderators are allowed to do that";
         return;
@@ -577,30 +494,6 @@ void JitsiConnector::setRoomPassword(QString value)
     }
 
     setIsPasswordRequired(!value.isEmpty());
-}
-
-void JitsiConnector::setCurrentAudioInputDevice(JitsiMediaDevice *device)
-{
-    if (m_currentAudioInputDevice != device) {
-        m_currentAudioInputDevice = device;
-        emit currentAudioInputDeviceChanged();
-    }
-}
-
-void JitsiConnector::setCurrentAudioOutputDevice(JitsiMediaDevice *device)
-{
-    if (m_currentAudioOutputDevice != device) {
-        m_currentAudioOutputDevice = device;
-        emit currentAudioOutputDeviceChanged();
-    }
-}
-
-void JitsiConnector::setCurrentVideoInputDevice(JitsiMediaDevice *device)
-{
-    if (m_currentVideoInputDevice != device) {
-        m_currentVideoInputDevice = device;
-        emit currentVideoInputDeviceChanged();
-    }
 }
 
 void JitsiConnector::updateVideoCallState()
@@ -650,15 +543,7 @@ JitsiMediaDevice *JitsiConnector::findDevice(const QList<JitsiMediaDevice *> &de
     return nullptr;
 }
 
-void JitsiConnector::setIsMuted(bool value)
-{
-    if (m_isMuted != value) {
-        m_isMuted = value;
-        emit isMutedChanged();
-    }
-}
-
-void JitsiConnector::setIsVideoAvailable(bool value)
+void JitsiConnector::setVideoAvailableInternal(bool value)
 {
     if (m_isVideoAvailable != value) {
         m_isVideoAvailable = value;
@@ -667,31 +552,7 @@ void JitsiConnector::setIsVideoAvailable(bool value)
     }
 }
 
-void JitsiConnector::toggleVideoMute()
-{
-    emit executeToggleVideoCommand();
-}
-
-void JitsiConnector::setIsVideoMuted(bool value)
-{
-    if (m_isVideoMuted != value) {
-        m_isVideoMuted = value;
-        emit isVideoMutedChanged();
-        updateVideoCallState();
-    }
-}
-
-void JitsiConnector::toggleVirtualBackgroundDialog()
-{
-    emit executeToggleVirtualBackgroundDialogCommand();
-}
-
-void JitsiConnector::toggleScreenShare()
-{
-    emit executeToggleShareScreenCommand();
-}
-
-void JitsiConnector::setIsSharingScreen(bool value)
+void JitsiConnector::setIsSharingScreenInternal(bool value)
 {
     if (m_isSharingScreen != value) {
         m_isSharingScreen = value;
@@ -699,54 +560,12 @@ void JitsiConnector::setIsSharingScreen(bool value)
     }
 }
 
-void JitsiConnector::toggleTileView()
-{
-    setProperty("largeVideoParticipantId", "");
-    emit executeToggleTileViewCommand();
-}
-
-void JitsiConnector::setIsTileView(bool value)
+void JitsiConnector::setIsTileViewInternal(bool value)
 {
     if (m_isTileView != value) {
         m_isTileView = value;
         emit isTileViewChanged();
     }
-}
-
-void JitsiConnector::toggleRaiseHand()
-{
-    setIsHandRaised(!m_isHandRaised);
-    emit executeToggleRaiseHandCommand();
-}
-
-void JitsiConnector::toggleNoiseSupression()
-{
-    m_isNoiseSupression = !m_isNoiseSupression;
-    emit executeSetNoiseSupressionCommand(m_isNoiseSupression);
-    emit isNoiseSupressionChanged();
-}
-
-void JitsiConnector::toggleSubtitles()
-{
-    m_isSubtitles = !m_isSubtitles;
-    emit executeToggleSubtitlesCommand();
-    emit isSubtitlesChanged();
-}
-
-void JitsiConnector::passwordEntered(const QString &password, bool shouldRemember)
-{
-    if (shouldRemember) {
-        auto &secretPortal = SecretPortal::instance();
-        if (secretPortal.isValid()) {
-            KeychainSettings settings;
-            settings.beginGroup("jitsiRoomPasswords");
-            settings.setValue(m_roomName, secretPortal.encrypt(password));
-            settings.endGroup();
-        }
-    }
-
-    setIsPasswordEntryRequired(false);
-    emit executePasswordCommand(password);
 }
 
 void JitsiConnector::onPasswordRequired()
@@ -760,7 +579,7 @@ void JitsiConnector::onPasswordRequired()
             KeychainSettings settings;
             settings.beginGroup("jitsiRoomPasswords");
             if (settings.contains(m_roomName)) {
-                passwordEntered(secretPortal.decrypt(settings.value(m_roomName).toString()), false);
+                enterPassword(secretPortal.decrypt(settings.value(m_roomName).toString()), false);
                 return;
             }
             settings.endGroup();
@@ -768,7 +587,7 @@ void JitsiConnector::onPasswordRequired()
     }
 
     setIsPasswordRequired(true);
-    setIsPasswordEntryRequired(true);
+    setIsPasswordRequired(true);
 }
 
 void JitsiConnector::setVideoQuality(VideoQuality quality)
@@ -779,7 +598,30 @@ void JitsiConnector::setVideoQuality(VideoQuality quality)
         if (m_videoQuality == VideoQuality::AudioOnly) {
             emit executeSetAudioOnlyCommand(false);
         }
-        emit executeSetVideoQualityCommand(static_cast<uint>(quality));
+
+        uint numVal = 0;
+
+        switch (quality) {
+
+        case IConferenceConnector::VideoQuality::AudioOnly:
+            numVal = 0;
+            break;
+        case IConferenceConnector::VideoQuality::Minimum:
+        case IConferenceConnector::VideoQuality::Low:
+            numVal = 180;
+            break;
+        case IConferenceConnector::VideoQuality::Average:
+            numVal = 360;
+            break;
+        case IConferenceConnector::VideoQuality::High:
+            numVal = 720;
+            break;
+        case IConferenceConnector::VideoQuality::Maximum:
+            numVal = 2160;
+            break;
+        }
+
+        emit executeSetVideoQualityCommand(numVal);
     }
 
     if (m_videoQuality != quality) {
@@ -790,12 +632,27 @@ void JitsiConnector::setVideoQuality(VideoQuality quality)
 
 void JitsiConnector::setVideoQualityInternal(uint quality)
 {
-    const auto conv = static_cast<VideoQuality>(quality);
+    VideoQuality conv = VideoQuality::AudioOnly;
+
+    if (quality >= 2160) {
+        conv = VideoQuality::Maximum;
+    } else if (quality >= 720) {
+        conv = VideoQuality::High;
+    } else if (quality >= 360) {
+        conv = VideoQuality::Average;
+    } else if (quality >= 180) {
+        conv = VideoQuality::Low;
+    }
 
     if (m_videoQuality != conv) {
         m_videoQuality = conv;
         emit videoQualityChanged();
     }
+}
+
+void JitsiConnector::showVirtualBackgroundDialog()
+{
+    emit executeToggleVirtualBackgroundDialogCommand();
 }
 
 void JitsiConnector::addParticipant(const QString &id, const QString &displayName)
@@ -807,13 +664,15 @@ void JitsiConnector::addParticipant(const QString &id, const QString &displayNam
     qsizetype i = 0;
 
     for (; i < m_participants.size(); ++i) {
-        if (displayName.localeAwareCompare(m_participants.at(i).displayName) < 0) {
+        if (displayName.localeAwareCompare(m_participants.at(i)->displayName()) < 0) {
             break;
         }
     }
 
-    m_participants.insert(i, { id, displayName });
-    emit participantAdded(i, id);
+    auto participant = new ConferenceParticipant(id, displayName,
+                                                 ConferenceParticipant::Role::Participant, this);
+    m_participants.insert(i, participant);
+    emit participantAdded(i, participant);
     emit numberOfParticipantsChanged();
 
     addRoomMessage(tr("%1 has joined the conference").arg(displayName));
@@ -822,8 +681,9 @@ void JitsiConnector::addParticipant(const QString &id, const QString &displayNam
 void JitsiConnector::removeParticipant(const QString &id)
 {
     for (qsizetype i = 0; i < m_participants.size(); ++i) {
-        if (m_participants.at(i).id == id) {
-            const QString displayName = m_participants.at(i).displayName;
+        if (m_participants.at(i)->id() == id) {
+            auto participant = m_participants.at(i);
+            const QString displayName = participant->displayName();
 
             qCDebug(lcJitsiConnector).noquote().nospace()
                     << "Removing participant " << displayName << " (" << id << ")";
@@ -831,7 +691,7 @@ void JitsiConnector::removeParticipant(const QString &id)
             m_participants.removeAt(i);
             addRoomMessage(tr("%1 has left the conference").arg(displayName));
 
-            emit participantRemoved(i, id);
+            emit participantRemoved(i, participant);
             emit numberOfParticipantsChanged();
 
             return;
@@ -841,17 +701,19 @@ void JitsiConnector::removeParticipant(const QString &id)
 
 void JitsiConnector::setParticipantRole(const QString &id, const QString &roleString)
 {
+    using Role = ConferenceParticipant::Role;
 
-    ParticipantRole role = ParticipantRole::None;
+    Role role = Role::None;
     if (roleString == "moderator") {
-        role = ParticipantRole::Moderator;
+        role = Role::Moderator;
     } else if (roleString == "participant") {
-        role = ParticipantRole::Participant;
+        role = Role::Participant;
     }
 
     if (id == m_jitsiId) {
         if (m_ownRole != role) {
-            qCInfo(lcJitsiConnector) << "Own role changed to" << participantRoleToString(role);
+            qCInfo(lcJitsiConnector) << "Own role changed to"
+                                     << ConferenceParticipant::participantRoleToString(role);
             m_ownRole = role;
             emit ownRoleChanged();
         }
@@ -860,31 +722,22 @@ void JitsiConnector::setParticipantRole(const QString &id, const QString &roleSt
     for (qsizetype i = 0; i < m_participants.size(); ++i) {
         auto &participant = m_participants[i];
 
-        if (participant.id == id) {
-            participant.role = role;
+        if (participant->id() == id) {
+            participant->setRole(role);
 
             qCInfo(lcJitsiConnector).noquote().nospace()
-                    << "Jitsi participant " << participant.displayName << " (" << id
-                    << ") got new role" << participantRoleToString(role);
+                    << "Jitsi participant " << participant->displayName() << " (" << id
+                    << ") got new role" << ConferenceParticipant::participantRoleToString(role);
 
-            emit participantRoleChanged(i, id, role);
+            emit participantRoleChanged(i, participant, role);
             return;
         }
     }
 
     qCWarning(lcJitsiConnector).noquote()
-            << "Jitsi participant" << id << "got new role" << participantRoleToString(role)
+            << "Jitsi participant" << id << "got new role"
+            << ConferenceParticipant::participantRoleToString(role)
             << "but could not be found in participant list - ignoring";
-}
-
-void JitsiConnector::kickParticipant(const QString &id)
-{
-    emit executeKickParticipantCommand(id);
-}
-
-void JitsiConnector::grantParticipantModerator(const QString &id)
-{
-    emit executeGrantModeratorCommand(id);
 }
 
 void JitsiConnector::muteAll()
@@ -892,15 +745,8 @@ void JitsiConnector::muteAll()
     emit executeMuteAllCommand();
 }
 
-void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices,
-                                     const QVariantMap currentDevices)
+void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
 {
-    emit beganJitsiDevicesReset();
-
-    m_currentAudioInputDevice = nullptr;
-    m_currentAudioOutputDevice = nullptr;
-    m_currentVideoInputDevice = nullptr;
-
     qDeleteAll(m_audioInputDevices);
     m_audioInputDevices.clear();
 
@@ -938,26 +784,6 @@ void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices,
                              << "audio input devices," << m_audioOutputDevices.size()
                              << "audio output devices and" << m_videoInputDevices.size()
                              << "video input devices";
-
-    if (currentDevices.contains("audioInput")) {
-        const auto audioInputMap = currentDevices.value("audioInput").toMap();
-        setCurrentAudioInputDevice(
-                findDevice(m_audioInputDevices, audioInputMap.value("deviceId").toString()));
-    }
-
-    if (currentDevices.contains("audioOutput")) {
-        const auto audioOutputMap = currentDevices.value("audioOutput").toMap();
-        setCurrentAudioOutputDevice(
-                findDevice(m_audioOutputDevices, audioOutputMap.value("deviceId").toString()));
-    }
-
-    if (currentDevices.contains("videoInput")) {
-        const auto videoInputMap = currentDevices.value("videoInput").toMap();
-        setCurrentVideoInputDevice(
-                findDevice(m_videoInputDevices, videoInputMap.value("deviceId").toString()));
-    }
-
-    emit endedJitsiDevicesReset();
 
     transferAudioManagerDevicesToJitsi();
     transferVideoManagerDeviceToJitsi();
@@ -1025,8 +851,9 @@ void JitsiConnector::addRoomMessage(QString message, QDateTime stamp)
 {
     qCInfo(lcJitsiConnector) << "Adding room 'chat' message at" << stamp << ":" << message;
 
-    m_messages.append({ "room", "", message, stamp, false, true });
-    emit messageAdded(m_messages.size() - 1);
+    auto msgObj = new ConferenceChatMessage("room", "", message, stamp, false, true, this);
+    m_messages.append(msgObj);
+    emit chatMessageAdded(m_messages.size() - 1, msgObj);
 }
 
 QString JitsiConnector::jitsiDisplayName() const
@@ -1048,7 +875,6 @@ void JitsiConnector::selectAudioInputDevice(const QString &deviceId)
         return;
     }
 
-    setCurrentAudioInputDevice(device);
     emit executeSetAudioInputDeviceCommand(deviceId);
 }
 
@@ -1060,7 +886,6 @@ void JitsiConnector::selectAudioOutputDevice(const QString &deviceId)
         return;
     }
 
-    setCurrentAudioOutputDevice(device);
     emit executeSetAudioOutputDeviceCommand(deviceId);
 }
 
@@ -1072,20 +897,20 @@ void JitsiConnector::selectVideoInputDevice(const QString &deviceId)
         return;
     }
 
-    setCurrentVideoInputDevice(device);
     emit executeSetVideoInputDeviceCommand(deviceId);
 }
 
 void JitsiConnector::toggleHoldImpl()
 {
-    setIsOnHold(!m_isOnHold);
+    setOnHold(!m_isOnHold);
 }
 
-void JitsiConnector::setIsHandRaised(bool value)
+void JitsiConnector::setHandRaised(bool value)
 {
     if (m_isHandRaised != value) {
         m_isHandRaised = value;
         emit isHandRaisedChanged();
+        emit executeToggleRaiseHandCommand();
     }
 }
 
@@ -1093,7 +918,7 @@ void JitsiConnector::onHeadsetHookSwitchChanged()
 {
     const auto headsetProxy = USBDevices::instance().getHeadsetDeviceProxy();
     if (!headsetProxy->getHookSwitch()) {
-        leaveRoom();
+        leaveConference();
     }
 }
 
@@ -1165,11 +990,11 @@ void JitsiConnector::transferVideoManagerDeviceToJitsi()
     }
 }
 
-void JitsiConnector::setRoomName(const QString &name)
+void JitsiConnector::setConferenceName(const QString &name)
 {
     if (m_roomName != name) {
         m_roomName = name;
-        emit roomNameChanged();
+        emit conferenceNameChanged();
     }
 }
 
@@ -1186,4 +1011,222 @@ ContactInfo JitsiConnector::remoteContactInfo() const
     ContactInfo contactInfo;
     contactInfo.displayName = m_displayName.isEmpty() ? m_roomName : m_displayName;
     return contactInfo;
+}
+
+bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
+{
+    const static QSet<Capability> m_capabilites = {
+        Capability::TileView,
+        Capability::ScreenShare,
+        Capability::NoiseSuppression,
+        Capability::RaiseHand,
+        Capability::Subtitles,
+        Capability::ParticipantRoles,
+        Capability::ParticipantKickable,
+        Capability::ChatInCall,
+        Capability::ShareUrl,
+        Capability::RoomPassword,
+        Capability::VideoQualityAdjustable,
+    };
+    return m_capabilites.contains(capabilityToCheck);
+}
+
+void JitsiConnector::joinConference(const QString &conferenceId, const QString &displayName,
+                                    IConferenceConnector::StartFlags startFlags)
+{
+    qCInfo(lcJitsiConnector).nospace().noquote() << "Entering conference " << conferenceId << " ("
+                                                 << displayName << ") with flags:" << startFlags;
+
+    m_startWithVideo = startFlags & IConferenceConnector::StartFlag::VideoActive;
+
+    if (m_callHistoryItem) {
+        m_callHistoryItem->addFlags(CallHistoryItem::Type::JitsiMeetCall);
+    } else {
+        m_callHistoryItem = CallHistory::instance().addHistoryItem(
+                CallHistoryItem::Type::JitsiMeetCall, "", conferenceId);
+    }
+
+    setConferenceName(conferenceId);
+    setDisplayName(displayName);
+    setIsInConference(true);
+    setVideoMuted(!m_startWithVideo);
+
+    if (startFlags & IConferenceConnector::StartFlag::ScreenShareActive) {
+        if (isInitialized()) {
+            setSharingScreen(true);
+        } else {
+            m_isToggleScreenSharePending = true;
+        }
+    }
+}
+
+void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
+{
+    if (rememberPassword) {
+        auto &secretPortal = SecretPortal::instance();
+        if (secretPortal.isValid()) {
+            KeychainSettings settings;
+            settings.beginGroup("jitsiRoomPasswords");
+            settings.setValue(m_roomName, secretPortal.encrypt(password));
+            settings.endGroup();
+        }
+    }
+
+    setIsPasswordRequired(false);
+    emit executePasswordCommand(password);
+}
+
+void JitsiConnector::leaveConference()
+{
+    if (m_callHistoryItem) {
+        m_callHistoryItem->endCall();
+        m_callHistoryItem.clear();
+    }
+
+    emit executeLeaveRoomCommand();
+    setConferenceName("");
+    setDisplayName("");
+    setIsInConference(false);
+}
+
+void JitsiConnector::terminateConference()
+{
+    if (m_callHistoryItem) {
+        m_callHistoryItem->endCall();
+        m_callHistoryItem.clear();
+    }
+
+    emit executeEndConferenceCommand();
+    setConferenceName("");
+    setDisplayName("");
+    setIsInConference(false);
+}
+
+void JitsiConnector::setOnHold(bool shallHold)
+{
+    if (m_isOnHold != shallHold) {
+
+        if (shallHold) {
+            m_wasVideoMutedBeforeHold = isVideoMuted();
+
+            if (!isAudioMuted()) {
+                toggleMute();
+            }
+            if (!isVideoMuted()) {
+                setVideoMuted(!isVideoMuted());
+            }
+        } else {
+            if (isAudioMuted() != GlobalMuteState::instance().isMuted()) {
+                toggleMute();
+            }
+            if (isVideoMuted() != m_wasVideoMutedBeforeHold) {
+                setVideoMuted(!isVideoMuted());
+            }
+        }
+
+        m_isOnHold = shallHold;
+        emit isOnHoldChanged();
+    }
+}
+
+void JitsiConnector::setAudioMuted(bool value)
+{
+    if (m_isAudioMuted != value) {
+        m_isAudioMuted = value;
+        emit isAudioMutedChanged();
+    }
+    // m_muteTag = QUuid::createUuid().toString();
+    // GlobalMuteState::instance().toggleMute(m_muteTag);
+}
+
+void JitsiConnector::setVideoMuted(bool shallMute)
+{
+    if (m_isVideoMuted != shallMute) {
+        m_isVideoMuted = shallMute;
+        emit executeToggleVideoCommand();
+        emit isVideoMutedChanged();
+        updateVideoCallState();
+    }
+}
+
+void JitsiConnector::setTileView(bool showTileView)
+{
+    if (m_isTileView != showTileView) {
+        setLargeVideoParticipant(nullptr);
+        emit executeToggleTileViewCommand();
+    }
+}
+
+void JitsiConnector::setNoiseSuppressionEnabled(bool enabled)
+{
+    if (m_isNoiseSupression != enabled) {
+        emit executeSetNoiseSupressionCommand(m_isNoiseSupression);
+        emit isNoiseSuppressionEnabledChanged();
+    }
+}
+
+void JitsiConnector::setSubtitlesEnabled(bool enabled)
+{
+    if (m_isSubtitles != enabled) {
+        emit executeToggleSubtitlesCommand();
+        emit isSubtitlesEnabledChanged();
+    }
+}
+
+void JitsiConnector::setSharingScreen(bool shareScreen)
+{
+    if (m_isSharingScreen != shareScreen) {
+        emit executeToggleShareScreenCommand();
+    }
+}
+
+ConferenceParticipant::Role JitsiConnector::ownRole() const
+{
+    return m_ownRole;
+}
+
+void JitsiConnector::kickParticipant(const QString &id)
+{
+    emit executeKickParticipantCommand(id);
+}
+
+void JitsiConnector::kickParticipant(ConferenceParticipant *participant)
+{
+    if (!participant) {
+        qCCritical(lcJitsiConnector) << "Cannot kick nullptr participant";
+        return;
+    }
+    kickParticipant(participant->id());
+}
+
+void JitsiConnector::grantParticipantRole(const QString &participantId,
+                                          ConferenceParticipant::Role newRole)
+{
+    if (newRole != ConferenceParticipant::Role::Moderator) {
+        qCCritical(lcJitsiConnector) << "Role" << newRole << "is not supported by Jitsi Meet";
+    }
+    emit executeGrantModeratorCommand(participantId);
+}
+
+void JitsiConnector::grantParticipantRole(ConferenceParticipant *participant,
+                                          ConferenceParticipant::Role newRole)
+{
+    if (!participant) {
+        qCCritical(lcJitsiConnector) << "Cannot grant role to nullptr participant";
+        return;
+    }
+    grantParticipantRole(participant->id(), newRole);
+}
+
+void JitsiConnector::setLargeVideoParticipant(ConferenceParticipant *participant)
+{
+    if (m_largeVideoParticipant != participant) {
+        m_largeVideoParticipant = participant;
+        emit largeVideoParticipantChanged();
+    }
+}
+
+QUrl JitsiConnector::conferenceUrl() const
+{
+    return QUrl(QString("%1/%2").arg(GlobalInfo::instance().jitsiUrl(), conferenceName()));
 }
