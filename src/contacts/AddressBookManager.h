@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QMutex>
 
 class IAddressBookFeeder;
 
@@ -30,6 +31,7 @@ private:
     explicit AddressBookManager(QObject *parent = nullptr);
 
     QString secret(const QString &group) const;
+    QMutex m_queueMutex;
 
     void processAddressBookQueue();
 
