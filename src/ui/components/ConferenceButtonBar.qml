@@ -18,13 +18,13 @@ Item {
 
     property alias videoMuteButtonVisible: videoDeviceButton.visible
 
-    signal toggleHold
-    signal toggleMute
-    signal toggleVideoMute
+    signal setOnHold(value : bool)
+    signal setAudioMuted(value : bool)
+    signal setVideoMuted(value : bool)
+    signal setScreenShare(value : bool)
+    signal setTileView(value : bool)
+    signal setRaiseHand(value : bool)
     signal toggleVirtualBackgroundDialog
-    signal toggleScreenShare
-    signal toggleTileView
-    signal toggleRaiseHand
     signal openSetPasswordDialog
     signal openVideoQualityDialog
     signal hangup
@@ -60,7 +60,7 @@ Item {
         Component.onCompleted: () => internal.updateElapsedTime()
 
         readonly property Timer elapsedTimeTimer: Timer {
-            running: control.jitsiConnector?.isInRoom ?? false
+            running: control.jitsiConnector?.isInConference ?? false
             repeat: true
             interval: 100
             onTriggered: () => internal.updateElapsedTime()
@@ -119,7 +119,7 @@ Item {
 
         Label {
             id: roomNameLabel
-            text: control.jitsiConnector.displayName || control.jitsiConnector.roomName
+            text: control.jitsiConnector.displayName || control.jitsiConnector.conferenceName
             anchors.left: parent.left
         }
     }
@@ -162,15 +162,15 @@ Item {
 
                     MenuItem {
                         text: qsTr("Copy room name")
-                        onTriggered: () => ViewHelper.copyToClipboard(control.jitsiConnector.roomName)
+                        onTriggered: () => ViewHelper.copyToClipboard(control.jitsiConnector.conferenceName)
                     }
                     MenuItem {
                         text: qsTr("Copy room link")
-                        onTriggered: () => ViewHelper.copyToClipboard(control.jitsiConnector.roomUrl)
+                        onTriggered: () => ViewHelper.copyToClipboard(control.jitsiConnector.conferenceUrl)
                     }
                     MenuItem {
                         text: qsTr("Open in browser")
-                        onTriggered: () => Qt.openUrlExternally(control.jitsiConnector.roomUrl)
+                        onTriggered: () => Qt.openUrlExternally(control.jitsiConnector.conferenceUrl)
                     }
 
                     // MenuItem {
@@ -186,14 +186,14 @@ Item {
                 text: qsTr("Raise")
                 iconPath: Icons.transformBrowse
                 iconText: control.isHandRaised ? "!" : ""
-                onClicked: () => control.toggleRaiseHand()
+                onClicked: () => control.setRaiseHand(!control.isHandRaised)
             }
 
             BarButton {
                 id: holdButton
                 text: control.isOnHold ? qsTr("Resume") : qsTr("Hold")
                 iconPath: control.isOnHold ? Icons.mediaPlaybackStart : Icons.mediaPlaybackPause
-                onClicked: () => control.toggleHold()
+                onClicked: () => control.setOnHold(!control.isOnHold)
             }
 
             BarButton {
@@ -201,7 +201,7 @@ Item {
                 enabled: !control.isOnHold
                 text: qsTr("View")
                 iconPath: control.isTileView ? Icons.viewLeftNew : Icons.viewGrid
-                onClicked: () => control.toggleTileView()
+                onClicked: () => control.setTileView(!control.isTileView)
             }
 
             BarButton {
@@ -209,7 +209,7 @@ Item {
                 enabled: !control.isOnHold
                 text: qsTr("Screen")
                 iconPath: control.isSharingScreen ? Icons.mediaPlaybackStopped : Icons.inputTouchscreen
-                onClicked: () => control.toggleScreenShare()
+                onClicked: () => control.setScreenShare(!control.isSharingScreen)
             }
 
             BarButton {
@@ -218,7 +218,7 @@ Item {
                 text: qsTr("Camera")
                 iconPath: control.isVideoMuted ? Icons.cameraOff : Icons.cameraOn
                 showDropdownButton: true
-                onClicked: () => control.toggleVideoMute()
+                onClicked: () => control.setVideoMuted(!control.isVideoMuted)
                 onDropDownClicked: () => videoDeviceMenu.popup(videoDeviceButton, -videoDeviceMenu.width + videoDeviceButton.width, videoDeviceButton.height)
 
                 VideoDeviceMenu {
@@ -235,7 +235,7 @@ Item {
                 text: qsTr("Micro")
                 iconPath: control.isMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
                 showDropdownButton: true
-                onClicked: () => control.toggleMute()
+                onClicked: () => control.setAudioMuted(!control.isMuted)
                 onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
 
 
@@ -281,14 +281,14 @@ Item {
                     MenuItem {
                         id: noiseSuppressionMenuItem
                         text: qsTr("Noise supression")
-                        icon.source: control.jitsiConnector.isNoiseSupression ? Icons.checkbox : ""
-                        onClicked: () => control.jitsiConnector.toggleNoiseSupression()
+                        icon.source: control.jitsiConnector.isNoiseSuppressionEnabled ? Icons.checkbox : ""
+                        onClicked: () => control.jitsiConnector.setNoiseSupressionEnabled(!control.jitsiConnector.isNoiseSuppressionEnabled)
                     }
 
                     MenuItem {
                         text: qsTr("Toggle subtitles")
-                        icon.source: control.jitsiConnector.isSubtitles ? Icons.checkbox : ""
-                        onClicked: () => control.jitsiConnector.toggleSubtitles()
+                        icon.source: control.jitsiConnector.isSubtitlesEnabled ? Icons.checkbox : ""
+                        onClicked: () => control.jitsiConnector.setSubtitlesEnabled(!control.jitsiConnector.isSubtitlesEnabled)
                     }
 
                     MenuItem {

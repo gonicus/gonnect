@@ -289,7 +289,7 @@ Item {
 
         Connections {
             target: control.jitsiConnector
-            function onIsInRoomChanged() {
+            function onIsInConferenceChanged() {
                 chatSideBar.lastMessageCount = 0
             }
         }

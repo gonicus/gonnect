@@ -68,8 +68,8 @@ Item {
         id: jitsiConn
         WebChannel.id: "jitsiConn"
 
-        function onIsInRoomChanged() {
-            if (!jitsiConn.isInRoom) {
+        function onIsInConferenceChanged() {
+            if (!jitsiConn.isInConference) {
                 internal.authButton.enabled = true
             }
         }
@@ -81,7 +81,7 @@ Item {
             if (!AuthManager.isAuthManagerInitialized) {
                 return undefined
             }
-            if (jitsiConn.isInRoom) {
+            if (jitsiConn.isInConference) {
                 return jitsiViewComponent
             }
             if (AuthManager.isJitsiAuthRequired && AuthManager.isWaitingForAuth) {
@@ -224,7 +224,7 @@ Item {
                     height: topBar.implicitHeight
                     enabled: true
                     isOnHold: jitsiConn.isOnHold
-                    isMuted: jitsiConn.isMuted
+                    isMuted: jitsiConn.isAudioMuted
                     isVideoMuted: jitsiConn.isVideoMuted
                     videoMuteButtonVisible: jitsiConn.isVideoAvailable
                     isSharingScreen: jitsiConn.isSharingScreen
@@ -237,17 +237,19 @@ Item {
                         top: topBar.parent.top
                     }
 
-                    onToggleHold: () => GlobalCallState.triggerHold()
-                    onToggleMute: () => GlobalMuteState.toggleMute()
-                    onToggleVideoMute: () => jitsiConn.toggleVideoMute()
                     onToggleVirtualBackgroundDialog: () => jitsiConn.toggleVirtualBackgroundDialog()
-                    onToggleScreenShare: () => jitsiConn.toggleScreenShare()
-                    onToggleTileView: () => jitsiConn.toggleTileView()
-                    onToggleRaiseHand: () => jitsiConn.toggleRaiseHand()
+
+                    onSetOnHold: (value) => jitsiConn.setOnHold(value)
+                    onSetAudioMuted: (value) => jitsiConn.setAudioMuted(value)
+                    onSetVideoMuted: (value) => jitsiConn.setVideoMuted(value)
+                    onSetScreenShare: (value) => jitsiConn.setScreenShare(value)
+                    onSetTileView: (value) => jitsiConn.setTileView(value)
+                    onSetRaiseHand: (value) => jitsiConn.setRaiseHand(value)
+
                     onOpenSetPasswordDialog: () => ViewHelper.topDrawer.loader.sourceComponent = setPasswordItemComponent
                     onOpenVideoQualityDialog: () => ViewHelper.topDrawer.loader.sourceComponent = videoQualityComponent
-                    onHangup: () => jitsiConn.leaveRoom()
-                    onFinishForAll: () => jitsiConn.terminateRoom()
+                    onHangup: () => jitsiConn.leaveConference()
+                    onFinishForAll: () => jitsiConn.terminateConference()
                 }
 
                 WebEngineView {
@@ -281,7 +283,7 @@ Item {
 
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
-                            jitsiView.runJavaScript(jitsiConn.jitsiJavascript())
+                            jitsiView.runJavaScript(jitsiConn.jitsiJavascriptInternal())
                         } else {
                             console.error("failed to load HTML")
                         }
@@ -308,11 +310,11 @@ Item {
                         implicitHeight: passwordItemColumn.implicitHeight
 
                         function respondPassword() {
-                            jitsiConn.passwordEntered(passwordField.text, rememberCheckBox.checked)
+                            jitsiConn.enterPassword(passwordField.text, rememberCheckBox.checked)
                         }
 
                         function cancel() {
-                            jitsiConn.leaveRoom()
+                            jitsiConn.leaveConference()
                             ViewHelper.topDrawer.loader.sourceComponent = undefined
                         }
 
@@ -589,22 +591,22 @@ Item {
 
                             QualityButton {
                                 text: qsTr("No video (audio only)")
-                                qualityValue: JitsiConnector.VideoQuality.AudioOnly
+                                qualityValue: IConferenceConnector.VideoQuality.AudioOnly
                             }
 
                             QualityButton {
                                 text: qsTr("Lowest quality")
-                                qualityValue: JitsiConnector.VideoQuality.Low
+                                qualityValue: IConferenceConnector.VideoQuality.Low
                             }
 
                             QualityButton {
                                 text: qsTr("Standard quality")
-                                qualityValue: JitsiConnector.VideoQuality.Standard
+                                qualityValue: IConferenceConnector.VideoQuality.Average
                             }
 
                             QualityButton {
                                 text: qsTr("Highest quality")
-                                qualityValue: JitsiConnector.VideoQuality.Highest
+                                qualityValue: IConferenceConnector.VideoQuality.Maximum
                             }
 
                             Button {
@@ -619,7 +621,7 @@ Item {
                 }
 
                 Component.onCompleted: {
-                    jitsiView.loadHtml(jitsiConn.jitsiHtml(), "https://" + GlobalInfo.jitsiUrl())
+                    jitsiView.loadHtml(jitsiConn.jitsiHtmlInternal(), "https://" + GlobalInfo.jitsiUrl())
                 }
             }
         }
@@ -663,7 +665,7 @@ Item {
     Card {
         id: callListCard
         width: 70
-        visible: jitsiConn.isInRoom
+        visible: jitsiConn.isInConference
         anchors {
             top: parent.top
             right: parent.right
@@ -682,8 +684,8 @@ Item {
 
             Connections {
                 target: jitsiConn
-                function onIsInRoomChanged() {
-                    if (!jitsiConn.isInRoom) {
+                function onIsInConferenceChanged() {
+                    if (!jitsiConn.isInConference) {
                         callSideBar.selectedSideBarMode = CallSideBar.None
                     }
                 }

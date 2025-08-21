@@ -32,8 +32,8 @@ Item {
             required property string displayName
             required property int role
 
-            readonly property bool isModerator: delg.role === JitsiConnector.ParticipantRole.Moderator
-            readonly property bool isMe: delg.id === control.jitsiConnector?.ownJitsiId ?? false
+            readonly property bool isModerator: delg.role === ConferenceParticipant.Role.Moderator
+            readonly property bool isMe: delg.id === control.jitsiConnector?.ownId ?? false
 
             Rectangle {
                 id: selectedBackground
@@ -140,7 +140,7 @@ Item {
                     MenuItem {
                         enabled: !delg.isModerator
                         text: qsTr("Make moderator")
-                        onClicked: () => control.jitsiConnector.grantParticipantModerator(delg.id)
+                        onClicked: () => control.jitsiConnector.grantParticipantRole(delg.id, ConferenceParticipant.Role.Moderator)
                     }
                 }
             }

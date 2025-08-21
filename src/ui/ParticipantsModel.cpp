@@ -1,5 +1,6 @@
 #include "ParticipantsModel.h"
 #include "JitsiConnector.h"
+#include "ConferenceParticipant.h"
 
 ParticipantsModel::ParticipantsModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -28,18 +29,18 @@ QVariant ParticipantsModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    const auto &participant = m_jitsiConnector->participants().at(index.row());
+    const auto participant = m_jitsiConnector->participants().at(index.row());
 
     switch (role) {
     case static_cast<int>(Roles::Id):
-        return participant.id;
+        return participant->id();
 
     case static_cast<int>(Roles::Role):
-        return static_cast<int>(participant.role);
+        return static_cast<int>(participant->role());
 
     case static_cast<int>(Roles::DisplayName):
     default:
-        return participant.displayName;
+        return participant->displayName();
     }
 }
 
@@ -61,19 +62,19 @@ void ParticipantsModel::onJitsiConnectorChanged()
         });
 
         connect(m_jitsiConnector, &JitsiConnector::participantAdded, this,
-                [this](qsizetype index, const QString) {
+                [this](qsizetype index, ConferenceParticipant *) {
                     beginInsertRows(QModelIndex(), index, index);
                     endInsertRows();
                 });
 
         connect(m_jitsiConnector, &JitsiConnector::participantRemoved, this,
-                [this](qsizetype index, const QString) {
+                [this](qsizetype index, ConferenceParticipant *) {
                     beginRemoveRows(QModelIndex(), index, index);
                     endRemoveRows();
                 });
 
         connect(m_jitsiConnector, &JitsiConnector::participantRoleChanged, this,
-                [this](qsizetype index, const QString, const JitsiConnector::ParticipantRole) {
+                [this](qsizetype index, const QString, const ConferenceParticipant::Role) {
                     const auto modelIndex = createIndex(index, 0);
                     emit dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::Role) });
                 });

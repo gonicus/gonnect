@@ -1,5 +1,6 @@
 #include "ChatModel.h"
 #include "EmojiResolver.h"
+#include "ConferenceChatMessage.h"
 #include <QRegularExpression>
 
 ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
@@ -32,23 +33,23 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    const auto &item = m_jitsiConnector->messages().at(index.row());
+    const auto item = m_jitsiConnector->messages().at(index.row());
 
     switch (role) {
     case static_cast<int>(Roles::FromId):
-        return item.fromId;
+        return item->fromId();
     case static_cast<int>(Roles::NickName):
-        return item.nickName;
+        return item->nickName();
     case static_cast<int>(Roles::Message):
-        return addLinkTags(EmojiResolver::instance().replaceEmojiCodes(item.message));
+        return addLinkTags(EmojiResolver::instance().replaceEmojiCodes(item->message()));
     case static_cast<int>(Roles::Timestamp):
-        return item.timestamp;
+        return item->timestamp();
     case static_cast<int>(Roles::IsPrivateMessage):
-        return item.isPrivateMessage;
+        return item->isPrivateMessage();
     case static_cast<int>(Roles::IsOwnMessage):
-        return item.fromId == m_jitsiConnector->jitsiId();
+        return item->fromId() == m_jitsiConnector->ownId();
     case static_cast<int>(Roles::IsSystemMessage):
-        return item.isSystemMessage;
+        return item->isSystemMessage();
     default:
         return QVariant();
     }
@@ -90,7 +91,7 @@ void ChatModel::updateRealMessagesCount()
     if (m_jitsiConnector) {
         const auto &messages = m_jitsiConnector->messages();
         for (const auto &message : messages) {
-            if (!message.isSystemMessage) {
+            if (!message->isSystemMessage()) {
                 ++count;
             }
         }

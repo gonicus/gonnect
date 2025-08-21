@@ -341,7 +341,7 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
 
     emit openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
     setProperty("nextMeetingStartFlags",
-                QVariant::fromValue(JitsiConnector::MeetingStartFlag::AudioActive));
+                QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
 }
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)

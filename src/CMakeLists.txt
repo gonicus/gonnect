@@ -12,7 +12,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineQuick
     Xml
 )
-find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qca-qt6 REQUIRED)
 
 include(FindPkgConfig)
@@ -402,6 +401,12 @@ qt_add_qml_module(gonnect
         chat/IChatRoom.h
         chat/IChatRoom.cpp
 
+        conference/ConferenceChatMessage.h
+        conference/ConferenceChatMessage.cpp
+        conference/ConferenceParticipant.h
+        conference/ConferenceParticipant.cpp
+        conference/IConferenceConnector.h
+
         contacts/AddressBook.cpp
         contacts/AddressBook.h
         contacts/AddressBookManager.cpp
@@ -627,6 +632,7 @@ target_include_directories(gonnect
     sip
     calendar
     contacts
+    conference
     ui
     ui/chat
     usb

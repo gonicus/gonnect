@@ -59,7 +59,7 @@ BaseWindow {
             if (callsModel.count && ![GonnectWindow.PageId.Call, GonnectWindow.PageId.Conference].includes(mainTabBar.selectedPageId)) {
                 control.showPage(GonnectWindow.PageId.Call)
             } else if (!callsModel.count && mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
-                if (conferencePage.jitsiConnector.isInRoom) {
+                if (conferencePage.jitsiConnector.isInConference) {
                     control.showPage(GonnectWindow.PageId.Conference)
                 } else {
                     control.showPage(GonnectWindow.PageId.Calls)
@@ -154,7 +154,7 @@ BaseWindow {
             id: mainTabBar
             selectedPageId: GonnectWindow.PageId.Calls
             hasActiveCall: callsModel.count > 0
-            hasActiveConference: conferencePage.jitsiConnector.isInRoom
+            hasActiveConference: conferencePage.jitsiConnector.isInConference
             anchors {
                 left: parent.left
                 top: parent.top
@@ -282,8 +282,8 @@ BaseWindow {
 
     readonly property Connections jitsiConnectorConnections: Connections {
         target: conferencePage.jitsiConnector
-        function onIsInRoomChanged() {
-            if (!conferencePage.jitsiConnector.isInRoom) {
+        function onIsInConferenceChanged() {
+            if (!conferencePage.jitsiConnector.isInConference) {
                 control.showPage(GonnectWindow.PageId.Calls)
             }
         }
