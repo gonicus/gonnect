@@ -231,7 +231,7 @@ void Contact::updateSipStatusSubscriptable()
 
 bool Contact::isNumberValid(const QString &number) const
 {
-    return !number.isEmpty() && number != "+492932916";
+    return !number.isEmpty();
 }
 
 QList<Contact::PhoneNumber> Contact::phoneNumbers() const
