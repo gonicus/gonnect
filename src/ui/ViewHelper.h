@@ -23,8 +23,8 @@ class ViewHelper : public QObject
     Q_PROPERTY(bool isPlayingRingTone READ isPlayingRingTone NOTIFY isPlayingRingToneChanged FINAL)
     Q_PROPERTY(Contact *currentUser READ currentUser NOTIFY currentUserChanged FINAL)
     Q_PROPERTY(QString currentUserName READ currentUserName NOTIFY currentUserChanged FINAL)
-    Q_PROPERTY(JitsiConnector::MeetingStartFlags nextMeetingStartFlags MEMBER
-                       m_nextMeetingStartFlags NOTIFY nextMeetingStartFlagsChanged FINAL)
+    Q_PROPERTY(IConferenceConnector::StartFlags nextMeetingStartFlags MEMBER m_nextMeetingStartFlags
+                       NOTIFY nextMeetingStartFlagsChanged FINAL)
     Q_PROPERTY(QObject *topDrawer MEMBER m_topDrawer NOTIFY topDrawerChanged FINAL)
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
 
@@ -135,8 +135,8 @@ private:
     Ringer *m_ringer = nullptr;
     QTimer m_ringerTimer;
     Contact *m_currentUser = nullptr;
-    JitsiConnector::MeetingStartFlags m_nextMeetingStartFlags =
-            JitsiConnector::MeetingStartFlag::AudioActive;
+    IConferenceConnector::StartFlags m_nextMeetingStartFlags =
+            IConferenceConnector::StartFlag::AudioActive;
     QObject *m_topDrawer = nullptr;
     bool m_isActiveVideoCall = false;
 
@@ -162,7 +162,7 @@ signals:
     void fullscreenToggle();
 
     void openMeetingRequested(QString meetingId, QString displayName,
-                              JitsiConnector::MeetingStartFlags startFlags,
+                              IConferenceConnector::StartFlags startFlags,
                               QPointer<CallHistoryItem> callHistoryItem);
 
     void passwordRequested(QString id, QString host);

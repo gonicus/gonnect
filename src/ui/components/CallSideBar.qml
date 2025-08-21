@@ -36,7 +36,7 @@ Item {
     /// Whether the list of persons/participants is available at all (default: true)
     property alias personsAvailable: personCountButton.visible
 
-    property alias jitsiConnector: chatSideBar.jitsiConnector
+    property alias iConferenceConnector: chatSideBar.iConferenceConnector
 
     onChatAvailableChanged: {
         if (!control.chatAvailable && control.selectedSideBarMode === CallSideBar.Chat) {
@@ -258,7 +258,7 @@ Item {
 
     ParticipantsList {
         id: participantList
-        jitsiConnector: control.jitsiConnector
+        iConferenceConnector: control.iConferenceConnector
         clip: true
         visible: false
         anchors {
@@ -288,8 +288,8 @@ Item {
         }
 
         Connections {
-            target: control.jitsiConnector
-            function onIsInRoomChanged() {
+            target: control.iConferenceConnector
+            function onIsInConferenceChanged() {
                 chatSideBar.lastMessageCount = 0
             }
         }

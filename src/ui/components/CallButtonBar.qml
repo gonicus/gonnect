@@ -87,7 +87,7 @@ Item {
             enabled: control.areInCallButtonsEnabled
             visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
             onClicked: () => {
-                ViewHelper.nextMeetingStartFlags = JitsiConnector.MeetingStartFlag.AudioActive | JitsiConnector.MeetingStartFlag.ScreenShareActive
+                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
         }
@@ -99,7 +99,7 @@ Item {
             enabled: control.areInCallButtonsEnabled
             visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
             onClicked: () => {
-                ViewHelper.nextMeetingStartFlags = JitsiConnector.MeetingStartFlag.AudioActive | JitsiConnector.MeetingStartFlag.VideoActive
+                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
         }

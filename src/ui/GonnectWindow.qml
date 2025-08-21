@@ -88,7 +88,7 @@ BaseWindow {
 
     function updateCallInForeground() {
         if (mainTabBar.selectedPageId === GonnectWindow.PageId.Conference) {
-            GlobalCallState.callInForeground = conferencePage.jitsiConnector
+            GlobalCallState.callInForeground = conferencePage.iConferenceConnector
         } else if (mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
             const selectedCallItem = callsPage.selectedCallItem
             if (selectedCallItem) {
@@ -163,7 +163,7 @@ BaseWindow {
             id: mainTabBar
             selectedPageId: GonnectWindow.PageId.Calls
             hasActiveCall: callsModel.count > 0
-            hasActiveConference: conferencePage.jitsiConnector.isInRoom
+            hasActiveConference: conferencePage.iConferenceConnector.isInConference
             anchors {
                 left: parent.left
                 top: parent.top

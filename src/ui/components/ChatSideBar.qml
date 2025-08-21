@@ -7,7 +7,7 @@ import base
 Item {
     id: control
 
-    property JitsiConnector jitsiConnector
+    property IConferenceConnector iConferenceConnector
 
     readonly property alias messageCount: chatModel.realMessagesCount
 
@@ -28,7 +28,7 @@ Item {
             bottomMargin: 20
             model: ChatModel {
                 id: chatModel
-                jitsiConnector: control.jitsiConnector
+                iConferenceConnector: control.iConferenceConnector
             }
 
             // Use timer as items needs time for rendering before it can scroll there
@@ -253,7 +253,7 @@ Item {
 
         TextField {
             id: chatInputField
-            enabled: !!control.jitsiConnector
+            enabled: !!control.iConferenceConnector
             y: chatInputField.anchors.margins
             placeholderText: qsTr("Enter chat message...")
             anchors {
@@ -265,7 +265,7 @@ Item {
             onAccepted: () => {
                 const trimmed = chatInputField.text.trim()
                 if (trimmed !== "") {
-                    control.jitsiConnector.sendMessage(trimmed)
+                    control.iConferenceConnector.sendMessage(trimmed)
                     chatInputField.text = ""
                 }
             }
