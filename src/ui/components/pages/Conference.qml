@@ -237,7 +237,6 @@ Item {
                         top: topBar.parent.top
                     }
 
-
                     onSetOnHold: (value) => confConn.setOnHold(value)
                     onSetAudioMuted: (value) => confConn.setAudioMuted(value)
                     onSetVideoMuted: (value) => confConn.setVideoMuted(value)
