@@ -64,7 +64,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
         }
     });
     connect(dev, &HeadsetDeviceProxy::hookSwitch, this, [dev, this]() {
-        auto callsCount = GlobalCallState::instance().callsCount();
+        auto callsCount = GlobalCallState::instance().activeCallsCount();
 
         // Were're busy with one call -> end call
         if (!dev->getHookSwitch() && callsCount == 1 && !m_calls.isEmpty()) {
