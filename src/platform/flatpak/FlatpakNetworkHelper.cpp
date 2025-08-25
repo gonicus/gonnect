@@ -1,13 +1,23 @@
+#include "FlatpakNetworkHelper.h"
+#include "NetworkMonitor.h"
+#include <QLoggingCategory>
 #include <netdb.h>
 #include <qhostaddress.h>
-#include "NetworkHelper.h"
-#include "NetworkMonitor.h"
 
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
 
 #define NH_CALL_TIMEOUT 500
 
-NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
+NetworkHelper &NetworkHelper::instance()
+{
+    static NetworkHelper *_instance = nullptr;
+    if (!_instance) {
+        _instance = new FlatpakNetworkHelper;
+    }
+    return *_instance;
+}
+
+FlatpakNetworkHelper::FlatpakNetworkHelper() : NetworkHelper{}
 {
     m_portal = new OrgFreedesktopPortalNetworkMonitorInterface("org.freedesktop.portal.Desktop",
                                                                "/org/freedesktop/portal/desktop",
@@ -15,12 +25,12 @@ NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
     m_portal->setTimeout(NH_CALL_TIMEOUT);
 
     connect(m_portal, &OrgFreedesktopPortalNetworkMonitorInterface::changed, this,
-            &NetworkHelper::updateNetworkState);
+            &FlatpakNetworkHelper::updateNetworkState);
 
-    QTimer::singleShot(0, this, &NetworkHelper::updateNetworkState);
+    QTimer::singleShot(0, this, &FlatpakNetworkHelper::updateNetworkState);
 }
 
-void NetworkHelper::updateNetworkState()
+void FlatpakNetworkHelper::updateNetworkState()
 {
     QDBusPendingReply<QVariantMap> reply = m_portal->GetStatus();
     reply.waitForFinished();
@@ -76,7 +86,7 @@ void NetworkHelper::updateNetworkState()
     emit connectivityChanged();
 }
 
-bool NetworkHelper::isReachable(const QUrl &url)
+bool FlatpakNetworkHelper::isReachable(const QUrl &url)
 {
     int port = url.port();
     if (port < 0) {
@@ -106,7 +116,7 @@ bool NetworkHelper::isReachable(const QUrl &url)
     return reply.value();
 }
 
-QStringList NetworkHelper::nameservers() const
+QStringList FlatpakNetworkHelper::nameservers() const
 {
     QStringList servers;
     QFile resolvconf;

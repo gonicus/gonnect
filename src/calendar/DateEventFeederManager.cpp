@@ -4,8 +4,7 @@
 #include "IDateEventFeeder.h"
 #include "NetworkHelper.h"
 #include "DateEventManager.h"
-#include "SecretPortal.h"
-#include "KeychainSettings.h"
+#include "Credentials.h"
 #include "ViewHelper.h"
 
 #include <QTimer>
@@ -26,57 +25,44 @@ void DateEventFeederManager::reload()
 void DateEventFeederManager::acquireSecret(const QString &configId,
                                            std::function<void(const QString &)> callback)
 {
-    auto &secretPortal = SecretPortal::instance();
-    if (!secretPortal.isValid()) {
-        qCWarning(lcDateEventFeederManager)
-                << "Secrets portal is not available - unable to retrieve passwords";
-        callback("");
-        return;
-    }
-
-    if (!secretPortal.isInitialized()) {
-        // Retry once secret portal is initialized
-        connect(
-                &secretPortal, &SecretPortal::initializedChanged, this,
-                [this, configId, callback]() { acquireSecret(configId, callback); },
-                Qt::ConnectionType::SingleShotConnection);
-
-        return;
-    }
-
     ReadOnlyConfdSettings settings;
 
     const auto configIdHash = settings.hashForSettingsGroup(configId);
     const auto secretKey = QString("%1_%2").arg(configId, configIdHash);
-    const QString secret = KeychainSettings::secret(secretKey);
 
-    if (secret.isEmpty()) {
-        auto conn = connect(
-                &ViewHelper::instance(), &ViewHelper::passwordResponded, this,
-                [secretKey, configId, callback, this](const QString &id, const QString &password) {
-                    if (id == configId) {
-                        QObject::disconnect(m_viewHelperConnections.value(configId));
-                        m_viewHelperConnections.remove(configId);
+    Credentials::instance().get(secretKey + "/secret", [this, configId, secretKey, callback](bool error, const QString &secret){
+        if (error) {
+            qCWarning(lcDateEventFeederManager) << "failed to retrieve secret:" << secret;
+            return;
+        }
 
-                        auto &secretPortal = SecretPortal::instance();
-                        if (secretPortal.isValid()) {
-                            KeychainSettings settings;
-                            settings.beginGroup(secretKey);
-                            settings.setValue("secret", secretPortal.encrypt(password));
-                            settings.endGroup();
+        if (secret.isEmpty()) {
+            auto &viewHelper = ViewHelper::instance();
+            auto conn = connect(
+                    &viewHelper, &ViewHelper::passwordResponded, this,
+                    [secretKey, configId, callback, this](const QString &id, const QString &password) {
+                        if (id == configId) {
+                            QObject::disconnect(m_viewHelperConnections.value(configId));
+                            m_viewHelperConnections.remove(configId);
+
+                            Credentials::instance().set(secretKey + "/secret", password, [secretKey](bool error, const QString &data) {
+                                if (error) {
+                                    qCCritical(lcDateEventFeederManager) << "failed to set credentials:" << data;
+                                }
+                            });
+
+                            callback(password);
                         }
+                    });
 
-                        callback(password);
-                    }
-                });
+            m_viewHelperConnections.insert(configId, conn);
 
-        m_viewHelperConnections.insert(configId, conn);
-        settings.beginGroup(configId);
-        ViewHelper::instance().requestPassword(configId, settings.value("host", "").toString());
-        settings.endGroup();
-    } else {
-        callback(secretPortal.decrypt(secret));
-    }
+            ReadOnlyConfdSettings settings;
+            viewHelper.requestPassword(configId, settings.value("host", "").toString());
+        } else {
+            callback(secret);
+        }
+    });
 }
 
 void DateEventFeederManager::initFeederConfigs()

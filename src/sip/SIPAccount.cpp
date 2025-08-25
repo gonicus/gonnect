@@ -7,9 +7,9 @@
 #include "PreferredIdentity.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
-#include "SecretPortal.h"
 #include "KeychainSettings.h"
 #include "NetworkHelper.h"
+#include "Credentials.h"
 
 #include <QUuid>
 
@@ -22,7 +22,7 @@ SIPAccount::SIPAccount(const QString &group, QObject *parent)
 {
 }
 
-bool SIPAccount::initialize()
+void SIPAccount::initialize()
 {
     bool ok = false;
     static QRegularExpression sipURI = QRegularExpression("^(sips?):([^@]+)(?:@(.+))?$");
@@ -42,7 +42,8 @@ bool SIPAccount::initialize()
         m_transportType = TRANSPORT_TYPE::TCP;
     } else {
         qCCritical(lcSIPAccount) << "invalid transport [tcp, udp, tls]:" << transport;
-        return false;
+        emit initialized(false);
+        return;
     }
 
     QString net = m_settings.value("network", "auto").toString();
@@ -54,7 +55,8 @@ bool SIPAccount::initialize()
         m_transportNet = TRANSPORT_NET::IPv6;
     } else {
         qCCritical(lcSIPAccount) << "invalid transport [auto, ipv4, ipv6]:" << transport;
-        return false;
+        emit initialized(false);
+        return;
     }
 
     QString userUri = m_settings.value("userUri", "").toString();
@@ -63,14 +65,16 @@ bool SIPAccount::initialize()
             qCCritical(lcSIPAccount) << "'userUri' is no valid SIP URI:" << userUri;
             ErrorBus::instance().addFatalError(
                     tr("'userUri' is no valid SIP URI: %1").arg(userUri));
-            return false;
+            emit initialized(false);
+            return;
         }
 
         m_accountConfig.idUri = userUri.toStdString();
     } else {
         qCCritical(lcSIPAccount) << "'userUri' is required";
         ErrorBus::instance().addFatalError(tr("'userUri' is required"));
-        return false;
+        emit initialized(false);
+        return;
     }
 
     QString registrarUri = m_settings.value("registrarUri", "").toString();
@@ -81,7 +85,8 @@ bool SIPAccount::initialize()
             qCCritical(lcSIPAccount) << "'registrarUri' is no valid SIP URI:" << registrarUri;
             ErrorBus::instance().addFatalError(
                     tr("'registrarUri' is no valid SIP URI: %1").arg(registrarUri));
-            return false;
+            emit initialized(false);
+            return;
         }
 
         registrarUri = addTransport(registrarUri);
@@ -91,7 +96,8 @@ bool SIPAccount::initialize()
     } else {
         qCCritical(lcSIPAccount) << "'registrarUri' is required";
         ErrorBus::instance().addFatalError(tr("'registrarUri' is required"));
-        return false;
+        emit initialized(false);
+        return;
     }
 
     QStringList proxies = m_settings.value("proxies").toStringList();
@@ -101,7 +107,8 @@ bool SIPAccount::initialize()
             qCCritical(lcSIPAccount) << "'proxies' contains invalid SIP URI entry:" << proxy;
             ErrorBus::instance().addFatalError(
                     tr("'proxies' contains invalid SIP URI entry: %1").arg(proxy));
-            return false;
+            emit initialized(false);
+            return;
         }
 
         QString _proxy = addTransport(proxy);
@@ -120,7 +127,8 @@ bool SIPAccount::initialize()
         } else {
             qCCritical(lcSIPAccount)
                     << "invalid value for 'srtpUse' [disabled, optional, mandatory]:" << srtpUse;
-            return false;
+            emit initialized(false);
+            return;
         }
     }
     m_accountConfig.mediaConfig.srtpUse = srtpUseValue;
@@ -128,7 +136,8 @@ bool SIPAccount::initialize()
     int rtpPort = m_settings.value("rtpPort", 0).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'rtpPort':" << rtpPort;
-        return false;
+        emit initialized(false);
+        return;
     }
     if (rtpPort != 0) {
         m_accountConfig.mediaConfig.transportConfig.port = rtpPort;
@@ -137,7 +146,8 @@ bool SIPAccount::initialize()
     int rtpPortRange = m_settings.value("rtpPortRange", 0).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'rtpPortRange':" << rtpPort;
-        return false;
+        emit initialized(false);
+        return;
     }
     if (rtpPortRange != 0) {
         m_accountConfig.mediaConfig.transportConfig.portRange = rtpPortRange;
@@ -163,7 +173,8 @@ bool SIPAccount::initialize()
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'srtpSecureSignaling' [0, 1 ,2]:"
                                  << srtpSecureSignaling;
-        return false;
+        emit initialized(false);
+        return;
     }
     m_accountConfig.mediaConfig.srtpSecureSignaling = srtpSecureSignaling;
 
@@ -174,14 +185,16 @@ bool SIPAccount::initialize()
     int port = m_settings.value("port", 5061).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'port':" << port;
-        return false;
+        emit initialized(false);
+        return;
     }
     m_transportConfig.port = port;
 
     int portRange = m_settings.value("portRange", 10).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'portRange':" << portRange;
-        return false;
+        emit initialized(false);
+        return;
     }
     m_transportConfig.portRange = portRange;
 
@@ -231,7 +244,8 @@ bool SIPAccount::initialize()
         }
     } catch (pj::Error &err) {
         qCCritical(lcSIPAccount) << "failed to create transport:" << err.info(false);
-        return false;
+        emit initialized(false);
+        return;
     }
 
     // NAT config
@@ -261,7 +275,8 @@ bool SIPAccount::initialize()
     } else {
         qCCritical(lcSIPAccount) << "invalid value for 'contactRewriteUse' [0,1,2]:"
                                  << contactRewriteUse;
-        return false;
+        emit initialized(false);
+        return;
     }
     if (m_settings.contains("contactUseSrcPort")) {
         m_accountConfig.natConfig.contactUseSrcPort =
@@ -277,7 +292,8 @@ bool SIPAccount::initialize()
             qCCritical(lcSIPAccount)
                     << "invalid value for 'contactRewriteMethod' [always-update,no-unreg]:"
                     << contactRewriteMethod;
-            return false;
+            emit initialized(false);
+            return;
         }
     }
 
@@ -328,7 +344,8 @@ bool SIPAccount::initialize()
 
         if (!m_settings.childGroups().contains(auth)) {
             qCCritical(lcSIPAccount) << "'auth' contains undefined reference to:" << auth;
-            return false;
+            emit initialized(false);
+            return;
         }
 
         m_settings.beginGroup(auth);
@@ -344,26 +361,35 @@ bool SIPAccount::initialize()
             dataTypeValue = PJSIP_CRED_DATA_DIGEST;
         } else {
             qCCritical(lcSIPAccount) << "invalid value for 'type' [plain, digest]:" << dataType;
-            return false;
+            emit initialized(false);
+            return;
         }
 
         m_settings.endGroup();
 
-        // The designed way for getting the credentials is the secret portal. For debugging
-        // purposes, it's possible to have a clear text password in "data". Only ask the
-        // secret portal / keychain, if there is no override set.
+        // Allow plain text password for debugging cases
         if (data.isEmpty()) {
-            auto &sp = SecretPortal::instance();
-            if (sp.isValid()) {
-                KeychainSettings settings;
+            auto &cds = Credentials::instance();
+            cds.get(auth + "/secret", [this, auth, scheme, realm, username, dataTypeValue](bool error, const QString &data){
+                if (error) {
+                    qCCritical(lcSIPAccount) << "authentification failed:" << data;
+                    emit initialized(false);
+                    return;
+                }
 
-                settings.beginGroup(auth);
-                QString secret = settings.value("secret", "").toString();
-                data = sp.decrypt(secret);
                 if (data.isEmpty()) {
                     qCWarning(lcSIPAccount) << "no password available for auth group" << auth;
                 }
-            }
+
+                pj::AuthCredInfo cred(scheme.toStdString(), realm.toStdString(), username.toStdString(),
+                                      dataTypeValue, data.toStdString());
+
+                m_accountConfig.sipConfig.authCreds.push_back(cred);
+
+                finalizeInitialization();
+            });
+
+            return;
         }
 
         pj::AuthCredInfo cred(scheme.toStdString(), realm.toStdString(), username.toStdString(),
@@ -372,6 +398,11 @@ bool SIPAccount::initialize()
         m_accountConfig.sipConfig.authCreds.push_back(cred);
     }
 
+    finalizeInitialization();
+}
+
+void SIPAccount::finalizeInitialization()
+{
     try {
         create(m_accountConfig);
     } catch (pj::Error &err) {
@@ -379,7 +410,8 @@ bool SIPAccount::initialize()
         ErrorBus::instance().addFatalError(
                 tr("Failed to create %1: %2")
                         .arg(m_account, QString::fromLocal8Bit(err.info(false))));
-        return false;
+        emit initialized(false);
+        return;
     }
 
     connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
@@ -394,7 +426,7 @@ bool SIPAccount::initialize()
         }
     });
 
-    return true;
+    emit initialized(true);
 }
 
 QString SIPAccount::call(const QString &number, const QString &contactId,
@@ -770,14 +802,12 @@ void SIPAccount::setCredentials(const QString &password)
         modify(m_accountConfig);
     }
 
-    // Update disk storage
-    auto &sp = SecretPortal::instance();
-    if (sp.isValid()) {
-        KeychainSettings settings;
-
-        settings.beginGroup(authGroup);
-        settings.setValue("secret", sp.encrypt(password));
-    }
+    // Update storage
+    Credentials::instance().set(authGroup + "/secret", password, [authGroup](bool error, const QString &data){
+        if (error) {
+            qCCritical(lcSIPAccount) << "failed to set credentials:" << data;
+        }
+    });
 }
 
 SIPAccount::~SIPAccount()

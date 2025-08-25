@@ -37,6 +37,8 @@ public:
 
     void initialize();
 
+    bool hasConfiguration() const { return m_numberOfAccounts; }
+
 signals:
     void accountsChanged();
     void sipRegisteredChanged();
@@ -46,6 +48,8 @@ private:
     SIPAccountManager(QObject *parent = nullptr);
     void setSipRegistered(bool value);
     void updateSipRegistered();
+
+    unsigned m_numberOfAccounts = 0;
 
     QList<SIPAccount *> m_accounts;
     bool m_sipRegistered = false;

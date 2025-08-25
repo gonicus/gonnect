@@ -3,9 +3,9 @@
 #include "AddressBook.h"
 #include "KeychainSettings.h"
 #include "IAddressBookFactory.h"
-#include "SecretPortal.h"
 #include "ViewHelper.h"
 #include "NetworkHelper.h"
+#include "Credentials.h"
 
 #include <QTimer>
 #include <QUrl>
@@ -139,56 +139,43 @@ void AddressBookManager::processAddressBookQueue()
 void AddressBookManager::acquireSecret(const QString &group,
                                        std::function<void(const QString &secret)> callback)
 {
-    auto &secretPortal = SecretPortal::instance();
-    if (!secretPortal.isValid()) {
-        qCWarning(lcAddressBookManager)
-                << "Secrets portal is not available - unable to retrieve passwords";
-        callback("");
-        return;
-    }
-
-    // Retry after we're initialized
-    if (!secretPortal.isInitialized()) {
-        connect(
-                &secretPortal, &SecretPortal::initializedChanged, this,
-                [this, group, callback]() { acquireSecret(group, callback); },
-                Qt::ConnectionType::SingleShotConnection);
-
-        return;
-    }
-
     ReadOnlyConfdSettings settings;
 
     const auto groupHash = settings.hashForSettingsGroup(group);
     const auto secretKey = QString("%1_%2").arg(group, groupHash);
-    const QString secret = KeychainSettings::secret(secretKey);
 
-    if (secret.isEmpty()) {
-        auto &viewHelper = ViewHelper::instance();
-        auto conn = connect(
-                &viewHelper, &ViewHelper::passwordResponded, this,
-                [secretKey, group, callback, this](const QString &id, const QString &password) {
-                    if (id == group) {
-                        QObject::disconnect(m_viewHelperConnections.value(group));
-                        m_viewHelperConnections.remove(group);
+    Credentials::instance().get(secretKey + "/secret", [this, group, secretKey, callback](bool error, const QString &secret){
+        if (error) {
+            qCWarning(lcAddressBookManager) << "failed to retrieve secret:" << secret;
+            return;
+        }
 
-                        auto &secretPortal = SecretPortal::instance();
-                        if (secretPortal.isValid()) {
-                            KeychainSettings settings;
-                            settings.beginGroup(secretKey);
-                            const auto secret = secretPortal.encrypt(password);
-                            settings.setValue("secret", secret);
-                            settings.endGroup();
+        if (secret.isEmpty()) {
+            auto &viewHelper = ViewHelper::instance();
+
+            auto conn = connect(
+                    &viewHelper, &ViewHelper::passwordResponded, this,
+                    [secretKey, group, callback, this](const QString &id, const QString &password) {
+                        if (id == group) {
+                            QObject::disconnect(m_viewHelperConnections.value(group));
+                            m_viewHelperConnections.remove(group);
+
+                            Credentials::instance().set(secretKey + "/secret", password, [secretKey](bool error, const QString &data) {
+                                if (error) {
+                                    qCCritical(lcAddressBookManager) << "failed to set credentials:" << data;
+                                }
+                            });
+
+                            callback(password);
                         }
+                    });
 
-                        callback(password);
-                    }
-                });
+            m_viewHelperConnections.insert(group, conn);
 
-        m_viewHelperConnections.insert(group, conn);
-        viewHelper.requestPassword(group, settings.value("host", "").toString());
-
-    } else {
-        callback(secretPortal.decrypt(secret));
-    }
+            ReadOnlyConfdSettings settings;
+            viewHelper.requestPassword(group, settings.value("host", "").toString());
+        } else {
+            callback(secret);
+        }
+    });
 }

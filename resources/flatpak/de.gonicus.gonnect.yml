@@ -27,7 +27,7 @@ finish-args:
   - --talk-name=org.gnome.evolution.dataserver.Sources5
   - --talk-name=org.gnome.evolution.dataserver.Subprocess.Backend.*
   # Access for the default avatars
-  - --filesystem=xdg-data/pixmaps/faces:create
+  - --filesystem=xdg-data/pixmaps/faces:ro
   # Access for evolution-data-server avatars
   - --filesystem=xdg-cache/evolution/addressbook:ro
   # Access to music folder for ring tones
@@ -53,8 +53,8 @@ modules:
       - install -Dm644 ../krb5.conf -t ${FLATPAK_DEST}/etc/
     sources:
       - type: archive
-        url: https://kerberos.org/dist/krb5/1.21/krb5-1.21.3.tar.gz
-        sha256: b7a4cd5ead67fb08b980b21abd150ff7217e85ea320c9ed0c6dadd304840ad35
+        url: https://kerberos.org/dist/krb5/1.22/krb5-1.22.1.tar.gz
+        sha256: 1a8832b8cad923ebbf1394f67e2efcf41e3a49f460285a66e35adec8fa0053af
         x-checker-data:
           type: anitya
           project-id: 13287
@@ -104,6 +104,20 @@ modules:
         commit: ac39687b8ae16118d385d3694e900becd108a0f2
       - type: patch
         path: patches/qtwebdav-cmake.patch
+
+  - name: qtkeychain
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+    - -DBUILD_WITH_QT6=ON
+    sources:
+      - type: git
+        url: https://github.com/frankosterfeld/qtkeychain.git
+        tag: 0.15.0
+        commit: ad7344c45a86a4f66cbafc4b081b5f7b876cb0b7
+        x-checker-data:
+          type: git
+          tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
 
   - name: libsecret
     buildsystem: meson
@@ -169,8 +183,8 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        url: https://download.gnome.org/sources/evolution-data-server/3.57/evolution-data-server-3.57.2.tar.xz
-        sha256: 9b2647c4265e0a6767fe19c7d602eb9bdcf3f428e4f9c41617e962a7fff9eebd
+        url: https://download.gnome.org/sources/evolution-data-server/3.56/evolution-data-server-3.56.2.tar.xz
+        sha256: df4ec29950f29a76eac6fbe0f814c48d2cef7d3fdb905002a4a883dd761ce93c
         x-checker-data:
           type: gnome
           name: evolution-data-server

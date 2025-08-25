@@ -52,17 +52,22 @@ void SIPAccountManager::initialize()
                     [this, sipAccount]() { emit authorizationFailed(sipAccount->id()); });
             updateSipRegistered();
 
-            if (sipAccount->initialize()) {
-                qCInfo(lcSIPAccountManager) << "created account" << group;
-                m_accounts.push_back(sipAccount);
-            } else {
-                qCCritical(lcSIPAccountManager)
-                        << "skipped" << group << "due to initialization errors";
-            }
+            connect(sipAccount, &SIPAccount::initialized, this, [this, sipAccount, group](bool success){
+                if (!success) {
+                    qCInfo(lcSIPAccountManager) << "created account" << group;
+                    m_accounts.push_back(sipAccount);
+                    emit accountsChanged();
+                } else {
+                    qCCritical(lcSIPAccountManager)
+                    << "skipped" << group << "due to initialization errors";
+                }
+            });
+
+            ++m_numberOfAccounts;
+
+            sipAccount->initialize();
         }
     }
-
-    emit accountsChanged();
 }
 
 void SIPAccountManager::setAccountCredentials(const QString &accountId, const QString &password)
