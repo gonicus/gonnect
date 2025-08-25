@@ -113,12 +113,21 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
 
 void DateEventManager::removeDateEvent(const QString &id)
 {
+    auto &notMan = NotificationManager::instance();
+
     qsizetype i = 0;
     QMutableListIterator it(m_dateEvents);
     while (it.hasNext()) {
         i++;
         const auto item = it.next();
         if (item && item->id() == id) {
+            QString id = item->id();
+            m_alreadyNotifiedDates.remove(id);
+
+            const auto &tag = m_notificationIds[id];
+            notMan.remove(tag);
+            m_notificationIds.remove(id);
+
             item->deleteLater();
             it.remove();
 
@@ -134,6 +143,13 @@ void DateEventManager::resetDateEvents()
     }
 
     m_alreadyNotifiedDates.clear();
+
+    auto &notMan = NotificationManager::instance();
+
+    for (const auto &tag : std::as_const(m_notificationIds)) {
+        notMan.remove(tag);
+    }
+    m_notificationIds.clear();
 
     qDeleteAll(m_dateEvents);
     m_dateEvents.clear();
@@ -175,6 +191,8 @@ DateEvent *DateEventManager::currentDateEventByRoomName(const QString &roomName)
 
 void DateEventManager::onTimerTimeout()
 {
+    auto &notMan = NotificationManager::instance();
+
     const QTime now = QTime::currentTime();
     if (now.minute() != m_lastCheckedTime.minute()) {
         m_lastCheckedTime = now;
@@ -184,30 +202,31 @@ void DateEventManager::onTimerTimeout()
         // Checking if new notifications must be created
         for (const auto dateEvent : std::as_const(m_dateEvents)) {
             const auto start = dateEvent->start();
+            const auto id = dateEvent->id();
+            const auto summary = dateEvent->summary();
+            const auto roomName = dateEvent->roomName();
 
-            if (!m_alreadyNotifiedDates.contains(dateEvent)
-                && !m_notificationIds.contains(dateEvent) && start.date() == today
+            if (!m_alreadyNotifiedDates.contains(id) && !m_notificationIds.contains(id)
+                && start.date() == today && start.time() > now
                 && now.secsTo(start.time()) < 2 * 60) {
-                auto &notificationManager = NotificationManager::instance();
-                auto notification =
-                        new Notification(tr("Conference starting soon"), dateEvent->summary(),
-                                         Notification::Priority::high, &notificationManager);
+                auto notification = new Notification(tr("Conference starting soon"), summary,
+                                                     Notification::Priority::high, &notMan);
 
                 notification->addButton(tr("Join"), "join-meeting", "", {});
-                const auto notificationId = notificationManager.add(notification);
+                const auto notificationId = notMan.add(notification);
 
                 connect(notification, &Notification::actionInvoked, this,
-                        [this, dateEvent, notificationId](QString action, QVariantList) {
+                        [this, id, roomName, notificationId](QString action, QVariantList) {
                             if (action == "join-meeting") {
                                 NotificationManager::instance().remove(notificationId);
-                                m_notificationIds.remove(dateEvent);
+                                m_notificationIds.remove(id);
 
-                                ViewHelper::instance().requestMeeting(dateEvent->roomName());
+                                ViewHelper::instance().requestMeeting(roomName);
                             }
                         });
 
-                m_alreadyNotifiedDates.insert(dateEvent);
-                m_notificationIds.insert(dateEvent, notificationId);
+                m_alreadyNotifiedDates.insert(id);
+                m_notificationIds.insert(id, notificationId);
             }
         }
     }
