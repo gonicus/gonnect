@@ -6,6 +6,7 @@
 #include "ViewHelper.h"
 #include "GlobalInfo.h"
 
+#include <QRegularExpression>
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(lcDateEventManager, "gonnect.app.dateevents.manager")

@@ -12,14 +12,12 @@
 #include "AudioManager.h"
 #include "VideoManager.h"
 #include "SIPAudioDevice.h"
-#include "GlobalCallState.h"
 #include "GlobalMuteState.h"
 #include "FuzzyCompare.h"
 #include "NotificationManager.h"
-#include "SecretPortal.h"
-#include "KeychainSettings.h"
 #include "GlobalInfo.h"
 #include "DateEventManager.h"
+#include "Credentials.h"
 
 #include <QLoggingCategory>
 
@@ -588,26 +586,22 @@ void JitsiConnector::setRoomPassword(QString value)
         return;
     }
 
-    auto &secretPortal = SecretPortal::instance();
-    if (secretPortal.isValid()) {
-        KeychainSettings settings;
-        settings.beginGroup("jitsiRoomPasswords");
-        if (value.isEmpty()) {
-            settings.remove(m_roomName);
+    QString authGroup = "jitsiRoomPasswords/" + m_roomName;
+
+    Credentials::instance().set(authGroup, value, [this, value, authGroup](bool error, const QString &data){
+        if (error) {
+            qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
         } else {
-            settings.setValue(m_roomName, secretPortal.encrypt(value));
+            emit executePasswordCommand(value);
+
+            if (m_roomPassword != value) {
+                m_roomPassword = value;
+                emit roomPasswordChanged();
+            }
+
+            setIsPasswordRequired(!value.isEmpty());
         }
-        settings.endGroup();
-    }
-
-    emit executePasswordCommand(value);
-
-    if (m_roomPassword != value) {
-        m_roomPassword = value;
-        emit roomPasswordChanged();
-    }
-
-    setIsPasswordRequired(!value.isEmpty());
+    });
 }
 
 void JitsiConnector::setCurrentAudioInputDevice(JitsiMediaDevice *device)
@@ -767,17 +761,26 @@ void JitsiConnector::toggleSubtitles()
 void JitsiConnector::passwordEntered(const QString &password, bool shouldRemember)
 {
     if (shouldRemember) {
-        auto &secretPortal = SecretPortal::instance();
-        if (secretPortal.isValid()) {
-            KeychainSettings settings;
-            settings.beginGroup("jitsiRoomPasswords");
-            settings.setValue(m_roomName, secretPortal.encrypt(password));
-            settings.endGroup();
-        }
-    }
+        QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-    setIsPasswordEntryRequired(false);
-    emit executePasswordCommand(password);
+        Credentials::instance().set(authGroup, password, [this, password, authGroup](bool error, const QString &data){
+            if (error) {
+                qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
+            } else {
+                emit executePasswordCommand(password);
+
+                if (m_roomPassword != password) {
+                    m_roomPassword = password;
+                    emit roomPasswordChanged();
+                }
+
+                setIsPasswordEntryRequired(false);
+                setIsPasswordRequired(false);
+
+                emit executePasswordCommand(password);
+            }
+        });
+    }
 }
 
 void JitsiConnector::onPasswordRequired()
@@ -786,20 +789,25 @@ void JitsiConnector::onPasswordRequired()
     if (!m_passwordAlreadyRequested) {
         m_passwordAlreadyRequested = true;
 
-        auto &secretPortal = SecretPortal::instance();
-        if (secretPortal.isValid()) {
-            KeychainSettings settings;
-            settings.beginGroup("jitsiRoomPasswords");
-            if (settings.contains(m_roomName)) {
-                passwordEntered(secretPortal.decrypt(settings.value(m_roomName).toString()), false);
-                return;
-            }
-            settings.endGroup();
-        }
-    }
+        QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-    setIsPasswordRequired(true);
-    setIsPasswordEntryRequired(true);
+        Credentials::instance().get(authGroup, [this, authGroup](bool error, const QString &data){
+            if (error) {
+                qCCritical(lcJitsiConnector) << "failed to get credentials:" << data;
+            } else {
+                if (!data.isEmpty()) {
+                    passwordEntered(data, false);
+                    return;
+                }
+            }
+
+            setIsPasswordRequired(true);
+            setIsPasswordEntryRequired(true);
+        });
+    } else {
+        setIsPasswordRequired(true);
+        setIsPasswordEntryRequired(true);
+    }
 }
 
 void JitsiConnector::setVideoQuality(VideoQuality quality)

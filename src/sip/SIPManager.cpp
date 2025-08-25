@@ -103,14 +103,16 @@ void SIPManager::initialize()
     m_ep.libStart();
 
     // Load Accounts + Transports
-    SIPAccountManager::instance().initialize();
-    TogglerManager::instance().initialize();
+    auto& sam = SIPAccountManager::instance();
+    connect(&sam, &SIPAccountManager::accountsChanged, this, [this](){
+        for (const QString &var : std::as_const(m_buddyStateQueue)) {
+            buddyStatus(var);
+        }
+        m_buddyStateQueue.clear();
+    });
+    sam.initialize();
 
-    // Account initialized - process saved buddy status requests so they get updated
-    for (const QString &var : std::as_const(m_buddyStateQueue)) {
-        buddyStatus(var);
-    }
-    m_buddyStateQueue.clear();
+    TogglerManager::instance().initialize();
 
     // Create event loop object
     m_ev = new SIPEventLoop(this);
@@ -130,7 +132,7 @@ void SIPManager::initialize()
 
 bool SIPManager::isConfigured() const
 {
-    return SIPAccountManager::instance().accounts().length();
+    return SIPAccountManager::instance().hasConfiguration();
 }
 
 void SIPManager::initializePreferredIdentities()

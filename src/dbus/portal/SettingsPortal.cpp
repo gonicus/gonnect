@@ -28,16 +28,16 @@ SettingsPortal::SettingsPortal(QObject *parent) : QObject(parent)
             &SettingsPortal::settingsChanged);
 }
 
-SettingsPortal::ColorScheme SettingsPortal::unsignedToColorScheme(unsigned value)
+ThemeManager::ColorScheme SettingsPortal::unsignedToColorScheme(unsigned value)
 {
     if (value == 1) {
-        return ColorScheme::DARK;
+        return ThemeManager::ColorScheme::DARK;
     }
     if (value == 2) {
-        return ColorScheme::LIGHT;
+        return ThemeManager::ColorScheme::LIGHT;
     }
 
-    return ColorScheme::NO_PREFERENCE;
+    return ThemeManager::ColorScheme::NO_PREFERENCE;
 }
 
 void SettingsPortal::settingsChanged(QString ns, QString key, QDBusVariant value)

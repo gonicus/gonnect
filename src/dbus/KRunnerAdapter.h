@@ -19,7 +19,7 @@
 #include <QtCore/qcontainerfwd.h>
 
 // HAND-EDIT - added missing include
-#include "SearchProvider.h"
+#include "linux/LinuxDesktopSearchProvider.h"
 
 /*
  * Adaptor class for interface org.kde.krunner1
