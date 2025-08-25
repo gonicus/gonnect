@@ -53,8 +53,8 @@ private:
 
     QString m_jitsiUrl;
     QList<DateEvent *> m_dateEvents;
-    QHash<DateEvent *, QString> m_notificationIds;
-    QSet<DateEvent *> m_alreadyNotifiedDates;
+    QHash<QString, QString> m_notificationIds;
+    QSet<QString> m_alreadyNotifiedDates;
     QTimer m_minuteTimer;
     QTime m_lastCheckedTime;
     QDate m_lastCheckedDate;
