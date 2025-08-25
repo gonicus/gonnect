@@ -206,15 +206,11 @@ void DateEventManager::onTimerTimeout()
             const auto summary = dateEvent->summary();
             const auto roomName = dateEvent->roomName();
 
-            if (!m_alreadyNotifiedDates.contains(id)
-                && !m_notificationIds.contains(id)
-                && start.date() == today
-                && start.time() > now
-                && now.secsTo(start.time()) < 2 * 60)
-            {
-                auto notification =
-                        new Notification(tr("Conference starting soon"), summary,
-                                         Notification::Priority::high, &notMan);
+            if (!m_alreadyNotifiedDates.contains(id) && !m_notificationIds.contains(id)
+                && start.date() == today && start.time() > now
+                && now.secsTo(start.time()) < 2 * 60) {
+                auto notification = new Notification(tr("Conference starting soon"), summary,
+                                                     Notification::Priority::high, &notMan);
 
                 notification->addButton(tr("Join"), "join-meeting", "", {});
                 const auto notificationId = notMan.add(notification);
