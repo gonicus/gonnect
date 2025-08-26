@@ -5,7 +5,8 @@
 
 ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
 {
-    connect(this, &ChatModel::iConferenceConnectorChanged, this, &ChatModel::onIConferenceConnectorChanged);
+    connect(this, &ChatModel::iConferenceConnectorChanged, this,
+            &ChatModel::onIConferenceConnectorChanged);
 }
 
 QHash<int, QByteArray> ChatModel::roleNames() const
@@ -66,14 +67,14 @@ void ChatModel::onIConferenceConnectorChanged()
 
     if (m_iConferenceConnector) {
         m_iConferenceConnectorContext = new QObject(this);
-        connect(m_iConferenceConnector, &IConferenceConnector::chatMessageAdded, m_iConferenceConnectorContext,
-                [this](qsizetype index, ConferenceChatMessage *) {
+        connect(m_iConferenceConnector, &IConferenceConnector::chatMessageAdded,
+                m_iConferenceConnectorContext, [this](qsizetype index, ConferenceChatMessage *) {
                     beginInsertRows(QModelIndex(), index, index);
                     endInsertRows();
                     updateRealMessagesCount();
                 });
-        connect(m_iConferenceConnector, &IConferenceConnector::chatMessagesReset, m_iConferenceConnectorContext,
-                [this]() {
+        connect(m_iConferenceConnector, &IConferenceConnector::chatMessagesReset,
+                m_iConferenceConnectorContext, [this]() {
                     beginResetModel();
                     endResetModel();
                     updateRealMessagesCount();
