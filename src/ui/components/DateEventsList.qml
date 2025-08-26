@@ -141,20 +141,14 @@ ListView {
 
                 Label {
                     id: remainingMinutesLabel
-                    visible: delg.isToday && !delg.isInPast && (delg.minutesRemainingToStart < 120 || delg.isCurrentlyTakingPlace)
+                    visible: delg.isToday && !delg.isInPast
+                             && ((delg.minutesRemainingToStart >= 0 && delg.minutesRemainingToStart < 120)
+                                 || delg.isCurrentlyTakingPlace)
                     font.weight: summaryLabel.font.weight
                     color: Theme.secondaryTextColor
-                    text: {
-                        if (delg.isCurrentlyTakingPlace) {
-                            return qsTr("(until %1)").arg(delg.endDateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm")))
-                        } else if (delg.minutesRemainingToStart === 0) {
-                            return qsTr("now")
-                        } else if (delg.minutesRemainingToStart < 0) {
-                            return ""
-                        } else {
-                            return qsTr("(in %1)").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))
-                        }
-                    }
+                    text: "(" + (delg.isCurrentlyTakingPlace
+                          ? qsTr("till %1").arg(delg.endDateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm")))
+                          : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))) + ")"
                 }
             }
         }
