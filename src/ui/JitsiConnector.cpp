@@ -1016,16 +1016,21 @@ ContactInfo JitsiConnector::remoteContactInfo() const
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
     const static QSet<Capability> m_capabilites = {
-        Capability::TileView,
-        Capability::ScreenShare,
-        Capability::NoiseSuppression,
+        Capability::AudioMute,
+        Capability::ChatInCall,
+        Capability::Holdable,
         Capability::RaiseHand,
+        Capability::ScreenShare,
+        Capability::Sharable,
         Capability::Subtitles,
+        Capability::MuteAll,
+        Capability::NoiseSuppression,
         Capability::ParticipantRoles,
         Capability::ParticipantKickable,
-        Capability::ChatInCall,
-        Capability::ShareUrl,
         Capability::RoomPassword,
+        Capability::ShareUrl,
+        Capability::TileView,
+        Capability::VideoMute,
         Capability::VideoQualityAdjustable,
     };
     return m_capabilites.contains(capabilityToCheck);

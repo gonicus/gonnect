@@ -48,18 +48,22 @@ public:
     IConferenceConnector(QObject *parent = nullptr) : ICallState{ parent } { }
 
     enum class Capability {
-        TileView = 1,
-        ScreenShare,
-        NoiseSuppression,
+        AudioMute = 1,
+        ChatInCall,
+        Holdable,
         RaiseHand,
+        ScreenShare,
+        Sharable,
         Subtitles,
+        MuteAll,
+        NoiseSuppression,
         ParticipantRoles,
         ParticipantKickable,
-        ChatInCall,
-        ShareUrl,
         RoomPassword,
+        ShareUrl,
+        TileView,
+        VideoMute,
         VideoQualityAdjustable,
-        MuteAll
     };
     Q_ENUM(Capability)
 
