@@ -146,6 +146,7 @@ Item {
 
             BarButton {
                 id: shareButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Sharable)
                 enabled: !control.isOnHold
                 text: qsTr("Share")
                 iconPath: Icons.documentShare
@@ -182,6 +183,7 @@ Item {
 
             BarButton {
                 id: raiseHandButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.RaiseHand)
                 enabled: !control.isOnHold
                 text: qsTr("Raise")
                 iconPath: Icons.transformBrowse
@@ -191,6 +193,7 @@ Item {
 
             BarButton {
                 id: holdButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Holdable)
                 text: control.isOnHold ? qsTr("Resume") : qsTr("Hold")
                 iconPath: control.isOnHold ? Icons.mediaPlaybackStart : Icons.mediaPlaybackPause
                 onClicked: () => control.setOnHold(!control.isOnHold)
@@ -198,6 +201,7 @@ Item {
 
             BarButton {
                 id: tileViewButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.TileView)
                 enabled: !control.isOnHold
                 text: qsTr("View")
                 iconPath: control.isTileView ? Icons.viewLeftNew : Icons.viewGrid
@@ -206,6 +210,7 @@ Item {
 
             BarButton {
                 id: screenShareButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.ScreenShare)
                 enabled: !control.isOnHold
                 text: qsTr("Screen")
                 iconPath: control.isSharingScreen ? Icons.mediaPlaybackStopped : Icons.inputTouchscreen
@@ -214,6 +219,7 @@ Item {
 
             BarButton {
                 id: videoDeviceButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
                 enabled: !control.isOnHold
                 text: qsTr("Camera")
                 iconPath: control.isVideoMuted ? Icons.cameraOff : Icons.cameraOn
@@ -231,6 +237,7 @@ Item {
 
             BarButton {
                 id: audioInputDeviceButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.AudioMute)
                 enabled: !control.isOnHold
                 text: qsTr("Micro")
                 iconPath: control.isMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
@@ -280,6 +287,7 @@ Item {
 
                     MenuItem {
                         id: noiseSuppressionMenuItem
+                        visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.NoiseSuppression)
                         text: qsTr("Noise supression")
                         icon.source: control.iConferenceConnector.isNoiseSuppressionEnabled ? Icons.checkbox : ""
                         onClicked: () => control.iConferenceConnector.setNoiseSuppressionEnabled(!control.iConferenceConnector.isNoiseSuppressionEnabled)
@@ -287,24 +295,28 @@ Item {
 
                     MenuItem {
                         text: qsTr("Toggle subtitles")
+                        visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Subtitles)
                         icon.source: control.iConferenceConnector.isSubtitlesEnabled ? Icons.checkbox : ""
                         onClicked: () => control.iConferenceConnector.setSubtitlesEnabled(!control.iConferenceConnector.isSubtitlesEnabled)
                     }
 
                     MenuItem {
                         text: qsTr("Video quality...")
+                        visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoQualityAdjustable)
                         onClicked: () => control.openVideoQualityDialog()
                     }
 
                     MenuItem {
                         id: setPasswordMenuItem
                         visible: control.iConferenceConnector.ownRole === ConferenceParticipant.Role.Moderator
+                                 && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.RoomPassword)
                         text: qsTr("Set room password...")
                         onClicked: () => control.openSetPasswordDialog()
                     }
 
                     MenuItem {
                         visible: control.iConferenceConnector.ownRole === ConferenceParticipant.Role.Moderator
+                                 && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.MuteAll)
                         text: qsTr("Mute everyone")
                         onClicked: () => control.iConferenceConnector.muteAll()
                     }
