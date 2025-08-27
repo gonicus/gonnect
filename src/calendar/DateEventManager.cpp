@@ -20,6 +20,16 @@ DateEventManager::DateEventManager(QObject *parent) : QObject{ parent }
     m_minuteTimer.callOnTimeout(this, &DateEventManager::onTimerTimeout);
 }
 
+DateEvent *DateEventManager::findDateEventById(const QString &id) const
+{
+    for (auto dateEvent : std::as_const(m_dateEvents)) {
+        if (dateEvent->id() == id) {
+            return dateEvent;
+        }
+    }
+    return nullptr;
+}
+
 DateEventManager::~DateEventManager()
 {
     if (m_minuteTimer.isActive()) {
@@ -189,6 +199,30 @@ DateEvent *DateEventManager::currentDateEventByRoomName(const QString &roomName)
     return nullptr;
 }
 
+void DateEventManager::removeNotificationByRoomName(const QString &roomName)
+{
+    DateEvent *foundDateEvent = nullptr;
+
+    for (auto dateEvent : std::as_const(m_dateEvents)) {
+        if (dateEvent->roomName() == roomName) {
+            foundDateEvent = dateEvent;
+            break;
+        }
+    }
+
+    if (!foundDateEvent) {
+        return;
+    }
+
+    auto notificationId = m_notificationIds.value(foundDateEvent->id());
+    if (notificationId.isEmpty()) {
+        return;
+    }
+
+    NotificationManager::instance().remove(notificationId);
+    m_notificationIds.remove(foundDateEvent->id());
+}
+
 void DateEventManager::onTimerTimeout()
 {
     auto &notMan = NotificationManager::instance();
@@ -231,6 +265,7 @@ void DateEventManager::onTimerTimeout()
         }
     }
 
+    // Clear DateEvent objects from yesterday and before
     const QDate today = QDate::currentDate();
     if (today != m_lastCheckedDate) {
         m_lastCheckedDate = today;
@@ -244,9 +279,26 @@ void DateEventManager::onTimerTimeout()
             }
         }
     }
+
+    // Clear notifications of events that are over
+    QMutableHashIterator it(m_notificationIds);
+
+    while (it.hasNext()) {
+        it.next();
+        auto dateEvent = findDateEventById(it.key());
+        if (dateEvent && isOver(*dateEvent)) {
+            NotificationManager::instance().remove(it.value());
+            it.remove();
+        }
+    }
 }
 
 bool DateEventManager::isTooOld(const DateEvent &dateEvent) const
 {
     return dateEvent.start().date() < QDate::currentDate();
+}
+
+bool DateEventManager::isOver(const DateEvent &dateEvent) const
+{
+    return dateEvent.end() < QDateTime::currentDateTime();
 }

@@ -19,6 +19,7 @@
 #include "SecretPortal.h"
 #include "KeychainSettings.h"
 #include "GlobalInfo.h"
+#include "DateEventManager.h"
 
 #include <QLoggingCategory>
 
@@ -406,6 +407,8 @@ void JitsiConnector::enterRoom(const QString &roomName, const QString &displayNa
 {
     qCInfo(lcJitsiConnector).nospace().noquote()
             << "Entering room " << roomName << " (" << displayName << ") with flags:" << startFlags;
+
+    DateEventManager::instance().removeNotificationByRoomName(roomName);
 
     m_startWithVideo = startFlags & JitsiConnector::MeetingStartFlag::VideoActive;
 
