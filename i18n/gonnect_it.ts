@@ -594,12 +594,12 @@
 <context>
     <name>DateEventManager</name>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="193"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="246"/>
         <source>Conference starting soon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="196"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="249"/>
         <source>Join</source>
         <translation type="unfinished"></translation>
     </message>
@@ -629,18 +629,13 @@
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="139"/>
-        <location filename="../src/ui/components/DateEventsList.qml" line="148"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="150"/>
         <source>hh:mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="148"/>
-        <source>till %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="150"/>
-        <source>now</source>
+        <source>till %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1052,22 +1047,32 @@
 <context>
     <name>JitsiConnector</name>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="122"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="123"/>
         <source>New chat message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="165"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="166"/>
         <source>Unnamed participant</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="819"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="439"/>
+        <source>Active conference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/JitsiConnector.cpp" line="444"/>
+        <source>Hang up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/JitsiConnector.cpp" line="850"/>
         <source>%1 has joined the conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="832"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="863"/>
         <source>%1 has left the conference</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1256,32 +1261,32 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="113"/>
+        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="114"/>
         <source>Prefix</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="123"/>
+        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="125"/>
         <source>Identity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="139"/>
+        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="142"/>
         <source>Enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="149"/>
+        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="152"/>
         <source>Automatic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="161"/>
+        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="164"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="184"/>
+        <location filename="../src/ui/PreferredIdentityEditWindow.qml" line="187"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
