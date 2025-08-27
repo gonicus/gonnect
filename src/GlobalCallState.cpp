@@ -51,17 +51,32 @@ bool GlobalCallState::registerCallStateObject(ICallState *callStateObject)
     const bool isRegistered = m_globalCallStateObjects.contains(callStateObject);
     if (!isRegistered) {
         m_globalCallStateObjects.insert(callStateObject);
-        m_globalCallStateObjectsStack.push(callStateObject);
 
         connect(callStateObject, &QObject::destroyed, this, [this](QObject *obj) {
-            m_globalCallStateObjectsStack.removeOne(static_cast<ICallState *>(obj));
+            if (m_lastCallThatBecameActive == obj) {
+                m_lastCallThatBecameActive = nullptr;
+            }
+
             if (m_globalCallStateObjects.remove(static_cast<ICallState *>(obj))) {
                 updateGlobalCallState();
                 emit globalCallStateObjectsChanged();
             }
         });
+
+        connect(callStateObject, &ICallState::callStateChanged, this,
+                [this, callStateObject](ICallState::States newState, ICallState::States oldState) {
+                    const auto CallActive = ICallState::State::CallActive;
+
+                    if (!(oldState & CallActive) && (newState & CallActive)) {
+                        m_lastCallThatBecameActive = callStateObject;
+                    } else if ((oldState & CallActive) && !(newState & CallActive)) {
+                        m_lastCallThatBecameActive = nullptr;
+                    }
+                });
+
         connect(callStateObject, &ICallState::callStateChanged, this,
                 &GlobalCallState::updateGlobalCallState);
+
         updateGlobalCallState();
         emit globalCallStateObjectsChanged();
     }
@@ -75,7 +90,10 @@ bool GlobalCallState::unregisterCallStateObject(ICallState *callStateObject)
         return false;
     }
 
-    m_globalCallStateObjectsStack.removeOne(callStateObject);
+    if (m_lastCallThatBecameActive == callStateObject) {
+        m_lastCallThatBecameActive = nullptr;
+    }
+
     const bool wasRegistered = m_globalCallStateObjects.remove(callStateObject);
     if (wasRegistered) {
         disconnect(callStateObject);
@@ -182,11 +200,7 @@ void GlobalCallState::triggerHold()
 
 bool GlobalCallState::wasLastAddedConference() const
 {
-    if (m_globalCallStateObjectsStack.isEmpty()) {
-        return false;
-    }
-
-    return qobject_cast<JitsiConnector *>(m_globalCallStateObjectsStack.top());
+    return qobject_cast<JitsiConnector *>(m_lastCallThatBecameActive);
 }
 
 void GlobalCallState::updateRinger()

@@ -61,7 +61,7 @@ private:
 
     ICallState::States m_globalCallState = ICallState::State::Idle;
     QSet<ICallState *> m_globalCallStateObjects;
-    QStack<ICallState *> m_globalCallStateObjectsStack;
+    ICallState *m_lastCallThatBecameActive = nullptr;
     ICallState *m_callInForeground = nullptr;
     QObject *m_foregroundCallContext = nullptr;
 
