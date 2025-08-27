@@ -113,6 +113,14 @@ qsizetype GlobalCallState::callsCount() const
     return count;
 }
 
+void GlobalCallState::setCallInForeground(ICallState *call)
+{
+    if (m_callInForeground != call) {
+        m_callInForeground = call;
+        emit callInForegroundChanged();
+    }
+}
+
 void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
 {
     if (m_remoteContactInfo != info) {
@@ -123,54 +131,37 @@ void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
 
 void GlobalCallState::triggerHold()
 {
-    // Gather active call objects
-    QSet<ICallState *> activeCalls;
-    QSet<ICallState *> callsOnHold;
-    QSet<ICallState *> callsNotOnHold;
-
-    for (auto call : std::as_const(m_globalCallStateObjects)) {
-        if (call->callState() & ICallState::State::CallActive) {
-            activeCalls.insert(call);
-
-            if (call->callState() & ICallState::State::OnHold) {
-                callsOnHold.insert(call);
-            } else {
-                callsNotOnHold.insert(call);
-            }
-        }
-    }
-
-    // 0 calls - do nothing
-    if (activeCalls.size() == 0) {
-        return;
-    }
-
-    // 1 call - toggle
-    if (activeCalls.size() == 1) {
-        (*activeCalls.cbegin())->toggleHold();
-        return;
-    }
-
-    // n calls, 1 active - hold active call, unhold next
-    if (!callsNotOnHold.isEmpty()) {
-        (*activeCalls.cbegin())->toggleHold();
-
-        if (!callsOnHold.isEmpty()) {
-            (*callsOnHold.cbegin())->toggleHold();
-        }
-        return;
-    }
-
-    // n calls, 0 active - unhold call in foreground
     if (m_callInForeground) {
-        m_callInForeground->toggleHold();
-        return;
+        if (m_callInForeground->callState() & ICallState::State::OnHold) {
+            holdAllCalls(m_callInForeground);
+            m_callInForeground->toggleHold();
+        } else {
+            holdAllCalls();
+        }
     }
+}
 
-    // n calls, m active - hold all but the one in foreground
-    for (auto call : std::as_const(callsNotOnHold)) {
-        if (call != m_callInForeground) {
-            call->toggleHold();
+void GlobalCallState::holdAllCalls(const ICallState *stateObjectToSkip) const
+{
+    for (auto callObj : std::as_const(m_globalCallStateObjects)) {
+        if (callObj != stateObjectToSkip && !(callObj->callState() & ICallState::State::OnHold)) {
+            callObj->toggleHold();
+        }
+    }
+}
+
+void GlobalCallState::unholdOtherCall() const
+{
+    if (m_callInForeground) {
+        if (m_callInForeground->callState() & ICallState::State::OnHold) {
+            m_callInForeground->toggleHold();
+        }
+    } else {
+        for (auto callObj : std::as_const(m_globalCallStateObjects)) {
+            if (callObj->callState() & ICallState::State::OnHold) {
+                callObj->toggleHold();
+            }
+            break;
         }
     }
 }

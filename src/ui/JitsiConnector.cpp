@@ -407,6 +407,10 @@ void JitsiConnector::enterRoom(const QString &roomName, const QString &displayNa
     qCInfo(lcJitsiConnector).nospace().noquote()
             << "Entering room " << roomName << " (" << displayName << ") with flags:" << startFlags;
 
+    if (isOnHold()) {
+        GlobalCallState::instance().triggerHold();
+    }
+
     m_startWithVideo = startFlags & JitsiConnector::MeetingStartFlag::VideoActive;
 
     if (m_callHistoryItem) {
