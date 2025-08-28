@@ -54,9 +54,22 @@ BaseWindow {
 
     readonly property CallsModel globalCallsModel: CallsModel {
         id: callsModel
+        onCountChanged: () => control.checkIfToChangeCallOrConferencePage()
+    }
 
-        onCountChanged: () => {
-            if (callsModel.count && ![GonnectWindow.PageId.Call, GonnectWindow.PageId.Conference].includes(mainTabBar.selectedPageId)) {
+    readonly property Connections globalStateConnections: Connections {
+        target: GlobalCallState
+        function onActiveCallsCountChanged() { control.checkIfToChangeCallOrConferencePage() }
+    }
+
+    function checkIfToChangeCallOrConferencePage() {
+        const count = GlobalCallState.activeCallsCount
+        const isOnCallOrConferencePage = [GonnectWindow.PageId.Call, GonnectWindow.PageId.Conference].includes(mainTabBar.selectedPageId)
+
+        if (count) {
+            if (GlobalCallState.wasLastAddedConference()) {
+                control.showPage(GonnectWindow.PageId.Conference)
+            } else {
                 control.showPage(GonnectWindow.PageId.Call)
             } else if (!callsModel.count && mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
                 if (conferencePage.iConferenceConnector.isInConference) {
@@ -65,6 +78,8 @@ BaseWindow {
                     control.showPage(GonnectWindow.PageId.Calls)
                 }
             }
+        } else if (!count && isOnCallOrConferencePage) {
+            control.showPage(GonnectWindow.PageId.Calls)
         }
     }
 
