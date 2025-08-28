@@ -55,7 +55,7 @@ private:
     QString m_id;
 
 signals:
-    void callStateChanged();
+    void callStateChanged(ICallState::States newState, ICallState::States oldState);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ICallState::States)

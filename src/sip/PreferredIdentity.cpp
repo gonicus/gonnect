@@ -1,7 +1,7 @@
 #include <QLoggingCategory>
-#include <QRegularExpression>
 #include "SIPManager.h"
 #include "PreferredIdentity.h"
+#include "PreferredIdentityValidator.h"
 
 Q_LOGGING_CATEGORY(lcSIPIdentity, "gonnect.sip.identity")
 
@@ -89,11 +89,7 @@ void PreferredIdentity::setAutomatic(bool flag)
 
 void PreferredIdentity::validate()
 {
-    static const QRegularExpression numberMatch("^\\+[0-9]+$");
-    static const QRegularExpression mulitNumberMatch("^(\\+[0-9]+)(,\\+[0-9]+)*$");
-
-    const bool isValid = !m_displayName.isEmpty() && numberMatch.match(m_identity).hasMatch()
-            && (m_prefix.isEmpty() || mulitNumberMatch.match(m_prefix).hasMatch());
+    const bool isValid = PreferredIdentityValidator::instance().isValid(*this);
 
     if (isValid != m_isValid) {
         m_isValid = isValid;

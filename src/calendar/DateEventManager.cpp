@@ -20,6 +20,16 @@ DateEventManager::DateEventManager(QObject *parent) : QObject{ parent }
     m_minuteTimer.callOnTimeout(this, &DateEventManager::onTimerTimeout);
 }
 
+DateEvent *DateEventManager::findDateEventByHash(const size_t &eventHash) const
+{
+    for (auto dateEvent : std::as_const(m_dateEvents)) {
+        if (dateEvent->getHash() == eventHash) {
+            return dateEvent;
+        }
+    }
+    return nullptr;
+}
+
 DateEventManager::~DateEventManager()
 {
     if (m_minuteTimer.isActive()) {
@@ -113,12 +123,21 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
 
 void DateEventManager::removeDateEvent(const QString &id)
 {
+    auto &notMan = NotificationManager::instance();
+
     qsizetype i = 0;
     QMutableListIterator it(m_dateEvents);
     while (it.hasNext()) {
         i++;
         const auto item = it.next();
         if (item && item->id() == id) {
+            const auto eventHash = item->getHash();
+            m_alreadyNotifiedDates.remove(eventHash);
+
+            const auto &tag = m_notificationIds[eventHash];
+            notMan.remove(tag);
+            m_notificationIds.remove(eventHash);
+
             item->deleteLater();
             it.remove();
 
@@ -134,6 +153,13 @@ void DateEventManager::resetDateEvents()
     }
 
     m_alreadyNotifiedDates.clear();
+
+    auto &notMan = NotificationManager::instance();
+
+    for (const auto &tag : std::as_const(m_notificationIds)) {
+        notMan.remove(tag);
+    }
+    m_notificationIds.clear();
 
     qDeleteAll(m_dateEvents);
     m_dateEvents.clear();
@@ -173,8 +199,36 @@ DateEvent *DateEventManager::currentDateEventByRoomName(const QString &roomName)
     return nullptr;
 }
 
+void DateEventManager::removeNotificationByRoomName(const QString &roomName)
+{
+    DateEvent *foundDateEvent = nullptr;
+
+    for (auto dateEvent : std::as_const(m_dateEvents)) {
+        if (dateEvent->roomName() == roomName) {
+            foundDateEvent = dateEvent;
+            break;
+        }
+    }
+
+    if (!foundDateEvent) {
+        return;
+    }
+
+    const auto eventHash = foundDateEvent->getHash();
+
+    auto notificationId = m_notificationIds.value(eventHash);
+    if (notificationId.isEmpty()) {
+        return;
+    }
+
+    NotificationManager::instance().remove(notificationId);
+    m_notificationIds.remove(eventHash);
+}
+
 void DateEventManager::onTimerTimeout()
 {
+    auto &notMan = NotificationManager::instance();
+
     const QTime now = QTime::currentTime();
     if (now.minute() != m_lastCheckedTime.minute()) {
         m_lastCheckedTime = now;
@@ -183,35 +237,37 @@ void DateEventManager::onTimerTimeout()
 
         // Checking if new notifications must be created
         for (const auto dateEvent : std::as_const(m_dateEvents)) {
+            const auto eventHash = dateEvent->getHash();
             const auto start = dateEvent->start();
+            const auto summary = dateEvent->summary();
+            const auto roomName = dateEvent->roomName();
 
-            if (!m_alreadyNotifiedDates.contains(dateEvent)
-                && !m_notificationIds.contains(dateEvent) && start.date() == today
-                && now.secsTo(start.time()) < 2 * 60) {
-                auto &notificationManager = NotificationManager::instance();
-                auto notification =
-                        new Notification(tr("Conference starting soon"), dateEvent->summary(),
-                                         Notification::Priority::high, &notificationManager);
+            if (!m_alreadyNotifiedDates.contains(eventHash)
+                && !m_notificationIds.contains(eventHash) && start.date() == today
+                && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
+                auto notification = new Notification(tr("Conference starting soon"), summary,
+                                                     Notification::Priority::high, &notMan);
 
                 notification->addButton(tr("Join"), "join-meeting", "", {});
-                const auto notificationId = notificationManager.add(notification);
+                const auto notificationId = notMan.add(notification);
 
                 connect(notification, &Notification::actionInvoked, this,
-                        [this, dateEvent, notificationId](QString action, QVariantList) {
+                        [this, eventHash, roomName, notificationId](QString action, QVariantList) {
                             if (action == "join-meeting") {
                                 NotificationManager::instance().remove(notificationId);
-                                m_notificationIds.remove(dateEvent);
+                                m_notificationIds.remove(eventHash);
 
-                                ViewHelper::instance().requestMeeting(dateEvent->roomName());
+                                ViewHelper::instance().requestMeeting(roomName);
                             }
                         });
 
-                m_alreadyNotifiedDates.insert(dateEvent);
-                m_notificationIds.insert(dateEvent, notificationId);
+                m_alreadyNotifiedDates.insert(eventHash);
+                m_notificationIds.insert(eventHash, notificationId);
             }
         }
     }
 
+    // Clear DateEvent objects from yesterday and before
     const QDate today = QDate::currentDate();
     if (today != m_lastCheckedDate) {
         m_lastCheckedDate = today;
@@ -225,9 +281,26 @@ void DateEventManager::onTimerTimeout()
             }
         }
     }
+
+    // Clear notifications of events that are over
+    QMutableHashIterator it(m_notificationIds);
+
+    while (it.hasNext()) {
+        it.next();
+        auto dateEvent = findDateEventByHash(it.key());
+        if (dateEvent && isOver(*dateEvent)) {
+            NotificationManager::instance().remove(it.value());
+            it.remove();
+        }
+    }
 }
 
 bool DateEventManager::isTooOld(const DateEvent &dateEvent) const
 {
     return dateEvent.start().date() < QDate::currentDate();
+}
+
+bool DateEventManager::isOver(const DateEvent &dateEvent) const
+{
+    return dateEvent.end() < QDateTime::currentDateTime();
 }

@@ -203,6 +203,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/Switch.qml
         ui/components/controls/TabBar.qml
         ui/components/controls/TabButton.qml
+        ui/components/controls/TextField.qml
 
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
@@ -377,6 +378,8 @@ qt_add_qml_module(gonnect
         sip/SIPUserAgentConfig.cpp
         sip/PreferredIdentity.h
         sip/PreferredIdentity.cpp
+        sip/PreferredIdentityValidator.h
+        sip/PreferredIdentityValidator.cpp
         sip/Ringer.h
         sip/Ringer.cpp
         sip/RingTone.h

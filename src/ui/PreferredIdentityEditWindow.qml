@@ -102,6 +102,7 @@ BaseWindow {
                 id: displayNameTextField
                 placeholderText: qsTr("Name")
                 text: internal.originalDisplayName
+                isValid: PreferredIdentityValidator.isDisplayNameValid(displayNameTextField.text)
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -112,6 +113,7 @@ BaseWindow {
                 id: prefixTextField
                 placeholderText: qsTr("Prefix")
                 text: internal.originalPrefix
+                isValid: PreferredIdentityValidator.isPrefixValid(prefixTextField.text)
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -122,6 +124,7 @@ BaseWindow {
                 id: identityTextField
                 placeholderText: qsTr("Identity")
                 text: internal.originalIdentity
+                isValid: PreferredIdentityValidator.isIdentityNumberValid(identityTextField.text)
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -182,10 +185,12 @@ BaseWindow {
         Button {
             id: saveButton
             text: qsTr("Save")
-            enabled: internal.modified && control.preferredIdentity?.isValid
             highlighted: true
             icon.source: Icons.documentSave
-
+            enabled: internal.modified
+                     && displayNameTextField.isValid
+                     && prefixTextField.isValid
+                     && identityTextField.isValid
             anchors {
                 bottom: parent.bottom
                 bottomMargin: 5

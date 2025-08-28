@@ -8,6 +8,7 @@
 #include "KeychainSettings.h"
 #include "ViewHelper.h"
 
+#include <QTimer>
 #include <QLoggingCategory>
 #include <QPluginLoader>
 
@@ -106,8 +107,12 @@ void DateEventFeederManager::processQueue()
     bool networkAvailable = true;
     auto &networkHelper = NetworkHelper::instance();
 
-    QMutableStringListIterator it(m_feederConfigIds);
+    if (!m_queueMutex.tryLock()) {
+        QTimer::singleShot(100, this, &DateEventFeederManager::processQueue);
+        return;
+    }
 
+    QMutableStringListIterator it(m_feederConfigIds);
     while (it.hasNext()) {
         const auto &configId = it.next();
 
@@ -144,6 +149,8 @@ void DateEventFeederManager::processQueue()
             it.remove();
         }
     }
+
+    m_queueMutex.unlock();
 }
 
 void DateEventFeederManager::setupReconnectSignal()

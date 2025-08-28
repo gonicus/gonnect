@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <libusb.h>
 #include "HeadsetDevice.h"
+#include "GlobalInfo.h"
 
 Q_LOGGING_CATEGORY(lcHeadset, "gonnect.usb.headset")
 
@@ -28,6 +29,9 @@ HeadsetDevice::HeadsetDevice(const hid_device_info *deviceInfo, QObject *parent)
 
     m_productName = QString::fromWCharArray(deviceInfo->product_string);
     m_path = deviceInfo->path;
+
+    m_ignoreHookTimer.setSingleShot(true);
+    m_ignoreHookTimer.setInterval(500ms);
 
     m_eventHandler.setSingleShot(false);
     m_eventHandler.setInterval(250ms);
@@ -181,6 +185,10 @@ void HeadsetDevice::setUsageInfos(const QHash<UsageId, UsageInfo> &infos)
 
 void HeadsetDevice::setBusyLine(bool flag)
 {
+    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_001)) {
+        m_ignoreHookTimer.start();
+    }
+
     if (!m_hidUsages.contains(UsageId::LED_OffHook)) {
         qCInfo(lcHeadset) << "Busy line is not supported by this device";
         return;
@@ -372,13 +380,18 @@ void HeadsetDevice::processEvents()
 
             // Hook switch
             if (m_hidUsages.contains(UsageId::Telephony_HookSwitch)) {
-                const auto &usage = m_hidUsages.value(UsageId::Telephony_HookSwitch);
-                if (usage.reportId == reportId) {
-                    bool _hookSwitch = value & (1 << usage.bitPosition);
-                    if (m_hookSwitch != _hookSwitch) {
-                        m_hookSwitch = _hookSwitch;
-                        emit hookSwitch();
-                        qCDebug(lcHeadset) << "  Hook switch changed to" << m_hookSwitch;
+                if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_001)
+                    && m_ignoreHookTimer.isActive()) {
+                    m_ignoreHookTimer.stop();
+                } else {
+                    const auto &usage = m_hidUsages.value(UsageId::Telephony_HookSwitch);
+                    if (usage.reportId == reportId) {
+                        bool _hookSwitch = value & (1 << usage.bitPosition);
+                        if (m_hookSwitch != _hookSwitch) {
+                            m_hookSwitch = _hookSwitch;
+                            emit hookSwitch();
+                            qCDebug(lcHeadset) << "  Hook switch changed to" << m_hookSwitch;
+                        }
                     }
                 }
             }

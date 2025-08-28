@@ -1,5 +1,7 @@
 #include "DateEvent.h"
 
+#include <QHash>
+
 DateEvent::DateEvent(const QString &id, const QString &source, const QDateTime &start,
                      const QDateTime &end, const QString &summary, const QString &roomName,
                      bool isConfirmed, QObject *parent)
@@ -47,6 +49,17 @@ void DateEvent::setRoomName(const QString &roomName)
 void DateEvent::setIsConfirmed(bool isConfirmed)
 {
     m_isConfirmed = isConfirmed;
+}
+
+size_t DateEvent::getHash()
+{
+    size_t sum = 0;
+    sum ^= qHash(m_id);
+    sum ^= qHash(m_start);
+    sum ^= qHash(m_end);
+    sum ^= qHash(m_summary);
+    sum ^= qHash(m_roomName);
+    return sum;
 }
 
 QDebug operator<<(QDebug debug, const DateEvent &dateEvent)

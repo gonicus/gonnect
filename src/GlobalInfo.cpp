@@ -21,6 +21,19 @@ QString GlobalInfo::jitsiUrl()
     return m_jitsiUrl;
 }
 
+bool GlobalInfo::isWorkaroundActive(const WorkaroundId id)
+{
+    if (m_workaroundActiveCache.contains(id)) {
+        return m_workaroundActiveCache.value(id);
+    }
+
+    ReadOnlyConfdSettings settings;
+    const auto idStr = GlobalInfo::workaroundIdToString(id);
+    const bool value = settings.value("workarounds/" + idStr, false).toBool();
+    m_workaroundActiveCache.insert(id, value);
+    return value;
+}
+
 void GlobalInfo::initEmergencyContacts()
 {
     if (m_hasEmergencyNumbersInitialized) {

@@ -81,6 +81,11 @@ void AddressBookManager::processAddressBookQueue()
     bool networkAvailable = true;
     auto &nh = NetworkHelper::instance();
 
+    if (!m_queueMutex.tryLock()) {
+        QTimer::singleShot(100, this, &AddressBookManager::processAddressBookQueue);
+        return;
+    }
+
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {
         QString group = it.next();
@@ -104,6 +109,7 @@ void AddressBookManager::processAddressBookQueue()
                             &nh, &NetworkHelper::connectivityChanged, this,
                             [this]() { processAddressBookQueue(); },
                             Qt::ConnectionType::SingleShotConnection);
+
                     continue;
                 }
 
@@ -126,6 +132,8 @@ void AddressBookManager::processAddressBookQueue()
     if (changed) {
         emit AddressBook::instance().contactsReady();
     }
+
+    m_queueMutex.unlock();
 }
 
 void AddressBookManager::acquireSecret(const QString &group,

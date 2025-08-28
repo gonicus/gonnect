@@ -123,7 +123,7 @@ Item {
                 Label {
                     id: infoLabel
                     y: 20
-                    font.pixelSize: 10
+                    font.pixelSize: 14
                     textFormat: Text.StyledText
                     color: Theme.secondaryTextColor
                     text: delg.nickName ? `${delg.nickName}, ${delg.timeFormatted}` : delg.timeFormatted

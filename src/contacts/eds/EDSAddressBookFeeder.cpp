@@ -39,7 +39,7 @@ EDSAddressBookFeeder::~EDSAddressBookFeeder()
     }
 }
 
-void EDSAddressBookFeeder::init()
+bool EDSAddressBookFeeder::init()
 {
     GError *error = nullptr;
 
@@ -49,14 +49,14 @@ void EDSAddressBookFeeder::init()
         qCDebug(lcEDSAddressBookFeeder) << "Can't create registry: " << error->message;
         g_error_free(error);
         error = nullptr;
-        return;
+        return false;
     }
 
     // Get the enabled address book sources of the registry
     m_sources = e_source_registry_list_enabled(m_registry, E_SOURCE_EXTENSION_ADDRESS_BOOK);
     if (g_list_length(m_sources) == 0) {
         qCDebug(lcEDSAddressBookFeeder) << "No sources found in registry";
-        return;
+        return false;
     }
 
     // Prepare the search query
@@ -88,6 +88,8 @@ void EDSAddressBookFeeder::init()
             m_clients.append(client);
         }
     }
+
+    return true;
 }
 
 void EDSAddressBookFeeder::process()
@@ -103,8 +105,9 @@ void EDSAddressBookFeeder::process()
         m_priority = 0;
     }
 
-    init();
-    feedAddressBook();
+    if (init()) {
+        feedAddressBook();
+    }
 
     settings.endGroup();
 }
