@@ -37,8 +37,9 @@ void ICallState::toggleHold()
 void ICallState::setCallState(const ICallState::States &callState)
 {
     if (m_callState != callState) {
+        const auto oldState = m_callState;
         m_callState = callState;
-        emit callStateChanged();
+        emit callStateChanged(callState, oldState);
     }
 }
 
