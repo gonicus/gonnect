@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QMutex>
 
 class IDateEventFeeder;
 
@@ -26,6 +27,8 @@ public:
 
 private:
     explicit DateEventFeederManager(QObject *parent = nullptr);
+
+    QMutex m_queueMutex;
 
     void processQueue();
     void setupReconnectSignal();

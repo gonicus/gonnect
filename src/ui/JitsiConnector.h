@@ -168,6 +168,7 @@ private:
     QPointer<CallHistoryItem> m_callHistoryItem;
     QDateTime m_establishedDateTime;
     QList<Notification *> m_chatNotifications;
+    Notification *m_inConferenceNotification = nullptr;
 
     QList<JitsiMediaDevice *> m_audioInputDevices;
     QList<JitsiMediaDevice *> m_audioOutputDevices;

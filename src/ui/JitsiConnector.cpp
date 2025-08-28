@@ -19,6 +19,7 @@
 #include "KeychainSettings.h"
 #include "GlobalInfo.h"
 #include "ConferenceParticipant.h"
+#include "DateEventManager.h"
 
 #include <QLoggingCategory>
 
@@ -1042,6 +1043,8 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     qCInfo(lcJitsiConnector).nospace().noquote() << "Entering conference " << conferenceId << " ("
                                                  << displayName << ") with flags:" << startFlags;
 
+    DateEventManager::instance().removeNotificationByRoomName(displayName);
+
     m_startWithVideo = startFlags & IConferenceConnector::StartFlag::VideoActive;
 
     if (m_callHistoryItem) {
@@ -1063,6 +1066,29 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
             m_isToggleScreenSharePending = true;
         }
     }
+
+    // Create notification about ongoing conference
+    m_inConferenceNotification = new Notification(tr("Active conference"), this->displayName(),
+                                                  Notification::Priority::normal, this);
+    m_inConferenceNotification->setDisplayHint(Notification::tray
+                                               | Notification::hideContentOnLockScreen);
+    m_inConferenceNotification->setCategory("call.ongoing");
+    m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
+
+    QString ref = NotificationManager::instance().add(m_inConferenceNotification);
+    connect(m_inConferenceNotification, &Notification::actionInvoked, this,
+            [this, ref](QString action, QVariantList) {
+                if (action == "hangup") {
+                    NotificationManager::instance().remove(ref);
+                    leaveConference();
+                }
+            });
+
+    connect(m_inConferenceNotification, &QObject::destroyed, this, [this](QObject *obj) {
+        if (m_inConferenceNotification == obj) {
+            m_inConferenceNotification = nullptr;
+        }
+    });
 }
 
 void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
@@ -1088,6 +1114,12 @@ void JitsiConnector::leaveConference()
         m_callHistoryItem.clear();
     }
 
+    if (m_inConferenceNotification) {
+        NotificationManager::instance().remove(m_inConferenceNotification->id());
+        m_inConferenceNotification->deleteLater();
+        m_inConferenceNotification = nullptr;
+    }
+
     emit executeLeaveRoomCommand();
     setConferenceName("");
     setDisplayName("");
@@ -1099,6 +1131,12 @@ void JitsiConnector::terminateConference()
     if (m_callHistoryItem) {
         m_callHistoryItem->endCall();
         m_callHistoryItem.clear();
+    }
+
+    if (m_inConferenceNotification) {
+        NotificationManager::instance().remove(m_inConferenceNotification->id());
+        m_inConferenceNotification->deleteLater();
+        m_inConferenceNotification = nullptr;
     }
 
     emit executeEndConferenceCommand();
