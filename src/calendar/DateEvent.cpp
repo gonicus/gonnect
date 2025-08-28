@@ -1,6 +1,6 @@
 #include "DateEvent.h"
 
-#include<QHash>
+#include <QHash>
 
 DateEvent::DateEvent(const QString &id, const QString &source, const QDateTime &start,
                      const QDateTime &end, const QString &summary, const QString &roomName,

@@ -242,9 +242,9 @@ void DateEventManager::onTimerTimeout()
             const auto summary = dateEvent->summary();
             const auto roomName = dateEvent->roomName();
 
-            if (!m_alreadyNotifiedDates.contains(eventHash) && !m_notificationIds.contains(eventHash)
-                && start.date() == today && start.time() > now
-                && now.secsTo(start.time()) < 2 * 60) {
+            if (!m_alreadyNotifiedDates.contains(eventHash)
+                && !m_notificationIds.contains(eventHash) && start.date() == today
+                && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
                 auto notification = new Notification(tr("Conference starting soon"), summary,
                                                      Notification::Priority::high, &notMan);
 
