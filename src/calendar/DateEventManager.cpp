@@ -20,10 +20,10 @@ DateEventManager::DateEventManager(QObject *parent) : QObject{ parent }
     m_minuteTimer.callOnTimeout(this, &DateEventManager::onTimerTimeout);
 }
 
-DateEvent *DateEventManager::findDateEventById(const QString &id) const
+DateEvent *DateEventManager::findDateEventByHash(const size_t &eventHash) const
 {
     for (auto dateEvent : std::as_const(m_dateEvents)) {
-        if (dateEvent->id() == id) {
+        if (dateEvent->getHash() == eventHash) {
             return dateEvent;
         }
     }
@@ -131,12 +131,12 @@ void DateEventManager::removeDateEvent(const QString &id)
         i++;
         const auto item = it.next();
         if (item && item->id() == id) {
-            QString id = item->id();
-            m_alreadyNotifiedDates.remove(id);
+            const auto eventHash = item->getHash();
+            m_alreadyNotifiedDates.remove(eventHash);
 
-            const auto &tag = m_notificationIds[id];
+            const auto &tag = m_notificationIds[eventHash];
             notMan.remove(tag);
-            m_notificationIds.remove(id);
+            m_notificationIds.remove(eventHash);
 
             item->deleteLater();
             it.remove();
@@ -214,13 +214,15 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
         return;
     }
 
-    auto notificationId = m_notificationIds.value(foundDateEvent->id());
+    const auto eventHash = foundDateEvent->getHash();
+
+    auto notificationId = m_notificationIds.value(eventHash);
     if (notificationId.isEmpty()) {
         return;
     }
 
     NotificationManager::instance().remove(notificationId);
-    m_notificationIds.remove(foundDateEvent->id());
+    m_notificationIds.remove(eventHash);
 }
 
 void DateEventManager::onTimerTimeout()
@@ -235,12 +237,12 @@ void DateEventManager::onTimerTimeout()
 
         // Checking if new notifications must be created
         for (const auto dateEvent : std::as_const(m_dateEvents)) {
+            const auto eventHash = dateEvent->getHash();
             const auto start = dateEvent->start();
-            const auto id = dateEvent->id();
             const auto summary = dateEvent->summary();
             const auto roomName = dateEvent->roomName();
 
-            if (!m_alreadyNotifiedDates.contains(id) && !m_notificationIds.contains(id)
+            if (!m_alreadyNotifiedDates.contains(eventHash) && !m_notificationIds.contains(eventHash)
                 && start.date() == today && start.time() > now
                 && now.secsTo(start.time()) < 2 * 60) {
                 auto notification = new Notification(tr("Conference starting soon"), summary,
@@ -250,17 +252,17 @@ void DateEventManager::onTimerTimeout()
                 const auto notificationId = notMan.add(notification);
 
                 connect(notification, &Notification::actionInvoked, this,
-                        [this, id, roomName, notificationId](QString action, QVariantList) {
+                        [this, eventHash, roomName, notificationId](QString action, QVariantList) {
                             if (action == "join-meeting") {
                                 NotificationManager::instance().remove(notificationId);
-                                m_notificationIds.remove(id);
+                                m_notificationIds.remove(eventHash);
 
                                 ViewHelper::instance().requestMeeting(roomName);
                             }
                         });
 
-                m_alreadyNotifiedDates.insert(id);
-                m_notificationIds.insert(id, notificationId);
+                m_alreadyNotifiedDates.insert(eventHash);
+                m_notificationIds.insert(eventHash, notificationId);
             }
         }
     }
@@ -285,7 +287,7 @@ void DateEventManager::onTimerTimeout()
 
     while (it.hasNext()) {
         it.next();
-        auto dateEvent = findDateEventById(it.key());
+        auto dateEvent = findDateEventByHash(it.key());
         if (dateEvent && isOver(*dateEvent)) {
             NotificationManager::instance().remove(it.value());
             it.remove();

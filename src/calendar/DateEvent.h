@@ -28,6 +28,8 @@ public:
     void setRoomName(const QString &roomName);
     void setIsConfirmed(bool isConfirmed);
 
+    size_t getHash();
+
 private:
     QString m_id;
     QString m_source;
