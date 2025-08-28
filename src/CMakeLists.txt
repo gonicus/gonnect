@@ -12,6 +12,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineQuick
     Xml
 )
+find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qca-qt6 REQUIRED)
 
 include(FindPkgConfig)
@@ -202,6 +203,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/Switch.qml
         ui/components/controls/TabBar.qml
         ui/components/controls/TabButton.qml
+        ui/components/controls/TextField.qml
 
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
@@ -376,6 +378,8 @@ qt_add_qml_module(gonnect
         sip/SIPUserAgentConfig.cpp
         sip/PreferredIdentity.h
         sip/PreferredIdentity.cpp
+        sip/PreferredIdentityValidator.h
+        sip/PreferredIdentityValidator.cpp
         sip/Ringer.h
         sip/Ringer.cpp
         sip/RingTone.h
@@ -411,6 +415,10 @@ qt_add_qml_module(gonnect
         contacts/Contact.h
         contacts/ContactSerializer.cpp
         contacts/ContactSerializer.h
+        contacts/EmergencyContact.h
+        contacts/EmergencyContact.cpp
+        contacts/EmergencyContactsModel.h
+        contacts/EmergencyContactsModel.cpp
         contacts/FuzzyCompare.cpp
         contacts/FuzzyCompare.h
         contacts/IAddressBookFeeder.h
@@ -602,6 +610,7 @@ target_link_libraries(gonnect
         ${EDS_ADDRESSBOOK_LIBRARIES}
         ${EDS_CALENDAR_LIBRARIES}
 )
+target_link_libraries(gonnect PRIVATE Qt6::Core)
 
 qt_import_plugins(gonnect INCLUDE
      ${AKONADI_CONTACT_FACTORY}

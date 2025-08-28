@@ -24,7 +24,7 @@ private:
     QString getFieldMerge(EContact *contact, EContactField pId, EContactField sId);
     void addAvatar(QString id, EContact *contact, QDateTime changed);
 
-    void init();
+    bool init();
     void feedAddressBook();
 
     void connectContactSignals(EBookClientView *view);

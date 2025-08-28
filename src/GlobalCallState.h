@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QStack>
 
 #include "ICallState.h"
 #include "PhoneNumberUtil.h"
@@ -15,6 +16,8 @@ class GlobalCallState : public QObject
                        FINAL)
     Q_PROPERTY(ICallState *callInForeground MEMBER m_callInForeground NOTIFY callInForegroundChanged
                        FINAL)
+    Q_PROPERTY(
+            qsizetype activeCallsCount READ activeCallsCount NOTIFY activeCallsCountChanged FINAL)
 
 public:
     static GlobalCallState &instance()
@@ -37,9 +40,10 @@ public:
     ContactInfo remoteContactInfo() const { return m_remoteContactInfo; }
 
     const QSet<ICallState *> &globalCallStateObjects() const { return m_globalCallStateObjects; }
-    qsizetype callsCount() const;
+    qsizetype activeCallsCount() const;
 
     Q_INVOKABLE void triggerHold();
+    Q_INVOKABLE bool wasLastAddedConference() const;
 
 private slots:
     void updateGlobalCallState();
@@ -57,6 +61,7 @@ private:
 
     ICallState::States m_globalCallState = ICallState::State::Idle;
     QSet<ICallState *> m_globalCallStateObjects;
+    ICallState *m_lastCallThatBecameActive = nullptr;
     ICallState *m_callInForeground = nullptr;
     QObject *m_foregroundCallContext = nullptr;
 
@@ -71,6 +76,7 @@ signals:
     void callInForegroundChanged();
     void isPhoneConferenceChanged();
     void globalCallStateObjectsChanged();
+    void activeCallsCountChanged();
 };
 
 class GlobalCallStateWrapper

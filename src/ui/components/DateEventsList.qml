@@ -88,7 +88,7 @@ ListView {
             delg.minutesRemainingToStart = Math.ceil((delg.dateTime - now) / 60000)
             delg.minutesRemainingToEnd = Math.ceil((delg.endDateTime - now) / 60000)
             delg.isToday = ViewHelper.isToday(delg.dateTime)
-            delg.isInPast = (delg.endDateTime.getTime() + 60000) < now.getTime()
+            delg.isInPast = delg.endDateTime.getTime() < now.getTime()
             delg.isCurrentlyTakingPlace = delg.dateTime.getTime() < now.getTime() && now.getTime() < delg.endDateTime.getTime()
         }
 
@@ -141,14 +141,14 @@ ListView {
 
                 Label {
                     id: remainingMinutesLabel
-                    visible: delg.isToday && !delg.isInPast && (delg.minutesRemainingToStart < 120 || delg.isCurrentlyTakingPlace)
+                    visible: delg.isToday && !delg.isInPast
+                             && ((delg.minutesRemainingToStart >= 0 && delg.minutesRemainingToStart < 120)
+                                 || delg.isCurrentlyTakingPlace)
                     font.weight: summaryLabel.font.weight
                     color: Theme.secondaryTextColor
                     text: "(" + (delg.isCurrentlyTakingPlace
                           ? qsTr("till %1").arg(delg.endDateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm")))
-                          : (delg.minutesRemainingToStart === 0
-                             ? qsTr("now")
-                             : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart)))) + ")"
+                          : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))) + ")"
                 }
             }
         }

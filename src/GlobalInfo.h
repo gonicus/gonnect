@@ -3,10 +3,13 @@
 #include <QObject>
 #include <QQmlEngine>
 
+class EmergencyContact;
+
 class GlobalInfo : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
+    Q_PROPERTY(bool hasEmergencyNumbers READ hasEmergencyNumbers CONSTANT FINAL)
 
 public:
     enum class WorkaroundId { GOW_001 };
@@ -30,12 +33,21 @@ public:
 
     Q_INVOKABLE bool isWorkaroundActive(const WorkaroundId id);
 
+    bool hasEmergencyNumbers();
+    const QList<EmergencyContact *> &emergencyContacts();
+
 private:
     explicit GlobalInfo(QObject *parent = nullptr);
+    void initEmergencyContacts();
 
     bool m_isJitsiUrlInitialized = false;
+
     QHash<WorkaroundId, bool> m_workaroundActiveCache;
+
+    bool m_hasEmergencyNumbersInitialized = false;
+
     QString m_jitsiUrl;
+    QList<EmergencyContact *> m_emergencyContacts;
 };
 
 class GlobalInfoWrapper
