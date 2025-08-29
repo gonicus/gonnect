@@ -71,12 +71,6 @@ BaseWindow {
                 control.showPage(GonnectWindow.PageId.Conference)
             } else {
                 control.showPage(GonnectWindow.PageId.Call)
-            } else if (!callsModel.count && mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
-                if (conferencePage.iConferenceConnector.isInConference) {
-                    control.showPage(GonnectWindow.PageId.Conference)
-                } else {
-                    control.showPage(GonnectWindow.PageId.Calls)
-                }
             }
         } else if (!count && isOnCallOrConferencePage) {
             control.showPage(GonnectWindow.PageId.Calls)
