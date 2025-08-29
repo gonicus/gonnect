@@ -3,15 +3,15 @@
 #include <QAbstractListModel>
 #include <QQmlEngine>
 
-class JitsiConnector;
+class IConferenceConnector;
 
 class ParticipantsModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_ELEMENT
 
-    Q_PROPERTY(JitsiConnector *jitsiConnector MEMBER m_jitsiConnector NOTIFY jitsiConnectorChanged
-                       FINAL)
+    Q_PROPERTY(IConferenceConnector *iConferenceConnector MEMBER m_iConferenceConnector NOTIFY
+                       iConferenceConnectorChanged FINAL)
 
 public:
     enum class Roles { Id = Qt::UserRole + 1, DisplayName, Role };
@@ -23,12 +23,12 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const override;
 
 private slots:
-    void onJitsiConnectorChanged();
+    void onIConferenceConnectorChanged();
 
 private:
-    JitsiConnector *m_jitsiConnector = nullptr;
+    IConferenceConnector *m_iConferenceConnector = nullptr;
     QObject *m_jistiConnectorContext = nullptr;
 
 signals:
-    void jitsiConnectorChanged();
+    void iConferenceConnectorChanged();
 };
