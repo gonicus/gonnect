@@ -26,6 +26,14 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
     m_trayIcon->show();
     resetTrayIcon();
 
+    connect(m_trayIcon, &QSystemTrayIcon::activated, this, [](QSystemTrayIcon::ActivationReason reason){
+        if (reason == QSystemTrayIcon::DoubleClick ||
+            reason == QSystemTrayIcon::MiddleClick ||
+            reason == QSystemTrayIcon::Trigger) {
+            emit ViewHelper::instance().activateSearch();
+        }
+    });
+
     updateMenu();
 
     m_ringTimer.setInterval(750ms);
