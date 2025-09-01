@@ -35,7 +35,7 @@ bool Theme::useOwnDecoration()
 
         AppSettings settings;
         const auto settingsVal =
-                settings.value("generic/useOwnWindowDecoration", "true").toString();
+                settings.value("generic/useOwnWindowDecoration", "auto").toString();
 
         if (settingsVal == "auto") {
             const auto desktop =
