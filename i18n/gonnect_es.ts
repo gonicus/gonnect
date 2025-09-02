@@ -6,7 +6,7 @@
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="12"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="66"/>
@@ -21,7 +21,7 @@
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="108"/>
         <source>Bug Tracker</source>
-        <translation type="unfinished"></translation>
+        <translation>Rastreador de errores</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="119"/>
@@ -47,7 +47,7 @@
     <message>
         <location filename="../src/ui/components/popups/AudioDeviceMenu.qml" line="30"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Predeterminado</translation>
     </message>
 </context>
 <context>
@@ -55,7 +55,7 @@
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="11"/>
         <source>Unknown audio environment</source>
-        <translation>Un conocido entorno de audio</translation>
+        <translation>Desconocido entorno de audio</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="34"/>
@@ -75,7 +75,7 @@
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="148"/>
         <source>Output device for ring tone</source>
-        <translation>Dispositivo de salida para tono de anillo</translation>
+        <translation>Dispositivo de salida para tono de llamada</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="194"/>
@@ -88,12 +88,12 @@
     <message>
         <location filename="../src/media/AudioManager.cpp" line="145"/>
         <source>Default input</source>
-        <translation type="unfinished"></translation>
+        <translation>Entrada predeterminada</translation>
     </message>
     <message>
         <location filename="../src/media/AudioManager.cpp" line="146"/>
         <source>Default output</source>
-        <translation type="unfinished"></translation>
+        <translation>Salida predeterminada</translation>
     </message>
 </context>
 <context>
@@ -101,7 +101,7 @@
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="410"/>
         <source>Failed to initialize LDAP connection: %1</source>
-        <translation>Failed to initialize LDAP connection: %1</translation>
+        <translation>No se pudo inicializar la conexión LDAP: %1</translation>
     </message>
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="423"/>
@@ -135,22 +135,22 @@
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="17"/>
         <source>Toggle fullscreen</source>
-        <translation type="unfinished"></translation>
+        <translation>Cambiar al modo de pantalla completa</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="22"/>
         <source>Shortcuts...</source>
-        <translation type="unfinished"></translation>
+        <translation>Atajos de teclado</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
         <source>About...</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="33"/>
         <source>Quit</source>
-        <translation type="unfinished"></translation>
+        <translation>Terminar</translation>
     </message>
 </context>
 <context>
@@ -158,7 +158,7 @@
     <message>
         <location filename="../src/ui/components/pages/Call.qml" line="170"/>
         <source>Conference</source>
-        <translation type="unfinished"></translation>
+        <translation>Conferencia</translation>
     </message>
 </context>
 <context>
@@ -166,32 +166,32 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="85"/>
         <source>Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Pantalla</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="97"/>
         <source>Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Cámera</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="109"/>
         <source>Resume</source>
-        <translation type="unfinished"></translation>
+        <translation>Continuar</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="109"/>
         <source>Hold</source>
-        <translation type="unfinished"></translation>
+        <translation>Mantener</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="133"/>
         <source>Micro</source>
-        <translation type="unfinished"></translation>
+        <translation>Micrófono</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="152"/>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Salida</translation>
     </message>
 </context>
 <context>
@@ -199,17 +199,17 @@
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="176"/>
         <source>Jitsi Meet</source>
-        <translation type="unfinished"></translation>
+        <translation>Jitsi Meet</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="193"/>
         <source>Unhold</source>
-        <translation>Unhold</translation>
+        <translation>Reanudar</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="193"/>
         <source>Hold</source>
-        <translation type="unfinished"></translation>
+        <translation>Mantener</translation>
     </message>
 </context>
 <context>
