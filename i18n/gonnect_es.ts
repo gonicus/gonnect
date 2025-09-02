@@ -209,7 +209,7 @@
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="193"/>
         <source>Hold</source>
-        <translation>Mantener</translation>
+        <translation>Espera</translation>
     </message>
 </context>
 <context>
@@ -217,7 +217,7 @@
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="30"/>
         <source>Failed to create directory %1 to store the call history database.</source>
-        <translation type="unfinished"></translation>
+        <translation>Failed to create directory %1 to store the call history database.</translation>
     </message>
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="77"/>
