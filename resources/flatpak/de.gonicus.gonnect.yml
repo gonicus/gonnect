@@ -27,9 +27,9 @@ finish-args:
   - --talk-name=org.gnome.evolution.dataserver.Sources5
   - --talk-name=org.gnome.evolution.dataserver.Subprocess.Backend.*
   # Access for the default avatars
-  - --filesystem=xdg-data/pixmaps/faces:create
+  # - --filesystem=xdg-data/pixmaps/faces:create
   # Access for evolution-data-server avatars
-  - --filesystem=xdg-cache/evolution/addressbook:ro
+  # - --filesystem=xdg-cache/evolution/addressbook:ro
   # Access to music folder for ring tones
   - --filesystem=xdg-music:ro
   # Place to save download chat attachments
