@@ -1,6 +1,6 @@
-#include "MatrixEvent.h"
+#include "JsChatEvent.h"
 
-MatrixEvent::MatrixEvent(const QString &eventId, const QString &roomId, const QString &senderId,
+JsChatEvent::JsChatEvent(const QString &eventId, const QString &roomId, const QString &senderId,
                          const QDateTime &dateTime, QObject *parent)
     : QObject(parent),
       m_eventId{ eventId },

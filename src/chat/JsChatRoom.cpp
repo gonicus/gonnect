@@ -1,20 +1,20 @@
-#include "MatrixChatRoom.h"
+#include "JsChatRoom.h"
 #include "ChatMessage.h"
-#include "MatrixConnector.h"
-#include "MatrixEvent.h"
+#include "JsChatConnector.h"
+#include "JsChatEvent.h"
 
-MatrixChatRoom::MatrixChatRoom(const QString &id, const QString &name, MatrixConnector *parent)
+JsChatRoom::JsChatRoom(const QString &id, const QString &name, JsChatConnector *parent)
     : IChatRoom{ parent }, m_id{ id }, m_name{ name }
 {
 }
 
-MatrixChatRoom::~MatrixChatRoom()
+JsChatRoom::~JsChatRoom()
 {
     qDeleteAll(m_messages);
     m_messages.clear();
 }
 
-void MatrixChatRoom::addMessage(ChatMessage *chatMessageObject)
+void JsChatRoom::addMessage(ChatMessage *chatMessageObject)
 {
     Q_CHECK_PTR(chatMessageObject);
     chatMessageObject->setFlags(chatMessageObject->flags() | ChatMessage::Flag::Markdown);
@@ -22,13 +22,13 @@ void MatrixChatRoom::addMessage(ChatMessage *chatMessageObject)
     emit chatMessageAdded(m_messages.length() - 1, chatMessageObject);
 }
 
-void MatrixChatRoom::setUnreadNotificationCount(qsizetype count)
+void JsChatRoom::setUnreadNotificationCount(qsizetype count)
 {
     m_unreadCount = count;
     emit notificationCountChanged(count);
 }
 
-void MatrixChatRoom::setName(const QString &name)
+void JsChatRoom::setName(const QString &name)
 {
     if (m_name != name) {
         m_name = name;
@@ -36,9 +36,9 @@ void MatrixChatRoom::setName(const QString &name)
     }
 }
 
-void MatrixChatRoom::resetUnreadCount()
+void JsChatRoom::resetUnreadCount()
 {
-    MatrixEvent *foundEvent = nullptr;
+    JsChatEvent *foundEvent = nullptr;
     auto connector = connectorParent();
     const auto &events = connector->events();
 
@@ -54,12 +54,12 @@ void MatrixChatRoom::resetUnreadCount()
     }
 }
 
-void MatrixChatRoom::sendMessage(const QString &message)
+void JsChatRoom::sendMessage(const QString &message)
 {
     emit connectorParent() -> sendMessageRequested(m_id, message);
 }
 
-MatrixConnector *MatrixChatRoom::connectorParent() const
+JsChatConnector *JsChatRoom::connectorParent() const
 {
-    return qobject_cast<MatrixConnector *>(parent());
+    return qobject_cast<JsChatConnector *>(parent());
 }

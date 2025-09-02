@@ -2,10 +2,10 @@
 
 #include <QString>
 
-struct MatrixConnectorConfig
+struct JsConnectorConfig
 {
     QString settingsGroup;
-    QString matrixId;
+    QString ownUserId;
     QString deviceId;
     QString displayName;
     QString recoveryKey;

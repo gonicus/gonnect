@@ -3,12 +3,12 @@
 #include <QObject>
 #include <QDateTime>
 
-class MatrixEvent : public QObject
+class JsChatEvent : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit MatrixEvent(const QString &eventId, const QString &roomId, const QString &senderId,
+    explicit JsChatEvent(const QString &eventId, const QString &roomId, const QString &senderId,
                          const QDateTime &dateTime, QObject *parent = nullptr);
 
     QString eventId() const { return m_eventId; }

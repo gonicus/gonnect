@@ -1,24 +1,24 @@
-#include "MatrixConnector.h"
-#include "MatrixConnectorManager.h"
-#include "MatrixMessageEvent.h"
-#include "MatrixImageEvent.h"
-#include "MatrixUser.h"
+#include "JsChatConnector.h"
+#include "ChatConnectorManager.h"
+#include "JsChatMessageEvent.h"
+#include "JsChatImageEvent.h"
+#include "JsChatUser.h"
 #include "ViewHelper.h"
 #include "IChatRoom.h"
 #include "ChatMessage.h"
-#include "MatrixChatRoom.h"
+#include "JsChatRoom.h"
 
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(lcMatrixConnector, "gonnect.app.MatrixConnector")
+Q_LOGGING_CATEGORY(lcJsChatConnector, "gonnect.app.JsChatConnector")
 
-MatrixConnector::MatrixConnector(const MatrixConnectorConfig &config, QObject *parent)
+JsChatConnector::JsChatConnector(const JsConnectorConfig &config, QObject *parent)
     : IChatProvider{ config.settingsGroup, parent }, m_config{ config }
 {
     connect();
 }
 
-void MatrixConnector::connect()
+void JsChatConnector::connect()
 {
     if (m_config.recoveryKey.isEmpty()) {
         auto &viewHelper = ViewHelper::instance();
@@ -35,74 +35,74 @@ void MatrixConnector::connect()
     }
 }
 
-qsizetype MatrixConnector::indexOf(IChatRoom *chatRoom) const
+qsizetype JsChatConnector::indexOf(IChatRoom *chatRoom) const
 {
     return m_rooms.indexOf(chatRoom);
 }
 
-IChatRoom *MatrixConnector::chatRoomByRoomId(const QString &roomId) const
+IChatRoom *JsChatConnector::chatRoomByRoomId(const QString &roomId) const
 {
     return qobject_cast<IChatRoom *>(m_roomLookup.value(roomId, nullptr));
 }
 
-void MatrixConnector::handleRecoveryKey(const QString &key)
+void JsChatConnector::handleRecoveryKey(const QString &key)
 {
-    MatrixConnectorManager::instance().saveRecoveryKey(m_config.settingsGroup, key);
+    ChatConnectorManager::instance().saveRecoveryKey(m_config.settingsGroup, key);
     setIsSecretInitalized(true);
 }
 
-void MatrixConnector::handleAccessToken(const QString &value)
+void JsChatConnector::handleAccessToken(const QString &value)
 {
-    MatrixConnectorManager::instance().saveAccessToken(m_config.settingsGroup, value);
+    ChatConnectorManager::instance().saveAccessToken(m_config.settingsGroup, value);
     m_config.accessToken = value;
     emit accessTokenChanged();
 }
 
-void MatrixConnector::addMatrixRoom(const QString &roomId, const QString name)
+void JsChatConnector::addChatRoom(const QString &roomId, const QString name)
 {
     createOrLookupChatRoom(roomId, name);
 }
 
-void MatrixConnector::addMessageEvent(const QString &eventId, const QString &roomId,
+void JsChatConnector::addMessageEvent(const QString &eventId, const QString &roomId,
                                       const QString &senderId, const QString &message,
                                       const QDateTime &dateTime)
 {
     ChatMessage::Flags flags;
-    if (senderId == matrixId()) {
+    if (senderId == ownUserId()) {
         flags |= ChatMessage::Flag::OwnMessage;
     }
 
     auto room = createOrLookupChatRoom(roomId);
-    room->addMessage(new MatrixMessageEvent(eventId, roomId, senderId, dateTime, message, flags));
+    room->addMessage(new JsChatMessageEvent(eventId, roomId, senderId, dateTime, message, flags));
 }
 
-void MatrixConnector::addImageEvent(const QString &eventId, const QString &roomId,
+void JsChatConnector::addImageEvent(const QString &eventId, const QString &roomId,
                                     const QString &senderId, const QString &imageUrl,
                                     const QDateTime &dateTime)
 {
-    m_events.append(new MatrixImageEvent(eventId, roomId, senderId, dateTime, imageUrl, this));
-    emit matrixEventAdded();
+    m_events.append(new JsChatImageEvent(eventId, roomId, senderId, dateTime, imageUrl, this));
+    emit chatEventAdded();
 }
 
-void MatrixConnector::addUser(const QString &userId, const QString &displayName)
+void JsChatConnector::addUser(const QString &userId, const QString &displayName)
 {
-    auto user = new MatrixUser(userId, displayName, this);
+    auto user = new JsChatUser(userId, displayName, this);
     m_users.insert(userId, user);
-    emit matrixUserAdded();
+    emit chatUserAdded();
 }
 
-void MatrixConnector::updateRoomNotificationCount(const QString &roomId, quint16 count)
+void JsChatConnector::updateRoomNotificationCount(const QString &roomId, quint16 count)
 {
     auto room = m_roomLookup.value(roomId, nullptr);
     if (!room) {
-        qCWarning(lcMatrixConnector) << "Unable to find room object for id" << roomId;
+        qCWarning(lcJsChatConnector) << "Unable to find room object for id" << roomId;
         return;
     }
 
     room->setUnreadNotificationCount(count);
 }
 
-void MatrixConnector::setIsSecretInitalized(bool value)
+void JsChatConnector::setIsSecretInitalized(bool value)
 {
     if (m_isSecretInitalized != value) {
         m_isSecretInitalized = value;
@@ -110,16 +110,16 @@ void MatrixConnector::setIsSecretInitalized(bool value)
     }
 }
 
-MatrixChatRoom *MatrixConnector::createOrLookupChatRoom(const QString &roomId,
-                                                        const QString &roomName)
+JsChatRoom *JsChatConnector::createOrLookupChatRoom(const QString &roomId, const QString &roomName)
 {
-    MatrixChatRoom *room = m_roomLookup.value(roomId, nullptr);
+    JsChatRoom *room = m_roomLookup.value(roomId, nullptr);
 
     if (!room) {
-        room = new MatrixChatRoom(roomId, roomName, this);
+        room = new JsChatRoom(roomId, roomName, this);
         m_rooms.append(room);
         m_roomLookup.insert(roomId, room);
         emit chatRoomAdded(m_rooms.length() - 1, room);
+
     } else if (!roomName.isEmpty()) {
         room->setName(roomName);
         emit chatRoomNameChanged(m_rooms.indexOf(room), room, roomName);

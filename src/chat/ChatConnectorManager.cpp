@@ -1,43 +1,43 @@
-#include "MatrixConnectorManager.h"
+#include "ChatConnectorManager.h"
 #include "KeychainSettings.h"
-#include "MatrixConnector.h"
-#include "MatrixConnectorConfig.h"
+#include "JsChatConnector.h"
+#include "JsConnectorConfig.h"
 #include "ReadOnlyConfdSettings.h"
 #include "SecretPortal.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(lcMatrixConnectorManager, "gonnect.app.chat.matrix.manager")
+Q_LOGGING_CATEGORY(lcChatConnectorManager, "gonnect.app.chat.connectorManager")
 
-MatrixConnectorManager::MatrixConnectorManager(QObject *parent) : QObject{ parent }
+ChatConnectorManager::ChatConnectorManager(QObject *parent) : QObject{ parent }
 {
     auto &secretPortal = SecretPortal::instance();
     if (secretPortal.isValid() && !secretPortal.isInitialized()) {
-        connect(&secretPortal, &SecretPortal::initializedChanged, this,
-                &MatrixConnectorManager::init, Qt::SingleShotConnection);
+        connect(&secretPortal, &SecretPortal::initializedChanged, this, &ChatConnectorManager::init,
+                Qt::SingleShotConnection);
     } else {
         init();
     }
 }
 
-void MatrixConnectorManager::saveRecoveryKey(const QString &settingsGroup, const QString &key) const
+void ChatConnectorManager::saveRecoveryKey(const QString &settingsGroup, const QString &key) const
 {
     if (!m_isInitialized) {
-        qCCritical(lcMatrixConnectorManager)
-                << "Cannot save recovery key because MatrixConnectorManager has not been "
+        qCCritical(lcChatConnectorManager)
+                << "Cannot save recovery key because ChatConnectorManager has not been "
                    "initialized (yet)";
         return;
     }
 
     auto &secretPortal = SecretPortal::instance();
     if (!secretPortal.isInitialized()) {
-        qCCritical(lcMatrixConnectorManager)
+        qCCritical(lcChatConnectorManager)
                 << "Cannot save recovery key because SecretPortal is not initialized (yet)";
         return;
     }
     if (!secretPortal.isValid()) {
-        qCCritical(lcMatrixConnectorManager)
+        qCCritical(lcChatConnectorManager)
                 << "Cannot save recovery key because SecretPortal is not valid";
         return;
     }
@@ -48,24 +48,23 @@ void MatrixConnectorManager::saveRecoveryKey(const QString &settingsGroup, const
     settings.endGroup();
 }
 
-void MatrixConnectorManager::saveAccessToken(const QString &settingsGroup,
-                                             const QString &token) const
+void ChatConnectorManager::saveAccessToken(const QString &settingsGroup, const QString &token) const
 {
     if (!m_isInitialized) {
-        qCCritical(lcMatrixConnectorManager)
-                << "Cannot save access token because MatrixConnectorManager has not been "
+        qCCritical(lcChatConnectorManager)
+                << "Cannot save access token because ChatConnectorManager has not been "
                    "initialized (yet)";
         return;
     }
 
     auto &secretPortal = SecretPortal::instance();
     if (!secretPortal.isInitialized()) {
-        qCCritical(lcMatrixConnectorManager)
+        qCCritical(lcChatConnectorManager)
                 << "Cannot save access token because SecretPortal is not initialized (yet)";
         return;
     }
     if (!secretPortal.isValid()) {
-        qCCritical(lcMatrixConnectorManager)
+        qCCritical(lcChatConnectorManager)
                 << "Cannot save access token because SecretPortal is not valid";
         return;
     }
@@ -76,7 +75,7 @@ void MatrixConnectorManager::saveAccessToken(const QString &settingsGroup,
     settings.endGroup();
 }
 
-void MatrixConnectorManager::init()
+void ChatConnectorManager::init()
 {
     if (m_isInitialized) {
         return;
@@ -90,12 +89,12 @@ void MatrixConnectorManager::init()
 
     for (const auto &group : groups) {
         if (groupRegex.match(group).hasMatch()) {
-            m_isMatrixAvailable = true;
+            m_isJsChatAvailable = true;
             settings.beginGroup(group);
 
             if (!settings.contains("id")) {
-                qCCritical(lcMatrixConnectorManager)
-                        << "Matrix setting group must have 'id' in group" << group;
+                qCCritical(lcChatConnectorManager)
+                        << "Chat setting group must have 'id' in group" << group;
                 settings.endGroup();
                 continue;
             }
@@ -121,27 +120,25 @@ void MatrixConnectorManager::init()
                 }
             }
 
-            MatrixConnectorConfig config = {
-                group,
-                settings.value("id").toString(),
-                settings.value("deviceId", "GOnnect Client").toString(),
-                settings.value("displayName", group).toString(),
-                recoveryKey,
-                accessToken
-            };
+            JsConnectorConfig config = { group,
+                                         settings.value("id").toString(),
+                                         settings.value("deviceId", "GOnnect Client").toString(),
+                                         settings.value("displayName", group).toString(),
+                                         recoveryKey,
+                                         accessToken };
 
-            m_connectors.append(new MatrixConnector(config, this));
+            m_connectors.append(new JsChatConnector(config, this));
 
             settings.endGroup();
         }
     }
 
     std::sort(m_connectors.begin(), m_connectors.end(),
-              [](const MatrixConnector *left, const MatrixConnector *right) -> bool {
+              [](const JsChatConnector *left, const JsChatConnector *right) -> bool {
                   return left->displayName() < right->displayName();
               });
 
     if (!m_connectors.isEmpty()) {
-        emit matrixConnectorsChanged();
+        emit jsChatConnectorsChanged();
     }
 }
