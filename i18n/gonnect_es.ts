@@ -11,12 +11,12 @@
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="66"/>
         <source>Version: v%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Versión: v%1</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="97"/>
         <source>Homepage</source>
-        <translation type="unfinished"></translation>
+        <translation>Página</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="108"/>
@@ -26,7 +26,7 @@
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="119"/>
         <source>Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación</translation>
     </message>
 </context>
 <context>
@@ -34,12 +34,12 @@
     <message>
         <location filename="../src/dbus/portal/AbstractPortal.cpp" line="55"/>
         <source>No DBus session bus connection available</source>
-        <translation type="unfinished"></translation>
+        <translation>No hay conexión de bus DBus sesión disponible</translation>
     </message>
     <message>
         <location filename="../src/dbus/portal/AbstractPortal.cpp" line="78"/>
         <source>DBus call failed: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>La llamada DBus falló: %1</translation>
     </message>
 </context>
 <context>
@@ -55,7 +55,7 @@
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="11"/>
         <source>Unknown audio environment</source>
-        <translation type="unfinished"></translation>
+        <translation>Un conocido entorno de audio</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="34"/>
