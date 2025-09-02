@@ -101,7 +101,7 @@
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="410"/>
         <source>Failed to initialize LDAP connection: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Failed to initialize LDAP connection: %1</translation>
     </message>
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="423"/>
