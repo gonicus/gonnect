@@ -1,3 +1,28 @@
+## [2.0.4](https://github.com/gonicus/gonnect/compare/v2.0.3...v2.0.4) (2025-09-02)
+
+
+### Bug Fixes
+
+* autoremove date event notifications ([795f4b0](https://github.com/gonicus/gonnect/commit/795f4b0a469abff6a446700f347c39a114ba1382))
+* avoid parallel calls for date event queue processor ([eeabda9](https://github.com/gonicus/gonnect/commit/eeabda90704556fc7e68e4d4e986d5c777223ce0))
+* avoid parallel calls for queue processor ([63f2e7b](https://github.com/gonicus/gonnect/commit/63f2e7bdd51f9cdffbefe4fca4792193c0ebd5c4))
+* honour tray icon activation reasons ([#156](https://github.com/gonicus/gonnect/issues/156)) ([2eb3378](https://github.com/gonicus/gonnect/commit/2eb3378e347520831a1abc823d7272c4f47233cc))
+* ignore timer for unvoluntary hook on via headset ([#138](https://github.com/gonicus/gonnect/issues/138)) ([9e3208c](https://github.com/gonicus/gonnect/commit/9e3208c84f1e35470831acef87308b447610be25))
+* properly display event status, fix event notifications (calendar) ([ff7a0cc](https://github.com/gonicus/gonnect/commit/ff7a0cc8ba42e80103267f1332dbc4bc570e7218))
+* re-trigger event notifications for updated events ([#154](https://github.com/gonicus/gonnect/issues/154)) ([b1e0f34](https://github.com/gonicus/gonnect/commit/b1e0f34163be2b653b9ab437ac9c171449dbbba1))
+* regonize DateEvent as in the past ([ec4e2fb](https://github.com/gonicus/gonnect/commit/ec4e2fb573f1f549e6b8125c4dcbc5cbc8ab66c9))
+* revert evolution-data-server back to 3.56.0 ([409b830](https://github.com/gonicus/gonnect/commit/409b8306be09832ef1c6ec092e30408a8b84b771))
+* show notification while in conference ([2fdfe7a](https://github.com/gonicus/gonnect/commit/2fdfe7a3eb4564c088186f82d9fca516e9f8bf6c))
+* **ui:** change to conference page on video upgrade ([#159](https://github.com/gonicus/gonnect/issues/159)) ([6dff6ab](https://github.com/gonicus/gonnect/commit/6dff6ab59053b93a179dcb9065e6052f3187d20f))
+* **ui:** larger font for chat message info label ([0dc4793](https://github.com/gonicus/gonnect/commit/0dc4793498b68f37d58366d1ca07c7bdc4579320))
+* **ui:** show correct page after terminating call ([#146](https://github.com/gonicus/gonnect/issues/146)) ([c837c92](https://github.com/gonicus/gonnect/commit/c837c92c507a307e2666f181de29115c15aad425))
+* use placeholder identity that looks like a placeholder ([19dd5bb](https://github.com/gonicus/gonnect/commit/19dd5bbc598056ac272f9bd213a66fc0d9523102))
+
+
+### Reverts
+
+* Revert "fix: revert evolution-data-server back to 3.56.0" ([8f8a19d](https://github.com/gonicus/gonnect/commit/8f8a19d2484afe432507eee3f7f895ba8514fd05))
+
 # [2.0.3](https://github.com/gonicus/gonnect/compare/v2.0.2...v2.1.3) (2025-08-18)
 
 
