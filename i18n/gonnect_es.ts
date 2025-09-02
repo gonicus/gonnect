@@ -106,7 +106,7 @@
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="423"/>
         <source>LDAP error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Error LDAP: %1</translation>
     </message>
     <message>
         <location filename="../src/contacts/AvatarManager.cpp" line="502"/>
@@ -204,7 +204,7 @@
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="193"/>
         <source>Unhold</source>
-        <translation type="unfinished"></translation>
+        <translation>Unhold</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="193"/>
