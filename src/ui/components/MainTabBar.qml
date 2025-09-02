@@ -153,10 +153,10 @@ Item {
                     }
                 ].filter(item => ViewHelper.isJitsiAvailable || item.pageId !== GonnectWindow.PageId.Conference)
 
-                if (MatrixConnectorManager.isMatrixAvailable) {
-                    const matrixConnectors = MatrixConnectorManager.matrixConnectors
+                if (ChatConnectorManager.isJsChatAvailable) {
+                    const chatConnectors = ChatConnectorManager.jsChatConnectors
 
-                    for (const connector of matrixConnectors) {
+                    for (const connector of chatConnectors) {
                         baseModel.push({
                                            pageId: GonnectWindow.PageId.Chats,
                                            iconSource: Icons.dialogMessages,

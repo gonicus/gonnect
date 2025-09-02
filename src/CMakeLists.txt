@@ -195,11 +195,11 @@ qt_add_qml_module(gonnect
 
         ${gonnect_qml_singletons}
 
-        ui/components/chat/MatrixMessageBox.qml
-        ui/components/chat/MatrixMessageList.qml
-        ui/components/chat/MatrixMessageListItem.qml
-        ui/components/chat/MatrixRoomList.qml
-        ui/components/chat/MatrixRoomListItem.qml
+        ui/components/chat/ChatMessageBox.qml
+        ui/components/chat/ChatMessageList.qml
+        ui/components/chat/ChatMessageListItem.qml
+        ui/components/chat/ChatRoomList.qml
+        ui/components/chat/ChatRoomListItem.qml
 
         ui/components/controls/AudioLevelButton.qml
         ui/components/controls/BarButton.qml
@@ -413,6 +413,8 @@ qt_add_qml_module(gonnect
         chat/IChatProvider.cpp
         chat/IChatRoom.h
         chat/IChatRoom.cpp
+        chat/ChatConnectorManager.h
+        chat/ChatConnectorManager.cpp
         chat/ChatMessage.h
         chat/ChatMessage.cpp
         chat/ChatModel.h
@@ -425,23 +427,19 @@ qt_add_qml_module(gonnect
         chat/ChatRoomProxyModel.cpp
         chat/ConferenceChatRoom.h
         chat/ConferenceChatRoom.cpp
-        chat/MatrixChatRoom.h
-        chat/MatrixChatRoom.cpp
-        chat/MatrixConnector.h
-        chat/MatrixConnector.cpp
-        chat/MatrixConnectorConfig.h
-        chat/MatrixConnectorManager.h
-        chat/MatrixConnectorManager.cpp
-        chat/MatrixEvent.h
-        chat/MatrixEvent.cpp
-        chat/MatrixImageEvent.h
-        chat/MatrixImageEvent.cpp
-        chat/MatrixMessageEvent.h
-        chat/MatrixMessageEvent.cpp
-        chat/MatrixRoom.h
-        chat/MatrixRoom.cpp
-        chat/MatrixUser.h
-        chat/MatrixUser.cpp
+        chat/JsChatConnector.h
+        chat/JsChatConnector.cpp
+        chat/JsChatRoom.h
+        chat/JsChatRoom.cpp
+        chat/JsConnectorConfig.h
+        chat/JsChatEvent.h
+        chat/JsChatEvent.cpp
+        chat/JsChatImageEvent.h
+        chat/JsChatImageEvent.cpp
+        chat/JsChatMessageEvent.h
+        chat/JsChatMessageEvent.cpp
+        chat/JsChatUser.h
+        chat/JsChatUser.cpp
 
         conference/ConferenceParticipant.h
         conference/ConferenceParticipant.cpp

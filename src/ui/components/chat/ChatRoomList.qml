@@ -28,7 +28,7 @@ ListView {
         }
     }
 
-    delegate: MatrixRoomListItem {
+    delegate: ChatRoomListItem {
         id: delg
         highlighted: control.selectedRoomId === delg.roomId
         anchors {

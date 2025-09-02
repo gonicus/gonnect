@@ -1,14 +1,14 @@
 #pragma once
 
-#include "MatrixEvent.h"
+#include "JsChatEvent.h"
 
 #include <QUrl>
 
-class MatrixImageEvent : public MatrixEvent
+class JsChatImageEvent : public JsChatEvent
 {
     Q_OBJECT
 public:
-    explicit MatrixImageEvent(const QString &eventId, const QString &roomId,
+    explicit JsChatImageEvent(const QString &eventId, const QString &roomId,
                               const QString &senderId, const QDateTime &dateTime,
                               const QString &imageUrl, QObject *parent = nullptr);
 

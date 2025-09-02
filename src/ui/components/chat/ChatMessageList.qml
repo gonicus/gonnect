@@ -22,7 +22,7 @@ Item {
                 id: chatModel
             }
         }
-        delegate: MatrixMessageListItem {
+        delegate: ChatMessageListItem {
             anchors {
                 left: parent?.left
                 right: parent?.right

@@ -2,12 +2,12 @@
 
 #include <QObject>
 
-class MatrixUser : public QObject
+class JsChatUser : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit MatrixUser(const QString &userId, const QString &displayName,
+    explicit JsChatUser(const QString &userId, const QString &displayName,
                         QObject *parent = nullptr);
 
     QString userId() const { return m_userId; }

@@ -2,16 +2,16 @@
 
 #include "IChatRoom.h"
 
-class MatrixConnector;
+class JsChatConnector;
 
-class MatrixChatRoom : public IChatRoom
+class JsChatRoom : public IChatRoom
 {
     Q_OBJECT
 
 public:
-    explicit MatrixChatRoom(const QString &id, const QString &name, MatrixConnector *parent);
+    explicit JsChatRoom(const QString &id, const QString &name, JsChatConnector *parent);
 
-    virtual ~MatrixChatRoom();
+    virtual ~JsChatRoom();
 
     /// Takes ownership of the ChatMessage object
     void addMessage(ChatMessage *chatMessageObject);
@@ -27,7 +27,7 @@ public:
     virtual void sendMessage(const QString &message) override;
 
 private:
-    MatrixConnector *connectorParent() const;
+    JsChatConnector *connectorParent() const;
 
     QString m_id;
     QString m_name;

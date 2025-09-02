@@ -9,7 +9,7 @@ import base
 Item {
     id: control
 
-    property MatrixConnector attachedData
+    property JsChatConnector attachedData
 
     states: [
         State {
@@ -35,8 +35,8 @@ Item {
     Connections {
         target: control.attachedData
         function onAccessTokenChanged() {
-            matrixView.url = "about:blank"
-            matrixView.loadUrl()
+            webView.url = "about:blank"
+            webView.loadUrl()
         }
     }
 
@@ -95,23 +95,23 @@ Item {
         }
 
         WebEngineView {
-            id: matrixView
+            id: webView
             anchors.fill: parent
             settings {
                 localStorageEnabled: true
             }
             profile {
                 offTheRecord: false
-                storageName: "gonnect_matrix"
+                storageName: "gonnect_js_chat"
                 httpCacheType: WebEngineProfile.NoCache
             }
             webChannel: WebChannel {
-                id: matrixWebChannel
+                id: chatWebChannel
 
                 Component.onCompleted: () => {
                     if (control.attachedData) {
-                        matrixWebChannel.registerObject("matrixConnector", control.attachedData)
-                        matrixView.loadUrl()
+                        chatWebChannel.registerObject("jsChatConnector", control.attachedData)
+                        webView.loadUrl()
                     }
                 }
 
@@ -119,15 +119,15 @@ Item {
                     target: control
                     function onAttachedDataChanged() {
                         if (control.attachedData) {
-                            matrixWebChannel.registerObject("matrixConnector", control.attachedData)
-                            matrixView.loadUrl()
+                            chatWebChannel.registerObject("jsChatConnector", control.attachedData)
+                            webView.loadUrl()
                         }
                     }
                 }
             }
 
             function loadUrl() {
-                matrixView.url = "http://localhost:8080" // "?cacheInhibitor=" + Math.round(Math.random() * 100000)
+                webView.url = "http://localhost:8080" // "?cacheInhibitor=" + Math.round(Math.random() * 100000)
             }
 
             onJavaScriptConsoleMessage: (level, message, line, source) => {
@@ -158,8 +158,8 @@ Item {
             margins: 24
         }
 
-        MatrixRoomList {
-            id: matrixRoomList
+        ChatRoomList {
+            id: chatRoomList
             chatProvider: control.attachedData
             clip: true
             anchors {
@@ -181,24 +181,24 @@ Item {
             margins: 24
         }
 
-        MatrixMessageList {
-            id: matrixMessageList
-            chatRoom: control.attachedData?.chatRoomByRoomId(matrixRoomList.selectedRoomId) ?? null
+        ChatMessageList {
+            id: chatMessageList
+            chatRoom: control.attachedData?.chatRoomByRoomId(chatRoomList.selectedRoomId) ?? null
             clip: true
             anchors {
                 left: parent.left
                 right: parent.right
                 top: parent.top
-                bottom: matrixMessageBox.top
+                bottom: chatMessageBox.top
                 bottomMargin: 10
                 leftMargin: 10
                 rightMargin: 10
             }
         }
 
-        MatrixMessageBox {
-            id: matrixMessageBox
-            enabled: !!matrixRoomList.selectedRoomId
+        ChatMessageBox {
+            id: chatMessageBox
+            enabled: !!chatRoomList.selectedRoomId
             anchors {
                 left: parent.left
                 right: parent.right
@@ -207,8 +207,8 @@ Item {
             }
 
             onSendMessage: () => {
-                matrixMessageList.chatRoom.sendMessage(matrixMessageBox.text)
-                matrixMessageBox.clear()
+                chatMessageList.chatRoom.sendMessage(chatMessageBox.text)
+                chatMessageBox.clear()
             }
         }
     }
