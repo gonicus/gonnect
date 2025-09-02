@@ -60,22 +60,22 @@
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="34"/>
         <source>No fitting audio environment could be found. Please select the desired audio devices.</source>
-        <translation type="unfinished"></translation>
+        <translation>No se puede encontrar un ambiente de audio adecuado. Seleccione los dispositivos de audio deseados.</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="50"/>
         <source>Input device</source>
-        <translation type="unfinished"></translation>
+        <translation>Dispositivo de entrada</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="99"/>
         <source>Output device</source>
-        <translation type="unfinished"></translation>
+        <translation>Dispositivo de salida</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="148"/>
         <source>Output device for ring tone</source>
-        <translation type="unfinished"></translation>
+        <translation>Dispositivo de salida para tono de anillo</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="194"/>
