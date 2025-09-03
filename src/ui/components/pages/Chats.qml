@@ -99,6 +99,8 @@ Item {
             anchors.fill: parent
             settings {
                 localStorageEnabled: true
+                localContentCanAccessFileUrls: true
+                localContentCanAccessRemoteUrls: true
             }
             profile {
                 offTheRecord: false
@@ -127,7 +129,7 @@ Item {
             }
 
             function loadUrl() {
-                webView.url = "http://localhost:8080" // "?cacheInhibitor=" + Math.round(Math.random() * 100000)
+                webView.url = control.attachedData.url
             }
 
             onJavaScriptConsoleMessage: (level, message, line, source) => {

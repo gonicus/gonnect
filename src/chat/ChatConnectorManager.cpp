@@ -84,7 +84,7 @@ void ChatConnectorManager::init()
     m_isInitialized = true;
 
     ReadOnlyConfdSettings settings;
-    static const QRegularExpression groupRegex = QRegularExpression("^matrix[0-9]+$");
+    static const QRegularExpression groupRegex = QRegularExpression("^jschat[0-9]+$");
     const auto groups = settings.childGroups();
 
     for (const auto &group : groups) {
@@ -121,6 +121,7 @@ void ChatConnectorManager::init()
             }
 
             JsConnectorConfig config = { group,
+                                         settings.value("url").toUrl(),
                                          settings.value("id").toString(),
                                          settings.value("deviceId", "GOnnect Client").toString(),
                                          settings.value("displayName", group).toString(),
