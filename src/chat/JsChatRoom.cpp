@@ -38,20 +38,7 @@ void JsChatRoom::setName(const QString &name)
 
 void JsChatRoom::resetUnreadCount()
 {
-    JsChatEvent *foundEvent = nullptr;
-    auto connector = connectorParent();
-    const auto &events = connector->events();
-
-    for (const auto event : events) {
-        if (event->roomId() == m_id
-            && (!foundEvent || event->dateTime() > foundEvent->dateTime())) {
-            foundEvent = event;
-        }
-    }
-
-    if (foundEvent) {
-        emit connector->resetUnreadCountRequested(m_id, foundEvent->eventId());
-    }
+    emit connectorParent() -> resetUnreadCountRequested(m_id);
 }
 
 void JsChatRoom::sendMessage(const QString &message)
