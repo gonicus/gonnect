@@ -78,7 +78,6 @@ private:
     explicit AuthManager(QObject *parent = nullptr);
 
     void init();
-    const QString storedRefreshToken() const;
     void storeRefreshToken(const QString &token) const;
     void setIsWaitingForAuth(bool value);
     QDateTime tokenExpiry(const QString &token) const;

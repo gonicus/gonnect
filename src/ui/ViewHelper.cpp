@@ -10,7 +10,6 @@
 #include "GlobalCallState.h"
 #include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
-#include "SecretPortal.h"
 #include "SystemTrayMenu.h"
 #include "SIPCallManager.h"
 #include "GlobalCallState.h"
@@ -22,7 +21,10 @@
 #include <QMediaFormat>
 #include <QFileDialog>
 #include <QSystemTrayIcon>
+#include <QRegularExpression>
 #include <QUuid>
+#include <QMimeType>
+#include <QLoggingCategory>
 
 using namespace std::chrono_literals;
 
@@ -288,13 +290,6 @@ void ViewHelper::testPlayRingTone(qreal volume)
 HeadsetDeviceProxy *ViewHelper::headsetDeviceProxy() const
 {
     return USBDevices::instance().getHeadsetDeviceProxy();
-}
-
-QString ViewHelper::encryptSecret(const QString &secret) const
-{
-    auto &sp = SecretPortal::instance();
-    Q_ASSERT(sp.isValid());
-    return sp.encrypt(secret);
 }
 
 void ViewHelper::requestPassword(const QString &id, const QString &host)

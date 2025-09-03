@@ -1,5 +1,5 @@
 #include "Theme.h"
-#include "SettingsPortal.h"
+#include "ThemeManager.h"
 #include "AppSettings.h"
 
 #include <QLoggingCategory>
@@ -13,7 +13,7 @@ Theme::Theme(QObject *parent) : QObject{ parent }
 
     // Setup theme variant
     connect(this, &Theme::themeVariantChanged, this, &Theme::onThemeVariantChanged);
-    connect(&SettingsPortal::instance(), &SettingsPortal::colorSchemeChanged, this,
+    connect(&ThemeManager::instance(), &ThemeManager::colorSchemeChanged, this,
             &Theme::onThemeVariantChanged);
 
     AppSettings settings;
@@ -66,17 +66,17 @@ void Theme::onThemeVariantChanged()
     switch (m_themeVariant) {
 
     case ThemeVariant::System: {
-        const auto portalScheme = SettingsPortal::instance().colorScheme();
+        const auto portalScheme = ThemeManager::instance().colorScheme();
         switch (portalScheme) {
-        case SettingsPortal::ColorScheme::NO_PREFERENCE:
+        case ThemeManager::ColorScheme::NO_PREFERENCE:
             setDarkMode(false);
             break;
 
-        case SettingsPortal::ColorScheme::DARK:
+        case ThemeManager::ColorScheme::DARK:
             setDarkMode(true);
             break;
 
-        case SettingsPortal::ColorScheme::LIGHT:
+        case ThemeManager::ColorScheme::LIGHT:
             setDarkMode(false);
             break;
         }

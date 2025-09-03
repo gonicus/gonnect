@@ -1,15 +1,17 @@
 #include <QtDBus/QDBusConnection>
 
-#include "DBusActivationAdapter.h"
-#include "DBusActivationInterface.h"
-#include "GOnnectDBusAPI.h"
-#include "GlobalShortcutPortal.h"
+#ifdef Q_OS_LINUX
+#  include "DBusActivationAdapter.h"
+#  include "DBusActivationInterface.h"
+#  include "GOnnectDBusAPI.h"
+#endif
+
+#include "GlobalShortcuts.h"
 #include "StateManager.h"
 #include "SIPCallManager.h"
 #include "SIPManager.h"
 #include "Application.h"
 #include "CallHistory.h"
-#include "ScreenSaverInterface.h"
 #include "GlobalCallState.h"
 #include "ExternalMediaManager.h"
 
@@ -17,8 +19,10 @@ Q_LOGGING_CATEGORY(lcStateHandling, "gonnect.state")
 
 StateManager::StateManager(QObject *parent) : QObject(parent)
 {
+#ifdef Q_OS_LINUX
     m_activationAdapter = new DBusActivationAdapter(this);
     m_apiEndpoint = new GOnnectDBusAPI(this);
+#endif
 
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
@@ -26,34 +30,30 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
                 con.registerObject(FLATPAK_APP_PATH, this) && con.registerService(FLATPAK_APP_ID);
     }
 
-    m_inhibitPortal = new InhibitPortal(this);
-    connect(m_inhibitPortal, &InhibitPortal::stateChanged, this,
+    m_inhibitHelper = &InhibitHelper::instance();
+    connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
             &StateManager::sessionStateChanged);
 
     auto &cm = SIPCallManager::instance();
     connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
         if (SIPCallManager::instance().activeCalls() == 0) {
-            m_inhibitPortal->release();
+            m_inhibitHelper->release();
         }
     });
 
     connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
             &StateManager::updateInhibitState);
-
-    m_screenSaverInterface = new OrgFreedesktopScreenSaverInterface("org.freedesktop.ScreenSaver",
-                                                                    "/org/freedesktop/ScreenSaver",
-                                                                    QDBusConnection::sessionBus());
 }
 
 bool StateManager::globalShortcutsSupported() const
 {
-    return m_globalShortcutPortal ? m_globalShortcutPortal->isSupported() : false;
+    return GlobalShortcuts::instance().isSupported();
 }
 
 QVariantMap StateManager::globalShortcuts() const
 {
     QVariantMap res;
-    auto gcs = m_globalShortcutPortal->shortcuts();
+    auto gcs = GlobalShortcuts::instance().shortcuts();
 
     for (auto &gc : std::as_const(gcs)) {
         QVariantMap info = { { "description", gc->description },
@@ -66,27 +66,40 @@ QVariantMap StateManager::globalShortcuts() const
 
 void StateManager::initialize()
 {
-    m_globalShortcutPortal = new GlobalShortcutPortal(this);
-    m_globalShortcutPortal->initialize();
+    auto &globalShortcuts = GlobalShortcuts::instance();
 
-    connect(m_globalShortcutPortal, &GlobalShortcutPortal::initialized, this,
+    QList<Shortcut> shortcuts = {
+        { "dial",
+          { { "description", tr("Show dial window and focus search field") },
+            { "preferred_trigger", "CTRL+ALT+K" } } },
+        { "hangup",
+          { { "description", tr("End all calls") }, { "preferred_trigger", "CTRL+ALT+E" } } },
+        { "redial",
+          { { "description", tr("Redial last outgoing call") },
+            { "preferred_trigger", "CTRL+ALT+R" } } },
+        { "toggle-hold",
+          { { "description", tr("Toggle hold") }, { "preferred_trigger", "CTRL+ALT+M" } } },
+    };
+
+    globalShortcuts.setShortcuts(shortcuts);
+
+    connect(&globalShortcuts, &GlobalShortcuts::initialized, this,
             &StateManager::globalShortcutsSupportedChanged);
-    connect(m_globalShortcutPortal, &GlobalShortcutPortal::shortcutsChanged, this,
+    connect(&globalShortcuts, &GlobalShortcuts::shortcutsChanged, this,
             &StateManager::globalShortcutsChanged);
-    connect(m_globalShortcutPortal, &GlobalShortcutPortal::activated, this,
-            [](const QString &action) {
-                auto &cm = SIPCallManager::instance();
-                if (action == "dial") {
-                    qobject_cast<Application *>(Application::instance())->rootWindow()->show();
-                } else if (action == "hangup") {
-                    cm.endAllCalls();
-                } else if (action == "redial") {
-                    auto ci = CallHistory::instance().lastOutgoingSipInfo();
-                    SIPCallManager::instance().call(ci.sipUrl);
-                } else if (action == "toggle-hold") {
-                    cm.toggleHold();
-                }
-            });
+    connect(&globalShortcuts, &GlobalShortcuts::activated, this, [](const QString &action) {
+        auto &cm = SIPCallManager::instance();
+        if (action == "dial") {
+            qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+        } else if (action == "hangup") {
+            cm.endAllCalls();
+        } else if (action == "redial") {
+            auto ci = CallHistory::instance().lastOutgoingSipInfo();
+            SIPCallManager::instance().call(ci.sipUrl);
+        } else if (action == "toggle-hold") {
+            cm.toggleHold();
+        }
+    });
 }
 
 void StateManager::restart()
@@ -103,33 +116,28 @@ StateManager::~StateManager()
     }
 
     if (SIPCallManager::instance().activeCalls() == 0) {
-        m_inhibitPortal->release();
+        m_inhibitHelper->release();
     }
 }
 
 void StateManager::inhibitScreenSaver()
 {
-    if (m_screenSaverInterface && !m_screenSaverIsInhibited) {
-        QDBusPendingReply<unsigned> reply = m_screenSaverInterface->Inhibit(
-                QApplication::applicationName(), tr("Phone calls are active"));
-        reply.waitForFinished();
-
-        m_screenSaverCookie = reply.value();
-        m_screenSaverIsInhibited = true;
+    if (m_inhibitHelper) {
+        m_inhibitHelper->inhibitScreenSaver(QApplication::applicationName(),
+                                            tr("Phone calls are active"));
     }
 }
 
 void StateManager::releaseScreenSaver()
 {
-    if (m_screenSaverInterface && m_screenSaverIsInhibited) {
-        m_screenSaverInterface->UnInhibit(m_screenSaverCookie);
-        m_screenSaverIsInhibited = false;
+    if (m_inhibitHelper) {
+        m_inhibitHelper->releaseScreenSaver();
     }
 }
 
-void StateManager::sessionStateChanged(bool, InhibitPortal::InhibitState state)
+void StateManager::sessionStateChanged(bool, InhibitHelper::InhibitState state)
 {
-    if (state == InhibitPortal::InhibitState::QUERY_END) {
+    if (state == InhibitHelper::InhibitState::QUERY_END) {
 
         // If there are active calls, inhibit session changes that would interrupt
         // the call. That allows (at least for ~60s) for a reaction of the user.
@@ -137,25 +145,18 @@ void StateManager::sessionStateChanged(bool, InhibitPortal::InhibitState state)
         if (activeCalls) {
             qCDebug(lcStateHandling)
                     << "trying to inhibit session due to" << activeCalls << "active calls";
-            m_inhibitPortal->inhibit(
-                    InhibitPortal::InhibitFlag::IDLE | InhibitPortal::InhibitFlag::LOGOUT
-                            | InhibitPortal::InhibitFlag::SUSPEND
-                            | InhibitPortal::InhibitFlag::USER_SWITCH,
-                    QObject::tr("There are %n active call(s).", "calls", activeCalls),
-                    [this](uint code, const QVariantMap &) {
-                        if (code != 0) {
-                            qCCritical(lcStateHandling)
-                                    << "failed to inhibit session: response code" << code;
-                        } else {
-                            m_inhibitPortal->queryEndResponse();
-                        }
-                    });
+            m_inhibitHelper->inhibit(
+                    InhibitHelper::InhibitFlag::IDLE | InhibitHelper::InhibitFlag::LOGOUT
+                            | InhibitHelper::InhibitFlag::SUSPEND
+                            | InhibitHelper::InhibitFlag::USER_SWITCH,
+                    QObject::tr("There are %n active call(s).", "calls", activeCalls));
         }
     }
 }
 
 void StateManager::sendArguments(const QStringList &args)
 {
+#ifdef Q_OS_LINUX
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
         QVariantList vlArgs;
@@ -168,6 +169,9 @@ void StateManager::sendArguments(const QStringList &args)
 
         actionInterface.ActivateAction("invoke", vlArgs, {});
     }
+#else
+    Q_UNUSED(args)
+#endif
 }
 
 void StateManager::Activate(const QVariantMap &)

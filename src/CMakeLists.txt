@@ -1,5 +1,7 @@
 find_package(Qt6 REQUIRED COMPONENTS
     Core
+    CorePrivate
+    GuiPrivate
     Core5Compat
     Widgets
     Quick
@@ -76,7 +78,7 @@ qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Notification.
     NotificationInterface
 )
 qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.GlobalShortcuts.xml
-    GlobalShortcuts
+    GlobalShortcutsInterface
 )
 qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Session.xml
     PortalSession
@@ -163,13 +165,25 @@ if(BUILD_DEPENDENCIES)
     include_directories("${INSTALL_DIR}/include/Qca-qt6/QtCrypto")
     link_directories("${INSTALL_DIR}/lib")
 
+    ExternalProject_Add(qtkeychain
+        GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
+        GIT_TAG 0.15.0
+        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON -DBUILD_SHARED_LIBS=OFF
+        UPDATE_DISCONNECTED TRUE
+    )
+    ExternalProject_Get_Property(qtkeychain INSTALL_DIR)
+    include_directories("${INSTALL_DIR}/include")
+    link_directories("${INSTALL_DIR}/lib64")
+
     add_dependencies(gonnect qca)
+    add_dependencies(gonnect qtkeychain)
     add_dependencies(CardDAVAddressBookFactory vcard qtwebdav)
     add_dependencies(CalDAVEventFeederFactory qtwebdav)
 else()
     find_package(QtWebDAV REQUIRED)
     find_package(vCard REQUIRED)
     find_package(Qca-qt6 QUIET)
+    find_package(qtkeychain QUIET)
 endif()
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
@@ -237,7 +251,6 @@ qt_add_qml_module(gonnect
         ui/components/search/SearchResultNumberItem.qml
 
         ui/components/templatefields/TemplateFieldText.qml
-        ui/components/templatefields/TemplateFieldSecret.qml
         ui/components/templatefields/TemplateFieldFile.qml
 
         ui/components/AdditionalInfo.qml
@@ -319,11 +332,7 @@ qt_add_qml_module(gonnect
         dbus/portal/SettingsPortal.cpp
         dbus/portal/SecretPortal.h
         dbus/portal/SecretPortal.cpp
-        dbus/portal/NetworkHelper.h
-        dbus/portal/NetworkHelper.cpp
 
-        dbus/ExternalMediaManager.cpp
-        dbus/ExternalMediaManager.h
         dbus/GOnnectDBusAPI.h
         dbus/GOnnectDBusAPI.cpp
         dbus/KRunnerAdapter.h
@@ -332,10 +341,6 @@ qt_add_qml_module(gonnect
         dbus/Notification.cpp
         dbus/NotificationIcon.h
         dbus/NotificationIcon.cpp
-        dbus/NotificationManager.h
-        dbus/NotificationManager.cpp
-        dbus/SearchProvider.h
-        dbus/SearchProvider.cpp
 
         sip/CallHistory.h
         sip/CallHistory.cpp
@@ -447,8 +452,35 @@ qt_add_qml_module(gonnect
         media/VideoManager.h
         media/VideoManager.cpp
 
+        platform/Credentials.h
+        platform/Credentials.cpp
         platform/UserInfo.h
-        platform/UserInfo.cpp
+        platform/flatpak/FlatpakUserInfo.h
+        platform/flatpak/FlatpakUserInfo.cpp
+        platform/NotificationManager.h
+        platform/flatpak/FlatpakNotificationManager.h
+        platform/flatpak/FlatpakNotificationManager.cpp
+        platform/ExternalMediaManager.h
+        platform/linux/MPRISExternalMediaManager.cpp
+        platform/linux/MPRISExternalMediaManager.h
+        platform/BackgroundManager.h
+        platform/flatpak/FlatpakBackgroundManager.h
+        platform/flatpak/FlatpakBackgroundManager.cpp
+        platform/ThemeManager.h
+        platform/flatpak/FlatpakThemeManager.h
+        platform/flatpak/FlatpakThemeManager.cpp
+        platform/NetworkHelper.h
+        platform/flatpak/FlatpakNetworkHelper.h
+        platform/flatpak/FlatpakNetworkHelper.cpp
+        platform/InhibitHelper.h
+        platform/flatpak/FlatpakInhibitHelper.h
+        platform/flatpak/FlatpakInhibitHelper.cpp
+        platform/GlobalShortcuts.h
+        platform/flatpak/FlatpakGlobalShortcuts.h
+        platform/flatpak/FlatpakGlobalShortcuts.cpp
+        platform/SearchProvider.h
+        platform/linux/LinuxDesktopSearchProvider.h
+        platform/linux/LinuxDesktopSearchProvider.cpp
 
         ui/CallsModel.h
         ui/CallsModel.cpp
@@ -598,6 +630,7 @@ target_link_libraries(gonnect
         PkgConfig::LIBICAL
         GOnnectVersion
         qca-qt6
+        qt6keychain
         hid-rp
         QtWebDAV
         Qt6::Xml

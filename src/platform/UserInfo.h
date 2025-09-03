@@ -1,30 +1,18 @@
 #pragma once
 #include <QObject>
 
-class AccountPortal;
-
 class UserInfo : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(UserInfo)
 
 public:
-    static UserInfo &instance()
-    {
-        static UserInfo *_instance = nullptr;
-        if (!_instance) {
-            _instance = new UserInfo;
-        }
-        return *_instance;
-    }
+    static UserInfo &instance();
 
-    QString getDisplayName();
+    explicit UserInfo() : QObject() { }
+    ~UserInfo() = default;
 
-private:
-    explicit UserInfo(QObject *parent = nullptr);
-    void acquireDisplayName(std::function<void(const QString &displayName)> callback);
-
-    AccountPortal *m_accountPortal = nullptr;
-    QString m_displayName;
+    virtual QString getDisplayName() = 0;
 
 signals:
     void displayNameChanged();

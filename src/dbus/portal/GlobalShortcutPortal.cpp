@@ -7,19 +7,6 @@ GlobalShortcutPortal::GlobalShortcutPortal(QObject *parent)
     : AbstractPortal{ FREEDESKTOP_DBUS_PORTAL_SERVICE, FREEDESKTOP_DBUS_PORTAL_PATH,
                       GLOBALSHORTCUT_PORTAL_INTERFACE, parent }
 {
-    // List of supported shortcuts
-    m_shortcuts = {
-        { "dial",
-          { { "description", tr("Show dial window and focus search field") },
-            { "preferred_trigger", "CTRL+ALT+K" } } },
-        { "hangup",
-          { { "description", tr("End all calls") }, { "preferred_trigger", "CTRL+ALT+E" } } },
-        { "redial",
-          { { "description", tr("Redial last outgoing call") },
-            { "preferred_trigger", "CTRL+ALT+R" } } },
-        { "toggle-hold",
-          { { "description", tr("Toggle hold") }, { "preferred_trigger", "CTRL+ALT+M" } } },
-    };
 }
 
 void GlobalShortcutPortal::initialize()

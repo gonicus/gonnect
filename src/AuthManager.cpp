@@ -1,7 +1,6 @@
 #include "AuthManager.h"
-#include "KeychainSettings.h"
 #include "ReadOnlyConfdSettings.h"
-#include "SecretPortal.h"
+#include "Credentials.h"
 
 #include <QtNetworkAuth/QtNetworkAuth>
 #include <QLoggingCategory>
@@ -17,13 +16,7 @@ Q_LOGGING_CATEGORY(lcAuthManager, "gonnect.app.auth")
 
 AuthManager::AuthManager(QObject *parent) : QObject{ parent }
 {
-    auto &secretPortal = SecretPortal::instance();
-    if (secretPortal.isValid() && !secretPortal.isInitialized()) {
-        connect(&secretPortal, &SecretPortal::initializedChanged, this, &AuthManager::init,
-                Qt::SingleShotConnection);
-    } else {
-        init();
-    }
+    init();
 }
 
 void AuthManager::init()
@@ -92,44 +85,30 @@ void AuthManager::init()
                          qCInfo(lcAuthManager) << "Browser opened:" << result;
                      });
 
-    const auto decryptedRefreshToken = storedRefreshToken();
-    if (!decryptedRefreshToken.isEmpty()) {
-        m_authFlow->setRefreshToken(decryptedRefreshToken);
-    }
+    Credentials::instance().get(
+            "jitsi/refreshToken", [this, sslConfig](bool error, const QString &data) {
+                if (error) {
+                    qCCritical(lcAuthManager) << "failed to set credentials:" << data;
+                    return;
+                }
 
-    m_authFlow->setAutoRefresh(true);
-    m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
-    m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
-    m_authFlow->setClientIdentifier(settings.value("clientIdentifier", "").toString());
-    m_authFlow->setSslConfiguration(sslConfig);
+                if (!data.isEmpty()) {
+                    m_authFlow->setRefreshToken(data);
+                }
 
-    settings.endGroup();
+                ReadOnlyConfdSettings settings;
+                settings.beginGroup("jitsi");
 
-    emit isAuthManagerInitializedChanged();
-}
+                m_authFlow->setAutoRefresh(true);
+                m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
+                m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
+                m_authFlow->setClientIdentifier(settings.value("clientIdentifier", "").toString());
+                m_authFlow->setSslConfiguration(sslConfig);
 
-const QString AuthManager::storedRefreshToken() const
-{
-    KeychainSettings keychainSettings;
-    keychainSettings.beginGroup("jitsi");
-    const auto encryptedRefreshToken = keychainSettings.value("refreshToken", "").toString();
-    keychainSettings.endGroup();
+                settings.endGroup();
 
-    if (encryptedRefreshToken.isEmpty()) {
-        return "";
-    }
-
-    auto &secretPortal = SecretPortal::instance();
-    if (!secretPortal.isValid()) {
-        qCWarning(lcAuthManager) << "SecretPortal is not valid";
-        return "";
-    }
-    if (!secretPortal.isInitialized()) {
-        qCWarning(lcAuthManager) << "SecretPortal is not initialized";
-        return "";
-    }
-
-    return secretPortal.decrypt(encryptedRefreshToken);
+                emit isAuthManagerInitializedChanged();
+            });
 }
 
 void AuthManager::storeRefreshToken(const QString &token) const
@@ -138,22 +117,11 @@ void AuthManager::storeRefreshToken(const QString &token) const
         return;
     }
 
-    auto &secretPortal = SecretPortal::instance();
-    if (!secretPortal.isValid()) {
-        qCWarning(lcAuthManager) << "SecretPortal is not valid";
-        return;
-    }
-    if (!secretPortal.isInitialized()) {
-        qCWarning(lcAuthManager) << "SecretPortal is not initialized";
-        return;
-    }
-
-    const auto encryptedToken = secretPortal.encrypt(token);
-
-    KeychainSettings keychainSettings;
-    keychainSettings.beginGroup("jitsi");
-    keychainSettings.setValue("refreshToken", encryptedToken);
-    keychainSettings.endGroup();
+    Credentials::instance().set("jitsi/refreshToken", token, [](bool error, const QString &data) {
+        if (error) {
+            qCCritical(lcAuthManager) << "failed to set credentials:" << data;
+        }
+    });
 }
 
 bool AuthManager::isOAuthAuthenticated() const

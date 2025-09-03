@@ -22,7 +22,7 @@ public:
     enum TRANSPORT_NET { AUTO, IPv4, IPv6 };
     Q_ENUM(TRANSPORT_NET)
 
-    bool initialize();
+    void initialize();
 
     virtual void onIncomingCall(pj::OnIncomingCallParam &prm) override;
     virtual void onRegState(pj::OnRegStateParam &prm) override;
@@ -61,6 +61,8 @@ public:
     ~SIPAccount();
 
 private:
+    void finalizeInitialization();
+
     void generatePreferredIdentityHeader(const QString &var, const QString &preferredIdentity,
                                          pj::CallOpParam &prm);
     bool hasAllowGrant(const QString &header, const QString &grant) const;
@@ -86,6 +88,7 @@ private:
     TRANSPORT_NET m_transportNet = TRANSPORT_NET::AUTO;
 
 signals:
+    void initialized(bool success);
     void isRegisteredChanged();
     void authorizationFailed();
     void messageReceived(const QString &sender, const QString &message, const QString &mimeType);

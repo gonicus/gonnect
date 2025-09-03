@@ -1,9 +1,19 @@
+#include "FlatpakUserInfo.h"
 #include "UserInfo.h"
 #include "AccountPortal.h"
 #include "AppSettings.h"
 #include "ReadOnlyConfdSettings.h"
 
-UserInfo::UserInfo(QObject *parent) : QObject{ parent }
+UserInfo &UserInfo::instance()
+{
+    static UserInfo *_instance = nullptr;
+    if (!_instance) {
+        _instance = new FlatpakUserInfo;
+    }
+    return *_instance;
+}
+
+FlatpakUserInfo::FlatpakUserInfo() : UserInfo{}
 {
     ReadOnlyConfdSettings settings;
 
@@ -11,7 +21,7 @@ UserInfo::UserInfo(QObject *parent) : QObject{ parent }
     m_displayName = settings.value("generic/displayName", "").toString();
 }
 
-QString UserInfo::getDisplayName()
+QString FlatpakUserInfo::getDisplayName()
 {
     if (m_displayName.isEmpty()) {
         acquireDisplayName([this](const QString &displayName) {
@@ -23,7 +33,7 @@ QString UserInfo::getDisplayName()
     return m_displayName;
 }
 
-void UserInfo::acquireDisplayName(std::function<void(const QString &displayName)> callback)
+void FlatpakUserInfo::acquireDisplayName(std::function<void(const QString &displayName)> callback)
 {
     if (m_displayName.isEmpty()) {
         m_accountPortal->GetUserInformation(

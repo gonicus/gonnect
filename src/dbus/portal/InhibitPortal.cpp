@@ -75,7 +75,7 @@ void InhibitPortal::sessionStateReceived(const QDBusObjectPath &, const QVariant
 {
     emit stateChanged(
             map.value("screensaver-active", false).toBool(),
-            static_cast<InhibitPortal::InhibitState>(map.value("session-state").toUInt()));
+            static_cast<InhibitHelper::InhibitState>(map.value("session-state").toUInt()));
 }
 
 void InhibitPortal::queryEndResponse()
