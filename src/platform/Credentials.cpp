@@ -30,24 +30,24 @@ void Credentials::initialize()
 {
 #ifdef Q_OS_LINUX
     auto &sp = SecretPortal::instance();
-    if (!sp.isValid()) {
-        qFatal("doh!"); // TODO: bummer or not?
-    }
-
-    if (sp.isInitialized()) {
-        m_initialized = true;
-        emit initializedChanged();
+    if (sp.isValid()) {
+        if (sp.isInitialized()) {
+            m_initialized = true;
+            emit initializedChanged();
+        } else {
+            connect(
+                    &sp, &SecretPortal::initializedChanged, this,
+                    [this]() {
+                        bool isInitialized = SecretPortal::instance().isInitialized();
+                        if (isInitialized != m_initialized) {
+                            m_initialized = isInitialized;
+                            emit initializedChanged();
+                        }
+                    },
+                    Qt::ConnectionType::SingleShotConnection);
+        }
     } else {
-        connect(
-                &sp, &SecretPortal::initializedChanged, this,
-                [this]() {
-                    bool isInitialized = SecretPortal::instance().isInitialized();
-                    if (isInitialized != m_initialized) {
-                        m_initialized = isInitialized;
-                        emit initializedChanged();
-                    }
-                },
-                Qt::ConnectionType::SingleShotConnection);
+        qCFatal(lcCredentials) << "flatpak Secret Portal is not valid - bailing out";
     }
 #else
     m_initialized = true;
