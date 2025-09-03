@@ -96,7 +96,11 @@ void JitsiConnector::apiLoadingFinished()
 
     if (m_isToggleScreenSharePending) {
         m_isToggleScreenSharePending = false;
-        toggleScreenShare();
+
+        // It can sometimes crash the JS API, when the toggleScreenShare command is executed too
+        // early. Since there is no reliable event to listen to, a random timer must be used here to
+        // defer it such that Jitsi Meet is hopefully ready...
+        QTimer::singleShot(2000, this, [this]() { toggleScreenShare(); });
     }
 }
 
