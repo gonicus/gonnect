@@ -378,7 +378,7 @@ api.addListener("participantRoleChanged", data => {
 })
 
 api.addListener("errorOccurred", data => {
-    jitsiConn.addError(data.type, data.name, data.message, data.isFatal, data.details)
+    jitsiConn.addError(data.type, data.name, data.message, !!data.isFatal, data?.details ?? {})
 })
 
 api.addListener("incomingMessage", data => {
