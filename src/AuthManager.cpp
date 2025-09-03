@@ -85,29 +85,30 @@ void AuthManager::init()
                          qCInfo(lcAuthManager) << "Browser opened:" << result;
                      });
 
-    Credentials::instance().get("jitsi/refreshToken", [this, sslConfig](bool error, const QString &data) {
-        if (error) {
-            qCCritical(lcAuthManager) << "failed to set credentials:" << data;
-            return;
-        }
+    Credentials::instance().get(
+            "jitsi/refreshToken", [this, sslConfig](bool error, const QString &data) {
+                if (error) {
+                    qCCritical(lcAuthManager) << "failed to set credentials:" << data;
+                    return;
+                }
 
-        if (!data.isEmpty()) {
-            m_authFlow->setRefreshToken(data);
-        }
+                if (!data.isEmpty()) {
+                    m_authFlow->setRefreshToken(data);
+                }
 
-        ReadOnlyConfdSettings settings;
-        settings.beginGroup("jitsi");
+                ReadOnlyConfdSettings settings;
+                settings.beginGroup("jitsi");
 
-        m_authFlow->setAutoRefresh(true);
-        m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
-        m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
-        m_authFlow->setClientIdentifier(settings.value("clientIdentifier", "").toString());
-        m_authFlow->setSslConfiguration(sslConfig);
+                m_authFlow->setAutoRefresh(true);
+                m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
+                m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
+                m_authFlow->setClientIdentifier(settings.value("clientIdentifier", "").toString());
+                m_authFlow->setSslConfiguration(sslConfig);
 
-        settings.endGroup();
+                settings.endGroup();
 
-        emit isAuthManagerInitializedChanged();
-    });
+                emit isAuthManagerInitializedChanged();
+            });
 }
 
 void AuthManager::storeRefreshToken(const QString &token) const

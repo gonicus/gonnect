@@ -29,7 +29,7 @@ Credentials::Credentials(QObject *parent)
 void Credentials::initialize()
 {
 #ifdef Q_OS_LINUX
-    auto& sp = SecretPortal::instance();
+    auto &sp = SecretPortal::instance();
     if (!sp.isValid()) {
         qFatal("doh!"); // TODO: bummer or not?
     }
@@ -55,54 +55,64 @@ void Credentials::initialize()
 #endif
 }
 
-void Credentials::set(const QString &key, const QString& secret, CredentialsResponse callback) {
+void Credentials::set(const QString &key, const QString &secret, CredentialsResponse callback)
+{
     m_writeCredentialJob.setKey(key);
 
-    connect(&m_writeCredentialJob, &QKeychain::WritePasswordJob::finished, this, [this, callback]() {
-        if (m_writeCredentialJob.error()) {
-            callback(true, tr("storing credentials failed: %1").arg(qPrintable(m_writeCredentialJob.errorString())));
-        } else {
-            callback(false, "");
-        }
-    });
+    connect(&m_writeCredentialJob, &QKeychain::WritePasswordJob::finished, this,
+            [this, callback]() {
+                if (m_writeCredentialJob.error()) {
+                    callback(true,
+                             tr("storing credentials failed: %1")
+                                     .arg(qPrintable(m_writeCredentialJob.errorString())));
+                } else {
+                    callback(false, "");
+                }
+            });
 
     m_writeCredentialJob.setTextData(secret);
     m_writeCredentialJob.start();
 }
 
-void Credentials::get(const QString &key, CredentialsResponse callback) {
+void Credentials::get(const QString &key, CredentialsResponse callback)
+{
     m_readCredentialJob.setKey(key);
 
-    QObject::connect(&m_readCredentialJob, &QKeychain::ReadPasswordJob::finished, this, [this, key, callback]() {
-        auto error = m_readCredentialJob.error();
-        QString secret = m_readCredentialJob.textData();
+    QObject::connect(&m_readCredentialJob, &QKeychain::ReadPasswordJob::finished, this,
+                     [this, key, callback]() {
+                         auto error = m_readCredentialJob.error();
+                         QString secret = m_readCredentialJob.textData();
 
-        // Key is not present in keychain? Try to update it from Flatpak portal
-        if (error == QKeychain::EntryNotFound || secret.isEmpty()) {
-            KeychainSettings keychainSettings;
+                         // Key is not present in keychain? Try to update it from Flatpak portal
+                         if (error == QKeychain::EntryNotFound || secret.isEmpty()) {
+                             KeychainSettings keychainSettings;
 
 #ifdef Q_OS_LINUX
-            const auto encryptedSecret = keychainSettings.value(key, "").toString();
-            secret = SecretPortal::instance().decrypt(encryptedSecret);
+                             const auto encryptedSecret =
+                                     keychainSettings.value(key, "").toString();
+                             secret = SecretPortal::instance().decrypt(encryptedSecret);
 
-            if (!secret.isEmpty()) {
+                             if (!secret.isEmpty()) {
 
-                set(key, secret, [key](bool error, const QString& misc){
-                    if (error) {
-                        qCCritical(lcCredentials) << "failed to update keychain credentials for" << key << "-" << misc;
-                    }
-                });
-            }
+                                 set(key, secret, [key](bool error, const QString &misc) {
+                                     if (error) {
+                                         qCCritical(lcCredentials)
+                                                 << "failed to update keychain credentials for"
+                                                 << key << "-" << misc;
+                                     }
+                                 });
+                             }
 #endif
 
-            callback(false, secret);
-        } else if (error != QKeychain::NoError) {
-            callback(true, tr("reading credentials failed: %1").arg(qPrintable(m_writeCredentialJob.errorString())));
-        } else {
-            callback(false, secret);
-        }
-    });
+                             callback(false, secret);
+                         } else if (error != QKeychain::NoError) {
+                             callback(true,
+                                      tr("reading credentials failed: %1")
+                                              .arg(qPrintable(m_writeCredentialJob.errorString())));
+                         } else {
+                             callback(false, secret);
+                         }
+                     });
 
     m_readCredentialJob.start();
 }
-

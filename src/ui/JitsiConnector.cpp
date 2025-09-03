@@ -592,20 +592,21 @@ void JitsiConnector::setRoomPassword(QString value)
 
     QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-    Credentials::instance().set(authGroup, value, [this, value, authGroup](bool error, const QString &data){
-        if (error) {
-            qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
-        } else {
-            emit executePasswordCommand(value);
+    Credentials::instance().set(
+            authGroup, value, [this, value, authGroup](bool error, const QString &data) {
+                if (error) {
+                    qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
+                } else {
+                    emit executePasswordCommand(value);
 
-            if (m_roomPassword != value) {
-                m_roomPassword = value;
-                emit roomPasswordChanged();
-            }
+                    if (m_roomPassword != value) {
+                        m_roomPassword = value;
+                        emit roomPasswordChanged();
+                    }
 
-            setIsPasswordRequired(!value.isEmpty());
-        }
-    });
+                    setIsPasswordRequired(!value.isEmpty());
+                }
+            });
 }
 
 void JitsiConnector::setCurrentAudioInputDevice(JitsiMediaDevice *device)
@@ -767,23 +768,24 @@ void JitsiConnector::passwordEntered(const QString &password, bool shouldRemembe
     if (shouldRemember) {
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-        Credentials::instance().set(authGroup, password, [this, password, authGroup](bool error, const QString &data){
-            if (error) {
-                qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
-            } else {
-                emit executePasswordCommand(password);
+        Credentials::instance().set(
+                authGroup, password, [this, password, authGroup](bool error, const QString &data) {
+                    if (error) {
+                        qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
+                    } else {
+                        emit executePasswordCommand(password);
 
-                if (m_roomPassword != password) {
-                    m_roomPassword = password;
-                    emit roomPasswordChanged();
-                }
+                        if (m_roomPassword != password) {
+                            m_roomPassword = password;
+                            emit roomPasswordChanged();
+                        }
 
-                setIsPasswordEntryRequired(false);
-                setIsPasswordRequired(false);
+                        setIsPasswordEntryRequired(false);
+                        setIsPasswordRequired(false);
 
-                emit executePasswordCommand(password);
-            }
-        });
+                        emit executePasswordCommand(password);
+                    }
+                });
     }
 }
 
@@ -795,7 +797,7 @@ void JitsiConnector::onPasswordRequired()
 
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-        Credentials::instance().get(authGroup, [this, authGroup](bool error, const QString &data){
+        Credentials::instance().get(authGroup, [this, authGroup](bool error, const QString &data) {
             if (error) {
                 qCCritical(lcJitsiConnector) << "failed to get credentials:" << data;
             } else {
