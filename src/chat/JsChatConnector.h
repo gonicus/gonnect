@@ -85,5 +85,5 @@ signals:
     void chatEventAdded();
     void chatUserAdded();
     void sendMessageRequested(QString roomId, QString message);
-    void resetUnreadCountRequested(QString roomId, const QString &eventId);
+    void resetUnreadCountRequested(QString roomId);
 };
