@@ -26,7 +26,7 @@ public:
 
     bool isInitialized() { return m_initialized; }
 
-    void set(const QString &key, const QString& secret, CredentialsResponse callback);
+    void set(const QString &key, const QString &secret, CredentialsResponse callback);
     void get(const QString &key, CredentialsResponse callback);
 
     ~Credentials() = default;

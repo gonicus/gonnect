@@ -103,8 +103,8 @@ void SIPManager::initialize()
     m_ep.libStart();
 
     // Load Accounts + Transports
-    auto& sam = SIPAccountManager::instance();
-    connect(&sam, &SIPAccountManager::accountsChanged, this, [this](){
+    auto &sam = SIPAccountManager::instance();
+    connect(&sam, &SIPAccountManager::accountsChanged, this, [this]() {
         for (const QString &var : std::as_const(m_buddyStateQueue)) {
             buddyStatus(var);
         }

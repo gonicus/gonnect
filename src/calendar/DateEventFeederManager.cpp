@@ -30,39 +30,45 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
     const auto configIdHash = settings.hashForSettingsGroup(configId);
     const auto secretKey = QString("%1_%2").arg(configId, configIdHash);
 
-    Credentials::instance().get(secretKey + "/secret", [this, configId, secretKey, callback](bool error, const QString &secret){
-        if (error) {
-            qCWarning(lcDateEventFeederManager) << "failed to retrieve secret:" << secret;
-            return;
-        }
+    Credentials::instance().get(
+            secretKey + "/secret",
+            [this, configId, secretKey, callback](bool error, const QString &secret) {
+                if (error) {
+                    qCWarning(lcDateEventFeederManager) << "failed to retrieve secret:" << secret;
+                    return;
+                }
 
-        if (secret.isEmpty()) {
-            auto &viewHelper = ViewHelper::instance();
-            auto conn = connect(
-                    &viewHelper, &ViewHelper::passwordResponded, this,
-                    [secretKey, configId, callback, this](const QString &id, const QString &password) {
-                        if (id == configId) {
-                            QObject::disconnect(m_viewHelperConnections.value(configId));
-                            m_viewHelperConnections.remove(configId);
+                if (secret.isEmpty()) {
+                    auto &viewHelper = ViewHelper::instance();
+                    auto conn = connect(
+                            &viewHelper, &ViewHelper::passwordResponded, this,
+                            [secretKey, configId, callback, this](const QString &id,
+                                                                  const QString &password) {
+                                if (id == configId) {
+                                    QObject::disconnect(m_viewHelperConnections.value(configId));
+                                    m_viewHelperConnections.remove(configId);
 
-                            Credentials::instance().set(secretKey + "/secret", password, [secretKey](bool error, const QString &data) {
-                                if (error) {
-                                    qCCritical(lcDateEventFeederManager) << "failed to set credentials:" << data;
+                                    Credentials::instance().set(
+                                            secretKey + "/secret", password,
+                                            [secretKey](bool error, const QString &data) {
+                                                if (error) {
+                                                    qCCritical(lcDateEventFeederManager)
+                                                            << "failed to set credentials:" << data;
+                                                }
+                                            });
+
+                                    callback(password);
                                 }
                             });
 
-                            callback(password);
-                        }
-                    });
+                    m_viewHelperConnections.insert(configId, conn);
 
-            m_viewHelperConnections.insert(configId, conn);
-
-            ReadOnlyConfdSettings settings;
-            viewHelper.requestPassword(configId, settings.value("host", "").toString());
-        } else {
-            callback(secret);
-        }
-    });
+                    ReadOnlyConfdSettings settings;
+                    viewHelper.requestPassword(configId, settings.value("host", "").toString());
+                } else {
+                    callback(secret);
+                }
+            });
 }
 
 void DateEventFeederManager::initFeederConfigs()

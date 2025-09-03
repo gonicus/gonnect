@@ -370,24 +370,28 @@ void SIPAccount::initialize()
         // Allow plain text password for debugging cases
         if (data.isEmpty()) {
             auto &cds = Credentials::instance();
-            cds.get(auth + "/secret", [this, auth, scheme, realm, username, dataTypeValue](bool error, const QString &data){
-                if (error) {
-                    qCCritical(lcSIPAccount) << "authentification failed:" << data;
-                    emit initialized(false);
-                    return;
-                }
+            cds.get(auth + "/secret",
+                    [this, auth, scheme, realm, username, dataTypeValue](bool error,
+                                                                         const QString &data) {
+                        if (error) {
+                            qCCritical(lcSIPAccount) << "authentification failed:" << data;
+                            emit initialized(false);
+                            return;
+                        }
 
-                if (data.isEmpty()) {
-                    qCWarning(lcSIPAccount) << "no password available for auth group" << auth;
-                }
+                        if (data.isEmpty()) {
+                            qCWarning(lcSIPAccount)
+                                    << "no password available for auth group" << auth;
+                        }
 
-                pj::AuthCredInfo cred(scheme.toStdString(), realm.toStdString(), username.toStdString(),
-                                      dataTypeValue, data.toStdString());
+                        pj::AuthCredInfo cred(scheme.toStdString(), realm.toStdString(),
+                                              username.toStdString(), dataTypeValue,
+                                              data.toStdString());
 
-                m_accountConfig.sipConfig.authCreds.push_back(cred);
+                        m_accountConfig.sipConfig.authCreds.push_back(cred);
 
-                finalizeInitialization();
-            });
+                        finalizeInitialization();
+                    });
 
             return;
         }
@@ -803,11 +807,12 @@ void SIPAccount::setCredentials(const QString &password)
     }
 
     // Update storage
-    Credentials::instance().set(authGroup + "/secret", password, [authGroup](bool error, const QString &data){
-        if (error) {
-            qCCritical(lcSIPAccount) << "failed to set credentials:" << data;
-        }
-    });
+    Credentials::instance().set(
+            authGroup + "/secret", password, [authGroup](bool error, const QString &data) {
+                if (error) {
+                    qCCritical(lcSIPAccount) << "failed to set credentials:" << data;
+                }
+            });
 }
 
 SIPAccount::~SIPAccount()
