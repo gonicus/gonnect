@@ -19,6 +19,7 @@ class JsChatConnector : public IChatProvider
 
     Q_PROPERTY(
             bool isSecretInitalized READ isSecretInitalized NOTIFY isSecretInitalizedChanged FINAL)
+    Q_PROPERTY(QUrl url READ url CONSTANT FINAL)
     Q_PROPERTY(QString ownUserId READ ownUserId CONSTANT FINAL)
     Q_PROPERTY(QString displayName READ displayName CONSTANT FINAL)
     Q_PROPERTY(QString deviceId READ deviceId CONSTANT FINAL)
@@ -28,6 +29,7 @@ class JsChatConnector : public IChatProvider
 public:
     explicit JsChatConnector(const JsConnectorConfig &config, QObject *parent = nullptr);
 
+    QUrl url() const { return m_config.url; }
     QString ownUserId() const { return m_config.ownUserId; }
     QString deviceId() const { return m_config.deviceId; }
     QString displayName() const { return m_config.displayName; }
