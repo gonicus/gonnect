@@ -47,8 +47,10 @@ runs:
       run: |
         echo "CMAKE_VERSION=$(cmake --version | head -n 1 | awk '{print $3}')" >> $GITHUB_OUTPUT
         echo "QCA_HASH=$(git submodule status external/qca | awk '{print $1}')" >> $GITHUB_OUTPUT
+        key: ${{ steps.hashes.outputs.QTKEYCHAIN_HASH }}-qtkeychain
         echo "HIDAPI_TAG=$(yq '.. | select(has("name")) | select(.name == "hidapi") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
         echo "PJSIP_TAG=$(yq '.. | select(has("name")) | select(.name == "pjsip") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
+        echo "QTKEYCHAIN_TAG=$(yq '.. | select(has("name")) | select(.name == "qtkeychain") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
 
     - name: Cache hidapi
       id: cache-hidapi
@@ -118,3 +120,30 @@ runs:
         ${QT_ROOT_DIR}/bin/qt-cmake .. -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/qca -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
         make 
         make install
+
+    - name: Cache qtkeychain
+      id: cache-qtkeychain
+      if: inputs.qt-only == 'false'
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+      with:
+        path: qtkeychain
+        key: ${{ steps.hashes.outputs.QTKEYCHAIN_TAG }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-qtkeychain
+
+    - name: Build qtkeychain
+      shell: bash
+      if: ${{ inputs.qt-only == 'false' && steps.cache-qtkeychain.outputs.cache-hit != 'true' }}
+      run: |
+        git clone https://github.com/frankosterfeld/qtkeychain.git
+        cd qtkeychain
+        git checkout ${{ steps.hashes.outputs.QTKEYCHAIN_TAG }}
+        mkdir -p build
+        cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_WITH_QT6=ON
+        make
+
+    - name: Install qtkeychain
+      shell: bash
+      if: inputs.qt-only == 'false'
+      run: |
+        cd qtkeychain/build
+        sudo make install
