@@ -9,6 +9,8 @@
 #include "JsChatRoom.h"
 
 #include <QLoggingCategory>
+#include <QHttpServer>
+#include <QTcpServer>
 
 Q_LOGGING_CATEGORY(lcJsChatConnector, "gonnect.app.JsChatConnector")
 
@@ -18,8 +20,15 @@ JsChatConnector::JsChatConnector(const JsConnectorConfig &config, QObject *paren
     connect();
 }
 
+QUrl JsChatConnector::url() const
+{
+    return QString("http://localhost:%1/index.html").arg(m_tcpPort);
+}
+
 void JsChatConnector::connect()
 {
+    setupServer();
+
     if (m_config.recoveryKey.isEmpty()) {
         auto &viewHelper = ViewHelper::instance();
         QObject::connect(&viewHelper, &ViewHelper::recoveryKeyResponded, this,
@@ -33,6 +42,31 @@ void JsChatConnector::connect()
     } else {
         setIsSecretInitalized(true);
     }
+}
+
+void JsChatConnector::setupServer()
+{
+    auto httpServer = new QHttpServer(this);
+    httpServer->route("/<arg>", [this](const QUrl &url) {
+        auto response = QHttpServerResponse::fromFile(m_config.url.toString() + "/" + url.path());
+
+        // Wasm files need MIME type fixed
+        if (url.path().endsWith(".wasm")) {
+            auto headers = response.headers();
+            headers.replaceOrAppend(QHttpHeaders::WellKnownHeader::ContentType, "application/wasm");
+            response.setHeaders(headers);
+        }
+
+        return response;
+    });
+
+    auto tcpServer = new QTcpServer(this);
+    if (!tcpServer->listen() || !httpServer->bind(tcpServer)) {
+        qCCritical(lcJsChatConnector) << "Server failed to listen";
+        return;
+    }
+
+    m_tcpPort = tcpServer->serverPort();
 }
 
 qsizetype JsChatConnector::indexOf(IChatRoom *chatRoom) const
