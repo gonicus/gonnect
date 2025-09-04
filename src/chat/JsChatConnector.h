@@ -29,7 +29,7 @@ class JsChatConnector : public IChatProvider
 public:
     explicit JsChatConnector(const JsConnectorConfig &config, QObject *parent = nullptr);
 
-    QUrl url() const { return m_config.url; }
+    QUrl url() const;
     QString ownUserId() const { return m_config.ownUserId; }
     QString deviceId() const { return m_config.deviceId; }
     QString displayName() const { return m_config.displayName; }
@@ -71,9 +71,11 @@ public:
 
 private:
     void connect();
+    void setupServer();
     void setIsSecretInitalized(bool value);
     JsChatRoom *createOrLookupChatRoom(const QString &roomId, const QString &roomName = "");
 
+    quint16 m_tcpPort = 0;
     JsConnectorConfig m_config;
     bool m_isSecretInitalized = false;
     QList<IChatRoom *> m_rooms;

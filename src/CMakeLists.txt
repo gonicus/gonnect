@@ -6,6 +6,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     Quick
     QuickControls2
+    HttpServer
     Multimedia
     Sql
     Network
@@ -646,6 +647,7 @@ target_link_libraries(gonnect
         Qt6::Quick
         Qt6::QuickControls2
         Qt6::DBus
+        Qt6::HttpServer
         Qt6::Multimedia
         Qt6::Sql
         Qt6::Network
