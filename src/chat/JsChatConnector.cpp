@@ -150,6 +150,16 @@ JsChatRoom *JsChatConnector::createOrLookupChatRoom(const QString &roomId, const
 
     if (!room) {
         room = new JsChatRoom(roomId, roomName, this);
+
+        QObject::connect(
+                room, &JsChatRoom::notificationCountChanged, this, [this, room](qsizetype count) {
+                    emit chatRoomNotificationCountChanged(m_rooms.indexOf(room), room, count);
+                });
+
+        QObject::connect(room, &JsChatRoom::nameChanged, this, [this, room](const QString &name) {
+            emit chatRoomNameChanged(m_rooms.indexOf(room), room, name);
+        });
+
         m_rooms.append(room);
         m_roomLookup.insert(roomId, room);
         emit chatRoomAdded(m_rooms.length() - 1, room);
