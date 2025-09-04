@@ -248,7 +248,11 @@ HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceIn
     QHash<UsageId, UsageInfo> usageInfos;
 
     QString ps = QString::fromWCharArray(deviceInfo->product_string);
-    qCDebug(lcHeadsets, "HID headset %s [%s] found:", deviceInfo->path, ps.toStdString().c_str());
+    qCDebug(lcHeadsets).nospace().noquote()
+            << "HID headset" << deviceInfo->path << " found [" << ps.toStdString().c_str() << "]"
+            << QString::asprintf(" (vendor: 0x%04X, product: 0x%04X)", deviceInfo->vendor_id,
+                                 deviceInfo->product_id);
+
     if (!teamsUsageMapping.isEmpty()) {
         qCDebug(lcHeadsets, "  Teams support enabled");
     }
