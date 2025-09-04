@@ -239,21 +239,21 @@ void HeadsetDevice::setMute(bool flag)
                           << "to headset with display specification usage"
                           << UsageId::Teams_IconsControl;
         hid_write(m_device, buf, sizeof(buf));
-    } else {
-        const auto &usage = m_hidUsages.value(UsageId::LED_Mute);
-        const unsigned bitValue = 1 << usage.bitPosition;
-        unsigned value = currentFlags(usage.reportId);
-
-        if (flag) {
-            value |= bitValue;
-        } else {
-            value &= ~bitValue;
-        }
-
-        qCInfo(lcHeadset) << "Sending 'mute' state with value" << flag << "to headset with usage"
-                          << usage;
-        send(usage.reportId, value);
     }
+
+    const auto &usage = m_hidUsages.value(UsageId::LED_Mute);
+    const unsigned bitValue = 1 << usage.bitPosition;
+    unsigned value = currentFlags(usage.reportId);
+
+    if (flag) {
+        value |= bitValue;
+    } else {
+        value &= ~bitValue;
+    }
+
+    qCInfo(lcHeadset) << "Sending 'mute' state with value" << flag << "to headset with usage"
+                      << usage;
+    send(usage.reportId, value);
 }
 
 void HeadsetDevice::setRing(bool flag)
