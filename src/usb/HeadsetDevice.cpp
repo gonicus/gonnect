@@ -69,8 +69,20 @@ bool HeadsetDevice::open()
             auto res = hid_get_feature_report(device, buf, sizeof(buf));
             if (res >= 5) {
                 quint32 vendorId = buf[1] + (buf[2] << 8);
-                quint32 version = buf[3] + (buf[4] << 8);
-                m_displaySupported = vendorId == 0x045e && version == 0x0200;
+                quint32 productId = buf[3] + (buf[4] << 8);
+
+                static const QList<QPair<const quint32, const quint32>> displayDevices = {
+                    // vendorId, productId
+                    { 0x045e, 0x0200 },
+                    { 0x6993, 0xb02b },
+                };
+
+                for (const auto &pair : displayDevices) {
+                    if (vendorId == pair.first && productId == pair.second) {
+                        m_displaySupported = true;
+                        break;
+                    }
+                }
             }
 
             // If we've display support, read the display configuration from device
