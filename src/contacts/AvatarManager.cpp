@@ -126,16 +126,11 @@ void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
     const auto dbModified = modifiedTimeInDb(id);
 
     if (dbModified.isValid() && dbModified < modified) {
+        // Valid, but outdated DB timestamp; update
         createFile(id, data);
-        if (dbModified == QDateTime::fromMSecsSinceEpoch(0)) {
-            // Record does not exist, got UNIX epoch
-            QHash<QString, QDateTime> tmp;
-            tmp.insert(id, modified);
-            addIdsToDb(tmp);
-        } else {
-            updateAvatarModifiedTime(id, modified);
-        }
+        updateAvatarModifiedTime(id, modified);
     } else if (dbModified.isNull()) {
+        // Invalid/no DB timestamp found; create new entry
         createFile(id, data);
         QHash<QString, QDateTime> tmp;
         tmp.insert(id, modified);
@@ -259,7 +254,7 @@ void AvatarManager::updateAvatarModifiedTime(const QString &id, const QDateTime 
     } else {
         qCInfo(lcAvatarManager) << "Successfully opened avatars database";
 
-        qCInfo(lcAvatarManager) << "Writing new avatars item to database";
+        qCInfo(lcAvatarManager) << "Updating avatars item in database";
         QSqlQuery query(db);
         query.prepare("UPDATE avatars SET lastModified = :lastModified WHERE id = :id;");
 
@@ -288,14 +283,8 @@ QDateTime AvatarManager::modifiedTimeInDb(const QString &id) const
             qCCritical(lcAvatarManager)
                     << "Error on executing SQL query:" << query.lastError().text();
             return QDateTime();
-        } else {
-            if (query.size() > 1) {
-                qCCritical(lcAvatarManager) << "Error: id" << id << "is ambigous";
-                return QDateTime();
-            } else {
-                query.next();
-                return QDateTime::fromSecsSinceEpoch(query.value("lastModified").toLongLong());
-            }
+        } else if (query.next()) {
+            return QDateTime::fromSecsSinceEpoch(query.value("lastModified").toLongLong());
         }
     }
 
