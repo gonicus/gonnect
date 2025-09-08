@@ -52,7 +52,6 @@ public:
 
     Q_INVOKABLE bool wasLastAddedConference() const;
 
-
 private slots:
     void updateGlobalCallState();
     void updateRinger();
