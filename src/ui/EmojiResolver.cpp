@@ -56,7 +56,10 @@ void EmojiResolver::fillData()
     QFile groupsFile(":/emojis/groups.dat");
 
     // Emojis and tags
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qFatal("failed to open emojis.dat");
+    }
+
     QDataStream in(&file);
 
     while (!in.atEnd()) {
@@ -71,7 +74,10 @@ void EmojiResolver::fillData()
     file.close();
 
     // Shortcodes
-    shortCodesFile.open(QIODevice::ReadOnly);
+    if (!shortCodesFile.open(QIODevice::ReadOnly)) {
+        qFatal("failed to open shortcodes.dat");
+    }
+
     QDataStream shortCodesIn(&shortCodesFile);
 
     while (!shortCodesIn.atEnd()) {
@@ -83,7 +89,9 @@ void EmojiResolver::fillData()
     shortCodesFile.close();
 
     // Order
-    orderedFile.open(QIODevice::ReadOnly);
+    if (!orderedFile.open(QIODevice::ReadOnly)) {
+        qFatal("failed to open ordered.dat");
+    }
     QDataStream orderedIn(&orderedFile);
 
     while (!orderedIn.atEnd()) {
@@ -94,7 +102,9 @@ void EmojiResolver::fillData()
     orderedFile.close();
 
     // Group indexes
-    groupsFile.open(QIODevice::ReadOnly);
+    if (!groupsFile.open(QIODevice::ReadOnly)) {
+        qFatal("failed to open groups.dat");
+    }
     QDataStream groupsIn(&groupsFile);
 
     while (!groupsIn.atEnd()) {

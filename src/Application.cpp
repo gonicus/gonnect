@@ -8,9 +8,10 @@
 #include "SystemTrayMenu.h"
 #include "AddressBookManager.h"
 #include "USBDevices.h"
-#include "SecretPortal.h"
+#include "Credentials.h"
 #include "AppSettings.h"
 #include "DateEventFeederManager.h"
+#include "BackgroundManager.h"
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -92,6 +93,8 @@ void Application::installTranslations()
 
 void Application::initialize()
 {
+    StateManager::instance().initialize();
+
     AddressBookManager::instance().reloadAddressBook();
     DateEventFeederManager::instance().reload();
     SystemTrayMenu::instance(); // Ensure singleton is created
@@ -99,33 +102,11 @@ void Application::initialize()
     AppSettings settings;
     bool autostart = settings.value("generic/autostart", false).toBool();
 
-    m_backgroundPortal.RequestBackground(
-            autostart, false, [](uint code, const QVariantMap &response) {
-                switch (code) {
-                case 0:
-                    qCDebug(lcApplication)
-                            << "autostart is set to" << response.value("autostart").toBool();
-                    qCDebug(lcApplication)
-                            << "background is set to" << response.value("background").toBool();
-                    break;
-                case 1:
-                    qCWarning(lcApplication) << "autostart request was rejected by portal";
-                    break;
-                case 2:
-                    qCWarning(lcApplication) << "autostart request to portal failed";
-                    break;
-                }
-            });
+    BackgroundManager::instance().request(autostart);
 
-    auto &sp = SecretPortal::instance();
-    if (sp.isValid()) {
-        connect(&sp, &SecretPortal::initializedChanged, this, [this]() { initializeSIP(); });
-
-        sp.initialize();
-    } else {
-        qCWarning(lcApplication) << "no secrets portal available - unable to store secrets";
-        initializeSIP();
-    }
+    auto &cds = Credentials::instance();
+    connect(&cds, &Credentials::initializedChanged, this, [this]() { initializeSIP(); });
+    cds.initialize();
 }
 
 void Application::initializeSIP()
@@ -140,7 +121,6 @@ void Application::initializeSIP()
         SystemTrayMenu::instance().setBadgeNumber(count);
     });
 
-    StateManager::instance().initialize();
     m_initialized = true;
 }
 

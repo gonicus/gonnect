@@ -2,17 +2,26 @@
 #include <QLoggingCategory>
 
 #include "MediaPlayerInterface.h"
-#include "ExternalMediaManager.h"
+#include "MPRISExternalMediaManager.h"
 
 #define MPRIS_CALL_TIMEOUT 2000
 
 Q_LOGGING_CATEGORY(lcExternalMedia, "gonnect.external.media")
 
-ExternalMediaManager::ExternalMediaManager(QObject *parent) : QObject(parent) { }
+ExternalMediaManager &ExternalMediaManager::instance()
+{
+    static ExternalMediaManager *_instance = nullptr;
+    if (!_instance) {
+        _instance = new MPRISExternalMediaManager;
+    }
+    return *_instance;
+}
 
-ExternalMediaManager::~ExternalMediaManager() { }
+MPRISExternalMediaManager::MPRISExternalMediaManager() : ExternalMediaManager() { }
 
-void ExternalMediaManager::pause()
+MPRISExternalMediaManager::~MPRISExternalMediaManager() { }
+
+void MPRISExternalMediaManager::pause()
 {
     auto con = QDBusConnection::sessionBus();
     if (!con.isConnected()) {
@@ -41,7 +50,7 @@ void ExternalMediaManager::pause()
     }
 }
 
-void ExternalMediaManager::resume()
+void MPRISExternalMediaManager::resume()
 {
     auto con = QDBusConnection::sessionBus();
     if (!con.isConnected()) {
@@ -63,7 +72,7 @@ void ExternalMediaManager::resume()
     m_playerActiveTargets.clear();
 }
 
-QStringList ExternalMediaManager::getMprisTargets() const
+QStringList MPRISExternalMediaManager::getMprisTargets() const
 {
     auto con = QDBusConnection::sessionBus();
 

@@ -2,9 +2,8 @@
 
 #include <QObject>
 #include <QHash>
-#include <QtQml/qqml.h>
-#include <QtQml/qqmlregistration.h>
 #include <QDBusMetaType>
+#include "SearchProvider.h"
 #include "Contact.h"
 
 class ShellSearchProvider2Adapter;
@@ -89,26 +88,13 @@ inline const QDBusArgument &operator>>(const QDBusArgument &argument, Action &ac
     return argument;
 }
 
-class SearchProvider : public QObject
+class LinuxDesktopSearchProvider : public SearchProvider
 {
     Q_OBJECT
 
 public:
-    Q_REQUIRED_RESULT static SearchProvider &instance()
-    {
-        static SearchProvider *_instance = nullptr;
-
-        if (_instance == nullptr) {
-            _instance = new SearchProvider();
-
-            qDBusRegisterMetaType<RemoteMatch>();
-            qDBusRegisterMetaType<RemoteMatches>();
-        }
-
-        return *_instance;
-    }
-
-    ~SearchProvider();
+    explicit LinuxDesktopSearchProvider(QObject *parent = nullptr);
+    ~LinuxDesktopSearchProvider();
 
 public slots:
     // GNOME search provider
@@ -130,27 +116,12 @@ signals:
     void activateSearch(QString query);
 
 private:
-    explicit SearchProvider(QObject *parent = nullptr);
     ShellSearchProvider2Adapter *m_searchAdapter = nullptr;
     KRunner2Adapter *m_krunnerAdapter = nullptr;
 
     QHash<QString, SearchResult *> m_searchResults;
 
     bool m_isRegistered = false;
-};
-
-class SearchProviderWrapper
-{
-    Q_GADGET
-    QML_FOREIGN(SearchProvider)
-    QML_NAMED_ELEMENT(SearchProvider)
-    QML_SINGLETON
-
-public:
-    static SearchProvider *create(QQmlEngine *, QJSEngine *) { return &SearchProvider::instance(); }
-
-private:
-    SearchProviderWrapper() = default;
 };
 
 Q_DECLARE_METATYPE(Action)
