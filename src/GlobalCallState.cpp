@@ -1,5 +1,6 @@
 #include "GlobalCallState.h"
 #include "Ringer.h"
+#include "JitsiConnector.h"
 
 #include <QLoggingCategory>
 
@@ -52,13 +53,33 @@ bool GlobalCallState::registerCallStateObject(ICallState *callStateObject)
         m_globalCallStateObjects.insert(callStateObject);
 
         connect(callStateObject, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_lastCallThatBecameActive == obj) {
+                m_lastCallThatBecameActive = nullptr;
+            }
+
             if (m_globalCallStateObjects.remove(static_cast<ICallState *>(obj))) {
                 updateGlobalCallState();
                 emit globalCallStateObjectsChanged();
             }
         });
+
+        connect(callStateObject, &ICallState::callStateChanged, this,
+                [this, callStateObject](ICallState::States newState, ICallState::States oldState) {
+                    using State = ICallState::State;
+
+                    if (!(oldState & State::Migrating)) {
+                        if (!(oldState & State::CallActive) && (newState & State::CallActive)) {
+                            m_lastCallThatBecameActive = callStateObject;
+                        } else if ((oldState & State::CallActive)
+                                   && !(newState & State::CallActive)) {
+                            m_lastCallThatBecameActive = nullptr;
+                        }
+                    }
+                });
+
         connect(callStateObject, &ICallState::callStateChanged, this,
                 &GlobalCallState::updateGlobalCallState);
+
         updateGlobalCallState();
         emit globalCallStateObjectsChanged();
     }
@@ -70,6 +91,10 @@ bool GlobalCallState::unregisterCallStateObject(ICallState *callStateObject)
 {
     if (!callStateObject) {
         return false;
+    }
+
+    if (m_lastCallThatBecameActive == callStateObject) {
+        m_lastCallThatBecameActive = nullptr;
     }
 
     const bool wasRegistered = m_globalCallStateObjects.remove(callStateObject);
@@ -92,6 +117,7 @@ void GlobalCallState::updateGlobalCallState()
 
     setGlobalCallState(globalState);
     updateRemoteContactInfo();
+    emit activeCallsCountChanged();
 }
 
 void GlobalCallState::setIsPhoneConference(bool flag)
@@ -102,7 +128,7 @@ void GlobalCallState::setIsPhoneConference(bool flag)
     }
 }
 
-qsizetype GlobalCallState::callsCount() const
+qsizetype GlobalCallState::activeCallsCount() const
 {
     qsizetype count = 0;
     for (const auto callObj : std::as_const(m_globalCallStateObjects)) {
@@ -164,6 +190,11 @@ void GlobalCallState::unholdOtherCall() const
             break;
         }
     }
+}
+
+bool GlobalCallState::wasLastAddedConference() const
+{
+    return qobject_cast<JitsiConnector *>(m_lastCallThatBecameActive);
 }
 
 void GlobalCallState::updateRinger()

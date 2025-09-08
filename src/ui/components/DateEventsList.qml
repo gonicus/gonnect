@@ -88,7 +88,7 @@ ListView {
             delg.minutesRemainingToStart = Math.ceil((delg.dateTime - now) / 60000)
             delg.minutesRemainingToEnd = Math.ceil((delg.endDateTime - now) / 60000)
             delg.isToday = ViewHelper.isToday(delg.dateTime)
-            delg.isInPast = (delg.endDateTime.getTime() + 60000) < now.getTime()
+            delg.isInPast = delg.endDateTime.getTime() < now.getTime()
             delg.isCurrentlyTakingPlace = delg.dateTime.getTime() < now.getTime() && now.getTime() < delg.endDateTime.getTime()
         }
 

@@ -19,6 +19,7 @@
 #include "SecretPortal.h"
 #include "KeychainSettings.h"
 #include "GlobalInfo.h"
+#include "DateEventManager.h"
 
 #include <QLoggingCategory>
 
@@ -95,7 +96,11 @@ void JitsiConnector::apiLoadingFinished()
 
     if (m_isToggleScreenSharePending) {
         m_isToggleScreenSharePending = false;
-        toggleScreenShare();
+
+        // It can sometimes crash the JS API, when the toggleScreenShare command is executed too
+        // early. Since there is no reliable event to listen to, a random timer must be used here to
+        // defer it such that Jitsi Meet is hopefully ready...
+        QTimer::singleShot(2000, this, [this]() { toggleScreenShare(); });
     }
 }
 
@@ -377,7 +382,7 @@ api.addListener("participantRoleChanged", data => {
 })
 
 api.addListener("errorOccurred", data => {
-    jitsiConn.addError(data.type, data.name, data.message, data.isFatal, data.details)
+    jitsiConn.addError(data.type, data.name, data.message, !!data.isFatal, data?.details ?? {})
 })
 
 api.addListener("incomingMessage", data => {
@@ -411,6 +416,8 @@ void JitsiConnector::enterRoom(const QString &roomName, const QString &displayNa
         GlobalCallState::instance().triggerHold();
     }
 
+    DateEventManager::instance().removeNotificationByRoomName(roomName);
+
     m_startWithVideo = startFlags & JitsiConnector::MeetingStartFlag::VideoActive;
 
     if (m_callHistoryItem) {
@@ -435,6 +442,28 @@ void JitsiConnector::enterRoom(const QString &roomName, const QString &displayNa
             m_isToggleScreenSharePending = true;
         }
     }
+
+    // Create notification about ongoing conference
+    m_inConferenceNotification = new Notification(tr("Active conference"), this->displayName(),
+                                                  Notification::Priority::normal, this);
+    m_inConferenceNotification->setDisplayHint(Notification::tray
+                                               | Notification::hideContentOnLockScreen);
+    m_inConferenceNotification->setCategory("call.ongoing");
+    m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
+
+    QString ref = NotificationManager::instance().add(m_inConferenceNotification);
+    connect(m_inConferenceNotification, &Notification::actionInvoked, this,
+            [this, ref](QString action, QVariantList) {
+                if (action == "hangup") {
+                    NotificationManager::instance().remove(ref);
+                    leaveRoom();
+                }
+            });
+    connect(m_inConferenceNotification, &QObject::destroyed, this, [this](QObject *obj) {
+        if (m_inConferenceNotification == obj) {
+            m_inConferenceNotification = nullptr;
+        }
+    });
 }
 
 void JitsiConnector::leaveRoom()
@@ -442,6 +471,12 @@ void JitsiConnector::leaveRoom()
     if (m_callHistoryItem) {
         m_callHistoryItem->endCall();
         m_callHistoryItem.clear();
+    }
+
+    if (m_inConferenceNotification) {
+        NotificationManager::instance().remove(m_inConferenceNotification->id());
+        m_inConferenceNotification->deleteLater();
+        m_inConferenceNotification = nullptr;
     }
 
     emit executeLeaveRoomCommand();

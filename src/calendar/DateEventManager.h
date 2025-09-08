@@ -43,18 +43,22 @@ public:
     /// Find the DateEvent by the given room name that is currently taking place or nullptr
     DateEvent *currentDateEventByRoomName(const QString &roomName) const;
 
+    void removeNotificationByRoomName(const QString &roomName);
+
 private slots:
     void onTimerTimeout();
 
 private:
     explicit DateEventManager(QObject *parent = nullptr);
 
+    DateEvent *findDateEventByHash(const size_t &eventHash) const;
     bool isTooOld(const DateEvent &dateEvent) const;
+    bool isOver(const DateEvent &dateEvent) const;
 
     QString m_jitsiUrl;
     QList<DateEvent *> m_dateEvents;
-    QHash<QString, QString> m_notificationIds;
-    QSet<QString> m_alreadyNotifiedDates;
+    QHash<size_t, QString> m_notificationIds;
+    QSet<size_t> m_alreadyNotifiedDates;
     QTimer m_minuteTimer;
     QTime m_lastCheckedTime;
     QDate m_lastCheckedDate;
