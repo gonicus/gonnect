@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(GOnnect VERSION 2.0.0 LANGUAGES CXX)
+project(GOnnect VERSION 2.1.0 LANGUAGES CXX)
 include(cmake/CCache.cmake)
 useCompilerCache()
 
@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_UNITY_BUILD_BATCH_SIZE 10)
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
 option(BUILD_DEPENDENCIES "Build dependencies" OFF)
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)

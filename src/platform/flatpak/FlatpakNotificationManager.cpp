@@ -1,7 +1,16 @@
-#include "NotificationManager.h"
+#include "FlatpakNotificationManager.h"
 #include "NotificationIcon.h"
 
-NotificationManager::NotificationManager(QObject *parent) : QObject(parent)
+NotificationManager &NotificationManager::instance()
+{
+    static NotificationManager *_instance = nullptr;
+    if (!_instance) {
+        _instance = new FlatpakNotificationManager;
+    }
+    return *_instance;
+}
+
+FlatpakNotificationManager::FlatpakNotificationManager() : NotificationManager()
 {
     m_interface = new OrgFreedesktopPortalNotificationInterface(
             "org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
@@ -11,17 +20,17 @@ NotificationManager::NotificationManager(QObject *parent) : QObject(parent)
     qDBusRegisterMetaType<NotificationIcon>();
 
     connect(m_interface, &OrgFreedesktopPortalNotificationInterface::ActionInvoked, this,
-            &NotificationManager::handleAction);
+            &FlatpakNotificationManager::handleAction);
 }
 
-void NotificationManager::handleAction(QString id, QString action, QVariantList parameters)
+void FlatpakNotificationManager::handleAction(QString id, QString action, QVariantList parameters)
 {
     if (auto notification = m_notifications.value(id, nullptr)) {
         emit notification->actionInvoked(action, parameters);
     }
 }
 
-QString NotificationManager::add(Notification *notification)
+QString FlatpakNotificationManager::add(Notification *notification)
 {
     if (!notification) {
         return "";
@@ -35,7 +44,7 @@ QString NotificationManager::add(Notification *notification)
     return notification->id();
 }
 
-bool NotificationManager::remove(const QString &id)
+bool FlatpakNotificationManager::remove(const QString &id)
 {
     if (m_notifications.contains(id)) {
         m_notifications.value(id)->deleteLater();
@@ -45,7 +54,7 @@ bool NotificationManager::remove(const QString &id)
     return m_notifications.remove(id);
 }
 
-void NotificationManager::shutdown()
+void FlatpakNotificationManager::shutdown()
 {
     // Close notifications
     for (auto iter = m_notifications.constBegin(); iter != m_notifications.constEnd(); ++iter) {

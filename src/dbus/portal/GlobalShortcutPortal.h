@@ -3,20 +3,11 @@
 #include <QMap>
 #include <QString>
 #include "AbstractPortal.h"
+#include "GlobalShortcuts.h"
 
 #define GLOBALSHORTCUT_PORTAL_INTERFACE "org.freedesktop.portal.GlobalShortcuts"
 
-using Shortcut = QPair<QString, QVariantMap>;
-using Shortcuts = QList<Shortcut>;
-
 Q_DECLARE_METATYPE(Shortcuts)
-
-struct ShortcutItem
-{
-    QString id;
-    QString description;
-    QString triggerDescription;
-};
 
 class GlobalShortcutPortal : public AbstractPortal
 {
@@ -28,6 +19,8 @@ public:
 
     void initialize();
     bool isSupported() const { return m_supported; }
+
+    void setShortcuts(Shortcuts &shortcuts) { m_shortcuts = shortcuts; }
     QList<ShortcutItem *> shortcuts() const { return m_currentShortcuts; }
 
 public slots:

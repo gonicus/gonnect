@@ -222,8 +222,6 @@ BaseWindow {
                                 return ""
                             case SIPTemplateField.TemplateFieldType.Text:
                                 return base + "TemplateFieldText.qml"
-                            case SIPTemplateField.TemplateFieldType.Secret:
-                                return base + "TemplateFieldSecret.qml"
                             case SIPTemplateField.TemplateFieldType.File:
                                 return base + "TemplateFieldFile.qml"
                         }
