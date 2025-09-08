@@ -54,7 +54,7 @@ void SIPAccountManager::initialize()
 
             connect(sipAccount, &SIPAccount::initialized, this,
                     [this, sipAccount, group](bool success) {
-                        if (!success) {
+                        if (success) {
                             qCInfo(lcSIPAccountManager) << "created account" << group;
                             m_accounts.push_back(sipAccount);
                             emit accountsChanged();
