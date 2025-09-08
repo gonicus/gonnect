@@ -520,8 +520,7 @@ void JitsiConnector::setIsInRoom(bool value)
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
             auto &globalMute = GlobalMuteState::instance();
             if (m_isMuted != globalMute.isMuted()) {
-                m_muteTag = QUuid::createUuid().toString();
-                globalMute.toggleMute(m_muteTag);
+                toggleMute();
             }
         } else {
             setCallState(ICallState::State::Idle);
