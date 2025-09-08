@@ -3,13 +3,11 @@
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
-#include "InhibitPortal.h"
+#include "InhibitHelper.h"
 #include "ICallState.h"
 
 class DBusActivationAdapter;
 class GOnnectDBusAPI;
-class GlobalShortcutPortal;
-class OrgFreedesktopScreenSaverInterface;
 
 class StateManager : public QObject
 {
@@ -34,7 +32,9 @@ public:
     bool globalShortcutsSupported() const;
     QVariantMap globalShortcuts() const;
 
+#ifdef Q_OS_LINUX
     GOnnectDBusAPI *apiEndpoint() { return m_apiEndpoint; }
+#endif
 
     void sendArguments(const QStringList &args);
     Q_INVOKABLE void restart();
@@ -59,22 +59,17 @@ public slots:
 private:
     explicit StateManager(QObject *parent = nullptr);
 
-    void sessionStateChanged(bool screensaverActive, InhibitPortal::InhibitState state);
+    void sessionStateChanged(bool screensaverActive, InhibitHelper::InhibitState state);
     void updateInhibitState();
 
-    GlobalShortcutPortal *m_globalShortcutPortal = nullptr;
-    InhibitPortal *m_inhibitPortal = nullptr;
-    OrgFreedesktopScreenSaverInterface *m_screenSaverInterface = nullptr;
+    InhibitHelper *m_inhibitHelper = nullptr;
 
     DBusActivationAdapter *m_activationAdapter = nullptr;
     GOnnectDBusAPI *m_apiEndpoint = nullptr;
 
     ICallState::States m_oldCallState = ICallState::State::Idle;
 
-    unsigned m_screenSaverCookie = 0;
-
     bool m_isFirstInstance = true;
-    bool m_screenSaverIsInhibited = false;
 };
 
 class StateManagerWrapper

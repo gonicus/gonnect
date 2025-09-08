@@ -1,7 +1,11 @@
 #include "ICallState.h"
 #include "GlobalCallState.h"
 #include "StateManager.h"
-#include "GOnnectDBusAPI.h"
+
+#ifdef Q_OS_LINUX
+#  include "GOnnectDBusAPI.h"
+#endif
+
 #include <qmetaobject.h>
 #include <QUuid>
 
@@ -20,7 +24,9 @@ ICallState::ICallState(QObject *parent) : QObject{ parent }
     GlobalCallState::instance().registerCallStateObject(this);
     m_id = QUuid::createUuid().toString(QUuid::WithoutBraces);
 
+#ifdef Q_OS_LINUX
     StateManager::instance().apiEndpoint()->registerCallState(this);
+#endif
 }
 
 void ICallState::toggleHold()

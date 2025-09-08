@@ -65,12 +65,15 @@ bool GlobalCallState::registerCallStateObject(ICallState *callStateObject)
 
         connect(callStateObject, &ICallState::callStateChanged, this,
                 [this, callStateObject](ICallState::States newState, ICallState::States oldState) {
-                    const auto CallActive = ICallState::State::CallActive;
+                    using State = ICallState::State;
 
-                    if (!(oldState & CallActive) && (newState & CallActive)) {
-                        m_lastCallThatBecameActive = callStateObject;
-                    } else if ((oldState & CallActive) && !(newState & CallActive)) {
-                        m_lastCallThatBecameActive = nullptr;
+                    if (!(oldState & State::Migrating)) {
+                        if (!(oldState & State::CallActive) && (newState & State::CallActive)) {
+                            m_lastCallThatBecameActive = callStateObject;
+                        } else if ((oldState & State::CallActive)
+                                   && !(newState & State::CallActive)) {
+                            m_lastCallThatBecameActive = nullptr;
+                        }
                     }
                 });
 

@@ -283,7 +283,7 @@ Item {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
                             jitsiView.runJavaScript(jitsiConn.jitsiJavascript())
                         } else {
-                            console.error("failed to load HTML")
+                            console.error(`Failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
                         }
                     }
 

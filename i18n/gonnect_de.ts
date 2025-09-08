@@ -915,8 +915,8 @@
     <name>HeadsetDevice</name>
     <message>
         <location filename="../src/usb/HeadsetDevice.cpp" line="552"/>
-        <source>MMMM dd</source>
-        <translation>dd MMMM</translation>
+        <source>MMM dd</source>
+        <translation>dd MMM</translation>
     </message>
 </context>
 <context>
