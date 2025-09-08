@@ -18,6 +18,7 @@
 #include "GlobalInfo.h"
 #include "DateEventManager.h"
 #include "Credentials.h"
+#include "GlobalCallState.h"
 
 #include <QLoggingCategory>
 
