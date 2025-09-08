@@ -153,7 +153,6 @@ void CallHistory::ensureDatabaseVersion()
                     if (!query.prepare(queryString) || !query.exec()) {
                         qCCritical(lcCallHistory)
                                 << "Error on executing SQL query:" << query.lastError().text();
-                        return;
                     }
                 }
             }

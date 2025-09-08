@@ -93,7 +93,10 @@ void JitsiConnector::apiLoadingFinishedInternal()
 
     if (m_isToggleScreenSharePending) {
         m_isToggleScreenSharePending = false;
-        setSharingScreen(true);
+        // It can sometimes crash the JS API, when the toggleScreenShare command is executed too
+        // early. Since there is no reliable event to listen to, a random timer must be used here to
+        // defer it such that Jitsi Meet is hopefully ready...
+        QTimer::singleShot(2000, this, [this]() { setSharingScreen(true); });
     }
 
     emit isInitializedChanged();
@@ -379,7 +382,7 @@ api.addListener("participantRoleChanged", data => {
 })
 
 api.addListener("errorOccurred", data => {
-    jitsiConn.addError(data.type, data.name, data.message, data.isFatal, data.details)
+    jitsiConn.addError(data.type, data.name, data.message, !!data.isFatal, data?.details ?? {})
 })
 
 api.addListener("incomingMessage", data => {
