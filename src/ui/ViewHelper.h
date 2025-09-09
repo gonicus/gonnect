@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QStandardPaths>
 
 #include "appversion.h"
 #include "Application.h"
@@ -89,8 +90,6 @@ public:
     Q_INVOKABLE void resetTrayIcon() const;
 
     Q_INVOKABLE HeadsetDeviceProxy *headsetDeviceProxy() const;
-
-    Q_INVOKABLE QString encryptSecret(const QString &secret) const;
 
     void requestPassword(const QString &id, const QString &host);
     Q_INVOKABLE void respondPassword(const QString &id, const QString password);

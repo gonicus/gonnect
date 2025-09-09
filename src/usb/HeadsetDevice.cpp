@@ -562,7 +562,7 @@ void HeadsetDevice::syncDateAndTime()
     now.toString();
 
     setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::Date,
-                    locale.toString(now, tr("MMMM dd")));
+                    locale.toString(now, tr("MMM dd")));
     setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport::Time,
                     now.toString("h:mm ap").toUpper());
 }

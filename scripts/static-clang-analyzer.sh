@@ -21,4 +21,4 @@ analyze-build -v --output "$TMP_OUT" $ANALYZE_ARGS --plist-html --enable-checker
 
 popd &> /dev/null
 
-scripts/process-clang-output.py --exclude '.*/(Qt|qt6|qca)/.*' --token $API_TOKEN "$TMP_OUT/$(ls -1 $TMP_OUT)"
+scripts/process-clang-output.py --exclude '.*/(Qt|qt6|qca|qtkeychain)/.*' --token $API_TOKEN "$TMP_OUT/$(ls -1 $TMP_OUT)"

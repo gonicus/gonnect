@@ -4,13 +4,25 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "ShellSearchProvider2Adapter.h"
-#include "SearchProvider.h"
+#include "LinuxDesktopSearchProvider.h"
 #include "AddressBook.h"
 #include "KRunnerAdapter.h"
 
 Q_LOGGING_CATEGORY(lcSearchProvider, "gonnect.dbus.searchprovider")
 
-SearchProvider::SearchProvider(QObject *parent) : QObject(parent)
+SearchProvider &SearchProvider::instance()
+{
+    static SearchProvider *_instance = nullptr;
+    if (!_instance) {
+        _instance = new LinuxDesktopSearchProvider;
+
+        qDBusRegisterMetaType<RemoteMatch>();
+        qDBusRegisterMetaType<RemoteMatches>();
+    }
+    return *_instance;
+}
+
+LinuxDesktopSearchProvider::LinuxDesktopSearchProvider(QObject *parent) : SearchProvider(parent)
 {
     m_searchAdapter = new ShellSearchProvider2Adapter(this);
     m_krunnerAdapter = new KRunner2Adapter(this);
@@ -22,7 +34,7 @@ SearchProvider::SearchProvider(QObject *parent) : QObject(parent)
     }
 }
 
-SearchProvider::~SearchProvider()
+LinuxDesktopSearchProvider::~LinuxDesktopSearchProvider()
 {
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
@@ -35,8 +47,8 @@ SearchProvider::~SearchProvider()
     m_searchResults.clear();
 }
 
-void SearchProvider::ActivateResult(const QString &identifier, const QStringList &terms,
-                                    uint timestamp)
+void LinuxDesktopSearchProvider::ActivateResult(const QString &identifier, const QStringList &terms,
+                                                uint timestamp)
 {
     Q_UNUSED(terms)
     Q_UNUSED(timestamp)
@@ -53,15 +65,15 @@ void SearchProvider::ActivateResult(const QString &identifier, const QStringList
     m_searchResults.clear();
 }
 
-QStringList SearchProvider::GetInitialResultSet(const QStringList &terms)
+QStringList LinuxDesktopSearchProvider::GetInitialResultSet(const QStringList &terms)
 {
     qDeleteAll(m_searchResults);
     m_searchResults.clear();
     return GetSubsearchResultSet({}, terms);
 }
 
-QStringList SearchProvider::GetSubsearchResultSet(const QStringList &previous_results,
-                                                  const QStringList &terms)
+QStringList LinuxDesktopSearchProvider::GetSubsearchResultSet(const QStringList &previous_results,
+                                                              const QStringList &terms)
 {
     Q_UNUSED(previous_results)
     qCDebug(lcSearchProvider) << "got search request for:" << terms.join(" ");
@@ -98,7 +110,7 @@ QStringList SearchProvider::GetSubsearchResultSet(const QStringList &previous_re
     return resultIds;
 }
 
-QList<QVariantMap> SearchProvider::GetResultMetas(const QStringList &identifiers)
+QList<QVariantMap> LinuxDesktopSearchProvider::GetResultMetas(const QStringList &identifiers)
 {
     QList<QVariantMap> results;
     qCDebug(lcSearchProvider) << "got meta result request for" << identifiers;
@@ -142,7 +154,7 @@ QList<QVariantMap> SearchProvider::GetResultMetas(const QStringList &identifiers
     return results;
 }
 
-void SearchProvider::LaunchSearch(const QStringList &terms, uint timestamp)
+void LinuxDesktopSearchProvider::LaunchSearch(const QStringList &terms, uint timestamp)
 {
     Q_UNUSED(timestamp)
     qCDebug(lcSearchProvider) << "sending launch search request to search dialog:"
@@ -152,30 +164,30 @@ void SearchProvider::LaunchSearch(const QStringList &terms, uint timestamp)
     m_searchResults.clear();
 }
 
-void SearchProvider::Teardown()
+void LinuxDesktopSearchProvider::Teardown()
 {
     qDeleteAll(m_searchResults);
     m_searchResults.clear();
 }
 
-QVariantMap SearchProvider::Config()
+QVariantMap LinuxDesktopSearchProvider::Config()
 {
     return QVariantMap();
 }
 
-ActionList SearchProvider::Actions()
+ActionList LinuxDesktopSearchProvider::Actions()
 {
     return ActionList({ { "call", tr("Call"), "call-start-symbolic" } });
 }
 
-void SearchProvider::Run(const QString &matchId, const QString &actionId)
+void LinuxDesktopSearchProvider::Run(const QString &matchId, const QString &actionId)
 {
     if (actionId == "call") {
         ActivateResult(matchId, {}, 0);
     }
 }
 
-RemoteMatches SearchProvider::Match(const QString &query)
+RemoteMatches LinuxDesktopSearchProvider::Match(const QString &query)
 {
     auto resultIds = GetSubsearchResultSet({}, { query });
 

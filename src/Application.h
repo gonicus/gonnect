@@ -5,7 +5,6 @@
 #include <QQuickWindow>
 #include <QObject>
 #include <QTranslator>
-#include "BackgroundPortal.h"
 
 #define RESTART_CODE 255
 
@@ -53,8 +52,6 @@ private:
 
     static int s_sighupFd[2];
     static int s_sigtermFd[2];
-
-    BackgroundPortal m_backgroundPortal;
 
     QQuickWindow *m_rootWindow = nullptr;
 
