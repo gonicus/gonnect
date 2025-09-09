@@ -241,7 +241,7 @@ void ViewHelper::updateIsActiveVideoCall()
     const auto &callObjects = GlobalCallState::instance().globalCallStateObjects();
 
     for (const auto obj : callObjects) {
-        const auto jitsiConn = qobject_cast<JitsiConnector *>(obj);
+        const auto jitsiConn = qobject_cast<ICallState *>(obj);
         if (jitsiConn && jitsiConn->callState() & ICallState::State::CallActive) {
             hasJitsiCall = true;
             break;
@@ -336,7 +336,7 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
 
     emit openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
     setProperty("nextMeetingStartFlags",
-                QVariant::fromValue(JitsiConnector::MeetingStartFlag::AudioActive));
+                QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
 }
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
