@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.0.5" date="2025-09-09">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>do not abort on minor SQL migration error (#164)</li>
+        <li>fix Jitsi Meet crash when upgrading SIP call with screen share (#162)</li>
+        <li>mute behaviour in jitsi rooms</li>
+        <li>revert evolution-data-server back to 3.56.0</li>
+        <li>show password dialog again</li>
+        <li>use short month names for display headsets</li>
+        <li>do not show multiple password dialogs (#165)</li>
+      </ul>
+    </description>
+  </release>
   <release version="2.0.4" date="2025-09-02">
     <description>
       <p>Bug Fixes:</p>

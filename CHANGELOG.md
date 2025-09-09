@@ -1,3 +1,21 @@
+## [2.0.5](https://github.com/gonicus/gonnect/compare/v2.0.4...v2.0.5) (2025-09-09)
+
+
+### Bug Fixes
+
+* do not abort on minor SQL migration error ([#164](https://github.com/gonicus/gonnect/issues/164)) ([33a9e2b](https://github.com/gonicus/gonnect/commit/33a9e2b3a52344f2b5f2a33c78dcf66eaf62a1d2))
+* fix Jitsi Meet crash when upgrading SIP call with screen share ([#162](https://github.com/gonicus/gonnect/issues/162)) ([ba4ca9f](https://github.com/gonicus/gonnect/commit/ba4ca9f8f8e256f8bdda072c8fa40b267a32f8fd))
+* mute behaviour in jitsi rooms ([12def7b](https://github.com/gonicus/gonnect/commit/12def7bea63a58cde78f51c01bb9447b02479a9a))
+* revert evolution-data-server back to 3.56.0 ([2f9e9be](https://github.com/gonicus/gonnect/commit/2f9e9be7b2de99572f714bc6311875db2ab4b138))
+* show password dialog again ([8164305](https://github.com/gonicus/gonnect/commit/816430571e1082c2a066afeced316998ae0c26bc))
+* **ui:** do not show multiple password dialogs ([#165](https://github.com/gonicus/gonnect/issues/165)) ([bb0020e](https://github.com/gonicus/gonnect/commit/bb0020eeb64ad52fb4097f6a45c31fdb87930866))
+* use short month names for display headsets ([4449ac0](https://github.com/gonicus/gonnect/commit/4449ac07d891096e9f27445e477ae165647f71da))
+
+
+### Reverts
+
+* Revert "fix: revert evolution-data-server back to 3.56.0" ([02ce3e9](https://github.com/gonicus/gonnect/commit/02ce3e9c3bc95cbbbe3a0b558f52345432352f01))
+
 ## [2.0.4](https://github.com/gonicus/gonnect/compare/v2.0.3...v2.0.4) (2025-09-02)
 
 
