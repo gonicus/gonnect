@@ -38,12 +38,12 @@ void JsChatRoom::setName(const QString &name)
 
 void JsChatRoom::resetUnreadCount()
 {
-    Q_EMIT connectorParent() -> resetUnreadCountRequested(m_id);
+    Q_EMIT connectorParent()->resetUnreadCountRequested(m_id);
 }
 
 void JsChatRoom::sendMessage(const QString &message)
 {
-    Q_EMIT connectorParent() -> sendMessageRequested(m_id, message);
+    Q_EMIT connectorParent()->sendMessageRequested(m_id, message);
 }
 
 JsChatConnector *JsChatRoom::connectorParent() const
