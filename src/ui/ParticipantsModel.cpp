@@ -76,7 +76,7 @@ void ParticipantsModel::onIConferenceConnectorChanged()
         connect(m_iConferenceConnector, &IConferenceConnector::participantRoleChanged, this,
                 [this](qsizetype index, ConferenceParticipant *, ConferenceParticipant::Role) {
                     const auto modelIndex = createIndex(index, 0);
-                    emit dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::Role) });
+                    Q_EMIT dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::Role) });
                 });
     }
 

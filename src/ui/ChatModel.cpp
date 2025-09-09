@@ -100,7 +100,7 @@ void ChatModel::updateRealMessagesCount()
 
     if (m_realMessagesCount != count) {
         m_realMessagesCount = count;
-        emit realMessagesCountChanged();
+        Q_EMIT realMessagesCountChanged();
     }
 }
 

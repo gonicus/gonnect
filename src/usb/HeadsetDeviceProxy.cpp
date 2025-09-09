@@ -158,40 +158,40 @@ bool HeadsetDeviceProxy::refreshDevice()
 
         connect(m_device, &HeadsetDevice::hookSwitch, this, [this]() {
             if (isEnabled()) {
-                emit hookSwitch();
+                Q_EMIT hookSwitch();
             }
         });
         connect(m_device, &HeadsetDevice::mute, this, [this]() {
             if (isEnabled()) {
-                emit mute();
+                Q_EMIT mute();
                 m_muteTag = QUuid::createUuid().toString();
                 GlobalMuteState::instance().toggleMute(m_muteTag);
             }
         });
         connect(m_device, &HeadsetDevice::busyLine, this, [this]() {
             if (isEnabled()) {
-                emit busyLine();
+                Q_EMIT busyLine();
             }
         });
         connect(m_device, &HeadsetDevice::flash, this, [this]() {
             if (isEnabled()) {
-                emit flash();
+                Q_EMIT flash();
                 GlobalCallState::instance().triggerHold();
             }
         });
         connect(m_device, &HeadsetDevice::teamsButton, this, [this]() {
             if (isEnabled()) {
-                emit teamsButton();
+                Q_EMIT teamsButton();
             }
         });
         connect(m_device, &HeadsetDevice::programmableButton, this, [this]() {
             if (isEnabled()) {
-                emit programmableButton();
+                Q_EMIT programmableButton();
             }
         });
         connect(m_device, &HeadsetDevice::dial, this, [this](const QString &number) {
             if (isEnabled()) {
-                emit dial(number);
+                Q_EMIT dial(number);
             }
         });
         open();
@@ -199,7 +199,7 @@ bool HeadsetDeviceProxy::refreshDevice()
         QTimer::singleShot(500ms, this, [this]() { updateDeviceState(); });
     }
 
-    emit nameChanged();
+    Q_EMIT nameChanged();
 
     return !!m_device;
 }

@@ -96,7 +96,7 @@ public:
     explicit LinuxDesktopSearchProvider(QObject *parent = nullptr);
     ~LinuxDesktopSearchProvider();
 
-public slots:
+public Q_SLOTS:
     // GNOME search provider
     void ActivateResult(const QString &identifier, const QStringList &terms, uint timestamp);
     QStringList GetInitialResultSet(const QStringList &terms);
@@ -112,7 +112,7 @@ public slots:
     void Run(const QString &matchId, const QString &actionId);
     RemoteMatches Match(const QString &query);
 
-signals:
+Q_SIGNALS:
     void activateSearch(QString query);
 
 private:

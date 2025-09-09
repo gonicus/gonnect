@@ -112,7 +112,7 @@ public:
 protected:
     virtual void toggleHoldImpl() override;
 
-private slots:
+private Q_SLOTS:
     void onHeadsetHookSwitchChanged();
     void transferAudioManagerDevicesToJitsi();
     void transferVideoManagerDeviceToJitsi();
@@ -174,7 +174,7 @@ private:
     QList<JitsiMediaDevice *> m_audioOutputDevices;
     QList<JitsiMediaDevice *> m_videoInputDevices;
 
-signals:
+Q_SIGNALS:
     // Internal API
     // These events are meant to be received by JS code.
     void messageSent(QString message);

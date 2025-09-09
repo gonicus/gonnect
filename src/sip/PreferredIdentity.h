@@ -46,7 +46,7 @@ public:
 
     bool isValid() const { return m_isValid; }
 
-signals:
+Q_SIGNALS:
     void displayNameChanged();
     void identityChanged();
     void prefixChanged();
@@ -54,7 +54,7 @@ signals:
     void automaticChanged();
     void isValidChanged();
 
-private slots:
+private Q_SLOTS:
     void validate();
 
 private:

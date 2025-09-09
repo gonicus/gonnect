@@ -130,7 +130,7 @@ void AddressBookManager::processAddressBookQueue()
     }
 
     if (changed) {
-        emit AddressBook::instance().contactsReady();
+        Q_EMIT AddressBook::instance().contactsReady();
     }
 
     m_queueMutex.unlock();

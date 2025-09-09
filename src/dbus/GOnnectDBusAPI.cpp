@@ -35,18 +35,18 @@ void GOnnectDBusAPI::registerCallState(ICallState *state)
                     const auto contactInfo =
                             PhoneNumberUtil::instance().contactInfoBySipUrl(call->sipUrl());
 
-                    emit m_apiAdaptor->Ringing(uuid, contactInfo.toString());
+                    Q_EMIT m_apiAdaptor->Ringing(uuid, contactInfo.toString());
                 }
             }
 
             if (changeMask & ICallState::State::CallActive && cs & ICallState::State::CallActive) {
-                emit m_apiAdaptor->CallAnswered(uuid);
+                Q_EMIT m_apiAdaptor->CallAnswered(uuid);
             }
         });
 
         connect(state, &ICallState::destroyed, this, [this, uuid]() {
             m_states.remove(uuid);
-            emit m_apiAdaptor->CallEnded(uuid);
+            Q_EMIT m_apiAdaptor->CallEnded(uuid);
         });
     }
 }

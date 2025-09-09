@@ -119,11 +119,11 @@ public:
 
     Q_INVOKABLE void toggleFullscreen();
 
-public slots:
+public Q_SLOTS:
     Q_INVOKABLE void quitApplicationNoConfirm() const;
     Q_INVOKABLE void quitApplication();
 
-private slots:
+private Q_SLOTS:
     void updateCurrentUser();
     void updateIsActiveVideoCall();
 
@@ -139,7 +139,7 @@ private:
     QObject *m_topDrawer = nullptr;
     bool m_isActiveVideoCall = false;
 
-signals:
+Q_SIGNALS:
     void activateSearch();
     void isPlayingRingToneChanged();
     void currentUserChanged();

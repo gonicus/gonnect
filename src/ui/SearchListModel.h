@@ -40,7 +40,7 @@ public:
     Q_INVOKABLE QString phoneNumberByIndex(quint16 index) const;
     Q_INVOKABLE QString contactIdByIndex(quint16 index) const;
 
-private slots:
+private Q_SLOTS:
     void updateSearchResults();
     void handleFavoriteToggle(const NumberStat *numberStat);
 
@@ -50,7 +50,7 @@ private:
     QList<quint8> m_numberIndexOffsets;
     quint16 m_totalNumbersCount = 0;
 
-signals:
+Q_SIGNALS:
     void searchPhraseChanged();
     void numbersIndexUpdated();
 };

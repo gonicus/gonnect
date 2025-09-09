@@ -15,27 +15,27 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
 
     connect(&history, &CallHistory::dataChanged, this, [this](qsizetype index, CallHistoryItem *) {
         auto idx = createIndex(index, 0);
-        emit dataChanged(idx, idx);
+        Q_EMIT dataChanged(idx, idx);
     });
 
     connect(&AvatarManager::instance(), &AvatarManager::avatarsLoaded, this, [this]() {
         const auto startIndex = createIndex(0, 0);
         const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
-        emit dataChanged(
+        Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
     connect(&AvatarManager::instance(), &AvatarManager::avatarAdded, this, [this](QString) {
         const auto startIndex = createIndex(0, 0);
         const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
-        emit dataChanged(
+        Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
     connect(&AvatarManager::instance(), &AvatarManager::avatarRemoved, this, [this](QString) {
         const auto startIndex = createIndex(0, 0);
         const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
-        emit dataChanged(
+        Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
@@ -89,7 +89,7 @@ void HistoryModel::handleFavoriteToggle(const NumberStat *item)
                                         .phoneNumber;
         if (number == phoneNumber) {
             auto idx = createIndex(i, 0);
-            emit dataChanged(idx, idx, { static_cast<int>(Roles::IsFavorite) });
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::IsFavorite) });
         }
     }
 }

@@ -65,7 +65,7 @@ public:
     void addButton(const QString &label, const QString &action, const QString &purpose,
                    const QVariantMap &parameters);
 
-signals:
+Q_SIGNALS:
     void actionInvoked(QString action, QVariantList parameters);
 
 private:

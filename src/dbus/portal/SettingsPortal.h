@@ -22,7 +22,7 @@ public:
     QColor accentColor() const { return m_accentColor; }
     bool highContrast() const { return m_highContrast; }
 
-signals:
+Q_SIGNALS:
     void colorSchemeChanged();
     void accentColorChanged();
     void highContrastChanged();

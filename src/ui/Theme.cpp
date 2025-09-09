@@ -54,7 +54,7 @@ void Theme::setUseOwnDecoration(bool value)
         m_useOwnDecoration = value;
         AppSettings settings;
         settings.setValue("generic/useOwnWindowDecoration", value ? "true" : "false");
-        emit useOwnDecorationChanged();
+        Q_EMIT useOwnDecorationChanged();
     }
 }
 
@@ -143,14 +143,14 @@ void Theme::updateColorPalette()
         m_paneColor = QColor(45, 45, 45);
     }
 
-    emit colorPaletteChanged();
+    Q_EMIT colorPaletteChanged();
 }
 
 void Theme::setDarkMode(bool value)
 {
     if (m_isDarkMode != value) {
         m_isDarkMode = value;
-        emit isDarkModeChanged();
+        Q_EMIT isDarkModeChanged();
     }
 }
 

@@ -13,7 +13,7 @@ public:
     virtual QString name() = 0;
     virtual qsizetype notificationCount() = 0;
 
-signals:
+Q_SIGNALS:
     void nameChanged(QString name);
     void notificationCountChanged(qsizetype count);
 };

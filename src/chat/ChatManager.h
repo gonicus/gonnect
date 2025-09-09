@@ -33,7 +33,7 @@ public:
 
     IChatProvider *firstProvider() const;
 
-private slots:
+private Q_SLOTS:
     void updateConnectionState();
 
 private:
@@ -43,7 +43,7 @@ private:
     QList<IChatProvider *> m_chatProviders;
     ConnectionState m_connectionState = ConnectionState::Disconnected;
 
-signals:
+Q_SIGNALS:
     void connectionStateChanged();
 };
 

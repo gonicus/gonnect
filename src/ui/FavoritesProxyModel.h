@@ -21,6 +21,6 @@ protected:
 private:
     bool m_showJitsi = true;
 
-signals:
+Q_SIGNALS:
     void showJitsiChanged();
 };

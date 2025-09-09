@@ -16,6 +16,6 @@ public:
     virtual void request(bool autostart) = 0;
     virtual bool autostart() = 0;
 
-signals:
+Q_SIGNALS:
     void autostartChanged();
 };

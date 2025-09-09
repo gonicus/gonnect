@@ -16,7 +16,7 @@ public:
 
     QList<ResponseItem *> loadResponse();
 
-private slots:
+private Q_SLOTS:
 
 private:
     void assrt(bool cond, QString err);
@@ -24,7 +24,7 @@ private:
     QString m_sourceData;
     QJsonDocument m_dataDoc;
 
-signals:
+Q_SIGNALS:
     void finished();
     void error(QString err);
 };

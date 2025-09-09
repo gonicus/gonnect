@@ -14,6 +14,6 @@ public:
 
     virtual QString getDisplayName() = 0;
 
-signals:
+Q_SIGNALS:
     void displayNameChanged();
 };

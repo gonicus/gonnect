@@ -23,7 +23,7 @@ void ResponseLoader::assrt(bool cond, QString err)
 {
     if (!cond) {
         qCWarning(lcResponseLoader) << "Assert error:" << err;
-        emit error(err);
+        Q_EMIT error(err);
     }
 }
 
@@ -35,10 +35,10 @@ QList<ResponseItem *> ResponseLoader::loadResponse()
     QJsonParseError jsonErr;
     m_dataDoc = QJsonDocument::fromJson(m_sourceData.toUtf8(), &jsonErr);
     if (jsonErr.error) {
-        emit error(jsonErr.errorString());
+        Q_EMIT error(jsonErr.errorString());
         return response;
     } else if (m_dataDoc.isNull() || !m_dataDoc.isArray()) {
-        emit error("Invalid JSON format in response");
+        Q_EMIT error("Invalid JSON format in response");
         return response;
     }
 
@@ -149,6 +149,6 @@ QList<ResponseItem *> ResponseLoader::loadResponse()
 
     qCDebug(lcResponseLoader) << "JSON response entries:" << response.count();
 
-    emit finished();
+    Q_EMIT finished();
     return response;
 }

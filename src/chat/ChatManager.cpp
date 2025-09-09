@@ -81,7 +81,7 @@ void ChatManager::updateConnectionState()
 
     if (m_connectionState != newState) {
         m_connectionState = newState;
-        emit connectionStateChanged();
+        Q_EMIT connectionStateChanged();
 
         qCInfo(lcChatManager) << "Chat manager connection state changed to" << newState << "with"
                               << count << "providers connected";

@@ -221,7 +221,7 @@ void ViewHelper::stopTestPlayRingTone()
         m_ringer = nullptr;
 
         m_isPlayingRingTone = false;
-        emit isPlayingRingToneChanged();
+        Q_EMIT isPlayingRingToneChanged();
     }
 }
 
@@ -231,7 +231,7 @@ void ViewHelper::updateCurrentUser()
 
     if (m_currentUser != contact) {
         m_currentUser = contact;
-        emit currentUserChanged();
+        Q_EMIT currentUserChanged();
     }
 }
 
@@ -250,7 +250,7 @@ void ViewHelper::updateIsActiveVideoCall()
 
     if (m_isActiveVideoCall != hasJitsiCall) {
         m_isActiveVideoCall = hasJitsiCall;
-        emit isActiveVideoCallChanged();
+        Q_EMIT isActiveVideoCallChanged();
     }
 }
 
@@ -267,7 +267,7 @@ void ViewHelper::resetTrayIcon() const
 void ViewHelper::quitApplication()
 {
     if (GlobalCallState::instance().globalCallState() & ICallState::State::CallActive) {
-        emit showQuitConfirm();
+        Q_EMIT showQuitConfirm();
     } else {
         quitApplicationNoConfirm();
     }
@@ -283,7 +283,7 @@ void ViewHelper::testPlayRingTone(qreal volume)
 
     if (!m_isPlayingRingTone) {
         m_isPlayingRingTone = true;
-        emit isPlayingRingToneChanged();
+        Q_EMIT isPlayingRingToneChanged();
     }
 }
 
@@ -294,24 +294,24 @@ HeadsetDeviceProxy *ViewHelper::headsetDeviceProxy() const
 
 void ViewHelper::requestPassword(const QString &id, const QString &host)
 {
-    emit passwordRequested(id, host);
+    Q_EMIT passwordRequested(id, host);
 }
 
 void ViewHelper::respondPassword(const QString &id, const QString password)
 {
-    emit passwordResponded(id, password);
+    Q_EMIT passwordResponded(id, password);
 }
 
 const QString ViewHelper::requestUserVerification(const QString &verificationKey)
 {
     const QString uuid = QUuid::createUuid().toString();
-    emit userVerificationRequested(uuid, verificationKey);
+    Q_EMIT userVerificationRequested(uuid, verificationKey);
     return uuid;
 }
 
 void ViewHelper::respondUserVerification(const QString &id, bool isAccepted)
 {
-    emit userVerificationResponded(id, isAccepted);
+    Q_EMIT userVerificationResponded(id, isAccepted);
 }
 
 bool ViewHelper::isPhoneNumber(const QString &number) const
@@ -334,7 +334,7 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
             << "Requesting meeting for " << roomName << " (" << displayName
             << ") with flags:" << m_nextMeetingStartFlags;
 
-    emit openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
+    Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
     setProperty("nextMeetingStartFlags",
                 QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
 }
@@ -380,5 +380,5 @@ QDateTime ViewHelper::endTimeForOngoingDateEventByRoomName(const QString &roomNa
 
 void ViewHelper::toggleFullscreen()
 {
-    emit fullscreenToggle();
+    Q_EMIT fullscreenToggle();
 }

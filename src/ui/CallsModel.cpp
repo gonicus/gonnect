@@ -26,7 +26,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && callInfo->isEstablished;
 
             auto idx = createIndex(index, 0);
-            emit dataChanged(idx, idx,
+            Q_EMIT dataChanged(idx, idx,
                              {
                                      static_cast<int>(Roles::IsEstablished),
                                      static_cast<int>(Roles::EstablishedTime),
@@ -42,7 +42,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             callInfo->hasMetadata = call->hasMetadata();
 
             auto idx = createIndex(index, 0);
-            emit dataChanged(idx, idx, { static_cast<int>(Roles::HasMetadata) });
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::HasMetadata) });
         }
     });
 
@@ -54,7 +54,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             callInfo->isHolding = call->isHolding();
 
             auto idx = createIndex(index, 0);
-            emit dataChanged(idx, idx, { static_cast<int>(Roles::IsHolding) });
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::IsHolding) });
         }
     });
 
@@ -66,7 +66,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             callInfo->isBlocked = call->isBlocked();
 
             auto idx = createIndex(index, 0);
-            emit dataChanged(idx, idx, { static_cast<int>(Roles::IsBlocked) });
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::IsBlocked) });
         }
     });
 
@@ -80,7 +80,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                             level, QtAudio::LinearVolumeScale, QtAudio::LogarithmicVolumeScale);
 
                     auto idx = createIndex(index, 0);
-                    emit dataChanged(idx, idx, { static_cast<int>(Roles::HasIncomingAudioLevel) });
+                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::HasIncomingAudioLevel) });
                 }
             });
 
@@ -92,7 +92,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             callInfo->statusCode = static_cast<pjsip_status_code>(statusCode);
 
             auto idx = createIndex(index, 0);
-            emit dataChanged(idx, idx, { static_cast<int>(Roles::StatusCode) });
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::StatusCode) });
         }
     });
 
@@ -104,7 +104,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && callInfo->isEstablished;
 
             auto idx = createIndex(index, 0);
-            emit dataChanged(idx, idx, { static_cast<int>(Roles::HasCapabilityJitsi) });
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::HasCapabilityJitsi) });
         }
     });
 
@@ -237,7 +237,7 @@ void CallsModel::updateCalls()
                 delete callInfo;
                 endRemoveRows();
 
-                emit countChanged();
+                Q_EMIT countChanged();
             }
         });
 
@@ -246,7 +246,7 @@ void CallsModel::updateCalls()
         auto modelIndex = createIndex(idx, 0);
         callInfo->isFinished = true;
         callInfo->hasCapabilityJitsi = false;
-        emit dataChanged(modelIndex, modelIndex,
+        Q_EMIT dataChanged(modelIndex, modelIndex,
                          {
                                  static_cast<int>(Roles::IsFinished),
                                  static_cast<int>(Roles::HasCapabilityJitsi),
@@ -256,7 +256,7 @@ void CallsModel::updateCalls()
     endResetModel();
 
     if (oldCount != m_calls.size()) {
-        emit countChanged();
+        Q_EMIT countChanged();
     }
 }
 

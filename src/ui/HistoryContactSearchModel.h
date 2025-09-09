@@ -30,7 +30,7 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const override;
     virtual QHash<int, QByteArray> roleNames() const override;
 
-private slots:
+private Q_SLOTS:
     void updateModel();
     void onFavoriteChanged(const NumberStat *numStatItem);
 
@@ -50,6 +50,6 @@ private:
     QString m_searchText;
     QList<Item> m_resultList;
 
-signals:
+Q_SIGNALS:
     void searchTextChanged();
 };

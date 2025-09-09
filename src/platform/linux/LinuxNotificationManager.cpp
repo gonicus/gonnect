@@ -19,7 +19,7 @@ LinuxNotificationManager::LinuxNotificationManager() : NotificationManager()
 void LinuxNotificationManager::handleAction(QString id, QString action, QVariantList parameters)
 {
     if (auto notification = m_notifications.value(id, nullptr)) {
-        emit notification->actionInvoked(action, parameters);
+        Q_EMIT notification->actionInvoked(action, parameters);
     }
 }
 
@@ -57,7 +57,7 @@ QString LinuxNotificationManager::add(Notification *notification)
     }
 
     // Map urgency
-    NotifyUrgency urgency;
+    NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
     switch (notification->urgency()) {
         case Notification::low:
             urgency = NOTIFY_URGENCY_LOW;
@@ -111,7 +111,7 @@ QString LinuxNotificationManager::add(Notification *notification)
                 label.toStdString().c_str(),
                 [](NotifyNotification* notification, char* action, gpointer user_data){
                     Notification* en = (Notification*)user_data;
-                    emit en->actionInvoked(action, {});
+                    Q_EMIT en->actionInvoked(action, {});
                     notify_notification_close(notification, NULL);
                 },
                 (gpointer)notification,

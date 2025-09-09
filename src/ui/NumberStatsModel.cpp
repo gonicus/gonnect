@@ -9,7 +9,7 @@ NumberStatsModel::NumberStatsModel(QObject *parent) : QAbstractListModel{ parent
 
     connect(&numStats, &NumberStats::countChanged, this, [this](const qsizetype index) {
         const auto modelIndex = createIndex(index, 0);
-        emit dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::Count) });
+        Q_EMIT dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::Count) });
     });
 
     connect(&numStats, &NumberStats::numberStatAdded, this, [this](const qsizetype index) {

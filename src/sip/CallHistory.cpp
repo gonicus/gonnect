@@ -282,7 +282,7 @@ CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem *item)
     if (!m_historyItems.contains(item)) {
         item->setParent(this);
         const auto index = insertItemAtCorrectPosition(item);
-        emit itemAdded(index, item);
+        Q_EMIT itemAdded(index, item);
     }
     return item;
 }
@@ -294,7 +294,7 @@ CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem::Types type, const 
 
     auto item = new CallHistoryItem(remoteUrl, account, contactId, isSipSubscriptable, type, this);
     const auto index = insertItemAtCorrectPosition(item);
-    emit itemAdded(index, item);
+    Q_EMIT itemAdded(index, item);
     return item;
 }
 

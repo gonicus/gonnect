@@ -42,13 +42,13 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const override;
     virtual QHash<int, QByteArray> roleNames() const override;
 
-private slots:
+private Q_SLOTS:
     void handleFavoriteToggle(const NumberStat *item);
     void resetModel();
 
 private:
     int m_limit = -1;
 
-signals:
+Q_SIGNALS:
     void limitChanged();
 };

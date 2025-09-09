@@ -670,7 +670,10 @@ target_include_directories(gonnect
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-target_compile_definitions(gonnect PRIVATE QT_DISABLE_DEPRECATED_BEFORE=0x060900)
+target_compile_definitions(gonnect
+   PRIVATE
+    QT_DISABLE_DEPRECATED_BEFORE=0x060900
+    QT_NO_KEYWORDS)
 
 # Add hid-rp header only stuff as "isystem" so that we have a chance
 # to ignore the warnings their code issues.

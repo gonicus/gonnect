@@ -66,10 +66,10 @@ void SIPBuddy::onBuddyState()
     if (status != m_status) {
         m_status = status;
         m_statusText = statusText;
-        emit statusChanged(m_status);
+        Q_EMIT statusChanged(m_status);
 
         qCInfo(lcSIPBuddy) << "Buddy" << m_uri << "changed state to:" << m_status;
-        emit SIPManager::instance().buddyStateChanged(m_uri, status);
+        Q_EMIT SIPManager::instance().buddyStateChanged(m_uri, status);
     }
 }
 

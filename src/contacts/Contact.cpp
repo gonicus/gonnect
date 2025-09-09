@@ -292,7 +292,7 @@ void Contact::setHasAvatar(bool hasAvatar)
 {
     if (m_hasAvatar != hasAvatar) {
         m_hasAvatar = hasAvatar;
-        emit avatarChanged();
+        Q_EMIT avatarChanged();
     }
 }
 

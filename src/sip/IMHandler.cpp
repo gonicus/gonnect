@@ -58,7 +58,7 @@ bool IMHandler::process(const QString &contentType, const QString &message)
 
         qCDebug(lcIMHandler) << "call party announced capabilities:" << m_capabilities;
 
-        emit capabilitiesChanged();
+        Q_EMIT capabilitiesChanged();
     }
 
     // Jitsi handler
@@ -83,7 +83,7 @@ bool IMHandler::process(const QString &contentType, const QString &message)
         }
 
         m_jistiRequestedMeetingId = meetingId;
-        emit meetingRequested(m_call->account()->id(), m_call->getId());
+        Q_EMIT meetingRequested(m_call->account()->id(), m_call->getId());
 
         return true;
     }
@@ -166,7 +166,7 @@ bool IMHandler::sendCapabilities()
         return false;
     }
 
-    emit capabilitiesChanged();
+    Q_EMIT capabilitiesChanged();
     return true;
 }
 

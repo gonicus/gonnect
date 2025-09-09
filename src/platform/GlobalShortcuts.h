@@ -30,7 +30,7 @@ public:
     virtual void setShortcuts(Shortcuts &shortcuts) = 0;
     virtual QList<ShortcutItem *> shortcuts() const = 0;
 
-signals:
+Q_SIGNALS:
     void initialized();
     void shortcutsChanged();
     void activated(QString id);

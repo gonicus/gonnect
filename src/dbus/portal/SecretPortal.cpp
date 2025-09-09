@@ -63,7 +63,7 @@ void SecretPortal::initialize()
             }
         }
 
-        emit initializedChanged();
+        Q_EMIT initializedChanged();
     });
 }
 

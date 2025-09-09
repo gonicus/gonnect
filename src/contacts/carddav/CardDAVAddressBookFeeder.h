@@ -20,7 +20,7 @@ public:
     void process() override;
     QUrl networkCheckURL() const override;
 
-private slots:
+private Q_SLOTS:
     void onError(QString error) const;
     void onParserFinished();
     void flushCachImpl();

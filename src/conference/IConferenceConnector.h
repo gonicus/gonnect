@@ -148,7 +148,7 @@ public:
     Q_INVOKABLE virtual void muteAll() = 0;
     Q_INVOKABLE virtual void showVirtualBackgroundDialog() = 0;
 
-signals:
+Q_SIGNALS:
     void isInitializedChanged();
     void isInConferenceChanged();
     void isPasswordRequiredChanged();
