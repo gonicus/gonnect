@@ -1,10 +1,12 @@
 #include "ChatModel.h"
 #include "EmojiResolver.h"
+#include "ConferenceChatMessage.h"
 #include <QRegularExpression>
 
 ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
 {
-    connect(this, &ChatModel::jitsiConnectorChanged, this, &ChatModel::onJitsiConnectorChanged);
+    connect(this, &ChatModel::iConferenceConnectorChanged, this,
+            &ChatModel::onIConferenceConnectorChanged);
 }
 
 QHash<int, QByteArray> ChatModel::roleNames() const
@@ -23,56 +25,56 @@ QHash<int, QByteArray> ChatModel::roleNames() const
 int ChatModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return m_jitsiConnector ? m_jitsiConnector->messages().size() : 0;
+    return m_iConferenceConnector ? m_iConferenceConnector->messages().size() : 0;
 }
 
 QVariant ChatModel::data(const QModelIndex &index, int role) const
 {
-    if (!m_jitsiConnector) {
+    if (!m_iConferenceConnector) {
         return QVariant();
     }
 
-    const auto &item = m_jitsiConnector->messages().at(index.row());
+    const auto item = m_iConferenceConnector->messages().at(index.row());
 
     switch (role) {
     case static_cast<int>(Roles::FromId):
-        return item.fromId;
+        return item->fromId();
     case static_cast<int>(Roles::NickName):
-        return item.nickName;
+        return item->nickName();
     case static_cast<int>(Roles::Message):
-        return addLinkTags(EmojiResolver::instance().replaceEmojiCodes(item.message));
+        return addLinkTags(EmojiResolver::instance().replaceEmojiCodes(item->message()));
     case static_cast<int>(Roles::Timestamp):
-        return item.timestamp;
+        return item->timestamp();
     case static_cast<int>(Roles::IsPrivateMessage):
-        return item.isPrivateMessage;
+        return item->isPrivateMessage();
     case static_cast<int>(Roles::IsOwnMessage):
-        return item.fromId == m_jitsiConnector->jitsiId();
+        return item->fromId() == m_iConferenceConnector->ownId();
     case static_cast<int>(Roles::IsSystemMessage):
-        return item.isSystemMessage;
+        return item->isSystemMessage();
     default:
         return QVariant();
     }
 }
 
-void ChatModel::onJitsiConnectorChanged()
+void ChatModel::onIConferenceConnectorChanged()
 {
     beginResetModel();
 
-    if (m_jitsiConnectorContext) {
-        m_jitsiConnectorContext->deleteLater();
-        m_jitsiConnectorContext = nullptr;
+    if (m_iConferenceConnectorContext) {
+        m_iConferenceConnectorContext->deleteLater();
+        m_iConferenceConnectorContext = nullptr;
     }
 
-    if (m_jitsiConnector) {
-        m_jitsiConnectorContext = new QObject(this);
-        connect(m_jitsiConnector, &JitsiConnector::messageAdded, m_jitsiConnectorContext,
-                [this](qsizetype index) {
+    if (m_iConferenceConnector) {
+        m_iConferenceConnectorContext = new QObject(this);
+        connect(m_iConferenceConnector, &IConferenceConnector::chatMessageAdded,
+                m_iConferenceConnectorContext, [this](qsizetype index, ConferenceChatMessage *) {
                     beginInsertRows(QModelIndex(), index, index);
                     endInsertRows();
                     updateRealMessagesCount();
                 });
-        connect(m_jitsiConnector, &JitsiConnector::messagesReset, m_jitsiConnectorContext,
-                [this]() {
+        connect(m_iConferenceConnector, &IConferenceConnector::chatMessagesReset,
+                m_iConferenceConnectorContext, [this]() {
                     beginResetModel();
                     endResetModel();
                     updateRealMessagesCount();
@@ -87,10 +89,10 @@ void ChatModel::updateRealMessagesCount()
 {
     uint count = 0;
 
-    if (m_jitsiConnector) {
-        const auto &messages = m_jitsiConnector->messages();
+    if (m_iConferenceConnector) {
+        const auto &messages = m_iConferenceConnector->messages();
         for (const auto &message : messages) {
-            if (!message.isSystemMessage) {
+            if (!message->isSystemMessage()) {
                 ++count;
             }
         }

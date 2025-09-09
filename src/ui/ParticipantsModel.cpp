@@ -1,11 +1,12 @@
 #include "ParticipantsModel.h"
-#include "JitsiConnector.h"
+#include "IConferenceConnector.h"
+#include "ConferenceParticipant.h"
 
 ParticipantsModel::ParticipantsModel(QObject *parent) : QAbstractListModel{ parent }
 {
 
-    connect(this, &ParticipantsModel::jitsiConnectorChanged, this,
-            &ParticipantsModel::onJitsiConnectorChanged);
+    connect(this, &ParticipantsModel::iConferenceConnectorChanged, this,
+            &ParticipantsModel::onIConferenceConnectorChanged);
 }
 
 QHash<int, QByteArray> ParticipantsModel::roleNames() const
@@ -19,31 +20,31 @@ QHash<int, QByteArray> ParticipantsModel::roleNames() const
 
 int ParticipantsModel::rowCount(const QModelIndex &) const
 {
-    return m_jitsiConnector ? m_jitsiConnector->participants().size() : 0;
+    return m_iConferenceConnector ? m_iConferenceConnector->participants().size() : 0;
 }
 
 QVariant ParticipantsModel::data(const QModelIndex &index, int role) const
 {
-    if (!m_jitsiConnector || !index.isValid()) {
+    if (!m_iConferenceConnector || !index.isValid()) {
         return QVariant();
     }
 
-    const auto &participant = m_jitsiConnector->participants().at(index.row());
+    const auto participant = m_iConferenceConnector->participants().at(index.row());
 
     switch (role) {
     case static_cast<int>(Roles::Id):
-        return participant.id;
+        return participant->id();
 
     case static_cast<int>(Roles::Role):
-        return static_cast<int>(participant.role);
+        return static_cast<int>(participant->role());
 
     case static_cast<int>(Roles::DisplayName):
     default:
-        return participant.displayName;
+        return participant->displayName();
     }
 }
 
-void ParticipantsModel::onJitsiConnectorChanged()
+void ParticipantsModel::onIConferenceConnectorChanged()
 {
     beginResetModel();
 
@@ -52,28 +53,28 @@ void ParticipantsModel::onJitsiConnectorChanged()
         m_jistiConnectorContext = nullptr;
     }
 
-    if (m_jitsiConnector) {
+    if (m_iConferenceConnector) {
         m_jistiConnectorContext = new QObject(this);
 
-        connect(m_jitsiConnector, &JitsiConnector::participantsCleared, this, [this]() {
+        connect(m_iConferenceConnector, &IConferenceConnector::participantsCleared, this, [this]() {
             beginResetModel();
             endResetModel();
         });
 
-        connect(m_jitsiConnector, &JitsiConnector::participantAdded, this,
-                [this](qsizetype index, const QString) {
+        connect(m_iConferenceConnector, &IConferenceConnector::participantAdded, this,
+                [this](qsizetype index, ConferenceParticipant *) {
                     beginInsertRows(QModelIndex(), index, index);
                     endInsertRows();
                 });
 
-        connect(m_jitsiConnector, &JitsiConnector::participantRemoved, this,
-                [this](qsizetype index, const QString) {
+        connect(m_iConferenceConnector, &IConferenceConnector::participantRemoved, this,
+                [this](qsizetype index, ConferenceParticipant *) {
                     beginRemoveRows(QModelIndex(), index, index);
                     endRemoveRows();
                 });
 
-        connect(m_jitsiConnector, &JitsiConnector::participantRoleChanged, this,
-                [this](qsizetype index, const QString, const JitsiConnector::ParticipantRole) {
+        connect(m_iConferenceConnector, &IConferenceConnector::participantRoleChanged, this,
+                [this](qsizetype index, ConferenceParticipant *, ConferenceParticipant::Role) {
                     const auto modelIndex = createIndex(index, 0);
                     emit dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::Role) });
                 });
