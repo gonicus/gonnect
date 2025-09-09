@@ -189,7 +189,7 @@ QDateTime AuthManager::tokenExpiry(const QString &token) const
     const auto parts = token.split('.');
     if (parts.size() != 3) {
         qCCritical(lcAuthManager)
-                << "Error parsing refreh token: expected to be three parts in token, but found"
+                << "Error parsing refresh token: expected to be three parts in token, but found"
                 << parts.size();
         return QDateTime();
     }
