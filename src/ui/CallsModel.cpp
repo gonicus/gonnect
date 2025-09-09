@@ -27,11 +27,11 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
 
             auto idx = createIndex(index, 0);
             Q_EMIT dataChanged(idx, idx,
-                             {
-                                     static_cast<int>(Roles::IsEstablished),
-                                     static_cast<int>(Roles::EstablishedTime),
-                                     static_cast<int>(Roles::HasCapabilityJitsi),
-                             });
+                               {
+                                       static_cast<int>(Roles::IsEstablished),
+                                       static_cast<int>(Roles::EstablishedTime),
+                                       static_cast<int>(Roles::HasCapabilityJitsi),
+                               });
         }
     });
 
@@ -80,7 +80,8 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                             level, QtAudio::LinearVolumeScale, QtAudio::LogarithmicVolumeScale);
 
                     auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::HasIncomingAudioLevel) });
+                    Q_EMIT dataChanged(idx, idx,
+                                       { static_cast<int>(Roles::HasIncomingAudioLevel) });
                 }
             });
 
@@ -247,10 +248,10 @@ void CallsModel::updateCalls()
         callInfo->isFinished = true;
         callInfo->hasCapabilityJitsi = false;
         Q_EMIT dataChanged(modelIndex, modelIndex,
-                         {
-                                 static_cast<int>(Roles::IsFinished),
-                                 static_cast<int>(Roles::HasCapabilityJitsi),
-                         });
+                           {
+                                   static_cast<int>(Roles::IsFinished),
+                                   static_cast<int>(Roles::HasCapabilityJitsi),
+                           });
     }
 
     endResetModel();

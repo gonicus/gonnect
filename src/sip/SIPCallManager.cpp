@@ -242,8 +242,8 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             [ref]() { NotificationManager::instance().remove(ref); });
 
     if (isEmergency) {
-        Q_EMIT ViewHelper::instance().showEmergency(call -> account()->id(), call->getId(),
-                                                  displayName);
+        Q_EMIT ViewHelper::instance().showEmergency(call->account()->id(), call->getId(),
+                                                    displayName);
     }
 }
 
@@ -662,7 +662,8 @@ void SIPCallManager::addCall(SIPCall *call)
             [call, this]() { Q_EMIT capabilitiesChanged(call); });
     connect(call, &SIPCall::contactChanged, this,
             [call, this]() { Q_EMIT callContactChanged(call); });
-    connect(call, &SIPCall::metadataChanged, this, [call, this]() { Q_EMIT metadataChanged(call); });
+    connect(call, &SIPCall::metadataChanged, this,
+            [call, this]() { Q_EMIT metadataChanged(call); });
 
     connect(call, &SIPCall::missed, this, [this, call]() {
         if (call->isBlocked()) {

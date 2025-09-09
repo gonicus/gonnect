@@ -50,12 +50,14 @@ void Notification::addButton(const QString &label, const QString &action, const 
     m_buttons.append(buttonDescription);
 }
 
-bool Notification::hasThemedIcon() const {
+bool Notification::hasThemedIcon() const
+{
     NotificationIcon icon(m_iconUri, m_emblemUri, m_roundedIcon);
     return !icon.imageName().isEmpty();
 }
 
-QByteArray Notification::iconData() const {
+QByteArray Notification::iconData() const
+{
     NotificationIcon icon(m_iconUri, m_emblemUri, m_roundedIcon);
     return icon.data();
 }

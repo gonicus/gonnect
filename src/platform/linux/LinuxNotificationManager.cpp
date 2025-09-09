@@ -34,24 +34,24 @@ QString LinuxNotificationManager::add(Notification *notification)
 
     // Convert icon to libnotify
     if (notification->hasThemedIcon()) {
-        internalNotification = notify_notification_new(
-                notification->title().toStdString().c_str(),
-                notification->body().toStdString().c_str(),
-                notification->iconName().toStdString().c_str());
+        internalNotification =
+                notify_notification_new(notification->title().toStdString().c_str(),
+                                        notification->body().toStdString().c_str(),
+                                        notification->iconName().toStdString().c_str());
     } else {
         QByteArray iconData = notification->iconData();
 
-        internalNotification = notify_notification_new(
-                notification->title().toStdString().c_str(),
-                notification->body().toStdString().c_str(),
-                iconData.isEmpty() ? "dummy" : nullptr);
+        internalNotification = notify_notification_new(notification->title().toStdString().c_str(),
+                                                       notification->body().toStdString().c_str(),
+                                                       iconData.isEmpty() ? "dummy" : nullptr);
 
         if (!iconData.isEmpty()) {
-            GdkPixbufLoader* loader = gdk_pixbuf_loader_new();
-            gdk_pixbuf_loader_write(loader, (const guchar*)iconData.constData(), iconData.length(), NULL);
+            GdkPixbufLoader *loader = gdk_pixbuf_loader_new();
+            gdk_pixbuf_loader_write(loader, (const guchar *)iconData.constData(), iconData.length(),
+                                    NULL);
             gdk_pixbuf_loader_close(loader, NULL);
 
-            auto icon = gdk_pixbuf_loader_get_pixbuf (loader);
+            auto icon = gdk_pixbuf_loader_get_pixbuf(loader);
             notify_notification_set_image_from_pixbuf(internalNotification, icon);
         }
     }
@@ -59,15 +59,15 @@ QString LinuxNotificationManager::add(Notification *notification)
     // Map urgency
     NotifyUrgency urgency = NOTIFY_URGENCY_NORMAL;
     switch (notification->urgency()) {
-        case Notification::low:
-            urgency = NOTIFY_URGENCY_LOW;
-            break;
-        case Notification::normal:
-            urgency = NOTIFY_URGENCY_NORMAL;
-            break;
-        case Notification::high:
-        case Notification::urgent:
-            urgency = NOTIFY_URGENCY_CRITICAL;
+    case Notification::low:
+        urgency = NOTIFY_URGENCY_LOW;
+        break;
+    case Notification::normal:
+        urgency = NOTIFY_URGENCY_NORMAL;
+        break;
+    case Notification::high:
+    case Notification::urgent:
+        urgency = NOTIFY_URGENCY_CRITICAL;
     }
     notify_notification_set_urgency(internalNotification, urgency);
 
@@ -84,7 +84,7 @@ QString LinuxNotificationManager::add(Notification *notification)
         }
         if (displayHint & Notification::DisplayHint::hideOnLockscreen) {
             notify_notification_set_hint(internalNotification, "hide-on-lockscreen", NULL);
-                    }
+        }
         if (displayHint & Notification::DisplayHint::hideContentOnLockScreen) {
             notify_notification_set_hint(internalNotification, "hide-content-on-lockscreen", NULL);
         }
@@ -93,11 +93,12 @@ QString LinuxNotificationManager::add(Notification *notification)
         }
     }
 
-    notify_notification_set_category(internalNotification, notification->category().toStdString().c_str());
+    notify_notification_set_category(internalNotification,
+                                     notification->category().toStdString().c_str());
 
     // Assemble actions
     QList<QVariantMap> buttonDescriptions = notification->buttonDescriptions();
-    for (auto& bd : std::as_const(buttonDescriptions)) {
+    for (auto &bd : std::as_const(buttonDescriptions)) {
         if (!bd.contains("label") || !bd.contains("action")) {
             continue;
         }
@@ -106,16 +107,13 @@ QString LinuxNotificationManager::add(Notification *notification)
         QString action = bd.value("action").toString();
 
         notify_notification_add_action(
-                internalNotification,
-                action.toStdString().c_str(),
-                label.toStdString().c_str(),
-                [](NotifyNotification* notification, char* action, gpointer user_data){
-                    Notification* en = (Notification*)user_data;
+                internalNotification, action.toStdString().c_str(), label.toStdString().c_str(),
+                [](NotifyNotification *notification, char *action, gpointer user_data) {
+                    Notification *en = (Notification *)user_data;
                     Q_EMIT en->actionInvoked(action, {});
                     notify_notification_close(notification, NULL);
                 },
-                (gpointer)notification,
-                NULL);
+                (gpointer)notification, NULL);
     }
 
     notify_notification_show(internalNotification, NULL);
@@ -140,7 +138,8 @@ bool LinuxNotificationManager::remove(const QString &id)
 void LinuxNotificationManager::shutdown()
 {
     // Close notifications
-    for (auto iter = m_internalNotifications.constBegin(); iter != m_internalNotifications.constEnd(); ++iter) {
+    for (auto iter = m_internalNotifications.constBegin();
+         iter != m_internalNotifications.constEnd(); ++iter) {
         notify_notification_close(iter.value(), NULL);
     }
 

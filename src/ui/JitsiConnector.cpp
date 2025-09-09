@@ -33,8 +33,8 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
     });
 
     connect(this, &IConferenceConnector::largeVideoParticipantChanged, this, [this]() {
-        Q_EMIT executeSetLargeVideoParticipant(m_largeVideoParticipant ? m_largeVideoParticipant->id()
-                                                                     : "");
+        Q_EMIT executeSetLargeVideoParticipant(
+                m_largeVideoParticipant ? m_largeVideoParticipant->id() : "");
     });
 
     auto &audioManager = AudioManager::instance();

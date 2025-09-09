@@ -83,7 +83,7 @@ private:
     QString m_sound = "silent";
     QString m_category;
 
-    NotificationIcon* m_icon = nullptr;
+    NotificationIcon *m_icon = nullptr;
 
     unsigned m_displayHint = 0;
     unsigned m_version = 1;

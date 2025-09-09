@@ -19,7 +19,7 @@ HistoryContactSearchModel::HistoryContactSearchModel(QObject *parent) : QAbstrac
         const auto count = rowCount(QModelIndex());
         if (count) {
             Q_EMIT dataChanged(createIndex(0, 0), createIndex(count - 1, 0),
-                             { static_cast<int>(Roles::IsBlocked) });
+                               { static_cast<int>(Roles::IsBlocked) });
         }
     });
 }

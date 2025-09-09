@@ -14,7 +14,8 @@ TogglerModel::TogglerModel(QObject *parent) : QAbstractListModel{ parent }
                 const auto idx = TogglerManager::instance().toggler().indexOf(toggler);
                 if (idx >= 0) {
                     const auto modelIndex = createIndex(idx, 0);
-                    Q_EMIT dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::IsActive) });
+                    Q_EMIT dataChanged(modelIndex, modelIndex,
+                                       { static_cast<int>(Roles::IsActive) });
                 }
             });
     connect(&TogglerManager::instance(), &TogglerManager::togglerBusyChanged, this,

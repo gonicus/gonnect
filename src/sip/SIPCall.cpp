@@ -309,7 +309,7 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*sniffer));
                     connect(sniffer, &Sniffer::audioLevelChanged, this, [this, sniffer]() {
                         Q_EMIT SIPCallManager::instance().audioLevelChanged(this,
-                                                                          sniffer -> audioLevel());
+                                                                            sniffer->audioLevel());
                     });
                 }
 
