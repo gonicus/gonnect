@@ -94,6 +94,9 @@ public:
     void requestPassword(const QString &id, const QString &host);
     Q_INVOKABLE void respondPassword(const QString &id, const QString password);
 
+    void requestRecoveryKey(const QString &id, const QString &displayName);
+    Q_INVOKABLE void respondRecoveryKey(const QString &id, const QString &key);
+
     Q_INVOKABLE uint durationCallVisibleAfterEnd() const { return GONNECT_CALL_VISIBLE_AFTER_END; }
 
     const QString requestUserVerification(const QString &verificationKey);
@@ -166,6 +169,9 @@ Q_SIGNALS:
 
     void passwordRequested(QString id, QString host);
     void passwordResponded(QString id, QString password);
+
+    void recoveryKeyRequested(QString id, QString displayName);
+    void recoveryKeyResponded(QString id, QString key);
 
     void userVerificationRequested(QString id, QString verificationKey);
     void userVerificationResponded(QString id, bool isAccepted);

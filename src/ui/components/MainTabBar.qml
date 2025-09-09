@@ -11,6 +11,7 @@ Item {
     implicitHeight: menuCol.implicitHeight
 
     property int selectedPageId: -1
+    property var attachedData: null
     property alias backgroundColor: filler.color
     property bool hasActiveCall
     property bool hasActiveConference
@@ -38,6 +39,7 @@ Item {
             required property string labelText
             required property string disabledTooltipText
             required property string iconSource
+            required property var attachedData
 
             readonly property bool isSelected: control.selectedPageId === delg.pageId
 
@@ -102,7 +104,10 @@ Item {
             }
 
             TapHandler {
-                onTapped: () => control.selectedPageId = delg.pageId
+                onTapped: () => {
+                    control.attachedData = delg.attachedData
+                    control.selectedPageId = delg.pageId
+                }
             }
         }
     }
@@ -119,30 +124,53 @@ Item {
         Repeater {
             id: menuRepeater
             delegate: delegComp
-            model: [
-                {
-                    pageId: GonnectWindow.PageId.Calls,
-                    iconSource: Icons.userHome,
-                    labelText: qsTr("Home"),
-                    disabledTooltipText: qsTr("Home"),
-                    isEnabled: true,
-                    showRedDot: false
-                }, {
-                    pageId: GonnectWindow.PageId.Conference,
-                    iconSource: Icons.userGroupNew,
-                    labelText: qsTr("Conference"),
-                    disabledTooltipText: qsTr("No active conference"),
-                    isEnabled: control.hasActiveConference,
-                    showRedDot: false
-                }, {
-                    pageId: GonnectWindow.PageId.Call,
-                    iconSource: Icons.callStart,
-                    labelText: qsTr("Call"),
-                    disabledTooltipText: qsTr("No active call"),
-                    isEnabled: control.hasActiveCall,
-                    showRedDot: false
+            model: {
+                const baseModel = [
+                    {
+                        pageId: GonnectWindow.PageId.Calls,
+                        iconSource: Icons.userHome,
+                        labelText: qsTr("Home"),
+                        disabledTooltipText: qsTr("Home"),
+                        isEnabled: true,
+                        showRedDot: false,
+                        attachedData: null
+                    }, {
+                        pageId: GonnectWindow.PageId.Conference,
+                        iconSource: Icons.userGroupNew,
+                        labelText: qsTr("Conference"),
+                        disabledTooltipText: qsTr("No active conference"),
+                        isEnabled: control.hasActiveConference,
+                        showRedDot: false,
+                        attachedData: null
+                    }, {
+                        pageId: GonnectWindow.PageId.Call,
+                        iconSource: Icons.callStart,
+                        labelText: qsTr("Call"),
+                        disabledTooltipText: qsTr("No active call"),
+                        isEnabled: control.hasActiveCall,
+                        showRedDot: false,
+                        attachedData: null
+                    }
+                ].filter(item => ViewHelper.isJitsiAvailable || item.pageId !== GonnectWindow.PageId.Conference)
+
+                if (ChatConnectorManager.isJsChatAvailable) {
+                    const chatConnectors = ChatConnectorManager.jsChatConnectors
+
+                    for (const connector of chatConnectors) {
+                        baseModel.push({
+                                           pageId: GonnectWindow.PageId.Chats,
+                                           iconSource: Icons.dialogMessages,
+                                           labelText: connector.displayName,
+                                           disabledTooltipText: qsTr("Chat not available"),
+                                           isEnabled: true,
+                                           showRedDot: false,
+                                           attachedData: connector
+                                       })
+                    }
                 }
-            ].filter(item => ViewHelper.isJitsiAvailable || item.pageId !== GonnectWindow.PageId.Conference)
+
+                return baseModel
+            }
         }
     }
 
@@ -166,7 +194,8 @@ Item {
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
                     isEnabled: true,
-                    showRedDot: false
+                    showRedDot: false,
+                    attachedData: null
                 }
             ]
         }

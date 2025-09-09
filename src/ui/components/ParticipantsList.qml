@@ -7,7 +7,7 @@ import base
 Item {
     id: control
 
-    property alias iConferenceConnector: participantsModel.iConferenceConnector
+    property alias conferenceConnector: participantsModel.conferenceConnector
 
     readonly property alias count: participantListView.count
 
@@ -33,11 +33,11 @@ Item {
             required property int role
 
             readonly property bool isModerator: delg.role === ConferenceParticipant.Role.Moderator
-            readonly property bool isMe: delg.id === control.iConferenceConnector?.ownId ?? false
+            readonly property bool isMe: delg.id === control.conferenceConnector?.ownId ?? false
 
             Rectangle {
                 id: selectedBackground
-                visible: control.iConferenceConnector.largeVideoParticipant?.id === delg.id
+                visible: control.conferenceConnector.largeVideoParticipant?.id === delg.id
                 color: Theme.backgroundOffsetHoveredColor
                 radius: 4
                 anchors {
@@ -118,10 +118,10 @@ Item {
                             participantContextMenuComponent.createObject(delg).popup()
                         }
                     } else {
-                        if (control.iConferenceConnector.largeVideoParticipant?.id === delg.id) {
-                            control.iConferenceConnector.setLargeVideoParticipantById("")
+                        if (control.conferenceConnector.largeVideoParticipant?.id === delg.id) {
+                            control.conferenceConnector.setLargeVideoParticipantById("")
                         } else {
-                            control.iConferenceConnector.setLargeVideoParticipantById(delg.id)
+                            control.conferenceConnector.setLargeVideoParticipantById(delg.id)
                         }
                     }
                 }
@@ -135,12 +135,12 @@ Item {
 
                     MenuItem {
                         text: qsTr("Kick")
-                        onClicked: () => control.iConferenceConnector.kickParticipant(delg.id)
+                        onClicked: () => control.conferenceConnector.kickParticipant(delg.id)
                     }
                     MenuItem {
                         enabled: !delg.isModerator
                         text: qsTr("Make moderator")
-                        onClicked: () => control.iConferenceConnector.grantParticipantRole(delg.id, ConferenceParticipant.Role.Moderator)
+                        onClicked: () => control.conferenceConnector.grantParticipantRole(delg.id, ConferenceParticipant.Role.Moderator)
                     }
                 }
             }

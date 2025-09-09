@@ -3,9 +3,9 @@
 #include <QObject>
 #include <QQmlEngine>
 #include <QPointer>
+#include "ConferenceChatRoom.h"
 #include "IConferenceConnector.h"
 #include "JitsiMediaDevice.h"
-#include "ConferenceChatMessage.h"
 #include "ConferenceParticipant.h"
 
 class CallHistoryItem;
@@ -19,6 +19,7 @@ class JitsiConnector : public IConferenceConnector
 
 public:
     explicit JitsiConnector(QObject *parent = nullptr);
+    virtual ~JitsiConnector();
 
     // INTERNAL API
     // These methods are meant to be called by the JS code
@@ -79,8 +80,7 @@ public:
     virtual bool isNoiseSuppressionEnabled() const override { return m_isNoiseSupression; }
     virtual void setSubtitlesEnabled(bool enabled) override;
     virtual bool isSubtitlesEnabled() const override { return m_isSubtitles; }
-    virtual ConferenceChatMessage *sendMessage(const QString &message) override;
-    virtual QList<ConferenceChatMessage *> messages() const override { return m_messages; }
+    virtual IChatRoom *chatRoom() override { return m_chatRoom; }
     virtual QString ownId() const override { return m_jitsiId; }
     virtual ConferenceParticipant::Role ownRole() const override;
     virtual QList<ConferenceParticipant *> participants() const override { return m_participants; }
@@ -142,6 +142,7 @@ private:
     QString m_jitsiId;
     QString m_muteTag;
     ConferenceParticipant *m_largeVideoParticipant = nullptr;
+    ConferenceChatRoom *m_chatRoom = nullptr;
     bool m_isInConference = false;
     bool m_isAudioMuted = false;
     bool m_isVideoMuted = false;
@@ -163,7 +164,6 @@ private:
 
     QString m_roomName;
     QString m_displayName;
-    QList<ConferenceChatMessage *> m_messages;
     QList<ConferenceParticipant *> m_participants;
     QPointer<CallHistoryItem> m_callHistoryItem;
     QDateTime m_establishedDateTime;

@@ -3,6 +3,7 @@
 #include "AddressBookManager.h"
 #include "Contact.h"
 #include "Application.h"
+#include "JsChatConnector.h"
 #include "NumberStats.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Ringer.h"
@@ -300,6 +301,16 @@ void ViewHelper::requestPassword(const QString &id, const QString &host)
 void ViewHelper::respondPassword(const QString &id, const QString password)
 {
     Q_EMIT passwordResponded(id, password);
+}
+
+void ViewHelper::respondRecoveryKey(const QString &id, const QString &key)
+{
+    emit recoveryKeyResponded(id, key);
+}
+
+void ViewHelper::requestRecoveryKey(const QString &id, const QString &displayName)
+{
+    emit recoveryKeyRequested(id, displayName);
 }
 
 const QString ViewHelper::requestUserVerification(const QString &verificationKey)

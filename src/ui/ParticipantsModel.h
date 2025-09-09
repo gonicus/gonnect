@@ -10,8 +10,8 @@ class ParticipantsModel : public QAbstractListModel
     Q_OBJECT
     QML_ELEMENT
 
-    Q_PROPERTY(IConferenceConnector *iConferenceConnector MEMBER m_iConferenceConnector NOTIFY
-                       iConferenceConnectorChanged FINAL)
+    Q_PROPERTY(IConferenceConnector *conferenceConnector MEMBER m_conferenceConnector NOTIFY
+                       conferenceConnectorChanged FINAL)
 
 public:
     enum class Roles { Id = Qt::UserRole + 1, DisplayName, Role };
@@ -23,12 +23,12 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const override;
 
 private Q_SLOTS:
-    void onIConferenceConnectorChanged();
+    void onConferenceConnectorChanged();
 
 private:
-    IConferenceConnector *m_iConferenceConnector = nullptr;
+    IConferenceConnector *m_conferenceConnector = nullptr;
     QObject *m_jistiConnectorContext = nullptr;
 
 Q_SIGNALS:
-    void iConferenceConnectorChanged();
+    void conferenceConnectorChanged();
 };
