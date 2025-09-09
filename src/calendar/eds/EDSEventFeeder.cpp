@@ -86,7 +86,6 @@ void EDSEventFeeder::init()
 
         qCDebug(lcEDSEventFeeder) << "Connecting to source" << sourceInfo;
 
-
         e_cal_client_connect(source, E_CAL_CLIENT_SOURCE_TYPE_EVENTS, -1, nullptr,
                              onEcalClientConnected, this);
     }
@@ -109,7 +108,6 @@ void EDSEventFeeder::init()
     });
 
     m_futureWatcher->setFuture(m_sourceFuture);
-
 }
 
 void EDSEventFeeder::process()

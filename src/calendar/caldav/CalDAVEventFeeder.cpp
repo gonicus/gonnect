@@ -48,7 +48,7 @@ void CalDAVEventFeeder::init()
     /*
         As the Kopano CalDAV server doesn't provide 'getetag' and 'getlastmodified' values,
         it's impossible to actively poll for changes. Thus, we're simply re-launching the
-        propcess() loop, at least until there's a better solution.
+        process() loop, at least until there's a better solution.
 
         Kopano saves every VEVENT wrapped in a VCALENDAR entry in separate '.ics' files in
         '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
