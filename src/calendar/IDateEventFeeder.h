@@ -6,6 +6,6 @@ class IDateEventFeeder
 {
 
 public:
-    virtual void process() = 0;
+    virtual void init() = 0;
     virtual QUrl networkCheckURL() const { return QUrl(); }
 };

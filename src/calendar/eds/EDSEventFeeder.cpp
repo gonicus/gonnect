@@ -7,7 +7,14 @@
 
 Q_LOGGING_CATEGORY(lcEDSEventFeeder, "gonnect.app.dateevents.feeder.eds")
 
-EDSEventFeeder::EDSEventFeeder(QObject *parent) : QObject(parent) { }
+EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source,
+                               const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd)
+    : QObject(parent),
+      m_source(source),
+      m_timeRangeStart(timeRangeStart),
+      m_timeRangeEnd(timeRangeEnd)
+{
+}
 
 EDSEventFeeder::~EDSEventFeeder()
 {
@@ -30,17 +37,18 @@ EDSEventFeeder::~EDSEventFeeder()
         g_object_unref(clientView);
         clientView = nullptr;
     }
+
+    if (m_sourcePromise) {
+        delete m_sourcePromise;
+    }
+
+    if (m_futureWatcher) {
+        delete m_futureWatcher;
+    }
 }
 
-void EDSEventFeeder::init(const QString &settingsGroupId, const QString &source,
-                          const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd)
+void EDSEventFeeder::init()
 {
-    Q_UNUSED(settingsGroupId)
-
-    m_source = source;
-    m_timeRangeStart = timeRangeStart;
-    m_timeRangeEnd = timeRangeEnd;
-
     GError *error = nullptr;
 
     // Create a source registry
@@ -54,7 +62,8 @@ void EDSEventFeeder::init(const QString &settingsGroupId, const QString &source,
 
     // Get the enabled calendar sources of the registry
     m_sources = e_source_registry_list_enabled(m_registry, E_SOURCE_EXTENSION_CALENDAR);
-    if (g_list_length(m_sources) == 0) {
+    m_sourceCount = g_list_length(m_sources);
+    if (m_sourceCount == 0) {
         qCDebug(lcEDSEventFeeder) << "No sources found in registry";
         return;
     }
@@ -65,16 +74,42 @@ void EDSEventFeeder::init(const QString &settingsGroupId, const QString &source,
             "(or (contains? \"status\" \"CONFIRMED\") (contains? \"status\" \"NOT STARTED\"))");
 
     // Clients and signals
+    m_sourcePromise = new QPromise<void>();
+    m_sourceFuture = m_sourcePromise->future();
+    m_futureWatcher = new QFutureWatcher<void>();
+
     for (GList *iter = m_sources; iter != nullptr; iter = g_list_next(iter)) {
         ESource *source = E_SOURCE(iter->data);
 
-        const gchar *id = e_source_get_uid(source);
-        const gchar *dn = e_source_get_display_name(source);
+        QString sourceInfo =
+                QString("%1 (%2)").arg(e_source_get_display_name(source), e_source_get_uid(source));
 
-        qCDebug(lcEDSEventFeeder) << "Connecting to '" << id << "' (" << dn << ")";
+        qCDebug(lcEDSEventFeeder) << "Connecting to source" << sourceInfo;
 
-        connectEcalClient(source);
+
+        e_cal_client_connect(source, E_CAL_CLIENT_SOURCE_TYPE_EVENTS, -1, nullptr,
+                             onEcalClientConnected, this);
     }
+
+    m_sourcePromise->start();
+
+    QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished).then([this]() {
+        if (m_sourceFuture.isFinished()) {
+            process();
+        }
+    });
+
+    QTimer::singleShot(5000, this, [this]() {
+        if (!m_futureWatcher->isFinished()) {
+            qCDebug(lcEDSEventFeeder) << "Failed to process EDS sources";
+
+            m_sourceFuture.cancel();
+            m_futureWatcher->cancel();
+        }
+    });
+
+    m_futureWatcher->setFuture(m_sourceFuture);
+
 }
 
 void EDSEventFeeder::process()
@@ -219,12 +254,6 @@ QDateTime EDSEventFeeder::createDateTimeFromTimeType(const ICalTime *datetime)
     }
 }
 
-void EDSEventFeeder::connectEcalClient(ESource *source)
-{
-    e_cal_client_connect(source, E_CAL_CLIENT_SOURCE_TYPE_EVENTS, -1, nullptr,
-                         onEcalClientConnected, this);
-}
-
 void EDSEventFeeder::onEcalClientConnected(GObject *source_object, GAsyncResult *result,
                                            gpointer user_data)
 {
@@ -241,10 +270,10 @@ void EDSEventFeeder::onEcalClientConnected(GObject *source_object, GAsyncResult 
                     << "Can't retrieve finished client connection: " << error->message;
             g_error_free(error);
             error = nullptr;
+            return;
         }
 
         e_cal_client_get_view(client, feeder->m_searchExpr, nullptr, onViewCreated, feeder);
-        feeder->m_clients.append(client);
     }
 }
 
@@ -315,11 +344,12 @@ void EDSEventFeeder::processEventsRemoved(ECalClient *client, GSList *uids)
 void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result, gpointer user_data)
 {
     GError *error = nullptr;
+    ECalClient *client = E_CAL_CLIENT(source_object);
     ECalClientView *view = nullptr;
-
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
-    if (feeder) {
-        if (!e_cal_client_get_view_finish(E_CAL_CLIENT(source_object), result, &view, &error)) {
+
+    if (feeder && client) {
+        if (!e_cal_client_get_view_finish(client, result, &view, &error)) {
             qCDebug(lcEDSEventFeeder) << "Can't retrieve finished view: " << error->message;
             g_error_free(error);
             error = nullptr;
@@ -333,6 +363,13 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
             qCDebug(lcEDSEventFeeder) << "Can't start view: " << error->message;
             g_error_free(error);
             error = nullptr;
+            return;
+        }
+
+        feeder->m_clients.append(client);
+        feeder->m_clientCount++;
+        if (feeder->m_clientCount == feeder->m_sourceCount) {
+            feeder->m_sourcePromise->finish();
         }
     }
 }

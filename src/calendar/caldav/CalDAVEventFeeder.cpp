@@ -11,7 +11,25 @@ Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
 
 using namespace std::chrono_literals;
 
-CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent) : QObject(parent) { }
+CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const QString &settingsGroupId,
+                                     const QString &source, const QString &host,
+                                     const QString &path, const QString &user, int port,
+                                     bool useSSL, int interval, const QDateTime &timeRangeStart,
+                                     const QDateTime &timeRangeEnd)
+    : QObject(parent),
+      m_settingsGroupId(settingsGroupId),
+      m_source(source),
+      m_host(host),
+      m_path(path),
+      m_user(user),
+      m_port(port),
+      m_useSSL(useSSL),
+      m_interval(interval),
+      m_timeRangeStart(timeRangeStart),
+      m_timeRangeEnd(timeRangeEnd),
+      m_url(QUrl(QString("%1://%2%3").arg(useSSL ? "https" : "http", host, path)))
+{
+}
 
 CalDAVEventFeeder::~CalDAVEventFeeder()
 {
@@ -20,25 +38,8 @@ CalDAVEventFeeder::~CalDAVEventFeeder()
     }
 }
 
-void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &source,
-                             const QString &host, const QString &path, const QString &user,
-                             int port, bool useSSL, int interval, const QDateTime &timeRangeStart,
-                             const QDateTime &timeRangeEnd)
+void CalDAVEventFeeder::init()
 {
-    m_settingsGroupId = settingsGroupId;
-    m_host = host;
-    m_path = path;
-    m_user = user;
-    m_port = port;
-    m_useSSL = useSSL;
-    m_interval = interval;
-
-    m_source = source;
-    m_timeRangeStart = timeRangeStart;
-    m_timeRangeEnd = timeRangeEnd;
-
-    m_url = QUrl(QString("%1://%2%3").arg(useSSL ? "https" : "http", host, path));
-
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CalDAVEventFeeder::onParserFinished);
     connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this, &CalDAVEventFeeder::onError);
@@ -47,7 +48,7 @@ void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &sour
     /*
         As the Kopano CalDAV server doesn't provide 'getetag' and 'getlastmodified' values,
         it's impossible to actively poll for changes. Thus, we're simply re-launching the
-        process() loop, at least until there's a better solution.
+        propcess() loop, at least until there's a better solution.
 
         Kopano saves every VEVENT wrapped in a VCALENDAR entry in separate '.ics' files in
         '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
@@ -55,6 +56,8 @@ void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &sour
     m_calendarRefreshTimer.setInterval(m_interval);
     connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
     m_calendarRefreshTimer.start();
+
+    process();
 }
 
 void CalDAVEventFeeder::onError(QString error) const

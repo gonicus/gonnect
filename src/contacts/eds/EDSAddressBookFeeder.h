@@ -5,6 +5,10 @@
 #include <glib.h>
 
 #include <QObject>
+#include <QFuture>
+#include <QFutureWatcher>
+#include <QPromise>
+
 #include "IAddressBookFeeder.h"
 
 class AddressBookManager;
@@ -24,8 +28,11 @@ private:
     QString getFieldMerge(EContact *contact, EContactField pId, EContactField sId);
     void addAvatar(QString id, EContact *contact, QDateTime changed);
 
-    bool init();
+    void init();
     void feedAddressBook();
+
+    static void onEbookClientConnected(GObject *source_object, GAsyncResult *result,
+                                       gpointer user_data);
 
     void connectContactSignals(EBookClientView *view);
 
@@ -39,6 +46,11 @@ private:
 
     static void onViewCreated(GObject *source_object, GAsyncResult *result, gpointer user_data);
 
+    static void onClientContactsRequested(GObject *source_object, GAsyncResult *result,
+                                          gpointer user_data);
+
+    void processContacts(QString clientInfo, GSList *contacts);
+
     QString m_group;
 
     ESourceRegistry *m_registry = nullptr;
@@ -46,4 +58,10 @@ private:
     gchar *m_searchExpr = nullptr;
     QList<EBookClient *> m_clients;
     QList<EBookClientView *> m_clientViews;
+
+    int m_sourceCount = 0;
+    std::atomic<int> m_clientCount = 0;
+    QPromise<void> *m_sourcePromise = nullptr;
+    QFuture<void> m_sourceFuture;
+    QFutureWatcher<void> *m_futureWatcher = nullptr;
 };

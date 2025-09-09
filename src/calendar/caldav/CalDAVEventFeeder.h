@@ -16,15 +16,19 @@ class CalDAVEventFeeder : public QObject, public IDateEventFeeder
     Q_OBJECT
 
 public:
-    explicit CalDAVEventFeeder(QObject *parent = nullptr);
+    explicit CalDAVEventFeeder(QObject *parent = nullptr, const QString &settingsGroupId = "",
+                               const QString &source = "", const QString &host = "",
+                               const QString &path = "", const QString &user = "", int port = 0,
+                               bool useSSL = true, int interval = 300000,
+                               const QDateTime &timeRangeStart = QDateTime(),
+                               const QDateTime &timeRangeEnd = QDateTime());
+
     ~CalDAVEventFeeder();
 
-    void init(const QString &settingsGroupId, const QString &source, const QString &host,
-              const QString &path, const QString &user, int port, bool useSSL, int interval,
-              const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd);
-
-    virtual void process() override;
+    virtual void init() override;
     virtual QUrl networkCheckURL() const override { return m_url; };
+
+    void process();
 
 private slots:
     void onError(QString error) const;
@@ -38,18 +42,17 @@ private:
 
     QList<size_t> m_checksums;
 
-    QString m_source;
-    QDateTime m_timeRangeStart;
-    QDateTime m_timeRangeEnd;
-
-    QUrl m_url;
     QString m_settingsGroupId;
+    QString m_source;
     QString m_host;
     QString m_path;
     QString m_user;
-    int m_port = 0;
-    bool m_useSSL = true;
-    int m_interval = 300000;
+    int m_port;
+    bool m_useSSL;
+    int m_interval;
+    QDateTime m_timeRangeStart;
+    QDateTime m_timeRangeEnd;
+    QUrl m_url;
 
     QTimer m_calendarRefreshTimer;
 

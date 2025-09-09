@@ -37,9 +37,17 @@ EDSAddressBookFeeder::~EDSAddressBookFeeder()
         g_object_unref(clientView);
         clientView = nullptr;
     }
+
+    if (m_sourcePromise) {
+        delete m_sourcePromise;
+    }
+
+    if (m_futureWatcher) {
+        delete m_futureWatcher;
+    }
 }
 
-bool EDSAddressBookFeeder::init()
+void EDSAddressBookFeeder::init()
 {
     GError *error = nullptr;
 
@@ -49,14 +57,15 @@ bool EDSAddressBookFeeder::init()
         qCDebug(lcEDSAddressBookFeeder) << "Can't create registry: " << error->message;
         g_error_free(error);
         error = nullptr;
-        return false;
+        return;
     }
 
     // Get the enabled address book sources of the registry
     m_sources = e_source_registry_list_enabled(m_registry, E_SOURCE_EXTENSION_ADDRESS_BOOK);
-    if (g_list_length(m_sources) == 0) {
+    m_sourceCount = g_list_length(m_sources);
+    if (m_sourceCount == 0) {
         qCDebug(lcEDSAddressBookFeeder) << "No sources found in registry";
-        return false;
+        return;
     }
 
     // Prepare the search query
@@ -65,31 +74,39 @@ bool EDSAddressBookFeeder::init()
     e_book_query_unref(query);
 
     // Clients and signals
-    EBookClient *client = nullptr;
+    m_sourcePromise = new QPromise<void>();
+    m_sourceFuture = m_sourcePromise->future();
+    m_futureWatcher = new QFutureWatcher<void>();
+
     for (GList *iter = m_sources; iter != nullptr; iter = g_list_next(iter)) {
         ESource *source = E_SOURCE(iter->data);
 
-        const gchar *id = e_source_get_uid(source);
-        const gchar *dn = e_source_get_display_name(source);
+        QString sourceInfo =
+                QString("%1 (%2)").arg(e_source_get_display_name(source), e_source_get_uid(source));
 
-        client = E_BOOK_CLIENT(e_book_client_connect_sync(source, 5, nullptr, &error));
-        if (!client) {
-            qCDebug(lcEDSAddressBookFeeder) << "Can't connect to '" << id << "' (" << dn << "): '"
-                                            << error->message << "', skipping...";
-            g_error_free(error);
-            error = nullptr;
-        } else {
-            qCDebug(lcEDSAddressBookFeeder) << "Connected to '" << id << "' (" << dn << ")";
+        qCDebug(lcEDSAddressBookFeeder) << "Connecting to source" << sourceInfo;
 
-            // INFO: e_book_client_get_view(): The last argument is an instance of the EDS class
-            // (gpointer user_data) client -> e_book_client_get_view() -> e_book_client_get_finish()
-            // -> e_book_client_view_start()
-            e_book_client_get_view(client, m_searchExpr, nullptr, onViewCreated, this);
-            m_clients.append(client);
-        }
+        e_book_client_connect(source, 5, nullptr, onEbookClientConnected, this);
     }
 
-    return true;
+    m_sourcePromise->start();
+
+    QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished).then([this]() {
+        if (m_sourceFuture.isFinished()) {
+            feedAddressBook();
+        }
+    });
+
+    QTimer::singleShot(5000, this, [this]() {
+        if (!m_futureWatcher->isFinished()) {
+            qCDebug(lcEDSAddressBookFeeder) << "Failed to process EDS sources";
+
+            m_sourceFuture.cancel();
+            m_futureWatcher->cancel();
+        }
+    });
+
+    m_futureWatcher->setFuture(m_sourceFuture);
 }
 
 void EDSAddressBookFeeder::process()
@@ -104,12 +121,9 @@ void EDSAddressBookFeeder::process()
         qCWarning(lcEDSAddressBookFeeder) << "Could not parse priority value for" << m_group;
         m_priority = 0;
     }
-
-    if (init()) {
-        feedAddressBook();
-    }
-
     settings.endGroup();
+
+    init();
 }
 
 QString EDSAddressBookFeeder::getField(EContact *contact, EContactField id)
@@ -254,15 +268,39 @@ void EDSAddressBookFeeder::processContactsRemoved(EBookClient *client, GSList *u
     }
 }
 
+void EDSAddressBookFeeder::onEbookClientConnected(GObject *source_object, GAsyncResult *result,
+                                                  gpointer user_data)
+{
+    Q_UNUSED(source_object)
+
+    GError *error = nullptr;
+    EBookClient *client = nullptr;
+
+    EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
+    if (feeder) {
+        client = E_BOOK_CLIENT(e_book_client_connect_finish(result, &error));
+        if (error) {
+            qCDebug(lcEDSAddressBookFeeder)
+                    << "Can't retrieve finished client connection: " << error->message;
+            g_error_free(error);
+            error = nullptr;
+            return;
+        }
+
+        e_book_client_get_view(client, feeder->m_searchExpr, nullptr, onViewCreated, feeder);
+    }
+}
+
 void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
                                          gpointer user_data)
 {
     GError *error = nullptr;
+    EBookClient *client = E_BOOK_CLIENT(source_object);
     EBookClientView *view = nullptr;
-
     EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
-    if (feeder) {
-        if (!e_book_client_get_view_finish(E_BOOK_CLIENT(source_object), result, &view, &error)) {
+
+    if (feeder && client) {
+        if (!e_book_client_get_view_finish(client, result, &view, &error)) {
             qCDebug(lcEDSAddressBookFeeder) << "Can't retrieve finished view: " << error->message;
             g_error_free(error);
             error = nullptr;
@@ -276,8 +314,80 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
             qCDebug(lcEDSAddressBookFeeder) << "Can't start view: " << error->message;
             g_error_free(error);
             error = nullptr;
+            return;
+        }
+
+        feeder->m_clients.append(client);
+        feeder->m_clientCount++;
+        if (feeder->m_clientCount == feeder->m_sourceCount) {
+            feeder->m_sourcePromise->finish();
         }
     }
+}
+
+void EDSAddressBookFeeder::onClientContactsRequested(GObject *source_object, GAsyncResult *result,
+                                                     gpointer user_data)
+{
+    GError *error = nullptr;
+    GSList *contacts = nullptr;
+
+    EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
+    if (feeder) {
+        if (!e_book_client_get_contacts_finish(E_BOOK_CLIENT(source_object), result, &contacts,
+                                               &error)) {
+            qCDebug(lcEDSAddressBookFeeder) << "Can't retrieve contacts: " << error->message;
+            g_error_free(error);
+            error = nullptr;
+            return;
+        }
+    }
+
+    if (contacts) {
+        QString sourceInfo = QString("%1 (%2)").arg(
+                e_source_get_display_name(e_client_get_source(E_CLIENT(source_object))),
+                e_source_get_uid(e_client_get_source(E_CLIENT(source_object))));
+
+        feeder->processContacts(sourceInfo, contacts);
+    }
+}
+
+void EDSAddressBookFeeder::processContacts(QString clientInfo, GSList *contacts)
+{
+    unsigned contactCount = 0;
+    auto &addressbook = AddressBook::instance();
+
+    for (GSList *item = contacts; item != nullptr; item = g_slist_next(item)) {
+        if (EContact *eContact = E_CONTACT(item->data)) {
+            QDateTime changed =
+                    QDateTime::fromString(getField(eContact, E_CONTACT_REV), Qt::ISODate);
+
+            QList<Contact::PhoneNumber> phoneNumbers;
+            phoneNumbers.append(
+                    { Contact::NumberType::Commercial,
+                      getFieldMerge(eContact, E_CONTACT_PHONE_COMPANY, E_CONTACT_PHONE_BUSINESS),
+                      false });
+            phoneNumbers.append({ Contact::NumberType::Mobile,
+                                  getField(eContact, E_CONTACT_PHONE_MOBILE), false });
+            phoneNumbers.append(
+                    { Contact::NumberType::Home, getField(eContact, E_CONTACT_PHONE_HOME), false });
+
+            Contact *contact = addressbook.addContact(
+                    getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
+                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
+                    getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
+                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers);
+
+            addAvatar(contact->id(), eContact, changed);
+
+            contactCount++;
+        }
+    }
+
+    g_slist_free_full(contacts, g_object_unref);
+    contacts = nullptr;
+
+    qCInfo(lcEDSAddressBookFeeder)
+            << "Loaded" << contactCount << "contact(s) of source" << clientInfo;
 }
 
 void EDSAddressBookFeeder::addAvatar(QString id, EContact *contact, QDateTime changed)
@@ -329,58 +439,7 @@ void EDSAddressBookFeeder::addAvatar(QString id, EContact *contact, QDateTime ch
 
 void EDSAddressBookFeeder::feedAddressBook()
 {
-    unsigned contactCount = 0;
-    auto &addressbook = AddressBook::instance();
-
-    GError *error = nullptr;
-    GSList *contacts = nullptr;
-
     for (auto client : std::as_const(m_clients)) {
-        const gchar *id = e_source_get_uid(e_client_get_source(E_CLIENT(client)));
-        const gchar *dn = e_source_get_display_name(e_client_get_source(E_CLIENT(client)));
-
-        if (!e_book_client_get_contacts_sync(client, m_searchExpr, &contacts, nullptr, &error)) {
-            qCDebug(lcEDSAddressBookFeeder)
-                    << "Can't get contacts of '" << id << "' (" << dn << "), skipping...";
-            g_error_free(error);
-            error = nullptr;
-        } else {
-            for (GSList *item = contacts; item != nullptr; item = g_slist_next(item)) {
-                if (EContact *eContact = E_CONTACT(item->data)) {
-                    QDateTime changed =
-                            QDateTime::fromString(getField(eContact, E_CONTACT_REV), Qt::ISODate);
-
-                    QList<Contact::PhoneNumber> phoneNumbers;
-                    phoneNumbers.append({ Contact::NumberType::Commercial,
-                                          getFieldMerge(eContact, E_CONTACT_PHONE_COMPANY,
-                                                        E_CONTACT_PHONE_BUSINESS),
-                                          false });
-                    phoneNumbers.append({ Contact::NumberType::Mobile,
-                                          getField(eContact, E_CONTACT_PHONE_MOBILE), false });
-                    phoneNumbers.append({ Contact::NumberType::Home,
-                                          getField(eContact, E_CONTACT_PHONE_HOME), false });
-
-                    Contact *contact = addressbook.addContact(
-                            getField(eContact, E_CONTACT_FULL_NAME)
-                                    + getField(eContact, E_CONTACT_ORG),
-                            getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
-                            getField(eContact, E_CONTACT_FULL_NAME),
-                            getField(eContact, E_CONTACT_ORG),
-                            getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers);
-
-                    addAvatar(contact->id(), eContact, changed);
-
-                    contactCount++;
-                }
-            }
-
-            qCDebug(lcEDSAddressBookFeeder) << "Loaded contacts of '" << id << "' (" << dn << ")";
-
-            g_slist_free_full(contacts, g_object_unref);
-            contacts = nullptr;
-        }
+        e_book_client_get_contacts(client, m_searchExpr, nullptr, onClientContactsRequested, this);
     }
-
-    qCInfo(lcEDSAddressBookFeeder)
-            << "Finished processing EDS sources, loaded" << contactCount << "contacts";
 }

@@ -138,7 +138,7 @@ void DateEventFeederManager::processQueue()
                 }
             }
 
-            feeder->process();
+            feeder->init();
             it.remove();
         }
     }
