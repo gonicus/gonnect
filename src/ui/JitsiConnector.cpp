@@ -96,7 +96,11 @@ void JitsiConnector::apiLoadingFinished()
 
     if (m_isToggleScreenSharePending) {
         m_isToggleScreenSharePending = false;
-        toggleScreenShare();
+
+        // It can sometimes crash the JS API, when the toggleScreenShare command is executed too
+        // early. Since there is no reliable event to listen to, a random timer must be used here to
+        // defer it such that Jitsi Meet is hopefully ready...
+        QTimer::singleShot(2000, this, [this]() { toggleScreenShare(); });
     }
 }
 
@@ -378,7 +382,7 @@ api.addListener("participantRoleChanged", data => {
 })
 
 api.addListener("errorOccurred", data => {
-    jitsiConn.addError(data.type, data.name, data.message, data.isFatal, data.details)
+    jitsiConn.addError(data.type, data.name, data.message, !!data.isFatal, data?.details ?? {})
 })
 
 api.addListener("incomingMessage", data => {
@@ -518,8 +522,7 @@ void JitsiConnector::setIsInRoom(bool value)
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
             auto &globalMute = GlobalMuteState::instance();
             if (m_isMuted != globalMute.isMuted()) {
-                m_muteTag = QUuid::createUuid().toString();
-                globalMute.toggleMute(m_muteTag);
+                toggleMute();
             }
         } else {
             setCallState(ICallState::State::Idle);
