@@ -1,12 +1,13 @@
 #pragma once
 
 #include "ICallState.h"
+#include "IChatRoom.h"
 #include "ConferenceParticipant.h"
 #include "CallHistoryItem.h"
 
 #include <QPointer>
 
-class ConferenceChatMessage;
+class ChatMessage;
 
 class IConferenceConnector : public ICallState
 {
@@ -128,8 +129,7 @@ public:
     Q_INVOKABLE virtual void setSubtitlesEnabled(bool enabled) = 0;
     virtual bool isSubtitlesEnabled() const = 0;
 
-    virtual QList<ConferenceChatMessage *> messages() const = 0;
-    Q_INVOKABLE virtual ConferenceChatMessage *sendMessage(const QString &message) = 0;
+    Q_INVOKABLE virtual IChatRoom *chatRoom() = 0;
 
     virtual QString ownId() const = 0;
     virtual ConferenceParticipant::Role ownRole() const = 0;
@@ -167,8 +167,6 @@ signals:
     void isNoiseSuppressionEnabledChanged();
     void isSubtitlesEnabledChanged();
     void videoQualityChanged();
-    void chatMessageAdded(qsizetype index, ConferenceChatMessage *messageObject);
-    void chatMessagesReset();
     void ownIdChanged();
     void ownRoleChanged();
     void participantAdded(qsizetype index, ConferenceParticipant *participant);
