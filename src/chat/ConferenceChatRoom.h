@@ -29,6 +29,6 @@ private:
     QString m_name;
     QList<ChatMessage *> m_messages;
 
-signals:
+Q_SIGNALS:
     void sendMessageRequested(QString message);
 };

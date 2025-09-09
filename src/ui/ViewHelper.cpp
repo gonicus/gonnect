@@ -305,12 +305,12 @@ void ViewHelper::respondPassword(const QString &id, const QString password)
 
 void ViewHelper::respondRecoveryKey(const QString &id, const QString &key)
 {
-    emit recoveryKeyResponded(id, key);
+    Q_EMIT recoveryKeyResponded(id, key);
 }
 
 void ViewHelper::requestRecoveryKey(const QString &id, const QString &displayName)
 {
-    emit recoveryKeyRequested(id, displayName);
+    Q_EMIT recoveryKeyRequested(id, displayName);
 }
 
 const QString ViewHelper::requestUserVerification(const QString &verificationKey)

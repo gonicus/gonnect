@@ -41,12 +41,12 @@ void ChatRoomModel::onChatProviderChanged()
         connect(m_chatProvider, &IChatProvider::chatRoomNameChanged, m_chatProviderContext,
                 [this](qsizetype index, IChatRoom *, QString) {
                     const auto idx = createIndex(index, 0);
-                    emit dataChanged(idx, idx, { static_cast<int>(Roles::Name) });
+                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Name) });
                 });
         connect(m_chatProvider, &IChatProvider::chatRoomNotificationCountChanged,
                 m_chatProviderContext, [this](qsizetype index, IChatRoom *, qsizetype) {
                     const auto idx = createIndex(index, 0);
-                    emit dataChanged(idx, idx, { static_cast<int>(Roles::UnreadCount) });
+                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::UnreadCount) });
                 });
     }
 
