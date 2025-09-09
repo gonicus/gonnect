@@ -118,13 +118,13 @@ void EDSEventFeeder::process()
     DateEventManager &manager = DateEventManager::instance();
 
     for (auto client : std::as_const(m_clients)) {
-        const gchar *id = e_source_get_uid(e_client_get_source(E_CLIENT(client)));
-        const gchar *dn = e_source_get_display_name(e_client_get_source(E_CLIENT(client)));
+        QString sourceInfo = QString("%1 (%2)").arg(
+                e_source_get_display_name(e_client_get_source(E_CLIENT(client))),
+                e_source_get_uid(e_client_get_source(E_CLIENT(client))));
 
         if (!e_cal_client_get_object_list_sync(client, m_searchExpr, &components, nullptr,
                                                &error)) {
-            qCDebug(lcEDSEventFeeder)
-                    << "Can't get events of '" << id << "' (" << dn << "), skipping...";
+            qCDebug(lcEDSEventFeeder) << "Can't get events of '" << sourceInfo << "), skipping...";
             g_error_free(error);
             error = nullptr;
         } else {
