@@ -77,14 +77,14 @@ Item {
         function onPasswordRequested(id : string, host : string) {
             const existingDialog = viewHelperConnections.passwordDialogs
 
-            if (!existingDialog) {
+            if (!existingDialog[id]) {
                 const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for %1:").arg(host) })
                 dialog.onPasswordAccepted.connect(pw => ViewHelper.respondPassword(id, pw))
 
                 viewHelperConnections.passwordDialogs[id] = dialog
                 dialog.Component.destruction.connect(() => delete viewHelperConnections.passwordDialogs[id])
             } else {
-                existingDialog.show()
+                existingDialog[id].show()
             }
         }
     }
