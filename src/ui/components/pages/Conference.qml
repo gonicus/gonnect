@@ -38,10 +38,10 @@ Item {
     ]
 
     function startConference(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
-        jitsiConn.setCallHistoryItem(callHistoryItem)
+        confConn.setCallHistoryItem(callHistoryItem)
 
         if (!AuthManager.isJitsiAuthRequired || AuthManager.isJitsiRoomAuthenticated(meetingId)) {
-            jitsiConn.enterRoom(meetingId, displayName, startFlags)
+            confConn.joinConference(meetingId, displayName, startFlags)
         } else {
             authConn.enabled = true
             authConn.displayName = displayName
@@ -60,16 +60,16 @@ Item {
 
         function onJitsiRoomAuthenticated(roomName : string) {
             authConn.enabled = false
-            jitsiConn.enterRoom(roomName, authConn.displayName, authConn.startFlags)
+            confConn.joinConference(roomName, authConn.displayName, authConn.startFlags)
         }
     }
 
-    readonly property JitsiConnector jitsiConnector: JitsiConnector {
-        id: jitsiConn
+    readonly property IConferenceConnector iConferenceConnector: JitsiConnector {
+        id: confConn
         WebChannel.id: "jitsiConn"
 
-        function onIsInRoomChanged() {
-            if (!jitsiConn.isInRoom) {
+        function onIsInConferenceChanged() {
+            if (!confConn.isInConference) {
                 internal.authButton.enabled = true
             }
         }
@@ -81,7 +81,7 @@ Item {
             if (!AuthManager.isAuthManagerInitialized) {
                 return undefined
             }
-            if (jitsiConn.isInRoom) {
+            if (confConn.isInConference) {
                 return jitsiViewComponent
             }
             if (AuthManager.isJitsiAuthRequired && AuthManager.isWaitingForAuth) {
@@ -223,31 +223,33 @@ Item {
                     id: topBar
                     height: topBar.implicitHeight
                     enabled: true
-                    isOnHold: jitsiConn.isOnHold
-                    isMuted: jitsiConn.isMuted
-                    isVideoMuted: jitsiConn.isVideoMuted
-                    videoMuteButtonVisible: jitsiConn.isVideoAvailable
-                    isSharingScreen: jitsiConn.isSharingScreen
-                    isTileView: jitsiConn.isTileView
-                    isHandRaised: jitsiConn.isHandRaised
-                    jitsiConnector: jitsiConn
+                    isOnHold: confConn.isOnHold
+                    isMuted: confConn.isAudioMuted
+                    isVideoMuted: confConn.isVideoMuted
+                    videoMuteButtonVisible: confConn.isVideoAvailable
+                    isSharingScreen: confConn.isSharingScreen
+                    isTileView: confConn.isTileView
+                    isHandRaised: confConn.isHandRaised
+                    iConferenceConnector: confConn
                     anchors {
                         left: topBar.parent.left
                         right: topBar.parent.right
                         top: topBar.parent.top
                     }
 
-                    onToggleHold: () => GlobalCallState.triggerHold()
-                    onToggleMute: () => GlobalMuteState.toggleMute()
-                    onToggleVideoMute: () => jitsiConn.toggleVideoMute()
-                    onToggleVirtualBackgroundDialog: () => jitsiConn.toggleVirtualBackgroundDialog()
-                    onToggleScreenShare: () => jitsiConn.toggleScreenShare()
-                    onToggleTileView: () => jitsiConn.toggleTileView()
-                    onToggleRaiseHand: () => jitsiConn.toggleRaiseHand()
+
+                    onSetOnHold: (value) => confConn.setOnHold(value)
+                    onSetAudioMuted: (value) => confConn.setAudioMuted(value)
+                    onSetVideoMuted: (value) => confConn.setVideoMuted(value)
+                    onSetScreenShare: (value) => confConn.setScreenShare(value)
+                    onSetTileView: (value) => confConn.setTileView(value)
+                    onSetRaiseHand: (value) => confConn.setHandRaised(value)
+
+                    onShowVirtualBackgroundDialog: () => confConn.showVirtualBackgroundDialog()
                     onOpenSetPasswordDialog: () => ViewHelper.topDrawer.loader.sourceComponent = setPasswordItemComponent
                     onOpenVideoQualityDialog: () => ViewHelper.topDrawer.loader.sourceComponent = videoQualityComponent
-                    onHangup: () => jitsiConn.leaveRoom()
-                    onFinishForAll: () => jitsiConn.terminateRoom()
+                    onHangup: () => confConn.leaveConference()
+                    onFinishForAll: () => confConn.terminateConference()
                 }
 
                 WebEngineView {
@@ -261,7 +263,7 @@ Item {
                         storageName: "gonnect_jitsi_meet"
                     }
                     webChannel: WebChannel {
-                        registeredObjects: [ jitsiConn ]
+                        registeredObjects: [ confConn ]
                     }
                     anchors {
                         top: topBar.bottom
@@ -281,16 +283,16 @@ Item {
 
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
-                            jitsiView.runJavaScript(jitsiConn.jitsiJavascript())
+                            jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
                         } else {
                             console.error(`Failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
                         }
                     }
 
                     Connections {
-                        target: jitsiConn
-                        function onIsPasswordEntryRequiredChanged() {
-                            if (jitsiConn.isPasswordEntryRequired) {
+                        target: confConn
+                        function onIsPasswordRequiredChanged() {
+                            if (confConn.isPasswordRequired) {
                                 ViewHelper.topDrawer.loader.sourceComponent = passwordItemComponent
                             } else {
                                 ViewHelper.topDrawer.loader.sourceComponent = undefined
@@ -308,11 +310,11 @@ Item {
                         implicitHeight: passwordItemColumn.implicitHeight
 
                         function respondPassword() {
-                            jitsiConn.passwordEntered(passwordField.text, rememberCheckBox.checked)
+                            confConn.enterPassword(passwordField.text, rememberCheckBox.checked)
                         }
 
                         function cancel() {
-                            jitsiConn.leaveRoom()
+                            confConn.leaveConference()
                             ViewHelper.topDrawer.loader.sourceComponent = undefined
                         }
 
@@ -391,7 +393,7 @@ Item {
                         implicitHeight: setPasswordItemColumn.implicitHeight
 
                         function setPassword(password : string) {
-                            jitsiConn.setRoomPassword(password)
+                            confConn.setRoomPassword(password)
                             ViewHelper.topDrawer.loader.sourceComponent = undefined
                         }
 
@@ -412,12 +414,12 @@ Item {
                             states: [
                                 State {
                                     name: "PASSWORD_SET_BY_ME"
-                                    when: jitsiConn.isPasswordRequired && jitsiConn.roomPassword !== ""
+                                    when: confConn.isPasswordRequired && confConn.roomPassword !== ""
 
                                     PropertyChanges {
                                         passwordField.visible: false
                                         passwordLabel.visible: true
-                                        copyClipboardButton.text: jitsiConn.roomPassword
+                                        copyClipboardButton.text: confConn.roomPassword
                                         newPasswordLabel.visible: false
                                         existingPasswordLabel.visible: true
                                         removePasswordButton.visible: true
@@ -426,7 +428,7 @@ Item {
                                 },
                                 State {
                                     name: "PASSWORD_SET_BY_SOMEONE_ELSE"
-                                    when: jitsiConn.isPasswordRequired && jitsiConn.roomPassword === ""
+                                    when: confConn.isPasswordRequired && confConn.roomPassword === ""
 
                                     PropertyChanges {
                                         passwordField.visible: false
@@ -493,7 +495,7 @@ Item {
 
                                 Label {
                                     id: passwordLabel
-                                    text: showPasswordSwitch.checked ? jitsiConn.roomPassword : "*".repeat(jitsiConn.roomPassword.length)
+                                    text: showPasswordSwitch.checked ? confConn.roomPassword : "*".repeat(confConn.roomPassword.length)
                                     visible: false
                                     font {
                                         family: "Mono"
@@ -575,7 +577,7 @@ Item {
 
                             component QualityButton : RadioButton {
                                 id: qButton
-                                checked: jitsiConn.videoQuality === qButton.qualityValue
+                                checked: confConn.videoQuality === qButton.qualityValue
                                 anchors {
                                     left: parent?.left
                                     right: parent?.right
@@ -583,28 +585,27 @@ Item {
 
                                 required property int qualityValue
 
-                                onToggled: () => jitsiConn
-                                .setVideoQuality(qButton.qualityValue)
+                                onToggled: () => confConn.setVideoQuality(qButton.qualityValue)
                             }
 
                             QualityButton {
                                 text: qsTr("No video (audio only)")
-                                qualityValue: JitsiConnector.VideoQuality.AudioOnly
+                                qualityValue: IConferenceConnector.VideoQuality.AudioOnly
                             }
 
                             QualityButton {
                                 text: qsTr("Lowest quality")
-                                qualityValue: JitsiConnector.VideoQuality.Low
+                                qualityValue: IConferenceConnector.VideoQuality.Low
                             }
 
                             QualityButton {
                                 text: qsTr("Standard quality")
-                                qualityValue: JitsiConnector.VideoQuality.Standard
+                                qualityValue: IConferenceConnector.VideoQuality.Average
                             }
 
                             QualityButton {
                                 text: qsTr("Highest quality")
-                                qualityValue: JitsiConnector.VideoQuality.Highest
+                                qualityValue: IConferenceConnector.VideoQuality.Maximum
                             }
 
                             Button {
@@ -619,7 +620,7 @@ Item {
                 }
 
                 Component.onCompleted: {
-                    jitsiView.loadHtml(jitsiConn.jitsiHtml(), "https://" + GlobalInfo.jitsiUrl())
+                    jitsiView.loadHtml(confConn.jitsiHtmlInternal(), "https://" + GlobalInfo.jitsiUrl())
                 }
             }
         }
@@ -663,7 +664,7 @@ Item {
     Card {
         id: callListCard
         width: 70
-        visible: jitsiConn.isInRoom
+        visible: confConn.isInConference
         anchors {
             top: parent.top
             right: parent.right
@@ -676,14 +677,14 @@ Item {
         CallSideBar {
             id: callSideBar
             anchors.fill: parent
-            chatAvailable: true
-            personsAvailable: true
-            jitsiConnector: jitsiConn
+            chatAvailable: confConn.hasCapability(IConferenceConnector.Capability.ChatInCall)
+            personsAvailable: confConn.hasCapability(IConferenceConnector.Capability.ParticipantRoles)
+            iConferenceConnector: confConn
 
             Connections {
-                target: jitsiConn
-                function onIsInRoomChanged() {
-                    if (!jitsiConn.isInRoom) {
+                target: confConn
+                function onIsInConferenceChanged() {
+                    if (!confConn.isInConference) {
                         callSideBar.selectedSideBarMode = CallSideBar.None
                     }
                 }
@@ -692,7 +693,9 @@ Item {
             Connections {
                 target: ViewHelper
                 function onShowConferenceChat() {
-                    callSideBar.selectedSideBarMode = CallSideBar.Chat
+                    if (callSideBar.chatAvailable) {
+                        callSideBar.selectedSideBarMode = CallSideBar.Chat
+                    }
                 }
             }
         }

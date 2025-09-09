@@ -88,7 +88,7 @@ BaseWindow {
 
     function updateCallInForeground() {
         if (mainTabBar.selectedPageId === GonnectWindow.PageId.Conference) {
-            GlobalCallState.callInForeground = conferencePage.jitsiConnector
+            GlobalCallState.callInForeground = conferencePage.iConferenceConnector
         } else if (mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
             const selectedCallItem = callPage.selectedCallItem
             if (selectedCallItem) {
@@ -163,7 +163,7 @@ BaseWindow {
             id: mainTabBar
             selectedPageId: GonnectWindow.PageId.Calls
             hasActiveCall: callsModel.count > 0
-            hasActiveConference: conferencePage.jitsiConnector.isInRoom
+            hasActiveConference: conferencePage.iConferenceConnector.isInConference
             anchors {
                 left: parent.left
                 top: parent.top
@@ -285,6 +285,15 @@ BaseWindow {
                 control.showNormal()
             } else {
                 control.showFullScreen()
+            }
+        }
+    }
+
+    readonly property Connections iConferenceConnectorConnections: Connections {
+        target: conferencePage.iConferenceConnector
+        function onIsInConferenceChanged() {
+            if (!conferencePage.iConferenceConnector.isInConference) {
+                control.showPage(GonnectWindow.PageId.Calls)
             }
         }
     }

@@ -7,7 +7,7 @@ import base
 Item {
     id: control
 
-    property alias jitsiConnector: participantsModel.jitsiConnector
+    property alias iConferenceConnector: participantsModel.iConferenceConnector
 
     readonly property alias count: participantListView.count
 
@@ -32,12 +32,12 @@ Item {
             required property string displayName
             required property int role
 
-            readonly property bool isModerator: delg.role === JitsiConnector.ParticipantRole.Moderator
-            readonly property bool isMe: delg.id === control.jitsiConnector?.ownJitsiId ?? false
+            readonly property bool isModerator: delg.role === ConferenceParticipant.Role.Moderator
+            readonly property bool isMe: delg.id === control.iConferenceConnector?.ownId ?? false
 
             Rectangle {
                 id: selectedBackground
-                visible: control.jitsiConnector.largeVideoParticipantId === delg.id
+                visible: control.iConferenceConnector.largeVideoParticipant?.id === delg.id
                 color: Theme.backgroundOffsetHoveredColor
                 radius: 4
                 anchors {
@@ -114,14 +114,14 @@ Item {
                         // The functions features in the context menu are not working right now (jitsi meet issues), so hide
                         // the menu completely until fixed.
 
-                        if (!delg.isMe && control.jitsiConnector.isModerator) {
+                        if (!delg.isMe && delg.isModerator) {
                             participantContextMenuComponent.createObject(delg).popup()
                         }
                     } else {
-                        if (control.jitsiConnector.largeVideoParticipantId === delg.id) {
-                            control.jitsiConnector.largeVideoParticipantId = ""
+                        if (control.iConferenceConnector.largeVideoParticipant?.id === delg.id) {
+                            control.iConferenceConnector.setLargeVideoParticipantById("")
                         } else {
-                            control.jitsiConnector.largeVideoParticipantId = delg.id
+                            control.iConferenceConnector.setLargeVideoParticipantById(delg.id)
                         }
                     }
                 }
@@ -135,12 +135,12 @@ Item {
 
                     MenuItem {
                         text: qsTr("Kick")
-                        onClicked: () => control.jitsiConnector.kickParticipant(delg.id)
+                        onClicked: () => control.iConferenceConnector.kickParticipant(delg.id)
                     }
                     MenuItem {
                         enabled: !delg.isModerator
                         text: qsTr("Make moderator")
-                        onClicked: () => control.jitsiConnector.grantParticipantModerator(delg.id)
+                        onClicked: () => control.iConferenceConnector.grantParticipantRole(delg.id, ConferenceParticipant.Role.Moderator)
                     }
                 }
             }
