@@ -7,7 +7,7 @@ ChatRoomProxyModel::ChatRoomProxyModel(QObject *parent) : QSortFilterProxyModel{
 }
 
 bool ChatRoomProxyModel::lessThan(const QModelIndex &sourceLeft,
-                                    const QModelIndex &sourceRight) const
+                                  const QModelIndex &sourceRight) const
 {
     const auto model = sourceModel();
     if (!model) {
