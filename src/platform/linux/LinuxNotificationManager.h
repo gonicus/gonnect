@@ -2,17 +2,18 @@
 
 #include <QObject>
 #include "NotificationManager.h"
-#include "NotificationInterface.h"
 #include "Notification.h"
 
-class FlatpakNotificationManager : public NotificationManager
+struct _NotifyNotification;
+
+class LinuxNotificationManager : public NotificationManager
 {
     Q_OBJECT
-    Q_DISABLE_COPY(FlatpakNotificationManager)
+    Q_DISABLE_COPY(LinuxNotificationManager)
 
 public:
-    explicit FlatpakNotificationManager();
-    ~FlatpakNotificationManager() = default;
+    explicit LinuxNotificationManager();
+    ~LinuxNotificationManager() = default;
 
     QString add(Notification *notification) override;
     bool remove(const QString &id) override;
@@ -23,6 +24,5 @@ private:
     void handleAction(QString id, QString action, QVariantList parameters);
 
     QMap<QString, Notification *> m_notifications;
-
-    OrgFreedesktopPortalNotificationInterface *m_interface = nullptr;
+    QMap<QString, _NotifyNotification *> m_internalNotifications;
 };

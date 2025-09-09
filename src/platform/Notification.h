@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QFileInfo>
 
+class NotificationIcon;
+
 class Notification : public QObject
 {
     Q_OBJECT
@@ -41,6 +43,19 @@ public:
         m_defaultParameters = parameters;
     }
 
+    QString title() const { return m_title; }
+    QString body() const { return m_body; }
+    QString category() const { return m_category; }
+
+    bool hasThemedIcon() const;
+    QString iconName() const { return m_iconUri; }
+    QByteArray iconData() const;
+
+    QList<QVariantMap> buttonDescriptions() const { return m_buttons; }
+
+    Priority urgency() const { return m_priority; }
+    unsigned displayHint() const { return m_displayHint; }
+
     void setIcon(const QString &iconUri);
     void setSound(const QString &sound) { m_sound = sound; }
     void setCategory(const QString &category) { m_category = category; }
@@ -49,9 +64,6 @@ public:
     void setEmblem(const QString &emblemUri);
     void addButton(const QString &label, const QString &action, const QString &purpose,
                    const QVariantMap &parameters);
-
-    QVariantMap toPortalDefinition() const;
-    QVariantMap toPortalDefinition2() const;
 
 signals:
     void actionInvoked(QString action, QVariantList parameters);
@@ -70,6 +82,8 @@ private:
     QString m_emblemUri;
     QString m_sound = "silent";
     QString m_category;
+
+    NotificationIcon* m_icon = nullptr;
 
     unsigned m_displayHint = 0;
     unsigned m_version = 1;

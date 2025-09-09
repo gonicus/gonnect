@@ -55,29 +55,3 @@ NotificationIcon::NotificationIcon(const QString &fileUri, const QString &emblem
     buffer.open(QIODevice::WriteOnly);
     pixmap.save(&buffer, "PNG");
 }
-
-QDBusArgument &operator<<(QDBusArgument &argument, const NotificationIcon &ni)
-{
-    argument.beginStructure();
-
-    if (!ni.imageName().isEmpty()) {
-        argument << QString("themed");
-        argument << QDBusVariant(QList<QString>({ ni.imageName() }));
-    } else if (!ni.data().isEmpty()) {
-        argument << QString("bytes");
-        argument << QDBusVariant(ni.data());
-    } else {
-        argument << QString("themed");
-        argument << QDBusVariant(QList<QString>({ "dummy" }));
-    }
-
-    argument.endStructure();
-
-    return argument;
-}
-
-const QDBusArgument &operator>>(const QDBusArgument &argument, NotificationIcon &)
-{
-    // Not needed
-    return argument;
-}
