@@ -46,11 +46,11 @@ public:
 
     bool isFirstInstance() const { return m_isFirstInstance; }
 
-signals:
+Q_SIGNALS:
     void globalShortcutsSupportedChanged();
     void globalShortcutsChanged();
 
-public slots:
+public Q_SLOTS:
     void Activate(const QVariantMap &platform_data);
     void ActivateAction(const QString &action_name, const QVariantList &parameter,
                         const QVariantMap &platform_data);

@@ -70,7 +70,7 @@ public:
     /// loaded
     const QList<QSslCertificate> &sslCAs();
 
-private slots:
+private Q_SLOTS:
     void authenticateJitsiImpl(const QString &roomName);
     void authRoomWaiting();
 
@@ -96,7 +96,7 @@ private:
     QObject *m_authWaitingContext = nullptr;
     QNetworkRequestFactory m_reqFactory;
 
-signals:
+Q_SIGNALS:
     void isAuthManagerInitializedChanged();
     void oAuthReady();
     void jitsiRoomAuthenticated(QString roomName);

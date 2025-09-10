@@ -54,7 +54,7 @@ private:
     States m_callState = State::Idle;
     QString m_id;
 
-signals:
+Q_SIGNALS:
     void callStateChanged(ICallState::States newState, ICallState::States oldState);
 };
 

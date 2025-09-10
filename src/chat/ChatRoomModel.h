@@ -24,9 +24,9 @@ private:
     IChatProvider *m_chatProvider = nullptr;
     QObject *m_chatProviderContext = nullptr;
 
-private slots:
+private Q_SLOTS:
     void onChatProviderChanged();
 
-signals:
+Q_SIGNALS:
     void chatProviderChanged();
 };

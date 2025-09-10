@@ -19,10 +19,10 @@ public:
     void inhibit(unsigned int flags, const QString &reason, PortalResponse callback);
     void release();
 
-signals:
+Q_SIGNALS:
     void stateChanged(bool screensaverActive, InhibitHelper::InhibitState state);
 
-public slots:
+public Q_SLOTS:
     void sessionStateReceived(const QDBusObjectPath &session_handle, const QVariantMap &map);
 
 private:

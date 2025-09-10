@@ -140,6 +140,6 @@ void ChatConnectorManager::init()
               });
 
     if (!m_connectors.isEmpty()) {
-        emit jsChatConnectorsChanged();
+        Q_EMIT jsChatConnectorsChanged();
     }
 }

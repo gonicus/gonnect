@@ -33,7 +33,7 @@ public:
 
     uint realMessagesCount() const { return m_realMessagesCount; }
 
-private slots:
+private Q_SLOTS:
     void onChatRoomChanged();
     void updateRealMessagesCount();
 
@@ -44,7 +44,7 @@ private:
     QObject *m_chatRoomContext = nullptr;
     uint m_realMessagesCount = 0;
 
-signals:
+Q_SIGNALS:
     void chatRoomChanged();
     void realMessagesCountChanged();
 };

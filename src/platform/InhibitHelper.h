@@ -29,6 +29,6 @@ public:
     virtual void inhibitScreenSaver(const QString &applicationName, const QString &reason) = 0;
     virtual void releaseScreenSaver() = 0;
 
-signals:
+Q_SIGNALS:
     void stateChanged(bool screensaverActive, InhibitHelper::InhibitState state);
 };

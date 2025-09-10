@@ -36,10 +36,10 @@ public:
 
     ~USBDevices() { shutdown(); }
 
-signals:
+Q_SIGNALS:
     void devicesChanged();
 
-private slots:
+private Q_SLOTS:
     void processUsbEvents();
 
 private:

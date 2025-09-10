@@ -45,7 +45,7 @@ public:
 
     void removeNotificationByRoomName(const QString &roomName);
 
-private slots:
+private Q_SLOTS:
     void onTimerTimeout();
 
 private:
@@ -63,7 +63,7 @@ private:
     QTime m_lastCheckedTime;
     QDate m_lastCheckedDate;
 
-signals:
+Q_SIGNALS:
     void dateEventAdded(qsizetype index, DateEvent *dateEvent);
     void dateEventModified();
     void dateEventRemoved(qsizetype index);

@@ -89,7 +89,7 @@ void DateEventManager::addDateEvent(DateEvent *dateEvent)
     }
 
     m_dateEvents.insert(i, dateEvent);
-    emit dateEventAdded(i, dateEvent);
+    Q_EMIT dateEventAdded(i, dateEvent);
 
     if (!m_minuteTimer.isActive()) {
         m_minuteTimer.start();
@@ -119,7 +119,7 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
     std::sort(m_dateEvents.begin(), m_dateEvents.end(),
               [](const DateEvent *a, const DateEvent *b) { return a->start() < b->start(); });
 
-    emit dateEventModified();
+    Q_EMIT dateEventModified();
 }
 
 void DateEventManager::removeDateEvent(const QString &id)
@@ -142,7 +142,7 @@ void DateEventManager::removeDateEvent(const QString &id)
             item->deleteLater();
             it.remove();
 
-            emit dateEventRemoved(i);
+            Q_EMIT dateEventRemoved(i);
         }
     }
 }
@@ -164,7 +164,7 @@ void DateEventManager::resetDateEvents()
 
     qDeleteAll(m_dateEvents);
     m_dateEvents.clear();
-    emit dateEventsCleared();
+    Q_EMIT dateEventsCleared();
 }
 
 void DateEventManager::removeDateEventsBySource(const QString &source)
@@ -178,7 +178,7 @@ void DateEventManager::removeDateEventsBySource(const QString &source)
             item->deleteLater();
             it.remove();
 
-            emit dateEventRemoved(i);
+            Q_EMIT dateEventRemoved(i);
         }
     }
 }

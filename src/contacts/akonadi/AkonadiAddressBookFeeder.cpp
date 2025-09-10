@@ -215,7 +215,7 @@ void AkonadiAddressBookFeeder::processSearchResult(KJob *job)
         }
     }
 
-    emit addressbook.contactsReady();
+    Q_EMIT addressbook.contactsReady();
 }
 
 AkonadiAddressBookFeeder::~AkonadiAddressBookFeeder()

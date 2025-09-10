@@ -14,12 +14,12 @@ class SimpleSortProxyModel : public QSortFilterProxyModel
 public:
     explicit SimpleSortProxyModel(QObject *parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void updateSorting();
 
 private:
     QString m_sortRoleName;
 
-signals:
+Q_SIGNALS:
     void sortRoleNameChanged();
 };

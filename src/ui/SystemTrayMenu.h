@@ -29,7 +29,7 @@ public:
     void resetTrayIcon();
     void setRinging(bool flag);
 
-private slots:
+private Q_SLOTS:
     void updateMenu();
     void updateCalls();
     void updateFavorites();

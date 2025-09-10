@@ -23,7 +23,7 @@ public:
 private:
     explicit ErrorBus(QObject *parent = nullptr);
 
-signals:
+Q_SIGNALS:
     void error(QString message);
     void fatalError(QString message);
 };

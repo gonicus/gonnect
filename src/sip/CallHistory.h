@@ -42,7 +42,7 @@ private:
     QList<CallHistoryItem *> m_historyItems;
     QString m_databasePath;
 
-signals:
+Q_SIGNALS:
     void itemAdded(qsizetype index, CallHistoryItem *item);
     void dataChanged(qsizetype index, CallHistoryItem *item);
 };

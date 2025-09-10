@@ -34,7 +34,7 @@ private:
     MediumFilter m_mediumFilter = MediumFilter::ALL;
     QString m_filterText;
 
-signals:
+Q_SIGNALS:
     void filterTextChanged();
     void typeFilterChanged();
     void mediumFilterChanged();

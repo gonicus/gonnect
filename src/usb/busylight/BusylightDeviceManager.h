@@ -32,7 +32,7 @@ public:
     void switchStreamlightOn() const;
     void switchStreamlightOff() const;
 
-private slots:
+private Q_SLOTS:
     void updateBusylightState();
 
 private:

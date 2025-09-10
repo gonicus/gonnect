@@ -29,7 +29,7 @@ void AuthManager::init()
     // Use this when other auth types for Jitsi Meet are implemented
     m_isJitsiAuthRequired = settings.value("authorizationMode", "none").toString() != "none";
     if (!m_isJitsiAuthRequired) {
-        emit isAuthManagerInitializedChanged();
+        Q_EMIT isAuthManagerInitializedChanged();
         return;
     }
 
@@ -56,7 +56,7 @@ void AuthManager::init()
 
                          if (isOAuthAuthenticated()) {
                              m_oauthToken = token;
-                             emit oAuthReady();
+                             Q_EMIT oAuthReady();
                          }
                      });
 
@@ -67,7 +67,7 @@ void AuthManager::init()
                      [this](const QDateTime &) {
                          if (isOAuthAuthenticated()) {
                              m_oauthToken.clear();
-                             emit oAuthReady();
+                             Q_EMIT oAuthReady();
                          }
                      });
 
@@ -107,7 +107,7 @@ void AuthManager::init()
 
                 settings.endGroup();
 
-                emit isAuthManagerInitializedChanged();
+                Q_EMIT isAuthManagerInitializedChanged();
             });
 }
 
@@ -175,7 +175,7 @@ void AuthManager::setIsWaitingForAuth(bool value)
 {
     if (m_isWaitingForAuth != value) {
         m_isWaitingForAuth = value;
-        emit isWaitingForAuthChanged();
+        Q_EMIT isWaitingForAuthChanged();
     }
 }
 
@@ -355,7 +355,7 @@ void AuthManager::authenticateJitsiImpl(const QString &roomName)
 
                          qCInfo(lcAuthManager) << "Successfully received JWT for room" << roomName;
                          setIsWaitingForAuth(false);
-                         emit jitsiRoomAuthenticated(roomName);
+                         Q_EMIT jitsiRoomAuthenticated(roomName);
                      });
 
     auto request = m_reqFactory.createRequest(QUrlQuery(QString("room=%1").arg(roomName)));

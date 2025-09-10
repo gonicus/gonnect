@@ -88,7 +88,7 @@ void VideoManager::updateDevices()
         }
     }
 
-    emit devicesChanged();
+    Q_EMIT devicesChanged();
 }
 
 void VideoManager::updateProfile()
@@ -116,7 +116,7 @@ void VideoManager::updateProfile()
     for (const auto &device : std::as_const(m_devices)) {
         if (device.isDefault()) {
             setProperty("selectedDeviceId", device.id());
-            emit selectedDeviceIdChanged();
+            Q_EMIT selectedDeviceIdChanged();
             return;
         }
     }

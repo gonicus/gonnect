@@ -28,6 +28,7 @@ pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
 pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
 pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
 pkg_check_modules(LIBICAL REQUIRED libical IMPORTED_TARGET)
+pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
 
 add_definitions(${PJSIP_STATIC_CFLAGS} -DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
 
@@ -55,15 +56,10 @@ set_source_files_properties(
     ../specs/org.freedesktop.application.xml
     ../specs/org.mpris.MediaPlayer2.Player.xml
     ../specs/org.freedesktop.ScreenSaver.xml
-    ../specs/org.freedesktop.portal.Notification.xml
     ../specs/org.freedesktop.portal.Session.xml
     ../specs/org.freedesktop.portal.Request.xml
     ../specs/org.freedesktop.portal.Secret.xml
     NO_NAMESPACE ON
-)
-set_source_files_properties(
-    ../specs/org.freedesktop.portal.Notification.xml
-    INCLUDE Notification.h
 )
 qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.application.xml
     DBusActivationInterface
@@ -73,9 +69,6 @@ qt_add_dbus_interface(DBUS_SOURCES ../specs/org.mpris.MediaPlayer2.Player.xml
 )
 qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.ScreenSaver.xml
     ScreenSaverInterface
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Notification.xml
-    NotificationInterface
 )
 qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.GlobalShortcuts.xml
     GlobalShortcutsInterface
@@ -342,10 +335,6 @@ qt_add_qml_module(gonnect
         dbus/GOnnectDBusAPI.cpp
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
-        dbus/Notification.h
-        dbus/Notification.cpp
-        dbus/NotificationIcon.h
-        dbus/NotificationIcon.cpp
 
         sip/CallHistory.h
         sip/CallHistory.cpp
@@ -491,11 +480,15 @@ qt_add_qml_module(gonnect
         platform/Credentials.h
         platform/Credentials.cpp
         platform/UserInfo.h
+        platform/Notification.h
+        platform/Notification.cpp
+        platform/NotificationIcon.h
+        platform/NotificationIcon.cpp
         platform/flatpak/FlatpakUserInfo.h
         platform/flatpak/FlatpakUserInfo.cpp
         platform/NotificationManager.h
-        platform/flatpak/FlatpakNotificationManager.h
-        platform/flatpak/FlatpakNotificationManager.cpp
+        platform/linux/LinuxNotificationManager.h
+        platform/linux/LinuxNotificationManager.cpp
         platform/ExternalMediaManager.h
         platform/linux/MPRISExternalMediaManager.cpp
         platform/linux/MPRISExternalMediaManager.h
@@ -661,6 +654,7 @@ target_link_libraries(gonnect
         PkgConfig::LIBHIDAPI
         PkgConfig::LIBPULSE
         PkgConfig::LIBICAL
+        PkgConfig::LIBNOTIFY
         GOnnectVersion
         qca-qt6
         qt6keychain
@@ -707,7 +701,10 @@ target_include_directories(gonnect
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-target_compile_definitions(gonnect PRIVATE QT_DISABLE_DEPRECATED_BEFORE=0x060900)
+target_compile_definitions(gonnect
+   PRIVATE
+    QT_DISABLE_DEPRECATED_BEFORE=0x060900
+    QT_NO_KEYWORDS)
 
 # Add hid-rp header only stuff as "isystem" so that we have a chance
 # to ignore the warnings their code issues.

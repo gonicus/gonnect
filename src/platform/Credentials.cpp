@@ -33,7 +33,7 @@ void Credentials::initialize()
     if (sp.isValid()) {
         if (sp.isInitialized()) {
             m_initialized = true;
-            emit initializedChanged();
+            Q_EMIT initializedChanged();
         } else {
             connect(
                     &sp, &SecretPortal::initializedChanged, this,
@@ -41,7 +41,7 @@ void Credentials::initialize()
                         bool isInitialized = SecretPortal::instance().isInitialized();
                         if (isInitialized != m_initialized) {
                             m_initialized = isInitialized;
-                            emit initializedChanged();
+                            Q_EMIT initializedChanged();
                         }
                     },
                     Qt::ConnectionType::SingleShotConnection);
@@ -51,7 +51,7 @@ void Credentials::initialize()
     }
 #else
     m_initialized = true;
-    emit initializedChanged();
+    Q_EMIT initializedChanged();
 #endif
 }
 

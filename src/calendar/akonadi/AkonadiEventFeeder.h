@@ -35,7 +35,7 @@ public:
 
     void process();
 
-private slots:
+private Q_SLOTS:
     void processCollections(KJob *job);
 
 private:

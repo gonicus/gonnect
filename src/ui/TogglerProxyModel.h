@@ -21,6 +21,6 @@ protected:
 private:
     uint m_displayFilter = 0;
 
-signals:
+Q_SIGNALS:
     void displayFilterChanged();
 };

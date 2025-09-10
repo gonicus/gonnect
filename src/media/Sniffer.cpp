@@ -57,7 +57,7 @@ void Sniffer::updateAudioLevel(const char *data, qint64 size)
 
     if (m_audioLevel != max) {
         m_audioLevel = max;
-        emit audioLevelChanged(max);
+        Q_EMIT audioLevelChanged(max);
     }
 }
 

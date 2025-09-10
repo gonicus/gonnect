@@ -17,7 +17,7 @@ public:
     virtual void process() override;
     ~AkonadiAddressBookFeeder();
 
-private slots:
+private Q_SLOTS:
     void processSearchResult(KJob *);
 
 private:

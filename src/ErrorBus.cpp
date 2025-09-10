@@ -8,11 +8,11 @@ ErrorBus::ErrorBus(QObject *parent) : QObject{ parent } { }
 void ErrorBus::addError(const QString &message)
 {
     qCCritical(lcErrorBus) << "ERROR:" << message;
-    emit error(message);
+    Q_EMIT error(message);
 }
 
 void ErrorBus::addFatalError(const QString &message)
 {
     qCCritical(lcErrorBus) << "FATAL ERROR:" << message;
-    emit fatalError(message);
+    Q_EMIT fatalError(message);
 }

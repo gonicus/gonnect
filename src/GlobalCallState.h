@@ -45,7 +45,7 @@ public:
     Q_INVOKABLE void triggerHold();
     Q_INVOKABLE bool wasLastAddedConference() const;
 
-private slots:
+private Q_SLOTS:
     void updateGlobalCallState();
     void updateRinger();
     void onCallInForegroundChanged();
@@ -70,7 +70,7 @@ private:
 
     bool m_isPhoneConference = false;
 
-signals:
+Q_SIGNALS:
     void globalCallStateChanged();
     void remoteContactInfoChanged();
     void callInForegroundChanged();

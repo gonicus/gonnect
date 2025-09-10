@@ -64,26 +64,26 @@ void FlatpakNetworkHelper::updateNetworkState()
 
     if (localNetwork != m_localNetwork) {
         m_localNetwork = localNetwork;
-        emit localNetworkAvailableChanged();
+        Q_EMIT localNetworkAvailableChanged();
         qCDebug(lcNetwork) << "local network available changed to" << localNetwork;
     }
     if (limitedNetwork != m_limitedNetwork) {
         m_limitedNetwork = limitedNetwork;
-        emit limitedNetworkAvailableChanged();
+        Q_EMIT limitedNetworkAvailableChanged();
         qCDebug(lcNetwork) << "limited network available changed to" << limitedNetwork;
     }
     if (captiveNetwork != m_captiveNetwork) {
         m_captiveNetwork = captiveNetwork;
-        emit captiveNetworkAvailableChanged();
+        Q_EMIT captiveNetworkAvailableChanged();
         qCDebug(lcNetwork) << "captive network available changed to" << captiveNetwork;
     }
     if (fullNetwork != m_fullNetwork) {
         m_fullNetwork = fullNetwork;
-        emit fullNetworkAvailableChanged();
+        Q_EMIT fullNetworkAvailableChanged();
         qCDebug(lcNetwork) << "full network available changed to" << fullNetwork;
     }
 
-    emit connectivityChanged();
+    Q_EMIT connectivityChanged();
 }
 
 bool FlatpakNetworkHelper::isReachable(const QUrl &url)

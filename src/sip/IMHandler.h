@@ -33,7 +33,7 @@ public:
     void openMeeting(const QString &meetingId, const QString &displayName = "", bool hangup = false,
                      QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>());
 
-signals:
+Q_SIGNALS:
     void capabilitiesChanged();
     void meetingRequested(const QString &accountId, int callId);
 

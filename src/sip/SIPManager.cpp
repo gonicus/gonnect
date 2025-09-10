@@ -122,11 +122,11 @@ void SIPManager::initialize()
     VideoManager::instance().updateDevices();
 
     m_defaultPreferredIdentity = m_settings->value("generic/preferredIdentity", "auto").toString();
-    emit defaultPreferredIdentityChanged();
+    Q_EMIT defaultPreferredIdentityChanged();
     initializePreferredIdentities();
 
     if (!isConfigured()) {
-        emit notConfigured();
+        Q_EMIT notConfigured();
     }
 }
 
@@ -249,11 +249,11 @@ void SIPManager::updatePreferredIdentities()
             qCCritical(lcSIPManager)
                     << "invalid preferred identity for account - reverting to 'auto'";
             m_defaultPreferredIdentity = "auto";
-            emit defaultPreferredIdentityChanged();
+            Q_EMIT defaultPreferredIdentityChanged();
         }
     }
 
-    emit preferredIdentitiesChanged();
+    Q_EMIT preferredIdentitiesChanged();
 }
 
 SIPBuddy *SIPManager::getBuddy(const QString &var)
@@ -303,6 +303,6 @@ void SIPManager::setDefaultPreferredIdentity(const QString &value)
     if (m_defaultPreferredIdentity != value) {
         m_settings->setValue("generic/preferredIdentity", value);
         m_defaultPreferredIdentity = value;
-        emit defaultPreferredIdentityChanged();
+        Q_EMIT defaultPreferredIdentityChanged();
     }
 }

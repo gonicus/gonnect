@@ -87,7 +87,7 @@ private:
     TRANSPORT_TYPE m_transportType = TRANSPORT_TYPE::TLS;
     TRANSPORT_NET m_transportNet = TRANSPORT_NET::AUTO;
 
-signals:
+Q_SIGNALS:
     void initialized(bool success);
     void isRegisteredChanged();
     void authorizationFailed();

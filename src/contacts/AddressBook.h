@@ -57,10 +57,10 @@ private:
     QHash<QString, Contact *> m_contactsBySourceId;
     QList<Contact::ContactSourceInfo> m_contactSourceInfos;
 
-private slots:
+private Q_SLOTS:
     void updateSourceInfos(const Contact *contact);
 
-signals:
+Q_SIGNALS:
     void contactAdded(Contact *contact);
     void contactModified(Contact *contact);
     void contactRemoved(QString sourceUid);

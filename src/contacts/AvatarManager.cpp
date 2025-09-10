@@ -62,7 +62,7 @@ void AvatarManager::updateContacts()
     }
 
     m_contactsWithPendingUpdates.clear();
-    emit avatarsLoaded();
+    Q_EMIT avatarsLoaded();
 }
 
 void AvatarManager::initialLoad(const LDAPInitializer::Config &ldapConfig)
@@ -106,7 +106,7 @@ void AvatarManager::initialLoad(const LDAPInitializer::Config &ldapConfig)
         }
     }
 
-    emit avatarsLoaded();
+    Q_EMIT avatarsLoaded();
 }
 
 QString AvatarManager::avatarPathFor(const QString &id)
@@ -141,7 +141,7 @@ void AvatarManager::addExternalImage(const QString &id, const QByteArray &data,
         contact->setHasAvatar(true);
     }
 
-    emit avatarAdded(id);
+    Q_EMIT avatarAdded(id);
 }
 
 void AvatarManager::removeExternalImage(const QString &id)
@@ -155,7 +155,7 @@ void AvatarManager::removeExternalImage(const QString &id)
         contact->setHasAvatar(false);
     }
 
-    emit avatarRemoved(id);
+    Q_EMIT avatarRemoved(id);
 }
 
 void AvatarManager::clearCStringlist(char **attrs) const

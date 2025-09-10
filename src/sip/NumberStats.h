@@ -67,7 +67,7 @@ private:
     QList<NumberStat *> m_statItems;
     QTimer m_debounceAddressBookUpdateTimer;
 
-signals:
+Q_SIGNALS:
     void countChanged(qsizetype index);
     void numberStatAdded(qsizetype index);
     void favoriteAdded(NumberStat *item);

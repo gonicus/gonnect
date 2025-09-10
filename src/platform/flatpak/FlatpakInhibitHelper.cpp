@@ -18,7 +18,7 @@ FlatpakInhibitHelper::FlatpakInhibitHelper() : InhibitHelper{}
 
     connect(m_portal, &InhibitPortal::stateChanged, this,
             [this](bool screensaverActive, InhibitHelper::InhibitState state) {
-                emit stateChanged(screensaverActive, state);
+                Q_EMIT stateChanged(screensaverActive, state);
             });
 
     m_screenSaverInterface = new OrgFreedesktopScreenSaverInterface("org.freedesktop.ScreenSaver",

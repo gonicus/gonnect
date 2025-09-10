@@ -53,10 +53,10 @@ public:
     void start();
     void stop();
 
-signals:
+Q_SIGNALS:
     void ready();
 
-private slots:
+private Q_SLOTS:
     void playNextTone();
 
 private:

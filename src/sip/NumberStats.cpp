@@ -70,14 +70,14 @@ void NumberStats::initialRead()
                     m_favoriteLookup.insert(item->phoneNumber, item);
                 }
 
-                emit numberStatAdded(m_statItems.size() - 1);
+                Q_EMIT numberStatAdded(m_statItems.size() - 1);
             }
 
             qCInfo(lcNumberStats) << "Read" << m_statItems.size() << "flags/stats from database";
         }
     }
 
-    emit modelReset();
+    Q_EMIT modelReset();
 }
 
 NumberStats::~NumberStats()
@@ -103,7 +103,7 @@ void NumberStats::incrementCallCount(const QString &phoneNumber)
         if (ensureFlaggedNumberExists(phoneNumber)) {
             auto statItem = m_statItemsLookup.value(phoneNumber);
             statItem->callCount++;
-            emit countChanged(m_statItems.indexOf(statItem));
+            Q_EMIT countChanged(m_statItems.indexOf(statItem));
 
             // Update DB entry
             qCInfo(lcNumberStats) << "Updating call count for number" << phoneNumber
@@ -179,11 +179,11 @@ void NumberStats::toggleFavorite(const QString &phoneNumber,
     if (item->isFavorite) {
         item->isFavorite = false;
         m_favoriteLookup.remove(phoneNumber);
-        emit favoriteRemoved(item);
+        Q_EMIT favoriteRemoved(item);
     } else {
         item->isFavorite = true;
         m_favoriteLookup.insert(phoneNumber, item);
-        emit favoriteAdded(item);
+        Q_EMIT favoriteAdded(item);
     }
 
     auto db = QSqlDatabase::database();
@@ -247,7 +247,7 @@ bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,
         statItem->contact = AddressBook::instance().lookupByNumber(phoneNumber);
         m_statItems.append(statItem);
         m_statItemsLookup.insert(phoneNumber, statItem);
-        emit numberStatAdded(m_statItems.size() - 1);
+        Q_EMIT numberStatAdded(m_statItems.size() - 1);
         return true;
     }
 

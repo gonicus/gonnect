@@ -23,13 +23,13 @@ public:
     void setShortcuts(Shortcuts &shortcuts) { m_shortcuts = shortcuts; }
     QList<ShortcutItem *> shortcuts() const { return m_currentShortcuts; }
 
-public slots:
+public Q_SLOTS:
     void shortcutActivatedReceived(const QDBusObjectPath &session_handle, const QString &id,
                                    qulonglong timestamp, const QVariantMap &map);
     void shortcutsChangedReceived(const QDBusObjectPath &session_handle,
                                   const Shortcuts &shortcuts);
 
-signals:
+Q_SIGNALS:
     void initialized();
     void shortcutsChanged();
     void activated(QString id);

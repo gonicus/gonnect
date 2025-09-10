@@ -39,7 +39,7 @@ public:
 
     bool hasConfiguration() const { return m_numberOfAccounts; }
 
-signals:
+Q_SIGNALS:
     void accountsChanged();
     void sipRegisteredChanged();
     void authorizationFailed(QString accountId);

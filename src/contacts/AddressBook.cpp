@@ -12,7 +12,7 @@ AddressBook::AddressBook(QObject *parent) : QObject{ parent }
     connect(this, &AddressBook::contactsCleared, this, [this]() {
         if (m_contactSourceInfos.size()) {
             m_contactSourceInfos.clear();
-            emit contactSourceInfosChanged();
+            Q_EMIT contactSourceInfosChanged();
         }
     });
 }
@@ -41,7 +41,7 @@ void AddressBook::updateSourceInfos(const Contact *contact)
                       }
                       return left.prio > right.prio;
                   });
-        emit contactSourceInfosChanged();
+        Q_EMIT contactSourceInfosChanged();
     }
 }
 
@@ -80,7 +80,7 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
         }
     }
 
-    emit contactAdded(contact);
+    Q_EMIT contactAdded(contact);
 
     return contact;
 }
@@ -92,7 +92,7 @@ void AddressBook::addContact(Contact *contact)
         m_contacts.insert(contact->id(), contact);
         m_contactsBySourceId.insert(contact->sourceUid(), contact);
 
-        emit contactAdded(contact);
+        Q_EMIT contactAdded(contact);
     }
 }
 
@@ -111,7 +111,7 @@ Contact *AddressBook::modifyContact(const QString &dn, const QString &sourceUid,
         contact->clearPhoneNumbers();
         contact->addPhoneNumbers(phoneNumbers);
 
-        emit contactModified(contact);
+        Q_EMIT contactModified(contact);
 
         return contact;
     }
@@ -126,7 +126,7 @@ void AddressBook::removeContact(const QString &sourceUid)
         m_contacts.remove(contact->id());
         m_contactsBySourceId.remove(contact->sourceUid());
 
-        emit contactRemoved(sourceUid);
+        Q_EMIT contactRemoved(sourceUid);
     }
 }
 
@@ -212,5 +212,5 @@ void AddressBook::clear()
 {
     qDeleteAll(m_contacts);
     m_contacts.clear();
-    emit contactsCleared();
+    Q_EMIT contactsCleared();
 }

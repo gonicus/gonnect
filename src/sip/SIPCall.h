@@ -71,7 +71,7 @@ public:
 protected:
     virtual void toggleHoldImpl() override;
 
-signals:
+Q_SIGNALS:
     void missed();
     void ringing();
     void establishedChanged();
@@ -82,7 +82,7 @@ signals:
     void contactChanged();
     void metadataChanged();
 
-private slots:
+private Q_SLOTS:
     void updateIsBlocked();
     void updateMutedState();
 

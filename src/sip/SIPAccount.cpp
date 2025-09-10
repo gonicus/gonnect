@@ -42,7 +42,7 @@ void SIPAccount::initialize()
         m_transportType = TRANSPORT_TYPE::TCP;
     } else {
         qCCritical(lcSIPAccount) << "invalid transport [tcp, udp, tls]:" << transport;
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
 
@@ -55,7 +55,7 @@ void SIPAccount::initialize()
         m_transportNet = TRANSPORT_NET::IPv6;
     } else {
         qCCritical(lcSIPAccount) << "invalid transport [auto, ipv4, ipv6]:" << transport;
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
 
@@ -65,7 +65,7 @@ void SIPAccount::initialize()
             qCCritical(lcSIPAccount) << "'userUri' is no valid SIP URI:" << userUri;
             ErrorBus::instance().addFatalError(
                     tr("'userUri' is no valid SIP URI: %1").arg(userUri));
-            emit initialized(false);
+            Q_EMIT initialized(false);
             return;
         }
 
@@ -73,7 +73,7 @@ void SIPAccount::initialize()
     } else {
         qCCritical(lcSIPAccount) << "'userUri' is required";
         ErrorBus::instance().addFatalError(tr("'userUri' is required"));
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
 
@@ -85,7 +85,7 @@ void SIPAccount::initialize()
             qCCritical(lcSIPAccount) << "'registrarUri' is no valid SIP URI:" << registrarUri;
             ErrorBus::instance().addFatalError(
                     tr("'registrarUri' is no valid SIP URI: %1").arg(registrarUri));
-            emit initialized(false);
+            Q_EMIT initialized(false);
             return;
         }
 
@@ -96,7 +96,7 @@ void SIPAccount::initialize()
     } else {
         qCCritical(lcSIPAccount) << "'registrarUri' is required";
         ErrorBus::instance().addFatalError(tr("'registrarUri' is required"));
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
 
@@ -107,7 +107,7 @@ void SIPAccount::initialize()
             qCCritical(lcSIPAccount) << "'proxies' contains invalid SIP URI entry:" << proxy;
             ErrorBus::instance().addFatalError(
                     tr("'proxies' contains invalid SIP URI entry: %1").arg(proxy));
-            emit initialized(false);
+            Q_EMIT initialized(false);
             return;
         }
 
@@ -127,7 +127,7 @@ void SIPAccount::initialize()
         } else {
             qCCritical(lcSIPAccount)
                     << "invalid value for 'srtpUse' [disabled, optional, mandatory]:" << srtpUse;
-            emit initialized(false);
+            Q_EMIT initialized(false);
             return;
         }
     }
@@ -136,7 +136,7 @@ void SIPAccount::initialize()
     int rtpPort = m_settings.value("rtpPort", 0).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'rtpPort':" << rtpPort;
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
     if (rtpPort != 0) {
@@ -146,7 +146,7 @@ void SIPAccount::initialize()
     int rtpPortRange = m_settings.value("rtpPortRange", 0).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'rtpPortRange':" << rtpPort;
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
     if (rtpPortRange != 0) {
@@ -173,7 +173,7 @@ void SIPAccount::initialize()
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'srtpSecureSignaling' [0, 1 ,2]:"
                                  << srtpSecureSignaling;
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
     m_accountConfig.mediaConfig.srtpSecureSignaling = srtpSecureSignaling;
@@ -185,7 +185,7 @@ void SIPAccount::initialize()
     int port = m_settings.value("port", 5061).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'port':" << port;
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
     m_transportConfig.port = port;
@@ -193,7 +193,7 @@ void SIPAccount::initialize()
     int portRange = m_settings.value("portRange", 10).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'portRange':" << portRange;
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
     m_transportConfig.portRange = portRange;
@@ -244,7 +244,7 @@ void SIPAccount::initialize()
         }
     } catch (pj::Error &err) {
         qCCritical(lcSIPAccount) << "failed to create transport:" << err.info(false);
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
 
@@ -275,7 +275,7 @@ void SIPAccount::initialize()
     } else {
         qCCritical(lcSIPAccount) << "invalid value for 'contactRewriteUse' [0,1,2]:"
                                  << contactRewriteUse;
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
     if (m_settings.contains("contactUseSrcPort")) {
@@ -292,7 +292,7 @@ void SIPAccount::initialize()
             qCCritical(lcSIPAccount)
                     << "invalid value for 'contactRewriteMethod' [always-update,no-unreg]:"
                     << contactRewriteMethod;
-            emit initialized(false);
+            Q_EMIT initialized(false);
             return;
         }
     }
@@ -344,7 +344,7 @@ void SIPAccount::initialize()
 
         if (!m_settings.childGroups().contains(auth)) {
             qCCritical(lcSIPAccount) << "'auth' contains undefined reference to:" << auth;
-            emit initialized(false);
+            Q_EMIT initialized(false);
             return;
         }
 
@@ -361,7 +361,7 @@ void SIPAccount::initialize()
             dataTypeValue = PJSIP_CRED_DATA_DIGEST;
         } else {
             qCCritical(lcSIPAccount) << "invalid value for 'type' [plain, digest]:" << dataType;
-            emit initialized(false);
+            Q_EMIT initialized(false);
             return;
         }
 
@@ -375,7 +375,7 @@ void SIPAccount::initialize()
                                                                          const QString &data) {
                         if (error) {
                             qCCritical(lcSIPAccount) << "authentification failed:" << data;
-                            emit initialized(false);
+                            Q_EMIT initialized(false);
                             return;
                         }
 
@@ -414,7 +414,7 @@ void SIPAccount::finalizeInitialization()
         ErrorBus::instance().addFatalError(
                 tr("Failed to create %1: %2")
                         .arg(m_account, QString::fromLocal8Bit(err.info(false))));
-        emit initialized(false);
+        Q_EMIT initialized(false);
         return;
     }
 
@@ -430,7 +430,7 @@ void SIPAccount::finalizeInitialization()
         }
     });
 
-    emit initialized(true);
+    Q_EMIT initialized(true);
 }
 
 QString SIPAccount::call(const QString &number, const QString &contactId,
@@ -501,7 +501,7 @@ void SIPAccount::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
 {
     qCDebug(lcSIPAccount) << "received message from " << prm.fromUri << ":" << prm.msgBody;
-    emit messageReceived(prm.fromUri.c_str(), prm.msgBody.c_str(), prm.contentType.c_str());
+    Q_EMIT messageReceived(prm.fromUri.c_str(), prm.msgBody.c_str(), prm.contentType.c_str());
 }
 
 SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
@@ -717,7 +717,7 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
 
     m_calls.push_back(call);
 
-    emit SIPCallManager::instance().incomingCall(call);
+    Q_EMIT SIPCallManager::instance().incomingCall(call);
 }
 
 void SIPAccount::onRegState(pj::OnRegStateParam &prm)
@@ -729,11 +729,11 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
 
     if (m_isRegistered != ai.regIsActive) {
         m_isRegistered = ai.regIsActive;
-        emit isRegisteredChanged();
+        Q_EMIT isRegisteredChanged();
     }
 
     if (prm.code == PJSIP_SC_UNAUTHORIZED) {
-        emit authorizationFailed();
+        Q_EMIT authorizationFailed();
     }
 
     if (!m_useInstantMessagingWithoutCheck && m_isRegistered && m_shallNegotiateCapabilities) {
