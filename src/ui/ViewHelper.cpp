@@ -241,7 +241,7 @@ void ViewHelper::updateIsActiveVideoCall()
     const auto &callObjects = GlobalCallState::instance().globalCallStateObjects();
 
     for (const auto obj : callObjects) {
-        const auto jitsiConn = qobject_cast<JitsiConnector *>(obj);
+        const auto jitsiConn = qobject_cast<IConferenceConnector *>(obj);
         if (jitsiConn && jitsiConn->callState() & ICallState::State::CallActive) {
             hasJitsiCall = true;
             break;

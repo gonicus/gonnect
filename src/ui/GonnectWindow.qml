@@ -54,26 +54,27 @@ BaseWindow {
 
     readonly property CallsModel globalCallsModel: CallsModel {
         id: callsModel
-        onCountChanged: () => control.checkIfToChangeCallOrConferencePage()
     }
 
     readonly property Connections globalStateConnections: Connections {
         target: GlobalCallState
-        function onActiveCallsCountChanged() { control.checkIfToChangeCallOrConferencePage() }
-    }
 
-    function checkIfToChangeCallOrConferencePage() {
-        const count = GlobalCallState.activeCallsCount
-        const isOnCallOrConferencePage = [GonnectWindow.PageId.Call, GonnectWindow.PageId.Conference].includes(mainTabBar.selectedPageId)
+        function onCallStarted(isConference : bool) {
+            control.showPage(isConference ? GonnectWindow.PageId.Conference : GonnectWindow.PageId.Call)
+        }
 
-        if (count) {
-            if (GlobalCallState.wasLastAddedConference()) {
+        function onCallEnded(isConference : bool) {
+            const count = GlobalCallState.activeCallsCount
+            const isOnCallPage = mainTabBar.selectedPageId === GonnectWindow.PageId.Call
+            const isOnConferencePage = mainTabBar.selectedPageId === GonnectWindow.PageId.Conference
+
+            if (count && isOnCallPage && !isConference) {
                 control.showPage(GonnectWindow.PageId.Conference)
-            } else {
+            } else if (count && isOnConferencePage && isConference) {
                 control.showPage(GonnectWindow.PageId.Call)
+            } else if (!count && (isOnCallPage || isOnConferencePage)) {
+                control.showPage(GonnectWindow.PageId.Calls)
             }
-        } else if (!count && isOnCallOrConferencePage) {
-            control.showPage(GonnectWindow.PageId.Calls)
         }
     }
 
@@ -285,15 +286,6 @@ BaseWindow {
                 control.showNormal()
             } else {
                 control.showFullScreen()
-            }
-        }
-    }
-
-    readonly property Connections iConferenceConnectorConnections: Connections {
-        target: conferencePage.iConferenceConnector
-        function onIsInConferenceChanged() {
-            if (!conferencePage.iConferenceConnector.isInConference) {
-                control.showPage(GonnectWindow.PageId.Calls)
             }
         }
     }

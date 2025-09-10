@@ -120,16 +120,6 @@ Item {
         }
     }
 
-    Connections {
-        target: SIPCallManager
-        function onCallAdded(accountId : string, callId : int) {
-            if (ViewHelper.hasNonSilentCall() && (!ViewHelper.isBusyOnBusy() || !(GlobalCallState.globalCallState & ICallState.State.CallActive))) {
-                gonnectWindow.ensureVisible()
-                gonnectWindow.showPage(GonnectWindow.PageId.Call)
-            }
-        }
-    }
-
     Component {
         id: shortcutsWindowComponent
         ShortcutsWindow {}

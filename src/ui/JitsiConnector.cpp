@@ -1099,6 +1099,8 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
             m_inConferenceNotification = nullptr;
         }
     });
+
+    Q_EMIT GlobalCallState::instance().callStarted(true);
 }
 
 void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
@@ -1143,6 +1145,7 @@ void JitsiConnector::leaveConference()
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
+    Q_EMIT GlobalCallState::instance().callEnded(true);
 }
 
 void JitsiConnector::terminateConference()
@@ -1162,6 +1165,7 @@ void JitsiConnector::terminateConference()
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
+    Q_EMIT GlobalCallState::instance().callEnded(true);
 }
 
 void JitsiConnector::setOnHold(bool shallHold)

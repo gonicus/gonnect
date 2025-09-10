@@ -50,8 +50,6 @@ public:
     Q_INVOKABLE void holdAllCalls(const ICallState *stateObjectToSkip = nullptr) const;
     Q_INVOKABLE void unholdOtherCall() const;
 
-    Q_INVOKABLE bool wasLastAddedConference() const;
-
 private slots:
     void updateGlobalCallState();
     void updateRinger();
@@ -68,7 +66,6 @@ private:
 
     ICallState::States m_globalCallState = ICallState::State::Idle;
     QSet<ICallState *> m_globalCallStateObjects;
-    ICallState *m_lastCallThatBecameActive = nullptr;
     ICallState *m_callInForeground = nullptr;
     QObject *m_foregroundCallContext = nullptr;
 
@@ -84,6 +81,8 @@ signals:
     void isPhoneConferenceChanged();
     void globalCallStateObjectsChanged();
     void activeCallsCountChanged();
+    void callStarted(bool isConference);
+    void callEnded(bool isConference);
 };
 
 class GlobalCallStateWrapper

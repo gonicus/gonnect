@@ -64,7 +64,11 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
             &SIPCall::updateMutedState);
     updateMutedState();
 
-    GlobalCallState::instance().holdAllCalls(this);
+    if (!silent) {
+        auto &globalCallState = GlobalCallState::instance();
+        Q_EMIT globalCallState.callStarted(false);
+        globalCallState.holdAllCalls(this);
+    }
 }
 
 SIPCall::~SIPCall()
@@ -88,6 +92,7 @@ SIPCall::~SIPCall()
     m_metadata.clear();
 
     SIPCallManager::instance().removeCall(this);
+    Q_EMIT GlobalCallState::instance().callEnded(false);
 }
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
