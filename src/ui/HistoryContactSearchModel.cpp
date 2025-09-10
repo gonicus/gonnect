@@ -18,8 +18,8 @@ HistoryContactSearchModel::HistoryContactSearchModel(QObject *parent) : QAbstrac
     connect(&SIPCallManager::instance(), &SIPCallManager::blocksChanged, this, [this]() {
         const auto count = rowCount(QModelIndex());
         if (count) {
-            emit dataChanged(createIndex(0, 0), createIndex(count - 1, 0),
-                             { static_cast<int>(Roles::IsBlocked) });
+            Q_EMIT dataChanged(createIndex(0, 0), createIndex(count - 1, 0),
+                               { static_cast<int>(Roles::IsBlocked) });
         }
     });
 }
@@ -83,7 +83,7 @@ void HistoryContactSearchModel::onFavoriteChanged(const NumberStat *numStatItem)
     for (qsizetype i = 0; i < m_resultList.size(); ++i) {
         if (std::as_const(m_resultList).at(i).url == numStatItem->phoneNumber) {
             const auto index = createIndex(i, 0);
-            emit dataChanged(index, index, { static_cast<int>(Roles::IsFavorite) });
+            Q_EMIT dataChanged(index, index, { static_cast<int>(Roles::IsFavorite) });
             return;
         }
     }

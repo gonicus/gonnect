@@ -48,7 +48,7 @@ public:
     Q_INVOKABLE void subscribeToBuddyStatus();
     void notifyOnceWhenBuddyAvailable();
 
-signals:
+Q_SIGNALS:
     void statusChanged(SIPBuddyState::STATUS);
 
 private:

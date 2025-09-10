@@ -25,7 +25,7 @@ private:
     bool m_onlyEstablishedCalls = false;
     bool m_hideIncomingSecondaryCallOnBusy = false;
 
-signals:
+Q_SIGNALS:
     void onlyEstablishedCallsChanged();
     void hideIncomingSecondaryCallOnBusyChanged();
 };

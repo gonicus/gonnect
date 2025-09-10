@@ -26,7 +26,7 @@ public:
 
     virtual void shutdown() = 0;
 
-signals:
+Q_SIGNALS:
     void colorSchemeChanged();
     void accentColorChanged();
     void highContrastChanged();

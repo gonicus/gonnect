@@ -19,7 +19,7 @@ public:
     void registerCallState(ICallState *state);
     unsigned version() const { return API_VERSION; }
 
-public slots:
+public Q_SLOTS:
     void AddMetaData(const QString &Id, const QString &Data);
     QString Call(const QString &uri);
     QVariantList CallIds();

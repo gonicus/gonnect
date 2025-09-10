@@ -279,7 +279,7 @@ void CardDAVAddressBookFeeder::flushCachImpl()
             << m_cachedContacts.size() << "contacts written to CardDAV cache with hash"
             << m_settingsHash;
 
-    emit AddressBook::instance().contactsReady();
+    Q_EMIT AddressBook::instance().contactsReady();
 }
 
 void CardDAVAddressBookFeeder::process()

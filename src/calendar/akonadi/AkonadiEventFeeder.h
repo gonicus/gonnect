@@ -33,7 +33,7 @@ public:
     virtual void process() override;
     virtual QUrl networkCheckURL() const override { return QUrl(); };
 
-private slots:
+private Q_SLOTS:
     void processCollections(KJob *job);
 
 private:

@@ -153,7 +153,7 @@ void AudioManager::refreshAudioDevices()
         m_devices.push_back(new SIPAudioDevice(d.description(), false, false, this));
     }
 
-    emit devicesChanged();
+    Q_EMIT devicesChanged();
 }
 
 pj::AudioMedia &AudioManager::getPlaybackDevMedia() const
@@ -208,7 +208,7 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
                 &AudioManager::playbackAudioVolumeChanged);
     }
 
-    emit playbackDeviceIdChanged();
+    Q_EMIT playbackDeviceIdChanged();
 }
 
 void AudioManager::setCaptureDeviceId(const QString &id)
@@ -258,7 +258,7 @@ void AudioManager::setCaptureDeviceId(const QString &id)
     // Get the initial mute state of the input device
     paGetInputMuteState(m_paContext);
 
-    emit captureDeviceIdChanged();
+    Q_EMIT captureDeviceIdChanged();
 }
 
 void AudioManager::setRingDeviceId(const QString &id)
@@ -272,7 +272,7 @@ void AudioManager::setRingDeviceId(const QString &id)
                 } else {
                     m_settings->setValue(QString("audio%1/ringing").arg(m_currentAudioProfile), id);
                 }
-                emit ringDeviceIdChanged();
+                Q_EMIT ringDeviceIdChanged();
             }
 
             qCInfo(lcAudioManager) << "set ring device ID to" << id;
@@ -289,7 +289,7 @@ void AudioManager::setExternalRinger(bool flag)
         m_settings->setValue(QString("audio%1/preferExternalRinger").arg(m_currentAudioProfile),
                              flag);
         qCInfo(lcAudioManager) << "set external ringer to" << flag;
-        emit externalRingerChanged();
+        Q_EMIT externalRingerChanged();
     }
 }
 
@@ -333,16 +333,16 @@ void AudioManager::doProfileElection()
             if (isDeviceAvailable(playbackHash) && isDeviceAvailable(captureHash)
                 && isDeviceAvailable(ringHash)) {
                 m_playbackHash = playbackHash;
-                emit playbackDeviceIdChanged();
+                Q_EMIT playbackDeviceIdChanged();
 
                 m_captureHash = captureHash;
-                emit captureDeviceIdChanged();
+                Q_EMIT captureDeviceIdChanged();
 
                 m_ringHash = ringHash;
-                emit ringDeviceIdChanged();
+                Q_EMIT ringDeviceIdChanged();
 
                 m_currentAudioProfile = pc;
-                emit currentProfileChanged();
+                Q_EMIT currentProfileChanged();
                 found = true;
                 break;
             }
@@ -352,11 +352,11 @@ void AudioManager::doProfileElection()
     }
 
     if (found) {
-        emit matchingAudioProfile();
+        Q_EMIT matchingAudioProfile();
     } else {
         m_currentAudioProfile = pc;
         if (SIPManager::instance().isConfigured()) {
-            emit noMatchingAudioProfile();
+            Q_EMIT noMatchingAudioProfile();
         }
 
         qCWarning(lcAudioManager) << "no matching audio profile found - using defaults";
@@ -369,17 +369,17 @@ void AudioManager::doProfileElection()
 
         if (m_playbackHash.isEmpty()) {
             m_playbackHash = defaultPlaybackDevice->uniqueId();
-            emit playbackDeviceIdChanged();
+            Q_EMIT playbackDeviceIdChanged();
         }
 
         if (m_captureHash.isEmpty()) {
             m_captureHash = defaultCaptureDevice->uniqueId();
-            emit captureDeviceIdChanged();
+            Q_EMIT captureDeviceIdChanged();
         }
 
         if (m_ringHash.isEmpty()) {
             m_ringHash = defaultPlaybackDevice->uniqueId();
-            emit ringDeviceIdChanged();
+            Q_EMIT ringDeviceIdChanged();
         }
     }
 }
@@ -478,7 +478,7 @@ void AudioManager::setCaptureAudioVolume(qreal volume)
         auto source = m_captureAudioPort->audioSource();
         if (source && source->volume() != volume) {
             source->setVolume(volume);
-            emit captureAudioVolumeChanged();
+            Q_EMIT captureAudioVolumeChanged();
         }
     }
 }
@@ -503,7 +503,7 @@ void AudioManager::setPlaybackAudioVolume(qreal volume)
 
         if (sink && sink->volume() != volume) {
             sink->setVolume(volume);
-            emit playbackAudioVolumeChanged();
+            Q_EMIT playbackAudioVolumeChanged();
         }
     }
 }

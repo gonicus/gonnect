@@ -27,7 +27,7 @@ void FlatpakBackgroundManager::request(bool autostart)
                     m_autostart = response.value("autostart").toBool();
                     qCDebug(lcBackgroundManager)
                             << "autostart is set to" << response.value("autostart").toBool();
-                    emit autostartChanged();
+                    Q_EMIT autostartChanged();
 
                     qCDebug(lcBackgroundManager)
                             << "background is set to" << response.value("background").toBool();

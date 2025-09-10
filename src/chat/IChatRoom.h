@@ -28,7 +28,7 @@ public:
     /// Send a message in this room
     Q_INVOKABLE virtual void sendMessage(const QString &message) = 0;
 
-signals:
+Q_SIGNALS:
     void nameChanged(QString name);
     void notificationCountChanged(qsizetype count);
 

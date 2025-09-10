@@ -32,7 +32,7 @@ public:
 
     qreal sourceLevel() const { return m_sourceAudioLevel; }
 
-signals:
+Q_SIGNALS:
     void startIdleTimer();
     void audioSourceChanged();
     void audioSinkChanged();

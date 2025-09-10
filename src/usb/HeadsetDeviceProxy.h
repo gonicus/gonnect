@@ -51,10 +51,10 @@ public:
 
     ~HeadsetDeviceProxy();
 
-signals:
+Q_SIGNALS:
     void nameChanged();
 
-protected slots:
+protected Q_SLOTS:
     void updateDeviceState(bool refreshAll = false);
     void updateRemoteContactInfo();
 

@@ -32,7 +32,7 @@ public:
 
     ~SecretPortal() = default;
 
-signals:
+Q_SIGNALS:
     void initializedChanged();
 
 private:

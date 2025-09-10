@@ -23,7 +23,7 @@ public:
 
     ~NetworkHelper() = default;
 
-signals:
+Q_SIGNALS:
     void connectivityChanged();
     void localNetworkAvailableChanged();
     void limitedNetworkAvailableChanged();

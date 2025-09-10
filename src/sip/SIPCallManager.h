@@ -101,7 +101,7 @@ public:
 
     ~SIPCallManager() = default;
 
-signals:
+Q_SIGNALS:
     void incomingCall(SIPCall *call);
     void callsChanged();
     void callAdded(QString accountId, int callId);
@@ -121,7 +121,7 @@ signals:
     void blocksChanged();
     void isBlockedChanged(SIPCall *call);
 
-private slots:
+private Q_SLOTS:
     void dispatchDtmfBuffer();
     void cleanupBlocks();
     void updateBlockTimerRunning();

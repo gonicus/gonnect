@@ -67,7 +67,7 @@ public:
 
     Q_INVOKABLE SIPBuddy *getBuddy(const QString &var);
 
-signals:
+Q_SIGNALS:
     void preferredIdentitiesChanged();
     void defaultPreferredIdentityChanged();
     void buddyStateChanged(const QString uri, SIPBuddyState::STATUS status);

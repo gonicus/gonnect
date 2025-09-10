@@ -18,7 +18,7 @@ public:
     void start(qreal customVolume = -1.0);
     void stop();
 
-private slots:
+private Q_SLOTS:
     void playbackStateChanged(QMediaPlayer::PlaybackState state);
 
 private:

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QFileInfo>
-#include <QDBusArgument>
 
 class NotificationIcon
 {
@@ -22,6 +21,3 @@ private:
 };
 
 Q_DECLARE_METATYPE(NotificationIcon)
-
-QDBusArgument &operator<<(QDBusArgument &argument, const NotificationIcon &ni);
-const QDBusArgument &operator>>(const QDBusArgument &argument, NotificationIcon &ni);

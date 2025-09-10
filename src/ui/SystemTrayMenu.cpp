@@ -30,7 +30,7 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             [](QSystemTrayIcon::ActivationReason reason) {
                 if (reason == QSystemTrayIcon::DoubleClick || reason == QSystemTrayIcon::MiddleClick
                     || reason == QSystemTrayIcon::Trigger) {
-                    emit ViewHelper::instance().activateSearch();
+                    Q_EMIT ViewHelper::instance().activateSearch();
                 }
             });
 

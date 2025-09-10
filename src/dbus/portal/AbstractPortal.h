@@ -22,7 +22,7 @@ public:
 private:
     PortalResponse m_callback;
 
-private slots:
+private Q_SLOTS:
     void responseReceived(uint state, const QVariantMap &map);
 };
 

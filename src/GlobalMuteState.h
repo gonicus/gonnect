@@ -31,7 +31,7 @@ private:
 
     bool m_isMuted = false;
 
-signals:
+Q_SIGNALS:
     void isMutedChanged();
     void isMutedChangedWithTag(bool isMuted, const QString tag);
 };

@@ -89,7 +89,7 @@ void JsChatConnector::handleAccessToken(const QString &value)
 {
     ChatConnectorManager::instance().saveAccessToken(m_config.settingsGroup, value);
     m_config.accessToken = value;
-    emit accessTokenChanged();
+    Q_EMIT accessTokenChanged();
 }
 
 void JsChatConnector::addChatRoom(const QString &roomId, const QString name)
@@ -115,14 +115,14 @@ void JsChatConnector::addImageEvent(const QString &eventId, const QString &roomI
                                     const QDateTime &dateTime)
 {
     m_events.append(new JsChatImageEvent(eventId, roomId, senderId, dateTime, imageUrl, this));
-    emit chatEventAdded();
+    Q_EMIT chatEventAdded();
 }
 
 void JsChatConnector::addUser(const QString &userId, const QString &displayName)
 {
     auto user = new JsChatUser(userId, displayName, this);
     m_users.insert(userId, user);
-    emit chatUserAdded();
+    Q_EMIT chatUserAdded();
 }
 
 void JsChatConnector::updateRoomNotificationCount(const QString &roomId, quint16 count)
@@ -140,7 +140,7 @@ void JsChatConnector::setIsSecretInitalized(bool value)
 {
     if (m_isSecretInitalized != value) {
         m_isSecretInitalized = value;
-        emit isSecretInitalizedChanged();
+        Q_EMIT isSecretInitalizedChanged();
     }
 }
 
@@ -153,20 +153,20 @@ JsChatRoom *JsChatConnector::createOrLookupChatRoom(const QString &roomId, const
 
         QObject::connect(
                 room, &JsChatRoom::notificationCountChanged, this, [this, room](qsizetype count) {
-                    emit chatRoomNotificationCountChanged(m_rooms.indexOf(room), room, count);
+                    Q_EMIT chatRoomNotificationCountChanged(m_rooms.indexOf(room), room, count);
                 });
 
         QObject::connect(room, &JsChatRoom::nameChanged, this, [this, room](const QString &name) {
-            emit chatRoomNameChanged(m_rooms.indexOf(room), room, name);
+            Q_EMIT chatRoomNameChanged(m_rooms.indexOf(room), room, name);
         });
 
         m_rooms.append(room);
         m_roomLookup.insert(roomId, room);
-        emit chatRoomAdded(m_rooms.length() - 1, room);
+        Q_EMIT chatRoomAdded(m_rooms.length() - 1, room);
 
     } else if (!roomName.isEmpty()) {
         room->setName(roomName);
-        emit chatRoomNameChanged(m_rooms.indexOf(room), room, roomName);
+        Q_EMIT chatRoomNameChanged(m_rooms.indexOf(room), room, roomName);
     }
 
     return room;

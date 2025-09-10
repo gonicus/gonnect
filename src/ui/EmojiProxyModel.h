@@ -21,6 +21,6 @@ protected:
 private:
     int m_group = -1;
 
-signals:
+Q_SIGNALS:
     void groupChanged();
 };

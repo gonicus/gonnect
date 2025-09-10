@@ -156,11 +156,11 @@ public:
     QColor toolbarText() const { return m_toolbarText; }
     QColor toolbarTopSeparator() const { return m_toolbarTopSeparator; }
 
-private slots:
+private Q_SLOTS:
     void updateColorPalette();
     void onThemeVariantChanged();
 
-signals:
+Q_SIGNALS:
     void themeVariantChanged();
     void isDarkModeChanged();
     void colorPaletteChanged();

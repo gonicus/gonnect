@@ -389,7 +389,7 @@ void HeadsetDevice::processEvents()
                         bool _hookSwitch = value & (1 << usage.bitPosition);
                         if (m_hookSwitch != _hookSwitch) {
                             m_hookSwitch = _hookSwitch;
-                            emit hookSwitch();
+                            Q_EMIT hookSwitch();
                             qCDebug(lcHeadset) << "  Hook switch changed to" << m_hookSwitch;
                         }
                     }
@@ -405,7 +405,7 @@ void HeadsetDevice::processEvents()
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_PhoneMute);
                     if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
                         m_muted = !m_muted;
-                        emit mute();
+                        Q_EMIT mute();
 
                         qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
                         setMute(m_muted);
@@ -419,7 +419,7 @@ void HeadsetDevice::processEvents()
                         bool _line = value & (1 << usage.bitPosition);
                         if (m_line != _line) {
                             m_line = _line;
-                            emit busyLine();
+                            Q_EMIT busyLine();
                             qCDebug(lcHeadset) << "  Line busy tone changed to" << m_line;
                         }
                     }
@@ -431,7 +431,7 @@ void HeadsetDevice::processEvents()
                 const auto &usage = m_hidUsages.value(UsageId::Telephony_Flash);
                 if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
                     m_flash = !m_flash;
-                    emit flash();
+                    Q_EMIT flash();
                     qCDebug(lcHeadset) << "  Flashing changed to" << m_flash;
                 }
             }
@@ -440,7 +440,7 @@ void HeadsetDevice::processEvents()
             if (m_hidUsages.contains(UsageId::Telephony_ProgrammableButton)) {
                 const auto &usage = m_hidUsages.value(UsageId::Telephony_ProgrammableButton);
                 if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
-                    emit programmableButton();
+                    Q_EMIT programmableButton();
                     qCDebug(lcHeadset) << "  Programmable button pressed";
                 }
             }
@@ -469,7 +469,7 @@ void HeadsetDevice::processEvents()
                         if (value == 0 && lastValue == 0) {
                             if (!number.isEmpty()) {
                                 qCDebug(lcHeadset) << "  dial" << number;
-                                emit dial(number);
+                                Q_EMIT dial(number);
                                 number.clear();
                             }
 
@@ -486,7 +486,7 @@ void HeadsetDevice::processEvents()
 
         // Teams button
         if (reportId == 0x9B && data[1] == 1) {
-            emit teamsButton();
+            Q_EMIT teamsButton();
         }
     }
 }

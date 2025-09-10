@@ -19,7 +19,7 @@ void GlobalCallState::setGlobalCallState(const ICallState::States state)
 {
     if (m_globalCallState != state) {
         m_globalCallState = state;
-        emit globalCallStateChanged();
+        Q_EMIT globalCallStateChanged();
 
         // Debug output
         qCInfo(lcGlobalCallState).noquote().nospace()
@@ -59,7 +59,7 @@ bool GlobalCallState::registerCallStateObject(ICallState *callStateObject)
 
             if (m_globalCallStateObjects.remove(static_cast<ICallState *>(obj))) {
                 updateGlobalCallState();
-                emit globalCallStateObjectsChanged();
+                Q_EMIT globalCallStateObjectsChanged();
             }
         });
 
@@ -81,7 +81,7 @@ bool GlobalCallState::registerCallStateObject(ICallState *callStateObject)
                 &GlobalCallState::updateGlobalCallState);
 
         updateGlobalCallState();
-        emit globalCallStateObjectsChanged();
+        Q_EMIT globalCallStateObjectsChanged();
     }
 
     return !isRegistered;
@@ -101,7 +101,7 @@ bool GlobalCallState::unregisterCallStateObject(ICallState *callStateObject)
     if (wasRegistered) {
         disconnect(callStateObject);
         updateGlobalCallState();
-        emit globalCallStateObjectsChanged();
+        Q_EMIT globalCallStateObjectsChanged();
     }
 
     return wasRegistered;
@@ -117,14 +117,14 @@ void GlobalCallState::updateGlobalCallState()
 
     setGlobalCallState(globalState);
     updateRemoteContactInfo();
-    emit activeCallsCountChanged();
+    Q_EMIT activeCallsCountChanged();
 }
 
 void GlobalCallState::setIsPhoneConference(bool flag)
 {
     if (flag != m_isPhoneConference) {
         m_isPhoneConference = flag;
-        emit isPhoneConferenceChanged();
+        Q_EMIT isPhoneConferenceChanged();
     }
 }
 
@@ -143,7 +143,7 @@ void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
 {
     if (m_remoteContactInfo != info) {
         m_remoteContactInfo = info;
-        emit remoteContactInfoChanged();
+        Q_EMIT remoteContactInfoChanged();
     }
 }
 

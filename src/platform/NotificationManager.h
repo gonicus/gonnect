@@ -18,7 +18,4 @@ public:
     virtual bool remove(const QString &id) = 0;
 
     virtual void shutdown() = 0;
-
-signals:
-    void actionInvoked(QString id, QString action, QVariantList parameters);
 };

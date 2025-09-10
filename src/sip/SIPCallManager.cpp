@@ -37,7 +37,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
     connect(this, &SIPCallManager::establishedCallsCountChanged, this, [this]() {
         if (m_isConferenceMode && m_establishedCallsCount < 2) {
             m_isConferenceMode = false;
-            emit isConferenceModeChanged();
+            Q_EMIT isConferenceModeChanged();
         }
     });
 
@@ -118,7 +118,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
         if (dev->getHookSwitch() && callsCount == 0) {
             AppSettings settings;
             if (settings.value("generic/headsetHookOff", true).toBool()) {
-                emit ViewHelper::instance().activateSearch();
+                Q_EMIT ViewHelper::instance().activateSearch();
             }
         }
     });
@@ -230,7 +230,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
         } else if (action == "reject") {
             rejectCall(call);
         } else {
-            emit showCallWindow();
+            Q_EMIT showCallWindow();
         }
     });
 
@@ -242,8 +242,8 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             [ref]() { NotificationManager::instance().remove(ref); });
 
     if (isEmergency) {
-        emit ViewHelper::instance().showEmergency(call -> account()->id(), call->getId(),
-                                                  displayName);
+        Q_EMIT ViewHelper::instance().showEmergency(call->account()->id(), call->getId(),
+                                                    displayName);
     }
 }
 
@@ -254,7 +254,7 @@ void SIPCallManager::updateCallCount()
 
     if (m_calls.length() != m_activeCalls) {
         m_activeCalls = m_calls.length();
-        emit activeCallsChanged();
+        Q_EMIT activeCallsChanged();
     }
 
     if (m_activeCalls != 0) {
@@ -274,7 +274,7 @@ void SIPCallManager::updateCallCount()
 
     if (establishedCallsCount != m_establishedCallsCount) {
         m_establishedCallsCount = establishedCallsCount;
-        emit establishedCallsCountChanged();
+        Q_EMIT establishedCallsCountChanged();
     }
 
     if ((establishedCallsCount > 0) != m_hasEstablishedCalls) {
@@ -283,7 +283,7 @@ void SIPCallManager::updateCallCount()
 
     if (m_earlyCallState != earlyCallState) {
         m_earlyCallState = earlyCallState;
-        emit earlyCallStateChanged();
+        Q_EMIT earlyCallStateChanged();
     }
 }
 
@@ -608,7 +608,7 @@ void SIPCallManager::startConference()
 
             m_isConferenceMode = true;
             GlobalCallState::instance().setIsPhoneConference(true);
-            emit isConferenceModeChanged();
+            Q_EMIT isConferenceModeChanged();
         });
     } else {
         qCWarning(lcSIPCallManager) << "Already in conference mode";
@@ -621,7 +621,7 @@ void SIPCallManager::endConference()
         endAllCalls();
         m_isConferenceMode = false;
         GlobalCallState::instance().setIsPhoneConference(false);
-        emit isConferenceModeChanged();
+        Q_EMIT isConferenceModeChanged();
     } else {
         qCWarning(lcSIPCallManager) << "Not in conference mode";
     }
@@ -655,14 +655,15 @@ void SIPCallManager::addCall(SIPCall *call)
     connect(call, &SIPCall::earlyCallStateChanged, this, &SIPCallManager::updateCallCount);
     connect(call, &SIPCall::establishedChanged, this, &SIPCallManager::updateCallCount);
     connect(call, &SIPCall::establishedChanged, this,
-            [call, this]() { emit establishedChanged(call); });
+            [call, this]() { Q_EMIT establishedChanged(call); });
     connect(call, &SIPCall::isHoldingChanged, this,
-            [call, this]() { emit isHoldingChanged(call); });
+            [call, this]() { Q_EMIT isHoldingChanged(call); });
     connect(call, &SIPCall::capabilitiesChanged, this,
-            [call, this]() { emit capabilitiesChanged(call); });
+            [call, this]() { Q_EMIT capabilitiesChanged(call); });
     connect(call, &SIPCall::contactChanged, this,
-            [call, this]() { emit callContactChanged(call); });
-    connect(call, &SIPCall::metadataChanged, this, [call, this]() { emit metadataChanged(call); });
+            [call, this]() { Q_EMIT callContactChanged(call); });
+    connect(call, &SIPCall::metadataChanged, this,
+            [call, this]() { Q_EMIT metadataChanged(call); });
 
     connect(call, &SIPCall::missed, this, [this, call]() {
         if (call->isBlocked()) {
@@ -672,7 +673,7 @@ void SIPCallManager::addCall(SIPCall *call)
         pj::CallInfo ci = call->getInfo();
 
         m_missedCalls++;
-        emit missedCallsChanged();
+        Q_EMIT missedCallsChanged();
 
         // Create notification text
         const auto contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(
@@ -729,8 +730,8 @@ void SIPCallManager::addCall(SIPCall *call)
                 });
     });
 
-    emit callAdded(call->account()->id(), call->getId());
-    emit callsChanged();
+    Q_EMIT callAdded(call->account()->id(), call->getId());
+    Q_EMIT callsChanged();
 }
 
 void SIPCallManager::removeCall(SIPCall *call)
@@ -738,7 +739,7 @@ void SIPCallManager::removeCall(SIPCall *call)
     const auto oldCount = m_calls.size();
 
     m_calls.removeAll(call);
-    emit callsChanged();
+    Q_EMIT callsChanged();
 
     // Automatically unhold last remaining call
     if (oldCount > 1 && m_calls.size() == 1 && m_calls.at(0)->isHolding()) {
@@ -751,7 +752,7 @@ void SIPCallManager::removeCall(SIPCall *call)
 void SIPCallManager::resetMissedCalls()
 {
     m_missedCalls = 0;
-    emit missedCallsChanged();
+    Q_EMIT missedCallsChanged();
 }
 
 void SIPCallManager::toggleTemporaryBlock(const QString &contactId, const QString &phoneNumber)
@@ -802,7 +803,7 @@ void SIPCallManager::toggleTemporaryBlock(const QString &contactId, const QStrin
     }
 
     if (wasAdded || wasRemoved) {
-        emit blocksChanged();
+        Q_EMIT blocksChanged();
     }
 }
 
@@ -935,7 +936,7 @@ void SIPCallManager::cleanupBlocks()
     }
 
     if (anythingRemoved) {
-        emit blocksChanged();
+        Q_EMIT blocksChanged();
     }
 }
 

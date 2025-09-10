@@ -30,8 +30,8 @@ public:
 
     void setRole(Role newRole);
 
-signals:
-    emit void roleChanged();
+Q_SIGNALS:
+    Q_EMIT void roleChanged();
 
 private:
     QString m_id;

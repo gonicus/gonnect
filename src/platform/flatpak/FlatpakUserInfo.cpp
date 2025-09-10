@@ -26,7 +26,7 @@ QString FlatpakUserInfo::getDisplayName()
     if (m_displayName.isEmpty()) {
         acquireDisplayName([this](const QString &displayName) {
             m_displayName = displayName;
-            emit displayNameChanged();
+            Q_EMIT displayNameChanged();
         });
     }
 

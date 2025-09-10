@@ -39,7 +39,7 @@ public:
 
     ~IHeadsetDevice() = default;
 
-signals:
+Q_SIGNALS:
     void hookSwitch();
     void mute();
     void busyLine();

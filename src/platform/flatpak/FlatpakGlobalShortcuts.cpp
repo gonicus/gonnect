@@ -20,7 +20,7 @@ FlatpakGlobalShortcuts::FlatpakGlobalShortcuts() : GlobalShortcuts{}
     connect(m_portal, &GlobalShortcutPortal::shortcutsChanged, this,
             &FlatpakGlobalShortcuts::shortcutsChanged);
     connect(m_portal, &GlobalShortcutPortal::activated, this,
-            [this](const QString &id) { emit activated(id); });
+            [this](const QString &id) { Q_EMIT activated(id); });
 }
 
 bool FlatpakGlobalShortcuts::isSupported() const

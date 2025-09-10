@@ -17,6 +17,6 @@ void ConferenceParticipant::setRole(Role newRole)
 {
     if (m_role != newRole) {
         m_role = newRole;
-        emit roleChanged();
+        Q_EMIT roleChanged();
     }
 }

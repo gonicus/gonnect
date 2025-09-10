@@ -53,7 +53,7 @@ void SearchListModel::handleFavoriteToggle(const NumberStat *numberStat)
         for (const auto &numObj : numbers) {
             if (numObj.number == phoneNumber) {
                 const auto idx = createIndex(i, 0);
-                emit dataChanged(idx, idx, { static_cast<int>(Roles::Numbers) });
+                Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Numbers) });
                 return;
             }
         }

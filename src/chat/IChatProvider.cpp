@@ -9,6 +9,6 @@ void IChatProvider::setIsConnected(bool value)
 {
     if (m_isConnected != value) {
         m_isConnected = value;
-        emit isConnectedChanged();
+        Q_EMIT isConnectedChanged();
     }
 }
