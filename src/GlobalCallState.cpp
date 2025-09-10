@@ -109,7 +109,7 @@ qsizetype GlobalCallState::activeCallsCount() const
 {
     qsizetype count = 0;
     for (const auto callObj : std::as_const(m_globalCallStateObjects)) {
-        if (callObj->callState().toInt()) {
+        if (callObj->callState() & ICallState::State::CallActive) {
             ++count;
         }
     }
