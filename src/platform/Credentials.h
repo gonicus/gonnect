@@ -37,9 +37,8 @@ Q_SIGNALS:
 private:
     explicit Credentials(QObject *parent = nullptr);
 
-    QKeychain::ReadPasswordJob m_readCredentialJob;
-    QKeychain::WritePasswordJob m_writeCredentialJob;
-    QKeychain::DeletePasswordJob m_deleteCredentialJob;
+    QList<QKeychain::ReadPasswordJob *> m_readCredentialJobs;
+    QList<QKeychain::WritePasswordJob *> m_writeCredentialJobs;
 
     bool m_initialized = false;
 };

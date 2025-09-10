@@ -180,8 +180,9 @@ void AddressBookManager::acquireSecret(const QString &group,
 
                     ReadOnlyConfdSettings settings;
                     settings.beginGroup(group);
-                    viewHelper.requestPassword(group,
-                                               settings.value("host", "").toString());
+                    viewHelper.requestPassword(group, settings.value("host", "").toString());
+                    settings.beginGroup(group);
+
                 } else {
                     callback(secret);
                 }

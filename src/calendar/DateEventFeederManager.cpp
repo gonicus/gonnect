@@ -50,13 +50,12 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
-                                            [secretKey](bool error, const QString &data) {
+                                            [](bool error, const QString &data) {
                                                 if (error) {
                                                     qCCritical(lcDateEventFeederManager)
                                                             << "failed to set credentials:" << data;
                                                 }
                                             });
-
                                     callback(password);
                                 }
                             });
@@ -65,8 +64,8 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
                     ReadOnlyConfdSettings settings;
                     settings.beginGroup(configId);
-                    viewHelper.requestPassword(
-                            configId, settings.value("host", "").toString());
+                    viewHelper.requestPassword(configId, settings.value("host", "").toString());
+                    settings.endGroup();
                 } else {
                     callback(secret);
                 }
