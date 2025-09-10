@@ -238,7 +238,7 @@ Item {
                     }
 
 
-                    onSetOnHold: (value) => confConn.setOnHold(value)
+                    onSetOnHold: () => confConn.toggleHold()
                     onSetAudioMuted: (value) => confConn.setAudioMuted(value)
                     onSetVideoMuted: (value) => confConn.setVideoMuted(value)
                     onSetScreenShare: (value) => confConn.setScreenShare(value)

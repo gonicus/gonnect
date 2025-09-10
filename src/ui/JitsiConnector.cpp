@@ -1046,6 +1046,13 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     qCInfo(lcJitsiConnector).nospace().noquote() << "Entering conference " << conferenceId << " ("
                                                  << displayName << ") with flags:" << startFlags;
 
+    auto &globalCallState = GlobalCallState::instance();
+    globalCallState.holdAllCalls(this);
+
+    if (isOnHold()) {
+        toggleHold();
+    }
+
     DateEventManager::instance().removeNotificationByRoomName(displayName);
 
     m_startWithVideo = startFlags & IConferenceConnector::StartFlag::VideoActive;
@@ -1171,6 +1178,8 @@ void JitsiConnector::setOnHold(bool shallHold)
                 setVideoMuted(!isVideoMuted());
             }
         } else {
+            GlobalCallState::instance().holdAllCalls(this);
+
             if (isAudioMuted() != GlobalMuteState::instance().isMuted()) {
                 toggleMute();
             }

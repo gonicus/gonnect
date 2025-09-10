@@ -394,6 +394,22 @@ void SIPCallManager::unholdAllCalls() const
     GlobalCallState::instance().unholdOtherCall();
 }
 
+void SIPCallManager::toggleHoldCall(const QString &accountId, const int callId)
+{
+    auto account = SIPAccountManager::instance().getAccount(accountId);
+
+    if (account) {
+        auto callObj = qobject_cast<ICallState *>(account->getCallById(callId));
+        if (callObj) {
+            callObj->toggleHold();
+        } else {
+            qCCritical(lcSIPCallManager) << "Call with id" << callId << "not found";
+        }
+    } else {
+        qCCritical(lcSIPCallManager) << "Account with id" << accountId << "not found";
+    }
+}
+
 void SIPCallManager::endCall(const QString &accountId, const int callId)
 {
     auto account = SIPAccountManager::instance().getAccount(accountId);

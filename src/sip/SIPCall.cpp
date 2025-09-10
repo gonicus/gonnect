@@ -63,6 +63,8 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     connect(&AudioManager::instance(), &AudioManager::isAudioCaptureMutedChanged, this,
             &SIPCall::updateMutedState);
     updateMutedState();
+
+    GlobalCallState::instance().holdAllCalls(this);
 }
 
 SIPCall::~SIPCall()
@@ -457,6 +459,10 @@ void SIPCall::toggleHoldImpl()
 void SIPCall::setIsHolding(bool value)
 {
     if (m_isHolding != value) {
+        if (!value) {
+            GlobalCallState::instance().holdAllCalls(this);
+        }
+
         m_isHolding = value;
         emit isHoldingChanged();
     }

@@ -39,7 +39,7 @@ public:
 
     const ICallState::States callState() const { return m_callState; }
 
-    void toggleHold();
+    Q_INVOKABLE void toggleHold();
 
     virtual ContactInfo remoteContactInfo() const = 0;
 

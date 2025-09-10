@@ -56,6 +56,7 @@ public:
     void holdOtherCalls(const SIPCall *call);
     void holdAllCalls() const;
     void unholdAllCalls() const;
+    Q_INVOKABLE void toggleHoldCall(const QString &accountId, const int callId);
     Q_INVOKABLE void holdCall(const QString &accountId, const int callId);
     Q_INVOKABLE void unholdCall(const QString &accountId, const int callId);
     Q_INVOKABLE void acceptCall(const QString &accountId, const int callId);
