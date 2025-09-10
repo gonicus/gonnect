@@ -120,7 +120,7 @@ void GlobalCallState::setCallInForeground(ICallState *call)
 {
     if (m_callInForeground != call) {
         m_callInForeground = call;
-        emit callInForegroundChanged();
+        Q_EMIT callInForegroundChanged();
     }
 }
 
