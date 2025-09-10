@@ -57,6 +57,8 @@ void Credentials::initialize()
 
 void Credentials::set(const QString &key, const QString &secret, CredentialsResponse callback)
 {
+    qCritical() << "### set ->" << key << secret;
+
     m_writeCredentialJob.setKey(key);
 
     connect(&m_writeCredentialJob, &QKeychain::WritePasswordJob::finished, this,
@@ -78,10 +80,14 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
 {
     m_readCredentialJob.setKey(key);
 
+    qCritical() << "### get" << key;
+
     QObject::connect(&m_readCredentialJob, &QKeychain::ReadPasswordJob::finished, this,
                      [this, key, callback]() {
                          auto error = m_readCredentialJob.error();
                          QString secret = m_readCredentialJob.textData();
+
+                        qCritical() << "### get ->" << key << secret << error;
 
                          // Key is not present in keychain? Try to update it from Flatpak portal
                          if (error == QKeychain::EntryNotFound || secret.isEmpty()) {

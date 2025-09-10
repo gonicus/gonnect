@@ -64,8 +64,9 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
                     m_viewHelperConnections.insert(configId, conn);
 
                     ReadOnlyConfdSettings settings;
+                    settings.beginGroup(configId);
                     viewHelper.requestPassword(
-                            configId, configId + "/" + settings.value("host", "").toString());
+                            configId, settings.value("host", "").toString());
                 } else {
                     callback(secret);
                 }
