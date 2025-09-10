@@ -18,9 +18,9 @@ Toggler::Toggler(const QString &id, QObject *parent) : QObject(parent), Account(
     connect(&m_timeoutTimer, &QTimer::timeout, this, [this]() {
         m_busy = false;
 
-        emit ErrorBus::instance().error(tr("Failed to toggle the state of %1.").arg(m_id));
-        emit busyChanged();
-        emit activeChanged();
+        Q_EMIT ErrorBus::instance().error(tr("Failed to toggle the state of %1.").arg(m_id));
+        Q_EMIT busyChanged();
+        Q_EMIT activeChanged();
     });
 }
 
@@ -77,9 +77,9 @@ bool Toggler::initialize()
         m_timeoutTimer.stop();
 
         m_busy = false;
-        emit busyChanged();
+        Q_EMIT busyChanged();
 
-        emit activeChanged();
+        Q_EMIT activeChanged();
     });
     m_buddy->initialize();
 
@@ -95,7 +95,7 @@ void Toggler::setActive(bool value)
             m_timeoutTimer.start();
 
             m_busy = true;
-            emit busyChanged();
+            Q_EMIT busyChanged();
 
             SIPCallManager::instance().call(m_toggle, true);
         }

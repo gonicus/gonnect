@@ -34,7 +34,7 @@ public:
     void checkMetadata();
     void loadModelData();
 
-private slots:
+private Q_SLOTS:
     void resetModel();
 
 private:
@@ -46,7 +46,7 @@ private:
     QString m_accountId;
     QPointer<SIPCall> m_call;
 
-signals:
+Q_SIGNALS:
     void callIdChanged();
     void accountIdChanged();
 };

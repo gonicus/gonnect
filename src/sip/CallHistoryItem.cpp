@@ -57,7 +57,7 @@ void CallHistoryItem::endCall()
 void CallHistoryItem::flushToDatabase()
 {
     CallHistory &history = *callHistory();
-    emit history.dataChanged(history.indexOfItem(this), this);
+    Q_EMIT history.dataChanged(history.indexOfItem(this), this);
     history.writeToDatabase(*this);
 }
 

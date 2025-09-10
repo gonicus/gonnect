@@ -26,7 +26,7 @@ public:
     virtual void process() override;
     virtual QUrl networkCheckURL() const override { return m_url; };
 
-private slots:
+private Q_SLOTS:
     void onError(QString error) const;
     void onParserFinished();
 

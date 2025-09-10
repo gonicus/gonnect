@@ -29,10 +29,10 @@ public:
     QList<QCameraDevice> devices() const { return m_devices; }
     QCameraDevice selectedDevice() const;
 
-public slots:
+public Q_SLOTS:
     void updateDevices();
 
-private slots:
+private Q_SLOTS:
     void updateProfile();
 
 private:
@@ -47,7 +47,7 @@ private:
     std::unique_ptr<AppSettings> m_settings = nullptr;
     unsigned m_currentProfile = 0;
 
-signals:
+Q_SIGNALS:
     void devicesChanged();
     void selectedDeviceIdChanged();
 };

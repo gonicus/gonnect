@@ -172,7 +172,7 @@ void USBDevices::refresh()
 
     hid_free_enumeration(devs);
 
-    emit devicesChanged();
+    Q_EMIT devicesChanged();
 }
 
 void USBDevices::clearDevices()

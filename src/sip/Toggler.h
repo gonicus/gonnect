@@ -45,7 +45,7 @@ public:
 
     ~Toggler();
 
-signals:
+Q_SIGNALS:
     void activeChanged();
     void busyChanged();
 

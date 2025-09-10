@@ -20,6 +20,6 @@ protected:
 private:
     QString m_sourceDisplayName;
 
-signals:
+Q_SIGNALS:
     void sourceDisplayNameChanged();
 };

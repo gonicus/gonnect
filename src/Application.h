@@ -36,7 +36,7 @@ public:
 
     static bool isFlatpak();
 
-public slots:
+public Q_SLOTS:
     void handleSigHup();
     void handleSigTerm();
     void shutdown();

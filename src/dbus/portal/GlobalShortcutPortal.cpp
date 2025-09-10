@@ -46,7 +46,7 @@ void GlobalShortcutPortal::initialize()
         }
     });
 
-    emit initialized();
+    Q_EMIT initialized();
 }
 
 void GlobalShortcutPortal::registerShortcuts()
@@ -134,7 +134,7 @@ void GlobalShortcutPortal::bindShortcuts(PortalResponse callback)
 void GlobalShortcutPortal::shortcutActivatedReceived(const QDBusObjectPath &, const QString &id,
                                                      qulonglong, const QVariantMap &)
 {
-    emit activated(id);
+    Q_EMIT activated(id);
 }
 
 void GlobalShortcutPortal::shortcutsChangedReceived(const QDBusObjectPath &,
@@ -157,7 +157,7 @@ void GlobalShortcutPortal::updateShortcuts(const Shortcuts &shortcuts)
         m_currentShortcuts.push_back(sci);
     }
 
-    emit shortcutsChanged();
+    Q_EMIT shortcutsChanged();
 }
 
 void GlobalShortcutPortal::createSession(PortalResponse callback)

@@ -92,7 +92,7 @@ public:
 
     ~AudioManager();
 
-signals:
+Q_SIGNALS:
     void noMatchingAudioProfile();
     void matchingAudioProfile();
     void currentProfileChanged();
@@ -107,7 +107,7 @@ signals:
     void isAudioCaptureMutedChanged();
     void externalRingerChanged();
 
-private slots:
+private Q_SLOTS:
     void paMainloopIterate();
 
 private:

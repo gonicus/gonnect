@@ -25,7 +25,7 @@ protected:
     bool m_isConnected = false;
     QString m_settingsGroup;
 
-signals:
+Q_SIGNALS:
     void isConnectedChanged();
 
     void chatRoomAdded(qsizetype index, IChatRoom *);

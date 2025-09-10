@@ -13,14 +13,14 @@ SettingsPortal::SettingsPortal(QObject *parent) : QObject(parent)
         if (reply.isValid()) {
             unsigned cs = reply.value().variant().toUInt();
             m_colorScheme = unsignedToColorScheme(cs);
-            emit colorSchemeChanged();
+            Q_EMIT colorSchemeChanged();
         }
 
         reply = m_portal->ReadOne("org.freedesktop.appearance", "contrast");
         reply.waitForFinished();
         if (reply.isValid()) {
             m_highContrast = reply.value().variant().toBool();
-            emit highContrastChanged();
+            Q_EMIT highContrastChanged();
         }
     });
 
@@ -46,13 +46,13 @@ void SettingsPortal::settingsChanged(QString ns, QString key, QDBusVariant value
 
         if (key == "color-scheme") {
             m_colorScheme = unsignedToColorScheme(value.variant().toUInt());
-            emit colorSchemeChanged();
+            Q_EMIT colorSchemeChanged();
             return;
         }
 
         if (key == "contrast") {
             m_highContrast = value.variant().toBool();
-            emit highContrastChanged();
+            Q_EMIT highContrastChanged();
             return;
         }
     }

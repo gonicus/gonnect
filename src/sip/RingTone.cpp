@@ -61,7 +61,7 @@ void RingTone::stop()
     m_toneGen.stop();
     m_toneGen.stopTransmit(m_mediaSink);
 
-    emit ready();
+    Q_EMIT ready();
 }
 
 void RingTone::playNextTone()

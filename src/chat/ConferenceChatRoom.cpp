@@ -23,14 +23,14 @@ void ConferenceChatRoom::sendMessage(const QString &message)
     auto chatMessageObject = new ChatMessage("", "", "", message, QDateTime::currentDateTime(),
                                              ChatMessage::Flag::OwnMessage);
     addMessage(chatMessageObject);
-    emit sendMessageRequested(message);
+    Q_EMIT sendMessageRequested(message);
 }
 
 void ConferenceChatRoom::addMessage(ChatMessage *chatMessageObj)
 {
     Q_CHECK_PTR(chatMessageObj);
     m_messages.append(chatMessageObj);
-    emit chatMessageAdded(m_messages.length() - 1, chatMessageObj);
+    Q_EMIT chatMessageAdded(m_messages.length() - 1, chatMessageObj);
 }
 
 void ConferenceChatRoom::resetUnreadCount()

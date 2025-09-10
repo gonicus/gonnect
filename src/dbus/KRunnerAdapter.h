@@ -59,13 +59,13 @@ public:
     ~KRunner2Adapter() override;
 
 public: // PROPERTIES
-public slots: // METHODS
+public Q_SLOTS: // METHODS
     ActionList Actions();
     QVariantMap Config();
     RemoteMatches Match(const QString &query);
     void Run(const QString &matchId, const QString &actionId);
     void Teardown();
-signals: // SIGNALS
+Q_SIGNALS: // SIGNALS
 };
 
 #endif

@@ -41,7 +41,7 @@ void PreferredIdentity::setDisplayName(const QString &value)
 {
     if (value != m_displayName) {
         m_displayName = value;
-        emit displayNameChanged();
+        Q_EMIT displayNameChanged();
 
         m_settings.setValue("name", m_displayName);
     }
@@ -51,7 +51,7 @@ void PreferredIdentity::setIdentity(const QString &value)
 {
     if (value != m_identity) {
         m_identity = value;
-        emit identityChanged();
+        Q_EMIT identityChanged();
 
         m_settings.setValue("identity", m_identity);
     }
@@ -61,7 +61,7 @@ void PreferredIdentity::setPrefix(const QString &value)
 {
     if (value != m_prefix) {
         m_prefix = value;
-        emit prefixChanged();
+        Q_EMIT prefixChanged();
     }
 
     m_settings.setValue("prefix", m_prefix);
@@ -71,7 +71,7 @@ void PreferredIdentity::setEnabled(bool flag)
 {
     if (flag != m_enabled) {
         m_enabled = flag;
-        emit enabledChanged();
+        Q_EMIT enabledChanged();
     }
 
     m_settings.setValue("enabled", m_enabled);
@@ -81,7 +81,7 @@ void PreferredIdentity::setAutomatic(bool flag)
 {
     if (flag != m_automatic) {
         m_automatic = flag;
-        emit automaticChanged();
+        Q_EMIT automaticChanged();
     }
 
     m_settings.setValue("automatic", m_automatic);
@@ -93,6 +93,6 @@ void PreferredIdentity::validate()
 
     if (isValid != m_isValid) {
         m_isValid = isValid;
-        emit isValidChanged();
+        Q_EMIT isValidChanged();
     }
 }

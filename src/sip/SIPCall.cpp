@@ -56,7 +56,7 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     }
 
     connect(this, &SIPCall::isBlockedChanged, this,
-            [this]() { emit SIPCallManager::instance().isBlockedChanged(this); });
+            [this]() { Q_EMIT SIPCallManager::instance().isBlockedChanged(this); });
     connect(&sipCallManager, &SIPCallManager::blocksChanged, this, &SIPCall::updateIsBlocked);
 
     // Forward muted state to ICallState
@@ -74,7 +74,7 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
 SIPCall::~SIPCall()
 {
     if (m_isEmergencyCall) {
-        emit ViewHelper::instance().hideEmergency();
+        Q_EMIT ViewHelper::instance().hideEmergency();
     }
 
     auto &ringToneFactory = RingToneFactory::instance();
@@ -172,7 +172,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         if (!m_isSilent && !m_incoming) {
             m_wasEstablished = true;
             m_earlyCallState = true;
-            emit earlyCallStateChanged();
+            Q_EMIT earlyCallStateChanged();
         }
         break;
 
@@ -191,12 +191,12 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             m_establishedTime = QDateTime::currentDateTime();
 
             if (isEmergencyCall()) {
-                emit ViewHelper::instance().hideEmergency();
+                Q_EMIT ViewHelper::instance().hideEmergency();
             }
-            emit establishedChanged();
+            Q_EMIT establishedChanged();
 
             m_earlyCallState = false;
-            emit earlyCallStateChanged();
+            Q_EMIT earlyCallStateChanged();
 
             if (m_account && m_account->isInstantMessagingAllowed()) {
                 if (!m_imHandler->capabilitiesSent()) {
@@ -227,7 +227,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
     case PJSIP_INV_STATE_DISCONNECTED:
         if (!m_isEstablished && m_incoming) {
-            emit missed();
+            Q_EMIT missed();
         }
 
         qCInfo(lcSIPCall).nospace() << "Call state disconnected, reason: " << ci.lastReason << ", "
@@ -254,7 +254,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         }
 
         if (isEmergencyCall()) {
-            emit ViewHelper::instance().hideEmergency();
+            Q_EMIT ViewHelper::instance().hideEmergency();
         }
 
         m_account->removeCall(this);
@@ -268,7 +268,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     }
 
     qCInfo(lcSIPCall) << "Emitting call state of call" << getId() << "and status" << statusCode;
-    emit SIPCallManager::instance().callState(getId(), statusCode);
+    Q_EMIT SIPCallManager::instance().callState(getId(), statusCode);
 }
 
 void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
@@ -315,8 +315,8 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     sniffer->initialize();
                     aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*sniffer));
                     connect(sniffer, &Sniffer::audioLevelChanged, this, [this, sniffer]() {
-                        emit SIPCallManager::instance().audioLevelChanged(this,
-                                                                          sniffer -> audioLevel());
+                        Q_EMIT SIPCallManager::instance().audioLevelChanged(this,
+                                                                            sniffer->audioLevel());
                     });
                 }
 
@@ -469,7 +469,7 @@ void SIPCall::setIsHolding(bool value)
         }
 
         m_isHolding = value;
-        emit isHoldingChanged();
+        Q_EMIT isHoldingChanged();
     }
 }
 
@@ -477,7 +477,7 @@ void SIPCall::setIsBlocked(bool value)
 {
     if (m_isBlocked != value) {
         m_isBlocked = value;
-        emit isBlockedChanged();
+        Q_EMIT isBlockedChanged();
     }
 }
 
@@ -513,7 +513,7 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
                                                                m_contactId,
                                                                m_contactInfo.isSipSubscriptable);
 
-        emit contactChanged();
+        Q_EMIT contactChanged();
     }
 }
 
@@ -640,5 +640,5 @@ void SIPCall::addMetadata(const QString &data)
         m_hasMetadata = true;
     }
 
-    emit metadataChanged();
+    Q_EMIT metadataChanged();
 }

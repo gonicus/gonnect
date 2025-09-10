@@ -103,7 +103,7 @@ private:
     QList<PhoneNumber> m_phoneNumbers;
     bool m_sipStatusSubscriptable;
 
-signals:
+Q_SIGNALS:
     void avatarChanged();
 };
 

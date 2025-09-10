@@ -19,7 +19,7 @@ void SIPAccountManager::setSipRegistered(bool value)
                 value ? ReportDescriptorEnums::TeamsPresenceIcon::Online
                       : ReportDescriptorEnums::TeamsPresenceIcon::Offline);
 
-        emit sipRegisteredChanged();
+        Q_EMIT sipRegisteredChanged();
     }
 }
 
@@ -49,7 +49,7 @@ void SIPAccountManager::initialize()
             connect(sipAccount, &SIPAccount::isRegisteredChanged, this,
                     &SIPAccountManager::updateSipRegistered);
             connect(sipAccount, &SIPAccount::authorizationFailed, this,
-                    [this, sipAccount]() { emit authorizationFailed(sipAccount->id()); });
+                    [this, sipAccount]() { Q_EMIT authorizationFailed(sipAccount->id()); });
             updateSipRegistered();
 
             connect(sipAccount, &SIPAccount::initialized, this,
@@ -57,7 +57,7 @@ void SIPAccountManager::initialize()
                         if (success) {
                             qCInfo(lcSIPAccountManager) << "created account" << group;
                             m_accounts.push_back(sipAccount);
-                            emit accountsChanged();
+                            Q_EMIT accountsChanged();
                         } else {
                             qCCritical(lcSIPAccountManager)
                                     << "skipped" << group << "due to initialization errors";

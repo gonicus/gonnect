@@ -50,7 +50,7 @@ public:
     Q_INVOKABLE void holdAllCalls(const ICallState *stateObjectToSkip = nullptr) const;
     Q_INVOKABLE void unholdOtherCall() const;
 
-private slots:
+private Q_SLOTS:
     void updateGlobalCallState();
     void updateRinger();
     void onCallInForegroundChanged();
@@ -74,7 +74,7 @@ private:
 
     bool m_isPhoneConference = false;
 
-signals:
+Q_SIGNALS:
     void globalCallStateChanged();
     void remoteContactInfoChanged();
     void callInForegroundChanged();

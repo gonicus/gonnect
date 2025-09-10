@@ -21,7 +21,7 @@ public:
 
     qreal audioLevel() const { return m_audioLevel; }
 
-signals:
+Q_SIGNALS:
     void audioLevelChanged(qreal level);
 
 private:

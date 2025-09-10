@@ -98,7 +98,7 @@ void AudioPort::setSourceAudioLevel(qreal level)
 {
     if (m_sourceAudioLevel != level) {
         m_sourceAudioLevel = level;
-        emit sourceLevelChanged(level);
+        Q_EMIT sourceLevelChanged(level);
     }
 }
 
@@ -147,7 +147,7 @@ void AudioPort::startSinkIO()
     m_sink = new QAudioSink(m_device, m_audioFormat);
     m_io = m_sink->start();
 
-    emit audioSinkChanged();
+    Q_EMIT audioSinkChanged();
 }
 
 void AudioPort::stopSinkIO()
@@ -164,7 +164,7 @@ void AudioPort::stopSinkIO()
         m_io = nullptr;
     }
 
-    emit audioSinkChanged();
+    Q_EMIT audioSinkChanged();
 }
 
 void AudioPort::startSourceIO()
@@ -188,7 +188,7 @@ void AudioPort::startSourceIO()
     m_source = new QAudioSource(m_device, m_audioFormat);
     m_io = m_source->start();
 
-    emit audioSourceChanged();
+    Q_EMIT audioSourceChanged();
 }
 
 void AudioPort::stopSourceIO()
@@ -205,7 +205,7 @@ void AudioPort::stopSourceIO()
         m_io = nullptr;
     }
 
-    emit audioSourceChanged();
+    Q_EMIT audioSourceChanged();
 }
 
 QString AudioPort::getDeviceID() const
@@ -245,7 +245,7 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
     }
 
     // Auto destroy sink after timeout
-    emit startIdleTimer();
+    Q_EMIT startIdleTimer();
 }
 
 void AudioPort::onFrameReceived(pj::MediaFrame &frame)
@@ -267,5 +267,5 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
     m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);
 
     // Auto destroy sink after timeout
-    emit startIdleTimer();
+    Q_EMIT startIdleTimer();
 }

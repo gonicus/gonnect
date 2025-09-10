@@ -159,7 +159,7 @@ void LinuxDesktopSearchProvider::LaunchSearch(const QStringList &terms, uint tim
     Q_UNUSED(timestamp)
     qCDebug(lcSearchProvider) << "sending launch search request to search dialog:"
                               << terms.join(" ");
-    emit activateSearch(terms.join(" "));
+    Q_EMIT activateSearch(terms.join(" "));
     qDeleteAll(m_searchResults);
     m_searchResults.clear();
 }

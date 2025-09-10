@@ -83,7 +83,7 @@ private:
     QList<JsChatEvent *> m_events;
     QHash<QString, JsChatUser *> m_users;
 
-signals:
+Q_SIGNALS:
     void isSecretInitalizedChanged();
     void accessTokenChanged();
     void chatEventAdded();

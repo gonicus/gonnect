@@ -31,7 +31,7 @@ public:
 
     void initialize();
 
-signals:
+Q_SIGNALS:
     void togglerChanged();
     void togglerActiveChanged(Toggler *toggler, bool value);
     void togglerBusyChanged(Toggler *toggler, bool value);

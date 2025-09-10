@@ -22,10 +22,11 @@ void TogglerManager::initialize()
                 m_toggler.push_back(toggler);
 
                 connect(toggler, &Toggler::activeChanged, this, [this, toggler]() {
-                    emit togglerActiveChanged(toggler, toggler->isActive());
+                    Q_EMIT togglerActiveChanged(toggler, toggler->isActive());
                 });
-                connect(toggler, &Toggler::busyChanged, this,
-                        [this, toggler]() { emit togglerBusyChanged(toggler, toggler->isBusy()); });
+                connect(toggler, &Toggler::busyChanged, this, [this, toggler]() {
+                    Q_EMIT togglerBusyChanged(toggler, toggler->isBusy());
+                });
 
             } else {
                 qCCritical(lcTogglerManager)
@@ -34,7 +35,7 @@ void TogglerManager::initialize()
         }
     }
 
-    emit togglerChanged();
+    Q_EMIT togglerChanged();
 }
 
 Toggler *TogglerManager::getToggler(const QString &id)

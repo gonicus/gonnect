@@ -46,10 +46,10 @@ private:
     QTimer m_updateContactsTimer;
     QList<QPointer<Contact>> m_contactsWithPendingUpdates;
 
-private slots:
+private Q_SLOTS:
     void updateContacts();
 
-signals:
+Q_SIGNALS:
     void avatarsLoaded();
     void avatarAdded(QString contactId);
     void avatarRemoved(QString contactId);

@@ -14,7 +14,7 @@ public:
     explicit SearchProvider(QObject *parent = nullptr) : QObject(parent) { }
     ~SearchProvider() = default;
 
-signals:
+Q_SIGNALS:
     void activateSearch(QString query);
 };
 

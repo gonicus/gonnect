@@ -29,7 +29,7 @@ public:
     void saveRecoveryKey(const QString &settingsGroup, const QString &key) const;
     void saveAccessToken(const QString &settingsGroup, const QString &token) const;
 
-private slots:
+private Q_SLOTS:
     void init();
 
 private:
@@ -39,7 +39,7 @@ private:
     bool m_isJsChatAvailable = false;
     QList<JsChatConnector *> m_connectors;
 
-signals:
+Q_SIGNALS:
     void jsChatConnectorsChanged();
 };
 
