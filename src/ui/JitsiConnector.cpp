@@ -20,6 +20,7 @@
 #include "DateEventManager.h"
 #include "Credentials.h"
 #include "GlobalCallState.h"
+#include "ChatMessage.h"
 
 #include <QLoggingCategory>
 
@@ -27,6 +28,8 @@ Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
 
 JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 {
+    m_chatRoom = new ConferenceChatRoom(this);
+
     connect(this, &JitsiConnector::isInConferenceChanged, this, [this]() {
         if (isInConference()) {
             m_establishedDateTime = QDateTime::currentDateTime();
@@ -65,6 +68,11 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
             });
 }
 
+JitsiConnector::~JitsiConnector()
+{
+    qDeleteAll(m_chatNotifications);
+}
+
 void JitsiConnector::setJitsiId(QString id)
 {
     if (m_jitsiId != id) {
@@ -93,6 +101,7 @@ void JitsiConnector::apiLoadingFinishedInternal()
 
     if (m_isToggleScreenSharePending) {
         m_isToggleScreenSharePending = false;
+
         // It can sometimes crash the JS API, when the toggleScreenShare command is executed too
         // early. Since there is no reliable event to listen to, a random timer must be used here to
         // defer it such that Jitsi Meet is hopefully ready...
@@ -116,10 +125,16 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
                              << "from" << fromId << nickName << "at" << stamp
                              << "as private message:" << isPrivateMessage << ":" << message;
 
-    auto msgObj = new ConferenceChatMessage(fromId, nickName, message, stamp, isPrivateMessage,
-                                            false, this);
-    m_messages.append(msgObj);
-    emit chatMessageAdded(m_messages.size() - 1, msgObj);
+    ChatMessage::Flags flags = static_cast<ChatMessage::Flag>(0);
+    if (isPrivateMessage) {
+        flags |= ChatMessage::Flag::PrivateMessage;
+    }
+    if (fromId == ownId()) {
+        flags |= ChatMessage::Flag::OwnMessage;
+    }
+
+    auto msgObj = new ChatMessage("", fromId, nickName, message, stamp, flags);
+    m_chatRoom->addMessage(msgObj);
 
     // System notification
     AppSettings settings;
@@ -236,7 +251,7 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("password", pw)
     })
 
-    jitsiConn.messageSent.connect(msg => {
+    jitsiConn.chatRoom.sendMessageRequested.connect(msg => {
         api.executeCommand("sendChatMessage", msg)
     })
 
@@ -422,17 +437,6 @@ void JitsiConnector::setLargeVideoParticipantById(const QString &id)
     setLargeVideoParticipant(nullptr);
 }
 
-ConferenceChatMessage *JitsiConnector::sendMessage(const QString &message)
-{
-    auto chatMessage = new ConferenceChatMessage(m_jitsiId, jitsiDisplayName(), message,
-                                                 QDateTime::currentDateTime(), false, false, this);
-    m_messages.append(chatMessage);
-    emit chatMessageAdded(m_messages.size() - 1, chatMessage);
-    emit messageSent(message);
-
-    return chatMessage;
-}
-
 void JitsiConnector::setIsInConference(bool value)
 {
     if (m_isInConference != value) {
@@ -453,8 +457,6 @@ void JitsiConnector::setIsInConference(bool value)
 
             qDeleteAll(m_chatNotifications);
             m_chatNotifications.clear();
-            m_messages.clear();
-            emit chatMessagesReset();
 
             m_participants.clear();
             emit participantsCleared();
@@ -854,10 +856,8 @@ JitsiMediaDevice *JitsiConnector::sipToJitsiDevice(const SIPAudioDevice *sipDevi
 void JitsiConnector::addRoomMessage(QString message, QDateTime stamp)
 {
     qCInfo(lcJitsiConnector) << "Adding room 'chat' message at" << stamp << ":" << message;
-
-    auto msgObj = new ConferenceChatMessage("room", "", message, stamp, false, true, this);
-    m_messages.append(msgObj);
-    emit chatMessageAdded(m_messages.size() - 1, msgObj);
+    m_chatRoom->addMessage(
+            new ChatMessage("", "room", "", message, stamp, ChatMessage::Flag::SystemMessage));
 }
 
 QString JitsiConnector::jitsiDisplayName() const

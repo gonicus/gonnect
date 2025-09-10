@@ -15,9 +15,9 @@ public:
 
     bool isConnected() const { return m_isConnected; }
 
-    virtual void connect() = 0;
     virtual QList<IChatRoom *> chatRooms() = 0;
     virtual qsizetype indexOf(IChatRoom *chatRoom) const = 0;
+    Q_INVOKABLE virtual IChatRoom *chatRoomByRoomId(const QString &roomId) const = 0;
 
 protected:
     void setIsConnected(bool value);
