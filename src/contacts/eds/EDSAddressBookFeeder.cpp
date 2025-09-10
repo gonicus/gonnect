@@ -335,7 +335,7 @@ void EDSAddressBookFeeder::onClientContactsRequested(GObject *source_object, GAs
     if (feeder) {
         if (!e_book_client_get_contacts_finish(E_BOOK_CLIENT(source_object), result, &contacts,
                                                &error)) {
-            qCDebug(lcEDSAddressBookFeeder) << "Can't retrieve contacts: " << error->message;
+            qCDebug(lcEDSAddressBookFeeder) << "Can't retrieve contacts:" << error->message;
             g_error_free(error);
             error = nullptr;
             return;

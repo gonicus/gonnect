@@ -36,12 +36,9 @@ IDateEventFeeder *CalDAVEventFeederFactory::createFeeder(
     ReadOnlyConfdSettings settings;
     settings.beginGroup(settingsGroup);
 
-    auto feeder = new CalDAVEventFeeder(feederManager);
-
-    feeder->init(settingsGroup, name(), settings.value("host").toString(),
-                 settings.value("path").toString(), settings.value("user").toString(),
-                 settings.value("port", 0).toInt(), settings.value("useSSL", true).toBool(),
-                 settings.value("interval", 300000).toInt(), timeRangeStart, timeRangeEnd);
-
-    return feeder;
+    return new CalDAVEventFeeder(
+            feederManager, settingsGroup, name(), settings.value("host").toString(),
+            settings.value("path").toString(), settings.value("user").toString(),
+            settings.value("port", 0).toInt(), settings.value("useSSL", true).toBool(),
+            settings.value("interval", 300000).toInt(), timeRangeStart, timeRangeEnd);
 }

@@ -112,118 +112,8 @@ void EDSEventFeeder::init()
 
 void EDSEventFeeder::process()
 {
-    GError *error = nullptr;
-    GSList *components = nullptr;
-
-    DateEventManager &manager = DateEventManager::instance();
-
     for (auto client : std::as_const(m_clients)) {
-        QString sourceInfo = QString("%1 (%2)").arg(
-                e_source_get_display_name(e_client_get_source(E_CLIENT(client))),
-                e_source_get_uid(e_client_get_source(E_CLIENT(client))));
-
-        if (!e_cal_client_get_object_list_sync(client, m_searchExpr, &components, nullptr,
-                                               &error)) {
-            qCDebug(lcEDSEventFeeder) << "Can't get events of '" << sourceInfo << "), skipping...";
-            g_error_free(error);
-            error = nullptr;
-        } else {
-            for (GSList *item = components; item != nullptr; item = g_slist_next(item)) {
-                ICalComponent *component = I_CAL_COMPONENT(item->data);
-                if (component && i_cal_component_isa(component) == I_CAL_VEVENT_COMPONENT) {
-                    // RRULE
-                    bool isRecurrent = false;
-                    ICalProperty *prop =
-                            i_cal_component_get_first_property(component, I_CAL_RRULE_PROPERTY);
-                    ICalRecurrence *rrule = nullptr;
-                    if (prop) {
-                        isRecurrent = true;
-                        rrule = i_cal_property_get_rrule(prop);
-                        g_clear_object(&prop);
-                    }
-
-                    ICalTime *dtstart = i_cal_component_get_dtstart(component);
-                    QDateTime start = createDateTimeFromTimeType(dtstart);
-
-                    QString location = manager.getJitsiRoomFromLocation(
-                            i_cal_component_get_location(component));
-
-                    // Skip non-recurrent events that are outside of our date range
-                    if (location.isEmpty()
-                        || ((start < m_timeRangeStart || start > m_timeRangeEnd) && !isRecurrent)) {
-                        continue;
-                    }
-
-                    ICalTime *dtend = i_cal_component_get_dtend(component);
-                    QDateTime end = createDateTimeFromTimeType(dtend);
-
-                    QString id = i_cal_component_get_uid(component);
-                    QString summary = i_cal_component_get_summary(component);
-
-                    // RID: The first ever recorded time of a recurrent event instance. We'll use
-                    // 'UID-UNIX_TIMESTAMP' as ID.
-                    bool isUpdatedRecurrence = false;
-                    ICalTime *rid = i_cal_component_get_recurrenceid(component);
-                    if (rid && !i_cal_time_is_null_time(rid)) {
-                        isUpdatedRecurrence = true;
-                        id += QString("-%1").arg(
-                                createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
-                    }
-
-                    // Get EXDATE's
-                    ICalTime *exdate = nullptr;
-                    QList<QDateTime> exdates;
-                    for (ICalProperty *prop = i_cal_component_get_first_property(
-                                 component, I_CAL_EXDATE_PROPERTY);
-                         prop != nullptr; prop = i_cal_component_get_next_property(
-                                                  component, I_CAL_EXDATE_PROPERTY)) {
-                        exdate = i_cal_property_get_exdate(prop);
-                        exdates.append(createDateTimeFromTimeType(exdate));
-                    }
-
-                    // Recurrent origin event
-                    if (isRecurrent && !isUpdatedRecurrence) {
-                        ICalRecurIterator *recurrenceIter =
-                                i_cal_recur_iterator_new(rrule, dtstart);
-
-                        if (recurrenceIter) {
-                            qint64 duration = start.secsTo(end);
-
-                            for (ICalTime *next = i_cal_recur_iterator_next(recurrenceIter);
-                                 !i_cal_time_is_null_time(next);
-                                 next = i_cal_recur_iterator_next(recurrenceIter)) {
-                                QDateTime recur = createDateTimeFromTimeType(next);
-                                if (recur > m_timeRangeEnd) {
-                                    break;
-                                }
-
-                                if (!exdates.contains(recur) && recur >= m_timeRangeStart) {
-                                    QString nid =
-                                            QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
-                                    manager.addDateEvent(new DateEvent(nid, m_source, recur,
-                                                                       recur.addMSecs(duration),
-                                                                       summary, location, true));
-                                }
-                            }
-
-                            i_cal_recur_iterator_free(recurrenceIter);
-                        }
-                    } else {
-                        // Non-recurrent event or update of a recurrent event instance
-                        if (isUpdatedRecurrence) {
-                            manager.modifyDateEvent(id, m_source, start, end, summary, location,
-                                                    true);
-                        } else {
-                            manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
-                                                               location, true));
-                        }
-                    }
-                }
-            }
-
-            g_slist_free_full(components, g_object_unref);
-            components = nullptr;
-        }
+        e_cal_client_get_object_list(client, m_searchExpr, nullptr, onClientEventsRequested, this);
     }
 }
 
@@ -370,4 +260,128 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
             feeder->m_sourcePromise->finish();
         }
     }
+}
+void EDSEventFeeder::onClientEventsRequested(GObject *source_object, GAsyncResult *result,
+                                             gpointer user_data)
+{
+    GError *error = nullptr;
+    GSList *components = nullptr;
+
+    EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
+    if (feeder) {
+        if (!e_cal_client_get_object_list_finish(E_CAL_CLIENT(source_object), result, &components,
+                                                 &error)) {
+            qCDebug(lcEDSEventFeeder) << "Can't retrieve events:" << error->message;
+            g_error_free(error);
+            error = nullptr;
+            return;
+        }
+    }
+
+    if (components) {
+        QString sourceInfo = QString("%1 (%2)").arg(
+                e_source_get_display_name(e_client_get_source(E_CLIENT(source_object))),
+                e_source_get_uid(e_client_get_source(E_CLIENT(source_object))));
+
+        feeder->processEvents(sourceInfo, components);
+    }
+}
+
+void EDSEventFeeder::processEvents(QString clientInfo, GSList *components)
+{
+    DateEventManager &manager = DateEventManager::instance();
+
+    for (GSList *item = components; item != nullptr; item = g_slist_next(item)) {
+        ICalComponent *component = I_CAL_COMPONENT(item->data);
+        if (component && i_cal_component_isa(component) == I_CAL_VEVENT_COMPONENT) {
+            // RRULE
+            bool isRecurrent = false;
+            ICalProperty *prop =
+                    i_cal_component_get_first_property(component, I_CAL_RRULE_PROPERTY);
+            ICalRecurrence *rrule = nullptr;
+            if (prop) {
+                isRecurrent = true;
+                rrule = i_cal_property_get_rrule(prop);
+                g_clear_object(&prop);
+            }
+
+            ICalTime *dtstart = i_cal_component_get_dtstart(component);
+            QDateTime start = createDateTimeFromTimeType(dtstart);
+
+            QString location =
+                    manager.getJitsiRoomFromLocation(i_cal_component_get_location(component));
+
+            // Skip non-recurrent events that are outside of our date range
+            if (location.isEmpty()
+                || ((start < m_timeRangeStart || start > m_timeRangeEnd) && !isRecurrent)) {
+                continue;
+            }
+
+            ICalTime *dtend = i_cal_component_get_dtend(component);
+            QDateTime end = createDateTimeFromTimeType(dtend);
+
+            QString id = i_cal_component_get_uid(component);
+            QString summary = i_cal_component_get_summary(component);
+
+            // RID: The first ever recorded time of a recurrent event instance. We'll use
+            // 'UID-UNIX_TIMESTAMP' as ID.
+            bool isUpdatedRecurrence = false;
+            ICalTime *rid = i_cal_component_get_recurrenceid(component);
+            if (rid && !i_cal_time_is_null_time(rid)) {
+                isUpdatedRecurrence = true;
+                id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+            }
+
+            // Get EXDATE's
+            ICalTime *exdate = nullptr;
+            QList<QDateTime> exdates;
+            for (ICalProperty *prop =
+                         i_cal_component_get_first_property(component, I_CAL_EXDATE_PROPERTY);
+                 prop != nullptr;
+                 prop = i_cal_component_get_next_property(component, I_CAL_EXDATE_PROPERTY)) {
+                exdate = i_cal_property_get_exdate(prop);
+                exdates.append(createDateTimeFromTimeType(exdate));
+            }
+
+            // Recurrent origin event
+            if (isRecurrent && !isUpdatedRecurrence) {
+                ICalRecurIterator *recurrenceIter = i_cal_recur_iterator_new(rrule, dtstart);
+
+                if (recurrenceIter) {
+                    qint64 duration = start.secsTo(end);
+
+                    for (ICalTime *next = i_cal_recur_iterator_next(recurrenceIter);
+                         !i_cal_time_is_null_time(next);
+                         next = i_cal_recur_iterator_next(recurrenceIter)) {
+                        QDateTime recur = createDateTimeFromTimeType(next);
+                        if (recur > m_timeRangeEnd) {
+                            break;
+                        }
+
+                        if (!exdates.contains(recur) && recur >= m_timeRangeStart) {
+                            QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
+                            manager.addDateEvent(new DateEvent(nid, m_source, recur,
+                                                               recur.addMSecs(duration), summary,
+                                                               location, true));
+                        }
+                    }
+
+                    i_cal_recur_iterator_free(recurrenceIter);
+                }
+            } else {
+                // Non-recurrent event or update of a recurrent event instance
+                if (isUpdatedRecurrence) {
+                    manager.modifyDateEvent(id, m_source, start, end, summary, location, true);
+                } else {
+                    manager.addDateEvent(
+                            new DateEvent(id, m_source, start, end, summary, location, true));
+                }
+            }
+        }
+    }
+
+    g_slist_free_full(components, g_object_unref);
+    components = nullptr;
+
+    qCInfo(lcEDSEventFeeder) << "Loaded event(s) of source" << clientInfo;
 }
