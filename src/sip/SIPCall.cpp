@@ -93,6 +93,7 @@ SIPCall::~SIPCall()
 
     SIPCallManager::instance().removeCall(this);
     Q_EMIT GlobalCallState::instance().callEnded(false);
+    GlobalCallState::instance().unholdOtherCall();
 }
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)

@@ -1146,6 +1146,7 @@ void JitsiConnector::leaveConference()
     setDisplayName("");
     setIsInConference(false);
     Q_EMIT GlobalCallState::instance().callEnded(true);
+    GlobalCallState::instance().unholdOtherCall();
 }
 
 void JitsiConnector::terminateConference()
@@ -1166,6 +1167,7 @@ void JitsiConnector::terminateConference()
     setDisplayName("");
     setIsInConference(false);
     Q_EMIT GlobalCallState::instance().callEnded(true);
+    GlobalCallState::instance().unholdOtherCall();
 }
 
 void JitsiConnector::setOnHold(bool shallHold)
