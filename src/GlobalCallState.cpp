@@ -147,7 +147,8 @@ void GlobalCallState::triggerHold()
 void GlobalCallState::holdAllCalls(const ICallState *stateObjectToSkip) const
 {
     for (auto callObj : std::as_const(m_globalCallStateObjects)) {
-        if (callObj != stateObjectToSkip && !(callObj->callState() & ICallState::State::OnHold)) {
+        if (callObj != stateObjectToSkip && (callObj->callState() & ICallState::State::CallActive)
+            && !(callObj->callState() & ICallState::State::OnHold)) {
             callObj->toggleHold();
         }
     }
