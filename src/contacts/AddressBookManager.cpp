@@ -179,8 +179,10 @@ void AddressBookManager::acquireSecret(const QString &group,
                     m_viewHelperConnections.insert(group, conn);
 
                     ReadOnlyConfdSettings settings;
-                    viewHelper.requestPassword(group,
-                                               group + "/" + settings.value("host", "").toString());
+                    settings.beginGroup(group);
+                    viewHelper.requestPassword(group, settings.value("host", "").toString());
+                    settings.beginGroup(group);
+
                 } else {
                     callback(secret);
                 }

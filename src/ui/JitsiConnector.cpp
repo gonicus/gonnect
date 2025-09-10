@@ -19,6 +19,7 @@
 #include "ConferenceParticipant.h"
 #include "DateEventManager.h"
 #include "Credentials.h"
+#include "GlobalCallState.h"
 #include "ChatMessage.h"
 
 #include <QLoggingCategory>
@@ -1045,6 +1046,13 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     qCInfo(lcJitsiConnector).nospace().noquote() << "Entering conference " << conferenceId << " ("
                                                  << displayName << ") with flags:" << startFlags;
 
+    auto &globalCallState = GlobalCallState::instance();
+    globalCallState.holdAllCalls(this);
+
+    if (isOnHold()) {
+        toggleHold();
+    }
+
     DateEventManager::instance().removeNotificationByRoomName(displayName);
 
     m_startWithVideo = startFlags & IConferenceConnector::StartFlag::VideoActive;
@@ -1091,6 +1099,8 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
             m_inConferenceNotification = nullptr;
         }
     });
+
+    Q_EMIT GlobalCallState::instance().callStarted(true);
 }
 
 void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
@@ -1135,6 +1145,8 @@ void JitsiConnector::leaveConference()
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
+    Q_EMIT GlobalCallState::instance().callEnded(true);
+    GlobalCallState::instance().unholdOtherCall();
 }
 
 void JitsiConnector::terminateConference()
@@ -1154,6 +1166,8 @@ void JitsiConnector::terminateConference()
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
+    Q_EMIT GlobalCallState::instance().callEnded(true);
+    GlobalCallState::instance().unholdOtherCall();
 }
 
 void JitsiConnector::setOnHold(bool shallHold)
@@ -1170,6 +1184,8 @@ void JitsiConnector::setOnHold(bool shallHold)
                 setVideoMuted(!isVideoMuted());
             }
         } else {
+            GlobalCallState::instance().holdAllCalls(this);
+
             if (isAudioMuted() != GlobalMuteState::instance().isMuted()) {
                 toggleMute();
             }
