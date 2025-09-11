@@ -242,17 +242,24 @@ const api = new JitsiMeetExternalAPI(jitsiUrl, options)
 
 let jitsiConn = null
 
+
 new QWebChannel(qt.webChannelTransport, function(channel) {
     jitsiConn = channel.objects.jitsiConn
 
     // Listeners to JitsiConnector
 
-    jitsiConn.executePasswordCommand.connect(pw => {
-        api.executeCommand("password", pw)
+    jitsiConn.chatRoom().then(
+        chatRoom => {
+            chatRoom.sendMessageRequested.connect(msg => {
+                api.executeCommand("sendChatMessage", msg)
+            })
+        }
+    ).catch(err => {
+        throw new Error("Unable to receive chat room object:", err)
     })
 
-    jitsiConn.chatRoom.sendMessageRequested.connect(msg => {
-        api.executeCommand("sendChatMessage", msg)
+    jitsiConn.executePasswordCommand.connect(pw => {
+        api.executeCommand("password", pw)
     })
 
     jitsiConn.executeLeaveRoomCommand.connect(() => {
