@@ -196,36 +196,6 @@ void CallsModel::updateCalls()
         removedCallIds.removeOne(callId);
     }
 
-    // // --- DEV ---
-    // CallInfo* devCallInfo = new CallInfo {
-    //     0,
-    //     "0",
-    //     "sip:123@gonicus.de",
-    //     true,
-    //     false,
-    //     true,
-    //     false,
-    //     false,
-    //     0.0,
-    //     QDateTime::currentDateTime().addSecs(-10),
-    //     {
-    //         "sip:123@gonicus.de",
-    //         "123",
-    //         "Cajus Pollmeier",
-    //         Contact::NumberType::Commercial,
-    //         "Weilheim",
-    //         { "Deutschland" },
-    //         false,
-    //         false,
-    //         AddressBook::instance().lookupByNumber("123")
-    //     },
-    // };
-
-    // m_calls.append(devCallInfo);
-    // m_callsHash.insert(0, devCallInfo);
-
-    // // --- DEV ---
-
     // Kill timer for removed calls
     for (const int callId : std::as_const(removedCallIds)) {
         QTimer::singleShot(GONNECT_CALL_VISIBLE_AFTER_END, this, [this, callId]() {
