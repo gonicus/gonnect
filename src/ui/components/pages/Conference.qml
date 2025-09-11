@@ -273,7 +273,13 @@ Item {
                     }
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
-                        console.log("# " + message + ": " + source + " +" + line)
+                        if (level >= 2) {
+                            console.error("# " + message + ": " + source + " +" + line)
+                        } else if (level === 1) {
+                            console.warn("# " + message + ": " + source + " +" + line)
+                        } else {
+                            console.log("# " + message + ": " + source + " +" + line)
+                        }
                     }
 
                     onPermissionRequested: (permission) => {
