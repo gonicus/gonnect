@@ -18,6 +18,8 @@ class GlobalCallState : public QObject
                        callInForegroundChanged FINAL)
     Q_PROPERTY(
             qsizetype activeCallsCount READ activeCallsCount NOTIFY activeCallsCountChanged FINAL)
+    Q_PROPERTY(qsizetype nonIdleCallsCount READ nonIdleCallsCount NOTIFY nonIdleCallsCountChanged
+                       FINAL)
 
 public:
     static GlobalCallState &instance()
@@ -41,6 +43,7 @@ public:
 
     const QSet<ICallState *> &globalCallStateObjects() const { return m_globalCallStateObjects; }
     qsizetype activeCallsCount() const;
+    qsizetype nonIdleCallsCount() const;
 
     void setCallInForeground(ICallState *call);
     ICallState *callInForeground() const { return m_callInForeground; }
@@ -81,6 +84,7 @@ Q_SIGNALS:
     void isPhoneConferenceChanged();
     void globalCallStateObjectsChanged();
     void activeCallsCountChanged();
+    void nonIdleCallsCountChanged();
     void callStarted(bool isConference);
     void callEnded(bool isConference);
 };

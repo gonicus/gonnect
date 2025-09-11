@@ -33,7 +33,7 @@ SecretPortal::SecretPortal(QObject *parent)
 void SecretPortal::initialize()
 {
     if (!isValid()) {
-        qCCritical(lcSecretPortal)
+        qCFatal(lcSecretPortal)
                 << "secret portal not available - storing secrets will not be possible";
         return;
     }
@@ -42,7 +42,7 @@ void SecretPortal::initialize()
     m_supported = QCA::isSupported("aes256-cbc-pkcs7");
 
     if (!m_supported) {
-        qCCritical(lcSecretPortal) << "QCA does not support aes256-cbc-pkcs7!";
+        qCFatal(lcSecretPortal) << "QCA does not support aes256-cbc-pkcs7!";
         return;
     }
 

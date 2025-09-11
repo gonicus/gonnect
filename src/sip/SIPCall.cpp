@@ -395,14 +395,14 @@ bool SIPCall::unhold()
     pj::CallOpParam op(true);
     op.opt.flag = PJSUA_CALL_UNHOLD;
 
+    setIsHolding(false);
+
     try {
         reinvite(op);
     } catch (pj::Error &err) {
         qCWarning(lcSIPCall) << "failed to un-hold call:" << err.info();
         return false;
     }
-
-    setIsHolding(false);
 
     return true;
 }
