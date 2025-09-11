@@ -6,9 +6,13 @@
 
 Q_LOGGING_CATEGORY(lcAkonadiEventFeeder, "gonnect.app.dateevents.feeder.akonadi")
 
-AkonadiEventFeeder::AkonadiEventFeeder(QObject *parent)
+AkonadiEventFeeder::AkonadiEventFeeder(QObject *parent, const QString &source,
+                                       const QDateTime &timeRangeStart,
+                                       const QDateTime &timeRangeEnd)
     : QObject(parent),
-      m_session(new Akonadi::Session("GOnnect::CalendarSession")),
+      m_source(source),
+      m_timeRangeStart(timeRangeStart),
+      m_timeRangeEnd(timeRangeEnd) m_session(new Akonadi::Session("GOnnect::CalendarSession")),
       m_monitor(new Akonadi::Monitor(parent))
 {
 }
@@ -19,15 +23,8 @@ AkonadiEventFeeder::~AkonadiEventFeeder()
     delete m_session;
 }
 
-void AkonadiEventFeeder::init(const QString &settingsGroupId, const QString &source,
-                              const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd)
+void AkonadiEventFeeder::init()
 {
-    Q_UNUSED(settingsGroupId)
-
-    m_source = source;
-    m_timeRangeStart = timeRangeStart;
-    m_timeRangeEnd = timeRangeEnd;
-
     Akonadi::ItemFetchScope scope;
     scope.fetchFullPayload(true);
 
@@ -63,6 +60,8 @@ void AkonadiEventFeeder::init(const QString &settingsGroupId, const QString &sou
 
         process();
     });
+
+    process();
 }
 
 void AkonadiEventFeeder::process()

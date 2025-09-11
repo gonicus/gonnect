@@ -32,9 +32,5 @@ IDateEventFeeder *AkonadiEventFeederFactory::createFeeder(
     ReadOnlyConfdSettings settings;
     settings.beginGroup(settingsGroup);
 
-    auto feeder = new AkonadiEventFeeder(feederManager);
-
-    feeder->init(settingsGroup, name(), timeRangeStart, timeRangeEnd);
-
-    return feeder;
+    return new AkonadiEventFeeder(feederManager, name(), timeRangeStart, timeRangeEnd);
 }

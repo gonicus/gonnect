@@ -3,6 +3,7 @@ qt_add_plugin(CalDAVEventFeederFactory STATIC
 
   CalDAVEventFeeder.cpp
   CalDAVEventFeeder.h
+  CalDAVEventFeederConfig.h
 
   CalDAVEventFeederFactory.cpp
   CalDAVEventFeederFactory.h
