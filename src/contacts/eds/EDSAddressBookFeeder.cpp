@@ -9,6 +9,8 @@
 #include <QImage>
 #include <QLoggingCategory>
 
+using namespace std::chrono_literals;
+
 Q_LOGGING_CATEGORY(lcEDSAddressBookFeeder, "gonnect.app.feeder.EDSAddressBookFeeder")
 
 EDSAddressBookFeeder::EDSAddressBookFeeder(const QString &group, AddressBookManager *parent)
@@ -40,10 +42,12 @@ EDSAddressBookFeeder::~EDSAddressBookFeeder()
 
     if (m_sourcePromise) {
         delete m_sourcePromise;
+        m_sourcePromise = nullptr;
     }
 
     if (m_futureWatcher) {
-        delete m_futureWatcher;
+        m_futureWatcher->deleteLater();
+        m_futureWatcher = nullptr;
     }
 }
 
@@ -97,7 +101,7 @@ void EDSAddressBookFeeder::init()
         }
     });
 
-    QTimer::singleShot(5000, this, [this]() {
+    QTimer::singleShot(5s, this, [this]() {
         if (!m_futureWatcher->isFinished()) {
             qCDebug(lcEDSAddressBookFeeder) << "Failed to process EDS sources";
 

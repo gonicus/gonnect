@@ -5,6 +5,8 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
+using namespace std::chrono_literals;
+
 Q_LOGGING_CATEGORY(lcEDSEventFeeder, "gonnect.app.dateevents.feeder.eds")
 
 EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source,
@@ -40,10 +42,12 @@ EDSEventFeeder::~EDSEventFeeder()
 
     if (m_sourcePromise) {
         delete m_sourcePromise;
+        m_sourcePromise = nullptr;
     }
 
     if (m_futureWatcher) {
-        delete m_futureWatcher;
+        m_futureWatcher->deleteLater();
+        m_futureWatcher = nullptr;
     }
 }
 
@@ -98,7 +102,7 @@ void EDSEventFeeder::init()
         }
     });
 
-    QTimer::singleShot(5000, this, [this]() {
+    QTimer::singleShot(5s, this, [this]() {
         if (!m_futureWatcher->isFinished()) {
             qCDebug(lcEDSEventFeeder) << "Failed to process EDS sources";
 
