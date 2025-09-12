@@ -198,9 +198,9 @@ Item {
             }
         }
 
-        ChatMessageBox {
+        ChatInput {
             id: chatMessageBox
-            enabled: !!chatRoomList.selectedRoomId
+            visible: !!chatRoomList.selectedRoomId
             anchors {
                 left: parent.left
                 right: parent.right
@@ -208,8 +208,8 @@ Item {
                 margins: 10
             }
 
-            onSendMessage: () => {
-                chatMessageList.chatRoom.sendMessage(chatMessageBox.text)
+            onSendMessage: (txt) => {
+                chatMessageList.chatRoom.sendMessage(txt)
                 chatMessageBox.clear()
             }
         }

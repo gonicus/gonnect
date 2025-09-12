@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls.Material
 import base
 
 Item {
@@ -195,81 +194,15 @@ Item {
         }
     }
 
-    Item {
+    ChatInput {
         id: chatInputContainer
-        height: chatInputField.y + chatInputField.height + chatInputField.anchors.margins
+        enabled: !!control.chatRoom
         anchors {
             left: chatContainer.left
             right: chatContainer.right
             bottom: parent.bottom
         }
 
-        Item {
-            id: emojiButton
-            height: chatInputField.implicitHeight - 20
-            width: emojiButton.height
-            anchors {
-                verticalCenter: chatInputContainer.verticalCenter
-                left: parent.left
-                leftMargin: 10
-            }
-
-            Label {
-                anchors.centerIn: parent
-                text: "🙂"
-                font.pixelSize: 20
-            }
-
-            TapHandler {
-                gesturePolicy: TapHandler.WithinBounds
-                grabPermissions: PointerHandler.CanTakeOverFromAnything
-                exclusiveSignals: TapHandler.SingleTap
-
-                onTapped: () => {
-                    const item = emojiPickerComponent.createObject(emojiButton)
-                    item.emojiPicked.connect(emoji => chatInputField.insert(chatInputField.cursorPosition, emoji))
-                    item.open()
-                }
-            }
-        }
-
-        Component {
-            id: emojiPickerComponent
-
-            Popup {
-                id: emojiPickerPopup
-                width: 300
-                height: 400
-                x: chatInputField.x + chatInputField.width - emojiPickerPopup.width
-                y: chatInputField.y - emojiPickerPopup.height
-
-                signal emojiPicked(string emoji)
-
-                EmojiPicker {
-                    anchors.fill: parent
-                    onEmojiPicked: emoji => emojiPickerPopup.emojiPicked(emoji)
-                }
-            }
-        }
-
-        TextField {
-            id: chatInputField
-            enabled: !!control.chatRoom
-            y: chatInputField.anchors.margins
-            placeholderText: qsTr("Enter chat message...")
-            anchors {
-                left: emojiButton.right
-                right: parent.right
-                margins: 10
-            }
-
-            onAccepted: () => {
-                const trimmed = chatInputField.text.trim()
-                if (trimmed !== "") {
-                    control.chatRoom.sendMessage(trimmed)
-                    chatInputField.text = ""
-                }
-            }
-        }
+        onSendMessage: msg => control.chatRoom.sendMessage(msg)
     }
 }
