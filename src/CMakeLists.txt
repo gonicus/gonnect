@@ -189,7 +189,7 @@ qt_add_qml_module(gonnect
 
         ${gonnect_qml_singletons}
 
-        ui/components/chat/ChatMessageBox.qml
+        ui/components/chat/ChatInput.qml
         ui/components/chat/ChatMessageList.qml
         ui/components/chat/ChatMessageListItem.qml
         ui/components/chat/ChatRoomList.qml

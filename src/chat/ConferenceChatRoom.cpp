@@ -1,9 +1,11 @@
 #include "ConferenceChatRoom.h"
 #include "ChatMessage.h"
+#include "IConferenceConnector.h"
 
-ConferenceChatRoom::ConferenceChatRoom(QObject *parent) : IChatRoom{ parent } { }
+ConferenceChatRoom::ConferenceChatRoom(IConferenceConnector *parent) : IChatRoom{ parent } { }
 
-ConferenceChatRoom::ConferenceChatRoom(const QString &roomId, const QString &name, QObject *parent)
+ConferenceChatRoom::ConferenceChatRoom(const QString &roomId, const QString &name,
+                                       IConferenceConnector *parent)
     : IChatRoom{ parent }, m_id{ roomId }, m_name{ name }
 {
 }
@@ -20,7 +22,10 @@ qsizetype ConferenceChatRoom::notificationCount()
 
 void ConferenceChatRoom::sendMessage(const QString &message)
 {
-    auto chatMessageObject = new ChatMessage("", "", "", message, QDateTime::currentDateTime(),
+    auto confConn = qobject_cast<IConferenceConnector *>(parent());
+    const QString ownName = confConn ? confConn->ownDisplayName() : "";
+
+    auto chatMessageObject = new ChatMessage("", "", ownName, message, QDateTime::currentDateTime(),
                                              ChatMessage::Flag::OwnMessage);
     addMessage(chatMessageObject);
     Q_EMIT sendMessageRequested(message);
