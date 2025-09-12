@@ -132,6 +132,7 @@ public:
     Q_INVOKABLE virtual IChatRoom *chatRoom() = 0;
 
     virtual QString ownId() const = 0;
+    virtual QString ownDisplayName() = 0;
     virtual ConferenceParticipant::Role ownRole() const = 0;
 
     virtual QList<ConferenceParticipant *> participants() const = 0;
