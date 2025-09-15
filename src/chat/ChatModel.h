@@ -23,7 +23,8 @@ public:
         ImageUrl,
         IsPrivateMessage,
         IsOwnMessage,
-        IsSystemMessage
+        IsSystemMessage,
+        Reactions
     };
     explicit ChatModel(QObject *parent = nullptr);
 

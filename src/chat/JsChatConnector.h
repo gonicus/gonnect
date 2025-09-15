@@ -69,6 +69,9 @@ public:
 
     const QList<JsChatEvent *> &events() const { return m_events; }
 
+    virtual void reactToMessage(IChatRoom *chatRoom, const QString &eventId,
+                                const QString &emoji) override;
+
 private:
     void connect();
     void setupServer();
@@ -90,4 +93,5 @@ Q_SIGNALS:
     void chatUserAdded();
     void sendMessageRequested(QString roomId, QString message);
     void resetUnreadCountRequested(QString roomId);
+    void reactToMessageRequested(QString roomId, QString eventId, QString emoji);
 };

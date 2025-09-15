@@ -1,6 +1,9 @@
 #include "ConferenceChatRoom.h"
 #include "ChatMessage.h"
 #include "IConferenceConnector.h"
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcConferenceChatRoom, "gonnect.app.conference.ChatRoom")
 
 ConferenceChatRoom::ConferenceChatRoom(IConferenceConnector *parent) : IChatRoom{ parent } { }
 
@@ -41,4 +44,14 @@ void ConferenceChatRoom::addMessage(ChatMessage *chatMessageObj)
 void ConferenceChatRoom::resetUnreadCount()
 {
     // Unsupported
+}
+
+void ConferenceChatRoom::toggleReaction(const QString &, const QString &)
+{
+    qCWarning(lcConferenceChatRoom) << "ConferenceChatRoom does not support toggleReaction";
+}
+
+void ConferenceChatRoom::setReactionCount(const QString &, const QString &, qsizetype, bool)
+{
+    qCWarning(lcConferenceChatRoom) << "ConferenceChatRoom does not support setReactionCount";
 }

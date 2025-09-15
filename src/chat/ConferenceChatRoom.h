@@ -22,6 +22,9 @@ public:
     virtual void resetUnreadCount() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
     virtual void sendMessage(const QString &message) override;
+    virtual void toggleReaction(const QString &eventId, const QString &emoji) override;
+    virtual void setReactionCount(const QString &eventId, const QString &emoji, qsizetype count,
+                                  bool hasOwnReaction = false) override;
 
     /// Add a message object to be handled by this room. Takes ownership of that object.
     void addMessage(ChatMessage *chatMessageObj);

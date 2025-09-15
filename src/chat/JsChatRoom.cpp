@@ -1,7 +1,10 @@
 #include "JsChatRoom.h"
 #include "ChatMessage.h"
 #include "JsChatConnector.h"
-#include "JsChatEvent.h"
+
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcJsChatRoom, "gonnect.chat.JsChatRoom")
 
 JsChatRoom::JsChatRoom(const QString &id, const QString &name, JsChatConnector *parent)
     : IChatRoom{ parent }, m_id{ id }, m_name{ name }
@@ -49,4 +52,25 @@ void JsChatRoom::sendMessage(const QString &message)
 JsChatConnector *JsChatRoom::connectorParent() const
 {
     return qobject_cast<JsChatConnector *>(parent());
+}
+
+void JsChatRoom::toggleReaction(const QString &eventId, const QString &emoji)
+{
+    connectorParent()->reactToMessage(this, eventId, emoji);
+}
+
+void JsChatRoom::setReactionCount(const QString &eventId, const QString &emoji, qsizetype count,
+                                  bool hasOwnReaction)
+{
+    qsizetype idx = 0;
+    for (auto chatMessageObj : std::as_const(m_messages)) {
+        if (chatMessageObj->eventId() == eventId) {
+            chatMessageObj->setReactionCount(emoji, count, hasOwnReaction);
+            Q_EMIT reactionChanged(eventId, idx);
+            return;
+        }
+        ++idx;
+    }
+
+    qCWarning(lcJsChatRoom) << "Cannot find ChatMessage object for event id" << eventId;
 }

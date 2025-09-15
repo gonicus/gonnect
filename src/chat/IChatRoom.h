@@ -28,6 +28,10 @@ public:
     /// Send a message in this room
     Q_INVOKABLE virtual void sendMessage(const QString &message) = 0;
 
+    Q_INVOKABLE virtual void toggleReaction(const QString &eventId, const QString &emoji) = 0;
+    Q_INVOKABLE virtual void setReactionCount(const QString &eventId, const QString &emoji,
+                                              qsizetype count, bool hasOwnReaction = false) = 0;
+
 Q_SIGNALS:
     void nameChanged(QString name);
     void notificationCountChanged(qsizetype count);
@@ -44,4 +48,8 @@ Q_SIGNALS:
     /// Send when chat messages have been cleared (i.e. removed and deleted). All objects have been
     /// destroyed at this moment.
     void chatMessagesReset();
+
+    /// Send when at least one reaction changed on the given eventId in this room. The index must be
+    /// that of the message in the list returned by messages().
+    void reactionChanged(QString eventId, qsizetype index);
 };

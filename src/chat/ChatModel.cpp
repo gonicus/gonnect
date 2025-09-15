@@ -20,6 +20,7 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::IsPrivateMessage), "isPrivateMessage" },
         { static_cast<int>(Roles::IsOwnMessage), "isOwnMessage" },
         { static_cast<int>(Roles::IsSystemMessage), "isSystemMessage" },
+        { static_cast<int>(Roles::Reactions), "reactions" },
     };
 }
 
@@ -61,6 +62,19 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
         return static_cast<bool>(item->flags() & ChatMessage::Flag::OwnMessage);
     case static_cast<int>(Roles::IsSystemMessage):
         return static_cast<bool>(item->flags() & ChatMessage::Flag::SystemMessage);
+    case static_cast<int>(Roles::Reactions): {
+        QVariantList l;
+
+        const auto &reactions = item->sortedReactions();
+        for (const auto &reaction : reactions) {
+            QVariantMap entry;
+            entry.insert("emoji", reaction.emoji);
+            entry.insert("count", reaction.count);
+            entry.insert("hasOwnReaction", reaction.hasOwnReaction);
+            l.append(entry);
+        }
+        return l;
+    }
     default:
         return QVariant();
     }
@@ -88,6 +102,11 @@ void ChatModel::onChatRoomChanged()
             endResetModel();
             updateRealMessagesCount();
         });
+        connect(m_chatRoom, &IChatRoom::reactionChanged, m_chatRoomContext,
+                [this](QString, qsizetype index) {
+                    const auto idx = createIndex(index, 0);
+                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Reactions) });
+                });
     }
 
     endResetModel();

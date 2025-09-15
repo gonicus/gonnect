@@ -175,3 +175,10 @@ JsChatRoom *JsChatConnector::createOrLookupChatRoom(const QString &roomId, const
 
     return room;
 }
+
+void JsChatConnector::reactToMessage(IChatRoom *chatRoom, const QString &eventId,
+                                     const QString &emoji)
+{
+    Q_CHECK_PTR(chatRoom);
+    Q_EMIT reactToMessageRequested(chatRoom->id(), eventId, emoji);
+}

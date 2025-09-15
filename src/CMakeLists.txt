@@ -189,11 +189,13 @@ qt_add_qml_module(gonnect
 
         ${gonnect_qml_singletons}
 
+        ui/components/chat/AddReactionButton.qml
         ui/components/chat/ChatInput.qml
         ui/components/chat/ChatMessageList.qml
         ui/components/chat/ChatMessageListItem.qml
         ui/components/chat/ChatRoomList.qml
         ui/components/chat/ChatRoomListItem.qml
+        ui/components/chat/ReactionButton.qml
 
         ui/components/controls/AudioLevelButton.qml
         ui/components/controls/BarButton.qml
