@@ -175,7 +175,6 @@ bool HeadsetDeviceProxy::refreshDevice()
         });
         connect(m_device, &HeadsetDevice::flash, this, [this]() {
             if (isEnabled()) {
-                Q_EMIT flash();
                 GlobalCallState::instance().triggerHold();
             }
         });

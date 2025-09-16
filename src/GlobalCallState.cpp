@@ -1,6 +1,5 @@
 #include "GlobalCallState.h"
 #include "Ringer.h"
-#include "JitsiConnector.h"
 
 #include <QLoggingCategory>
 
@@ -53,29 +52,11 @@ bool GlobalCallState::registerCallStateObject(ICallState *callStateObject)
         m_globalCallStateObjects.insert(callStateObject);
 
         connect(callStateObject, &QObject::destroyed, this, [this](QObject *obj) {
-            if (m_lastCallThatBecameActive == obj) {
-                m_lastCallThatBecameActive = nullptr;
-            }
-
             if (m_globalCallStateObjects.remove(static_cast<ICallState *>(obj))) {
                 updateGlobalCallState();
                 Q_EMIT globalCallStateObjectsChanged();
             }
         });
-
-        connect(callStateObject, &ICallState::callStateChanged, this,
-                [this, callStateObject](ICallState::States newState, ICallState::States oldState) {
-                    using State = ICallState::State;
-
-                    if (!(oldState & State::Migrating)) {
-                        if (!(oldState & State::CallActive) && (newState & State::CallActive)) {
-                            m_lastCallThatBecameActive = callStateObject;
-                        } else if ((oldState & State::CallActive)
-                                   && !(newState & State::CallActive)) {
-                            m_lastCallThatBecameActive = nullptr;
-                        }
-                    }
-                });
 
         connect(callStateObject, &ICallState::callStateChanged, this,
                 &GlobalCallState::updateGlobalCallState);
@@ -91,10 +72,6 @@ bool GlobalCallState::unregisterCallStateObject(ICallState *callStateObject)
 {
     if (!callStateObject) {
         return false;
-    }
-
-    if (m_lastCallThatBecameActive == callStateObject) {
-        m_lastCallThatBecameActive = nullptr;
     }
 
     const bool wasRegistered = m_globalCallStateObjects.remove(callStateObject);
@@ -118,6 +95,7 @@ void GlobalCallState::updateGlobalCallState()
     setGlobalCallState(globalState);
     updateRemoteContactInfo();
     Q_EMIT activeCallsCountChanged();
+    Q_EMIT nonIdleCallsCount();
 }
 
 void GlobalCallState::setIsPhoneConference(bool flag)
@@ -132,11 +110,30 @@ qsizetype GlobalCallState::activeCallsCount() const
 {
     qsizetype count = 0;
     for (const auto callObj : std::as_const(m_globalCallStateObjects)) {
+        if (callObj->callState() & ICallState::State::CallActive) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+qsizetype GlobalCallState::nonIdleCallsCount() const
+{
+    qsizetype count = 0;
+    for (const auto callObj : std::as_const(m_globalCallStateObjects)) {
         if (callObj->callState().toInt()) {
             ++count;
         }
     }
     return count;
+}
+
+void GlobalCallState::setCallInForeground(ICallState *call)
+{
+    if (m_callInForeground != call) {
+        m_callInForeground = call;
+        Q_EMIT callInForegroundChanged();
+    }
 }
 
 void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
@@ -149,61 +146,40 @@ void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
 
 void GlobalCallState::triggerHold()
 {
-    // Gather active call objects
-    QSet<ICallState *> activeCalls;
-    QSet<ICallState *> callsOnHold;
-    QSet<ICallState *> callsNotOnHold;
-
-    for (auto call : std::as_const(m_globalCallStateObjects)) {
-        if (call->callState() & ICallState::State::CallActive) {
-            activeCalls.insert(call);
-
-            if (call->callState() & ICallState::State::OnHold) {
-                callsOnHold.insert(call);
-            } else {
-                callsNotOnHold.insert(call);
-            }
-        }
-    }
-
-    // 0 calls - do nothing
-    if (activeCalls.size() == 0) {
-        return;
-    }
-
-    // 1 call - toggle
-    if (activeCalls.size() == 1) {
-        (*activeCalls.cbegin())->toggleHold();
-        return;
-    }
-
-    // n calls, 1 active - hold active call, unhold next
-    if (!callsNotOnHold.isEmpty()) {
-        (*activeCalls.cbegin())->toggleHold();
-
-        if (!callsOnHold.isEmpty()) {
-            (*callsOnHold.cbegin())->toggleHold();
-        }
-        return;
-    }
-
-    // n calls, 0 active - unhold call in foreground
     if (m_callInForeground) {
-        m_callInForeground->toggleHold();
-        return;
-    }
-
-    // n calls, m active - hold all but the one in foreground
-    for (auto call : std::as_const(callsNotOnHold)) {
-        if (call != m_callInForeground) {
-            call->toggleHold();
+        if (m_callInForeground->callState() & ICallState::State::OnHold) {
+            holdAllCalls(m_callInForeground);
+            m_callInForeground->toggleHold();
+        } else {
+            holdAllCalls();
         }
     }
 }
 
-bool GlobalCallState::wasLastAddedConference() const
+void GlobalCallState::holdAllCalls(const ICallState *stateObjectToSkip) const
 {
-    return qobject_cast<JitsiConnector *>(m_lastCallThatBecameActive);
+    for (auto callObj : std::as_const(m_globalCallStateObjects)) {
+        if (callObj != stateObjectToSkip && (callObj->callState() & ICallState::State::CallActive)
+            && !(callObj->callState() & ICallState::State::OnHold)) {
+            callObj->toggleHold();
+        }
+    }
+}
+
+void GlobalCallState::unholdOtherCall() const
+{
+    if (m_callInForeground) {
+        if (m_callInForeground->callState() & ICallState::State::OnHold) {
+            m_callInForeground->toggleHold();
+        }
+    } else {
+        for (auto callObj : std::as_const(m_globalCallStateObjects)) {
+            if (callObj->callState() & ICallState::State::OnHold) {
+                callObj->toggleHold();
+            }
+            break;
+        }
+    }
 }
 
 void GlobalCallState::updateRinger()

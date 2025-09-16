@@ -64,7 +64,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
         }
     });
     connect(dev, &HeadsetDeviceProxy::hookSwitch, this, [dev, this]() {
-        auto callsCount = GlobalCallState::instance().activeCallsCount();
+        auto callsCount = GlobalCallState::instance().nonIdleCallsCount();
 
         // Were're busy with one call -> end call
         if (!dev->getHookSwitch() && callsCount == 1 && !m_calls.isEmpty()) {
@@ -359,12 +359,14 @@ void SIPCallManager::endAllCalls()
     for (auto call : std::as_const(m_calls)) {
         call->account()->hangup(call->getId());
     }
+    GlobalCallState::instance().unholdOtherCall();
 }
 
 void SIPCallManager::endCall(QString id)
 {
     if (auto call = findCallById(id)) {
         call->account()->hangup(call->getId());
+        GlobalCallState::instance().unholdOtherCall();
     }
 }
 
@@ -377,24 +379,34 @@ void SIPCallManager::addMetadata(const QString &id, const QString &data)
 
 void SIPCallManager::holdOtherCalls(const SIPCall *call)
 {
-    for (auto otherCall : std::as_const(m_calls)) {
-        if (otherCall != call) {
-            otherCall->hold();
-        }
-    }
+    auto &globalCallState = GlobalCallState::instance();
+    globalCallState.setProperty("callInForeground", QVariant::fromValue(call));
+    globalCallState.holdAllCalls(call);
 }
 
 void SIPCallManager::holdAllCalls() const
 {
-    for (auto call : std::as_const(m_calls)) {
-        call->hold();
-    }
+    GlobalCallState::instance().holdAllCalls();
 }
 
 void SIPCallManager::unholdAllCalls() const
 {
-    for (auto call : std::as_const(m_calls)) {
-        call->unhold();
+    GlobalCallState::instance().unholdOtherCall();
+}
+
+void SIPCallManager::toggleHoldCall(const QString &accountId, const int callId)
+{
+    auto account = SIPAccountManager::instance().getAccount(accountId);
+
+    if (account) {
+        auto callObj = qobject_cast<ICallState *>(account->getCallById(callId));
+        if (callObj) {
+            callObj->toggleHold();
+        } else {
+            qCCritical(lcSIPCallManager) << "Call with id" << callId << "not found";
+        }
+    } else {
+        qCCritical(lcSIPCallManager) << "Account with id" << accountId << "not found";
     }
 }
 
@@ -404,6 +416,7 @@ void SIPCallManager::endCall(const QString &accountId, const int callId)
 
     if (account) {
         account->hangup(callId);
+        GlobalCallState::instance().unholdOtherCall();
     } else {
         qCCritical(lcSIPCallManager) << "Account with id" << accountId << "not found";
     }
@@ -413,6 +426,7 @@ void SIPCallManager::endCall(SIPCall *call)
 {
     if (call) {
         call->account()->hangup(call->getId());
+        GlobalCallState::instance().unholdOtherCall();
     }
 }
 
