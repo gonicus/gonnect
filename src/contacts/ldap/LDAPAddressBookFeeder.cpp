@@ -139,6 +139,7 @@ void LDAPAddressBookFeeder::feedAddressBook()
         size_t sz = attr.size() + 1;
         char *p = (char *)malloc(sz);
         strncpy(p, attr.toLocal8Bit().toStdString().c_str(), sz);
+        p[sz - 1] = '\0';
         attrs[i++] = p;
     }
     attrs[i] = NULL;
