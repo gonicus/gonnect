@@ -21,6 +21,8 @@ public:
     explicit JitsiConnector(QObject *parent = nullptr);
     virtual ~JitsiConnector();
 
+    virtual QString ownDisplayName() override;
+
     // INTERNAL API
     // These methods are meant to be called by the JS code
 

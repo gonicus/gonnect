@@ -242,7 +242,7 @@ void ViewHelper::updateIsActiveVideoCall()
     const auto &callObjects = GlobalCallState::instance().globalCallStateObjects();
 
     for (const auto obj : callObjects) {
-        const auto jitsiConn = qobject_cast<ICallState *>(obj);
+        const auto jitsiConn = qobject_cast<IConferenceConnector *>(obj);
         if (jitsiConn && jitsiConn->callState() & ICallState::State::CallActive) {
             hasJitsiCall = true;
             break;
@@ -352,8 +352,8 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
 {
-    setProperty("callInForeground",
-                QVariant::fromValue(SIPCallManager::instance().findCall(accountId, callId)));
+    GlobalCallState::instance().setCallInForeground(
+            SIPCallManager::instance().findCall(accountId, callId));
 }
 
 bool ViewHelper::hasNonSilentCall() const

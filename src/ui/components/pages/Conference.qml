@@ -237,7 +237,7 @@ Item {
                         top: topBar.parent.top
                     }
 
-                    onSetOnHold: (value) => confConn.setOnHold(value)
+                    onSetOnHold: () => confConn.toggleHold()
                     onSetAudioMuted: (value) => confConn.setAudioMuted(value)
                     onSetVideoMuted: (value) => confConn.setVideoMuted(value)
                     onSetScreenShare: (value) => confConn.setScreenShare(value)
@@ -273,7 +273,13 @@ Item {
                     }
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
-                        console.log("# " + message + ": " + source + " +" + line)
+                        if (level >= 2) {
+                            console.error("# " + message + ": " + source + " +" + line)
+                        } else if (level === 1) {
+                            console.warn("# " + message + ": " + source + " +" + line)
+                        } else {
+                            console.log("# " + message + ": " + source + " +" + line)
+                        }
                     }
 
                     onPermissionRequested: (permission) => {

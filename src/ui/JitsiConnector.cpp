@@ -19,6 +19,7 @@
 #include "ConferenceParticipant.h"
 #include "DateEventManager.h"
 #include "Credentials.h"
+#include "GlobalCallState.h"
 #include "ChatMessage.h"
 
 #include <QLoggingCategory>
@@ -70,6 +71,11 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 JitsiConnector::~JitsiConnector()
 {
     qDeleteAll(m_chatNotifications);
+}
+
+QString JitsiConnector::ownDisplayName()
+{
+    return ViewHelper::instance().currentUserName();
 }
 
 void JitsiConnector::setJitsiId(QString id)
@@ -180,7 +186,6 @@ QString JitsiConnector::jitsiHtmlInternal()
 
 QString JitsiConnector::jitsiJavascriptInternal()
 {
-    const auto currentUser = ViewHelper::instance().currentUser();
     const auto defaultName = tr("Unnamed participant");
     auto &authManager = AuthManager::instance();
 
@@ -241,17 +246,24 @@ const api = new JitsiMeetExternalAPI(jitsiUrl, options)
 
 let jitsiConn = null
 
+
 new QWebChannel(qt.webChannelTransport, function(channel) {
     jitsiConn = channel.objects.jitsiConn
 
     // Listeners to JitsiConnector
 
-    jitsiConn.executePasswordCommand.connect(pw => {
-        api.executeCommand("password", pw)
+    jitsiConn.chatRoom().then(
+        chatRoom => {
+            chatRoom.sendMessageRequested.connect(msg => {
+                api.executeCommand("sendChatMessage", msg)
+            })
+        }
+    ).catch(err => {
+        throw new Error("Unable to receive chat room object:", err)
     })
 
-    jitsiConn.chatRoom.sendMessageRequested.connect(msg => {
-        api.executeCommand("sendChatMessage", msg)
+    jitsiConn.executePasswordCommand.connect(pw => {
+        api.executeCommand("password", pw)
     })
 
     jitsiConn.executeLeaveRoomCommand.connect(() => {
@@ -412,7 +424,7 @@ api.addListener("passwordRequired", data => {
             .arg(GlobalInfo::instance().jitsiUrl(), // %1
                  authManager.isJitsiAuthRequired() ? authManager.jitsiTokenForRoom(m_roomName)
                                                    : "", // %2
-                 currentUser ? currentUser->name() : "", // %3
+                 ownDisplayName(), // %3
                  Theme::instance().backgroundColor().name(), // %4
                  m_roomName, // %5
                  defaultName // %6
@@ -1045,6 +1057,13 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     qCInfo(lcJitsiConnector).nospace().noquote() << "Entering conference " << conferenceId << " ("
                                                  << displayName << ") with flags:" << startFlags;
 
+    auto &globalCallState = GlobalCallState::instance();
+    globalCallState.holdAllCalls(this);
+
+    if (isOnHold()) {
+        toggleHold();
+    }
+
     DateEventManager::instance().removeNotificationByRoomName(displayName);
 
     m_startWithVideo = startFlags & IConferenceConnector::StartFlag::VideoActive;
@@ -1091,6 +1110,8 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
             m_inConferenceNotification = nullptr;
         }
     });
+
+    Q_EMIT GlobalCallState::instance().callStarted(true);
 }
 
 void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
@@ -1135,6 +1156,8 @@ void JitsiConnector::leaveConference()
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
+    Q_EMIT GlobalCallState::instance().callEnded(true);
+    GlobalCallState::instance().unholdOtherCall();
 }
 
 void JitsiConnector::terminateConference()
@@ -1154,6 +1177,8 @@ void JitsiConnector::terminateConference()
     setConferenceName("");
     setDisplayName("");
     setIsInConference(false);
+    Q_EMIT GlobalCallState::instance().callEnded(true);
+    GlobalCallState::instance().unholdOtherCall();
 }
 
 void JitsiConnector::setOnHold(bool shallHold)
@@ -1170,6 +1195,8 @@ void JitsiConnector::setOnHold(bool shallHold)
                 setVideoMuted(!isVideoMuted());
             }
         } else {
+            GlobalCallState::instance().holdAllCalls(this);
+
             if (isAudioMuted() != GlobalMuteState::instance().isMuted()) {
                 toggleMute();
             }

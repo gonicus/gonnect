@@ -4,14 +4,16 @@
 
 #include <QDateTime>
 
+class IConferenceConnector;
+
 class ConferenceChatRoom : public IChatRoom
 {
     Q_OBJECT
 public:
-    explicit ConferenceChatRoom(QObject *parent = nullptr);
+    explicit ConferenceChatRoom(IConferenceConnector *parent = nullptr);
 
     explicit ConferenceChatRoom(const QString &roomId, const QString &name,
-                                QObject *parent = nullptr);
+                                IConferenceConnector *parent = nullptr);
     virtual ~ConferenceChatRoom();
 
     virtual QString id() override { return m_id; }
