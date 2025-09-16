@@ -42,12 +42,16 @@ static int interact(LDAP *ld, unsigned flags, void *defaults, void *sasl_interac
         break;
     }
 
-    const char *cstr = resultStr.c_str();
-    data->len = strlen(cstr);
-    data->result = malloc(data->len * sizeof(char));
-    strncpy(const_cast<char *>(static_cast<const char *>(data->result)), cstr, data->len);
+    if (resultStr.length()) {
+        const char *cstr = resultStr.c_str();
+        data->len = strlen(cstr);
+        data->result = malloc(data->len * sizeof(char));
 
-    qCDebug(lcLDAPInitializer) << "SASL interactive method response:" << data->id << resultStr;
+        strncpy(const_cast<char *>(static_cast<const char *>(data->result)), cstr, data->len);
+        ((char *)data->result)[data->len * sizeof(char) - 1] = '\0';
+
+        qCDebug(lcLDAPInitializer) << "SASL interactive method response:" << data->id << resultStr;
+    }
 
     return LDAP_SUCCESS;
 }
