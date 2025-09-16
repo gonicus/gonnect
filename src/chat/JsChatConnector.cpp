@@ -106,8 +106,12 @@ void JsChatConnector::addMessageEvent(const QString &eventId, const QString &roo
         flags |= ChatMessage::Flag::OwnMessage;
     }
 
+    const auto userObj = m_users.value(senderId, nullptr);
+    const QString displayName = userObj ? userObj->displayName() : nullptr;
+
     auto room = createOrLookupChatRoom(roomId);
-    room->addMessage(new JsChatMessageEvent(eventId, roomId, senderId, dateTime, message, flags));
+    room->addMessage(new JsChatMessageEvent(eventId, roomId, senderId, displayName, dateTime,
+                                            message, flags));
 }
 
 void JsChatConnector::addImageEvent(const QString &eventId, const QString &roomId,

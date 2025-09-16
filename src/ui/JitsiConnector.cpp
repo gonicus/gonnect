@@ -73,6 +73,11 @@ JitsiConnector::~JitsiConnector()
     qDeleteAll(m_chatNotifications);
 }
 
+QString JitsiConnector::ownDisplayName()
+{
+    return ViewHelper::instance().currentUserName();
+}
+
 void JitsiConnector::setJitsiId(QString id)
 {
     if (m_jitsiId != id) {
@@ -181,7 +186,6 @@ QString JitsiConnector::jitsiHtmlInternal()
 
 QString JitsiConnector::jitsiJavascriptInternal()
 {
-    const auto currentUser = ViewHelper::instance().currentUser();
     const auto defaultName = tr("Unnamed participant");
     auto &authManager = AuthManager::instance();
 
@@ -420,7 +424,7 @@ api.addListener("passwordRequired", data => {
             .arg(GlobalInfo::instance().jitsiUrl(), // %1
                  authManager.isJitsiAuthRequired() ? authManager.jitsiTokenForRoom(m_roomName)
                                                    : "", // %2
-                 currentUser ? currentUser->name() : "", // %3
+                 ownDisplayName(), // %3
                  Theme::instance().backgroundColor().name(), // %4
                  m_roomName, // %5
                  defaultName // %6
