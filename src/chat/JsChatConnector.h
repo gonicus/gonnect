@@ -55,6 +55,8 @@ public:
     /// To add an existing image event via JS api; does not create an image "on the server"
     Q_INVOKABLE void addImageEvent(const QString &eventId, const QString &roomId,
                                    const QString &senderId, const QString &imageUrl,
+                                   const QString &key, const QString &iv,
+                                   const QByteArray &accessToken,
                                    const QDateTime &dateTime);
 
     /// To add an existing user via JS api; does not create a new user "on the server"

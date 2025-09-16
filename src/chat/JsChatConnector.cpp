@@ -116,9 +116,10 @@ void JsChatConnector::addMessageEvent(const QString &eventId, const QString &roo
 
 void JsChatConnector::addImageEvent(const QString &eventId, const QString &roomId,
                                     const QString &senderId, const QString &imageUrl,
-                                    const QDateTime &dateTime)
+                                    const QString &key, const QString &iv,
+                                    const QByteArray &accessToken, const QDateTime &dateTime)
 {
-    m_events.append(new JsChatImageEvent(eventId, roomId, senderId, dateTime, imageUrl, this));
+    m_events.append(new JsChatImageEvent(eventId, roomId, senderId, dateTime, imageUrl, key, iv, accessToken, this));
     Q_EMIT chatEventAdded();
 }
 
