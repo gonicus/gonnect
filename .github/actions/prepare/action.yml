@@ -118,7 +118,7 @@ runs:
         git checkout ${{ steps.hashes.outputs.QCA_HASH }}
         mkdir -p build
         cd build
-        ${QT_ROOT_DIR}/bin/qt-cmake .. -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/qca -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
+        ${QT_ROOT_DIR}/bin/qt-cmake .. -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
         make 
 
     - name: Install qca
@@ -126,7 +126,7 @@ runs:
       if: inputs.qt-only == 'false'
       run: |
         cd qca/build
-        make install
+        sudo make install
 
     - name: Cache qtkeychain
       id: cache-qtkeychain
@@ -145,7 +145,7 @@ runs:
         git checkout ${{ steps.hashes.outputs.QTKEYCHAIN_TAG }}
         mkdir -p build
         cd build
-        cmake .. -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/qtkeychain -DBUILD_WITH_QT6=ON
+        cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_WITH_QT6=ON
         make
 
     - name: Install qtkeychain
@@ -153,4 +153,4 @@ runs:
       if: inputs.qt-only == 'false'
       run: |
         cd qtkeychain/build
-        make install
+        sudo make install
