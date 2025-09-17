@@ -58,9 +58,11 @@ void EDSEventFeeder::init()
     // Create a source registry
     m_registry = e_source_registry_new_sync(nullptr, &error);
     if (!m_registry) {
-        qCDebug(lcEDSEventFeeder) << "Can't create registry: " << error->message;
-        g_error_free(error);
-        error = nullptr;
+        if (error) {
+            qCDebug(lcEDSEventFeeder) << "Can't create registry:" << error->message;
+            g_error_free(error);
+            error = nullptr;
+        }
         return;
     }
 
@@ -159,7 +161,7 @@ void EDSEventFeeder::onEcalClientConnected(GObject *source_object, GAsyncResult 
         client = E_CAL_CLIENT(e_cal_client_connect_finish(result, &error));
         if (error) {
             qCDebug(lcEDSEventFeeder)
-                    << "Can't retrieve finished client connection: " << error->message;
+                    << "Can't retrieve finished client connection:" << error->message;
             g_error_free(error);
             error = nullptr;
             return;
@@ -242,9 +244,11 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
 
     if (feeder && client) {
         if (!e_cal_client_get_view_finish(client, result, &view, &error)) {
-            qCCritical(lcEDSEventFeeder) << "Can't retrieve finished view: " << error->message;
-            g_error_free(error);
-            error = nullptr;
+            if (error) {
+                qCCritical(lcEDSEventFeeder) << "Can't retrieve finished view:" << error->message;
+                g_error_free(error);
+                error = nullptr;
+            }
             return;
         }
 
@@ -252,7 +256,7 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
         feeder->connectCalendarSignals(view);
         e_cal_client_view_start(view, &error);
         if (error) {
-            qCCritical(lcEDSEventFeeder) << "Can't start view: " << error->message;
+            qCCritical(lcEDSEventFeeder) << "Can't start view:" << error->message;
             g_error_free(error);
             error = nullptr;
             return;

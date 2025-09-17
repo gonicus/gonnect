@@ -58,9 +58,11 @@ void EDSAddressBookFeeder::init()
     // Create a source registry
     m_registry = e_source_registry_new_sync(nullptr, &error);
     if (!m_registry) {
-        qCDebug(lcEDSAddressBookFeeder) << "Can't create registry: " << error->message;
-        g_error_free(error);
-        error = nullptr;
+        if (error) {
+            qCDebug(lcEDSAddressBookFeeder) << "Can't create registry:" << error->message;
+            g_error_free(error);
+            error = nullptr;
+        }
         return;
     }
 
@@ -285,7 +287,7 @@ void EDSAddressBookFeeder::onEbookClientConnected(GObject *source_object, GAsync
         client = E_BOOK_CLIENT(e_book_client_connect_finish(result, &error));
         if (error) {
             qCDebug(lcEDSAddressBookFeeder)
-                    << "Can't retrieve finished client connection: " << error->message;
+                    << "Can't retrieve finished client connection:" << error->message;
             g_error_free(error);
             error = nullptr;
             return;
@@ -305,9 +307,12 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
 
     if (feeder && client) {
         if (!e_book_client_get_view_finish(client, result, &view, &error)) {
-            qCDebug(lcEDSAddressBookFeeder) << "Can't retrieve finished view: " << error->message;
-            g_error_free(error);
-            error = nullptr;
+            if (error) {
+                qCCritical(lcEDSAddressBookFeeder)
+                        << "Can't retrieve finished view:" << error->message;
+                g_error_free(error);
+                error = nullptr;
+            }
             return;
         }
 
@@ -315,7 +320,7 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
         feeder->connectContactSignals(view);
         e_book_client_view_start(view, &error);
         if (error) {
-            qCDebug(lcEDSAddressBookFeeder) << "Can't start view: " << error->message;
+            qCCritical(lcEDSAddressBookFeeder) << "Can't start view:" << error->message;
             g_error_free(error);
             error = nullptr;
             return;
@@ -339,9 +344,11 @@ void EDSAddressBookFeeder::onClientContactsRequested(GObject *source_object, GAs
     if (feeder) {
         if (!e_book_client_get_contacts_finish(E_BOOK_CLIENT(source_object), result, &contacts,
                                                &error)) {
-            qCDebug(lcEDSAddressBookFeeder) << "Can't retrieve contacts:" << error->message;
-            g_error_free(error);
-            error = nullptr;
+            if (error) {
+                qCCritical(lcEDSAddressBookFeeder) << "Can't retrieve contacts:" << error->message;
+                g_error_free(error);
+                error = nullptr;
+            }
             return;
         }
     }
