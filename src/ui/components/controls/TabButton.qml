@@ -37,6 +37,7 @@ T.TabButton {
         text: control.text
         color: !control.enabled ? control.Material.hintTextColor : control.down || control.checked ? control.Material.accentColor : Theme.secondaryTextColor
         horizontalAlignment: Label.AlignHCenter
+        elide: Label.ElideRight
 
         font.family: "Noto Sans"
         font.pixelSize: 16
