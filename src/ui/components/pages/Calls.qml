@@ -160,7 +160,6 @@ Item {
         HistoryList {
             id: historyList
             height: parent.height
-            rightPadding: 20
             proxyModel {
                 filterText: historySearchField.text.trim()
                 typeFilter: historyFilterTypeSelector.currentValue
@@ -171,7 +170,6 @@ Item {
                 left: parent.left
                 right: parent.right
                 bottom: parent.bottom
-                leftMargin: 20
             }
         }
     }

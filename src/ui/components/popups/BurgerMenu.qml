@@ -14,6 +14,21 @@ Menu {
     }
 
     Action {
+        id: pageEditAction
+        text: qsTr("Enable UI edit mode")
+        enabled: true
+        onTriggered: () => {
+            if (SM.uiEditMode) {
+                pageEditAction.text = qsTr("Enable UI edit mode")
+                SM.setUiEditMode(false)
+            } else {
+                pageEditAction.text = qsTr("Disable UI edit mode")
+                SM.setUiEditMode(true)
+            }
+        }
+    }
+
+    Action {
         text: qsTr("Toggle fullscreen")
         onTriggered: () => ViewHelper.toggleFullscreen()
     }

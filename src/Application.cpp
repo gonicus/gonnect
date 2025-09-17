@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "StateManager.h"
 #include "SearchProvider.h"
+#include "UISettings.h"
 #include "NotificationManager.h"
 #include "appversion.h"
 #include "SIPManager.h"
@@ -56,6 +57,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     StateManager::instance().setParent(this);
     SearchProvider::instance().setParent(this);
+    UISettings::instance().setParent(this);
 
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, s_sighupFd)) {
         qFatal("Couldn't create HUP socketpair");
@@ -77,18 +79,18 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 void Application::installTranslations()
 {
     if (m_baseTranslator.load(QLocale::system(), u"qtbase"_s, u"_"_s,
-                              QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+        QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
         installTranslator(&m_baseTranslator);
-    }
+        }
 
-    if (m_declarativeTranslator.load(QLocale::system(), u"qtdeclarative"_s, u"_"_s,
-                                     QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
-        installTranslator(&m_declarativeTranslator);
-    }
+        if (m_declarativeTranslator.load(QLocale::system(), u"qtdeclarative"_s, u"_"_s,
+            QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+            installTranslator(&m_declarativeTranslator);
+            }
 
-    if (m_appTranslator.load(QLocale(), "gonnect"_L1, "_"_L1, ":/i18n"_L1)) {
-        installTranslator(&m_appTranslator);
-    }
+            if (m_appTranslator.load(QLocale(), "gonnect"_L1, "_"_L1, ":/i18n"_L1)) {
+                installTranslator(&m_appTranslator);
+            }
 }
 
 void Application::initialize()
@@ -171,6 +173,8 @@ Application::~Application()
 
 void Application::shutdown()
 {
+    StateManager::instance().setSaveDynamicUi(true);
+
     NotificationManager::instance().shutdown();
     USBDevices::instance().shutdown();
 
@@ -182,14 +186,14 @@ void Application::shutdown()
 QString Application::logFilePath()
 {
     static QString path =
-            QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/" + logFileName();
+    QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/" + logFileName();
     return path;
 }
 
 QString Application::logFileName()
 {
     static QString fileName =
-            QDateTime::currentDateTime().toString("yyyy-MM-dd---hh-mm-ss") + "---gonnect-log.txt";
+    QDateTime::currentDateTime().toString("yyyy-MM-dd---hh-mm-ss") + "---gonnect-log.txt";
     return fileName;
 }
 

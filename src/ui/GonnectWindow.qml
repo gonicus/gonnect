@@ -44,14 +44,22 @@ BaseWindow {
         property alias gonnectWindowHeight: control.height
     }
 
-    enum PageId {
-        Activity,
+    enum PageType {
+        Base,
         Calls,
         Call,
         Conference,
-        Chats,
         Settings
     }
+
+    // Thse pages will remain static and thus have hard-coded ID's
+    property string callPageId: "call0"
+    property string callsPageId: "calls0" // TODO: This page should be replaced by its dynamic counterpart
+    property string conferencePageId: "conference0"
+    property string settingsPageId: "settings0"
+    property string defaultPageId: "" // Default page fallback that can be dynamic, currently unused
+
+    property var previousPage
 
     readonly property CallsModel globalCallsModel: CallsModel {
         id: callsModel
@@ -61,43 +69,153 @@ BaseWindow {
         target: GlobalCallState
 
         function onCallStarted(isConference : bool) {
-            control.showPage(isConference ? GonnectWindow.PageId.Conference : GonnectWindow.PageId.Call)
+            control.showPage(isConference ? GonnectWindow.PageType.Conference : GonnectWindow.PageType.Call)
         }
 
         function onCallEnded(isConference : bool) {
             const count = GlobalCallState.activeCallsCount
-            const isOnCallPage = mainTabBar.selectedPageId === GonnectWindow.PageId.Call
-            const isOnConferencePage = mainTabBar.selectedPageId === GonnectWindow.PageId.Conference
+            const isOnCallPage = mainTabBar.selectedPageId === GonnectWindow.PageType.Call
+            const isOnConferencePage = mainTabBar.selectedPageId === GonnectWindow.PageType.Conference
 
             if (count && isOnCallPage && !isConference) {
-                control.showPage(GonnectWindow.PageId.Conference)
+                control.updateTabSelection(control.conferencePageId,
+                                           GonnectWindow.PageType.Conference)
             } else if (count && isOnConferencePage && isConference) {
-                control.showPage(GonnectWindow.PageId.Call)
+                control.updateTabSelection(control.callPageId,
+                                           GonnectWindow.PageType.Call)
             } else if (!count && (isOnCallPage || isOnConferencePage)) {
-                control.showPage(GonnectWindow.PageId.Calls)
+                control.updateTabSelection(control.callsPageId,
+                                           GonnectWindow.PageType.Calls)
             }
         }
     }
 
-    function showPage(pageId : int) {
+    function updateTabSelection(pageId : string, pageType : int) {
+        // page{Id,Type} changes not as a result of tab bar clicks
         mainTabBar.selectedPageId = pageId
+        mainTabBar.selectedPageType = pageType
+    }
+
+    function showPage(pageId : string) {
+        let page
+        switch (pageId) {
+            case callPageId:
+                page = callPage
+                break
+            case callsPageId:
+                page = callsPage
+                break
+            case conferencePageId:
+                page = conferencePage
+                break
+            case settingsPageId:
+                page = settingsPage
+                break
+            default:
+                page = pageStack.pages[pageId]
+        }
+
+        if (previousPage) {
+            previousPage.visible = false
+        }
+
+        if (page) {
+            page.visible = true
+            previousPage = page
+        }
     }
 
     function openMeeting(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
-        control.showPage(GonnectWindow.PageId.Conference)
+        control.updateTabSelection(control.conferencePageId,
+                                   GonnectWindow.PageType.Conference)
         conferencePage.startConference(meetingId, displayName, startFlags, callHistoryItem)
     }
 
     function updateCallInForeground() {
-        if (mainTabBar.selectedPageId === GonnectWindow.PageId.Conference) {
+        if (mainTabBar.selectedPageType === GonnectWindow.PageType.Conference) {
             GlobalCallState.callInForeground = conferencePage.iConferenceConnector
-        } else if (mainTabBar.selectedPageId === GonnectWindow.PageId.Call) {
+        } else if (mainTabBar.selectedPageType === GonnectWindow.PageType.Call) {
             const selectedCallItem = callPage.selectedCallItem
             if (selectedCallItem) {
                 ViewHelper.setCallInForegroundByIds(selectedCallItem.accountId, selectedCallItem.callId)
             }
         }
     }
+
+    function removePage(pageId : string) {
+        let page = pageStack.pages[pageId]
+        pageModel.remove(page)
+        page.writer.reset()
+        page.destroy()
+        delete pageStack.pages[pageId]
+
+        let pageCount = pageModel.count()
+        UISettings.setUISetting("generic", "pages", pageCount)
+    }
+
+    function createPage(pageId : string) {
+        let page = pages.base.createObject(pageStack,
+                                           {
+                                               pageId: pageId,
+                                               name: "",
+                                               icon: ""
+                                           })
+        if (page === null) {
+            console.log("Could not create page component", pageId)
+        }
+
+        pageModel.add(page)
+        pageStack.pages[pageId] = page
+    }
+
+    function loadPages() {
+        pageReader.load()
+    }
+
+    readonly property Connections dynamicUiConnections: Connections {
+        target: SM
+        function onSaveDynamicUiChanged() {
+            if (SM.saveDynamicUi) {
+                console.log("Writing dynamic UI state to disk")
+
+                let pageCount = pageModel.count()
+                let pageList = pageModel.items()
+
+                // Generic
+                UISettings.setUISetting("generic", "pages", pageCount)
+                UISettings.setUISetting("generic", "gonnectTabBarWidth", mainTabBar.width)
+                UISettings.setUISetting("generic", "gonnectControlBarHeight", controlBar.height)
+
+                // Pages & Widgets
+                for (let i = 0; i < pageCount; i++) {
+                    let page = pageList[i]
+
+                    page.writer.save()
+                }
+
+                SM.setSaveDynamicUi(false)
+            }
+        }
+    }
+
+    CommonPages {
+        id: pages
+    }
+
+    PageModel {
+        id: pageModel
+    }
+
+    PageReader {
+        id: pageReader
+
+        tabRoot: mainTabBar
+        pageRoot: pageStack
+        pageList: control.pageList
+        model: pageModel
+    }
+
+    property alias pageList: pageStack.pages
 
     Item {
         anchors.fill: parent
@@ -163,16 +281,36 @@ BaseWindow {
 
         MainTabBar {
             id: mainTabBar
-            selectedPageId: GonnectWindow.PageId.Calls
-            hasActiveCall: callsModel.count > 0
-            hasActiveConference: conferencePage.iConferenceConnector.isInConference
-            anchors {
-                left: parent.left
-                top: parent.top
-                bottom: parent.bottom
-            }
+            selectedPageId: control.callsPageId
+            selectedPageType: GonnectWindow.PageType.Calls
 
-            onSelectedPageIdChanged: () => control.updateCallInForeground()
+            callPageId: control.callPageId
+            callsPageId: control.callsPageId
+            conferencePageId: control.conferencePageId
+            settingsPageId: control.settingsPageId
+            defaultPageId: control.defaultPageId
+
+                mainWindow: control
+
+                hasActiveCall: callsModel.count > 0
+                hasActiveConference: conferencePage.iConferenceConnector.isInConference
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    bottom: parent.bottom
+                }
+
+                onSelectedPageIdChanged: {
+                    control.showPage(selectedPageId)
+                }
+
+                onSelectedPageTypeChanged: {
+                    control.updateCallInForeground()
+                }
+
+                Component.onCompleted: {
+                    control.showPage(selectedPageId)
+                }
         }
 
         ControlBar {
@@ -194,6 +332,9 @@ BaseWindow {
                 bottom: parent.bottom
             }
 
+            property var pages: ({})
+
+            // TODO: These might still be useful
             onSelectedPageChanged: () => {
                 // Forward attached data from MainTabBar element
                 const page = pageStack.selectedPage
@@ -211,52 +352,6 @@ BaseWindow {
                 return null
             }
 
-            states: [
-                State {
-                    when: mainTabBar.selectedPageId < 0
-                    PropertyChanges {
-                        defaultPage.visible: true
-                    }
-                },
-                State {
-                    when: mainTabBar.selectedPageId === GonnectWindow.PageId.Activity
-                    PropertyChanges {
-                        activityPage.visible: true
-                    }
-                },
-                State {
-                    when: mainTabBar.selectedPageId === GonnectWindow.PageId.Settings
-                    PropertyChanges {
-                        settingsPage.visible: true
-                    }
-                },
-                State {
-                    when: mainTabBar.selectedPageId === GonnectWindow.PageId.Call
-                    PropertyChanges {
-                        callPage.visible: true
-                    }
-                },
-                State {
-                    when: mainTabBar.selectedPageId === GonnectWindow.PageId.Calls
-                    PropertyChanges {
-                        callsPage.visible: true
-                    }
-                },
-                State {
-                    when: mainTabBar.selectedPageId === GonnectWindow.PageId.Conference
-                    PropertyChanges {
-                        conferencePage.visible: true
-                    }
-                },
-                State {
-                    when: mainTabBar.selectedPageId === GonnectWindow.PageId.Chats
-                    PropertyChanges {
-                        chatsPage.visible: true
-                    }
-                }
-            ]
-
-            // Default {
             Default {
                 id: defaultPage
                 visible: false
@@ -308,7 +403,7 @@ BaseWindow {
         }
         function onShowConferenceChat() {
             control.ensureVisible()
-            control.showPage(GonnectWindow.PageId.Conference)
+            control.updateTabSelection(control.conferencePageId, GonnectWindow.PageType.Conference)
         }
         function onFullscreenToggle() {
             if (control.visibility === Window.FullScreen) {

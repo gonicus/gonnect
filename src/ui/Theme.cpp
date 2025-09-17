@@ -35,11 +35,11 @@ bool Theme::useOwnDecoration()
 
         AppSettings settings;
         const auto settingsVal =
-                settings.value("generic/useOwnWindowDecoration", "auto").toString();
+        settings.value("generic/useOwnWindowDecoration", "auto").toString();
 
         if (settingsVal == "auto") {
             const auto desktop =
-                    QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower(); // gnome|kde
+            QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower(); // gnome|kde
             m_useOwnDecoration = desktop == "gnome";
         } else {
             m_useOwnDecoration = settingsVal == "true";
@@ -65,31 +65,31 @@ void Theme::onThemeVariantChanged()
 
     switch (m_themeVariant) {
 
-    case ThemeVariant::System: {
-        const auto portalScheme = ThemeManager::instance().colorScheme();
-        switch (portalScheme) {
-        case ThemeManager::ColorScheme::NO_PREFERENCE:
-            setDarkMode(false);
-            break;
+        case ThemeVariant::System: {
+            const auto portalScheme = ThemeManager::instance().colorScheme();
+            switch (portalScheme) {
+                case ThemeManager::ColorScheme::NO_PREFERENCE:
+                    setDarkMode(false);
+                    break;
 
-        case ThemeManager::ColorScheme::DARK:
-            setDarkMode(true);
-            break;
+                case ThemeManager::ColorScheme::DARK:
+                    setDarkMode(true);
+                    break;
 
-        case ThemeManager::ColorScheme::LIGHT:
-            setDarkMode(false);
+                case ThemeManager::ColorScheme::LIGHT:
+                    setDarkMode(false);
+                    break;
+            }
             break;
         }
-        break;
-    }
 
-    case ThemeVariant::Light:
-        setDarkMode(false);
-        break;
+                case ThemeVariant::Light:
+                    setDarkMode(false);
+                    break;
 
-    case ThemeVariant::Dark:
-        setDarkMode(true);
-        break;
+                case ThemeVariant::Dark:
+                    setDarkMode(true);
+                    break;
     }
 }
 
@@ -108,6 +108,7 @@ void Theme::updateColorPalette()
     m_borderHeaderIconHovered = QColor(206, 201, 196);
     m_highlightColor = QColor(30, 57, 143, 76);
     m_paneColor = QColor(246, 245, 244);
+    m_highContrastColor = QColor(0, 0, 0);
     m_backgroundColor = QColor(255, 255, 255);
     m_backgroundSecondaryColor = QColor(250, 250, 250);
     m_backgroundOffsetColor = QColor(0, 0, 0, 20);

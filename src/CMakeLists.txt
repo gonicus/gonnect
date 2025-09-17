@@ -222,13 +222,20 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
         ui/components/dialogs/InfoDialog.qml
+        # Dynamic UI
+        ui/components/BaseWidget.qml
+        ui/components/DateEventsWidget.qml
+        ui/components/FavoritesWidget.qml
+        ui/components/HistoryWidget.qml
+        ui/components/MetadataWidget.qml
 
-        ui/components/pages/Activity.qml
         ui/components/pages/Chats.qml
         ui/components/pages/Call.qml
         ui/components/pages/Calls.qml
         ui/components/pages/Conference.qml
         ui/components/pages/Default.qml
+        # Dynamic UI
+        ui/components/pages/BasePage.qml
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
@@ -289,6 +296,14 @@ qt_add_qml_module(gonnect
         ui/PreferredIdentityEditWindow.qml
         ui/ShortcutsWindow.qml
         ui/SipTemplateWizard.qml
+        # Dynamic UI
+        ui/CommonPages.qml
+        ui/CommonWidgets.qml
+        ui/PageModel.qml
+        ui/PageReader.qml
+        ui/PageWriter.qml
+        ui/WidgetModel.qml
+
 
     DEPENDENCIES
         QtQml.Models
@@ -315,6 +330,8 @@ qt_add_qml_module(gonnect
         KeychainSettings.h
         StateManager.cpp
         StateManager.h
+        UISettings.cpp
+        UISettings.h
 
         dbus/portal/AbstractPortal.h
         dbus/portal/AbstractPortal.cpp

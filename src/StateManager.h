@@ -14,6 +14,10 @@ class StateManager : public QObject
     Q_OBJECT
     Q_PROPERTY(bool globalShortcutsSupported READ globalShortcutsSupported NOTIFY
                        globalShortcutsSupportedChanged FINAL)
+    Q_PROPERTY(bool uiEditMode READ uiEditMode NOTIFY
+                       uiEditModeChanged FINAL)
+    Q_PROPERTY(bool saveDynamicUi READ saveDynamicUi NOTIFY
+                       saveDynamicUiChanged FINAL)
     Q_PROPERTY(QVariantMap globalShortcuts READ globalShortcuts NOTIFY globalShortcutsChanged FINAL)
 
 public:
@@ -27,6 +31,12 @@ public:
 
         return *_instance;
     }
+
+    Q_INVOKABLE void setUiEditMode(bool option);
+    bool uiEditMode() { return m_uiEditMode; };
+
+    Q_INVOKABLE void setSaveDynamicUi(bool option);
+    bool saveDynamicUi() { return m_saveDynamicUi; };
 
     void initialize();
     bool globalShortcutsSupported() const;
@@ -47,6 +57,8 @@ public:
     bool isFirstInstance() const { return m_isFirstInstance; }
 
 Q_SIGNALS:
+    void uiEditModeChanged();
+    void saveDynamicUiChanged();
     void globalShortcutsSupportedChanged();
     void globalShortcutsChanged();
 
@@ -68,6 +80,9 @@ private:
     GOnnectDBusAPI *m_apiEndpoint = nullptr;
 
     ICallState::States m_oldCallState = ICallState::State::Idle;
+
+    bool m_uiEditMode = false;
+    bool m_saveDynamicUi = false;
 
     bool m_isFirstInstance = true;
 };
