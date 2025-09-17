@@ -671,6 +671,7 @@ target_link_libraries(gonnect
         ${EDS_CALENDAR_LIBRARIES}
 )
 target_link_libraries(gonnect PRIVATE Qt6::Core)
+target_link_libraries(gonnect PRIVATE cryptopp)
 
 qt_import_plugins(gonnect INCLUDE
      ${AKONADI_CONTACT_FACTORY}

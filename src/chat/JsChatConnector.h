@@ -54,7 +54,8 @@ public:
 
     /// To add an existing image event via JS api; does not create an image "on the server"
     Q_INVOKABLE void addImageEvent(const QString &eventId, const QString &roomId,
-                                   const QString &senderId, const QString &imageUrl,
+                                   const QString &senderId, const QString &filename,
+                                   const QString &imageUrl,
                                    const QString &key, const QString &iv,
                                    const QByteArray &accessToken,
                                    const QDateTime &dateTime);
