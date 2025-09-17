@@ -242,7 +242,7 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
 
     if (feeder && client) {
         if (!e_cal_client_get_view_finish(client, result, &view, &error)) {
-            qCDebug(lcEDSEventFeeder) << "Can't retrieve finished view: " << error->message;
+            qCCritical(lcEDSEventFeeder) << "Can't retrieve finished view: " << error->message;
             g_error_free(error);
             error = nullptr;
             return;
@@ -252,7 +252,7 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
         feeder->connectCalendarSignals(view);
         e_cal_client_view_start(view, &error);
         if (error) {
-            qCDebug(lcEDSEventFeeder) << "Can't start view: " << error->message;
+            qCCritical(lcEDSEventFeeder) << "Can't start view: " << error->message;
             g_error_free(error);
             error = nullptr;
             return;
@@ -275,9 +275,11 @@ void EDSEventFeeder::onClientEventsRequested(GObject *source_object, GAsyncResul
     if (feeder) {
         if (!e_cal_client_get_object_list_finish(E_CAL_CLIENT(source_object), result, &components,
                                                  &error)) {
-            qCDebug(lcEDSEventFeeder) << "Can't retrieve events:" << error->message;
-            g_error_free(error);
-            error = nullptr;
+            if (error) {
+                qCCritical(lcEDSEventFeeder) << "Can't retrieve events:" << error->message;
+                g_error_free(error);
+                error = nullptr;
+            }
             return;
         }
     }
