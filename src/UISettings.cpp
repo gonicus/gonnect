@@ -10,7 +10,8 @@ UISettings::UISettings(QObject *parent)
 {
 }
 
-QVariant UISettings::getUISetting(const QString &group, const QString &key, const QVariant &defaultValue)
+QVariant UISettings::getUISetting(const QString &group, const QString &key,
+                                  const QVariant &defaultValue)
 {
     QString compoundSetting = QString("%1/%2").arg(group, key);
     return value(compoundSetting, defaultValue);

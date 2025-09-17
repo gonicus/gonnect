@@ -12,9 +12,11 @@ Item {
 
     property string selectedPageId: ""
     property int selectedPageType: -1
+    property var attachedData: null
 
     property string callPageId
     property string callsPageId
+    property string chatsPageId
     property string conferencePageId
     property string settingsPageId
     property string defaultPageId
@@ -38,7 +40,8 @@ Item {
                                                      labelText: "",
                                                      disabledTooltipText: "",
                                                      isEnabled: true,
-                                                     showRedDot: false
+                                                     showRedDot: false,
+                                                     attachedData: null
                                                  })
         if (tabButton === null) {
             console.log("Could not create tab button component")
@@ -179,9 +182,9 @@ Item {
 
             TapHandler {
                 onTapped: () => {
-                    control.attachedData = delg.attachedData
                     control.selectedPageId = delg.pageId
                     control.selectedPageType = delg.pageType
+                    control.attachedData = delg.attachedData
                 }
             }
         }
@@ -236,7 +239,7 @@ Item {
 
                     for (const connector of chatConnectors) {
                         baseModel.push({
-                            pageId: "", // TODO: ...
+                            pageId: control.chatsPageId,
                             pageType: GonnectWindow.PageType.Chats,
                             iconSource: Icons.dialogMessages,
                             labelText: connector.displayName,

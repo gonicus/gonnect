@@ -48,6 +48,7 @@ BaseWindow {
         Base,
         Calls,
         Call,
+        Chats,
         Conference,
         Settings
     }
@@ -55,6 +56,7 @@ BaseWindow {
     // Thse pages will remain static and thus have hard-coded ID's
     property string callPageId: "call0"
     property string callsPageId: "calls0" // TODO: This page should be replaced by its dynamic counterpart
+    property string chatsPageId: "chats0"
     property string conferencePageId: "conference0"
     property string settingsPageId: "settings0"
     property string defaultPageId: "" // Default page fallback that can be dynamic, currently unused
@@ -357,11 +359,6 @@ BaseWindow {
                 visible: false
                 anchors.fill: parent
             }
-            Activity {
-                id: activityPage
-                visible: false
-                anchors.fill: parent
-            }
             Call {
                 id: callPage
                 visible: false
@@ -374,13 +371,13 @@ BaseWindow {
                 visible: false
                 anchors.fill: parent
             }
-            Conference {
-                id: conferencePage
+            Chats {
+                id: chatsPage
                 visible: false
                 anchors.fill: parent
             }
-            Chats {
-                id: chatsPage
+            Conference {
+                id: conferencePage
                 visible: false
                 anchors.fill: parent
             }

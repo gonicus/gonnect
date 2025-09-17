@@ -26,7 +26,8 @@ public:
 
     ~UISettings() = default;
 
-    Q_INVOKABLE QVariant getUISetting(const QString &group, const QString &key, const QVariant &defaultValue);
+    Q_INVOKABLE QVariant getUISetting(const QString &group, const QString &key,
+                                      const QVariant &defaultValue);
     Q_INVOKABLE void setUISetting(const QString &group, const QString &key, const QVariant &value);
     Q_INVOKABLE void removeUISetting(const QString &group, const QString &key);
 

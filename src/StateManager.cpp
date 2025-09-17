@@ -69,7 +69,7 @@ void StateManager::setUiEditMode(bool option)
     if (m_uiEditMode != option) {
         m_uiEditMode = option;
 
-        emit uiEditModeChanged();
+        Q_EMIT uiEditModeChanged();
     }
 };
 
@@ -78,7 +78,7 @@ void StateManager::setSaveDynamicUi(bool option)
     if (m_saveDynamicUi != option) {
         m_saveDynamicUi = option;
 
-        emit saveDynamicUiChanged();
+        Q_EMIT saveDynamicUiChanged();
     }
 };
 
