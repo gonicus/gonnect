@@ -126,13 +126,18 @@ Item {
 
     Flickable {
         id: rowFlickable
-        width: Math.min(buttonRow.implicitWidth, control.width - (roomNameColumn.x + roomNameColumn.width))
+        width: Math.min(buttonRow.implicitWidth, control.width - (roomNameColumn.x + roomNameColumn.width) - rightStickyButtonRow.implicitWidth)
         contentWidth: buttonRow.implicitWidth
         clip: true
         anchors {
             top: parent.top
             bottom: parent.bottom
-            right: parent.right
+            right: rightStickyButtonRow.left
+        }
+
+        ScrollBar.horizontal: ScrollBar {
+            height: 5
+            policy: rowFlickable.contentWidth > rowFlickable.width ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
         }
 
         Row {
@@ -322,63 +327,68 @@ Item {
                     }
                 }
             }
+        }
+    }
 
-            Rectangle {
-                visible: raiseHandButton.visible
-                         || tileViewButton.visible
-                         || audioInputDeviceButton.visible
-                         || audioOutputDeviceButton.visible
-                         || videoDeviceButton.visible
-                         || screenShareButton.visible
-                height: 32
-                width: 1
-                color: Theme.borderColor
-                anchors.verticalCenter: parent.verticalCenter
+    Row {
+        id: rightStickyButtonRow
+        spacing: 5
+        rightPadding: 20
+        anchors {
+            top: parent.top
+            bottom: parent.bottom
+            right: parent.right
+        }
+
+        Rectangle {
+            height: 32
+            width: 1
+            color: Theme.borderColor
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Button {
+            id: hangupButton
+            width: 50
+            height: 50
+            highlighted: true
+            anchors.verticalCenter: parent.verticalCenter
+            icon.source: Icons.callStop
+
+            Material.accent: Theme.redColor
+
+            Component.onCompleted: () => {
+                hangupButton.icon.width = 24
+                hangupButton.icon.height = 24
             }
 
-            Button {
-                id: hangupButton
-                width: 50
-                height: 50
-                highlighted: true
-                anchors.verticalCenter: parent.verticalCenter
-                icon.source: Icons.callStop
+            onClicked: () => {
+                const conn = control.iConferenceConnector
 
-                Material.accent: Theme.redColor
-
-                Component.onCompleted: () => {
-                    hangupButton.icon.width = 24
-                    hangupButton.icon.height = 24
+                if (conn.ownRole === ConferenceParticipant.Role.Moderator && conn.numberOfParticipants > 1) {
+                    leaveMenu.popup(hangupButton, -leaveMenu.width + hangupButton.width, hangupButton.height)
+                } else {
+                    hangupButton.enabled = false
+                    control.hangup()
                 }
+            }
 
-                onClicked: () => {
-                    const conn = control.iConferenceConnector
+            Menu {
+                id: leaveMenu
 
-                    if (conn.ownRole === ConferenceParticipant.Role.Moderator && conn.numberOfParticipants > 1) {
-                        leaveMenu.popup(hangupButton, -leaveMenu.width + hangupButton.width, hangupButton.height)
-                    } else {
+                MenuItem {
+                    text: qsTr("Leave conference")
+                    onClicked: () => {
                         hangupButton.enabled = false
                         control.hangup()
                     }
                 }
 
-                Menu {
-                    id: leaveMenu
-
-                    MenuItem {
-                        text: qsTr("Leave conference")
-                        onClicked: () => {
-                            hangupButton.enabled = false
-                            control.hangup()
-                        }
-                    }
-
-                    MenuItem {
-                        text: qsTr("End conference for all")
-                        onClicked: () => {
-                            hangupButton.enabled = false
-                            control.finishForAll()
-                        }
+                MenuItem {
+                    text: qsTr("End conference for all")
+                    onClicked: () => {
+                        hangupButton.enabled = false
+                        control.finishForAll()
                     }
                 }
             }
