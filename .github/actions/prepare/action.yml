@@ -46,7 +46,7 @@ runs:
       if: inputs.qt-only == 'false'
       run: |
         echo "CMAKE_VERSION=$(cmake --version | head -n 1 | awk '{print $3}')" >> $GITHUB_OUTPUT
-        echo "QCA_HASH=$(curl -s "https://api.github.com/repos/KDE/qca/tags" | jq -r '.[0].commit.sha')" >> $GITHUB_OUTPUT
+        echo "QCA_HASH=$(sed -n '/(qca/,/)/s/^.*GIT_TAG \(.*\).*$/\1/p' ${{github.workspace}}/src/CMakeLists.txt)" >> $GITHUB_OUTPUT
         echo "HIDAPI_TAG=$(yq '.. | select(has("name")) | select(.name == "hidapi") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
         echo "PJSIP_TAG=$(yq '.. | select(has("name")) | select(.name == "pjsip") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
         echo "QTKEYCHAIN_TAG=$(yq '.. | select(has("name")) | select(.name == "qtkeychain") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
@@ -107,7 +107,7 @@ runs:
       uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
       with:
         path: ${{github.workspace}}/qca
-        key: ${{ steps.hashes.outputs.QCA_HASH }}-qca
+        key: ${{ steps.hashes.outputs.QCA_HASH }}-qca6
 
     - name: Build qca
       shell: bash
@@ -126,7 +126,7 @@ runs:
       if: inputs.qt-only == 'false'
       run: |
         cd qca/build
-        sudo make install
+        make install
 
     - name: Cache qtkeychain
       id: cache-qtkeychain
