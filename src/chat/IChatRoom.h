@@ -30,7 +30,7 @@ public:
 
     Q_INVOKABLE virtual void toggleReaction(const QString &eventId, const QString &emoji) = 0;
     Q_INVOKABLE virtual void setReactionCount(const QString &eventId, const QString &emoji,
-                                              qsizetype count, bool hasOwnReaction = false) = 0;
+                                              qsizetype count, const QString &ownReactEventId) = 0;
 
 Q_SIGNALS:
     void nameChanged(QString name);

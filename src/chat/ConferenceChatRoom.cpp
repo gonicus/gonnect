@@ -51,7 +51,8 @@ void ConferenceChatRoom::toggleReaction(const QString &, const QString &)
     qCWarning(lcConferenceChatRoom) << "ConferenceChatRoom does not support toggleReaction";
 }
 
-void ConferenceChatRoom::setReactionCount(const QString &, const QString &, qsizetype, bool)
+void ConferenceChatRoom::setReactionCount(const QString &, const QString &, qsizetype,
+                                          const QString &)
 {
     qCWarning(lcConferenceChatRoom) << "ConferenceChatRoom does not support setReactionCount";
 }

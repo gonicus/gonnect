@@ -70,7 +70,7 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
             QVariantMap entry;
             entry.insert("emoji", reaction.emoji);
             entry.insert("count", reaction.count);
-            entry.insert("hasOwnReaction", reaction.hasOwnReaction);
+            entry.insert("hasOwnReaction", !reaction.ownReactEventId.isEmpty());
             l.append(entry);
         }
         return l;

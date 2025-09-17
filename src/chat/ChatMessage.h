@@ -7,7 +7,7 @@ struct ChatMessageReaction
 {
     QString emoji;
     qsizetype count = 0;
-    bool hasOwnReaction = false;
+    QString ownReactEventId;
 };
 
 class ChatMessage
@@ -38,8 +38,9 @@ public:
     Flags flags() const { return m_flags; }
     void setFlags(Flags flags) { m_flags = flags; }
 
-    void setReactionCount(const QString &reaction, qsizetype count, bool hasOwnReaction = false);
+    void setReactionCount(const QString &reaction, qsizetype count, const QString &ownReactEventId);
     const QList<ChatMessageReaction> &sortedReactions() const { return m_sortedReactions; }
+    const ChatMessageReaction *reactionByEmoji(const QString &emoji) const;
 
 private:
     QString m_eventId;

@@ -11,7 +11,8 @@ ChatMessage::ChatMessage(const QString &eventId, const QString &fromId, const QS
 {
 }
 
-void ChatMessage::setReactionCount(const QString &reaction, qsizetype count, bool hasOwnReaction)
+void ChatMessage::setReactionCount(const QString &reaction, qsizetype count,
+                                   const QString &ownReactEventId)
 {
     if (count) {
 
@@ -21,13 +22,13 @@ void ChatMessage::setReactionCount(const QString &reaction, qsizetype count, boo
             if (entry.emoji == reaction) {
                 found = true;
                 entry.count = count;
-                entry.hasOwnReaction = hasOwnReaction;
+                entry.ownReactEventId = ownReactEventId;
                 break;
             }
         }
 
         if (!found) {
-            m_sortedReactions.append(ChatMessageReaction(reaction, count, hasOwnReaction));
+            m_sortedReactions.append(ChatMessageReaction(reaction, count, ownReactEventId));
         }
 
         std::sort(m_sortedReactions.begin(), m_sortedReactions.end(),
@@ -45,4 +46,14 @@ void ChatMessage::setReactionCount(const QString &reaction, qsizetype count, boo
             }
         }
     }
+}
+
+const ChatMessageReaction *ChatMessage::reactionByEmoji(const QString &emoji) const
+{
+    for (const auto &reactionObj : std::as_const(m_sortedReactions)) {
+        if (reactionObj.emoji == emoji) {
+            return &reactionObj;
+        }
+    }
+    return nullptr;
 }

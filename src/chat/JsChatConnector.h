@@ -94,4 +94,5 @@ Q_SIGNALS:
     void sendMessageRequested(QString roomId, QString message);
     void resetUnreadCountRequested(QString roomId);
     void reactToMessageRequested(QString roomId, QString eventId, QString emoji);
+    void redactEventRequested(QString roomId, QString eventId);
 };
