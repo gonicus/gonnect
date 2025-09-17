@@ -54,7 +54,8 @@ JsChatImageEvent::onDownloadFinished(QNetworkReply *reply)
         qInfo() << "===> downloaded (image) data starts with:" << data.left(100) << "...";
 
         QByteArray *recovered = decryptA256CTR(&data);
-        writeToFile(recovered);
+
+        writeToFile(recovered); // instead of writing it, we want to render the image in right place in its chat dialog
     }
     else
     {
