@@ -149,6 +149,7 @@ if(BUILD_DEPENDENCIES)
 
     ExternalProject_Add(qca
         GIT_REPOSITORY https://github.com/KDE/qca.git
+        # renovate: datasource=github-tags depName=KDE/qca
         GIT_TAG v2.3.10
         CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
         UPDATE_DISCONNECTED TRUE
@@ -161,6 +162,7 @@ if(BUILD_DEPENDENCIES)
 
     ExternalProject_Add(qtkeychain
         GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
+        # renovate: datasource=github-tags depName=frankosterfeld/qtkeychain
         GIT_TAG 0.15.0
         CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON
         UPDATE_DISCONNECTED TRUE

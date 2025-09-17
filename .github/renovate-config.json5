@@ -39,6 +39,16 @@
 	        versioningTemplate: "git",
             currentValueTemplate: "master",
 	        datasourceTemplate: "git-refs"
+        },
+        {
+            customType: "regex",
+            fileMatch: [
+                "^src/CMakeLists.txt$"
+            ],
+            matchStrings: [
+                "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\n\\s*GIT_TAG (?<currentValue>.*?)\\n"
+            ],
+	        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}'
         }
     ]
 }
