@@ -47,7 +47,8 @@ static int interact(LDAP *ld, unsigned flags, void *defaults, void *sasl_interac
         data->len = strlen(cstr);
         data->result = malloc(data->len * sizeof(char));
 
-        snprintf(const_cast<char *>(static_cast<const char *>(data->result)), sizeof(data->len), "%s", cstr);
+        snprintf(const_cast<char *>(static_cast<const char *>(data->result)), sizeof(data->len),
+                 "%s", cstr);
 
         qCDebug(lcLDAPInitializer) << "SASL interactive method response:" << data->id << resultStr;
     }
