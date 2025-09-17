@@ -227,7 +227,6 @@ qt_add_qml_module(gonnect
         ui/components/DateEventsWidget.qml
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
-        ui/components/MetadataWidget.qml
 
         ui/components/pages/Chats.qml
         ui/components/pages/Call.qml

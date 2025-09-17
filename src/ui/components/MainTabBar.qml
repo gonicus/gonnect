@@ -236,7 +236,7 @@ Item {
 
                     for (const connector of chatConnectors) {
                         baseModel.push({
-                            pageId:, // TODO: ...
+                            pageId: "", // TODO: ...
                             pageType: GonnectWindow.PageType.Chats,
                             iconSource: Icons.dialogMessages,
                             labelText: connector.displayName,
