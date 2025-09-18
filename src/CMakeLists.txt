@@ -188,7 +188,7 @@ else()
     find_package(QtWebDAV REQUIRED)
     find_package(vCard REQUIRED)
     find_package(Qca-qt6 REQUIRED)
-    find_package(qtkeychain REQUIRED)
+    find_package(Qt6Keychain REQUIRED)
 endif()
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
