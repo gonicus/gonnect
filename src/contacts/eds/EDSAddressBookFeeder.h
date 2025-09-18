@@ -5,6 +5,8 @@
 #include <glib.h>
 
 #include <QObject>
+#include <QSet>
+#include "Contact.h"
 #include "IAddressBookFeeder.h"
 
 class AddressBookManager;
@@ -21,8 +23,9 @@ public:
 
 private:
     QString getField(EContact *contact, EContactField id);
-    QString getFieldMerge(EContact *contact, EContactField pId, EContactField sId);
     void addAvatar(QString id, EContact *contact, QDateTime changed);
+    QList<Contact::PhoneNumber> collectPhoneNumbers(EContact *contact) const;
+    bool isSipStatusSubscriptable(EContactField field) const;
 
     bool init();
     void feedAddressBook();
@@ -46,4 +49,5 @@ private:
     gchar *m_searchExpr = nullptr;
     QList<EBookClient *> m_clients;
     QList<EBookClientView *> m_clientViews;
+    QSet<EContactField> m_sipStatusSubscriptableFields;
 };

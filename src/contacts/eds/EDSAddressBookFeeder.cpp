@@ -8,6 +8,7 @@
 #include <QBuffer>
 #include <QImage>
 #include <QLoggingCategory>
+#include <QStringList>
 
 Q_LOGGING_CATEGORY(lcEDSAddressBookFeeder, "gonnect.app.feeder.EDSAddressBookFeeder")
 
@@ -105,6 +106,31 @@ void EDSAddressBookFeeder::process()
         m_priority = 0;
     }
 
+    m_sipStatusSubscriptableFields.clear();
+    const auto sipFieldsValue = settings.value("sipStatusSubscriptableFields", "").toString();
+    if (!sipFieldsValue.isEmpty()) {
+        const auto tokens = sipFieldsValue.split(',', Qt::SkipEmptyParts);
+        for (const auto &token : tokens) {
+            const auto trimmedToken = token.trimmed();
+            const auto normalizedToken = trimmedToken.toLower();
+
+            if (normalizedToken == "company") {
+                m_sipStatusSubscriptableFields.insert(E_CONTACT_PHONE_COMPANY);
+                m_sipStatusSubscriptableFields.insert(E_CONTACT_PHONE_BUSINESS);
+            } else if (normalizedToken == "business") {
+                m_sipStatusSubscriptableFields.insert(E_CONTACT_PHONE_BUSINESS);
+            } else if (normalizedToken == "mobile") {
+                m_sipStatusSubscriptableFields.insert(E_CONTACT_PHONE_MOBILE);
+            } else if (normalizedToken == "home") {
+                m_sipStatusSubscriptableFields.insert(E_CONTACT_PHONE_HOME);
+            } else if (!trimmedToken.isEmpty()) {
+                qCWarning(lcEDSAddressBookFeeder).nospace()
+                        << "Unknown sipStatusSubscriptableFields token '" << trimmedToken
+                        << "' for group '" << m_group << "'";
+            }
+        }
+    }
+
     if (init()) {
         feedAddressBook();
     }
@@ -121,18 +147,37 @@ QString EDSAddressBookFeeder::getField(EContact *contact, EContactField id)
     return "";
 }
 
-QString EDSAddressBookFeeder::getFieldMerge(EContact *contact, EContactField pId, EContactField sId)
+QList<Contact::PhoneNumber> EDSAddressBookFeeder::collectPhoneNumbers(EContact *contact) const
 {
-    if (contact) {
-        const gchar *field = static_cast<const gchar *>(e_contact_get_const(contact, pId));
-        if (!field) {
-            field = static_cast<const gchar *>(e_contact_get_const(contact, sId));
-        }
+    QList<Contact::PhoneNumber> phoneNumbers;
 
-        return QString::fromUtf8(field);
-    }
+    const auto companyNumber = getField(contact, E_CONTACT_PHONE_COMPANY);
+    const auto businessNumber = getField(contact, E_CONTACT_PHONE_BUSINESS);
+    const auto mobileNumber = getField(contact, E_CONTACT_PHONE_MOBILE);
+    const auto homeNumber = getField(contact, E_CONTACT_PHONE_HOME);
 
-    return "";
+    const auto commercialNumber = !companyNumber.isEmpty() ? companyNumber : businessNumber;
+    const bool commercialSubscriptable =
+            (!companyNumber.isEmpty() && isSipStatusSubscriptable(E_CONTACT_PHONE_COMPANY))
+            || (!businessNumber.isEmpty() && isSipStatusSubscriptable(E_CONTACT_PHONE_BUSINESS));
+
+    phoneNumbers.append({ Contact::NumberType::Commercial, commercialNumber,
+                          commercialSubscriptable });
+
+    phoneNumbers.append({ Contact::NumberType::Mobile, mobileNumber,
+                          !mobileNumber.isEmpty()
+                                  && isSipStatusSubscriptable(E_CONTACT_PHONE_MOBILE) });
+
+    phoneNumbers.append({ Contact::NumberType::Home, homeNumber,
+                          !homeNumber.isEmpty()
+                                  && isSipStatusSubscriptable(E_CONTACT_PHONE_HOME) });
+
+    return phoneNumbers;
+}
+
+bool EDSAddressBookFeeder::isSipStatusSubscriptable(EContactField field) const
+{
+    return m_sipStatusSubscriptableFields.contains(field);
 }
 
 void EDSAddressBookFeeder::connectContactSignals(EBookClientView *view)
@@ -182,14 +227,7 @@ void EDSAddressBookFeeder::processContactsAdded(EBookClient *client, GSList *con
                     QDateTime::fromString(getField(eContact, E_CONTACT_REV), Qt::ISODate);
 
             QList<Contact::PhoneNumber> phoneNumbers;
-            phoneNumbers.append(
-                    { Contact::NumberType::Commercial,
-                      getFieldMerge(eContact, E_CONTACT_PHONE_COMPANY, E_CONTACT_PHONE_BUSINESS),
-                      false });
-            phoneNumbers.append({ Contact::NumberType::Mobile,
-                                  getField(eContact, E_CONTACT_PHONE_MOBILE), false });
-            phoneNumbers.append(
-                    { Contact::NumberType::Home, getField(eContact, E_CONTACT_PHONE_HOME), false });
+            phoneNumbers = collectPhoneNumbers(eContact);
 
             Contact *contact = addressbook.addContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
@@ -213,15 +251,7 @@ void EDSAddressBookFeeder::processContactsModified(EBookClient *client, GSList *
             QDateTime changed =
                     QDateTime::fromString(getField(eContact, E_CONTACT_REV), Qt::ISODate);
 
-            QList<Contact::PhoneNumber> phoneNumbers;
-            phoneNumbers.append(
-                    { Contact::NumberType::Commercial,
-                      getFieldMerge(eContact, E_CONTACT_PHONE_COMPANY, E_CONTACT_PHONE_BUSINESS),
-                      false });
-            phoneNumbers.append({ Contact::NumberType::Mobile,
-                                  getField(eContact, E_CONTACT_PHONE_MOBILE), false });
-            phoneNumbers.append(
-                    { Contact::NumberType::Home, getField(eContact, E_CONTACT_PHONE_HOME), false });
+            QList<Contact::PhoneNumber> phoneNumbers = collectPhoneNumbers(eContact);
 
             Contact *contact = addressbook.modifyContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
@@ -350,15 +380,7 @@ void EDSAddressBookFeeder::feedAddressBook()
                     QDateTime changed =
                             QDateTime::fromString(getField(eContact, E_CONTACT_REV), Qt::ISODate);
 
-                    QList<Contact::PhoneNumber> phoneNumbers;
-                    phoneNumbers.append({ Contact::NumberType::Commercial,
-                                          getFieldMerge(eContact, E_CONTACT_PHONE_COMPANY,
-                                                        E_CONTACT_PHONE_BUSINESS),
-                                          false });
-                    phoneNumbers.append({ Contact::NumberType::Mobile,
-                                          getField(eContact, E_CONTACT_PHONE_MOBILE), false });
-                    phoneNumbers.append({ Contact::NumberType::Home,
-                                          getField(eContact, E_CONTACT_PHONE_HOME), false });
+                    QList<Contact::PhoneNumber> phoneNumbers = collectPhoneNumbers(eContact);
 
                     Contact *contact = addressbook.addContact(
                             getField(eContact, E_CONTACT_FULL_NAME)
