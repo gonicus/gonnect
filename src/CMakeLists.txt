@@ -19,74 +19,77 @@ find_package(Qt6 REQUIRED COMPONENTS
 include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /opt/pjsip) # Temporary add /usr/local
 pkg_check_modules(PJSIP REQUIRED libpjproject)
 pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
 pkg_check_modules(SASL2 REQUIRED IMPORTED_TARGET libsasl2)
 pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
 pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
-pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
 pkg_check_modules(LIBICAL REQUIRED libical IMPORTED_TARGET)
-pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
 
 add_definitions(${PJSIP_STATIC_CFLAGS} -DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
 
-set(DBUS_SOURCES)
-qt_add_dbus_adaptor(DBUS_SOURCES ../specs/org.freedesktop.application.xml
-    QObject
-    ""
-    DBusActivationAdapter
-    DBusActivationAdapter
-)
-qt_add_dbus_adaptor(DBUS_SOURCES ../specs/de.gonicus.gonnect.api.xml
-    QObject
-    ""
-    GOnnectDBusAPIAdaptor
-    GOnnectDBusAPIAdaptor
-)
-qt_add_dbus_adaptor(DBUS_SOURCES ../specs/org.gnome.ShellSearchProvider2.xml
-    QObject
-    ""
-    ShellSearchProvider2Adapter
-    ShellSearchProvider2Adapter
-)
+if(LINUX)
+    pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
+    pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
+    set(PLATFORM_LIBRARIES PkgConfig::LIBPULSE PkgConfig::LIBNOTIFY)
 
-set_source_files_properties(
-    ../specs/org.freedesktop.application.xml
-    ../specs/org.mpris.MediaPlayer2.Player.xml
-    ../specs/org.freedesktop.ScreenSaver.xml
-    ../specs/org.freedesktop.portal.Session.xml
-    ../specs/org.freedesktop.portal.Request.xml
-    ../specs/org.freedesktop.portal.Secret.xml
-    NO_NAMESPACE ON
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.application.xml
-    DBusActivationInterface
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.mpris.MediaPlayer2.Player.xml
-    MediaPlayerInterface
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.ScreenSaver.xml
-    ScreenSaverInterface
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.GlobalShortcuts.xml
-    GlobalShortcutsInterface
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Session.xml
-    PortalSession
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Request.xml
-    PortalRequest
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Settings.xml
-    PortalSettings
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.NetworkMonitor.xml
-    NetworkMonitor
-)
-qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Secret.xml
-    PortalSecret
-)
+    set(DBUS_SOURCES)
+    qt_add_dbus_adaptor(DBUS_SOURCES ../specs/org.freedesktop.application.xml
+        QObject
+        ""
+        DBusActivationAdapter
+        DBusActivationAdapter
+    )
+    qt_add_dbus_adaptor(DBUS_SOURCES ../specs/de.gonicus.gonnect.api.xml
+        QObject
+        ""
+        GOnnectDBusAPIAdaptor
+        GOnnectDBusAPIAdaptor
+    )
+    qt_add_dbus_adaptor(DBUS_SOURCES ../specs/org.gnome.ShellSearchProvider2.xml
+        QObject
+        ""
+        ShellSearchProvider2Adapter
+        ShellSearchProvider2Adapter
+    )
+    
+    set_source_files_properties(
+        ../specs/org.freedesktop.application.xml
+        ../specs/org.mpris.MediaPlayer2.Player.xml
+        ../specs/org.freedesktop.ScreenSaver.xml
+        ../specs/org.freedesktop.portal.Session.xml
+        ../specs/org.freedesktop.portal.Request.xml
+        ../specs/org.freedesktop.portal.Secret.xml
+        NO_NAMESPACE ON
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.application.xml
+        DBusActivationInterface
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.mpris.MediaPlayer2.Player.xml
+        MediaPlayerInterface
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.ScreenSaver.xml
+        ScreenSaverInterface
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.GlobalShortcuts.xml
+        GlobalShortcutsInterface
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Session.xml
+        PortalSession
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Request.xml
+        PortalRequest
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Settings.xml
+        PortalSettings
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.NetworkMonitor.xml
+        NetworkMonitor
+    )
+    qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Secret.xml
+        PortalSecret
+    )
+endif()
 
 set(APP_SOURCES main.cpp)
 qt_add_big_resources(APP_SOURCES application.qrc)
@@ -189,6 +192,68 @@ else()
 endif()
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
+
+if(LINUX)
+    set(PLATFORM_SOURCES
+        dbus/portal/AbstractPortal.h
+        dbus/portal/AbstractPortal.cpp
+        dbus/portal/AccountPortal.h
+        dbus/portal/AccountPortal.cpp
+        dbus/portal/BackgroundPortal.h
+        dbus/portal/BackgroundPortal.cpp
+        dbus/portal/GlobalShortcutPortal.h
+        dbus/portal/GlobalShortcutPortal.cpp
+        dbus/portal/InhibitPortal.h
+        dbus/portal/InhibitPortal.cpp
+        dbus/portal/SettingsPortal.h
+        dbus/portal/SettingsPortal.cpp
+        dbus/portal/SecretPortal.h
+        dbus/portal/SecretPortal.cpp
+
+        dbus/GOnnectDBusAPI.h
+        dbus/GOnnectDBusAPI.cpp
+        dbus/KRunnerAdapter.h
+        dbus/KRunnerAdapter.cpp
+
+        platform/linux/LinuxNotificationManager.h
+        platform/linux/LinuxNotificationManager.cpp
+        platform/flatpak/FlatpakUserInfo.h
+        platform/flatpak/FlatpakUserInfo.cpp
+        platform/linux/MPRISExternalMediaManager.cpp
+        platform/linux/MPRISExternalMediaManager.h
+        platform/flatpak/FlatpakBackgroundManager.h
+        platform/flatpak/FlatpakBackgroundManager.cpp
+        platform/flatpak/FlatpakThemeManager.h
+        platform/flatpak/FlatpakThemeManager.cpp
+        platform/flatpak/FlatpakNetworkHelper.h
+        platform/flatpak/FlatpakNetworkHelper.cpp
+        platform/flatpak/FlatpakInhibitHelper.h
+        platform/flatpak/FlatpakInhibitHelper.cpp
+        platform/flatpak/FlatpakGlobalShortcuts.h
+        platform/flatpak/FlatpakGlobalShortcuts.cpp
+        platform/linux/LinuxDesktopSearchProvider.h
+        platform/linux/LinuxDesktopSearchProvider.cpp)
+else()
+    set(PLATFORM_SOURCES
+        platform/dummy/DummyNotificationManager.h
+        platform/dummy/DummyNotificationManager.cpp
+        platform/dummy/DummyUserInfo.cpp
+        platform/dummy/DummyUserInfo.h
+        platform/dummy/DummyExternalMediaManager.cpp
+        platform/dummy/DummyExternalMediaManager.h
+        platform/dummy/DummyBackgroundManager.cpp
+        platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyThemeManager.cpp
+        platform/dummy/DummyThemeManager.h
+        platform/dummy/DummyNetworkHelper.cpp
+        platform/dummy/DummyNetworkHelper.h
+        platform/dummy/DummyInhibitHelper.h
+        platform/dummy/DummyInhibitHelper.cpp
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+        platform/dummy/DummySearchProvider.h
+        platform/dummy/DummySearchProvider.cpp)
+endif()
 
 qt_add_qml_module(gonnect
     URI base
@@ -324,26 +389,6 @@ qt_add_qml_module(gonnect
         KeychainSettings.h
         StateManager.cpp
         StateManager.h
-
-        dbus/portal/AbstractPortal.h
-        dbus/portal/AbstractPortal.cpp
-        dbus/portal/AccountPortal.h
-        dbus/portal/AccountPortal.cpp
-        dbus/portal/BackgroundPortal.h
-        dbus/portal/BackgroundPortal.cpp
-        dbus/portal/GlobalShortcutPortal.h
-        dbus/portal/GlobalShortcutPortal.cpp
-        dbus/portal/InhibitPortal.h
-        dbus/portal/InhibitPortal.cpp
-        dbus/portal/SettingsPortal.h
-        dbus/portal/SettingsPortal.cpp
-        dbus/portal/SecretPortal.h
-        dbus/portal/SecretPortal.cpp
-
-        dbus/GOnnectDBusAPI.h
-        dbus/GOnnectDBusAPI.cpp
-        dbus/KRunnerAdapter.h
-        dbus/KRunnerAdapter.cpp
 
         sip/CallHistory.h
         sip/CallHistory.cpp
@@ -493,32 +538,15 @@ qt_add_qml_module(gonnect
         platform/Notification.cpp
         platform/NotificationIcon.h
         platform/NotificationIcon.cpp
-        platform/flatpak/FlatpakUserInfo.h
-        platform/flatpak/FlatpakUserInfo.cpp
         platform/NotificationManager.h
-        platform/linux/LinuxNotificationManager.h
-        platform/linux/LinuxNotificationManager.cpp
         platform/ExternalMediaManager.h
-        platform/linux/MPRISExternalMediaManager.cpp
-        platform/linux/MPRISExternalMediaManager.h
         platform/BackgroundManager.h
-        platform/flatpak/FlatpakBackgroundManager.h
-        platform/flatpak/FlatpakBackgroundManager.cpp
         platform/ThemeManager.h
-        platform/flatpak/FlatpakThemeManager.h
-        platform/flatpak/FlatpakThemeManager.cpp
         platform/NetworkHelper.h
-        platform/flatpak/FlatpakNetworkHelper.h
-        platform/flatpak/FlatpakNetworkHelper.cpp
         platform/InhibitHelper.h
-        platform/flatpak/FlatpakInhibitHelper.h
-        platform/flatpak/FlatpakInhibitHelper.cpp
         platform/GlobalShortcuts.h
-        platform/flatpak/FlatpakGlobalShortcuts.h
-        platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/SearchProvider.h
-        platform/linux/LinuxDesktopSearchProvider.h
-        platform/linux/LinuxDesktopSearchProvider.cpp
+        ${PLATFORM_SOURCES}
 
         ui/CallsModel.h
         ui/CallsModel.cpp
@@ -661,9 +689,8 @@ target_link_libraries(gonnect
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI
-        PkgConfig::LIBPULSE
         PkgConfig::LIBICAL
-        PkgConfig::LIBNOTIFY
+        ${PLATFORM_LIBRARIES}
         GOnnectVersion
         qca-qt6
         qt6keychain

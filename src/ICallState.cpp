@@ -1,8 +1,8 @@
 #include "ICallState.h"
 #include "GlobalCallState.h"
-#include "StateManager.h"
 
 #ifdef Q_OS_LINUX
+#  include "StateManager.h"
 #  include "GOnnectDBusAPI.h"
 #endif
 
