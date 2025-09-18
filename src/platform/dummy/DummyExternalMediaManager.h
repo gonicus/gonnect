@@ -8,10 +8,10 @@ class DummyExternalMediaManager : public ExternalMediaManager
     Q_OBJECT
 
 public:
-    void pause() override {}
-    void resume() override {}
+    void pause() override { }
+    void resume() override { }
     bool hasState() const override { return false; }
 
-    explicit DummyExternalMediaManager() : ExternalMediaManager() {}
+    explicit DummyExternalMediaManager() : ExternalMediaManager() { }
     ~DummyExternalMediaManager() = default;
 };

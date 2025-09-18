@@ -7,7 +7,7 @@ class DummyBackgroundManager : public BackgroundManager
     Q_OBJECT
 
 public:
-    explicit DummyBackgroundManager() : BackgroundManager() {}
+    explicit DummyBackgroundManager() : BackgroundManager() { }
 
     void request(bool autostart) override { Q_UNUSED(autostart); }
     bool autostart() override { return false; }

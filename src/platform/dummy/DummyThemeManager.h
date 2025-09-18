@@ -8,7 +8,7 @@ class DummyThemeManager : public ThemeManager
     Q_OBJECT
 
 public:
-    explicit DummyThemeManager() : ThemeManager() {}
+    explicit DummyThemeManager() : ThemeManager() { }
 
     ThemeManager::ColorScheme colorScheme() const override
     {

@@ -8,6 +8,6 @@ class DummyDesktopSearchProvider : public SearchProvider
     Q_OBJECT
 
 public:
-    explicit DummyDesktopSearchProvider(QObject *parent = nullptr) : SearchProvider(parent) {}
+    explicit DummyDesktopSearchProvider(QObject *parent = nullptr) : SearchProvider(parent) { }
     ~DummyDesktopSearchProvider() = default;
 };

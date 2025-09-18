@@ -3,7 +3,7 @@
 #include <QObject>
 
 #ifdef Q_OS_LINUX
-#   include <pulse/pulseaudio.h>
+#  include <pulse/pulseaudio.h>
 #endif
 
 #include <QMediaDevices>
