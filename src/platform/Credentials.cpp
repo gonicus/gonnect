@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <QtCrypto>
+#include <QLoggingCategory>
 #include "KeychainSettings.h"
 #include "Credentials.h"
 
@@ -43,7 +43,7 @@ void Credentials::initialize()
     }
 #else
     m_initialized = true;
-    emit initializedChanged();
+    Q_EMIT initializedChanged();
 #endif
 }
 

@@ -112,9 +112,6 @@ public Q_SLOTS:
     void Run(const QString &matchId, const QString &actionId);
     RemoteMatches Match(const QString &query);
 
-Q_SIGNALS:
-    void activateSearch(QString query);
-
 private:
     ShellSearchProvider2Adapter *m_searchAdapter = nullptr;
     KRunner2Adapter *m_krunnerAdapter = nullptr;

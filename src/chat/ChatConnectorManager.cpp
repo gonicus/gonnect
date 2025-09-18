@@ -1,9 +1,8 @@
 #include "ChatConnectorManager.h"
-#include "KeychainSettings.h"
 #include "JsChatConnector.h"
 #include "JsConnectorConfig.h"
 #include "ReadOnlyConfdSettings.h"
-#include "SecretPortal.h"
+#include "Credentials.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -12,9 +11,10 @@ Q_LOGGING_CATEGORY(lcChatConnectorManager, "gonnect.app.chat.connectorManager")
 
 ChatConnectorManager::ChatConnectorManager(QObject *parent) : QObject{ parent }
 {
-    auto &secretPortal = SecretPortal::instance();
-    if (secretPortal.isValid() && !secretPortal.isInitialized()) {
-        connect(&secretPortal, &SecretPortal::initializedChanged, this, &ChatConnectorManager::init,
+    auto &credentials = Credentials::instance();
+
+    if (!credentials.isInitialized()) {
+        connect(&credentials, &Credentials::initializedChanged, this, &ChatConnectorManager::init,
                 Qt::SingleShotConnection);
     } else {
         init();
@@ -30,22 +30,19 @@ void ChatConnectorManager::saveRecoveryKey(const QString &settingsGroup, const Q
         return;
     }
 
-    auto &secretPortal = SecretPortal::instance();
-    if (!secretPortal.isInitialized()) {
+    auto &credentials = Credentials::instance();
+    if (!credentials.isInitialized()) {
         qCCritical(lcChatConnectorManager)
-                << "Cannot save recovery key because SecretPortal is not initialized (yet)";
-        return;
-    }
-    if (!secretPortal.isValid()) {
-        qCCritical(lcChatConnectorManager)
-                << "Cannot save recovery key because SecretPortal is not valid";
+                << "Cannot save recovery key because Credentials is not initialized (yet)";
         return;
     }
 
-    KeychainSettings settings;
-    settings.beginGroup(settingsGroup);
-    settings.setValue("secret", secretPortal.encrypt(key));
-    settings.endGroup();
+    credentials.set(
+            QString("%1/secret").arg(settingsGroup), key, [](bool error, const QString &misc) {
+                if (error) {
+                    qCCritical(lcChatConnectorManager) << "Error on saving recovery key:" << misc;
+                }
+            });
 }
 
 void ChatConnectorManager::saveAccessToken(const QString &settingsGroup, const QString &token) const
@@ -57,22 +54,19 @@ void ChatConnectorManager::saveAccessToken(const QString &settingsGroup, const Q
         return;
     }
 
-    auto &secretPortal = SecretPortal::instance();
-    if (!secretPortal.isInitialized()) {
+    auto &credentials = Credentials::instance();
+    if (!credentials.isInitialized()) {
         qCCritical(lcChatConnectorManager)
-                << "Cannot save access token because SecretPortal is not initialized (yet)";
-        return;
-    }
-    if (!secretPortal.isValid()) {
-        qCCritical(lcChatConnectorManager)
-                << "Cannot save access token because SecretPortal is not valid";
+                << "Cannot save access token because Credentials is not initialized (yet)";
         return;
     }
 
-    KeychainSettings settings;
-    settings.beginGroup(settingsGroup);
-    settings.setValue("token", secretPortal.encrypt(token));
-    settings.endGroup();
+    credentials.set(
+            QString("%1/token").arg(settingsGroup), token, [](bool error, const QString &misc) {
+                if (error) {
+                    qCCritical(lcChatConnectorManager) << "Error on saving access token:" << misc;
+                }
+            });
 }
 
 void ChatConnectorManager::init()
@@ -100,35 +94,63 @@ void ChatConnectorManager::init()
             }
 
             // Retrieve key from secret store
-            auto &secretPortal = SecretPortal::instance();
-            QString recoveryKey;
-            QString accessToken;
+            auto &credentials = Credentials::instance();
 
-            if (secretPortal.isValid() && secretPortal.isInitialized()) {
-                KeychainSettings settings;
-                settings.beginGroup(group);
-                recoveryKey = settings.value("secret").toString();
-                accessToken = settings.value("token").toString();
-                settings.endGroup();
+            auto config =
+                    new JsConnectorConfig{ group,
+                                           settings.value("url").toUrl(),
+                                           settings.value("id").toString(),
+                                           settings.value("deviceId", "GOnnect Client").toString(),
+                                           settings.value("displayName", group).toString(),
+                                           "",
+                                           "" };
 
-                if (!recoveryKey.isEmpty()) {
-                    recoveryKey = secretPortal.decrypt(recoveryKey);
-                }
+            m_waitingCallbackConfigs.insert(group, config);
 
-                if (!accessToken.isEmpty()) {
-                    accessToken = secretPortal.decrypt(accessToken);
-                }
+            if (credentials.isInitialized()) {
+
+                credentials.get(QString("%1/secret").arg(group),
+                                [this, group](bool error, const QString &misc) {
+                                    if (error) {
+                                        qCCritical(lcChatConnectorManager)
+                                                << "Error on retrieving recovery key:" << misc;
+                                    } else if (!m_waitingCallbackConfigs.contains(group)
+                                               || !m_waitingCallbackCount.contains(group)) {
+                                        qCCritical(lcChatConnectorManager)
+                                                << "Connector listeners are out ouf sync while "
+                                                   "retrieving recovery key";
+                                    } else {
+                                        auto config = m_waitingCallbackConfigs.value(group);
+                                        config->recoveryKey = misc;
+                                        m_waitingCallbackCount.insert(
+                                                group, m_waitingCallbackCount.value(group) - 1);
+
+                                        checkConfigAfterCallback(group);
+                                    }
+                                });
+
+                credentials.get(QString("%1/token").arg(group),
+                                [this, group](bool error, const QString &misc) {
+                                    if (error) {
+                                        qCCritical(lcChatConnectorManager)
+                                                << "Error on retrieving access token:" << misc;
+                                    } else if (!m_waitingCallbackConfigs.contains(group)
+                                               || !m_waitingCallbackCount.contains(group)) {
+                                        qCCritical(lcChatConnectorManager)
+                                                << "Connector listeners are out ouf sync while "
+                                                   "retrieving access token";
+                                    } else {
+                                        auto config = m_waitingCallbackConfigs.value(group);
+                                        config->accessToken = misc;
+                                        m_waitingCallbackCount.insert(
+                                                group, m_waitingCallbackCount.value(group) - 1);
+
+                                        checkConfigAfterCallback(group);
+                                    }
+                                });
+
+                m_waitingCallbackCount.insert(group, 2);
             }
-
-            JsConnectorConfig config = { group,
-                                         settings.value("url").toUrl(),
-                                         settings.value("id").toString(),
-                                         settings.value("deviceId", "GOnnect Client").toString(),
-                                         settings.value("displayName", group).toString(),
-                                         recoveryKey,
-                                         accessToken };
-
-            m_connectors.append(new JsChatConnector(config, this));
 
             settings.endGroup();
         }
@@ -142,4 +164,34 @@ void ChatConnectorManager::init()
     if (!m_connectors.isEmpty()) {
         Q_EMIT jsChatConnectorsChanged();
     }
+}
+
+void ChatConnectorManager::checkConfigAfterCallback(const QString &settingsGroup)
+{
+    if (!m_waitingCallbackCount.contains(settingsGroup)
+        || !m_waitingCallbackConfigs.contains(settingsGroup)) {
+        qCCritical(lcChatConnectorManager)
+                << "Connector listeners for group" << settingsGroup << "are out ouf sync";
+        return;
+    }
+
+    if (m_waitingCallbackCount.value(settingsGroup, 1) != 0) {
+        // Still waiting for a callback
+        return;
+    }
+
+    auto config = m_waitingCallbackConfigs.take(settingsGroup);
+    m_waitingCallbackCount.remove(settingsGroup);
+
+    m_connectors.append(new JsChatConnector(*config, this));
+
+    delete config;
+    config = nullptr;
+
+    std::sort(m_connectors.begin(), m_connectors.end(),
+              [](const JsChatConnector *left, const JsChatConnector *right) -> bool {
+                  return left->displayName() < right->displayName();
+              });
+
+    Q_EMIT jsChatConnectorsChanged();
 }
