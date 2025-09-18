@@ -35,13 +35,13 @@ private:
 
     void connectCalendarSignals(ECalClientView *view);
 
-    static void onEventsAdded(ECalClient *client, GSList *components, gpointer user_data);
-    static void onEventsModified(ECalClient *client, GSList *components, gpointer user_data);
-    static void onEventsRemoved(ECalClient *client, GSList *uids, gpointer user_data);
+    static void onEventsAdded(ECalClientView *view, GSList *components, gpointer user_data);
+    static void onEventsModified(ECalClientView *view, GSList *components, gpointer user_data);
+    static void onEventsRemoved(ECalClientView *view, GSList *uids, gpointer user_data);
 
-    void processEventsAdded(ECalClient *client, GSList *components);
-    void processEventsModified(ECalClient *client, GSList *components);
-    void processEventsRemoved(ECalClient *client, GSList *uids);
+    void processEventsAdded(ECalClientView *view, GSList *components);
+    void processEventsModified(ECalClientView *view, GSList *components);
+    void processEventsRemoved(ECalClientView *view, GSList *uids);
 
     static void onViewCreated(GObject *source_object, GAsyncResult *result, gpointer user_data);
 

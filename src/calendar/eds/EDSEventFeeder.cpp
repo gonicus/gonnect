@@ -178,61 +178,78 @@ void EDSEventFeeder::connectCalendarSignals(ECalClientView *view)
     g_signal_connect(view, "objects-removed", G_CALLBACK(onEventsRemoved), this);
 }
 
-void EDSEventFeeder::onEventsAdded(ECalClient *client, GSList *components, gpointer user_data)
+void EDSEventFeeder::onEventsAdded(ECalClientView *view, GSList *components, gpointer user_data)
 {
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
-        feeder->processEventsAdded(client, components);
+        feeder->processEventsAdded(view, components);
     }
 }
 
-void EDSEventFeeder::onEventsModified(ECalClient *client, GSList *components, gpointer user_data)
+void EDSEventFeeder::onEventsModified(ECalClientView *view, GSList *components, gpointer user_data)
 {
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
-        feeder->processEventsModified(client, components);
+        feeder->processEventsModified(view, components);
     }
 }
 
-void EDSEventFeeder::onEventsRemoved(ECalClient *client, GSList *uids, gpointer user_data)
+void EDSEventFeeder::onEventsRemoved(ECalClientView *view, GSList *uids, gpointer user_data)
 {
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
-        feeder->processEventsRemoved(client, uids);
+        feeder->processEventsRemoved(view, uids);
     }
 }
 
-void EDSEventFeeder::processEventsAdded(ECalClient *client, GSList *components)
+void EDSEventFeeder::processEventsAdded(ECalClientView *view, GSList *components)
 {
-    Q_UNUSED(client)
+    // INFO: We want *all* events to account for recursive updates
     Q_UNUSED(components)
 
     DateEventManager &manager = DateEventManager::instance();
-    manager.removeDateEventsBySource(m_source);
+    ECalClient *client = e_cal_client_view_ref_client(view);
 
-    process();
+    // INFO: And we only want to remove the EDS events of the current client/source
+    QString concreteSource =
+            QString("%1: %2 (%3)")
+                    .arg(m_source, e_source_get_display_name(e_client_get_source(E_CLIENT(client))),
+                         e_source_get_uid(e_client_get_source(E_CLIENT(E_CLIENT(client)))));
+    manager.removeDateEventsBySource(concreteSource);
+
+    e_cal_client_get_object_list(client, m_searchExpr, nullptr, onClientEventsRequested, this);
 }
 
-void EDSEventFeeder::processEventsModified(ECalClient *client, GSList *components)
+void EDSEventFeeder::processEventsModified(ECalClientView *view, GSList *components)
 {
-    Q_UNUSED(client)
     Q_UNUSED(components)
 
     DateEventManager &manager = DateEventManager::instance();
-    manager.removeDateEventsBySource(m_source);
+    ECalClient *client = e_cal_client_view_ref_client(view);
 
-    process();
+    QString concreteSource =
+            QString("%1: %2 (%3)")
+                    .arg(m_source, e_source_get_display_name(e_client_get_source(E_CLIENT(client))),
+                         e_source_get_uid(e_client_get_source(E_CLIENT(E_CLIENT(client)))));
+    manager.removeDateEventsBySource(concreteSource);
+
+    e_cal_client_get_object_list(client, m_searchExpr, nullptr, onClientEventsRequested, this);
 }
 
-void EDSEventFeeder::processEventsRemoved(ECalClient *client, GSList *uids)
+void EDSEventFeeder::processEventsRemoved(ECalClientView *view, GSList *uids)
 {
-    Q_UNUSED(client)
     Q_UNUSED(uids)
 
     DateEventManager &manager = DateEventManager::instance();
-    manager.removeDateEventsBySource(m_source);
+    ECalClient *client = e_cal_client_view_ref_client(view);
 
-    process();
+    QString concreteSource =
+            QString("%1: %2 (%3)")
+                    .arg(m_source, e_source_get_display_name(e_client_get_source(E_CLIENT(client))),
+                         e_source_get_uid(e_client_get_source(E_CLIENT(E_CLIENT(client)))));
+    manager.removeDateEventsBySource(concreteSource);
+
+    e_cal_client_get_object_list(client, m_searchExpr, nullptr, onClientEventsRequested, this);
 }
 
 void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result, gpointer user_data)
@@ -252,7 +269,6 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
             return;
         }
 
-        feeder->m_clientViews.append(view);
         feeder->connectCalendarSignals(view);
         e_cal_client_view_start(view, &error);
         if (error) {
@@ -261,6 +277,7 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
             error = nullptr;
             return;
         }
+        feeder->m_clientViews.append(view);
 
         feeder->m_clients.append(client);
         feeder->m_clientCount++;
@@ -300,6 +317,8 @@ void EDSEventFeeder::onClientEventsRequested(GObject *source_object, GAsyncResul
 void EDSEventFeeder::processEvents(QString clientInfo, GSList *components)
 {
     DateEventManager &manager = DateEventManager::instance();
+
+    QString concreteSource = QString("%1: %2").arg(m_source, clientInfo);
 
     for (GSList *item = components; item != nullptr; item = g_slist_next(item)) {
         ICalComponent *component = I_CAL_COMPONENT(item->data);
@@ -370,7 +389,7 @@ void EDSEventFeeder::processEvents(QString clientInfo, GSList *components)
 
                         if (!exdates.contains(recur) && recur >= m_timeRangeStart) {
                             QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
-                            manager.addDateEvent(new DateEvent(nid, m_source, recur,
+                            manager.addDateEvent(new DateEvent(nid, concreteSource, recur,
                                                                recur.addMSecs(duration), summary,
                                                                location, true));
                         }
@@ -381,10 +400,11 @@ void EDSEventFeeder::processEvents(QString clientInfo, GSList *components)
             } else {
                 // Non-recurrent event or update of a recurrent event instance
                 if (isUpdatedRecurrence) {
-                    manager.modifyDateEvent(id, m_source, start, end, summary, location, true);
+                    manager.modifyDateEvent(id, concreteSource, start, end, summary, location,
+                                            true);
                 } else {
                     manager.addDateEvent(
-                            new DateEvent(id, m_source, start, end, summary, location, true));
+                            new DateEvent(id, concreteSource, start, end, summary, location, true));
                 }
             }
         }
