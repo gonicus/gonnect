@@ -15,7 +15,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineQuick
     Xml
 )
-find_package(Qca-qt6 REQUIRED)
 
 include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
@@ -150,23 +149,33 @@ if(BUILD_DEPENDENCIES)
 
     ExternalProject_Add(qca
         GIT_REPOSITORY https://github.com/KDE/qca.git
+        # renovate: datasource=github-tags depName=KDE/qca
         GIT_TAG v2.3.10
-        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON
+        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
         UPDATE_DISCONNECTED TRUE
     )
     ExternalProject_Get_Property(qca INSTALL_DIR)
     include_directories("${INSTALL_DIR}/include/Qca-qt6/QtCrypto")
     link_directories("${INSTALL_DIR}/lib")
 
+    set(QCA_RPATH "${INSTALL_DIR}/lib")
+
     ExternalProject_Add(qtkeychain
         GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
+        # renovate: datasource=github-tags depName=frankosterfeld/qtkeychain
         GIT_TAG 0.15.0
-        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON -DBUILD_SHARED_LIBS=OFF
+        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON
         UPDATE_DISCONNECTED TRUE
     )
     ExternalProject_Get_Property(qtkeychain INSTALL_DIR)
     include_directories("${INSTALL_DIR}/include")
     link_directories("${INSTALL_DIR}/lib64")
+
+    set(QKEYCHAIN_RPATH ${INSTALL_DIR}/lib64)
+
+    set_target_properties(gonnect
+       PROPERTIES
+           LINK_FLAGS "-Wl,-rpath,${QCA_RPATH} -Wl,-rpath,${QKEYCHAIN_RPATH}")
 
     add_dependencies(gonnect qca)
     add_dependencies(gonnect qtkeychain)
@@ -175,8 +184,8 @@ if(BUILD_DEPENDENCIES)
 else()
     find_package(QtWebDAV REQUIRED)
     find_package(vCard REQUIRED)
-    find_package(Qca-qt6 QUIET)
-    find_package(qtkeychain QUIET)
+    find_package(Qca-qt6 REQUIRED)
+    find_package(qtkeychain REQUIRED)
 endif()
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
@@ -715,3 +724,12 @@ target_include_directories(gonnect
 install(TARGETS gonnect
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+#qt_generate_deploy_qml_app_script(
+#    TARGET gonnect
+#    OUTPUT_SCRIPT deploy_script
+#    MACOS_BUNDLE_POST_BUILD
+#    NO_UNSUPPORTED_PLATFORM_ERROR
+#    DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM
+#)
+#install(SCRIPT ${deploy_script})
