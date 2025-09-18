@@ -1,6 +1,11 @@
 #pragma once
-#include <pulse/pulseaudio.h>
+
 #include <QObject>
+
+#ifdef Q_OS_LINUX
+#  include <pulse/pulseaudio.h>
+#endif
+
 #include <QMediaDevices>
 #include <QTimer>
 #include <QtQml/qqml.h>
@@ -52,6 +57,7 @@ public:
 
     void initialize();
 
+#ifdef Q_OS_LINUX
     static void paSubscriptionEventCallback(pa_context *context, pa_subscription_event_type_t type,
                                             uint32_t index, void *userdata);
     static void paContextStateCallback(pa_context *context, void *userdata);
@@ -59,6 +65,7 @@ public:
     void paGetInputMuteState(pa_context *context);
     static void paInputMuteStateCallback(pa_context *context, const pa_source_info *source, int end,
                                          void *userdata);
+#endif
 
     pj::AudioMedia &getPlaybackDevMedia() const;
     pj::AudioMedia &getCaptureDevMedia() const;
@@ -108,7 +115,9 @@ Q_SIGNALS:
     void externalRingerChanged();
 
 private Q_SLOTS:
+#ifdef Q_OS_LINUX
     void paMainloopIterate();
+#endif
 
 private:
     AudioManager(QObject *parent = nullptr);
@@ -137,9 +146,11 @@ private:
 
     bool m_externalRinger = false;
 
+#ifdef Q_OS_LINUX
     pa_mainloop *m_paMainloop = nullptr;
     QTimer m_paMainloopTimer;
     pa_context *m_paContext = nullptr;
+#endif
 };
 
 class AudioManagerWrapper
