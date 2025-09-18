@@ -1215,7 +1215,6 @@ void JitsiConnector::setAudioMuted(bool value)
     if (m_isAudioMuted != value) {
         m_isAudioMuted = value;
         Q_EMIT isAudioMutedChanged();
-        GlobalMuteState::instance().toggleMute();
     }
 }
 
