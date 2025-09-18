@@ -413,5 +413,5 @@ void EDSEventFeeder::processEvents(QString clientInfo, GSList *components)
     g_slist_free_full(components, g_object_unref);
     components = nullptr;
 
-    qCInfo(lcEDSEventFeeder) << "Loaded event(s) of source" << clientInfo;
+    qCInfo(lcEDSEventFeeder) << "Loaded events of source" << clientInfo;
 }
