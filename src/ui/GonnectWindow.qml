@@ -69,7 +69,7 @@ BaseWindow {
             const isOnCallPage = mainTabBar.selectedPageId === GonnectWindow.PageId.Call
             const isOnConferencePage = mainTabBar.selectedPageId === GonnectWindow.PageId.Conference
 
-            if (count && isOnCallPage && !isConference) {
+            if (count && isOnCallPage && ViewHelper.isActiveVideoCall) {
                 control.showPage(GonnectWindow.PageId.Conference)
             } else if (count && isOnConferencePage && isConference) {
                 control.showPage(GonnectWindow.PageId.Call)
