@@ -32,6 +32,8 @@ Item {
     property alias backgroundColor: filler.color
 
     function createTab(id : string, type : int) {
+        // TODO: Popup or window with icon/title selection
+
         let tabButton = tabDelegate.createObject(topMenuCol,
                                                  {
                                                      pageId: id,

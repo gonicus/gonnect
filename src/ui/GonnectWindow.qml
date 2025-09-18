@@ -71,13 +71,19 @@ BaseWindow {
         target: GlobalCallState
 
         function onCallStarted(isConference : bool) {
-            control.showPage(isConference ? GonnectWindow.PageType.Conference : GonnectWindow.PageType.Call)
+            if (isConference) {
+                control.updateTabSelection(control.conferencePageId,
+                                           GonnectWindow.PageType.Conference)
+            } else {
+                control.updateTabSelection(control.callPageId,
+                                           GonnectWindow.PageType.Call)
+            }
         }
 
         function onCallEnded(isConference : bool) {
             const count = GlobalCallState.activeCallsCount
-            const isOnCallPage = mainTabBar.selectedPageId === GonnectWindow.PageType.Call
-            const isOnConferencePage = mainTabBar.selectedPageId === GonnectWindow.PageType.Conference
+            const isOnCallPage = mainTabBar.selectedPageType === GonnectWindow.PageType.Call
+            const isOnConferencePage = mainTabBar.selectedPageType === GonnectWindow.PageType.Conference
 
             if (count && isOnCallPage && !isConference) {
                 control.updateTabSelection(control.conferencePageId,
