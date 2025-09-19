@@ -33,9 +33,5 @@ IDateEventFeeder *EDSEventFeederFactory::createFeeder(const QString &settingsGro
     ReadOnlyConfdSettings settings;
     settings.beginGroup(settingsGroup);
 
-    auto feeder = new EDSEventFeeder(feederManager);
-
-    feeder->init(settingsGroup, name(), timeRangeStart, timeRangeEnd);
-
-    return feeder;
+    return new EDSEventFeeder(feederManager, name(), timeRangeStart, timeRangeEnd);
 }
