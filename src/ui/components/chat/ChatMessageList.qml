@@ -23,9 +23,14 @@ Item {
             }
         }
         delegate: ChatMessageListItem {
+            id: messageDelg
             anchors {
                 left: parent?.left
                 right: parent?.right
+            }
+
+            onToggleReaction: (emoji) => {
+                control.chatRoom.toggleReaction(messageDelg.eventId, emoji)
             }
         }
 

@@ -18,6 +18,8 @@ public:
     virtual QList<IChatRoom *> chatRooms() = 0;
     virtual qsizetype indexOf(IChatRoom *chatRoom) const = 0;
     Q_INVOKABLE virtual IChatRoom *chatRoomByRoomId(const QString &roomId) const = 0;
+    virtual void reactToMessage(IChatRoom *chatRoom, const QString &eventId,
+                                const QString &emoji) = 0;
 
 protected:
     void setIsConnected(bool value);

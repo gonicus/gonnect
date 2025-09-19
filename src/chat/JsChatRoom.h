@@ -26,8 +26,13 @@ public:
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
     virtual void sendMessage(const QString &message) override;
 
+    virtual void toggleReaction(const QString &eventId, const QString &emoji) override;
+    virtual void setReactionCount(const QString &eventId, const QString &emoji, qsizetype count,
+                                  const QString &ownReactEventId) override;
+
 private:
     JsChatConnector *connectorParent() const;
+    ChatMessage *chatMessageByEventId(const QString &eventId) const;
 
     QString m_id;
     QString m_name;
