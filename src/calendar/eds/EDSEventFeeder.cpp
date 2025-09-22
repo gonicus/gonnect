@@ -178,83 +178,37 @@ void EDSEventFeeder::connectCalendarSignals(ECalClientView *view)
 
 void EDSEventFeeder::onEventsAdded(ECalClientView *view, GSList *components, gpointer user_data)
 {
+    // INFO: We want *all* events to account for recursive updates
+    Q_UNUSED(components)
+
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
-        feeder->processEventsAdded(view, components);
+        feeder->processEventsAdded(view);
     }
 }
 
 void EDSEventFeeder::onEventsModified(ECalClientView *view, GSList *components, gpointer user_data)
 {
+    Q_UNUSED(components)
+
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
-        feeder->processEventsModified(view, components);
+        feeder->processEventsModified(view);
     }
 }
 
 void EDSEventFeeder::onEventsRemoved(ECalClientView *view, GSList *uids, gpointer user_data)
 {
-    EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
-    if (feeder) {
-        feeder->processEventsRemoved(view, uids);
-    }
-}
-
-void EDSEventFeeder::processEventsAdded(ECalClientView *view, GSList *components)
-{
-    // INFO: We want *all* events to account for recursive updates
-    Q_UNUSED(components)
-
-    DateEventManager &manager = DateEventManager::instance();
-    ECalClient *client = e_cal_client_view_ref_client(view);
-
-    if (client) {
-        if (!m_clients.contains(client)) {
-            g_object_unref(client);
-            return;
-        }
-
-        // Use a class-managed reference instead
-        const auto idx = m_clients.indexOf(client);
-        g_object_unref(client);
-
-        QString concreteSource = QString("%1-%2").arg(
-                m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
-        manager.removeDateEventsBySource(concreteSource);
-
-        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
-    }
-}
-
-void EDSEventFeeder::processEventsModified(ECalClientView *view, GSList *components)
-{
-    Q_UNUSED(components)
-
-    DateEventManager &manager = DateEventManager::instance();
-    ECalClient *client = e_cal_client_view_ref_client(view);
-
-    if (client) {
-        if (!m_clients.contains(client)) {
-            g_object_unref(client);
-            return;
-        }
-
-        // Use a class-managed reference instead
-        const auto idx = m_clients.indexOf(client);
-        g_object_unref(client);
-
-        QString concreteSource = QString("%1-%2").arg(
-                m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
-        manager.removeDateEventsBySource(concreteSource);
-
-        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
-    }
-}
-
-void EDSEventFeeder::processEventsRemoved(ECalClientView *view, GSList *uids)
-{
     Q_UNUSED(uids)
 
+    EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
+    if (feeder) {
+        feeder->processEventsRemoved(view);
+    }
+}
+
+void EDSEventFeeder::processEventsAdded(ECalClientView *view)
+{
     DateEventManager &manager = DateEventManager::instance();
     ECalClient *client = e_cal_client_view_ref_client(view);
 
@@ -264,7 +218,51 @@ void EDSEventFeeder::processEventsRemoved(ECalClientView *view, GSList *uids)
             return;
         }
 
-               // Use a class-managed reference instead
+        // Use a class-managed reference instead
+        const auto idx = m_clients.indexOf(client);
+        g_object_unref(client);
+
+        QString concreteSource = QString("%1-%2").arg(
+                m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
+        manager.removeDateEventsBySource(concreteSource);
+
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
+    }
+}
+
+void EDSEventFeeder::processEventsModified(ECalClientView *view)
+{
+    DateEventManager &manager = DateEventManager::instance();
+    ECalClient *client = e_cal_client_view_ref_client(view);
+
+    if (client) {
+        if (!m_clients.contains(client)) {
+            g_object_unref(client);
+            return;
+        }
+
+        const auto idx = m_clients.indexOf(client);
+        g_object_unref(client);
+
+        QString concreteSource = QString("%1-%2").arg(
+                m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
+        manager.removeDateEventsBySource(concreteSource);
+
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
+    }
+}
+
+void EDSEventFeeder::processEventsRemoved(ECalClientView *view)
+{
+    DateEventManager &manager = DateEventManager::instance();
+    ECalClient *client = e_cal_client_view_ref_client(view);
+
+    if (client) {
+        if (!m_clients.contains(client)) {
+            g_object_unref(client);
+            return;
+        }
+
         const auto idx = m_clients.indexOf(client);
         g_object_unref(client);
 

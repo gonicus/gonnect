@@ -39,9 +39,9 @@ private:
     static void onEventsModified(ECalClientView *view, GSList *components, gpointer user_data);
     static void onEventsRemoved(ECalClientView *view, GSList *uids, gpointer user_data);
 
-    void processEventsAdded(ECalClientView *view, GSList *components);
-    void processEventsModified(ECalClientView *view, GSList *components);
-    void processEventsRemoved(ECalClientView *view, GSList *uids);
+    void processEventsAdded(ECalClientView *view);
+    void processEventsModified(ECalClientView *view);
+    void processEventsRemoved(ECalClientView *view);
 
     static void onViewCreated(GObject *source_object, GAsyncResult *result, gpointer user_data);
 

@@ -36,13 +36,13 @@ private:
 
     void connectContactSignals(EBookClientView *view);
 
-    static void onContactsAdded(EBookClient *client, GSList *contacts, gpointer user_data);
-    static void onContactsModified(EBookClient *client, GSList *contacts, gpointer user_data);
-    static void onContactsRemoved(EBookClient *client, GSList *uids, gpointer user_data);
+    static void onContactsAdded(EBookClientView *view, GSList *contacts, gpointer user_data);
+    static void onContactsModified(EBookClientView *view, GSList *contacts, gpointer user_data);
+    static void onContactsRemoved(EBookClientView *view, GSList *uids, gpointer user_data);
 
-    void processContactsAdded(EBookClient *client, GSList *contacts);
-    void processContactsModified(EBookClient *client, GSList *contacts);
-    void processContactsRemoved(EBookClient *client, GSList *uids);
+    void processContactsAdded(GSList *contacts);
+    void processContactsModified(GSList *contacts);
+    void processContactsRemoved(GSList *uids);
 
     static void onViewCreated(GObject *source_object, GAsyncResult *result, gpointer user_data);
 

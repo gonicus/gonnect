@@ -164,36 +164,40 @@ void EDSAddressBookFeeder::connectContactSignals(EBookClientView *view)
     g_signal_connect(view, "objects-removed", G_CALLBACK(onContactsRemoved), this);
 }
 
-void EDSAddressBookFeeder::onContactsAdded(EBookClient *client, GSList *contacts,
+void EDSAddressBookFeeder::onContactsAdded(EBookClientView *view, GSList *contacts,
                                            gpointer user_data)
 {
+    Q_UNUSED(view)
+
     EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
     if (feeder) {
-        feeder->processContactsAdded(client, contacts);
+        feeder->processContactsAdded(contacts);
     }
 }
 
-void EDSAddressBookFeeder::onContactsModified(EBookClient *client, GSList *contacts,
+void EDSAddressBookFeeder::onContactsModified(EBookClientView *view, GSList *contacts,
                                               gpointer user_data)
 {
+    Q_UNUSED(view)
+
     EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
     if (feeder) {
-        feeder->processContactsModified(client, contacts);
+        feeder->processContactsModified(contacts);
     }
 }
 
-void EDSAddressBookFeeder::onContactsRemoved(EBookClient *client, GSList *uids, gpointer user_data)
+void EDSAddressBookFeeder::onContactsRemoved(EBookClientView *view, GSList *uids, gpointer user_data)
 {
+    Q_UNUSED(view)
+
     EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
     if (feeder) {
-        feeder->processContactsRemoved(client, uids);
+        feeder->processContactsRemoved(uids);
     }
 }
 
-void EDSAddressBookFeeder::processContactsAdded(EBookClient *client, GSList *contacts)
+void EDSAddressBookFeeder::processContactsAdded(GSList *contacts)
 {
-    Q_UNUSED(client)
-
     auto &addressbook = AddressBook::instance();
 
     for (GSList *item = contacts; item != nullptr; item = g_slist_next(item)) {
@@ -222,10 +226,8 @@ void EDSAddressBookFeeder::processContactsAdded(EBookClient *client, GSList *con
     }
 }
 
-void EDSAddressBookFeeder::processContactsModified(EBookClient *client, GSList *contacts)
+void EDSAddressBookFeeder::processContactsModified(GSList *contacts)
 {
-    Q_UNUSED(client)
-
     auto &addressbook = AddressBook::instance();
 
     for (GSList *item = contacts; item != nullptr; item = g_slist_next(item)) {
@@ -256,10 +258,8 @@ void EDSAddressBookFeeder::processContactsModified(EBookClient *client, GSList *
     }
 }
 
-void EDSAddressBookFeeder::processContactsRemoved(EBookClient *client, GSList *uids)
+void EDSAddressBookFeeder::processContactsRemoved(GSList *uids)
 {
-    Q_UNUSED(client)
-
     auto &addressbook = AddressBook::instance();
 
     for (GSList *item = uids; item != nullptr; item = g_slist_next(item)) {
