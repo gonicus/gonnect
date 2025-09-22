@@ -155,6 +155,24 @@ QString EDSAddressBookFeeder::getFieldMerge(EContact *contact, EContactField pId
     return "";
 }
 
+QStringList EDSAddressBookFeeder::getList(EContact *contact, EContactField id)
+{
+    // MULTI_LIST_FIELD (E_CONTACT_FIELD_TYPE_MULTI) -> E_CONTACT_SIP
+    QStringList results;
+
+    GList *items = static_cast<GList *>(e_contact_get(contact, id));
+    for (GList *item = items; item != nullptr; item = g_list_next(item)) {
+        const gchar *result = static_cast<const gchar *>(item->data);
+        if (result) {
+            results.append(QString::fromUtf8(result));
+        }
+    }
+    // g_list_free_full(items, g_object_unref);
+    e_contact_attr_list_free(items);
+
+    return results;
+}
+
 void EDSAddressBookFeeder::connectContactSignals(EBookClientView *view)
 {
     // INFO: g_signal_connect(): The last argument is an instance of the EDS class (gpointer
@@ -216,6 +234,11 @@ void EDSAddressBookFeeder::processContactsAdded(GSList *contacts)
             phoneNumbers.append(
                     { Contact::NumberType::Home, getField(eContact, E_CONTACT_PHONE_HOME), false });
 
+            QStringList sipUris = getList(eContact, E_CONTACT_SIP);
+            for (const auto &sipUri : std::as_const(sipUris)) {
+                phoneNumbers.append({ Contact::NumberType::Unknown, sipUri, true });
+            }
+
             Contact *contact = addressbook.addContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
@@ -245,6 +268,11 @@ void EDSAddressBookFeeder::processContactsModified(GSList *contacts)
                                   getField(eContact, E_CONTACT_PHONE_MOBILE), false });
             phoneNumbers.append(
                     { Contact::NumberType::Home, getField(eContact, E_CONTACT_PHONE_HOME), false });
+
+            QStringList sipUris = getList(eContact, E_CONTACT_SIP);
+            for (const auto &sipUri : std::as_const(sipUris)) {
+                phoneNumbers.append({ Contact::NumberType::Unknown, sipUri, true });
+            }
 
             Contact *contact = addressbook.modifyContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
@@ -382,6 +410,11 @@ void EDSAddressBookFeeder::processContacts(QString clientInfo, GSList *contacts)
                                   getField(eContact, E_CONTACT_PHONE_MOBILE), false });
             phoneNumbers.append(
                     { Contact::NumberType::Home, getField(eContact, E_CONTACT_PHONE_HOME), false });
+
+            QStringList sipUris = getList(eContact, E_CONTACT_SIP);
+            for (const auto &sipUri : std::as_const(sipUris)) {
+                phoneNumbers.append({ Contact::NumberType::Unknown, sipUri, true });
+            }
 
             Contact *contact = addressbook.addContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
