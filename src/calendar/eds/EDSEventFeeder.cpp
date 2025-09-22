@@ -88,7 +88,7 @@ void EDSEventFeeder::init()
         ESource *source = E_SOURCE(iter->data);
 
         qCDebug(lcEDSEventFeeder) << "Connecting to source" << e_source_get_display_name(source)
-                                  << e_source_get_uid(source);
+                                  << "(" << e_source_get_uid(source) << ")";
 
         e_cal_client_connect(source, E_CAL_CLIENT_SOURCE_TYPE_EVENTS, -1, nullptr,
                              onEcalClientConnected, this);
@@ -437,5 +437,5 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
     g_slist_free_full(components, g_object_unref);
     components = nullptr;
 
-    qCInfo(lcEDSEventFeeder) << "Loaded events of source" << clientName << clientUid;
+    qCInfo(lcEDSEventFeeder) << "Loaded events of source" << clientName << "(" << clientUid << ")";
 }

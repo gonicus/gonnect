@@ -317,7 +317,6 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
             return;
         }
 
-        feeder->m_clientViews.append(view);
         feeder->connectContactSignals(view);
         e_book_client_view_start(view, &error);
         if (error) {
@@ -326,6 +325,7 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
             error = nullptr;
             return;
         }
+        feeder->m_clientViews.append(view);
 
         feeder->m_clients.append(client);
         feeder->m_clientCount++;
