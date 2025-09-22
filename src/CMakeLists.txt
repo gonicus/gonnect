@@ -302,6 +302,7 @@ qt_add_qml_module(gonnect
         ui/PageReader.qml
         ui/PageWriter.qml
         ui/WidgetModel.qml
+        ui/WidgetSelectionWindow.qml
 
 
     DEPENDENCIES
