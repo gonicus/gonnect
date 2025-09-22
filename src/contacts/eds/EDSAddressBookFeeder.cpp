@@ -186,7 +186,8 @@ void EDSAddressBookFeeder::onContactsModified(EBookClientView *view, GSList *con
     }
 }
 
-void EDSAddressBookFeeder::onContactsRemoved(EBookClientView *view, GSList *uids, gpointer user_data)
+void EDSAddressBookFeeder::onContactsRemoved(EBookClientView *view, GSList *uids,
+                                             gpointer user_data)
 {
     Q_UNUSED(view)
 

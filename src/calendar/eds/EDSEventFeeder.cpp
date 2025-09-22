@@ -226,7 +226,8 @@ void EDSEventFeeder::processEventsAdded(ECalClientView *view)
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
-        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr,
+                                     onClientEventsRequested, this);
     }
 }
 
@@ -248,7 +249,8 @@ void EDSEventFeeder::processEventsModified(ECalClientView *view)
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
-        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr,
+                                     onClientEventsRequested, this);
     }
 }
 
@@ -270,7 +272,8 @@ void EDSEventFeeder::processEventsRemoved(ECalClientView *view)
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
-        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr,
+                                     onClientEventsRequested, this);
     }
 }
 
