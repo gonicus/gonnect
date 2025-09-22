@@ -48,7 +48,7 @@ private:
     static void onClientEventsRequested(GObject *source_object, GAsyncResult *result,
                                         gpointer user_data);
 
-    void processEvents(QString clientInfo, GSList *components);
+    void processEvents(QString clientName, QString clientUid, GSList *components);
 
     QString m_source;
     QDateTime m_timeRangeStart;

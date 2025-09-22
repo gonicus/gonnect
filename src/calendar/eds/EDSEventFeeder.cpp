@@ -87,10 +87,8 @@ void EDSEventFeeder::init()
     for (GList *iter = m_sources; iter != nullptr; iter = g_list_next(iter)) {
         ESource *source = E_SOURCE(iter->data);
 
-        QString sourceInfo =
-                QString("%1 (%2)").arg(e_source_get_display_name(source), e_source_get_uid(source));
-
-        qCDebug(lcEDSEventFeeder) << "Connecting to source" << sourceInfo;
+        qCDebug(lcEDSEventFeeder) << "Connecting to source" << e_source_get_display_name(source)
+                                  << e_source_get_uid(source);
 
         e_cal_client_connect(source, E_CAL_CLIENT_SOURCE_TYPE_EVENTS, -1, nullptr,
                              onEcalClientConnected, this);
@@ -210,14 +208,22 @@ void EDSEventFeeder::processEventsAdded(ECalClientView *view, GSList *components
     DateEventManager &manager = DateEventManager::instance();
     ECalClient *client = e_cal_client_view_ref_client(view);
 
-    // INFO: And we only want to remove the EDS events of the current client/source
-    QString concreteSource =
-            QString("%1: %2 (%3)")
-                    .arg(m_source, e_source_get_display_name(e_client_get_source(E_CLIENT(client))),
-                         e_source_get_uid(e_client_get_source(E_CLIENT(E_CLIENT(client)))));
-    manager.removeDateEventsBySource(concreteSource);
+    if (client) {
+        if (!m_clients.contains(client)) {
+            g_object_unref(client);
+            return;
+        }
 
-    e_cal_client_get_object_list(client, m_searchExpr, nullptr, onClientEventsRequested, this);
+        // Use a class-managed reference instead
+        const auto idx = m_clients.indexOf(client);
+        g_object_unref(client);
+
+        QString concreteSource = QString("%1-%2").arg(
+                m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
+        manager.removeDateEventsBySource(concreteSource);
+
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
+    }
 }
 
 void EDSEventFeeder::processEventsModified(ECalClientView *view, GSList *components)
@@ -227,13 +233,22 @@ void EDSEventFeeder::processEventsModified(ECalClientView *view, GSList *compone
     DateEventManager &manager = DateEventManager::instance();
     ECalClient *client = e_cal_client_view_ref_client(view);
 
-    QString concreteSource =
-            QString("%1: %2 (%3)")
-                    .arg(m_source, e_source_get_display_name(e_client_get_source(E_CLIENT(client))),
-                         e_source_get_uid(e_client_get_source(E_CLIENT(E_CLIENT(client)))));
-    manager.removeDateEventsBySource(concreteSource);
+    if (client) {
+        if (!m_clients.contains(client)) {
+            g_object_unref(client);
+            return;
+        }
 
-    e_cal_client_get_object_list(client, m_searchExpr, nullptr, onClientEventsRequested, this);
+        // Use a class-managed reference instead
+        const auto idx = m_clients.indexOf(client);
+        g_object_unref(client);
+
+        QString concreteSource = QString("%1-%2").arg(
+                m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
+        manager.removeDateEventsBySource(concreteSource);
+
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
+    }
 }
 
 void EDSEventFeeder::processEventsRemoved(ECalClientView *view, GSList *uids)
@@ -243,13 +258,22 @@ void EDSEventFeeder::processEventsRemoved(ECalClientView *view, GSList *uids)
     DateEventManager &manager = DateEventManager::instance();
     ECalClient *client = e_cal_client_view_ref_client(view);
 
-    QString concreteSource =
-            QString("%1: %2 (%3)")
-                    .arg(m_source, e_source_get_display_name(e_client_get_source(E_CLIENT(client))),
-                         e_source_get_uid(e_client_get_source(E_CLIENT(E_CLIENT(client)))));
-    manager.removeDateEventsBySource(concreteSource);
+    if (client) {
+        if (!m_clients.contains(client)) {
+            g_object_unref(client);
+            return;
+        }
 
-    e_cal_client_get_object_list(client, m_searchExpr, nullptr, onClientEventsRequested, this);
+               // Use a class-managed reference instead
+        const auto idx = m_clients.indexOf(client);
+        g_object_unref(client);
+
+        QString concreteSource = QString("%1-%2").arg(
+                m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
+        manager.removeDateEventsBySource(concreteSource);
+
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr, onClientEventsRequested, this);
+    }
 }
 
 void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result, gpointer user_data)
@@ -306,19 +330,18 @@ void EDSEventFeeder::onClientEventsRequested(GObject *source_object, GAsyncResul
     }
 
     if (components) {
-        QString sourceInfo = QString("%1 (%2)").arg(
-                e_source_get_display_name(e_client_get_source(E_CLIENT(source_object))),
-                e_source_get_uid(e_client_get_source(E_CLIENT(source_object))));
-
-        feeder->processEvents(sourceInfo, components);
+        feeder->processEvents(
+                QString(e_source_get_display_name(e_client_get_source(E_CLIENT(source_object)))),
+                QString(e_source_get_uid(e_client_get_source(E_CLIENT(source_object)))),
+                components);
     }
 }
 
-void EDSEventFeeder::processEvents(QString clientInfo, GSList *components)
+void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList *components)
 {
     DateEventManager &manager = DateEventManager::instance();
 
-    QString concreteSource = QString("%1: %2").arg(m_source, clientInfo);
+    QString concreteSource = QString("%1-%2").arg(m_source, clientUid);
 
     for (GSList *item = components; item != nullptr; item = g_slist_next(item)) {
         ICalComponent *component = I_CAL_COMPONENT(item->data);
@@ -413,5 +436,5 @@ void EDSEventFeeder::processEvents(QString clientInfo, GSList *components)
     g_slist_free_full(components, g_object_unref);
     components = nullptr;
 
-    qCInfo(lcEDSEventFeeder) << "Loaded events of source" << clientInfo;
+    qCInfo(lcEDSEventFeeder) << "Loaded events of source" << clientName << clientUid;
 }
