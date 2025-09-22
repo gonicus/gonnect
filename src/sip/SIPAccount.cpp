@@ -7,7 +7,6 @@
 #include "PreferredIdentity.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
-#include "KeychainSettings.h"
 #include "NetworkHelper.h"
 #include "Credentials.h"
 

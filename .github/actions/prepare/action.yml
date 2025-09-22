@@ -46,7 +46,7 @@ runs:
       if: inputs.qt-only == 'false'
       run: |
         echo "CMAKE_VERSION=$(cmake --version | head -n 1 | awk '{print $3}')" >> $GITHUB_OUTPUT
-        echo "QCA_HASH=$(git submodule status external/qca | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "QCA_HASH=$(sed -n '/(qca/,/)/s/^.*GIT_TAG \(.*\).*$/\1/p' ${{github.workspace}}/src/CMakeLists.txt)" >> $GITHUB_OUTPUT
         echo "HIDAPI_TAG=$(yq '.. | select(has("name")) | select(.name == "hidapi") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
         echo "PJSIP_TAG=$(yq '.. | select(has("name")) | select(.name == "pjsip") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
         echo "QTKEYCHAIN_TAG=$(yq '.. | select(has("name")) | select(.name == "qtkeychain") | .sources[] | .tag' ${{github.workspace}}/resources/flatpak/de.gonicus.gonnect.yml)" >> $GITHUB_OUTPUT
@@ -107,18 +107,26 @@ runs:
       uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
       with:
         path: ${{github.workspace}}/qca
-        key: ${{ steps.hashes.outputs.QCA_HASH }}-qca
+        key: ${{ steps.hashes.outputs.QCA_HASH }}-qca6
 
-    - name: Install qca
+    - name: Build qca
       shell: bash
       if: ${{ inputs.qt-only == 'false' && steps.cache-qca.outputs.cache-hit != 'true' }}
       run: |
-        cd external/qca
+        git clone https://github.com/KDE/qca.git
+        cd qca
+        git checkout ${{ steps.hashes.outputs.QCA_HASH }}
         mkdir -p build
         cd build
-        ${QT_ROOT_DIR}/bin/qt-cmake .. -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/qca -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
+        ${QT_ROOT_DIR}/bin/qt-cmake .. -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
         make 
-        make install
+
+    - name: Install qca
+      shell: bash
+      if: inputs.qt-only == 'false'
+      run: |
+        cd qca/build
+        sudo make install
 
     - name: Cache qtkeychain
       id: cache-qtkeychain

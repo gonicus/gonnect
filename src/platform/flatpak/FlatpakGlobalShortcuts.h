@@ -3,7 +3,6 @@
 #include "../GlobalShortcuts.h"
 
 class GlobalShortcutPortal;
-;
 
 class FlatpakGlobalShortcuts : public GlobalShortcuts
 {

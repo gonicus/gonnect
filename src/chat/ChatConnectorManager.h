@@ -34,10 +34,13 @@ private Q_SLOTS:
 
 private:
     explicit ChatConnectorManager(QObject *parent = nullptr);
+    void checkConfigAfterCallback(const QString &settingsGroup);
 
     bool m_isInitialized = false;
     bool m_isJsChatAvailable = false;
     QList<JsChatConnector *> m_connectors;
+    QHash<QString, quint8> m_waitingCallbackCount;
+    QHash<QString, JsConnectorConfig *> m_waitingCallbackConfigs;
 
 Q_SIGNALS:
     void jsChatConnectorsChanged();
