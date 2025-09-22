@@ -507,6 +507,10 @@ SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
 {
     QString sipUrl = toSipUri(var);
 
+    if (sipUrl.isEmpty()) {
+        return SIPBuddyState::STATUS::UNKNOWN;
+    }
+
     // Do we have such a buddy already?
     for (auto buddy : std::as_const(m_buddies)) {
         if (buddy->uri() == sipUrl) {
