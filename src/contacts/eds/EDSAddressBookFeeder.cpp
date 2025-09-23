@@ -157,7 +157,6 @@ QString EDSAddressBookFeeder::getFieldMerge(EContact *contact, EContactField pId
 
 QStringList EDSAddressBookFeeder::getList(EContact *contact, EContactField id)
 {
-    // MULTI_LIST_FIELD (E_CONTACT_FIELD_TYPE_MULTI) -> E_CONTACT_SIP
     QStringList results;
 
     GList *items = static_cast<GList *>(e_contact_get(contact, id));
@@ -167,7 +166,7 @@ QStringList EDSAddressBookFeeder::getList(EContact *contact, EContactField id)
             results.append(QString::fromUtf8(result));
         }
     }
-    // g_list_free_full(items, g_object_unref);
+
     e_contact_attr_list_free(items);
 
     return results;
