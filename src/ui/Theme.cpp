@@ -39,8 +39,8 @@ bool Theme::useOwnDecoration()
 
         if (settingsVal == "auto") {
             const auto desktop =
-            QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower(); // gnome|kde
-            m_useOwnDecoration = desktop == "gnome";
+                    QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower(); // gnome|kde
+            m_useOwnDecoration = desktop.contains("gnome");
         } else {
             m_useOwnDecoration = settingsVal == "true";
         }

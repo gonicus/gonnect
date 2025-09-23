@@ -24,14 +24,16 @@ class AkonadiEventFeeder : public QObject, public IDateEventFeeder
     Q_OBJECT
 
 public:
-    explicit AkonadiEventFeeder(QObject *parent = nullptr);
+    explicit AkonadiEventFeeder(QObject *parent = nullptr, const QString &source = "",
+                                const QDateTime &timeRangeStart = QDateTime(),
+                                const QDateTime &timeRangeEnd = QDateTime());
+
     ~AkonadiEventFeeder();
 
-    void init(const QString &settingsGroupId, const QString &source,
-              const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd);
-
-    virtual void process() override;
+    virtual void init() override;
     virtual QUrl networkCheckURL() const override { return QUrl(); };
+
+    void process();
 
 private Q_SLOTS:
     void processCollections(KJob *job);

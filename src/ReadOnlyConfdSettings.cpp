@@ -3,8 +3,11 @@
 #include <QRegularExpression>
 #include <QLoggingCategory>
 #include <QCryptographicHash>
-#include <unistd.h>
-#include <grp.h>
+
+#ifdef Q_OS_LINUX
+#  include <unistd.h>
+#  include <grp.h>
+#endif
 #include "ReadOnlyConfdSettings.h"
 
 Q_LOGGING_CATEGORY(lcReadOnlySettings, "gonnect.app.settings")
@@ -16,6 +19,7 @@ ReadOnlyConfdSettings::ReadOnlyConfdSettings(QObject *parent)
     readConfd();
 }
 
+#ifdef Q_OS_LINUX
 QString ReadOnlyConfdSettings::gidToName(gid_t gid)
 {
     struct group *g;
@@ -48,6 +52,7 @@ QStringList ReadOnlyConfdSettings::getUserGroups()
 
     return res;
 };
+#endif
 
 void ReadOnlyConfdSettings::readConfd()
 {
@@ -61,8 +66,12 @@ void ReadOnlyConfdSettings::readConfd()
     const auto baseDir = QDir(basePath);
     const QStringList entries = baseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
 
+#ifdef Q_OS_LINUX
     // Filter scope and replace %ENV[variablename]% and %CONF[config/key]% placeholders
     const auto groupList = getUserGroups();
+#else
+    const auto groupList = QStringList();
+#endif
 
     for (auto &entry : std::as_const(entries)) {
         if (configFileName.match(entry).hasMatch()) {

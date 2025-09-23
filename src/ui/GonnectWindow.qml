@@ -85,7 +85,7 @@ BaseWindow {
             const isOnCallPage = mainTabBar.selectedPageType === GonnectWindow.PageType.Call
             const isOnConferencePage = mainTabBar.selectedPageType === GonnectWindow.PageType.Conference
 
-            if (count && isOnCallPage && !isConference) {
+            if (count && isOnCallPage && ViewHelper.isActiveVideoCall) {
                 control.updateTabSelection(control.conferencePageId,
                                            GonnectWindow.PageType.Conference)
             } else if (count && isOnConferencePage && isConference) {
