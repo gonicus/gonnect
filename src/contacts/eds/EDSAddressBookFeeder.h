@@ -26,6 +26,7 @@ public:
 private:
     QString getField(EContact *contact, EContactField id);
     QString getFieldMerge(EContact *contact, EContactField pId, EContactField sId);
+    QStringList getList(EContact *contact, EContactField id);
     void addAvatar(QString id, EContact *contact, QDateTime changed);
 
     void init();
