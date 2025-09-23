@@ -70,6 +70,15 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
                         phoneNumbers.append({ nt, pn.normalizedNumber(), false });
                     }
 
+                    QListIterator<KContacts::Impp> imit(addr.imppList());
+                    while (imit.hasNext()) {
+                        auto imn = imit.next();
+
+                        if (imn.serviceType() == "sip") {
+                            phoneNumbers.append({ Contact::NumberType::Unknown, imn.address().toString(), true });
+                        }
+                    }
+
                     QString email = "";
                     auto emails = addr.emails();
                     if (emails.count()) {
@@ -91,7 +100,7 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
             });
 
     connect(m_monitor, &Akonadi::Monitor::itemChanged, this,
-            [this](const Akonadi::Item &item, const QSet<QByteArray> &) {
+            [](const Akonadi::Item &item, const QSet<QByteArray> &) {
                 if (item.mimeType() != "text/directory") {
                     return;
                 }
@@ -115,6 +124,15 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
                         }
 
                         phoneNumbers.append({ nt, pn.normalizedNumber(), false });
+                    }
+
+                    QListIterator<KContacts::Impp> imit(addr.imppList());
+                    while (imit.hasNext()) {
+                        auto imn = imit.next();
+
+                        if (imn.serviceType() == "sip") {
+                            phoneNumbers.append({ Contact::NumberType::Unknown, imn.address().toString(), true });
+                        }
                     }
 
                     QString email = "";
@@ -194,6 +212,16 @@ void AkonadiAddressBookFeeder::processSearchResult(KJob *job)
             }
 
             phoneNumbers.append({ nt, pn.normalizedNumber(), false });
+        }
+
+        QListIterator<KContacts::Impp> imit(addressee.imppList());
+        while (imit.hasNext()) {
+            auto imn = imit.next();
+
+            imn.address().scheme();
+            if (imn.serviceType() == "sip") {
+                phoneNumbers.append({ Contact::NumberType::Unknown, imn.address().toString(), true });
+            }
         }
 
         QString email = "";
