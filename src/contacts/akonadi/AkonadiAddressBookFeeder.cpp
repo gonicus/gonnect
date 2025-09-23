@@ -70,13 +70,14 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
                         phoneNumbers.append({ nt, pn.normalizedNumber(), false });
                     }
 
-                    QListIterator<KContacts::Impp> imit(addr.imppList());
-                    while (imit.hasNext()) {
-                        auto imn = imit.next();
+                    // Retrieve SIP URI's by reading the IMPP (Instant Messaging and Presence Protocol) field
+                    QListIterator<KContacts::Impp> imppIterator(addr.imppList());
+                    while (imppIterator.hasNext()) {
+                        auto imppEntry = imppIterator.next();
 
-                        if (imn.serviceType() == "sip") {
+                        if (imppEntry.serviceType() == "sip") {
                             phoneNumbers.append({ Contact::NumberType::Unknown,
-                                                  imn.address().toString(), true });
+                                                  imppEntry.address().toString(), true });
                         }
                     }
 
@@ -127,13 +128,13 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
                         phoneNumbers.append({ nt, pn.normalizedNumber(), false });
                     }
 
-                    QListIterator<KContacts::Impp> imit(addr.imppList());
-                    while (imit.hasNext()) {
-                        auto imn = imit.next();
+                    QListIterator<KContacts::Impp> imppIterator(addr.imppList());
+                    while (imppIterator.hasNext()) {
+                        auto imppEntry = imppIterator.next();
 
-                        if (imn.serviceType() == "sip") {
+                        if (imppEntry.serviceType() == "sip") {
                             phoneNumbers.append({ Contact::NumberType::Unknown,
-                                                  imn.address().toString(), true });
+                                                  imppEntry.address().toString(), true });
                         }
                     }
 
@@ -216,14 +217,13 @@ void AkonadiAddressBookFeeder::processSearchResult(KJob *job)
             phoneNumbers.append({ nt, pn.normalizedNumber(), false });
         }
 
-        QListIterator<KContacts::Impp> imit(addressee.imppList());
-        while (imit.hasNext()) {
-            auto imn = imit.next();
+        QListIterator<KContacts::Impp> imppIterator(addressee.imppList());
+        while (imppIterator.hasNext()) {
+            auto imppEntry = imppIterator.next();
 
-            imn.address().scheme();
-            if (imn.serviceType() == "sip") {
+            if (imppEntry.serviceType() == "sip") {
                 phoneNumbers.append(
-                        { Contact::NumberType::Unknown, imn.address().toString(), true });
+                        { Contact::NumberType::Unknown, imppEntry.address().toString(), true });
             }
         }
 
