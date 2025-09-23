@@ -75,7 +75,8 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
                         auto imn = imit.next();
 
                         if (imn.serviceType() == "sip") {
-                            phoneNumbers.append({ Contact::NumberType::Unknown, imn.address().toString(), true });
+                            phoneNumbers.append({ Contact::NumberType::Unknown,
+                                                  imn.address().toString(), true });
                         }
                     }
 
@@ -131,7 +132,8 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
                         auto imn = imit.next();
 
                         if (imn.serviceType() == "sip") {
-                            phoneNumbers.append({ Contact::NumberType::Unknown, imn.address().toString(), true });
+                            phoneNumbers.append({ Contact::NumberType::Unknown,
+                                                  imn.address().toString(), true });
                         }
                     }
 
@@ -220,7 +222,8 @@ void AkonadiAddressBookFeeder::processSearchResult(KJob *job)
 
             imn.address().scheme();
             if (imn.serviceType() == "sip") {
-                phoneNumbers.append({ Contact::NumberType::Unknown, imn.address().toString(), true });
+                phoneNumbers.append(
+                        { Contact::NumberType::Unknown, imn.address().toString(), true });
             }
         }
 
