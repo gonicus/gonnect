@@ -70,7 +70,8 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
                         phoneNumbers.append({ nt, pn.normalizedNumber(), false });
                     }
 
-                    // Retrieve SIP URI's by reading the IMPP (Instant Messaging and Presence Protocol) field
+                    // Retrieve SIP URI's by reading the IMPP
+                    // (Instant Messaging and Presence Protocol) field
                     QListIterator<KContacts::Impp> imppIterator(addr.imppList());
                     while (imppIterator.hasNext()) {
                         auto imppEntry = imppIterator.next();
