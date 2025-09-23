@@ -159,15 +159,19 @@ QStringList EDSAddressBookFeeder::getList(EContact *contact, EContactField id)
 {
     QStringList results;
 
-    GList *items = static_cast<GList *>(e_contact_get(contact, id));
-    for (GList *item = items; item != nullptr; item = g_list_next(item)) {
-        const gchar *result = static_cast<const gchar *>(item->data);
-        if (result) {
-            results.append(QString::fromUtf8(result));
+    if (contact) {
+        GList *items = static_cast<GList *>(e_contact_get(contact, id));
+        for (GList *item = items; item != nullptr; item = g_list_next(item)) {
+            const gchar *result = static_cast<const gchar *>(item->data);
+            if (result) {
+                results.append(QString::fromUtf8(result));
+            }
+        }
+
+        if (items) {
+            e_contact_attr_list_free(items);
         }
     }
-
-    e_contact_attr_list_free(items);
 
     return results;
 }
