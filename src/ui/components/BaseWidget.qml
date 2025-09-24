@@ -124,39 +124,6 @@ Item {
                 anchors.centerIn: parent
                 spacing: resizableRect.indicatorPadding
 
-                // Drag
-                Rectangle {
-                    id: dragIndicator
-                    width: resizableRect.indicatorSize
-                    height: resizableRect.indicatorSize
-                    color: "transparent"
-
-                    IconLabel {
-                        id: dragIcon
-                        anchors.centerIn: parent
-                        icon {
-                            source: Icons.viewGrid
-                            width: parent.width
-                            height: parent.height
-                            color: Theme.highContrastColor
-                        }
-                    }
-
-                    DragHandler {
-                        id: dragControl
-                        acceptedButtons: Qt.LeftButton
-                        target: resizableRect
-
-                        onActiveChanged: function(active) {
-                            if (!active) {
-                                control.xRelative = Number(resizableRect.x / control.gridWidth)
-                                control.yRelative = Number(resizableRect.y / control.gridHeight)
-                                control.setPlacement()
-                            }
-                        }
-                    }
-                }
-
                 // Remove
                 Rectangle {
                     id: removeIndicator
@@ -189,51 +156,112 @@ Item {
                 }
             }
 
+            // Drag
+            Rectangle {
+                id: dragIndicator
+                width: resizableRect.width - resizableRect.indicatorSize
+                height: resizableRect.height - resizableRect.indicatorSize
+                //color: "transparent"
+                anchors.centerIn: parent
+
+                MouseArea {
+                    enabled: control.editMode
+                    hoverEnabled: true
+                    anchors.fill: parent
+                    cursorShape: Qt.SizeAllCursor
+                }
+
+                DragHandler {
+                    id: dragControl
+                    acceptedButtons: Qt.LeftButton
+                    target: resizableRect
+
+                    onActiveChanged: function(active) {
+                        if (!active) {
+                            control.xRelative = Number(resizableRect.x / control.gridWidth)
+                            control.yRelative = Number(resizableRect.y / control.gridHeight)
+                            control.setPlacement()
+                        }
+                    }
+                }
+            }
+
             // Resize
             Rectangle {
                 id: resizeIndicator
-                visible: control.editMode
-                width: resizableRect.indicatorSize
-                height: resizableRect.indicatorSize
                 color: "transparent"
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.margins: resizableRect.indicatorPadding
+                anchors.fill: parent
+                anchors.centerIn: parent
 
-                IconLabel {
-                    id: resizeIcon
-                    anchors.centerIn: parent
-                    icon {
-                        source: Icons.viewLeftNew
-                        width: parent.width
-                        height: parent.height
-                        color: Theme.highContrastColor
+                property real startX
+                property real startY
+
+                Rectangle {
+                    id: resizeBottomRight
+                    width: resizableRect.indicatorSize
+                    height: resizableRect.indicatorSize
+                    color: "transparent"
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    //anchors.margins: resizableRect.indicatorPadding
+
+                    MouseArea {
+                        parent: resizeBottomRight
+                        anchors.fill: parent
+                        cursorShape: Qt.SizeFDiagCursor
+
+                        onPressed: function(mouse) {
+                            resizeIndicator.startX = mouse.x
+                            resizeIndicator.startY = mouse.y
+                        }
+
+                        onPositionChanged: function(mouse) {
+                            if (mouse.buttons === Qt.LeftButton) {
+                                // Deltas
+                                let dx = mouse.x - resizeIndicator.startX
+                                let dy = mouse.y - resizeIndicator.startY
+
+                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
+                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
+                                control.setDimensions()
+                            }
+                        }
                     }
                 }
 
-                MouseArea {
-                    id: resizeControl
-                    parent: resizeIndicator
-                    anchors.fill: parent
-                    cursorShape: Qt.SizeFDiagCursor
+                Rectangle {
+                    id: resizeBottomLeft
+                    width: resizableRect.indicatorSize
+                    height: resizableRect.indicatorSize
+                    color: "transparent"
+                    anchors.right: parent.left
+                    anchors.bottom: parent.bottom
+                    //anchors.margins: resizableRect.indicatorPadding
 
-                    property real startX
-                    property real startY
+                    MouseArea {
+                        parent: resizeBottomLeft
+                        anchors.fill: parent
+                        cursorShape: Qt.SizeBDiagCursor
 
-                    onPressed: function(mouse) {
-                        startX = mouse.x
-                        startY = mouse.y
-                    }
+                        onPressed: function(mouse) {
+                            resizeIndicator.startX = mouse.x
+                            resizeIndicator.startY = mouse.y
+                        }
 
-                    onPositionChanged: function(mouse) {
-                        if (mouse.buttons === Qt.LeftButton) {
-                            // Deltas
-                            let dx = mouse.x - startX
-                            let dy = mouse.y - startY
+                        onPositionChanged: function(mouse) {
+                            if (mouse.buttons === Qt.LeftButton) {
+                                // Deltas
+                                let dx = 0 // resizeIndicator.startX - mouse.x
+                                let dy = 0 // resizeIndicator.startY - mouse.y
 
-                            control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
-                            control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
-                            control.setDimensions()
+                                control.xRelative = Number(mouse.x / control.gridWidth)
+                                control.yRelative = Number(mouse.y / control.gridWidth)
+                                control.setPlacement()
+
+                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
+                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
+                                control.setDimensions()
+                            }
                         }
                     }
                 }
