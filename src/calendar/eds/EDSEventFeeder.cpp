@@ -423,7 +423,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 }
             } else {
                 // Non-recurrent event or update of a recurrent event instance
-                if (isUpdatedRecurrence) {
+                if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
                     manager.modifyDateEvent(id, concreteSource, start, end, summary, location,
                                             true);
                 } else {

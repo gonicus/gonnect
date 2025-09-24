@@ -40,6 +40,8 @@ public:
 
     const QList<DateEvent *> &dateEvents() const { return m_dateEvents; }
 
+    bool isAddedDateEvent(const QString &id);
+
     /// Find the DateEvent by the given room name that is currently taking place or nullptr
     DateEvent *currentDateEventByRoomName(const QString &roomName) const;
 

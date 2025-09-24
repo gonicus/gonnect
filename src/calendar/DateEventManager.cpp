@@ -183,6 +183,21 @@ void DateEventManager::removeDateEventsBySource(const QString &source)
     }
 }
 
+bool DateEventManager::isAddedDateEvent(const QString &id)
+{
+    // Useful to check if an event instance is a past recurrence,
+    // but has been moved into the future
+    QMutableListIterator it(m_dateEvents);
+    while (it.hasNext()) {
+        const auto event = it.next();
+        if (event && event->id() == id) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 DateEvent *DateEventManager::currentDateEventByRoomName(const QString &roomName) const
 {
     if (roomName.isEmpty()) {
