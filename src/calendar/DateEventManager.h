@@ -4,6 +4,7 @@
 #include <QHash>
 #include <QTime>
 #include <QTimer>
+#include <QMutexLocker>
 
 class DateEvent;
 
@@ -64,6 +65,8 @@ private:
     QTimer m_minuteTimer;
     QTime m_lastCheckedTime;
     QDate m_lastCheckedDate;
+
+    QMutex m_feederMutex;
 
 Q_SIGNALS:
     void dateEventAdded(qsizetype index, DateEvent *dateEvent);

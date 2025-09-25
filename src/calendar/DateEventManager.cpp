@@ -81,6 +81,8 @@ void DateEventManager::addDateEvent(DateEvent *dateEvent)
 
     dateEvent->setParent(this);
 
+    QMutexLocker lock(&m_feederMutex);
+
     qsizetype i = 0;
     for (; i < m_dateEvents.size(); ++i) {
         if (dateEvent->start() < m_dateEvents.at(i)->start()) {
@@ -101,6 +103,8 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
                                        const QString &summary, const QString &roomName,
                                        bool isConfirmed)
 {
+    QMutexLocker lock(&m_feederMutex);
+
     QMutableListIterator it(m_dateEvents);
     while (it.hasNext()) {
         const auto event = it.next();
@@ -127,6 +131,8 @@ void DateEventManager::removeDateEvent(const QString &id)
     auto &notMan = NotificationManager::instance();
 
     qsizetype i = 0;
+    QMutexLocker lock(&m_feederMutex);
+
     QMutableListIterator it(m_dateEvents);
     while (it.hasNext()) {
         i++;
@@ -162,6 +168,7 @@ void DateEventManager::resetDateEvents()
     }
     m_notificationIds.clear();
 
+    QMutexLocker lock(&m_feederMutex);
     qDeleteAll(m_dateEvents);
     m_dateEvents.clear();
     Q_EMIT dateEventsCleared();
@@ -170,6 +177,7 @@ void DateEventManager::resetDateEvents()
 void DateEventManager::removeDateEventsBySource(const QString &source)
 {
     qsizetype i = 0;
+    QMutexLocker lock(&m_feederMutex);
     QMutableListIterator it(m_dateEvents);
     while (it.hasNext()) {
         i++;
@@ -187,6 +195,7 @@ bool DateEventManager::isAddedDateEvent(const QString &id)
 {
     // Useful to check if an event instance is a past recurrence,
     // but has been moved into the future
+    QMutexLocker lock(&m_feederMutex);
     QMutableListIterator it(m_dateEvents);
     while (it.hasNext()) {
         const auto event = it.next();
@@ -219,6 +228,7 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
 {
     DateEvent *foundDateEvent = nullptr;
 
+    QMutexLocker lock(&m_feederMutex);
     for (auto dateEvent : std::as_const(m_dateEvents)) {
         if (dateEvent->roomName() == roomName) {
             foundDateEvent = dateEvent;
@@ -244,6 +254,7 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
 void DateEventManager::onTimerTimeout()
 {
     auto &notMan = NotificationManager::instance();
+    QMutexLocker lock(&m_feederMutex);
 
     const QTime now = QTime::currentTime();
     if (now.minute() != m_lastCheckedTime.minute()) {
