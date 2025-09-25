@@ -54,7 +54,7 @@ runs:
     - name: Cache hidapi
       id: cache-hidapi
       if: inputs.qt-only == 'false'
-      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: hidapi
         key: ${{ steps.hashes.outputs.HIDAPI_TAG }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-hidapi
@@ -81,7 +81,7 @@ runs:
     - name: Cache pjsip
       id: cache-pjsip
       if: inputs.qt-only == 'false'
-      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: ${{github.workspace}}/pjproject
         key: ${{ steps.hashes.outputs.PJSIP_TAG }}-pjsip
@@ -104,7 +104,7 @@ runs:
     - name: Cache qca
       id: cache-qca
       if: inputs.qt-only == 'false'
-      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: ${{github.workspace}}/qca
         key: ${{ steps.hashes.outputs.QCA_HASH }}-qca6
@@ -131,7 +131,7 @@ runs:
     - name: Cache qtkeychain
       id: cache-qtkeychain
       if: inputs.qt-only == 'false'
-      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: qtkeychain
         key: ${{ steps.hashes.outputs.QTKEYCHAIN_TAG }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-qtkeychain
