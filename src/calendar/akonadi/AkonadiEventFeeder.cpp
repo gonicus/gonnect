@@ -171,7 +171,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                             }
                         } else {
                             // Non-recurrent event or update of a recurrent event instance
-                            if (isUpdatedRecurrence) {
+                            if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
                                 manager.modifyDateEvent(id, m_source, start, end, summary, location,
                                                         true);
                             } else {
