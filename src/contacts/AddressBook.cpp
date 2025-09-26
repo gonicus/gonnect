@@ -60,6 +60,9 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
     const auto hid = hashifyCn(dn);
 
     bool newContactCreated = false;
+
+    QMutexLocker lock(&m_feederMutex);
+
     Contact *contact = m_contacts.value(hid, nullptr);
     if (!contact) {
         newContactCreated = true;
@@ -87,6 +90,8 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
 
 void AddressBook::addContact(Contact *contact)
 {
+    QMutexLocker lock(&m_feederMutex);
+
     if (contact != nullptr && !m_contacts.contains(contact->id())) {
         contact->setParent(this);
         m_contacts.insert(contact->id(), contact);
@@ -102,6 +107,9 @@ Contact *AddressBook::modifyContact(const QString &dn, const QString &sourceUid,
                                     const QList<Contact::PhoneNumber> &phoneNumbers)
 {
     auto contact = lookupBySourceUid(sourceUid);
+
+    QMutexLocker lock(&m_feederMutex);
+
     if (contact) {
         contact->setDisplayName(dn);
         contact->setName(name);
@@ -122,6 +130,9 @@ Contact *AddressBook::modifyContact(const QString &dn, const QString &sourceUid,
 void AddressBook::removeContact(const QString &sourceUid)
 {
     auto contact = lookupBySourceUid(sourceUid);
+
+    QMutexLocker lock(&m_feederMutex);
+
     if (contact) {
         m_contacts.remove(contact->id());
         m_contactsBySourceId.remove(contact->sourceUid());
@@ -210,6 +221,8 @@ Contact *AddressBook::lookupBySourceUid(const QString &sourceUid) const
 
 void AddressBook::clear()
 {
+    QMutexLocker lock(&m_feederMutex);
+
     qDeleteAll(m_contacts);
     m_contacts.clear();
     Q_EMIT contactsCleared();
