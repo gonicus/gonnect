@@ -4,6 +4,7 @@
 #include <QHash>
 #include <QTime>
 #include <QTimer>
+#include <QMutexLocker>
 
 class DateEvent;
 
@@ -40,6 +41,8 @@ public:
 
     const QList<DateEvent *> &dateEvents() const { return m_dateEvents; }
 
+    bool isAddedDateEvent(const QString &id);
+
     /// Find the DateEvent by the given room name that is currently taking place or nullptr
     DateEvent *currentDateEventByRoomName(const QString &roomName) const;
 
@@ -62,6 +65,8 @@ private:
     QTimer m_minuteTimer;
     QTime m_lastCheckedTime;
     QDate m_lastCheckedDate;
+
+    QMutex m_feederMutex;
 
 Q_SIGNALS:
     void dateEventAdded(qsizetype index, DateEvent *dateEvent);
