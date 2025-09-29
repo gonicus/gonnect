@@ -123,6 +123,7 @@ BaseWindow {
                     let text = titleEntry.text
 
                     tabRoot.createTab(pageId, pageType, icon, text)
+                    tabRoot.mainWindow.createPage(pageId)
 
                     control.close()
                 }

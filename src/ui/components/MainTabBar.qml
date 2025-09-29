@@ -68,8 +68,6 @@ Item {
         }
 
         control.dynamicPageCount += 1
-
-        mainWindow.createPage(id)
     }
 
     Rectangle {

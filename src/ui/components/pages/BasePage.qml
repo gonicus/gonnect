@@ -43,6 +43,13 @@ Item {
         model: control.model
     }
 
+    Component {
+        id: widgetSelectionWindowComponent
+        WidgetSelectionWindow {
+            pageRoot: control
+        }
+    }
+
     CommonWidgets {
         id: widgets
     }
