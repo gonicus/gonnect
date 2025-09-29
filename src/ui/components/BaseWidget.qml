@@ -200,7 +200,7 @@ Item {
                     id: resizeBottomRight
                     width: resizableRect.indicatorSize
                     height: resizableRect.indicatorSize
-                    color: "transparent"
+                    color: "red"
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     //anchors.margins: resizableRect.indicatorPadding
@@ -233,7 +233,7 @@ Item {
                     id: resizeBottomLeft
                     width: resizableRect.indicatorSize
                     height: resizableRect.indicatorSize
-                    color: "transparent"
+                    color: "blue"
                     anchors.right: parent.left
                     anchors.bottom: parent.bottom
                     //anchors.margins: resizableRect.indicatorPadding

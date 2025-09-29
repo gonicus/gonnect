@@ -22,6 +22,8 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
+    required property var pageRoot
+
     property string name: ""
     property int selection: -1
 
@@ -55,6 +57,11 @@ BaseWindow {
         Row {
             id: widgetButtons
             spacing: 10
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
 
             Button {
                 id: widgetConfirm

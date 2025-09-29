@@ -31,15 +31,32 @@ Item {
 
     property alias backgroundColor: filler.color
 
-    function createTab(id : string, type : int) {
-        // TODO: Popup or window with icon/title selection
+    Component {
+        id: pageCreationWindowComponent
+        PageCreationWindow {
+            tabRoot: control
+        }
+    }
+
+    function createTab(id : string, type : int, icon : url, name : string) {
+        let iconPath
+        if (!icon.toString().startsWith("qrc:/")) {
+            if (Theme.isDarkMode) {
+                iconPath = "qrc:/icons/dark/" + icon + ".svg"
+            } else {
+                iconPath = "qrc:/icons/" + icon + ".svg"
+            }
+        } else {
+            // We already have a full path + file
+            iconPath = icon
+        }
 
         let tabButton = tabDelegate.createObject(topMenuCol,
                                                  {
                                                      pageId: id,
                                                      pageType: type,
-                                                     iconSource: Icons.folderOpen,
-                                                     labelText: "",
+                                                     iconSource: iconPath,
+                                                     labelText: name,
                                                      disabledTooltipText: "",
                                                      isEnabled: true,
                                                      showRedDot: false,
@@ -51,6 +68,8 @@ Item {
         }
 
         control.dynamicPageCount += 1
+
+        mainWindow.createPage(id)
     }
 
     Rectangle {
@@ -246,9 +265,9 @@ Item {
                             iconSource: Icons.dialogMessages,
                             labelText: connector.displayName,
                             disabledTooltipText: qsTr("Chat not available"),
-                                       isEnabled: true,
-                                       showRedDot: false,
-                                       attachedData: connector
+                            isEnabled: true,
+                            showRedDot: false,
+                            attachedData: connector
                         })
                     }
                 }
@@ -275,7 +294,6 @@ Item {
         Button {
             id: tabBarEditButton
             visible: SM.uiEditMode
-            spacing: 10
             anchors {
                 left: parent.left
                 right: parent.right
@@ -286,9 +304,6 @@ Item {
                 source: Icons.listAdd
                 width: 32
                 height: 32
-                color: tabBarEditButton.checked
-                ? Theme.primaryTextColor
-                : Theme.secondaryInactiveTextColor
             }
             onClicked: {
                 // INFO: Artificial limitation to avoid tab bar clutter
@@ -299,9 +314,11 @@ Item {
                 let id = "page"+control.dynamicPageCount
                 let type = GonnectWindow.PageType.Base
 
-                control.createTab(id, type)
-
-                mainWindow.createPage(id)
+                pageCreationWindowComponent.createObject(control,
+                                                         {
+                                                             pageId: id,
+                                                             pageType: type
+                                                         }).show()
             }
         }
 

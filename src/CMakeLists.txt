@@ -374,6 +374,7 @@ qt_add_qml_module(gonnect
         ui/CommonWidgets.qml
         ui/PageModel.qml
         ui/PageReader.qml
+        ui/PageCreationWindow.qml
         ui/PageWriter.qml
         ui/WidgetModel.qml
         ui/WidgetSelectionWindow.qml

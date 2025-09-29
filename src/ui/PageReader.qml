@@ -88,7 +88,10 @@ Item {
 
             model.add(page)
 
-            tabRoot.createTab(pageItem.id, GonnectWindow.PageType.Base)
+            tabRoot.createTab(pageItem.id,
+                              GonnectWindow.PageType.Base,
+                              pageItem.icon,
+                              pageItem.name)
 
             pageList[pageItem.id] = page
 
