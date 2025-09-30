@@ -99,8 +99,8 @@ Item {
         color: Theme.backgroundColor
 
         property int widgetRadius: 12
-        property int indicatorPadding: 15
-        property int indicatorSize: 20
+        property int indicatorSize: 30
+        property int indicatorPadding: indicatorSize * 2
 
         // Edit mode overlay
         Rectangle {
@@ -114,66 +114,22 @@ Item {
 
             MouseArea {
                 id: hoverEdit
-                enabled: control.editMode
                 hoverEnabled: true
                 anchors.fill: parent
-            }
-
-            // Centered options
-            Row {
-                anchors.centerIn: parent
-                spacing: resizableRect.indicatorPadding
-
-                // Remove
-                Rectangle {
-                    id: removeIndicator
-                    width: resizableRect.indicatorSize
-                    height: resizableRect.indicatorSize
-                    color: "transparent"
-
-                    IconLabel {
-                        id: removeIcon
-                        anchors.centerIn: parent
-                        icon {
-                            source: Icons.mobileCloseApp
-                            width: parent.width
-                            height: parent.height
-                            color: Theme.redColor
-                        }
-                    }
-
-                    MouseArea {
-                        id: removeControl
-                        parent: removeIndicator
-                        anchors.fill: parent
-                        cursorShape: Qt.CrossCursor
-
-                        onClicked: {
-                            control.model.remove(control)
-                            control.destroy()
-                        }
-                    }
-                }
             }
 
             // Drag
             Rectangle {
                 id: dragIndicator
-                width: resizableRect.width - resizableRect.indicatorSize
-                height: resizableRect.height - resizableRect.indicatorSize
-                //color: "transparent"
+                width: resizableRect.width
+                height: resizableRect.height
+                color: "transparent"
                 anchors.centerIn: parent
-
-                MouseArea {
-                    enabled: control.editMode
-                    hoverEnabled: true
-                    anchors.fill: parent
-                    cursorShape: Qt.SizeAllCursor
-                }
 
                 DragHandler {
                     id: dragControl
                     acceptedButtons: Qt.LeftButton
+                    cursorShape: active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                     target: resizableRect
 
                     onActiveChanged: function(active) {
@@ -182,6 +138,40 @@ Item {
                             control.yRelative = Number(resizableRect.y / control.gridHeight)
                             control.setPlacement()
                         }
+                    }
+                }
+            }
+
+            // Remove
+            Rectangle {
+                id: removeIndicator
+                width: resizableRect.indicatorSize
+                height: resizableRect.indicatorSize
+                color: "transparent"
+                anchors.centerIn: parent
+
+                IconLabel {
+                    id: removeIcon
+                    anchors.centerIn: parent
+                    icon {
+                        source: Icons.mobileCloseApp
+                        width: parent.width
+                        height: parent.height
+                        color: Theme.redColor
+                    }
+                }
+
+                MouseArea {
+                    id: removeControl
+                    hoverEnabled: true
+                    parent: removeIndicator
+                    anchors.fill: parent
+                    cursorShape: Qt.ForbiddenCursor
+                    drag.target: removeIndicator
+
+                    onClicked: {
+                        control.model.remove(control)
+                        control.destroy()
                     }
                 }
             }
@@ -200,15 +190,15 @@ Item {
                     id: resizeBottomRight
                     width: resizableRect.indicatorSize
                     height: resizableRect.indicatorSize
-                    color: "red"
+                    color: "transparent"
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    //anchors.margins: resizableRect.indicatorPadding
 
                     MouseArea {
                         parent: resizeBottomRight
                         anchors.fill: parent
                         cursorShape: Qt.SizeFDiagCursor
+                        drag.target: resizeBottomRight
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -233,15 +223,15 @@ Item {
                     id: resizeBottomLeft
                     width: resizableRect.indicatorSize
                     height: resizableRect.indicatorSize
-                    color: "blue"
-                    anchors.right: parent.left
+                    color: "transparent"
+                    anchors.left: parent.left
                     anchors.bottom: parent.bottom
-                    //anchors.margins: resizableRect.indicatorPadding
 
                     MouseArea {
                         parent: resizeBottomLeft
                         anchors.fill: parent
                         cursorShape: Qt.SizeBDiagCursor
+                        drag.target: resizeBottomLeft
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x

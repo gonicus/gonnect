@@ -56,6 +56,8 @@ BaseWindow {
                 ListElement { name: "Example" }
             }
 
+            // TODO: Delegate with both widget icon/image and text
+
             onCurrentIndexChanged: {
                 control.name = widgetEntries.get(currentIndex).name
                 control.selection = currentIndex

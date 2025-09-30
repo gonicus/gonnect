@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtCore
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Controls.impl
 import QtQuick.Controls.Material
@@ -75,9 +76,9 @@ BaseWindow {
 
             delegate: ItemDelegate {
                 width: parent.width
-                contentItem: Row {
+                contentItem: RowLayout {
                     spacing: 10
-                    anchors.centerIn: parent
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                     IconLabel {
                         icon {
                             source: icons[name]
@@ -88,10 +89,11 @@ BaseWindow {
                 required property string name
             }
 
-            contentItem: Row {
+            contentItem: RowLayout {
                 spacing: 10
-                anchors.centerIn: parent
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
                 IconLabel {
+                    leftPadding: 15
                     icon {
                         source: icons[iconEntries.get(iconSelection.currentIndex).name]
                     }
