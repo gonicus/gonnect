@@ -32,10 +32,16 @@ BaseWindow {
     property int selection: -1
 
     Column {
+        id: widgetOptions
         spacing: 10
         anchors {
             fill: parent
             margins: 20
+        }
+
+        Label {
+            id: titleLabel
+            text: qsTr("Widget")
         }
 
         ComboBox {
@@ -59,6 +65,7 @@ BaseWindow {
         Row {
             id: widgetButtons
             spacing: 10
+            layoutDirection: Qt.RightToLeft
             anchors {
                 left: parent.left
                 right: parent.right
@@ -66,8 +73,16 @@ BaseWindow {
             }
 
             Button {
+                id: widgetCancel
+                width: parent.width / 4
+                text: qsTr("Cancel")
+
+                onPressed: control.close()
+            }
+
+            Button {
                 id: widgetConfirm
-                width: parent.width / 2
+                width: parent.width / 4
                 text: qsTr("Add")
 
                 onPressed: {
@@ -83,19 +98,19 @@ BaseWindow {
                     switch (selection) {
                         case CommonWidgets.Type.DateEvents:
                             widget = widgets.dateEvents.createObject(pageRoot,
-                                                                              widgetProperties)
+                                                                     widgetProperties)
                             break
                         case CommonWidgets.Type.Favorites:
                             widget = widgets.favorites.createObject(pageRoot,
-                                                                             widgetProperties)
+                                                                    widgetProperties)
                             break
                         case CommonWidgets.Type.History:
                             widget = widgets.history.createObject(pageRoot,
-                                                                           widgetProperties)
+                                                                  widgetProperties)
                             break
                         case CommonWidgets.Type.Example:
                             widget = widgets.example.createObject(pageRoot,
-                                                                           widgetProperties)
+                                                                  widgetProperties)
                             break
                         default:
                             widget = null
@@ -110,14 +125,6 @@ BaseWindow {
 
                     control.close()
                 }
-            }
-
-            Button {
-                id: widgetCancel
-                width: parent.width / 2
-                text: qsTr("Cancel")
-
-                onPressed: control.close()
             }
         }
     }

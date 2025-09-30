@@ -65,7 +65,7 @@ BaseWindow {
             id: iconSelection
             width: parent.width / 4
             model: ListModel {
-                id: widgetEntries
+                id: iconEntries
                 ListElement { name: "Home" }
                 ListElement { name: "Folder" }
                 ListElement { name: "Person" }
@@ -93,7 +93,7 @@ BaseWindow {
                 anchors.centerIn: parent
                 IconLabel {
                     icon {
-                        source: icons[widgetEntries.get(iconSelection.currentIndex).name]
+                        source: icons[iconEntries.get(iconSelection.currentIndex).name]
                     }
                 }
             }
@@ -105,8 +105,9 @@ BaseWindow {
         }
 
         Row {
-            id: widgetButtons
+            id: pageButtons
             spacing: 10
+            layoutDirection: Qt.RightToLeft
             anchors {
                 left: parent.left
                 right: parent.right
@@ -114,12 +115,20 @@ BaseWindow {
             }
 
             Button {
-                id: widgetConfirm
-                width: parent.width / 2
+                id: pageCancel
+                width: parent.width / 4
+                text: qsTr("Cancel")
+
+                onPressed: control.close()
+            }
+
+            Button {
+                id: pageConfirm
+                width: parent.width / 4
                 text: qsTr("Add")
 
                 onPressed: {
-                    let icon = icons[widgetEntries.get(iconSelection.currentIndex).name]
+                    let icon = icons[iconEntries.get(iconSelection.currentIndex).name]
                     let text = titleEntry.text
 
                     tabRoot.createTab(pageId, pageType, icon, text)
@@ -127,14 +136,6 @@ BaseWindow {
 
                     control.close()
                 }
-            }
-
-            Button {
-                id: widgetCancel
-                width: parent.width / 2
-                text: qsTr("Cancel")
-
-                onPressed: control.close()
             }
         }
     }
