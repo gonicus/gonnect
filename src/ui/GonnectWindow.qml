@@ -161,12 +161,12 @@ BaseWindow {
         UISettings.setUISetting("generic", "pages", pageCount)
     }
 
-    function createPage(pageId : string) {
+    function createPage(pageId : string, icon : url, name : string) {
         let page = pages.base.createObject(pageStack,
                                            {
                                                pageId: pageId,
-                                               name: "",
-                                               icon: ""
+                                               name: name,
+                                               icon: icon
                                            })
         if (page === null) {
             console.log("Could not create page component", pageId)

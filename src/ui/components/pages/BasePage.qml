@@ -146,7 +146,8 @@ Item {
                     anchors.fill: parent
 
                     onClicked: {
-                        addSelection.open()
+                        // TODO: ...
+                        widgetSelectionWindowComponent.createObject(control).show()
                     }
                 }
             }
@@ -183,84 +184,4 @@ Item {
         }
     }
 
-    Popup {
-        id: addSelection
-        width: 400
-        height: 400
-        background: Rectangle {
-            radius: 12
-            color: Theme.backgroundHeader
-        }
-        anchors.centerIn: parent
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-
-        property string name: ""
-        property int selection: -1
-
-        Column {
-            anchors.centerIn: parent
-            spacing: 10
-
-            ComboBox {
-                id: widgetSelection
-                width: addSelection.width / 2
-                currentIndex: -1
-                model: ListModel {
-                    id: widgetEntries
-                    ListElement { name: "DateEvents" }
-                    ListElement { name: "Favorites" }
-                    ListElement { name: "History" }
-                    ListElement { name: "Example" }
-                }
-
-                onCurrentIndexChanged: {
-                    addSelection.name = widgetEntries.get(currentIndex).name
-                    addSelection.selection = currentIndex
-                }
-            }
-
-            Button {
-                id: widgetConfirm
-                width: addSelection.width / 2
-                text: qsTr("Add widget")
-
-                onPressed: {
-                    const name = addSelection.name
-                    const selection = addSelection.selection
-
-                    const widgetProperties = {
-                        name: name.toLowerCase(),
-                        type: selection
-                    }
-
-                    let widget
-                    switch (selection) {
-                        case CommonWidgets.Type.DateEvents:
-                            widget = widgets.dateEvents.createObject(control, widgetProperties)
-                            break
-                        case CommonWidgets.Type.Favorites:
-                            widget = widgets.favorites.createObject(control, widgetProperties)
-                            break
-                        case CommonWidgets.Type.History:
-                            widget = widgets.history.createObject(control, widgetProperties)
-                            break
-                        case CommonWidgets.Type.Example:
-                            widget = widgets.example.createObject(control, widgetProperties)
-                            break
-                        default:
-                            widget = null
-                            console.log("Widget type unknown", selection)
-                    }
-
-                    if (widget === null) {
-                        console.log("Could not create widget component")
-                    } else {
-                        widgetModel.add(widget)
-                    }
-
-                    addSelection.close()
-                }
-            }
-        }
-    }
 }

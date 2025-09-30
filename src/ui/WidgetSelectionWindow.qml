@@ -72,7 +72,39 @@ BaseWindow {
                     const name = control.name
                     const selection = control.selection
 
-                    console.log(name, selection)
+                    const widgetProperties = {
+                        name: name.toLowerCase(),
+                        type: selection
+                    }
+
+                    let widget
+                    switch (selection) {
+                        case CommonWidgets.Type.DateEvents:
+                            widget = pageRoot.widgets.dateEvents.createObject(control,
+                                                                              widgetProperties)
+                            break
+                        case CommonWidgets.Type.Favorites:
+                            widget = pageRoot.widgets.favorites.createObject(control,
+                                                                             widgetProperties)
+                            break
+                        case CommonWidgets.Type.History:
+                            widget = pageRoot.widgets.history.createObject(control,
+                                                                           widgetProperties)
+                            break
+                        case CommonWidgets.Type.Example:
+                            widget = pageRoot.widgets.example.createObject(control,
+                                                                           widgetProperties)
+                            break
+                        default:
+                            widget = null
+                            console.log("Widget type unknown", selection)
+                    }
+
+                    if (widget === null) {
+                        console.log("Could not create widget component")
+                    } else {
+                        pageRoot.widgetModel.add(widget)
+                    }
 
                     control.close()
                 }

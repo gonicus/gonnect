@@ -123,7 +123,7 @@ BaseWindow {
                     let text = titleEntry.text
 
                     tabRoot.createTab(pageId, pageType, icon, text)
-                    tabRoot.mainWindow.createPage(pageId)
+                    tabRoot.mainWindow.createPage(pageId, icon, text)
 
                     control.close()
                 }
