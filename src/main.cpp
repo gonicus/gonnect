@@ -1,16 +1,19 @@
 #include <QQmlApplicationEngine>
-#include <QDBusConnection>
 #include <QQuickWindow>
-#include <QDBusMetaType>
 #include <QtWebEngineQuick>
-
-#include <signal.h>
 #include "Application.h"
+
+#ifdef Q_OS_LINUX
+#  include <QDBusConnection>
+#  include <QDBusMetaType>
+#  include <signal.h>
+#endif
 
 using namespace Qt::Literals::StringLiterals;
 
 static int setup_unix_signal_handlers()
 {
+#ifdef Q_OS_LINUX
     struct sigaction hup, term;
 
     hup.sa_handler = Application::hupSignalHandler;
@@ -30,6 +33,7 @@ static int setup_unix_signal_handlers()
     if (sigaction(SIGTERM, &term, 0)) {
         return 2;
     }
+#endif
 
     return 0;
 }
@@ -45,9 +49,11 @@ int main(int argc, char *argv[])
 
     QtWebEngineQuick::initialize();
 
+#ifdef WITH_DBUS
     qDBusRegisterMetaType<QList<QVariantMap>>();
     qDBusRegisterMetaType<QPair<QString, QVariantMap>>();
     qDBusRegisterMetaType<QList<QPair<QString, QVariantMap>>>();
+#endif
 
     qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", "7000"); // Workaround bad scrolling
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS",

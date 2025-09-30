@@ -12,6 +12,8 @@
 #define __HID_RDF_CONSTANTS_HPP_
 
 #include "hid/report.hpp"
+#undef ABSOLUTE
+#undef RELATIVE
 
 namespace hid::rdf
 {

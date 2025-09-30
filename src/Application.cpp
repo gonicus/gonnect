@@ -12,9 +12,6 @@
 #include "AppSettings.h"
 #include "DateEventFeederManager.h"
 #include "BackgroundManager.h"
-
-#include <sys/socket.h>
-#include <unistd.h>
 #include <QLoggingCategory>
 #include <QTranslator>
 #include <QLibraryInfo>
@@ -23,14 +20,21 @@
 #include <QDesktopServices>
 #include <QtWebEngineQuick>
 
+#ifdef Q_OS_LINUX
+#  include <sys/socket.h>
+#  include <unistd.h>
+#endif
+
 using namespace std::chrono_literals;
 
 using namespace Qt::Literals::StringLiterals;
 
 Q_LOGGING_CATEGORY(lcApplication, "gonnect.app")
 
+#ifdef Q_OS_LINUX
 int Application::s_sighupFd[2];
 int Application::s_sigtermFd[2];
+#endif
 
 Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 {
@@ -40,7 +44,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setApplicationName("GOnnect");
     setOrganizationName("gonnect");
     setOrganizationDomain("gonicus.de");
+#ifdef Q_OS_LINUX
     setDesktopFileName(FLATPAK_APP_ID);
+#endif
     setApplicationVersion(QString::fromStdString(getVersion()));
 
     installTranslations();
@@ -57,6 +63,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     StateManager::instance().setParent(this);
     SearchProvider::instance().setParent(this);
 
+#ifdef Q_OS_LINUX
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, s_sighupFd)) {
         qFatal("Couldn't create HUP socketpair");
     }
@@ -69,6 +76,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     connect(m_hupNotifier, SIGNAL(activated(QSocketDescriptor)), this, SLOT(handleSigHup()));
     m_termNotifier = new QSocketNotifier(s_sigtermFd[1], QSocketNotifier::Read, this);
     connect(m_termNotifier, SIGNAL(activated(QSocketDescriptor)), this, SLOT(handleSigTerm()));
+#endif
 
     // Take care for running "initialize" after exec() is called
     QTimer::singleShot(0, this, &Application::initialize);
@@ -134,6 +142,7 @@ void Application::sendArguments() const
     StateManager::instance().sendArguments(arguments().sliced(1));
 }
 
+#ifdef Q_OS_LINUX
 void Application::hupSignalHandler(int)
 {
     char a = 1;
@@ -163,6 +172,7 @@ void Application::handleSigHup()
 
     quit();
 }
+#endif // Q_OS_LINUX
 
 Application::~Application()
 {

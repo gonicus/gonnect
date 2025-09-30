@@ -423,7 +423,7 @@ api.addListener("passwordRequired", data => {
 )""")
             .arg(GlobalInfo::instance().jitsiUrl(), // %1
                  authManager.isJitsiAuthRequired() ? authManager.jitsiTokenForRoom(m_roomName)
-                                                   : "", // %2
+                                                   : QByteArray(), // %2
                  ownDisplayName(), // %3
                  Theme::instance().backgroundColor().name(), // %4
                  m_roomName, // %5

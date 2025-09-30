@@ -17,4 +17,4 @@ target_include_directories(CSVAddressBookFactory
     ${PROJECT_BINARY_DIR}/src
 )
 
-target_link_libraries(CSVAddressBookFactory PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets Qt6::DBus)
+target_link_libraries(CSVAddressBookFactory PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets)
