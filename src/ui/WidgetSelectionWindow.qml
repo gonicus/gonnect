@@ -24,15 +24,17 @@ BaseWindow {
 
     required property var pageRoot
 
+    CommonWidgets {
+        id: widgets
+    }
+
     property string name: ""
     property int selection: -1
 
     Column {
-        spacing: 20
+        spacing: 10
         anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
+            fill: parent
             margins: 20
         }
 
@@ -80,19 +82,19 @@ BaseWindow {
                     let widget
                     switch (selection) {
                         case CommonWidgets.Type.DateEvents:
-                            widget = pageRoot.widgets.dateEvents.createObject(control,
+                            widget = widgets.dateEvents.createObject(pageRoot,
                                                                               widgetProperties)
                             break
                         case CommonWidgets.Type.Favorites:
-                            widget = pageRoot.widgets.favorites.createObject(control,
+                            widget = widgets.favorites.createObject(pageRoot,
                                                                              widgetProperties)
                             break
                         case CommonWidgets.Type.History:
-                            widget = pageRoot.widgets.history.createObject(control,
+                            widget = widgets.history.createObject(pageRoot,
                                                                            widgetProperties)
                             break
                         case CommonWidgets.Type.Example:
-                            widget = pageRoot.widgets.example.createObject(control,
+                            widget = widgets.example.createObject(pageRoot,
                                                                            widgetProperties)
                             break
                         default:
@@ -103,7 +105,7 @@ BaseWindow {
                     if (widget === null) {
                         console.log("Could not create widget component")
                     } else {
-                        pageRoot.widgetModel.add(widget)
+                        pageRoot.model.add(widget)
                     }
 
                     control.close()

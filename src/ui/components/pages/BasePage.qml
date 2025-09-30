@@ -50,10 +50,6 @@ Item {
         }
     }
 
-    CommonWidgets {
-        id: widgets
-    }
-
     Rectangle {
         id: snapGrid
         visible: control.editMode
@@ -146,7 +142,6 @@ Item {
                     anchors.fill: parent
 
                     onClicked: {
-                        // TODO: ...
                         widgetSelectionWindowComponent.createObject(control).show()
                     }
                 }
