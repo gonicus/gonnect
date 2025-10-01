@@ -7,12 +7,15 @@ Item {
     id: control
     implicitHeight: 44
 
+    required property bool showSearch
+
     function focusSearchBox() {
         searchField.giveFocus()
     }
 
     SearchField {
         id: searchField
+        visible: control.showSearch
         anchors.centerIn: parent
 
         Keys.onDownPressed: () => {

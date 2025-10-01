@@ -241,14 +241,14 @@ Item {
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
                                 // Deltas
-                                let dx = 0 // resizeIndicator.startX - mouse.x
-                                let dy = 0 // resizeIndicator.startY - mouse.y
+                                let dx = mouse.x - resizeIndicator.startX
+                                let dy = mouse.y - resizeIndicator.startY
 
                                 control.xRelative = Number(mouse.x / control.gridWidth)
                                 control.yRelative = Number(mouse.y / control.gridWidth)
                                 control.setPlacement()
 
-                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
+                                control.wRelative = Number((resizableRect.width - dx) / control.gridWidth)
                                 control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
                                 control.setDimensions()
                             }

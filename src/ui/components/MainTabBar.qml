@@ -38,7 +38,26 @@ Item {
         }
     }
 
+    function pageCreationDialog() {
+        // INFO: Artificial limitation to avoid tab bar clutter
+        if (control.dynamicPageCount > control.dynamicPageLimit) {
+            return
+        }
+
+        let id = "page"+control.dynamicPageCount
+        let type = GonnectWindow.PageType.Base
+
+        pageCreationWindowComponent.createObject(control,
+                                                 {
+                                                     pageId: id,
+                                                     pageType: type
+                                                 }).show()
+    }
+
     function createTab(id : string, type : int, icon : url, name : string) {
+        // TODO: We should have a unified way in the config, not sometimes
+        // path + file and other time just a file, especially considering the
+        // path changes based on the theme, thus needlessly cluttering the config
         let iconPath
         if (!icon.toString().startsWith("qrc:/")) {
             if (Theme.isDarkMode) {
@@ -110,9 +129,9 @@ Item {
                     rightMargin: 8
                 }
 
-                // Remove
+                // Options
                 Rectangle {
-                    id: removeIndicator
+                    id: optionIndicator
                     visible: SM.uiEditMode && delg.pageType === GonnectWindow.PageType.Base
                     width: 10
                     height: 10
@@ -126,19 +145,23 @@ Item {
                         id: removeIcon
                         anchors.centerIn: parent
                         icon {
-                            source: Icons.mobileCloseApp
+                            source: Icons.goDown
                             width: parent.width
                             height: parent.height
                         }
                     }
 
                     MouseArea {
-                        id: removeControl
-                        parent: removeIndicator
+                        id: optionControl
+                        parent: optionIndicator
                         anchors.fill: parent
                         cursorShape: Qt.CrossCursor
 
                         onClicked: {
+                            optionSelection.open()
+
+                            // TODO: Use in "delete" option of the menu
+                            /*
                             mainWindow.removePage(delg.pageId)
                             delg.destroy()
 
@@ -146,6 +169,7 @@ Item {
 
                             mainWindow.updateTabSelection(control.callsPageId,
                                                           GonnectWindow.PageType.Calls)
+                            */
                         }
                     }
                 }
@@ -304,19 +328,7 @@ Item {
                 height: 32
             }
             onClicked: {
-                // INFO: Artificial limitation to avoid tab bar clutter
-                if (control.dynamicPageCount > control.dynamicPageLimit) {
-                    return
-                }
-
-                let id = "page"+control.dynamicPageCount
-                let type = GonnectWindow.PageType.Base
-
-                pageCreationWindowComponent.createObject(control,
-                                                         {
-                                                             pageId: id,
-                                                             pageType: type
-                                                         }).show()
+                control.pageCreationDialog()
             }
         }
 
@@ -347,5 +359,19 @@ Item {
             top: parent.top
             bottom: parent.bottom
         }
+    }
+
+    Popup {
+        id: optionSelection
+        width: 400
+        height: 400
+        background: Rectangle {
+            radius: 12
+            color: Theme.backgroundHeader
+        }
+        anchors.centerIn: parent
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        // TODO: Is there any better menu that a popup?
     }
 }

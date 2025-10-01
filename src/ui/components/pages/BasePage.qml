@@ -50,6 +50,10 @@ Item {
         }
     }
 
+    function widgetCreationDialog() {
+        widgetSelectionWindowComponent.createObject(control).show()
+    }
+
     Rectangle {
         id: snapGrid
         visible: control.editMode
@@ -109,7 +113,7 @@ Item {
         property int indicatorPadding: 12
 
         Row {
-            id: pageButtons
+            id: bottomSpacer
             spacing: 10
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -117,65 +121,7 @@ Item {
             anchors.leftMargin: pageEdit.indicatorPadding
             anchors.rightMargin: pageEdit.indicatorPadding
 
-            Rectangle {
-                id: addIndicator
-                visible: control.editMode
-                width: addIcon.implicitWidth
-                height: pageEdit.iconSize
-                color: "transparent"
-
-                IconLabel {
-                    id: addIcon
-                    anchors.centerIn: parent
-                    color: Theme.secondaryTextColor
-                    text: qsTr("Add element")
-                    icon {
-                        source: Icons.listAdd
-                        width: pageEdit.iconSize
-                        height: pageEdit.iconSize
-                    }
-                }
-
-                MouseArea {
-                    id: addControl
-                    parent: addIndicator
-                    anchors.fill: parent
-
-                    onClicked: {
-                        widgetSelectionWindowComponent.createObject(control).show()
-                    }
-                }
-            }
-
-            Rectangle {
-                id: saveIndicator
-                visible: control.editMode
-                width: saveIcon.implicitWidth
-                height: pageEdit.iconSize
-                color: "transparent"
-
-                IconLabel {
-                    id: saveIcon
-                    anchors.centerIn: parent
-                    color: Theme.secondaryTextColor
-                    text: qsTr("Save")
-                    icon {
-                        source: Icons.documentSave
-                        width: pageEdit.iconSize
-                        height: pageEdit.iconSize
-                    }
-                }
-
-                MouseArea {
-                    id: saveControl
-                    parent: saveIndicator
-                    anchors.fill: parent
-
-                    onClicked: {
-                        SM.setSaveDynamicUi(true)
-                    }
-                }
-            }
+            // TODO: Add the emergency button stuff here
         }
     }
 

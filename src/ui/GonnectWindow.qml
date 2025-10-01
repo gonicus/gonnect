@@ -324,10 +324,56 @@ BaseWindow {
         ControlBar {
             id: controlBar
             visible: !Theme.useOwnDecoration
+            showSearch: !SM.uiEditMode
             anchors {
                 left: mainTabBar.right
                 right: parent.right
                 top: parent.top
+            }
+        }
+
+        Row {
+            id: editControls
+            visible: SM.uiEditMode
+                     &&  mainTabBar.selectedPageType === GonnectWindow.PageType.Base
+            spacing: 15
+            anchors {
+                top: parent.top
+                horizontalCenter: parent.horizontalCenter
+            }
+
+            // TODO: Design choice; feels a little misleading to have this as
+            // an edit option *on* a page
+            Button {
+                icon.source: Icons.listAdd
+                text: qsTr("Add page")
+
+                onPressed: {
+                    mainTabBar.pageCreationDialog()
+                }
+            }
+
+            Button {
+                icon.source: Icons.viewLeftNew
+                text: qsTr("Add widget")
+
+                onPressed: {
+                    if (mainTabBar.selectedPageType !== GonnectWindow.PageType.Base) {
+                        return
+                    }
+
+                    let page = pageStack.pages[mainTabBar.selectedPageId]
+                    page.widgetCreationDialog()
+                }
+            }
+
+            Button {
+                icon.source: Icons.objectSelectSymbolic
+                text: qsTr("Save")
+
+                onClicked: {
+                    SM.setSaveDynamicUi(true)
+                }
             }
         }
 
