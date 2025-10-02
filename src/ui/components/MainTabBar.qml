@@ -158,18 +158,10 @@ Item {
                         cursorShape: Qt.CrossCursor
 
                         onClicked: {
-                            optionSelection.open()
-
-                            // TODO: Use in "delete" option of the menu
-                            /*
-                            mainWindow.removePage(delg.pageId)
-                            delg.destroy()
-
-                            control.dynamicPageCount -= 1
-
-                            mainWindow.updateTabSelection(control.callsPageId,
-                                                          GonnectWindow.PageType.Calls)
-                            */
+                            optionMenu.x = removeIcon.x
+                            optionMenu.y = removeIcon.y
+                            optionMenu.tabButton = delg
+                            optionMenu.open()
                         }
                     }
                 }
@@ -361,9 +353,9 @@ Item {
         }
     }
 
-    Popup {
-        id: optionSelection
-        width: 400
+    Menu {
+        id: optionMenu
+        width: 300
         height: 400
         background: Rectangle {
             radius: 12
@@ -372,6 +364,63 @@ Item {
         anchors.centerIn: parent
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        // TODO: Is there any better menu that a popup?
+        property var tabButton: null
+
+        // TODO: Move ops...
+
+        MenuItem {
+            text: qsTr("Move up")
+
+            onTriggered: {
+                if (optionMenu.tabButton !== null) {
+                    let index
+                    let tabButtons = topMenuCol.children
+                    for (let i = 0; i < tabButtons.length; i++) {
+                        let tabButton = tabButtons[i]
+                        if (tabButton.pageId === optionMenu.tabButton.pageId) {
+                            index = i
+                        }
+                        tabButton.parent = null
+                        tabButton.visible = false
+                    }
+
+                    if (index > 0) {
+                        let a = tabButtons[index-1]
+                        let b = tabButtons[index]
+
+                        tabButtons[index-1] = b
+                        tabButtons[index] = a
+                    }
+
+                    for (let j = 0; j < tabButtons.length; j++) {
+                        let tabButton = tabButtons[j]
+                        tabButton.parent = topMenuCol
+                        tabButton.visible = true
+                    }
+                }
+            }
+        }
+        MenuItem {
+            text: qsTr("Move down")
+
+            onTriggered: {
+
+            }
+        }
+        MenuItem {
+            text: qsTr("Delete")
+
+            onTriggered: {
+                if (optionMenu.tabButton !== null) {
+                    mainWindow.removePage(optionMenu.tabButton.pageId)
+                    optionMenu.tabButton.destroy()
+
+                    control.dynamicPageCount -= 1
+
+                    mainWindow.updateTabSelection(control.callsPageId,
+                                                  GonnectWindow.PageType.Calls)
+                }
+            }
+        }
     }
 }
