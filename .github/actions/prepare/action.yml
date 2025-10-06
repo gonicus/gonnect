@@ -106,7 +106,7 @@ runs:
       uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
       with:
         path: ${{github.workspace}}/qca
-        key: ${{ steps.hashes.outputs.QCA_HASH }}-qca
+        key: ${{ steps.hashes.outputs.QCA_HASH }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-qca6
 
     - name: Install qca
       shell: bash
