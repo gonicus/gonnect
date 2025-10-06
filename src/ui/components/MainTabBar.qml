@@ -366,40 +366,40 @@ Item {
 
         property var tabButton: null
 
-        // TODO: Move ops...
+        // TODO: baseModel items behave differently; how to save?
 
         MenuItem {
             text: qsTr("Move up")
 
             onTriggered: {
                 if (optionMenu.tabButton !== null) {
-                    let index
+                    let index = 0
+                    let newOrder = []
+
                     let tabButtons = topMenuCol.children
                     for (let i = 0; i < tabButtons.length; i++) {
                         let tabButton = tabButtons[i]
                         if (tabButton.pageId === optionMenu.tabButton.pageId) {
                             index = i
                         }
+
+                        newOrder.push(tabButton)
                     }
 
                     if (index > 0) {
-                        for (let j = 0; j < tabButtons.length; j++) {
-                            let tabButton = tabButtons[j]
-                            let prev = tabButtons[j-1]
+                        let old = newOrder[index-1]
+
+                        newOrder[index-1] = newOrder[index]
+                        newOrder[index] = old
+
+                        for (let j = 0; j < newOrder.length; j++) {
+                            let tabButton = newOrder[j]
 
                             tabButton.parent = null
                             tabButton.visible = false
 
                             tabButton.parent = topMenuCol
                             tabButton.visible = true
-
-                            if (j === index) {
-                                prev.parent = null
-                                prev.visible = false
-
-                                prev.parent = topMenuCol
-                                prev.visible = true
-                            }
                         }
                     }
                 }
@@ -409,7 +409,37 @@ Item {
             text: qsTr("Move down")
 
             onTriggered: {
+                if (optionMenu.tabButton !== null) {
+                    let index = 0
+                    let newOrder = []
 
+                    let tabButtons = topMenuCol.children
+                    for (let i = 0; i < tabButtons.length; i++) {
+                        let tabButton = tabButtons[i]
+                        if (tabButton.pageId === optionMenu.tabButton.pageId) {
+                            index = i
+                        }
+
+                        newOrder.push(tabButton)
+                    }
+
+                    if (index < tabButtons.length-1) {
+                        let old = newOrder[index+1]
+
+                        newOrder[index+1] = newOrder[index]
+                        newOrder[index] = old
+
+                        for (let j = 0; j < newOrder.length; j++) {
+                            let tabButton = newOrder[j]
+
+                            tabButton.parent = null
+                            tabButton.visible = false
+
+                            tabButton.parent = topMenuCol
+                            tabButton.visible = true
+                        }
+                    }
+                }
             }
         }
         MenuItem {
