@@ -100,29 +100,4 @@ Item {
             control.gridResized()
         }
     }
-
-    Rectangle {
-        id: pageEdit
-        color: Theme.backgroundColor
-        height: 20
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
-
-        property int iconSize: 20
-        property int indicatorPadding: 12
-
-        Row {
-            id: bottomSpacer
-            spacing: 10
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            anchors.leftMargin: pageEdit.indicatorPadding
-            anchors.rightMargin: pageEdit.indicatorPadding
-
-            // TODO: Add the emergency button stuff here
-        }
-    }
-
 }

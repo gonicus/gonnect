@@ -380,22 +380,27 @@ Item {
                         if (tabButton.pageId === optionMenu.tabButton.pageId) {
                             index = i
                         }
-                        tabButton.parent = null
-                        tabButton.visible = false
                     }
 
                     if (index > 0) {
-                        let a = tabButtons[index-1]
-                        let b = tabButtons[index]
+                        for (let j = 0; j < tabButtons.length; j++) {
+                            let tabButton = tabButtons[j]
+                            let prev = tabButtons[j-1]
 
-                        tabButtons[index-1] = b
-                        tabButtons[index] = a
-                    }
+                            tabButton.parent = null
+                            tabButton.visible = false
 
-                    for (let j = 0; j < tabButtons.length; j++) {
-                        let tabButton = tabButtons[j]
-                        tabButton.parent = topMenuCol
-                        tabButton.visible = true
+                            tabButton.parent = topMenuCol
+                            tabButton.visible = true
+
+                            if (j === index) {
+                                prev.parent = null
+                                prev.visible = false
+
+                                prev.parent = topMenuCol
+                                prev.visible = true
+                            }
+                        }
                     }
                 }
             }

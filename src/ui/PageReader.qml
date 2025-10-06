@@ -25,10 +25,6 @@ Item {
     function load() {
         // Generic
         let pageCount = Number(UISettings.getUISetting("generic", "pages", 0))
-        let windowWidth = Number(UISettings.getUISetting("generic", "gonnectWindowWidth", 0))
-        let windowHeight = Number(UISettings.getUISetting("generic", "gonnectWindowHeight", 0))
-        let tabBarWidth = Number(UISettings.getUISetting("generic", "gonnectTabBarWidth", 0))
-        let controlBarHeight = Number(UISettings.getUISetting("generic", "gonnectControlBarHeight", 0))
 
         // Pages
         let pageItems = []

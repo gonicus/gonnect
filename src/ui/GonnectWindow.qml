@@ -191,8 +191,6 @@ BaseWindow {
 
                 // Generic
                 UISettings.setUISetting("generic", "pages", pageCount)
-                UISettings.setUISetting("generic", "gonnectTabBarWidth", mainTabBar.width)
-                UISettings.setUISetting("generic", "gonnectControlBarHeight", controlBar.height)
 
                 // Pages & Widgets
                 for (let i = 0; i < pageCount; i++) {
@@ -340,6 +338,7 @@ BaseWindow {
             anchors {
                 top: parent.top
                 horizontalCenter: parent.horizontalCenter
+                verticalCenter: parent.verticalCenter
             }
 
             // TODO: Design choice; feels a little misleading to have this as
@@ -370,6 +369,11 @@ BaseWindow {
             Button {
                 icon.source: Icons.objectSelectSymbolic
                 text: qsTr("Save")
+                background: Rectangle {
+                    //anchors.fill: parent
+                    color: Theme.greenColor
+                    radius: 8
+                }
 
                 onClicked: {
                     SM.setSaveDynamicUi(true)
@@ -383,7 +387,7 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
-                bottom: parent.bottom
+                bottom: bottomBar.visible ? bottomBar.top : parent.bottom
             }
 
             property var pages: ({})
@@ -437,6 +441,36 @@ BaseWindow {
                 id: settingsPage
                 visible: false
                 anchors.fill: parent
+            }
+        }
+
+        Rectangle {
+            id: bottomBar
+            visible: mainTabBar.selectedPageType === GonnectWindow.PageType.Base
+            color: "transparent"
+            height: 35
+            anchors {
+                right: parent.right
+                left: parent.left
+                bottom: parent.bottom
+            }
+
+            Row {
+                spacing: 10
+                anchors {
+                    right: parent.right
+                    bottom: parent.bottom
+
+                    topMargin: 6
+                    bottomMargin: 6
+                    leftMargin: 12
+                    rightMargin: 12
+                }
+
+                FirstAidButton {
+                    id: firstAidButton
+                    z: 100000
+                }
             }
         }
     }
