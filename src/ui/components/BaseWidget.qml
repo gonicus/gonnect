@@ -99,8 +99,6 @@ Item {
         color: Theme.backgroundColor
 
         property int widgetRadius: 12
-        property int indicatorSize: 30
-        property int indicatorPadding: indicatorSize * 2
 
         // Edit mode overlay
         Rectangle {
@@ -145,9 +143,10 @@ Item {
             // Remove
             Rectangle {
                 id: removeIndicator
-                width: resizableRect.indicatorSize
-                height: resizableRect.indicatorSize
-                color: "transparent"
+                width: 35
+                height: 35
+                color: Theme.backgroundSecondaryColor
+                radius: 6
                 anchors.centerIn: parent
 
                 IconLabel {
@@ -155,15 +154,14 @@ Item {
                     anchors.centerIn: parent
                     icon {
                         source: Icons.mobileCloseApp
-                        width: parent.width
-                        height: parent.height
+                        width: parent.width * 0.5
+                        height: parent.height * 0.5
                         color: Theme.redColor
                     }
                 }
 
                 MouseArea {
                     id: removeControl
-                    hoverEnabled: true
                     parent: removeIndicator
                     anchors.fill: parent
                     cursorShape: Qt.ForbiddenCursor
@@ -183,13 +181,15 @@ Item {
                 anchors.fill: parent
                 anchors.centerIn: parent
 
+                property int indicatorSize: 30
+
                 property real startX
                 property real startY
 
                 Rectangle {
                     id: resizeBottomRight
-                    width: resizableRect.indicatorSize
-                    height: resizableRect.indicatorSize
+                    width: resizeIndicator.indicatorSize
+                    height: resizeIndicator.indicatorSize
                     color: "transparent"
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
@@ -221,8 +221,8 @@ Item {
 
                 Rectangle {
                     id: resizeBottomLeft
-                    width: resizableRect.indicatorSize
-                    height: resizableRect.indicatorSize
+                    width: resizeIndicator.indicatorSize
+                    height: resizeIndicator.indicatorSize
                     color: "transparent"
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom

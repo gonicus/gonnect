@@ -367,13 +367,10 @@ BaseWindow {
             }
 
             Button {
+                highlighted: true
+                Material.accent: Theme.greenColor
                 icon.source: Icons.objectSelectSymbolic
                 text: qsTr("Save")
-                background: Rectangle {
-                    //anchors.fill: parent
-                    color: Theme.greenColor
-                    radius: 8
-                }
 
                 onClicked: {
                     SM.setSaveDynamicUi(true)
