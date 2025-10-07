@@ -1,3 +1,10 @@
+## [2.0.6](https://github.com/gonicus/gonnect/compare/v2.0.5...v2.0.6) (2025-10-07)
+
+
+### Bug Fixes
+
+* allow sending of asterisk via dtmf  ([#201](https://github.com/gonicus/gonnect/issues/201)) ([41c377b](https://github.com/gonicus/gonnect/commit/41c377bd4d18fc0c74e603e5b5557ee5979621a6)), closes [#197](https://github.com/gonicus/gonnect/issues/197)
+
 ## [2.0.5](https://github.com/gonicus/gonnect/compare/v2.0.4...v2.0.5) (2025-09-09)
 
 
