@@ -296,27 +296,27 @@ BaseWindow {
             settingsPageId: control.settingsPageId
             defaultPageId: control.defaultPageId
 
-                mainWindow: control
+            mainWindow: control
 
-                hasActiveCall: callsModel.count > 0
-                hasActiveConference: conferencePage.iConferenceConnector.isInConference
-                anchors {
-                    left: parent.left
-                    top: parent.top
-                    bottom: parent.bottom
-                }
+            hasActiveCall: callsModel.count > 0
+            hasActiveConference: conferencePage.iConferenceConnector.isInConference
+            anchors {
+                left: parent.left
+                top: parent.top
+                bottom: parent.bottom
+            }
 
-                onSelectedPageIdChanged: {
-                    control.showPage(selectedPageId)
-                }
+            onSelectedPageIdChanged: {
+                control.showPage(selectedPageId)
+            }
 
-                onSelectedPageTypeChanged: {
-                    control.updateCallInForeground()
-                }
+            onSelectedPageTypeChanged: {
+                control.updateCallInForeground()
+            }
 
-                Component.onCompleted: {
-                    control.showPage(selectedPageId)
-                }
+            Component.onCompleted: {
+                control.showPage(selectedPageId)
+            }
         }
 
         ControlBar {
@@ -324,53 +324,61 @@ BaseWindow {
             visible: !Theme.useOwnDecoration
             showSearch: !SM.uiEditMode
             anchors {
+                top: parent.top
                 left: mainTabBar.right
                 right: parent.right
-                top: parent.top
             }
         }
 
-        Row {
+        Item {
             id: editControls
-            visible: SM.uiEditMode
-            spacing: 15
             anchors {
                 top: parent.top
-                horizontalCenter: parent.horizontalCenter
-                verticalCenter: parent.verticalCenter
+                bottom: pageStack.top
+                left: mainTabBar.right
+                right: parent.right
             }
 
-            Button {
-                icon.source: Icons.listAdd
-                text: qsTr("Add page")
+            Row {
+                visible: SM.uiEditMode
+                spacing: 15
+                anchors.centerIn: parent
 
-                onPressed: {
-                    mainTabBar.pageCreationDialog()
-                }
-            }
+                Button {
+                    icon.source: Icons.listAdd
+                    height: 44
+                    text: qsTr("Add page")
 
-            Button {
-                icon.source: Icons.viewLeftNew
-                text: qsTr("Add widget")
-
-                onPressed: {
-                    if (mainTabBar.selectedPageType !== GonnectWindow.PageType.Base) {
-                        return
+                    onPressed: {
+                        mainTabBar.pageCreationDialog()
                     }
-
-                    let page = pageStack.pages[mainTabBar.selectedPageId]
-                    page.widgetCreationDialog()
                 }
-            }
 
-            Button {
-                highlighted: true
-                Material.accent: Theme.greenColor
-                icon.source: Icons.objectSelectSymbolic
-                text: qsTr("Save")
+                Button {
+                    icon.source: Icons.viewLeftNew
+                    height: 44
+                    text: qsTr("Add widget")
 
-                onClicked: {
-                    SM.setSaveDynamicUi(true)
+                    onPressed: {
+                        if (mainTabBar.selectedPageType !== GonnectWindow.PageType.Base) {
+                            return
+                        }
+
+                        let page = pageStack.pages[mainTabBar.selectedPageId]
+                        page.widgetCreationDialog()
+                    }
+                }
+
+                Button {
+                    highlighted: true
+                    Material.accent: Theme.greenColor
+                    icon.source: Icons.objectSelectSymbolic
+                    height: 44
+                    text: qsTr("Save")
+
+                    onClicked: {
+                        SM.setSaveDynamicUi(true)
+                    }
                 }
             }
         }
