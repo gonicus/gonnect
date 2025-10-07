@@ -6,7 +6,7 @@ FavoritesProxyModel::FavoritesProxyModel(QObject *parent) : QSortFilterProxyMode
 {
 
     connect(this, &FavoritesProxyModel::showJitsiChanged, this,
-            [this]() { invalidateRowsFilter(); });
+            [this]() { beginFilterChange(); endFilterChange(); });
 }
 
 bool FavoritesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
