@@ -3,10 +3,8 @@
 
 TogglerProxyModel::TogglerProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
-    connect(this, &TogglerProxyModel::displayFilterChanged, this, [this](){
-            beginFilterChange();
-            endFilterChange();
-        });
+    connect(this, &TogglerProxyModel::displayFilterChanged, this,
+            &TogglerProxyModel::invalidateRowsFilter);
 }
 
 bool TogglerProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
