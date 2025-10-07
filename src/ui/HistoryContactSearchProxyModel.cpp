@@ -5,7 +5,7 @@ HistoryContactSearchProxyModel::HistoryContactSearchProxyModel(QObject *parent)
     : QSortFilterProxyModel{ parent }
 {
     connect(this, &HistoryContactSearchProxyModel::showJitsiChanged, this,
-            [this]() { invalidateRowsFilter(); });
+            [this]() { beginFilterChange(); endFilterChange(); });
 }
 
 bool HistoryContactSearchProxyModel::filterAcceptsRow(int sourceRow,

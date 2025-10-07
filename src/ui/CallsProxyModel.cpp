@@ -6,11 +6,11 @@ CallsProxyModel::CallsProxyModel(QObject *parent) : QSortFilterProxyModel{ paren
 {
 
     connect(this, &CallsProxyModel::onlyEstablishedCallsChanged, this,
-            [this]() { invalidateRowsFilter(); });
+            [this]() { beginFilterChange(); endFilterChange(); });
     connect(this, &CallsProxyModel::hideIncomingSecondaryCallOnBusyChanged, this,
-            [this]() { invalidateRowsFilter(); });
+            [this]() { beginFilterChange(); endFilterChange(); });
     connect(&SIPCallManager::instance(), &SIPCallManager::establishedCallsCountChanged, this,
-            [this]() { invalidateRowsFilter(); });
+            [this]() { beginFilterChange(); endFilterChange(); });
 }
 
 bool CallsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
