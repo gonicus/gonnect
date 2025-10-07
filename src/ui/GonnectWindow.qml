@@ -333,7 +333,6 @@ BaseWindow {
         Row {
             id: editControls
             visible: SM.uiEditMode
-                     &&  mainTabBar.selectedPageType === GonnectWindow.PageType.Base
             spacing: 15
             anchors {
                 top: parent.top
@@ -341,8 +340,6 @@ BaseWindow {
                 verticalCenter: parent.verticalCenter
             }
 
-            // TODO: Design choice; feels a little misleading to have this as
-            // an edit option *on* a page
             Button {
                 icon.source: Icons.listAdd
                 text: qsTr("Add page")

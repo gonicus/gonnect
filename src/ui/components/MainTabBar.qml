@@ -89,6 +89,52 @@ Item {
         control.dynamicPageCount += 1
     }
 
+    function saveTabList() {
+        let tabOrder = []
+        let tabButtons = topMenuCol.children
+
+        for (let i = 0; i < tabButtons.length; i++) {
+            let tabButton = tabButtons[i]
+
+            tabOrder.push(tabButton.pageId)
+        }
+
+        if (tabOrder.length > 0) {
+            UISettings.setUISetting("generic", "tabBarOrder", tabOrder.join(","))
+        }
+    }
+
+    function sortTabList() {
+        let tabList = UISettings.setUISetting("generic", "tabBarOrder", "")
+        let tabOrder = tabList.split(",")
+        if (!tabOrder.length > 0) {
+            return
+        }
+
+        let tabButtons = topMenuCol.children
+
+        for (let i = 0; i < tabButtons.length; i++) {
+            let tabButton = tabButtons[i]
+
+            tabButton.parent = null
+            tabButton.visible = false
+        }
+
+        for (let j = 0; j < tabOrder.length; j++) {
+            let tabId = tabOrder[j]
+
+            for (let k = 0; k < tabButtons.length; k++) {
+                let tabButton = tabButtons[k]
+
+                if (tabButton.pageId === tabId) {
+                    tabButton.parent = topMenuCol
+                    tabButton.visible = true
+                    break
+                }
+            }
+        }
+    }
+
     Rectangle {
         id: filler
         anchors.fill: parent
@@ -158,8 +204,8 @@ Item {
                         cursorShape: Qt.CrossCursor
 
                         onClicked: {
-                            optionMenu.x = removeIcon.x
-                            optionMenu.y = removeIcon.y
+                            optionMenu.x = delg.x + 15
+                            optionMenu.y = delg.y + 15
                             optionMenu.tabButton = delg
                             optionMenu.open()
                         }
@@ -305,25 +351,6 @@ Item {
             bottom: parent.bottom
         }
 
-        Button {
-            id: tabBarEditButton
-            visible: SM.uiEditMode
-            anchors {
-                left: parent.left
-                right: parent.right
-                leftMargin: 8
-                rightMargin: 8
-            }
-            icon {
-                source: Icons.listAdd
-                width: 32
-                height: 32
-            }
-            onClicked: {
-                control.pageCreationDialog()
-            }
-        }
-
         Repeater {
             id: bottomMenuRepeater
             delegate: tabDelegate
@@ -342,38 +369,20 @@ Item {
         }
     }
 
-    Rectangle {
-        id: border
-        color: Theme.borderColor
-        width: 1
-        anchors {
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
-        }
-    }
-
     Menu {
         id: optionMenu
-        width: 300
-        height: 400
-        background: Rectangle {
-            radius: 12
-            color: Theme.backgroundHeader
-        }
-        anchors.centerIn: parent
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
         property var tabButton: null
 
-        // TODO: baseModel items behave differently; how to save?
+        // TODO: baseModel items behave differently
 
-        MenuItem {
+        Action {
             text: qsTr("Move up")
 
             onTriggered: {
                 if (optionMenu.tabButton !== null) {
-                    let index = 0
+                    let index
                     let newOrder = []
 
                     let tabButtons = topMenuCol.children
@@ -405,12 +414,13 @@ Item {
                 }
             }
         }
-        MenuItem {
+
+        Action {
             text: qsTr("Move down")
 
             onTriggered: {
                 if (optionMenu.tabButton !== null) {
-                    let index = 0
+                    let index
                     let newOrder = []
 
                     let tabButtons = topMenuCol.children
@@ -442,7 +452,8 @@ Item {
                 }
             }
         }
-        MenuItem {
+
+        Action {
             text: qsTr("Delete")
 
             onTriggered: {
@@ -456,6 +467,17 @@ Item {
                                                   GonnectWindow.PageType.Calls)
                 }
             }
+        }
+    }
+
+    Rectangle {
+        id: border
+        color: Theme.borderColor
+        width: 1
+        anchors {
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
         }
     }
 }
