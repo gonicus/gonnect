@@ -3,7 +3,10 @@
 
 EmojiProxyModel::EmojiProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
-    connect(this, &EmojiProxyModel::groupChanged, this, [this]() { beginFilterChange(); endFilterChange(); });
+    connect(this, &EmojiProxyModel::groupChanged, this, [this]() {
+        beginFilterChange();
+        endFilterChange();
+    });
 }
 
 bool EmojiProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const

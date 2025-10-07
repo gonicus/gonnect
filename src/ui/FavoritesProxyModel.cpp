@@ -5,8 +5,10 @@
 FavoritesProxyModel::FavoritesProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
 
-    connect(this, &FavoritesProxyModel::showJitsiChanged, this,
-            [this]() { beginFilterChange(); endFilterChange(); });
+    connect(this, &FavoritesProxyModel::showJitsiChanged, this, [this]() {
+        beginFilterChange();
+        endFilterChange();
+    });
 }
 
 bool FavoritesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
