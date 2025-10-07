@@ -231,7 +231,7 @@ Item {
                         parent: resizeBottomLeft
                         anchors.fill: parent
                         cursorShape: Qt.SizeBDiagCursor
-                        drag.target: resizeBottomLeft
+                        drag.target: resizableRect
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -240,17 +240,73 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                // Deltas
-                                let dx = mouse.x - resizeIndicator.startX
-                                let dy = mouse.y - resizeIndicator.startY
-
-                                control.xRelative = Number(mouse.x / control.gridWidth)
-                                control.yRelative = Number(mouse.y / control.gridWidth)
+                                control.xRelative = Number(resizableRect.x / control.gridWidth)
+                                control.yRelative = Number(resizableRect.y / control.gridHeight)
                                 control.setPlacement()
 
-                                control.wRelative = Number((resizableRect.width - dx) / control.gridWidth)
-                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
-                                control.setDimensions()
+                                // TODO: Deltas & resize
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: resizeTopLeft
+                    width: resizeIndicator.indicatorSize
+                    height: resizeIndicator.indicatorSize
+                    color: "transparent"
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+
+                    MouseArea {
+                        parent: resizeTopLeft
+                        anchors.fill: parent
+                        cursorShape: Qt.SizeFDiagCursor
+                        drag.target: resizableRect
+
+                        onPressed: function(mouse) {
+                            resizeIndicator.startX = mouse.x
+                            resizeIndicator.startY = mouse.y
+                        }
+
+                        onPositionChanged: function(mouse) {
+                            if (mouse.buttons === Qt.LeftButton) {
+                                control.xRelative = Number(resizableRect.x / control.gridWidth)
+                                control.yRelative = Number(resizableRect.y / control.gridHeight)
+                                control.setPlacement()
+
+                                // TODO: Deltas & resize
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: resizeTopRight
+                    width: resizeIndicator.indicatorSize
+                    height: resizeIndicator.indicatorSize
+                    color: "transparent"
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+
+                    MouseArea {
+                        parent: resizeTopRight
+                        anchors.fill: parent
+                        cursorShape: Qt.SizeBDiagCursor
+                        drag.target: resizableRect
+
+                        onPressed: function(mouse) {
+                            resizeIndicator.startX = mouse.x
+                            resizeIndicator.startY = mouse.y
+                        }
+
+                        onPositionChanged: function(mouse) {
+                            if (mouse.buttons === Qt.LeftButton) {
+                                control.xRelative = Number(resizableRect.x / control.gridWidth)
+                                control.yRelative = Number(resizableRect.y / control.gridHeight)
+                                control.setPlacement()
+
+                                // TODO: Deltas & resize
                             }
                         }
                     }
