@@ -15,16 +15,22 @@ option(BUILD_DEPENDENCIES "Build dependencies" OFF)
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)
 
-# Adjust flatpak base if desired
-if(NOT FLATPAK_APP_ID)
-    set(FLATPAK_APP_ID "de.gonicus.gonnect")
-endif()
-string(REPLACE "." "/" FLATPAK_APP_PATH ${FLATPAK_APP_ID})
-add_definitions(-DFLATPAK_APP_ID="${FLATPAK_APP_ID}")
-add_definitions(-DFLATPAK_APP_PATH="/${FLATPAK_APP_PATH}")
+set(APP_ID "de.gonicus.gonnect")
+add_definitions(-DAPP_ID="${APP_ID}")
 
-if(NOT LINUX)
-    message(FATAL_ERROR "GOnnect only works for Linux/Flatpack targets")
+if(LINUX)
+    if(NOT FLATPAK_APP_ID)
+        set(FLATPAK_APP_ID "de.gonicus.gonnect")
+    endif()
+    string(REPLACE "." "/" FLATPAK_APP_PATH ${FLATPAK_APP_ID})
+    add_definitions(-DFLATPAK_APP_ID="${FLATPAK_APP_ID}")
+    add_definitions(-DFLATPAK_APP_PATH="/${FLATPAK_APP_PATH}")
+
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-gnu-zero-variadic-macro-arguments)
+    set(PLATFORM_QT_MODULES DBus)
+endif()
+if(WIN32)
+    add_definitions(-DNOMINMAX)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -34,9 +40,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     endif()
 endif()
 
-add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-gnu-zero-variadic-macro-arguments)
-
-find_package(Qt6 REQUIRED COMPONENTS Gui DBus Qml Quick QuickControls2 LinguistTools)
+find_package(Qt6 REQUIRED COMPONENTS Gui ${PLATFORM_QT_MODULES} Qml Quick QuickControls2 LinguistTools)
 qt_standard_project_setup(REQUIRES 6.9
     I18N_SOURCE_LANGUAGE en
     I18N_TRANSLATED_LANGUAGES de es it
@@ -45,8 +49,8 @@ qt_standard_project_setup(REQUIRES 6.9
 # Adjust target path for qm files
 file(GLOB tsfiles "i18n/*.ts")
 foreach(tsfile ${tsfiles})
-  set_source_files_properties(${tsfile}
-      PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}")
+    set_source_files_properties(${tsfile}
+        PROPERTIES OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}")
 endforeach()
 
 # Versioning setup
@@ -68,10 +72,12 @@ if(${BUILD_TESTING})
     add_definitions(-DAPP_TESTS)
 endif()
 
-install(FILES resources/flatpak/de.gonicus.gonnect.svg DESTINATION share/icons/hicolor/scalable/apps)
-install(FILES resources/flatpak/de.gonicus.gonnect.desktop DESTINATION share/applications)
-install(FILES resources/flatpak/de.gonicus.gonnect.krunner.desktop DESTINATION share/krunner/dbusplugins)
-install(FILES resources/flatpak/de.gonicus.gonnect.metainfo.xml DESTINATION share/metainfo)
-install(FILES resources/flatpak/de.gonicus.gonnect.releases.xml DESTINATION share/metainfo/releases)
-install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
-install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
+if(LINUX)
+    install(FILES resources/flatpak/de.gonicus.gonnect.svg DESTINATION share/icons/hicolor/scalable/apps)
+    install(FILES resources/flatpak/de.gonicus.gonnect.desktop DESTINATION share/applications)
+    install(FILES resources/flatpak/de.gonicus.gonnect.krunner.desktop DESTINATION share/krunner/dbusplugins)
+    install(FILES resources/flatpak/de.gonicus.gonnect.metainfo.xml DESTINATION share/metainfo)
+    install(FILES resources/flatpak/de.gonicus.gonnect.releases.xml DESTINATION share/metainfo/releases)
+    install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
+    install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
+endif()

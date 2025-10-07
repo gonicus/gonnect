@@ -4,6 +4,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QMutex>
 
 class AddressBook : public QObject
 {
@@ -56,6 +57,8 @@ private:
     QHash<QString, Contact *> m_contacts;
     QHash<QString, Contact *> m_contactsBySourceId;
     QList<Contact::ContactSourceInfo> m_contactSourceInfos;
+
+    QMutex m_feederMutex;
 
 private Q_SLOTS:
     void updateSourceInfos(const Contact *contact);

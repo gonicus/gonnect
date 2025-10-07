@@ -30,13 +30,17 @@ Here's a short feature list:
  * Conference calls with three parties
  * Busy state for supported sources
  * Configurable busy on active call
- * address sources
+ * Address sources
    * LDAP
    * CardDAV
    * CSV
+   * GNOME Contacts / Evolution Data Service
  * Configurable identities for outgoing calls
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
  * **Jitsi Meet Integration: Upgrade call to Videoconference**
+ * Calendar sources for upcoming conferences
+   * CalDAV
+   * GNOME Calendar / Evolution Data Service
  * **Support for various hardware headsets (i.e. Yealink, Jabra)**
  * Support for various busylights
  * Custom audio device profiles or managed by your system

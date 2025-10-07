@@ -22,13 +22,13 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
 #ifdef Q_OS_LINUX
     m_activationAdapter = new DBusActivationAdapter(this);
     m_apiEndpoint = new GOnnectDBusAPI(this);
-#endif
 
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
         m_isFirstInstance =
                 con.registerObject(FLATPAK_APP_PATH, this) && con.registerService(FLATPAK_APP_ID);
     }
+#endif
 
     m_inhibitHelper = &InhibitHelper::instance();
     connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
@@ -109,11 +109,13 @@ void StateManager::restart()
 
 StateManager::~StateManager()
 {
+#ifdef Q_OS_LINUX
     auto con = QDBusConnection::sessionBus();
     if (con.isConnected()) {
         con.unregisterObject(FLATPAK_APP_PATH, QDBusConnection::UnregisterTree);
         con.unregisterService(FLATPAK_APP_ID);
     }
+#endif
 
     if (SIPCallManager::instance().activeCalls() == 0) {
         m_inhibitHelper->release();

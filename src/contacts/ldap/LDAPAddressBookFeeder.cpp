@@ -1,3 +1,7 @@
+#ifdef WIN32
+#  include <winsock2.h>
+#endif
+
 #include <ldap.h>
 #include <QDebug>
 #include <QLoggingCategory>

@@ -11,7 +11,10 @@ Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
 
 using namespace std::chrono_literals;
 
-CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent) : QObject(parent) { }
+CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederConfig &config)
+    : QObject(parent), m_config(config)
+{
+}
 
 CalDAVEventFeeder::~CalDAVEventFeeder()
 {
@@ -20,25 +23,14 @@ CalDAVEventFeeder::~CalDAVEventFeeder()
     }
 }
 
-void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &source,
-                             const QString &host, const QString &path, const QString &user,
-                             int port, bool useSSL, int interval, const QDateTime &timeRangeStart,
-                             const QDateTime &timeRangeEnd)
+QUrl CalDAVEventFeeder::networkCheckURL() const
 {
-    m_settingsGroupId = settingsGroupId;
-    m_host = host;
-    m_path = path;
-    m_user = user;
-    m_port = port;
-    m_useSSL = useSSL;
-    m_interval = interval;
+    return (QUrl(QString("%1://%2%3")
+                         .arg(m_config.useSSL ? "https" : "http", m_config.host, m_config.path)));
+}
 
-    m_source = source;
-    m_timeRangeStart = timeRangeStart;
-    m_timeRangeEnd = timeRangeEnd;
-
-    m_url = QUrl(QString("%1://%2%3").arg(useSSL ? "https" : "http", host, path));
-
+void CalDAVEventFeeder::init()
+{
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CalDAVEventFeeder::onParserFinished);
     connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this, &CalDAVEventFeeder::onError);
@@ -52,9 +44,11 @@ void CalDAVEventFeeder::init(const QString &settingsGroupId, const QString &sour
         Kopano saves every VEVENT wrapped in a VCALENDAR entry in separate '.ics' files in
         '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
     */
-    m_calendarRefreshTimer.setInterval(m_interval);
+    m_calendarRefreshTimer.setInterval(m_config.interval);
     connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
     m_calendarRefreshTimer.start();
+
+    process();
 }
 
 void CalDAVEventFeeder::onError(QString error) const
@@ -81,7 +75,7 @@ void CalDAVEventFeeder::onParserFinished()
                     if (type.name() == "text/calendar" && !data.isEmpty()
                         && responseDataChanged(data)) {
                         DateEventManager &manager = DateEventManager::instance();
-                        manager.removeDateEventsBySource(m_source);
+                        manager.removeDateEventsBySource(m_config.source);
 
                         processResponse(data);
                     }
@@ -93,9 +87,10 @@ void CalDAVEventFeeder::onParserFinished()
 void CalDAVEventFeeder::process()
 {
     auto manager = q_check_ptr(qobject_cast<DateEventFeederManager *>(parent()));
-    manager->acquireSecret(m_settingsGroupId, [this](const QString &password) {
-        m_webdav.setConnectionSettings(m_useSSL ? QWebdav::HTTPS : QWebdav::HTTP, m_host, m_path,
-                                       m_user, password, m_port);
+    manager->acquireSecret(m_config.settingsGroupId, [this](const QString &password) {
+        m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
+                                       m_config.host, m_config.path, m_config.user, password,
+                                       m_config.port);
 
         m_webdavParser.listDirectory(&m_webdav, "/");
     });
@@ -130,7 +125,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
 
             // Skip non-recurrent events that are outside of our date range
             if (!isRelevantStatus || location.isEmpty()
-                || ((start < m_timeRangeStart || start > m_timeRangeEnd) && !isRecurrent)) {
+                || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd)
+                    && !isRecurrent)) {
                 continue;
             }
 
@@ -170,13 +166,13 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                          !icaltime_is_null_time(next);
                          next = icalrecur_iterator_next(recurrenceIter)) {
                         QDateTime recur = createDateTimeFromTimeType(next);
-                        if (recur > m_timeRangeEnd) {
+                        if (recur > m_config.timeRangeEnd) {
                             break;
                         }
 
-                        if (!exdates.contains(recur) && recur >= m_timeRangeStart) {
+                        if (!exdates.contains(recur) && recur >= m_config.timeRangeStart) {
                             QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
-                            manager.addDateEvent(new DateEvent(nid, m_source, recur,
+                            manager.addDateEvent(new DateEvent(nid, m_config.source, recur,
                                                                recur.addMSecs(duration), summary,
                                                                location, true));
                         }
@@ -186,11 +182,12 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 }
             } else {
                 // Non-recurrent event or update of a recurrent event instance
-                if (isUpdatedRecurrence) {
-                    manager.modifyDateEvent(id, m_source, start, end, summary, location, true);
+                if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
+                    manager.modifyDateEvent(id, m_config.source, start, end, summary, location,
+                                            true);
                 } else {
-                    manager.addDateEvent(
-                            new DateEvent(id, m_source, start, end, summary, location, true));
+                    manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
+                                                       location, true));
                 }
             }
         }

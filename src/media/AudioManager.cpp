@@ -18,6 +18,7 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 {
     m_settings = std::make_unique<AppSettings>();
 
+#ifdef Q_OS_LINUX
     // PulseAudio handling
     m_paMainloop = pa_mainloop_new();
     m_paContext = pa_context_new(pa_mainloop_get_api(m_paMainloop), "GOnnect");
@@ -29,6 +30,7 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
     connect(&m_paMainloopTimer, &QTimer::timeout, this, &AudioManager::paMainloopIterate);
     m_paMainloopTimer.start(100ms);
+#endif
 
     // Use Qt mechanism to get notified for updates and re-initialize on changes
     m_updateDebouncer.setSingleShot(true);
@@ -46,6 +48,7 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
     connect(this, &AudioManager::playbackDeviceIdChanged, this,
             &AudioManager::playbackAudioVolumeChanged);
 
+#ifdef Q_OS_LINUX
     connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
         if (m_captureAudioPort) {
             paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
@@ -53,6 +56,7 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
             qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
         }
     });
+#endif
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
             [this](bool value, const QString) { setProperty("isAudioCaptureMuted", value); });
@@ -60,6 +64,7 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
 AudioManager::~AudioManager()
 {
+#ifdef Q_OS_LINUX
     if (m_paContext) {
         pa_context_disconnect(m_paContext);
         pa_context_unref(m_paContext);
@@ -68,6 +73,7 @@ AudioManager::~AudioManager()
     if (m_paMainloop) {
         pa_mainloop_free(m_paMainloop);
     }
+#endif
 }
 
 void AudioManager::initialize()
@@ -79,6 +85,7 @@ void AudioManager::initialize()
     setPlaybackDeviceId(m_playbackHash);
 }
 
+#ifdef Q_OS_LINUX
 void AudioManager::paMainloopIterate()
 {
     if (m_paMainloop) {
@@ -136,6 +143,7 @@ void AudioManager::paInputMuteStateCallback(pa_context *, const pa_source_info *
         }
     }
 }
+#endif
 
 void AudioManager::refreshAudioDevices()
 {
@@ -255,8 +263,10 @@ void AudioManager::setCaptureDeviceId(const QString &id)
                 &AudioManager::captureAudioVolumeChanged);
     }
 
+#ifdef Q_OS_LINUX
     // Get the initial mute state of the input device
     paGetInputMuteState(m_paContext);
+#endif
 
     Q_EMIT captureDeviceIdChanged();
 }

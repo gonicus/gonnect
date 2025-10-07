@@ -1,7 +1,6 @@
-#include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <QtCrypto>
+#include <QLoggingCategory>
 #include "KeychainSettings.h"
 #include "Credentials.h"
 
@@ -43,13 +42,13 @@ void Credentials::initialize()
     }
 #else
     m_initialized = true;
-    emit initializedChanged();
+    Q_EMIT initializedChanged();
 #endif
 }
 
 void Credentials::set(const QString &key, const QString &secret, CredentialsResponse callback)
 {
-    auto writeJob = new QKeychain::WritePasswordJob(FLATPAK_APP_ID);
+    auto writeJob = new QKeychain::WritePasswordJob(APP_ID);
     writeJob->setAutoDelete(false);
     writeJob->setKey(key);
     m_writeCredentialJobs.push_back(writeJob);
@@ -72,7 +71,7 @@ void Credentials::set(const QString &key, const QString &secret, CredentialsResp
 
 void Credentials::get(const QString &key, CredentialsResponse callback)
 {
-    auto readJob = new QKeychain::ReadPasswordJob(FLATPAK_APP_ID);
+    auto readJob = new QKeychain::ReadPasswordJob(APP_ID);
     readJob->setAutoDelete(false);
     readJob->setKey(key);
     m_readCredentialJobs.push_back(readJob);
