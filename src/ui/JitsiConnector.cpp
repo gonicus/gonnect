@@ -116,6 +116,15 @@ void JitsiConnector::apiLoadingFinishedInternal()
     Q_EMIT isInitializedChanged();
 }
 
+void JitsiConnector::setVideoMutedInternal(bool value)
+{
+    if (m_isVideoMuted != value) {
+        m_isVideoMuted = value;
+        Q_EMIT isVideoMutedChanged();
+        updateVideoCallState();
+    }
+}
+
 void JitsiConnector::addError(QString type, QString name, QString message, bool isFatal,
                               QVariantMap details)
 {
@@ -380,7 +389,7 @@ api.addListener("videoAvailabilityChanged", data => {
 })
 
 api.addListener("videoMuteStatusChanged", data => {
-    jitsiConn.setVideoMuted(data.muted)
+    jitsiConn.setVideoMutedInternal(data.muted)
 })
 
 api.addListener("screenSharingStatusChanged", data => {
