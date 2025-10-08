@@ -49,8 +49,8 @@ Item {
     function setDimensions() {
         // Width
         //TODO: Enforce absolute min sizes again?
-        if (control.wRelative < wRelativeMin) {
-            control.wRelative = wRelativeMin
+        if (control.wRelative < control.wRelativeMin) {
+            control.wRelative = control.wRelativeMin
         }
 
         let absWidth = Math.round((control.gridWidth * control.wRelative) / control.density) * control.density
@@ -64,8 +64,8 @@ Item {
         control.root.width = absWidth
 
         // Height
-        if (control.hRelative < hRelativeMin) {
-            control.hRelative = hRelativeMin
+        if (control.hRelative < control.hRelativeMin) {
+            control.hRelative = control.hRelativeMin
         }
 
         let absHeight = Math.round((control.gridHeight * control.hRelative) / control.density) * control.density
@@ -251,8 +251,10 @@ Item {
                                 control.setDimensions()
 
                                 // Reposition
-                                control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
-                                //control.yRelative = Number((resizableRect.y + dy) / control.gridHeight)
+                                if (control.wRelative > control.wRelativeMin) {
+                                    control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
+                                }
+
                                 control.setPlacement()
                             }
                         }
@@ -289,8 +291,14 @@ Item {
                                 control.setDimensions()
 
                                 // Reposition
-                                control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
-                                control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                                if (control.wRelative > control.wRelativeMin) {
+                                    control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
+                                }
+
+                                if (control.hRelative > control.hRelativeMin) {
+                                    control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                                }
+
                                 control.setPlacement()
                             }
                         }
@@ -327,7 +335,10 @@ Item {
                                 control.setDimensions()
 
                                 // Reposition
-                                control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                                if (control.hRelative > control.hRelativeMin) {
+                                    control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                                }
+
                                 control.setPlacement()
                             }
                         }
