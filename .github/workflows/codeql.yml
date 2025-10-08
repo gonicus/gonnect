@@ -26,7 +26,6 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  QT_VERSION: '6.10.0'
   EXT_BASE: ${{github.workspace}}
 
 jobs:
@@ -75,8 +74,6 @@ jobs:
 
     - name: Prepare
       uses: ./.github/actions/prepare
-      with:
-        qt-version: ${{ env.QT_VERSION }}
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
