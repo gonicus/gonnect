@@ -110,6 +110,8 @@ Item {
             z: 1
             anchors.fill: parent
 
+            // TODO: Taps still register on the items below this layer
+
             MouseArea {
                 id: hoverEdit
                 hoverEnabled: true
@@ -207,7 +209,7 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                // Deltas
+                                // Resize
                                 let dx = mouse.x - resizeIndicator.startX
                                 let dy = mouse.y - resizeIndicator.startY
 
@@ -231,7 +233,7 @@ Item {
                         parent: resizeBottomLeft
                         anchors.fill: parent
                         cursorShape: Qt.SizeBDiagCursor
-                        drag.target: resizableRect
+                        drag.target: resizeBottomLeft
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -240,11 +242,18 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                control.xRelative = Number(resizableRect.x / control.gridWidth)
-                                control.yRelative = Number(resizableRect.y / control.gridHeight)
-                                control.setPlacement()
+                                // Resize
+                                let dx = resizeIndicator.startX - mouse.x
+                                let dy = mouse.y - resizeIndicator.startY
 
-                                // TODO: Deltas & resize
+                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
+                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
+                                control.setDimensions()
+
+                                // Reposition
+                                control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
+                                //control.yRelative = Number((resizableRect.y + dy) / control.gridHeight)
+                                control.setPlacement()
                             }
                         }
                     }
@@ -262,7 +271,7 @@ Item {
                         parent: resizeTopLeft
                         anchors.fill: parent
                         cursorShape: Qt.SizeFDiagCursor
-                        drag.target: resizableRect
+                        drag.target: resizeTopLeft
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -271,11 +280,18 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                control.xRelative = Number(resizableRect.x / control.gridWidth)
-                                control.yRelative = Number(resizableRect.y / control.gridHeight)
-                                control.setPlacement()
+                                // Resize
+                                let dx = resizeIndicator.startX - mouse.x
+                                let dy = resizeIndicator.startY - mouse.y
 
-                                // TODO: Deltas & resize
+                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
+                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
+                                control.setDimensions()
+
+                                // Reposition
+                                control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
+                                control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                                control.setPlacement()
                             }
                         }
                     }
@@ -293,7 +309,7 @@ Item {
                         parent: resizeTopRight
                         anchors.fill: parent
                         cursorShape: Qt.SizeBDiagCursor
-                        drag.target: resizableRect
+                        drag.target: resizeTopRight
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -302,11 +318,17 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                control.xRelative = Number(resizableRect.x / control.gridWidth)
-                                control.yRelative = Number(resizableRect.y / control.gridHeight)
-                                control.setPlacement()
+                                // Resize
+                                let dx = mouse.x - resizeIndicator.startX
+                                let dy = resizeIndicator.startY - mouse.y
 
-                                // TODO: Deltas & resize
+                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
+                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
+                                control.setDimensions()
+
+                                // Reposition
+                                control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                                control.setPlacement()
                             }
                         }
                     }
