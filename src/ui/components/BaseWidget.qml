@@ -47,36 +47,21 @@ Item {
     }
 
     function setDimensions() {
-        // Width
         //TODO: Enforce absolute min sizes again?
+
+        // Width
         if (control.wRelative < control.wRelativeMin) {
             control.wRelative = control.wRelativeMin
         }
 
-        let absWidth = Math.round((control.gridWidth * control.wRelative) / control.density) * control.density
-
-        let wBound = control.root.x + absWidth
-        if (wBound > control.gridWidth) {
-            let wDiff = wBound - control.gridWidth
-            absWidth -= wDiff
-        }
-
-        control.root.width = absWidth
+        control.root.width = Math.round((control.gridWidth * control.wRelative) / control.density) * control.density
 
         // Height
         if (control.hRelative < control.hRelativeMin) {
             control.hRelative = control.hRelativeMin
         }
 
-        let absHeight = Math.round((control.gridHeight * control.hRelative) / control.density) * control.density
-
-        let hBound = control.root.y + absHeight
-        if (hBound > control.gridHeight) {
-            let hDiff = hBound - control.gridHeight
-            absHeight -= hDiff
-        }
-
-        control.root.height = absHeight
+        control.root.height = Math.round((control.gridHeight * control.hRelative) / control.density) * control.density
     }
 
     Connections {
@@ -111,11 +96,14 @@ Item {
             anchors.fill: parent
 
             // TODO: Taps still register on the items below this layer
-
             MouseArea {
                 id: hoverEdit
                 hoverEnabled: true
                 anchors.fill: parent
+
+                onClicked: function(mouse) {
+                    mouse.accepted = true
+                }
             }
 
             // Drag
@@ -188,6 +176,9 @@ Item {
                 property real startX
                 property real startY
 
+                // TODO: Fix weird reposition effect on min size resize
+                // and max size / bounds swap-over
+
                 Rectangle {
                     id: resizeBottomRight
                     width: resizeIndicator.indicatorSize
@@ -209,9 +200,17 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                // Resize
+                                // Resize within bounds
+                                let rb = control.gridWidth - (resizableRect.x + resizableRect.width)
+                                let bb = control.gridHeight - (resizableRect.y + resizableRect.height)
                                 let dx = mouse.x - resizeIndicator.startX
+                                if (dx > rb) {
+                                    dx = rb
+                                }
                                 let dy = mouse.y - resizeIndicator.startY
+                                if (dy > bb) {
+                                    dy = bb
+                                }
 
                                 control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
                                 control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
@@ -242,9 +241,17 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                // Resize
+                                // Resize within bounds
+                                let lb = resizableRect.x - parent.x
+                                let bb = control.gridHeight - (resizableRect.y + resizableRect.height)
                                 let dx = resizeIndicator.startX - mouse.x
+                                if (dx > lb) {
+                                    dx = lb
+                                }
                                 let dy = mouse.y - resizeIndicator.startY
+                                if (dy > bb) {
+                                    dy = bb
+                                }
 
                                 control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
                                 control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
@@ -282,9 +289,17 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                // Resize
+                                // Resize within bounds
+                                let lb = resizableRect.x - parent.x
+                                let tb = resizableRect.y - parent.y
                                 let dx = resizeIndicator.startX - mouse.x
+                                if (dx > lb) {
+                                    dx = lb
+                                }
                                 let dy = resizeIndicator.startY - mouse.y
+                                if (dy > tb) {
+                                    dy = tb
+                                }
 
                                 control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
                                 control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
@@ -326,9 +341,17 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             if (mouse.buttons === Qt.LeftButton) {
-                                // Resize
+                                // Resize within bounds
+                                let rb = control.gridWidth - (resizableRect.x + resizableRect.width)
+                                let tb = resizableRect.y - parent.y
                                 let dx = mouse.x - resizeIndicator.startX
+                                if (dx > rb) {
+                                    dx = rb
+                                }
                                 let dy = resizeIndicator.startY - mouse.y
+                                if (dy > tb) {
+                                    dy = tb
+                                }
 
                                 control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
                                 control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
