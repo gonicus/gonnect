@@ -3,6 +3,13 @@
 #include <QObject>
 #include <QDateTime>
 
+struct ChatMessageReaction
+{
+    QString emoji;
+    qsizetype count = 0;
+    QString ownReactEventId;
+};
+
 class ChatMessage
 {
     Q_GADGET
@@ -31,6 +38,10 @@ public:
     Flags flags() const { return m_flags; }
     void setFlags(Flags flags) { m_flags = flags; }
 
+    void setReactionCount(const QString &reaction, qsizetype count, const QString &ownReactEventId);
+    const QList<ChatMessageReaction> &sortedReactions() const { return m_sortedReactions; }
+    const ChatMessageReaction *reactionByEmoji(const QString &emoji) const;
+
 private:
     QString m_eventId;
     QString m_fromId;
@@ -38,6 +49,7 @@ private:
     QString m_message;
     QDateTime m_timestamp;
     Flags m_flags;
+    QList<ChatMessageReaction> m_sortedReactions;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ChatMessage::Flags)
