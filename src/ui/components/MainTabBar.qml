@@ -147,7 +147,7 @@ Item {
         Item {
             id: delg
             height: 54
-            enabled: delg.isEnabled
+            enabled: true
             anchors {
                 left: parent?.left
                 right: parent?.right
@@ -166,7 +166,8 @@ Item {
 
             Rectangle {
                 id: hoverBackground
-                visible: delg.isSelected || (delg.isEnabled && delgHoverHandler.hovered)
+                visible: delg.isSelected
+                         || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
                 radius: 4
                 color: Theme.backgroundSecondaryColor
                 anchors {
@@ -178,7 +179,7 @@ Item {
                 // Options
                 Rectangle {
                     id: optionIndicator
-                    visible: SM.uiEditMode && delg.pageType === GonnectWindow.PageType.Base
+                    visible: SM.uiEditMode
                     width: 10
                     height: 10
                     color: "transparent"
@@ -263,9 +264,11 @@ Item {
 
             TapHandler {
                 onTapped: () => {
-                    control.selectedPageId = delg.pageId
-                    control.selectedPageType = delg.pageType
-                    control.attachedData = delg.attachedData
+                    if (delg.isEnabled) {
+                        control.selectedPageId = delg.pageId
+                        control.selectedPageType = delg.pageType
+                        control.attachedData = delg.attachedData
+                    }
                 }
             }
         }
@@ -375,8 +378,6 @@ Item {
 
         property var selectedTabButton: null
 
-        // TODO: baseModel items behave differently
-
         Action {
             text: qsTr("Move up")
 
@@ -437,6 +438,7 @@ Item {
 
         Action {
             text: qsTr("Delete")
+            enabled: optionMenu.selectedTabButton.pageType === GonnectWindow.PageType.Base
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
