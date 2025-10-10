@@ -90,49 +90,47 @@ Item {
     }
 
     function saveTabList() {
+        let tabNames = []
         let tabOrder = []
-        let tabButtons = topMenuCol.children
 
-        for (let i = 0; i < tabButtons.length; i++) {
-            let tabButton = tabButtons[i]
+        tabOrder.push(...topMenuCol.children)
+        tabOrder.forEach((button) => {
+            if (button.pageId) {
+                tabNames.push(button.pageId)
+            }
+        })
 
-            tabOrder.push(tabButton.pageId)
-        }
-
-        if (tabOrder.length > 0) {
-            UISettings.setUISetting("generic", "tabBarOrder", tabOrder.join(","))
+        if (tabNames.length > 0) {
+            UISettings.setUISetting("generic", "tabBarOrder", tabNames.join(","))
         }
     }
 
     function sortTabList() {
-        let tabList = UISettings.setUISetting("generic", "tabBarOrder", "")
-        let tabOrder = tabList.split(",")
-        if (!tabOrder.length > 0) {
+        let tabList = UISettings.getUISetting("generic", "tabBarOrder", "").split(",")
+        if (!tabList.length > 0) {
             return
         }
 
-        let tabButtons = topMenuCol.children
+        let tabOrder = []
+        let newOrder = []
 
-        for (let i = 0; i < tabButtons.length; i++) {
-            let tabButton = tabButtons[i]
+        tabOrder.push(...topMenuCol.children)
 
-            tabButton.parent = null
-            tabButton.visible = false
-        }
-
-        for (let j = 0; j < tabOrder.length; j++) {
-            let tabId = tabOrder[j]
-
-            for (let k = 0; k < tabButtons.length; k++) {
-                let tabButton = tabButtons[k]
-
-                if (tabButton.pageId === tabId) {
-                    tabButton.parent = topMenuCol
-                    tabButton.visible = true
-                    break
+        tabList.forEach((tabId) => {
+            tabOrder.forEach((button) => {
+                if (button.pageId && button.pageId === tabId) {
+                    newOrder.push(button)
                 }
-            }
-        }
+            })
+        })
+
+        newOrder.forEach((button) => {
+            button.parent = null
+            button.visible = false
+
+            button.parent = topMenuCol
+            button.visible = true
+        })
     }
 
     Rectangle {

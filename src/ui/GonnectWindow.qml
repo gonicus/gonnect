@@ -178,6 +178,8 @@ BaseWindow {
 
     function loadPages() {
         pageReader.load()
+
+        mainTabBar.sortTabList()
     }
 
     readonly property Connections dynamicUiConnections: Connections {
@@ -198,6 +200,9 @@ BaseWindow {
 
                     page.writer.save()
                 }
+
+                // Tabs
+                mainTabBar.saveTabList()
 
                 SM.setSaveDynamicUi(false)
             }
