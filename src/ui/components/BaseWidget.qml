@@ -177,7 +177,6 @@ Item {
                 property real startY
 
                 // TODO: Fix weird reposition effect on min size resize
-                // and max size / bounds swap-over
 
                 Rectangle {
                     id: resizeBottomRight

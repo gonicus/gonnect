@@ -206,7 +206,7 @@ Item {
                         onClicked: {
                             optionMenu.x = delg.x + 15
                             optionMenu.y = delg.y + 15
-                            optionMenu.tabButton = delg
+                            optionMenu.selectedTabButton = delg
                             optionMenu.open()
                         }
                     }
@@ -373,7 +373,7 @@ Item {
         id: optionMenu
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        property var tabButton: null
+        property var selectedTabButton: null
 
         // TODO: baseModel items behave differently
 
@@ -381,35 +381,26 @@ Item {
             text: qsTr("Move up")
 
             onTriggered: {
-                if (optionMenu.tabButton !== null) {
+                if (optionMenu.selectedTabButton !== null) {
                     let index
                     let newOrder = []
 
-                    let tabButtons = topMenuCol.children
-                    for (let i = 0; i < tabButtons.length; i++) {
-                        let tabButton = tabButtons[i]
-                        if (tabButton.pageId === optionMenu.tabButton.pageId) {
-                            index = i
-                        }
-
-                        newOrder.push(tabButton)
-                    }
+                    newOrder.push(...topMenuCol.children)
+                    newOrder = newOrder.filter((button) => button.pageId)
+                    index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
 
                     if (index > 0) {
                         let old = newOrder[index-1]
-
                         newOrder[index-1] = newOrder[index]
                         newOrder[index] = old
 
-                        for (let j = 0; j < newOrder.length; j++) {
-                            let tabButton = newOrder[j]
+                        newOrder.forEach((button) => {
+                            button.parent = null
+                            button.visible = false
 
-                            tabButton.parent = null
-                            tabButton.visible = false
-
-                            tabButton.parent = topMenuCol
-                            tabButton.visible = true
-                        }
+                            button.parent = topMenuCol
+                            button.visible = true
+                        })
                     }
                 }
             }
@@ -419,35 +410,26 @@ Item {
             text: qsTr("Move down")
 
             onTriggered: {
-                if (optionMenu.tabButton !== null) {
+                if (optionMenu.selectedTabButton !== null) {
                     let index
                     let newOrder = []
 
-                    let tabButtons = topMenuCol.children
-                    for (let i = 0; i < tabButtons.length; i++) {
-                        let tabButton = tabButtons[i]
-                        if (tabButton.pageId === optionMenu.tabButton.pageId) {
-                            index = i
-                        }
+                    newOrder.push(...topMenuCol.children)
+                    newOrder = newOrder.filter((button) => button.pageId)
+                    index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
 
-                        newOrder.push(tabButton)
-                    }
-
-                    if (index < tabButtons.length-1) {
+                    if (index < newOrder.length-1) {
                         let old = newOrder[index+1]
-
                         newOrder[index+1] = newOrder[index]
                         newOrder[index] = old
 
-                        for (let j = 0; j < newOrder.length; j++) {
-                            let tabButton = newOrder[j]
+                        newOrder.forEach((button) => {
+                            button.parent = null
+                            button.visible = false
 
-                            tabButton.parent = null
-                            tabButton.visible = false
-
-                            tabButton.parent = topMenuCol
-                            tabButton.visible = true
-                        }
+                            button.parent = topMenuCol
+                            button.visible = true
+                        })
                     }
                 }
             }
@@ -457,9 +439,9 @@ Item {
             text: qsTr("Delete")
 
             onTriggered: {
-                if (optionMenu.tabButton !== null) {
-                    mainWindow.removePage(optionMenu.tabButton.pageId)
-                    optionMenu.tabButton.destroy()
+                if (optionMenu.selectedTabButton !== null) {
+                    mainWindow.removePage(optionMenu.selectedTabButton.pageId)
+                    optionMenu.selectedTabButton.destroy()
 
                     control.dynamicPageCount -= 1
 
