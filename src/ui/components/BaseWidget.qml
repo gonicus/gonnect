@@ -179,7 +179,7 @@ Item {
                 property real startX
                 property real startY
 
-                // TODO: Fix weird reposition effect on min size resize
+                // TODO: Fix resize stopping on reverse mouse (drag beyond limits of ither side)
 
                 Rectangle {
                     id: resizeBottomRight
@@ -194,6 +194,7 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.SizeFDiagCursor
                         drag.target: resizeBottomRight
+                        acceptedButtons: Qt.LeftButton
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -201,23 +202,21 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            if (mouse.buttons === Qt.LeftButton) {
-                                // Resize within bounds
-                                let rb = control.gridWidth - (resizableRect.x + resizableRect.width)
-                                let bb = control.gridHeight - (resizableRect.y + resizableRect.height)
-                                let dx = mouse.x - resizeIndicator.startX
-                                if (dx > rb) {
-                                    dx = rb
-                                }
-                                let dy = mouse.y - resizeIndicator.startY
-                                if (dy > bb) {
-                                    dy = bb
-                                }
-
-                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
-                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
-                                control.setDimensions()
+                            // Resize within bounds
+                            let rb = control.gridWidth - (resizableRect.x + resizableRect.width)
+                            let bb = control.gridHeight - (resizableRect.y + resizableRect.height)
+                            let dx = mouse.x - resizeIndicator.startX
+                            if (dx > rb) {
+                                dx = rb
                             }
+                            let dy = mouse.y - resizeIndicator.startY
+                            if (dy > bb) {
+                                dy = bb
+                            }
+
+                            control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
+                            control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
+                            control.setDimensions()
                         }
                     }
                 }
@@ -235,6 +234,7 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.SizeBDiagCursor
                         drag.target: resizeBottomLeft
+                        acceptedButtons: Qt.LeftButton
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -242,32 +242,30 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            if (mouse.buttons === Qt.LeftButton) {
-                                // Resize within bounds
-                                let lb = resizableRect.x - parent.x
-                                let bb = control.gridHeight - (resizableRect.y + resizableRect.height)
-                                let dx = resizeIndicator.startX - mouse.x
-                                if (dx > lb) {
-                                    dx = lb
-                                }
-                                let dy = mouse.y - resizeIndicator.startY
-                                if (dy > bb) {
-                                    dy = bb
-                                }
-
-                                let nwr = Number((resizableRect.width + dx) / control.gridWidth)
-                                if (nwr >= control.wRelativeMin) {
-                                    control.wRelative = nwr
-                                    control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
-                                }
-                                let nhr = Number((resizableRect.height + dy) / control.gridHeight)
-                                if (nhr >= control.hRelativeMin) {
-                                    control.hRelative = nhr
-                                }
-
-                                control.setDimensions()
-                                control.setPlacement()
+                            // Resize within bounds
+                            let lb = resizableRect.x - parent.x
+                            let bb = control.gridHeight - (resizableRect.y + resizableRect.height)
+                            let dx = resizeIndicator.startX - mouse.x
+                            if (dx > lb) {
+                                dx = lb
                             }
+                            let dy = mouse.y - resizeIndicator.startY
+                            if (dy > bb) {
+                                dy = bb
+                            }
+
+                            let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                            if (nwr >= control.wRelativeMin) {
+                                control.wRelative = nwr
+                                control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
+                            }
+                            let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                            if (nhr >= control.hRelativeMin) {
+                                control.hRelative = nhr
+                            }
+
+                            control.setDimensions()
+                            control.setPlacement()
                         }
                     }
                 }
@@ -285,6 +283,7 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.SizeFDiagCursor
                         drag.target: resizeTopLeft
+                        acceptedButtons: Qt.LeftButton
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -292,33 +291,31 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            if (mouse.buttons === Qt.LeftButton) {
-                                // Resize within bounds
-                                let lb = resizableRect.x - parent.x
-                                let tb = resizableRect.y - parent.y
-                                let dx = resizeIndicator.startX - mouse.x
-                                if (dx > lb) {
-                                    dx = lb
-                                }
-                                let dy = resizeIndicator.startY - mouse.y
-                                if (dy > tb) {
-                                    dy = tb
-                                }
-
-                                let nwr = Number((resizableRect.width + dx) / control.gridWidth)
-                                if (nwr >= control.wRelativeMin) {
-                                    control.wRelative = nwr
-                                    control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
-                                }
-                                let nhr = Number((resizableRect.height + dy) / control.gridHeight)
-                                if (nhr >= control.hRelativeMin) {
-                                    control.hRelative = nhr
-                                    control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
-                                }
-
-                                control.setDimensions()
-                                control.setPlacement()
+                            // Resize within bounds
+                            let lb = resizableRect.x - parent.x
+                            let tb = resizableRect.y - parent.y
+                            let dx = resizeIndicator.startX - mouse.x
+                            if (dx > lb) {
+                                dx = lb
                             }
+                            let dy = resizeIndicator.startY - mouse.y
+                            if (dy > tb) {
+                                dy = tb
+                            }
+
+                            let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                            if (nwr >= control.wRelativeMin) {
+                                control.wRelative = nwr
+                                control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
+                            }
+                            let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                            if (nhr >= control.hRelativeMin) {
+                                control.hRelative = nhr
+                                control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                            }
+
+                            control.setDimensions()
+                            control.setPlacement()
                         }
                     }
                 }
@@ -336,6 +333,7 @@ Item {
                         anchors.fill: parent
                         cursorShape: Qt.SizeBDiagCursor
                         drag.target: resizeTopRight
+                        acceptedButtons: Qt.LeftButton
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -343,32 +341,30 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            if (mouse.buttons === Qt.LeftButton) {
-                                // Resize within bounds
-                                let rb = control.gridWidth - (resizableRect.x + resizableRect.width)
-                                let tb = resizableRect.y - parent.y
-                                let dx = mouse.x - resizeIndicator.startX
-                                if (dx > rb) {
-                                    dx = rb
-                                }
-                                let dy = resizeIndicator.startY - mouse.y
-                                if (dy > tb) {
-                                    dy = tb
-                                }
-
-                                let nwr = Number((resizableRect.width + dx) / control.gridWidth)
-                                if (nwr >= control.wRelativeMin) {
-                                    control.wRelative = nwr
-                                }
-                                let nhr = Number((resizableRect.height + dy) / control.gridHeight)
-                                if (nhr >= control.hRelativeMin) {
-                                    control.hRelative = nhr
-                                    control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
-                                }
-
-                                control.setDimensions()
-                                control.setPlacement()
+                            // Resize within bounds
+                            let rb = control.gridWidth - (resizableRect.x + resizableRect.width)
+                            let tb = resizableRect.y - parent.y
+                            let dx = mouse.x - resizeIndicator.startX
+                            if (dx > rb) {
+                                dx = rb
                             }
+                            let dy = resizeIndicator.startY - mouse.y
+                            if (dy > tb) {
+                                dy = tb
+                            }
+
+                            let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                            if (nwr >= control.wRelativeMin) {
+                                control.wRelative = nwr
+                            }
+                            let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                            if (nhr >= control.hRelativeMin) {
+                                control.hRelative = nhr
+                                control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                            }
+
+                            control.setDimensions()
+                            control.setPlacement()
                         }
                     }
                 }
