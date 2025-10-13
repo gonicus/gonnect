@@ -114,7 +114,7 @@ Item {
                 enabled: true
                 exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
                 acceptedButtons: Qt.AllButtons
-                grabPermissions: PointerHandler.TakeOverForbidden
+                grabPermissions: PointerHandler.ApprovesTakeOverByAnything
                 gesturePolicy: TapHandler.WithinBounds
 
                 onTapped: {}
