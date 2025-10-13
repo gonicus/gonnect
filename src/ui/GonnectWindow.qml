@@ -363,12 +363,9 @@ BaseWindow {
                     icon.source: Icons.viewLeftNew
                     height: 44
                     text: qsTr("Add widget")
+                    enabled: mainTabBar.selectedPageType === GonnectWindow.PageType.Base
 
                     onPressed: {
-                        if (mainTabBar.selectedPageType !== GonnectWindow.PageType.Base) {
-                            return
-                        }
-
                         let page = pageStack.pages[mainTabBar.selectedPageId]
                         page.widgetCreationDialog()
                     }
