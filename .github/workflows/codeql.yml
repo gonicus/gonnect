@@ -26,7 +26,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  QT_VERSION: '6.9.1'
+  QT_VERSION: '6.9.3'
   EXT_BASE: ${{github.workspace}}
 
 jobs:
@@ -86,7 +86,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3
+      uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -110,6 +110,6 @@ jobs:
         cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel $(nproc --all)
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
+      uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4
       with:
         category: "/language:${{matrix.language}}"

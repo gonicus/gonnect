@@ -1,4 +1,8 @@
 #pragma once
+#ifdef WIN32
+#  include <winsock2.h>
+#endif
+
 #include <hidapi.h>
 #include <libusb.h>
 #include <QObject>
