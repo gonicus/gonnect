@@ -95,7 +95,7 @@ Item {
             z: 1
             anchors.fill: parent
 
-            // TODO: Taps still register on the items below this layer
+            // INFO: Inhibit all lower widget hover and tap actions
             MouseArea {
                 id: hoverEdit
                 enabled: true
@@ -107,6 +107,18 @@ Item {
                 propagateComposedEvents: false
 
                 onClicked: {}
+            }
+
+            TapHandler {
+                id: tabEdit
+                enabled: true
+                exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
+                acceptedButtons: Qt.AllButtons
+                grabPermissions: PointerHandler.TakeOverForbidden
+                gesturePolicy: TapHandler.WithinBounds
+
+                onTapped: {}
+                onDoubleTapped: {}
             }
 
             // Drag
