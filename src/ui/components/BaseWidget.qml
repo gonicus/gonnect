@@ -47,7 +47,7 @@ Item {
     }
 
     function setDimensions() {
-        //TODO: Enforce absolute min sizes again?
+        //TODO: Enforce absolute min sizes again? Avoids ever decreasing min size relative to window size
 
         // Width
         if (control.wRelative < control.wRelativeMin) {
@@ -98,12 +98,15 @@ Item {
             // TODO: Taps still register on the items below this layer
             MouseArea {
                 id: hoverEdit
+                enabled: true
                 hoverEnabled: true
                 anchors.fill: parent
 
-                onClicked: function(mouse) {
-                    mouse.accepted = true
-                }
+                preventStealing: true
+                acceptedButtons: Qt.AllButtons
+                propagateComposedEvents: false
+
+                onClicked: {}
             }
 
             // Drag
@@ -252,15 +255,17 @@ Item {
                                     dy = bb
                                 }
 
-                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
-                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
-                                control.setDimensions()
-
-                                // Reposition
-                                if (control.wRelative > control.wRelativeMin) {
+                                let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                                if (nwr >= control.wRelativeMin) {
+                                    control.wRelative = nwr
                                     control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
                                 }
+                                let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                                if (nhr >= control.hRelativeMin) {
+                                    control.hRelative = nhr
+                                }
 
+                                control.setDimensions()
                                 control.setPlacement()
                             }
                         }
@@ -300,19 +305,18 @@ Item {
                                     dy = tb
                                 }
 
-                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
-                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
-                                control.setDimensions()
-
-                                // Reposition
-                                if (control.wRelative > control.wRelativeMin) {
+                                let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                                if (nwr >= control.wRelativeMin) {
+                                    control.wRelative = nwr
                                     control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
                                 }
-
-                                if (control.hRelative > control.hRelativeMin) {
+                                let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                                if (nhr >= control.hRelativeMin) {
+                                    control.hRelative = nhr
                                     control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
                                 }
 
+                                control.setDimensions()
                                 control.setPlacement()
                             }
                         }
@@ -352,15 +356,17 @@ Item {
                                     dy = tb
                                 }
 
-                                control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
-                                control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
-                                control.setDimensions()
-
-                                // Reposition
-                                if (control.hRelative > control.hRelativeMin) {
+                                let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                                if (nwr >= control.wRelativeMin) {
+                                    control.wRelative = nwr
+                                }
+                                let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                                if (nhr >= control.hRelativeMin) {
+                                    control.hRelative = nhr
                                     control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
                                 }
 
+                                control.setDimensions()
                                 control.setPlacement()
                             }
                         }
