@@ -64,6 +64,10 @@ Item {
         control.root.height = Math.round((control.gridHeight * control.hRelative) / control.density) * control.density
     }
 
+    function makeOpaque(base : color, opacity : double) : color {
+        return Qt.rgba(base.r, base.g, base.b, opacity)
+    }
+
     Connections {
         target: resized
         function onGridResized() {
@@ -90,12 +94,11 @@ Item {
             id: widgetEdit
             radius: resizableRect.widgetRadius
             visible: control.editMode
-            color: Theme.backgroundColor
-            opacity: 0.6
+            color: control.makeOpaque(Theme.backgroundColor, 0.5)
             z: 1
             anchors.fill: parent
 
-            // INFO: Inhibit all lower widget hover and tap actions
+            // INFO: Inhibit all lower widget hover, scroll and tap actions
             MouseArea {
                 id: hoverEdit
                 enabled: true
@@ -107,10 +110,11 @@ Item {
                 propagateComposedEvents: false
 
                 onClicked: {}
+                onWheel: {}
             }
 
             TapHandler {
-                id: tabEdit
+                id: tapEdit
                 enabled: true
                 exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
                 acceptedButtons: Qt.AllButtons
