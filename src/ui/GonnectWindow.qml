@@ -18,6 +18,11 @@ BaseWindow {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
             mainBarColor: mainTabBar.backgroundColor
+
+            showSearch: !SM.uiEditMode
+
+            tabRoot: mainTabBar
+            pageRoot: pageStack
         }
     }
 
@@ -333,56 +338,9 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
             }
-        }
 
-        Item {
-            id: editControls
-            anchors {
-                top: parent.top
-                bottom: pageStack.top
-                left: mainTabBar.right
-                right: parent.right
-            }
-
-            Row {
-                visible: SM.uiEditMode
-                spacing: 15
-                anchors.centerIn: parent
-
-                Button {
-                    icon.source: Icons.listAdd
-                    height: 44
-                    text: qsTr("Add page")
-
-                    onPressed: {
-                        mainTabBar.pageCreationDialog()
-                    }
-                }
-
-                Button {
-                    icon.source: Icons.viewLeftNew
-                    height: 44
-                    text: qsTr("Add widget")
-                    enabled: mainTabBar.selectedPageType === GonnectWindow.PageType.Base
-
-                    onPressed: {
-                        let page = pageStack.pages[mainTabBar.selectedPageId]
-                        page.widgetCreationDialog()
-                    }
-                }
-
-                Button {
-                    highlighted: true
-                    Material.accent: Theme.greenColor
-                    icon.source: Icons.objectSelectSymbolic
-                    height: 44
-                    text: qsTr("Save")
-
-                    onClicked: {
-                        SM.setSaveDynamicUi(true)
-                    }
-                }
-            }
+            tabRoot: mainTabBar
+            pageRoot: pageStack
         }
 
         Item {

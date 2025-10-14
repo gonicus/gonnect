@@ -24,7 +24,7 @@ Item {
     property var mainWindow
 
     property int dynamicPageCount: 0
-    property int dynamicPageLimit: 4
+    property int dynamicPageLimit: 5
 
     property bool hasActiveCall
     property bool hasActiveConference
@@ -40,7 +40,7 @@ Item {
 
     function pageCreationDialog() {
         // INFO: Artificial limitation to avoid tab bar clutter
-        if (control.dynamicPageCount > control.dynamicPageLimit) {
+        if (control.dynamicPageCount >= control.dynamicPageLimit) {
             return
         }
 
@@ -436,7 +436,7 @@ Item {
 
         Action {
             text: qsTr("Delete")
-            enabled: optionMenu.selectedTabButton.pageType === GonnectWindow.PageType.Base
+            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
