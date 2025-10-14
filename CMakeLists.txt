@@ -11,7 +11,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_UNITY_BUILD_BATCH_SIZE 10)
 set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
-option(BUILD_DEPENDENCIES "Build dependencies" OFF)
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)
 

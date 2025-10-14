@@ -1,3 +1,6 @@
+find_package(QtWebDAV REQUIRED)
+find_package(vCard REQUIRED)
+
 qt_add_plugin(CardDAVAddressBookFactory STATIC
   CLASS_NAME CardDAVAddressBookFactory
 
@@ -18,7 +21,7 @@ target_include_directories(CardDAVAddressBookFactory
     ${PROJECT_BINARY_DIR}/src
 )
 
-target_link_libraries(CardDAVAddressBookFactory PUBLIC
+target_link_libraries(CardDAVAddressBookFactory PRIVATE
   Qt6::Core
   Qt6::Gui
   Qt6::Quick
