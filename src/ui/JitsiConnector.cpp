@@ -60,6 +60,7 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
                 if (m_isOnHold) {
                     return;
                 }
+
                 if (m_muteTag.isEmpty() || m_muteTag != tag) {
                     toggleMute();
                 } else if (!m_muteTag.isEmpty() && m_muteTag == tag) {
@@ -114,6 +115,15 @@ void JitsiConnector::apiLoadingFinishedInternal()
     }
 
     Q_EMIT isInitializedChanged();
+}
+
+void JitsiConnector::setVideoMutedInternal(bool value)
+{
+    if (m_isVideoMuted != value) {
+        m_isVideoMuted = value;
+        Q_EMIT isVideoMutedChanged();
+        updateVideoCallState();
+    }
 }
 
 void JitsiConnector::addError(QString type, QString name, QString message, bool isFatal,
@@ -380,7 +390,7 @@ api.addListener("videoAvailabilityChanged", data => {
 })
 
 api.addListener("videoMuteStatusChanged", data => {
-    jitsiConn.setVideoMuted(data.muted)
+    jitsiConn.setVideoMutedInternal(data.muted)
 })
 
 api.addListener("screenSharingStatusChanged", data => {
@@ -434,6 +444,7 @@ api.addListener("passwordRequired", data => {
 
 void JitsiConnector::toggleMute()
 {
+    m_didExecuteAudioMuteToggle = true;
     Q_EMIT executeToggleAudioCommand();
 }
 
@@ -1216,6 +1227,13 @@ void JitsiConnector::setAudioMuted(bool value)
         m_isAudioMuted = value;
         Q_EMIT isAudioMutedChanged();
     }
+
+    if (!m_didExecuteAudioMuteToggle) {
+        m_muteTag = QUuid::createUuid().toString();
+        GlobalMuteState::instance().toggleMute(m_muteTag);
+    }
+
+    m_didExecuteAudioMuteToggle = false;
 }
 
 void JitsiConnector::setVideoMuted(bool shallMute)

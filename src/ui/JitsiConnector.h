@@ -39,6 +39,7 @@ public:
     // Should be called by the JS code once when all initialization is done
     Q_INVOKABLE void apiLoadingFinishedInternal();
 
+    Q_INVOKABLE void setVideoMutedInternal(bool value);
     Q_INVOKABLE void setVideoAvailableInternal(bool value);
     Q_INVOKABLE void setVideoQualityInternal(uint quality);
     Q_INVOKABLE void setIsSharingScreenInternal(bool value);
@@ -143,6 +144,7 @@ private:
     ConferenceParticipant::Role m_ownRole = ConferenceParticipant::Role::None;
     QString m_jitsiId;
     QString m_muteTag;
+    bool m_didExecuteAudioMuteToggle = false;
     ConferenceParticipant *m_largeVideoParticipant = nullptr;
     ConferenceChatRoom *m_chatRoom = nullptr;
     bool m_isInConference = false;
