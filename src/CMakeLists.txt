@@ -358,6 +358,8 @@ qt_add_qml_module(gonnect
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
+        # Dynamic UI
+        ui/components/EditModeOptions.qml
 
         ui/scripts/util.js
 

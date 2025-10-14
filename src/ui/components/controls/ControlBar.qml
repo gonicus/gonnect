@@ -17,46 +17,13 @@ Item {
         searchField.giveFocus()
     }
 
-    Row {
+    EditModeOptions {
         id: editControls
         visible: !control.showSearch
-        spacing: 15
         anchors.centerIn: parent
 
-        Button {
-            icon.source: Icons.listAdd
-            height: 44
-            text: qsTr("Add page")
-            enabled: tabRoot.dynamicPageCount < tabRoot.dynamicPageLimit
-
-            onPressed: {
-                tabRoot.pageCreationDialog()
-            }
-        }
-
-        Button {
-            icon.source: Icons.viewLeftNew
-            height: 44
-            text: qsTr("Add widget")
-            enabled: tabRoot.selectedPageType === GonnectWindow.PageType.Base
-
-            onPressed: {
-                let page = pageRoot.pages[tabRoot.selectedPageId]
-                page.widgetCreationDialog()
-            }
-        }
-
-        Button {
-            highlighted: true
-            Material.accent: Theme.greenColor
-            icon.source: Icons.objectSelectSymbolic
-            height: 44
-            text: qsTr("Save")
-
-            onClicked: {
-                SM.setSaveDynamicUi(true)
-            }
-        }
+        tabRoot: control.tabRoot
+        pageRoot: control.pageRoot
     }
 
     SearchField {
