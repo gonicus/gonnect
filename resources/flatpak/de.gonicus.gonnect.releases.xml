@@ -1,5 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.0.6" date="2025-10-07">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>allow sending of asterisk via dtmf  (#201)</li>
+      </ul>
+    </description>
+  </release>
+  <release version="2.0.5" date="2025-09-09">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>do not abort on minor SQL migration error (#164)</li>
+        <li>fix Jitsi Meet crash when upgrading SIP call with screen share (#162)</li>
+        <li>mute behaviour in jitsi rooms</li>
+        <li>revert evolution-data-server back to 3.56.0</li>
+        <li>show password dialog again</li>
+        <li>use short month names for display headsets</li>
+        <li>do not show multiple password dialogs (#165)</li>
+      </ul>
+    </description>
+  </release>
+  <release version="2.0.4" date="2025-09-02">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>autoremove date event notifications</li>
+        <li>avoid parallel calls for date event queue processor</li>
+        <li>avoid parallel calls for queue processor</li>
+        <li>honour tray icon activation reasons (#156)</li>
+        <li>ignore timer for unvoluntary hook on via headset (#138)</li>
+        <li>properly display event status, fix event notifications (calendar)</li>
+        <li>re-trigger event notifications for updated events (#154)</li>
+        <li>regonize DateEvent as in the past</li>
+        <li>revert evolution-data-server back to 3.56.0</li>
+        <li>show notification while in conference</li>
+        <li>use placeholder identity that looks like a placeholder</li>
+        <li>change to conference page on video upgrade (#159)</li>
+        <li>larger font for chat message info label</li>
+        <li>show correct page after terminating call (#146)</li>
+      </ul>
+    </description>
+  </release>
+  <release version="2.0.3" date="2025-08-18">
+    <description>
+      <p>Features:</p>
+      <ul>
+        <li>emergency numbers are now configurable (#140)</li>
+      </ul>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>read settings value for dark tray icon correctly (#141)</li>
+        <li>revert evolution-data-server back to 3.56.0</li>
+        <li>segfault happend in certain hold states (#142)</li>
+        <li>better color for button bar labels in dark mode (#143)</li>
+      </ul>
+    </description>
+  </release>
+  <release version="2.0.2" date="2025-08-15">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>trigger new release</li>
+      </ul>
+    </description>
+  </release>
+  <release version="2.0.1" date="2025-08-14">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>togglers are working again (regression fix) (#136)</li>
+      </ul>
+    </description>
+  </release>
   <release version="2.0.0" date="2025-08-12">
     <description>
       <p>Features:</p>
