@@ -29,8 +29,6 @@ CallsProxyModel::CallsProxyModel(QObject *parent) : QSortFilterProxyModel{ paren
 #else
                 invalidateRowsFilter();
 #endif
-                beginFilterChange();
-                endFilterChange();
             });
 }
 
