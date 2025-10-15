@@ -6,15 +6,29 @@ CallsProxyModel::CallsProxyModel(QObject *parent) : QSortFilterProxyModel{ paren
 {
 
     connect(this, &CallsProxyModel::onlyEstablishedCallsChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
     });
     connect(this, &CallsProxyModel::hideIncomingSecondaryCallOnBusyChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
     });
     connect(&SIPCallManager::instance(), &SIPCallManager::establishedCallsCountChanged, this,
             [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+                beginFilterChange();
+                endFilterChange();
+#else
+                invalidateRowsFilter();
+#endif
                 beginFilterChange();
                 endFilterChange();
             });
