@@ -25,7 +25,6 @@ public:
     QStringList nameservers() const override;
 
 private:
-
     bool m_localNetwork = true;
     bool m_limitedNetwork = true;
     bool m_captiveNetwork = true;

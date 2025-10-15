@@ -7,9 +7,9 @@
 #ifdef Q_OS_LINUX
 #  include <unistd.h>
 #  include <grp.h>
-    static constexpr const char* NULL_DEVICE_NAME = "/dev/null"
+static constexpr const char *NULL_DEVICE_NAME = "/dev/null";
 #else
-    static constexpr const char *NULL_DEVICE_NAME = "nul";
+static constexpr const char *NULL_DEVICE_NAME = "nul";
 #endif
 
 #include "ReadOnlyConfdSettings.h"
@@ -18,7 +18,7 @@ Q_LOGGING_CATEGORY(lcReadOnlySettings, "gonnect.app.settings")
 
 ReadOnlyConfdSettings::ReadOnlyConfdSettings(QObject *parent)
     : QSettings(NULL_DEVICE_NAME, QSettings::IniFormat, parent)
-    {
+{
     setFallbacksEnabled(false);
     readConfd();
 }
