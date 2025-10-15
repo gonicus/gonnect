@@ -30,7 +30,7 @@ pkg_check_modules(LIBICAL REQUIRED libical IMPORTED_TARGET)
 if(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
-    set(PLATFORM_LIBRARIES PkgConfig::LIBPULSE PkgConfig::LIBNOTIFY)
+    set(PLATFORM_LIBRARIES PkgConfig::LIBPULSE PkgConfig::LIBNOTIFY Qt6::DBus)
 
     set(DBUS_SOURCES)
     qt_add_dbus_adaptor(DBUS_SOURCES ../specs/org.freedesktop.application.xml
@@ -88,6 +88,8 @@ if(LINUX)
     qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Secret.xml
         PortalSecret
     )
+elseif(WIN32)
+    set(PLATFORM_LIBRARIES Iphlpapi.lib)
 endif()
 
 set(APP_SOURCES main.cpp)
@@ -163,6 +165,27 @@ if(LINUX)
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp)
+elseif(WIN32)
+    set(PLATFORM_SOURCES
+        platform/dummy/DummyNotificationManager.h
+        platform/dummy/DummyNotificationManager.cpp
+        platform/dummy/DummyUserInfo.cpp
+        platform/dummy/DummyUserInfo.h
+        platform/dummy/DummyExternalMediaManager.cpp
+        platform/dummy/DummyExternalMediaManager.h
+        platform/dummy/DummyBackgroundManager.cpp
+        platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyThemeManager.cpp
+        platform/dummy/DummyThemeManager.h
+        platform/windows/WindowsNetworkHelper.cpp
+        platform/windows/WindowsNetworkHelper.h
+        platform/dummy/DummyInhibitHelper.h
+        platform/dummy/DummyInhibitHelper.cpp
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+        platform/dummy/DummySearchProvider.h
+        platform/dummy/DummySearchProvider.cpp
+    )
 else()
     set(PLATFORM_SOURCES
         platform/dummy/DummyNotificationManager.h
@@ -608,7 +631,6 @@ target_link_libraries(gonnect
         Qt6::Qml
         Qt6::Quick
         Qt6::QuickControls2
-        Qt6::DBus
         Qt6::HttpServer
         Qt6::Multimedia
         Qt6::Sql
