@@ -158,9 +158,6 @@ void AudioPort::stopSinkIO()
         m_sink->stop();
         delete m_sink;
         m_sink = nullptr;
-    }
-    if (m_io) {
-        delete m_io;
         m_io = nullptr;
     }
 
@@ -198,10 +195,6 @@ void AudioPort::stopSourceIO()
         m_source->stop();
         delete m_source;
         m_source = nullptr;
-    }
-
-    if (m_io) {
-        delete m_io;
         m_io = nullptr;
     }
 
