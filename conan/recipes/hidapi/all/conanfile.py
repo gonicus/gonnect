@@ -39,6 +39,8 @@ class HidAPIConan(ConanFile):
     def requirements(self):
         if self.settings.os != "Windows":
             self.requires("libusb/1.0.26")
+
+        if self.settings.os == "Linux":
             self.requires("libudev/system")
 
     def generate(self):

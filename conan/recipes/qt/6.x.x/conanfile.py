@@ -293,7 +293,8 @@ class QtConan(ConanFile):
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
-            self.requires("libdrm/2.4.119")
+            if self.settings.os == "Linux":
+                self.requires("libdrm/2.4.119")
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.options.with_icu:
@@ -620,7 +621,8 @@ class QtConan(ConanFile):
             # manually...
             zlib_libdirs = ["-L{}".format(it) for it in self.dependencies["zlib"].cpp_info.aggregated_components().libdirs]
             pcre2_libdirs = ["-L{}".format(it) for it in self.dependencies["pcre2"].cpp_info.aggregated_components().libdirs]
-            harfbuzz_libdirs = ["-L{}".format(it) for it in self.dependencies["harfbuzz"].cpp_info.aggregated_components().libdirs]
+            if self.options.with_harfbuzz:
+                harfbuzz_libdirs = ["-L{}".format(it) for it in self.dependencies["harfbuzz"].cpp_info.aggregated_components().libdirs]
             dc_libdirs = ["-L{}".format(it) for it in self.dependencies["double-conversion"].cpp_info.aggregated_components().libdirs]
             freetype_libdirs = []
             freetype_libs = []
@@ -655,7 +657,9 @@ class QtConan(ConanFile):
                     os.unlink(f + ".orig")
 
                     replace_in_file(self, f, " -lfreetype ", " -lfreetype %s %s " % (" ".join(freetype_libdirs), " ".join(freetype_libs)), strict=False)
-                    replace_in_file(self, f, " -lharfbuzz ", " -lharfbuzz %s " % (" ".join(harfbuzz_libdirs)), strict=False)
+                    if self.options.with_harfbuzz:
+                        replace_in_file(self, f, " -lharfbuzz ", " -lharfbuzz %s " % (" ".join(harfbuzz_libdirs)), strict=False)
+
                     replace_in_file(self, f, " -lz ", " -lz %s " % (" ".join(zlib_libdirs)), strict=False)
                     replace_in_file(self, f, " -lpcre2-16 ", " -lpcre2-16 %s " % (" ".join(pcre2_libdirs)), strict=False)
                     replace_in_file(self, f, " -ldouble-conversion ", " -ldouble-conversion %s " % (" ".join(dc_libdirs)), strict=False)

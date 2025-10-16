@@ -65,6 +65,7 @@ class GOnnectRecipe(ConanFile):
         self.requires("openldap/2.6.7")
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
+        self.requires("libuuid/1.0.3")
 
         if self.options.with_conan_qt:
             self.requires("qt/6.9.3")
@@ -76,6 +77,8 @@ class GOnnectRecipe(ConanFile):
         if self.settings.os != "Windows":
             self.requires("libusb/1.0.26")
 
+        self.requires("openssl/3.5.4", override=True)
+
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
@@ -84,6 +87,7 @@ class GOnnectRecipe(ConanFile):
         self.options["pjproject/*"].shared=True
         self.options["openldap/*"].with_cyrus_sasl=False
         self.options["openldap/*"].shared=True
+        self.options["openssl/*"].shared=True
         self.options["sqlite3/*"].shared=True
         self.options["nss/*"].shared=True
         self.options["nspr/*"].shared=True
@@ -93,12 +97,12 @@ class GOnnectRecipe(ConanFile):
         self.options["qca/*"].shared=True
 
         if self.options.with_conan_qt:
+            self.options["*/*"].with_conan_qt=True
             self.options["qtwebdav/*"].with_conan_qt=True
             self.options["qtkeychain/*"].with_conan_qt=True
             self.options["qca/*"].with_conan_qt=True
 
             self.options["qt/*"].shared=True
-            self.options["qt/*"].with_fontconfig=True
             self.options["qt/*"].with_mysql=False
             self.options["qt/*"].with_glib=False
             self.options["qt/*"].with_pq=False
@@ -117,7 +121,7 @@ class GOnnectRecipe(ConanFile):
             self.options["qt/*"].qtqa=False
             self.options["qt/*"].qtlocation=False
             self.options["qt/*"].qtsensors=False
-            self.options["qt/*"].qt5compat=False
+            self.options["qt/*"].qt5compat=True
             self.options["qt/*"].qtcoap=False
             self.options["qt/*"].qtopcua=False
             self.options["qt/*"].qtpositioning=False
@@ -147,6 +151,7 @@ class GOnnectRecipe(ConanFile):
 
             if self.settings.os == "Linux":
                 self.options["qt/*"].with_dbus=True
+                self.options["qt/*"].with_fontconfig=True
                 self.options["qt/*"].qtwayland=True
             else:
                 self.options["qt/*"].with_dbus=False
