@@ -4,7 +4,7 @@ inputs:
   qt-version:
     description: 'QT version'
     required: true
-    default: '6.9.3'
+    default: '6.10.0'
   qt-only:
     description: 'Install Qt only, skip other steps'
     default: 'false'
@@ -107,7 +107,7 @@ runs:
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: ${{github.workspace}}/qca
-        key: ${{ steps.hashes.outputs.QCA_HASH }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-qca6
+        key: ${{ steps.hashes.outputs.QCA_HASH }}-${{ inputs.qt-version }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-qca6
 
     - name: Build qca
       shell: bash
@@ -134,7 +134,7 @@ runs:
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: qtkeychain
-        key: ${{ steps.hashes.outputs.QTKEYCHAIN_TAG }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-qtkeychain
+        key: ${{ steps.hashes.outputs.QTKEYCHAIN_TAG }}-${{ inputs.qt-version }}-${{ steps.hashes.outputs.CMAKE_VERSION }}-qtkeychain
 
     - name: Build qtkeychain
       shell: bash

@@ -4,8 +4,14 @@
 HistoryContactSearchProxyModel::HistoryContactSearchProxyModel(QObject *parent)
     : QSortFilterProxyModel{ parent }
 {
-    connect(this, &HistoryContactSearchProxyModel::showJitsiChanged, this,
-            [this]() { invalidateRowsFilter(); });
+    connect(this, &HistoryContactSearchProxyModel::showJitsiChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+        beginFilterChange();
+        endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
+    });
 }
 
 bool HistoryContactSearchProxyModel::filterAcceptsRow(int sourceRow,
