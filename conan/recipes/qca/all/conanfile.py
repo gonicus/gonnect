@@ -28,7 +28,7 @@ class QCA(ConanFile):
 
     def requirements(self):
         if self.options.with_conan_qt:
-            self.requires("qt/6.9.3")
+            self.requires("qt/6.10.0")
 
         self.requires("openssl/3.5.4")
 

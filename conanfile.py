@@ -68,7 +68,7 @@ class GOnnectRecipe(ConanFile):
         self.requires("libuuid/1.0.3")
 
         if self.options.with_conan_qt:
-            self.requires("qt/6.9.3")
+            self.requires("qt/6.10.0")
 
         self.requires("qca/2.3.10")
         self.requires("qtwebdav/3.19.0")

@@ -27,7 +27,7 @@ class QtWebDAV(ConanFile):
 
     def requirements(self):
         if self.options.with_conan_qt:
-            self.requires("qt/6.9.3")
+            self.requires("qt/6.10.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -34,7 +34,7 @@ class QtKeychain(ConanFile):
 
     def requirements(self):
         if self.options.with_conan_qt:
-            self.requires("qt/6.9.3")
+            self.requires("qt/6.10.0")
 
     def layout(self):
         cmake_layout(self)

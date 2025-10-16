@@ -277,8 +277,8 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.with_glib:
-            self.requires("glib/2.85.3")
-            self.dependencies["glib"].options.shared = True
+            self.requires("glib/2.78.3")
+            self.options["glib/*"].shared = True
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.with_freetype and not self.options.multiconfiguration:
