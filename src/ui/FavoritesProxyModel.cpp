@@ -5,8 +5,14 @@
 FavoritesProxyModel::FavoritesProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
 
-    connect(this, &FavoritesProxyModel::showJitsiChanged, this,
-            [this]() { invalidateRowsFilter(); });
+    connect(this, &FavoritesProxyModel::showJitsiChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+        beginFilterChange();
+        endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
+    });
 }
 
 bool FavoritesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
