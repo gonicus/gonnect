@@ -130,7 +130,6 @@ class PjSIPConan(ConanFile):
         with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
             file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
 
-        #define PJ_HAS_SSL_SOCK 1
         path = os.path.join(self.build_folder, "pjproject-vs14.sln")
 
         # Upgrade sln to current build system
@@ -182,9 +181,10 @@ class PjSIPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "pjproject")
         self.cpp_info.set_property("pkg_config_name", "libpjproject")
 
-        if self.options.get_safe("endianness") == "big":
-            self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
-        else:
-            self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+        if self.settings.os != "Windows":
+            if self.options.get_safe("endianness") == "big":
+                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+            else:
+                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
 
         self.cpp_info.libs = collect_libs(self)
