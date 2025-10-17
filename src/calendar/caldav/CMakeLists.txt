@@ -1,3 +1,5 @@
+find_package(QtWebDAV REQUIRED)
+
 qt_add_plugin(CalDAVEventFeederFactory STATIC
   CLASS_NAME CalDAVEventFeederFactory
 
@@ -9,10 +11,16 @@ qt_add_plugin(CalDAVEventFeederFactory STATIC
   CalDAVEventFeederFactory.h
 )
 
-target_include_directories(CalDAVEventFeederFactory 
+target_include_directories(CalDAVEventFeederFactory
   PRIVATE
     ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/src/calendar
 )
 
-target_link_libraries(CalDAVEventFeederFactory PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets Qt6::Xml)
+target_link_libraries(CalDAVEventFeederFactory PRIVATE
+  Qt6::Core
+  Qt6::Gui
+  Qt6::Quick
+  Qt6::Widgets
+  Qt6::Xml
+  QtWebDAV)

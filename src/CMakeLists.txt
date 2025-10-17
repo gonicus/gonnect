@@ -16,22 +16,53 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml
 )
 
-include(FindPkgConfig)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
-pkg_check_modules(PJSIP REQUIRED libpjproject)
-pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
-pkg_check_modules(SASL2 REQUIRED IMPORTED_TARGET libsasl2)
-pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
-pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
-pkg_check_modules(LIBICAL REQUIRED libical IMPORTED_TARGET)
+if(UNIX)
+    include(FindPkgConfig)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
+    pkg_check_modules(PJSIP REQUIRED libpjproject IMPORTED_TARGET)
+    pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
+    pkg_check_modules(SASL2 REQUIRED IMPORTED_TARGET libsasl2)
+    pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
+    pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
+    pkg_check_modules(LIBICAL REQUIRED libical IMPORTED_TARGET)
 
-add_definitions(${PJSIP_STATIC_CFLAGS} -DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
+    list(APPEND PLATFORM_LIBRARIES
+        PkgConfig::OPENLDAP
+        PkgConfig::SASL2
+        PkgConfig::LIBUUID
+        PkgConfig::LIBUSB1
+        PkgConfig::LIBHIDAPI
+        PkgConfig::LIBICAL
+        PkgConfig::PJSIP)
+else()
+    find_package(hidapi REQUIRED)
+    find_package(libusb REQUIRED)
+    find_package(pjproject REQUIRED)
+    find_package(libical REQUIRED)
+    find_package(vcard REQUIRED)
+    find_package(qtwebdav REQUIRED)
+    find_package(qtkeychain REQUIRED)
+    find_package(openldap REQUIRED)
+
+    list(APPEND PLATFORM_LIBRARIES
+        hidapi::hidapi
+        pjproject::pjproject
+        libical::libical
+        vcard::vcard
+        qtwebdav::qtwebdav
+        qtkeychain::qtkeychain
+        libusb::libusb
+        openldap::openldap)
+endif()
 
 if(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
-    set(PLATFORM_LIBRARIES PkgConfig::LIBPULSE PkgConfig::LIBNOTIFY)
+    list(APPEND PLATFORM_LIBRARIES
+        PkgConfig::LIBPULSE
+        PkgConfig::LIBNOTIFY
+        Qt6::DBus)
 
     set(DBUS_SOURCES)
     qt_add_dbus_adaptor(DBUS_SOURCES ../specs/org.freedesktop.application.xml
@@ -52,7 +83,7 @@ if(LINUX)
         ShellSearchProvider2Adapter
         ShellSearchProvider2Adapter
     )
-    
+
     set_source_files_properties(
         ../specs/org.freedesktop.application.xml
         ../specs/org.mpris.MediaPlayer2.Player.xml
@@ -89,6 +120,9 @@ if(LINUX)
     qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Secret.xml
         PortalSecret
     )
+elseif(WIN32)
+    list(APPEND PLATFORM_LIBRARIES
+        Iphlpapi.lib)
 endif()
 
 set(APP_SOURCES main.cpp)
@@ -118,78 +152,9 @@ add_subdirectory(calendar/eds)
 #add_subdirectory(contacts/akonadi)
 #add_subdirectory(calendar/akonadi)
 
-if(BUILD_DEPENDENCIES)
-    include(ExternalProject)
-
-    ExternalProject_Add(qtwebdav
-        GIT_REPOSITORY https://github.com/PikachuHy/QtWebDAV.git
-        # renovate-commit: packageName=https://github.com/PikachuHy/QtWebDAV.git
-        GIT_TAG ac39687b8ae16118d385d3694e900becd108a0f2
-        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DBUILD_WITH_QT6=ON -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/qtwebdav-cmake.patch"
-        UPDATE_DISCONNECTED TRUE
-    )
-    ExternalProject_Get_Property(qtwebdav INSTALL_DIR)
-    target_include_directories(CardDAVAddressBookFactory SYSTEM PRIVATE ${INSTALL_DIR}/include)
-    target_link_directories(CardDAVAddressBookFactory PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
-    target_include_directories(CalDAVEventFeederFactory SYSTEM PRIVATE ${INSTALL_DIR}/include)
-    target_link_directories(CalDAVEventFeederFactory PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
-    target_include_directories(gonnect PRIVATE ${INSTALL_DIR}/include)
-    target_link_directories(gonnect PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
-
-    ExternalProject_Add(vcard
-        GIT_REPOSITORY https://github.com/ivanenko/vCard.git
-        # renovate-commit: packageName=https://github.com/ivanenko/vCard.git
-        GIT_TAG 9e6a5349d27733c931815b2e236807f3414ab251
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        PATCH_COMMAND git apply "${PROJECT_SOURCE_DIR}/resources/flatpak/patches/vcard-cmake.patch"
-        UPDATE_DISCONNECTED TRUE
-    )
-    ExternalProject_Get_Property(vcard INSTALL_DIR)
-    target_include_directories(CardDAVAddressBookFactory SYSTEM PRIVATE ${INSTALL_DIR}/include)
-    target_link_directories(CardDAVAddressBookFactory PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
-    target_link_directories(gonnect PRIVATE ${INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
-
-    ExternalProject_Add(qca
-        GIT_REPOSITORY https://github.com/KDE/qca.git
-        # renovate: datasource=github-tags depName=KDE/qca
-        GIT_TAG v2.3.10
-        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF
-        UPDATE_DISCONNECTED TRUE
-    )
-    ExternalProject_Get_Property(qca INSTALL_DIR)
-    include_directories("${INSTALL_DIR}/include/Qca-qt6/QtCrypto")
-    link_directories("${INSTALL_DIR}/lib")
-
-    set(QCA_RPATH "${INSTALL_DIR}/lib")
-
-    ExternalProject_Add(qtkeychain
-        GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
-        # renovate: datasource=github-tags depName=frankosterfeld/qtkeychain
-        GIT_TAG 0.15.0
-        CMAKE_ARGS -DCMAKE_PREFIX_PATH=${QT6_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_WITH_QT6=ON
-        UPDATE_DISCONNECTED TRUE
-    )
-    ExternalProject_Get_Property(qtkeychain INSTALL_DIR)
-    include_directories("${INSTALL_DIR}/include")
-    link_directories("${INSTALL_DIR}/lib64")
-
-    set(QKEYCHAIN_RPATH ${INSTALL_DIR}/lib64)
-
-    set_target_properties(gonnect
-       PROPERTIES
-           LINK_FLAGS "-Wl,-rpath,${QCA_RPATH} -Wl,-rpath,${QKEYCHAIN_RPATH}")
-
-    add_dependencies(gonnect qca)
-    add_dependencies(gonnect qtkeychain)
-    add_dependencies(CardDAVAddressBookFactory vcard qtwebdav)
-    add_dependencies(CalDAVEventFeederFactory qtwebdav)
-else()
-    find_package(QtWebDAV REQUIRED)
-    find_package(vCard REQUIRED)
-    find_package(Qca-qt6 REQUIRED)
-    find_package(Qt6Keychain REQUIRED)
-endif()
+find_package(vCard REQUIRED)
+find_package(Qca-qt6 REQUIRED)
+find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
 
@@ -233,6 +198,27 @@ if(LINUX)
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp)
+elseif(WIN32)
+    set(PLATFORM_SOURCES
+        platform/dummy/DummyNotificationManager.h
+        platform/dummy/DummyNotificationManager.cpp
+        platform/dummy/DummyUserInfo.cpp
+        platform/dummy/DummyUserInfo.h
+        platform/dummy/DummyExternalMediaManager.cpp
+        platform/dummy/DummyExternalMediaManager.h
+        platform/dummy/DummyBackgroundManager.cpp
+        platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyThemeManager.cpp
+        platform/dummy/DummyThemeManager.h
+        platform/windows/WindowsNetworkHelper.cpp
+        platform/windows/WindowsNetworkHelper.h
+        platform/dummy/DummyInhibitHelper.h
+        platform/dummy/DummyInhibitHelper.cpp
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+        platform/dummy/DummySearchProvider.h
+        platform/dummy/DummySearchProvider.cpp
+    )
 else()
     set(PLATFORM_SOURCES
         platform/dummy/DummyNotificationManager.h
@@ -656,18 +642,12 @@ qt_add_translations(gonnect
     TS_FILE_DIR ${PROJECT_SOURCE_DIR}/i18n
     LUPDATE_OPTIONS -no-obsolete)
 
-target_link_directories(gonnect PRIVATE
-    ${PJSIP_STATIC_LIBRARY_DIRS}
-)
-
 if(ENABLE_PCH)
     target_precompile_headers(gonnect PRIVATE pch.h)
 endif()
 
 target_link_libraries(gonnect
     PRIVATE
-        PkgConfig::OPENLDAP
-        PkgConfig::SASL2
         Qt6::Core
         Qt6::CorePrivate
         Qt6::Gui
@@ -676,7 +656,6 @@ target_link_libraries(gonnect
         Qt6::Qml
         Qt6::Quick
         Qt6::QuickControls2
-        Qt6::DBus
         Qt6::HttpServer
         Qt6::Multimedia
         Qt6::Sql
@@ -685,17 +664,11 @@ target_link_libraries(gonnect
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
         Qt6::Core5Compat
-        ${PJSIP_STATIC_LIBRARIES}
-        PkgConfig::LIBUUID
-        PkgConfig::LIBUSB1
-        PkgConfig::LIBHIDAPI
-        PkgConfig::LIBICAL
         ${PLATFORM_LIBRARIES}
         GOnnectVersion
         qca-qt6
         qt6keychain
         hid-rp
-        QtWebDAV
         Qt6::Xml
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
@@ -733,7 +706,6 @@ target_include_directories(gonnect
     usb/busylight
     media
     platform
-    ${PJSIP_STATIC_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
