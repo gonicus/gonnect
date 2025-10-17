@@ -83,7 +83,7 @@ class GOnnectRecipe(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
-    def config_options(self):
+    def configure(self):
         self.options["pjproject/*"].shared=True
         self.options["openldap/*"].with_cyrus_sasl=False
         self.options["openldap/*"].shared=True
@@ -98,9 +98,6 @@ class GOnnectRecipe(ConanFile):
 
         if self.options.with_conan_qt:
             self.options["*/*"].with_conan_qt=True
-            self.options["qtwebdav/*"].with_conan_qt=True
-            self.options["qtkeychain/*"].with_conan_qt=True
-            self.options["qca/*"].with_conan_qt=True
 
             self.options["qt/*"].shared=True
             self.options["qt/*"].with_mysql=False
@@ -157,3 +154,5 @@ class GOnnectRecipe(ConanFile):
                 self.options["qt/*"].with_dbus=False
                 self.options["qt/*"].qtwayland=False
 
+            if self.settings.os == "Macos":
+                self.options["qt/*"].with_harfbuzz=False # TODO: why? cmake info export for harfbuzz != both?

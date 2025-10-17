@@ -20,7 +20,8 @@ sources:
       - "https://mirrors.sjtug.sjtu.edu.cn/qt/archive/qt/6.10/6.10.0/single/qt-everywhere-src-6.10.0.tar.xz"
       - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/6.10/6.10.0/single/qt-everywhere-src-6.10.0.tar.xz"
       - "https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/qt/6.10/6.10.0/single/qt-everywhere-src-6.10.0.tar.xz"
-    sha256: "59d4fbf50d2524a9082f85d565f0197316cde89c26.107cfc6c157cb255b7ea18"
+    sha256: "81895fb038a9c3d6c6f698d7611339a189eb45c3d91746c7789b0b77a5981aa3"
+patches:
   "6.10.0":
     - patch_file: "patches/untag-versions.patch"
 

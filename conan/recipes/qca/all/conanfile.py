@@ -59,7 +59,7 @@ class QCA(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.variables['BUILD_WITH_QT6'] = True
-        tc.variables['BUILD_TESTING'] = False
+        tc.variables['BUILD_TESTS'] = False
         tc.variables['BUILD_TOOLS'] = False
         tc.variables['BUILD_PLUGINS'] = "ossl"
         tc.generate()
