@@ -13,7 +13,7 @@ BaseWindow {
     objectName: "pageCreationWindow"
     title: qsTr("Create new dashboard page")
     width: 600
-    height: 380
+    height: 340
     visible: true
     resizable: false
     showMinimizeButton: false
@@ -39,9 +39,9 @@ BaseWindow {
         "Message": Icons.dialogMessages
     }
 
-    Column {
+    ColumnLayout {
         id: pageOptions
-        spacing: 10
+        spacing: 5
         anchors {
             fill: parent
             margins: 20
@@ -54,7 +54,7 @@ BaseWindow {
 
         TextArea {
             id: titleEntry
-            width: parent.width
+            Layout.fillWidth: true
         }
 
         Label {
@@ -64,7 +64,8 @@ BaseWindow {
 
         ComboBox {
             id: iconSelection
-            width: parent.width / 4
+            Layout.preferredWidth: parent.width / 4
+
             model: ListModel {
                 id: iconEntries
                 ListElement { name: "Home" }
@@ -106,19 +107,15 @@ BaseWindow {
             }
         }
 
-        Row {
+        RowLayout {
             id: pageButtons
             spacing: 10
+            Layout.fillWidth: true
             layoutDirection: Qt.RightToLeft
-            anchors {
-                left: parent.left
-                right: parent.right
-                bottom: parent.bottom
-            }
+            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
 
             Button {
                 id: pageCancel
-                width: parent.width / 4
                 text: qsTr("Cancel")
 
                 onPressed: control.close()
@@ -126,7 +123,7 @@ BaseWindow {
 
             Button {
                 id: pageConfirm
-                width: parent.width / 4
+                icon.source: Icons.listAdd
                 text: qsTr("Add")
 
                 onPressed: {

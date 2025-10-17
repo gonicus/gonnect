@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtCore
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Controls.Material
 import base
@@ -11,7 +12,7 @@ BaseWindow {
     objectName: "widgetSelectionWindow"
     title: qsTr("Add widget")
     width: 600
-    height: 380
+    height: 340
     visible: true
     resizable: false
     showMinimizeButton: false
@@ -31,9 +32,9 @@ BaseWindow {
     property string name: ""
     property int selection: -1
 
-    Column {
+    ColumnLayout {
         id: widgetOptions
-        spacing: 10
+        spacing: 5
         anchors {
             fill: parent
             margins: 20
@@ -46,8 +47,9 @@ BaseWindow {
 
         ComboBox {
             id: widgetSelection
-            width: parent.width / 2
+            Layout.preferredWidth: parent.width / 2
             currentIndex: -1
+
             model: ListModel {
                 id: widgetEntries
                 ListElement { name: "DateEvents" }
@@ -64,19 +66,15 @@ BaseWindow {
             }
         }
 
-        Row {
+        RowLayout {
             id: widgetButtons
             spacing: 10
+            Layout.fillWidth: true
             layoutDirection: Qt.RightToLeft
-            anchors {
-                left: parent.left
-                right: parent.right
-                bottom: parent.bottom
-            }
+            Layout.alignment: Qt.AlignRight | Qt.AlignBottom
 
             Button {
                 id: widgetCancel
-                width: parent.width / 4
                 text: qsTr("Cancel")
 
                 onPressed: control.close()
@@ -84,7 +82,7 @@ BaseWindow {
 
             Button {
                 id: widgetConfirm
-                width: parent.width / 4
+                icon.source: Icons.listAdd
                 text: qsTr("Add")
 
                 onPressed: {
