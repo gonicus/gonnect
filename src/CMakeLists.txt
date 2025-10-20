@@ -25,7 +25,6 @@ if(UNIX)
     pkg_check_modules(SASL2 REQUIRED IMPORTED_TARGET libsasl2)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
-    pkg_check_modules(LIBICAL REQUIRED libical IMPORTED_TARGET)
 
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::OPENLDAP
@@ -33,14 +32,11 @@ if(UNIX)
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI
-        PkgConfig::LIBICAL
         PkgConfig::PJSIP)
 else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
     find_package(pjproject REQUIRED)
-    find_package(libical REQUIRED)
-    find_package(vcard REQUIRED)
     find_package(qtwebdav REQUIRED)
     find_package(qtkeychain REQUIRED)
     find_package(openldap REQUIRED)
@@ -48,8 +44,6 @@ else()
     list(APPEND PLATFORM_LIBRARIES
         hidapi::hidapi
         pjproject::pjproject
-        libical::libical
-        vcard::vcard
         qtwebdav::qtwebdav
         qtkeychain::qtkeychain
         libusb::libusb
@@ -149,10 +143,11 @@ add_subdirectory(calendar/eds)
 
 # Disabled, because akonadi doesn't provide a reliable way to be used
 # within flatpaks.
-#add_subdirectory(contacts/akonadi)
-#add_subdirectory(calendar/akonadi)
+#if(LINUX)
+#    add_subdirectory(contacts/akonadi)
+#    add_subdirectory(calendar/akonadi)
+#endif()
 
-find_package(vCard REQUIRED)
 find_package(Qca-qt6 REQUIRED)
 find_package(Qt6Keychain REQUIRED)
 

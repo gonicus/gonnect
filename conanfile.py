@@ -84,22 +84,12 @@ class GOnnectRecipe(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
 
     def configure(self):
-        self.options["pjproject/*"].shared=True
+        self.options["*/*"].shared = self.settings.os != "Windows"
         self.options["openldap/*"].with_cyrus_sasl=False
-        self.options["openldap/*"].shared=True
-        self.options["openssl/*"].shared=True
-        self.options["sqlite3/*"].shared=True
-        self.options["nss/*"].shared=True
-        self.options["nspr/*"].shared=True
         self.options["harfbuzz/*"].with_subset=True
-        self.options["qtwebdav/*"].shared=True
-        self.options["qtkeychain/*"].shared=True
-        self.options["qca/*"].shared=True
 
         if self.options.with_conan_qt:
             self.options["*/*"].with_conan_qt=True
-
-            self.options["qt/*"].shared=True
             self.options["qt/*"].with_mysql=False
             self.options["qt/*"].with_glib=False
             self.options["qt/*"].with_pq=False
