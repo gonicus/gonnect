@@ -89,6 +89,13 @@ Item {
         control.dynamicPageCount += 1
     }
 
+    function getTabList() {
+        let tabOrder = []
+
+        tabOrder.push(...topMenuCol.children)
+        return tabOrder.filter((button) => button.pageId)
+    }
+
     function saveTabList() {
         let tabNames = []
         let tabOrder = []
@@ -382,12 +389,9 @@ Item {
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
                     let index
-                    let newOrder = []
+                    let newOrder = control.getTabList()
 
-                    newOrder.push(...topMenuCol.children)
-                    newOrder = newOrder.filter((button) => button.pageId)
                     index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
-
                     if (index > 0) {
                         let old = newOrder[index-1]
                         newOrder[index-1] = newOrder[index]
@@ -411,12 +415,9 @@ Item {
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
                     let index
-                    let newOrder = []
+                    let newOrder = control.getTabList()
 
-                    newOrder.push(...topMenuCol.children)
-                    newOrder = newOrder.filter((button) => button.pageId)
                     index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
-
                     if (index < newOrder.length-1) {
                         let old = newOrder[index+1]
                         newOrder[index+1] = newOrder[index]
@@ -440,13 +441,27 @@ Item {
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
+                    let curIndex
+                    let newIndex
+                    let tabOrder = control.getTabList().filter((button) => button.isEnabled)
+
+                    if (optionMenu.selectedTabButton.isSelected) {
+                        // If the actively selected button is deleted, move up/down
+                        curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
+                        if (curIndex > 0) {
+                            newIndex = curIndex - 1
+                        } else if (curIndex < tabOrder.length - 1) {
+                            newIndex = curIndex + 1
+                        }
+
+                        mainWindow.updateTabSelection(tabOrder[newIndex].pageId,
+                                                      tabOrder[newIndex].pageType)
+                    }
+
                     mainWindow.removePage(optionMenu.selectedTabButton.pageId)
                     optionMenu.selectedTabButton.destroy()
 
                     control.dynamicPageCount -= 1
-
-                    mainWindow.updateTabSelection(control.callsPageId,
-                                                  GonnectWindow.PageType.Calls)
                 }
             }
         }

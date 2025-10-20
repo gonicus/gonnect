@@ -7,6 +7,7 @@
 #include <QStandardPaths>
 #include <QLibraryInfo>
 #include <QLoggingCategory>
+#include <QUuid>
 
 class UISettings : public QSettings
 {
@@ -30,6 +31,11 @@ public:
                                       const QVariant &defaultValue);
     Q_INVOKABLE void setUISetting(const QString &group, const QString &key, const QVariant &value);
     Q_INVOKABLE void removeUISetting(const QString &group, const QString &key);
+
+    Q_INVOKABLE QStringList getPageIds();
+    Q_INVOKABLE QStringList getWidgetIds();
+
+    Q_INVOKABLE QString generateUuid();
 
 private:
     explicit UISettings(QObject *parent = nullptr);

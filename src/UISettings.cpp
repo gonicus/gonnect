@@ -1,4 +1,4 @@
-#include <UISettings.h>
+#include "UISettings.h"
 
 Q_LOGGING_CATEGORY(lcUISettings, "gonnect.ui.settings")
 
@@ -28,4 +28,38 @@ void UISettings::removeUISetting(const QString &group, const QString &key)
     beginGroup(group);
     remove(key); // INFO: If key == "", the entire group is deleted!
     endGroup();
+}
+
+QStringList UISettings::getPageIds()
+{
+    QStringList keys = allKeys();
+    QStringList matchingKeys;
+
+    // "pageXXXXXX"
+    for (const QString &key : keys) {
+        if (key.startsWith("page") && !key.contains("widget")) {
+            matchingKeys.append(key);
+        }
+    }
+    return matchingKeys;
+}
+
+QStringList UISettings::getWidgetIds()
+{
+    QStringList keys = allKeys();
+    QStringList matchingKeys;
+
+    // "pageXXXXXX_widgetYYYYYY"
+    for (const QString &key : keys) {
+        if (key.startsWith("page") && key.contains("widget")) {
+            matchingKeys.append(key);
+        }
+    }
+    return matchingKeys;
+}
+
+QString UISettings::generateUuid()
+{
+    // Variant QUuid::DCE and version QUuid::UnixEpoch
+    return QUuid::createUuidV7().toString();
 }

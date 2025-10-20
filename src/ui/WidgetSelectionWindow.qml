@@ -43,13 +43,15 @@ BaseWindow {
         Label {
             id: titleLabel
             text: qsTr("Widget")
+            Layout.alignment: Qt.AlignTop
         }
 
         ComboBox {
             id: widgetSelection
             Layout.preferredWidth: parent.width / 2
-            currentIndex: -1
+            Layout.alignment: Qt.AlignTop
 
+            currentIndex: -1
             model: ListModel {
                 id: widgetEntries
                 ListElement { name: "DateEvents" }

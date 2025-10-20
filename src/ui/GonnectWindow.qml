@@ -354,24 +354,6 @@ BaseWindow {
 
             property var pages: ({})
 
-            // TODO: These might still be useful
-            onSelectedPageChanged: () => {
-                // Forward attached data from MainTabBar element
-                const page = pageStack.selectedPage
-                if (page && page.hasOwnProperty("attachedData")) {
-                    page.attachedData = mainTabBar.attachedData
-                }
-            }
-
-            readonly property Item selectedPage: {
-                for (const child of pageStack.children) {
-                    if (child.visible) {
-                        return child
-                    }
-                }
-                return null
-            }
-
             Default {
                 id: defaultPage
                 visible: false
