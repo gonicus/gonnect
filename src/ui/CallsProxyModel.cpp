@@ -5,12 +5,31 @@
 CallsProxyModel::CallsProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
 
-    connect(this, &CallsProxyModel::onlyEstablishedCallsChanged, this,
-            [this]() { invalidateRowsFilter(); });
-    connect(this, &CallsProxyModel::hideIncomingSecondaryCallOnBusyChanged, this,
-            [this]() { invalidateRowsFilter(); });
+    connect(this, &CallsProxyModel::onlyEstablishedCallsChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+        beginFilterChange();
+        endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
+    });
+    connect(this, &CallsProxyModel::hideIncomingSecondaryCallOnBusyChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+        beginFilterChange();
+        endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
+    });
     connect(&SIPCallManager::instance(), &SIPCallManager::establishedCallsCountChanged, this,
-            [this]() { invalidateRowsFilter(); });
+            [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+                beginFilterChange();
+                endFilterChange();
+#else
+                invalidateRowsFilter();
+#endif
+            });
 }
 
 bool CallsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const

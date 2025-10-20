@@ -60,6 +60,7 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
                 if (m_isOnHold) {
                     return;
                 }
+
                 if (m_muteTag.isEmpty() || m_muteTag != tag) {
                     toggleMute();
                 } else if (!m_muteTag.isEmpty() && m_muteTag == tag) {
@@ -443,6 +444,7 @@ api.addListener("passwordRequired", data => {
 
 void JitsiConnector::toggleMute()
 {
+    m_didExecuteAudioMuteToggle = true;
     Q_EMIT executeToggleAudioCommand();
 }
 
@@ -1225,6 +1227,13 @@ void JitsiConnector::setAudioMuted(bool value)
         m_isAudioMuted = value;
         Q_EMIT isAudioMutedChanged();
     }
+
+    if (!m_didExecuteAudioMuteToggle) {
+        m_muteTag = QUuid::createUuid().toString();
+        GlobalMuteState::instance().toggleMute(m_muteTag);
+    }
+
+    m_didExecuteAudioMuteToggle = false;
 }
 
 void JitsiConnector::setVideoMuted(bool shallMute)

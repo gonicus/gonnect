@@ -144,6 +144,7 @@ private:
     ConferenceParticipant::Role m_ownRole = ConferenceParticipant::Role::None;
     QString m_jitsiId;
     QString m_muteTag;
+    bool m_didExecuteAudioMuteToggle = false;
     ConferenceParticipant *m_largeVideoParticipant = nullptr;
     ConferenceChatRoom *m_chatRoom = nullptr;
     bool m_isInConference = false;
