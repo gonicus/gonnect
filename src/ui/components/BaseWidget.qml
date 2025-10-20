@@ -9,6 +9,7 @@ import base
 Item {
     id: control
 
+    required property string widgetId
     required property string name
     required property int type
 

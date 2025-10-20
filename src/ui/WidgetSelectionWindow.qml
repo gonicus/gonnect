@@ -92,6 +92,7 @@ BaseWindow {
                     const selection = control.selection
 
                     const widgetProperties = {
+                        widgetId: pageRoot.pageId+"_widget"+UISettings.generateUuid(),
                         name: name.toLowerCase(),
                         type: selection
                     }

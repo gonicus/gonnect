@@ -33,7 +33,7 @@ public:
     Q_INVOKABLE void removeUISetting(const QString &group, const QString &key);
 
     Q_INVOKABLE QStringList getPageIds();
-    Q_INVOKABLE QStringList getWidgetIds();
+    Q_INVOKABLE QStringList getWidgetIds(QString pageId);
 
     Q_INVOKABLE QString generateUuid();
 

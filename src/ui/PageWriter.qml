@@ -14,11 +14,13 @@ Item {
     required property WidgetModel model
 
     function reset() {
-        const widgetCount = model.count()
+        let widgetList = model.items()
+        let widgetCount = model.count()
 
         // Widgets
         for (let i = 0; i < widgetCount; i++) {
-            let widgetId = control.pageId+"_widget"+i
+            let widgetItem = widgetList[i]
+            let widgetId = widgetItem.widgetId
 
             UISettings.removeUISetting(widgetId, "")
         }
@@ -34,7 +36,7 @@ Item {
         // Widgets
         for (let i = 0; i < widgetCount; i++) {
             let widgetItem = widgetList[i]
-            let widgetId = control.pageId+"_widget"+i
+            let widgetId = widgetItem.widgetId
 
             UISettings.setUISetting(widgetId, "name", widgetItem.name)
             UISettings.setUISetting(widgetId, "type", widgetItem.type)

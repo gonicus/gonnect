@@ -44,7 +44,7 @@ Item {
             return
         }
 
-        let id = "page"+control.dynamicPageCount
+        let id = "page"+UISettings.generateUuid()
         let type = GonnectWindow.PageType.Base
 
         pageCreationWindowComponent.createObject(control,

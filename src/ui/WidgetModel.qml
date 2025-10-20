@@ -6,8 +6,6 @@ import base
 Item {
     id: control
 
-    required property string pageId
-
     property var model: []
 
     function items() {
@@ -27,8 +25,7 @@ Item {
         if (index !== -1) {
             model.splice(index, 1)
 
-            let widgetId = control.pageId+"_widget"+index
-            UISettings.removeUISetting(widgetId, "")
+            UISettings.removeUISetting(widget.widgetId, "")
         }
     }
 }

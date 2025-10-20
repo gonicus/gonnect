@@ -30,6 +30,7 @@ void UISettings::removeUISetting(const QString &group, const QString &key)
     endGroup();
 }
 
+// TODO: Use "page_XXXXXX-widget_YYYYYY" format?
 QStringList UISettings::getPageIds()
 {
     QStringList keys = allKeys();
@@ -37,21 +38,21 @@ QStringList UISettings::getPageIds()
 
     // "pageXXXXXX"
     for (const QString &key : keys) {
-        if (key.startsWith("page") && !key.contains("widget")) {
+        if (key.startsWith("page") && !key.contains("_widget")) {
             matchingKeys.append(key);
         }
     }
     return matchingKeys;
 }
 
-QStringList UISettings::getWidgetIds()
+QStringList UISettings::getWidgetIds(QString pageId)
 {
     QStringList keys = allKeys();
     QStringList matchingKeys;
 
     // "pageXXXXXX_widgetYYYYYY"
     for (const QString &key : keys) {
-        if (key.startsWith("page") && key.contains("widget")) {
+        if (key.startsWith(pageId+"_widget")) {
             matchingKeys.append(key);
         }
     }
@@ -61,5 +62,5 @@ QStringList UISettings::getWidgetIds()
 QString UISettings::generateUuid()
 {
     // Variant QUuid::DCE and version QUuid::UnixEpoch
-    return QUuid::createUuidV7().toString();
+    return QUuid::createUuidV7().toString(QUuid::WithoutBraces);
 }

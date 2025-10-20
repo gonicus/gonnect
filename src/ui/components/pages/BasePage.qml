@@ -29,8 +29,6 @@ Item {
     property alias model: widgetModel
     WidgetModel {
         id: widgetModel
-
-        pageId: control.pageId
     }
 
     property alias writer: pageWriter

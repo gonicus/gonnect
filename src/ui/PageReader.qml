@@ -26,20 +26,20 @@ Item {
         // Generic
         let pageCount = Number(UISettings.getUISetting("generic", "pages", 0))
 
-        // Pages
-        let pageItems = []
-        for (let i = 0; i < pageCount; i++) {
-            let pageId = "page"+i
+        // TODO: Page and widget counts still needed? Seems useless now
 
+        // Pages
+        let pageIds = UISettings.getPageIds()
+        let pageItems = []
+        for (const pageId of pageIds) {
             let pageName = UISettings.getUISetting(pageId, "name", "")
             let pageIcon = UISettings.getUISetting(pageId, "icon", "")
             let widgetCount = Number(UISettings.getUISetting(pageId, "widgets", 0))
 
             // Widgets
+            let widgetIds = UISettings.getWidgetIds(pageId)
             let widgetItems = []
-            for (let j = 0; j < widgetCount; j++) {
-                let widgetId = pageId+"_widget"+j
-
+            for (const widgetId of widgetIds) {
                 let widgetName = UISettings.getUISetting(widgetId, "name", "")
                 let widgetType = UISettings.getUISetting(widgetId, "type", "")
                 let widgetX = Number(UISettings.getUISetting(widgetId, "x", 0))
@@ -96,6 +96,7 @@ Item {
                 const type = Number(widgetItem.type)
 
                 const widgetProperties = {
+                    widgetId: widgetItem.id,
                     name: widgetItem.name,
                     type: type,
                     xRelative: widgetItem.x,
