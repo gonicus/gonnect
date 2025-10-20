@@ -4,6 +4,7 @@ import QtCore
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Window
+import QtQuick.Controls.impl
 import QtQuick.Controls.Material
 import base
 
@@ -48,19 +49,66 @@ BaseWindow {
 
         ComboBox {
             id: widgetSelection
-            Layout.preferredWidth: parent.width / 2
+            Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
 
-            currentIndex: -1
             model: ListModel {
                 id: widgetEntries
-                ListElement { name: "DateEvents" }
-                ListElement { name: "Favorites" }
-                ListElement { name: "History" }
-                ListElement { name: "Example" }
+                ListElement {
+                    name: "DateEvents"
+                    description: qsTr("A list of upcoming conferences")
+                }
+                ListElement {
+                    name: "Favorites"
+                    description: qsTr("A list of your favorite contacts and conferences")
+                }
+                ListElement {
+                    name: "History"
+                    description: qsTr("A searchable call/conference history")
+                }
+                ListElement {
+                    name: "Example";
+                    description: qsTr("An example widget, ha ha")
+                }
             }
 
-            // TODO: Delegate with both widget icon/image and text
+            delegate: ItemDelegate {
+                width: parent.width
+                contentItem: RowLayout {
+                    spacing: 10
+                    IconLabel {
+                        icon {
+                            source: Icons.userHome
+                            height: 96
+                            width: 96
+                        }
+                    }
+                    Label {
+                        textFormat: Text.RichText
+                        text: qsTr("<b>%1</b><br>%2").arg(name)
+                                                     .arg(description)
+                    }
+                }
+
+                required property string name
+                required property string description
+            }
+
+            contentItem: RowLayout {
+                spacing: 10
+                IconLabel {
+                    icon {
+                        source: Icons.userHome
+                        height: 96
+                        width: 96
+                    }
+                }
+                Label {
+                    textFormat: Text.RichText
+                    text: qsTr("<b>%1</b><br>%2").arg(widgetEntries.get(widgetSelection.currentIndex).name)
+                                                 .arg(widgetEntries.get(widgetSelection.currentIndex).description)
+                }
+            }
 
             onCurrentIndexChanged: {
                 control.name = widgetEntries.get(currentIndex).name
