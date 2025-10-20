@@ -1,4 +1,0 @@
-sources:
-  "1.0.0":
-    url: "https://github.com/cmoede/openldap/archive/refs/heads/cmake.zip"
-    sha256: "4b803a879d6bd7d9c37706a86cb04c2c1182f4b62798a5ec1b5cb4609f383cfb"
