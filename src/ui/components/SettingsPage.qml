@@ -40,7 +40,6 @@ Item {
         property alias disableMutePropagation: disableMutePropagationCheckBox.checked
         property alias useHeadset: headsetCheckBox.checked
         property alias jitsiChatAsNotifications: jitsiChatAsNotificationsCheckBox.checked
-
     }
 
     Settings {
@@ -59,6 +58,7 @@ Item {
         anchors.fill: parent
         contentHeight: flickableContainer.implicitHeight
         bottomMargin: 20
+        clip: true
 
         ScrollBar.vertical: ScrollBar { width: 10 }
 
@@ -192,7 +192,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -203,12 +202,10 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
                     }
                 }
-
 
                 CardList {
                     title: qsTr('Appearance')
@@ -288,7 +285,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: [
                                 {
@@ -336,7 +332,6 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
-
                         }
                     }
 
@@ -438,7 +433,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -450,7 +444,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: [
                                 {
@@ -495,7 +488,6 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
-
                         }
 
                         Column {
@@ -666,7 +658,6 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
-
                         }
                     }
 
@@ -692,7 +683,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: AudioManager.devices.filter(device => device.isInput)
 
@@ -732,7 +722,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -744,7 +733,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
@@ -784,7 +772,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -796,7 +783,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
@@ -837,7 +823,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -938,7 +923,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -991,7 +975,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -1000,7 +983,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
 
                             Slider {
