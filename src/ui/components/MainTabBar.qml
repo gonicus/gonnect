@@ -44,8 +44,8 @@ Item {
             return
         }
 
-        let id = "page"+UISettings.generateUuid()
-        let type = GonnectWindow.PageType.Base
+        const id = "page_"+UISettings.generateUuid()
+        const type = GonnectWindow.PageType.Base
 
         pageCreationWindowComponent.createObject(control,
                                                  {

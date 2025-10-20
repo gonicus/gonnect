@@ -23,18 +23,12 @@ Item {
     }
 
     function load() {
-        // Generic
-        let pageCount = Number(UISettings.getUISetting("generic", "pages", 0))
-
-        // TODO: Page and widget counts still needed? Seems useless now
-
         // Pages
         let pageIds = UISettings.getPageIds()
         let pageItems = []
         for (const pageId of pageIds) {
             let pageName = UISettings.getUISetting(pageId, "name", "")
             let pageIcon = UISettings.getUISetting(pageId, "icon", "")
-            let widgetCount = Number(UISettings.getUISetting(pageId, "widgets", 0))
 
             // Widgets
             let widgetIds = UISettings.getWidgetIds(pageId)

@@ -49,6 +49,5 @@ Item {
         // Page
         UISettings.setUISetting(control.pageId, "name", control.name)
         UISettings.setUISetting(control.pageId, "icon", control.icon)
-        UISettings.setUISetting(control.pageId, "widgets", widgetCount)
     }
 }

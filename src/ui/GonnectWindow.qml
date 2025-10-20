@@ -162,8 +162,7 @@ BaseWindow {
         page.destroy()
         delete pageStack.pages[pageId]
 
-        let pageCount = pageModel.count()
-        UISettings.setUISetting("generic", "pages", pageCount)
+        mainTabBar.saveTabList()
     }
 
     function createPage(pageId : string, icon : url, name : string) {
@@ -179,6 +178,8 @@ BaseWindow {
 
         pageModel.add(page)
         pageStack.pages[pageId] = page
+
+        mainTabBar.saveTabList()
     }
 
     function loadPages() {
@@ -195,9 +196,6 @@ BaseWindow {
 
                 let pageCount = pageModel.count()
                 let pageList = pageModel.items()
-
-                // Generic
-                UISettings.setUISetting("generic", "pages", pageCount)
 
                 // Pages & Widgets
                 for (let i = 0; i < pageCount; i++) {

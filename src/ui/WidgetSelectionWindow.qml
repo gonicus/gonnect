@@ -88,11 +88,12 @@ BaseWindow {
                 text: qsTr("Add")
 
                 onPressed: {
+                    const id = "-widget_"+UISettings.generateUuid()
                     const name = control.name
                     const selection = control.selection
 
                     const widgetProperties = {
-                        widgetId: pageRoot.pageId+"_widget"+UISettings.generateUuid(),
+                        widgetId: pageRoot.pageId+id,
                         name: name.toLowerCase(),
                         type: selection
                     }
