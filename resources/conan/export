@@ -3,7 +3,7 @@ import yaml
 import pathlib
 import subprocess
 
-recipes = pathlib.Path("recipes")
+recipes = pathlib.Path(__file__).parent / pathlib.Path("recipes")
 for recipe_dir in [r for r in recipes.iterdir() if r.is_dir()]:
     recipe_conf = pathlib.Path(recipe_dir, "config.yml")
     if recipe_conf.is_file():
