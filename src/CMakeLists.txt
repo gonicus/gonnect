@@ -39,7 +39,7 @@ else()
     find_package(pjproject REQUIRED)
     find_package(qtwebdav REQUIRED)
     find_package(qtkeychain REQUIRED)
-    find_package(openldap REQUIRED)
+    find_package(OpenLDAP REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         hidapi::hidapi
@@ -47,7 +47,8 @@ else()
         qtwebdav::qtwebdav
         qtkeychain::qtkeychain
         libusb::libusb
-        openldap::openldap)
+        OpenLDAP::LDAP
+        OpenLDAP::LBER)
 endif()
 
 if(LINUX)
@@ -137,16 +138,17 @@ set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETO
 add_subdirectory(contacts/ldap)
 add_subdirectory(contacts/carddav)
 add_subdirectory(contacts/csv)
-add_subdirectory(contacts/eds)
 add_subdirectory(calendar/caldav)
-add_subdirectory(calendar/eds)
 
-# Disabled, because akonadi doesn't provide a reliable way to be used
-# within flatpaks.
-#if(LINUX)
-#    add_subdirectory(contacts/akonadi)
-#    add_subdirectory(calendar/akonadi)
-#endif()
+if(LINUX)
+    add_subdirectory(contacts/eds)
+    add_subdirectory(calendar/eds)
+
+    # Disabled, because akonadi doesn't provide a reliable way to be used
+    # within flatpaks.
+    #add_subdirectory(contacts/akonadi)
+    #add_subdirectory(calendar/akonadi)
+endif()
 
 find_package(Qca-qt6 REQUIRED)
 find_package(Qt6Keychain REQUIRED)

@@ -65,7 +65,9 @@ class GOnnectRecipe(ConanFile):
         self.requires("openldap/2.6.10")
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
-        self.requires("libuuid/1.0.3")
+
+        if self.settings.os != "Windows":
+            self.requires("libuuid/1.0.3")
 
         if self.options.with_conan_qt:
             self.requires("qt/6.10.0")
@@ -73,9 +75,7 @@ class GOnnectRecipe(ConanFile):
         self.requires("qca/2.3.10")
         self.requires("qtwebdav/3.19.0")
         self.requires("qtkeychain/0.15.0")
-
-        if self.settings.os != "Windows":
-            self.requires("libusb/1.0.26")
+        self.requires("libusb/1.0.26")
 
         self.requires("openssl/3.5.4", override=True)
 
