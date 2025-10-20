@@ -80,6 +80,7 @@ BaseWindow {
                 contentItem: RowLayout {
                     spacing: 10
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
                     IconLabel {
                         icon {
                             source: icons[name]
@@ -93,6 +94,7 @@ BaseWindow {
             contentItem: RowLayout {
                 spacing: 10
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
                 IconLabel {
                     leftPadding: 15
                     icon {

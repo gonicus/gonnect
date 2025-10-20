@@ -76,14 +76,22 @@ BaseWindow {
                 width: parent.width
                 contentItem: RowLayout {
                     spacing: 10
+
                     IconLabel {
+                        id: widgetSelecionPreview
+                        Layout.preferredWidth: 96
+                        Layout.preferredHeight: 96
+
                         icon {
                             source: Icons.userHome
-                            height: 96
-                            width: 96
+                            width: widgetSelecionPreview.width
+                            height: widgetSelecionPreview.height
                         }
                     }
+
                     Label {
+                        Layout.fillWidth: true
+
                         textFormat: Text.RichText
                         text: qsTr("<b>%1</b><br>%2").arg(name)
                                                      .arg(description)
@@ -96,14 +104,22 @@ BaseWindow {
 
             contentItem: RowLayout {
                 spacing: 10
+
                 IconLabel {
+                    id: widgetChoicePreview
+                    Layout.preferredWidth: 96
+                    Layout.preferredHeight: 96
+
                     icon {
                         source: Icons.userHome
-                        height: 96
-                        width: 96
+                        width: widgetChoicePreview.width
+                        height: widgetChoicePreview.height
                     }
                 }
+
                 Label {
+                    Layout.fillWidth: true
+
                     textFormat: Text.RichText
                     text: qsTr("<b>%1</b><br>%2").arg(widgetEntries.get(widgetSelection.currentIndex).name)
                                                  .arg(widgetEntries.get(widgetSelection.currentIndex).description)
