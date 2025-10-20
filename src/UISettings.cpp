@@ -32,7 +32,7 @@ void UISettings::removeUISetting(const QString &group, const QString &key)
 
 QStringList UISettings::getPageIds()
 {
-    QStringList keys = allKeys();
+    QStringList keys = childGroups();
     QStringList matchingKeys;
 
     // "page_XXXXXX"
@@ -46,7 +46,7 @@ QStringList UISettings::getPageIds()
 
 QStringList UISettings::getWidgetIds(QString pageId)
 {
-    QStringList keys = allKeys();
+    QStringList keys = childGroups();
     QStringList matchingKeys;
 
     // "page_XXXXXX-widget_YYYYYY"

@@ -26,6 +26,7 @@ Item {
         // Pages
         let pageIds = UISettings.getPageIds()
         let pageItems = []
+
         for (const pageId of pageIds) {
             let pageName = UISettings.getUISetting(pageId, "name", "")
             let pageIcon = UISettings.getUISetting(pageId, "icon", "")
@@ -33,6 +34,7 @@ Item {
             // Widgets
             let widgetIds = UISettings.getWidgetIds(pageId)
             let widgetItems = []
+
             for (const widgetId of widgetIds) {
                 let widgetName = UISettings.getUISetting(widgetId, "name", "")
                 let widgetType = UISettings.getUISetting(widgetId, "type", "")
