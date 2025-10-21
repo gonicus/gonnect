@@ -17,12 +17,13 @@ Item {
     required property double yRelative
 
     required property double wRelative
-    required property double wRelativeMin
-    required property double wRelativeMax
-
     required property double hRelative
-    required property double hRelativeMin
-    required property double hRelativeMax
+
+    required property double wMin
+    required property double hMin
+
+    property double wRelativeMin: control.wMin / control.gridWidth
+    property double hRelativeMin: control.hMin / control.gridHeight
 
     property alias root: resizableRect
 
@@ -48,8 +49,6 @@ Item {
     }
 
     function setDimensions() {
-        //TODO: Enforce absolute min sizes again? Avoids ever decreasing min size relative to window size
-
         // Width
         if (control.wRelative < control.wRelativeMin) {
             control.wRelative = control.wRelativeMin
@@ -163,10 +162,9 @@ Item {
                     id: removeIcon
                     anchors.centerIn: parent
                     icon {
-                        source: Icons.mobileCloseApp
-                        width: parent.width * 0.5
-                        height: parent.height * 0.5
-                        color: Theme.redColor
+                        source: Icons.editDelete
+                        width: parent.width * 0.75
+                        height: parent.height * 0.75
                     }
                 }
 

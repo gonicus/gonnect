@@ -37,6 +37,8 @@ BaseWidget {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
                     right: historyFilterMediumSelector.left
+                    leftMargin: 20
+                    rightMargin: 20
                 }
 
                 Keys.onEscapePressed: () => {

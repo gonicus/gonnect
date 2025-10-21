@@ -30,12 +30,10 @@ Item {
             yRelative: 0.05
 
             wRelative: 0.25
-            wRelativeMin: 0.25
-            wRelativeMax: 1.0
-
             hRelative: 0.50
-            hRelativeMin: 0.50
-            hRelativeMax: 1.0
+
+            wMin: 300
+            hMin: 350
         }
     }
 
@@ -50,12 +48,10 @@ Item {
             yRelative: 0.05
 
             wRelative: 0.25
-            wRelativeMin: 0.25
-            wRelativeMax: 1.0
-
             hRelative: 0.50
-            hRelativeMin: 0.50
-            hRelativeMax: 1.0
+
+            wMin: 300
+            hMin: 350
         }
     }
 
@@ -70,12 +66,10 @@ Item {
             yRelative: 0.05
 
             wRelative: 0.45
-            wRelativeMin: 0.45
-            wRelativeMax: 1.0
-
             hRelative: 0.65
-            hRelativeMin: 0.65
-            hRelativeMax: 1.0
+
+            wMin: 550
+            hMin: 500
         }
     }
 
@@ -90,12 +84,10 @@ Item {
             yRelative: 0.05
 
             wRelative: 0.25
-            wRelativeMin: 0.25
-            wRelativeMax: 1.0
-
             hRelative: 0.25
-            hRelativeMin: 0.25
-            hRelativeMax: 1.0
+
+            wMin: 250
+            hMin: 250
         }
     }
 }
