@@ -158,11 +158,9 @@ BaseWindow {
     function removePage(pageId : string) {
         let page = pageStack.pages[pageId]
         pageModel.remove(page)
-        page.writer.reset()
+        page.model.removeAll()
         page.destroy()
         delete pageStack.pages[pageId]
-
-        mainTabBar.saveTabList()
     }
 
     function createPage(pageId : string, icon : url, name : string) {
@@ -178,8 +176,6 @@ BaseWindow {
 
         pageModel.add(page)
         pageStack.pages[pageId] = page
-
-        mainTabBar.saveTabList()
     }
 
     function loadPages() {

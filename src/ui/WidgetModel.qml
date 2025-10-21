@@ -8,6 +8,8 @@ Item {
 
     property var model: []
 
+    signal modelUpdated()
+
     function items() {
         return model
     }
@@ -18,6 +20,8 @@ Item {
 
     function add(widget: Item) {
         model.push(widget)
+
+        control.modelUpdated()
     }
 
     function remove(widget: Item) {
@@ -26,6 +30,18 @@ Item {
             model.splice(index, 1)
 
             UISettings.removeUISetting(widget.widgetId, "")
+
+            control.modelUpdated()
         }
+    }
+
+    function removeAll() {
+        for (const widget of model) {
+           UISettings.removeUISetting(widget.widgetId, "")
+        }
+
+        model.splice(0, model.length);
+
+        control.modelUpdated()
     }
 }

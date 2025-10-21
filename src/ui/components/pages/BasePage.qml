@@ -20,6 +20,14 @@ Item {
         }
     }
 
+    property bool emptyPage: true
+    Connections {
+        target: model
+        function onModelUpdated() {
+            emptyPage = model.count() === 0
+        }
+    }
+
     property alias gridWidth: snapGrid.width
     property alias gridHeight: snapGrid.height
     property alias density: snapGrid.cellSize
@@ -58,6 +66,21 @@ Item {
         anchors.fill: parent
         color: "transparent"
 
+        onWidthChanged: () => {
+            if (snapGrid.width <= 0) {
+                return
+            }
+
+            control.gridResized()
+        }
+        onHeightChanged: () => {
+            if (snapGrid.height <= 0) {
+                return
+            }
+
+            control.gridResized()
+        }
+
         property int cellSize: 15
         property int dotRadius: 1
 
@@ -82,20 +105,14 @@ Item {
             onWidthChanged: requestPaint()
             onHeightChanged: requestPaint()
         }
+    }
 
-        onWidthChanged: () => {
-            if (snapGrid.width <= 0) {
-                return
-            }
+    // TODO: Provide button to get into edit mode right away instead
+    Label {
+        id: emptyPageInfo
+        visible: control.emptyPage && !control.editMode
+        anchors.centerIn: parent
 
-            control.gridResized()
-        }
-        onHeightChanged: () => {
-            if (snapGrid.height <= 0) {
-                return
-            }
-
-            control.gridResized()
-        }
+        text: qsTr("This page is empty. Add widgets by using the edit mode") + " ( ≡ )"
     }
 }
