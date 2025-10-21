@@ -187,7 +187,7 @@ BaseWindow {
     readonly property Connections dynamicUiConnections: Connections {
         target: SM
         function onSaveDynamicUiChanged() {
-            if (SM.saveDynamicUi) {
+            if (SM.uiSaveState) {
                 console.log("Writing dynamic UI state to disk")
 
                 let pageCount = pageModel.count()
@@ -203,7 +203,7 @@ BaseWindow {
                 // Tabs
                 mainTabBar.saveTabList()
 
-                SM.setSaveDynamicUi(false)
+                SM.setUiSaveState(false)
             }
         }
     }

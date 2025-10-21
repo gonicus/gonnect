@@ -73,12 +73,22 @@ void StateManager::setUiEditMode(bool option)
     }
 };
 
-void StateManager::setSaveDynamicUi(bool option)
+// TODO: Call this through other signals to have a working dirty state
+void StateManager::setUiDirtyState(bool option)
 {
-    if (m_saveDynamicUi != option) {
-        m_saveDynamicUi = option;
+    if (m_uiDirtyState != option) {
+        m_uiDirtyState = option;
 
-        Q_EMIT saveDynamicUiChanged();
+        Q_EMIT uiDirtyStateChanged();
+    }
+};
+
+void StateManager::setUiSaveState(bool option)
+{
+    if (m_uiSaveState != option) {
+        m_uiSaveState = option;
+
+        Q_EMIT uiSaveStateChanged();
     }
 };
 

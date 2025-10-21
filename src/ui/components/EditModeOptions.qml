@@ -48,7 +48,9 @@ Item {
             text: qsTr("Save")
 
             onClicked: {
-                SM.setSaveDynamicUi(true)
+                SM.setUiSaveState(true)
+
+                SM.setUiEditMode(false)
             }
         }
     }
