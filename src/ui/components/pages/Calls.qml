@@ -12,7 +12,7 @@ Item {
 
     states: [
         State {
-            when: favList.count > 0
+            when: favList.count > 0 || dateList.count > 0
             AnchorChanges {
                 target: historyCard
                 anchors.right: verticalDragbarDummy.left
@@ -234,12 +234,13 @@ Item {
             rightMargin: 24
         }
 
+        property bool hasFavorites: false
         property bool hasDateEvents: false
 
         CardHeading {
             id: favCardHeading
-            visible: !favCard.hasDateEvents
-            text: qsTr("Favorites")
+            visible: !favCardTabBar.visible
+            text: favCard.hasFavorites ? qsTr("Favorites") : qsTr("Conferences")
             anchors {
                 left: parent.left
                 right: parent.right
@@ -248,7 +249,7 @@ Item {
 
         TabBar {
             id: favCardTabBar
-            visible: favCard.hasDateEvents
+            visible: favCard.hasFavorites && favCard.hasDateEvents
             topLeftRadius: 12
             topRightRadius: 12
             anchors {
@@ -272,6 +273,7 @@ Item {
             id: favList
             header: null
             visible: favCardTabBar.currentItem === favTabButton
+                     || (favCardHeading.visible && favCard.hasFavorites)
             delegate: FavoriteListItemBig {}
             anchors {
                 top: favCardTabBar.bottom
@@ -281,11 +283,15 @@ Item {
                 leftMargin: 10
                 rightMargin: 10
             }
+            onCountChanged: {
+                favCard.hasFavorites = favList.count > 0
+            }
         }
 
         DateEventsList {
             id: dateList
             visible: favCardTabBar.currentItem === dateTabButton
+                     || (favCardHeading.visible && favCard.hasDateEvents)
             anchors {
                 top: favCardTabBar.bottom
                 left: parent.left
@@ -295,9 +301,7 @@ Item {
                 rightMargin: 10
             }
             onCountChanged: {
-                if (dateList.count > 0) {
-                    favCard.hasDateEvents = true
-                }
+                favCard.hasDateEvents = dateList.count > 0
             }
         }
     }
