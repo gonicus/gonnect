@@ -13,39 +13,31 @@ Item {
     required property string name
     required property int type
 
-    required property double xRelative
-    required property double yRelative
-
-    required property double wRelative
-    required property double hRelative
-
     required property double wMin
     required property double hMin
+
+    property double xRelative: 0
+    property double yRelative: 0
+
+    property double wRelative: 0
+    property double hRelative: 0
 
     property double wRelativeMin: 0
     property double hRelativeMin: 0
 
-    property alias root: resizableRect
+    property alias page: control.parent
+    property alias widget: resizableRect
 
     // INFO: Temporarily overrides render/draw order in edit mode. All widgets have
     // a different elevation based on the order they were instantiated in
     z: hoverEdit?.containsMouse ? 100 : 0
 
-    property WidgetModel model: parent.model
-
-    property bool editMode: parent.editMode
-    property double gridWidth: parent.gridWidth
-    property double gridHeight: parent.gridHeight
-    property int density: parent.density
-
-    property var resized: parent
-
     function setPlacement() {
-        control.root.x = Math.round((control.gridWidth * control.xRelative) / control.density) * control.density
-        control.root.x = Math.max(0, Math.min(control.root.x, control.gridWidth - control.root.width))
+        control.widget.x = Math.round((page.gridWidth * control.xRelative) / page.gridDensity) * page.gridDensity
+        control.widget.x = Math.max(0, Math.min(control.widget.x, page.gridWidth - control.widget.width))
 
-        control.root.y = Math.round((control.gridHeight * control.yRelative) / control.density) * control.density
-        control.root.y = Math.max(0, Math.min(control.root.y, control.gridHeight - control.root.height))
+        control.widget.y = Math.round((page.gridHeight * control.yRelative) / page.gridDensity) * page.gridDensity
+        control.widget.y = Math.max(0, Math.min(control.widget.y, page.gridHeight - control.widget.height))
     }
 
     function setDimensions() {
@@ -54,14 +46,14 @@ Item {
             control.wRelative = control.wRelativeMin
         }
 
-        control.root.width = Math.round((control.gridWidth * control.wRelative) / control.density) * control.density
+        control.widget.width = Math.round((page.gridWidth * control.wRelative) / page.gridDensity) * page.gridDensity
 
         // Height
         if (control.hRelative < control.hRelativeMin) {
             control.hRelative = control.hRelativeMin
         }
 
-        control.root.height = Math.round((control.gridHeight * control.hRelative) / control.density) * control.density
+        control.widget.height = Math.round((page.gridHeight * control.hRelative) / page.gridDensity) * page.gridDensity
     }
 
     function makeOpaque(base : color, opacity : double) : color {
@@ -69,19 +61,21 @@ Item {
     }
 
     Connections {
-        target: resized
+        target: page
         function onGridResized() {
-            control.wRelativeMin = Number(control.wMin / control.gridWidth)
-            control.hRelativeMin = Number(control.hMin / control.gridHeight)
+            control.wRelativeMin = Number(control.wMin / page.gridWidth)
+            control.hRelativeMin = Number(control.hMin / page.gridHeight)
 
             control.setPlacement()
             control.setDimensions()
+
+            console.log(widget.x, widget.y, widget.width, widget.height)
         }
     }
 
     Component.onCompleted: {
-        control.wRelativeMin = Number(control.wMin / control.gridWidth)
-        control.hRelativeMin = Number(control.hMin / control.gridHeight)
+        control.wRelativeMin = Number(control.wMin / page.gridWidth)
+        control.hRelativeMin = Number(control.hMin / page.gridHeight)
 
         control.setPlacement()
         control.setDimensions()
@@ -98,8 +92,8 @@ Item {
         // Edit mode overlay
         Rectangle {
             id: widgetEdit
-            radius: resizableRect.widgetRadius
-            visible: control.editMode
+            radius: widget.widgetRadius
+            visible: page.editMode
             color: control.makeOpaque(Theme.backgroundColor, 0.5)
             z: 1
             anchors.fill: parent
@@ -134,8 +128,8 @@ Item {
             // Drag
             Rectangle {
                 id: dragIndicator
-                width: resizableRect.width
-                height: resizableRect.height
+                width: widget.width
+                height: widget.height
                 color: "transparent"
                 anchors.centerIn: parent
 
@@ -143,12 +137,12 @@ Item {
                     id: dragControl
                     acceptedButtons: Qt.LeftButton
                     cursorShape: active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
-                    target: resizableRect
+                    target: widget
 
                     onActiveChanged: function(active) {
                         if (!active) {
-                            control.xRelative = Number(resizableRect.x / control.gridWidth)
-                            control.yRelative = Number(resizableRect.y / control.gridHeight)
+                            control.xRelative = Number(widget.x / page.gridWidth)
+                            control.yRelative = Number(widget.y / page.gridHeight)
                             control.setPlacement()
                         }
                     }
@@ -182,7 +176,7 @@ Item {
                     drag.target: removeIndicator
 
                     onClicked: {
-                        control.model.remove(control)
+                        control.page.model.remove(control)
                         control.destroy()
                     }
                 }
@@ -224,8 +218,8 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             // Resize within bounds
-                            let rb = control.gridWidth - (resizableRect.x + resizableRect.width)
-                            let bb = control.gridHeight - (resizableRect.y + resizableRect.height)
+                            let rb = page.gridWidth - (widget.x + widget.width)
+                            let bb = page.gridHeight - (widget.y + widget.height)
                             let dx = mouse.x - resizeIndicator.startX
                             if (dx > rb) {
                                 dx = rb
@@ -235,8 +229,8 @@ Item {
                                 dy = bb
                             }
 
-                            control.wRelative = Number((resizableRect.width + dx) / control.gridWidth)
-                            control.hRelative = Number((resizableRect.height + dy) / control.gridHeight)
+                            control.wRelative = Number((widget.width + dx) / page.gridWidth)
+                            control.hRelative = Number((widget.height + dy) / page.gridHeight)
                             control.setDimensions()
                         }
                     }
@@ -264,8 +258,8 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             // Resize within bounds
-                            let lb = resizableRect.x - parent.x
-                            let bb = control.gridHeight - (resizableRect.y + resizableRect.height)
+                            let lb = widget.x - parent.x
+                            let bb = page.gridHeight - (widget.y + widget.height)
                             let dx = resizeIndicator.startX - mouse.x
                             if (dx > lb) {
                                 dx = lb
@@ -275,12 +269,12 @@ Item {
                                 dy = bb
                             }
 
-                            let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                            let nwr = Number((widget.width + dx) / page.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
-                                control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
+                                control.xRelative = Number((widget.x - dx) / page.gridWidth)
                             }
-                            let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                            let nhr = Number((widget.height + dy) / page.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
                             }
@@ -313,8 +307,8 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             // Resize within bounds
-                            let lb = resizableRect.x - parent.x
-                            let tb = resizableRect.y - parent.y
+                            let lb = widget.x - parent.x
+                            let tb = widget.y - parent.y
                             let dx = resizeIndicator.startX - mouse.x
                             if (dx > lb) {
                                 dx = lb
@@ -324,15 +318,15 @@ Item {
                                 dy = tb
                             }
 
-                            let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                            let nwr = Number((widget.width + dx) / page.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
-                                control.xRelative = Number((resizableRect.x - dx) / control.gridWidth)
+                                control.xRelative = Number((widget.x - dx) / page.gridWidth)
                             }
-                            let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                            let nhr = Number((widget.height + dy) / page.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
-                                control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                                control.yRelative = Number((widget.y - dy) / page.gridHeight)
                             }
 
                             control.setDimensions()
@@ -363,8 +357,8 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             // Resize within bounds
-                            let rb = control.gridWidth - (resizableRect.x + resizableRect.width)
-                            let tb = resizableRect.y - parent.y
+                            let rb = page.gridWidth - (widget.x + widget.width)
+                            let tb = widget.y - parent.y
                             let dx = mouse.x - resizeIndicator.startX
                             if (dx > rb) {
                                 dx = rb
@@ -374,14 +368,14 @@ Item {
                                 dy = tb
                             }
 
-                            let nwr = Number((resizableRect.width + dx) / control.gridWidth)
+                            let nwr = Number((widget.width + dx) / page.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
                             }
-                            let nhr = Number((resizableRect.height + dy) / control.gridHeight)
+                            let nhr = Number((widget.height + dy) / page.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
-                                control.yRelative = Number((resizableRect.y - dy) / control.gridHeight)
+                                control.yRelative = Number((widget.y - dy) / page.gridHeight)
                             }
 
                             control.setDimensions()
@@ -395,11 +389,11 @@ Item {
 
     DropShadow {
         id: shadowEffect
-        anchors.fill: resizableRect
+        anchors.fill: widget
         horizontalOffset: 1
         verticalOffset: 1
         radius: 6.0
         color: Theme.shadowColor
-        source: resizableRect
+        source: widget
     }
 }

@@ -10,7 +10,7 @@ BaseWidget {
 
     Rectangle {
         id: historyWidget
-        parent: control.root
+        parent: control.widget
         color: "transparent"
         anchors {
             left: parent.left
@@ -148,7 +148,7 @@ BaseWidget {
     TogglerList {
         id: togglerList
         visible: togglerList.count > 0
-        parent: control.root
+        parent: control.widget
         clip: true
         anchors {
             left: parent.left

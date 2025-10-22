@@ -26,12 +26,6 @@ Item {
             id: widgetDateEvents
             type: CommonWidgets.Type.DateEvents
 
-            xRelative: 0.05
-            yRelative: 0.05
-
-            wRelative: 0.25
-            hRelative: 0.50
-
             wMin: 300
             hMin: 350
         }
@@ -43,12 +37,6 @@ Item {
         FavoritesWidget {
             id: widgetFavorites
             type: CommonWidgets.Type.Favorites
-
-            xRelative: 0.05
-            yRelative: 0.05
-
-            wRelative: 0.25
-            hRelative: 0.50
 
             wMin: 300
             hMin: 350
@@ -62,12 +50,6 @@ Item {
             id: widgetHistory
             type: CommonWidgets.Type.History
 
-            xRelative: 0.05
-            yRelative: 0.05
-
-            wRelative: 0.45
-            hRelative: 0.65
-
             wMin: 550
             hMin: 500
         }
@@ -79,12 +61,6 @@ Item {
         BaseWidget {
             id: widgetExample
             type: CommonWidgets.Type.Example
-
-            xRelative: 0.05
-            yRelative: 0.05
-
-            wRelative: 0.25
-            hRelative: 0.25
 
             wMin: 250
             hMin: 250
