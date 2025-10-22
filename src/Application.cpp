@@ -183,7 +183,7 @@ Application::~Application()
 
 void Application::shutdown()
 {
-    StateManager::instance().setSaveDynamicUi(true);
+    StateManager::instance().setUiSaveState(true);
 
     NotificationManager::instance().shutdown();
     USBDevices::instance().shutdown();

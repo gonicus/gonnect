@@ -15,7 +15,8 @@ class StateManager : public QObject
     Q_PROPERTY(bool globalShortcutsSupported READ globalShortcutsSupported NOTIFY
                        globalShortcutsSupportedChanged FINAL)
     Q_PROPERTY(bool uiEditMode READ uiEditMode NOTIFY uiEditModeChanged FINAL)
-    Q_PROPERTY(bool saveDynamicUi READ saveDynamicUi NOTIFY saveDynamicUiChanged FINAL)
+    Q_PROPERTY(bool uiDirtyState READ uiDirtyState NOTIFY uiDirtyStateChanged FINAL)
+    Q_PROPERTY(bool uiSaveState READ uiSaveState NOTIFY uiSaveStateChanged FINAL)
     Q_PROPERTY(QVariantMap globalShortcuts READ globalShortcuts NOTIFY globalShortcutsChanged FINAL)
 
 public:
@@ -33,8 +34,11 @@ public:
     Q_INVOKABLE void setUiEditMode(bool option);
     bool uiEditMode() { return m_uiEditMode; };
 
-    Q_INVOKABLE void setSaveDynamicUi(bool option);
-    bool saveDynamicUi() { return m_saveDynamicUi; };
+    Q_INVOKABLE void setUiDirtyState(bool option);
+    bool uiDirtyState() { return m_uiDirtyState; };
+
+    Q_INVOKABLE void setUiSaveState(bool option);
+    bool uiSaveState() { return m_uiSaveState; };
 
     void initialize();
     bool globalShortcutsSupported() const;
@@ -56,7 +60,8 @@ public:
 
 Q_SIGNALS:
     void uiEditModeChanged();
-    void saveDynamicUiChanged();
+    void uiDirtyStateChanged();
+    void uiSaveStateChanged();
     void globalShortcutsSupportedChanged();
     void globalShortcutsChanged();
 
@@ -80,7 +85,8 @@ private:
     ICallState::States m_oldCallState = ICallState::State::Idle;
 
     bool m_uiEditMode = false;
-    bool m_saveDynamicUi = false;
+    bool m_uiDirtyState = false;
+    bool m_uiSaveState = false;
 
     bool m_isFirstInstance = true;
 };
