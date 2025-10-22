@@ -10,7 +10,7 @@ BaseWidget {
 
     Rectangle {
         id: favWidget
-        parent: control.root
+        parent: control.widget
         color: "transparent"
         anchors {
             centerIn: parent

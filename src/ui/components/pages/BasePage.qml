@@ -30,7 +30,7 @@ Item {
 
     property alias gridWidth: snapGrid.width
     property alias gridHeight: snapGrid.height
-    property alias density: snapGrid.cellSize
+    property int gridDensity: 15
 
     signal gridResized()
 
@@ -82,7 +82,6 @@ Item {
             control.gridResized()
         }
 
-        property int cellSize: 15
         property int dotRadius: 1
 
         Canvas {
@@ -94,8 +93,8 @@ Item {
                 ctx.clearRect(0, 0, width, height)
                 ctx.fillStyle = "gray"
 
-                for (let x = 0; x < width; x += snapGrid.cellSize) {
-                    for (let y = 0; y < height; y += snapGrid.cellSize) {
+                for (let x = 0; x < width; x += control.gridDensity) {
+                    for (let y = 0; y < height; y += control.gridDensity) {
                         ctx.beginPath()
                         ctx.arc(x, y, snapGrid.dotRadius, 0, 2*Math.PI)
                         ctx.fill()
