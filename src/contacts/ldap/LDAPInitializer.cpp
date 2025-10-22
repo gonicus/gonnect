@@ -2,10 +2,14 @@
 
 #include <QLoggingCategory>
 #include <QCoreApplication>
-#include <sasl/sasl.h>
+
+#ifdef HAVE_SASL
+#  include <sasl/sasl.h>
+#endif
 
 Q_LOGGING_CATEGORY(lcLDAPInitializer, "gonnect.app.LDAPInitializer")
 
+#ifdef HAVE_SASL
 static int interact(LDAP *ld, unsigned flags, void *defaults, void *sasl_interact)
 {
     Q_UNUSED(ld)
@@ -55,6 +59,7 @@ static int interact(LDAP *ld, unsigned flags, void *defaults, void *sasl_interac
 
     return LDAP_SUCCESS;
 }
+#endif
 
 LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config)
 {
@@ -117,11 +122,13 @@ LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config)
             result = ldap_sasl_bind_s(ldap, config.bindDn.toStdString().c_str(), LDAP_SASL_SIMPLE,
                                       &cred, NULL, NULL, NULL);
 
+#ifdef HAVE_SASL
         } else if (config.bindMethod == LDAPInitializer::BindMethod::GSSAPI) {
             result = ldap_sasl_interactive_bind_s(ldap, config.bindDn.toStdString().c_str(),
                                                   "GSSAPI", NULL, NULL, LDAP_SASL_INTERACTIVE,
                                                   &interact,
                                                   const_cast<LDAPInitializer::Config *>(&config));
+#endif
         }
 
         if (result != LDAP_SUCCESS) {
