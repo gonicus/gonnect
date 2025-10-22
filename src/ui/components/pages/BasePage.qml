@@ -60,6 +60,7 @@ Item {
         widgetSelectionWindowComponent.createObject(control).show()
     }
 
+    // TODO: This should be rounded up in steps as well, otherwise weird clipping will occur
     Rectangle {
         id: snapGrid
         visible: control.editMode

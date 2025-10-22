@@ -22,8 +22,8 @@ Item {
     required property double wMin
     required property double hMin
 
-    property double wRelativeMin: control.wMin / control.gridWidth
-    property double hRelativeMin: control.hMin / control.gridHeight
+    property double wRelativeMin: 0
+    property double hRelativeMin: 0
 
     property alias root: resizableRect
 
@@ -71,12 +71,18 @@ Item {
     Connections {
         target: resized
         function onGridResized() {
+            control.wRelativeMin = Number(control.wMin / control.gridWidth)
+            control.hRelativeMin = Number(control.hMin / control.gridHeight)
+
             control.setPlacement()
             control.setDimensions()
         }
     }
 
     Component.onCompleted: {
+        control.wRelativeMin = Number(control.wMin / control.gridWidth)
+        control.hRelativeMin = Number(control.hMin / control.gridHeight)
+
         control.setPlacement()
         control.setDimensions()
     }
