@@ -15,6 +15,13 @@ option(BUILD_DEPENDENCIES "Build dependencies" OFF)
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)
 
+# Contacts / Calendar plugins
+option(ENABLE_AKONADI "Enable Akonadi plugins" OFF)
+option(ENABLE_EDS "Enable EDS plugins" ON)
+option(ENABLE_LDAP "Enable LDAP plugin" ON)
+option(ENABLE_DAV "Enable DAV plugin" ON)
+option(ENABLE_CSV "Enable CSV plugin" ON)
+
 set(APP_ID "de.gonicus.gonnect")
 add_definitions(-DAPP_ID="${APP_ID}")
 
