@@ -186,7 +186,7 @@ BaseWindow {
 
     readonly property Connections dynamicUiConnections: Connections {
         target: SM
-        function onSaveDynamicUiChanged() {
+        function onUiSaveStateChanged() {
             if (SM.uiSaveState) {
                 console.log("Writing dynamic UI state to disk")
 
