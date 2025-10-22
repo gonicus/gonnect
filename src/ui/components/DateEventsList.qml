@@ -164,7 +164,7 @@ ListView {
 
                 Action {
                     text: qsTr('Copy room link')
-                    onTriggered: () => ViewHelper.copyToClipboard(delg.roomName)
+                    onTriggered: () => ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
                 }
             }
         }
