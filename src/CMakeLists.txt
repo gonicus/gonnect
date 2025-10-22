@@ -20,8 +20,6 @@ include(FindPkgConfig)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
 pkg_check_modules(PJSIP REQUIRED libpjproject)
-pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
-pkg_check_modules(SASL2 REQUIRED IMPORTED_TARGET libsasl2)
 pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
 pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
 pkg_check_modules(LIBICAL REQUIRED libical IMPORTED_TARGET)
@@ -107,16 +105,13 @@ set(gonnect_qml_singletons
 set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 add_subdirectory(contacts/ldap)
-add_subdirectory(contacts/carddav)
 add_subdirectory(contacts/csv)
-add_subdirectory(contacts/eds)
+add_subdirectory(contacts/carddav)
 add_subdirectory(calendar/caldav)
+add_subdirectory(contacts/eds)
 add_subdirectory(calendar/eds)
-
-# Disabled, because akonadi doesn't provide a reliable way to be used
-# within flatpaks.
-#add_subdirectory(contacts/akonadi)
-#add_subdirectory(calendar/akonadi)
+add_subdirectory(contacts/akonadi)
+add_subdirectory(calendar/akonadi)
 
 if(BUILD_DEPENDENCIES)
     include(ExternalProject)
@@ -518,8 +513,6 @@ qt_add_qml_module(gonnect
         contacts/ResponseTreeItem.cpp
         contacts/ResponseTreeModel.h
         contacts/ResponseTreeModel.cpp
-        contacts/LDAPInitializer.h
-        contacts/LDAPInitializer.cpp
         contacts/IAddressBookFactory.h
 
         media/AudioManager.h
@@ -666,8 +659,6 @@ endif()
 
 target_link_libraries(gonnect
     PRIVATE
-        PkgConfig::OPENLDAP
-        PkgConfig::SASL2
         Qt6::Core
         Qt6::CorePrivate
         Qt6::Gui
@@ -705,6 +696,7 @@ target_link_libraries(gonnect
         CalDAVEventFeederFactory
         ${EDS_ADDRESSBOOK_LIBRARIES}
         ${EDS_CALENDAR_LIBRARIES}
+        ${LDAP_ADDRESSBOOK_LIBRARIES}
 )
 target_link_libraries(gonnect PRIVATE Qt6::Core)
 
@@ -716,7 +708,8 @@ qt_import_plugins(gonnect INCLUDE
      CSVAddressBookFactory
      CalDAVEventFeederFactory
      ${EDS_ADDRESSBOOK_FACTORY}
-     ${EDS_CALENDAR_FACTORY})
+     ${EDS_CALENDAR_FACTORY}
+     ${LDAP_ADDRESSBOOK_FACTORY})
 
 target_include_directories(gonnect
     PRIVATE
