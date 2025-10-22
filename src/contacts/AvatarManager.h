@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QTimer>
 #include "Contact.h"
-#include "LDAPInitializer.h"
 
 class AvatarManager : public QObject
 {

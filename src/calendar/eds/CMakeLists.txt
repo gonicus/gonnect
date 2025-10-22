@@ -1,10 +1,7 @@
-# EDS plugin
-pkg_check_modules(GLIB glib-2.0)
-pkg_check_modules(EDS libecal-2.0 libedata-cal-2.0)
+if(ENABLE_EDS)
+    pkg_check_modules(GLIB REQUIRED glib-2.0)
+    pkg_check_modules(EDS REQUIRED libecal-2.0 libedata-cal-2.0)
 
-if("${GLIB_LIBRARIES}" STREQUAL "" OR "${EDS_LIBRARIES}" STREQUAL "")
-    message(STATUS "Skipping EDS build - no libraries found")
-else()
     qt_add_plugin(EDSEventFeederFactory STATIC
       CLASS_NAME EDSEventFeederFactory
     
