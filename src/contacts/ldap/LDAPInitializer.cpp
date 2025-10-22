@@ -131,7 +131,6 @@ LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config)
 #endif
         }
 
-
         if (result != LDAP_SUCCESS) {
             qCCritical(lcLDAPInitializer) << "Error on LDAP bind:" << ldap_err2string(result);
             if (ldap) {
