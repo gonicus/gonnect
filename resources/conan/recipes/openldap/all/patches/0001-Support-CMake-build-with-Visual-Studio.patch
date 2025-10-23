@@ -1,32 +1,19 @@
-From c92df711d15bff83f815cdb0df21701299f47ba0 Mon Sep 17 00:00:00 2001
-From: Windows User <someone@windows-machine.arg>
-Date: Sat, 27 Sep 2025 17:08:39 +0200
-Subject: [PATCH] Support CMake build with Visual Studio
+commit 7e47519aeaa3e2258d2f823e727485c007d9af60
+Author: Windows User <someone@windows-machine.arg>
+Date:   Sat Sep 27 17:08:39 2025 +0200
 
----
- CMakeLists.txt              | 205 ++++++++++++++++++++++++++++++++++++
- include/ac/socket.h         |   3 +
- include/lber_types.h.win    |  64 +++++++++++
- include/ldap_config.h.win   |  73 +++++++++++++
- include/ldap_features.h.win |  55 ++++++++++
- include/portable.h.win      | 123 ++++++++++++++++++++++
- libraries/liblber/sockbuf.c |   5 +-
- 7 files changed, 527 insertions(+), 1 deletion(-)
- create mode 100644 CMakeLists.txt
- create mode 100644 include/lber_types.h.win
- create mode 100644 include/ldap_config.h.win
- create mode 100644 include/ldap_features.h.win
- create mode 100644 include/portable.h.win
+    Support CMake build with Visual Studio
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000000..5bb73c5981
+index 0000000000..b8491610c4
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,205 @@
+@@ -0,0 +1,212 @@
 +cmake_minimum_required(VERSION 3.18.0)
 +project(libopenldap C)
 +
++find_package(OpenSSL REQUIRED)
 +
 +configure_file(
 +    include/lber_types.h.win
@@ -60,7 +47,7 @@ index 0000000000..5bb73c5981
 +	libraries/liblber/sockbuf.c
 +	libraries/liblber/nt_err.c
 +)
-+	
++
 +add_library(lber STATIC
 +	${LBER_SOURCES}
 +)
@@ -72,8 +59,10 @@ index 0000000000..5bb73c5981
 +
 +target_link_libraries(lber PRIVATE
 +	Ws2_32
++    openssl::openssl
 +)
 +
++target_compile_definitions(lber PRIVATE -DHAVE_TLS=1 -DHAVE_OPENSSL=1 -DHAVE_OPENSSL_SSL_H=1)
 +
 +set(LDAP_SOURCES
 +	libraries/libldap/bind.c
@@ -214,7 +203,11 @@ index 0000000000..5bb73c5981
 +target_link_libraries(ldap PRIVATE
 +	Ws2_32
 +	lber
++    openssl::openssl
 +)
++
++target_compile_definitions(ldap PRIVATE -DHAVE_TLS=1 -DHAVE_OPENSSL=1 -DHAVE_OPENSSL_SSL_H=1)
++
 +
 +install (TARGETS lber
 +    RUNTIME DESTINATION bin
@@ -605,6 +598,3 @@ index 89d037bcad..638658a5e8 100644
  	int flags = fcntl( sd, F_GETFL);
  	if( nb ) {
  		flags |= O_NONBLOCK;
--- 
-2.50.1.windows.1
-
