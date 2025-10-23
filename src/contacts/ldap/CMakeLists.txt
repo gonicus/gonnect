@@ -1,8 +1,15 @@
 if(ENABLE_LDAP)
-    include(FindPkgConfig)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
-    pkg_check_modules(SASL2 IMPORTED_TARGET libsasl2)
+    if(UNIX)
+        include(FindPkgConfig)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
+        pkg_check_modules(SASL2 IMPORTED_TARGET libsasl2)
+
+        set(LDAP_PLATFORM_LIBS PkgConfig::OPENLDAP)
+    else()
+        find_package(OpenLDAP REQUIRED)
+        set(LDAP_PLATFORM_LIBS OpenLDAP::LDAP)
+    endif()
 
     qt_add_plugin(LDAPAddressBookFactory STATIC
       CLASS_NAME LDAPAddressBookFactory
@@ -16,7 +23,7 @@ if(ENABLE_LDAP)
     )
 
     target_compile_definitions(LDAPAddressBookFactory PRIVATE HAVE_SASL=${SASL2_FOUND})
-    
+
     target_include_directories(LDAPAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
