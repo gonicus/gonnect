@@ -22,7 +22,9 @@ if(ENABLE_LDAP)
       LDAPInitializer.h
     )
 
-    target_compile_definitions(LDAPAddressBookFactory PRIVATE HAVE_SASL=${SASL2_FOUND})
+    if(HAVE_SASL)
+        target_compile_definitions(LDAPAddressBookFactory PRIVATE HAVE_SASL=1)
+    endif()
 
     target_include_directories(LDAPAddressBookFactory
       PRIVATE
