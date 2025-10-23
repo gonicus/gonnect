@@ -47,7 +47,6 @@ class PjSIPConan(ConanFile):
         "endianness": "little",
     }
 
-    implements = ["auto_shared_fpic"]
     languages = "C"
 
     def requirements(self):
@@ -58,6 +57,10 @@ class PjSIPConan(ConanFile):
             self.requires("libuuid/1.0.3")
         if self.options.with_samplerate:
             self.requires("libsamplerate/0.2.2")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def layout(self):
         basic_layout(self, src_folder="src")

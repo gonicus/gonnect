@@ -88,6 +88,8 @@ class GOnnectRecipe(ConanFile):
         self.options["openldap/*"].with_cyrus_sasl=False
         self.options["harfbuzz/*"].with_subset=True
 
+        self.options["pjproject/*"].shared = False
+
         if self.options.with_conan_qt:
             self.options["*/*"].with_conan_qt=True
             self.options["qt/*"].with_mysql=False
@@ -122,6 +124,7 @@ class GOnnectRecipe(ConanFile):
             self.options["qt/*"].qtwebchannel=True
             self.options["qt/*"].qtwebengine=True
             self.options["qt/*"].qtnetworkauth=True
+            self.options["qt/*"].qthttpserver=True
             self.options["qt/*"].qtscxml=False
             self.options["qt/*"].qtmqtt=False
             self.options["qt/*"].qtwebview=False
