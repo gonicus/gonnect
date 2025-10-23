@@ -66,8 +66,8 @@ Item {
             control.wRelativeMin = Number(control.wMin / page.gridWidth)
             control.hRelativeMin = Number(control.hMin / page.gridHeight)
 
-            control.setPlacement()
             control.setDimensions()
+            control.setPlacement()
         }
     }
 
@@ -75,8 +75,8 @@ Item {
         control.wRelativeMin = Number(control.wMin / page.gridWidth)
         control.hRelativeMin = Number(control.hMin / page.gridHeight)
 
-        control.setPlacement()
         control.setDimensions()
+        control.setPlacement()
     }
 
     // Basic widget
