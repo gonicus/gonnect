@@ -15,7 +15,6 @@ BaseWidget {
         anchors {
             centerIn: parent
             fill: parent
-            bottomMargin: 15
         }
 
         CardHeading {

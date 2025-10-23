@@ -115,10 +115,6 @@ Item {
                         widget = widgets.history.createObject(page,
                                                               widgetProperties)
                         break
-                    case CommonWidgets.Type.Example:
-                        widget = widgets.example.createObject(page,
-                                                              widgetProperties)
-                        break
                     default:
                         widget = null
                         console.log("Widget type unknown", type)

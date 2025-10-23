@@ -17,7 +17,6 @@ BaseWidget {
             top: parent.top
             right: parent.right
             bottom: togglerList.visible ? togglerList.top : parent.bottom
-            bottomMargin: togglerList.visible ? 5 : 24
         }
 
         CardHeading {

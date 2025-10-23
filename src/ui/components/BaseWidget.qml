@@ -68,8 +68,6 @@ Item {
 
             control.setPlacement()
             control.setDimensions()
-
-            console.log(widget.x, widget.y, widget.width, widget.height)
         }
     }
 

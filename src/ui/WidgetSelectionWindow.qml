@@ -66,10 +66,6 @@ BaseWindow {
                     name: "History"
                     description: qsTr("A searchable call/conference history")
                 }
-                ListElement {
-                    name: "Example";
-                    description: qsTr("An example widget, ha ha")
-                }
             }
 
             delegate: ItemDelegate {
@@ -174,10 +170,6 @@ BaseWindow {
                             break
                         case CommonWidgets.Type.History:
                             widget = widgets.history.createObject(pageRoot,
-                                                                  widgetProperties)
-                            break
-                        case CommonWidgets.Type.Example:
-                            widget = widgets.example.createObject(pageRoot,
                                                                   widgetProperties)
                             break
                         default:

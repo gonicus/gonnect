@@ -10,13 +10,11 @@ Item {
     property alias dateEvents: compDateEvents
     property alias favorites: compFavorites
     property alias history: compHistory
-    property alias example: compExample
 
     enum Type {
         DateEvents,
         Favorites,
-        History,
-        Example
+        History
     }
 
     Component {
@@ -52,18 +50,6 @@ Item {
 
             wMin: 550
             hMin: 500
-        }
-    }
-
-    Component {
-        id: compExample
-
-        BaseWidget {
-            id: widgetExample
-            type: CommonWidgets.Type.Example
-
-            wMin: 250
-            hMin: 250
         }
     }
 }
