@@ -91,6 +91,8 @@ class GOnnectRecipe(ConanFile):
         self.options["harfbuzz/*"].with_subset=True
 
         self.options["pjproject/*"].shared = False
+        if self.settings.os == "Windows":
+            self.options["pjproject/*"].with_uuid=False
 
         if self.options.with_conan_qt:
             self.options["*/*"].with_conan_qt=True
