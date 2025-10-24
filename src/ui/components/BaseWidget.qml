@@ -28,10 +28,6 @@ Item {
     property alias page: control.parent
     property alias widget: resizableRect
 
-    // INFO: Temporarily overrides render/draw order in edit mode. All widgets have
-    // a different elevation based on the order they were instantiated in
-    z: hoverEdit?.containsMouse ? 100 : 0
-
     function setPlacement() {
         control.widget.x = Math.round((page.gridWidth * control.xRelative) / page.gridDensity) * page.gridDensity
         control.widget.x = Math.max(0, Math.min(control.widget.x, page.gridWidth - control.widget.width))
@@ -136,6 +132,15 @@ Item {
                     acceptedButtons: Qt.LeftButton
                     cursorShape: active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                     target: widget
+
+                    // INFO: Temporarily override render/draw order of a widget
+                    // in edit mode.
+                    onGrabChanged: function(grab) {
+                        if (grab === PointerDevice.GrabExclusive) {
+                            page.resetWidgetElevation()
+                            control.z = 100
+                        }
+                    }
 
                     onActiveChanged: function(active) {
                         if (!active) {

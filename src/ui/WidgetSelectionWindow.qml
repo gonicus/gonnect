@@ -180,6 +180,7 @@ BaseWindow {
                     if (widget === null) {
                         console.log("Could not create widget component")
                     } else {
+                        pageRoot.resetWidgetElevation()
                         pageRoot.model.add(widget)
 
                         SM.setUiDirtyState(true)

@@ -39,6 +39,12 @@ Item {
         id: widgetModel
     }
 
+    function resetWidgetElevation() {
+        for (const widget of model.items()) {
+            widget.z = 0
+        }
+    }
+
     property alias writer: pageWriter
     PageWriter {
         id: pageWriter
