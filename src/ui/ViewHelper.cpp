@@ -3,7 +3,6 @@
 #include "AddressBookManager.h"
 #include "Contact.h"
 #include "Application.h"
-#include "JsChatConnector.h"
 #include "NumberStats.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Ringer.h"
