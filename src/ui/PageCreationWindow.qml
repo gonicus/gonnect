@@ -135,6 +135,8 @@ BaseWindow {
                     tabRoot.createTab(pageId, pageType, icon, text)
                     tabRoot.mainWindow.createPage(pageId, icon, text)
 
+                    SM.setUiDirtyState(true)
+
                     control.close()
                 }
             }

@@ -204,6 +204,7 @@ BaseWindow {
                 mainTabBar.saveTabList()
 
                 SM.setUiSaveState(false)
+                SM.setUiDirtyState(false)
             }
         }
     }

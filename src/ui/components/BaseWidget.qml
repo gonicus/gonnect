@@ -141,7 +141,10 @@ Item {
                         if (!active) {
                             control.xRelative = Number(widget.x / page.gridWidth)
                             control.yRelative = Number(widget.y / page.gridHeight)
+
                             control.setPlacement()
+
+                            SM.setUiDirtyState(true)
                         }
                     }
                 }
@@ -176,6 +179,8 @@ Item {
                     onClicked: {
                         control.page.model.remove(control)
                         control.destroy()
+
+                        SM.setUiDirtyState(true)
                     }
                 }
             }
@@ -229,7 +234,10 @@ Item {
 
                             control.wRelative = Number((widget.width + dx) / page.gridWidth)
                             control.hRelative = Number((widget.height + dy) / page.gridHeight)
+
                             control.setDimensions()
+
+                            SM.setUiDirtyState(true)
                         }
                     }
                 }
@@ -279,6 +287,8 @@ Item {
 
                             control.setDimensions()
                             control.setPlacement()
+
+                            SM.setUiDirtyState(true)
                         }
                     }
                 }
@@ -329,6 +339,8 @@ Item {
 
                             control.setDimensions()
                             control.setPlacement()
+
+                            SM.setUiDirtyState(true)
                         }
                     }
                 }
@@ -378,6 +390,8 @@ Item {
 
                             control.setDimensions()
                             control.setPlacement()
+
+                            SM.setUiDirtyState(true)
                         }
                     }
                 }

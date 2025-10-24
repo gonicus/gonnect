@@ -46,6 +46,7 @@ Item {
             icon.source: Icons.objectSelectSymbolic
             height: control.buttonHeight
             text: qsTr("Save")
+            enabled: SM.uiDirtyState
 
             onClicked: {
                 SM.setUiSaveState(true)

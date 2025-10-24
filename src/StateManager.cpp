@@ -73,7 +73,6 @@ void StateManager::setUiEditMode(bool option)
     }
 };
 
-// TODO: Call this through other signals to have a working dirty state
 void StateManager::setUiDirtyState(bool option)
 {
     if (m_uiDirtyState != option) {

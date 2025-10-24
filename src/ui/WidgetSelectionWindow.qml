@@ -181,6 +181,8 @@ BaseWindow {
                         console.log("Could not create widget component")
                     } else {
                         pageRoot.model.add(widget)
+
+                        SM.setUiDirtyState(true)
                     }
 
                     control.close()
