@@ -30,7 +30,7 @@ Item {
 
     property alias gridWidth: snapGrid.width
     property alias gridHeight: snapGrid.height
-    property int gridDensity: 15
+    property double gridDensity: 15
 
     signal gridResized()
 
@@ -107,12 +107,14 @@ Item {
         }
     }
 
-    // TODO: Provide button to get into edit mode right away instead
-    Label {
-        id: emptyPageInfo
+    Button {
+        icon.source: Icons.viewLeftNew
+        text: qsTr("Add widgets")
         visible: control.emptyPage && !control.editMode
         anchors.centerIn: parent
 
-        text: qsTr("This page is empty. Add widgets by using the edit mode") + " ( ≡ )"
+        onClicked: {
+            SM.setUiEditMode(true)
+        }
     }
 }
