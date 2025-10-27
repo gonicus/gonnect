@@ -78,6 +78,8 @@ class GOnnectRecipe(ConanFile):
         self.requires("libusb/1.0.26")
 
         self.requires("openssl/3.5.4", override=True)
+        self.requires("mpg123/1.33.0", override=True)
+        self.requires("wayland/1.23.92", override=True)
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -142,7 +144,7 @@ class GOnnectRecipe(ConanFile):
             if self.settings.os == "Linux":
                 self.options["qt/*"].with_dbus=True
                 self.options["qt/*"].with_fontconfig=True
-                self.options["qt/*"].qtwayland=True
+                self.options["qt/*"].qtwayland=False
             else:
                 self.options["qt/*"].with_dbus=False
                 self.options["qt/*"].qtwayland=False

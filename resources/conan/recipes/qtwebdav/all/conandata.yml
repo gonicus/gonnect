@@ -4,3 +4,4 @@ sources:
     sha256: "059ef0c4d0f26c34eefb243c2bd9f7701dabd9e0bfc1793dd546f2410b646a1c"
 patches:
   - patch_file: "patches/fixcmake.patch"
+  - patch_file: "patches/remove-deprecations.patch"
