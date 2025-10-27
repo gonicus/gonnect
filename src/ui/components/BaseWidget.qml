@@ -28,28 +28,17 @@ Item {
     property alias page: control.parent
     property alias widget: resizableRect
 
+    function setDimensions() {
+        control.widget.width = Math.round((page.gridWidth * control.wRelative) / page.gridDensity) * page.gridDensity
+        control.widget.height = Math.round((page.gridHeight * control.hRelative) / page.gridDensity) * page.gridDensity
+    }
+
     function setPlacement() {
         control.widget.x = Math.round((page.gridWidth * control.xRelative) / page.gridDensity) * page.gridDensity
         control.widget.x = Math.max(0, Math.min(control.widget.x, page.gridWidth - control.widget.width))
 
         control.widget.y = Math.round((page.gridHeight * control.yRelative) / page.gridDensity) * page.gridDensity
         control.widget.y = Math.max(0, Math.min(control.widget.y, page.gridHeight - control.widget.height))
-    }
-
-    function setDimensions() {
-        // Width
-        if (control.wRelative < control.wRelativeMin) {
-            control.wRelative = control.wRelativeMin
-        }
-
-        control.widget.width = Math.round((page.gridWidth * control.wRelative) / page.gridDensity) * page.gridDensity
-
-        // Height
-        if (control.hRelative < control.hRelativeMin) {
-            control.hRelative = control.hRelativeMin
-        }
-
-        control.widget.height = Math.round((page.gridHeight * control.hRelative) / page.gridDensity) * page.gridDensity
     }
 
     function makeOpaque(base : color, opacity : double) : color {
@@ -62,6 +51,14 @@ Item {
             control.wRelativeMin = Number(control.wMin / page.gridWidth)
             control.hRelativeMin = Number(control.hMin / page.gridHeight)
 
+            if (control.wRelative < control.wRelativeMin) {
+                control.wRelative = control.wRelativeMin
+            }
+
+            if (control.hRelative < control.hRelativeMin) {
+                control.hRelative = control.hRelativeMin
+            }
+
             control.setDimensions()
             control.setPlacement()
         }
@@ -70,6 +67,14 @@ Item {
     Component.onCompleted: {
         control.wRelativeMin = Number(control.wMin / page.gridWidth)
         control.hRelativeMin = Number(control.hMin / page.gridHeight)
+
+        if (control.wRelative < control.wRelativeMin) {
+            control.wRelative = control.wRelativeMin
+        }
+
+        if (control.hRelative < control.hRelativeMin) {
+            control.hRelative = control.hRelativeMin
+        }
 
         control.setDimensions()
         control.setPlacement()
@@ -237,8 +242,19 @@ Item {
                                 dy = bb
                             }
 
-                            control.wRelative = Number((widget.width + dx) / page.gridWidth)
-                            control.hRelative = Number((widget.height + dy) / page.gridHeight)
+                            let nwr = Number((widget.width + dx) / page.gridWidth)
+                            if (nwr >= control.wRelativeMin) {
+                                control.wRelative = nwr
+                            } else {
+                                control.wRelative = control.wRelativeMin
+                            }
+
+                            let nhr = Number((widget.height + dy) / page.gridHeight)
+                            if (nhr >= control.hRelativeMin) {
+                                control.hRelative = nhr
+                            } else {
+                                control.hRelative = control.hRelativeMin
+                            }
 
                             control.setDimensions()
 
@@ -288,6 +304,8 @@ Item {
                             let nhr = Number((widget.height + dy) / page.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
+                            } else {
+                                control.hRelative = control.hRelativeMin
                             }
 
                             control.setDimensions()
@@ -386,7 +404,10 @@ Item {
                             let nwr = Number((widget.width + dx) / page.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
+                            } else {
+                                control.wRelative = control.wRelativeMin
                             }
+
                             let nhr = Number((widget.height + dy) / page.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr

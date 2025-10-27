@@ -66,6 +66,11 @@ Item {
         widgetSelectionWindowComponent.createObject(control).show()
     }
 
+    anchors {
+        leftMargin: 15
+        rightMargin: 15
+    }
+
     // TODO: This should be rounded up in steps as well, otherwise weird clipping will occur
     Rectangle {
         id: snapGrid
