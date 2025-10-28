@@ -8,9 +8,10 @@ if(ENABLE_DAV)
             PkgConfig::LIBICAL)
     else()
         find_package(libical REQUIRED)
+        find_package(QtWebDAV REQUIRED)
     
         list(APPEND CALDAV_PLATFORM_LIBRARIES
-            libical::libical)
+            libical::libical QtWebDAV)
     endif()
     
     qt_add_plugin(CalDAVEventFeederFactory STATIC

@@ -172,6 +172,8 @@ class QtConan(ConanFile):
 
         cmake = CMakeDeps(self)
         cmake.set_property("libdrm", "cmake_file_name", "Libdrm")
+        cmake.set_property("libdrm", "cmake_target_name", "Libdrm::Libdrm")
+        cmake.set_property("libdrm::libdrm", "cmake_target_name", "Libdrm::Libdrm")
         cmake.set_property("libdrm::libdrm_libdrm", "cmake_target_name", "Libdrm::Libdrm")
         cmake.set_property("wayland", "cmake_file_name", "Wayland")
         cmake.set_property("wayland::wayland-client", "cmake_target_name", "Wayland::Client")
@@ -182,7 +184,7 @@ class QtConan(ConanFile):
         # override https://github.com/qt/qtbase/blob/dev/cmake/3rdparty/extra-cmake-modules/find-modules/FindEGL.cmake
         cmake.set_property("egl", "cmake_file_name", "EGL")
         cmake.set_property("egl", "cmake_find_mode", "module")
-        cmake.set_property("egl::egl", "cmake_target_name", "EGL::EGL")
+        cmake.set_property("egl", "cmake_target_name", "EGL::EGL")
 
         # don't override https://github.com/qt/qtmultimedia/blob/dev/cmake/FindGStreamer.cmake
         cmake.set_property("gstreamer", "cmake_file_name", "gstreamer_conan")

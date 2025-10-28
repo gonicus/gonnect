@@ -22,7 +22,9 @@ if(ENABLE_LDAP)
       LDAPInitializer.h
     )
 
-    target_compile_definitions(LDAPAddressBookFactory PRIVATE HAVE_SASL=${SASL2_FOUND})
+    if(HAVE_SASL)
+        target_compile_definitions(LDAPAddressBookFactory PRIVATE HAVE_SASL=1)
+    endif()
 
     target_include_directories(LDAPAddressBookFactory
       PRIVATE
@@ -35,13 +37,15 @@ if(ENABLE_LDAP)
         ${PROJECT_BINARY_DIR}/src
     )
     
-    target_link_libraries(LDAPAddressBookFactory PRIVATE
-      PkgConfig::OPENLDAP
-      PkgConfig::SASL2
+    target_link_libraries(LDAPAddressBookFactory
+    PRIVATE
       Qt6::Core
       Qt6::Gui
       Qt6::Quick
-      Qt6::Widgets)
+      Qt6::Widgets
+    PUBLIC
+      ${LDAP_PLATFORM_LIBS}
+    )
     
     set(LDAP_ADDRESSBOOK_FACTORY LDAPAddressBookFactory PARENT_SCOPE)
     set(LDAP_ADDRESSBOOK_LIBRARIES LDAPAddressBookFactory ${OPENLDAP_LIBRARIES} ${SASL2_LIBRARIES} PARENT_SCOPE)

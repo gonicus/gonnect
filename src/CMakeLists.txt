@@ -23,28 +23,24 @@ if(UNIX)
     pkg_check_modules(PJSIP REQUIRED libpjproject IMPORTED_TARGET)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
-
+    find_package(Qca-qt6 REQUIRED)
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI
-        PkgConfig::PJSIP)
+        PkgConfig::PJSIP
+        qca-qt6)
 else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
     find_package(pjproject REQUIRED)
-    find_package(qtwebdav REQUIRED)
-    find_package(qtkeychain REQUIRED)
-    find_package(OpenLDAP REQUIRED)
+    find_package(qca REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         hidapi::hidapi
         pjproject::pjproject
-        qtwebdav::qtwebdav
-        qtkeychain::qtkeychain
         libusb::libusb
-        OpenLDAP::LDAP
-        OpenLDAP::LBER)
+        qca::qca)
 endif()
 
 if(LINUX)
@@ -140,7 +136,6 @@ add_subdirectory(calendar/eds)
 add_subdirectory(contacts/akonadi)
 add_subdirectory(calendar/akonadi)
 
-find_package(Qca-qt6 REQUIRED)
 find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
@@ -651,7 +646,6 @@ target_link_libraries(gonnect
         Qt6::Core5Compat
         ${PLATFORM_LIBRARIES}
         GOnnectVersion
-        qca-qt6
         qt6keychain
         hid-rp
         Qt6::Xml

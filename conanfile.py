@@ -69,28 +69,32 @@ class GOnnectRecipe(ConanFile):
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 
+        if self.settings.os == "Linux":
+            self.requires("libnotify/system")
+            self.requires("libpulse/system")
+
         if self.options.with_conan_qt:
             self.requires("qt/6.10.0")
+            self.requires("openssl/3.5.4", override=True)
+            self.requires("mpg123/1.33.0", override=True)
+            self.requires("wayland/1.23.92", override=True)
 
         self.requires("qca/2.3.10")
         self.requires("qtwebdav/3.19.0")
         self.requires("qtkeychain/0.15.0")
         self.requires("libusb/1.0.26")
 
-        self.requires("openssl/3.5.4", override=True)
-        self.requires("mpg123/1.33.0", override=True)
-        self.requires("wayland/1.23.92", override=True)
-
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
     def configure(self):
-        self.options["*/*"].shared = self.settings.os != "Windows"
+        self.options["*/*"].shared = False
         self.options["openldap/*"].with_cyrus_sasl=False
         self.options["harfbuzz/*"].with_subset=True
 
-        self.options["pjproject/*"].shared = False
+        if self.settings.os == "Windows":
+            self.options["pjproject/*"].with_uuid=False
 
         if self.options.with_conan_qt:
             self.options["*/*"].with_conan_qt=True
@@ -140,6 +144,7 @@ class GOnnectRecipe(ConanFile):
             self.options["qt/*"].qtgrpc=False
             self.options["qt/*"].qtquickeffectmaker=False
             self.options["qt/*"].qtgraphs=False
+            self.options["qt/*"].qtwayland=False
 
             if self.settings.os == "Linux":
                 self.options["qt/*"].with_dbus=True
@@ -147,7 +152,6 @@ class GOnnectRecipe(ConanFile):
                 self.options["qt/*"].qtwayland=False
             else:
                 self.options["qt/*"].with_dbus=False
-                self.options["qt/*"].qtwayland=False
 
             if self.settings.os == "Macos":
                 self.options["qt/*"].with_harfbuzz=False # TODO: why? cmake info export for harfbuzz != both?
