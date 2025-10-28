@@ -131,13 +131,10 @@ add_subdirectory(contacts/ldap)
 add_subdirectory(contacts/csv)
 add_subdirectory(calendar/caldav)
 add_subdirectory(contacts/carddav)
-
-if(LINUX)
-    add_subdirectory(contacts/eds)
-    add_subdirectory(calendar/eds)
-    add_subdirectory(contacts/akonadi)
-    add_subdirectory(calendar/akonadi)
-endif()
+add_subdirectory(contacts/eds)
+add_subdirectory(calendar/eds)
+add_subdirectory(contacts/akonadi)
+add_subdirectory(calendar/akonadi)
 
 find_package(Qt6Keychain REQUIRED)
 
