@@ -24,3 +24,4 @@ sources:
 patches:
   "6.10.0":
     - patch_file: "patches/untag-versions.patch"
+    - patch_file: "patches/fix-macos-no-framework.patch"

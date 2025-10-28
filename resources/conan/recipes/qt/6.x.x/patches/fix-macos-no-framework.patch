@@ -1,0 +1,12 @@
+diff -Naur a/qtwebengine/src/core/chromium_overrides.cpp b/qtwebengine/src/core/chromium_overrides.cpp
+--- a/qtwebengine/src/core/chromium_overrides.cpp	2025-10-02 02:36:39
++++ b/qtwebengine/src/core/chromium_overrides.cpp	2025-10-24 12:16:58
+@@ -70,7 +70,7 @@
+ #else
+ base::FilePath getSandboxPath()
+ {
+-    const QString prefix = QLibraryInfo::location(QLibraryInfo::PrefixPath);
++    const QString prefix = QLibraryInfo::path(QLibraryInfo::PrefixPath);
+     return QtWebEngineCore::toFilePath(prefix);
+ }
+ #endif
