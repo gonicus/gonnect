@@ -52,6 +52,7 @@ class QtConan(ConanFile):
         "with_pcre2": [True, False],
         "with_dbus": [True, False],
         "with_glib": [True, False],
+        "with_zstd": [True, False],
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
         "with_fontconfig": [True, False],
@@ -94,6 +95,7 @@ class QtConan(ConanFile):
         "securetransport": False,
         "with_pcre2": True,
         "with_glib": True,
+        "with_zstd": True,
         "with_tabletevent": True,
         "with_doubleconversion": True,
         "with_freetype": True,
@@ -298,6 +300,8 @@ class QtConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.78.3")
             self.options["glib/*"].shared = True
+        if self.options.with_zstd:
+            self.requires("zstd/[>=1.5 <1.6]")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.3.0")
         if self.options.with_freetype and not self.options.multiconfiguration:
@@ -305,7 +309,7 @@ class QtConan(ConanFile):
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.15.0")
         if self.options.qtwayland:
-            self.requires("wayland/1.22.0")
+            self.requires("wayland/1.23.92")
         if self.options.get_safe("qtwebengine"):
             self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
@@ -313,7 +317,7 @@ class QtConan(ConanFile):
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
             if self.settings.os == "Linux":
-                self.requires("libdrm/2.4.119")
+                self.requires("libdrm/2.4.124")
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.options.with_icu:
