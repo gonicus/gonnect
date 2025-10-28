@@ -138,14 +138,13 @@ class GOnnectRecipe(ConanFile):
             self.options["qt/*"].qtgrpc=False
             self.options["qt/*"].qtquickeffectmaker=False
             self.options["qt/*"].qtgraphs=False
+            self.options["qt/*"].qtwayland=False
 
             if self.settings.os == "Linux":
                 self.options["qt/*"].with_dbus=True
                 self.options["qt/*"].with_fontconfig=True
-                self.options["qt/*"].qtwayland=True
             else:
                 self.options["qt/*"].with_dbus=False
-                self.options["qt/*"].qtwayland=False
 
             if self.settings.os == "Macos":
                 self.options["qt/*"].with_harfbuzz=False # TODO: why? cmake info export for harfbuzz != both?
