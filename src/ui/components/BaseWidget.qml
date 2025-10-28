@@ -46,20 +46,6 @@ Item {
         control.widget.y = Math.max(0, Math.min(control.widget.y, page.gridHeight - control.widget.height))
     }
 
-    // TODO: Remove these
-    function setDimensions() {
-        control.widget.width = Math.round((page.gridWidth * control.wRelative) / page.gridDensity) * page.gridDensity
-        control.widget.height = Math.round((page.gridHeight * control.hRelative) / page.gridDensity) * page.gridDensity
-    }
-
-    function setPlacement() {
-        control.widget.x = Math.round((page.gridWidth * control.xRelative) / page.gridDensity) * page.gridDensity
-        control.widget.x = Math.max(0, Math.min(control.widget.x, page.gridWidth - control.widget.width))
-
-        control.widget.y = Math.round((page.gridHeight * control.yRelative) / page.gridDensity) * page.gridDensity
-        control.widget.y = Math.max(0, Math.min(control.widget.y, page.gridHeight - control.widget.height))
-    }
-
     function makeOpaque(base : color, opacity : double) : color {
         return Qt.rgba(base.r, base.g, base.b, opacity)
     }
@@ -159,7 +145,8 @@ Item {
                             control.xRelative = Number(widget.x / page.gridWidth)
                             control.yRelative = Number(widget.y / page.gridHeight)
 
-                            control.setPlacement()
+                            control.setX()
+                            control.setY()
 
                             SM.setUiDirtyState(true)
                         }
@@ -214,8 +201,6 @@ Item {
                 property real startX
                 property real startY
 
-                // TODO: Fix resize stopping on reverse mouse (drag beyond limits of ither side) [TL, BL]
-
                 Rectangle {
                     id: resizeBottomRight
                     width: resizeIndicator.indicatorSize
@@ -249,6 +234,7 @@ Item {
                                 dy = bb
                             }
 
+                            // Width, X
                             let nwr = Number((widget.width + dx) / page.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
@@ -256,6 +242,9 @@ Item {
                                 control.wRelative = control.wRelativeMin
                             }
 
+                            control.setWidth()
+
+                            // Height, Y
                             let nhr = Number((widget.height + dy) / page.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
@@ -263,7 +252,7 @@ Item {
                                 control.hRelative = control.hRelativeMin
                             }
 
-                            control.setDimensions()
+                            control.setHeight()
 
                             SM.setUiDirtyState(true)
                         }
@@ -303,11 +292,24 @@ Item {
                                 dy = bb
                             }
 
+                            // Width, X
                             let nwr = Number((widget.width + dx) / page.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
                                 control.xRelative = Number((widget.x - dx) / page.gridWidth)
+
+                                control.setWidth()
+                                control.setX()
+                            } else {
+                                control.wRelative = control.wRelativeMin
+                                let oldWidth = widget.width
+                                control.setWidth()
+
+                                control.xRelative = Number((widget.x + (oldWidth - widget.width)) / page.gridWidth)
+                                control.setX()
                             }
+
+                            // Height, Y
                             let nhr = Number((widget.height + dy) / page.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
@@ -315,8 +317,7 @@ Item {
                                 control.hRelative = control.hRelativeMin
                             }
 
-                            control.setDimensions()
-                            control.setPlacement()
+                            control.setHeight()
 
                             SM.setUiDirtyState(true)
                         }
@@ -356,19 +357,39 @@ Item {
                                 dy = tb
                             }
 
+                            // Width, X
                             let nwr = Number((widget.width + dx) / page.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
                                 control.xRelative = Number((widget.x - dx) / page.gridWidth)
+
+                                control.setWidth()
+                                control.setX()
+                            } else {
+                                control.wRelative = control.wRelativeMin
+                                let oldWidth = widget.width
+                                control.setWidth()
+
+                                control.xRelative = Number((widget.x + (oldWidth - widget.width)) / page.gridWidth)
+                                control.setX()
                             }
+
+                            // Height, Y
                             let nhr = Number((widget.height + dy) / page.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
                                 control.yRelative = Number((widget.y - dy) / page.gridHeight)
-                            }
 
-                            control.setDimensions()
-                            control.setPlacement()
+                                control.setHeight()
+                                control.setY()
+                            } else {
+                                control.hRelative = control.hRelativeMin
+                                let oldHeight = widget.height
+                                control.setHeight()
+
+                                control.yRelative = Number((widget.y + (oldHeight - widget.height)) / page.gridHeight)
+                                control.setY()
+                            }
 
                             SM.setUiDirtyState(true)
                         }
@@ -417,7 +438,6 @@ Item {
                             }
 
                             control.setWidth()
-                            control.setX()
 
                             // Height, Y
                             let nhr = Number((widget.height + dy) / page.gridHeight)
