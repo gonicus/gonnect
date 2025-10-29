@@ -321,7 +321,7 @@ Item {
                         showRedDot: false,
                         attachedData: null
                     }
-                ].filter(item => ViewHelper.isJitsiAvailable || item.pageId !== GonnectWindow.PageId.Conference)
+                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
 
                 return baseModel
             }
