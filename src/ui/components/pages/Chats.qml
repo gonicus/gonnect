@@ -9,8 +9,6 @@ import base
 Item {
     id: control
 
-    property JsChatConnector attachedData
-
     states: [
         State {
             when: !!(control.attachedData?.isSecretInitalized && !!control.attachedData?.accessToken)
@@ -33,7 +31,8 @@ Item {
     ]
 
     Connections {
-        target: control.attachedData
+        target: control.attachedData ?? null
+        ignoreUnknownSignals: true
         function onAccessTokenChanged() {
             webView.url = "about:blank"
             webView.loadUrl()
@@ -112,16 +111,15 @@ Item {
 
                 Component.onCompleted: () => {
                     if (control.attachedData) {
-                        chatWebChannel.registerObject("jsChatConnector", control.attachedData)
                         webView.loadUrl()
                     }
                 }
 
                 readonly property Connections controlConnections: Connections {
                     target: control
+                    ignoreUnknownSignals: true
                     function onAttachedDataChanged() {
                         if (control.attachedData) {
-                            chatWebChannel.registerObject("jsChatConnector", control.attachedData)
                             webView.loadUrl()
                         }
                     }
@@ -162,7 +160,7 @@ Item {
 
         ChatRoomList {
             id: chatRoomList
-            chatProvider: control.attachedData
+            chatProvider: control.attachedData ?? null
             clip: true
             anchors {
                 fill: parent

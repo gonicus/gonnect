@@ -6,7 +6,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     Quick
     QuickControls2
-    HttpServer
     Multimedia
     Sql
     Network
@@ -486,19 +485,6 @@ qt_add_qml_module(gonnect
         chat/ChatRoomProxyModel.cpp
         chat/ConferenceChatRoom.h
         chat/ConferenceChatRoom.cpp
-        chat/JsChatConnector.h
-        chat/JsChatConnector.cpp
-        chat/JsChatRoom.h
-        chat/JsChatRoom.cpp
-        chat/JsConnectorConfig.h
-        chat/JsChatEvent.h
-        chat/JsChatEvent.cpp
-        chat/JsChatImageEvent.h
-        chat/JsChatImageEvent.cpp
-        chat/JsChatMessageEvent.h
-        chat/JsChatMessageEvent.cpp
-        chat/JsChatUser.h
-        chat/JsChatUser.cpp
 
         conference/ConferenceParticipant.h
         conference/ConferenceParticipant.cpp
@@ -688,7 +674,6 @@ target_link_libraries(gonnect
         Qt6::Quick
         Qt6::QuickControls2
         Qt6::DBus
-        Qt6::HttpServer
         Qt6::Multimedia
         Qt6::Sql
         Qt6::Network

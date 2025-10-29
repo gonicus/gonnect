@@ -321,24 +321,7 @@ Item {
                         showRedDot: false,
                         attachedData: null
                     }
-                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
-
-                if (ChatConnectorManager.isJsChatAvailable) {
-                    const chatConnectors = ChatConnectorManager.jsChatConnectors
-
-                    for (const connector of chatConnectors) {
-                        baseModel.push({
-                            pageId: control.chatsPageId,
-                            pageType: GonnectWindow.PageType.Chats,
-                            iconSource: Icons.dialogMessages,
-                            labelText: connector.displayName,
-                            disabledTooltipText: qsTr("Chat not available"),
-                            isEnabled: true,
-                            showRedDot: false,
-                            attachedData: connector
-                        })
-                    }
-                }
+                ].filter(item => ViewHelper.isJitsiAvailable || item.pageId !== GonnectWindow.PageId.Conference)
 
                 return baseModel
             }
