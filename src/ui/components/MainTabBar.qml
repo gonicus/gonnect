@@ -412,6 +412,7 @@ Item {
         Action {
             text: qsTr("Delete")
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {

@@ -14,6 +14,9 @@ BaseWindow {
     minimumHeight: 600
     title: "GOnnect"
     resizable: true
+
+    property alias pageRooot: pageStack
+
     windowHeaderComponent: Component {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
@@ -108,29 +111,27 @@ BaseWindow {
         mainTabBar.selectedPageType = pageType
     }
 
-    function showPage(pageId : string) {
-        let page
+    function getPage(pageId : string) {
         switch (pageId) {
             case homePageId:
-                page = homePage
-                break
+                return homePage
             case callPageId:
-                page = callPage
-                break
+                return callPage
             case conferencePageId:
-                page = conferencePage
-                break
+                return conferencePage
             case settingsPageId:
-                page = settingsPage
-                break
+                return settingsPage
             default:
-                page = pageStack.pages[pageId]
+                return pageStack.pages[pageId]
         }
+    }
 
+    function showPage(pageId : string) {
         if (previousPage) {
             previousPage.visible = false
         }
 
+        let page = getPage(pageId)
         if (page) {
             page.visible = true
             previousPage = page
@@ -189,6 +190,10 @@ BaseWindow {
 
     }
 
+    function saveHome() {
+
+    }
+
     readonly property Connections dynamicUiConnections: Connections {
         target: SM
         function onUiSaveStateChanged() {
@@ -207,6 +212,8 @@ BaseWindow {
 
                 // Tabs
                 mainTabBar.saveTabList()
+
+                // TODO: Home page saving
 
                 SM.setUiSaveState(false)
                 SM.setUiDirtyState(false)
