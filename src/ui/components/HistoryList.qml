@@ -34,6 +34,7 @@ Item {
         ScrollBar.vertical: ScrollBar {
             id: verticalScrollBar
             width: 10
+            clip: true
         }
 
         model: HistoryProxyModel {

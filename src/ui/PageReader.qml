@@ -95,6 +95,7 @@ Item {
                     widgetId: widgetItem.id,
                     name: widgetItem.name,
                     type: type,
+                    page: page,
                     xRelative: widgetItem.x,
                     yRelative: widgetItem.y,
                     wRelative: widgetItem.width,
@@ -104,15 +105,15 @@ Item {
                 let widget
                 switch(type) {
                     case CommonWidgets.Type.DateEvents:
-                        widget = widgets.dateEvents.createObject(page,
+                        widget = widgets.dateEvents.createObject(page.grid,
                                                                  widgetProperties)
                         break
                     case CommonWidgets.Type.Favorites:
-                        widget = widgets.favorites.createObject(page,
+                        widget = widgets.favorites.createObject(page.grid,
                                                                 widgetProperties)
                         break
                     case CommonWidgets.Type.History:
-                        widget = widgets.history.createObject(page,
+                        widget = widgets.history.createObject(page.grid,
                                                               widgetProperties)
                         break
                     default:

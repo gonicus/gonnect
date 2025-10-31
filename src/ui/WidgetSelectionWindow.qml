@@ -24,7 +24,7 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
-    required property var pageRoot
+    required property var widgetRoot
 
     CommonWidgets {
         id: widgets
@@ -153,23 +153,24 @@ BaseWindow {
                     const selection = control.selection
 
                     const widgetProperties = {
-                        widgetId: pageRoot.pageId+id,
+                        widgetId: widgetRoot.pageId+id,
                         name: name.toLowerCase(),
-                        type: selection
+                        type: selection,
+                        page: widgetRoot
                     }
 
                     let widget
                     switch (selection) {
                         case CommonWidgets.Type.DateEvents:
-                            widget = widgets.dateEvents.createObject(pageRoot,
+                            widget = widgets.dateEvents.createObject(widgetRoot.grid,
                                                                      widgetProperties)
                             break
                         case CommonWidgets.Type.Favorites:
-                            widget = widgets.favorites.createObject(pageRoot,
+                            widget = widgets.favorites.createObject(widgetRoot.grid,
                                                                     widgetProperties)
                             break
                         case CommonWidgets.Type.History:
-                            widget = widgets.history.createObject(pageRoot,
+                            widget = widgets.history.createObject(widgetRoot.grid,
                                                                   widgetProperties)
                             break
                         default:
@@ -180,8 +181,8 @@ BaseWindow {
                     if (widget === null) {
                         console.log("Could not create widget component")
                     } else {
-                        pageRoot.resetWidgetElevation()
-                        pageRoot.model.add(widget)
+                        widgetRoot.resetWidgetElevation()
+                        widgetRoot.model.add(widget)
 
                         SM.setUiDirtyState(true)
                     }

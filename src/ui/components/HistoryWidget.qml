@@ -130,6 +130,7 @@ BaseWidget {
         HistoryList {
             id: historyList
             height: parent.height
+            clip: true
             proxyModel {
                 filterText: historySearchField.text.trim()
                 typeFilter: historyFilterTypeSelector.currentValue

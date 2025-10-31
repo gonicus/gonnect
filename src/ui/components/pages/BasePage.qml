@@ -28,6 +28,7 @@ Item {
         }
     }
 
+    property alias grid: snapGrid
     property alias gridWidth: snapGrid.width
     property alias gridHeight: snapGrid.height
     property double gridDensity: 15
@@ -58,7 +59,7 @@ Item {
     Component {
         id: widgetSelectionWindowComponent
         WidgetSelectionWindow {
-            pageRoot: control
+            widgetRoot: control
         }
     }
 
@@ -66,16 +67,15 @@ Item {
         widgetSelectionWindowComponent.createObject(control).show()
     }
 
-    anchors {
-        leftMargin: 15
-        rightMargin: 15
-    }
+    property int horizontalPadding: gridDensity * 2
+    property int verticalPadding: gridDensity
+    property int dotRadius: 1
 
-    // TODO: This should be rounded up in steps as well, otherwise weird clipping will occur
     Rectangle {
         id: snapGrid
-        visible: control.editMode
-        anchors.fill: parent
+        width: Math.round((parent.width - horizontalPadding) / gridDensity) * gridDensity
+        height: Math.round((parent.height - verticalPadding) / gridDensity) * gridDensity
+        anchors.centerIn: parent
         color: "transparent"
 
         onWidthChanged: () => {
@@ -93,10 +93,9 @@ Item {
             control.gridResized()
         }
 
-        property int dotRadius: 1
-
         Canvas {
             id: dotGrid
+            visible: control.editMode
             anchors.fill: parent
 
             onPaint: {
@@ -104,10 +103,10 @@ Item {
                 ctx.clearRect(0, 0, width, height)
                 ctx.fillStyle = "gray"
 
-                for (let x = 0; x < width; x += control.gridDensity) {
-                    for (let y = 0; y < height; y += control.gridDensity) {
+                for (let x = 0; x <= width; x += control.gridDensity) {
+                    for (let y = 0; y <= height; y += control.gridDensity) {
                         ctx.beginPath()
-                        ctx.arc(x, y, snapGrid.dotRadius, 0, 2*Math.PI)
+                        ctx.arc(x, y, dotRadius, 0, 2*Math.PI)
                         ctx.fill()
                     }
                 }
@@ -116,16 +115,18 @@ Item {
             onWidthChanged: requestPaint()
             onHeightChanged: requestPaint()
         }
-    }
 
-    Button {
-        icon.source: Icons.viewLeftNew
-        text: qsTr("Add widgets")
-        visible: control.emptyPage && !control.editMode
-        anchors.centerIn: parent
+        Button {
+            id: editShortcut
+            icon.source: Icons.viewLeftNew
+            text: qsTr("Add widgets")
+            visible: control.emptyPage && !control.editMode
+            anchors.centerIn: parent
 
-        onClicked: {
-            SM.setUiEditMode(true)
+            onClicked: {
+                SM.setUiEditMode(true)
+            }
         }
     }
+
 }

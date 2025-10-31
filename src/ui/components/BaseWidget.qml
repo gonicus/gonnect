@@ -12,6 +12,7 @@ Item {
     required property string widgetId
     required property string name
     required property int type
+    required property var page
 
     required property double wMin
     required property double hMin
@@ -25,7 +26,6 @@ Item {
     property double wRelativeMin: 0
     property double hRelativeMin: 0
 
-    property alias page: control.parent
     property alias widget: resizableRect
 
     function setWidth() {
