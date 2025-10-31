@@ -58,13 +58,12 @@ BaseWindow {
         Settings
     }
 
-    // Thse pages will remain static and thus have hard-coded ID's
-    property string callPageId: "call0"
-    property string callsPageId: "calls0" // TODO: This page should be replaced by its dynamic counterpart
-    property string chatsPageId: "chats0"
-    property string conferencePageId: "conference0"
-    property string settingsPageId: "settings0"
-    property string defaultPageId: "" // Default page fallback that can be dynamic, currently unused
+    // INFO: Static page ID's
+    property string homePageId: "page_home"
+    property string callPageId: "page_call"
+    property string chatsPageId: "page_chats"
+    property string conferencePageId: "page_conference"
+    property string settingsPageId: "page_settings"
 
     property var previousPage
 
@@ -97,8 +96,8 @@ BaseWindow {
                 control.updateTabSelection(control.callPageId,
                                            GonnectWindow.PageType.Call)
             } else if (!count && (isOnCallPage || isOnConferencePage)) {
-                control.updateTabSelection(control.callsPageId,
-                                           GonnectWindow.PageType.Calls)
+                control.updateTabSelection(control.homePageId,
+                                           GonnectWindow.PageType.Base)
             }
         }
     }
@@ -112,11 +111,11 @@ BaseWindow {
     function showPage(pageId : string) {
         let page
         switch (pageId) {
+            case homePageId:
+                page = homePage
+                break
             case callPageId:
                 page = callPage
-                break
-            case callsPageId:
-                page = callsPage
                 break
             case conferencePageId:
                 page = conferencePage
@@ -179,9 +178,15 @@ BaseWindow {
     }
 
     function loadPages() {
+        // TODO: Home page loading
+
         pageReader.load()
 
         mainTabBar.sortTabList()
+    }
+
+    function loadHome() {
+
     }
 
     readonly property Connections dynamicUiConnections: Connections {
@@ -292,14 +297,8 @@ BaseWindow {
 
         MainTabBar {
             id: mainTabBar
-            selectedPageId: control.callsPageId
-            selectedPageType: GonnectWindow.PageType.Calls
-
-            callPageId: control.callPageId
-            callsPageId: control.callsPageId
-            conferencePageId: control.conferencePageId
-            settingsPageId: control.settingsPageId
-            defaultPageId: control.defaultPageId
+            selectedPageId: control.homePageId
+            selectedPageType: GonnectWindow.PageType.Base
 
             mainWindow: control
 
@@ -349,11 +348,16 @@ BaseWindow {
 
             property var pages: ({})
 
-            Default {
-                id: defaultPage
+            BasePage {
+                id: homePage
                 visible: false
                 anchors.fill: parent
+
+                pageId: control.homePageId
+                name: qsTr("Home")
+                icon: Icons.userHome
             }
+
             Call {
                 id: callPage
                 visible: false
@@ -361,21 +365,19 @@ BaseWindow {
 
                 onSelectedCallItemChanged: () => control.updateCallInForeground()
             }
-            Calls {
-                id: callsPage
-                visible: false
-                anchors.fill: parent
-            }
+
             Chats {
                 id: chatsPage
                 visible: false
                 anchors.fill: parent
             }
+
             Conference {
                 id: conferencePage
                 visible: false
                 anchors.fill: parent
             }
+
             SettingsPage {
                 id: settingsPage
                 visible: false

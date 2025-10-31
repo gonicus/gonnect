@@ -14,13 +14,6 @@ Item {
     property int selectedPageType: -1
     property var attachedData: null
 
-    property string callPageId
-    property string callsPageId
-    property string chatsPageId
-    property string conferencePageId
-    property string settingsPageId
-    property string defaultPageId
-
     property var mainWindow
 
     property int dynamicPageCount: 0
@@ -294,8 +287,8 @@ Item {
             model: {
                 const baseModel = [
                     {
-                        pageId: control.callsPageId,
-                        pageType: GonnectWindow.PageType.Calls,
+                        pageId: control.mainWindow.homePageId,
+                        pageType: GonnectWindow.PageType.Base,
                         iconSource: Icons.userHome,
                         labelText: qsTr("Home"),
                         disabledTooltipText: qsTr("Home"),
@@ -303,7 +296,7 @@ Item {
                         showRedDot: false,
                         attachedData: null
                     }, {
-                        pageId: control.conferencePageId,
+                        pageId: control.mainWindow.conferencePageId,
                         pageType: GonnectWindow.PageType.Conference,
                         iconSource: Icons.userGroupNew,
                         labelText: qsTr("Conference"),
@@ -312,7 +305,7 @@ Item {
                         showRedDot: false,
                         attachedData: null
                     }, {
-                        pageId: control.callPageId,
+                        pageId: control.mainWindow.callPageId,
                         pageType: GonnectWindow.PageType.Call,
                         iconSource: Icons.callStart,
                         labelText: qsTr("Call"),
@@ -327,9 +320,7 @@ Item {
             }
         }
 
-        Component.onCompleted: {
-            mainWindow.loadPages()
-        }
+        Component.onCompleted: () => mainWindow.loadPages()
     }
 
     Column {
@@ -347,7 +338,7 @@ Item {
             delegate: tabDelegate
             model: [
                 {
-                    pageId: control.settingsPageId,
+                    pageId: control.mainWindow.settingsPageId,
                     pageType: GonnectWindow.PageType.Settings,
                     iconSource: Icons.settingsConfigure,
                     labelText: qsTr("Settings"),

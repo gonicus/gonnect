@@ -1,5 +1,7 @@
 #include "UISettings.h"
 
+#include <QRegularExpression>
+
 Q_LOGGING_CATEGORY(lcUISettings, "gonnect.ui.settings")
 
 // TODO: Custom config for UI? E.g. '98-ui.conf'?
@@ -32,12 +34,14 @@ void UISettings::removeUISetting(const QString &group, const QString &key)
 
 QStringList UISettings::getPageIds()
 {
-    QStringList keys = childGroups();
+    static const QRegularExpression dynamicPageName("^page_[0-9a-f]{32}$", QRegularExpression::CaseInsensitiveOption);
+
+    const QStringList keys = childGroups();
     QStringList matchingKeys;
 
-    // "page_XXXXXX"
     for (const QString &key : keys) {
-        if (key.startsWith("page_") && !key.contains("-widget_")) {
+        // "page_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        if (dynamicPageName.match(key).hasMatch()) {
             matchingKeys.append(key);
         }
     }
@@ -46,12 +50,13 @@ QStringList UISettings::getPageIds()
 
 QStringList UISettings::getWidgetIds(QString pageId)
 {
-    QStringList keys = childGroups();
+
+    const QStringList keys = childGroups();
     QStringList matchingKeys;
 
-    // "page_XXXXXX-widget_YYYYYY"
     for (const QString &key : keys) {
-        if (key.startsWith(pageId+"-widget_")) {
+        // "page_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-widget_YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+        if (key.startsWith(QString("%1-widget_").arg(pageId))) {
             matchingKeys.append(key);
         }
     }

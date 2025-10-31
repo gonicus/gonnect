@@ -296,11 +296,9 @@ qt_add_qml_module(gonnect
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
 
-        ui/components/pages/Chats.qml
         ui/components/pages/Call.qml
-        ui/components/pages/Calls.qml
+        ui/components/pages/Chats.qml
         ui/components/pages/Conference.qml
-        ui/components/pages/Default.qml
         # Dynamic UI
         ui/components/pages/BasePage.qml
 

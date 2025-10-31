@@ -12,7 +12,7 @@ Item {
     required property string name
     required property string icon
 
-    property bool editMode: true
+    property bool editMode: false
     Connections {
         target: SM
         function onUiEditModeChanged() {

@@ -70,8 +70,7 @@ Item {
                                                {
                                                    pageId: pageItem.id,
                                                    name: pageItem.name,
-                                                   icon: pageItem.icon,
-                                                   editMode: false
+                                                   icon: pageItem.icon
                                                })
             if (page === null) {
                 console.log("Could not create page component", pageItem.id)
