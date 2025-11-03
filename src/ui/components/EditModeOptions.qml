@@ -35,9 +35,10 @@ Item {
             enabled: control.tabRoot.selectedPageType === GonnectWindow.PageType.Base
 
             onPressed: {
-                // TODO: Get all pages
-                let page = control.pageRoot.pages[control.tabRoot.selectedPageId]
-                page.widgetCreationDialog()
+                let page = control.pageRoot.getPage(control.tabRoot.selectedPageId)
+                if (page) {
+                    page.widgetCreationDialog()
+                }
             }
         }
 

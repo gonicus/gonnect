@@ -15,8 +15,6 @@ BaseWindow {
     title: "GOnnect"
     resizable: true
 
-    property alias pageRooot: pageStack
-
     windowHeaderComponent: Component {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
@@ -111,27 +109,12 @@ BaseWindow {
         mainTabBar.selectedPageType = pageType
     }
 
-    function getPage(pageId : string) {
-        switch (pageId) {
-            case homePageId:
-                return homePage
-            case callPageId:
-                return callPage
-            case conferencePageId:
-                return conferencePage
-            case settingsPageId:
-                return settingsPage
-            default:
-                return pageStack.pages[pageId]
-        }
-    }
-
     function showPage(pageId : string) {
         if (previousPage) {
             previousPage.visible = false
         }
 
-        let page = getPage(pageId)
+        let page = pageStack.getPage(pageId)
         if (page) {
             page.visible = true
             previousPage = page
@@ -156,11 +139,11 @@ BaseWindow {
     }
 
     function removePage(pageId : string) {
-        let page = pageStack.pages[pageId]
+        let page = pageStack.getPage(pageId)
         pageModel.remove(page)
         page.model.removeAll()
         page.destroy()
-        delete pageStack.pages[pageId]
+        delete pageStack.getPage(pageId)
     }
 
     function createPage(pageId : string, icon : url, name : string) {
@@ -351,6 +334,21 @@ BaseWindow {
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
                 bottom: bottomBar.visible ? bottomBar.top : parent.bottom
+            }
+
+            function getPage(pageId : string) : variant {
+                switch (pageId) {
+                    case homePageId:
+                        return homePage
+                    case callPageId:
+                        return callPage
+                    case conferencePageId:
+                        return conferencePage
+                    case settingsPageId:
+                        return settingsPage
+                    default:
+                        return pageStack.pages[pageId]
+                }
             }
 
             property var pages: ({})
