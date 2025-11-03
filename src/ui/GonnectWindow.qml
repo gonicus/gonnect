@@ -151,7 +151,8 @@ BaseWindow {
                                            {
                                                pageId: pageId,
                                                name: name,
-                                               icon: icon
+                                               icon: icon,
+                                               editMode: true
                                            })
         if (page === null) {
             console.log("Could not create page component", pageId)
