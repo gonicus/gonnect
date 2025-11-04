@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
+title: "[BUG] "
 labels: bug
 assignees: ''
 
@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
  - OS: [e.g. Ubuntu 24.04]
- - Version [e.g. 22]
+ - Version [e.g. 2.0.6]
  - Other Apps: [e.g. Evolution 3.58.1]
 
 **Additional context**
