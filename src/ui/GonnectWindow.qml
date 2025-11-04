@@ -162,7 +162,7 @@ BaseWindow {
     }
 
     function loadPages() {
-        pageReader.loadHomePage()
+        pageReader.loadHomePage(control.homePageId)
         pageReader.loadDynamicPages()
 
         mainTabBar.sortTabList()
@@ -206,11 +206,8 @@ BaseWindow {
 
         tabRoot: mainTabBar
         pageRoot: pageStack
-        pageList: control.pageList
         model: pageModel
     }
-
-    property alias pageList: pageStack.pages
 
     Item {
         anchors.fill: parent
