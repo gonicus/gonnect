@@ -14,13 +14,10 @@ Item {
     required property WidgetModel model
 
     function reset() {
-        let widgetList = model.items()
-        let widgetCount = model.count()
-
         // Widgets
-        for (let i = 0; i < widgetCount; i++) {
-            let widgetItem = widgetList[i]
-            let widgetId = widgetItem.widgetId
+        let widgets = model.items()
+        for (const widget of widgets) {
+            let widgetId = widget.widgetId
 
             UISettings.removeUISetting(widgetId, "")
         }
@@ -30,20 +27,17 @@ Item {
     }
 
     function save() {
-        let widgetList = model.items()
-        let widgetCount = model.count()
-
         // Widgets
-        for (let i = 0; i < widgetCount; i++) {
-            let widgetItem = widgetList[i]
-            let widgetId = widgetItem.widgetId
+        let widgets = model.items()
+        for (const widget of widgets) {
+            let widgetId = widget.widgetId
 
-            UISettings.setUISetting(widgetId, "name", widgetItem.name)
-            UISettings.setUISetting(widgetId, "type", widgetItem.type)
-            UISettings.setUISetting(widgetId, "x", widgetItem.xRelative)
-            UISettings.setUISetting(widgetId, "y", widgetItem.yRelative)
-            UISettings.setUISetting(widgetId, "width", widgetItem.wRelative)
-            UISettings.setUISetting(widgetId, "height", widgetItem.hRelative)
+            UISettings.setUISetting(widgetId, "name", widget.name)
+            UISettings.setUISetting(widgetId, "type", widget.type)
+            UISettings.setUISetting(widgetId, "x", widget.xRelative)
+            UISettings.setUISetting(widgetId, "y", widget.yRelative)
+            UISettings.setUISetting(widgetId, "width", widget.wRelative)
+            UISettings.setUISetting(widgetId, "height", widget.hRelative)
         }
 
         // Page

@@ -52,7 +52,6 @@ BaseWindow {
 
     enum PageType {
         Base,
-        Calls,
         Call,
         Chats,
         Conference,
@@ -163,19 +162,10 @@ BaseWindow {
     }
 
     function loadPages() {
-        // TODO: Home page loading
-
-        pageReader.load()
+        pageReader.loadHomePage()
+        pageReader.loadDynamicPages()
 
         mainTabBar.sortTabList()
-    }
-
-    function loadHome() {
-
-    }
-
-    function saveHome() {
-
     }
 
     readonly property Connections dynamicUiConnections: Connections {
@@ -184,20 +174,18 @@ BaseWindow {
             if (SM.uiSaveState) {
                 console.log("Writing dynamic UI state to disk")
 
-                let pageCount = pageModel.count()
-                let pageList = pageModel.items()
+                // Home page
+                let homePage = pageStack.getPage(control.homePageId)
+                homePage.writer.save()
 
-                // Pages & Widgets
-                for (let i = 0; i < pageCount; i++) {
-                    let page = pageList[i]
-
+                // Dynamic pages & widgets
+                let pages = pageModel.items()
+                for (const page of pages) {
                     page.writer.save()
                 }
 
                 // Tabs
                 mainTabBar.saveTabList()
-
-                // TODO: Home page saving
 
                 SM.setUiSaveState(false)
                 SM.setUiDirtyState(false)
@@ -339,13 +327,13 @@ BaseWindow {
 
             function getPage(pageId : string) : variant {
                 switch (pageId) {
-                    case homePageId:
+                    case control.homePageId:
                         return homePage
-                    case callPageId:
+                    case control.callPageId:
                         return callPage
-                    case conferencePageId:
+                    case control.conferencePageId:
                         return conferencePage
-                    case settingsPageId:
+                    case control.settingsPageId:
                         return settingsPage
                     default:
                         return pageStack.pages[pageId]
