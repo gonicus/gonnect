@@ -14,6 +14,7 @@ BaseWindow {
     minimumHeight: 600
     title: "GOnnect"
     resizable: true
+
     windowHeaderComponent: Component {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
@@ -109,28 +110,11 @@ BaseWindow {
     }
 
     function showPage(pageId : string) {
-        let page
-        switch (pageId) {
-            case homePageId:
-                page = homePage
-                break
-            case callPageId:
-                page = callPage
-                break
-            case conferencePageId:
-                page = conferencePage
-                break
-            case settingsPageId:
-                page = settingsPage
-                break
-            default:
-                page = pageStack.pages[pageId]
-        }
-
         if (previousPage) {
             previousPage.visible = false
         }
 
+        let page = pageStack.getPage(pageId)
         if (page) {
             page.visible = true
             previousPage = page
@@ -155,11 +139,11 @@ BaseWindow {
     }
 
     function removePage(pageId : string) {
-        let page = pageStack.pages[pageId]
+        let page = pageStack.getPage(pageId)
         pageModel.remove(page)
         page.model.removeAll()
         page.destroy()
-        delete pageStack.pages[pageId]
+        delete pageStack.getPage(pageId)
     }
 
     function createPage(pageId : string, icon : url, name : string) {
@@ -167,7 +151,8 @@ BaseWindow {
                                            {
                                                pageId: pageId,
                                                name: name,
-                                               icon: icon
+                                               icon: icon,
+                                               editMode: true
                                            })
         if (page === null) {
             console.log("Could not create page component", pageId)
@@ -189,6 +174,10 @@ BaseWindow {
 
     }
 
+    function saveHome() {
+
+    }
+
     readonly property Connections dynamicUiConnections: Connections {
         target: SM
         function onUiSaveStateChanged() {
@@ -207,6 +196,8 @@ BaseWindow {
 
                 // Tabs
                 mainTabBar.saveTabList()
+
+                // TODO: Home page saving
 
                 SM.setUiSaveState(false)
                 SM.setUiDirtyState(false)
@@ -344,6 +335,21 @@ BaseWindow {
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
                 bottom: bottomBar.visible ? bottomBar.top : parent.bottom
+            }
+
+            function getPage(pageId : string) : variant {
+                switch (pageId) {
+                    case homePageId:
+                        return homePage
+                    case callPageId:
+                        return callPage
+                    case conferencePageId:
+                        return conferencePage
+                    case settingsPageId:
+                        return settingsPage
+                    default:
+                        return pageStack.pages[pageId]
+                }
             }
 
             property var pages: ({})

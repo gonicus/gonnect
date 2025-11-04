@@ -67,6 +67,13 @@ Item {
         control.wRelativeMin = Number(control.wMin / page.gridWidth)
         control.hRelativeMin = Number(control.hMin / page.gridHeight)
 
+        if (control.wRelative < control.wRelativeMin) {
+            control.wRelative = control.wRelativeMin
+        }
+        if (control.hRelative < control.hRelativeMin) {
+            control.hRelative = control.hRelativeMin
+        }
+
         control.setWidth()
         control.setHeight()
         control.setX()
