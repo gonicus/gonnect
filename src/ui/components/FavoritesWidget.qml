@@ -43,5 +43,19 @@ BaseWidget {
                 rightMargin: 10
             }
         }
+
+        Label {
+            id: favInfo
+            color: Theme.secondaryTextColor
+            visible: favList.count > 0 ? false : true
+            text: qsTr("No favorites to display")
+            wrapMode: Label.Wrap
+            width: favList.width
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            anchors {
+                centerIn: favList
+            }
+        }
     }
 }

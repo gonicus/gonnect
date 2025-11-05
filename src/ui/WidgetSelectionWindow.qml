@@ -155,7 +155,6 @@ BaseWindow {
                     const widgetProperties = {
                         widgetId: widgetRoot.pageId+id,
                         name: name.toLowerCase(),
-                        type: selection,
                         page: widgetRoot
                     }
 

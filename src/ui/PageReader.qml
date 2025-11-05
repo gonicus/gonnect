@@ -58,13 +58,57 @@ Item {
     function loadHomePage(pageId : string) {
         let page = pageRoot.getPage(pageId)
 
-        let widgets = UISettings.getWidgetIds(pageId)
-        if (widgets.length > 0) {
-            for (const widget of widgets) {
-                control.createWidget(widget, page)
+        let widgetIds = UISettings.getWidgetIds(pageId)
+        if (widgetIds.length > 0) {
+            // Config-based layout
+            for (const widgetId of widgetIds) {
+                control.createWidget(widgetId, page)
             }
         } else {
-            // TODO: Load a default widget selection here
+            // Default widget layout
+            let baseId = page.pageId+"-widget_"
+
+            let dateEvents = widgets.dateEvents.createObject(page.grid,
+                                                             {
+                                                                 widgetId: baseId+UISettings.generateUuid(),
+                                                                 name: "dateevents",
+                                                                 page: page,
+                                                                 xRelative: 0.7514,
+                                                                 yRelative: 0,
+                                                                 wRelative: 0.2485,
+                                                                 hRelative: 0.4667
+                                                             })
+            if (dateEvents) {
+                page.model.add(dateEvents)
+            }
+
+            let favorites = widgets.favorites.createObject(page.grid,
+                                                           {
+                                                               widgetId: baseId+UISettings.generateUuid(),
+                                                               name: "favorites",
+                                                               page: page,
+                                                               xRelative: 0.7492,
+                                                               yRelative: 0.4772,
+                                                               wRelative: 0.2507,
+                                                               hRelative: 0.5227
+                                                           })
+            if (favorites) {
+                page.model.add(favorites)
+            }
+
+            let history = widgets.history.createObject(page.grid,
+                                                       {
+                                                           widgetId: baseId+UISettings.generateUuid(),
+                                                           name: "history",
+                                                           page: page,
+                                                           xRelative: 0,
+                                                           yRelative: 0,
+                                                           wRelative: 0.7433,
+                                                           hRelative: 1
+                                                       })
+            if (history) {
+                page.model.add(history)
+            }
         }
     }
 
@@ -79,7 +123,6 @@ Item {
         const widgetProperties = {
             widgetId: widgetId,
             name: widgetName,
-            type: widgetType,
             page: page,
             xRelative: widgetX,
             yRelative: widgetY,
