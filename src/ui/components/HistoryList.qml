@@ -35,6 +35,27 @@ Item {
             id: verticalScrollBar
             width: 10
             clip: true
+
+            // TODO: This is *still* broken...
+            property double scrollBarRadius: 50
+
+            contentItem: Rectangle {
+                color: "#7d8182"
+                bottomRightRadius: {
+                    let isAtBottom = (verticalScrollBar.position + verticalScrollBar.size) >= 0.98
+
+                    if (isAtBottom) {
+                        return verticalScrollBar.scrollBarRadius
+                    } else {
+                        return 0
+                    }
+                }
+            }
+
+            background: Rectangle {
+                color: Theme.backgroundOffsetColor
+                bottomRightRadius: verticalScrollBar.scrollBarRadius
+            }
         }
 
         model: HistoryProxyModel {
