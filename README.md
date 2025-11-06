@@ -155,7 +155,7 @@ After _distrobox_ is installed, create the _distrobox_ for _GOnnect_ development
 by running
 
 ```bash
-distrobox assemble create
+distrobox assemble create --name=gonnect
 ```
 
 in the directory of your _GOnnect_ checkout.
@@ -168,7 +168,9 @@ and start the ordinary _CMake_ build:
 
 ```bash
 distrobox enter gonnect
-cmake --workflow --preset default
+conan install . --build=missing
+cmake --preset conan-release .
+cmake --build --preset conan-release --parallel $(nproc --all)
 ```
 
 Alternatively you can simply run `qtcreator` inside the _distrobox_ and open the
