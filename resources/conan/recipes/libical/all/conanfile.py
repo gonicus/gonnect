@@ -45,7 +45,7 @@ class LibICALConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
 
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["STATIC_ONLY"] = not self.options.shared
         tc.variables["GOBJECT_INTROSPECTION"] = False
         tc.variables["ICAL_GLIB"] = False
         tc.variables["ICAL_GLIB_VAPI"] = False
