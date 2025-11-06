@@ -24,8 +24,8 @@ Item {
             id: widgetDateEvents
             type: CommonWidgets.Type.DateEvents
 
-            wMin: 300
-            hMin: 350
+            wMin: 250
+            hMin: 250
         }
     }
 
@@ -36,8 +36,8 @@ Item {
             id: widgetFavorites
             type: CommonWidgets.Type.Favorites
 
-            wMin: 300
-            hMin: 350
+            wMin: 250
+            hMin: 250
         }
     }
 
@@ -48,8 +48,8 @@ Item {
             id: widgetHistory
             type: CommonWidgets.Type.History
 
-            wMin: 550
-            hMin: 500
+            wMin: 500
+            hMin: 400
         }
     }
 }

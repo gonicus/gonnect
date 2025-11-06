@@ -46,6 +46,18 @@ Item {
         control.widget.y = Math.max(0, Math.min(control.widget.y, page.gridHeight - control.widget.height))
     }
 
+    function setMinSize() {
+        control.wRelativeMin = Number(control.wMin / page.gridWidth).toFixed(4)
+        if (control.wRelative < control.wRelativeMin) {
+            control.wRelative = control.wRelativeMin
+        }
+
+        control.hRelativeMin = Number(control.hMin / page.gridHeight).toFixed(4)
+        if (control.hRelative < control.hRelativeMin) {
+            control.hRelative = control.hRelativeMin
+        }
+    }
+
     function makeOpaque(base : color, opacity : double) : color {
         return Qt.rgba(base.r, base.g, base.b, opacity)
     }
@@ -53,29 +65,22 @@ Item {
     Connections {
         target: page
         function onGridResized() {
-            control.wRelativeMin = Number(control.wMin / page.gridWidth)
-            control.hRelativeMin = Number(control.hMin / page.gridHeight)
+            control.setMinSize()
 
             control.setWidth()
             control.setHeight()
+
             control.setX()
             control.setY()
         }
     }
 
     Component.onCompleted: {
-        control.wRelativeMin = Number(control.wMin / page.gridWidth)
-        control.hRelativeMin = Number(control.hMin / page.gridHeight)
-
-        if (control.wRelative < control.wRelativeMin) {
-            control.wRelative = control.wRelativeMin
-        }
-        if (control.hRelative < control.hRelativeMin) {
-            control.hRelative = control.hRelativeMin
-        }
+        control.setMinSize()
 
         control.setWidth()
         control.setHeight()
+
         control.setX()
         control.setY()
     }
