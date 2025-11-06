@@ -26,6 +26,14 @@ Item {
     property double wRelativeMin: 0
     property double hRelativeMin: 0
 
+    // TODO: Might help relax the scaling a little
+    onXRelativeChanged: { xRelative = xRelative.toFixed(4) }
+    onYRelativeChanged: { yRelative = yRelative.toFixed(4) }
+    onWRelativeChanged: { wRelative = wRelative.toFixed(4) }
+    onHRelativeChanged: { hRelative = hRelative.toFixed(4) }
+    onWRelativeMinChanged: { wRelativeMin = wRelativeMin.toFixed(4) }
+    onHRelativeMinChanged: { hRelativeMin = hRelativeMin.toFixed(4) }
+
     property alias widget: resizableRect
 
     function setWidth() {
@@ -47,12 +55,12 @@ Item {
     }
 
     function setMinSize() {
-        control.wRelativeMin = Number(control.wMin / page.gridWidth).toFixed(4)
+        control.wRelativeMin = Number(control.wMin / page.gridWidth)
         if (control.wRelative < control.wRelativeMin) {
             control.wRelative = control.wRelativeMin
         }
 
-        control.hRelativeMin = Number(control.hMin / page.gridHeight).toFixed(4)
+        control.hRelativeMin = Number(control.hMin / page.gridHeight)
         if (control.hRelative < control.hRelativeMin) {
             control.hRelative = control.hRelativeMin
         }
