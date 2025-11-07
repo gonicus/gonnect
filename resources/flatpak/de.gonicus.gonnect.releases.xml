@@ -1,5 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.0.7" date="2025-11-07">
+    <description>
+      <p>Changes:</p>
+      <ul>
+        <li>add template for STARFACE PBX</li>
+        <li>add platform abstraction layer</li>
+        <li>add dummy platform</li>
+        <li>use libnotify instead of portal</li>
+        <li>forward initial Jitsi mute to headset</li>
+        <li>prevent changing of camera in confernece to cause inifinite loop</li>
+        <li>bump Qt to 6.9.3</li>
+        <li>do not hold other calls on new incoming call when ringing</li>
+        <li>added mutex for addressbook operations</li>
+        <li>display past recurrent event instances that have been updated</li>
+        <li>enable buddy subscription for eds/akonadi sip uris</li>
+        <li>async component retrieval (calendar) fix freeze on startup</li>
+        <li>adjust path for eds avatar images</li>
+        <li>make conference mute button work again</li>
+        <li>fixed screen share button on conference page</li>
+        <li>fixed hold/unhold handling conflicts</li>
+        <li>show correct page on call/conference start/end</li>
+        <li>fixes for too narrow screen</li>
+        <li>show (correct) own display name in chats</li>
+        <li>fixed hold/unhold handling conflicts        </li>
+      </ul>
+    </description>
+  </release>
   <release version="2.0.6" date="2025-10-07">
     <description>
       <p>Bug Fixes:</p>

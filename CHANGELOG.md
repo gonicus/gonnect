@@ -1,3 +1,28 @@
+## [2.0.7](https://github.com/gonicus/gonnect/compare/v2.0.6...v2.0.7) (2025-11-07)
+
+### Bug Fixes
+
+* add template for STARFACE PBX
+* add platform abstraction layer
+  * add dummy platform
+  * use libnotify instead of portal
+* forward initial Jitsi mute to headset
+* prevent changing of camera in confernece to cause inifinite loop
+* bump Qt to 6.9.3
+* do not hold other calls on new incoming call when ringing
+* added mutex for addressbook operations
+* display past recurrent event instances that have been updated
+* enable buddy subscription for eds/akonadi sip uris
+* async component retrieval (calendar) fix freeze on startup
+* adjust path for eds avatar images
+* make conference mute button work again
+* fixed screen share button on conference page
+* fixed hold/unhold handling conflicts
+* show correct page on call/conference start/end
+* fixes for too narrow screen
+* show (correct) own display name in chats
+* fixed hold/unhold handling conflicts
+
 ## [2.0.6](https://github.com/gonicus/gonnect/compare/v2.0.5...v2.0.6) (2025-10-07)
 
 
