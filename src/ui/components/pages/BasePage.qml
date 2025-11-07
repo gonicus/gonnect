@@ -35,8 +35,7 @@ Item {
 
     signal gridResized()
 
-    property alias model: widgetModel
-    WidgetModel {
+    property WidgetModel model: WidgetModel {
         id: widgetModel
     }
 
@@ -46,8 +45,7 @@ Item {
         }
     }
 
-    property alias writer: pageWriter
-    PageWriter {
+    property PageWriter writer: PageWriter {
         id: pageWriter
 
         pageId: control.pageId
@@ -73,9 +71,15 @@ Item {
 
     Rectangle {
         id: snapGrid
-        width: Math.round((parent.width - horizontalPadding) / gridDensity) * gridDensity
-        height: Math.round((parent.height - verticalPadding) / gridDensity) * gridDensity
-        anchors.centerIn: parent
+        width: Math.floor((parent.width - horizontalPadding) / gridDensity) * gridDensity
+        height: Math.floor((parent.height - verticalPadding) / gridDensity) * gridDensity
+        anchors {
+            left: parent.left
+            top: parent.top
+            topMargin: gridDensity
+            leftMargin: gridDensity
+            rightMargin: gridDensity
+        }
         color: "transparent"
 
         onWidthChanged: () => {

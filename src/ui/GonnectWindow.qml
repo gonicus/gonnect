@@ -177,6 +177,8 @@ BaseWindow {
                 // Home page
                 let homePage = pageStack.getPage(control.homePageId)
                 homePage.writer.save()
+                UISettings.setUISetting("generic", "gonnectGridWidth", homePage.gridWidth)
+                UISettings.setUISetting("generic", "gonnectGridHeight", homePage.gridHeight)
 
                 // Dynamic pages & widgets
                 let pages = pageModel.items()

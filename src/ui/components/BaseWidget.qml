@@ -26,15 +26,12 @@ Item {
     property double wRelativeMin: 0
     property double hRelativeMin: 0
 
-    // TODO: Might help relax the scaling a little
-    onXRelativeChanged: { xRelative = xRelative.toFixed(4) }
-    onYRelativeChanged: { yRelative = yRelative.toFixed(4) }
-    onWRelativeChanged: { wRelative = wRelative.toFixed(4) }
-    onHRelativeChanged: { hRelative = hRelative.toFixed(4) }
-    onWRelativeMinChanged: { wRelativeMin = wRelativeMin.toFixed(4) }
-    onHRelativeMinChanged: { hRelativeMin = hRelativeMin.toFixed(4) }
-
     property alias widget: resizableRect
+
+    // TODO: Avoid floats, save X/Y and grid W/H
+    // where to save grid X/X best, what if new window launch is somehow bigger/smaller
+    // how to apply this to home page preset, ^
+    // how to use saved grid W/H on load, then switch?
 
     function setWidth() {
         control.widget.width = Math.round((page.gridWidth * control.wRelative) / page.gridDensity) * page.gridDensity

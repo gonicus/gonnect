@@ -68,15 +68,16 @@ Item {
             // Default widget layout
             let baseId = page.pageId+"-widget_"
 
+            // TODO: This has to be redone if we avoid floats and use fractions instead...
             let dateEvents = widgets.dateEvents.createObject(page.grid,
                                                              {
                                                                  widgetId: baseId+UISettings.generateUuid(),
                                                                  name: "dateevents",
                                                                  page: page,
-                                                                 xRelative: 0.7514,
+                                                                 xRelative: 0.75,
                                                                  yRelative: 0,
-                                                                 wRelative: 0.2485,
-                                                                 hRelative: 0.4667
+                                                                 wRelative: 0.25,
+                                                                 hRelative: 0.50
                                                              })
             if (dateEvents) {
                 page.model.add(dateEvents)
@@ -87,10 +88,10 @@ Item {
                                                                widgetId: baseId+UISettings.generateUuid(),
                                                                name: "favorites",
                                                                page: page,
-                                                               xRelative: 0.7492,
-                                                               yRelative: 0.4772,
-                                                               wRelative: 0.2507,
-                                                               hRelative: 0.5227
+                                                               xRelative: 0.75,
+                                                               yRelative: 0.55,
+                                                               wRelative: 0.25,
+                                                               hRelative: 0.50
                                                            })
             if (favorites) {
                 page.model.add(favorites)
@@ -103,7 +104,7 @@ Item {
                                                            page: page,
                                                            xRelative: 0,
                                                            yRelative: 0,
-                                                           wRelative: 0.7433,
+                                                           wRelative: 0.74,
                                                            hRelative: 1
                                                        })
             if (history) {
