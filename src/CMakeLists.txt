@@ -34,11 +34,13 @@ else()
     find_package(libusb REQUIRED)
     find_package(pjproject REQUIRED)
     find_package(qca REQUIRED)
+    find_package(wintoast REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         hidapi::hidapi
         pjproject::pjproject
         libusb::libusb
+        wintoast::wintoast
         qca-qt6)
 endif()
 
@@ -134,6 +136,7 @@ add_subdirectory(contacts/eds)
 add_subdirectory(calendar/eds)
 add_subdirectory(contacts/akonadi)
 add_subdirectory(calendar/akonadi)
+add_subdirectory(contacts/msgraph)
 
 find_package(Qt6Keychain REQUIRED)
 
@@ -639,10 +642,11 @@ target_link_libraries(gonnect
         LDAPAddressBookFactory
         CardDAVAddressBookFactory
         CSVAddressBookFactory
-        CalDAVEventFeederFactory
+        CalDAVEventFeederFactory        
         ${EDS_ADDRESSBOOK_LIBRARIES}
         ${EDS_CALENDAR_LIBRARIES}
         ${LDAP_ADDRESSBOOK_LIBRARIES}
+        MSGraphAddressBookFactory
 )
 target_link_libraries(gonnect PRIVATE Qt6::Core)
 
@@ -653,6 +657,7 @@ qt_import_plugins(gonnect INCLUDE
      CardDAVAddressBookFactory
      CSVAddressBookFactory
      CalDAVEventFeederFactory
+     MSGraphAddressBookFactory
      ${EDS_ADDRESSBOOK_FACTORY}
      ${EDS_CALENDAR_FACTORY}
      ${LDAP_ADDRESSBOOK_FACTORY})

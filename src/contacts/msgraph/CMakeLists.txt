@@ -1,5 +1,4 @@
-#if(ENABLE_MSGRAPH)   
-    
+if(ENABLE_MSGRAPH)   
     qt_add_plugin(MSGraphAddressBookFactory STATIC
       CLASS_NAME MSGraphAddressBookFactory
     
@@ -26,4 +25,4 @@
       Qt6::Quick      
       Qt6::Xml
       Qt6::NetworkAuth)
-#endif()
+endif()

@@ -69,6 +69,9 @@ class GOnnectRecipe(ConanFile):
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 
+        if self.settings.os == "Windows":
+            self.requires("wintoast/1.3.2")
+
         if self.settings.os == "Linux":
             self.requires("libnotify/system")
             self.requires("libpulse/system")
