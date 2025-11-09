@@ -181,8 +181,6 @@ if(LINUX)
         platform/linux/LinuxDesktopSearchProvider.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
-        platform/dummy/DummyNotificationManager.h
-        platform/dummy/DummyNotificationManager.cpp
         platform/dummy/DummyUserInfo.cpp
         platform/dummy/DummyUserInfo.h
         platform/dummy/DummyExternalMediaManager.cpp
@@ -193,6 +191,8 @@ elseif(WIN32)
         platform/dummy/DummyThemeManager.h
         platform/windows/WindowsNetworkHelper.cpp
         platform/windows/WindowsNetworkHelper.h
+        platform/windows/WindowsNotificationManager.h
+        platform/windows/WindowsNotificationManager.cpp
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h
