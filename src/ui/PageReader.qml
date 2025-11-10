@@ -21,6 +21,10 @@ Item {
     }
 
     function loadDynamicPages() {
+        // Generic
+        let gridWidth = Number(UISettings.getUISetting("generic", "gonnectGridWidth", 0))
+        let gridHeight = Number(UISettings.getUISetting("generic", "gonnectGridHeight", 0))
+
         // Pages
         let pageIds = UISettings.getPageIds()
         for (const pageId of pageIds) {
@@ -37,6 +41,9 @@ Item {
                 console.log("Could not create page component", pageId)
                 continue
             }
+
+            page.oldGridWidth = gridWidth
+            page.oldGridHeight = gridHeight
 
             model.add(page)
 
@@ -55,7 +62,7 @@ Item {
         }
     }
 
-    function loadHomePage(pageId : string) {
+    function loadHomePage(pageId : string) { // TODO: Update me!
         let page = pageRoot.getPage(pageId)
 
         let widgetIds = UISettings.getWidgetIds(pageId)
@@ -65,10 +72,10 @@ Item {
                 control.createWidget(widgetId, page)
             }
         } else {
+            /*
             // Default widget layout
             let baseId = page.pageId+"-widget_"
 
-            // TODO: This has to be redone if we avoid floats and use fractions instead...
             let dateEvents = widgets.dateEvents.createObject(page.grid,
                                                              {
                                                                  widgetId: baseId+UISettings.generateUuid(),
@@ -110,6 +117,7 @@ Item {
             if (history) {
                 page.model.add(history)
             }
+            */
         }
     }
 
@@ -124,11 +132,7 @@ Item {
         const widgetProperties = {
             widgetId: widgetId,
             name: widgetName,
-            page: page,
-            xRelative: widgetX,
-            yRelative: widgetY,
-            wRelative: widgetWidth,
-            hRelative: widgetHeight
+            page: page
         }
 
         let widget
@@ -154,6 +158,11 @@ Item {
             console.log("Could not create widget component", widgetId)
             return
         }
+
+        widget.widget.x = widgetX
+        widget.widget.y = widgetY
+        widget.widget.width = widgetWidth
+        widget.widget.height = widgetHeight
 
         page.model.add(widget)
     }

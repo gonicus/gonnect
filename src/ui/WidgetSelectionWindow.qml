@@ -181,6 +181,10 @@ BaseWindow {
                         console.log("Could not create widget component")
                     } else {
                         widgetRoot.resetWidgetElevation()
+
+                        widget.widget.x = 0
+                        widget.widget.y = 0
+
                         widgetRoot.model.add(widget)
 
                         SM.setUiDirtyState(true)

@@ -70,6 +70,20 @@ Item {
     Connections {
         target: page
         function onGridResized() {
+            let minWidth = Number(control.wMin / page.gridWidth)
+            let newWidth = Math.round(((widget.width / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
+            widget.width = newWidth < minWidth ? minWidth : newWidth
+
+            let minHeight = Number(control.hMin / page.gridHeight)
+            let newHeight = height = Math.round(((widget.height / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
+            widget.height = newHeight < minHeight ? minHeight : newHeight
+
+            widget.x = Math.round(((widget.x / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
+            widget.x = Math.max(0, Math.min(widget.x, page.gridWidth - widget.width))
+
+            widget.y = Math.round(((widget.y / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
+            widget.y = Math.max(0, Math.min(widget.y, page.gridHeight - widget.height))
+            /*
             control.setMinSize()
 
             control.setWidth()
@@ -77,10 +91,26 @@ Item {
 
             control.setX()
             control.setY()
+            */
         }
     }
 
     Component.onCompleted: {
+        let minWidth = Number(control.wMin / page.gridWidth)
+        let newWidth = Math.round(((widget.width / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
+        widget.width = newWidth < minWidth ? minWidth : newWidth
+
+        let minHeight = Number(control.hMin / page.gridHeight)
+        let newHeight = height = Math.round(((widget.height / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
+        widget.height = newHeight < minHeight ? minHeight : newHeight
+
+        widget.x = Math.round(((widget.x / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
+        widget.x = Math.max(0, Math.min(widget.x, page.gridWidth - widget.width))
+
+        widget.y = Math.round(((widget.y / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
+        widget.y = Math.max(0, Math.min(widget.y, page.gridHeight - widget.height))
+
+        /*
         control.setMinSize()
 
         control.setWidth()
@@ -88,6 +118,7 @@ Item {
 
         control.setX()
         control.setY()
+        */
     }
 
     // Basic widget

@@ -12,6 +12,9 @@ Item {
     required property string name
     required property string icon
 
+    property int oldGridWidth: 0
+    property int oldGridHeight: 0
+
     property bool editMode: false
     Connections {
         target: SM
@@ -88,6 +91,8 @@ Item {
             }
 
             control.gridResized()
+
+            oldGridWidth = snapGrid.width
         }
         onHeightChanged: () => {
             if (snapGrid.height <= 0) {
@@ -95,6 +100,8 @@ Item {
             }
 
             control.gridResized()
+
+            oldGridHeight = snapGrid.height
         }
 
         Canvas {
