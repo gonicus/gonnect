@@ -15,6 +15,8 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml
 )
 
+find_package(Qca-qt6 REQUIRED)
+
 if(UNIX)
     include(FindPkgConfig)
     find_package(PkgConfig REQUIRED)
@@ -22,26 +24,22 @@ if(UNIX)
     pkg_check_modules(PJSIP REQUIRED libpjproject IMPORTED_TARGET)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
-    find_package(Qca-qt6 REQUIRED)
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI
-        PkgConfig::PJSIP
-        qca-qt6)
+        PkgConfig::PJSIP)
 else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
     find_package(pjproject REQUIRED)
-    find_package(qca REQUIRED)
     find_package(wintoast REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         hidapi::hidapi
         pjproject::pjproject
         libusb::libusb
-        wintoast::wintoast
-        qca-qt6)
+        wintoast::wintoast)
 endif()
 
 if(LINUX)
@@ -634,6 +632,7 @@ target_link_libraries(gonnect
         Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
+        Qca-qt6
         qt6keychain
         hid-rp
         Qt6::Xml
