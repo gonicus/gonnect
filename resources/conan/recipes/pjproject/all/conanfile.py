@@ -92,6 +92,8 @@ class PjSIPConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
+#        if self.options.shared:
+#            tc.configure_args.append("--enable-shared")
         if not self.options.with_uuid:
             tc.configure_args.append("--disable-uuid")
         if self.options.with_samplerate:
@@ -108,6 +110,7 @@ class PjSIPConan(ConanFile):
 
         tc.configure_args.append("--disable-install-examples")
         tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
+
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -184,10 +187,26 @@ class PjSIPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "pjproject")
         self.cpp_info.set_property("pkg_config_name", "libpjproject")
 
-        if self.settings.os != "Windows":
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "stdc++", "rt", "m"]
+
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = collect_libs(self)
+
+        else:
             if self.options.get_safe("endianness") == "big":
                 self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
             else:
                 self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
 
-        self.cpp_info.libs = collect_libs(self)
+            libs = []
+            installed_libs = collect_libs(self)
+            lib_basenames = ["srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "pjnath", "pjlib-util", "pj"]
+
+            for basename in lib_basenames:
+                for installed in installed_libs:
+                    if installed.startswith(basename + "-"):
+                        libs.append(installed)
+                        break
+
+            self.cpp_info.libs = libs

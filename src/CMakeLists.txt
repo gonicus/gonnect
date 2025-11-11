@@ -39,7 +39,7 @@ else()
         hidapi::hidapi
         pjproject::pjproject
         libusb::libusb
-        qca::qca)
+        qca-qt6)
 endif()
 
 if(LINUX)
@@ -629,8 +629,8 @@ target_link_libraries(gonnect
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
         Qt6::Core5Compat
-        ${PLATFORM_LIBRARIES}
         GOnnectVersion
+        ${PLATFORM_LIBRARIES}
         qt6keychain
         hid-rp
         Qt6::Xml

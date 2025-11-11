@@ -39,6 +39,8 @@ if(LINUX)
     set(PLATFORM_QT_MODULES DBus)
 endif()
 if(WIN32)
+    set(ENABLE_AKONADI OFF)
+    set(ENABLE_EDS OFF)
     add_definitions(-DNOMINMAX)
 endif()
 
