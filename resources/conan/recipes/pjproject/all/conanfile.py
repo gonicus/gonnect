@@ -100,6 +100,10 @@ class PjSIPConan(ConanFile):
 #            tc.configure_args.append("--enable-shared")
         if not self.options.with_uuid:
             tc.configure_args.append("--disable-uuid")
+        if not self.options.with_opus:
+            tc.configure_args.append("--disable-opus")
+        else:
+            tc.configure_args.append("--with-opus=%s" % self.dependencies["opus"].package_folder)
         if self.options.with_samplerate:
             tc.configure_args.append("--enable-libsamplerate")
         if not self.options.with_video:

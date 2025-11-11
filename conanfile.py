@@ -78,10 +78,10 @@ class GOnnectRecipe(ConanFile):
 
         if self.options.with_conan_qt:
             self.requires("qt/6.10.0")
-            self.requires("openssl/3.5.4", override=True)
             self.requires("mpg123/1.33.0", override=True)
             self.requires("wayland/1.23.92", override=True)
 
+        self.requires("openssl/3.5.4", override=True)
         self.requires("qca/2.3.10")
         self.requires("qtwebdav/3.19.0")
         self.requires("qtkeychain/0.15.0")
