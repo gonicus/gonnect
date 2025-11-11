@@ -34,10 +34,10 @@ Item {
 
             UISettings.setUISetting(widgetId, "name", widget.name)
             UISettings.setUISetting(widgetId, "type", widget.type)
-            UISettings.setUISetting(widgetId, "x", widget.widget.x)
-            UISettings.setUISetting(widgetId, "y", widget.widget.y)
-            UISettings.setUISetting(widgetId, "width", widget.widget.width)
-            UISettings.setUISetting(widgetId, "height", widget.widget.height)
+            UISettings.setUISetting(widgetId, "x", widget.root.x)
+            UISettings.setUISetting(widgetId, "y", widget.root.y)
+            UISettings.setUISetting(widgetId, "width", widget.root.width)
+            UISettings.setUISetting(widgetId, "height", widget.root.height)
         }
 
         // Page

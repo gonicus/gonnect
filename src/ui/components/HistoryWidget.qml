@@ -10,7 +10,7 @@ BaseWidget {
 
     Rectangle {
         id: historyWidget
-        parent: control.widget
+        parent: control.root
         color: "transparent"
         anchors {
             left: parent.left

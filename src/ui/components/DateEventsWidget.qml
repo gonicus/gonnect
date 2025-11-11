@@ -10,7 +10,7 @@ BaseWidget {
 
     Rectangle {
         id: dateWidget
-        parent: control.widget
+        parent: control.root
         color: "transparent"
         anchors {
             centerIn: parent

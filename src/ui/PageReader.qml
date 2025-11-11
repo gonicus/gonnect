@@ -35,15 +35,14 @@ Item {
                                                {
                                                    pageId: pageId,
                                                    name: pageName,
-                                                   icon: pageIcon
+                                                   icon: pageIcon,
+                                                   oldGridWidth: gridWidth,
+                                                   oldGridHeight: gridHeight
                                                })
             if (page === null) {
                 console.log("Could not create page component", pageId)
                 continue
             }
-
-            page.oldGridWidth = gridWidth
-            page.oldGridHeight = gridHeight
 
             model.add(page)
 
@@ -159,10 +158,10 @@ Item {
             return
         }
 
-        widget.widget.x = widgetX
-        widget.widget.y = widgetY
-        widget.widget.width = widgetWidth
-        widget.widget.height = widgetHeight
+        widget.root.x = widgetX
+        widget.root.y = widgetY
+        widget.root.width = widgetWidth
+        widget.root.height = widgetHeight
 
         page.model.add(widget)
     }
