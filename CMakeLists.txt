@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(GOnnect VERSION 2.1.0 LANGUAGES CXX)
+project(GOnnect VERSION 2.0.7 LANGUAGES CXX)
 include(cmake/CCache.cmake)
 useCompilerCache()
 
