@@ -350,8 +350,8 @@ BaseWindow {
                 name: qsTr("Home")
                 icon: Icons.userHome
 
-                oldGridWidth: Number(UISettings.getUISetting("generic", "gonnectGridWidth", 0))
-                oldGridHeight: Number(UISettings.getUISetting("generic", "gonnectGridHeight", 0))
+                oldGridWidth: UISettings.getUISetting("generic", "gonnectGridWidth", 0)
+                oldGridHeight: UISettings.getUISetting("generic", "gonnectGridHeight", 0)
             }
 
             Call {

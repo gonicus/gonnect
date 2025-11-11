@@ -155,7 +155,9 @@ BaseWindow {
                     const widgetProperties = {
                         widgetId: widgetRoot.pageId+id,
                         name: name.toLowerCase(),
-                        page: widgetRoot
+                        page: widgetRoot,
+                        posX: 0,
+                        posY: 0
                     }
 
                     let widget
@@ -181,9 +183,6 @@ BaseWindow {
                         console.log("Could not create widget component")
                     } else {
                         widgetRoot.resetWidgetElevation()
-
-                        widget.root.x = 0
-                        widget.root.y = 0
 
                         widgetRoot.model.add(widget)
 

@@ -27,6 +27,10 @@ Item {
     property double hRelativeMin: 0
 
     property alias root: resizableRect
+    property alias posX: resizableRect.x
+    property alias posY: resizableRect.y
+    property alias sizeW: resizableRect.width
+    property alias sizeH: resizableRect.height
 
     function setWidth() {
         control.root.width = Math.round((page.gridWidth * control.wRelative) / page.gridDensity) * page.gridDensity
@@ -59,6 +63,10 @@ Item {
     }
 
     function resize() {
+        if (page.gridWidth <= 0 || page.gridHeight <= 0) {
+            return
+        }
+
         let minWidth = Number(control.wMin / page.gridWidth)
         let newWidth = Math.round(((control.root.width / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
         control.root.width = newWidth < minWidth ? minWidth : newWidth
@@ -81,32 +89,8 @@ Item {
     Connections {
         target: page
         function onGridResized() {
-            console.log("SIGNAL OK")
             control.resize()
-            /*
-            control.setMinSize()
-
-            control.setWidth()
-            control.setHeight()
-
-            control.setX()
-            control.setY()
-            */
         }
-    }
-
-    Component.onCompleted: {
-        console.log("COMPLETE OK", page.oldGridWidth, page.oldGridHeight)
-        control.resize()
-        /*
-        control.setMinSize()
-
-        control.setWidth()
-        control.setHeight()
-
-        control.setX()
-        control.setY()
-        */
     }
 
     // Basic widget

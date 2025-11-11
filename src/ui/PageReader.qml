@@ -22,8 +22,8 @@ Item {
 
     function loadDynamicPages() {
         // Generic
-        let gridWidth = Number(UISettings.getUISetting("generic", "gonnectGridWidth", 0))
-        let gridHeight = Number(UISettings.getUISetting("generic", "gonnectGridHeight", 0))
+        let gridWidth = UISettings.getUISetting("generic", "gonnectGridWidth", 0)
+        let gridHeight = UISettings.getUISetting("generic", "gonnectGridHeight", 0)
 
         // Pages
         let pageIds = UISettings.getPageIds()
@@ -123,15 +123,19 @@ Item {
     function createWidget(widgetId : string, page : variant) {
         let widgetName = UISettings.getUISetting(widgetId, "name", "")
         let widgetType = Number(UISettings.getUISetting(widgetId, "type", 0))
-        let widgetX = Number(UISettings.getUISetting(widgetId, "x", 0))
-        let widgetY = Number(UISettings.getUISetting(widgetId, "y", 0))
-        let widgetWidth = Number(UISettings.getUISetting(widgetId, "width", 0))
-        let widgetHeight = Number(UISettings.getUISetting(widgetId, "height", 0))
+        let widgetX = UISettings.getUISetting(widgetId, "x", 0)
+        let widgetY = UISettings.getUISetting(widgetId, "y", 0)
+        let widgetWidth = UISettings.getUISetting(widgetId, "width", 0)
+        let widgetHeight = UISettings.getUISetting(widgetId, "height", 0)
 
         const widgetProperties = {
             widgetId: widgetId,
             name: widgetName,
-            page: page
+            page: page,
+            posX: widgetX,
+            posY: widgetX,
+            sizeW: widgetWidth,
+            sizeH: widgetHeight
         }
 
         let widget
@@ -157,11 +161,6 @@ Item {
             console.log("Could not create widget component", widgetId)
             return
         }
-
-        widget.root.x = widgetX
-        widget.root.y = widgetY
-        widget.root.width = widgetWidth
-        widget.root.height = widgetHeight
 
         page.model.add(widget)
     }
