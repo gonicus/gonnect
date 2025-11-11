@@ -40,4 +40,6 @@ if(ENABLE_DAV)
             Qt6::Quick
             Qt6::Xml
             ${CALDAV_PLATFORM_LIBRARIES})
+
+    set(CALDAV_ADDRESSBOOK_FACTORY CalDAVEventFeederFactory PARENT_SCOPE)
 endif()

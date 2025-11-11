@@ -47,5 +47,4 @@ if(ENABLE_LDAP)
     )
     
     set(LDAP_ADDRESSBOOK_FACTORY LDAPAddressBookFactory PARENT_SCOPE)
-    set(LDAP_ADDRESSBOOK_LIBRARIES LDAPAddressBookFactory PARENT_SCOPE)
 endif()

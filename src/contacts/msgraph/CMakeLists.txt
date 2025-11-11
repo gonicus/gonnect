@@ -25,4 +25,6 @@ if(ENABLE_MSGRAPH)
       Qt6::Quick      
       Qt6::Xml
       Qt6::NetworkAuth)
+
+    set(MSGRAPH_ADDRESSBOOK_FACTORY MSGraphAddressBookFactory PARENT_SCOPE)
 endif()

@@ -632,31 +632,28 @@ target_link_libraries(gonnect
         Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
-        Qca-qt6
+        qca-qt6
         qt6keychain
         hid-rp
         Qt6::Xml
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
-        LDAPAddressBookFactory
-        CardDAVAddressBookFactory
-        CSVAddressBookFactory
-        CalDAVEventFeederFactory        
+        ${CARDDAV_CONTACT_FACTORY}
+        ${CSV_ADDRESSBOOK_FACTORY}
+        ${CALDAV_ADDRESSBOOK_FACTORY}
         ${EDS_ADDRESSBOOK_LIBRARIES}
         ${EDS_CALENDAR_LIBRARIES}
-        ${LDAP_ADDRESSBOOK_LIBRARIES}
-        MSGraphAddressBookFactory
+        ${LDAP_ADDRESSBOOK_FACTORY}
+        ${MSGRAPH_ADDRESSBOOK_FACTORY}
 )
-target_link_libraries(gonnect PRIVATE Qt6::Core)
 
 qt_import_plugins(gonnect INCLUDE
      ${AKONADI_CONTACT_FACTORY}
      ${AKONADI_CALENDAR_FACTORY}
-     LDAPAddressBookFactory
-     CardDAVAddressBookFactory
-     CSVAddressBookFactory
-     CalDAVEventFeederFactory
-     MSGraphAddressBookFactory
+     ${CARDDAV_CONTACT_FACTORY}
+     ${CSV_ADDRESSBOOK_FACTORY}
+     ${CALDAV_ADDRESSBOOK_FACTORY}
+     ${MSGRAPH_ADDRESSBOOK_FACTORY}
      ${EDS_ADDRESSBOOK_FACTORY}
      ${EDS_CALENDAR_FACTORY}
      ${LDAP_ADDRESSBOOK_FACTORY})
