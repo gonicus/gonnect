@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, collect_libs
 
 
 class LibICALConan(ConanFile):
@@ -70,4 +70,4 @@ class LibICALConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libical")
         self.cpp_info.set_property("cmake_target_name", "libical::libical")
-        self.cpp_info.libs = ["ical"]
+        self.cpp_info.libs = collect_libs(self)
