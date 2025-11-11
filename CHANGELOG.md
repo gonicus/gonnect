@@ -1,3 +1,107 @@
+## [2.0.7](https://github.com/gonicus/gonnect/compare/v2.0.6...v2.0.7) (2025-11-07)
+
+### Bug Fixes
+
+* add template for STARFACE PBX
+* add platform abstraction layer
+  * add dummy platform
+  * use libnotify instead of portal
+* forward initial Jitsi mute to headset
+* prevent changing of camera in confernece to cause inifinite loop
+* bump Qt to 6.9.3
+* do not hold other calls on new incoming call when ringing
+* added mutex for addressbook operations
+* display past recurrent event instances that have been updated
+* enable buddy subscription for eds/akonadi sip uris
+* async component retrieval (calendar) fix freeze on startup
+* adjust path for eds avatar images
+* make conference mute button work again
+* fixed screen share button on conference page
+* fixed hold/unhold handling conflicts
+* show correct page on call/conference start/end
+* fixes for too narrow screen
+* show (correct) own display name in chats
+* fixed hold/unhold handling conflicts
+
+## [2.0.6](https://github.com/gonicus/gonnect/compare/v2.0.5...v2.0.6) (2025-10-07)
+
+
+### Bug Fixes
+
+* allow sending of asterisk via dtmf  ([#201](https://github.com/gonicus/gonnect/issues/201)) ([41c377b](https://github.com/gonicus/gonnect/commit/41c377bd4d18fc0c74e603e5b5557ee5979621a6)), closes [#197](https://github.com/gonicus/gonnect/issues/197)
+
+## [2.0.5](https://github.com/gonicus/gonnect/compare/v2.0.4...v2.0.5) (2025-09-09)
+
+
+### Bug Fixes
+
+* do not abort on minor SQL migration error ([#164](https://github.com/gonicus/gonnect/issues/164)) ([33a9e2b](https://github.com/gonicus/gonnect/commit/33a9e2b3a52344f2b5f2a33c78dcf66eaf62a1d2))
+* fix Jitsi Meet crash when upgrading SIP call with screen share ([#162](https://github.com/gonicus/gonnect/issues/162)) ([ba4ca9f](https://github.com/gonicus/gonnect/commit/ba4ca9f8f8e256f8bdda072c8fa40b267a32f8fd))
+* mute behaviour in jitsi rooms ([12def7b](https://github.com/gonicus/gonnect/commit/12def7bea63a58cde78f51c01bb9447b02479a9a))
+* revert evolution-data-server back to 3.56.0 ([2f9e9be](https://github.com/gonicus/gonnect/commit/2f9e9be7b2de99572f714bc6311875db2ab4b138))
+* show password dialog again ([8164305](https://github.com/gonicus/gonnect/commit/816430571e1082c2a066afeced316998ae0c26bc))
+* **ui:** do not show multiple password dialogs ([#165](https://github.com/gonicus/gonnect/issues/165)) ([bb0020e](https://github.com/gonicus/gonnect/commit/bb0020eeb64ad52fb4097f6a45c31fdb87930866))
+* use short month names for display headsets ([4449ac0](https://github.com/gonicus/gonnect/commit/4449ac07d891096e9f27445e477ae165647f71da))
+
+
+### Reverts
+
+* Revert "fix: revert evolution-data-server back to 3.56.0" ([02ce3e9](https://github.com/gonicus/gonnect/commit/02ce3e9c3bc95cbbbe3a0b558f52345432352f01))
+
+## [2.0.4](https://github.com/gonicus/gonnect/compare/v2.0.3...v2.0.4) (2025-09-02)
+
+
+### Bug Fixes
+
+* autoremove date event notifications ([795f4b0](https://github.com/gonicus/gonnect/commit/795f4b0a469abff6a446700f347c39a114ba1382))
+* avoid parallel calls for date event queue processor ([eeabda9](https://github.com/gonicus/gonnect/commit/eeabda90704556fc7e68e4d4e986d5c777223ce0))
+* avoid parallel calls for queue processor ([63f2e7b](https://github.com/gonicus/gonnect/commit/63f2e7bdd51f9cdffbefe4fca4792193c0ebd5c4))
+* honour tray icon activation reasons ([#156](https://github.com/gonicus/gonnect/issues/156)) ([2eb3378](https://github.com/gonicus/gonnect/commit/2eb3378e347520831a1abc823d7272c4f47233cc))
+* ignore timer for unvoluntary hook on via headset ([#138](https://github.com/gonicus/gonnect/issues/138)) ([9e3208c](https://github.com/gonicus/gonnect/commit/9e3208c84f1e35470831acef87308b447610be25))
+* properly display event status, fix event notifications (calendar) ([ff7a0cc](https://github.com/gonicus/gonnect/commit/ff7a0cc8ba42e80103267f1332dbc4bc570e7218))
+* re-trigger event notifications for updated events ([#154](https://github.com/gonicus/gonnect/issues/154)) ([b1e0f34](https://github.com/gonicus/gonnect/commit/b1e0f34163be2b653b9ab437ac9c171449dbbba1))
+* regonize DateEvent as in the past ([ec4e2fb](https://github.com/gonicus/gonnect/commit/ec4e2fb573f1f549e6b8125c4dcbc5cbc8ab66c9))
+* revert evolution-data-server back to 3.56.0 ([409b830](https://github.com/gonicus/gonnect/commit/409b8306be09832ef1c6ec092e30408a8b84b771))
+* show notification while in conference ([2fdfe7a](https://github.com/gonicus/gonnect/commit/2fdfe7a3eb4564c088186f82d9fca516e9f8bf6c))
+* **ui:** change to conference page on video upgrade ([#159](https://github.com/gonicus/gonnect/issues/159)) ([6dff6ab](https://github.com/gonicus/gonnect/commit/6dff6ab59053b93a179dcb9065e6052f3187d20f))
+* **ui:** larger font for chat message info label ([0dc4793](https://github.com/gonicus/gonnect/commit/0dc4793498b68f37d58366d1ca07c7bdc4579320))
+* **ui:** show correct page after terminating call ([#146](https://github.com/gonicus/gonnect/issues/146)) ([c837c92](https://github.com/gonicus/gonnect/commit/c837c92c507a307e2666f181de29115c15aad425))
+* use placeholder identity that looks like a placeholder ([19dd5bb](https://github.com/gonicus/gonnect/commit/19dd5bbc598056ac272f9bd213a66fc0d9523102))
+
+
+### Reverts
+
+* Revert "fix: revert evolution-data-server back to 3.56.0" ([8f8a19d](https://github.com/gonicus/gonnect/commit/8f8a19d2484afe432507eee3f7f895ba8514fd05))
+
+# [2.0.3](https://github.com/gonicus/gonnect/compare/v2.0.2...v2.1.3) (2025-08-18)
+
+
+### Bug Fixes
+
+* read settings value for dark tray icon correctly ([#141](https://github.com/gonicus/gonnect/issues/141)) ([a5c044c](https://github.com/gonicus/gonnect/commit/a5c044cf0c73470f6600c04853441a2fb8d2a997))
+* revert evolution-data-server back to 3.56.0 ([bf15fe4](https://github.com/gonicus/gonnect/commit/bf15fe4914ecb474dd4376c3249223c3dc2911ee))
+* segfault happend in certain hold states ([#142](https://github.com/gonicus/gonnect/issues/142)) ([8199174](https://github.com/gonicus/gonnect/commit/81991741d8d906680dc5842c697c036d6cf71c11))
+* **ui:** better color for button bar labels in dark mode ([#143](https://github.com/gonicus/gonnect/issues/143)) ([420db09](https://github.com/gonicus/gonnect/commit/420db09c57d39fac40f3ae9534be338465b2ec28))
+
+
+### Features
+
+* emergency numbers are now configurable ([#140](https://github.com/gonicus/gonnect/issues/140)) ([5ec7e42](https://github.com/gonicus/gonnect/commit/5ec7e4246ebc6a615f72a249b93df7faf926f292))
+
+## [2.0.2](https://github.com/gonicus/gonnect/compare/v2.0.1...v2.0.2) (2025-08-15)
+
+
+### Bug Fixes
+
+* trigger new release ([aba7b2e](https://github.com/gonicus/gonnect/commit/aba7b2eeca7c76ba2044c00bc1df91f3a5901ba0))
+
+## [2.0.1](https://github.com/gonicus/gonnect/compare/v2.0.0...v2.0.1) (2025-08-14)
+
+
+### Bug Fixes
+
+* togglers are working again (regression fix) ([#136](https://github.com/gonicus/gonnect/issues/136)) ([30fe9db](https://github.com/gonicus/gonnect/commit/30fe9db56cac40154ae1bf842a4ffcaeb382cf19))
+
 # [2.0.0](https://github.com/gonicus/gonnect/compare/v1.3.12...v2.0.0) (2025-08-12)
 
 

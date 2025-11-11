@@ -1,9 +1,9 @@
+import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, collect_libs
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.build import cross_building
-
 
 class QCA(ConanFile):
     name = "qca"    
@@ -75,4 +75,8 @@ class QCA(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = [""]
+        self.cpp_info.set_property("cmake_file_name", "Qca-qt6")
+        self.cpp_info.set_property("cmake_target_name", "qca-qt6")
+        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.includedirs.append(os.path.join("include", "Qca-qt6"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Qca-qt6", "QtCrypto"))

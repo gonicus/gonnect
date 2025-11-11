@@ -155,7 +155,7 @@ After _distrobox_ is installed, create the _distrobox_ for _GOnnect_ development
 by running
 
 ```bash
-distrobox assemble create
+distrobox assemble create --name=gonnect
 ```
 
 in the directory of your _GOnnect_ checkout.
@@ -163,19 +163,25 @@ in the directory of your _GOnnect_ checkout.
 
 ## Building 
 
+### Unix based systems
+
 Assuming you're using the documented _distrobox_ approach above, enter the _distrobox_
 and start the ordinary _CMake_ build:
 
 ```bash
 distrobox enter gonnect
-cmake --workflow --preset default
+cd <to where you've cloned this repository>
+./resources/conan/export.py
+conan install . --build=missing
+cmake --preset conan-release .
+cmake --build --preset conan-release --parallel $(nproc --all)
 ```
 
 Alternatively you can simply run `qtcreator` inside the _distrobox_ and open the
 project as usual be selecting the `CMakeLists.txt`.
 
 
-## Building the flatpak
+### Building the flatpak
 
 As _GOnnect_ is mainly developed for use in _Flatpak_, some features only work in this
 kind of environment. If you want to build the _Flatpak_ locally, you can do this by
@@ -186,6 +192,34 @@ flatpak uninstall de.gonicus.gonnect
 flatpak run --command=flatpak-builder org.flatpak.Builder build --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean --repo=repo resources/flatpak/de.gonicus.gonnect.yml
 flatpak --user remote-add --no-gpg-verify gonnect-repo repo
 flatpak --user install gonnect-repo de.gonicus.gonnect
+```
+
+### Windows
+
+To build *GOnnect* on Windows, you need:
+
+ * Visual Studio [Community Edition](https://visualstudio.microsoft.com/de/vs/community/)
+   * Platform Toolset v140 (required for pjsip)
+   * Windows 8.1 SDK (required for pjsip)
+   * Build Tools
+ * [CMake](https://cmake.org/download/)
+ * [Git](https://git-scm.com/install)
+ * [Perl](https://strawberryperl.com/)
+ * [Python](https://www.python.org/downloads/)
+   * pip install aqtinstall
+   * pip install conan
+
+Make sure to use CMD for builds on the command line interface.
+
+```bash
+mkdir C:\Qt
+aqt install-qt --outputdir C:\Qt windows desktop 6.10.0 win64_msvc2022_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
+set Qt6_DIR=C:\Qt\6.10.0\msvc2022_64
+cd <to where you've cloned this repository>
+.\resources\conan\export.py
+conan install . --build=missing
+cmake --preset conan-default .
+cmake --build --preset conan-release
 ```
 
 # License

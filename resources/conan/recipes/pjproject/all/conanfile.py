@@ -30,6 +30,7 @@ class PjSIPConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_uuid": [True, False],
+        "with_opus": [True, False],
         "with_samplerate": [True, False],
         "with_ext_sound": [True, False],
         "with_video": [True, False],
@@ -40,6 +41,7 @@ class PjSIPConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_uuid": True,
+        "with_opus": True,
         "with_samplerate": False,
         "with_ext_sound": True,
         "with_video": False,
@@ -57,6 +59,8 @@ class PjSIPConan(ConanFile):
             self.requires("libuuid/1.0.3")
         if self.options.with_samplerate:
             self.requires("libsamplerate/0.2.2")
+        if self.options.with_opus:
+            self.requires("opus/1.5.2")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -92,6 +96,8 @@ class PjSIPConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
+#        if self.options.shared:
+#            tc.configure_args.append("--enable-shared")
         if not self.options.with_uuid:
             tc.configure_args.append("--disable-uuid")
         if self.options.with_samplerate:
@@ -108,6 +114,7 @@ class PjSIPConan(ConanFile):
 
         tc.configure_args.append("--disable-install-examples")
         tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
+
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -184,10 +191,28 @@ class PjSIPConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "pjproject")
         self.cpp_info.set_property("pkg_config_name", "libpjproject")
 
-        if self.settings.os != "Windows":
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread", "stdc++", "rt", "m"]
+
+        if self.settings.os == "Windows":
+            self.cpp_info.libs = collect_libs(self)
+
+        else:
             if self.options.get_safe("endianness") == "big":
                 self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
             else:
                 self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
 
-        self.cpp_info.libs = collect_libs(self)
+            libs = []
+            installed_libs = collect_libs(self)
+            installed_libs.sort(key=len)
+
+            lib_basenames = ["pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "ilbccodec", "srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "pjnath", "pjlib-util", "pj"]
+
+            for basename in lib_basenames:
+                for installed in installed_libs:
+                    if installed.startswith(basename + "-"):
+                        libs.append(installed)
+                        break
+
+            self.cpp_info.libs = libs

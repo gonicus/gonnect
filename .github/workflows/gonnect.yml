@@ -43,7 +43,7 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel $(nproc --all)
 
       - name: Upload Test artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: gonnect-tests
           path: build/tests/contactsTest
@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - name: Run clang-format style check for C/C++/Protobuf programs.
-        uses: jidicula/clang-format-action@4726374d1aa3c6aecf132e5197e498979588ebc8 # v4.15.0
+        uses: jidicula/clang-format-action@6cd220de46c89139a0365edae93eee8eb30ca8fe # v4.16.0
         with:
           clang-format-version: '19'
           check-path: 'src'
@@ -80,7 +80,7 @@ jobs:
           scripts/static-clang-analyzer.sh
       
       - name: Save Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: clang-report
           path: /tmp/build.log
@@ -122,7 +122,7 @@ jobs:
           qt-only: 'true'
 
       - name: Download Test artifacts
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
         with:
           name: gonnect-tests
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(GOnnect VERSION 2.1.0 LANGUAGES CXX)
+project(GOnnect VERSION 2.0.7 LANGUAGES CXX)
 include(cmake/CCache.cmake)
 useCompilerCache()
 
@@ -23,6 +23,7 @@ option(ENABLE_EDS "Enable EDS plugins" ON)
 option(ENABLE_LDAP "Enable LDAP plugin" ON)
 option(ENABLE_DAV "Enable DAV plugin" ON)
 option(ENABLE_CSV "Enable CSV plugin" ON)
+option(ENABLE_MSGRAPH "Enable MS Graph plugin" ON)
 
 set(APP_ID "de.gonicus.gonnect")
 add_definitions(-DAPP_ID="${APP_ID}")
@@ -37,8 +38,11 @@ if(LINUX)
 
     add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-gnu-zero-variadic-macro-arguments)
     set(PLATFORM_QT_MODULES DBus)
+    set(ENABLE_MSGRAPH OFF)
 endif()
 if(WIN32)
+    set(ENABLE_AKONADI OFF)
+    set(ENABLE_EDS OFF)
     add_definitions(-DNOMINMAX)
 endif()
 

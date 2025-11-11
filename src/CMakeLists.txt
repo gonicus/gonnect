@@ -6,7 +6,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     Quick
     QuickControls2
-    HttpServer
     Multimedia
     Sql
     Network
@@ -16,6 +15,8 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml
 )
 
+find_package(Qca-qt6 REQUIRED)
+
 if(UNIX)
     include(FindPkgConfig)
     find_package(PkgConfig REQUIRED)
@@ -23,24 +24,22 @@ if(UNIX)
     pkg_check_modules(PJSIP REQUIRED libpjproject IMPORTED_TARGET)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
-    find_package(Qca-qt6 REQUIRED)
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI
-        PkgConfig::PJSIP
-        qca-qt6)
+        PkgConfig::PJSIP)
 else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
     find_package(pjproject REQUIRED)
-    find_package(qca REQUIRED)
+    find_package(wintoast REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         hidapi::hidapi
         pjproject::pjproject
         libusb::libusb
-        qca::qca)
+        wintoast::wintoast)
 endif()
 
 if(LINUX)
@@ -135,6 +134,7 @@ add_subdirectory(contacts/eds)
 add_subdirectory(calendar/eds)
 add_subdirectory(contacts/akonadi)
 add_subdirectory(calendar/akonadi)
+add_subdirectory(contacts/msgraph)
 
 find_package(Qt6Keychain REQUIRED)
 
@@ -182,8 +182,6 @@ if(LINUX)
         platform/linux/LinuxDesktopSearchProvider.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
-        platform/dummy/DummyNotificationManager.h
-        platform/dummy/DummyNotificationManager.cpp
         platform/dummy/DummyUserInfo.cpp
         platform/dummy/DummyUserInfo.h
         platform/dummy/DummyExternalMediaManager.cpp
@@ -194,6 +192,8 @@ elseif(WIN32)
         platform/dummy/DummyThemeManager.h
         platform/windows/WindowsNetworkHelper.cpp
         platform/windows/WindowsNetworkHelper.h
+        platform/windows/WindowsNotificationManager.h
+        platform/windows/WindowsNotificationManager.cpp
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h
@@ -439,19 +439,6 @@ qt_add_qml_module(gonnect
         chat/ChatRoomProxyModel.cpp
         chat/ConferenceChatRoom.h
         chat/ConferenceChatRoom.cpp
-        chat/JsChatConnector.h
-        chat/JsChatConnector.cpp
-        chat/JsChatRoom.h
-        chat/JsChatRoom.cpp
-        chat/JsConnectorConfig.h
-        chat/JsChatEvent.h
-        chat/JsChatEvent.cpp
-        chat/JsChatImageEvent.h
-        chat/JsChatImageEvent.cpp
-        chat/JsChatMessageEvent.h
-        chat/JsChatMessageEvent.cpp
-        chat/JsChatUser.h
-        chat/JsChatUser.cpp
 
         conference/ConferenceParticipant.h
         conference/ConferenceParticipant.cpp
@@ -636,7 +623,6 @@ target_link_libraries(gonnect
         Qt6::Qml
         Qt6::Quick
         Qt6::QuickControls2
-        Qt6::HttpServer
         Qt6::Multimedia
         Qt6::Sql
         Qt6::Network
@@ -644,30 +630,30 @@ target_link_libraries(gonnect
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
         Qt6::Core5Compat
-        ${PLATFORM_LIBRARIES}
         GOnnectVersion
+        ${PLATFORM_LIBRARIES}
+        qca-qt6
         qt6keychain
         hid-rp
         Qt6::Xml
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
-        LDAPAddressBookFactory
-        CardDAVAddressBookFactory
-        CSVAddressBookFactory
-        CalDAVEventFeederFactory
+        ${CARDDAV_CONTACT_FACTORY}
+        ${CSV_ADDRESSBOOK_FACTORY}
+        ${CALDAV_CALENDAR_FACTORY}
         ${EDS_ADDRESSBOOK_LIBRARIES}
         ${EDS_CALENDAR_LIBRARIES}
-        ${LDAP_ADDRESSBOOK_LIBRARIES}
+        ${LDAP_ADDRESSBOOK_FACTORY}
+        ${MSGRAPH_ADDRESSBOOK_FACTORY}
 )
-target_link_libraries(gonnect PRIVATE Qt6::Core)
 
 qt_import_plugins(gonnect INCLUDE
      ${AKONADI_CONTACT_FACTORY}
      ${AKONADI_CALENDAR_FACTORY}
-     LDAPAddressBookFactory
-     CardDAVAddressBookFactory
-     CSVAddressBookFactory
-     CalDAVEventFeederFactory
+     ${CARDDAV_CONTACT_FACTORY}
+     ${CSV_ADDRESSBOOK_FACTORY}
+     ${CALDAV_CALENDAR_FACTORY}
+     ${MSGRAPH_ADDRESSBOOK_FACTORY}
      ${EDS_ADDRESSBOOK_FACTORY}
      ${EDS_CALENDAR_FACTORY}
      ${LDAP_ADDRESSBOOK_FACTORY})

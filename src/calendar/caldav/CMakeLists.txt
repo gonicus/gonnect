@@ -1,4 +1,7 @@
 if(ENABLE_DAV)
+    find_package(QtWebDAV REQUIRED)
+    list(APPEND CALDAV_PLATFORM_LIBRARIES QtWebDAV)
+
     if(UNIX)
         include(FindPkgConfig)
         find_package(PkgConfig REQUIRED)
@@ -8,12 +11,11 @@ if(ENABLE_DAV)
             PkgConfig::LIBICAL)
     else()
         find_package(libical REQUIRED)
-        find_package(QtWebDAV REQUIRED)
     
         list(APPEND CALDAV_PLATFORM_LIBRARIES
             libical::libical QtWebDAV)
     endif()
-    
+
     qt_add_plugin(CalDAVEventFeederFactory STATIC
       CLASS_NAME CalDAVEventFeederFactory
     
@@ -38,4 +40,6 @@ if(ENABLE_DAV)
             Qt6::Quick
             Qt6::Xml
             ${CALDAV_PLATFORM_LIBRARIES})
+
+    set(CALDAV_CALENDAR_FACTORY CalDAVEventFeederFactory PARENT_SCOPE)
 endif()

@@ -29,4 +29,6 @@ if(ENABLE_DAV)
       QtWebDAV
       vCard
       Qt6::Xml)
+
+    set(CARDDAV_ADDRESSBOOK_FACTORY CardDAVAddressBookFactory PARENT_SCOPE)
 endif()

@@ -43,10 +43,8 @@ if(ENABLE_LDAP)
       Qt6::Gui
       Qt6::Quick
       Qt6::Widgets
-    PUBLIC
       ${LDAP_PLATFORM_LIBS}
     )
     
     set(LDAP_ADDRESSBOOK_FACTORY LDAPAddressBookFactory PARENT_SCOPE)
-    set(LDAP_ADDRESSBOOK_LIBRARIES LDAPAddressBookFactory ${OPENLDAP_LIBRARIES} ${SASL2_LIBRARIES} PARENT_SCOPE)
 endif()
