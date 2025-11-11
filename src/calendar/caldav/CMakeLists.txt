@@ -41,5 +41,5 @@ if(ENABLE_DAV)
             Qt6::Xml
             ${CALDAV_PLATFORM_LIBRARIES})
 
-    set(CALDAV_ADDRESSBOOK_FACTORY CalDAVEventFeederFactory PARENT_SCOPE)
+    set(CALDAV_CALENDAR_FACTORY CalDAVEventFeederFactory PARENT_SCOPE)
 endif()
