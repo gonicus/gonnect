@@ -30,6 +30,7 @@ class PjSIPConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_uuid": [True, False],
+        "with_opus": [True, False],
         "with_samplerate": [True, False],
         "with_ext_sound": [True, False],
         "with_video": [True, False],
@@ -40,6 +41,7 @@ class PjSIPConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_uuid": True,
+        "with_opus": True,
         "with_samplerate": False,
         "with_ext_sound": True,
         "with_video": False,
@@ -57,6 +59,8 @@ class PjSIPConan(ConanFile):
             self.requires("libuuid/1.0.3")
         if self.options.with_samplerate:
             self.requires("libsamplerate/0.2.2")
+        if self.options.with_opus:
+            self.requires("opus/1.5.2")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -201,7 +205,9 @@ class PjSIPConan(ConanFile):
 
             libs = []
             installed_libs = collect_libs(self)
-            lib_basenames = ["srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "pjnath", "pjlib-util", "pj"]
+            installed_libs.sort(key=len)
+
+            lib_basenames = ["pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "ilbccodec", "srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "pjnath", "pjlib-util", "pj"]
 
             for basename in lib_basenames:
                 for installed in installed_libs:
