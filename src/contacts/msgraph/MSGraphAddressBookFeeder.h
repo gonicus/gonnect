@@ -22,21 +22,20 @@ public:
 
 private:
     void authStatusChanged(QAbstractOAuth::Status status);
-    
+
     void contactsReceived(QNetworkReply *reply);
-    
+
     void requestContacts();
 
     void authorize();
 
-    
     AddressBookManager *m_manager = nullptr;
-    
+
     QOAuthHttpServerReplyHandler *m_replyHandler = nullptr;
 
     QString m_group;
 
-    QOAuth2AuthorizationCodeFlow* m_authCodeFlow = nullptr;
+    QOAuth2AuthorizationCodeFlow *m_authCodeFlow = nullptr;
 
-    QNetworkAccessManager *m_networkAccessManager = nullptr;    
+    QNetworkAccessManager *m_networkAccessManager = nullptr;
 };

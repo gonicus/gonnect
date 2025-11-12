@@ -43,7 +43,7 @@ public:
         m_defaultParameters = parameters;
     }
 
-    QString defaultAction() const {  return m_defaultAction; }
+    QString defaultAction() const { return m_defaultAction; }
     const QVariantList &defaultActionParameters() const { return m_defaultParameters; }
 
     QString title() const { return m_title; }

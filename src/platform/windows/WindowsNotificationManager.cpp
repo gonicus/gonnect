@@ -12,43 +12,39 @@ public:
     {
     }
 
-    ~WindowsNotification() { 
-        m_notification->deleteLater();
-    }
+    ~WindowsNotification() { m_notification->deleteLater(); }
 
-    void toastActivated() const override { 
+    void toastActivated() const override
+    {
         if (!m_notification->defaultAction().isEmpty()) {
             Q_EMIT m_notification->actionInvoked(m_notification->defaultAction(),
                                                  m_notification->defaultActionParameters());
         }
     }
 
-    void toastActivated(int actionIndex) const override {        
+    void toastActivated(int actionIndex) const override
+    {
 
         auto descs = m_notification->buttonDescriptions();
 
-        if (actionIndex >= descs.count()) { 
+        if (actionIndex >= descs.count()) {
             qCritical() << "Invalid action with index" << actionIndex;
             return;
         }
 
         Q_EMIT m_notification->actionInvoked(descs[actionIndex]["action"].toString(),
-                                             descs[actionIndex]["target"].toList());        
+                                             descs[actionIndex]["target"].toList());
     }
 
-    void toastActivated(std::wstring response) const override {
-    }
+    void toastActivated(std::wstring response) const override { }
 
-    void toastDismissed(WinToastDismissalReason state) const override {
-    }
+    void toastDismissed(WinToastDismissalReason state) const override { }
 
-    void toastFailed() const override {
-    }
+    void toastFailed() const override { }
 
-    WindowsNotificationManager& m_manager;
-    ::Notification* m_notification = nullptr;
+    WindowsNotificationManager &m_manager;
+    ::Notification *m_notification = nullptr;
 };
-
 
 NotificationManager &NotificationManager::instance()
 {
@@ -66,9 +62,9 @@ WindowsNotificationManager::WindowsNotificationManager() : NotificationManager()
         return;
     }
 
-
     WinToast::instance()->setAppName(L"Gonnect");
-    const auto aumi = WinToast::configureAUMI(L"mohabouje", L"wintoast", L"wintoastexample", L"20161006");
+    const auto aumi =
+            WinToast::configureAUMI(L"mohabouje", L"wintoast", L"wintoastexample", L"20161006");
     WinToast::instance()->setAppUserModelId(aumi);
     WinToast::instance()->initialize();
 }
@@ -107,15 +103,13 @@ QString WindowsNotificationManager::add(::Notification *notification)
 bool WindowsNotificationManager::remove(const QString &id)
 {
     const auto id64 = id.toLongLong();
-    auto* windowsNotification = m_activeNotifications.value(id64);
+    auto *windowsNotification = m_activeNotifications.value(id64);
     if (!windowsNotification) {
         return false;
     }
-    WinToast::instance()->hideToast(id64);    
+    WinToast::instance()->hideToast(id64);
     delete windowsNotification;
     return true;
 }
 
-void WindowsNotificationManager::shutdown()
-{
-}
+void WindowsNotificationManager::shutdown() { }

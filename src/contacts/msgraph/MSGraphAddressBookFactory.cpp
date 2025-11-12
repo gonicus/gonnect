@@ -11,7 +11,7 @@ QStringList MSGraphAddressBookFactory::configurations() const
     ReadOnlyConfdSettings settings;
     const QStringList groups = settings.childGroups();
 
-    for (const auto &group : groups) {        
+    for (const auto &group : groups) {
         if (groupRegex.match(group).hasMatch()) {
             settings.beginGroup(group);
             const bool enabled = settings.value("enabled", true).toBool();

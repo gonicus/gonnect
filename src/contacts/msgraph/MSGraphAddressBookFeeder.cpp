@@ -27,16 +27,16 @@ QUrl MSGraphAddressBookFeeder::networkCheckURL() const
     return {};
 }
 
-void MSGraphAddressBookFeeder::authStatusChanged(QAbstractOAuth::Status status) {    
+void MSGraphAddressBookFeeder::authStatusChanged(QAbstractOAuth::Status status)
+{
     if (status == QAbstractOAuth::Status::Granted) {
         m_replyHandler->close();
-        QTimer::singleShot(std::chrono::seconds(0), this, [this]() { 
-            requestContacts();
-        });
+        QTimer::singleShot(std::chrono::seconds(0), this, [this]() { requestContacts(); });
     }
 }
 
-void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply* reply) {
+void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
+{
     if (reply->error() != QNetworkReply::NoError) {
         return;
     }
@@ -49,14 +49,17 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply* reply) {
 
     auto value = doc.object()["value"];
     auto contacts = value.toArray();
-    auto& addressBook = AddressBook::instance();
+    auto &addressBook = AddressBook::instance();
     for (auto contact : contacts) {
         const auto obj = contact.toObject();
-        
+
         const auto contactId = obj["id"].toString();
         const auto surName = obj["surname"].toString();
         const auto givenName = obj["givenName"].toString();
-        const auto displayName = obj["displayName"].toString(); // This is a name that cannot be edited via Outlook, in out test Account it holds an old Skype Nickname. We use thia as fallback only.
+        const auto displayName =
+                obj["displayName"].toString(); // This is a name that cannot be edited via Outlook,
+                                               // in out test Account it holds an old Skype
+                                               // Nickname. We use thia as fallback only.
         const auto nickName = obj["nickName"].toString(); // This one can be edited with Outlook
         const auto emails = obj["emailAddresses"].toArray();
         QString email;
@@ -101,35 +104,29 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply* reply) {
                 phoneNumbers.push_back(number);
             }
         }
-        
-        addressBook.addContact(contactId, 
-                                "", 
-                                { 1, "Outlook" }, 
-                                name, 
-                                company,
-                                email,
-                                QDateTime(), 
-                                phoneNumbers);        
+
+        addressBook.addContact(contactId, "", { 1, "Outlook" }, name, company, email, QDateTime(),
+                               phoneNumbers);
     }
 
     if (doc.object().contains("@odata.nextLink")) {
-        
-        QString nextLink = doc.object()["@odata.nextLink"].toString();        
+
+        QString nextLink = doc.object()["@odata.nextLink"].toString();
 
         using namespace Qt::StringLiterals;
         QNetworkRequest request(nextLink);
         QHttpHeaders headers;
-        headers.append(QHttpHeaders::WellKnownHeader::Authorization, u"Bearer "_s + m_authCodeFlow->token());
-        request.setHeaders(headers);        
+        headers.append(QHttpHeaders::WellKnownHeader::Authorization,
+                       u"Bearer "_s + m_authCodeFlow->token());
+        request.setHeaders(headers);
         auto *reply = m_networkAccessManager->get(request);
         connect(reply, &QNetworkReply::finished, reply,
                 [this, reply]() { contactsReceived(reply); });
-
     }
 }
 
 void MSGraphAddressBookFeeder::requestContacts()
-{    
+{
     if (!m_authCodeFlow || m_authCodeFlow->status() != QAbstractOAuth::Status::Granted) {
         qCWarning(msGraphAddressBookFeeder) << "Cannot request contacts - not logged in";
         return;
@@ -141,18 +138,17 @@ void MSGraphAddressBookFeeder::requestContacts()
     requestFactory.setBearerToken(m_authCodeFlow->token().toLatin1());
 
     auto request = requestFactory.createRequest("me/contacts");
-    auto* reply = m_networkAccessManager->get(request);
+    auto *reply = m_networkAccessManager->get(request);
     if (!reply) {
         qCCritical(msGraphAddressBookFeeder) << "Failed to create contacts request";
         return;
     }
-        
-    connect(reply, &QNetworkReply::finished, reply, [this, reply]() {   
-        contactsReceived(reply);
-    });    
+
+    connect(reply, &QNetworkReply::finished, reply, [this, reply]() { contactsReceived(reply); });
 }
 
-void MSGraphAddressBookFeeder::authorize() {
+void MSGraphAddressBookFeeder::authorize()
+{
     qCDebug(msGraphAddressBookFeeder) << "Starting microsoft authorization";
     if (!m_replyHandler) {
         m_replyHandler = new QOAuthHttpServerReplyHandler(this);
@@ -200,11 +196,9 @@ void MSGraphAddressBookFeeder::authorize() {
 
 void MSGraphAddressBookFeeder::process()
 {
-    if (m_authCodeFlow
-        && m_authCodeFlow->status() == QAbstractOAuth::Status::Granted) {
+    if (m_authCodeFlow && m_authCodeFlow->status() == QAbstractOAuth::Status::Granted) {
         requestContacts();
     } else {
         authorize();
     }
 }
-
