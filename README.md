@@ -219,7 +219,7 @@ cd <to where you've cloned this repository>
 .\resources\conan\export.py
 conan install . --build=missing
 cmake --preset conan-default .
-cmake --build --preset conan-release
+cmake --build --preset conan-default
 ```
 
 # License
