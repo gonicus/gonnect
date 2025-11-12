@@ -49,17 +49,17 @@ jobs:
       - name: Configure CMake
         env:
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/${{env.BUILD_TYPE}}/generators/conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DBUILD_TESTING=ON -DBUILD_DEPENDENCIES=ON
+        run: cmake --preset conan-release . -DBUILD_TESTING=ON
 
-      #- name: Build
-      #  run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel $(nproc --all)
+      - name: Build
+        run: cmake --build --preset conan-release
 
-      #- name: Upload Test artifacts
-      #  uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
-      #  with:
-      #    name: gonnect-tests
-      #    path: build/tests/contactsTest
-      #    retention-days: 1
+      - name: Upload Test artifacts
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: gonnect-tests
+          path: build/tests/contactsTest
+          retention-days: 1
 
   build-windows:
     runs-on: windows-2025
@@ -87,17 +87,10 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake -B ${{github.workspace}}\\build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}\\build\\${{env.BUILD_TYPE}}\\generators\\conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DBUILD_TESTING=ON -DBUILD_DEPENDENCIES=ON
+        run: cmake --preset conan-default .
 
       - name: Build
-        run: cmake --build ${{github.workspace}}\\build --config ${{env.BUILD_TYPE}}
-
-      #- name: Upload Test artifacts
-      #  uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
-      #  with:
-      #    name: gonnect-tests
-      #    path: build/tests/contactsTest
-      #    retention-days: 1
+        run: cmake --preset conan-release . -DBUILD_TESTING=ON
 
   format:
     runs-on: ubuntu-24.04
