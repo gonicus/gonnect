@@ -48,7 +48,7 @@ jobs:
 
       - name: Configure CMake
         env:
-          PKG_CONFIG_PATH: /usr/lib/pkgconfig
+          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/build/${{env.BUILD_TYPE}}/generators/conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DBUILD_TESTING=ON -DBUILD_DEPENDENCIES=ON
 
       - name: Build
@@ -82,7 +82,7 @@ jobs:
       - name: Install Conan dependencies
         shell: cmd
         run: |
-          .\\resources\\conan\\export.py
+          python resources\\conan\\export.py
           conan install . --build=missing
 
       #- name: Configure CMake
