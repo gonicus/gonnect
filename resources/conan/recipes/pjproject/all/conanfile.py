@@ -112,6 +112,13 @@ class PjSIPConan(ConanFile):
             tc.configure_args.append("--disable-floating-point")
         if self.options.with_ext_sound:
             tc.configure_args.append("--enable-ext-sound")
+        if self.settings.os == "Macos":
+            tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
+            tc.extra_cflags.append("-DPJ_SSL_SOCK_IMP=PJ_SSL_SOCK_IMP_APPLE")
+            tc.extra_ldflags.append("-Wl,-framework,Security")
+            tc.extra_ldflags.append("-Wl,-framework,Network")
+        else:
+            tc.configure_args.append("--with-ssl=%s" % self.dependencies["openssl"].package_folder)
 
         if cross_building(self):
             tc.configure_args.append("bash_cv_wcwidth_broken=yes")

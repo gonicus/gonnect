@@ -42,6 +42,12 @@ else()
         wintoast::wintoast)
 endif()
 
+if(APPLE)
+    list(APPEND PLATFORM_LIBRARIES
+        "-framework Security"
+        "-framework Network")
+endif()
+
 if(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)

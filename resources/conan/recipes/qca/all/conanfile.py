@@ -62,6 +62,7 @@ class QCA(ConanFile):
         tc.variables['BUILD_TESTS'] = False
         tc.variables['BUILD_TOOLS'] = False
         tc.variables['BUILD_PLUGINS'] = "ossl"
+        tc.variables['OSX_FRAMEWORK'] = False
         tc.generate()
 
     def build(self):

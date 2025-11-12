@@ -69,7 +69,11 @@ class HidAPIConan(ConanFile):
 
             self.cpp_info.components["hidraw"].set_property("cmake_target_name", "hidapi::hidraw")
             self.cpp_info.components["hidraw"].set_property("pkg_config_name", "hidapi-hidraw")
-            self.cpp_info.components["hidraw"].libs = ["hidapi-hidraw"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["hidraw"].libs = ["hidapi-hidraw"]
+            else:
+                self.cpp_info.components["hidraw"].libs = ["hidapi"]
+
             self.cpp_info.components["hidraw"].includedirs.append(os.path.join("include", "hidapi"))
 
             if self.settings.os == "Linux":
