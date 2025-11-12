@@ -1,4 +1,4 @@
-name: 'GOnnect prepare action [Linux build]'
+name: 'GOnnect prepare action [Windows build]'
 description: 'Recurring tasks for CI jobs'
 inputs:
   qt-version:
@@ -17,25 +17,24 @@ runs:
       uses: jwlawson/actions-setup-cmake@802fa1a2c4e212495c05bf94dba2704a92a472be # v2
       with:
         cmake-version: 'latest'
-            
-    - name: Install dependencies
-      shell: bash
-      if: inputs.qt-only == 'false'
-      run: |
-        sudo apt-get update
-        sudo apt install -y ninja-build llvm llvm-dev libudev-dev libsasl2-dev libical-dev libsecret-1-dev evolution-data-server-dev libnotify-dev libebook-contacts1.2-dev libebook1.2-dev libecal2.0-dev libedata-cal2.0-dev libedata-book1.2-dev
-        sudo snap install yq
-    
-    - name: Install git lfs
-      shell: bash
-      run: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 
+    - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
+      shell: powershell
+      run: |
+        $VS_BTOOLS_EXE="vs_buildtools.exe"
+        $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
+        Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
+        Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
+        "--add", "Microsoft.VisualStudio.Component.VC.140", `
+        "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
+        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
+            
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
         version: ${{ inputs.qt-version }}
-        host: 'linux'
+        host: 'windows'
         target: 'desktop'
         modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
-        arch: 'linux_gcc_64'
+        arch: 'win64_msvc2022_64'
         cache: true
