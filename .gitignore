@@ -11,6 +11,7 @@ repo/
 .flatpak-builder/
 
 # CMake
+CMakeCache.txt
 CMakeLists.txt.user*
 CMakeUserPresets.json
 

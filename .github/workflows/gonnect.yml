@@ -39,7 +39,9 @@ jobs:
         uses: conan-io/setup-conan@v1
 
       - name: Install Conan dependencies
-        run: conan install . --build=missing
+        run:
+          - resources/conan/export.py
+          - conan install . --build=missing
 
       - name: Configure CMake
         run: cmake -GNinja -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DBUILD_TESTING=ON -DBUILD_DEPENDENCIES=ON
