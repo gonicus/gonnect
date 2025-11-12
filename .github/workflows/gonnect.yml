@@ -90,7 +90,7 @@ jobs:
         run: cmake --preset conan-default .
 
       - name: Build
-        run: cmake --preset conan-default .
+        run: cmake --build --preset conan-release
 
   format:
     runs-on: ubuntu-24.04
