@@ -18,9 +18,12 @@ public:
 
     QString add(Notification *notification) override;
     bool remove(const QString &id) override;
+    Notification *notification(const QString &id);
 
     void shutdown() override;
 
 private:
-    QMap<int64_t, WindowsNotification *> m_activeNotifications;
+    QMap<QString, Notification *> m_notifications;
+
+    QMap<QString, WindowsNotification *> m_internalNotifications;
 };
