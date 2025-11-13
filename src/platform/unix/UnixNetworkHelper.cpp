@@ -1,5 +1,5 @@
 #include "UnixNetworkHelper.h"
-#include "NetworkMonitor.h"
+#include <QFile>
 #include <QLoggingCategory>
 #include <netdb.h>
 #include <qhostaddress.h>
