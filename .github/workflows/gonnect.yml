@@ -160,9 +160,20 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare-linux
 
-      - name: Install clang20
+      - name: Prepare clazy
         run: |
           sudo apt install -y clang-20
+          git clone --branch master https://github.com/KDE/clazy.git
+          cd clazy
+          git fetch --tags
+          git checkout 1.14
+          mkdir build
+          cd build
+          cmake -DCMAKE_INSTALL_PREFIX=/opt -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+          cmake --build .
+          cmake --build . --target install
+          sudo cp /opt/lib64/ClazyPlugin.so /usr/lib64
+          sudo cp /opt/bin/clazy /opt/bin/clazy-standalone /usr/bin
 
       - name: Install Conan
         uses: conan-io/setup-conan@v1
