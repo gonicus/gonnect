@@ -178,8 +178,7 @@ jobs:
       - name: Run clazy
         shell: bash
         run: |
-          find ~/.local/clazy/lib
-          LD_LIBRARY_PATH=~/.local/clazy/lib scripts/static-clazy-analyzer.sh
+          scripts/static-clazy-analyzer.sh
 
 
   tests:
