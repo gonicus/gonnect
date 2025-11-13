@@ -186,6 +186,26 @@ if(LINUX)
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp)
+elseif(APPLE)
+    set(PLATFORM_SOURCES
+        platform/dummy/DummyNotificationManager.h
+        platform/dummy/DummyNotificationManager.cpp
+        platform/dummy/DummyUserInfo.cpp
+        platform/dummy/DummyUserInfo.h
+        platform/dummy/DummyExternalMediaManager.cpp
+        platform/dummy/DummyExternalMediaManager.h
+        platform/dummy/DummyBackgroundManager.cpp
+        platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyThemeManager.cpp
+        platform/dummy/DummyThemeManager.h
+        platform/unix/UnixNetworkHelper.cpp
+        platform/unix/UnixNetworkHelper.h
+        platform/dummy/DummyInhibitHelper.h
+        platform/dummy/DummyInhibitHelper.cpp
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+        platform/dummy/DummySearchProvider.h
+        platform/dummy/DummySearchProvider.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
         platform/dummy/DummyUserInfo.cpp
