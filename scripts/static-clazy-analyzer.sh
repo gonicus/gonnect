@@ -10,10 +10,6 @@ export CLAZY_CHECKS="level0,level1,qt6-header-fixes,no-no-module-include,no-lamb
 export CLAZY_NO_WERROR=ON
 
 cmake -GNinja --preset conan-release -DENABLE_CLAZY=ON
-
-pushd .
-cd build/Release
-cmake --build . --parallel $(nproc --all) 2>&1 | tee /tmp/build.log
-popd
+cmake --build --preset conan-release --parallel $(nproc --all) 2>&1 | tee /tmp/build.log
 
 scripts/process-clazy-output.py --token $API_TOKEN /tmp/build.log
