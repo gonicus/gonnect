@@ -134,6 +134,8 @@ jobs:
 
       - name: Run static analyzer
         shell: bash
+        env:
+          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
         run: |
           pip install scan-build
           export ANALYZE_ARGS="--exclude ${QT_ROOT_DIR} --exclude ${{github.workspace}}/external"
