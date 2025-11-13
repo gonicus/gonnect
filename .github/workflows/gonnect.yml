@@ -55,7 +55,7 @@ jobs:
         run: cmake --preset conan-release . -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build --preset conan-release --parallel $(nproc --all) 
+        run: cmake --build --preset conan-release --parallel $(nproc --all)
 
       - name: Upload Test artifacts
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
@@ -108,7 +108,7 @@ jobs:
 
   clang:
     runs-on: ubuntu-24.04
-    name: "Static Code Analyzer"    
+    name: "Static Code Analyzer"
     env:
       CC: clang
       CXX: clang++
@@ -117,7 +117,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           submodules: 'recursive'
-          
+
       - name: Prepare
         uses: ./.github/actions/prepare-linux
 
@@ -140,34 +140,46 @@ jobs:
           pip install scan-build
           export ANALYZE_ARGS="--exclude ${QT_ROOT_DIR} --exclude ${{github.workspace}}/external"
           scripts/static-clang-analyzer.sh
-      
+
       - name: Save Report
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: clang-report
           path: /tmp/build.log
-              
 
-#  clazy:
-#    runs-on: ubuntu-24.04
-#    #needs: build
-#    name: "Qt Semantics"
-#
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          submodules: 'recursive'
-#
-#      - name: Prepare
-#        uses: ./.github/actions/prepare-linux
-#        with:
-#          for-clazy: 'true'             
-#
-#      - name: Run clazy
-#        shell: bash
-#        run: |
-#          find ~/.local/clazy/lib
-#          LD_LIBRARY_PATH=~/.local/clazy/lib scripts/static-clazy-analyzer.sh          
+  clazy:
+    runs-on: ubuntu-24.04
+    #needs: build
+    name: "Qt Semantics"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Prepare
+        uses: ./.github/actions/prepare-linux
+
+      - name: Install clang20
+        run: |
+          sudo apt install -y clang-20
+
+      - name: Install Conan
+        uses: conan-io/setup-conan@v1
+        with:
+          version: 2.22.2
+          cache_packages: true
+
+      - name: Install Conan dependencies
+        run: |
+          resources/conan/export.py
+          conan install . --build=missing
+
+      - name: Run clazy
+        shell: bash
+        run: |
+          find ~/.local/clazy/lib
+          LD_LIBRARY_PATH=~/.local/clazy/lib scripts/static-clazy-analyzer.sh
 
 
   tests:

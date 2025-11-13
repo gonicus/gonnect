@@ -17,7 +17,7 @@ on:
       - release
       - main
   pull_request:
-    branches: 
+    branches:
       - release
       - main
   schedule:
