@@ -26,6 +26,9 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     name: "Build GOnnect (Linux)"
+    env:
+      CC: clang
+      CXX: clang++
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -87,7 +90,7 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default .
+        run: cmake --preset conan-default -DENABLE_DAV=OFF
 
       - name: Build
         run: cmake --build --preset conan-release

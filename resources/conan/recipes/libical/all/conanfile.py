@@ -33,10 +33,6 @@ class LibICALConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    #def requirements(self):
-    #    self.requires("glib/2.78.3")
-    #    self.requires("gobject-introspection/1.78.1")
-
     def layout(self):
         cmake_layout(self)
 
@@ -66,6 +62,9 @@ class LibICALConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        rm(self, "*.cmake", self.package_folder, recursive=True)
+        rm(self, "*.pc", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libical")
