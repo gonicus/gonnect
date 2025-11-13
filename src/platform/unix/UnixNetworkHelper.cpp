@@ -15,9 +15,7 @@ NetworkHelper &NetworkHelper::instance()
     return *_instance;
 }
 
-UnixNetworkHelper::UnixNetworkHelper() : NetworkHelper{}
-{
-}
+UnixNetworkHelper::UnixNetworkHelper() : NetworkHelper{} { }
 
 QStringList UnixNetworkHelper::nameservers() const
 {
