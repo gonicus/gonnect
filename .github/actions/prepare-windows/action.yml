@@ -28,7 +28,7 @@ runs:
         "--add", "Microsoft.VisualStudio.Component.VC.140", `
         "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
         "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
-            
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:

@@ -4,7 +4,7 @@ diff -Naur a/CMakeLists.txt b/CMakeLists.txt
 @@ -477,8 +477,8 @@
        "Alternatively, disable the libical-glib build (by passing -DICAL_GLIB=False to cmake).")
    endif()
- 
+
 -  find_package(GLib ${MIN_GLIB})
 -  set_package_properties(GLib PROPERTIES
 +  find_package(glib ${MIN_GLIB})

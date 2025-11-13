@@ -26,7 +26,7 @@ if(ENABLE_DAV)
       CalDAVEventFeederFactory.cpp
       CalDAVEventFeederFactory.h
     )
-    
+
     target_include_directories(CalDAVEventFeederFactory 
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src
