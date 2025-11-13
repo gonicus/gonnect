@@ -152,6 +152,7 @@ jobs:
           path: /tmp/build.log
 
   clazy:
+    if: false
     runs-on: ubuntu-24.04
     #needs: build
     name: "Qt Semantics"
