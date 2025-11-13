@@ -11,10 +11,7 @@ public:
     explicit UnixNetworkHelper();
     ~UnixNetworkHelper() = default;
 
-    bool hasConnectivity() const override
-    {
-        return m_fullNetwork || m_limitedNetwork || m_localNetwork;
-    }
+    bool hasConnectivity() const override { return true; }
     bool localNetworkAvailable() const override { return true; }
     bool limitedNetworkAvailable() const override { return true; }
     bool captiveNetworkAvailable() const override { return true; }
