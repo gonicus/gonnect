@@ -62,8 +62,8 @@ void Credentials::set(const QString &key, const QString &secret, CredentialsResp
         }
 
         m_writeCredentialJobs.removeAll(writeJob);
-        delete writeJob;
-    });
+        writeJob->deleteLater();
+    }, Qt::QueuedConnection);
 
     writeJob->setTextData(secret);
     writeJob->start();
@@ -111,8 +111,8 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                 }
 
                 m_readCredentialJobs.removeAll(readJob);
-                delete readJob;
-            });
+                readJob->deleteLater();
+            }, Qt::QueuedConnection);
 
     readJob->start();
 }

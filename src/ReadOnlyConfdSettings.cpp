@@ -4,12 +4,12 @@
 #include <QLoggingCategory>
 #include <QCryptographicHash>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_WINDOWS
+static constexpr const char *NULL_DEVICE_NAME = "nul";
+#else
 #  include <unistd.h>
 #  include <grp.h>
 static constexpr const char *NULL_DEVICE_NAME = "/dev/null";
-#else
-static constexpr const char *NULL_DEVICE_NAME = "nul";
 #endif
 
 #include "ReadOnlyConfdSettings.h"
