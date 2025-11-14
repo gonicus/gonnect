@@ -104,8 +104,24 @@ BaseWindow {
 
         Keys.onPressed: keyEvent => {
             if (keyEvent.key === Qt.Key_F11 || (keyEvent.key === Qt.Key_Escape && control.visibility === Window.FullScreen)) {
+
+                // Toggle fullscreen
                 keyEvent.accepted = true
                 ViewHelper.toggleFullscreen()
+
+            } else if (keyEvent.key === Qt.Key_F && (keyEvent.modifiers & Qt.ControlModifier)) {
+
+                // Focus search field
+                keyEvent.accepted = true
+                ViewHelper.activateSearch()
+
+            } else if (keyEvent.key === Qt.Key_M
+                       && (keyEvent.modifiers & Qt.ControlModifier)
+                       && (keyEvent.modifiers & Qt.ShiftModifier)) {
+
+                // Toggle Mute
+                keyEvent.accepted = true
+                GlobalMuteState.toggleMute()
             }
         }
 

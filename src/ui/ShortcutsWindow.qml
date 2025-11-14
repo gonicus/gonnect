@@ -19,6 +19,42 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
+    component KeyDelegate : Item {
+        id: delg
+        implicitHeight: descriptionLabel.y + descriptionLabel.implicitHeight
+        anchors {
+            left: parent?.left
+            right: parent?.right
+        }
+
+        required property string key
+        required property string description
+
+        Label {
+            id: keyLabel
+            text: delg.key
+            font.pixelSize: 16
+            font.weight: Font.DemiBold
+            anchors {
+                top: parent.top
+                left: parent.left
+            }
+        }
+
+        Label {
+            id: descriptionLabel
+            wrapMode: Label.Wrap
+            text: delg.description
+            anchors {
+                top: keyLabel.bottom
+                left: parent.left
+                right: parent.right
+                leftMargin: 20
+                rightMargin: 10
+            }
+        }
+    }
+
     Flickable {
         anchors.fill: parent
         contentHeight: flickableCol.implicitHeight
@@ -28,7 +64,7 @@ BaseWindow {
 
         Column {
             id: flickableCol
-            spacing: 10
+            spacing: 15
             topPadding: 20
             bottomPadding: 20
             anchors {
@@ -38,7 +74,55 @@ BaseWindow {
                 rightMargin: 20
             }
 
+            Label {
+                text: qsTr("Local shortcuts (work only when app is focused)")
+                font.pixelSize: 16
+                font.weight: Font.Medium
+                elide: Text.ElideRight
+                color: Theme.secondaryTextColor
+                visible: SM.globalShortcutsSupported
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+            }
+
+
+            KeyDelegate {
+                key: qsTr("Ctrl + F")
+                description: qsTr("Activates the global search field")
+            }
+            KeyDelegate {
+                key: qsTr("F11")
+                description: qsTr("Toggles between fullsceen and normal window mode")
+            }
+            KeyDelegate {
+                key: qsTr("Ctrl + Shift + M")
+                description: qsTr("Toggles audio mute")
+            }
+
+            Item {
+                width: 1
+                height: 15
+                visible: globalShortcutsHeading.visible
+            }
+
+            Label {
+                id: globalShortcutsHeading
+                text: qsTr("Global shortcuts (work from anywhere)")
+                font.pixelSize: 16
+                font.weight: Font.Medium
+                elide: Text.ElideRight
+                color: Theme.secondaryTextColor
+                visible: globalShortcutsRepeater.count > 0
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+            }
+
             Repeater {
+                id: globalShortcutsRepeater
                 model: {
                     const shortcuts = SM.globalShortcuts
                     const result = []
@@ -54,41 +138,7 @@ BaseWindow {
                     return result
                 }
 
-                delegate: Item {
-                    id: delg
-                    implicitHeight: descriptionLabel.y + descriptionLabel.implicitHeight
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-
-                    required property string key
-                    required property string description
-
-                    Label {
-                        id: keyLabel
-                        text: delg.key
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        anchors {
-                            top: parent.top
-                            left: parent.left
-                        }
-                    }
-
-                    Label {
-                        id: descriptionLabel
-                        wrapMode: Label.Wrap
-                        text: delg.description
-                        anchors {
-                            top: keyLabel.bottom
-                            left: parent.left
-                            right: parent.right
-                            leftMargin: 10
-                            rightMargin: 10
-                        }
-                    }
-                }
+                delegate: KeyDelegate {}
             }
         }
     }

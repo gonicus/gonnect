@@ -20,7 +20,6 @@ Menu {
 
     Action {
         text: qsTr("Shortcuts...")
-        enabled: SM.globalShortcutsSupported
         onTriggered: () => ViewHelper.showShortcuts()
     }
 
