@@ -27,19 +27,21 @@ def main():
             if active and (line.startswith("In ") or "generated." in line):
                 active = False
                 exit_code = 1
-                doc[e_file + "::" + e_line] = ("""##### {title} [{clazy_ref}](https://github.com/KDE/clazy/blob/master/docs/checks/README-{clazy_ref}.md) in [*{short_file}* +{line}]({file}#L{line}):
+                key = f"{e_file}::{e_line}"
+                if key not in doc:
+                    doc[key] = ("""##### {title} [{clazy_ref}](https://github.com/KDE/clazy/blob/master/docs/checks/README-{clazy_ref}.md) in [*{short_file}* +{line}]({file}#L{line}):
 ```c++
 {code}
 ```
 
 """.format(title=e_note.capitalize(), clazy_ref=e_clazy_ref, line=e_line, short_file=e_file, file=e_file, code='\n'.join(buf)))
 
-                print("::warning file={file},line={line},col={col}::{message}".format(
-                    file=e_file,
-                    line=e_line,
-                    col=e_column,
-                    message="{title} [{clazy_ref}](https://github.com/KDE/clazy/blob/master/docs/checks/README-{clazy_ref}.md)".format(title=e_note.capitalize(), clazy_ref=e_clazy_ref)
-                ))
+                    print("::warning file={file},line={line},col={col}::{message}".format(
+                        file=e_file,
+                        line=e_line,
+                        col=e_column,
+                        message="{title} [{clazy_ref}](https://github.com/KDE/clazy/blob/master/docs/checks/README-{clazy_ref}.md)".format(title=e_note.capitalize(), clazy_ref=e_clazy_ref)
+                    ))
 
                 buf = []
                 continue
