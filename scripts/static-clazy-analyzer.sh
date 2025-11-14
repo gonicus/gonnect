@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-export CLAZY_IGNORE_DIRS="(.*qmltyperegistrations.*|.*/tests/.*|.*/\\.rcc/.*|.*/build/src/.*)"
+export CLAZY_IGNORE_DIRS="(.*qmltyperegistrations.*|.*/tests/.*|.*/\\.rcc/.*|.*/build/Release/src/.*)"
 export CLAZY_CHECKS="level0,level1,qt6-header-fixes,no-no-module-include,no-lambda-unique-connection"
 export CLAZY_NO_WERROR=ON
 
