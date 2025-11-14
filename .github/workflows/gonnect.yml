@@ -139,7 +139,7 @@ jobs:
       - name: Run static analyzer
         shell: bash
         env:
-          PKG_CONFIG_PATH: /usr/lib64/pkgconfig
+          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
         run: |
           pip install scan-build
           export ANALYZE_ARGS="--exclude ${QT_ROOT_DIR} --exclude ${{github.workspace}}/external"
@@ -185,8 +185,8 @@ jobs:
           echo "conan-home=$(conan config home)" >> $GITHUB_OUTPUT
           conan profile detect || true
 
-      - name: Cache Conan packages
-        uses: actions/cache@v4.2.3
+      - name: Restore cached Conan packages
+        uses: actions/cache/restore@v4.2.3
         id: cache-conan-packages
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
@@ -199,10 +199,17 @@ jobs:
           resources/conan/export.py
           conan install . --build=missing
 
+      - name: Cached Conan packages
+        uses: actions/cache/save@v4.2.3
+        if: always() && steps.cache-conan-packages.outputs.cache-hit != 'true'
+        with:
+          path: ${{ steps.conan-info.outputs.conan-home }}/p
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}
+
       - name: Run clazy
         shell: bash
         env:
-          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
+          PKG_CONFIG_PATH: /usr/lib64/pkgconfig
         run: |
           scripts/static-clazy-analyzer.sh
 
