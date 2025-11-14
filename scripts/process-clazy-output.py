@@ -82,14 +82,18 @@ def main():
 
     print("Found %d clazy messages" % len(doc))
 
-    server_url = os.environ["CI_SERVER_URL"]
-    if server_url:
-        gl = gitlab.Gitlab(server_url, private_token=args.token)
-        project = gl.projects.get(os.environ["CI_MERGE_REQUEST_PROJECT_ID"])
+    if len(doc) > 0:
+        server_url = os.environ.get("CI_SERVER_URL")
+        if server_url:
+            gl = gitlab.Gitlab(server_url, private_token=args.token)
+            project = gl.projects.get(os.environ["CI_MERGE_REQUEST_PROJECT_ID"])
 
-        mr = project.mergerequests.get(int(os.environ["CI_MERGE_REQUEST_IID"]))
-        if mr and len(doc):
-            mr.discussions.create({'body': '#### Review of clazy static code analysis\n\n' + ("".join(doc.values()))})
+            mr = project.mergerequests.get(int(os.environ["CI_MERGE_REQUEST_IID"]))
+            if mr and len(doc):
+                mr.discussions.create({'body': '#### Review of clazy static code analysis\n\n' + ("".join(doc.values()))})
+        elif len(doc):
+            with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as fh:
+                print('#### Review of clazy static code analysis\n\n' + ("".join(doc)), file=fh)
 
     exit(exit_code)
 
