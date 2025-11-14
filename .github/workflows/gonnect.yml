@@ -152,9 +152,8 @@ jobs:
           path: /tmp/build.log
 
   clazy:
-    if: false
     runs-on: ubuntu-24.04
-    #needs: build
+    container: fedora:43
     name: "Qt Semantics"
 
     steps:
@@ -162,23 +161,14 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Prepare
-        uses: ./.github/actions/prepare-linux
-
-      - name: Prepare clazy
+      - name: Install dependencies
         run: |
-          sudo apt install -y clang-20
-          git clone --branch master https://github.com/KDE/clazy.git
-          cd clazy
-          git fetch --tags
-          git checkout 1.14
-          mkdir build
-          cd build
-          cmake -DCMAKE_INSTALL_PREFIX=/opt -DCMAKE_BUILD_TYPE=Release -G Ninja ..
-          cmake --build .
-          cmake --build . --target install
-          sudo cp /opt/lib64/ClazyPlugin.so /usr/lib64
-          sudo cp /opt/bin/clazy /opt/bin/clazy-standalone /usr/bin
+          dnf -y install clang clazy conan libnotify-devel libxkbfile libxcb-devel libXv-devel ninja-build alsa-lib-devel glew-devel \
+          libxcb-devel xcb-util-xrm-devel xcb-util-devel xcb-util-wm-devel xcb-util-image-devel xcb-util-cursor \
+          xcb-util-cursor-devel xcb-util-keysyms-devel xcb-util-renderutil-devel libusb1-devel hidapi-devel \
+          xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
+          libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
+          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA
 
       - name: Install Conan
         uses: conan-io/setup-conan@v1
@@ -193,11 +183,8 @@ jobs:
 
       - name: Run clazy
         shell: bash
-        env:
-          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
         run: |
           scripts/static-clazy-analyzer.sh
-
 
   tests:
     runs-on: ubuntu-24.04
