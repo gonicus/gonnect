@@ -156,8 +156,6 @@ jobs:
     runs-on: ubuntu-24.04
     container: fedora:43
     name: "Qt Semantics"
-    env:
-      Qt6_DIR: ${{ github.workspace }}/Qt/$QT_VERSION/gcc_64
 
     steps:
       - name: Install dependencies
@@ -177,7 +175,8 @@ jobs:
       - name: Install qt
         run: |
           pip install aqtinstall
-          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop $QT_VERSION linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
+          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ env.QT_VERSION }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
+          echo "Qt6_DIR=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64" >> $GITHUB_ENV
 
       - name: Prepare conan
         shell: bash
