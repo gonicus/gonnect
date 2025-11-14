@@ -17,7 +17,7 @@ runs:
       uses: jwlawson/actions-setup-cmake@802fa1a2c4e212495c05bf94dba2704a92a472be # v2
       with:
         cmake-version: 'latest'
-            
+
     - name: Install dependencies
       shell: bash
       if: inputs.qt-only == 'false'
@@ -25,7 +25,7 @@ runs:
         sudo apt-get update
         sudo apt install -y ninja-build llvm llvm-dev libudev-dev libsasl2-dev libical-dev libsecret-1-dev evolution-data-server-dev libnotify-dev libebook-contacts1.2-dev libebook1.2-dev libecal2.0-dev libedata-cal2.0-dev libedata-book1.2-dev git-lfs
         sudo snap install yq
-    
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
