@@ -193,9 +193,7 @@ jobs:
         id: cache-conan-packages
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
-          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}
-          restore-keys: |
-            conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-clazy
 
       - name: Install Conan dependencies
         run: |
