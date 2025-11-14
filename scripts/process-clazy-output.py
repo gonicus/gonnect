@@ -18,6 +18,9 @@ def main():
     e_clazy_ref = ""
     doc = {}
     exit_code = 0
+    base_link = ''
+    if 'GITHUB_SHA' in os.environ:
+        base_link = f'/{os.environ['GITHUB_REPOSITORY']}/blob/{os.environ['GITHUB_SHA']}/'
 
     with open(args.source, "r") as f:
         for _, line in enumerate(f):
@@ -34,7 +37,7 @@ def main():
 {code}
 ```
 
-""".format(title=e_note.capitalize(), clazy_ref=e_clazy_ref, line=e_line, short_file=e_file, file=e_file, code='\n'.join(buf)))
+""".format(title=e_note.capitalize(), clazy_ref=e_clazy_ref, line=e_line, short_file=e_file, file=base_link+e_file, code='\n'.join(buf)))
 
                     print("::warning file={file},line={line},col={col}::{message}".format(
                         file=e_file,
@@ -58,7 +61,7 @@ def main():
 {code}
 ```
 
-""".format(title=e_note.capitalize(), clazy_ref=e_clazy_ref, line=e_line, short_file=e_file, file=e_file, code='\n'.join(buf)))
+""".format(title=e_note.capitalize(), clazy_ref=e_clazy_ref, line=e_line, short_file=e_file, file=base_link+e_file, code='\n'.join(buf)))
                         print("::warning file={file},line={line},col={col}::{message}".format(
                             file=e_file,
                             line=e_line,
