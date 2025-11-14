@@ -170,12 +170,13 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Get Conan cache folder path
+      - name: Prepare conan
         shell: bash
         id: conan-info
         run: |
           echo "conan-version=$(conan --version | cut -d' ' -f3)" >> $GITHUB_OUTPUT
           echo "conan-home=$(conan config home)" >> $GITHUB_OUTPUT
+          conan profile detect || true
 
       - name: Cache Conan packages
         uses: actions/cache@v4.2.3
