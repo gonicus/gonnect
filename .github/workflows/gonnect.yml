@@ -170,11 +170,21 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Install Conan
-        uses: conan-io/setup-conan@v1
+      - name: Get Conan cache folder path
+        shell: bash
+        id: conan-info
+        run: |
+          echo "conan-version=$(conan --version | cut -d' ' -f3)" >> $GITHUB_OUTPUT
+          echo "conan-home=$(conan config home)" >> $GITHUB_OUTPUT
+
+      - name: Cache Conan packages
+        uses: actions/cache@v4.2.3
+        id: cache-conan-packages
         with:
-          version: 2.22.2
-          cache_packages: true
+          path: ${{ steps.conan-info.outputs.conan-home }}/p
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}
+          restore-keys: |
+            conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-
 
       - name: Install Conan dependencies
         run: |
