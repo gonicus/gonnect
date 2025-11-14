@@ -122,6 +122,9 @@ qt_add_big_resources(APP_SOURCES application.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
 qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
 
+if(WIN32)
+    list(APPEND APP_SOURCES gonnect.rc)
+endif()
 qt_add_executable(gonnect
     ${APP_SOURCES}
     ${DBUS_SOURCES}
