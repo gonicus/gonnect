@@ -176,9 +176,7 @@ jobs:
         run: |
           pip install aqtinstall
           aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ env.QT_VERSION }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
-          echo "CMAKE_PREFIX_PATH=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64/" >> $GITHUB_ENV
-          echo "Qt6_DIR=${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64/lib/cmake/Qt6/" >> $GITHUB_ENV
-          ls -la $Qt6_DIR
+          echo "PATH=$PATH;${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin" >> $GITHUB_ENV
 
       - name: Prepare conan
         shell: bash
