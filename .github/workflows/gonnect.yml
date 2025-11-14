@@ -157,18 +157,18 @@ jobs:
     name: "Qt Semantics"
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-
       - name: Install dependencies
         run: |
-          dnf -y install clang clazy conan libnotify-devel libxkbfile libxcb-devel libXv-devel ninja-build alsa-lib-devel glew-devel \
+          dnf -y install git git-lfs clang clazy conan libnotify-devel libxkbfile libxcb-devel libXv-devel ninja-build alsa-lib-devel glew-devel \
           libxcb-devel xcb-util-xrm-devel xcb-util-devel xcb-util-wm-devel xcb-util-image-devel xcb-util-cursor \
           xcb-util-cursor-devel xcb-util-keysyms-devel xcb-util-renderutil-devel libusb1-devel hidapi-devel \
           xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
           libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
           libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
       - name: Install Conan
         uses: conan-io/setup-conan@v1
