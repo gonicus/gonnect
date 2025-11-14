@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-API_TOKEN="${API_TOKEN:-null}"
 TMP_OUT=$(mktemp -d)
 
 pushd . &> /dev/null
@@ -17,4 +16,4 @@ analyze-build -v --output "$TMP_OUT" $ANALYZE_ARGS --plist-html --enable-checker
 
 popd &> /dev/null
 
-scripts/process-clang-output.py --exclude '.*/(Qt|qt6|qca|qtkeychain)/.*' --token $API_TOKEN "$TMP_OUT/$(ls -1 $TMP_OUT)"
+scripts/process-clang-output.py --exclude '.*/(Qt|qt6|qca|qtkeychain)/.*' "$TMP_OUT/$(ls -1 $TMP_OUT)"
