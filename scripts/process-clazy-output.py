@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 import re
 import os
-import sys
 import argparse
-
-try:
-    import gitlab
-except:
-    pass
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('source', help='source to analyze')
-    parser.add_argument("--token", help="gitlab private access token")
     args = parser.parse_args()
 
     start = re.compile(r'^([./0-9a-z][^:]+):(\d+):(\d+): warning: (.*) \[-Wclazy-(.*)\]$')
@@ -82,18 +75,9 @@ def main():
 
     print("Found %d clazy messages" % len(doc))
 
-    if len(doc) > 0:
-        server_url = os.environ.get("CI_SERVER_URL")
-        if server_url:
-            gl = gitlab.Gitlab(server_url, private_token=args.token)
-            project = gl.projects.get(os.environ["CI_MERGE_REQUEST_PROJECT_ID"])
-
-            mr = project.mergerequests.get(int(os.environ["CI_MERGE_REQUEST_IID"]))
-            if mr and len(doc):
-                mr.discussions.create({'body': '#### Review of clazy static code analysis\n\n' + ("".join(doc.values()))})
-        elif len(doc):
-            with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as fh:
-                print('#### Review of clazy static code analysis\n\n' + ("".join(doc)), file=fh)
+    if len(doc) > 0 and 'GITHUB_STEP_SUMMARY' in os.environ:
+        with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as fh:
+            print('#### Review of clazy static code analysis\n\n' + ("".join(doc)), file=fh)
 
     exit(exit_code)
 

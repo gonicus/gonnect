@@ -203,12 +203,15 @@ jobs:
         if: always() && steps.cache-conan-packages.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
-          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-clazy
 
       - name: Run clazy
         shell: bash
         env:
           PKG_CONFIG_PATH: /usr/lib64/pkgconfig
+          CC: clang
+          CXX: clang++
+
         run: |
           scripts/static-clazy-analyzer.sh
 
