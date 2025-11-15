@@ -121,7 +121,7 @@ jobs:
       - name: Install Conan dependencies
         shell: cmd
         run: |
-          resources/conan/export.py
+          python3 resources/conan/export.py
           conan install . --build=missing
 
       - name: Configure CMake
