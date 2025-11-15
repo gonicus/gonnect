@@ -119,7 +119,7 @@ jobs:
           cache_packages: true
 
       - name: Install Conan dependencies
-        shell: zsh
+        shell: bash
         run: |
           resources/conan/export.py
           conan install . --build=missing
