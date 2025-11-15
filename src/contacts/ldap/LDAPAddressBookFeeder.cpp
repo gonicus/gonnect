@@ -337,7 +337,6 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
     QString dn;
     QDateTime modifyTimestamp;
     QByteArray jpegPhoto;
-    QHash<QString, QDateTime> ids;
     int count = 0;
 
     qCInfo(lcLDAPAddressBookFeeder) << "Connecting to LDAP service" << ldapConfig.ldapUrl;

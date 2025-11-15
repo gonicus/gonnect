@@ -95,7 +95,7 @@ void GlobalCallState::updateGlobalCallState()
     setGlobalCallState(globalState);
     updateRemoteContactInfo();
     Q_EMIT activeCallsCountChanged();
-    Q_EMIT nonIdleCallsCount();
+    Q_EMIT nonIdleCallsCountChanged();
 }
 
 void GlobalCallState::setIsPhoneConference(bool flag)

@@ -1,0 +1,8 @@
+sources:
+  "cci.20250408":
+    url: "https://github.com/ivanenko/vCard/archive/9e6a5349d27733c931815b2e236807f3414ab251.tar.gz"
+    sha256: "6691a632c0c6ee2ed7fe6fbc21d940ce1c2bacf1d9ac6b55736d5a285ff7a5d6"
+patches:
+  "cci.20250408":
+    - patch_file: "patches/002-cmake-install.patch"
+    - patch_file: "patches/003-cmake-static-libs.patch"

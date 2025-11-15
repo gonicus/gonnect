@@ -1,0 +1,15 @@
+diff --git a/cmake/modules/QcaMacro.cmake b/cmake/modules/QcaMacro.cmake
+index 94f2562d..64dff0ff 100644
+--- a/cmake/modules/QcaMacro.cmake
++++ b/cmake/modules/QcaMacro.cmake
+@@ -66,8 +66,8 @@ endmacro(add_qca_test)
+ 
+ macro(install_pdb TARGET INSTALL_PATH)
+   if(MSVC)
+-    install(FILES $<TARGET_PDB_FILE:${TARGET}> DESTINATION ${INSTALL_PATH} CONFIGURATIONS Debug)
+-    install(FILES $<TARGET_PDB_FILE:${TARGET}> DESTINATION ${INSTALL_PATH} CONFIGURATIONS RelWithDebInfo)
++    #install(FILES $<TARGET_PDB_FILE:${TARGET}> DESTINATION ${INSTALL_PATH} CONFIGURATIONS Debug)
++    #install(FILES $<TARGET_PDB_FILE:${TARGET}> DESTINATION ${INSTALL_PATH} CONFIGURATIONS RelWithDebInfo)
+   endif()
+ endmacro(install_pdb)
+ 

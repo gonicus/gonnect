@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
         return 2;
     }
 
+    app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
+
     // Fonts
     const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
 
