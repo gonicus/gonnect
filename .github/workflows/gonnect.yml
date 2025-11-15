@@ -119,13 +119,11 @@ jobs:
           cache_packages: true
 
       - name: Install Conan dependencies
-        shell: bash
         run: |
           resources/conan/export.py
           conan install . --build=missing
 
       - name: Configure CMake
-        shell: cmd
         run: cmake --preset conan-default
 
       - name: Build
