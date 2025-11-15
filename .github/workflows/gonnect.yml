@@ -100,6 +100,37 @@ jobs:
       - name: Build
         run: cmake --build --preset conan-release
 
+  build-macos:
+    runs-on: macos-26
+    name: "Build GOnnect (MacOS)"
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          submodules: 'recursive'
+
+      - name: Prepare
+        uses: ./.github/actions/prepare-macos
+
+      - name: Install Conan
+        uses: conan-io/setup-conan@v1
+        with:
+          version: 2.22.2
+          cache_packages: true
+
+      - name: Install Conan dependencies
+        shell: cmd
+        run: |
+          resources/conan/export.py
+          conan install . --build=missing
+
+      - name: Configure CMake
+        shell: cmd
+        run: cmake --preset conan-default
+
+      - name: Build
+        run: cmake --build --preset conan-release
+
   format:
     runs-on: ubuntu-24.04
     name: "Code Formatting"

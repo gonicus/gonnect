@@ -95,3 +95,7 @@ if(LINUX)
     install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
     install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
 endif()
+
+if(APPLE)
+    set_target_properties(gonnect PROPERTIES MACOSX_BUNDLE TRUE)
+endif()
