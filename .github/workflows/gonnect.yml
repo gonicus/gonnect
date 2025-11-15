@@ -119,9 +119,9 @@ jobs:
           cache_packages: true
 
       - name: Install Conan dependencies
-        shell: cmd
+        shell: zsh
         run: |
-          python3 resources/conan/export.py
+          resources/conan/export.py
           conan install . --build=missing
 
       - name: Configure CMake
