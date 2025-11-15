@@ -124,7 +124,7 @@ jobs:
           conan install . --build=missing
 
       - name: Configure CMake
-        run: cmake --preset conan-default
+        run: cmake --preset conan-release
 
       - name: Build
         run: cmake --build --preset conan-release
