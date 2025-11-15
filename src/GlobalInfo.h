@@ -31,7 +31,7 @@ public:
 
     Q_INVOKABLE QString jitsiUrl();
 
-    Q_INVOKABLE bool isWorkaroundActive(const WorkaroundId id);
+    Q_INVOKABLE bool isWorkaroundActive(const GlobalInfo::WorkaroundId id);
 
     bool hasEmergencyNumbers();
     const QList<EmergencyContact *> &emergencyContacts();
