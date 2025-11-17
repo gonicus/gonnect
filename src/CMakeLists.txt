@@ -3,13 +3,13 @@ find_package(Qt6 REQUIRED COMPONENTS
     CorePrivate
     GuiPrivate
     Core5Compat
-    Widgets
     Quick
     QuickControls2
     Multimedia
     Sql
     Network
     NetworkAuth
+    Widgets
     WebEngineCore
     WebEngineQuick
     Xml)
@@ -651,8 +651,8 @@ target_link_libraries(gonnect
         Qt6::Core
         Qt6::CorePrivate
         Qt6::Gui
-        Qt6::GuiPrivate
         Qt6::Widgets
+        Qt6::GuiPrivate
         Qt6::Qml
         Qt6::Quick
         Qt6::QuickControls2

@@ -18,13 +18,13 @@ if(ENABLE_DAV)
 
     qt_add_plugin(CalDAVEventFeederFactory STATIC
       CLASS_NAME CalDAVEventFeederFactory
+
+      CalDAVEventFeederFactory.cpp
+      CalDAVEventFeederFactory.h
     
       CalDAVEventFeeder.cpp
       CalDAVEventFeeder.h
       CalDAVEventFeederConfig.h
-    
-      CalDAVEventFeederFactory.cpp
-      CalDAVEventFeederFactory.h
     )
 
     target_include_directories(CalDAVEventFeederFactory 

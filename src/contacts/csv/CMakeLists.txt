@@ -18,7 +18,7 @@ if(ENABLE_CSV)
         ${PROJECT_BINARY_DIR}/src
     )
     
-    target_link_libraries(CSVAddressBookFactory PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets)
+    target_link_libraries(CSVAddressBookFactory PRIVATE Qt6::Core Qt6::Gui Qt6::Quick)
 
     set(CSV_ADDRESSBOOK_LIBRARIES CSVAddressBookFactory PARENT_SCOPE)
 endif()

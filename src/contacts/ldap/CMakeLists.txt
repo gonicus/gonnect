@@ -42,7 +42,6 @@ if(ENABLE_LDAP)
       Qt6::Core
       Qt6::Gui
       Qt6::Quick
-      Qt6::Widgets
       ${LDAP_PLATFORM_LIBS}
     )
     
