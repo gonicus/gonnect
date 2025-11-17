@@ -19,4 +19,6 @@ if(ENABLE_CSV)
     )
     
     target_link_libraries(CSVAddressBookFactory PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets)
+
+    set(CSV_ADDRESSBOOK_LIBRARIES CSVAddressBookFactory PARENT_SCOPE)
 endif()
