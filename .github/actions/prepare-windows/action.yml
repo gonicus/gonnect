@@ -35,6 +35,6 @@ runs:
         version: ${{ inputs.qt-version }}
         host: 'windows'
         target: 'desktop'
-        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
+        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools'
         arch: 'win64_msvc2022_64'
         cache: true

@@ -47,6 +47,7 @@ modules:
       - /bin
       - /share/et
       - /share/examples
+      - /share/man
     post-install:
       - install -Dm644 ../krb5.conf -t ${FLATPAK_DEST}/etc/
     sources:
@@ -87,6 +88,7 @@ modules:
       - --with-tls=openssl
     cleanup:
       - /bin
+      - /share/man
     sources:
       - type: archive
         url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.10.tgz
@@ -123,6 +125,9 @@ modules:
           type: gnome
           name: libsecret
           stable-only: true
+    cleanup:
+    - /bin
+    - /share/man
 
   - name: qtkeychain
     buildsystem: cmake-ninja
@@ -141,6 +146,7 @@ modules:
   - name: libical
     cleanup:
       - /lib/cmake
+      - /libexec
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
@@ -162,9 +168,13 @@ modules:
   - name: evolution-data-server
     cleanup:
       - /lib/cmake
+      - /lib/systemd
       - /lib/evolution-data-server/*-backends
       - /libexec
+      - /share/applications
       - /share/dbus-1/services
+      - /share/evolution-data-server
+      - /share/pixmaps
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DENABLE_GTK=OFF
@@ -229,7 +239,7 @@ modules:
     - type: dir
       path: ../..
     cleanup:
-    - rm /app/bin/update-emojis
+    - /bin/update-emojis
 
 cleanup-commands:
   - /app/cleanup-BaseApp.sh

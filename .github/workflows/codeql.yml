@@ -76,6 +76,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
       with:
+        lfs: 'true'
         submodules: 'recursive'
 
     - name: Prepare

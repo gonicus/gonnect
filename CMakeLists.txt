@@ -14,8 +14,10 @@ set(QT_NO_PRIVATE_MODULE_WARNING ON)
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_BINARY_DIR}/generators")
 list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/generators")
 
+# Basic settings
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)
+option(BUILD_TESTING "Build tests" OFF)
 
 # Contacts / Calendar plugins
 option(ENABLE_AKONADI "Enable Akonadi plugins" OFF)
@@ -81,7 +83,7 @@ add_subdirectory(emoji)
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
 
-if(${BUILD_TESTING})
+if(BUILD_TESTING)
     add_subdirectory(tests)
     add_definitions(-DAPP_TESTS)
 endif()
@@ -96,6 +98,6 @@ if(LINUX)
     install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
 endif()
 
-if(APPLE)
-    set_target_properties(gonnect PROPERTIES MACOSX_BUNDLE TRUE)
+if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(packaging)
 endif()

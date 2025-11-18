@@ -32,7 +32,6 @@ if(UNIX)
     add_definitions(${PJSIP_STATIC_CFLAGS} -DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
     link_directories(${PJSIP_STATIC_LIBRARY_DIRS})
-
 else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
@@ -46,15 +45,22 @@ else()
         wintoast::wintoast)
 endif()
 
+set(APP_SOURCES main.cpp)
+
 if(APPLE)
+    set(MACOSX_BUNDLE_ICON_FILE gonnect.icns)
+    set(app_icon_macos "${PROJECT_SOURCE_DIR}/resources/artwork/gonnect.icns")
+    set_source_files_properties(${app_icon_macos} PROPERTIES
+           MACOSX_PACKAGE_LOCATION "Resources")
+
     list(APPEND PLATFORM_LIBRARIES
         "-framework Security"
         "-framework Network")
-endif()
 
-if(LINUX)
+elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
+
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
         PkgConfig::LIBNOTIFY
@@ -116,22 +122,20 @@ if(LINUX)
     qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Secret.xml
         PortalSecret
     )
+
 elseif(WIN32)
-    list(APPEND PLATFORM_LIBRARIES
-        Iphlpapi.lib)
+    list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib)
+    list(APPEND APP_SOURCES gonnect.rc)
 endif()
 
-set(APP_SOURCES main.cpp)
 qt_add_big_resources(APP_SOURCES application.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
 qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
 
-if(WIN32)
-    list(APPEND APP_SOURCES gonnect.rc)
-endif()
-qt_add_executable(gonnect
+qt_add_executable(gonnect WIN32 MACOSX_BUNDLE
     ${APP_SOURCES}
     ${DBUS_SOURCES}
+    ${app_icon_macos}
 )
 
 set(gonnect_qml_singletons
@@ -141,9 +145,7 @@ set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETO
 
 add_subdirectory(contacts/ldap)
 add_subdirectory(contacts/csv)
-if(NOT WIN32)
-    add_subdirectory(calendar/caldav)
-endif()
+add_subdirectory(calendar/caldav)
 add_subdirectory(contacts/carddav)
 add_subdirectory(contacts/eds)
 add_subdirectory(calendar/eds)
@@ -635,8 +637,11 @@ qt_add_qml_module(gonnect
 
 set_target_properties(gonnect PROPERTIES
     QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
-    LINK_FLAGS_RELEASE -s
+    MACOS_BUNDLE_BUNDLE_NAME "GOnnect"
 )
+if(NOT WIN32)
+    set_target_properties(gonnect PROPERTIES LINK_FLAGS_RELEASE -s)
+endif()
 
 qt_extract_metatypes(gonnect)
 qt_add_translations(gonnect
@@ -721,17 +726,22 @@ target_include_directories(gonnect
     SYSTEM PRIVATE ../external/hid-rp/hid-rp
 )
 
+set(RUNTIME_DESTINATION "bin")
+
+if(APPLE OR WIN32)
+    set(RUNTIME_DESTINATION ".")
+    qt_generate_deploy_qml_app_script(
+        TARGET gonnect
+        OUTPUT_SCRIPT deploy_script
+        MACOS_BUNDLE_POST_BUILD
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM
+    )
+    install(SCRIPT ${deploy_script})
+endif()
+
 install(TARGETS gonnect
     BUNDLE DESTINATION .
+    RUNTIME DESTINATION ${RUNTIME_DESTINATION}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-#qt_generate_deploy_qml_app_script(
-#    TARGET gonnect
-#    OUTPUT_SCRIPT deploy_script
-#    MACOS_BUNDLE_POST_BUILD
-#    NO_UNSUPPORTED_PLATFORM_ERROR
-#    DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM
-#)
-#install(SCRIPT ${deploy_script})
-
 

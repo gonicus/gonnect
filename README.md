@@ -188,10 +188,8 @@ kind of environment. If you want to build the _Flatpak_ locally, you can do this
 the following commands on your host shell:
 
 ```bash
-flatpak uninstall de.gonicus.gonnect
 flatpak run --command=flatpak-builder org.flatpak.Builder build --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean --repo=repo resources/flatpak/de.gonicus.gonnect.yml
-flatpak --user remote-add --no-gpg-verify gonnect-repo repo
-flatpak --user install gonnect-repo de.gonicus.gonnect
+flatpak --user install ./repo de.gonicus.gonnect
 ```
 
 # License
