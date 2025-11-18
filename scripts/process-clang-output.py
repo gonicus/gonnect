@@ -4,11 +4,6 @@ import plistlib
 import argparse
 import re
 
-try:
-    import gitlab
-except:
-    pass
-
 def get_plist_with_content(dir):
     plist_list = []
 
@@ -49,14 +44,13 @@ def filter_exclude(args, file):
     else:
         bool_res = False
 
-    return bool_res    
+    return bool_res
 
 
 if __name__ == '__main__':
     exit_code = 0
     parser = argparse.ArgumentParser()
     parser.add_argument('dir', help='search directory for plist-files')
-    parser.add_argument("--token", help="gitlab private access token")
     parser.add_argument('--exclude', action='append', help='regex to exclude path')
     args = parser.parse_args()
 
@@ -96,18 +90,8 @@ if __name__ == '__main__':
 
     print("Found %d clang messages" % count)
     if count > 0:
-
-        server_url = os.environ.get("CI_SERVER_URL")
-        if server_url:
-            gl = gitlab.Gitlab('https://gitlab.intranet.gonicus.de', private_token=args.token)
-            project = gl.projects.get(os.environ["CI_MERGE_REQUEST_PROJECT_ID"])
-
-            mr = project.mergerequests.get(int(os.environ["CI_MERGE_REQUEST_IID"]))
-            if mr and len(doc):
-                mr.discussions.create({'body': '#### Review of clang static code analysis\n\n' + ("".join(doc))})
-        elif len(doc):
-            with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as fh:
-                print('#### Review of clang static code analysis\n\n' + ("".join(doc)), file=fh)
+        with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as fh:
+            print('#### Review of clang static code analysis\n\n' + ("".join(doc)), file=fh)
 
     exit(exit_code)
 

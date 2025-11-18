@@ -1,0 +1,42 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b8d0506..0f14d34 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,5 +6,3 @@ set(CMAKE_CXX_STANDARD 14)
+ include_directories(include)
+ 
+ add_subdirectory(src)
+-ENABLE_TESTING()
+-add_subdirectory(test)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index f24ebe4..434b9ec 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -8,12 +8,24 @@ utils.cpp )
+ 
+ target_include_directories(${CMAKE_PROJECT_NAME}
+     PUBLIC 
+-        $<INSTALL_INTERFACE:include>    
++        $<INSTALL_INTERFACE:include>
+ 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+ 	PRIVATE
+         ${CMAKE_CURRENT_SOURCE_DIR}/src
+ )
+ 
++file(GLOB_RECURSE VCARD_INCLUDE_FILES "${PROJECT_SOURCE_DIR}/include/*.h")
++set_target_properties(${PROJECT_NAME}
++    PROPERTIES PUBLIC_HEADER "${VCARD_INCLUDE_FILES}"
++)
++
++include(GNUInstallDirs)
+ install(TARGETS ${CMAKE_PROJECT_NAME}
++    EXPORT targets
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+\ No newline at end of file
++    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
++
++install(EXPORT targets
++    FILE ${CMAKE_PROJECT_NAME}Config.cmake
++    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
++)
