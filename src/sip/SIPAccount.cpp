@@ -14,7 +14,7 @@
 
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
 
-long SIPAccount::runningMessageIndex = 0;
+intptr_t SIPAccount::runningMessageIndex = 0;
 
 SIPAccount::SIPAccount(const QString &group, QObject *parent)
     : QObject(parent), Account(), m_account(group)
@@ -463,7 +463,7 @@ QString SIPAccount::call(const QString &number, const QString &contactId,
 long SIPAccount::sendMessage(const QString &recipient, const QString &message,
                              const QString &mimeType)
 {
-    long id = SIPAccount::runningMessageIndex++;
+    const auto id = SIPAccount::runningMessageIndex++;
     QString sipUrl = toSipUri(recipient);
     SIPBuddy *foundBuddy = nullptr;
 
@@ -494,7 +494,7 @@ long SIPAccount::sendMessage(const QString &recipient, const QString &message,
 void SIPAccount::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 {
     qCDebug(lcSIPAccount) << "sent message to " << prm.toUri << ", status: " << prm.code
-                          << prm.reason << (long)prm.userData;
+                          << prm.reason << (intptr_t)prm.userData;
 }
 
 void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)

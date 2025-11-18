@@ -17,16 +17,22 @@ on:
       - release
       - main
   pull_request:
-    branches: 
+    branches:
       - release
       - main
   schedule:
     - cron: '18 19 * * 5'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   EXT_BASE: ${{github.workspace}}
+  CC: clang
+  CXX: clang++
 
 jobs:
   analyze:
@@ -73,7 +79,20 @@ jobs:
         submodules: 'recursive'
 
     - name: Prepare
-      uses: ./.github/actions/prepare
+      uses: ./.github/actions/prepare-linux
+
+    - if: matrix.build-mode == 'manual'
+      name: Install Conan
+      uses: conan-io/setup-conan@v1
+      with:
+        version: 2.22.2
+        cache_packages: true
+
+    - if: matrix.build-mode == 'manual'
+      name: Install Conan dependencies
+      run: |
+        resources/conan/export.py
+        conan install . --build=missing
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
@@ -101,10 +120,13 @@ jobs:
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - if: matrix.build-mode == 'manual'
+      name: Building GOnnect
+      env:
+        PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
       shell: bash
       run: |
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_DEPENDENCIES=ON -DCMAKE_PREFIX_PATH="${{github.workspace}}/pjproject;${{github.workspace}}/qca/lib/cmake"
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel $(nproc --all)
+        cmake --preset conan-release
+        cmake --build --preset conan-release --parallel $(nproc --all)
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@014f16e7ab1402f30e7c3329d33797e7948572db # v4
