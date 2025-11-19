@@ -97,24 +97,6 @@
     </message>
 </context>
 <context>
-    <name>AvatarManager</name>
-    <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="399"/>
-        <source>Failed to initialize LDAP connection: %1</source>
-        <translation>Kann die LDAP-Verbindung nicht initialisieren: %1</translation>
-    </message>
-    <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="412"/>
-        <source>LDAP error: %1</source>
-        <translation>LDAP-Fehler: %1</translation>
-    </message>
-    <message>
-        <location filename="../src/contacts/AvatarManager.cpp" line="491"/>
-        <source>Parse error: %1</source>
-        <translation>Syntaxfehler: %1</translation>
-    </message>
-</context>
-<context>
     <name>BackgroundPortal</name>
     <message>
         <location filename="../src/dbus/portal/BackgroundPortal.cpp" line="27"/>
@@ -154,12 +136,12 @@
         <translation>Tastaturkürzel...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="43"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="27"/>
         <source>About...</source>
         <translation>Über...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="48"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="32"/>
         <source>Quit</source>
         <translation>Beenden</translation>
     </message>
@@ -365,19 +347,19 @@
 <context>
     <name>Chats</name>
     <message>
-        <location filename="../src/ui/components/pages/Chats.qml" line="59"/>
+        <location filename="../src/ui/components/pages/Chats.qml" line="58"/>
         <source>Please enter your recovery key to decrypt messages:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bitte geben Sie den Wiederherstellungsschlüssel zum Entschlüsseln der Nachrichten ein:</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Chats.qml" line="67"/>
+        <location filename="../src/ui/components/pages/Chats.qml" line="66"/>
         <source>Recovery key</source>
-        <translation type="unfinished"></translation>
+        <translation>Wiederherstellungsschlüssel</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Chats.qml" line="81"/>
+        <location filename="../src/ui/components/pages/Chats.qml" line="80"/>
         <source>Use key</source>
-        <translation type="unfinished"></translation>
+        <translation>Schlüssel benutzen</translation>
     </message>
 </context>
 <context>
@@ -1216,19 +1198,26 @@
 <context>
     <name>LDAPAddressBookFeeder</name>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="156"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="165"/>
         <source>Failed to initialize LDAP connection</source>
         <translation>LDAP-Verbindung konnte nicht initialisiert werden</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="174"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="183"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="364"/>
         <source>LDAP error: %1</source>
         <translation>LDAP-Fehler: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="272"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="281"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="436"/>
         <source>Parse error: %1</source>
         <translation>Syntaxfehler: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="350"/>
+        <source>Failed to initialize LDAP connection: %1</source>
+        <translation>Kann die LDAP-Verbindung nicht initialisieren: %1</translation>
     </message>
 </context>
 <context>
@@ -1236,7 +1225,7 @@
     <message>
         <location filename="../src/platform/linux/LinuxDesktopSearchProvider.cpp" line="180"/>
         <source>Call</source>
-        <translation>Anruf</translation>
+        <translation>Anrufen</translation>
     </message>
 </context>
 <context>
@@ -1252,42 +1241,42 @@
         <translation>GOnnect kann das System Tray für einen schnelleren Zugriff verwenden. Dein Desktop-Environment stellt keines zur Verfügung.</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="54"/>
+        <location filename="../src/Main.qml" line="53"/>
         <source>There are still phone calls going on, do you really want to quit?</source>
         <translation>Es sind noch aktive Anrufe vorhanden. Möchtest Du wirklich beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="82"/>
+        <location filename="../src/Main.qml" line="81"/>
         <source>Please enter the password for %1:</source>
         <translation>Bitte geben Sie das Passwort für %1 ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="93"/>
+        <location filename="../src/Main.qml" line="92"/>
         <source>Please enter the recovery key for %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bitte geben Sie den Wiederherstellungsschlüssel für %1 ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="124"/>
+        <location filename="../src/Main.qml" line="123"/>
         <source>Please enter the password for the SIP account:</source>
         <translation>Bitte gib das Passwort für den SIP-Account ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="108"/>
+        <location filename="../src/Main.qml" line="107"/>
         <source>End all calls</source>
         <translation>Alle Anrufe beenden</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="109"/>
+        <location filename="../src/Main.qml" line="108"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
         <translation>Möchtest Du das Fenster schliessen und alle aktiven Anrufe beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="187"/>
+        <location filename="../src/Main.qml" line="186"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="193"/>
+        <location filename="../src/Main.qml" line="192"/>
         <source>Fatal Error</source>
         <translation>Fataler Fehler</translation>
     </message>
@@ -1295,54 +1284,34 @@
 <context>
     <name>MainTabBar</name>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="300"/>
-        <location filename="../src/ui/components/MainTabBar.qml" line="301"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="132"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="133"/>
         <source>Home</source>
         <translation>Home</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="309"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="140"/>
         <source>Conference</source>
         <translation>Konferenz</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="310"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="141"/>
         <source>No active conference</source>
         <translation>Keine aktive Konferenz</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="319"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="149"/>
         <source>No active call</source>
         <translation>Kein aktiver Anruf</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="387"/>
-        <source>Move up</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="413"/>
-        <source>Move down</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="439"/>
-        <source>Delete</source>
-        <translation>Löschen</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="318"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="148"/>
         <source>Call</source>
         <translation>Anruf</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="335"/>
-        <source>Chat not available</source>
-        <translation>Kein Chat verfügbar</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="370"/>
-        <location filename="../src/ui/components/MainTabBar.qml" line="371"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="178"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="179"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
@@ -2685,7 +2654,7 @@
         <translation>Simbabwe</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/StateManager.cpp" line="172"/>
+        <location filename="../src/StateManager.cpp" line="154"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>
@@ -3133,6 +3102,46 @@
         <source>Shortcuts</source>
         <translation>Tastaturkürzel</translation>
     </message>
+    <message>
+        <location filename="../src/ui/ShortcutsWindow.qml" line="78"/>
+        <source>Local shortcuts (work only when app is focused)</source>
+        <translation>Lokale Tastenkürzel (funktionieren nur wenn die Anwendung im Vordergrund ist)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ShortcutsWindow.qml" line="92"/>
+        <source>Ctrl + F</source>
+        <translation>Strg + F</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ShortcutsWindow.qml" line="93"/>
+        <source>Activates the global search field</source>
+        <translation>Aktiviert das globale Suchfeld</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ShortcutsWindow.qml" line="96"/>
+        <source>F11</source>
+        <translation>F11</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ShortcutsWindow.qml" line="97"/>
+        <source>Toggles between fullsceen and normal window mode</source>
+        <translation>Schaltet zwischen Vollbild und normalem Fenstermodus um</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ShortcutsWindow.qml" line="100"/>
+        <source>Ctrl + Shift + M</source>
+        <translation>Strg + Umschalt + M</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ShortcutsWindow.qml" line="101"/>
+        <source>Toggles audio mute</source>
+        <translation>Schaltet die Audio-Stummschaltung an und aus</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ShortcutsWindow.qml" line="112"/>
+        <source>Global shortcuts (work from anywhere)</source>
+        <translation>Globale Tastenkürzel (funktionieren überall)</translation>
+    </message>
 </context>
 <context>
     <name>SipTemplateWizard</name>
@@ -3186,27 +3195,27 @@
 <context>
     <name>StateManager</name>
     <message>
-        <location filename="../src/StateManager.cpp" line="91"/>
+        <location filename="../src/StateManager.cpp" line="73"/>
         <source>Show dial window and focus search field</source>
         <translation>Zeige das Wählfenster und fokussiere das Suchfeld</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="94"/>
+        <location filename="../src/StateManager.cpp" line="76"/>
         <source>End all calls</source>
         <translation>Alle Anrufe beenden</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="96"/>
+        <location filename="../src/StateManager.cpp" line="78"/>
         <source>Redial last outgoing call</source>
         <translation>Letzten ausgehenden Anruf wiederholen</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="99"/>
+        <location filename="../src/StateManager.cpp" line="81"/>
         <source>Toggle hold</source>
         <translation>Halten umschalten</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="147"/>
+        <location filename="../src/StateManager.cpp" line="129"/>
         <source>Phone calls are active</source>
         <translation>Anrufe sind aktiv</translation>
     </message>
@@ -3292,12 +3301,12 @@
 <context>
     <name>ViewHelper</name>
     <message>
-        <location filename="../src/ui/ViewHelper.cpp" line="85"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="84"/>
         <source>Save File</source>
         <translation>Datei speichern</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="106"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="105"/>
         <source>%n minute(s)</source>
         <translation>
             <numerusform>%n Minute</numerusform>
@@ -3305,7 +3314,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="109"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="108"/>
         <source>1 hour and %n minute(s)</source>
         <translation>
             <numerusform>1 Stunde und %n Minute</numerusform>
@@ -3313,7 +3322,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="111"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="110"/>
         <source>%n hour(s)</source>
         <translation>
             <numerusform>%n Stunde</numerusform>
@@ -3321,7 +3330,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/ViewHelper.cpp" line="193"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="192"/>
         <source>Audio Files (%1)</source>
         <translation>Audio-Dateien (%1)</translation>
     </message>

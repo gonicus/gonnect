@@ -56,7 +56,7 @@ public:
 
     void setCredentials(const QString &password);
 
-    static long runningMessageIndex;
+    static intptr_t runningMessageIndex;
 
     ~SIPAccount();
 

@@ -11,7 +11,9 @@ repo/
 .flatpak-builder/
 
 # CMake
+CMakeCache.txt
 CMakeLists.txt.user*
+CMakeUserPresets.json
 
 # A listing of all the files included in the project
 *.files

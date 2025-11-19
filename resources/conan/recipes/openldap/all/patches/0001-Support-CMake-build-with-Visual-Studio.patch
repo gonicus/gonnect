@@ -1,0 +1,600 @@
+commit 7e47519aeaa3e2258d2f823e727485c007d9af60
+Author: Windows User <someone@windows-machine.arg>
+Date:   Sat Sep 27 17:08:39 2025 +0200
+
+    Support CMake build with Visual Studio
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000000..b8491610c4
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,212 @@
++cmake_minimum_required(VERSION 3.18.0)
++project(libopenldap C)
++
++find_package(OpenSSL REQUIRED)
++
++configure_file(
++    include/lber_types.h.win
++    include/lber_types.h
++)
++
++configure_file(
++    include/ldap_features.h.win
++    include/ldap_features.h
++)
++
++configure_file(
++    include/portable.h.win
++    include/portable.h
++)
++
++configure_file(
++    include/ldap_config.h.win
++    include/ldap_config.h
++)
++
++set(LBER_SOURCES 
++	libraries/liblber/assert.c
++	libraries/liblber/decode.c
++	libraries/liblber/encode.c
++	libraries/liblber/io.c
++	libraries/liblber/bprint.c
++	libraries/liblber/debug.c
++	libraries/liblber/memory.c
++	libraries/liblber/options.c
++	libraries/liblber/sockbuf.c
++	libraries/liblber/nt_err.c
++)
++
++add_library(lber STATIC
++	${LBER_SOURCES}
++)
++
++target_include_directories(lber PRIVATE
++	include
++     ${CMAKE_CURRENT_BINARY_DIR}/include
++)
++
++target_link_libraries(lber PRIVATE
++	Ws2_32
++    openssl::openssl
++)
++
++target_compile_definitions(lber PRIVATE -DHAVE_TLS=1 -DHAVE_OPENSSL=1 -DHAVE_OPENSSL_SSL_H=1)
++
++set(LDAP_SOURCES
++	libraries/libldap/bind.c
++	libraries/libldap/open.c
++	libraries/libldap/result.c
++	libraries/libldap/error.c
++	libraries/libldap/compare.c
++	libraries/libldap/search.c
++	libraries/libldap/controls.c
++	libraries/libldap/messages.c
++	libraries/libldap/references.c
++	libraries/libldap/extended.c
++	libraries/libldap/cyrus.c	
++	libraries/libldap/modify.c
++	libraries/libldap/add.c
++	libraries/libldap/modrdn.c
++	libraries/libldap/delete.c
++	libraries/libldap/abandon.c
++	libraries/libldap/sasl.c
++	libraries/libldap/sbind.c
++	libraries/libldap/unbind.c
++	libraries/libldap/cancel.c
++	libraries/libldap/filter.c
++	libraries/libldap/free.c
++	libraries/libldap/sort.c
++	libraries/libldap/passwd.c
++	libraries/libldap/whoami.c
++	libraries/libldap/vc.c
++	libraries/libldap/getdn.c
++	libraries/libldap/getentry.c
++	libraries/libldap/getattr.c
++	libraries/libldap/getvalues.c
++	libraries/libldap/addentry.c
++	libraries/libldap/request.c
++	libraries/libldap/os-ip.c
++	libraries/libldap/url.c
++	libraries/libldap/pagectrl.c
++	libraries/libldap/sortctrl.c
++	libraries/libldap/vlvctrl.c
++	libraries/libldap/init.c
++	libraries/libldap/options.c
++	libraries/libldap/print.c
++	libraries/libldap/string.c
++	libraries/libldap/util-int.c
++	libraries/libldap/schema.c
++	libraries/libldap/charray.c
++	libraries/libldap/os-local.c
++	libraries/libldap/dnssrv.c
++	libraries/libldap/utf-8.c
++	libraries/libldap/utf-8-conv.c
++	libraries/libldap/tls2.c
++	libraries/libldap/tls_o.c
++	libraries/libldap/tls_g.c
++	libraries/libldap/turn.c
++	libraries/libldap/ppolicy.c
++	libraries/libldap/dds.c
++	libraries/libldap/txn.c
++	libraries/libldap/ldap_sync.c
++	libraries/libldap/stctrl.c
++	libraries/libldap/assertion.c 
++	libraries/libldap/deref.c 
++	libraries/libldap/ldifutil.c 
++	libraries/libldap/ldif.c 
++	libraries/libldap/fetch.c 
++	libraries/libldap/lbase64.c
++	libraries/libldap/msctrl.c 
++	libraries/libldap/psearchctrl.c 
++	libraries/libldap/threads.c 
++	libraries/libldap/rdwr.c 
++	libraries/libldap/tpool.c 
++	libraries/libldap/rq.c
++	libraries/libldap/thr_posix.c 
++	libraries/libldap/thr_thr.c 
++	libraries/libldap/thr_nt.c 
++	libraries/libldap/thr_pth.c 
++	libraries/libldap/thr_debug.c
++	libraries/libldap/account_usability.c 
++	libraries/libldap/avl.c 
++	libraries/libldap/tavl.c 
++	libraries/libldap/testavl.c
++)
++
++set(LDAP_PUBLIC_HEADERS
++    include/getopt-compat.h
++    include/lber.h
++    include/lber_pvt.h    
++    include/ldap.h
++    include/ldap_avl.h
++    include/ldap_cdefs.h
++    include/ldap_defaults.h
++    include/ldap_int_thread.h
++    include/ldap_log.h
++    include/ldap_pvt.h
++    include/ldap_pvt_thread.h
++    include/ldap_pvt_uc.h
++    include/ldap_queue.h
++    include/ldap_rq.h
++    include/ldap_schema.h
++    include/ldap_utf8.h
++    include/ldif.h
++    include/lutil.h
++    include/lutil_hash.h
++    include/lutil_ldap.h
++    include/lutil_lockf.h
++    include/lutil_md5.h
++    include/lutil_meter.h
++    include/lutil_sha1.h
++    include/openldap.h
++    include/rewrite.h
++    include/sd-notify.h
++    include/slapi-plugin.h
++    include/sysexits-compat.h
++)
++set(LDAP_PUBLIC_HEADERS_GENERATED
++    ${CMAKE_CURRENT_BINARY_DIR}/include/lber_types.h
++    ${CMAKE_CURRENT_BINARY_DIR}/include/ldap_config.h
++    ${CMAKE_CURRENT_BINARY_DIR}/include/ldap_features.h
++    ${CMAKE_CURRENT_BINARY_DIR}/include/portable.h
++)
++	
++add_library(ldap STATIC)
++
++target_sources(ldap
++    PRIVATE ${LDAP_SOURCES}
++    PUBLIC FILE_SET HEADERS
++    BASE_DIRS ${PROJECT_SOURCE_DIR}/include
++    FILES ${LDAP_PUBLIC_HEADERS}
++    PUBLIC FILE_SET HEADERS
++    BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/include
++    FILES ${LDAP_PUBLIC_HEADERS_GENERATED}
++)
++
++target_include_directories(ldap PRIVATE
++	include
++    ${CMAKE_CURRENT_BINARY_DIR}/include
++)
++
++target_link_libraries(ldap PRIVATE
++	Ws2_32
++	lber
++    openssl::openssl
++)
++
++target_compile_definitions(ldap PRIVATE -DHAVE_TLS=1 -DHAVE_OPENSSL=1 -DHAVE_OPENSSL_SSL_H=1)
++
++
++install (TARGETS lber
++    RUNTIME DESTINATION bin
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib    
++)
++
++install (TARGETS ldap
++    RUNTIME DESTINATION bin
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    FILE_SET HEADERS
++    FILE_SET HEADERS_GENERATED
++)
+diff --git a/include/ac/socket.h b/include/ac/socket.h
+index a80254120f..b543915bad 100644
+--- a/include/ac/socket.h
++++ b/include/ac/socket.h
+@@ -221,6 +221,7 @@ LDAP_F (int) ldap_pvt_inet_aton LDAP_P(( const char *, struct in_addr * ));
+ #	define LDAP_PF_LOCAL_SENDMSG 1
+ #endif
+ 
++#if 0
+ #ifdef HAVE_GETPEEREID
+ #define	LUTIL_GETPEEREID( s, uid, gid, bv )	getpeereid( s, uid, gid )
+ #elif defined(LDAP_PF_LOCAL_SENDMSG)
+@@ -231,6 +232,8 @@ LDAP_LUTIL_F( int ) lutil_getpeereid( int s, uid_t *, gid_t *, struct berval *bv
+ LDAP_LUTIL_F( int ) lutil_getpeereid( int s, uid_t *, gid_t * );
+ #define	LUTIL_GETPEEREID( s, uid, gid, bv )	lutil_getpeereid( s, uid, gid )
+ #endif
++#endif
++
+ 
+ typedef union Sockaddr {
+ 	struct sockaddr sa_addr;
+diff --git a/include/lber_types.h.win b/include/lber_types.h.win
+new file mode 100644
+index 0000000000..925c33541d
+--- /dev/null
++++ b/include/lber_types.h.win
+@@ -0,0 +1,64 @@
++/* $OpenLDAP$ */
++/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
++ *
++ * Copyright 1998-2024 The OpenLDAP Foundation.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted only as authorized by the OpenLDAP
++ * Public License.
++ *
++ * A copy of this license is available in file LICENSE in the
++ * top-level directory of the distribution or, alternatively, at
++ * <http://www.OpenLDAP.org/license.html>.
++ */
++
++/*
++ * LBER types
++ */
++
++#ifndef _LBER_TYPES_H
++#define _LBER_TYPES_H
++
++#include <ldap_cdefs.h>
++
++LDAP_BEGIN_DECL
++
++/* LBER boolean, enum, integers (32 bits or larger) */
++#define LBER_INT_T int
++
++/* LBER tags (32 bits or larger) */
++#define LBER_TAG_T int
++
++/* LBER socket descriptor */
++#define LBER_SOCKET_T unsigned int
++
++/* LBER lengths (32 bits or larger) */
++#define LBER_LEN_T __int64
++
++/* ------------------------------------------------------------ */
++
++/* booleans, enumerations, and integers */
++typedef LBER_INT_T ber_int_t;
++
++/* signed and unsigned versions */
++typedef signed LBER_INT_T ber_sint_t;
++typedef unsigned LBER_INT_T ber_uint_t;
++
++/* tags */
++typedef unsigned LBER_TAG_T ber_tag_t;
++
++/* "socket" descriptors */
++typedef LBER_SOCKET_T ber_socket_t;
++
++/* lengths */
++typedef unsigned LBER_LEN_T ber_len_t;
++
++/* signed lengths */
++typedef signed LBER_LEN_T ber_slen_t;
++
++typedef ber_len_t ber_socklen_t;
++
++LDAP_END_DECL
++
++#endif /* _LBER_TYPES_H */
+diff --git a/include/ldap_config.h.win b/include/ldap_config.h.win
+new file mode 100644
+index 0000000000..b6ce2de41b
+--- /dev/null
++++ b/include/ldap_config.h.win
+@@ -0,0 +1,73 @@
++/* $OpenLDAP$ */
++/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
++ *
++ * Copyright 1998-2024 The OpenLDAP Foundation.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted only as authorized by the OpenLDAP
++ * Public License.
++ *
++ * A copy of this license is available in file LICENSE in the
++ * top-level directory of the distribution or, alternatively, at
++ * <http://www.OpenLDAP.org/license.html>.
++ */
++
++/*
++ * This file works in conjunction with OpenLDAP configure system.
++ * If you do no like the values below, adjust your configure options.
++ */
++
++#ifndef _LDAP_CONFIG_H
++#define _LDAP_CONFIG_H
++
++/* directory separator */
++#ifndef LDAP_DIRSEP
++#ifndef _WIN32
++#define LDAP_DIRSEP "/"
++#else
++#define LDAP_DIRSEP "\\"
++#endif
++#endif
++
++/* directory for temporary files */
++#if defined(_WIN32)
++# define LDAP_TMPDIR "C:\\."	/* we don't have much of a choice */
++#elif defined( _P_tmpdir )
++# define LDAP_TMPDIR _P_tmpdir
++#elif defined( P_tmpdir )
++# define LDAP_TMPDIR P_tmpdir
++#elif defined( _PATH_TMPDIR )
++# define LDAP_TMPDIR _PATH_TMPDIR
++#else
++# define LDAP_TMPDIR LDAP_DIRSEP "tmp"
++#endif
++
++/* directories */
++#ifndef LDAP_BINDIR
++#define LDAP_BINDIR			"%BINDIR%"
++#endif
++#ifndef LDAP_SBINDIR
++#define LDAP_SBINDIR		"%SBINDIR%"
++#endif
++#ifndef LDAP_DATADIR
++#define LDAP_DATADIR		"%DATADIR%"
++#endif
++#ifndef LDAP_SYSCONFDIR
++#define LDAP_SYSCONFDIR		"%SYSCONFDIR%"
++#endif
++#ifndef LDAP_LIBEXECDIR
++#define LDAP_LIBEXECDIR		"%LIBEXECDIR%"
++#endif
++#ifndef LDAP_MODULEDIR
++#define LDAP_MODULEDIR		"%MODULEDIR%"
++#endif
++#ifndef LDAP_RUNDIR
++#define LDAP_RUNDIR			"%RUNDIR%"
++#endif
++#ifndef LDAP_LOCALEDIR
++#define LDAP_LOCALEDIR		"%LOCALEDIR%"
++#endif
++
++
++#endif /* _LDAP_CONFIG_H */
+diff --git a/include/ldap_features.h.win b/include/ldap_features.h.win
+new file mode 100644
+index 0000000000..73ebb19091
+--- /dev/null
++++ b/include/ldap_features.h.win
+@@ -0,0 +1,55 @@
++/* $OpenLDAP$ */
++/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
++ *
++ * Copyright 1998-2024 The OpenLDAP Foundation.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted only as authorized by the OpenLDAP
++ * Public License.
++ *
++ * A copy of this license is available in file LICENSE in the
++ * top-level directory of the distribution or, alternatively, at
++ * <http://www.OpenLDAP.org/license.html>.
++ */
++
++/* 
++ * LDAP Features
++ */
++
++#ifndef _LDAP_FEATURES_H
++#define _LDAP_FEATURES_H 1
++
++/* OpenLDAP API version macros */
++#define LDAP_VENDOR_VERSION 1
++#define LDAP_VENDOR_VERSION_MAJOR 1
++#define LDAP_VENDOR_VERSION_MINOR 1
++#define LDAP_VENDOR_VERSION_PATCH 1
++
++/*
++** WORK IN PROGRESS!
++**
++** OpenLDAP reentrancy/thread-safeness should be dynamically
++** checked using ldap_get_option().
++**
++** If built with thread support, the -lldap implementation is:
++**		LDAP_API_FEATURE_THREAD_SAFE (basic thread safety)
++**		LDAP_API_FEATURE_SESSION_THREAD_SAFE
++**		LDAP_API_FEATURE_OPERATION_THREAD_SAFE
++**
++** The preprocessor flag LDAP_API_FEATURE_X_OPENLDAP_THREAD_SAFE
++** can be used to determine if -lldap is thread safe at compile
++** time.
++**
++*/
++
++/* is -lldap reentrant or not */
++//#undef LDAP_API_FEATURE_X_OPENLDAP_REENTRANT
++
++/* is -lldap thread safe or not */
++//#undef LDAP_API_FEATURE_X_OPENLDAP_THREAD_SAFE
++
++/* LDAP v2 Referrals */
++//#undef LDAP_API_FEATURE_X_OPENLDAP_V2_REFERRALS
++
++#endif /* LDAP_FEATURES */
+diff --git a/include/portable.h.win b/include/portable.h.win
+new file mode 100644
+index 0000000000..5bebe4ff73
+--- /dev/null
++++ b/include/portable.h.win
+@@ -0,0 +1,123 @@
++/* include/portable.hin.  Generated from configure.ac by autoheader.  */
++
++
++/* begin of portable.h.pre */
++/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
++ *
++ * Copyright 1998-2024 The OpenLDAP Foundation
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted only as authorized by the OpenLDAP
++ * Public License.
++ *
++ * A copy of this license is available in the file LICENSE in the
++ * top-level directory of the distribution or, alternatively, at
++ * <http://www.OpenLDAP.org/license.html>.
++ */
++
++#ifndef _LDAP_PORTABLE_H
++#define _LDAP_PORTABLE_H
++
++/* define this if needed to get reentrant functions */
++#ifndef REENTRANT
++#undef REENTRANT
++#endif
++#ifndef _REENTRANT
++#undef _REENTRANT
++#endif
++
++/* define this if needed to get threadsafe functions */
++#ifndef THREADSAFE
++#undef THREADSAFE
++#endif
++#ifndef _THREADSAFE
++#undef _THREADSAFE
++#endif
++#ifndef THREAD_SAFE
++#undef THREAD_SAFE
++#endif
++#ifndef _THREAD_SAFE
++#undef _THREAD_SAFE
++#endif
++
++#ifndef _SGI_MP_SOURCE
++#undef _SGI_MP_SOURCE
++#endif
++
++/* end of portable.h.pre */
++
++
++/* define to use both <string.h> and <strings.h> */
++#undef BOTH_STRINGS_H
++
++/* set to the number of arguments ctime_r() expects */
++#define CTIME_R_NARGS 3
++#define EXEEXT "exe"
++#define GETHOSTBYADDR_R_NARGS 3
++#define GETHOSTBYNAME_R_NARGS 3
++#define HAVE_ASSERT_H
++#define HAVE_WINSOCK2
++#define STDC_HEADERS
++#define HAVE_CLOCK_GETTIME
++#define SIZEOF_INT 4
++#define SIZEOF_SHORT 2
++#define HAVE_NT_THREADS
++
++#ifdef _MSC_VER 
++#define strncasecmp _strnicmp
++#define strcasecmp _stricmp
++#endif
++
++
++/* begin of portable.h.post */
++
++#define RETSIGTYPE void
++
++#ifdef _WIN32
++	/* don't suck in all of the win32 api */
++#	define WIN32_LEAN_AND_MEAN 1
++#endif
++
++#ifndef LDAP_NEEDS_PROTOTYPES
++/* force LDAP_P to always include prototypes */
++#define LDAP_NEEDS_PROTOTYPES 1
++#endif
++
++#ifndef LDAP_REL_ENG
++#if (LDAP_VENDOR_VERSION == 000000) && !defined(LDAP_DEVEL)
++#define LDAP_DEVEL
++#endif
++#if defined(LDAP_DEVEL) && !defined(LDAP_TEST)
++#define LDAP_TEST
++#endif
++#endif
++
++#ifdef HAVE_STDDEF_H
++#	include <stddef.h>
++#endif
++
++#ifdef HAVE_EBCDIC 
++/* ASCII/EBCDIC converting replacements for stdio funcs
++ * vsnprintf and snprintf are used too, but they are already
++ * checked by the configure script
++ */
++#define fputs ber_pvt_fputs
++#define fgets ber_pvt_fgets
++#define printf ber_pvt_printf
++#define fprintf ber_pvt_fprintf
++#define vfprintf ber_pvt_vfprintf
++#define vsprintf ber_pvt_vsprintf
++#endif
++
++#include "ac/fdset.h"
++
++#include "ldap_cdefs.h"
++#include "ldap_features.h"
++
++#include "ac/assert.h"
++#include "ac/localize.h"
++
++#endif /* _LDAP_PORTABLE_H */
++/* end of portable.h.post */
++
+diff --git a/libraries/liblber/sockbuf.c b/libraries/liblber/sockbuf.c
+index 89d037bcad..638658a5e8 100644
+--- a/libraries/liblber/sockbuf.c
++++ b/libraries/liblber/sockbuf.c
+@@ -339,7 +339,10 @@ ber_pvt_sb_do_write( Sockbuf_IO_Desc *sbiod, Sockbuf_Buf *buf_out )
+ int
+ ber_pvt_socket_set_nonblock( ber_socket_t sd, int nb )
+ {
+-#ifdef HAVE_FCNTL
++#ifdef WIN32
++	u_long mode = nb ? 1 : 0;  // 1 to enable non-blocking socket
++	ioctlsocket(sd, FIONBIO, &mode);
++#elif defined( HAVE_FCNTL )
+ 	int flags = fcntl( sd, F_GETFL);
+ 	if( nb ) {
+ 		flags |= O_NONBLOCK;

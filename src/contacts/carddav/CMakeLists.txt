@@ -1,4 +1,7 @@
 if(ENABLE_DAV)
+    find_package(QtWebDAV REQUIRED)
+    find_package(vCard REQUIRED)
+
     qt_add_plugin(CardDAVAddressBookFactory STATIC
       CLASS_NAME CardDAVAddressBookFactory
     
@@ -19,12 +22,13 @@ if(ENABLE_DAV)
         ${PROJECT_BINARY_DIR}/src
     )
     
-    target_link_libraries(CardDAVAddressBookFactory PUBLIC
+    target_link_libraries(CardDAVAddressBookFactory PRIVATE
+      QtWebDAV
       Qt6::Core
       Qt6::Gui
       Qt6::Quick
-      Qt6::Widgets
-      QtWebDAV
-      vCard
-      Qt6::Xml)
+      Qt6::Xml
+      vCard)
+
+    set(CARDDAV_ADDRESSBOOK_FACTORY CardDAVAddressBookFactory PARENT_SCOPE)
 endif()

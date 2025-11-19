@@ -29,7 +29,6 @@ if(ENABLE_EDS)
             Qt6::Core
             Qt6::Gui
             Qt6::Quick
-            Qt6::Widgets
             Qt6::DBus
             ${GLIB_LIBRARIES}
             ${EDS_LIBRARIES})

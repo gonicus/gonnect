@@ -27,7 +27,7 @@ if(ENABLE_AKONADI)
         ${PROJECT_BINARY_DIR}/src
     )
     
-    target_link_libraries(AkonadiAddressBookFactory PUBLIC Qt6::Core Qt6::Gui Qt6::Quick Qt6::Widgets Qt6::DBus ${AKONADI_CONTACT_LIBS})
+    target_link_libraries(AkonadiAddressBookFactory PUBLIC Qt6::Core Qt6::Gui Qt6::Quick Qt6::DBus ${AKONADI_CONTACT_LIBS})
     
     set(AKONADI_CONTACT_FACTORY AkonadiAddressBookFactory PARENT_SCOPE)
 endif()

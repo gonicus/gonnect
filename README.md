@@ -155,7 +155,7 @@ After _distrobox_ is installed, create the _distrobox_ for _GOnnect_ development
 by running
 
 ```bash
-distrobox assemble create
+distrobox assemble create --name=gonnect
 ```
 
 in the directory of your _GOnnect_ checkout.
@@ -163,19 +163,25 @@ in the directory of your _GOnnect_ checkout.
 
 ## Building 
 
+### Unix based systems
+
 Assuming you're using the documented _distrobox_ approach above, enter the _distrobox_
 and start the ordinary _CMake_ build:
 
 ```bash
 distrobox enter gonnect
-cmake --workflow --preset default
+cd <to where you've cloned this repository>
+./resources/conan/export.py
+conan install . --build=missing
+cmake --preset conan-release .
+cmake --build --preset conan-release --parallel $(nproc --all)
 ```
 
 Alternatively you can simply run `qtcreator` inside the _distrobox_ and open the
 project as usual be selecting the `CMakeLists.txt`.
 
 
-## Building the flatpak
+### Building the flatpak
 
 As _GOnnect_ is mainly developed for use in _Flatpak_, some features only work in this
 kind of environment. If you want to build the _Flatpak_ locally, you can do this by
