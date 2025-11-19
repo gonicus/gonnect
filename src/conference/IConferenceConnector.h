@@ -36,6 +36,10 @@ class IConferenceConnector : public ICallState
                        isNoiseSuppressionEnabledChanged FINAL)
     Q_PROPERTY(
             bool isSubtitlesEnabled READ isSubtitlesEnabled NOTIFY isSubtitlesEnabledChanged FINAL)
+
+    Q_PROPERTY(bool hasWhiteboard READ hasWhiteboard NOTIFY hasWhiteboardChanged FINAL)
+    Q_PROPERTY(bool hasTextpad READ hasTextpad NOTIFY hasTextpadChanged FINAL)
+
     Q_PROPERTY(IConferenceConnector::VideoQuality videoQuality READ videoQuality NOTIFY
                        videoQualityChanged FINAL)
     Q_PROPERTY(QString ownId READ ownId NOTIFY ownIdChanged FINAL)
@@ -62,9 +66,11 @@ public:
         ParticipantKickable,
         RoomPassword,
         ShareUrl,
+        Textpad,
         TileView,
         VideoMute,
         VideoQualityAdjustable,
+        Whiteboard,
     };
     Q_ENUM(Capability)
 
@@ -135,6 +141,11 @@ public:
     virtual QString ownDisplayName() = 0;
     virtual ConferenceParticipant::Role ownRole() const = 0;
 
+    virtual bool hasWhiteboard() const = 0;
+    Q_INVOKABLE virtual void toggleWhiteboard() = 0;
+
+    virtual bool hasTextpad() const = 0;
+
     virtual QList<ConferenceParticipant *> participants() const = 0;
     virtual uint numberOfParticipants() const = 0;
     Q_INVOKABLE virtual void kickParticipant(const QString &participantId) = 0;
@@ -152,6 +163,8 @@ public:
 Q_SIGNALS:
     void isInitializedChanged();
     void isInConferenceChanged();
+    void hasWhiteboardChanged();
+    void hasTextpadChanged();
     void isPasswordRequiredChanged();
     void roomPasswordChanged();
     void displayNameChanged();
