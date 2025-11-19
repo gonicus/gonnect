@@ -78,6 +78,7 @@ class OpenldapConan(ConanFile):
                 "--without-fetch",
                 "--with-tls=openssl",
                 "--enable-auditlog",
+                "--disable-slapd",
                 "--libexecdir=${prefix}/bin",
                 f"systemdsystemunitdir={os.path.join(self.package_folder, 'res')}",
             ]
