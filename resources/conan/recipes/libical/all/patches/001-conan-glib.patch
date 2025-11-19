@@ -1,0 +1,14 @@
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2025-03-10 17:08:27.000000000 +0100
++++ b/CMakeLists.txt	2025-09-29 13:40:11.297469117 +0200
+@@ -477,8 +477,8 @@
+       "Alternatively, disable the libical-glib build (by passing -DICAL_GLIB=False to cmake).")
+   endif()
+
+-  find_package(GLib ${MIN_GLIB})
+-  set_package_properties(GLib PROPERTIES
++  find_package(glib ${MIN_GLIB})
++  set_package_properties(glib PROPERTIES
+     TYPE OPTIONAL
+     PURPOSE "For the optional libical-glib interface"
+   )

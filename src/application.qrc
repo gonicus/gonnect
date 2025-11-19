@@ -10,7 +10,7 @@
         <file alias="groups.dat">../resources/emojis/groups.dat</file>
     </qresource>
     <qresource prefix="/audio">
-        <file compress-algo="none" alias="phone-incoming-call.oga">../resources/sounds/phone-incoming-call.oga</file>
+        <file compress-algo="none" alias="phone-incoming-call.mp3">../resources/sounds/phone-incoming-call.mp3</file>
     </qresource>
     <qresource prefix="/emblems">
         <file compress-algo="none" alias="call-missed.png">../resources/artwork/emblems/call-missed.png</file>

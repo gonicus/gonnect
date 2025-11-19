@@ -1,0 +1,40 @@
+name: 'GOnnect prepare action [Windows build]'
+description: 'Recurring tasks for CI jobs'
+inputs:
+  qt-version:
+    description: 'QT version'
+    required: true
+    default: '6.10.0'
+  qt-only:
+    description: 'Install Qt only, skip other steps'
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@802fa1a2c4e212495c05bf94dba2704a92a472be # v2
+      with:
+        cmake-version: 'latest'
+
+    - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
+      shell: powershell
+      run: |
+        $VS_BTOOLS_EXE="vs_buildtools.exe"
+        $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
+        Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
+        Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
+        "--add", "Microsoft.VisualStudio.Component.VC.140", `
+        "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
+        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ inputs.qt-version }}
+        host: 'windows'
+        target: 'desktop'
+        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
+        arch: 'win64_msvc2022_64'
+        cache: true
