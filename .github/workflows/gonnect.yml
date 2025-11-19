@@ -183,7 +183,7 @@ jobs:
 
   clazy:
     runs-on: ubuntu-24.04
-    container: fedora:43
+    container: fedora:44
     name: "Qt Semantics"
 
     steps:
