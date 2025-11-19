@@ -36,7 +36,7 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           submodules: 'recursive'
 
@@ -44,7 +44,7 @@ jobs:
         uses: ./.github/actions/prepare-linux
 
       - name: Install Conan
-        uses: conan-io/setup-conan@v1
+        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
         with:
           version: 2.22.2
           cache_packages: true
@@ -82,7 +82,7 @@ jobs:
         uses: ./.github/actions/prepare-windows
 
       - name: Install Conan
-        uses: conan-io/setup-conan@v1
+        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
         with:
           version: 2.22.2
           cache_packages: true
@@ -113,7 +113,7 @@ jobs:
         uses: ./.github/actions/prepare-macos
 
       - name: Install Conan
-        uses: conan-io/setup-conan@v1
+        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
         with:
           version: 2.22.2
           cache_packages: true
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - name: Run clang-format style check for C/C++/Protobuf programs.
         uses: jidicula/clang-format-action@6cd220de46c89139a0365edae93eee8eb30ca8fe # v4.16.0
         with:
@@ -148,7 +148,7 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           submodules: 'recursive'
 
@@ -156,7 +156,7 @@ jobs:
         uses: ./.github/actions/prepare-linux
 
       - name: Install Conan
-        uses: conan-io/setup-conan@v1
+        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
         with:
           version: 2.22.2
           cache_packages: true
@@ -250,7 +250,7 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Prepare
         uses: ./.github/actions/prepare-linux

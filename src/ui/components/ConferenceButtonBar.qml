@@ -306,6 +306,12 @@ Item {
                     }
 
                     MenuItem {
+                        text: qsTr("Toggle whiteboard")
+                        visible: control.iConferenceConnector.hasWhiteboard
+                        onClicked: () => control.iConferenceConnector.toggleWhiteboard()
+                    }
+
+                    MenuItem {
                         text: qsTr("Video quality...")
                         visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoQualityAdjustable)
                         onClicked: () => control.openVideoQualityDialog()
