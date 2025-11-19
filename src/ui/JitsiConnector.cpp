@@ -465,20 +465,20 @@ void JitsiConnector::checkJitsiBackendFeatures()
     request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
 
     auto reply = manager->get(request);
-    connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err){
+    connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err) {
         qCCritical(lcJitsiConnector) << "Error on fetching config js:" << err;
     });
-    connect(reply, &QNetworkReply::sslErrors, this, [](const QList<QSslError>& errors){
+    connect(reply, &QNetworkReply::sslErrors, this, [](const QList<QSslError> &errors) {
         qCCritical(lcJitsiConnector) << "SSL errors on fetching config js:";
-        for (const auto& err : errors) {
+        for (const auto &err : errors) {
             qCCritical(lcJitsiConnector) << "  " << err.errorString();
         }
     });
-    connect(reply, &QIODevice::readyRead, this, [reply, this](){
-
-        static const QRegularExpression whiteboardRegex(R"(whiteboard\s*=\s*{\s*enabled\s*:\s*true)");
+    connect(reply, &QIODevice::readyRead, this, [reply, this]() {
+        static const QRegularExpression whiteboardRegex(
+                R"(whiteboard\s*=\s*{\s*enabled\s*:\s*true)");
         static const QRegularExpression etherpadRegex(R"(etherpad_base\s*=\s*['"])");
-        const auto txt  = reply->readAll();
+        const auto txt = reply->readAll();
 
         setHasWhiteboard(whiteboardRegex.match(txt).hasMatch());
         setHasTextpad(etherpadRegex.match(txt).hasMatch());
