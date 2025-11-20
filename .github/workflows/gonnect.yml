@@ -252,6 +252,9 @@ jobs:
       options: --privileged
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          submodules: 'recursive'
+
       - uses: flatpak/flatpak-github-actions/flatpak-builder@92ae9851ad316786193b1fd3f40c4b51eb5cb101 # v6.6
         with:
           bundle: palette.flatpak
