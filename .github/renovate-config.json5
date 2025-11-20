@@ -22,10 +22,36 @@
                 "github/codeql-action",
                 "renovatebot/github-action"
             ]
+        },
+        {
+            "groupName": "conan dependencies",
+            "matchManagers": ["conan"]
+        },
+        {
+            "matchPackageNames": [
+                "hidapi/**",
+                "libical/**",
+                "libinotify/**",
+                "libpulse/**",
+                "openldap/**",
+                "pjproject/**",
+                "qca/**",
+                "qtkeychain/**",
+                "qtwebdav/**",
+                "vcard/**",
+                "wintoast/**",
+            ],
+            "matchManagers": ["conan"],
+            "enabled": false
+        },
+        {
+            "matchPackageNames": ["openssl/**"],
+            "allowedVersions": "<3.6.0"
         }
+
     ],
     enabledManagers: [
-        "github-actions", "custom.regex"
+        "github-actions", "custom.regex", "conan"
     ],
     customManagers: [
         {
@@ -50,5 +76,66 @@
             ],
 	        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}'
         }
-    ]
+    ],
+    "customDatasources": {
+        "pjproject": {
+            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/379763",
+            "transformTemplates": [
+                '{"releases":[{\
+                    "version": $$.(stable_versions[0]),\
+                    "changelogUrl": $join(["https://github.com/", version_url, "/releases/tag/",data.stable_versions[0]]),\
+                    "sourceUrl": $join(["https://github.com/", version_url]),\
+                    "homepage": $$.(homepage)\
+                    }]\
+                }'
+            ]
+        },
+        "libical": {
+            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/1637",
+            "transformTemplates": [
+                '{"releases":[{\
+                    "version": $$.(stable_versions[0]),\
+                    "changelogUrl": $join(["https://github.com/", version_url, "/releases/tag/",data.stable_versions[0]]),\
+                    "sourceUrl": $join(["https://github.com/", version_url]),\
+                    "homepage": $$.(homepage)\
+                    }]\
+                }'
+            ]
+        },
+        "wintoast": {
+            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/386979",
+            "transformTemplates": [
+                '{"releases":[{\
+                    "version": $$.(stable_versions[0]),\
+                    "changelogUrl": $join(["https://github.com/", version_url, "/releases/tag/",data.stable_versions[0]]),\
+                    "sourceUrl": $join(["https://github.com/", version_url]),\
+                    "homepage": $$.(homepage)\
+                    }]\
+                }'
+            ]
+        },
+        "qca": {
+            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/13606",
+            "transformTemplates": [
+                '{"releases":[{\
+                    "version": $$.(stable_versions[0]),\
+                    "sourceUrl": $$.(version_url),\
+                    "homepage": $$.(homepage)\
+                    }]\
+                }'
+            ]
+        },
+        "qtkeychain": {
+            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/381807",
+            "transformTemplates": [
+                '{"releases":[{\
+                    "version": $$.(stable_versions[0]),\
+                    "changelogUrl": $join([homepage, "/releases/tag/", data.stable_versions[0]]),\
+                    "sourceUrl": $$.(homepage),\
+                    "homepage": $$.(homepage)\
+                    }]\
+                }'
+            ]
+        }
+    }
 }
