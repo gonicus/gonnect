@@ -141,9 +141,7 @@ set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETO
 
 add_subdirectory(contacts/ldap)
 add_subdirectory(contacts/csv)
-if(NOT WIN32)
-    add_subdirectory(calendar/caldav)
-endif()
+add_subdirectory(calendar/caldav)
 add_subdirectory(contacts/carddav)
 add_subdirectory(contacts/eds)
 add_subdirectory(calendar/eds)

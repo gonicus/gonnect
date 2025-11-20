@@ -70,3 +70,6 @@ class LibICALConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libical")
         self.cpp_info.set_property("cmake_target_name", "libical::libical")
         self.cpp_info.libs = collect_libs(self)
+
+        if not self.options.shared:
+            self.cpp_info.cxxflags = ['-DLIBICAL_ICAL_STATIC_DEFINE', '-DLIBICAL_ICALSS_STATIC_DEFINE', '-DLIBICAL_VCAL_STATIC_DEFINE']
