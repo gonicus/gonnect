@@ -89,7 +89,7 @@ class GOnnectRecipe(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.5.1")
 
     def configure(self):
         self.options["*/*"].shared = False
