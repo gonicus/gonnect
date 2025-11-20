@@ -145,7 +145,7 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
                              << "from" << fromId << nickName << "at" << stamp
                              << "as private message:" << isPrivateMessage << ":" << message;
 
-    ChatMessage::Flags flags = static_cast<ChatMessage::Flag>(0);
+    ChatMessage::Flags flags = ChatMessage::Flag::Unknown;
     if (isPrivateMessage) {
         flags |= ChatMessage::Flag::PrivateMessage;
     }
@@ -1223,6 +1223,8 @@ void JitsiConnector::leaveConference()
         m_inConferenceNotification = nullptr;
     }
 
+    m_chatRoom->clear();
+
     Q_EMIT executeLeaveRoomCommand();
     setConferenceName("");
     setDisplayName("");
@@ -1243,6 +1245,8 @@ void JitsiConnector::terminateConference()
         m_inConferenceNotification->deleteLater();
         m_inConferenceNotification = nullptr;
     }
+
+    m_chatRoom->clear();
 
     Q_EMIT executeEndConferenceCommand();
     setConferenceName("");
