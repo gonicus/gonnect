@@ -13,6 +13,7 @@ Item {
         id: internal
 
         property Button authButton
+        property bool shareFullScreen
     }
 
     states: [
@@ -240,7 +241,10 @@ Item {
                     onSetOnHold: () => confConn.toggleHold()
                     onSetAudioMuted: (value) => GlobalMuteState.toggleMute()
                     onSetVideoMuted: (value) => confConn.setVideoMuted(value)
-                    onSetScreenShare: (value) => confConn.setSharingScreen(value)
+                    onSetScreenShare: (value, screen) => {
+                        internal.shareFullScreen = screen
+                        confConn.setSharingScreen(value)
+                    }
                     onSetTileView: (value) => confConn.setTileView(value)
                     onSetRaiseHand: (value) => confConn.setHandRaised(value)
 
@@ -276,16 +280,26 @@ Item {
                         if (level >= 2) {
                             console.error("# " + message + ": " + source + " +" + line)
                         } else if (level === 1) {
-                            console.warn("# " + message + ": " + source + " +" + line)
+                            console.error("# " + message + ": " + source + " +" + line)
                         } else {
-                            console.log("# " + message + ": " + source + " +" + line)
+                            console.error("# " + message + ": " + source + " +" + line)
                         }
                     }
 
                     onPermissionRequested: (permission) => {
-                        console.log("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
+                        console.error("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
                         permission.grant()
                     }
+
+                   onDesktopMediaRequested: (request) => {
+                       if (internal.shareFullScreen) {
+                           console.error("### send selectScreen(0)")
+                           request.selectScreen(request.screensModel.index(0, 0))
+                       } else {
+                           console.error("### send selectWindow(0)")
+                           request.selectWindow(request.windowsModel.index(0, 0))
+                       }
+                   }
 
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {

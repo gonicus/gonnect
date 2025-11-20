@@ -85,6 +85,8 @@
         <file alias="data-success.svg">../resources/artwork/icons/data-success.svg</file>
         <file alias="data-error.svg">../resources/artwork/icons/data-error.svg</file>
         <file alias="video-call.svg">../resources/artwork/icons/video-call.svg</file>
+        <file alias="window.svg">../resources/artwork/icons/window.svg</file>
+        <file alias="screen.svg">../resources/artwork/icons/screen.svg</file>
     </qresource>
     <qresource prefix="/icons/dark">
         <file alias="gonnect.svg">../resources/artwork/gonnect.svg</file>
@@ -144,5 +146,7 @@
         <file alias="data-success.svg">../resources/artwork/icons/data-success.svg</file>
         <file alias="data-error.svg">../resources/artwork/icons/data-error.svg</file>
         <file alias="video-call.svg">../resources/artwork/icons/dark/video-call.svg</file>
+        <file alias="window.svg">../resources/artwork/icons/dark/window.svg</file>
+        <file alias="screen.svg">../resources/artwork/icons/dark/screen.svg</file>
     </qresource>
 </RCC>
