@@ -133,7 +133,7 @@ Item {
             name: widgetName,
             page: page,
             posX: widgetX,
-            posY: widgetX,
+            posY: widgetY,
             sizeW: widgetWidth,
             sizeH: widgetHeight
         }

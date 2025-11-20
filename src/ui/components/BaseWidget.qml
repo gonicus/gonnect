@@ -69,11 +69,19 @@ Item {
 
         let minWidth = Number(control.wMin / page.gridWidth)
         let newWidth = Math.round(((control.root.width / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
-        control.root.width = newWidth < minWidth ? minWidth : newWidth
+        if (newWidth < minWidth) {
+            control.root.width = minWidth
+        } else {
+            control.root.width = newWidth
+        }
 
         let minHeight = Number(control.hMin / page.gridHeight)
         let newHeight = Math.round(((control.root.height / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
-        control.root.height = newHeight < minHeight ? minHeight : newHeight
+        if (newHeight < minHeight) {
+            control.root.height = minHeight
+        } else {
+            control.root.height = newHeight
+        }
 
         control.root.x = Math.round(((control.root.x / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
         control.root.x = Math.max(0, Math.min(control.root.x, page.gridWidth - control.root.width))
