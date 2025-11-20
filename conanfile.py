@@ -85,7 +85,7 @@ class GOnnectRecipe(ConanFile):
         self.requires("qca/2.3.10")
         self.requires("qtwebdav/3.19.0")
         self.requires("qtkeychain/0.15.0")
-        self.requires("libusb/1.0.26")
+        self.requires("libusb/1.0.29")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
