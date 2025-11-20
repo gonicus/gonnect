@@ -30,7 +30,7 @@ class QCA(ConanFile):
         if self.options.with_conan_qt:
             self.requires("qt/6.10.0")
 
-        self.requires("openssl/3.5.4")
+        self.requires("openssl/3.6.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -53,7 +53,7 @@ class PjSIPConan(ConanFile):
 
     def requirements(self):
         if self.settings.os != "Macos":
-            self.requires("openssl/3.5.4")
+            self.requires("openssl/3.6.0")
 
         if self.options.with_uuid:
             self.requires("libuuid/1.0.3")
