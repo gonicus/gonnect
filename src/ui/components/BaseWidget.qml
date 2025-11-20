@@ -62,12 +62,16 @@ Item {
         }
     }
 
+    // INFO: This function, unlike the others, does not depend on relative float scaling
+    // Old implementation that "mostly" worked: 487a071fb743c3e0275867c8db4723d33445026e
     function resize() {
         if (page.gridWidth <= 0 || page.gridHeight <= 0) {
             return
         }
 
-        let minWidth = Number(control.wMin / page.gridWidth)
+        console.error(name, "X,Y:", posX, posY, "W,H:", sizeW, sizeH, "(g) W,H:", page.oldGridWidth, page.oldGridHeight)
+
+        let minWidth = control.wMin
         let newWidth = Math.round(((control.root.width / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
         if (newWidth < minWidth) {
             control.root.width = minWidth
@@ -75,7 +79,7 @@ Item {
             control.root.width = newWidth
         }
 
-        let minHeight = Number(control.hMin / page.gridHeight)
+        let minHeight = control.hMin
         let newHeight = Math.round(((control.root.height / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
         if (newHeight < minHeight) {
             control.root.height = minHeight
@@ -88,10 +92,22 @@ Item {
 
         control.root.y = Math.round(((control.root.y / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
         control.root.y = Math.max(0, Math.min(control.root.y, page.gridHeight - control.root.height))
+
+        console.error(name, "X,Y:", posX, posY, "W,H:", sizeW, sizeH, "(g) W,H:", page.gridWidth, page.gridHeight, "(min) W,H:", minWidth, minHeight)
     }
 
     function makeOpaque(base : color, opacity : double) : color {
         return Qt.rgba(base.r, base.g, base.b, opacity)
+    }
+
+    Component.onCompleted: {
+        if (sizeW < wMin) {
+            sizeW = wMin
+        }
+
+        if (sizeH < hMin) {
+            sizeH = hMin
+        }
     }
 
     Connections {
