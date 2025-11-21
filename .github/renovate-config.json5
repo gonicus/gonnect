@@ -11,9 +11,11 @@
     repositories: [
         "gonicus/gonnect"
     ],
+    allowedCommands: [".+"],
     prConcurrentLimit: 0,
     prHourlyLimit: 5,
     semanticCommits: "enabled",
+    configMigration: true,
     packageRules: [
         {
             groupName: "github actions",
@@ -25,7 +27,21 @@
         },
         {
             "groupName": "conan dependencies",
-            "matchManagers": ["conan"]
+            "matchManagers": ["conan"],
+             postUpgradeTasks: {
+                // /conan/ is the mount point of resources/conan inside the renovate container of the branch this action is running in
+                // /tmp/renovate/repos/github/gonicus/gonnect/ is the branch renovate is using to check for updated (usually "main")
+                commands: [
+                    "GITHUB_ACTION=1 /conan/updater.py --renovate --verbose --dir=/tmp/renovate/repos/github/gonicus/gonnect/ --branch={{branchName}}"
+                ],
+                executionMode: "branch",
+                fileFilters: [
+                    "conanfile.py",
+                    "resources/conan/recipes/*/config.yml",
+                    "resources/conan/recipes/*/all/conandata.yml",
+                    "resources/conan/recipes/*/all/conanfile.py"
+                ]
+            },
         },
         {
             "matchPackageNames": [
@@ -56,7 +72,7 @@
     customManagers: [
         {
             customType: "regex",
-            fileMatch: [
+            managerFilePatterns: [
                 "^src/CMakeLists.txt$"
             ],
             matchStrings: [
@@ -68,7 +84,7 @@
         },
         {
             customType: "regex",
-            fileMatch: [
+            managerFilePatterns: [
                 "^src/CMakeLists.txt$"
             ],
             matchStrings: [
@@ -77,65 +93,8 @@
 	        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}'
         }
     ],
-    "customDatasources": {
-        "pjproject": {
-            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/379763",
-            "transformTemplates": [
-                '{"releases":[{\
-                    "version": $$.(stable_versions[0]),\
-                    "changelogUrl": $join(["https://github.com/", version_url, "/releases/tag/",data.stable_versions[0]]),\
-                    "sourceUrl": $join(["https://github.com/", version_url]),\
-                    "homepage": $$.(homepage)\
-                    }]\
-                }'
-            ]
-        },
-        "libical": {
-            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/1637",
-            "transformTemplates": [
-                '{"releases":[{\
-                    "version": $$.(stable_versions[0]),\
-                    "changelogUrl": $join(["https://github.com/", version_url, "/releases/tag/",data.stable_versions[0]]),\
-                    "sourceUrl": $join(["https://github.com/", version_url]),\
-                    "homepage": $$.(homepage)\
-                    }]\
-                }'
-            ]
-        },
-        "wintoast": {
-            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/386979",
-            "transformTemplates": [
-                '{"releases":[{\
-                    "version": $$.(stable_versions[0]),\
-                    "changelogUrl": $join(["https://github.com/", version_url, "/releases/tag/",data.stable_versions[0]]),\
-                    "sourceUrl": $join(["https://github.com/", version_url]),\
-                    "homepage": $$.(homepage)\
-                    }]\
-                }'
-            ]
-        },
-        "qca": {
-            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/13606",
-            "transformTemplates": [
-                '{"releases":[{\
-                    "version": $$.(stable_versions[0]),\
-                    "sourceUrl": $$.(version_url),\
-                    "homepage": $$.(homepage)\
-                    }]\
-                }'
-            ]
-        },
-        "qtkeychain": {
-            "defaultRegistryUrlTemplate": "https://release-monitoring.org/api/project/381807",
-            "transformTemplates": [
-                '{"releases":[{\
-                    "version": $$.(stable_versions[0]),\
-                    "changelogUrl": $join([homepage, "/releases/tag/", data.stable_versions[0]]),\
-                    "sourceUrl": $$.(homepage),\
-                    "homepage": $$.(homepage)\
-                    }]\
-                }'
-            ]
-        }
-    }
+    "logLevelRemap": [{
+        "matchMessage": "/^Executed post-upgrade task/",
+        "newLogLevel": "info"
+    }]
 }
