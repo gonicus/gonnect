@@ -13,10 +13,15 @@ on:
       - release
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   EXT_BASE: ${{github.workspace}}
+  QT_VERSION: '6.10.0'
 
 permissions:
   contents: read
@@ -25,7 +30,48 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    name: "Build GOnnect"
+    name: "Build GOnnect (Linux)"
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          submodules: 'recursive'
+
+      - name: Prepare
+        uses: ./.github/actions/prepare-linux
+
+      - name: Install Conan
+        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
+        with:
+          version: 2.22.2
+          cache_packages: true
+
+      - name: Install Conan dependencies
+        run: |
+          resources/conan/export.py
+          conan install . --build=missing
+
+      - name: Configure CMake
+        env:
+          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
+        run: cmake --preset conan-release . -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build --preset conan-release --parallel $(nproc --all)
+
+      - name: Upload Test artifacts
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: gonnect-tests
+          path: build/Release/tests/contactsTest
+          retention-days: 1
+
+  build-windows:
+    runs-on: windows-2025
+    name: "Build GOnnect (Windows)"
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -33,80 +79,170 @@ jobs:
           submodules: 'recursive'
 
       - name: Prepare
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-windows
+
+      - name: Install Conan
+        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
+        with:
+          version: 2.22.2
+          cache_packages: true
+
+      - name: Install Conan dependencies
+        shell: cmd
+        run: |
+          python resources\\conan\\export.py
+          conan install . --build=missing
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=ON -DBUILD_DEPENDENCIES=ON -DCMAKE_PREFIX_PATH="${{github.workspace}}/pjproject;${{github.workspace}}/qca/lib/cmake"
+        shell: cmd
+        run: cmake --preset conan-default
 
       - name: Build
-        # Build your program with the given configuration
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel $(nproc --all)
+        run: cmake --build --preset conan-release
 
-      - name: Upload Test artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+  build-macos:
+    runs-on: macos-26
+    name: "Build GOnnect (MacOS)"
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
-          name: gonnect-tests
-          path: build/tests/contactsTest
-          retention-days: 1
+          submodules: 'recursive'
+
+      - name: Prepare
+        uses: ./.github/actions/prepare-macos
+
+      - name: Install Conan
+        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
+        with:
+          version: 2.22.2
+          cache_packages: true
+
+      - name: Install Conan dependencies
+        run: |
+          resources/conan/export.py
+          conan install . --build=missing
+
+      - name: Configure CMake
+        run: cmake --preset conan-release
+
+      - name: Build
+        run: cmake --build --preset conan-release
 
   format:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - name: Run clang-format style check for C/C++/Protobuf programs.
-        uses: jidicula/clang-format-action@4726374d1aa3c6aecf132e5197e498979588ebc8 # v4.15.0
+        uses: jidicula/clang-format-action@6cd220de46c89139a0365edae93eee8eb30ca8fe # v4.16.0
         with:
           clang-format-version: '19'
           check-path: 'src'
 
   clang:
     runs-on: ubuntu-24.04
-    name: "Static Code Analyzer"    
+    name: "Static Code Analyzer"
+    env:
+      CC: clang
+      CXX: clang++
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           submodules: 'recursive'
-          
-      - name: Prepare
-        uses: ./.github/actions/prepare
 
-      - name: Run clang
+      - name: Prepare
+        uses: ./.github/actions/prepare-linux
+
+      - name: Install Conan
+        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
+        with:
+          version: 2.22.2
+          cache_packages: true
+
+      - name: Install Conan dependencies
+        run: |
+          resources/conan/export.py
+          conan install . --build=missing
+
+      - name: Run static analyzer
         shell: bash
+        env:
+          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
         run: |
           pip install scan-build
           export ANALYZE_ARGS="--exclude ${QT_ROOT_DIR} --exclude ${{github.workspace}}/external"
           scripts/static-clang-analyzer.sh
-      
+
       - name: Save Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: clang-report
           path: /tmp/build.log
-              
 
-#  clazy:
-#    runs-on: ubuntu-24.04
-#    #needs: build
-#    name: "Qt Semantics"
-#
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          submodules: 'recursive'
-#
-#      - name: Prepare
-#        uses: ./.github/actions/prepare
-#        with:
-#          for-clazy: 'true'             
-#
-#      - name: Run clazy
-#        shell: bash
-#        run: |
-#          find ~/.local/clazy/lib
-#          LD_LIBRARY_PATH=~/.local/clazy/lib scripts/static-clazy-analyzer.sh          
+  clazy:
+    runs-on: ubuntu-24.04
+    container: fedora:43
+    name: "Qt Semantics"
 
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf -y install git git-lfs clang clazy conan libnotify-devel libxkbfile libxcb-devel libXv-devel ninja-build alsa-lib-devel glew-devel \
+          libxcb-devel xcb-util-xrm-devel xcb-util-devel xcb-util-wm-devel xcb-util-image-devel xcb-util-cursor \
+          xcb-util-cursor-devel xcb-util-keysyms-devel xcb-util-renderutil-devel libusb1-devel hidapi-devel \
+          xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
+          libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
+          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA \
+          pip python3-devel
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Install qt
+        run: |
+          pip install aqtinstall
+          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ env.QT_VERSION }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
+          echo "PATH=$PATH:${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin" >> $GITHUB_ENV
+
+      - name: Prepare conan
+        shell: bash
+        id: conan-info
+        run: |
+          echo "conan-version=$(conan --version | cut -d' ' -f3)" >> $GITHUB_OUTPUT
+          echo "conan-home=$(conan config home)" >> $GITHUB_OUTPUT
+          conan profile detect || true
+
+      - name: Restore cached Conan packages
+        uses: actions/cache/restore@v4.2.3
+        id: cache-conan-packages
+        with:
+          path: ${{ steps.conan-info.outputs.conan-home }}/p
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-clazy
+
+      - name: Install Conan dependencies
+        run: |
+          resources/conan/export.py
+          conan install . --build=missing
+
+      - name: Cached Conan packages
+        uses: actions/cache/save@v4.2.3
+        if: always() && steps.cache-conan-packages.outputs.cache-hit != 'true'
+        with:
+          path: ${{ steps.conan-info.outputs.conan-home }}/p
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-clazy
+
+      - name: Run clazy
+        shell: bash
+        env:
+          PKG_CONFIG_PATH: /usr/lib64/pkgconfig
+          CC: clang
+          CXX: clang++
+
+        run: |
+          scripts/static-clazy-analyzer.sh
 
   tests:
     runs-on: ubuntu-24.04
@@ -114,15 +250,15 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Prepare
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-linux
         with:
           qt-only: 'true'
 
       - name: Download Test artifacts
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
         with:
           name: gonnect-tests
 

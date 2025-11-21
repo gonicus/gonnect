@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(GOnnect VERSION 2.1.0 LANGUAGES CXX)
+project(GOnnect VERSION 2.0.7 LANGUAGES CXX)
 include(cmake/CCache.cmake)
 useCompilerCache()
 
@@ -11,9 +11,19 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_UNITY_BUILD_BATCH_SIZE 10)
 set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
-option(BUILD_DEPENDENCIES "Build dependencies" OFF)
+list(PREPEND CMAKE_MODULE_PATH "${PROJECT_BINARY_DIR}/generators")
+list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/generators")
+
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)
+
+# Contacts / Calendar plugins
+option(ENABLE_AKONADI "Enable Akonadi plugins" OFF)
+option(ENABLE_EDS "Enable EDS plugins" ON)
+option(ENABLE_LDAP "Enable LDAP plugin" ON)
+option(ENABLE_DAV "Enable DAV plugin" ON)
+option(ENABLE_CSV "Enable CSV plugin" ON)
+option(ENABLE_MSGRAPH "Enable MS Graph plugin" ON)
 
 set(APP_ID "de.gonicus.gonnect")
 add_definitions(-DAPP_ID="${APP_ID}")
@@ -28,6 +38,10 @@ if(LINUX)
 
     add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-gnu-zero-variadic-macro-arguments)
     set(PLATFORM_QT_MODULES DBus)
+    set(ENABLE_MSGRAPH OFF)
+else()
+    set(ENABLE_AKONADI OFF)
+    set(ENABLE_EDS OFF)
 endif()
 if(WIN32)
     add_definitions(-DNOMINMAX)
@@ -80,4 +94,8 @@ if(LINUX)
     install(FILES resources/flatpak/de.gonicus.gonnect.releases.xml DESTINATION share/metainfo/releases)
     install(FILES resources/flatpak/de.gonicus.gonnect.service DESTINATION share/dbus-1/services)
     install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
+endif()
+
+if(APPLE)
+    set_target_properties(gonnect PROPERTIES MACOSX_BUNDLE TRUE)
 endif()

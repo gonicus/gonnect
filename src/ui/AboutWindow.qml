@@ -38,7 +38,7 @@ BaseWindow {
 
             property string homePageURL: "https://gonnect.gonicus.de"
             property string issueTrackerURL: "https://github.com/gonicus/gonnect/issues"
-            property string documentationURL: "https://github.com/gonicus/gonnect/wiki"
+            property string documentationURL: "https://docs.gonicus.de/"
         }
 
         Image {

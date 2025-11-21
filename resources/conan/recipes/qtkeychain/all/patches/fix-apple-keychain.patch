@@ -1,0 +1,19 @@
+diff -Naur a/qtkeychain/keychain_apple.mm b/qtkeychain/keychain_apple.mm
+--- a/qtkeychain/keychain_apple.mm	2025-01-16 12:53:01
++++ b/qtkeychain/keychain_apple.mm	2025-11-13 15:44:41
+@@ -106,11 +106,10 @@
+ 
+ - (void)keychainReadTaskFinished:(NSData *)retrievedData
+ {
+-    _privateJob->data.clear();
+-    _privateJob->mode = JobPrivate::Binary;
+-
+-    if (retrievedData != nil) {
+-        if (_privateJob) {
++    if (_privateJob) {
++        _privateJob->data.clear();
++        _privateJob->mode = JobPrivate::Binary;
++        if (retrievedData != nil) {
+             _privateJob->data = QByteArray::fromNSData(retrievedData);
+         }
+     }

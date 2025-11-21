@@ -6,6 +6,7 @@
 #include "LDAPInitializer.h"
 
 class AddressBookManager;
+class Contact;
 
 class LDAPAddressBookFeeder : public QObject, public IAddressBookFeeder
 {
@@ -22,6 +23,8 @@ private:
     void init(const LDAPInitializer::Config &ldapConfig,
               QStringList sipStatusSubscriptableAttributes = {}, const QString &baseNumber = "");
     void feedAddressBook();
+    void loadAvatars(const QList<const Contact *> &contacts);
+    void loadAllAvatars(const LDAPInitializer::Config &ldapConfig);
     void processImpl(const QString &password);
 
     LDAPInitializer::Config m_ldapConfig;
