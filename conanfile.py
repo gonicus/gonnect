@@ -81,15 +81,15 @@ class GOnnectRecipe(ConanFile):
             self.requires("mpg123/1.33.0", override=True)
             self.requires("wayland/1.23.92", override=True)
 
-        self.requires("openssl/3.5.4", override=True)
+        self.requires("openssl/3.6.0", override=True)
         self.requires("qca/2.3.10")
         self.requires("qtwebdav/3.19.0")
         self.requires("qtkeychain/0.15.0")
-        self.requires("libusb/1.0.26")
+        self.requires("libusb/1.0.29")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.5.1")
 
     def configure(self):
         self.options["*/*"].shared = False
