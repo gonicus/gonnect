@@ -1,3 +1,8 @@
 versions:
   "0.15.0":
     folder: all
+
+updater:
+  source: anitya
+  id: 5594
+  url-pattern: https://github.com/libusb/hidapi/archive/refs/tags/hidapi-${version}.tar.gz
