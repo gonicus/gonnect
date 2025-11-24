@@ -92,6 +92,11 @@ ListView {
             delg.isCurrentlyTakingPlace = delg.dateTime.getTime() < now.getTime() && now.getTime() < delg.endDateTime.getTime()
         }
 
+        function updateRoom(roomName : string) {
+            delg.roomName = roomName
+            delg.isJitsiMeeting = true
+        }
+
         Connections {
             target: internal
             function onMinuteTick() {
@@ -154,6 +159,13 @@ ListView {
         }
 
         Component {
+            id: roomCreationComponent
+            RoomCreationWindow {
+                dateEventDelegate: delg
+            }
+        }
+
+        Component {
             id: dateEventContextMenuComponent
 
             Menu {
@@ -163,8 +175,7 @@ ListView {
                         if (delg.isJitsiMeeting) {
                             ViewHelper.requestMeeting(delg.roomName)
                         } else {
-                            // TODO: Roon naming popup?
-                            ViewHelper.requestMeeting("")
+                            roomCreationComponent.createObject(control).show()
                         }
                     }
                 }
