@@ -1,0 +1,7 @@
+argparse
+colorlog
+requests
+requests-cache
+pyyaml
+semver
+sh
