@@ -123,7 +123,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             // Location
             QString location = icalcomponent_get_location(event);
             QString jitsiRoom = manager.getJitsiRoomFromLocation(location);
-            bool isJitsiMeeting = location.isEmpty();
+            bool isJitsiMeeting = !location.isEmpty();
             if (isJitsiMeeting) {
                 location = jitsiRoom;
             }

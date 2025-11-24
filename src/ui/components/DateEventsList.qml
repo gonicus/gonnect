@@ -72,7 +72,7 @@ ListView {
         required property date endDateTime
         required property string summary
         required property string roomName
-        required property bool isConfirmed
+        required property bool isJitsiMeeting
 
         property bool isToday
         property bool isInPast
@@ -158,8 +158,15 @@ ListView {
 
             Menu {
                 Action {
-                    text: qsTr('Join')
-                    onTriggered: () => ViewHelper.requestMeeting(delg.roomName)
+                    text: delg.isJitsiMeeting ? qsTr('Join meeting') : qsTr('Create meeting')
+                    onTriggered: () => {
+                        if (delg.isJitsiMeeting) {
+                            ViewHelper.requestMeeting(delg.roomName)
+                        } else {
+                            // TODO: Roon naming popup?
+                            ViewHelper.requestMeeting("")
+                        }
+                    }
                 }
 
                 Action {
