@@ -116,17 +116,12 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 rrule = icalproperty_get_rrule(prop);
             }
 
-            // Beginning
             icaltimetype dtstart = icalcomponent_get_dtstart(event);
             QDateTime start = createDateTimeFromTimeType(dtstart);
 
             // Location
-            QString location = icalcomponent_get_location(event);
-            QString jitsiRoom = manager.getJitsiRoomFromLocation(location);
-            bool isJitsiMeeting = !location.isEmpty();
-            if (isJitsiMeeting) {
-                location = jitsiRoom;
-            }
+            QString location = manager.getJitsiRoomFromLocation(icalcomponent_get_location(event));
+            bool isNoJitsiMeeting = location.isEmpty();
 
             // Status filter
             icalproperty_status status = icalcomponent_get_status(event);
@@ -135,7 +130,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                                 || status == ICAL_STATUS_DELETED);
 
             // Skip non-recurrent events that are outside of our date range
-            if (isCancelled
+            if (isNoJitsiMeeting || isCancelled
                 || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd)
                     && !isRecurrent)) {
                 continue;
@@ -185,7 +180,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                             QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
                             manager.addDateEvent(new DateEvent(nid, m_config.source, recur,
                                                                recur.addMSecs(duration), summary,
-                                                               location, isJitsiMeeting));
+                                                               location));
                         }
                     }
 
@@ -194,11 +189,10 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             } else {
                 // Non-recurrent event or update of a recurrent event instance
                 if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
-                    manager.modifyDateEvent(id, m_config.source, start, end, summary, location,
-                                            isJitsiMeeting);
+                    manager.modifyDateEvent(id, m_config.source, start, end, summary, location);
                 } else {
                     manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                       location, isJitsiMeeting));
+                                                       location));
                 }
             }
         }

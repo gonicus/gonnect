@@ -116,15 +116,17 @@ void AkonadiEventFeeder::processCollections(KJob *job)
 
                         QDateTime start = event->dtStart().toLocalTime();
 
+                        // Location
                         QString location = manager.getJitsiRoomFromLocation(event->location());
-                        bool isRelevantStatus =
+                        bool isNoJitsiMeeting = location.isEmpty();
+
+                        // Status filter
+                        bool isCancelled =
                                 (event->status()
-                                         == KCalendarCore::Incidence::Status::StatusConfirmed
-                                 || event->status()
-                                         == KCalendarCore::Incidence::Status::StatusNone);
+                                         == KCalendarCore::Incidence::Status::StatusCanceled);
 
                         // Skip non-recurrent events that are outside of our date range
-                        if (!isRelevantStatus || location.isEmpty()
+                        if (isNoJitsiMeeting || isCancelled
                             || ((start < m_timeRangeStart || start > m_timeRangeEnd)
                                 && !isRecurrent)) {
                             continue;
@@ -166,17 +168,16 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                             QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
                                     manager.addDateEvent(new DateEvent(nid, m_source, recur,
                                                                        recur.addMSecs(duration),
-                                                                       summary, location, true));
+                                                                       summary, location));
                                 }
                             }
                         } else {
                             // Non-recurrent event or update of a recurrent event instance
                             if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
-                                manager.modifyDateEvent(id, m_source, start, end, summary, location,
-                                                        true);
+                                manager.modifyDateEvent(id, m_source, start, end, summary, location);
                             } else {
                                 manager.addDateEvent(new DateEvent(id, m_source, start, end,
-                                                                   summary, location, true));
+                                                                   summary, location));
                             }
                         }
                     }

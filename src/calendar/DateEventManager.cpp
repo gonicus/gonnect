@@ -100,8 +100,7 @@ void DateEventManager::addDateEvent(DateEvent *dateEvent)
 
 void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
                                        const QDateTime &start, const QDateTime &end,
-                                       const QString &summary, const QString &roomName,
-                                       bool isJitsiMeeting)
+                                       const QString &summary, const QString &roomName)
 {
     QMutexLocker lock(&m_feederMutex);
 
@@ -115,7 +114,6 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
             event->setEnd(end);
             event->setSummary(summary);
             event->setRoomName(roomName);
-            event->setIsJitsiMeeting(isJitsiMeeting);
         }
     }
 

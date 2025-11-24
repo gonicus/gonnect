@@ -4,15 +4,14 @@
 
 DateEvent::DateEvent(const QString &id, const QString &source, const QDateTime &start,
                      const QDateTime &end, const QString &summary, const QString &roomName,
-                     bool isJitsiMeeting, QObject *parent)
+                     QObject *parent)
     : QObject{ parent },
       m_id{ id },
       m_source{ source },
       m_start{ start },
       m_end{ end },
       m_summary{ summary },
-      m_roomName{ roomName },
-      m_isJitsiMeeting{ isJitsiMeeting }
+      m_roomName{ roomName }
 {
 }
 
@@ -46,11 +45,6 @@ void DateEvent::setRoomName(const QString &roomName)
     m_roomName = roomName;
 }
 
-void DateEvent::setIsJitsiMeeting(bool isJitsiMeeting)
-{
-    m_isJitsiMeeting = isJitsiMeeting;
-}
-
 size_t DateEvent::getHash()
 {
     size_t sum = 0;
@@ -71,7 +65,6 @@ QDebug operator<<(QDebug debug, const DateEvent &dateEvent)
                               << "end=" << dateEvent.end() << ","
                               << "roomName=" << dateEvent.roomName() << ","
                               << "summary=" << dateEvent.summary() << ","
-                              << "isJitsiMeeting=" << dateEvent.isJitsiMeeting() << ","
                               << "source=" << dateEvent.source() << ")";
     return debug;
 }

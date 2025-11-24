@@ -75,9 +75,9 @@ void EDSEventFeeder::init()
     }
 
     // Calendar event search filter, covers STATUS component
-    // Info: "NOT STARTED" == I_CAL_STATUS_NONE
-    m_searchExpr = g_strdup(
-            "(or (contains? \"status\" \"CONFIRMED\") (contains? \"status\" \"NOT STARTED\"))");
+    m_searchExpr = g_strdup("(or (not (contains? \"status\" \"CANCELLED\"))"
+                            "(not (contains? \"status\" \"FAILED\"))"
+                            "(not (contains? \"status\" \"DELETED\")))");
 
     // Clients and signals
     m_sourcePromise = new QPromise<void>();
@@ -361,11 +361,12 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             ICalTime *dtstart = i_cal_component_get_dtstart(component);
             QDateTime start = createDateTimeFromTimeType(dtstart);
 
-            QString location =
-                    manager.getJitsiRoomFromLocation(i_cal_component_get_location(component));
+            // Location
+            QString location = manager.getJitsiRoomFromLocation(i_cal_component_get_location(component));
+            bool isNoJitsiMeeting = location.isEmpty();
 
             // Skip non-recurrent events that are outside of our date range
-            if (location.isEmpty()
+            if (isNoJitsiMeeting
                 || ((start < m_timeRangeStart || start > m_timeRangeEnd) && !isRecurrent)) {
                 continue;
             }
@@ -415,7 +416,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                             QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
                             manager.addDateEvent(new DateEvent(nid, concreteSource, recur,
                                                                recur.addMSecs(duration), summary,
-                                                               location, true));
+                                                               location));
                         }
                     }
 
@@ -424,11 +425,10 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             } else {
                 // Non-recurrent event or update of a recurrent event instance
                 if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
-                    manager.modifyDateEvent(id, concreteSource, start, end, summary, location,
-                                            true);
+                    manager.modifyDateEvent(id, concreteSource, start, end, summary, location);
                 } else {
-                    manager.addDateEvent(
-                            new DateEvent(id, concreteSource, start, end, summary, location, true));
+                    manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
+                                                       location));
                 }
             }
         }

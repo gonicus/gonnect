@@ -72,7 +72,6 @@ ListView {
         required property date endDateTime
         required property string summary
         required property string roomName
-        required property bool isJitsiMeeting
 
         property bool isToday
         property bool isInPast
@@ -90,11 +89,6 @@ ListView {
             delg.isToday = ViewHelper.isToday(delg.dateTime)
             delg.isInPast = delg.endDateTime.getTime() < now.getTime()
             delg.isCurrentlyTakingPlace = delg.dateTime.getTime() < now.getTime() && now.getTime() < delg.endDateTime.getTime()
-        }
-
-        function updateRoom(roomName : string) {
-            delg.roomName = roomName
-            delg.isJitsiMeeting = true
         }
 
         Connections {
@@ -159,25 +153,12 @@ ListView {
         }
 
         Component {
-            id: roomCreationComponent
-            RoomCreationWindow {
-                dateEventDelegate: delg
-            }
-        }
-
-        Component {
             id: dateEventContextMenuComponent
 
             Menu {
                 Action {
-                    text: delg.isJitsiMeeting ? qsTr('Join meeting') : qsTr('Create meeting')
-                    onTriggered: () => {
-                        if (delg.isJitsiMeeting) {
-                            ViewHelper.requestMeeting(delg.roomName)
-                        } else {
-                            roomCreationComponent.createObject(control).show()
-                        }
-                    }
+                    text: qsTr('Join')
+                    onTriggered: () => ViewHelper.requestMeeting(delg.roomName)
                 }
 
                 Action {
