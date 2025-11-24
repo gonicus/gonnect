@@ -116,15 +116,26 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 rrule = icalproperty_get_rrule(prop);
             }
 
+            // Beginning
             icaltimetype dtstart = icalcomponent_get_dtstart(event);
             QDateTime start = createDateTimeFromTimeType(dtstart);
 
-            QString location = manager.getJitsiRoomFromLocation(icalcomponent_get_location(event));
-            bool isRelevantStatus = (icalcomponent_get_status(event) == ICAL_STATUS_CONFIRMED
-                                     || icalcomponent_get_status(event) == ICAL_STATUS_NONE);
+            // Location
+            QString location = icalcomponent_get_location(event);
+            QString jitsiRoom = manager.getJitsiRoomFromLocation(location);
+            bool isJitsiMeeting = location.isEmpty();
+            if (isJitsiMeeting) {
+                location = jitsiRoom;
+            }
+
+            // Status filter
+            icalproperty_status status = icalcomponent_get_status(event);
+            bool isCancelled = (status == ICAL_STATUS_CANCELLED
+                                || status == ICAL_STATUS_FAILED
+                                || status == ICAL_STATUS_DELETED);
 
             // Skip non-recurrent events that are outside of our date range
-            if (!isRelevantStatus || location.isEmpty()
+            if (isCancelled
                 || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd)
                     && !isRecurrent)) {
                 continue;
@@ -174,7 +185,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                             QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
                             manager.addDateEvent(new DateEvent(nid, m_config.source, recur,
                                                                recur.addMSecs(duration), summary,
-                                                               location, true));
+                                                               location, isJitsiMeeting));
                         }
                     }
 
@@ -184,10 +195,10 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 // Non-recurrent event or update of a recurrent event instance
                 if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
                     manager.modifyDateEvent(id, m_config.source, start, end, summary, location,
-                                            true);
+                                            isJitsiMeeting);
                 } else {
                     manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                       location, true));
+                                                       location, isJitsiMeeting));
                 }
             }
         }

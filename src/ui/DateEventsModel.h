@@ -16,7 +16,7 @@ public:
         EndDateTime,
         Summary,
         RoomName,
-        IsConfirmed
+        IsJitsiMeeting
     };
 
     explicit DateEventsModel(QObject *parent = nullptr);
