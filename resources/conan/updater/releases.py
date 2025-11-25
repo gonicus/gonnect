@@ -4,6 +4,7 @@ import requests
 import requests_cache
 import re
 import hashlib
+import dateutil.parser as parser
 from string import Template
 from typing import Optional
 from .logger import logger
@@ -47,6 +48,27 @@ def fix_version(version: str) -> str:
         if m:
             # 20250930 -> 2025.09.30
             base_version = f"{m.group(1)}.{m.group(2)}.{m.group(3)}"
+            skip = True
+
+    if not skip:
+        m = re.match(r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z?$", base_version)
+        if m:
+            # ISO date
+            base_version = f"{m.group(1)}.{m.group(2)}.{m.group(3)}"
+            seconds_of_day = int(m.group(4)) * 3600 + int(m.group(5)) * 60 + int(m.group(6))
+            build_no_suffix = "+" + str(seconds_of_day)
+            skip = True
+
+    if not skip:
+        # try to parse as date
+        try:
+            date = parser.parse(base_version)
+            base_version = f"{date.year}.{date.month}.{date.day}"
+            seconds_of_day = date.hour * 3600 + date.minute * 60 + date.second
+            build_no_suffix = "+" + str(seconds_of_day)
+        except parser.ParserError as e:
+            logger.warn(f"could not parse {base_version} as date: {e}")
+
 
     # leading zeros, e.g. 1.1.05
     base_version = re.sub(r"\.0+(\d+)", r".\1", base_version)
@@ -114,7 +136,10 @@ class Release:
                         parts += [0] * (3 - len(parts)) # fill up missing numbers
                         self.semver_version = semver.Version(*parts)
             else:
-                version = fix_version(self.version)
+                version = self.version
+                if "prefix" in self.config and version.startswith(self.config["prefix"]):
+                    version = version[len(self.config["prefix"]):]
+                version = fix_version(version)
                 if semver.Version.is_valid(version):
                     self.semver_version = semver.Version.parse(version)
         if self.semver_version is None:
@@ -209,6 +234,8 @@ class GithubRelease(Release):
         if self._download_url is None:
             if "zipball_url" in self.payload:
                 self._download_url = self.payload["zipball_url"]
+            elif "sha" in self.payload:
+                self._download_url = self.payload["sha"]
             else:
                 self._download_url = ""
         return self._download_url
@@ -219,6 +246,8 @@ class GithubRelease(Release):
             if "commit" in self.payload:
                 # only available for tags
                 self._hash = self.payload["commit"]["sha"]
+            elif "sha" in self.payload:
+                self._hash = self.payload["sha"]
             else:
                 # for releases we only have the tag name
                 self._hash = ""
@@ -316,41 +345,53 @@ def get_latest_release_anitya(config: dict, current_release: Release, locked, pr
     return None
 
 def get_latest_release_github(config : dict, current_release: Release, locked, pre_releases=None, use_tags=True) -> Optional[Release]:
-    r = s.get(f'https://api.github.com/repos/{config["id"]}/{"tags" if use_tags else "releases"}',
+    mode = "tags" if use_tags else "releases"
+    if "branch" in config:
+        # check for new commits in branch
+        url = f'https://api.github.com/repos/{config["id"]}/commits/{config["branch"]}'
+        use_tags = False
+        mode = "commits"
+    else:
+        url = f'https://api.github.com/repos/{config["id"]}/{mode}'
+
+    r = s.get(url,
               headers={
                   "Accept": "application/vnd.github+json"
               })
     if r.status_code == requests.codes.ok:
         data = r.json()
-        if len(data) == 0 and use_tags:
-            return get_latest_release_github(config, current_release, locked, pre_releases, False)
-
-        tag_property = "name" if use_tags else "tag_name"
-
-        if pre_releases is None:
-            pre_releases = config["preReleases"] if "preReleases" in config else False
-        releases = map(lambda x: GithubRelease(x[tag_property], config, x), data)
-        # sort by version descending
-        releases = sorted(list(releases), reverse=True)
-        if locked is False:
-            if pre_releases:
-                return releases[0]
-            else:
-                for release in releases:
-                    if release.is_prerelease is False:
-                        return release
+        if mode == "commits":
+            return GithubRelease(data["commit"]["author"]["date"].split("T")[0], config, data)
         else:
-            current = current_release.semver()
-            for release in releases:
-                if not pre_releases and release.is_prerelease is True:
-                    continue
+            if len(data) == 0 and mode == "tags":
+                return get_latest_release_github(config, current_release, locked, pre_releases, False)
 
-                if locked == "minor":
-                    if current.major == release.major:
-                        return release
-                elif locked == "patch":
-                    if current.major == release.major and current.minor == release.minor:
-                        return release
+            tag_property = "name" if use_tags else "tag_name"
+
+            if pre_releases is None:
+                pre_releases = config["preReleases"] if "preReleases" in config else False
+            releases = map(lambda x: GithubRelease(x[tag_property], config, x), data)
+            # sort by version descending
+            releases = sorted(list(releases), reverse=True)
+            if locked is False:
+                if pre_releases:
+                    return releases[0]
+                else:
+                    for release in releases:
+                        if release.is_prerelease is False:
+                            return release
+            else:
+                current = current_release.semver()
+                for release in releases:
+                    if not pre_releases and release.is_prerelease is True:
+                        continue
+
+                    if locked == "minor":
+                        if current.major == release.major:
+                            return release
+                    elif locked == "patch":
+                        if current.major == release.major and current.minor == release.minor:
+                            return release
 
     return None
 
