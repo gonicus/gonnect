@@ -74,10 +74,8 @@ void EDSEventFeeder::init()
         return;
     }
 
-    // Calendar event search filter, covers STATUS component
-    m_searchExpr = g_strdup("(or (not (contains? \"status\" \"CANCELLED\"))"
-                            "(not (contains? \"status\" \"FAILED\"))"
-                            "(not (contains? \"status\" \"DELETED\")))");
+    // Calendar event search filter, covers LOCATION component
+    m_searchExpr = g_strdup("(and (is-not-null? \"LOCATION\") (not (contains? \"LOCATION\" "")))");
 
     // Clients and signals
     m_sourcePromise = new QPromise<void>();
@@ -365,8 +363,14 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             QString location = manager.getJitsiRoomFromLocation(i_cal_component_get_location(component));
             bool isNoJitsiMeeting = location.isEmpty();
 
+            // Status filter
+            ICalPropertyStatus status = i_cal_component_get_status(component);
+            bool isCancelled = (status == I_CAL_STATUS_CANCELLED
+                                || status == I_CAL_STATUS_FAILED
+                                || status == I_CAL_STATUS_DELETED);
+
             // Skip non-recurrent events that are outside of our date range
-            if (isNoJitsiMeeting
+            if (isNoJitsiMeeting || isCancelled
                 || ((start < m_timeRangeStart || start > m_timeRangeEnd) && !isRecurrent)) {
                 continue;
             }
