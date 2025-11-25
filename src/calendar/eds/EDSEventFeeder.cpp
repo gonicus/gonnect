@@ -371,7 +371,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                                 || status == I_CAL_STATUS_DELETED);
 
             // Skip non-recurrent events that are outside of our date range
-            if (isNoJitsiMeeting || isCancelled
+            if (isNoJitsiMeeting //|| isCancelled
                 || ((start < m_timeRangeStart || start > m_timeRangeEnd) && !isRecurrent)) {
                 continue;
             }
@@ -429,7 +429,11 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 }
             } else {
                 // Non-recurrent event or update of a recurrent event instance
-                if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
+                if (isCancelled) {
+                    if (manager.isAddedDateEvent(id)) {
+                        manager.removeDateEvent(id);
+                    }
+                } else if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
                     manager.modifyDateEvent(id, concreteSource, start, end, summary, location);
                 } else {
                     manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,

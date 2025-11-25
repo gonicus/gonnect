@@ -130,7 +130,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                                 || status == ICAL_STATUS_DELETED);
 
             // Skip non-recurrent events that are outside of our date range
-            if (isNoJitsiMeeting || isCancelled
+            if (isNoJitsiMeeting //|| isCancelled
                 || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd)
                     && !isRecurrent)) {
                 continue;
@@ -188,9 +188,13 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 }
             } else {
                 // Non-recurrent event or update of a recurrent event instance
-                if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
+                if (isCancelled) {
+                    if (manager.isAddedDateEvent(id)) {
+                        manager.removeDateEvent(id);
+                    }
+                } else if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
                     manager.modifyDateEvent(id, m_config.source, start, end, summary, location);
-                } else {
+                }else {
                     manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
                                                        location));
                 }
