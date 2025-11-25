@@ -74,8 +74,9 @@ void EDSEventFeeder::init()
         return;
     }
 
-    // Calendar event search filter, covers LOCATION component
-    m_searchExpr = g_strdup("(and (is-not-null? \"LOCATION\") (not (contains? \"LOCATION\" "")))");
+    // Calendar event search filter, covers DTSTART component
+    // INFO: This is done because the @sexp literally cannot be empty or NULL...
+    m_searchExpr = g_strdup("(has-start?)");
 
     // Clients and signals
     m_sourcePromise = new QPromise<void>();
