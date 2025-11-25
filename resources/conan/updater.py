@@ -40,7 +40,6 @@ class Conan:
     def create(self, name, content):
         dep = Dependency(name, content, recipes_dir=self._recipes_dir, suffix=PACKAGE_SUFFIX)
         dep.logger.setLevel(log_level)
-        logger.info(f"{dep} created [{dep.logger.level}]")
         self.dependencies[name] = dep
         return dep
 
@@ -96,7 +95,7 @@ class Conan:
                                 dep.check(locked, pre_releases, force)
                                 if dep.changed and dep.name in tool_requires:
                                     tool_requirement_changed.append(dep.name)
-                    else:
+                    elif "system" not in content["versions"].keys():
                         logger.warning(f"no updater section in {path}")
 
                 except yaml.YAMLError as exc:
