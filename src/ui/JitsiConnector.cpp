@@ -161,6 +161,8 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     if (settings.value("generic/jitsiChatAsNotifications", true).toBool()) {
         auto notification = new Notification(tr("New chat message"), message,
                                              Notification::Priority::normal, this);
+        notification->setIcon("dialog-information");
+
         m_chatNotifications.append(notification);
         NotificationManager::instance().add(notification);
 
@@ -1166,6 +1168,7 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
                                                | Notification::hideContentOnLockScreen);
     m_inConferenceNotification->setCategory("call.ongoing");
     m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
+    m_inConferenceNotification->setIcon("dialog-information");
 
     QString ref = NotificationManager::instance().add(m_inConferenceNotification);
     connect(m_inConferenceNotification, &Notification::actionInvoked, this,

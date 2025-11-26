@@ -13,7 +13,6 @@ NotificationManager &NotificationManager::instance()
 
 LinuxNotificationManager::LinuxNotificationManager() : NotificationManager()
 {
-    notify_get_server_info(NULL, NULL, NULL, NULL);
     notify_init(qAppName().toStdString().c_str());
 }
 
