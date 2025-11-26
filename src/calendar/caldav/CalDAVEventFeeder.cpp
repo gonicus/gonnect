@@ -194,7 +194,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                     }
                 } else if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
                     manager.modifyDateEvent(id, m_config.source, start, end, summary, location);
-                }else {
+                } else {
                     manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
                                                        location));
                 }

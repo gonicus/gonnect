@@ -357,6 +357,17 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 g_clear_object(&prop);
             }
 
+            QString id = i_cal_component_get_uid(component);
+
+            // RID: The first ever recorded time of a recurrent event instance. We'll use
+            // 'UID-UNIX_TIMESTAMP' as ID.
+            bool isUpdatedRecurrence = false;
+            ICalTime *rid = i_cal_component_get_recurrenceid(component);
+            if (rid && !i_cal_time_is_null_time(rid)) {
+                isUpdatedRecurrence = true;
+                id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+            }
+
             ICalTime *dtstart = i_cal_component_get_dtstart(component);
             QDateTime start = createDateTimeFromTimeType(dtstart);
 
@@ -372,24 +383,15 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
             // Skip non-recurrent events that are outside of our date range
             if (isNoJitsiMeeting //|| isCancelled
-                || ((start < m_timeRangeStart || start > m_timeRangeEnd) && !isRecurrent)) {
+                || ((start < m_timeRangeStart || start > m_timeRangeEnd)
+                    && !isRecurrent && !isUpdatedRecurrence)) {
                 continue;
             }
 
             ICalTime *dtend = i_cal_component_get_dtend(component);
             QDateTime end = createDateTimeFromTimeType(dtend);
 
-            QString id = i_cal_component_get_uid(component);
             QString summary = i_cal_component_get_summary(component);
-
-            // RID: The first ever recorded time of a recurrent event instance. We'll use
-            // 'UID-UNIX_TIMESTAMP' as ID.
-            bool isUpdatedRecurrence = false;
-            ICalTime *rid = i_cal_component_get_recurrenceid(component);
-            if (rid && !i_cal_time_is_null_time(rid)) {
-                isUpdatedRecurrence = true;
-                id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
-            }
 
             // Get EXDATE's
             ICalTime *exdate = nullptr;
@@ -429,8 +431,9 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 }
             } else {
                 // Non-recurrent event or update of a recurrent event instance
-                if (isCancelled) {
+                if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd) {
                     if (manager.isAddedDateEvent(id)) {
+                        // Updated recurrence doesn't match our criteria
                         manager.removeDateEvent(id);
                     }
                 } else if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
