@@ -14,6 +14,11 @@ set(CPACK_PACKAGE_VERSION_PATCH "7")
 if(WIN32)
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}/resources/artwork/gonnect.ico")
+
+    if($ENV{NSIS_USE_FAST_COMPRESSION} STREQUAL "1")
+        set(CPACK_NSIS_COMPRESSOR ZLIB)
+    endif()
+
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
 endif()
