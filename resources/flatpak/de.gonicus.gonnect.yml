@@ -6,6 +6,14 @@ base: io.qt.qtwebengine.BaseApp
 base-version: '6.10'
 command: gonnect
 
+add-extensions:
+  de.gonicus.gonnect.plugin:
+    version: "2"
+    directory: plugins
+    subdirectories: true
+    no-autodownload: true
+    autodelete: true
+
 finish-args:
   - --env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess
   - --device=all
@@ -68,12 +76,12 @@ modules:
       - --disable-video
       - --enable-ext-sound
       - --with-opus
-      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1
+      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1 -DPJSIP_MAX_PKT_LEN=5000
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
-        tag: 2.15.1
-        commit: 7de6e686fee1642f5443a3f39f0e5ad5e478a117
+        tag: "2.16"
+        commit: 6cab30cec44af36ba7c8a45ff7af2f74a8ed288c
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
@@ -243,3 +251,4 @@ modules:
 
 cleanup-commands:
   - /app/cleanup-BaseApp.sh
+  - mkdir -p ${FLATPAK_DEST}/plugins
