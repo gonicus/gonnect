@@ -132,10 +132,15 @@ qt_add_big_resources(APP_SOURCES application.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
 qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
 
-qt_add_executable(gonnect WIN32 MACOSX_BUNDLE
+qt_add_executable(gonnect
     ${APP_SOURCES}
     ${DBUS_SOURCES}
     ${app_icon_macos}
+)
+
+set_target_properties(gonnect PROPERTIES
+    WIN32_EXECUTABLE TRUE
+    MACOSX_BUNDLE TRUE
 )
 
 set(gonnect_qml_singletons
