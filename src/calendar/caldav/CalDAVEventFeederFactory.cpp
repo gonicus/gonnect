@@ -30,8 +30,9 @@ QStringList CalDAVEventFeederFactory::configurations() const
 }
 
 IDateEventFeeder *CalDAVEventFeederFactory::createFeeder(
-        const QString &settingsGroup, const QDateTime &timeRangeStart,
-        const QDateTime &timeRangeEnd, DateEventFeederManager *feederManager) const
+        const QString &settingsGroup, const QDateTime &currentTime,
+        const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd,
+        DateEventFeederManager *feederManager) const
 {
     ReadOnlyConfdSettings settings;
     settings.beginGroup(settingsGroup);
@@ -41,5 +42,5 @@ IDateEventFeeder *CalDAVEventFeederFactory::createFeeder(
             { settingsGroup, name(), settings.value("host").toString(),
               settings.value("path").toString(), settings.value("user").toString(),
               settings.value("port", 0).toInt(), settings.value("useSSL", true).toBool(),
-              settings.value("interval", 300000).toInt(), timeRangeStart, timeRangeEnd });
+              settings.value("interval", 300000).toInt(), currentTime, timeRangeStart, timeRangeEnd });
 }

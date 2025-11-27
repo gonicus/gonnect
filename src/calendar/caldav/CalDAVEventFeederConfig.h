@@ -14,6 +14,7 @@ struct CalDAVEventFeederConfig
     int port;
     bool useSSL;
     int interval;
+    QDateTime currentTime;
     QDateTime timeRangeStart;
     QDateTime timeRangeEnd;
 };

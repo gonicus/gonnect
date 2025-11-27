@@ -100,8 +100,6 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
 {
     DateEventManager &manager = DateEventManager::instance();
 
-    QDateTime currentTime = QDateTime::currentDateTime();
-
     icalcomponent *calendar = icalparser_parse_string(data.toStdString().data());
     if (calendar) {
         // VEVENT's
@@ -148,7 +146,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             // as well as any events without a jitsi meeting as a location
             if (isNoJitsiMeeting
                 || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd
-                     || end < currentTime || isCancelled)
+                     || end < m_config.currentTime || isCancelled)
                     && !isRecurrent && !isUpdatedRecurrence)) {
                 continue;
             }
@@ -177,8 +175,10 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                          next = icalrecur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
                         QDateTime recurEnd = recurStart.addMSecs(duration);
-                        if (recurStart > m_config.timeRangeEnd || recurEnd < currentTime) {
+                        if (recurStart > m_config.timeRangeEnd) {
                             break;
+                        } else if (recurEnd < m_config.currentTime) {
+                            continue;
                         }
 
                         if (!exdates.contains(recurStart)
@@ -195,7 +195,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             } else if (isUpdatedRecurrence) {
                 // Updates of a recurrent event instance
                 if (isCancelled || start < m_config.timeRangeStart || start > m_config.timeRangeEnd
-                    || end < currentTime) {
+                    || end < m_config.currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
                     manager.removeDateEvent(id);
                 } else if (manager.isAddedDateEvent(id)) {

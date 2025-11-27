@@ -75,8 +75,8 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 void DateEventFeederManager::initFeederConfigs()
 {
     // Event filter options
-    QDate today = QDate::currentDate();
-    QDateTime timeRangeStart = today.startOfDay();
+    QDateTime currentTime = QDateTime::currentDateTime();
+    QDateTime timeRangeStart = currentTime.date().startOfDay(currentTime.timeZone());
     QDateTime timeRangeEnd = timeRangeStart.addDays(3);
 
     const QObjectList &staticPlugins = QPluginLoader::staticInstances();
@@ -90,7 +90,7 @@ void DateEventFeederManager::initFeederConfigs()
 
             for (auto &cfg : std::as_const(configs)) {
                 m_dateEventFeeders.insert(
-                        cfg, plugin->createFeeder(cfg, timeRangeStart, timeRangeEnd, this));
+                        cfg, plugin->createFeeder(cfg, currentTime, timeRangeStart, timeRangeEnd, this));
             }
         }
     }

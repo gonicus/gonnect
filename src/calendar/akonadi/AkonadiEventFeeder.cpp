@@ -7,10 +7,12 @@
 Q_LOGGING_CATEGORY(lcAkonadiEventFeeder, "gonnect.app.dateevents.feeder.akonadi")
 
 AkonadiEventFeeder::AkonadiEventFeeder(QObject *parent, const QString &source,
+                                       const QDateTime &currentTime,
                                        const QDateTime &timeRangeStart,
                                        const QDateTime &timeRangeEnd)
     : QObject(parent),
       m_source(source),
+      m_currentTime(currentTime),
       m_timeRangeStart(timeRangeStart),
       m_timeRangeEnd(timeRangeEnd) m_session(new Akonadi::Session("GOnnect::CalendarSession")),
       m_monitor(new Akonadi::Monitor(parent))
@@ -103,8 +105,6 @@ void AkonadiEventFeeder::processCollections(KJob *job)
 
                 DateEventManager &manager = DateEventManager::instance();
 
-                QDateTime currentTime = QDateTime::currentDateTime();
-
                 const Akonadi::Item::List items =
                         static_cast<Akonadi::ItemFetchJob *>(job)->items();
                 for (const auto &item : items) {
@@ -142,7 +142,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         // as well as any events without a jitsi meeting as a location
                         if (isNoJitsiMeeting
                             || ((start < m_timeRangeStart || start > m_timeRangeEnd
-                                 || end < currentTime || isCancelled)
+                                 || end < m_currentTime || isCancelled)
                                 && !isRecurrent && !isUpdatedRecurrence)) {
                             continue;
                         }
@@ -163,7 +163,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                  next = rrule->getNextDate(next)) {
                                 QDateTime recurStart = next.toLocalTime();
                                 QDateTime recurEnd = recurStart.addMSecs(duration);
-                                if (recurStart > m_timeRangeEnd || recurEnd < currentTime) {
+                                if (recurStart > m_timeRangeEnd || recurEnd < m_currentTime) {
                                     break;
                                 }
 
@@ -179,7 +179,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         } else if (isUpdatedRecurrence) {
                             // Updates of a recurrent event instance
                             if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd
-                                || end < currentTime) {
+                                || end < m_currentTime) {
                                 // Updated recurrence doesn't match our criteria anymore
                                 manager.removeDateEvent(id);
                             } else if (manager.isAddedDateEvent(id)) {
