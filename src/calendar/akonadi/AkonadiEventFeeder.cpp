@@ -163,8 +163,10 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                  next = rrule->getNextDate(next)) {
                                 QDateTime recurStart = next.toLocalTime();
                                 QDateTime recurEnd = recurStart.addMSecs(duration);
-                                if (recurStart > m_timeRangeEnd || recurEnd < m_currentTime) {
+                                if (recurStart > m_timeRangeEnd) {
                                     break;
+                                } else if (recurEnd < m_currentTime) {
+                                    continue;
                                 }
 
                                 if (!exdates.contains(recurStart)
