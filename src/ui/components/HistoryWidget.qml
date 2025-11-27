@@ -7,6 +7,7 @@ import base
 
 BaseWidget {
     id: control
+    minCellWidth: 12
 
     Rectangle {
         id: historyWidget
