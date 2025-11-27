@@ -8,9 +8,17 @@ import base
 Item {
     id: control
 
+    signal gridResized()
+
     required property string pageId
     required property string name
     required property string icon
+
+    readonly property alias grid: snapGrid
+    readonly property alias gridWidth: snapGrid.width
+    readonly property alias gridHeight: snapGrid.height
+    readonly property alias gridCellWidth: dotGrid.cellWidth
+    readonly property alias gridCellHeight: dotGrid.cellHeight
 
     property int oldGridWidth: 0
     property int oldGridHeight: 0
@@ -19,42 +27,35 @@ Item {
     Connections {
         target: SM
         function onUiEditModeChanged() {
-            editMode = SM.uiEditMode
+            control.editMode = SM.uiEditMode
         }
     }
 
     property bool emptyPage: true
     Connections {
-        target: model
+        target: widgetModel
         function onModelUpdated() {
-            emptyPage = model.count() === 0
+            control.emptyPage = widgetModel.count() === 0
         }
     }
 
-    property alias grid: snapGrid
-    property alias gridWidth: snapGrid.width
-    property alias gridHeight: snapGrid.height
-    property double gridDensity: 15
-
-    signal gridResized()
-
-    property WidgetModel model: WidgetModel {
+    readonly property WidgetModel model: WidgetModel {
         id: widgetModel
     }
 
     function resetWidgetElevation() {
-        for (const widget of model.items()) {
+        const items = widgetModel.items()
+        for (const widget of items) {
             widget.z = 0
         }
     }
 
     property PageWriter writer: PageWriter {
         id: pageWriter
-
         pageId: control.pageId
         name: control.name
         icon: control.icon
-        model: control.model
+        model: widgetModel
     }
 
     Component {
@@ -68,40 +69,32 @@ Item {
         widgetSelectionWindowComponent.createObject(control).show()
     }
 
-    property int horizontalPadding: gridDensity * 2
-    property int verticalPadding: gridDensity
-    property int dotRadius: 1
+    property int horizontalPadding: control.gridCellWidth * 2
+    property int verticalPadding: control.gridCellHeight
 
-    Rectangle {
+    Item {
         id: snapGrid
-        width: Math.floor((parent.width - horizontalPadding) / gridDensity) * gridDensity
-        height: Math.floor((parent.height - verticalPadding) / gridDensity) * gridDensity
         anchors {
-            left: parent.left
-            top: parent.top
-            topMargin: gridDensity
-            leftMargin: gridDensity
-            rightMargin: gridDensity
+            fill: parent
+            leftMargin: control.gridCellWidth
+            rightMargin: 2 * control.gridCellWidth
+            topMargin: control.gridCellHeight
+            bottomMargin: 2 * control.gridCellHeight
         }
-        color: "transparent"
 
         onWidthChanged: () => {
             if (snapGrid.width <= 0) {
                 return
             }
-
             control.gridResized()
-
-            oldGridWidth = snapGrid.width
+            control.oldGridWidth = snapGrid.width
         }
         onHeightChanged: () => {
             if (snapGrid.height <= 0) {
                 return
             }
-
             control.gridResized()
-
-            oldGridHeight = snapGrid.height
+            control.oldGridHeight = snapGrid.height
         }
 
         Canvas {
@@ -109,22 +102,24 @@ Item {
             visible: control.editMode
             anchors.fill: parent
 
+            readonly property real cellWidth: dotGrid.width / ViewHelper.numberOfGridCells()
+            readonly property real cellHeight: dotGrid.height / ViewHelper.numberOfGridCells()
+
+            onWidthChanged: dotGrid.requestPaint()
+            onHeightChanged: dotGrid.requestPaint()
             onPaint: {
-                let ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
+                const ctx = dotGrid.getContext("2d")
+                ctx.clearRect(0, 0, dotGrid.width, dotGrid.height)
                 ctx.fillStyle = "gray"
 
-                for (let x = 0; x <= width; x += control.gridDensity) {
-                    for (let y = 0; y <= height; y += control.gridDensity) {
+                for (let x = 0; x <= dotGrid.width; x += dotGrid.cellWidth) {
+                    for (let y = 0; y <= dotGrid.height; y += dotGrid.cellHeight) {
                         ctx.beginPath()
-                        ctx.arc(x, y, dotRadius, 0, 2*Math.PI)
+                        ctx.arc(x, y, 1, 0, 2 * Math.PI)
                         ctx.fill()
                     }
                 }
             }
-
-            onWidthChanged: requestPaint()
-            onHeightChanged: requestPaint()
         }
 
         Button {
@@ -139,5 +134,4 @@ Item {
             }
         }
     }
-
 }

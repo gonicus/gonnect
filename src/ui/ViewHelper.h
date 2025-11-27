@@ -122,6 +122,8 @@ public:
 
     Q_INVOKABLE void toggleFullscreen();
 
+    Q_INVOKABLE uint numberOfGridCells() const;
+
 public Q_SLOTS:
     Q_INVOKABLE void quitApplicationNoConfirm() const;
     Q_INVOKABLE void quitApplication();

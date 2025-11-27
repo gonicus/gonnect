@@ -17,6 +17,11 @@ Item {
     required property double wMin
     required property double hMin
 
+    property real gridWidth
+    property real gridHeight
+    property real gridCellWidth
+    property real gridCellHeight
+
     property double xRelative: 0
     property double yRelative: 0
 
@@ -33,30 +38,30 @@ Item {
     property alias sizeH: resizableRect.height
 
     function setWidth() {
-        control.root.width = Math.round((page.gridWidth * control.wRelative) / page.gridDensity) * page.gridDensity
+        control.root.width = Math.round((control.gridWidth * control.wRelative) / control.gridCellWidth) * control.gridCellWidth
     }
 
     function setHeight() {
-        control.root.height = Math.round((page.gridHeight * control.hRelative) / page.gridDensity) * page.gridDensity
+        control.root.height = Math.round((control.gridHeight * control.hRelative) / control.gridCellHeight) * control.gridCellHeight
     }
 
     function setX() {
-        control.root.x = Math.round((page.gridWidth * control.xRelative) / page.gridDensity) * page.gridDensity
-        control.root.x = Math.max(0, Math.min(control.root.x, page.gridWidth - control.root.width))
+        control.root.x = Math.round((control.gridWidth * control.xRelative) / control.gridCellWidth) * control.gridCellWidth
+        control.root.x = Math.max(0, Math.min(control.root.x, control.gridWidth - control.root.width))
     }
 
     function setY() {
-        control.root.y = Math.round((page.gridHeight * control.yRelative) / page.gridDensity) * page.gridDensity
-        control.root.y = Math.max(0, Math.min(control.root.y, page.gridHeight - control.root.height))
+        control.root.y = Math.round((control.gridHeight * control.yRelative) / control.gridCellHeight) * control.gridCellHeight
+        control.root.y = Math.max(0, Math.min(control.root.y, control.gridHeight - control.root.height))
     }
 
     function setMinSize() {
-        control.wRelativeMin = Number(control.wMin / page.gridWidth)
+        control.wRelativeMin = Number(control.wMin / control.gridWidth)
         if (control.wRelative < control.wRelativeMin) {
             control.wRelative = control.wRelativeMin
         }
 
-        control.hRelativeMin = Number(control.hMin / page.gridHeight)
+        control.hRelativeMin = Number(control.hMin / control.gridHeight)
         if (control.hRelative < control.hRelativeMin) {
             control.hRelative = control.hRelativeMin
         }
@@ -65,14 +70,14 @@ Item {
     // INFO: This function, unlike the others, does not depend on relative float scaling
     // Old implementation that "mostly" worked: 487a071fb743c3e0275867c8db4723d33445026e
     function resize() {
-        if (page.gridWidth <= 0 || page.gridHeight <= 0) {
+        if (control.gridWidth <= 0 || control.gridHeight <= 0) {
             return
         }
 
-        console.error(name, "X,Y:", posX, posY, "W,H:", sizeW, sizeH, "(g) W,H:", page.oldGridWidth, page.oldGridHeight)
+        console.error(name, "X,Y:", posX, posY, "W,H:", sizeW, sizeH, "(g) W,H:", control.page.oldGridWidth, control.page.oldGridHeight)
 
         let minWidth = control.wMin
-        let newWidth = Math.round(((control.root.width / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
+        let newWidth = Math.round(((control.root.width / control.page.oldGridWidth) * control.gridWidth) / control.gridCellWidth) * control.gridCellWidth
         if (newWidth < minWidth) {
             control.root.width = minWidth
         } else {
@@ -80,20 +85,20 @@ Item {
         }
 
         let minHeight = control.hMin
-        let newHeight = Math.round(((control.root.height / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
+        let newHeight = Math.round(((control.root.height / control.page.oldGridHeight) * control.gridHeight) / control.gridCellHeight) * control.gridCellHeight
         if (newHeight < minHeight) {
             control.root.height = minHeight
         } else {
             control.root.height = newHeight
         }
 
-        control.root.x = Math.round(((control.root.x / page.oldGridWidth) * page.gridWidth) / page.gridDensity) * page.gridDensity
-        control.root.x = Math.max(0, Math.min(control.root.x, page.gridWidth - control.root.width))
+        control.root.x = Math.round(((control.root.x / control.page.oldGridWidth) * control.gridWidth) / control.gridCellWidth) * control.gridCellWidth
+        control.root.x = Math.max(0, Math.min(control.root.x, control.gridWidth - control.root.width))
 
-        control.root.y = Math.round(((control.root.y / page.oldGridHeight) * page.gridHeight) / page.gridDensity) * page.gridDensity
-        control.root.y = Math.max(0, Math.min(control.root.y, page.gridHeight - control.root.height))
+        control.root.y = Math.round(((control.root.y / control.page.oldGridHeight) * control.gridHeight) / control.gridCellHeight) * control.gridCellHeight
+        control.root.y = Math.max(0, Math.min(control.root.y, control.gridHeight - control.root.height))
 
-        console.error(name, "X,Y:", posX, posY, "W,H:", sizeW, sizeH, "(g) W,H:", page.gridWidth, page.gridHeight, "(min) W,H:", minWidth, minHeight)
+        console.error(name, "X,Y:", posX, posY, "W,H:", sizeW, sizeH, "(g) W,H:", control.gridWidth, control.gridHeight, "(min) W,H:", minWidth, minHeight)
     }
 
     function makeOpaque(base : color, opacity : double) : color {
@@ -129,7 +134,7 @@ Item {
         Rectangle {
             id: widgetEdit
             radius: root.widgetRadius
-            visible: page.editMode
+            visible: control.page.editMode
             color: control.makeOpaque(Theme.backgroundColor, 0.5)
             z: 1
             anchors.fill: parent
@@ -179,15 +184,15 @@ Item {
                     // in edit mode.
                     onGrabChanged: function(grab) {
                         if (grab === PointerDevice.GrabExclusive) {
-                            page.resetWidgetElevation()
+                            control.page.resetWidgetElevation()
                             control.z = 100
                         }
                     }
 
                     onActiveChanged: function(active) {
                         if (!active) {
-                            control.xRelative = Number(root.x / page.gridWidth)
-                            control.yRelative = Number(root.y / page.gridHeight)
+                            control.xRelative = Number(root.x / control.gridWidth)
+                            control.yRelative = Number(root.y / control.gridHeight)
 
                             control.setX()
                             control.setY()
@@ -225,7 +230,7 @@ Item {
                     drag.target: removeIndicator
 
                     onClicked: {
-                        control.page.model.remove(control)
+                        control.control.page.model.remove(control)
                         control.destroy()
 
                         SM.setUiDirtyState(true)
@@ -267,8 +272,8 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             // Resize within bounds
-                            let rb = page.gridWidth - (root.x + root.width)
-                            let bb = page.gridHeight - (root.y + root.height)
+                            let rb = control.gridWidth - (root.x + root.width)
+                            let bb = control.gridHeight - (root.y + root.height)
                             let dx = mouse.x - resizeIndicator.startX
                             if (dx > rb) {
                                 dx = rb
@@ -279,7 +284,7 @@ Item {
                             }
 
                             // Width, X
-                            let nwr = Number((root.width + dx) / page.gridWidth)
+                            let nwr = Number((root.width + dx) / control.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
                             } else {
@@ -289,7 +294,7 @@ Item {
                             control.setWidth()
 
                             // Height, Y
-                            let nhr = Number((root.height + dy) / page.gridHeight)
+                            let nhr = Number((root.height + dy) / control.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
                             } else {
@@ -326,7 +331,7 @@ Item {
                         onPositionChanged: function(mouse) {
                             // Resize within bounds
                             let lb = root.x - parent.x
-                            let bb = page.gridHeight - (root.y + root.height)
+                            let bb = control.gridHeight - (root.y + root.height)
                             let dx = resizeIndicator.startX - mouse.x
                             if (dx > lb) {
                                 dx = lb
@@ -337,10 +342,10 @@ Item {
                             }
 
                             // Width, X
-                            let nwr = Number((root.width + dx) / page.gridWidth)
+                            let nwr = Number((root.width + dx) / control.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
-                                control.xRelative = Number((root.x - dx) / page.gridWidth)
+                                control.xRelative = Number((root.x - dx) / control.gridWidth)
 
                                 control.setWidth()
                                 control.setX()
@@ -349,12 +354,12 @@ Item {
                                 let oldWidth = root.width
                                 control.setWidth()
 
-                                control.xRelative = Number((root.x + (oldWidth - root.width)) / page.gridWidth)
+                                control.xRelative = Number((root.x + (oldWidth - root.width)) / control.gridWidth)
                                 control.setX()
                             }
 
                             // Height, Y
-                            let nhr = Number((root.height + dy) / page.gridHeight)
+                            let nhr = Number((root.height + dy) / control.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
                             } else {
@@ -402,10 +407,10 @@ Item {
                             }
 
                             // Width, X
-                            let nwr = Number((root.width + dx) / page.gridWidth)
+                            let nwr = Number((root.width + dx) / control.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
-                                control.xRelative = Number((root.x - dx) / page.gridWidth)
+                                control.xRelative = Number((root.x - dx) / control.gridWidth)
 
                                 control.setWidth()
                                 control.setX()
@@ -414,15 +419,15 @@ Item {
                                 let oldWidth = root.width
                                 control.setWidth()
 
-                                control.xRelative = Number((root.x + (oldWidth - root.width)) / page.gridWidth)
+                                control.xRelative = Number((root.x + (oldWidth - root.width)) / control.gridWidth)
                                 control.setX()
                             }
 
                             // Height, Y
-                            let nhr = Number((root.height + dy) / page.gridHeight)
+                            let nhr = Number((root.height + dy) / control.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
-                                control.yRelative = Number((root.y - dy) / page.gridHeight)
+                                control.yRelative = Number((root.y - dy) / control.gridHeight)
 
                                 control.setHeight()
                                 control.setY()
@@ -431,7 +436,7 @@ Item {
                                 let oldHeight = root.height
                                 control.setHeight()
 
-                                control.yRelative = Number((root.y + (oldHeight - root.height)) / page.gridHeight)
+                                control.yRelative = Number((root.y + (oldHeight - root.height)) / control.gridHeight)
                                 control.setY()
                             }
 
@@ -462,7 +467,7 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             // Resize within bounds
-                            let rb = page.gridWidth - (root.x + root.width)
+                            let rb = control.gridWidth - (root.x + root.width)
                             let tb = root.y - parent.y
                             let dx = mouse.x - resizeIndicator.startX
                             if (dx > rb) {
@@ -474,7 +479,7 @@ Item {
                             }
 
                             // Width, X
-                            let nwr = Number((root.width + dx) / page.gridWidth)
+                            let nwr = Number((root.width + dx) / control.gridWidth)
                             if (nwr >= control.wRelativeMin) {
                                 control.wRelative = nwr
                             } else {
@@ -484,10 +489,10 @@ Item {
                             control.setWidth()
 
                             // Height, Y
-                            let nhr = Number((root.height + dy) / page.gridHeight)
+                            let nhr = Number((root.height + dy) / control.gridHeight)
                             if (nhr >= control.hRelativeMin) {
                                 control.hRelative = nhr
-                                control.yRelative = Number((root.y - dy) / page.gridHeight)
+                                control.yRelative = Number((root.y - dy) / control.gridHeight)
 
                                 control.setHeight()
                                 control.setY()
@@ -496,7 +501,7 @@ Item {
                                 let oldHeight = root.height
                                 control.setHeight()
 
-                                control.yRelative = Number((root.y + (oldHeight - root.height)) / page.gridHeight)
+                                control.yRelative = Number((root.y + (oldHeight - root.height)) / control.gridHeight)
                                 control.setY()
                             }
 

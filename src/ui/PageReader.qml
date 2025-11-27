@@ -9,7 +9,6 @@ Item {
 
     required property var tabRoot  // Where to parent the tabs to
     required property var pageRoot // Where to parent the pages to
-
     required property PageModel model
 
     CommonPages {
@@ -22,24 +21,23 @@ Item {
 
     function loadDynamicPages() {
         // Generic
-        let gridWidth = UISettings.getUISetting("generic", "gonnectGridWidth", 0)
-        let gridHeight = UISettings.getUISetting("generic", "gonnectGridHeight", 0)
+        const gridWidth = UISettings.getUISetting("generic", "gonnectGridWidth", 0)
+        const gridHeight = UISettings.getUISetting("generic", "gonnectGridHeight", 0)
 
         // Pages
-        let pageIds = UISettings.getPageIds()
+        const pageIds = UISettings.getPageIds()
         for (const pageId of pageIds) {
-            let pageName = UISettings.getUISetting(pageId, "name", "")
-            let pageIcon = UISettings.getUISetting(pageId, "icon", "")
-
-            let page = pages.base.createObject(control.pageRoot,
-                                               {
-                                                   pageId: pageId,
-                                                   name: pageName,
-                                                   icon: pageIcon,
-                                                   oldGridWidth: gridWidth,
-                                                   oldGridHeight: gridHeight
-                                               })
-            if (page === null) {
+            const pageName = UISettings.getUISetting(pageId, "name", "")
+            const pageIcon = UISettings.getUISetting(pageId, "icon", "")
+            const page = pages.base.createObject(control.pageRoot,
+                                                 {
+                                                     pageId: pageId,
+                                                     name: pageName,
+                                                     icon: pageIcon,
+                                                     oldGridWidth: gridWidth,
+                                                     oldGridHeight: gridHeight
+                                                 })
+            if (!page) {
                 console.log("Could not create page component", pageId)
                 continue
             }
@@ -54,7 +52,7 @@ Item {
             pageRoot.pages[pageId] = page
 
             // Widgets
-            let widgetIds = UISettings.getWidgetIds(pageId)
+            const widgetIds = UISettings.getWidgetIds(pageId)
             for (const widgetId of widgetIds) {
                 control.createWidget(widgetId, page)
             }
@@ -62,9 +60,9 @@ Item {
     }
 
     function loadHomePage(pageId : string) { // TODO: Update me!
-        let page = pageRoot.getPage(pageId)
+        const page = pageRoot.getPage(pageId)
 
-        let widgetIds = UISettings.getWidgetIds(pageId)
+        const widgetIds = UISettings.getWidgetIds(pageId)
         if (widgetIds.length > 0) {
             // Config-based layout
             for (const widgetId of widgetIds) {
@@ -120,48 +118,41 @@ Item {
         }
     }
 
-    function createWidget(widgetId : string, page : variant) {
-        let widgetName = UISettings.getUISetting(widgetId, "name", "")
-        let widgetType = Number(UISettings.getUISetting(widgetId, "type", 0))
-        let widgetX = UISettings.getUISetting(widgetId, "x", 0)
-        let widgetY = UISettings.getUISetting(widgetId, "y", 0)
-        let widgetWidth = UISettings.getUISetting(widgetId, "width", 0)
-        let widgetHeight = UISettings.getUISetting(widgetId, "height", 0)
-
+    function createWidget(widgetId : string, page : BasePage) {
+        const widgetType = Number(UISettings.getUISetting(widgetId, "type", 0))
         const widgetProperties = {
             widgetId: widgetId,
-            name: widgetName,
+            name: UISettings.getUISetting(widgetId, "name", ""),
             page: page,
-            posX: widgetX,
-            posY: widgetY,
-            sizeW: widgetWidth,
-            sizeH: widgetHeight
+            posX: UISettings.getUISetting(widgetId, "x", 0),
+            posY: UISettings.getUISetting(widgetId, "y", 0),
+            sizeW: UISettings.getUISetting(widgetId, "width", 0),
+            sizeH: UISettings.getUISetting(widgetId, "height", 0),
+            gridWidth: Qt.binding(() => page.gridWidth),
+            gridHeight: Qt.binding(() => page.gridHeight),
+            gridCellWidth: Qt.binding(() => page.gridCellWidth),
+            gridCellHeight: Qt.binding(() => page.gridCellHeight)
         }
 
-        let widget
+        let widget = null
         switch(widgetType) {
             case CommonWidgets.Type.DateEvents:
-                widget = widgets.dateEvents.createObject(page.grid,
-                                                         widgetProperties)
+                widget = widgets.dateEvents.createObject(page.grid, widgetProperties)
                 break
             case CommonWidgets.Type.Favorites:
-                widget = widgets.favorites.createObject(page.grid,
-                                                        widgetProperties)
+                widget = widgets.favorites.createObject(page.grid, widgetProperties)
                 break
             case CommonWidgets.Type.History:
-                widget = widgets.history.createObject(page.grid,
-                                                      widgetProperties)
+                widget = widgets.history.createObject(page.grid, widgetProperties)
                 break
             default:
-                widget = null
-                console.log("Widget type unknown", widgetType)
+                console.error(`Widget type ${widgetType} unknown`)
         }
 
-        if (widget === null) {
-            console.log("Could not create widget component", widgetId)
-            return
+        if (widget) {
+            page.model.add(widget)
+        } else {
+            console.error("Could not create widget component", widgetId)
         }
-
-        page.model.add(widget)
     }
 }

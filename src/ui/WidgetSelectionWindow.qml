@@ -69,7 +69,12 @@ BaseWindow {
             }
 
             delegate: ItemDelegate {
+                id: widgetDelg
                 width: parent.width
+
+                required property string name
+                required property string description
+
                 contentItem: RowLayout {
                     spacing: 10
 
@@ -89,13 +94,10 @@ BaseWindow {
                         Layout.fillWidth: true
 
                         textFormat: Text.RichText
-                        text: qsTr("<b>%1</b><br>%2").arg(name)
-                                                     .arg(description)
+                        text: qsTr("<b>%1</b><br>%2").arg(widgetDelg.name)
+                                                     .arg(widgetDelg.description)
                     }
                 }
-
-                required property string name
-                required property string description
             }
 
             contentItem: RowLayout {
@@ -115,7 +117,6 @@ BaseWindow {
 
                 Label {
                     Layout.fillWidth: true
-
                     textFormat: Text.RichText
                     text: qsTr("<b>%1</b><br>%2").arg(widgetEntries.get(widgetSelection.currentIndex).name)
                                                  .arg(widgetEntries.get(widgetSelection.currentIndex).description)
@@ -148,45 +149,44 @@ BaseWindow {
                 text: qsTr("Add")
 
                 onPressed: {
-                    const id = "-widget_"+UISettings.generateUuid()
+                    const id = `-widget_${UISettings.generateUuid()}`
                     const name = control.name
                     const selection = control.selection
 
                     const widgetProperties = {
-                        widgetId: widgetRoot.pageId+id,
+                        widgetId: control.widgetRoot.pageId + id,
                         name: name.toLowerCase(),
-                        page: widgetRoot,
+                        page: control.widgetRoot,
                         posX: 0,
-                        posY: 0
+                        posY: 0,
+                        gridWidth: Qt.binding(() => control.widgetRoot.gridWidth),
+                        gridHeight: Qt.binding(() => control.widgetRoot.gridHeight),
+                        gridCellWidth: Qt.binding(() => control.widgetRoot.gridCellWidth),
+                        gridCellHeight: Qt.binding(() => control.widgetRoot.gridCellHeight)
                     }
 
                     let widget
                     switch (selection) {
                         case CommonWidgets.Type.DateEvents:
-                            widget = widgets.dateEvents.createObject(widgetRoot.grid,
-                                                                     widgetProperties)
+                            widget = widgets.dateEvents.createObject(control.widgetRoot.grid, widgetProperties)
                             break
                         case CommonWidgets.Type.Favorites:
-                            widget = widgets.favorites.createObject(widgetRoot.grid,
-                                                                    widgetProperties)
+                            widget = widgets.favorites.createObject(control.widgetRoot.grid, widgetProperties)
                             break
                         case CommonWidgets.Type.History:
-                            widget = widgets.history.createObject(widgetRoot.grid,
-                                                                  widgetProperties)
+                            widget = widgets.history.createObject(control.widgetRoot.grid, widgetProperties)
                             break
                         default:
                             widget = null
-                            console.log("Widget type unknown", selection)
+                            console.error(`Widget type ${selection} unknown`)
                     }
 
-                    if (widget === null) {
-                        console.log("Could not create widget component")
-                    } else {
-                        widgetRoot.resetWidgetElevation()
-
-                        widgetRoot.model.add(widget)
-
+                    if (widget) {
+                        control.widgetRoot.resetWidgetElevation()
+                        control.widgetRoot.model.add(widget)
                         SM.setUiDirtyState(true)
+                    } else {
+                        console.log("Could not create widget component")
                     }
 
                     control.close()
