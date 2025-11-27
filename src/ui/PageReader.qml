@@ -68,53 +68,6 @@ Item {
             for (const widgetId of widgetIds) {
                 control.createWidget(widgetId, page)
             }
-        } else {
-            /*
-            // Default widget layout
-            let baseId = page.pageId+"-widget_"
-
-            let dateEvents = widgets.dateEvents.createObject(page.grid,
-                                                             {
-                                                                 widgetId: baseId+UISettings.generateUuid(),
-                                                                 name: "dateevents",
-                                                                 page: page,
-                                                                 xRelative: 0.75,
-                                                                 yRelative: 0,
-                                                                 wRelative: 0.25,
-                                                                 hRelative: 0.50
-                                                             })
-            if (dateEvents) {
-                page.model.add(dateEvents)
-            }
-
-            let favorites = widgets.favorites.createObject(page.grid,
-                                                           {
-                                                               widgetId: baseId+UISettings.generateUuid(),
-                                                               name: "favorites",
-                                                               page: page,
-                                                               xRelative: 0.75,
-                                                               yRelative: 0.55,
-                                                               wRelative: 0.25,
-                                                               hRelative: 0.50
-                                                           })
-            if (favorites) {
-                page.model.add(favorites)
-            }
-
-            let history = widgets.history.createObject(page.grid,
-                                                       {
-                                                           widgetId: baseId+UISettings.generateUuid(),
-                                                           name: "history",
-                                                           page: page,
-                                                           xRelative: 0,
-                                                           yRelative: 0,
-                                                           wRelative: 0.74,
-                                                           hRelative: 1
-                                                       })
-            if (history) {
-                page.model.add(history)
-            }
-            */
         }
     }
 
@@ -124,10 +77,12 @@ Item {
             widgetId: widgetId,
             name: UISettings.getUISetting(widgetId, "name", ""),
             page: page,
-            posX: UISettings.getUISetting(widgetId, "x", 0),
-            posY: UISettings.getUISetting(widgetId, "y", 0),
-            sizeW: UISettings.getUISetting(widgetId, "width", 0),
-            sizeH: UISettings.getUISetting(widgetId, "height", 0),
+
+            xGrid: UISettings.getUISetting(widgetId, "xGrid", 0),
+            yGrid: UISettings.getUISetting(widgetId, "yGrid", 0),
+            widthGrid: UISettings.getUISetting(widgetId, "widthGrid", Math.floor(ViewHelper.numberOfGridCells() * 0.38)),
+            heightGrid: UISettings.getUISetting(widgetId, "heightGrid", Math.floor(ViewHelper.numberOfGridCells() * 0.38)),
+
             gridWidth: Qt.binding(() => page.gridWidth),
             gridHeight: Qt.binding(() => page.gridHeight),
             gridCellWidth: Qt.binding(() => page.gridCellWidth),

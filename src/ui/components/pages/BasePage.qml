@@ -8,8 +8,6 @@ import base
 Item {
     id: control
 
-    signal gridResized()
-
     required property string pageId
     required property string name
     required property string icon
@@ -69,9 +67,6 @@ Item {
         widgetSelectionWindowComponent.createObject(control).show()
     }
 
-    property int horizontalPadding: control.gridCellWidth * 2
-    property int verticalPadding: control.gridCellHeight
-
     Item {
         id: snapGrid
         anchors {
@@ -86,14 +81,12 @@ Item {
             if (snapGrid.width <= 0) {
                 return
             }
-            control.gridResized()
             control.oldGridWidth = snapGrid.width
         }
         onHeightChanged: () => {
             if (snapGrid.height <= 0) {
                 return
             }
-            control.gridResized()
             control.oldGridHeight = snapGrid.height
         }
 
@@ -105,8 +98,10 @@ Item {
             readonly property real cellWidth: dotGrid.width / ViewHelper.numberOfGridCells()
             readonly property real cellHeight: dotGrid.height / ViewHelper.numberOfGridCells()
 
-            onWidthChanged: dotGrid.requestPaint()
-            onHeightChanged: dotGrid.requestPaint()
+            onWidthChanged: Qt.callLater(dotGrid.requestPaint)
+            onHeightChanged: Qt.callLater(dotGrid.requestPaint)
+            onCellWidthChanged: Qt.callLater(dotGrid.requestPaint)
+            onCellHeightChanged: Qt.callLater(dotGrid.requestPaint)
             onPaint: {
                 const ctx = dotGrid.getContext("2d")
                 ctx.clearRect(0, 0, dotGrid.width, dotGrid.height)

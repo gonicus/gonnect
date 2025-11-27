@@ -157,8 +157,6 @@ BaseWindow {
                         widgetId: control.widgetRoot.pageId + id,
                         name: name.toLowerCase(),
                         page: control.widgetRoot,
-                        posX: 0,
-                        posY: 0,
                         gridWidth: Qt.binding(() => control.widgetRoot.gridWidth),
                         gridHeight: Qt.binding(() => control.widgetRoot.gridHeight),
                         gridCellWidth: Qt.binding(() => control.widgetRoot.gridCellWidth),

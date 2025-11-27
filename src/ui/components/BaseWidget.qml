@@ -22,6 +22,11 @@ Item {
     property real gridCellWidth
     property real gridCellHeight
 
+    property int xGrid
+    property int yGrid
+    property int widthGrid
+    property int heightGrid
+
     property double xRelative: 0
     property double yRelative: 0
 
@@ -32,108 +37,100 @@ Item {
     property double hRelativeMin: 0
 
     property alias root: resizableRect
-    property alias posX: resizableRect.x
-    property alias posY: resizableRect.y
-    property alias sizeW: resizableRect.width
-    property alias sizeH: resizableRect.height
 
     function setWidth() {
-        control.root.width = Math.round((control.gridWidth * control.wRelative) / control.gridCellWidth) * control.gridCellWidth
+        // control.root.width = Math.round((control.gridWidth * control.wRelative) / control.gridCellWidth) * control.gridCellWidth
     }
 
     function setHeight() {
-        control.root.height = Math.round((control.gridHeight * control.hRelative) / control.gridCellHeight) * control.gridCellHeight
+        // control.root.height = Math.round((control.gridHeight * control.hRelative) / control.gridCellHeight) * control.gridCellHeight
     }
 
     function setX() {
-        control.root.x = Math.round((control.gridWidth * control.xRelative) / control.gridCellWidth) * control.gridCellWidth
-        control.root.x = Math.max(0, Math.min(control.root.x, control.gridWidth - control.root.width))
+        // control.root.x = Math.round((control.gridWidth * control.xRelative) / control.gridCellWidth) * control.gridCellWidth
+        // control.root.x = Math.max(0, Math.min(control.root.x, control.gridWidth - control.root.width))
     }
 
     function setY() {
-        control.root.y = Math.round((control.gridHeight * control.yRelative) / control.gridCellHeight) * control.gridCellHeight
-        control.root.y = Math.max(0, Math.min(control.root.y, control.gridHeight - control.root.height))
+        // control.root.y = Math.round((control.gridHeight * control.yRelative) / control.gridCellHeight) * control.gridCellHeight
+        // control.root.y = Math.max(0, Math.min(control.root.y, control.gridHeight - control.root.height))
     }
 
     function setMinSize() {
-        control.wRelativeMin = Number(control.wMin / control.gridWidth)
-        if (control.wRelative < control.wRelativeMin) {
-            control.wRelative = control.wRelativeMin
-        }
+        // control.wRelativeMin = Number(control.wMin / control.gridWidth)
+        // if (control.wRelative < control.wRelativeMin) {
+        //     control.wRelative = control.wRelativeMin
+        // }
 
-        control.hRelativeMin = Number(control.hMin / control.gridHeight)
-        if (control.hRelative < control.hRelativeMin) {
-            control.hRelative = control.hRelativeMin
-        }
-    }
-
-    // INFO: This function, unlike the others, does not depend on relative float scaling
-    // Old implementation that "mostly" worked: 487a071fb743c3e0275867c8db4723d33445026e
-    function resize() {
-        if (control.gridWidth <= 0 || control.gridHeight <= 0) {
-            return
-        }
-
-        console.error(name, "X,Y:", posX, posY, "W,H:", sizeW, sizeH, "(g) W,H:", control.page.oldGridWidth, control.page.oldGridHeight)
-
-        let minWidth = control.wMin
-        let newWidth = Math.round(((control.root.width / control.page.oldGridWidth) * control.gridWidth) / control.gridCellWidth) * control.gridCellWidth
-        if (newWidth < minWidth) {
-            control.root.width = minWidth
-        } else {
-            control.root.width = newWidth
-        }
-
-        let minHeight = control.hMin
-        let newHeight = Math.round(((control.root.height / control.page.oldGridHeight) * control.gridHeight) / control.gridCellHeight) * control.gridCellHeight
-        if (newHeight < minHeight) {
-            control.root.height = minHeight
-        } else {
-            control.root.height = newHeight
-        }
-
-        control.root.x = Math.round(((control.root.x / control.page.oldGridWidth) * control.gridWidth) / control.gridCellWidth) * control.gridCellWidth
-        control.root.x = Math.max(0, Math.min(control.root.x, control.gridWidth - control.root.width))
-
-        control.root.y = Math.round(((control.root.y / control.page.oldGridHeight) * control.gridHeight) / control.gridCellHeight) * control.gridCellHeight
-        control.root.y = Math.max(0, Math.min(control.root.y, control.gridHeight - control.root.height))
-
-        console.error(name, "X,Y:", posX, posY, "W,H:", sizeW, sizeH, "(g) W,H:", control.gridWidth, control.gridHeight, "(min) W,H:", minWidth, minHeight)
+        // control.hRelativeMin = Number(control.hMin / control.gridHeight)
+        // if (control.hRelative < control.hRelativeMin) {
+        //     control.hRelative = control.hRelativeMin
+        // }
     }
 
     function makeOpaque(base : color, opacity : double) : color {
         return Qt.rgba(base.r, base.g, base.b, opacity)
     }
 
-    Component.onCompleted: {
-        if (sizeW < wMin) {
-            sizeW = wMin
-        }
-
-        if (sizeH < hMin) {
-            sizeH = hMin
-        }
-    }
-
-    Connections {
-        target: page
-        function onGridResized() {
-            control.resize()
-        }
-    }
-
     // Basic widget
     Rectangle {
         id: resizableRect
-        radius: widgetRadius
+        x: control.xGrid * control.gridCellWidth
+        y: control.yGrid * control.gridCellHeight
+        width: control.widthGrid * control.gridCellWidth
+        height: control.heightGrid * control.gridCellHeight
+        radius: resizableRect.widgetRadius
         color: Theme.backgroundColor
 
-        property int widgetRadius: 12
+        readonly property int widgetRadius: 12
+
+        onXChanged: () => {
+            // Round value to grid coordinate and clamp min/max values
+            const cellWidth = control.gridCellWidth
+            const newVal = Util.clamp(Math.round(resizableRect.x / cellWidth) * cellWidth,
+                                      0,
+                                      (ViewHelper.numberOfGridCells() - control.widthGrid) * cellWidth)
+
+            if (newVal !== resizableRect.x) {
+                resizableRect.x = newVal
+            }
+        }
+        onYChanged: () => {
+            // Round value to grid coordinate and clamp min/max values
+            const cellHeight = control.gridCellHeight
+            const newVal = Util.clamp(Math.round(resizableRect.y / cellHeight) * cellHeight,
+                                      0,
+                                      (ViewHelper.numberOfGridCells() - control.heightGrid) * cellHeight)
+
+            if (newVal !== resizableRect.y) {
+                resizableRect.y = newVal
+            }
+        }
+        onWidthChanged: () => {
+            // Round value to grid coordinate and clamp min/max values
+            const cellWidth = control.gridCellWidth
+            const newVal = Math.min(Math.floor((resizableRect.width) / cellWidth) * cellWidth,
+                                    (ViewHelper.numberOfGridCells() - control.xGrid) * cellWidth)
+
+            if (newVal !== resizableRect.width) {
+                resizableRect.width = newVal
+            }
+        }
+        onHeightChanged: () => {
+            // Round value to grid coordinate and clamp min/max values
+            const cellHeight = control.gridCellHeight
+            const newVal = Math.min(Math.floor((resizableRect.height) / cellHeight) * cellHeight,
+                                    (ViewHelper.numberOfGridCells() - control.yGrid) * cellHeight)
+
+            if (newVal !== resizableRect.height) {
+                resizableRect.height = newVal
+            }
+        }
 
         // Edit mode overlay
         Rectangle {
             id: widgetEdit
-            radius: root.widgetRadius
+            radius: resizableRect.widgetRadius
             visible: control.page.editMode
             color: control.makeOpaque(Theme.backgroundColor, 0.5)
             z: 1
@@ -191,11 +188,13 @@ Item {
 
                     onActiveChanged: function(active) {
                         if (!active) {
-                            control.xRelative = Number(root.x / control.gridWidth)
-                            control.yRelative = Number(root.y / control.gridHeight)
 
-                            control.setX()
-                            control.setY()
+                            // Re-establish bindings after dragging has ended
+                            control.xGrid = Math.round(resizableRect.x / control.gridCellWidth)
+                            control.yGrid = Math.round(resizableRect.y / control.gridCellHeight)
+
+                            resizableRect.x = Qt.binding(() => control.xGrid * control.gridCellWidth)
+                            resizableRect.y = Qt.binding(() => control.yGrid * control.gridCellHeight)
 
                             SM.setUiDirtyState(true)
                         }
