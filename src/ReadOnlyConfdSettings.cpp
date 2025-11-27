@@ -12,6 +12,7 @@ static constexpr const char *NULL_DEVICE_NAME = "nul";
 static constexpr const char *NULL_DEVICE_NAME = "/dev/null";
 #endif
 
+#include "Application.h"
 #include "ReadOnlyConfdSettings.h"
 
 Q_LOGGING_CATEGORY(lcReadOnlySettings, "gonnect.app.settings")
@@ -67,8 +68,15 @@ void ReadOnlyConfdSettings::readConfd()
     const QString basePath =
             QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/gonnect";
 
+    QStringList entries;
+
+    if (Application::isFlatpak()) {
+        const auto fpBaseDir = QDir("/app/etc/gonnect");
+        entries += fpBaseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+    }
+
     const auto baseDir = QDir(basePath);
-    const QStringList entries = baseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+    entries += baseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
 
 #ifdef Q_OS_LINUX
     // Filter scope and replace %ENV[variablename]% and %CONF[config/key]% placeholders

@@ -13,6 +13,9 @@ add-extensions:
     subdirectories: true
     no-autodownload: true
     autodelete: true
+  de.gonicus.gonnect.provisioning:
+    directory: etc/gonnect
+    no-autodownload: true
 
 finish-args:
   - --env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess
@@ -76,7 +79,7 @@ modules:
       - --disable-video
       - --enable-ext-sound
       - --with-opus
-      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1 -DPJSIP_MAX_PKT_LEN=5000
+      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1 -DPJSIP_MAX_PKT_LEN=8192
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
@@ -252,3 +255,4 @@ modules:
 cleanup-commands:
   - /app/cleanup-BaseApp.sh
   - mkdir -p ${FLATPAK_DEST}/plugins
+  - mkdir -p ${FLATPAK_DEST}/etc/gonnect
