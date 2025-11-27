@@ -381,9 +381,10 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                                 || status == I_CAL_STATUS_FAILED
                                 || status == I_CAL_STATUS_DELETED);
 
-            // Skip non-recurrent events that are outside of our date range
-            if (isNoJitsiMeeting //|| isCancelled
-                || ((start < m_timeRangeStart || start > m_timeRangeEnd)
+            // Skip non-recurrent events that are cancelled / outside of our date range
+            // as well as any events without a jitsi meeting as a location
+            if (isNoJitsiMeeting
+                || ((start < m_timeRangeStart || start > m_timeRangeEnd || isCancelled)
                     && !isRecurrent && !isUpdatedRecurrence)) {
                 continue;
             }
@@ -404,8 +405,8 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 exdates.append(createDateTimeFromTimeType(exdate));
             }
 
-            // Recurrent origin event
             if (isRecurrent && !isUpdatedRecurrence) {
+                // Recurrent origin event, parsed first
                 ICalRecurIterator *recurrenceIter = i_cal_recur_iterator_new(rrule, dtstart);
 
                 if (recurrenceIter) {
@@ -429,19 +430,23 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
                     i_cal_recur_iterator_free(recurrenceIter);
                 }
-            } else {
-                // Non-recurrent event or update of a recurrent event instance
+            } else if (isUpdatedRecurrence) {
+                // Updates of a recurrent event instance
                 if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd) {
-                    if (manager.isAddedDateEvent(id)) {
-                        // Updated recurrence doesn't match our criteria
-                        manager.removeDateEvent(id);
-                    }
-                } else if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
+                    // Updated recurrence doesn't match our criteria anymore
+                    manager.removeDateEvent(id);
+                } else if (manager.isAddedDateEvent(id)) {
+                    // Exists but modified
                     manager.modifyDateEvent(id, concreteSource, start, end, summary, location);
                 } else {
+                    // Does not exist, e.g. moved from past to future, different day
                     manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
                                                        location));
                 }
+            } else {
+                // Normal event, no recurrence, or update of a recurrent instance
+                manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
+                                                   location));
             }
         }
     }
