@@ -173,7 +173,7 @@ Item {
                     drag.target: removeIndicator
 
                     onClicked: {
-                        control.control.page.model.remove(control)
+                        control.page.model.remove(control)
                         control.destroy()
 
                         SM.setUiDirtyState(true)
