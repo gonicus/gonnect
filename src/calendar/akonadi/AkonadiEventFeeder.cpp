@@ -114,6 +114,17 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         KCalendarCore::Recurrence *recurrence = event->recurrence();
                         KCalendarCore::RecurrenceRule *rrule = recurrence->defaultRRule();
 
+                        QString id = event->uid();
+
+                        // RID: The first ever recorded time of a recurrent event instance. We'll
+                        // use 'UID-UNIX_TIMESTAMP' as ID.
+                        bool isUpdatedRecurrence = false;
+                        QDateTime rid = event->recurrenceId().toLocalTime();
+                        if (rid.isValid()) {
+                            isUpdatedRecurrence = true;
+                            id += QString("-%1").arg(rid.toMSecsSinceEpoch());
+                        }
+
                         QDateTime start = event->dtStart().toLocalTime();
 
                         // Location
@@ -125,26 +136,17 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                 (event->status()
                                          == KCalendarCore::Incidence::Status::StatusCanceled);
 
-                        // Skip non-recurrent events that are outside of our date range
-                        if (isNoJitsiMeeting || isCancelled
-                            || ((start < m_timeRangeStart || start > m_timeRangeEnd)
-                                && !isRecurrent)) {
+                        // Skip non-recurrent events that are cancelled / outside of our date range
+                        // as well as any events without a jitsi meeting as a location
+                        if (isNoJitsiMeeting
+                            || ((start < m_timeRangeStart || start > m_timeRangeEnd || isCancelled)
+                                && !isRecurrent && !isUpdatedRecurrence)) {
                             continue;
                         }
 
                         QDateTime end = event->dtEnd().toLocalTime();
 
-                        QString id = event->uid();
                         QString summary = event->summary();
-
-                        // RID: The first ever recorded time of a recurrent event instance. We'll
-                        // use 'UID-UNIX_TIMESTAMP' as ID.
-                        bool isUpdatedRecurrence = false;
-                        QDateTime rid = event->recurrenceId().toLocalTime();
-                        if (rid.isValid()) {
-                            isUpdatedRecurrence = true;
-                            id += QString("-%1").arg(rid.toMSecsSinceEpoch());
-                        }
 
                         // Get EXDATE's
                         QList<QDateTime> exdates;
@@ -152,8 +154,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                             exdates.append(exdate.toLocalTime());
                         }
 
-                        // Recurrent origin event
                         if (isRecurrent && !isUpdatedRecurrence) {
+                            // Recurrent origin event, parsed first
                             qint64 duration = start.secsTo(end);
 
                             for (auto next = rrule->getNextDate(m_timeRangeStart); next.isValid();
@@ -171,14 +173,23 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                                                        summary, location));
                                 }
                             }
-                        } else {
-                            // Non-recurrent event or update of a recurrent event instance
-                            if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
+                        } else if (isUpdatedRecurrence) {
+                            // Updates of a recurrent event instance
+                            if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd) {
+                                // Updated recurrence doesn't match our criteria anymore
+                                manager.removeDateEvent(id);
+                            } else if (manager.isAddedDateEvent(id)) {
+                                // Exists but modified
                                 manager.modifyDateEvent(id, m_source, start, end, summary, location);
                             } else {
-                                manager.addDateEvent(new DateEvent(id, m_source, start, end,
-                                                                   summary, location));
+                                // Does not exist, e.g. moved from past to future, different day
+                                manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
+                                                                   location));
                             }
+                        } else {
+                            // Normal event, no recurrence, or update of a recurrent instance
+                            manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
+                                                               location));
                         }
                     }
                 }
