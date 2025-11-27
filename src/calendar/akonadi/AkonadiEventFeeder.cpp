@@ -103,6 +103,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
 
                 DateEventManager &manager = DateEventManager::instance();
 
+                QDateTime currentTime = QDateTime::currentDateTime();
+
                 const Akonadi::Item::List items =
                         static_cast<Akonadi::ItemFetchJob *>(job)->items();
                 for (const auto &item : items) {
@@ -126,6 +128,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         }
 
                         QDateTime start = event->dtStart().toLocalTime();
+                        QDateTime end = event->dtEnd().toLocalTime();
 
                         // Location
                         QString location = manager.getJitsiRoomFromLocation(event->location());
@@ -138,12 +141,10 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         // Skip non-recurrent events that are cancelled / outside of our date range
                         // as well as any events without a jitsi meeting as a location
                         if (isNoJitsiMeeting
-                            || ((start < m_timeRangeStart || start > m_timeRangeEnd || isCancelled)
+                            || ((start < m_timeRangeStart || start > m_timeRangeEnd || end < currentTime || isCancelled)
                                 && !isRecurrent && !isUpdatedRecurrence)) {
                             continue;
                         }
-
-                        QDateTime end = event->dtEnd().toLocalTime();
 
                         QString summary = event->summary();
 
@@ -159,22 +160,23 @@ void AkonadiEventFeeder::processCollections(KJob *job)
 
                             for (auto next = rrule->getNextDate(m_timeRangeStart); next.isValid();
                                  next = rrule->getNextDate(next)) {
-                                QDateTime recur = next.toLocalTime();
-                                if (recur > m_timeRangeEnd) {
+                                QDateTime recurStart = next.toLocalTime();
+                                QDateTime recurEnd = recurStart.addMSecs(duration);
+                                if (recurStart > m_timeRangeEnd || recurEnd < currentTime) {
                                     break;
                                 }
 
-                                if (!exdates.contains(recur) && recur >= m_timeRangeStart) {
+                                if (!exdates.contains(recurStart) && recurStart >= m_timeRangeStart) {
                                     QString nid =
-                                            QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
-                                    manager.addDateEvent(new DateEvent(nid, m_source, recur,
-                                                                       recur.addMSecs(duration),
+                                            QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
+                                    manager.addDateEvent(new DateEvent(nid, m_source, recurStart,
+                                                                       recurEnd,
                                                                        summary, location));
                                 }
                             }
                         } else if (isUpdatedRecurrence) {
                             // Updates of a recurrent event instance
-                            if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd) {
+                            if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd || end < currentTime) {
                                 // Updated recurrence doesn't match our criteria anymore
                                 manager.removeDateEvent(id);
                             } else if (manager.isAddedDateEvent(id)) {

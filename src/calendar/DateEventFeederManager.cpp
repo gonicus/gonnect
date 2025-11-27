@@ -75,7 +75,8 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 void DateEventFeederManager::initFeederConfigs()
 {
     // Event filter options
-    QDateTime timeRangeStart = QDateTime::currentDateTime();
+    QDate today = QDate::currentDate();
+    QDateTime timeRangeStart = today.startOfDay();
     QDateTime timeRangeEnd = timeRangeStart.addDays(3);
 
     const QObjectList &staticPlugins = QPluginLoader::staticInstances();

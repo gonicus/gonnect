@@ -100,6 +100,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
 {
     DateEventManager &manager = DateEventManager::instance();
 
+    QDateTime currentTime = QDateTime::currentDateTime();
+
     icalcomponent *calendar = icalparser_parse_string(data.toStdString().data());
     if (calendar) {
         // VEVENT's
@@ -130,6 +132,9 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             icaltimetype dtstart = icalcomponent_get_dtstart(event);
             QDateTime start = createDateTimeFromTimeType(dtstart);
 
+            icaltimetype dtend = icalcomponent_get_dtend(event);
+            QDateTime end = createDateTimeFromTimeType(dtend);
+
             // Location
             QString location = manager.getJitsiRoomFromLocation(icalcomponent_get_location(event));
             bool isNoJitsiMeeting = location.isEmpty();
@@ -142,14 +147,11 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             // Skip non-recurrent events that are cancelled / outside of our date range
             // as well as any events without a jitsi meeting as a location
             if (isNoJitsiMeeting
-                || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd
+                || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd || end < currentTime
                      || isCancelled)
                     && !isRecurrent && !isUpdatedRecurrence)) {
                 continue;
             }
-
-            icaltimetype dtend = icalcomponent_get_dtend(event);
-            QDateTime end = createDateTimeFromTimeType(dtend);
 
             QString summary = icalcomponent_get_summary(event);
 
@@ -173,15 +175,16 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                     for (icaltimetype next = icalrecur_iterator_next(recurrenceIter);
                          !icaltime_is_null_time(next);
                          next = icalrecur_iterator_next(recurrenceIter)) {
-                        QDateTime recur = createDateTimeFromTimeType(next);
-                        if (recur > m_config.timeRangeEnd) {
+                        QDateTime recurStart = createDateTimeFromTimeType(next);
+                        QDateTime recurEnd = recurStart.addMSecs(duration);
+                        if (recurStart > m_config.timeRangeEnd || recurEnd < currentTime) {
                             break;
                         }
 
-                        if (!exdates.contains(recur) && recur >= m_config.timeRangeStart) {
-                            QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
-                            manager.addDateEvent(new DateEvent(nid, m_config.source, recur,
-                                                               recur.addMSecs(duration), summary,
+                        if (!exdates.contains(recurStart) && recurStart >= m_config.timeRangeStart) {
+                            QString nid = QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
+                            manager.addDateEvent(new DateEvent(nid, m_config.source, recurStart,
+                                                               recurEnd, summary,
                                                                location));
                         }
                     }
@@ -191,7 +194,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             } else if (isUpdatedRecurrence) {
                 // Updates of a recurrent event instance
                 if (isCancelled || start < m_config.timeRangeStart
-                    || start > m_config.timeRangeEnd) {
+                    || start > m_config.timeRangeEnd  || end < currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
                     manager.removeDateEvent(id);
                 } else if (manager.isAddedDateEvent(id)) {
