@@ -15,8 +15,8 @@ Item {
     readonly property alias grid: snapGrid
     readonly property alias gridWidth: snapGrid.width
     readonly property alias gridHeight: snapGrid.height
-    readonly property alias gridCellWidth: dotGrid.cellWidth
-    readonly property alias gridCellHeight: dotGrid.cellHeight
+    readonly property alias gridCellWidth: snapGrid.cellWidth
+    readonly property alias gridCellHeight: snapGrid.cellHeight
 
     property int oldGridWidth: 0
     property int oldGridHeight: 0
@@ -71,10 +71,12 @@ Item {
         id: snapGrid
         anchors {
             fill: parent
-            topMargin: 24
-            bottomMargin: 24
             leftMargin: 24
+            bottomMargin: -16
         }
+
+        readonly property real cellWidth: snapGrid.width / ViewHelper.numberOfGridCells()
+        readonly property real cellHeight: snapGrid.height / ViewHelper.numberOfGridCells()
 
         onWidthChanged: () => {
             if (snapGrid.width <= 0) {
@@ -87,33 +89,6 @@ Item {
                 return
             }
             control.oldGridHeight = snapGrid.height
-        }
-
-        Canvas {
-            id: dotGrid
-            visible: control.editMode
-            anchors.fill: parent
-
-            readonly property real cellWidth: dotGrid.width / ViewHelper.numberOfGridCells()
-            readonly property real cellHeight: dotGrid.height / ViewHelper.numberOfGridCells()
-
-            onWidthChanged: Qt.callLater(dotGrid.requestPaint)
-            onHeightChanged: Qt.callLater(dotGrid.requestPaint)
-            onCellWidthChanged: Qt.callLater(dotGrid.requestPaint)
-            onCellHeightChanged: Qt.callLater(dotGrid.requestPaint)
-            onPaint: {
-                const ctx = dotGrid.getContext("2d")
-                ctx.clearRect(0, 0, dotGrid.width, dotGrid.height)
-                ctx.fillStyle = "gray"
-
-                for (let x = 0; x <= dotGrid.width; x += dotGrid.cellWidth) {
-                    for (let y = 0; y <= dotGrid.height; y += dotGrid.cellHeight) {
-                        ctx.beginPath()
-                        ctx.arc(x, y, 1, 0, 2 * Math.PI)
-                        ctx.fill()
-                    }
-                }
-            }
         }
 
         Button {
