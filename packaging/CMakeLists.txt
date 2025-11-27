@@ -16,6 +16,7 @@ if(WIN32)
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "GOnnect")
     set(CPACK_NSIS_DISPLAY_NAME "GOnnect")
     set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}/resources/artwork/gonnect.ico")
+    set(CPACK_NSIS_MUI_UNIICON "${PROJECT_SOURCE_DIR}/resources/artwork/gonnect.ico")
     set(CPACK_NSIS_INSTALLED_ICON_NAME "gonnect.exe")
     set(CPACK_NSIS_MUI_FINISHPAGE_RUN "gonnect.exe")
 
