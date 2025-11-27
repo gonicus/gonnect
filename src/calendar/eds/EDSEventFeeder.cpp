@@ -9,9 +9,8 @@ using namespace std::chrono_literals;
 
 Q_LOGGING_CATEGORY(lcEDSEventFeeder, "gonnect.app.dateevents.feeder.eds")
 
-EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source,
-                               const QDateTime &currentTime, const QDateTime &timeRangeStart,
-                               const QDateTime &timeRangeEnd)
+EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDateTime &currentTime,
+                               const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd)
     : QObject(parent),
       m_source(source),
       m_currentTime(currentTime),
