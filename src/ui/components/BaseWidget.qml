@@ -27,46 +27,11 @@ Item {
     property int widthGrid
     property int heightGrid
 
-    property double xRelative: 0
-    property double yRelative: 0
-
-    property double wRelative: 0
-    property double hRelative: 0
-
-    property double wRelativeMin: 0
-    property double hRelativeMin: 0
+    property int minCellWidth: 8
+    property int minCellHeight: 8
 
     property alias root: resizableRect
 
-    function setWidth() {
-        // control.root.width = Math.round((control.gridWidth * control.wRelative) / control.gridCellWidth) * control.gridCellWidth
-    }
-
-    function setHeight() {
-        // control.root.height = Math.round((control.gridHeight * control.hRelative) / control.gridCellHeight) * control.gridCellHeight
-    }
-
-    function setX() {
-        // control.root.x = Math.round((control.gridWidth * control.xRelative) / control.gridCellWidth) * control.gridCellWidth
-        // control.root.x = Math.max(0, Math.min(control.root.x, control.gridWidth - control.root.width))
-    }
-
-    function setY() {
-        // control.root.y = Math.round((control.gridHeight * control.yRelative) / control.gridCellHeight) * control.gridCellHeight
-        // control.root.y = Math.max(0, Math.min(control.root.y, control.gridHeight - control.root.height))
-    }
-
-    function setMinSize() {
-        // control.wRelativeMin = Number(control.wMin / control.gridWidth)
-        // if (control.wRelative < control.wRelativeMin) {
-        //     control.wRelative = control.wRelativeMin
-        // }
-
-        // control.hRelativeMin = Number(control.hMin / control.gridHeight)
-        // if (control.hRelative < control.hRelativeMin) {
-        //     control.hRelative = control.hRelativeMin
-        // }
-    }
 
     function makeOpaque(base : color, opacity : double) : color {
         return Qt.rgba(base.r, base.g, base.b, opacity)
@@ -104,26 +69,6 @@ Item {
 
             if (newVal !== resizableRect.y) {
                 resizableRect.y = newVal
-            }
-        }
-        onWidthChanged: () => {
-            // Round value to grid coordinate and clamp min/max values
-            const cellWidth = control.gridCellWidth
-            const newVal = Math.min(Math.floor((resizableRect.width) / cellWidth) * cellWidth,
-                                    (ViewHelper.numberOfGridCells() - control.xGrid) * cellWidth)
-
-            if (newVal !== resizableRect.width) {
-                resizableRect.width = newVal
-            }
-        }
-        onHeightChanged: () => {
-            // Round value to grid coordinate and clamp min/max values
-            const cellHeight = control.gridCellHeight
-            const newVal = Math.min(Math.floor((resizableRect.height) / cellHeight) * cellHeight,
-                                    (ViewHelper.numberOfGridCells() - control.yGrid) * cellHeight)
-
-            if (newVal !== resizableRect.height) {
-                resizableRect.height = newVal
             }
         }
 
@@ -270,37 +215,12 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            // Resize within bounds
-                            let rb = control.gridWidth - (root.x + root.width)
-                            let bb = control.gridHeight - (root.y + root.height)
-                            let dx = mouse.x - resizeIndicator.startX
-                            if (dx > rb) {
-                                dx = rb
-                            }
-                            let dy = mouse.y - resizeIndicator.startY
-                            if (dy > bb) {
-                                dy = bb
-                            }
-
-                            // Width, X
-                            let nwr = Number((root.width + dx) / control.gridWidth)
-                            if (nwr >= control.wRelativeMin) {
-                                control.wRelative = nwr
-                            } else {
-                                control.wRelative = control.wRelativeMin
-                            }
-
-                            control.setWidth()
-
-                            // Height, Y
-                            let nhr = Number((root.height + dy) / control.gridHeight)
-                            if (nhr >= control.hRelativeMin) {
-                                control.hRelative = nhr
-                            } else {
-                                control.hRelative = control.hRelativeMin
-                            }
-
-                            control.setHeight()
+                            control.widthGrid = Util.clamp((root.width + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
+                                                           control.minCellWidth,
+                                                           ViewHelper.numberOfGridCells() - control.xGrid)
+                            control.heightGrid = Util.clamp((root.height + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
+                                                            control.minCellHeight,
+                                                            ViewHelper.numberOfGridCells() - control.yGrid)
 
                             SM.setUiDirtyState(true)
                         }
@@ -328,44 +248,14 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            // Resize within bounds
-                            let lb = root.x - parent.x
-                            let bb = control.gridHeight - (root.y + root.height)
-                            let dx = resizeIndicator.startX - mouse.x
-                            if (dx > lb) {
-                                dx = lb
-                            }
-                            let dy = mouse.y - resizeIndicator.startY
-                            if (dy > bb) {
-                                dy = bb
-                            }
-
-                            // Width, X
-                            let nwr = Number((root.width + dx) / control.gridWidth)
-                            if (nwr >= control.wRelativeMin) {
-                                control.wRelative = nwr
-                                control.xRelative = Number((root.x - dx) / control.gridWidth)
-
-                                control.setWidth()
-                                control.setX()
-                            } else {
-                                control.wRelative = control.wRelativeMin
-                                let oldWidth = root.width
-                                control.setWidth()
-
-                                control.xRelative = Number((root.x + (oldWidth - root.width)) / control.gridWidth)
-                                control.setX()
-                            }
-
-                            // Height, Y
-                            let nhr = Number((root.height + dy) / control.gridHeight)
-                            if (nhr >= control.hRelativeMin) {
-                                control.hRelative = nhr
-                            } else {
-                                control.hRelative = control.hRelativeMin
-                            }
-
-                            control.setHeight()
+                            const oldX = control.xGrid
+                            control.xGrid = Util.clamp((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
+                                                       0,
+                                                       oldX + control.widthGrid - control.minCellWidth)
+                            control.widthGrid -= control.xGrid - oldX
+                            control.heightGrid = Util.clamp((root.height + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
+                                                            control.minCellHeight,
+                                                            ViewHelper.numberOfGridCells() - control.yGrid)
 
                             SM.setUiDirtyState(true)
                         }
@@ -393,51 +283,17 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            // Resize within bounds
-                            let lb = root.x - parent.x
-                            let tb = root.y - parent.y
-                            let dx = resizeIndicator.startX - mouse.x
-                            if (dx > lb) {
-                                dx = lb
-                            }
-                            let dy = resizeIndicator.startY - mouse.y
-                            if (dy > tb) {
-                                dy = tb
-                            }
+                            const oldX = control.xGrid
+                            control.xGrid = Util.clamp((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
+                                                       0,
+                                                       oldX + control.widthGrid - control.minCellWidth)
+                            control.widthGrid -= control.xGrid - oldX
 
-                            // Width, X
-                            let nwr = Number((root.width + dx) / control.gridWidth)
-                            if (nwr >= control.wRelativeMin) {
-                                control.wRelative = nwr
-                                control.xRelative = Number((root.x - dx) / control.gridWidth)
-
-                                control.setWidth()
-                                control.setX()
-                            } else {
-                                control.wRelative = control.wRelativeMin
-                                let oldWidth = root.width
-                                control.setWidth()
-
-                                control.xRelative = Number((root.x + (oldWidth - root.width)) / control.gridWidth)
-                                control.setX()
-                            }
-
-                            // Height, Y
-                            let nhr = Number((root.height + dy) / control.gridHeight)
-                            if (nhr >= control.hRelativeMin) {
-                                control.hRelative = nhr
-                                control.yRelative = Number((root.y - dy) / control.gridHeight)
-
-                                control.setHeight()
-                                control.setY()
-                            } else {
-                                control.hRelative = control.hRelativeMin
-                                let oldHeight = root.height
-                                control.setHeight()
-
-                                control.yRelative = Number((root.y + (oldHeight - root.height)) / control.gridHeight)
-                                control.setY()
-                            }
+                            const oldY = control.yGrid
+                            control.yGrid = Util.clamp((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
+                                                       0,
+                                                       oldY + control.heightGrid - control.minCellHeight)
+                            control.heightGrid -= control.yGrid - oldY
 
                             SM.setUiDirtyState(true)
                         }
@@ -465,44 +321,14 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            // Resize within bounds
-                            let rb = control.gridWidth - (root.x + root.width)
-                            let tb = root.y - parent.y
-                            let dx = mouse.x - resizeIndicator.startX
-                            if (dx > rb) {
-                                dx = rb
-                            }
-                            let dy = resizeIndicator.startY - mouse.y
-                            if (dy > tb) {
-                                dy = tb
-                            }
-
-                            // Width, X
-                            let nwr = Number((root.width + dx) / control.gridWidth)
-                            if (nwr >= control.wRelativeMin) {
-                                control.wRelative = nwr
-                            } else {
-                                control.wRelative = control.wRelativeMin
-                            }
-
-                            control.setWidth()
-
-                            // Height, Y
-                            let nhr = Number((root.height + dy) / control.gridHeight)
-                            if (nhr >= control.hRelativeMin) {
-                                control.hRelative = nhr
-                                control.yRelative = Number((root.y - dy) / control.gridHeight)
-
-                                control.setHeight()
-                                control.setY()
-                            } else {
-                                control.hRelative = control.hRelativeMin
-                                let oldHeight = root.height
-                                control.setHeight()
-
-                                control.yRelative = Number((root.y + (oldHeight - root.height)) / control.gridHeight)
-                                control.setY()
-                            }
+                            const oldY = control.yGrid
+                            control.widthGrid = Util.clamp((root.width + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
+                                                            control.minCellWidth,
+                                                            ViewHelper.numberOfGridCells() - control.xGrid)
+                            control.yGrid = Util.clamp((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
+                                                       0,
+                                                       oldY + control.heightGrid - control.minCellHeight)
+                            control.heightGrid -= control.yGrid - oldY
 
                             SM.setUiDirtyState(true)
                         }
