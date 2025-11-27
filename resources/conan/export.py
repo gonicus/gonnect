@@ -1,7 +1,20 @@
 #!/usr/bin/env python3
 import yaml
 import pathlib
-import subprocess
+from conan.errors import ConanException
+from conan.api.conan_api import ConanAPI
+from conan.api.subapi.export import ExportAPI
+from conan.internal.model.version_range import validate_conan_version
+
+required_conan_version = ">=2.20"
+try:
+    validate_conan_version(required_conan_version)
+except ConanException:
+    print(f"Error: conan version {required_conan_version} required")
+    exit(1)
+
+conan_api = ConanAPI()
+api = ExportAPI(conan_api, conan_api._api_helpers)
 
 recipes = pathlib.Path(__file__).parent / pathlib.Path("recipes")
 for recipe_dir in [r for r in recipes.iterdir() if r.is_dir()]:
@@ -14,5 +27,4 @@ for recipe_dir in [r for r in recipes.iterdir() if r.is_dir()]:
             version = list(info.get('versions').keys())[0]
             sub_path = info.get('versions').get(version).get('folder')
 
-            print(f"Exporting {package_name} {version}...")
-            subprocess.run("conan export %s --version=%s" % (pathlib.PurePath(recipe_dir, sub_path), version) , shell=True, capture_output=True, text=True)
+            api.export(pathlib.PurePath(recipe_dir, sub_path, "conanfile.py"), package_name, version)
