@@ -731,10 +731,7 @@ target_include_directories(gonnect
     SYSTEM PRIVATE ../external/hid-rp/hid-rp
 )
 
-set(RUNTIME_DESTINATION "bin")
-
 if(APPLE OR WIN32)
-    set(RUNTIME_DESTINATION ".")
     qt_generate_deploy_qml_app_script(
         TARGET gonnect
         OUTPUT_SCRIPT deploy_script
@@ -747,6 +744,6 @@ endif()
 
 install(TARGETS gonnect
     BUNDLE DESTINATION .
-    RUNTIME DESTINATION ${RUNTIME_DESTINATION}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
