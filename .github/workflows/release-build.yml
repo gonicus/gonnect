@@ -1,4 +1,4 @@
-name: GOnnect Release build
+name: GOnnect Publish
 on:
   workflow_dispatch:
   push:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   flatpak:
-    name: "Release GOnnect Flatpak"
+    name: "Release GOnnect (Flatpak)"
     runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/')
     container:
@@ -27,6 +27,11 @@ jobs:
         with:
           lfs: 'true'
           submodules: 'recursive'
+      - name: Reading GOnnect version
+        shell: bash
+        id: var
+        run: |
+          echo "gonnect_version=$(grep -oP 'GOnnect VERSION ([0-9.]+)' CMakeLists.txt | awk '{ print $3 }')" >> $GITHUB_OUTPUT
 
       - uses: flatpak/flatpak-github-actions/flatpak-builder@92ae9851ad316786193b1fd3f40c4b51eb5cb101 # v6.6
         with:
@@ -34,19 +39,19 @@ jobs:
           build-bundle: 'true'
           upload-artifact: 'false'
           manifest-path: resources/flatpak/de.gonicus.gonnect.yml
-          cache-key: flatpak-builder-${{ github.sha }}
+          cache-key: flatpak-builder-${{ steps.var.outputs.gonnect_version }}
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: GOnnect.flatpak
-          tag: ${{ github.ref }}
+          asset_name: GOnnect-${{ steps.var.outputs.gonnect_version }}.flatpak
           overwrite: true
 
   build-windows:
     runs-on: windows-2025
-    name: "Release GOnnect Installer (Windows)"
+    name: "Release GOnnect (Windows)"
     if: startsWith(github.ref, 'refs/tags/')
 
     steps:
@@ -73,5 +78,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/GOnnect*.exe
-          tag: ${{ github.ref }}
+          file_glob: true
           overwrite: true
