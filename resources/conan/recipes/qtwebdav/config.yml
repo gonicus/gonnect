@@ -1,3 +1,8 @@
 versions:
-  "3.19.0":
+  '2025-03-16':
     folder: all
+updater:
+  source: github
+  id: QtWebDAV/QtWebDAV
+  branch: master
+  url-pattern: https://github.com/QtWebDAV/QtWebDAV/archive/${sha}.zip
