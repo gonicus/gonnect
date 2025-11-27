@@ -354,100 +354,100 @@
 <context>
     <name>Conference</name>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="123"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="176"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="124"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="177"/>
         <source>Room name:</source>
         <translation>Nombre de la sala virtual:</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="136"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="137"/>
         <source>Authenticate</source>
         <translation>Autenticar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="204"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="205"/>
         <source>Please authenticate in the opened browser window...</source>
         <translation>Por favor, autentifíquese en la ventana del navegador abierta...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="338"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="352"/>
         <source>This conference is protected by a password. Please enter it to join the room.</source>
         <translation>Esta conferencia está protegida por una contraseña. Por favor, introdúzcala para entrar en la sala.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="349"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="492"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="363"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="506"/>
         <source>Password</source>
         <translation>Contraseña</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="363"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="377"/>
         <source>Remember password</source>
         <translation>Recordar contraseña</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="375"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="542"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="389"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="556"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="382"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="396"/>
         <source>Join Room</source>
         <translation>Entrar en la sala</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="452"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="466"/>
         <source>Enter a password to protect this conference room. Other participants must enter it before taking part in the session.</source>
         <translation>Introduzca una contraseña para proteger esta sala de conferencias. Los demás participantes deben introducirla antes de participar en la sesión.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="463"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="477"/>
         <source>This password has been set for the conference room and must be entered by participants before taking part in the session.</source>
         <translation>Esta contraseña se ha establecido para la sala de conferencias y los participantes deben introducirla antes de participar en la sesión.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="474"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="488"/>
         <source>The room password has been set by someone else.</source>
         <translation>La contraseña de la sala ha sido establecida por otra persona.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="530"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="544"/>
         <source>Show password</source>
         <translation>Mostrar contraseña</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="550"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="564"/>
         <source>Remove</source>
         <translation>Eliminar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="556"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="570"/>
         <source>Save</source>
         <translation>Guardar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="598"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="612"/>
         <source>No video (audio only)</source>
         <translation>Sin vídeo (solo audio)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="603"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="617"/>
         <source>Lowest quality</source>
         <translation>Calidad inferior</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="608"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="622"/>
         <source>Standard quality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="613"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="627"/>
         <source>Highest quality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="618"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="632"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -513,57 +513,72 @@
         <translation type="unfinished">Pantalla</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="229"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="234"/>
+        <source>Share window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="239"/>
+        <source>Share screen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="249"/>
         <source>Camera</source>
         <translation type="unfinished">Cámera</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="247"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="267"/>
         <source>Micro</source>
         <translation type="unfinished">Micrófono</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="266"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="286"/>
         <source>Output</source>
         <translation type="unfinished">Salida</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="284"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="304"/>
         <source>More</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="296"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="316"/>
         <source>Noise supression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="302"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="322"/>
         <source>Toggle subtitles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="309"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="329"/>
+        <source>Toggle whiteboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="335"/>
         <source>Video quality...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="318"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="344"/>
         <source>Set room password...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="325"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="351"/>
         <source>Mute everyone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="380"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="406"/>
         <source>Leave conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="388"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="414"/>
         <source>End conference for all</source>
         <translation type="unfinished"></translation>
     </message>
@@ -579,12 +594,12 @@
 <context>
     <name>Credentials</name>
     <message>
-        <location filename="../src/platform/Credentials.cpp" line="59"/>
+        <location filename="../src/platform/Credentials.cpp" line="61"/>
         <source>storing credentials failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/platform/Credentials.cpp" line="107"/>
+        <location filename="../src/platform/Credentials.cpp" line="112"/>
         <source>reading credentials failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -620,7 +635,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="278"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="279"/>
         <source>Join</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1053,32 +1068,32 @@
 <context>
     <name>JitsiConnector</name>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="157"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="162"/>
         <source>New chat message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="199"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="206"/>
         <source>Unnamed participant</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1103"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1165"/>
         <source>Active conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1108"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1170"/>
         <source>Hang up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="706"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="761"/>
         <source>%1 has joined the conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="720"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="775"/>
         <source>%1 has left the conference</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1115,18 +1130,18 @@
     </message>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="183"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="364"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="363"/>
         <source>LDAP error: %1</source>
         <translation type="unfinished">Error LDAP: %1</translation>
     </message>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="281"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="436"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="435"/>
         <source>Parse error: %1</source>
         <translation>Error de sintaxis: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="350"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="349"/>
         <source>Failed to initialize LDAP connection: %1</source>
         <translation type="unfinished">No se pudo inicializar la conexión LDAP: %1</translation>
     </message>
