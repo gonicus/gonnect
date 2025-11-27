@@ -61,3 +61,7 @@ tags
 
 # Persistent undo
 [._]*.un~
+
+# Updater
+updater.sqlite
+__pycache__

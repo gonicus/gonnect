@@ -275,6 +275,7 @@ void DateEventManager::onTimerTimeout()
                 auto notification = new Notification(tr("Conference starting soon"), summary,
                                                      Notification::Priority::high, &notMan);
 
+                notification->setIcon(":/icons/gonnect.svg");
                 notification->addButton(tr("Join"), "join-meeting", "", {});
                 const auto notificationId = notMan.add(notification);
 
