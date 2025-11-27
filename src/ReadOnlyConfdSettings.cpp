@@ -12,7 +12,6 @@ static constexpr const char *NULL_DEVICE_NAME = "nul";
 static constexpr const char *NULL_DEVICE_NAME = "/dev/null";
 #endif
 
-#include "Application.h"
 #include "ReadOnlyConfdSettings.h"
 
 Q_LOGGING_CATEGORY(lcReadOnlySettings, "gonnect.app.settings")
@@ -70,7 +69,7 @@ void ReadOnlyConfdSettings::readConfd()
 
     QStringList entries;
 
-    if (Application::isFlatpak()) {
+    if (qEnvironmentVariable("container") == "flatpak") {
         const auto fpBaseDir = QDir("/app/etc/gonnect");
         entries += fpBaseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
     }

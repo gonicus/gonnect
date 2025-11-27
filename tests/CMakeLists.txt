@@ -3,7 +3,7 @@ set(CMAKE_AUTORCC ON)
 
 include(FindPkgConfig)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Quick Test)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Test)
 
 add_definitions(-DAPP_TESTS)
 enable_testing(true)
@@ -37,6 +37,5 @@ target_link_libraries(contactsTest
     PRIVATE
         Qt6::Core
         Qt6::Quick
-        Qt6::Widgets
         Qt6::Test
 )
