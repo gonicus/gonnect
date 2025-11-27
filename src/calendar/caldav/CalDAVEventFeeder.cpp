@@ -136,14 +136,14 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
 
             // Status filter
             icalproperty_status status = icalcomponent_get_status(event);
-            bool isCancelled = (status == ICAL_STATUS_CANCELLED
-                                || status == ICAL_STATUS_FAILED
+            bool isCancelled = (status == ICAL_STATUS_CANCELLED || status == ICAL_STATUS_FAILED
                                 || status == ICAL_STATUS_DELETED);
 
             // Skip non-recurrent events that are cancelled / outside of our date range
             // as well as any events without a jitsi meeting as a location
             if (isNoJitsiMeeting
-                || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd || isCancelled)
+                || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd
+                     || isCancelled)
                     && !isRecurrent && !isUpdatedRecurrence)) {
                 continue;
             }
@@ -190,7 +190,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 }
             } else if (isUpdatedRecurrence) {
                 // Updates of a recurrent event instance
-                if (isCancelled || start < m_config.timeRangeStart || start > m_config.timeRangeEnd) {
+                if (isCancelled || start < m_config.timeRangeStart
+                    || start > m_config.timeRangeEnd) {
                     // Updated recurrence doesn't match our criteria anymore
                     manager.removeDateEvent(id);
                 } else if (manager.isAddedDateEvent(id)) {
@@ -198,13 +199,13 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                     manager.modifyDateEvent(id, m_config.source, start, end, summary, location);
                 } else {
                     // Does not exist, e.g. moved from past to future, different day
-                    manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                       location));
+                    manager.addDateEvent(
+                            new DateEvent(id, m_config.source, start, end, summary, location));
                 }
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
-                manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                   location));
+                manager.addDateEvent(
+                        new DateEvent(id, m_config.source, start, end, summary, location));
             }
         }
     } else {

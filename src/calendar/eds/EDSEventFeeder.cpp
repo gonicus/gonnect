@@ -372,13 +372,13 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             QDateTime start = createDateTimeFromTimeType(dtstart);
 
             // Location
-            QString location = manager.getJitsiRoomFromLocation(i_cal_component_get_location(component));
+            QString location =
+                    manager.getJitsiRoomFromLocation(i_cal_component_get_location(component));
             bool isNoJitsiMeeting = location.isEmpty();
 
             // Status filter
             ICalPropertyStatus status = i_cal_component_get_status(component);
-            bool isCancelled = (status == I_CAL_STATUS_CANCELLED
-                                || status == I_CAL_STATUS_FAILED
+            bool isCancelled = (status == I_CAL_STATUS_CANCELLED || status == I_CAL_STATUS_FAILED
                                 || status == I_CAL_STATUS_DELETED);
 
             // Skip non-recurrent events that are cancelled / outside of our date range
@@ -440,13 +440,13 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                     manager.modifyDateEvent(id, concreteSource, start, end, summary, location);
                 } else {
                     // Does not exist, e.g. moved from past to future, different day
-                    manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
-                                                       location));
+                    manager.addDateEvent(
+                            new DateEvent(id, concreteSource, start, end, summary, location));
                 }
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
-                manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
-                                                   location));
+                manager.addDateEvent(
+                        new DateEvent(id, concreteSource, start, end, summary, location));
             }
         }
     }

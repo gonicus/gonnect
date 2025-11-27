@@ -132,9 +132,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         bool isNoJitsiMeeting = location.isEmpty();
 
                         // Status filter
-                        bool isCancelled =
-                                (event->status()
-                                         == KCalendarCore::Incidence::Status::StatusCanceled);
+                        bool isCancelled = (event->status()
+                                            == KCalendarCore::Incidence::Status::StatusCanceled);
 
                         // Skip non-recurrent events that are cancelled / outside of our date range
                         // as well as any events without a jitsi meeting as a location
@@ -180,16 +179,17 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                 manager.removeDateEvent(id);
                             } else if (manager.isAddedDateEvent(id)) {
                                 // Exists but modified
-                                manager.modifyDateEvent(id, m_source, start, end, summary, location);
+                                manager.modifyDateEvent(id, m_source, start, end, summary,
+                                                        location);
                             } else {
                                 // Does not exist, e.g. moved from past to future, different day
-                                manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
-                                                                   location));
+                                manager.addDateEvent(
+                                        new DateEvent(id, m_source, start, end, summary, location));
                             }
                         } else {
                             // Normal event, no recurrence, or update of a recurrent instance
-                            manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
-                                                               location));
+                            manager.addDateEvent(
+                                    new DateEvent(id, m_source, start, end, summary, location));
                         }
                     }
                 }
