@@ -71,7 +71,9 @@ Item {
         id: snapGrid
         anchors {
             fill: parent
-            margins: 24
+            topMargin: 24
+            bottomMargin: 24
+            leftMargin: 24
         }
 
         onWidthChanged: () => {

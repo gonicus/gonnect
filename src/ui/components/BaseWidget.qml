@@ -24,14 +24,13 @@ Item {
 
     property int xGrid
     property int yGrid
-    property int widthGrid
-    property int heightGrid
+    property int widthGrid: control.minCellWidth
+    property int heightGrid: control.minCellHeight
 
     property int minCellWidth: 8
     property int minCellHeight: 8
 
     property alias root: resizableRect
-
 
     function makeOpaque(base : color, opacity : double) : color {
         return Qt.rgba(base.r, base.g, base.b, opacity)
@@ -42,8 +41,8 @@ Item {
         id: resizableRect
         x: control.xGrid * control.gridCellWidth
         y: control.yGrid * control.gridCellHeight
-        width: control.widthGrid * control.gridCellWidth
-        height: control.heightGrid * control.gridCellHeight
+        width: control.widthGrid * control.gridCellWidth - 24
+        height: control.heightGrid * control.gridCellHeight - 24
         radius: resizableRect.widgetRadius
         color: Theme.backgroundColor
 

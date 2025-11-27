@@ -12,12 +12,7 @@ BaseWidget {
         id: historyWidget
         parent: control.root
         color: "transparent"
-        anchors {
-            left: parent.left
-            top: parent.top
-            right: parent.right
-            bottom: togglerList.visible ? togglerList.top : parent.bottom
-        }
+        anchors.fill: parent
 
         CardHeading {
             id: historyHeading
@@ -148,7 +143,6 @@ BaseWidget {
     TogglerList {
         id: togglerList
         visible: togglerList.count > 0
-        parent: control.widget
         clip: true
         anchors {
             left: parent.left
