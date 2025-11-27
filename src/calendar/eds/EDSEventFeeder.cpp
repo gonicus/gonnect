@@ -388,7 +388,8 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             // Skip non-recurrent events that are cancelled / outside of our date range
             // as well as any events without a jitsi meeting as a location
             if (isNoJitsiMeeting
-                || ((start < m_timeRangeStart || start > m_timeRangeEnd || end < currentTime || isCancelled)
+                || ((start < m_timeRangeStart || start > m_timeRangeEnd || end < currentTime
+                     || isCancelled)
                     && !isRecurrent && !isUpdatedRecurrence)) {
                 continue;
             }
@@ -423,10 +424,10 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                         }
 
                         if (!exdates.contains(recurStart) && recurStart >= m_timeRangeStart) {
-                            QString nid = QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
+                            QString nid =
+                                    QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
                             manager.addDateEvent(new DateEvent(nid, concreteSource, recurStart,
-                                                               recurEnd, summary,
-                                                               location));
+                                                               recurEnd, summary, location));
                         }
                     }
 
@@ -434,7 +435,8 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 }
             } else if (isUpdatedRecurrence) {
                 // Updates of a recurrent event instance
-                if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd || end < currentTime) {
+                if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd
+                    || end < currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
                     manager.removeDateEvent(id);
                 } else if (manager.isAddedDateEvent(id)) {

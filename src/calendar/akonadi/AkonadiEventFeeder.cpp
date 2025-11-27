@@ -141,7 +141,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         // Skip non-recurrent events that are cancelled / outside of our date range
                         // as well as any events without a jitsi meeting as a location
                         if (isNoJitsiMeeting
-                            || ((start < m_timeRangeStart || start > m_timeRangeEnd || end < currentTime || isCancelled)
+                            || ((start < m_timeRangeStart || start > m_timeRangeEnd
+                                 || end < currentTime || isCancelled)
                                 && !isRecurrent && !isUpdatedRecurrence)) {
                             continue;
                         }
@@ -166,17 +167,19 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                     break;
                                 }
 
-                                if (!exdates.contains(recurStart) && recurStart >= m_timeRangeStart) {
-                                    QString nid =
-                                            QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
+                                if (!exdates.contains(recurStart)
+                                    && recurStart >= m_timeRangeStart) {
+                                    QString nid = QString("%1-%2").arg(id).arg(
+                                            recurStart.toMSecsSinceEpoch());
                                     manager.addDateEvent(new DateEvent(nid, m_source, recurStart,
-                                                                       recurEnd,
-                                                                       summary, location));
+                                                                       recurEnd, summary,
+                                                                       location));
                                 }
                             }
                         } else if (isUpdatedRecurrence) {
                             // Updates of a recurrent event instance
-                            if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd || end < currentTime) {
+                            if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd
+                                || end < currentTime) {
                                 // Updated recurrence doesn't match our criteria anymore
                                 manager.removeDateEvent(id);
                             } else if (manager.isAddedDateEvent(id)) {
