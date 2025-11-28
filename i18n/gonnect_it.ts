@@ -113,35 +113,42 @@
     </message>
 </context>
 <context>
+    <name>BasePage</name>
+    <message>
+        <location filename="../src/ui/components/pages/BasePage.qml" line="97"/>
+        <source>Add widgets</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>BurgerMenu</name>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="18"/>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="22"/>
         <source>Enable UI edit mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="25"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="18"/>
         <source>Disable UI edit mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="32"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
         <source>Toggle fullscreen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="37"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="35"/>
         <source>Shortcuts...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="27"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="40"/>
         <source>About...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="32"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="45"/>
         <source>Quit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -267,56 +274,6 @@
     <message>
         <location filename="../src/ui/components/CallerBigAvatar.qml" line="68"/>
         <source>Calling...</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Calls</name>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="54"/>
-        <source>History</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="98"/>
-        <location filename="../src/ui/components/pages/Calls.qml" line="125"/>
-        <source>All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="101"/>
-        <source>SIP</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="104"/>
-        <source>Jitsi Meet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="128"/>
-        <source>Incoming</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="131"/>
-        <source>Outgoing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="134"/>
-        <source>Missed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="240"/>
-        <location filename="../src/ui/components/pages/Calls.qml" line="259"/>
-        <source>Favorites</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/pages/Calls.qml" line="264"/>
-        <source>Conferences</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -555,26 +512,31 @@
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="309"/>
+        <source>Toggle whiteboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="315"/>
         <source>Video quality...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="318"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="324"/>
         <source>Set room password...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="325"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="331"/>
         <source>Mute everyone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="380"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="386"/>
         <source>Leave conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="388"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="394"/>
         <source>End conference for all</source>
         <translation type="unfinished"></translation>
     </message>
@@ -590,12 +552,12 @@
 <context>
     <name>Credentials</name>
     <message>
-        <location filename="../src/platform/Credentials.cpp" line="59"/>
+        <location filename="../src/platform/Credentials.cpp" line="61"/>
         <source>storing credentials failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/platform/Credentials.cpp" line="107"/>
+        <location filename="../src/platform/Credentials.cpp" line="112"/>
         <source>reading credentials failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -631,7 +593,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="278"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="279"/>
         <source>Join</source>
         <translation type="unfinished"></translation>
     </message>
@@ -689,12 +651,12 @@
 <context>
     <name>DateEventsWidget</name>
     <message>
-        <location filename="../src/ui/components/DateEventsWidget.qml" line="24"/>
+        <location filename="../src/ui/components/DateEventsWidget.qml" line="23"/>
         <source>Conferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsWidget.qml" line="50"/>
+        <location filename="../src/ui/components/DateEventsWidget.qml" line="49"/>
         <source>No upcoming conferences to display</source>
         <translation type="unfinished"></translation>
     </message>
@@ -712,7 +674,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/EditModeOptions.qml" line="48"/>
+        <location filename="../src/ui/components/EditModeOptions.qml" line="50"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
@@ -933,8 +895,13 @@
 <context>
     <name>FavoritesWidget</name>
     <message>
-        <location filename="../src/ui/components/FavoritesWidget.qml" line="24"/>
+        <location filename="../src/ui/components/FavoritesWidget.qml" line="23"/>
         <source>Favorites</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/FavoritesWidget.qml" line="51"/>
+        <source>No favorites to display</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -964,6 +931,14 @@
     <message>
         <location filename="../src/platform/flatpak/FlatpakUserInfo.cpp" line="40"/>
         <source>The UC client wants to use your name to configure your display name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GonnectWindow</name>
+    <message>
+        <location filename="../src/ui/GonnectWindow.qml" line="366"/>
+        <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1025,7 +1000,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryList.qml" line="317"/>
+        <location filename="../src/ui/components/HistoryList.qml" line="318"/>
         <source>hh:mm</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1071,38 +1046,38 @@
 <context>
     <name>HistoryWidget</name>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="25"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="20"/>
         <source>History</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="67"/>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="94"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="64"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="91"/>
         <source>All</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="70"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="67"/>
         <source>SIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="73"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="70"/>
         <source>Jitsi Meet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="97"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="94"/>
         <source>Incoming</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="100"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="97"/>
         <source>Outgoing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="103"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="100"/>
         <source>Missed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1142,32 +1117,32 @@
 <context>
     <name>JitsiConnector</name>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="157"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="162"/>
         <source>New chat message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="199"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="206"/>
         <source>Unnamed participant</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1103"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1165"/>
         <source>Active conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1108"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1170"/>
         <source>Hang up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="706"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="761"/>
         <source>%1 has joined the conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="720"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="775"/>
         <source>%1 has left the conference</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1204,18 +1179,18 @@
     </message>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="183"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="364"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="363"/>
         <source>LDAP error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="281"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="436"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="435"/>
         <source>Parse error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="350"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="349"/>
         <source>Failed to initialize LDAP connection: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1241,42 +1216,42 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="53"/>
+        <location filename="../src/Main.qml" line="54"/>
         <source>There are still phone calls going on, do you really want to quit?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="81"/>
+        <location filename="../src/Main.qml" line="82"/>
         <source>Please enter the password for %1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="92"/>
+        <location filename="../src/Main.qml" line="93"/>
         <source>Please enter the recovery key for %1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="107"/>
+        <location filename="../src/Main.qml" line="108"/>
         <source>End all calls</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="108"/>
+        <location filename="../src/Main.qml" line="109"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="123"/>
+        <location filename="../src/Main.qml" line="124"/>
         <source>Please enter the password for the SIP account:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="186"/>
+        <location filename="../src/Main.qml" line="187"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="192"/>
+        <location filename="../src/Main.qml" line="193"/>
         <source>Fatal Error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1284,49 +1259,49 @@
 <context>
     <name>MainTabBar</name>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="132"/>
-        <location filename="../src/ui/components/MainTabBar.qml" line="133"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="293"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="294"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="140"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="302"/>
         <source>Conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="141"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="303"/>
         <source>No active conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="148"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="311"/>
         <source>Call</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="149"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="312"/>
         <source>No active call</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="178"/>
-        <location filename="../src/ui/components/MainTabBar.qml" line="179"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="344"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="345"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="387"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="361"/>
         <source>Move up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="413"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="387"/>
         <source>Move down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="439"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="413"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1444,7 +1419,7 @@
 <context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../src/StateManager.cpp" line="154"/>
+        <location filename="../src/StateManager.cpp" line="181"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation type="unfinished">
@@ -3210,27 +3185,27 @@
 <context>
     <name>StateManager</name>
     <message>
-        <location filename="../src/StateManager.cpp" line="73"/>
+        <location filename="../src/StateManager.cpp" line="100"/>
         <source>Show dial window and focus search field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="76"/>
+        <location filename="../src/StateManager.cpp" line="103"/>
         <source>End all calls</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="78"/>
+        <location filename="../src/StateManager.cpp" line="105"/>
         <source>Redial last outgoing call</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="81"/>
+        <location filename="../src/StateManager.cpp" line="108"/>
         <source>Toggle hold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="129"/>
+        <location filename="../src/StateManager.cpp" line="156"/>
         <source>Phone calls are active</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3378,23 +3353,18 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="71"/>
-        <source>An example widget, ha ha</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="96"/>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="124"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="97"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="121"/>
         <source>&lt;b&gt;%1&lt;/b&gt;&lt;br&gt;%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="144"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="141"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="152"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="149"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>

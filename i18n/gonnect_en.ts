@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/components/CallSideBar.qml" line="204"/>
+        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/components/CallSideBar.qml" line="204"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
@@ -15,7 +15,7 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/components/ConferenceButtonBar.qml" line="101"/>
+        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/components/ConferenceButtonBar.qml" line="101"/>
         <source>%n minutes left</source>
         <translation>
             <numerusform>%n minute left</numerusform>
@@ -26,7 +26,7 @@
 <context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../../../src/StateManager.cpp" line="154"/>
+        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/StateManager.cpp" line="181"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>
@@ -38,7 +38,7 @@
 <context>
     <name>ViewHelper</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="105"/>
+        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/ViewHelper.cpp" line="105"/>
         <source>%n minute(s)</source>
         <translation>
             <numerusform>%n Minute</numerusform>
@@ -46,7 +46,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="108"/>
+        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/ViewHelper.cpp" line="108"/>
         <source>1 hour and %n minute(s)</source>
         <translation>
             <numerusform>1 Stunde und %n Minute</numerusform>
@@ -54,7 +54,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="110"/>
+        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/ViewHelper.cpp" line="110"/>
         <source>%n hour(s)</source>
         <translation>
             <numerusform>eine Stunde</numerusform>
