@@ -140,19 +140,4 @@ BaseWidget {
             }
         }
     }
-
-    TogglerList {
-        id: togglerList
-        visible: togglerList.count > 0
-        clip: true
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-
-            leftMargin: 10
-            rightMargin: 10
-            bottomMargin: 3
-        }
-    }
 }

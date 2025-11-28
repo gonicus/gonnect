@@ -397,18 +397,30 @@ BaseWindow {
             }
         }
 
-        Rectangle {
+        Item {
             id: bottomBar
-            visible: mainTabBar.selectedPageType === GonnectWindow.PageType.Base
-            color: "transparent"
+            visible: true //  mainTabBar.selectedPageType === GonnectWindow.PageType.Base
             height: 35
             anchors {
                 right: parent.right
-                left: parent.left
+                left: mainTabBar.right
                 bottom: parent.bottom
             }
 
+            TogglerList {
+                id: togglerList
+                visible: togglerList.count > 0
+                clip: true
+                anchors {
+                    left: parent.left
+                    right: rightRow.left
+                    rightMargin: 24
+                    verticalCenter: rightRow.verticalCenter
+                }
+            }
+
             Row {
+                id: rightRow
                 spacing: 10
                 anchors {
                     right: parent.right
@@ -416,7 +428,6 @@ BaseWindow {
 
                     topMargin: 6
                     bottomMargin: 6
-                    leftMargin: 12
                     rightMargin: 12
                 }
 
