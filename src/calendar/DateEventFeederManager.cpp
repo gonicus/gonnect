@@ -90,7 +90,8 @@ void DateEventFeederManager::initFeederConfigs()
 
             for (auto &cfg : std::as_const(configs)) {
                 m_dateEventFeeders.insert(
-                        cfg, plugin->createFeeder(cfg, currentTime, timeRangeStart, timeRangeEnd, this));
+                        cfg,
+                        plugin->createFeeder(cfg, currentTime, timeRangeStart, timeRangeEnd, this));
             }
         }
     }
