@@ -82,7 +82,7 @@ jobs:
     - name: Prepare
       uses: ./.github/actions/prepare-linux
       with:
-        conan: matrix.build-mode == 'manual'
+        conan: ${{ matrix.build-mode == 'manual' && 'true' || 'false' }}
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
