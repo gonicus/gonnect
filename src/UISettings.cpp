@@ -34,7 +34,8 @@ void UISettings::removeUISetting(const QString &group, const QString &key)
 
 QStringList UISettings::getPageIds()
 {
-    static const QRegularExpression dynamicPageName("^page_[0-9a-f]{32}$", QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression dynamicPageName("^page_[0-9a-f]{32}$",
+                                                    QRegularExpression::CaseInsensitiveOption);
 
     const QStringList keys = childGroups();
     QStringList matchingKeys;

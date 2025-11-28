@@ -10,41 +10,41 @@ class Theme : public QObject
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
 
     Q_PROPERTY(
-        Theme::ThemeVariant themeVariant MEMBER m_themeVariant NOTIFY themeVariantChanged FINAL)
+            Theme::ThemeVariant themeVariant MEMBER m_themeVariant NOTIFY themeVariantChanged FINAL)
     Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY isDarkModeChanged FINAL)
     Q_PROPERTY(bool useOwnDecoration READ useOwnDecoration NOTIFY useOwnDecorationChanged FINAL)
 
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(
-        QColor foregroundWhiteColor READ foregroundWhiteColor NOTIFY colorPaletteChanged FINAL)
+            QColor foregroundWhiteColor READ foregroundWhiteColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor foregroundHeaderIcons READ foregroundHeaderIcons NOTIFY colorPaletteChanged
-    FINAL)
+                       FINAL)
     Q_PROPERTY(QColor foregroundHeaderIconsInactive READ foregroundHeaderIconsInactive NOTIFY
-    colorPaletteChanged FINAL)
+                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor foregroundInitials READ foregroundInitials NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor secondaryTextColor READ secondaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor inactiveTextColor READ inactiveTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor secondaryInactiveTextColor READ secondaryInactiveTextColor NOTIFY
-    colorPaletteChanged FINAL)
+                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor accentColor READ accentColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor borderColor READ borderColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor borderHeaderIconHovered READ borderHeaderIconHovered NOTIFY
-    colorPaletteChanged FINAL)
+                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor highlightColor READ highlightColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundColor READ backgroundColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundSecondaryColor READ backgroundSecondaryColor NOTIFY
-    colorPaletteChanged FINAL)
+                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundOffsetColor READ backgroundOffsetColor NOTIFY colorPaletteChanged
-    FINAL)
+                       FINAL)
     Q_PROPERTY(QColor backgroundOffsetHoveredColor READ backgroundOffsetHoveredColor NOTIFY
-    colorPaletteChanged FINAL)
+                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundHeader READ backgroundHeader NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundHeaderSelected READ backgroundHeaderSelected NOTIFY
-    colorPaletteChanged FINAL)
+                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundHeaderInactive READ backgroundHeaderInactive NOTIFY
-    colorPaletteChanged FINAL)
+                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundHeaderIconHovered READ backgroundHeaderIconHovered NOTIFY
-    colorPaletteChanged FINAL)
+                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundInitials READ backgroundInitials NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor shadowColor READ shadowColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor redColor READ redColor NOTIFY colorPaletteChanged FINAL)
@@ -54,7 +54,7 @@ class Theme : public QObject
     Q_PROPERTY(QColor highContrastColor READ highContrastColor NOTIFY colorPaletteChanged FINAL)
 
     Q_PROPERTY(QColor buttonBackgroundHover READ buttonBackgroundHover NOTIFY
-    buttonBackgroundHoverChanged FINAL)
+                       buttonBackgroundHoverChanged FINAL)
     Q_PROPERTY(QColor frame READ frame NOTIFY frameChanged FINAL)
     Q_PROPERTY(QColor icons READ icons NOTIFY iconsChanged FINAL)
     Q_PROPERTY(QColor iconsAttention READ iconsAttention NOTIFY iconsAttentionChanged FINAL)
@@ -66,24 +66,24 @@ class Theme : public QObject
     Q_PROPERTY(QColor sidebarBorder READ sidebarBorder NOTIFY sidebarBorderChanged FINAL)
     Q_PROPERTY(QColor sidebarText READ sidebarText NOTIFY sidebarTextChanged FINAL)
     Q_PROPERTY(
-        QColor tabBackgroundText READ tabBackgroundText NOTIFY tabBackgroundTextChanged FINAL)
+            QColor tabBackgroundText READ tabBackgroundText NOTIFY tabBackgroundTextChanged FINAL)
     Q_PROPERTY(QColor tabLine READ tabLine NOTIFY tabLineChanged FINAL)
     Q_PROPERTY(QColor tabLoading READ tabLoading NOTIFY tabLoadingChanged FINAL)
     Q_PROPERTY(QColor tabText READ tabText NOTIFY tabTextChanged FINAL)
     Q_PROPERTY(QColor toolbar READ toolbar NOTIFY toolbarChanged FINAL)
     Q_PROPERTY(QColor toolbarBottomSeparator READ toolbarBottomSeparator NOTIFY
-    toolbarBottomSeparatorChanged FINAL)
+                       toolbarBottomSeparatorChanged FINAL)
     Q_PROPERTY(QColor toolbarField READ toolbarField NOTIFY toolbarFieldChanged FINAL)
     Q_PROPERTY(QColor toolbarFieldBorder READ toolbarFieldBorder NOTIFY toolbarFieldBorderChanged
-    FINAL)
+                       FINAL)
     Q_PROPERTY(QColor toolbarFieldBorderFocus READ toolbarFieldBorderFocus NOTIFY
-    toolbarFieldBorderFocusChanged FINAL)
+                       toolbarFieldBorderFocusChanged FINAL)
     Q_PROPERTY(QColor toolbarFieldText READ toolbarFieldText NOTIFY toolbarFieldTextChanged FINAL)
     Q_PROPERTY(QColor toolbarFieldTextFocus READ toolbarFieldTextFocus NOTIFY
-    toolbarFieldTextFocusChanged FINAL)
+                       toolbarFieldTextFocusChanged FINAL)
     Q_PROPERTY(QColor toolbarText READ toolbarText NOTIFY toolbarTextChanged FINAL)
     Q_PROPERTY(QColor toolbarTopSeparator READ toolbarTopSeparator NOTIFY toolbarTopSeparatorChanged
-    FINAL)
+                       FINAL)
 
 public:
     static Theme &instance()

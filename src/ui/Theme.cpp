@@ -35,7 +35,7 @@ bool Theme::useOwnDecoration()
 
         AppSettings settings;
         const auto settingsVal =
-        settings.value("generic/useOwnWindowDecoration", "auto").toString();
+                settings.value("generic/useOwnWindowDecoration", "auto").toString();
 
         if (settingsVal == "auto") {
             const auto desktop =
@@ -65,31 +65,31 @@ void Theme::onThemeVariantChanged()
 
     switch (m_themeVariant) {
 
-        case ThemeVariant::System: {
-            const auto portalScheme = ThemeManager::instance().colorScheme();
-            switch (portalScheme) {
-                case ThemeManager::ColorScheme::NO_PREFERENCE:
-                    setDarkMode(false);
-                    break;
+    case ThemeVariant::System: {
+        const auto portalScheme = ThemeManager::instance().colorScheme();
+        switch (portalScheme) {
+        case ThemeManager::ColorScheme::NO_PREFERENCE:
+            setDarkMode(false);
+            break;
 
-                case ThemeManager::ColorScheme::DARK:
-                    setDarkMode(true);
-                    break;
+        case ThemeManager::ColorScheme::DARK:
+            setDarkMode(true);
+            break;
 
-                case ThemeManager::ColorScheme::LIGHT:
-                    setDarkMode(false);
-                    break;
-            }
+        case ThemeManager::ColorScheme::LIGHT:
+            setDarkMode(false);
             break;
         }
+        break;
+    }
 
-                case ThemeVariant::Light:
-                    setDarkMode(false);
-                    break;
+    case ThemeVariant::Light:
+        setDarkMode(false);
+        break;
 
-                case ThemeVariant::Dark:
-                    setDarkMode(true);
-                    break;
+    case ThemeVariant::Dark:
+        setDarkMode(true);
+        break;
     }
 }
 
