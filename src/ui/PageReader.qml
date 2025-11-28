@@ -59,14 +59,66 @@ Item {
         }
     }
 
-    function loadHomePage(pageId : string) { // TODO: Update me!
+    function loadHomePage(pageId : string) {
         const page = pageRoot.getPage(pageId)
 
         const widgetIds = UISettings.getWidgetIds(pageId)
-        if (widgetIds.length > 0) {
+        if (widgetIds.length) {
             // Config-based layout
             for (const widgetId of widgetIds) {
                 control.createWidget(widgetId, page)
+            }
+
+        } else {
+            // Default page layout
+            const baseId = `${pageId}-widget_`
+            const basicBindings = {
+                gridWidth: Qt.binding(() => page.gridWidth),
+                gridHeight: Qt.binding(() => page.gridHeight),
+                gridCellWidth: Qt.binding(() => page.gridCellWidth),
+                gridCellHeight: Qt.binding(() => page.gridCellHeight)
+            }
+
+            const history = widgets.history.createObject(page.grid,
+                                                         Object.assign({
+                                                             widgetId: baseId + UISettings.generateUuid(),
+                                                             name: "history",
+                                                             page: page,
+                                                             xGrid: 0,
+                                                             yGrid: 0,
+                                                             widthGrid: 33,
+                                                             heightGrid: 50
+                                                         }, basicBindings))
+            if (history) {
+                page.model.add(history)
+            }
+
+            const favorites = widgets.favorites.createObject(page.grid,
+                                                             Object.assign({
+                                                                 widgetId: baseId + UISettings.generateUuid(),
+                                                                 name: "favorites",
+                                                                 page: page,
+                                                                 xGrid: 33,
+                                                                 yGrid: 0,
+                                                                 widthGrid: 17,
+                                                                 heightGrid: 28
+                                                             }, basicBindings))
+            if (favorites) {
+                page.model.add(favorites)
+            }
+
+            const dateEvents = widgets.dateEvents.createObject(page.grid,
+                                                               Object.assign({
+                                                                   widgetId: baseId + UISettings.generateUuid(),
+                                                                   name: "dateevents",
+                                                                   page: page,
+                                                                   xGrid: 33,
+                                                                   yGrid: 28,
+                                                                   widthGrid: 17,
+                                                                   heightGrid: 22
+                                                               }, basicBindings))
+            if (dateEvents) {
+                page.model.add(dateEvents)
             }
         }
     }

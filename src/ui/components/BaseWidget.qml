@@ -108,21 +108,18 @@ Item {
             }
 
             // Drag
-            Rectangle {
+            Item {
                 id: dragIndicator
                 width: root.width
                 height: root.height
-                color: "transparent"
                 anchors.centerIn: parent
 
                 DragHandler {
                     id: dragControl
                     acceptedButtons: Qt.LeftButton
-                    cursorShape: active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                     target: root
 
-                    // INFO: Temporarily override render/draw order of a widget
-                    // in edit mode.
+                    // Show dragged widget on top of all others
                     onGrabChanged: function(grab) {
                         if (grab === PointerDevice.GrabExclusive) {
                             control.page.resetWidgetElevation()
@@ -130,9 +127,8 @@ Item {
                         }
                     }
 
-                    onActiveChanged: function(active) {
-                        if (!active) {
-
+                    onActiveChanged: () => {
+                        if (!dragControl.active) {
                             // Re-establish bindings after dragging has ended
                             control.xGrid = Math.round(resizableRect.x / control.gridCellWidth)
                             control.yGrid = Math.round(resizableRect.y / control.gridCellHeight)
@@ -144,47 +140,33 @@ Item {
                         }
                     }
                 }
+
+                HoverHandler {
+                    cursorShape: dragControl.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                }
             }
 
             // Remove
-            Rectangle {
-                id: removeIndicator
-                width: 35
-                height: 35
-                color: Theme.backgroundSecondaryColor
-                radius: 6
+            Button {
+                id: removeButton
                 anchors.centerIn: parent
-
-                IconLabel {
-                    id: removeIcon
-                    anchors.centerIn: parent
-                    icon {
-                        source: Icons.editDelete
-                        width: parent.width * 0.75
-                        height: parent.height * 0.75
-                    }
+                height: removeButton.width
+                icon {
+                    source: Icons.editDelete
+                    width: 32
+                    height: 32
                 }
+                onClicked: () => {
+                    control.page.model.remove(control)
+                    control.destroy()
 
-                MouseArea {
-                    id: removeControl
-                    parent: removeIndicator
-                    anchors.fill: parent
-                    cursorShape: Qt.ForbiddenCursor
-                    drag.target: removeIndicator
-
-                    onClicked: {
-                        control.page.model.remove(control)
-                        control.destroy()
-
-                        SM.setUiDirtyState(true)
-                    }
+                    SM.setUiDirtyState(true)
                 }
             }
 
             // Resize
-            Rectangle {
-                id: resizeIndicator
-                color: "transparent"
+            Item {
+                id: resizeHandleOverlay
                 anchors.fill: parent
                 anchors.centerIn: parent
 
@@ -195,7 +177,7 @@ Item {
 
                 function setNewX(x : real) {
                     const oldX = control.xGrid
-                    const newX = Util.clamp(Math.round((root.x + x - resizeIndicator.startX) / control.gridCellWidth),
+                    const newX = Util.clamp(Math.round((root.x + x - resizeHandleOverlay.startX) / control.gridCellWidth),
                                             0,
                                             oldX + control.widthGrid - control.minCellWidth)
 
@@ -207,7 +189,7 @@ Item {
 
                 function setNewY(y : real) {
                     const oldY = control.yGrid
-                    const newY = Util.clamp(Math.round((root.y + y - resizeIndicator.startY) / control.gridCellHeight),
+                    const newY = Util.clamp(Math.round((root.y + y - resizeHandleOverlay.startY) / control.gridCellHeight),
                                             0,
                                             oldY + control.heightGrid - control.minCellHeight)
 
@@ -218,21 +200,21 @@ Item {
                 }
 
                 function setNewWidth(x : real) {
-                    control.widthGrid = Util.clamp((root.width + x - resizeIndicator.startX) / control.gridCellWidth,
+                    control.widthGrid = Util.clamp((root.width + x - resizeHandleOverlay.startX) / control.gridCellWidth,
                                                     control.minCellWidth,
                                                     ViewHelper.numberOfGridCells() - control.xGrid)
                 }
 
                 function setNewHeight(y : real) {
-                    control.heightGrid = Util.clamp((root.height + y - resizeIndicator.startY) / control.gridCellHeight,
+                    control.heightGrid = Util.clamp((root.height + y - resizeHandleOverlay.startY) / control.gridCellHeight,
                                                     control.minCellHeight,
                                                     ViewHelper.numberOfGridCells() - control.yGrid)
                 }
 
                 component ResizeHandle : Item {
                     id: resizeHandle
-                    width: resizeIndicator.indicatorSize
-                    height: resizeIndicator.indicatorSize
+                    width: resizeHandleOverlay.indicatorSize
+                    height: resizeHandleOverlay.indicatorSize
 
                     property alias cursorShape: resizeMouseArea.cursorShape
 
@@ -245,8 +227,8 @@ Item {
                         drag.target: resizeHandle
 
                         onPressed: function(mouse) {
-                            resizeIndicator.startX = mouse.x
-                            resizeIndicator.startY = mouse.y
+                            resizeHandleOverlay.startX = mouse.x
+                            resizeHandleOverlay.startY = mouse.y
                         }
 
                         onPositionChanged: function(mouse) {
@@ -261,9 +243,9 @@ Item {
                     anchors.top: parent.top
                     cursorShape: Qt.SizeFDiagCursor
 
-                    onPositionChanged: function(mouse) {
-                        resizeIndicator.setNewX(mouse.x)
-                        resizeIndicator.setNewY(mouse.y)
+                    onPositionChanged: mouse => {
+                        resizeHandleOverlay.setNewX(mouse.x)
+                        resizeHandleOverlay.setNewY(mouse.y)
                         SM.setUiDirtyState(true)
                     }
                 }
@@ -279,7 +261,7 @@ Item {
                     }
 
                     onPositionChanged: mouse => {
-                        resizeIndicator.setNewY(mouse.y)
+                        resizeHandleOverlay.setNewY(mouse.y)
                         SM.setUiDirtyState(true)
                     }
                 }
@@ -290,9 +272,9 @@ Item {
                     anchors.top: parent.top
                     cursorShape: Qt.SizeBDiagCursor
 
-                    onPositionChanged: function(mouse) {
-                        resizeIndicator.setNewY(mouse.y)
-                        resizeIndicator.setNewWidth(mouse.x)
+                    onPositionChanged: mouse => {
+                        resizeHandleOverlay.setNewY(mouse.y)
+                        resizeHandleOverlay.setNewWidth(mouse.x)
                         SM.setUiDirtyState(true)
                     }
                 }
@@ -308,7 +290,7 @@ Item {
                     }
 
                     onPositionChanged: mouse => {
-                        resizeIndicator.setNewWidth(mouse.x)
+                        resizeHandleOverlay.setNewWidth(mouse.x)
                         SM.setUiDirtyState(true)
                     }
                 }
@@ -319,9 +301,9 @@ Item {
                     anchors.bottom: parent.bottom
                     cursorShape: Qt.SizeFDiagCursor
 
-                    onPositionChanged: function(mouse) {
-                        resizeIndicator.setNewWidth(mouse.x)
-                        resizeIndicator.setNewHeight(mouse.y)
+                    onPositionChanged: mouse => {
+                        resizeHandleOverlay.setNewWidth(mouse.x)
+                        resizeHandleOverlay.setNewHeight(mouse.y)
                         SM.setUiDirtyState(true)
                     }
                 }
@@ -337,7 +319,7 @@ Item {
                     }
 
                     onPositionChanged: mouse => {
-                        resizeIndicator.setNewHeight(mouse.y)
+                        resizeHandleOverlay.setNewHeight(mouse.y)
                         SM.setUiDirtyState(true)
                     }
                 }
@@ -348,9 +330,9 @@ Item {
                     anchors.bottom: parent.bottom
                     cursorShape: Qt.SizeBDiagCursor
 
-                    onPositionChanged: function(mouse) {
-                        resizeIndicator.setNewX(mouse.x)
-                        resizeIndicator.setNewHeight(mouse.y)
+                    onPositionChanged: mouse => {
+                        resizeHandleOverlay.setNewX(mouse.x)
+                        resizeHandleOverlay.setNewHeight(mouse.y)
                         SM.setUiDirtyState(true)
                     }
                 }
@@ -366,7 +348,7 @@ Item {
                     }
 
                     onPositionChanged: mouse => {
-                        resizeIndicator.setNewX(mouse.x)
+                        resizeHandleOverlay.setNewX(mouse.x)
                         SM.setUiDirtyState(true)
                     }
                 }
