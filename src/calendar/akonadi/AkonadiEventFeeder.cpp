@@ -162,7 +162,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                             for (auto next = rrule->getNextDate(m_timeRangeStart); next.isValid();
                                  next = rrule->getNextDate(next)) {
                                 QDateTime recurStart = next.toLocalTime();
-                                QDateTime recurEnd = recurStart.addMSecs(duration);
+                                QDateTime recurEnd = recurStart.addSecs(duration);
                                 if (recurStart > m_timeRangeEnd) {
                                     break;
                                 } else if (recurEnd < m_currentTime) {

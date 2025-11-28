@@ -174,7 +174,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                          !icaltime_is_null_time(next);
                          next = icalrecur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
-                        QDateTime recurEnd = recurStart.addMSecs(duration);
+                        QDateTime recurEnd = recurStart.addSecs(duration);
                         if (recurStart > m_config.timeRangeEnd) {
                             break;
                         } else if (recurEnd < m_config.currentTime) {

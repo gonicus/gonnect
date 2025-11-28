@@ -418,7 +418,8 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                          !i_cal_time_is_null_time(next);
                          next = i_cal_recur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
-                        QDateTime recurEnd = recurStart.addMSecs(duration);
+                        QDateTime recurEnd = recurStart.addSecs(duration);
+                        qCInfo(lcEDSEventFeeder) << summary << recurStart << recurEnd;
                         if (recurStart > m_timeRangeEnd) {
                             // Recurrence instances outside of date range
                             break;
