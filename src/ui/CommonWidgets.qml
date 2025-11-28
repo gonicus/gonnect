@@ -23,9 +23,6 @@ Item {
         DateEventsWidget {
             id: widgetDateEvents
             type: CommonWidgets.Type.DateEvents
-
-            wMin: 240
-            hMin: 240
         }
     }
 
@@ -35,9 +32,6 @@ Item {
         FavoritesWidget {
             id: widgetFavorites
             type: CommonWidgets.Type.Favorites
-
-            wMin: 240
-            hMin: 240
         }
     }
 
@@ -47,9 +41,6 @@ Item {
         HistoryWidget {
             id: widgetHistory
             type: CommonWidgets.Type.History
-
-            wMin: 495
-            hMin: 390
         }
     }
 }

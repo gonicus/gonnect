@@ -4,7 +4,6 @@
 
 Q_LOGGING_CATEGORY(lcUISettings, "gonnect.ui.settings")
 
-// TODO: Custom config for UI? E.g. '98-ui.conf'?
 UISettings::UISettings(QObject *parent)
     : QSettings(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)
                         + "/gonnect/99-user.conf",

@@ -14,9 +14,6 @@ Item {
     required property int type
     required property var page
 
-    required property double wMin
-    required property double hMin
-
     property real gridWidth
     property real gridHeight
     property real gridCellWidth
