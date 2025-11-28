@@ -36,6 +36,7 @@ def fix_version(version: str) -> str:
     if m:
         # incomplete, e.g. "10.46" -> "10.46.0"
         base_version += ".0"
+        skip = True
 
     m = re.match(r"^(\d+\.\d+\.\d+)([a-z]+)\.?(\d+)$", base_version)
     if m:
@@ -67,7 +68,7 @@ def fix_version(version: str) -> str:
             seconds_of_day = date.hour * 3600 + date.minute * 60 + date.second
             build_no_suffix = "+" + str(seconds_of_day)
         except parser.ParserError as e:
-            logger.warn(f"could not parse {base_version} as date: {e}")
+            pass
 
 
     # leading zeros, e.g. 1.1.05
@@ -149,7 +150,7 @@ class Release:
 
     def get_download_url(self, platform="all", arch="all"):
         if "url-pattern" in self.config:
-            data = self.payload.copy()
+            data = self.payload.copy() if self.payload is not None else {}
             if platform != "all" and "${platform}" not in self.config["url-pattern"] and ("platform-mapping" not in self.config or self.config["platform-mapping"] is not False):
                 raise Exception(f"url-pattern does not allow platform specific urls")
             elif platform == "all" and "${platform}" in self.config["url-pattern"]:
@@ -308,8 +309,27 @@ class AmityaRelease(Release):
             else:
                 raise Exception(f"invalid github version url type: {self.payload["version_url"]}")
 
+class RenovateRelease(Release):
+    def __init__(self, version, config, payload={}):
+        super().__init__(version, config, payload, payload["depName"])
+        self._github_repo = None
+
+    @property
+    def name(self):
+        if self._name == "":
+            self._name = self.payload["depName"]
+        return self._name
+
+    @property
+    def download_url(self):
+        return self.payload["sourceUrl"]
+
+
+
 def semver_parse(version):
     try:
+        if not semver.Version.is_valid(version):
+            version = fix_version(version)
         return semver.Version.parse(version)
     except:
         return "0.0.0"

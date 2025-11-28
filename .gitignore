@@ -64,3 +64,4 @@ tags
 # Updater
 updater.sqlite
 __pycache__
+tmp/
