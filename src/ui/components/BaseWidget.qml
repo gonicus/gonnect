@@ -248,10 +248,15 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             const oldX = control.xGrid
-                            control.xGrid = Util.clamp((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
-                                                       0,
-                                                       oldX + control.widthGrid - control.minCellWidth)
-                            control.widthGrid -= control.xGrid - oldX
+                            const newX = Util.clamp(Math.round((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth),
+                                                    0,
+                                                    oldX + control.widthGrid - control.minCellWidth)
+
+                            if (newX !== oldX) {
+                                control.widthGrid -= newX - oldX
+                                control.xGrid = newX
+                            }
+
                             control.heightGrid = Util.clamp((root.height + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
                                                             control.minCellHeight,
                                                             ViewHelper.numberOfGridCells() - control.yGrid)
@@ -283,16 +288,24 @@ Item {
 
                         onPositionChanged: function(mouse) {
                             const oldX = control.xGrid
-                            control.xGrid = Util.clamp((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
-                                                       0,
-                                                       oldX + control.widthGrid - control.minCellWidth)
-                            control.widthGrid -= control.xGrid - oldX
+                            const newX = Util.clamp(Math.round((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth),
+                                                    0,
+                                                    oldX + control.widthGrid - control.minCellWidth)
+
+                            if (newX !== oldX) {
+                                control.widthGrid -= newX - oldX
+                                control.xGrid = newX
+                            }
 
                             const oldY = control.yGrid
-                            control.yGrid = Util.clamp((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
-                                                       0,
-                                                       oldY + control.heightGrid - control.minCellHeight)
-                            control.heightGrid -= control.yGrid - oldY
+                            const newY = Util.clamp(Math.round((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight),
+                                                    0,
+                                                    oldY + control.heightGrid - control.minCellHeight)
+
+                            if (newY !== oldY) {
+                                control.heightGrid -= newY - oldY
+                                control.yGrid = newY
+                            }
 
                             SM.setUiDirtyState(true)
                         }
@@ -320,14 +333,20 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            const oldY = control.yGrid
                             control.widthGrid = Util.clamp((root.width + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
                                                             control.minCellWidth,
                                                             ViewHelper.numberOfGridCells() - control.xGrid)
-                            control.yGrid = Util.clamp((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
-                                                       0,
-                                                       oldY + control.heightGrid - control.minCellHeight)
-                            control.heightGrid -= control.yGrid - oldY
+
+
+                            const oldY = control.yGrid
+                            const newY = Util.clamp(Math.round((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight),
+                                                    0,
+                                                    oldY + control.heightGrid - control.minCellHeight)
+
+                            if (newY !== oldY) {
+                                control.heightGrid -= newY - oldY
+                                control.yGrid = newY
+                            }
 
                             SM.setUiDirtyState(true)
                         }
