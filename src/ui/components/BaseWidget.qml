@@ -193,20 +193,20 @@ Item {
                 property real startX
                 property real startY
 
-                Rectangle {
-                    id: resizeBottomRight
+                component ResizeHandle : Item {
+                    id: resizeHandle
                     width: resizeIndicator.indicatorSize
                     height: resizeIndicator.indicatorSize
-                    color: "transparent"
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
+
+                    property alias cursorShape: resizeMouseArea.cursorShape
+
+                    signal positionChanged(MouseEvent mouse)
 
                     MouseArea {
-                        parent: resizeBottomRight
+                        id: resizeMouseArea
                         anchors.fill: parent
-                        cursorShape: Qt.SizeFDiagCursor
-                        drag.target: resizeBottomRight
                         acceptedButtons: Qt.LeftButton
+                        drag.target: resizeHandle
 
                         onPressed: function(mouse) {
                             resizeIndicator.startX = mouse.x
@@ -214,142 +214,108 @@ Item {
                         }
 
                         onPositionChanged: function(mouse) {
-                            control.widthGrid = Util.clamp((root.width + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
-                                                           control.minCellWidth,
-                                                           ViewHelper.numberOfGridCells() - control.xGrid)
-                            control.heightGrid = Util.clamp((root.height + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
-                                                            control.minCellHeight,
-                                                            ViewHelper.numberOfGridCells() - control.yGrid)
-
-                            SM.setUiDirtyState(true)
+                            resizeHandle.positionChanged(mouse)
                         }
                     }
                 }
 
-                Rectangle {
-                    id: resizeBottomLeft
-                    width: resizeIndicator.indicatorSize
-                    height: resizeIndicator.indicatorSize
-                    color: "transparent"
-                    anchors.left: parent.left
-                    anchors.bottom: parent.bottom
-
-                    MouseArea {
-                        parent: resizeBottomLeft
-                        anchors.fill: parent
-                        cursorShape: Qt.SizeBDiagCursor
-                        drag.target: resizeBottomLeft
-                        acceptedButtons: Qt.LeftButton
-
-                        onPressed: function(mouse) {
-                            resizeIndicator.startX = mouse.x
-                            resizeIndicator.startY = mouse.y
-                        }
-
-                        onPositionChanged: function(mouse) {
-                            const oldX = control.xGrid
-                            const newX = Util.clamp(Math.round((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth),
-                                                    0,
-                                                    oldX + control.widthGrid - control.minCellWidth)
-
-                            if (newX !== oldX) {
-                                control.widthGrid -= newX - oldX
-                                control.xGrid = newX
-                            }
-
-                            control.heightGrid = Util.clamp((root.height + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
-                                                            control.minCellHeight,
-                                                            ViewHelper.numberOfGridCells() - control.yGrid)
-
-                            SM.setUiDirtyState(true)
-                        }
-                    }
-                }
-
-                Rectangle {
+                ResizeHandle {
                     id: resizeTopLeft
-                    width: resizeIndicator.indicatorSize
-                    height: resizeIndicator.indicatorSize
-                    color: "transparent"
                     anchors.left: parent.left
                     anchors.top: parent.top
+                    cursorShape: Qt.SizeFDiagCursor
 
-                    MouseArea {
-                        parent: resizeTopLeft
-                        anchors.fill: parent
-                        cursorShape: Qt.SizeFDiagCursor
-                        drag.target: resizeTopLeft
-                        acceptedButtons: Qt.LeftButton
+                    onPositionChanged: function(mouse) {
+                        const oldX = control.xGrid
+                        const newX = Util.clamp(Math.round((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth),
+                                                0,
+                                                oldX + control.widthGrid - control.minCellWidth)
 
-                        onPressed: function(mouse) {
-                            resizeIndicator.startX = mouse.x
-                            resizeIndicator.startY = mouse.y
+                        if (newX !== oldX) {
+                            control.widthGrid -= newX - oldX
+                            control.xGrid = newX
                         }
 
-                        onPositionChanged: function(mouse) {
-                            const oldX = control.xGrid
-                            const newX = Util.clamp(Math.round((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth),
-                                                    0,
-                                                    oldX + control.widthGrid - control.minCellWidth)
+                        const oldY = control.yGrid
+                        const newY = Util.clamp(Math.round((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight),
+                                                0,
+                                                oldY + control.heightGrid - control.minCellHeight)
 
-                            if (newX !== oldX) {
-                                control.widthGrid -= newX - oldX
-                                control.xGrid = newX
-                            }
-
-                            const oldY = control.yGrid
-                            const newY = Util.clamp(Math.round((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight),
-                                                    0,
-                                                    oldY + control.heightGrid - control.minCellHeight)
-
-                            if (newY !== oldY) {
-                                control.heightGrid -= newY - oldY
-                                control.yGrid = newY
-                            }
-
-                            SM.setUiDirtyState(true)
+                        if (newY !== oldY) {
+                            control.heightGrid -= newY - oldY
+                            control.yGrid = newY
                         }
+
+                        SM.setUiDirtyState(true)
                     }
                 }
 
-                Rectangle {
+                ResizeHandle {
                     id: resizeTopRight
-                    width: resizeIndicator.indicatorSize
-                    height: resizeIndicator.indicatorSize
-                    color: "transparent"
                     anchors.right: parent.right
                     anchors.top: parent.top
+                    cursorShape: Qt.SizeBDiagCursor
 
-                    MouseArea {
-                        parent: resizeTopRight
-                        anchors.fill: parent
-                        cursorShape: Qt.SizeBDiagCursor
-                        drag.target: resizeTopRight
-                        acceptedButtons: Qt.LeftButton
+                    onPositionChanged: function(mouse) {
+                        control.widthGrid = Util.clamp((root.width + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
+                                                        control.minCellWidth,
+                                                        ViewHelper.numberOfGridCells() - control.xGrid)
 
-                        onPressed: function(mouse) {
-                            resizeIndicator.startX = mouse.x
-                            resizeIndicator.startY = mouse.y
+
+                        const oldY = control.yGrid
+                        const newY = Util.clamp(Math.round((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight),
+                                                0,
+                                                oldY + control.heightGrid - control.minCellHeight)
+
+                        if (newY !== oldY) {
+                            control.heightGrid -= newY - oldY
+                            control.yGrid = newY
                         }
 
-                        onPositionChanged: function(mouse) {
-                            control.widthGrid = Util.clamp((root.width + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
-                                                            control.minCellWidth,
-                                                            ViewHelper.numberOfGridCells() - control.xGrid)
+                        SM.setUiDirtyState(true)
+                    }
+                }
 
+                ResizeHandle {
+                    id: resizeBottomRight
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    cursorShape: Qt.SizeFDiagCursor
 
-                            const oldY = control.yGrid
-                            const newY = Util.clamp(Math.round((root.y + mouse.y - resizeIndicator.startY) / control.gridCellHeight),
-                                                    0,
-                                                    oldY + control.heightGrid - control.minCellHeight)
+                    onPositionChanged: function(mouse) {
+                        control.widthGrid = Util.clamp((root.width + mouse.x - resizeIndicator.startX) / control.gridCellWidth,
+                                                       control.minCellWidth,
+                                                       ViewHelper.numberOfGridCells() - control.xGrid)
+                        control.heightGrid = Util.clamp((root.height + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
+                                                        control.minCellHeight,
+                                                        ViewHelper.numberOfGridCells() - control.yGrid)
 
-                            if (newY !== oldY) {
-                                control.heightGrid -= newY - oldY
-                                control.yGrid = newY
-                            }
+                        SM.setUiDirtyState(true)
+                    }
+                }
 
-                            SM.setUiDirtyState(true)
+                ResizeHandle {
+                    id: resizeBottomLeft
+                    anchors.left: parent.left
+                    anchors.bottom: parent.bottom
+                    cursorShape: Qt.SizeBDiagCursor
+
+                    onPositionChanged: function(mouse) {
+                        const oldX = control.xGrid
+                        const newX = Util.clamp(Math.round((root.x + mouse.x - resizeIndicator.startX) / control.gridCellWidth),
+                                                0,
+                                                oldX + control.widthGrid - control.minCellWidth)
+
+                        if (newX !== oldX) {
+                            control.widthGrid -= newX - oldX
+                            control.xGrid = newX
                         }
+
+                        control.heightGrid = Util.clamp((root.height + mouse.y - resizeIndicator.startY) / control.gridCellHeight,
+                                                        control.minCellHeight,
+                                                        ViewHelper.numberOfGridCells() - control.yGrid)
+
+                        SM.setUiDirtyState(true)
                     }
                 }
             }
