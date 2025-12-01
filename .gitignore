@@ -9,6 +9,7 @@ samples/callhistory.db
 build/
 repo/
 .flatpak-builder/
+.qtcreator
 
 # CMake
 CMakeCache.txt

@@ -1,5 +1,5 @@
 import semver
-import pprint
+import os
 import requests
 import requests_cache
 import re
@@ -9,8 +9,7 @@ from string import Template
 from typing import Optional
 from .logger import logger
 
-s = requests_cache.CachedSession('updater')
-
+s = requests_cache.CachedSession(f'updater{os.getenv('GITHUB_JOB', '')}{os.getenv('GITHUB_RUN_ID', '')}')
 
 def fix_version(version: str) -> str:
     """_summary_

@@ -1,0 +1,2 @@
+resources/artwork/gonnect.ico filter=lfs diff=lfs merge=lfs -text
+resources/artwork/gonnect.icns filter=lfs diff=lfs merge=lfs -text

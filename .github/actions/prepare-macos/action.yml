@@ -1,13 +1,10 @@
 name: 'GOnnect prepare action [MacOS build]'
 description: 'Recurring tasks for CI jobs'
-inputs:
+outputs:
   qt-version:
     description: 'QT version'
-    required: true
-    default: '6.10.0'
-  qt-only:
-    description: 'Install Qt only, skip other steps'
-    default: 'false'
+    value: ${{ steps.get-qt.outputs.qt-version }}
+
 
 runs:
   using: 'composite'
@@ -20,16 +17,32 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      if: inputs.qt-only == 'false'
       run: |
         brew install cyrus-sasl
+
+    - name: Get QT-Version
+      id: get-qt
+      uses: ./.github/actions/get-qt-version
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: ${{ inputs.qt-version }}
+        version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'mac'
         target: 'desktop'
         modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
         arch: 'clang_64'
         cache: true
+
+    - name: Install Conan
+      uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
+      with:
+        version: 2.22.2
+        cache_packages: true
+
+    - name: Install Conan dependencies
+      shell: bash
+      run: |
+        conan config install resources/conan
+        conan export-dependencies .
+        conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
