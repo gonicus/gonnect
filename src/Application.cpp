@@ -240,8 +240,3 @@ void Application::initDebugRun()
         });
     }
 }
-
-bool Application::isFlatpak()
-{
-    return qEnvironmentVariable("container") == "flatpak";
-}

@@ -322,100 +322,100 @@
 <context>
     <name>Conference</name>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="123"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="176"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="124"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="177"/>
         <source>Room name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="136"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="137"/>
         <source>Authenticate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="204"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="205"/>
         <source>Please authenticate in the opened browser window...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="338"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="352"/>
         <source>This conference is protected by a password. Please enter it to join the room.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="349"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="492"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="363"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="506"/>
         <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="363"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="377"/>
         <source>Remember password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="375"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="542"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="389"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="556"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="382"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="396"/>
         <source>Join Room</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="452"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="466"/>
         <source>Enter a password to protect this conference room. Other participants must enter it before taking part in the session.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="463"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="477"/>
         <source>This password has been set for the conference room and must be entered by participants before taking part in the session.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="474"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="488"/>
         <source>The room password has been set by someone else.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="530"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="544"/>
         <source>Show password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="550"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="564"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="556"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="570"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="598"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="612"/>
         <source>No video (audio only)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="603"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="617"/>
         <source>Lowest quality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="608"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="622"/>
         <source>Standard quality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="613"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="627"/>
         <source>Highest quality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="618"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="632"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -481,47 +481,57 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="229"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="234"/>
+        <source>Share window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="239"/>
+        <source>Share screen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="249"/>
         <source>Camera</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="247"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="267"/>
         <source>Micro</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="266"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="286"/>
         <source>Output</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="284"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="304"/>
         <source>More</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="296"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="316"/>
         <source>Noise supression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="302"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="322"/>
         <source>Toggle subtitles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="309"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="329"/>
         <source>Toggle whiteboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="315"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="335"/>
         <source>Video quality...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="324"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="344"/>
         <source>Set room password...</source>
         <translation type="unfinished"></translation>
     </message>

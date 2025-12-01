@@ -1,13 +1,9 @@
 name: 'GOnnect prepare action [Windows build]'
 description: 'Recurring tasks for CI jobs'
-inputs:
+outputs:
   qt-version:
     description: 'QT version'
-    required: true
-    default: '6.10.0'
-  qt-only:
-    description: 'Install Qt only, skip other steps'
-    default: 'false'
+    value: ${{ steps.get-qt.outputs.qt-version }}
 
 runs:
   using: 'composite'
@@ -29,12 +25,34 @@ runs:
         "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
         "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
 
+    - name: Install NSIS
+      uses: repolevedavaj/install-nsis@v1.1.0
+      with:
+        nsis-version: '3.11'
+
+    - name: Get QT-Version
+      id: get-qt
+      uses: ./.github/actions/get-qt-version
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: ${{ inputs.qt-version }}
+        version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'windows'
         target: 'desktop'
-        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
+        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools'
         arch: 'win64_msvc2022_64'
         cache: true
+
+    - name: Install Conan
+      uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
+      with:
+        version: 2.22.2
+        cache_packages: true
+
+    - name: Install Conan dependencies
+      shell: cmd
+      run: |
+        conan config install resources/conan
+        conan export-dependencies .
+        conan install . --build=missing
