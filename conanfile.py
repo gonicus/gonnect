@@ -61,7 +61,7 @@ class GOnnectRecipe(ConanFile):
 
     def requirements(self):
         self.requires("hidapi/0.15.0")
-        self.requires("pjproject/2.15.1")
+        self.requires("pjproject/2.16")
         self.requires("openldap/2.6.10")
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
@@ -77,7 +77,7 @@ class GOnnectRecipe(ConanFile):
             self.requires("libpulse/system")
 
         if self.options.with_conan_qt:
-            self.requires("qt/6.10.0")
+            self.requires("qt/6.10.1")
             self.requires("mpg123/1.33.0", override=True)
             self.requires("wayland/1.23.92", override=True)
 
