@@ -206,7 +206,7 @@ jobs:
         run: |
           conan config install resources/conan
           conan export-dependencies .
-          conan install . --build=missing
+          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
 
       - name: Cached Conan packages
         uses: actions/cache/save@v4.2.3
