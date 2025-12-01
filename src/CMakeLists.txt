@@ -49,7 +49,6 @@ set(APP_SOURCES main.cpp)
 set(APP_OUTPUT_NAME gonnect)
 
 if(APPLE)
-    set(MACOSX_BUNDLE_ICON_FILE gonnect.icns)
     set(APP_OUTPUT_NAME GOnnect)
     set(app_icon_macos "${PROJECT_SOURCE_DIR}/resources/artwork/gonnect.icns")
     set_source_files_properties(${app_icon_macos} PROPERTIES
@@ -135,15 +134,16 @@ qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
 qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
 
 qt_add_executable(gonnect
+    ${app_icon_macos}
     ${APP_SOURCES}
     ${DBUS_SOURCES}
-    ${app_icon_macos}
 )
 
 set_target_properties(gonnect PROPERTIES
     QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_ICON_FILE gonnect.icns
     OUTPUT_NAME ${APP_OUTPUT_NAME}
 )
 
