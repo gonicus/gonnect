@@ -178,8 +178,8 @@ Item {
                 Rectangle {
                     id: optionIndicator
                     visible: SM.uiEditMode
-                    width: 10
-                    height: 10
+                    width: 16
+                    height: 16
                     color: "transparent"
                     anchors.right: parent.right
                     anchors.top: parent.top
@@ -200,7 +200,7 @@ Item {
                         id: optionControl
                         parent: optionIndicator
                         anchors.fill: parent
-                        cursorShape: Qt.CrossCursor
+                        cursorShape: Qt.PointingHandCursor
 
                         onClicked: {
                             optionMenu.x = delg.x + 15
@@ -359,6 +359,7 @@ Item {
 
         Action {
             text: qsTr("Move up")
+            icon.source: "qrc:/icons/arrow-up.svg"
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
@@ -385,6 +386,7 @@ Item {
 
         Action {
             text: qsTr("Move down")
+            icon.source: "qrc:/icons/arrow-down.svg"
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
@@ -411,6 +413,7 @@ Item {
 
         Action {
             text: qsTr("Delete")
+            icon.source: "qrc:/icons/edit-delete.svg"
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
 

@@ -15,17 +15,20 @@ Menu {
 
     Action {
         text: qsTr("Toggle fullscreen")
+        icon.source: "qrc:/icons/view-fullscreen.svg"
         onTriggered: () => ViewHelper.toggleFullscreen()
     }
 
     Action {
         text: qsTr("Shortcuts...")
+        icon.source: "qrc:/icons/configure-shortcuts.svg"
         onTriggered: () => ViewHelper.showShortcuts()
     }
 
     Action {
         id: pageEditAction
-        text: SM.uiEditMode ? qsTr("Leave edit mode") : qsTr("Edit UI")
+        text: SM.uiEditMode ? qsTr("Leave edit mode") : qsTr("Customize UI...")
+        icon.source: "qrc:/icons/editor.svg"
         enabled: true
         onTriggered: () => {
             if (SM.uiEditMode) {
@@ -38,11 +41,13 @@ Menu {
 
     Action {
         text: qsTr("About...")
+        icon.source: "qrc:/icons/showinfo.svg"
         onTriggered: () => ViewHelper.showAbout()
     }
 
     Action {
         text: qsTr("Quit")
+        icon.source: "qrc:/icons/application-exit.svg"
         onTriggered: () => ViewHelper.quitApplication()
     }
 

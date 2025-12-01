@@ -139,8 +139,8 @@
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
-        <source>Edit UI</source>
-        <translation>UI bearbeiten</translation>
+        <source>Customize UI...</source>
+        <translation>Oberfläche anpassen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="40"/>

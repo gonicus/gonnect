@@ -139,7 +139,7 @@
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
-        <source>Edit UI</source>
+        <source>Customize UI...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
