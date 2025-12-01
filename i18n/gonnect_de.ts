@@ -128,27 +128,27 @@
         <translation>Vollbildmodus umschalten</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="22"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="23"/>
         <source>Shortcuts...</source>
         <translation>Tastaturkürzel...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
         <source>Leave edit mode</source>
         <translation>Bearbeiten beenden</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
-        <source>Customize UI...</source>
-        <translation>Oberfläche anpassen...</translation>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
+        <source>Customize UI</source>
+        <translation>Oberfläche anpassen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="40"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="43"/>
         <source>About...</source>
         <translation>Über...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="45"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="49"/>
         <source>Quit</source>
         <translation>Beenden</translation>
     </message>
@@ -1295,12 +1295,12 @@
         <translation>Nach oben bewegen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="387"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="388"/>
         <source>Move down</source>
         <translation>Nach unten bewegen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="413"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="415"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>

@@ -128,27 +128,27 @@
         <translation>Cambiar al modo de pantalla completa</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="22"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="23"/>
         <source>Shortcuts...</source>
         <translation>Atajos de teclado</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
         <source>Leave edit mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
-        <source>Customize UI...</source>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
+        <source>Customize UI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="40"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="43"/>
         <source>About...</source>
         <translation>Sobre...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="45"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="49"/>
         <source>Quit</source>
         <translation>Terminar</translation>
     </message>
@@ -1295,12 +1295,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="387"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="388"/>
         <source>Move down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="413"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="415"/>
         <source>Delete</source>
         <translation type="unfinished">Borrar</translation>
     </message>
