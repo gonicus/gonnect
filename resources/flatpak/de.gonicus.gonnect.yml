@@ -6,6 +6,17 @@ base: io.qt.qtwebengine.BaseApp
 base-version: '6.10'
 command: gonnect
 
+add-extensions:
+  de.gonicus.gonnect.plugin:
+    version: "2"
+    directory: plugins
+    subdirectories: true
+    no-autodownload: true
+    autodelete: true
+  de.gonicus.gonnect.provisioning:
+    directory: etc/gonnect
+    no-autodownload: true
+
 finish-args:
   - --env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess
   - --device=all
@@ -47,6 +58,7 @@ modules:
       - /bin
       - /share/et
       - /share/examples
+      - /share/man
     post-install:
       - install -Dm644 ../krb5.conf -t ${FLATPAK_DEST}/etc/
     sources:
@@ -67,12 +79,12 @@ modules:
       - --disable-video
       - --enable-ext-sound
       - --with-opus
-      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1
+      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1 -DPJSIP_MAX_PKT_LEN=8192
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
-        tag: 2.15.1
-        commit: 7de6e686fee1642f5443a3f39f0e5ad5e478a117
+        tag: "2.16"
+        commit: 6cab30cec44af36ba7c8a45ff7af2f74a8ed288c
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
@@ -87,6 +99,7 @@ modules:
       - --with-tls=openssl
     cleanup:
       - /bin
+      - /share/man
     sources:
       - type: archive
         url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.10.tgz
@@ -123,6 +136,9 @@ modules:
           type: gnome
           name: libsecret
           stable-only: true
+    cleanup:
+    - /bin
+    - /share/man
 
   - name: qtkeychain
     buildsystem: cmake-ninja
@@ -141,6 +157,7 @@ modules:
   - name: libical
     cleanup:
       - /lib/cmake
+      - /libexec
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
@@ -162,9 +179,13 @@ modules:
   - name: evolution-data-server
     cleanup:
       - /lib/cmake
+      - /lib/systemd
       - /lib/evolution-data-server/*-backends
       - /libexec
+      - /share/applications
       - /share/dbus-1/services
+      - /share/evolution-data-server
+      - /share/pixmaps
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DENABLE_GTK=OFF
@@ -229,7 +250,9 @@ modules:
     - type: dir
       path: ../..
     cleanup:
-    - rm /app/bin/update-emojis
+    - /bin/update-emojis
 
 cleanup-commands:
   - /app/cleanup-BaseApp.sh
+  - mkdir -p ${FLATPAK_DEST}/plugins
+  - mkdir -p ${FLATPAK_DEST}/etc/gonnect

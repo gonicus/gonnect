@@ -21,7 +21,6 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   EXT_BASE: ${{github.workspace}}
-  QT_VERSION: '6.10.0'
 
 permissions:
   contents: read
@@ -38,21 +37,11 @@ jobs:
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
+          lfs: 'true'
           submodules: 'recursive'
 
       - name: Prepare
         uses: ./.github/actions/prepare-linux
-
-      - name: Install Conan
-        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
-        with:
-          version: 2.22.2
-          cache_packages: true
-
-      - name: Install Conan dependencies
-        run: |
-          resources/conan/export.py
-          conan install . --build=missing
 
       - name: Configure CMake
         env:
@@ -76,29 +65,30 @@ jobs:
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
+          lfs: 'true'
           submodules: 'recursive'
 
       - name: Prepare
         uses: ./.github/actions/prepare-windows
 
-      - name: Install Conan
-        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
-        with:
-          version: 2.22.2
-          cache_packages: true
-
-      - name: Install Conan dependencies
-        shell: cmd
-        run: |
-          python resources\\conan\\export.py
-          conan install . --build=missing
-
       - name: Configure CMake
         shell: cmd
         run: cmake --preset conan-default
+        env:
+          NSIS_USE_FAST_COMPRESSION: "1"
 
       - name: Build
         run: cmake --build --preset conan-release
+
+      - name: Package
+        run: cd build && cpack ${{github.workspace}}
+
+      - name: Save installer
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: windows-installer.zip
+          compression-level: 0
+          path: build/GOnnect*.exe
 
   build-macos:
     runs-on: macos-26
@@ -107,21 +97,11 @@ jobs:
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
+          lfs: 'true'
           submodules: 'recursive'
 
       - name: Prepare
         uses: ./.github/actions/prepare-macos
-
-      - name: Install Conan
-        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
-        with:
-          version: 2.22.2
-          cache_packages: true
-
-      - name: Install Conan dependencies
-        run: |
-          resources/conan/export.py
-          conan install . --build=missing
 
       - name: Configure CMake
         run: cmake --preset conan-release
@@ -150,21 +130,11 @@ jobs:
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
+          lfs: 'true'
           submodules: 'recursive'
 
       - name: Prepare
         uses: ./.github/actions/prepare-linux
-
-      - name: Install Conan
-        uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
-        with:
-          version: 2.22.2
-          cache_packages: true
-
-      - name: Install Conan dependencies
-        run: |
-          resources/conan/export.py
-          conan install . --build=missing
 
       - name: Run static analyzer
         shell: bash
@@ -195,17 +165,27 @@ jobs:
           xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
           libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
           libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA \
-          pip python3-devel
+          pip python3-devel nodejs
 
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
+          lfs: 'true'
           submodules: 'recursive'
+
+      - name: Install action dependencies
+        shell: bash
+        run: npm install
+        working-directory: ./.github/actions/get-qt-version
+
+      - name: Get QT-Version
+        id: get-qt
+        uses: ./.github/actions/get-qt-version
 
       - name: Install qt
         run: |
           pip install aqtinstall
-          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ env.QT_VERSION }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
-          echo "PATH=$PATH:${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin" >> $GITHUB_ENV
+          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ steps.get-qt.outputs.qt-version }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
+          echo "PATH=$PATH:${{ github.workspace }}/Qt/${{ steps.get-qt.outputs.qt-version }}/gcc_64/bin" >> $GITHUB_ENV
 
       - name: Prepare conan
         shell: bash
@@ -224,8 +204,9 @@ jobs:
 
       - name: Install Conan dependencies
         run: |
-          resources/conan/export.py
-          conan install . --build=missing
+          conan config install resources/conan
+          conan export-dependencies .
+          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
 
       - name: Cached Conan packages
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -244,6 +225,32 @@ jobs:
         run: |
           scripts/static-clazy-analyzer.sh
 
+  flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
+      options: --privileged
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          lfs: 'true'
+          submodules: 'recursive'
+
+      - name: Reading GOnnect version
+        shell: bash
+        id: var
+        run: |
+          echo "gonnect_version=$(grep -oP 'GOnnect VERSION ([0-9.]+)' CMakeLists.txt | awk '{ print $3 }')" >> $GITHUB_OUTPUT
+
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@92ae9851ad316786193b1fd3f40c4b51eb5cb101 # v6.6
+        with:
+          bundle: gonnect
+          build-bundle: 'true'
+          upload-artifact: 'true'
+          manifest-path: resources/flatpak/de.gonicus.gonnect.yml
+          cache-key: flatpak-builder-${{ steps.var.outputs.gonnect_version }}
+
   tests:
     runs-on: ubuntu-24.04
     name: "Unit Tests"
@@ -255,7 +262,8 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare-linux
         with:
-          qt-only: 'true'
+          deps: false
+          conan: false
 
       - name: Download Test artifacts
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
@@ -267,3 +275,8 @@ jobs:
         run: |
           chmod +x contactsTest
           LD_LIBRARY_PATH=${QT_ROOT_DIR}/lib ./contactsTest
+
+      - name: Cleanup
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: gonnect-tests
