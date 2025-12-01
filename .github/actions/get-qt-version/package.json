@@ -1,0 +1,16 @@
+{
+  "name": "get-qt-version",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "license": "GPL-2.0-or-later",
+  "description": "",
+  "dependencies": {
+    "@actions/core": "^1.11.1"
+  }
+}

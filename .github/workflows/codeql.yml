@@ -76,23 +76,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
       with:
+        lfs: 'true'
         submodules: 'recursive'
 
     - name: Prepare
       uses: ./.github/actions/prepare-linux
-
-    - if: matrix.build-mode == 'manual'
-      name: Install Conan
-      uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
       with:
-        version: 2.22.2
-        cache_packages: true
-
-    - if: matrix.build-mode == 'manual'
-      name: Install Conan dependencies
-      run: |
-        resources/conan/export.py
-        conan install . --build=missing
+        conan: ${{ matrix.build-mode == 'manual' && 'true' || 'false' }}
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
