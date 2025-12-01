@@ -43,5 +43,6 @@ runs:
     - name: Install Conan dependencies
       shell: bash
       run: |
-        resources/conan/export.py
+        conan config install resources/conan
+        conan export-dependencies .
         conan install . --build=missing

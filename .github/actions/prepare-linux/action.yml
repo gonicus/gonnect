@@ -59,5 +59,6 @@ runs:
       if: inputs.conan == 'true'
       shell: bash
       run: |
-        resources/conan/export.py
+        conan config install resources/conan
+        conan export-dependencies .
         conan install . --build=missing

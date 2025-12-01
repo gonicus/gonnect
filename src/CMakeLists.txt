@@ -46,9 +46,11 @@ else()
 endif()
 
 set(APP_SOURCES main.cpp)
+set(APP_OUTPUT_NAME gonnect)
 
 if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE gonnect.icns)
+    set(APP_OUTPUT_NAME GOnnect)
     set(app_icon_macos "${PROJECT_SOURCE_DIR}/resources/artwork/gonnect.icns")
     set_source_files_properties(${app_icon_macos} PROPERTIES
            MACOSX_PACKAGE_LOCATION "Resources")
@@ -142,7 +144,7 @@ set_target_properties(gonnect PROPERTIES
     QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
-    OUTPUT_NAME "GOnnect"
+    OUTPUT_NAME ${APP_OUTPUT_NAME}
 )
 
 set(gonnect_qml_singletons

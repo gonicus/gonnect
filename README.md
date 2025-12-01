@@ -171,7 +171,8 @@ and start the ordinary _CMake_ build:
 ```bash
 distrobox enter gonnect
 cd <to where you've cloned this repository>
-./resources/conan/export.py
+conan config install resources/conan
+conan export-dependencies .
 conan install . --build=missing
 cmake --preset conan-release .
 cmake --build --preset conan-release --parallel $(nproc --all)
