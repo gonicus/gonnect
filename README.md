@@ -104,21 +104,21 @@ or head over to [the documentation](https://github.com/gonicus/gonnect/wiki).
 
 # Non-goals
 
-Like every other software, _GOnnect_ cannot be an all-purpose silver bullet. Here are some 
+Like every other software, _GOnnect_ cannot be an all-purpose silver bullet. Here are some
 deliberately chosen non-goals, so things that will not be implemented into _GOnnect_:
 
 * **Full SIP configuration**: Most SIP clients provide a plethora of options to configure
-every single bit of the SIP connection. That includes many audio codecs of which most are 
+every single bit of the SIP connection. That includes many audio codecs of which most are
 obsolete or rarely used. _GOnnect_ strives to be simple and therefore allows only the most
 common and important options. This will exclude some exotic ones.
-* **PIM/contact management**: This should be done via dedicated PIM services as opposed to 
+* **PIM/contact management**: This should be done via dedicated PIM services as opposed to
 implementing the nth place to store contacts.
 * **Speech-to-text transcription and audio recording**: Apart from some technical insufficiencies
-this bears some critical questions about data privacy. 
+this bears some critical questions about data privacy.
 * **Conferences with more than three participants**: Ad-hoc conferences are implemented such
 that the initializing participant will be a router for the audio streams of the others. In
 our experience, having more than three endpoints will produce bad sound quality, delays and
-other performance issues. Bigger conferences would require a specific configuration on the 
+other performance issues. Bigger conferences would require a specific configuration on the
 SIP server or another platform (like [Jitsi Meet](https://meet.jit.si/)).
 
 # Translations
@@ -127,9 +127,9 @@ We are using [Weblate](https://hosted.weblate.org/engage/gonnect/) to translate 
 in various languages. This hosted service is provided us for free as GOnnect is an Open Source
 project. Many thanks to the Weblate team for this!.
 
-Everyone is invited to contribute to the translations. Just head over to our 
+Everyone is invited to contribute to the translations. Just head over to our
 [Weblate project](https://hosted.weblate.org/engage/gonnect/) and start translating.
-If you miss a language request a new one at Weblate or 
+If you miss a language request a new one at Weblate or
 [create an issue at GitHub](https://github.com/gonicus/gonnect/issues/new/choose).
 
 # Development
@@ -155,13 +155,13 @@ After _distrobox_ is installed, create the _distrobox_ for _GOnnect_ development
 by running
 
 ```bash
-distrobox assemble create --name=gonnect
+distrobox assemble create --name gonnect
 ```
 
 in the directory of your _GOnnect_ checkout.
 
 
-## Building 
+## Building
 
 ### Unix based systems
 
@@ -171,7 +171,8 @@ and start the ordinary _CMake_ build:
 ```bash
 distrobox enter gonnect
 cd <to where you've cloned this repository>
-./resources/conan/export.py
+conan config install resources/conan
+conan export-dependencies .
 conan install . --build=missing
 cmake --preset conan-release .
 cmake --build --preset conan-release --parallel $(nproc --all)
@@ -188,10 +189,8 @@ kind of environment. If you want to build the _Flatpak_ locally, you can do this
 the following commands on your host shell:
 
 ```bash
-flatpak uninstall de.gonicus.gonnect
 flatpak run --command=flatpak-builder org.flatpak.Builder build --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean --repo=repo resources/flatpak/de.gonicus.gonnect.yml
-flatpak --user remote-add --no-gpg-verify gonnect-repo repo
-flatpak --user install gonnect-repo de.gonicus.gonnect
+flatpak --user install ./repo de.gonicus.gonnect
 ```
 
 # License

@@ -36,8 +36,6 @@ public:
     static QString logFilePath();
     static QString logFileName();
 
-    static bool isFlatpak();
-
 public Q_SLOTS:
 
 #ifdef Q_OS_LINUX
