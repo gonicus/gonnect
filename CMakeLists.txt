@@ -18,6 +18,7 @@ list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/generators")
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)
 option(BUILD_TESTING "Build tests" OFF)
+option(BUILD_TOOLS "Build tools" OFF)
 
 # Contacts / Calendar plugins
 option(ENABLE_AKONADI "Enable Akonadi plugins" OFF)
@@ -79,7 +80,10 @@ target_include_directories(GOnnectVersion PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
-add_subdirectory(emoji)
+if(BUILD_TOOLS)
+    add_subdirectory(emoji)
+endif()
+
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
 

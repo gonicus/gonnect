@@ -139,8 +139,10 @@ qt_add_executable(gonnect
 )
 
 set_target_properties(gonnect PROPERTIES
+    QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
+    OUTPUT_NAME "GOnnect"
 )
 
 set(gonnect_qml_singletons
@@ -640,11 +642,7 @@ qt_add_qml_module(gonnect
         usb/busylight/LitraGlow.cpp
 )
 
-set_target_properties(gonnect PROPERTIES
-    QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
-    MACOS_BUNDLE_BUNDLE_NAME "GOnnect"
-)
-if(NOT WIN32)
+if(LINUX)
     set_target_properties(gonnect PROPERTIES LINK_FLAGS_RELEASE -s)
 endif()
 
