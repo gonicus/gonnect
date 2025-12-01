@@ -144,6 +144,7 @@ set_target_properties(gonnect PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_ICON_FILE gonnect.icns
+    MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/resources/macos/Info.plist"
     OUTPUT_NAME ${APP_OUTPUT_NAME}
 )
 
