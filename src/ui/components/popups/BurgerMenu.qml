@@ -14,8 +14,18 @@ Menu {
     }
 
     Action {
+        text: qsTr("Toggle fullscreen")
+        onTriggered: () => ViewHelper.toggleFullscreen()
+    }
+
+    Action {
+        text: qsTr("Shortcuts...")
+        onTriggered: () => ViewHelper.showShortcuts()
+    }
+
+    Action {
         id: pageEditAction
-        text: SM.uiEditMode ? qsTr("Disable UI edit mode") : qsTr("Enable UI edit mode")
+        text: SM.uiEditMode ? qsTr("Leave edit mode") : qsTr("Edit UI")
         enabled: true
         onTriggered: () => {
             if (SM.uiEditMode) {
@@ -24,16 +34,6 @@ Menu {
                 SM.setUiEditMode(true)
             }
         }
-    }
-
-    Action {
-        text: qsTr("Toggle fullscreen")
-        onTriggered: () => ViewHelper.toggleFullscreen()
-    }
-
-    Action {
-        text: qsTr("Shortcuts...")
-        onTriggered: () => ViewHelper.showShortcuts()
     }
 
     Action {

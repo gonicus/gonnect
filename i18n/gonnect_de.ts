@@ -123,24 +123,24 @@
 <context>
     <name>BurgerMenu</name>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="18"/>
-        <source>Enable UI edit mode</source>
-        <translation>UI-Editiermodus aktivieren</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="18"/>
-        <source>Disable UI edit mode</source>
-        <translation>UI-Editiermodus deaktivieren</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="17"/>
         <source>Toggle fullscreen</source>
         <translation>Vollbildmodus umschalten</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="35"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="22"/>
         <source>Shortcuts...</source>
         <translation>Tastaturkürzel...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
+        <source>Leave edit mode</source>
+        <translation>Bearbeiten beenden</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
+        <source>Edit UI</source>
+        <translation>UI bearbeiten</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="40"/>
@@ -1046,38 +1046,38 @@
 <context>
     <name>HistoryWidget</name>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="20"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="21"/>
         <source>History</source>
         <translation>Verlauf</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="64"/>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="91"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="65"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="92"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="67"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="68"/>
         <source>SIP</source>
         <translation>SIP</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="70"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="71"/>
         <source>Jitsi Meet</source>
         <translation>Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="94"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="95"/>
         <source>Incoming</source>
         <translation>Eingehend</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="97"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="98"/>
         <source>Outgoing</source>
         <translation>Ausgehend</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="100"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="101"/>
         <source>Missed</source>
         <translation>Verpasst</translation>
     </message>
@@ -3356,7 +3356,7 @@
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="97"/>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="121"/>
         <source>&lt;b&gt;%1&lt;/b&gt;&lt;br&gt;%2</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;b&gt;%1&lt;/b&gt;&lt;br&gt;%2</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="141"/>

@@ -123,23 +123,23 @@
 <context>
     <name>BurgerMenu</name>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="18"/>
-        <source>Enable UI edit mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="18"/>
-        <source>Disable UI edit mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="17"/>
         <source>Toggle fullscreen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="35"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="22"/>
         <source>Shortcuts...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
+        <source>Leave edit mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="28"/>
+        <source>Edit UI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1046,38 +1046,38 @@
 <context>
     <name>HistoryWidget</name>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="20"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="21"/>
         <source>History</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="64"/>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="91"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="65"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="92"/>
         <source>All</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="67"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="68"/>
         <source>SIP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="70"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="71"/>
         <source>Jitsi Meet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="94"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="95"/>
         <source>Incoming</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="97"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="98"/>
         <source>Outgoing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="100"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="101"/>
         <source>Missed</source>
         <translation type="unfinished"></translation>
     </message>
