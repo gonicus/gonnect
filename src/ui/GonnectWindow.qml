@@ -365,9 +365,6 @@ BaseWindow {
                 pageId: control.homePageId
                 name: qsTr("Home")
                 icon: Icons.userHome
-
-                oldGridWidth: UISettings.getUISetting("generic", "gonnectGridWidth", 0)
-                oldGridHeight: UISettings.getUISetting("generic", "gonnectGridHeight", 0)
             }
 
             Call {

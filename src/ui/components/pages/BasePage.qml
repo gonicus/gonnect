@@ -18,9 +18,6 @@ Item {
     readonly property alias gridCellWidth: snapGrid.cellWidth
     readonly property alias gridCellHeight: snapGrid.cellHeight
 
-    property int oldGridWidth: 0
-    property int oldGridHeight: 0
-
     property bool editMode: false
     Connections {
         target: SM
@@ -77,19 +74,6 @@ Item {
 
         readonly property real cellWidth: snapGrid.width / ViewHelper.numberOfGridCells()
         readonly property real cellHeight: snapGrid.height / ViewHelper.numberOfGridCells()
-
-        onWidthChanged: () => {
-            if (snapGrid.width <= 0) {
-                return
-            }
-            control.oldGridWidth = snapGrid.width
-        }
-        onHeightChanged: () => {
-            if (snapGrid.height <= 0) {
-                return
-            }
-            control.oldGridHeight = snapGrid.height
-        }
 
         Button {
             id: editShortcut

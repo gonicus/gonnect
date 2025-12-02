@@ -33,9 +33,7 @@ Item {
                                                  {
                                                      pageId: pageId,
                                                      name: pageName,
-                                                     icon: pageIcon,
-                                                     oldGridWidth: gridWidth,
-                                                     oldGridHeight: gridHeight
+                                                     icon: pageIcon
                                                  })
             if (!page) {
                 console.log("Could not create page component", pageId)
