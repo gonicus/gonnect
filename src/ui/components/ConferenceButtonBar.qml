@@ -223,7 +223,11 @@ Item {
                     if (control.isSharingScreen) {
                         control.setScreenShare(false, false)
                     } else {
-                        screenShareMenu.popup(screenShareButton, -screenShareButton.width + screenShareButton.width, screenShareButton.height)
+                        control.setScreenShare(true, true)
+
+                        //TODO: this can be re-enabled after QTBUG-142040 / QTBUG-142040 are fixed
+                        //      see Conference.qml +293
+                        //screenShareMenu.popup(screenShareButton, -screenShareButton.width + screenShareButton.width, screenShareButton.height)
                     }
                 }
 
