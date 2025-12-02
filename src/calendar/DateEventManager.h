@@ -29,7 +29,8 @@ public:
     void addDateEvent(DateEvent *dateEvent);
 
     void modifyDateEvent(const QString &id, const QString &source, const QDateTime &start,
-                         const QDateTime &end, const QString &summary, const QString &roomName);
+                         const QDateTime &end, const QString &summary, const QString &roomName,
+                         bool isJitsiMeeting);
     void removeDateEvent(const QString &id);
 
     /// Delete all date events

@@ -378,7 +378,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             // Location
             QString location =
                     manager.getJitsiRoomFromLocation(i_cal_component_get_location(component));
-            bool isNoJitsiMeeting = location.isEmpty();
+            bool isJitsiMeeting = !location.isEmpty();
 
             // Status filter
             ICalPropertyStatus status = i_cal_component_get_status(component);
@@ -387,10 +387,9 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
             // Skip non-recurrent events that are cancelled / outside of our date range
             // as well as any events without a jitsi meeting as a location
-            if (isNoJitsiMeeting
-                || ((start < m_timeRangeStart || start > m_timeRangeEnd || end < m_currentTime
-                     || isCancelled)
-                    && !isRecurrent && !isUpdatedRecurrence)) {
+            if ((start < m_timeRangeStart || start > m_timeRangeEnd || end < m_currentTime
+                 || isCancelled)
+                && !isRecurrent && !isUpdatedRecurrence) {
                 continue;
             }
 
@@ -431,7 +430,8 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                             QString nid =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
                             manager.addDateEvent(new DateEvent(nid, concreteSource, recurStart,
-                                                               recurEnd, summary, location));
+                                                               recurEnd, summary, location,
+                                                               isJitsiMeeting));
                         }
                     }
 
@@ -445,16 +445,17 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                     manager.removeDateEvent(id);
                 } else if (manager.isAddedDateEvent(id)) {
                     // Exists but modified
-                    manager.modifyDateEvent(id, concreteSource, start, end, summary, location);
+                    manager.modifyDateEvent(id, concreteSource, start, end, summary, location,
+                                            isJitsiMeeting);
                 } else {
                     // Does not exist, e.g. moved from past to future, different day
-                    manager.addDateEvent(
-                            new DateEvent(id, concreteSource, start, end, summary, location));
+                    manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
+                                                       location, isJitsiMeeting));
                 }
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
-                manager.addDateEvent(
-                        new DateEvent(id, concreteSource, start, end, summary, location));
+                manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
+                                                   location, isJitsiMeeting));
             }
         }
     }

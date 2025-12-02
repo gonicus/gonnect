@@ -132,7 +132,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
 
                         // Location
                         QString location = manager.getJitsiRoomFromLocation(event->location());
-                        bool isNoJitsiMeeting = location.isEmpty();
+                        bool isJitsiMeeting = !location.isEmpty();
 
                         // Status filter
                         bool isCancelled = (event->status()
@@ -140,10 +140,9 @@ void AkonadiEventFeeder::processCollections(KJob *job)
 
                         // Skip non-recurrent events that are cancelled / outside of our date range
                         // as well as any events without a jitsi meeting as a location
-                        if (isNoJitsiMeeting
-                            || ((start < m_timeRangeStart || start > m_timeRangeEnd
-                                 || end < m_currentTime || isCancelled)
-                                && !isRecurrent && !isUpdatedRecurrence)) {
+                        if ((start < m_timeRangeStart || start > m_timeRangeEnd
+                             || end < m_currentTime || isCancelled)
+                            && !isRecurrent && !isUpdatedRecurrence) {
                             continue;
                         }
 
@@ -174,8 +173,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                     QString nid = QString("%1-%2").arg(id).arg(
                                             recurStart.toMSecsSinceEpoch());
                                     manager.addDateEvent(new DateEvent(nid, m_source, recurStart,
-                                                                       recurEnd, summary,
-                                                                       location));
+                                                                       recurEnd, summary, location,
+                                                                       isJitsiMeeting));
                                 }
                             }
                         } else if (isUpdatedRecurrence) {
@@ -186,17 +185,18 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                 manager.removeDateEvent(id);
                             } else if (manager.isAddedDateEvent(id)) {
                                 // Exists but modified
-                                manager.modifyDateEvent(id, m_source, start, end, summary,
-                                                        location);
+                                manager.modifyDateEvent(id, m_source, start, end, summary, location,
+                                                        isJitsiMeeting);
                             } else {
                                 // Does not exist, e.g. moved from past to future, different day
-                                manager.addDateEvent(
-                                        new DateEvent(id, m_source, start, end, summary, location));
+                                manager.addDateEvent(new DateEvent(id, m_source, start, end,
+                                                                   summary, location,
+                                                                   isJitsiMeeting));
                             }
                         } else {
                             // Normal event, no recurrence, or update of a recurrent instance
-                            manager.addDateEvent(
-                                    new DateEvent(id, m_source, start, end, summary, location));
+                            manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
+                                                               location, isJitsiMeeting));
                         }
                     }
                 }
