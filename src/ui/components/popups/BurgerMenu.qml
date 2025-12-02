@@ -27,15 +27,11 @@ Menu {
 
     Action {
         id: pageEditAction
-        text: SM.uiEditMode ? qsTr("Leave edit mode") : qsTr("Customize UI")
+        text: qsTr("Customize UI")
         icon.source: "qrc:/icons/editor.svg"
-        enabled: true
+        enabled: !SM.uiEditMode
         onTriggered: () => {
-            if (SM.uiEditMode) {
-                SM.setUiEditMode(false)
-            } else {
-                SM.setUiEditMode(true)
-            }
+            SM.setUiEditMode(true)
         }
     }
 
