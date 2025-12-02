@@ -10,7 +10,7 @@ class DateEventsModel : public QAbstractListModel
     QML_ELEMENT
 
 public:
-    enum class Roles { DateTime = Qt::UserRole + 1, Date, EndDateTime, Summary, RoomName };
+    enum class Roles { DateTime = Qt::UserRole + 1, Date, EndDateTime, Summary, RoomName, IsJitsiMeeting};
 
     explicit DateEventsModel(QObject *parent = nullptr);
 

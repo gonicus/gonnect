@@ -72,6 +72,7 @@ ListView {
         required property date endDateTime
         required property string summary
         required property string roomName
+        required property bool isJitsiMeeting
 
         property bool isToday
         property bool isInPast
@@ -180,10 +181,12 @@ ListView {
             exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onDoubleTapped: () => {
-                ViewHelper.requestMeeting(delg.roomName)
+                if (delg.isJitsiMeeting) {
+                    ViewHelper.requestMeeting(delg.roomName)
+                }
             }
             onTapped: (_, mouseButton) => {
-                if (mouseButton === Qt.RightButton) {
+                if (mouseButton === Qt.RightButton && delg.isJitsiMeeting) {
                     dateEventContextMenuComponent.createObject(delg).popup()
                 }
             }

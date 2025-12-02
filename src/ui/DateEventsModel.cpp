@@ -35,6 +35,7 @@ QHash<int, QByteArray> DateEventsModel::roleNames() const
         { static_cast<int>(Roles::EndDateTime), "endDateTime" },
         { static_cast<int>(Roles::Summary), "summary" },
         { static_cast<int>(Roles::RoomName), "roomName" },
+        { static_cast<int>(Roles::IsJitsiMeeting), "isJitsiMeeting" },
     };
 }
 
@@ -59,6 +60,9 @@ QVariant DateEventsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::RoomName):
         return dateEvent->roomName();
+
+    case static_cast<int>(Roles::IsJitsiMeeting):
+        return dateEvent->isJitsiMeeting();
 
     case static_cast<int>(Roles::Summary):
     default:
