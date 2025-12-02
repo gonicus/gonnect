@@ -55,9 +55,9 @@ Item {
         onXChanged: () => {
             // Round value to grid coordinate and clamp min/max values
             const cellWidth = control.gridCellWidth
-            const newVal = Util.clamp(Math.round(resizableRect.x / cellWidth) * cellWidth,
-                                      0,
-                                      (ViewHelper.numberOfGridCells() - control.widthGrid) * cellWidth)
+            const newVal = Math.round(Util.clamp(Math.round(resizableRect.x / cellWidth) * cellWidth,
+                                                 0,
+                                                 (ViewHelper.numberOfGridCells() - control.widthGrid) * cellWidth))
 
             if (newVal !== resizableRect.x) {
                 resizableRect.x = newVal
@@ -66,9 +66,9 @@ Item {
         onYChanged: () => {
             // Round value to grid coordinate and clamp min/max values
             const cellHeight = control.gridCellHeight
-            const newVal = Util.clamp(Math.round(resizableRect.y / cellHeight) * cellHeight,
-                                      0,
-                                      (ViewHelper.numberOfGridCells() - control.heightGrid) * cellHeight)
+            const newVal = Math.round(Util.clamp(Math.round(resizableRect.y / cellHeight) * cellHeight,
+                                                 0,
+                                                 (ViewHelper.numberOfGridCells() - control.heightGrid) * cellHeight))
 
             if (newVal !== resizableRect.y) {
                 resizableRect.y = newVal
