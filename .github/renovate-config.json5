@@ -27,21 +27,7 @@
         },
         {
             "groupName": "conan dependencies",
-            "matchManagers": ["conan"],
-             postUpgradeTasks: {
-                // /conan/ is the mount point of resources/conan inside the renovate container of the branch this action is running in
-                // /tmp/renovate/repos/github/gonicus/gonnect/ is the branch renovate is using to check for updated (usually "main")
-                commands: [
-                    "GITHUB_ACTION=1 /conan/updater.py --renovate --verbose --dir=/tmp/renovate/repos/github/gonicus/gonnect/ --branch={{branchName}}"
-                ],
-                executionMode: "branch",
-                fileFilters: [
-                    "conanfile.py",
-                    "resources/conan/recipes/*/config.yml",
-                    "resources/conan/recipes/*/all/conandata.yml",
-                    "resources/conan/recipes/*/all/conanfile.py"
-                ]
-            },
+            "matchManagers": ["conan"]
         },
         {
             "matchPackageNames": [
@@ -58,7 +44,20 @@
                 "wintoast/**",
             ],
             "matchManagers": ["conan"],
-            "enabled": false
+            "overrideDatasource": "custom.conan_local",
+            "postUpgradeTasks": {
+                // /conan/ is the mount point of resources/conan inside the renovate container of the branch this action is running in
+                // /tmp/renovate/repos/github/gonicus/gonnect/ is the branch renovate is using to check for updated (usually "main")
+                "commands": [
+                    "GITHUB_ACTION=1 /conan/updater.py --verbose --dir=/tmp/renovate/repos/github/gonicus/gonnect/ --update-recipes=\"$RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE\""
+                ],
+                "executionMode": "update",
+                "fileFilters": [
+                    "resources/conan/recipes/*/config.yml",
+                    "resources/conan/recipes/*/all/conandata.yml"
+                ],
+                "dataFileTemplate": "{\"depName\": \"{{{depName}}}\", \"currentVersion\": \"{{{currentVersion}}}\", \"newVersion\": \"{{{newVersion}}}\"}"
+            },
         },
         {
             "matchPackageNames": ["openssl/**"],
@@ -93,8 +92,13 @@
 	        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}'
         }
     ],
+    "customDatasources": {
+        "conan_local": {
+            "defaultRegistryUrlTemplate": "http://localhost:8080/{{packageName}}/versions.json",
+        }
+    },
     "logLevelRemap": [{
-        "matchMessage": "/^Executed post-upgrade task/",
+        "matchMessage": "/^(Checking for|Executed|Processed|Created) post-upgrade (task|command)/",
         "newLogLevel": "info"
     }]
 }

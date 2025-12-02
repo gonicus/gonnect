@@ -51,7 +51,7 @@ class OpenldapConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=3.5.4 <4]")
         if self.options.with_cyrus_sasl:
             self.requires("cyrus-sasl/2.1.28")
 
@@ -78,6 +78,7 @@ class OpenldapConan(ConanFile):
                 "--without-fetch",
                 "--with-tls=openssl",
                 "--enable-auditlog",
+                "--disable-slapd",
                 "--libexecdir=${prefix}/bin",
                 f"systemdsystemunitdir={os.path.join(self.package_folder, 'res')}",
             ]

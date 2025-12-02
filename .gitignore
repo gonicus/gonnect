@@ -9,6 +9,7 @@ samples/callhistory.db
 build/
 repo/
 .flatpak-builder/
+.qtcreator
 
 # CMake
 CMakeCache.txt
@@ -64,3 +65,4 @@ tags
 # Updater
 updater.sqlite
 __pycache__
+tmp/
