@@ -52,7 +52,18 @@ Item {
 
             onClicked: {
                 SM.setUiSaveState(true)
+                SM.setUiEditMode(false)
+            }
+        }
 
+        Button {
+            highlighted: true
+            Material.accent: Theme.redColor
+            icon.source: Icons.objectSelectSymbolic
+            height: control.buttonHeight
+            text: qsTr("Cancel")
+
+            onClicked: {
                 SM.setUiEditMode(false)
             }
         }
