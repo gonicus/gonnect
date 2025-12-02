@@ -131,6 +131,8 @@ Item {
             button.parent = topMenuCol
             button.visible = true
         })
+
+        control.saveTabList()
     }
 
     Rectangle {
@@ -380,6 +382,8 @@ Item {
                             button.visible = true
                         })
                     }
+
+                    control.saveTabList()
                 }
             }
         }
@@ -407,6 +411,8 @@ Item {
                             button.visible = true
                         })
                     }
+
+                    control.saveTabList()
                 }
             }
         }
@@ -442,6 +448,7 @@ Item {
                     control.dynamicPageCount -= 1
 
                     SM.uiDirtyState = true
+                    control.saveTabList()
                 }
             }
         }

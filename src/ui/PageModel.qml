@@ -26,11 +26,10 @@ Item {
 
     function remove(page: Item) {
         const index = model.indexOf(page)
+
         if (index !== -1) {
             model.splice(index, 1)
-
             UISettings.removeUISetting(page.pageId, "")
-
             control.modelUpdated()
         }
     }

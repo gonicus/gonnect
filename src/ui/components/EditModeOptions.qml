@@ -47,23 +47,12 @@ Item {
             Material.accent: Theme.greenColor
             icon.source: Icons.objectSelectSymbolic
             height: control.buttonHeight
-            text: qsTr("Save")
-            enabled: SM.uiDirtyState
+            text: qsTr("Finish editing")
 
             onClicked: () => {
                 SM.uiSaveState = true
                 SM.uiEditMode = false
             }
-        }
-
-        Button {
-            highlighted: true
-            Material.accent: Theme.redColor
-            icon.source: Icons.objectSelectSymbolic
-            height: control.buttonHeight
-            text: qsTr("Cancel")
-
-            onClicked: () => SM.uiEditMode = false
         }
     }
 }

@@ -139,10 +139,13 @@ BaseWindow {
 
     function removePage(pageId : string) {
         let page = pageStack.getPage(pageId)
+        page.isBeingDeleted = true
         pageModel.remove(page)
         page.model.removeAll()
         page.destroy()
         delete pageStack.getPage(pageId)
+
+        mainTabBar.saveTabList()
     }
 
     function createPage(pageId : string, icon : url, name : string) {
@@ -159,40 +162,15 @@ BaseWindow {
 
         pageModel.add(page)
         pageStack.pages[pageId] = page
+
+        page.writer.save()
+        mainTabBar.saveTabList()
     }
 
     function loadPages() {
         pageReader.loadHomePage(control.homePageId)
         pageReader.loadDynamicPages()
-
         mainTabBar.sortTabList()
-    }
-
-    readonly property Connections dynamicUiConnections: Connections {
-        target: SM
-        function onUiSaveStateChanged() {
-            if (SM.uiSaveState) {
-                console.log("Writing dynamic UI state to disk")
-
-                // Home page
-                let homePage = pageStack.getPage(control.homePageId)
-                homePage.writer.save()
-                UISettings.setUISetting("generic", "gonnectGridWidth", homePage.gridWidth)
-                UISettings.setUISetting("generic", "gonnectGridHeight", homePage.gridHeight)
-
-                // Dynamic pages & widgets
-                let pages = pageModel.items()
-                for (const page of pages) {
-                    page.writer.save()
-                }
-
-                // Tabs
-                mainTabBar.saveTabList()
-
-                SM.uiSaveState = false
-                SM.uiDirtyState = false
-            }
-        }
     }
 
     CommonPages {

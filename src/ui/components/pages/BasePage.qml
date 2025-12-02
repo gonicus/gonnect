@@ -18,6 +18,9 @@ Item {
     readonly property alias gridCellWidth: snapGrid.cellWidth
     readonly property alias gridCellHeight: snapGrid.cellHeight
 
+    /// Must be set to true when the page is about to be deleted. Prevents actions like saving.
+    property bool isBeingDeleted: false
+
     property bool editMode: false
     Connections {
         target: SM
@@ -31,6 +34,9 @@ Item {
         target: widgetModel
         function onModelUpdated() {
             control.emptyPage = widgetModel.count() === 0
+            if (!control.isBeingDeleted) {
+                pageWriter.save()
+            }
         }
     }
 
@@ -52,6 +58,10 @@ Item {
         icon: control.icon
         model: widgetModel
     }
+
+    Component.onCompleted: () => pageWriter.save()
+    onNameChanged: () => pageWriter.save()
+    onIconChanged: () => pageWriter.save()
 
     Component {
         id: widgetSelectionWindowComponent

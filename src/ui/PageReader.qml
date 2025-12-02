@@ -20,10 +20,6 @@ Item {
     }
 
     function loadDynamicPages() {
-        // Generic
-        const gridWidth = UISettings.getUISetting("generic", "gonnectGridWidth", 0)
-        const gridHeight = UISettings.getUISetting("generic", "gonnectGridHeight", 0)
-
         // Pages
         const pageIds = UISettings.getPageIds()
         for (const pageId of pageIds) {

@@ -29,6 +29,13 @@ Item {
 
     property alias root: resizableRect
 
+    onXGridChanged: () => control.page?.writer.save()
+    onYGridChanged: () => control.page?.writer.save()
+    onWidthGridChanged: () => control.page?.writer.save()
+    onHeightGridChanged: () => control.page?.writer.save()
+    onPageChanged: () => control.page?.writer.save()
+    Component.onCompleted: () => control.page?.writer.save()
+
     function makeOpaque(base : color, opacity : double) : color {
         return Qt.rgba(base.r, base.g, base.b, opacity)
     }

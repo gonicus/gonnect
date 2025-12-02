@@ -13,19 +13,6 @@ Item {
 
     required property WidgetModel model
 
-    function reset() {
-        // Widgets
-        let widgets = model.items()
-        for (const widget of widgets) {
-            let widgetId = widget.widgetId
-
-            UISettings.removeUISetting(widgetId, "")
-        }
-
-        // Page
-        UISettings.removeUISetting(control.pageId, "")
-    }
-
     function save() {
         // Widgets
         let widgets = model.items()
