@@ -151,6 +151,14 @@ ListView {
                           : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))) + ")"
                 }
             }
+
+            IconLabel {
+                icon {
+                    source: delg.isJitsiMeeting ? Icons.videoCall : Icons.notifications
+                    width: 16
+                    height: 16
+                }
+            }
         }
 
         Component {
