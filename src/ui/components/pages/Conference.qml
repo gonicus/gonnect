@@ -291,15 +291,17 @@ Item {
                         permission.grant()
                     }
 
-                   onDesktopMediaRequested: (request) => {
-                       if (internal.shareFullScreen) {
-                           console.error("### send selectScreen(0)")
-                           request.selectScreen(request.screensModel.index(0, 0))
-                       } else {
-                           console.error("### send selectWindow(0)")
-                           request.selectWindow(request.windowsModel.index(0, 0))
-                       }
-                   }
+                    //TODO: this can be re-enabled after QTBUG-142040 / QTBUG-142040 are fixed
+                    //      see ConferenceButtonBar.qml +228
+                    //onDesktopMediaRequested: (request) => {
+                    //    if (internal.shareFullScreen) {
+                    //        console.error("### send selectScreen(0)")
+                    //        request.selectScreen(request.screensModel.index(0, 0))
+                    //    } else {
+                    //        console.error("### send selectWindow(0)")
+                    //        request.selectWindow(request.windowsModel.index(0, 0))
+                    //    }
+                    //}
 
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
