@@ -42,7 +42,7 @@ jobs:
           cache-key: flatpak-builder-${{ steps.var.outputs.gonnect_version }}
 
       - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: GOnnect.flatpak
@@ -74,7 +74,7 @@ jobs:
         run: cd build && cpack ${{github.workspace}}
 
       - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/GOnnect*.exe
@@ -105,7 +105,7 @@ jobs:
         run: cd build/Release && cpack ${{github.workspace}}
 
       - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@6b7fa9f267e90b50a19fef07b3596790bb941741 # v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/Release/GOnnect*.dmg
