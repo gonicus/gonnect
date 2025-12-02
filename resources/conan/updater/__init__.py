@@ -77,6 +77,10 @@ class Dependency:
     def name(self):
         return self._name
 
+    @property
+    def package(self):
+        return self.conan_version()
+
     def conan_version(self, version=None, latest=False, old=False, new=False):
         if version is not None:
             return f"{self._name}/{version}{self._package_suffix}"
@@ -225,6 +229,36 @@ class Dependency:
                     f.write(changed_content)
 
 
+    def dump_renovate(self, dry_run=False) -> dict:
+        result = {}
+        releases = []
+        url = None
+
+        if self.has_update and self.latest_release is not None:
+            url = self.latest_release.get_download_url()
+
+            if url is None:
+                raise Exception(f"{self._name} no download url found")
+
+            r = requests.head(url)
+            if r.status_code >= 400:
+                self.logger.error(f"invalid download URL: {url}, {r.status_code}")
+            else:
+                releases.append({
+                    "version": self.latest_release.version,
+                    "sourceUrl": url
+                })
+
+        if self.current_release is not None:
+            releases.append({
+                "version": self.current_release.version
+            })
+        result["releases"] = releases
+        if url:
+            result["sourceUrl"] = url
+        return result
+
+
     def read_conandata(self) -> dict:
         if self._conandata_path is None:
             self._update_conandata_path()
@@ -349,7 +383,7 @@ class Dependency:
 
             if res == 1:# and self.latest_release.version not in versions:
                 if not silent:
-                    self.logger.debug(f"new version found '{self.current_release}'=>'{self.latest_release}'")
+                    self.logger.info(f"new version found '{self.current_release}'=>'{self.latest_release}'")
                 return True
             elif res == -1:
                 if not silent:
