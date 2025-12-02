@@ -14,9 +14,9 @@ class StateManager : public QObject
     Q_OBJECT
     Q_PROPERTY(bool globalShortcutsSupported READ globalShortcutsSupported NOTIFY
                        globalShortcutsSupportedChanged FINAL)
-    Q_PROPERTY(bool uiEditMode READ uiEditMode NOTIFY uiEditModeChanged FINAL)
-    Q_PROPERTY(bool uiDirtyState READ uiDirtyState NOTIFY uiDirtyStateChanged FINAL)
-    Q_PROPERTY(bool uiSaveState READ uiSaveState NOTIFY uiSaveStateChanged FINAL)
+    Q_PROPERTY(bool uiEditMode MEMBER m_uiEditMode NOTIFY uiEditModeChanged FINAL)
+    Q_PROPERTY(bool uiDirtyState MEMBER m_uiDirtyState NOTIFY uiDirtyStateChanged FINAL)
+    Q_PROPERTY(bool uiSaveState MEMBER m_uiSaveState NOTIFY uiSaveStateChanged FINAL)
     Q_PROPERTY(QVariantMap globalShortcuts READ globalShortcuts NOTIFY globalShortcutsChanged FINAL)
 
 public:
@@ -30,15 +30,6 @@ public:
 
         return *_instance;
     }
-
-    Q_INVOKABLE void setUiEditMode(bool option);
-    bool uiEditMode() { return m_uiEditMode; };
-
-    Q_INVOKABLE void setUiDirtyState(bool option);
-    bool uiDirtyState() { return m_uiDirtyState; };
-
-    Q_INVOKABLE void setUiSaveState(bool option);
-    bool uiSaveState() { return m_uiSaveState; };
 
     void initialize();
     bool globalShortcutsSupported() const;

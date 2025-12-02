@@ -64,33 +64,6 @@ QVariantMap StateManager::globalShortcuts() const
     return res;
 }
 
-void StateManager::setUiEditMode(bool option)
-{
-    if (m_uiEditMode != option) {
-        m_uiEditMode = option;
-
-        Q_EMIT uiEditModeChanged();
-    }
-};
-
-void StateManager::setUiDirtyState(bool option)
-{
-    if (m_uiDirtyState != option) {
-        m_uiDirtyState = option;
-
-        Q_EMIT uiDirtyStateChanged();
-    }
-};
-
-void StateManager::setUiSaveState(bool option)
-{
-    if (m_uiSaveState != option) {
-        m_uiSaveState = option;
-
-        Q_EMIT uiSaveStateChanged();
-    }
-};
-
 void StateManager::initialize()
 {
     auto &globalShortcuts = GlobalShortcuts::instance();

@@ -182,7 +182,7 @@ BaseWindow {
                     if (widget) {
                         control.widgetRoot.resetWidgetElevation()
                         control.widgetRoot.model.add(widget)
-                        SM.setUiDirtyState(true)
+                        SM.uiDirtyState = true
                     } else {
                         console.log("Could not create widget component")
                     }

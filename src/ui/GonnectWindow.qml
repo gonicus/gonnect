@@ -189,8 +189,8 @@ BaseWindow {
                 // Tabs
                 mainTabBar.saveTabList()
 
-                SM.setUiSaveState(false)
-                SM.setUiDirtyState(false)
+                SM.uiSaveState = false
+                SM.uiDirtyState = false
             }
         }
     }

@@ -98,9 +98,7 @@ Item {
             visible: control.emptyPage && !control.editMode
             anchors.centerIn: parent
 
-            onClicked: {
-                SM.setUiEditMode(true)
-            }
+            onClicked: () => SM.uiEditMode = true
         }
     }
 }

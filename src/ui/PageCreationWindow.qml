@@ -128,14 +128,14 @@ BaseWindow {
                 icon.source: Icons.listAdd
                 text: qsTr("Add")
 
-                onPressed: {
+                onPressed: () => {
                     let icon = icons[iconEntries.get(iconSelection.currentIndex).name]
                     let text = titleEntry.text
 
                     tabRoot.createTab(pageId, pageType, icon, text)
                     tabRoot.mainWindow.createPage(pageId, icon, text)
 
-                    SM.setUiDirtyState(true)
+                    SM.uiDirtyState = true
 
                     control.close()
                 }

@@ -441,7 +441,7 @@ Item {
 
                     control.dynamicPageCount -= 1
 
-                    SM.setUiDirtyState(true)
+                    SM.uiDirtyState = true
                 }
             }
         }

@@ -50,9 +50,9 @@ Item {
             text: qsTr("Save")
             enabled: SM.uiDirtyState
 
-            onClicked: {
-                SM.setUiSaveState(true)
-                SM.setUiEditMode(false)
+            onClicked: () => {
+                SM.uiSaveState = true
+                SM.uiEditMode = false
             }
         }
 
@@ -63,9 +63,7 @@ Item {
             height: control.buttonHeight
             text: qsTr("Cancel")
 
-            onClicked: {
-                SM.setUiEditMode(false)
-            }
+            onClicked: () => SM.uiEditMode = false
         }
     }
 }

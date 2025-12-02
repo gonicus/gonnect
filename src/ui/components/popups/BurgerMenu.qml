@@ -30,9 +30,7 @@ Menu {
         text: qsTr("Customize UI")
         icon.source: "qrc:/icons/editor.svg"
         enabled: !SM.uiEditMode
-        onTriggered: () => {
-            SM.setUiEditMode(true)
-        }
+        onTriggered: () => SM.uiEditMode = true
     }
 
     Action {
