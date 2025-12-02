@@ -7,13 +7,15 @@ import os
 import re
 from updater.logger import logger
 from updater import Dependency, diff
+from updater.releases import RenovateRelease
 import colorlog
+import json
 from sh import grep, ErrorReturnCode_1
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 ROOT_DIR = SCRIPT_DIR.parent.parent.resolve()
 RECIPES = ('resources', 'conan', 'recipes')
-PACKAGE_SUFFIX = ""
+PACKAGE_SUFFIX = "@_/_"
 
 log_level = colorlog.INFO
 # uncomment this to see the sh commands
@@ -22,7 +24,7 @@ log_level = colorlog.INFO
 
 
 class Conan:
-    def __init__(self, dir : Path):
+    def __init__(self, dir : Path, renovate_dir=None):
         self.dependencies = {}
         self._dir = dir
         self._profile_path = dir.joinpath('conanfile.py')
@@ -36,6 +38,7 @@ class Conan:
 
         self._project = None
         self._requires_pattern = re.compile(r'self.requires\("([^"]+)"')
+        self._renovate_dir = renovate_dir
 
     def create(self, name, content):
         dep = Dependency(name, content, recipes_dir=self._recipes_dir, suffix=PACKAGE_SUFFIX)
@@ -58,7 +61,9 @@ class Conan:
                         tools.append(content.split("/")[0])
         return tools
 
-    def run(self, filter=None, locked=None, pre_releases=None, dry_run=False, validate=False, force=False, blacklist=[], bump_build=False, verbose=False):
+    def run(self, filter=None, locked=None, pre_releases=None,
+            dry_run=False, validate=False, force=False, blacklist=[],
+            bump_build=False):
 
         whitelist = []
         if filter is not None:
@@ -100,6 +105,11 @@ class Conan:
 
                 except yaml.YAMLError as exc:
                     logger.error(exc)
+
+        if self._renovate_dir is not None:
+            # we only need to check to get the latest version for the dependencies
+            self._export_renovate_files(whitelist, blacklist, dry_run)
+            return
 
         if len(tool_requirement_changed) > 0:
             logger.info(f"bumping all build numbers because tool requirements have been updated: {tool_requirement_changed}")
@@ -183,13 +193,40 @@ class Conan:
                         f.write(changed)
                         f.truncate()
 
+    def _export_renovate_files(self, whitelist, blacklist, dry_run=False):
+        for dep in self.dependencies.values():
+            if (len(whitelist) == 0 or dep.name in whitelist) and dep.name not in blacklist:
+                data = dep.dump_renovate()
+                filename = Path(self._renovate_dir).joinpath(dep.package, 'versions.json')
+                logger.debug(f"{filename}: {json.dumps(data, indent=2)}")
+                if not dry_run:
+                    filename.parent.mkdir(parents=True, exist_ok=True)
+                    with open(filename, "w") as f:
+                        f.write(json.dumps(data, indent=2))
 
-    def renovate(self, branch=None, **kwargs):
-        logger.info("starting updater embedded in renovate")
-        if branch == "renovate/conan-dependencies":
-            self.run(**kwargs)
-        else:
-            logger.error('not in renovate/conan-dependencies branch, skipping update checks')
+    def update_recipes(self, data_file, dry_run=False):
+        with open(data_file) as json_data:
+            try:
+                data = json.load(json_data)
+            except json.JSONDecodeError as e:
+                logger.error("Invalid JSON syntax:", e)
+                return
+
+            config_path = self._recipes_dir.joinpath(data["depName"], "config.yml")
+            if config_path.exists():
+                with open(config_path) as f:
+                    try:
+                        content = yaml.safe_load(f)
+
+                        if "updater" in content:
+                            dep = self.create(data["depName"], content)
+                            if not dep.blocked:
+                                dep.check()
+                                # only call flush, renovate already did the post_flush part
+                                dep.flush(dry_run=dry_run)
+
+                    except yaml.YAMLError as exc:
+                        logger.error(exc)
 
 
 if __name__ == "__main__":
@@ -210,29 +247,29 @@ if __name__ == "__main__":
                         help="Force updating to latest version found")
     parser.add_argument("--bump-build", dest="bump_build", action="store_true",
                         help="Increase all build versions (except android tools)")
-    parser.add_argument("--renovate", action="store_true",
-                        help="Run this within renovate as postUpgradeTask")
-    parser.add_argument("--branch")
-
+    parser.add_argument("--renovate", dest="renovate_dir",
+                        help="Generate renovate local datasource files in this folder")
     parser.add_argument("--dir", help="Directory where the updates should be checked")
+    parser.add_argument("--update-recipes", dest="update_recipes",
+                        help="Path to a file generated for renovates postUpgradeTasks, updates urls / versions in recipes in that file")
 
     args = parser.parse_args()
     args_dict = vars(args)
-    renovate = args.renovate
     if args.verbose:
         log_level = colorlog.DEBUG
         logger.setLevel(log_level)
-    del args_dict["renovate"]
+    del args_dict["verbose"]
 
     dir = ROOT_DIR
     if args.dir:
         dir = Path(args.dir)
     del args_dict["dir"]
 
-    conan = Conan(dir)
+    conan = Conan(dir, renovate_dir=args.renovate_dir)
+    del args_dict["renovate_dir"]
     merge_request = None
-    if renovate:
-        conan.renovate(**args_dict)
+    if args.update_recipes:
+        conan.update_recipes(args.update_recipes, args.dry_run)
     else:
-        del args_dict["branch"]
+        del args_dict["update_recipes"]
         conan.run(**args_dict)
