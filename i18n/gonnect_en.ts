@@ -26,7 +26,7 @@
 <context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../../../src/StateManager.cpp" line="181"/>
+        <location filename="../../../src/StateManager.cpp" line="154"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>

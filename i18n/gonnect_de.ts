@@ -134,21 +134,16 @@
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
-        <source>Leave edit mode</source>
-        <translation>Bearbeiten beenden</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
         <source>Customize UI</source>
         <translation>Oberfläche anpassen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="43"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="37"/>
         <source>About...</source>
         <translation>Über...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="49"/>
+        <location filename="../src/ui/components/popups/BurgerMenu.qml" line="43"/>
         <source>Quit</source>
         <translation>Beenden</translation>
     </message>
@@ -687,6 +682,11 @@
         <location filename="../src/ui/components/EditModeOptions.qml" line="50"/>
         <source>Save</source>
         <translation>Speichern</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/EditModeOptions.qml" line="64"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
     </message>
 </context>
 <context>
@@ -2654,7 +2654,7 @@
         <translation>Simbabwe</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/StateManager.cpp" line="181"/>
+        <location filename="../src/StateManager.cpp" line="154"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>
@@ -3195,27 +3195,27 @@
 <context>
     <name>StateManager</name>
     <message>
-        <location filename="../src/StateManager.cpp" line="100"/>
+        <location filename="../src/StateManager.cpp" line="73"/>
         <source>Show dial window and focus search field</source>
         <translation>Zeige das Wählfenster und fokussiere das Suchfeld</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="103"/>
+        <location filename="../src/StateManager.cpp" line="76"/>
         <source>End all calls</source>
         <translation>Alle Anrufe beenden</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="105"/>
+        <location filename="../src/StateManager.cpp" line="78"/>
         <source>Redial last outgoing call</source>
         <translation>Letzten ausgehenden Anruf wiederholen</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="108"/>
+        <location filename="../src/StateManager.cpp" line="81"/>
         <source>Toggle hold</source>
         <translation>Halten umschalten</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="156"/>
+        <location filename="../src/StateManager.cpp" line="129"/>
         <source>Phone calls are active</source>
         <translation>Anrufe sind aktiv</translation>
     </message>
