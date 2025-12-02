@@ -35,14 +35,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: 'pip' # caching pip dependencies
+          pip-install: -r resources/conan/requirements.txt
+
+      - name: Local Conan versiontracker
+        run: |
+          resources/conan/updater.py --renovate=tmp/renovate/ -v
+
+      - name: Serve Files
+        uses: Eun/http-server-action@v1
+        with:
+          directory: ${{ github.workspace }}/tmp/renovate/
+          port: 8080
+          allowed-methods: |
+            ["GET", "HEAD"]
+          content-types: |
+            {
+              "json": "application/json"
+            }
+
       - name: Self-hosted Renovate
         uses: renovatebot/github-action@5712c6a41dea6cdf32c72d92a763bd417e6606aa # v44.0.5
         with:
           docker-cmd-file: .github/renovate-entrypoint.sh
           docker-user: root
           docker-volumes: |
-            /tmp:/tmp ;
-            ${{ github.workspace }}/resources/conan:/conan
+             /tmp:/tmp ;
+             ${{ github.workspace }}/resources/conan:/conan
+          docker-network: host
           token: "${{ steps.get_token.outputs.token }}"
           configurationFile: .github/renovate-config.json5
           env-regex: "^(?:RENOVATE_\\w+|LOG_LEVEL)$"
