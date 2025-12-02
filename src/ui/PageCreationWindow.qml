@@ -52,9 +52,10 @@ BaseWindow {
             text: qsTr("Name")
         }
 
-        TextArea {
+        TextField {
             id: titleEntry
             Layout.fillWidth: true
+            onAccepted: () => pageConfirm.click()
         }
 
         Label {
@@ -120,7 +121,7 @@ BaseWindow {
                 id: pageCancel
                 text: qsTr("Cancel")
 
-                onPressed: control.close()
+                onClicked: () => control.close()
             }
 
             Button {
@@ -128,7 +129,7 @@ BaseWindow {
                 icon.source: Icons.listAdd
                 text: qsTr("Add")
 
-                onPressed: () => {
+                onClicked: () => {
                     let icon = icons[iconEntries.get(iconSelection.currentIndex).name]
                     let text = titleEntry.text
 
