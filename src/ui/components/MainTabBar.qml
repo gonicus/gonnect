@@ -367,18 +367,49 @@ Item {
         id: optionMenu
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        property var selectedTabButton: null
+        property Item selectedTabButton: null
+
+        QtObject {
+            id: menuInternal
+
+            property bool isFirst
+            property bool isLast
+
+            readonly property Connections menuConnections: Connections {
+                target: optionMenu
+                function onSelectedTabButtonChanged() { menuInternal.updateIndexes() }
+                function onOpenedChanged() { menuInternal.updateIndexes() }
+            }
+
+            function updateIndexes() {
+                const selButton = optionMenu.selectedTabButton
+                if (!selButton) {
+                    menuInternal.isFirst = false
+                    menuInternal.isLast = false
+                    return
+                }
+
+                const index = control.getTabList().findIndex(button => button.pageId === selButton.pageId)
+                if (index >= 0) {
+                    menuInternal.isFirst = index === 0
+                    menuInternal.isLast = index === topMenuCol.children.length - 2
+                } else {
+                    menuInternal.isFirst = false
+                    menuInternal.isLast = false
+                }
+            }
+        }
 
         Action {
             text: qsTr("Move up")
             icon.source: Icons.arrowUp
+            enabled: !menuInternal.isFirst
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
-                    let index
-                    let newOrder = control.getTabList()
+                    const newOrder = control.getTabList()
+                    const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
 
-                    index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
                     if (index > 0) {
                         let old = newOrder[index-1]
                         newOrder[index-1] = newOrder[index]
@@ -401,13 +432,13 @@ Item {
         Action {
             text: qsTr("Move down")
             icon.source: Icons.arrowDown
+            enabled: !menuInternal.isLast
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
-                    let index
-                    let newOrder = control.getTabList()
+                    const newOrder = control.getTabList()
+                    const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
 
-                    index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
                     if (index < newOrder.length-1) {
                         let old = newOrder[index+1]
                         newOrder[index+1] = newOrder[index]
