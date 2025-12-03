@@ -24,12 +24,12 @@ Item {
         const pageIds = UISettings.getPageIds()
         for (const pageId of pageIds) {
             const pageName = UISettings.getUISetting(pageId, "name", "")
-            const pageIcon = UISettings.getUISetting(pageId, "icon", "")
+            const pageIconId = UISettings.getUISetting(pageId, "iconId", "")
             const page = pages.base.createObject(control.pageRoot,
                                                  {
                                                      pageId: pageId,
                                                      name: pageName,
-                                                     icon: pageIcon
+                                                     iconId: pageIconId
                                                  })
             if (!page) {
                 console.log("Could not create page component", pageId)
@@ -40,7 +40,7 @@ Item {
 
             tabRoot.createTab(pageId,
                               GonnectWindow.PageType.Base,
-                              pageIcon,
+                              pageIconId,
                               pageName)
 
             pageRoot.pages[pageId] = page

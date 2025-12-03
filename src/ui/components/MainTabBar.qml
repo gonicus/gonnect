@@ -26,44 +26,39 @@ Item {
 
     Component {
         id: pageCreationWindowComponent
-        PageCreationWindow {
-            tabRoot: control
-        }
+
+        PageCreationWindow {}
     }
 
-    function pageCreationDialog() {
+    function openPageCreationDialog() {
         // INFO: Artificial limitation to avoid tab bar clutter
         if (control.dynamicPageCount >= control.dynamicPageLimit) {
             return
         }
 
-        const id = "page_"+UISettings.generateUuid()
-        const type = GonnectWindow.PageType.Base
+        const id = `page_${UISettings.generateUuid()}`
+        const item = pageCreationWindowComponent.createObject(control, { pageId: id })
+        item.show()
 
-        pageCreationWindowComponent.createObject(control,
-                                                 {
-                                                     pageId: id,
-                                                     pageType: type
-                                                 }).show()
+        console.error("===> ITEM", item)
+
+        item.accepted.connect((name, iconId) => {
+                                  control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
+                                  control.mainWindow.createPage(id, iconId, name)
+                              })
     }
 
-    function createTab(id : string, type : int, icon : url, name : string) {
-        // TODO: We should have a unified way in the config, not sometimes
-        // path + file and other time just a file, especially considering the
-        // path changes based on the theme, thus needlessly cluttering the config
-        let iconPath
-        if (!icon.toString().startsWith("qrc:/")) {
-            if (Theme.isDarkMode) {
-                iconPath = "qrc:/icons/dark/" + icon + ".svg"
-            } else {
-                iconPath = "qrc:/icons/" + icon + ".svg"
-            }
-        } else {
-            // We already have a full path + file
-            iconPath = icon
-        }
+    function openPageEditDialog(id : string) {
+        const item = pageCreationWindowComponent.createObject(control, { pageId: id }).show()
 
-        let tabButton = tabDelegate.createObject(topMenuCol,
+        item.accepted.connect((name, iconId) => {
+                                  console.error("===> todo save", name, iconId)
+                              })
+    }
+
+    function createTab(id : string, type : int, iconId : string, name : string) {
+        const iconPath = Icons[iconId]
+        const tabButton = tabDelegate.createObject(topMenuCol,
                                                  {
                                                      pageId: id,
                                                      pageType: type,
@@ -414,6 +409,16 @@ Item {
 
                     control.saveTabList()
                 }
+            }
+        }
+
+        Action {
+            text: qsTr("Edit")
+            icon.source: Icons.editor
+            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+            onTriggered: () => {
+                console.error("todo")
             }
         }
 

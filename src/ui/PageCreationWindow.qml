@@ -24,20 +24,11 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
-    required property var tabRoot
     required property string pageId
-    required property int pageType
 
-    property string name: ""
     property int selection: -1
 
-    property var icons: {
-        "Home": Icons.userHome,
-        "Folder": Icons.folderOpen,
-        "Person": Icons.userGroupNew,
-        "Phone": Icons.callStart,
-        "Message": Icons.dialogMessages
-    }
+    signal accepted(string name, string iconId)
 
     ColumnLayout {
         id: pageOptions
@@ -69,27 +60,29 @@ BaseWindow {
 
             model: ListModel {
                 id: iconEntries
-                ListElement { name: "Home" }
-                ListElement { name: "Folder" }
-                ListElement { name: "Person" }
-                ListElement { name: "Phone" }
-                ListElement { name: "Message" }
+
+                // iconId must be one of those loaded by Icons class (e.g. Icons.userHome => "userHome")
+
+                ListElement { iconId: "userHome" }
+                ListElement { iconId: "folderOpen" }
+                ListElement { iconId: "userGroupNew" }
+                ListElement { iconId: "callStart" }
+                ListElement { iconId: "dialogMessages" }
             }
 
             delegate: ItemDelegate {
+                id: iconDelg
                 width: parent.width
                 contentItem: RowLayout {
                     spacing: 10
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
                     IconLabel {
-                        icon {
-                            source: icons[name]
-                        }
+                        icon.source: Icons[iconDelg.iconId]
                     }
                 }
 
-                required property string name
+                required property string iconId
             }
 
             contentItem: RowLayout {
@@ -98,14 +91,12 @@ BaseWindow {
 
                 IconLabel {
                     leftPadding: 15
-                    icon {
-                        source: icons[iconEntries.get(iconSelection.currentIndex).name]
-                    }
+                    icon.source: Icons[iconEntries.get(iconSelection.currentIndex).iconId]
                 }
             }
 
             onCurrentIndexChanged: {
-                control.name = model.get(currentIndex).name
+                const currentIndex = iconSelection.currentIndex
                 control.selection = currentIndex
             }
         }
@@ -130,12 +121,8 @@ BaseWindow {
                 text: qsTr("Add")
 
                 onClicked: () => {
-                    let icon = icons[iconEntries.get(iconSelection.currentIndex).name]
-                    let text = titleEntry.text
-
-                    tabRoot.createTab(pageId, pageType, icon, text)
-                    tabRoot.mainWindow.createPage(pageId, icon, text)
-
+                    control.accepted(titleEntry.text.trim(),
+                                     iconEntries.get(iconSelection.currentIndex).iconId)
                     control.close()
                 }
             }

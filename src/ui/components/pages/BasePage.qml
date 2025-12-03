@@ -10,7 +10,7 @@ Item {
 
     required property string pageId
     required property string name
-    required property string icon
+    required property string iconId
 
     readonly property alias grid: snapGrid
     readonly property alias gridWidth: snapGrid.width
@@ -55,13 +55,13 @@ Item {
         id: pageWriter
         pageId: control.pageId
         name: control.name
-        icon: control.icon
+        iconId: control.iconId
         model: widgetModel
     }
 
     Component.onCompleted: () => pageWriter.save()
     onNameChanged: () => pageWriter.save()
-    onIconChanged: () => pageWriter.save()
+    onIconIdChanged: () => pageWriter.save()
 
     Component {
         id: widgetSelectionWindowComponent

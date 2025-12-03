@@ -24,7 +24,7 @@ Item {
             enabled: control.tabRoot.dynamicPageCount < control.tabRoot.dynamicPageLimit
 
             onPressed: {
-                control.tabRoot.pageCreationDialog()
+                control.tabRoot.openPageCreationDialog()
             }
         }
 

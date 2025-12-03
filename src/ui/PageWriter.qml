@@ -9,7 +9,7 @@ Item {
 
     required property string pageId
     required property string name
-    required property string icon
+    required property string iconId
 
     required property WidgetModel model
 
@@ -29,6 +29,6 @@ Item {
 
         // Page
         UISettings.setUISetting(control.pageId, "name", control.name)
-        UISettings.setUISetting(control.pageId, "icon", control.icon)
+        UISettings.setUISetting(control.pageId, "iconId", control.iconId)
     }
 }

@@ -138,7 +138,7 @@ BaseWindow {
     }
 
     function removePage(pageId : string) {
-        let page = pageStack.getPage(pageId)
+        const page = pageStack.getPage(pageId)
         page.isBeingDeleted = true
         pageModel.remove(page)
         page.model.removeAll()
@@ -148,12 +148,12 @@ BaseWindow {
         mainTabBar.saveTabList()
     }
 
-    function createPage(pageId : string, icon : url, name : string) {
-        let page = pages.base.createObject(pageStack,
+    function createPage(pageId : string, iconId : string, name : string) {
+        const page = pages.base.createObject(pageStack,
                                            {
                                                pageId: pageId,
                                                name: name,
-                                               icon: icon,
+                                               iconId: iconId,
                                                editMode: true
                                            })
         if (page === null) {
@@ -342,7 +342,7 @@ BaseWindow {
 
                 pageId: control.homePageId
                 name: qsTr("Home")
-                icon: Icons.userHome
+                iconId: "userHome"
             }
 
             Call {
