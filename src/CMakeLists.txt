@@ -271,8 +271,8 @@ elseif(APPLE)
         platform/dummy/DummySearchProvider.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
-        platform/dummy/DummyUserInfo.cpp
-        platform/dummy/DummyUserInfo.h
+	    platform/windows/WindowsUserInfo.cpp
+	    platform/windows/WindowsUserInfo.h
         platform/dummy/DummyExternalMediaManager.cpp
         platform/dummy/DummyExternalMediaManager.h
         platform/dummy/DummyBackgroundManager.cpp
