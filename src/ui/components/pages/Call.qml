@@ -62,11 +62,11 @@ Item {
         anchors {
             left: parent.left
             top: parent.top
-            bottom: firstAidButton.top
+            bottom: parent.bottom
             right: verticalDragbarDummy.left
 
             leftMargin: 24
-            bottomMargin: 15
+            bottomMargin: 8
         }
 
         CallButtonBar {
@@ -268,28 +268,4 @@ Item {
         }
     }
 
-    TogglerList {
-        id: togglerList
-        visible: togglerList.count > 0
-        clip: true
-        anchors {
-            left: parent.left
-            right: firstAidButton.left
-            bottom: parent.bottom
-
-            leftMargin: 10
-            rightMargin: 10
-            bottomMargin: 10
-        }
-    }
-
-    FirstAidButton {
-        id: firstAidButton
-        z: 100000
-        anchors {
-            verticalCenter: togglerList.verticalCenter
-            right: callListCard.right
-            rightMargin: 10
-        }
-    }
 }
