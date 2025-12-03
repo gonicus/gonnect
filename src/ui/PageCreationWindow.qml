@@ -69,6 +69,11 @@ BaseWindow {
 
                 // iconId must be one of those loaded by Icons class (e.g. Icons.userHome => "userHome")
 
+                ListElement { iconId: "dashboardShow" }
+                ListElement { iconId: "folderTable" }
+                ListElement { iconId: "officeChartBar" }
+                ListElement { iconId: "officeChartLine" }
+                ListElement { iconId: "officeChartPie" }
                 ListElement { iconId: "userHome" }
                 ListElement { iconId: "folderOpen" }
                 ListElement { iconId: "userGroupNew" }

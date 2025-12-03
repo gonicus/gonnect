@@ -50,6 +50,7 @@
         <file alias="camera-video.svg">../resources/artwork/icons/camera-video.svg</file>
         <file alias="checkbox.svg">../resources/artwork/icons/checkbox.svg</file>
         <file alias="configure-shortcuts.svg">../resources/artwork/icons/configure-shortcuts.svg</file>
+        <file alias="dashboard-show.svg">../resources/artwork/icons/dashboard-show.svg</file> 
         <file alias="data-warning.svg">../resources/artwork/icons/data-warning.svg</file>
         <file alias="dialog-cancel.svg">../resources/artwork/icons/dialog-cancel.svg</file>
         <file alias="document-save.svg">../resources/artwork/icons/document-save.svg</file>
@@ -60,6 +61,7 @@
         <file alias="edit-copy.svg">../resources/artwork/icons/edit-copy.svg</file>
         <file alias="edit-delete.svg">../resources/artwork/icons/edit-delete.svg</file>
         <file alias="folder-open.svg">../resources/artwork/icons/folder-open.svg</file>
+        <file alias="folder-table.svg">../resources/artwork/icons/folder-table.svg</file> 
         <file alias="go-down.svg">../resources/artwork/icons/go-down.svg</file>
         <file alias="go-up.svg">../resources/artwork/icons/go-up.svg</file>
         <file alias="go-home.svg">../resources/artwork/icons/go-home.svg</file>
@@ -73,6 +75,9 @@
         <file alias="microphone-sensitivity-muted.svg">../resources/artwork/icons/microphone-sensitivity-muted.svg</file>
         <file alias="mobile-close-app.svg">../resources/artwork/icons/mobile-close-app.svg</file>
         <file alias="notifications.svg">../resources/artwork/icons/notifications.svg</file>
+        <file alias="office-chart-bar.svg">../resources/artwork/icons/office-chart-bar.svg</file> 
+        <file alias="office-chart-line.svg">../resources/artwork/icons/office-chart-line.svg</file> 
+        <file alias="office-chart-pie.svg">../resources/artwork/icons/office-chart-pie.svg</file>
         <file alias="object-select-symbolic.svg">../resources/artwork/icons/object-select-symbolic.svg</file>
         <file alias="settings-configure.svg">../resources/artwork/icons/settings-configure.svg</file>
         <file alias="showinfo.svg">../resources/artwork/icons/showinfo.svg</file>
@@ -116,6 +121,7 @@
         <file alias="camera-video.svg">../resources/artwork/icons/dark/camera-video.svg</file>
         <file alias="checkbox.svg">../resources/artwork/icons/dark/checkbox.svg</file>
         <file alias="configure-shortcuts.svg">../resources/artwork/icons/dark/configure-shortcuts.svg</file>
+        <file alias="dashboard-show.svg">../resources/artwork/icons/dark/dashboard-show.svg</file> 
         <file alias="data-warning.svg">../resources/artwork/icons/dark/data-warning.svg</file>
         <file alias="dialog-cancel.svg">../resources/artwork/icons/dark/dialog-cancel.svg</file>
         <file alias="document-save.svg">../resources/artwork/icons/dark/document-save.svg</file>
@@ -126,6 +132,7 @@
         <file alias="edit-copy.svg">../resources/artwork/icons/dark/edit-copy.svg</file>
         <file alias="edit-delete.svg">../resources/artwork/icons/dark/edit-delete.svg</file>
         <file alias="folder-open.svg">../resources/artwork/icons/dark/folder-open.svg</file>
+        <file alias="folder-table.svg">../resources/artwork/icons/dark/folder-table.svg</file>
         <file alias="go-down.svg">../resources/artwork/icons/dark/go-down.svg</file>
         <file alias="go-up.svg">../resources/artwork/icons/dark/go-up.svg</file>
         <file alias="go-home.svg">../resources/artwork/icons/dark/go-home.svg</file>
@@ -140,6 +147,9 @@
         <file alias="mobile-close-app.svg">../resources/artwork/icons/dark/mobile-close-app.svg</file>
         <file alias="notifications.svg">../resources/artwork/icons/dark/notifications.svg</file>
         <file alias="object-select-symbolic.svg">../resources/artwork/icons/dark/object-select-symbolic.svg</file>
+        <file alias="office-chart-bar.svg">../resources/artwork/icons/dark/office-chart-bar.svg</file> 
+        <file alias="office-chart-line.svg">../resources/artwork/icons/dark/office-chart-line.svg</file> 
+        <file alias="office-chart-pie.svg">../resources/artwork/icons/dark/office-chart-pie.svg</file>
         <file alias="settings-configure.svg">../resources/artwork/icons/dark/settings-configure.svg</file>
         <file alias="showinfo.svg">../resources/artwork/icons/dark/showinfo.svg</file>
         <file alias="smartphone.svg">../resources/artwork/icons/dark/smartphone.svg</file>
