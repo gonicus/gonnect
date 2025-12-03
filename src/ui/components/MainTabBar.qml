@@ -361,7 +361,7 @@ Item {
 
         Action {
             text: qsTr("Move up")
-            icon.source: "qrc:/icons/arrow-up.svg"
+            icon.source: Icons.arrowUp
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
@@ -390,7 +390,7 @@ Item {
 
         Action {
             text: qsTr("Move down")
-            icon.source: "qrc:/icons/arrow-down.svg"
+            icon.source: Icons.arrowDown
 
             onTriggered: {
                 if (optionMenu.selectedTabButton !== null) {
@@ -419,7 +419,7 @@ Item {
 
         Action {
             text: qsTr("Delete")
-            icon.source: "qrc:/icons/edit-delete.svg"
+            icon.source: Icons.editDelete
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
 
