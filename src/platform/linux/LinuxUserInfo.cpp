@@ -46,5 +46,7 @@ QString LinuxUserInfo::getDisplayName()
     } else {
         qCritical(lcLinuxUI) << "failed to resolve user - error:" << res;
     }
+
+    free(buf);
     return "";
 }
