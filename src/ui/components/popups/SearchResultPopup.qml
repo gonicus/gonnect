@@ -224,7 +224,7 @@ Popup {
 
                         SearchResultItem {
                             id: roomDirectItem
-                            mainText: qsTr('Open room "%1"').arg(control.searchText)
+                            mainText: qsTr('Open room "%1"').arg(roomDirectItem.room)
                             width: control.colWidth
                             visible: roomDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === roomDirectItem
@@ -236,15 +236,17 @@ Popup {
                                 }
                             }
 
+                            property string room: ViewHelper.filterJitsiUrl(control.searchText)
+
                             readonly property bool shallBeVisible: ViewHelper.isJitsiAvailable
                                                                    && !ViewHelper.isActiveVideoCall
-                                                                   && ViewHelper.isValidJitsiRoomName(control.searchText)
+                                                                   && (ViewHelper.isValidJitsiRoomName(roomDirectItem.room))
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(roomDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                ViewHelper.requestMeeting(control.searchText)
+                                ViewHelper.requestMeeting(roomDirectItem.room)
                                 control.primaryActionTriggered()
                             }
                         }

@@ -13,6 +13,7 @@
 #include "SystemTrayMenu.h"
 #include "SIPCallManager.h"
 #include "GlobalCallState.h"
+#include "GlobalInfo.h"
 #include "DateEventManager.h"
 #include "DateEvent.h"
 
@@ -335,6 +336,18 @@ bool ViewHelper::isValidJitsiRoomName(const QString &name) const
     // Regex from Jitsi Meet source code
     static const QRegularExpression roomNameRegEx(R"(^[^?&:"'%#]+$)");
     return roomNameRegEx.match(name).hasMatch();
+}
+
+QString ViewHelper::filterJitsiUrl(const QString &input) const
+{
+    QString room = input;
+    QString host = QString("%1/").arg(GlobalInfo::instance().jitsiUrl());
+    if (room.startsWith(host)) { // TODO: also match non https:// entry, regex?
+        room.remove(host);
+        return room;
+    }
+
+    return room;
 }
 
 void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryItem> callHistoryItem,

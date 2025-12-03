@@ -104,6 +104,7 @@ public:
 
     Q_INVOKABLE bool isPhoneNumber(const QString &number) const;
     Q_INVOKABLE bool isValidJitsiRoomName(const QString &name) const;
+    Q_INVOKABLE QString filterJitsiUrl(const QString &input) const;
 
     Q_INVOKABLE void
     requestMeeting(const QString &roomName,
