@@ -47,7 +47,7 @@ Item {
             Material.accent: Theme.greenColor
             icon.source: Icons.objectSelectSymbolic
             height: control.buttonHeight
-            text: qsTr("Finish editing")
+            text: qsTr("Finished")
 
             onClicked: () => {
                 SM.uiEditMode = false
