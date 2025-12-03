@@ -264,13 +264,13 @@ void ViewHelper::resetTrayIcon() const
     SystemTrayMenu::instance().resetTrayIcon();
 }
 
-bool ViewHelper::isUnsupportedPlatform() const {
+bool ViewHelper::isUnsupportedPlatform() const
+{
 #ifdef Q_OS_LINUX
     return false;
 #endif
     return true;
 }
-
 
 void ViewHelper::quitApplication()
 {

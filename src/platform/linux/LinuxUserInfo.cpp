@@ -14,9 +14,7 @@ UserInfo &UserInfo::instance()
     return *_instance;
 }
 
-LinuxUserInfo::LinuxUserInfo() : UserInfo{}
-{
-}
+LinuxUserInfo::LinuxUserInfo() : UserInfo{} { }
 
 QString LinuxUserInfo::getDisplayName()
 {
@@ -29,7 +27,7 @@ QString LinuxUserInfo::getDisplayName()
         bufsize = 16384;
     }
 
-    buf = (char*)malloc(bufsize);
+    buf = (char *)malloc(bufsize);
     if (buf == NULL) {
         qCritical(lcLinuxUI) << "failed to allocate memory";
         return "";

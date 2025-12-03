@@ -15,9 +15,7 @@ UserInfo &UserInfo::instance()
     return *_instance;
 }
 
-WindowsUserInfo::WindowsUserInfo() : UserInfo{}
-{
-}
+WindowsUserInfo::WindowsUserInfo() : UserInfo{} { }
 
 QString WindowsUserInfo::getDisplayName()
 {
