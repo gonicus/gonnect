@@ -89,7 +89,11 @@ BaseWindow {
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
                     IconLabel {
-                        icon.source: Icons[iconDelg.iconId]
+                        icon {
+                            source: Icons[iconDelg.iconId]
+                            width: 32
+                            height: 32
+                        }
                     }
                 }
 
@@ -102,9 +106,13 @@ BaseWindow {
 
                 IconLabel {
                     leftPadding: 15
-                    icon.source: iconSelection.currentIndex >= 0
-                                 ? Icons[iconEntries.get(iconSelection.currentIndex).iconId]
-                                 : ""
+                    icon {
+                        source: iconSelection.currentIndex >= 0
+                                ? Icons[iconEntries.get(iconSelection.currentIndex).iconId]
+                                : ""
+                        width: 32
+                        height: 32
+                    }
                 }
             }
 
