@@ -160,7 +160,11 @@ BaseWindow {
                         gridWidth: Qt.binding(() => control.widgetRoot.gridWidth),
                         gridHeight: Qt.binding(() => control.widgetRoot.gridHeight),
                         gridCellWidth: Qt.binding(() => control.widgetRoot.gridCellWidth),
-                        gridCellHeight: Qt.binding(() => control.widgetRoot.gridCellHeight)
+                        gridCellHeight: Qt.binding(() => control.widgetRoot.gridCellHeight),
+                        xGrid: Math.floor(0.25 * control.widgetRoot.gridWidth / control.widgetRoot.gridCellWidth),
+                        yGrid: Math.floor(0.25 * control.widgetRoot.gridHeight / control.widgetRoot.gridCellHeight),
+                        widthGrid: Math.floor(0.5 * control.widgetRoot.gridWidth / control.widgetRoot.gridCellWidth),
+                        heightGrid: Math.floor(0.5 * control.widgetRoot.gridHeight / control.widgetRoot.gridCellHeight),
                     }
 
                     let widget
