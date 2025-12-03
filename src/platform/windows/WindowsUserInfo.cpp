@@ -21,9 +21,12 @@ WindowsUserInfo::WindowsUserInfo() : UserInfo{}
 
 QString WindowsUserInfo::getDisplayName()
 {
-    char displayName[UNLEN + 1];
-    unsigned len = UNLEN + 1;
-    GetUserNameExA(EXTENDED_NAME_FORMAT::NameDisplay, displayName, &len);
+    WCHAR displayName[UNLEN + 1];
+    DWORD len = UNLEN + 1;
+    if (!GetUserName(displayName, &len)) {
+        qCCritical(lcWindowsUI) << "failed to acquire user name";
+        return "";
+    }
 
-    return QString(displayName);
+    return QString::fromWCharArray(displayName, len);
 }
