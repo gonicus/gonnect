@@ -14,6 +14,9 @@ set(QT_NO_PRIVATE_MODULE_WARNING ON)
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_BINARY_DIR}/generators")
 list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/generators")
 
+# Flatpak build?
+set(FLATPAK $ENV{FLATPAK_ID})
+
 # Basic settings
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)

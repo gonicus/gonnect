@@ -167,7 +167,7 @@ find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
 
-if(LINUX)
+if(FLATPAK)
     set(PLATFORM_SOURCES
         dbus/portal/AbstractPortal.h
         dbus/portal/AbstractPortal.cpp
@@ -189,10 +189,10 @@ if(LINUX)
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
 
-        platform/linux/LinuxNotificationManager.h
-        platform/linux/LinuxNotificationManager.cpp
         platform/flatpak/FlatpakUserInfo.h
         platform/flatpak/FlatpakUserInfo.cpp
+        platform/linux/LinuxNotificationManager.h
+        platform/linux/LinuxNotificationManager.cpp
         platform/linux/MPRISExternalMediaManager.cpp
         platform/linux/MPRISExternalMediaManager.h
         platform/flatpak/FlatpakBackgroundManager.h
@@ -207,6 +207,48 @@ if(LINUX)
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp)
+
+elseif(LINUX)
+    set(PLATFORM_SOURCES
+        dbus/portal/AbstractPortal.h
+        dbus/portal/AbstractPortal.cpp
+        dbus/portal/AccountPortal.h
+        dbus/portal/AccountPortal.cpp
+        dbus/portal/BackgroundPortal.h
+        dbus/portal/BackgroundPortal.cpp
+        dbus/portal/GlobalShortcutPortal.h
+        dbus/portal/GlobalShortcutPortal.cpp
+        dbus/portal/InhibitPortal.h
+        dbus/portal/InhibitPortal.cpp
+        dbus/portal/SettingsPortal.h
+        dbus/portal/SettingsPortal.cpp
+        dbus/portal/SecretPortal.h
+        dbus/portal/SecretPortal.cpp
+
+        dbus/GOnnectDBusAPI.h
+        dbus/GOnnectDBusAPI.cpp
+        dbus/KRunnerAdapter.h
+        dbus/KRunnerAdapter.cpp
+
+        platform/linux/LinuxUserInfo.h
+        platform/linux/LinuxUserInfo.cpp
+        platform/linux/LinuxNotificationManager.h
+        platform/linux/LinuxNotificationManager.cpp
+        platform/linux/MPRISExternalMediaManager.cpp
+        platform/linux/MPRISExternalMediaManager.h
+        platform/dummy/DummyBackgroundManager.cpp
+        platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyThemeManager.cpp
+        platform/dummy/DummyThemeManager.h
+        platform/dummy/DummyNetworkHelper.cpp
+        platform/dummy/DummyNetworkHelper.h
+        platform/dummy/DummyInhibitHelper.h
+        platform/dummy/DummyInhibitHelper.cpp
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+        platform/linux/LinuxDesktopSearchProvider.h
+        platform/linux/LinuxDesktopSearchProvider.cpp)
+
 elseif(APPLE)
     set(PLATFORM_SOURCES
         platform/dummy/DummyNotificationManager.h
@@ -219,8 +261,8 @@ elseif(APPLE)
         platform/dummy/DummyBackgroundManager.h
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
-        platform/unix/UnixNetworkHelper.cpp
-        platform/unix/UnixNetworkHelper.h
+        platform/dummy/DummyNetworkHelper.cpp
+        platform/dummy/DummyNetworkHelper.h
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h
