@@ -30,6 +30,11 @@ BaseWindow {
 
     signal accepted(string name, string iconId)
 
+    function prefill(iconId : string, name : string) {
+        titleEntry.text = name
+        iconSelection.currentValue = iconId
+    }
+
     ColumnLayout {
         id: pageOptions
         spacing: 5
@@ -56,6 +61,7 @@ BaseWindow {
 
         ComboBox {
             id: iconSelection
+            valueRole: "iconId"
             Layout.preferredWidth: parent.width / 4
 
             model: ListModel {
@@ -91,7 +97,9 @@ BaseWindow {
 
                 IconLabel {
                     leftPadding: 15
-                    icon.source: Icons[iconEntries.get(iconSelection.currentIndex).iconId]
+                    icon.source: iconSelection.currentIndex >= 0
+                                 ? Icons[iconEntries.get(iconSelection.currentIndex).iconId]
+                                 : ""
                 }
             }
 
@@ -117,8 +125,9 @@ BaseWindow {
 
             Button {
                 id: pageConfirm
-                icon.source: Icons.listAdd
-                text: qsTr("Add")
+                highlighted: true
+                icon.source: Icons.checkbox
+                text: qsTr("Confirm")
 
                 onClicked: () => {
                     control.accepted(titleEntry.text.trim(),

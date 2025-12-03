@@ -137,6 +137,10 @@ BaseWindow {
         }
     }
 
+    function getPage(pageId : string) : Item {
+        return pageStack.getPage(pageId)
+    }
+
     function removePage(pageId : string) {
         const page = pageStack.getPage(pageId)
         page.isBeingDeleted = true
@@ -318,7 +322,7 @@ BaseWindow {
                 bottom: bottomBar.visible ? bottomBar.top : parent.bottom
             }
 
-            function getPage(pageId : string) : variant {
+            function getPage(pageId : string) : Item {
                 switch (pageId) {
                     case control.homePageId:
                         return homePage

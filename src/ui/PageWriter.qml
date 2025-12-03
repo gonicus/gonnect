@@ -14,21 +14,32 @@ Item {
     required property WidgetModel model
 
     function save() {
-        // Widgets
-        let widgets = model.items()
-        for (const widget of widgets) {
-            let widgetId = widget.widgetId
+        saveTimer.start()
+    }
 
-            UISettings.setUISetting(widgetId, "name", widget.name)
-            UISettings.setUISetting(widgetId, "type", widget.type)
-            UISettings.setUISetting(widgetId, "xGrid", widget.xGrid)
-            UISettings.setUISetting(widgetId, "yGrid", widget.yGrid)
-            UISettings.setUISetting(widgetId, "widthGrid", widget.widthGrid)
-            UISettings.setUISetting(widgetId, "heightGrid", widget.heightGrid)
+    Timer {
+        id: saveTimer
+        repeat: false
+        running: false
+        interval: 10
+
+        onTriggered: () => {
+            // Widgets
+            const widgets = model.items()
+            for (const widget of widgets) {
+                const widgetId = widget.widgetId
+
+                UISettings.setUISetting(widgetId, "name", widget.name)
+                UISettings.setUISetting(widgetId, "type", widget.type)
+                UISettings.setUISetting(widgetId, "xGrid", widget.xGrid)
+                UISettings.setUISetting(widgetId, "yGrid", widget.yGrid)
+                UISettings.setUISetting(widgetId, "widthGrid", widget.widthGrid)
+                UISettings.setUISetting(widgetId, "heightGrid", widget.heightGrid)
+            }
+
+            // Page
+            UISettings.setUISetting(control.pageId, "name", control.name)
+            UISettings.setUISetting(control.pageId, "iconId", control.iconId)
         }
-
-        // Page
-        UISettings.setUISetting(control.pageId, "name", control.name)
-        UISettings.setUISetting(control.pageId, "iconId", control.iconId)
     }
 }

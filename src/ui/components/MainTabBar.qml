@@ -38,22 +38,37 @@ Item {
 
         const id = `page_${UISettings.generateUuid()}`
         const item = pageCreationWindowComponent.createObject(control, { pageId: id })
-        item.show()
-
-        console.error("===> ITEM", item)
-
         item.accepted.connect((name, iconId) => {
                                   control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
                                   control.mainWindow.createPage(id, iconId, name)
                               })
+        item.show()
     }
 
     function openPageEditDialog(id : string) {
-        const item = pageCreationWindowComponent.createObject(control, { pageId: id }).show()
+        const page = control.mainWindow.getPage(id)
 
+        if (!page) {
+            console.error("Unable to find page with id", id)
+            return
+        }
+
+        const item = pageCreationWindowComponent.createObject(control, { pageId: id })
         item.accepted.connect((name, iconId) => {
-                                  console.error("===> todo save", name, iconId)
+                                  page.iconId = iconId
+                                  page.name = name
+
+                                  // Update tab button
+                                  const tabList = control.getTabList()
+                                  for (const tab of tabList) {
+                                      if (tab.pageId === id) {
+                                          tab.iconSource = Icons[iconId]
+                                          tab.labelText = name
+                                      }
+                                  }
                               })
+        item.prefill(page.iconId, page.name)
+        item.show()
     }
 
     function createTab(id : string, type : int, iconId : string, name : string) {
@@ -417,9 +432,7 @@ Item {
             icon.source: Icons.editor
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
-            onTriggered: () => {
-                console.error("todo")
-            }
+            onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId)
         }
 
         Action {
