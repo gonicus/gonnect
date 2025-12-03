@@ -50,7 +50,6 @@ Item {
             text: qsTr("Finish editing")
 
             onClicked: () => {
-                SM.uiSaveState = true
                 SM.uiEditMode = false
             }
         }

@@ -446,8 +446,6 @@ Item {
                     optionMenu.selectedTabButton.destroy()
 
                     control.dynamicPageCount -= 1
-
-                    SM.uiDirtyState = true
                     control.saveTabList()
                 }
             }

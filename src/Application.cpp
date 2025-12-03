@@ -183,8 +183,6 @@ Application::~Application()
 
 void Application::shutdown()
 {
-    StateManager::instance().setProperty("uiSaveState", true);
-
     NotificationManager::instance().shutdown();
     USBDevices::instance().shutdown();
 

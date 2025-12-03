@@ -139,8 +139,6 @@ Item {
 
                             resizableRect.x = Qt.binding(() => control.xGrid * control.gridCellWidth)
                             resizableRect.y = Qt.binding(() => control.yGrid * control.gridCellHeight)
-
-                            SM.uiDirtyState = true
                         }
                     }
                 }
@@ -163,8 +161,6 @@ Item {
                 onClicked: () => {
                     control.page.model.remove(control)
                     control.destroy()
-
-                    SM.uiDirtyState = true
                 }
             }
 
@@ -250,7 +246,6 @@ Item {
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewX(mouse.x)
                         resizeHandleOverlay.setNewY(mouse.y)
-                        SM.uiDirtyState = true
                     }
                 }
 
@@ -266,7 +261,6 @@ Item {
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewY(mouse.y)
-                        SM.uiDirtyState = true
                     }
                 }
 
@@ -279,7 +273,6 @@ Item {
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewY(mouse.y)
                         resizeHandleOverlay.setNewWidth(mouse.x)
-                        SM.uiDirtyState = true
                     }
                 }
 
@@ -295,7 +288,6 @@ Item {
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewWidth(mouse.x)
-                        SM.uiDirtyState = true
                     }
                 }
 
@@ -308,7 +300,6 @@ Item {
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewWidth(mouse.x)
                         resizeHandleOverlay.setNewHeight(mouse.y)
-                        SM.uiDirtyState = true
                     }
                 }
 
@@ -324,7 +315,6 @@ Item {
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewHeight(mouse.y)
-                        SM.uiDirtyState = true
                     }
                 }
 
@@ -337,7 +327,6 @@ Item {
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewX(mouse.x)
                         resizeHandleOverlay.setNewHeight(mouse.y)
-                        SM.uiDirtyState = true
                     }
                 }
 
@@ -353,7 +342,6 @@ Item {
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewX(mouse.x)
-                        SM.uiDirtyState = true
                     }
                 }
             }
