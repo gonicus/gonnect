@@ -925,14 +925,6 @@
     </message>
 </context>
 <context>
-    <name>FlatpakUserInfo</name>
-    <message>
-        <location filename="../src/platform/flatpak/FlatpakUserInfo.cpp" line="40"/>
-        <source>The UC client wants to use your name to configure your display name.</source>
-        <translation>Die UC Anwendung möchte Deinen Namen verwenden, um ihn anderen Teilnehmern anzeigen zu können.</translation>
-    </message>
-</context>
-<context>
     <name>HeadsetDevice</name>
     <message>
         <location filename="../src/usb/HeadsetDevice.cpp" line="565"/>
@@ -1167,42 +1159,52 @@
         <translation>GOnnect kann das System Tray für einen schnelleren Zugriff verwenden. Dein Desktop-Environment stellt keines zur Verfügung.</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="53"/>
+        <location filename="../src/Main.qml" line="36"/>
+        <source>Information</source>
+        <translation>Information</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="37"/>
+        <source>GOnnect is under testing for your operating system and is not yet officially released. There is no feature parity with the Linux version yet, and there may be bugs that we didn&apos;t find yet. You&apos;re welcome with reporting these issues on github. Happy testing!</source>
+        <translation>GOnnect wird für Dein Betriebsystem gerade getestet und ist noch nicht offiziell freigegeben. Zur Zeit sind nicht alle Features der Linux-Version umgesetzt, und es könnte Fehler geben, die wir noch nicht gefunden haben. Gerne können diese Fehler auf github gemeldet werden. Frohes Testen!</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="60"/>
         <source>There are still phone calls going on, do you really want to quit?</source>
         <translation>Es sind noch aktive Anrufe vorhanden. Möchtest Du wirklich beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="81"/>
+        <location filename="../src/Main.qml" line="88"/>
         <source>Please enter the password for %1:</source>
         <translation>Bitte geben Sie das Passwort für %1 ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="92"/>
+        <location filename="../src/Main.qml" line="99"/>
         <source>Please enter the recovery key for %1:</source>
         <translation>Bitte geben Sie den Wiederherstellungsschlüssel für %1 ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="123"/>
+        <location filename="../src/Main.qml" line="130"/>
         <source>Please enter the password for the SIP account:</source>
         <translation>Bitte gib das Passwort für den SIP-Account ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="107"/>
+        <location filename="../src/Main.qml" line="114"/>
         <source>End all calls</source>
         <translation>Alle Anrufe beenden</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="108"/>
+        <location filename="../src/Main.qml" line="115"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
         <translation>Möchtest Du das Fenster schliessen und alle aktiven Anrufe beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="186"/>
+        <location filename="../src/Main.qml" line="193"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="192"/>
+        <location filename="../src/Main.qml" line="199"/>
         <source>Fatal Error</source>
         <translation>Fataler Fehler</translation>
     </message>
