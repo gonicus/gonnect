@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Controls.impl
+import QtQuick.Layouts
 import base
 
 ListView {
@@ -62,7 +63,7 @@ ListView {
 
     delegate: Item {
         id: delg
-        implicitHeight: innerCol.implicitHeight
+        implicitHeight: mainRow.implicitHeight
         anchors {
             left: parent?.left
             right: parent?.right
@@ -106,57 +107,72 @@ ListView {
             color: rowHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
         }
 
-        Column {
-            id: innerCol
+        RowLayout {
+            id: mainRow
             enabled: !delg.isInPast
-            topPadding: 10
-            bottomPadding: 10
             anchors {
-                left: parent.left
-                right: parent.right
+                fill: parent
                 leftMargin: 10
                 rightMargin: 10
             }
 
-            Label {
-                id: summaryLabel
-                text: delg.summary
-                elide: Label.ElideRight
-                font.weight: delg.isCurrentlyTakingPlace ? Font.Medium : Font.Normal
-                anchors {
-                    left: parent.left
-                    right: parent.right
+            Column {
+                id: leftCol
+                topPadding: 10
+                bottomPadding: 10
+                Layout.preferredWidth: parent.width * 0.9
+
+                Label {
+                    id: summaryLabel
+                    text: delg.summary
+                    elide: Label.ElideRight
+                    font.weight: delg.isCurrentlyTakingPlace ? Font.Medium : Font.Normal
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+                }
+
+                Row {
+                    spacing: 5
+                    height: summaryLabel.implicitHeight
+
+                    Label {
+                        id: timeLabel
+                        font.weight: summaryLabel.font.weight
+                        text: delg.dateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm"))
+                    }
+
+                    Label {
+                        id: remainingMinutesLabel
+                        visible: delg.isToday && !delg.isInPast
+                                 && ((delg.minutesRemainingToStart >= 0 && delg.minutesRemainingToStart < 120)
+                                     || delg.isCurrentlyTakingPlace)
+                        font.weight: summaryLabel.font.weight
+                        color: Theme.secondaryTextColor
+                        text: "(" + (delg.isCurrentlyTakingPlace
+                              ? qsTr("till %1").arg(delg.endDateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm")))
+                              : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))) + ")"
+                    }
                 }
             }
 
-            Row {
-                spacing: 5
-                height: timeLabel.implicitHeight
+            Column {
+                id: rightCol
+                topPadding: 10
+                bottomPadding: 10
+                Layout.preferredWidth: parent.width * 0.1
 
-                Label {
-                    id: timeLabel
-                    font.weight: summaryLabel.font.weight
-                    text: delg.dateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm"))
-                }
+                IconLabel {
+                    id: meetingIndicator
 
-                Label {
-                    id: remainingMinutesLabel
-                    visible: delg.isToday && !delg.isInPast
-                             && ((delg.minutesRemainingToStart >= 0 && delg.minutesRemainingToStart < 120)
-                                 || delg.isCurrentlyTakingPlace)
-                    font.weight: summaryLabel.font.weight
-                    color: Theme.secondaryTextColor
-                    text: "(" + (delg.isCurrentlyTakingPlace
-                          ? qsTr("till %1").arg(delg.endDateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm")))
-                          : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))) + ")"
-                }
-            }
-
-            IconLabel {
-                icon {
-                    source: delg.isJitsiMeeting ? Icons.videoCall : Icons.notifications
-                    width: 16
-                    height: 16
+                    alignment: Qt.AlignCenter
+                    visible: delg.isJitsiMeeting
+                    icon {
+                        source: Icons.videoCall
+                        width: 24
+                        height: 24
+                    }
                 }
             }
         }
