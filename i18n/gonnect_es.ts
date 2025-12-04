@@ -30,19 +30,6 @@
     </message>
 </context>
 <context>
-    <name>AbstractPortal</name>
-    <message>
-        <location filename="../src/dbus/portal/AbstractPortal.cpp" line="55"/>
-        <source>No DBus session bus connection available</source>
-        <translation>No hay conexión de bus DBus sesión disponible</translation>
-    </message>
-    <message>
-        <location filename="../src/dbus/portal/AbstractPortal.cpp" line="78"/>
-        <source>DBus call failed: %1</source>
-        <translation>La llamada DBus falló: %1</translation>
-    </message>
-</context>
-<context>
     <name>AudioDeviceMenu</name>
     <message>
         <location filename="../src/ui/components/popups/AudioDeviceMenu.qml" line="30"/>
@@ -94,14 +81,6 @@
         <location filename="../src/media/AudioManager.cpp" line="154"/>
         <source>Default output</source>
         <translation>Salida predeterminada</translation>
-    </message>
-</context>
-<context>
-    <name>BackgroundPortal</name>
-    <message>
-        <location filename="../src/dbus/portal/BackgroundPortal.cpp" line="27"/>
-        <source>Don&apos;t miss any calls by automatically starting GOnnect on session start.</source>
-        <translation>No te pierdas ninguna llamada iniciando automáticamente GOnnect en el inicio de sesión.</translation>
     </message>
 </context>
 <context>
@@ -932,14 +911,6 @@
     </message>
 </context>
 <context>
-    <name>FlatpakUserInfo</name>
-    <message>
-        <location filename="../src/platform/flatpak/FlatpakUserInfo.cpp" line="40"/>
-        <source>The UC client wants to use your name to configure your display name.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>GonnectWindow</name>
     <message>
         <location filename="../src/ui/GonnectWindow.qml" line="348"/>
@@ -1231,42 +1202,42 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="60"/>
+        <location filename="../src/Main.qml" line="61"/>
         <source>There are still phone calls going on, do you really want to quit?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="82"/>
+        <location filename="../src/Main.qml" line="89"/>
         <source>Please enter the password for %1:</source>
         <translation>Por favor introduzca la contraseña para %1:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="93"/>
+        <location filename="../src/Main.qml" line="100"/>
         <source>Please enter the recovery key for %1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="108"/>
+        <location filename="../src/Main.qml" line="115"/>
         <source>End all calls</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="109"/>
+        <location filename="../src/Main.qml" line="116"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="124"/>
+        <location filename="../src/Main.qml" line="131"/>
         <source>Please enter the password for the SIP account:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="187"/>
+        <location filename="../src/Main.qml" line="194"/>
         <source>Error</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="193"/>
+        <location filename="../src/Main.qml" line="200"/>
         <source>Fatal Error</source>
         <translation>Error fatal</translation>
     </message>
@@ -1352,24 +1323,34 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="48"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="14"/>
+        <source>Edit dashboard page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/PageCreationWindow.qml" line="53"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="59"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="64"/>
         <source>Icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="134"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="139"/>
         <source>Cancel</source>
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="143"/>
-        <source>Confirm</source>
+        <location filename="../src/ui/PageCreationWindow.qml" line="148"/>
+        <source>Create</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/PageCreationWindow.qml" line="148"/>
+        <source>Save</source>
+        <translation type="unfinished">Guardar</translation>
     </message>
 </context>
 <context>

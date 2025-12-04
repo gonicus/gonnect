@@ -15,33 +15,33 @@ Menu {
 
     Action {
         text: qsTr("Toggle fullscreen")
-        icon.source: "qrc:/icons/view-fullscreen.svg"
+        icon.source:  Icons.viewFullscreen
         onTriggered: () => ViewHelper.toggleFullscreen()
     }
 
     Action {
         text: qsTr("Shortcuts...")
-        icon.source: "qrc:/icons/configure-shortcuts.svg"
+        icon.source: Icons.configureShortcuts
         onTriggered: () => ViewHelper.showShortcuts()
     }
 
     Action {
         id: pageEditAction
         text: qsTr("Customize UI")
-        icon.source: "qrc:/icons/editor.svg"
+        icon.source: Icons.editor
         enabled: !SM.uiEditMode
         onTriggered: () => SM.uiEditMode = true
     }
 
     Action {
         text: qsTr("About...")
-        icon.source: "qrc:/icons/showinfo.svg"
+        icon.source: Icons.showinfo
         onTriggered: () => ViewHelper.showAbout()
     }
 
     Action {
         text: qsTr("Quit")
-        icon.source: "qrc:/icons/application-exit.svg"
+        icon.source: Icons.applicationExit
         onTriggered: () => ViewHelper.quitApplication()
     }
 

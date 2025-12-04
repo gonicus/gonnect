@@ -30,19 +30,6 @@
     </message>
 </context>
 <context>
-    <name>AbstractPortal</name>
-    <message>
-        <location filename="../src/dbus/portal/AbstractPortal.cpp" line="55"/>
-        <source>No DBus session bus connection available</source>
-        <translation>Keine DBus Session-Bus Verbindung verfügbar</translation>
-    </message>
-    <message>
-        <location filename="../src/dbus/portal/AbstractPortal.cpp" line="78"/>
-        <source>DBus call failed: %1</source>
-        <translation>DBus Aufruf fehlgeschlagen: %1</translation>
-    </message>
-</context>
-<context>
     <name>AudioDeviceMenu</name>
     <message>
         <location filename="../src/ui/components/popups/AudioDeviceMenu.qml" line="30"/>
@@ -94,14 +81,6 @@
         <location filename="../src/media/AudioManager.cpp" line="154"/>
         <source>Default output</source>
         <translation>Standard-Ausgang</translation>
-    </message>
-</context>
-<context>
-    <name>BackgroundPortal</name>
-    <message>
-        <location filename="../src/dbus/portal/BackgroundPortal.cpp" line="27"/>
-        <source>Don&apos;t miss any calls by automatically starting GOnnect on session start.</source>
-        <translation>Verpasse keine Anruf, indem Du GOnnect automatisch in Deiner Sitzung startest.</translation>
     </message>
 </context>
 <context>
@@ -932,14 +911,6 @@
     </message>
 </context>
 <context>
-    <name>FlatpakUserInfo</name>
-    <message>
-        <location filename="../src/platform/flatpak/FlatpakUserInfo.cpp" line="40"/>
-        <source>The UC client wants to use your name to configure your display name.</source>
-        <translation>Die UC Anwendung möchte Deinen Namen verwenden, um ihn anderen Teilnehmern anzeigen zu können.</translation>
-    </message>
-</context>
-<context>
     <name>GonnectWindow</name>
     <message>
         <location filename="../src/ui/GonnectWindow.qml" line="348"/>
@@ -1221,7 +1192,6 @@
         <translation>GOnnect kann das System Tray für einen schnelleren Zugriff verwenden. Dein Desktop-Environment stellt keines zur Verfügung.</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="54"/>
         <location filename="../src/Main.qml" line="36"/>
         <source>Information</source>
         <translation>Information</translation>
@@ -1232,42 +1202,42 @@
         <translation>GOnnect wird für Dein Betriebsystem gerade getestet und ist noch nicht offiziell freigegeben. Zur Zeit sind nicht alle Features der Linux-Version umgesetzt, und es könnte Fehler geben, die wir noch nicht gefunden haben. Gerne können diese Fehler auf github gemeldet werden. Frohes Testen!</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="60"/>
+        <location filename="../src/Main.qml" line="61"/>
         <source>There are still phone calls going on, do you really want to quit?</source>
         <translation>Es sind noch aktive Anrufe vorhanden. Möchtest Du wirklich beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="82"/>
+        <location filename="../src/Main.qml" line="89"/>
         <source>Please enter the password for %1:</source>
         <translation>Bitte geben Sie das Passwort für %1 ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="93"/>
+        <location filename="../src/Main.qml" line="100"/>
         <source>Please enter the recovery key for %1:</source>
         <translation>Bitte geben Sie den Wiederherstellungsschlüssel für %1 ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="124"/>
+        <location filename="../src/Main.qml" line="131"/>
         <source>Please enter the password for the SIP account:</source>
         <translation>Bitte gib das Passwort für den SIP-Account ein:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="108"/>
+        <location filename="../src/Main.qml" line="115"/>
         <source>End all calls</source>
         <translation>Alle Anrufe beenden</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="109"/>
+        <location filename="../src/Main.qml" line="116"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
         <translation>Möchtest Du das Fenster schliessen und alle aktiven Anrufe beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="187"/>
+        <location filename="../src/Main.qml" line="194"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="193"/>
+        <location filename="../src/Main.qml" line="200"/>
         <source>Fatal Error</source>
         <translation>Fataler Fehler</translation>
     </message>
@@ -1353,24 +1323,34 @@
         <translation>Neue Dashboard-Seite erzeugen</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="48"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="14"/>
+        <source>Edit dashboard page</source>
+        <translation>Dashboard-Seite bearbeiten</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/PageCreationWindow.qml" line="53"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="59"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="64"/>
         <source>Icon</source>
         <translation>Icon</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="134"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="139"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="143"/>
-        <source>Confirm</source>
-        <translation>Bestätigen</translation>
+        <location filename="../src/ui/PageCreationWindow.qml" line="148"/>
+        <source>Create</source>
+        <translation>Erstellen</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/PageCreationWindow.qml" line="148"/>
+        <source>Save</source>
+        <translation>Speichern</translation>
     </message>
 </context>
 <context>

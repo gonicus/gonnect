@@ -234,12 +234,12 @@ Item {
                 Menu {
                     id: screenShareMenu
                     MenuItem {
-                        icon.source: "qrc:/icons/window.svg"
+                        icon.source: Icons.window
                         text: qsTr("Share window")
                         onTriggered: () => control.setScreenShare(true, false)
                     }
                     MenuItem {
-                        icon.source: "qrc:/icons/screen.svg"
+                        icon.source: Icons.screen
                         text: qsTr("Share screen")
                         onTriggered: () => control.setScreenShare(true, true)
                     }

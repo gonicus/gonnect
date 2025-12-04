@@ -37,7 +37,7 @@ Item {
         }
 
         const id = `page_${UISettings.generateUuid()}`
-        const item = pageCreationWindowComponent.createObject(control, { pageId: id })
+        const item = pageCreationWindowComponent.createObject(control, { pageId: id, newPage: true })
         item.accepted.connect((name, iconId) => {
                                   control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
                                   control.mainWindow.createPage(id, iconId, name)
@@ -45,7 +45,7 @@ Item {
         item.show()
     }
 
-    function openPageEditDialog(id : string) {
+    function openPageEditDialog(id : string, newPage : bool) {
         const page = control.mainWindow.getPage(id)
 
         if (!page) {
@@ -53,7 +53,7 @@ Item {
             return
         }
 
-        const item = pageCreationWindowComponent.createObject(control, { pageId: id })
+        const item = pageCreationWindowComponent.createObject(control, { pageId: id, newPage: newPage })
         item.accepted.connect((name, iconId) => {
                                   page.iconId = iconId
                                   page.name = name
@@ -463,7 +463,7 @@ Item {
             icon.source: Icons.editor
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
-            onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId)
+            onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
         }
 
         Action {

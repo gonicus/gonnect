@@ -4,7 +4,7 @@
 #include "KeychainSettings.h"
 #include "Credentials.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
 #  include "SecretPortal.h"
 #endif
 
@@ -12,14 +12,14 @@ Q_LOGGING_CATEGORY(lcCredentials, "gonnect.credentials")
 
 Credentials::Credentials(QObject *parent) : QObject(parent)
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
     SecretPortal::instance().initialize();
 #endif
 }
 
 void Credentials::initialize()
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
     auto &sp = SecretPortal::instance();
     if (sp.isValid()) {
         if (sp.isInitialized()) {
@@ -88,7 +88,7 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                 if (error == QKeychain::EntryNotFound || secret.isEmpty()) {
                     KeychainSettings keychainSettings;
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
                     auto &sp = SecretPortal::instance();
                     if (sp.isValid()) {
                         const auto encryptedSecret = keychainSettings.value(key, "").toString();

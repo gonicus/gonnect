@@ -11,7 +11,7 @@ import base
 BaseWindow {
     id: control
     objectName: "pageCreationWindow"
-    title: qsTr("Create new dashboard page")
+    title: control.newPage ? qsTr("Create new dashboard page") : qsTr("Edit dashboard page")
     width: 600
     height: 340
     visible: true
@@ -26,6 +26,7 @@ BaseWindow {
 
     required property string pageId
 
+    property bool newPage: false
     property int selection: -1
 
     signal accepted(string name, string iconId)
@@ -33,6 +34,10 @@ BaseWindow {
     function prefill(iconId : string, name : string) {
         titleEntry.text = name
         iconSelection.currentValue = iconId
+    }
+
+    Component.onCompleted: {
+        titleEntry.forceActiveFocus()
     }
 
     ColumnLayout {
@@ -140,7 +145,7 @@ BaseWindow {
                 id: pageConfirm
                 highlighted: true
                 icon.source: Icons.checkbox
-                text: qsTr("Confirm")
+                text: control.newPage ? qsTr("Create") : qsTr("Save")
 
                 onClicked: () => {
                     control.accepted(titleEntry.text.trim(),

@@ -210,21 +210,6 @@ if(FLATPAK)
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
-        dbus/portal/AbstractPortal.h
-        dbus/portal/AbstractPortal.cpp
-        dbus/portal/AccountPortal.h
-        dbus/portal/AccountPortal.cpp
-        dbus/portal/BackgroundPortal.h
-        dbus/portal/BackgroundPortal.cpp
-        dbus/portal/GlobalShortcutPortal.h
-        dbus/portal/GlobalShortcutPortal.cpp
-        dbus/portal/InhibitPortal.h
-        dbus/portal/InhibitPortal.cpp
-        dbus/portal/SettingsPortal.h
-        dbus/portal/SettingsPortal.cpp
-        dbus/portal/SecretPortal.h
-        dbus/portal/SecretPortal.cpp
-
         dbus/GOnnectDBusAPI.h
         dbus/GOnnectDBusAPI.cpp
         dbus/KRunnerAdapter.h
@@ -236,16 +221,19 @@ elseif(LINUX)
         platform/linux/LinuxNotificationManager.cpp
         platform/linux/MPRISExternalMediaManager.cpp
         platform/linux/MPRISExternalMediaManager.h
+
         platform/dummy/DummyBackgroundManager.cpp
         platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
         platform/dummy/DummyNetworkHelper.cpp
         platform/dummy/DummyNetworkHelper.h
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
-        platform/dummy/DummyGlobalShortcuts.h
-        platform/dummy/DummyGlobalShortcuts.cpp
+
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp)
 
