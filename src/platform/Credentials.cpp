@@ -4,7 +4,7 @@
 #include "KeychainSettings.h"
 #include "Credentials.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
 #  include "SecretPortal.h"
 #endif
 
@@ -12,33 +12,31 @@ Q_LOGGING_CATEGORY(lcCredentials, "gonnect.credentials")
 
 Credentials::Credentials(QObject *parent) : QObject(parent)
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
     SecretPortal::instance().initialize();
 #endif
 }
 
 void Credentials::initialize()
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
     auto &sp = SecretPortal::instance();
-    if (!sp.isValid()) {
-        qCFatal(lcCredentials) << "flatpak Secret Portal is not valid - bailing out";
-    }
-
-    if (sp.isInitialized()) {
-        m_initialized = true;
-        Q_EMIT initializedChanged();
-    } else {
-        connect(
-                &sp, &SecretPortal::initializedChanged, this,
-                [this]() {
-                    bool isInitialized = SecretPortal::instance().isInitialized();
-                    if (isInitialized != m_initialized) {
-                        m_initialized = isInitialized;
-                        Q_EMIT initializedChanged();
-                    }
-                },
-                Qt::ConnectionType::SingleShotConnection);
+    if (sp.isValid()) {
+        if (sp.isInitialized()) {
+            m_initialized = true;
+            Q_EMIT initializedChanged();
+        } else {
+            connect(
+                    &sp, &SecretPortal::initializedChanged, this,
+                    [this]() {
+                        bool isInitialized = SecretPortal::instance().isInitialized();
+                        if (isInitialized != m_initialized) {
+                            m_initialized = isInitialized;
+                            Q_EMIT initializedChanged();
+                        }
+                    },
+                    Qt::ConnectionType::SingleShotConnection);
+        }
     }
 #else
     m_initialized = true;
@@ -90,19 +88,22 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                 if (error == QKeychain::EntryNotFound || secret.isEmpty()) {
                     KeychainSettings keychainSettings;
 
-#ifdef Q_OS_LINUX
-                    const auto encryptedSecret = keychainSettings.value(key, "").toString();
-                    secret = SecretPortal::instance().decrypt(encryptedSecret);
+#ifdef Q_OS_FLATPAK
+                    auto &sp = SecretPortal::instance();
+                    if (sp.isValid()) {
+                        const auto encryptedSecret = keychainSettings.value(key, "").toString();
+                        secret = sp.decrypt(encryptedSecret);
 
-                    if (!secret.isEmpty()) {
+                        if (!secret.isEmpty()) {
 
-                        set(key, secret, [key](bool error, const QString &misc) {
-                            if (error) {
-                                qCCritical(lcCredentials)
-                                        << "failed to update keychain credentials for" << key << "-"
-                                        << misc;
-                            }
-                        });
+                            set(key, secret, [key](bool error, const QString &misc) {
+                                if (error) {
+                                    qCCritical(lcCredentials)
+                                            << "failed to update keychain credentials for" << key
+                                            << "-" << misc;
+                                }
+                            });
+                        }
                     }
 #endif
 

@@ -5,7 +5,7 @@ TMP_OUT=$(mktemp -d)
 
 pushd . &> /dev/null
 
-cmake --preset conan-release -DBUILD_TESTING=OFF -DENABLE_QASSERT=ON
+cmake --preset conan-release -G "Unix Makefiles" -DBUILD_TESTING=OFF -DENABLE_QASSERT=ON
 
 set -eo pipefail
 cd build/Release

@@ -32,7 +32,6 @@ if(UNIX)
     add_definitions(${PJSIP_STATIC_CFLAGS} -DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
     link_directories(${PJSIP_STATIC_LIBRARY_DIRS})
-
 else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
@@ -46,15 +45,23 @@ else()
         wintoast::wintoast)
 endif()
 
+set(APP_SOURCES main.cpp)
+set(APP_OUTPUT_NAME gonnect)
+
 if(APPLE)
+    set(APP_OUTPUT_NAME GOnnect)
+    set(app_icon_macos "${PROJECT_SOURCE_DIR}/resources/artwork/gonnect.icns")
+    set_source_files_properties(${app_icon_macos} PROPERTIES
+           MACOSX_PACKAGE_LOCATION "Resources")
+
     list(APPEND PLATFORM_LIBRARIES
         "-framework Security"
         "-framework Network")
-endif()
 
-if(LINUX)
+elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
+
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
         PkgConfig::LIBNOTIFY
@@ -116,22 +123,29 @@ if(LINUX)
     qt_add_dbus_interface(DBUS_SOURCES ../specs/org.freedesktop.portal.Secret.xml
         PortalSecret
     )
+
 elseif(WIN32)
-    list(APPEND PLATFORM_LIBRARIES
-        Iphlpapi.lib)
+    list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib)
+    list(APPEND APP_SOURCES gonnect.rc)
 endif()
 
-set(APP_SOURCES main.cpp)
 qt_add_big_resources(APP_SOURCES application.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
 qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
 
-if(WIN32)
-    list(APPEND APP_SOURCES gonnect.rc)
-endif()
 qt_add_executable(gonnect
+    ${app_icon_macos}
     ${APP_SOURCES}
     ${DBUS_SOURCES}
+)
+
+set_target_properties(gonnect PROPERTIES
+    QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
+    WIN32_EXECUTABLE TRUE
+    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_ICON_FILE gonnect.icns
+    MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/resources/macos/Info.plist"
+    OUTPUT_NAME ${APP_OUTPUT_NAME}
 )
 
 set(gonnect_qml_singletons
@@ -141,9 +155,7 @@ set_source_files_properties(${gonnect_qml_singletons} PROPERTIES QT_QML_SINGLETO
 
 add_subdirectory(contacts/ldap)
 add_subdirectory(contacts/csv)
-if(NOT WIN32)
-    add_subdirectory(calendar/caldav)
-endif()
+add_subdirectory(calendar/caldav)
 add_subdirectory(contacts/carddav)
 add_subdirectory(contacts/eds)
 add_subdirectory(calendar/eds)
@@ -155,7 +167,7 @@ find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
 
-if(LINUX)
+if(FLATPAK)
     set(PLATFORM_SOURCES
         dbus/portal/AbstractPortal.h
         dbus/portal/AbstractPortal.cpp
@@ -177,10 +189,10 @@ if(LINUX)
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
 
-        platform/linux/LinuxNotificationManager.h
-        platform/linux/LinuxNotificationManager.cpp
         platform/flatpak/FlatpakUserInfo.h
         platform/flatpak/FlatpakUserInfo.cpp
+        platform/linux/LinuxNotificationManager.h
+        platform/linux/LinuxNotificationManager.cpp
         platform/linux/MPRISExternalMediaManager.cpp
         platform/linux/MPRISExternalMediaManager.h
         platform/flatpak/FlatpakBackgroundManager.h
@@ -195,6 +207,36 @@ if(LINUX)
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp)
+
+elseif(LINUX)
+    set(PLATFORM_SOURCES
+        dbus/GOnnectDBusAPI.h
+        dbus/GOnnectDBusAPI.cpp
+        dbus/KRunnerAdapter.h
+        dbus/KRunnerAdapter.cpp
+
+        platform/linux/LinuxUserInfo.h
+        platform/linux/LinuxUserInfo.cpp
+        platform/linux/LinuxNotificationManager.h
+        platform/linux/LinuxNotificationManager.cpp
+        platform/linux/MPRISExternalMediaManager.cpp
+        platform/linux/MPRISExternalMediaManager.h
+
+        platform/dummy/DummyBackgroundManager.cpp
+        platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+
+        platform/dummy/DummyThemeManager.cpp
+        platform/dummy/DummyThemeManager.h
+        platform/dummy/DummyNetworkHelper.cpp
+        platform/dummy/DummyNetworkHelper.h
+        platform/dummy/DummyInhibitHelper.h
+        platform/dummy/DummyInhibitHelper.cpp
+
+        platform/linux/LinuxDesktopSearchProvider.h
+        platform/linux/LinuxDesktopSearchProvider.cpp)
+
 elseif(APPLE)
     set(PLATFORM_SOURCES
         platform/dummy/DummyNotificationManager.h
@@ -207,8 +249,8 @@ elseif(APPLE)
         platform/dummy/DummyBackgroundManager.h
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
-        platform/unix/UnixNetworkHelper.cpp
-        platform/unix/UnixNetworkHelper.h
+        platform/dummy/DummyNetworkHelper.cpp
+        platform/dummy/DummyNetworkHelper.h
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h
@@ -217,8 +259,8 @@ elseif(APPLE)
         platform/dummy/DummySearchProvider.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
-        platform/dummy/DummyUserInfo.cpp
-        platform/dummy/DummyUserInfo.h
+	    platform/windows/WindowsUserInfo.cpp
+	    platform/windows/WindowsUserInfo.h
         platform/dummy/DummyExternalMediaManager.cpp
         platform/dummy/DummyExternalMediaManager.h
         platform/dummy/DummyBackgroundManager.cpp
@@ -299,13 +341,17 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
         ui/components/dialogs/InfoDialog.qml
+        # Dynamic UI
+        ui/components/BaseWidget.qml
+        ui/components/DateEventsWidget.qml
+        ui/components/FavoritesWidget.qml
+        ui/components/HistoryWidget.qml
 
-        ui/components/pages/Activity.qml
-        ui/components/pages/Chats.qml
         ui/components/pages/Call.qml
-        ui/components/pages/Calls.qml
+        ui/components/pages/Chats.qml
         ui/components/pages/Conference.qml
-        ui/components/pages/Default.qml
+        # Dynamic UI
+        ui/components/pages/BasePage.qml
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
@@ -355,6 +401,8 @@ qt_add_qml_module(gonnect
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
+        # Dynamic UI
+        ui/components/EditModeOptions.qml
 
         ui/scripts/util.js
 
@@ -366,6 +414,16 @@ qt_add_qml_module(gonnect
         ui/PreferredIdentityEditWindow.qml
         ui/ShortcutsWindow.qml
         ui/SipTemplateWizard.qml
+        # Dynamic UI
+        ui/CommonPages.qml
+        ui/CommonWidgets.qml
+        ui/PageModel.qml
+        ui/PageReader.qml
+        ui/PageCreationWindow.qml
+        ui/PageWriter.qml
+        ui/WidgetModel.qml
+        ui/WidgetSelectionWindow.qml
+
 
     DEPENDENCIES
         QtQml.Models
@@ -392,6 +450,8 @@ qt_add_qml_module(gonnect
         KeychainSettings.h
         StateManager.cpp
         StateManager.h
+        UISettings.cpp
+        UISettings.h
 
         sip/CallHistory.h
         sip/CallHistory.cpp
@@ -633,10 +693,9 @@ qt_add_qml_module(gonnect
         usb/busylight/LitraGlow.cpp
 )
 
-set_target_properties(gonnect PROPERTIES
-    QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
-    LINK_FLAGS_RELEASE -s
-)
+if(LINUX)
+    set_target_properties(gonnect PROPERTIES LINK_FLAGS_RELEASE -s)
+endif()
 
 qt_extract_metatypes(gonnect)
 qt_add_translations(gonnect
@@ -721,17 +780,19 @@ target_include_directories(gonnect
     SYSTEM PRIVATE ../external/hid-rp/hid-rp
 )
 
+if(APPLE OR WIN32)
+    qt_generate_deploy_qml_app_script(
+        TARGET gonnect
+        OUTPUT_SCRIPT deploy_script
+        MACOS_BUNDLE_POST_BUILD
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM
+    )
+    install(SCRIPT ${deploy_script})
+endif()
+
 install(TARGETS gonnect
     BUNDLE DESTINATION .
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-#qt_generate_deploy_qml_app_script(
-#    TARGET gonnect
-#    OUTPUT_SCRIPT deploy_script
-#    MACOS_BUNDLE_POST_BUILD
-#    NO_UNSUPPORTED_PLATFORM_ERROR
-#    DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM
-#)
-#install(SCRIPT ${deploy_script})
-
 

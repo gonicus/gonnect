@@ -11,11 +11,17 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_UNITY_BUILD_BATCH_SIZE 10)
 set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
-list(PREPEND CMAKE_MODULE_PATH "${PROJECT_BINARY_DIR}/generators")
+list(PREPEND CMAKE_MODULE_PATH "${PROJECT_BINARY_DIR}/generators" "${PROJECT_BINARY_DIR}/resources/windows")
 list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/generators")
 
+# Flatpak build?
+set(FLATPAK $ENV{FLATPAK_ID})
+
+# Basic settings
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)
+option(BUILD_TESTING "Build tests" OFF)
+option(BUILD_TOOLS "Build tools" OFF)
 
 # Contacts / Calendar plugins
 option(ENABLE_AKONADI "Enable Akonadi plugins" OFF)
@@ -27,6 +33,9 @@ option(ENABLE_MSGRAPH "Enable MS Graph plugin" ON)
 
 set(APP_ID "de.gonicus.gonnect")
 add_definitions(-DAPP_ID="${APP_ID}")
+if(FLATPAK)
+    add_definitions(-DQ_OS_FLATPAK)
+endif()
 
 if(LINUX)
     if(NOT FLATPAK_APP_ID)
@@ -77,11 +86,14 @@ target_include_directories(GOnnectVersion PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
-add_subdirectory(emoji)
+if(BUILD_TOOLS)
+    add_subdirectory(emoji)
+endif()
+
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
 
-if(${BUILD_TESTING})
+if(BUILD_TESTING)
     add_subdirectory(tests)
     add_definitions(-DAPP_TESTS)
 endif()
@@ -96,6 +108,6 @@ if(LINUX)
     install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
 endif()
 
-if(APPLE)
-    set_target_properties(gonnect PROPERTIES MACOSX_BUNDLE TRUE)
+if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(packaging)
 endif()

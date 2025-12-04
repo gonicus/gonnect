@@ -8,13 +8,142 @@ import base
 Item {
     id: control
     implicitWidth: 54 + 2 * 8
-    implicitHeight: menuCol.implicitHeight
+    implicitHeight: topMenuCol.implicitHeight
 
-    property int selectedPageId: -1
+    property string selectedPageId: ""
+    property int selectedPageType: -1
     property var attachedData: null
-    property alias backgroundColor: filler.color
+
+    property var mainWindow
+
+    property int dynamicPageCount: 0
+    property int dynamicPageLimit: 5
+
     property bool hasActiveCall
     property bool hasActiveConference
+
+    property alias backgroundColor: filler.color
+
+    Component {
+        id: pageCreationWindowComponent
+
+        PageCreationWindow {}
+    }
+
+    function openPageCreationDialog() {
+        // INFO: Artificial limitation to avoid tab bar clutter
+        if (control.dynamicPageCount >= control.dynamicPageLimit) {
+            return
+        }
+
+        const id = `page_${UISettings.generateUuid()}`
+        const item = pageCreationWindowComponent.createObject(control, { pageId: id, newPage: true })
+        item.accepted.connect((name, iconId) => {
+                                  control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
+                                  control.mainWindow.createPage(id, iconId, name)
+                              })
+        item.show()
+    }
+
+    function openPageEditDialog(id : string, newPage : bool) {
+        const page = control.mainWindow.getPage(id)
+
+        if (!page) {
+            console.error("Unable to find page with id", id)
+            return
+        }
+
+        const item = pageCreationWindowComponent.createObject(control, { pageId: id, newPage: newPage })
+        item.accepted.connect((name, iconId) => {
+                                  page.iconId = iconId
+                                  page.name = name
+
+                                  // Update tab button
+                                  const tabList = control.getTabList()
+                                  for (const tab of tabList) {
+                                      if (tab.pageId === id) {
+                                          tab.iconSource = Icons[iconId]
+                                          tab.labelText = name
+                                      }
+                                  }
+                              })
+        item.prefill(page.iconId, page.name)
+        item.show()
+    }
+
+    function createTab(id : string, type : int, iconId : string, name : string) {
+        const iconPath = Icons[iconId]
+        const tabButton = tabDelegate.createObject(topMenuCol,
+                                                 {
+                                                     pageId: id,
+                                                     pageType: type,
+                                                     iconSource: iconPath,
+                                                     labelText: name,
+                                                     disabledTooltipText: "",
+                                                     isEnabled: true,
+                                                     showRedDot: false,
+                                                     attachedData: null
+                                                 })
+        if (tabButton === null) {
+            console.log("Could not create tab button component")
+            return
+        }
+
+        control.dynamicPageCount += 1
+    }
+
+    function getTabList() {
+        let tabOrder = []
+
+        tabOrder.push(...topMenuCol.children)
+        return tabOrder.filter((button) => button.pageId)
+    }
+
+    function saveTabList() {
+        let tabNames = []
+        let tabOrder = []
+
+        tabOrder.push(...topMenuCol.children)
+        tabOrder.forEach((button) => {
+            if (button.pageId) {
+                tabNames.push(button.pageId)
+            }
+        })
+
+        if (tabNames.length > 0) {
+            UISettings.setUISetting("generic", "tabBarOrder", tabNames.join(","))
+        }
+    }
+
+    function sortTabList() {
+        let tabList = UISettings.getUISetting("generic", "tabBarOrder", "").split(",")
+        if (!tabList.length > 0) {
+            return
+        }
+
+        let tabOrder = []
+        let newOrder = []
+
+        tabOrder.push(...topMenuCol.children)
+
+        tabList.forEach((tabId) => {
+            tabOrder.forEach((button) => {
+                if (button.pageId && button.pageId === tabId) {
+                    newOrder.push(button)
+                }
+            })
+        })
+
+        newOrder.forEach((button) => {
+            button.parent = null
+            button.visible = false
+
+            button.parent = topMenuCol
+            button.visible = true
+        })
+
+        control.saveTabList()
+    }
 
     Rectangle {
         id: filler
@@ -23,17 +152,19 @@ Item {
     }
 
     Component {
-        id: delegComp
+        id: tabDelegate
+
         Item {
             id: delg
             height: 54
-            enabled: delg.isEnabled
+            enabled: true
             anchors {
                 left: parent?.left
                 right: parent?.right
             }
 
-            required property int pageId
+            required property string pageId
+            required property int pageType
             required property bool isEnabled
             required property bool showRedDot
             required property string labelText
@@ -45,13 +176,51 @@ Item {
 
             Rectangle {
                 id: hoverBackground
-                visible: delg.isSelected || (delg.isEnabled && delgHoverHandler.hovered)
+                visible: delg.isSelected
+                         || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
                 radius: 4
                 color: Theme.backgroundSecondaryColor
                 anchors {
                     fill: parent
                     leftMargin: 8
                     rightMargin: 8
+                }
+
+                // Options
+                Rectangle {
+                    id: optionIndicator
+                    visible: SM.uiEditMode
+                    width: 16
+                    height: 16
+                    color: "transparent"
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 2
+                    z: 1
+
+                    IconLabel {
+                        id: removeIcon
+                        anchors.centerIn: parent
+                        icon {
+                            source: Icons.goDown
+                            width: parent.width
+                            height: parent.height
+                        }
+                    }
+
+                    MouseArea {
+                        id: optionControl
+                        parent: optionIndicator
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+
+                        onClicked: {
+                            optionMenu.x = delg.x + 15
+                            optionMenu.y = delg.y + 15
+                            optionMenu.selectedTabButton = delg
+                            optionMenu.open()
+                        }
+                    }
                 }
             }
 
@@ -63,8 +232,8 @@ Item {
                     width: 32
                     height: 32
                     color: delg.isEnabled
-                           ? Theme.primaryTextColor
-                           : Theme.secondaryInactiveTextColor
+                    ? Theme.primaryTextColor
+                    : Theme.secondaryInactiveTextColor
                 }
             }
 
@@ -105,15 +274,18 @@ Item {
 
             TapHandler {
                 onTapped: () => {
-                    control.attachedData = delg.attachedData
-                    control.selectedPageId = delg.pageId
+                    if (delg.isEnabled) {
+                        control.selectedPageId = delg.pageId
+                        control.selectedPageType = delg.pageType
+                        control.attachedData = delg.attachedData
+                    }
                 }
             }
         }
     }
 
     Column {
-        id: menuCol
+        id: topMenuCol
         topPadding: 20
         spacing: 10
         anchors {
@@ -123,11 +295,12 @@ Item {
 
         Repeater {
             id: menuRepeater
-            delegate: delegComp
+            delegate: tabDelegate
             model: {
                 const baseModel = [
                     {
-                        pageId: GonnectWindow.PageId.Calls,
+                        pageId: control.mainWindow.homePageId,
+                        pageType: GonnectWindow.PageType.Base,
                         iconSource: Icons.userHome,
                         labelText: qsTr("Home"),
                         disabledTooltipText: qsTr("Home"),
@@ -135,7 +308,8 @@ Item {
                         showRedDot: false,
                         attachedData: null
                     }, {
-                        pageId: GonnectWindow.PageId.Conference,
+                        pageId: control.mainWindow.conferencePageId,
+                        pageType: GonnectWindow.PageType.Conference,
                         iconSource: Icons.userGroupNew,
                         labelText: qsTr("Conference"),
                         disabledTooltipText: qsTr("No active conference"),
@@ -143,7 +317,8 @@ Item {
                         showRedDot: false,
                         attachedData: null
                     }, {
-                        pageId: GonnectWindow.PageId.Call,
+                        pageId: control.mainWindow.callPageId,
+                        pageType: GonnectWindow.PageType.Call,
                         iconSource: Icons.callStart,
                         labelText: qsTr("Call"),
                         disabledTooltipText: qsTr("No active call"),
@@ -151,15 +326,17 @@ Item {
                         showRedDot: false,
                         attachedData: null
                     }
-                ].filter(item => ViewHelper.isJitsiAvailable || item.pageId !== GonnectWindow.PageId.Conference)
+                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
 
                 return baseModel
             }
         }
+
+        Component.onCompleted: () => mainWindow.loadPages()
     }
 
     Column {
-        id: bottommenuCol
+        id: bottomMenuCol
         bottomPadding: 20
         spacing: 10
         anchors {
@@ -170,10 +347,11 @@ Item {
 
         Repeater {
             id: bottomMenuRepeater
-            delegate: delegComp
+            delegate: tabDelegate
             model: [
                 {
-                    pageId: GonnectWindow.PageId.Settings,
+                    pageId: control.mainWindow.settingsPageId,
+                    pageType: GonnectWindow.PageType.Settings,
                     iconSource: Icons.settingsConfigure,
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
@@ -182,6 +360,144 @@ Item {
                     attachedData: null
                 }
             ]
+        }
+    }
+
+    Menu {
+        id: optionMenu
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        property Item selectedTabButton: null
+
+        QtObject {
+            id: menuInternal
+
+            property bool isFirst
+            property bool isLast
+
+            readonly property Connections menuConnections: Connections {
+                target: optionMenu
+                function onSelectedTabButtonChanged() { menuInternal.updateIndexes() }
+                function onOpenedChanged() { menuInternal.updateIndexes() }
+            }
+
+            function updateIndexes() {
+                const selButton = optionMenu.selectedTabButton
+                if (!selButton) {
+                    menuInternal.isFirst = false
+                    menuInternal.isLast = false
+                    return
+                }
+
+                const index = control.getTabList().findIndex(button => button.pageId === selButton.pageId)
+                if (index >= 0) {
+                    menuInternal.isFirst = index === 0
+                    menuInternal.isLast = index === topMenuCol.children.length - 2
+                } else {
+                    menuInternal.isFirst = false
+                    menuInternal.isLast = false
+                }
+            }
+        }
+
+        Action {
+            text: qsTr("Move up")
+            icon.source: Icons.arrowUp
+            enabled: !menuInternal.isFirst
+
+            onTriggered: {
+                if (optionMenu.selectedTabButton !== null) {
+                    const newOrder = control.getTabList()
+                    const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
+
+                    if (index > 0) {
+                        let old = newOrder[index-1]
+                        newOrder[index-1] = newOrder[index]
+                        newOrder[index] = old
+
+                        newOrder.forEach((button) => {
+                            button.parent = null
+                            button.visible = false
+
+                            button.parent = topMenuCol
+                            button.visible = true
+                        })
+                    }
+
+                    control.saveTabList()
+                }
+            }
+        }
+
+        Action {
+            text: qsTr("Move down")
+            icon.source: Icons.arrowDown
+            enabled: !menuInternal.isLast
+
+            onTriggered: {
+                if (optionMenu.selectedTabButton !== null) {
+                    const newOrder = control.getTabList()
+                    const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
+
+                    if (index < newOrder.length-1) {
+                        let old = newOrder[index+1]
+                        newOrder[index+1] = newOrder[index]
+                        newOrder[index] = old
+
+                        newOrder.forEach((button) => {
+                            button.parent = null
+                            button.visible = false
+
+                            button.parent = topMenuCol
+                            button.visible = true
+                        })
+                    }
+
+                    control.saveTabList()
+                }
+            }
+        }
+
+        Action {
+            text: qsTr("Edit")
+            icon.source: Icons.editor
+            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+            onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
+        }
+
+        Action {
+            text: qsTr("Delete")
+            icon.source: Icons.editDelete
+            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+
+            onTriggered: {
+                if (optionMenu.selectedTabButton !== null) {
+                    let curIndex
+                    let newIndex
+                    let tabOrder = control.getTabList().filter((button) => button.isEnabled)
+
+                    if (optionMenu.selectedTabButton.isSelected) {
+                        // If the actively selected button is deleted, move up/down
+                        curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
+                        if (curIndex > 0) {
+                            newIndex = curIndex - 1
+                        } else if (curIndex < tabOrder.length - 1) {
+                            newIndex = curIndex + 1
+                        }
+
+                        mainWindow.updateTabSelection(tabOrder[newIndex].pageId,
+                                                      tabOrder[newIndex].pageType)
+                    }
+
+                    mainWindow.removePage(optionMenu.selectedTabButton.pageId)
+                    optionMenu.selectedTabButton.destroy()
+
+                    control.dynamicPageCount -= 1
+                    control.saveTabList()
+                }
+            }
         }
     }
 
