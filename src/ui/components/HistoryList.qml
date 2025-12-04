@@ -10,7 +10,7 @@ Item {
     id: control
 
     property alias limit: historyModel.limit
-    property int rightPadding: 0
+    property int listMargin: 20
 
     readonly property alias count: list.count
     readonly property bool hasPastCalls: list.count > 0
@@ -34,6 +34,7 @@ Item {
         ScrollBar.vertical: ScrollBar {
             id: verticalScrollBar
             width: 10
+            clip: true
         }
 
         model: HistoryProxyModel {
@@ -53,7 +54,9 @@ Item {
             anchors {
                 left: parent?.left
                 right: parent?.right
-                rightMargin: control.rightPadding
+
+                leftMargin: control.listMargin
+                rightMargin: control.listMargin
             }
 
             required property date section
@@ -71,7 +74,9 @@ Item {
             anchors {
                 left: parent?.left
                 right: parent?.right
-                rightMargin: control.rightPadding
+
+                leftMargin: control.listMargin
+                rightMargin: control.listMargin
             }
 
             required property int id

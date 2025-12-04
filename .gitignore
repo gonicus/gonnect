@@ -1,4 +1,5 @@
 samples/callhistory.db
+.qtcreator
 
 
 # Used https://www.toptal.com/developers/gitignore/api/qtcreator,vim

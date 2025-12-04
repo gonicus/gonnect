@@ -33,6 +33,9 @@ option(ENABLE_MSGRAPH "Enable MS Graph plugin" ON)
 
 set(APP_ID "de.gonicus.gonnect")
 add_definitions(-DAPP_ID="${APP_ID}")
+if(FLATPAK)
+    add_definitions(-DQ_OS_FLATPAK)
+endif()
 
 if(LINUX)
     if(NOT FLATPAK_APP_ID)

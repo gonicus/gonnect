@@ -210,21 +210,6 @@ if(FLATPAK)
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
-        dbus/portal/AbstractPortal.h
-        dbus/portal/AbstractPortal.cpp
-        dbus/portal/AccountPortal.h
-        dbus/portal/AccountPortal.cpp
-        dbus/portal/BackgroundPortal.h
-        dbus/portal/BackgroundPortal.cpp
-        dbus/portal/GlobalShortcutPortal.h
-        dbus/portal/GlobalShortcutPortal.cpp
-        dbus/portal/InhibitPortal.h
-        dbus/portal/InhibitPortal.cpp
-        dbus/portal/SettingsPortal.h
-        dbus/portal/SettingsPortal.cpp
-        dbus/portal/SecretPortal.h
-        dbus/portal/SecretPortal.cpp
-
         dbus/GOnnectDBusAPI.h
         dbus/GOnnectDBusAPI.cpp
         dbus/KRunnerAdapter.h
@@ -236,16 +221,19 @@ elseif(LINUX)
         platform/linux/LinuxNotificationManager.cpp
         platform/linux/MPRISExternalMediaManager.cpp
         platform/linux/MPRISExternalMediaManager.h
+
         platform/dummy/DummyBackgroundManager.cpp
         platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
         platform/dummy/DummyNetworkHelper.cpp
         platform/dummy/DummyNetworkHelper.h
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
-        platform/dummy/DummyGlobalShortcuts.h
-        platform/dummy/DummyGlobalShortcuts.cpp
+
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp)
 
@@ -353,13 +341,17 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
         ui/components/dialogs/InfoDialog.qml
+        # Dynamic UI
+        ui/components/BaseWidget.qml
+        ui/components/DateEventsWidget.qml
+        ui/components/FavoritesWidget.qml
+        ui/components/HistoryWidget.qml
 
-        ui/components/pages/Activity.qml
-        ui/components/pages/Chats.qml
         ui/components/pages/Call.qml
-        ui/components/pages/Calls.qml
+        ui/components/pages/Chats.qml
         ui/components/pages/Conference.qml
-        ui/components/pages/Default.qml
+        # Dynamic UI
+        ui/components/pages/BasePage.qml
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
@@ -409,6 +401,8 @@ qt_add_qml_module(gonnect
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
+        # Dynamic UI
+        ui/components/EditModeOptions.qml
 
         ui/scripts/util.js
 
@@ -420,6 +414,16 @@ qt_add_qml_module(gonnect
         ui/PreferredIdentityEditWindow.qml
         ui/ShortcutsWindow.qml
         ui/SipTemplateWizard.qml
+        # Dynamic UI
+        ui/CommonPages.qml
+        ui/CommonWidgets.qml
+        ui/PageModel.qml
+        ui/PageReader.qml
+        ui/PageCreationWindow.qml
+        ui/PageWriter.qml
+        ui/WidgetModel.qml
+        ui/WidgetSelectionWindow.qml
+
 
     DEPENDENCIES
         QtQml.Models
@@ -446,6 +450,8 @@ qt_add_qml_module(gonnect
         KeychainSettings.h
         StateManager.cpp
         StateManager.h
+        UISettings.cpp
+        UISettings.h
 
         sip/CallHistory.h
         sip/CallHistory.cpp

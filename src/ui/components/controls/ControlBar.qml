@@ -1,18 +1,34 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.Material
 import base
 
 Item {
     id: control
     implicitHeight: 44
 
+    required property bool showSearch
+
+    required property var tabRoot
+    required property var pageRoot
+
     function focusSearchBox() {
         searchField.giveFocus()
     }
 
+    EditModeOptions {
+        id: editControls
+        visible: !control.showSearch
+        anchors.centerIn: parent
+
+        tabRoot: control.tabRoot
+        pageRoot: control.pageRoot
+    }
+
     SearchField {
         id: searchField
+        visible: control.showSearch
         anchors.centerIn: parent
 
         Keys.onDownPressed: () => {
