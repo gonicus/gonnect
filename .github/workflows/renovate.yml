@@ -33,11 +33,11 @@ jobs:
           private-key: ${{ secrets.APP_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
           cache: 'pip' # caching pip dependencies
           pip-install: -r resources/conan/requirements.txt
 
@@ -46,7 +46,7 @@ jobs:
           resources/conan/updater.py --renovate=tmp/renovate/ -v
 
       - name: Serve Files
-        uses: Eun/http-server-action@v1
+        uses: Eun/http-server-action@f71cec1321f665652a46c40b6852f8e5a68bfcd4 # v1
         with:
           directory: ${{ github.workspace }}/tmp/renovate/
           port: 8080

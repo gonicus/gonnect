@@ -1221,7 +1221,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="54"/>
+        <location filename="../src/Main.qml" line="36"/>
+        <source>Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="37"/>
+        <source>GOnnect is under testing for your operating system and is not yet officially released. There is no feature parity with the Linux version yet, and there may be bugs that we didn&apos;t find yet. You&apos;re welcome with reporting these issues on github. Happy testing!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="60"/>
         <source>There are still phone calls going on, do you really want to quit?</source>
         <translation type="unfinished"></translation>
     </message>

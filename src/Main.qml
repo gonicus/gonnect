@@ -30,6 +30,13 @@ Item {
             })
             item.accepted.connect(() => settings.showTrayDialog = false)
         }
+
+        if (ViewHelper.unsupportedPlatform) {
+            DialogFactory.createInfoDialog({
+                        title: qsTr("Information"),
+                        text: qsTr("GOnnect is under testing for your operating system and is not yet officially released. There is no feature parity with the Linux version yet, and there may be bugs that we didn't find yet. You're welcome with reporting these issues on github. Happy testing!")
+                    })
+        }
     }
 
     Connections {
