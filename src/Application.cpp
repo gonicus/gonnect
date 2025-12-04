@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "StateManager.h"
 #include "SearchProvider.h"
+#include "UISettings.h"
 #include "NotificationManager.h"
 #include "appversion.h"
 #include "SIPManager.h"
@@ -62,6 +63,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     StateManager::instance().setParent(this);
     SearchProvider::instance().setParent(this);
+    UISettings::instance().setParent(this);
 
 #ifdef Q_OS_LINUX
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, s_sighupFd)) {

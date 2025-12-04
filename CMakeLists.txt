@@ -11,8 +11,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_UNITY_BUILD_BATCH_SIZE 10)
 set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
-list(PREPEND CMAKE_MODULE_PATH "${PROJECT_BINARY_DIR}/generators")
+list(PREPEND CMAKE_MODULE_PATH "${PROJECT_BINARY_DIR}/generators" "${PROJECT_BINARY_DIR}/resources/windows")
 list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_BINARY_DIR}/generators")
+
+# Flatpak build?
+set(FLATPAK $ENV{FLATPAK_ID})
 
 # Basic settings
 option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
@@ -30,6 +33,9 @@ option(ENABLE_MSGRAPH "Enable MS Graph plugin" ON)
 
 set(APP_ID "de.gonicus.gonnect")
 add_definitions(-DAPP_ID="${APP_ID}")
+if(FLATPAK)
+    add_definitions(-DQ_OS_FLATPAK)
+endif()
 
 if(LINUX)
     if(NOT FLATPAK_APP_ID)

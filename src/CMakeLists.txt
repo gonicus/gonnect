@@ -167,7 +167,7 @@ find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
 
-if(LINUX)
+if(FLATPAK)
     set(PLATFORM_SOURCES
         dbus/portal/AbstractPortal.h
         dbus/portal/AbstractPortal.cpp
@@ -189,10 +189,10 @@ if(LINUX)
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
 
-        platform/linux/LinuxNotificationManager.h
-        platform/linux/LinuxNotificationManager.cpp
         platform/flatpak/FlatpakUserInfo.h
         platform/flatpak/FlatpakUserInfo.cpp
+        platform/linux/LinuxNotificationManager.h
+        platform/linux/LinuxNotificationManager.cpp
         platform/linux/MPRISExternalMediaManager.cpp
         platform/linux/MPRISExternalMediaManager.h
         platform/flatpak/FlatpakBackgroundManager.h
@@ -207,6 +207,36 @@ if(LINUX)
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
         platform/linux/LinuxDesktopSearchProvider.cpp)
+
+elseif(LINUX)
+    set(PLATFORM_SOURCES
+        dbus/GOnnectDBusAPI.h
+        dbus/GOnnectDBusAPI.cpp
+        dbus/KRunnerAdapter.h
+        dbus/KRunnerAdapter.cpp
+
+        platform/linux/LinuxUserInfo.h
+        platform/linux/LinuxUserInfo.cpp
+        platform/linux/LinuxNotificationManager.h
+        platform/linux/LinuxNotificationManager.cpp
+        platform/linux/MPRISExternalMediaManager.cpp
+        platform/linux/MPRISExternalMediaManager.h
+
+        platform/dummy/DummyBackgroundManager.cpp
+        platform/dummy/DummyBackgroundManager.h
+        platform/dummy/DummyGlobalShortcuts.h
+        platform/dummy/DummyGlobalShortcuts.cpp
+
+        platform/dummy/DummyThemeManager.cpp
+        platform/dummy/DummyThemeManager.h
+        platform/dummy/DummyNetworkHelper.cpp
+        platform/dummy/DummyNetworkHelper.h
+        platform/dummy/DummyInhibitHelper.h
+        platform/dummy/DummyInhibitHelper.cpp
+
+        platform/linux/LinuxDesktopSearchProvider.h
+        platform/linux/LinuxDesktopSearchProvider.cpp)
+
 elseif(APPLE)
     set(PLATFORM_SOURCES
         platform/dummy/DummyNotificationManager.h
@@ -219,8 +249,8 @@ elseif(APPLE)
         platform/dummy/DummyBackgroundManager.h
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
-        platform/unix/UnixNetworkHelper.cpp
-        platform/unix/UnixNetworkHelper.h
+        platform/dummy/DummyNetworkHelper.cpp
+        platform/dummy/DummyNetworkHelper.h
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h
@@ -229,8 +259,8 @@ elseif(APPLE)
         platform/dummy/DummySearchProvider.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
-        platform/dummy/DummyUserInfo.cpp
-        platform/dummy/DummyUserInfo.h
+	    platform/windows/WindowsUserInfo.cpp
+	    platform/windows/WindowsUserInfo.h
         platform/dummy/DummyExternalMediaManager.cpp
         platform/dummy/DummyExternalMediaManager.h
         platform/dummy/DummyBackgroundManager.cpp
@@ -311,13 +341,17 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
         ui/components/dialogs/InfoDialog.qml
+        # Dynamic UI
+        ui/components/BaseWidget.qml
+        ui/components/DateEventsWidget.qml
+        ui/components/FavoritesWidget.qml
+        ui/components/HistoryWidget.qml
 
-        ui/components/pages/Activity.qml
-        ui/components/pages/Chats.qml
         ui/components/pages/Call.qml
-        ui/components/pages/Calls.qml
+        ui/components/pages/Chats.qml
         ui/components/pages/Conference.qml
-        ui/components/pages/Default.qml
+        # Dynamic UI
+        ui/components/pages/BasePage.qml
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
@@ -367,6 +401,8 @@ qt_add_qml_module(gonnect
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
+        # Dynamic UI
+        ui/components/EditModeOptions.qml
 
         ui/scripts/util.js
 
@@ -378,6 +414,16 @@ qt_add_qml_module(gonnect
         ui/PreferredIdentityEditWindow.qml
         ui/ShortcutsWindow.qml
         ui/SipTemplateWizard.qml
+        # Dynamic UI
+        ui/CommonPages.qml
+        ui/CommonWidgets.qml
+        ui/PageModel.qml
+        ui/PageReader.qml
+        ui/PageCreationWindow.qml
+        ui/PageWriter.qml
+        ui/WidgetModel.qml
+        ui/WidgetSelectionWindow.qml
+
 
     DEPENDENCIES
         QtQml.Models
@@ -404,6 +450,8 @@ qt_add_qml_module(gonnect
         KeychainSettings.h
         StateManager.cpp
         StateManager.h
+        UISettings.cpp
+        UISettings.h
 
         sip/CallHistory.h
         sip/CallHistory.cpp

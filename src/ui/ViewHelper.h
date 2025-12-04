@@ -28,6 +28,7 @@ class ViewHelper : public QObject
                        NOTIFY nextMeetingStartFlagsChanged FINAL)
     Q_PROPERTY(QObject *topDrawer MEMBER m_topDrawer NOTIFY topDrawerChanged FINAL)
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
+    Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
 
 public:
     static ViewHelper &instance()
@@ -105,6 +106,8 @@ public:
     Q_INVOKABLE bool isPhoneNumber(const QString &number) const;
     Q_INVOKABLE bool isValidJitsiRoomName(const QString &name) const;
 
+    bool isUnsupportedPlatform() const;
+
     Q_INVOKABLE void
     requestMeeting(const QString &roomName,
                    QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
@@ -121,6 +124,8 @@ public:
     Q_INVOKABLE QDateTime endTimeForOngoingDateEventByRoomName(const QString &roomName) const;
 
     Q_INVOKABLE void toggleFullscreen();
+
+    Q_INVOKABLE uint numberOfGridCells() const;
 
 public Q_SLOTS:
     Q_INVOKABLE void quitApplicationNoConfirm() const;

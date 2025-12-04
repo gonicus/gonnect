@@ -73,6 +73,11 @@ modules:
       - type: file
         path: krb5.conf
 
+  - name: hello
+    buildsystem: simple
+    build-commands:
+      - set
+
   - name: pjsip
     buildsystem: autotools
     config-opts:
