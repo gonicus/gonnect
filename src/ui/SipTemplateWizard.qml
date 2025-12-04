@@ -24,7 +24,7 @@ BaseWindow {
 
         if (result.error) {
             wizardInstallationLabel.text = qsTr("Error: %1").arg(result.error)
-            wizardStatusImage.source = "qrc:/icons/data-error.svg"
+            wizardStatusImage.source = Icons.dataError
             wizardInstallationSaveLabel.visible = false
             wizardInstallItem.visible = false
             wizardFinishButton.enabled = false
@@ -100,7 +100,7 @@ BaseWindow {
             }
 
             Image {
-                source: "qrc:/icons/preferences-system-network.svg"
+                source: Icons.preferencesSystemNetwork
                 sourceSize.width: 128
                 sourceSize.height: 128
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -307,7 +307,7 @@ BaseWindow {
 
             Image {
                 id: wizardStatusImage
-                source: "qrc:/icons/data-success.svg"
+                source: Icons.dataSuccess
                 sourceSize.width: 128
                 sourceSize.height: 128
                 anchors.horizontalCenter: parent.horizontalCenter

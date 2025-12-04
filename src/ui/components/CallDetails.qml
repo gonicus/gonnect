@@ -176,7 +176,7 @@ Item {
         text: qsTr('Jitsi Meet')
         visible: control.hasCapabilityJitsi
         icon {
-            source: "qrc:/icons/jitsi.svg"
+            source: Icons.jitsi
             color: "transparent"
             height: 22
         }

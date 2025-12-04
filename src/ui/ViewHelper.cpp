@@ -400,3 +400,8 @@ void ViewHelper::toggleFullscreen()
 {
     Q_EMIT fullscreenToggle();
 }
+
+uint ViewHelper::numberOfGridCells() const
+{
+    return 50;
+}

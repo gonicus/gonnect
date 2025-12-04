@@ -199,4 +199,3 @@ _GOnnect_ is licensed under the terms of the GNU GENERAL PUBLIC LICENSE
 Version 2, or at your opinion any later version.
 
 See [LICENSE](LICENSE) for the full content of the license.
-

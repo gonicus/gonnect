@@ -51,6 +51,7 @@ class Theme : public QObject
     Q_PROPERTY(QColor greenColor READ greenColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor darkGreenColor READ darkGreenColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor paneColor READ paneColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(QColor highContrastColor READ highContrastColor NOTIFY colorPaletteChanged FINAL)
 
     Q_PROPERTY(QColor buttonBackgroundHover READ buttonBackgroundHover NOTIFY
                        buttonBackgroundHoverChanged FINAL)
@@ -130,6 +131,7 @@ public:
     QColor greenColor() const { return m_greenColor; }
     QColor darkGreenColor() const { return m_darkGreenColor; }
     QColor paneColor() const { return m_paneColor; }
+    QColor highContrastColor() const { return m_highContrastColor; }
 
     QColor buttonBackgroundHover() const { return m_buttonBackgroundHover; }
     QColor frame() const { return m_frame; }
@@ -226,6 +228,7 @@ private:
     QColor m_greenColor;
     QColor m_darkGreenColor;
     QColor m_paneColor;
+    QColor m_highContrastColor;
 
     QColor m_buttonBackgroundHover;
     QColor m_frame;
