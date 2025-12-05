@@ -104,6 +104,7 @@ public:
     Q_INVOKABLE void respondUserVerification(const QString &uuid, bool isAccepted);
 
     Q_INVOKABLE bool isPhoneNumber(const QString &number) const;
+    Q_INVOKABLE QString filterPhoneNumber(const QString &input) const;
     Q_INVOKABLE bool isValidJitsiRoomName(const QString &name) const;
     Q_INVOKABLE QString filterJitsiUrl(const QString &input) const;
 

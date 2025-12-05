@@ -339,6 +339,29 @@ bool ViewHelper::isPhoneNumber(const QString &number) const
     return numberRegEx.match(number).hasMatch();
 }
 
+QString ViewHelper::filterPhoneNumber(const QString &input) const
+{
+    QString filteredNumber;
+    bool hasCountryCode = false;
+    bool isInBrackets = false;
+
+    for (QChar c : input) {
+        if (c == '+') {
+            filteredNumber += c;
+            hasCountryCode = true;
+        } else if (c.isDigit() && (!isInBrackets || (isInBrackets && !hasCountryCode))) {
+            filteredNumber += c;
+        } else if (c == '(' && hasCountryCode && !isInBrackets) {
+            isInBrackets = true;
+        } else if (c == ')' && hasCountryCode && isInBrackets) {
+            isInBrackets = false;
+        }
+    }
+
+    qCInfo(lcViewHelper) << "NUMBER:" << filteredNumber;
+    return filteredNumber;
+}
+
 bool ViewHelper::isValidJitsiRoomName(const QString &name) const
 {
     // Regex from Jitsi Meet source code

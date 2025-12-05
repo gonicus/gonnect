@@ -199,7 +199,7 @@ Popup {
 
                         SearchResultItem {
                             id: callDirectItem
-                            mainText: qsTr('Call "%1"').arg(control.searchText)
+                            mainText: qsTr('Call "%1"').arg(callDirectItem.number)
                             width: control.colWidth
                             visible: callDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === callDirectItem
@@ -211,13 +211,15 @@ Popup {
                                 }
                             }
 
+                            property string number: ViewHelper.filterPhoneNumber(control.searchText)
+
                             readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(control.searchText)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(callDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                SIPCallManager.call("account0", control.searchText, "", identitySelector.currentValue)
+                                SIPCallManager.call("account0", callDirectItem.number, "", identitySelector.currentValue)
                                 control.primaryActionTriggered()
                             }
                         }
