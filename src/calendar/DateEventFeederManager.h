@@ -1,6 +1,9 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
+#include <QTime>
+#include <QDateTime>
 #include <QHash>
 #include <QMutex>
 
@@ -30,6 +33,15 @@ private:
 
     QMutex m_queueMutex;
 
+    QDateTime m_currentTime;
+    QDateTime m_timeRangeStart;
+    QDateTime m_timeRangeEnd;
+    QDateTime m_nextDayTime;
+    qint64 m_nextDayDuration;
+
+    QTimer m_nextDayRefreshTimer;
+
+    void setTimeData();
     void processQueue();
     void setupReconnectSignal();
 

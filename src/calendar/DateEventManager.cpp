@@ -101,7 +101,7 @@ void DateEventManager::addDateEvent(DateEvent *dateEvent)
 void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
                                        const QDateTime &start, const QDateTime &end,
                                        const QString &summary, const QString &roomName,
-                                       bool isConfirmed)
+                                       bool isJitsiMeeting)
 {
     QMutexLocker lock(&m_feederMutex);
 
@@ -115,7 +115,7 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
             event->setEnd(end);
             event->setSummary(summary);
             event->setRoomName(roomName);
-            event->setIsConfirmed(isConfirmed);
+            event->setIsJitsiMeeting(isJitsiMeeting);
         }
     }
 
@@ -268,15 +268,20 @@ void DateEventManager::onTimerTimeout()
             const auto start = dateEvent->start();
             const auto summary = dateEvent->summary();
             const auto roomName = dateEvent->roomName();
+            const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
 
             if (!m_alreadyNotifiedDates.contains(eventHash)
                 && !m_notificationIds.contains(eventHash) && start.date() == today
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
-                auto notification = new Notification(tr("Conference starting soon"), summary,
-                                                     Notification::Priority::high, &notMan);
+                QString message = isJitsiMeeting ? tr("Conference starting soon")
+                                                 : tr("Appointment starting soon");
+                auto notification =
+                        new Notification(message, summary, Notification::Priority::high, &notMan);
 
                 notification->setIcon(":/icons/gonnect.svg");
-                notification->addButton(tr("Join"), "join-meeting", "", {});
+                if (isJitsiMeeting) {
+                    notification->addButton(tr("Join"), "join-meeting", "", {});
+                }
                 const auto notificationId = notMan.add(notification);
 
                 connect(notification, &Notification::actionInvoked, this,

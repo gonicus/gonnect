@@ -30,7 +30,7 @@ public:
 
     void modifyDateEvent(const QString &id, const QString &source, const QDateTime &start,
                          const QDateTime &end, const QString &summary, const QString &roomName,
-                         bool isConfirmed);
+                         bool isJitsiMeeting);
     void removeDateEvent(const QString &id);
 
     /// Delete all date events
