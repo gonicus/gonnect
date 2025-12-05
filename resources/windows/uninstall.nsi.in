@@ -1,0 +1,12 @@
+## Application
+
+DeleteRegKey HKLM "SOFTWARE\IM Providers\@APPLICATION_NAME@"
+DeleteRegKey HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@"
+DeleteRegValue HKLM "SOFTWARE\RegisteredApplications" "@APPLICATION_NAME@"
+
+## Handlers
+
+DeleteRegKey HKCR "@APPLICATION_NAME@.sip"
+DeleteRegKey HKCR "@APPLICATION_NAME@.sips"
+DeleteRegKey HKCR "@APPLICATION_NAME@.tel"
+DeleteRegKey HKCR "@APPLICATION_NAME@.callto"

@@ -193,6 +193,30 @@ flatpak run --command=flatpak-builder org.flatpak.Builder build --user --install
 flatpak --user install ./repo de.gonicus.gonnect
 ```
 
+# Windows
+
+Install chocolatey: https://chocolatey.org
+
+```powershell
+choco install -y git git-lfs python3 conan nsis cmake strawberryperl aqt
+choco install -y visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.MSBuildTools;includeRecommended --add Microsoft.VisualStudio.Workload.VCTools;includeRecommended --quiet"
+
+# install qt
+aqt install-qt windows desktop 6.10.1 win64_msvc2022_64 -m qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools -O ~\Qt
+
+$env:Qt6_Dir = '~\Qt\6.10.1\msvc2022_64\'
+```
+```powershell
+cd <to where you've cloned this repository>
+conan config install resources/conan
+conan export-dependencies .
+conan install . --build=missing
+cmake --preset conan-default .
+cmake --build --preset conan-release --parallel
+cd build
+cpack
+```
+
 # License
 
 _GOnnect_ is licensed under the terms of the GNU GENERAL PUBLIC LICENSE
