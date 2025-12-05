@@ -213,7 +213,7 @@ Popup {
 
                             property string number: ViewHelper.filterPhoneNumber(control.searchText)
 
-                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(control.searchText)
+                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(callDirectItem.number)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(callDirectItem)
