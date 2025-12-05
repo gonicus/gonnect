@@ -169,9 +169,9 @@ ListView {
                     alignment: Qt.AlignCenter
                     visible: delg.isJitsiMeeting
                     icon {
-                        source: Icons.videoCall
-                        width: 24
-                        height: 24
+                        source: Icons.openLink
+                        width: 20
+                        height: 20
                     }
                 }
             }
