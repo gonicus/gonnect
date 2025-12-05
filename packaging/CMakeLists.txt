@@ -30,9 +30,9 @@ if(WIN32)
     endif()
 
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" DOS_STYLE_BINARY_DIR)
-    configure_file("${CMAKE_SOURCE_DIR}/cmake/install/windows/install.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/install.nsi" @ONLY)
+    configure_file("${CMAKE_SOURCE_DIR}/resources/windows/install.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/install.nsi" @ONLY)
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "!include \"${DOS_STYLE_BINARY_DIR}\\install.nsi\"")
-    configure_file("${CMAKE_SOURCE_DIR}/cmake/install/windows/uninstall.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/uninstall.nsi" @ONLY)
+    configure_file("${CMAKE_SOURCE_DIR}/resources/windows/uninstall.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/uninstall.nsi" @ONLY)
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "!include \"${DOS_STYLE_BINARY_DIR}\\uninstall.nsi\"")
 
 

@@ -11,14 +11,14 @@ WriteRegStr HKLM "SOFTWARE\IM Providers\@APPLICATION_NAME@" "FriendlyName" "@APP
 
 
 !macro registerForProtocol _name
-    WriteRegStr HKCR "{_name}" "" "URL:{_name}"
-    WriteRegStr HKCR "{_name}" "URL Protocol" ""
+    WriteRegStr HKCR "${_name}" "" "URL:${_name}"
+    WriteRegStr HKCR "${_name}" "URL Protocol" ""
 
-    WriteRegStr HKCR "@APPLICATION_NAME@.{_name}" "" "@APPLICATION_NAME@ {_name} Protocol"
-    WriteRegStr HKCR "@APPLICATION_NAME@.{_name}\Shell" "" ""
-    WriteRegStr HKCR "@APPLICATION_NAME@.{_name}\Shell\Open" "" ""
-    WriteRegStr HKCR "@APPLICATION_NAME@.{_name}\Shell\Open\Command" "" "$INSTDIR\bin\@APPLICATION_EXECUTABLE@.exe $\"%1$\""
-    WriteRegStr HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities\URLAssociations" "{_name}" "@APPLICATION_NAME@.{_name}"
+    WriteRegStr HKCR "@APPLICATION_NAME@.${_name}" "" "@APPLICATION_NAME@ ${_name} Protocol"
+    WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell" "" ""
+    WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell\Open" "" ""
+    WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell\Open\Command" "" "$INSTDIR\bin\@APPLICATION_EXECUTABLE@.exe $\"%1$\""
+    WriteRegStr HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities\URLAssociations" "${_name}" "@APPLICATION_NAME@.${_name}"
 !macroend
 
 # PROTOCOL registration
