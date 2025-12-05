@@ -1,8 +1,7 @@
 ## Application
 
-DeleteRegKey HKLM "SOFTWARE\IM Providers\@APPLICATION_NAME@"
-DeleteRegKey HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@"
-DeleteRegValue HKLM "SOFTWARE\RegisteredApplications" "@APPLICATION_NAME@"
+DeleteRegKey SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@"
+DeleteRegValue SHCTX "SOFTWARE\RegisteredApplications" "@APPLICATION_NAME@"
 
 ## Handlers
 

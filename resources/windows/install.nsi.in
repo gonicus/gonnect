@@ -1,14 +1,13 @@
 # Application details
 
-WriteRegStr HKLM "SOFTWARE\@APPLICATION_VENDOR@" "" ""
-WriteRegStr HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@" "" ""
-WriteRegStr HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "ApplicationDescription" "@APPLICATION_DESCRIPTION@"
-WriteRegStr HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "ApplicationName" "@APPLICATION_NAME@"
-WriteRegStr HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "FriendlyAppName" "@APPLICATION_NAME@"
-WriteRegStr HKLM "SOFTWARE\RegisteredApplications" "@APPLICATION_NAME@" "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities"
-WriteRegStr HKLM "SOFTWARE\IM Providers\@APPLICATION_NAME@" "ProcessName" "@APPLICATION_EXECUTABLE@.exe"
-WriteRegStr HKLM "SOFTWARE\IM Providers\@APPLICATION_NAME@" "FriendlyName" "@APPLICATION_NAME@"
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@" "" ""
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@" "" ""
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "ApplicationDescription" "@APPLICATION_DESCRIPTION@"
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "ApplicationName" "@APPLICATION_NAME@"
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "FriendlyAppName" "@APPLICATION_NAME@"
+WriteRegStr SHCTX "SOFTWARE\RegisteredApplications" "@APPLICATION_NAME@" "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities"
 
+WriteRegStr HKCU "Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache" "$INSTDIR\bin\@APPLICATION_EXECUTABLE@.exe.FriendlyAppName" "@APPLICATION_NAME@"
 
 !macro registerForProtocol _name
     WriteRegStr HKCR "${_name}" "" "URL:${_name}"
@@ -18,7 +17,7 @@ WriteRegStr HKLM "SOFTWARE\IM Providers\@APPLICATION_NAME@" "FriendlyName" "@APP
     WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell" "" ""
     WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell\Open" "" ""
     WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell\Open\Command" "" "$INSTDIR\bin\@APPLICATION_EXECUTABLE@.exe $\"%1$\""
-    WriteRegStr HKLM "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities\URLAssociations" "${_name}" "@APPLICATION_NAME@.${_name}"
+    WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities\URLAssociations" "${_name}" "@APPLICATION_NAME@.${_name}"
 !macroend
 
 # PROTOCOL registration
