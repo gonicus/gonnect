@@ -1,0 +1,51 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 95b88916f..6f51917a3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -123,7 +123,7 @@ install(
+     COMPONENT PjRuntime
+     NAMELINK_COMPONENT PjDevelopment
+   ARCHIVE
+-    DESTINATION  "${CMAKE_INSTALL_BINDIR}"
++    DESTINATION  "${CMAKE_INSTALL_LIBDIR}"
+     COMPONENT PjDevelopment
+ )
+ 
+diff --git a/third_party/CMakeLists.txt b/third_party/CMakeLists.txt
+index abf9243c2..0e547ccf9 100644
+--- a/third_party/CMakeLists.txt
++++ b/third_party/CMakeLists.txt
+@@ -106,12 +106,11 @@ endforeach()
+ 
+ # install selected sub-diriectories
+ if(install_subdirs)
+-  # append `$ORIGIN/pjproject/third_party` to RPATH
+   if(BUILD_SHARED_LIBS)
+     if(APPLE)
+-      list(APPEND CMAKE_INSTALL_RPATH "@loader_path/pjproject/third_party")
++      list(APPEND CMAKE_INSTALL_RPATH "@loader_path")
+     elseif(UNIX)
+-      list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN/pjproject/third_party")
++      list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN")
+     endif()
+     set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} PARENT_SCOPE)
+   endif()
+@@ -121,15 +120,15 @@ if(install_subdirs)
+     install(TARGETS ${subdir}
+       EXPORT PjTargets
+       LIBRARY
+-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pjproject/third_party"
++        DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+         COMPONENT PjRuntime
+         OPTIONAL
+       ARCHIVE
+-        DESTINATION  "${CMAKE_INSTALL_BINDIR}/pjproject/third_party"
++        DESTINATION  "${CMAKE_INSTALL_LIBDIR}"
+         COMPONENT PjDevelopment
+         OPTIONAL
+       FILE_SET HEADERS
+-        DESTINATION  "${CMAKE_INSTALL_INCLUDEDIR}/pjproject/third_party/${subdir}"
++        DESTINATION  "${CMAKE_INSTALL_INCLUDEDIR}/${subdir}"
+         COMPONENT PjDevelopment
+         OPTIONAL
+     )
