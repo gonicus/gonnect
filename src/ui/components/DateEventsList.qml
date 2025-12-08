@@ -220,6 +220,8 @@ ListView {
             onDoubleTapped: () => {
                 if (delg.isJitsiMeeting) {
                     ViewHelper.requestMeeting(delg.roomName)
+                } else if (delg.isOtherLink) {
+                    Qt.openUrlExternally(delg.roomName)
                 }
             }
             onTapped: (_, mouseButton) => {

@@ -8,6 +8,7 @@
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
+#include <QDesktopServices>
 
 Q_LOGGING_CATEGORY(lcDateEventManager, "gonnect.app.dateevents.manager")
 
@@ -269,6 +270,7 @@ void DateEventManager::onTimerTimeout()
             const auto summary = dateEvent->summary();
             const auto roomName = dateEvent->roomName();
             const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
+            const auto isOtherLink = dateEvent->isOtherLink();
 
             if (!m_alreadyNotifiedDates.contains(eventHash)
                 && !m_notificationIds.contains(eventHash) && start.date() == today
@@ -281,6 +283,8 @@ void DateEventManager::onTimerTimeout()
                 notification->setIcon(":/icons/gonnect.svg");
                 if (isJitsiMeeting) {
                     notification->addButton(tr("Join"), "join-meeting", "", {});
+                } else if (isOtherLink) {
+                    notification->addButton(tr("Open"), "open-link", "", {});
                 }
                 const auto notificationId = notMan.add(notification);
 
@@ -291,6 +295,11 @@ void DateEventManager::onTimerTimeout()
                                 m_notificationIds.remove(eventHash);
 
                                 ViewHelper::instance().requestMeeting(roomName);
+                            } else if (action == "open-link") {
+                                NotificationManager::instance().remove(notificationId);
+                                m_notificationIds.remove(eventHash);
+
+                                QDesktopServices::openUrl(roomName);
                             }
                         });
 
