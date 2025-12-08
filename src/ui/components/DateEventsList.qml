@@ -74,6 +74,7 @@ ListView {
         required property string summary
         required property string roomName
         required property bool isJitsiMeeting
+        required property bool isOtherLink
 
         property bool isToday
         property bool isInPast
@@ -167,9 +168,9 @@ ListView {
                     id: meetingIndicator
 
                     alignment: Qt.AlignCenter
-                    visible: delg.isJitsiMeeting
+                    visible: delg.isJitsiMeeting || delg.isOtherLink
                     icon {
-                        source: Icons.openLink
+                        source: delg.isJitsiMeeting ? Icons.videoCall : Icons.openLink
                         width: 20
                         height: 20
                     }
@@ -182,13 +183,25 @@ ListView {
 
             Menu {
                 Action {
-                    text: qsTr('Join')
-                    onTriggered: () => ViewHelper.requestMeeting(delg.roomName)
+                    text: delg.isJitsiMeeting ? qsTr('Join') : qsTr('Open')
+                    onTriggered: () => {
+                        if (delg.isJitsiMeeting) {
+                            ViewHelper.requestMeeting(delg.roomName)
+                        } else {
+                            Qt.openUrlExternally(delg.roomName)
+                        }
+                    }
                 }
 
                 Action {
-                    text: qsTr('Copy room link')
-                    onTriggered: () => ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
+                    text: delg.isJitsiMeeting ? qsTr('Copy room link') :  qsTr('Copy link')
+                    onTriggered: () => {
+                        if (delg.isJitsiMeeting) {
+                            ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
+                        } else {
+                            ViewHelper.copyToClipboard(delg.roomName)
+                        }
+                    }
                 }
             }
         }
@@ -210,7 +223,7 @@ ListView {
                 }
             }
             onTapped: (_, mouseButton) => {
-                if (mouseButton === Qt.RightButton && delg.isJitsiMeeting) {
+                if (mouseButton === Qt.RightButton && (delg.isJitsiMeeting || delg.isOtherLink)) {
                     dateEventContextMenuComponent.createObject(delg).popup()
                 }
             }

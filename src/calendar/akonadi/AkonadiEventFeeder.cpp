@@ -131,8 +131,16 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         QDateTime end = event->dtEnd().toLocalTime();
 
                         // Location
-                        QString location = manager.getJitsiRoomFromLocation(event->location());
-                        bool isJitsiMeeting = !location.isEmpty();
+                        QString location = event->location();
+                        QString jitsiRoom = manager.getJitsiRoomFromLocation(location);
+                        bool isJitsiMeeting = false;
+                        bool isOtherLink = false;
+                        if (!jitsiRoom.isEmpty()) {
+                            location = jitsiRoom;
+                            isJitsiMeeting = true;
+                        } else if (QUrl(location).isValid()) {
+                            isOtherLink = true;
+                        }
 
                         // Status filter
                         bool isCancelled = (event->status()
@@ -172,9 +180,9 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                     && recurStart >= m_timeRangeStart) {
                                     QString nid = QString("%1-%2").arg(id).arg(
                                             recurStart.toMSecsSinceEpoch());
-                                    manager.addDateEvent(new DateEvent(nid, m_source, recurStart,
-                                                                       recurEnd, summary, location,
-                                                                       isJitsiMeeting));
+                                    manager.addDateEvent(new DateEvent(
+                                            nid, m_source, recurStart, recurEnd, summary, location,
+                                            isJitsiMeeting, isOtherLink));
                                 }
                             }
                         } else if (isUpdatedRecurrence) {
@@ -191,12 +199,13 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                 // Does not exist, e.g. moved from past to future, different day
                                 manager.addDateEvent(new DateEvent(id, m_source, start, end,
                                                                    summary, location,
-                                                                   isJitsiMeeting));
+                                                                   isJitsiMeeting, isOtherLink));
                             }
                         } else {
                             // Normal event, no recurrence, or update of a recurrent instance
                             manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
-                                                               location, isJitsiMeeting));
+                                                               location, isJitsiMeeting,
+                                                               isOtherLink));
                         }
                     }
                 }

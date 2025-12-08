@@ -4,7 +4,7 @@
 
 DateEvent::DateEvent(const QString &id, const QString &source, const QDateTime &start,
                      const QDateTime &end, const QString &summary, const QString &roomName,
-                     bool isJitsiMeeting, QObject *parent)
+                     bool isJitsiMeeting, bool isOtherLink, QObject *parent)
     : QObject{ parent },
       m_id{ id },
       m_source{ source },
@@ -12,7 +12,8 @@ DateEvent::DateEvent(const QString &id, const QString &source, const QDateTime &
       m_end{ end },
       m_summary{ summary },
       m_roomName{ roomName },
-      m_isJitsiMeeting{ isJitsiMeeting }
+      m_isJitsiMeeting{ isJitsiMeeting },
+      m_isOtherLink{ isOtherLink }
 {
 }
 
@@ -51,6 +52,11 @@ void DateEvent::setIsJitsiMeeting(bool isJitsiMeeting)
     m_isJitsiMeeting = isJitsiMeeting;
 }
 
+void DateEvent::setIsOtherLink(bool isOtherLink)
+{
+    m_isOtherLink = isOtherLink;
+}
+
 size_t DateEvent::getHash()
 {
     size_t sum = 0;
@@ -71,7 +77,8 @@ QDebug operator<<(QDebug debug, const DateEvent &dateEvent)
                               << "end=" << dateEvent.end() << ","
                               << "roomName=" << dateEvent.roomName() << ","
                               << "summary=" << dateEvent.summary() << ","
-                              << "isConfirmed=" << dateEvent.isJitsiMeeting() << ","
+                              << "isJitsiMeeting=" << dateEvent.isJitsiMeeting() << ","
+                              << "isOtherLink=" << dateEvent.isOtherLink() << ","
                               << "source=" << dateEvent.source() << ")";
     return debug;
 }

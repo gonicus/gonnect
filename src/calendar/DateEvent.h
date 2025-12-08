@@ -10,7 +10,7 @@ class DateEvent : public QObject
 public:
     explicit DateEvent(const QString &id, const QString &source, const QDateTime &start,
                        const QDateTime &end, const QString &summary, const QString &roomName,
-                       bool isJitsiMeeting, QObject *parent = nullptr);
+                       bool isJitsiMeeting, bool isOtherLink, QObject *parent = nullptr);
 
     QString id() const { return m_id; }
     QString source() const { return m_source; }
@@ -19,6 +19,7 @@ public:
     QString summary() const { return m_summary; }
     QString roomName() const { return m_roomName; }
     bool isJitsiMeeting() const { return m_isJitsiMeeting; }
+    bool isOtherLink() const { return m_isOtherLink; }
 
     void setId(const QString &id);
     void setSource(const QString &source);
@@ -27,6 +28,7 @@ public:
     void setSummary(const QString &summary);
     void setRoomName(const QString &roomName);
     void setIsJitsiMeeting(bool isJitsiMeeting);
+    void setIsOtherLink(bool isOtherLink);
 
     size_t getHash();
 
@@ -38,6 +40,7 @@ private:
     QString m_summary;
     QString m_roomName;
     bool m_isJitsiMeeting;
+    bool m_isOtherLink;
 };
 
 QDebug operator<<(QDebug debug, const DateEvent &dateEvent);
