@@ -162,6 +162,7 @@ ListView {
                 id: rightCol
                 topPadding: 10
                 bottomPadding: 10
+                leftPadding: 7
                 Layout.preferredWidth: parent.width * 0.1
 
                 IconLabel {
