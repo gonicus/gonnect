@@ -82,12 +82,15 @@ class PjSIPConan(ConanFile):
             if not cross_building(self):
                 vre = VirtualRunEnv(self)
                 vre.generate(scope="build")
+
             env = Environment()
             env.unset("VCPKG_ROOT")
             env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
             env.vars(self).save_script("conanbuildenv_pkg_config_path")
+
             deps = CMakeDeps(self)
             deps.generate()
+
             tc = CMakeToolchain(self)
     
             tc.variables['PJLIB_WITH_LIBUUID'] = self.options.with_uuid
@@ -96,6 +99,9 @@ class PjSIPConan(ConanFile):
             tc.variables['PJMEDIA_HAS_VIDEO'] = "1" if self.options.with_video else "0"
             tc.variables['PJMEDIA_WITH_AUDIODEV'] = "0"
             tc.variables['BUILD_TESTING'] = False
+
+            tc.set_property("opus", "cmake_target_name", "OPUS::OPUS")
+            tc.set_property("Opus::opus", "cmake_target_name", "OPUS::OPUS")
 
             tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
             tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
