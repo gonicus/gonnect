@@ -193,6 +193,42 @@ flatpak run --command=flatpak-builder org.flatpak.Builder build --user --install
 flatpak --user install ./repo de.gonicus.gonnect
 ```
 
+# Windows
+
+Install build requirements
+
+```powershell
+# Install chocolatey: https://chocolatey.org
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# install build requirements
+choco install -y git git-lfs python3 conan nsis cmake strawberryperl aqt
+choco install -y visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.MSBuildTools;includeRecommended --add Microsoft.VisualStudio.Workload.VCTools;includeRecommended --quiet"
+
+# install qt in users home folder
+aqt install-qt windows desktop 6.10.1 win64_msvc2022_64 -m qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools -O $env:USERPROFILE\Qt
+
+[System.Environment]::SetEnvironmentVariable('Qt6_Dir', $env:USERPROFILE + '\Qt\6.10.1\msvc2022_64\', 'User')
+```
+
+Setup conan and build gonnect:
+
+```powershell
+cd <to where you have cloned this repository>
+
+# prepare conan
+conan config install resources/conan
+conan export-dependencies .
+conan profile detect
+conan install . --build=missing
+
+# build gonnect
+cmake --preset conan-default .
+cmake --build --preset conan-release --parallel $((Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors)
+cd build
+cpack
+```
+
 # License
 
 _GOnnect_ is licensed under the terms of the GNU GENERAL PUBLIC LICENSE

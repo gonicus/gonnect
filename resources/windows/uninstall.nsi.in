@@ -1,0 +1,11 @@
+## Application
+
+DeleteRegKey SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@"
+DeleteRegValue SHCTX "SOFTWARE\RegisteredApplications" "@APPLICATION_NAME@"
+
+## Handlers
+
+DeleteRegKey HKCR "@APPLICATION_NAME@.sip"
+DeleteRegKey HKCR "@APPLICATION_NAME@.sips"
+DeleteRegKey HKCR "@APPLICATION_NAME@.tel"
+DeleteRegKey HKCR "@APPLICATION_NAME@.callto"
