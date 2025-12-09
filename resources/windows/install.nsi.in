@@ -6,7 +6,7 @@ WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities
 WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "ApplicationName" "@APPLICATION_NAME@"
 WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "FriendlyAppName" "@APPLICATION_NAME@"
 WriteRegStr SHCTX "SOFTWARE\RegisteredApplications" "@APPLICATION_NAME@" "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities"
-
+# name for the list entry in e.g. "open with" list
 WriteRegStr HKCU "Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache" "$INSTDIR\bin\@APPLICATION_EXECUTABLE@.exe.FriendlyAppName" "@APPLICATION_NAME@"
 
 !macro registerForProtocol _name
