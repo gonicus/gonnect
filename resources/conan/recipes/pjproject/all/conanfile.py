@@ -209,10 +209,10 @@ class PjSIPConan(ConanFile):
             if cross_building(self):
                 tc.configure_args.append("bash_cv_wcwidth_broken=yes")
 
-        tc.configure_args.append("--disable-install-examples")
-        tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
+            tc.configure_args.append("--disable-install-examples")
+            tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
 
-        tc.generate()
+            tc.generate()
 
         deps = AutotoolsDeps(self)
         deps.generate()
