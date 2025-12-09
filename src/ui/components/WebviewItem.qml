@@ -7,12 +7,18 @@ import base
 Item {
     id: control
 
+    required property string primaryUrl
+    required property string secondaryUrl
+
+    property bool showPrimary: true
+
     WebView {
         id: webView
-        url: ""
+        url: control.showPrimary ? control.primaryUrl : control.secondaryUrl
         anchors.right: parent.left
         anchors.left: parent.left
         height: parent.height
+
         onLoadingChanged: function(loadRequest) {
             if (loadRequest.errorString) {
                 console.error(loadRequest.errorString)
