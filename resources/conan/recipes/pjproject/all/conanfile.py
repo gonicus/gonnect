@@ -161,12 +161,10 @@ class PjSIPConan(ConanFile):
             tc.extra_cxxflags.append("-DPJ_SSL_SOCK_IMP=PJ_SSL_SOCK_IMP_APPLE")
             tc.extra_ldflags.append("-Wl,-framework,Security")
             tc.extra_ldflags.append("-Wl,-framework,Network")
-            tc.variables['PJLIB_WITH_SSL'] = "darwin"
 
         elif self.settings.os == "Windows":
             tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
             tc.extra_cxxflags.append("-DPJ_HAS_SSL_SOCK=1")
-            tc.variables['PJLIB_WITH_SSL'] = "schannel"
 
         elif self.settings.os == "Linux":
             tc.variables['PJLIB_WITH_SSL'] = "openssl"
