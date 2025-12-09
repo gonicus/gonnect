@@ -10,6 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Network
     NetworkAuth
     Widgets
+    WebView
     WebEngineCore
     WebEngineQuick
     Xml)
@@ -346,6 +347,7 @@ qt_add_qml_module(gonnect
         ui/components/DateEventsWidget.qml
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
+        ui/components/WebviewWidget.qml
 
         ui/components/pages/Call.qml
         ui/components/pages/Chats.qml
@@ -401,6 +403,7 @@ qt_add_qml_module(gonnect
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
+        ui/components/WebviewItem.qml
         # Dynamic UI
         ui/components/EditModeOptions.qml
 
@@ -721,6 +724,7 @@ target_link_libraries(gonnect
         Qt6::Sql
         Qt6::Network
         Qt6::NetworkAuth
+        Qt6::WebView
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
         Qt6::Core5Compat
