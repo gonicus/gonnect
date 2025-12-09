@@ -4,14 +4,11 @@ from conan import ConanFile
 from conan.tools.files import get, replace_in_file, rmdir, copy, apply_conandata_patches, export_conandata_patches, collect_libs
 from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualRunEnv
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import MSBuild
-from conan.tools.microsoft import MSBuildToolchain
-from conan.tools.microsoft import MSBuildDeps
 
 required_conan_version = ">=2"
 
@@ -67,7 +64,10 @@ class PjSIPConan(ConanFile):
             del self.options.fPIC
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        if self.settings.os == "Windows":
+            cmake_layout(self)
+        else:
+            basic_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -77,15 +77,34 @@ class PjSIPConan(ConanFile):
 
     def generate(self):
         if self.settings.os == "Windows":
-            bd = MSBuildDeps(self)
-            if self.settings.build_type == 'Release':
-                bd.configuration  = 'Release-Dynamic'
-            elif self.settings.build_type == 'Debug':
-                bd.configuration  = 'Debug-Dynamic'
+            vbe = VirtualBuildEnv(self)
+            vbe.generate()
+            if not cross_building(self):
+                vre = VirtualRunEnv(self)
+                vre.generate(scope="build")
 
-            bd.generate()
+            env = Environment()
+            env.unset("VCPKG_ROOT")
+            env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+            env.vars(self).save_script("conanbuildenv_pkg_config_path")
 
-            tc = MSBuildToolchain(self)
+            deps = CMakeDeps(self)
+            deps.set_property("opus", "cmake_target_name", "OPUS::OPUS")
+            deps.set_property("Opus::opus", "cmake_target_name", "OPUS::OPUS")
+            deps.generate()
+
+            tc = CMakeToolchain(self)
+    
+            tc.variables['PJLIB_WITH_LIBUUID'] = self.options.with_uuid
+            tc.variables['PJLIB_WITH_OPUS'] = self.options.with_opus
+            tc.variables['PJLIB_WITH_FLOATING_POINT'] = self.options.with_floatingpoint
+            tc.variables['PJMEDIA_HAS_VIDEO'] = "1" if self.options.with_video else "0"
+            tc.variables['PJMEDIA_WITH_AUDIODEV'] = "0"
+            tc.variables['BUILD_TESTING'] = False
+
+            tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
+            tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
+    
             tc.generate()
             return
 
@@ -131,41 +150,13 @@ class PjSIPConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
-    def injectConanPropsFile(self):
-        search = '<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">'
-        prop = os.path.join(self.generators_folder, 'conan_openssl.props')
-        replace_in_file(self,
-                        os.path.join(self.build_folder, 'build/vs/pjproject-vs14-common-config.props'),
-                        search,
-                        search + '\r\n<Import Project="../../conan/conan_openssl.props"/>')
-
-
     def buildWindows(self):
         if self.options.shared:
             raise ConanInvalidConfiguration("Shared libraries not supported for Windows")
 
-        self.injectConanPropsFile()
-
-        shutil.copy(os.path.join(self.build_folder, 'pjlib/include/pj/config_site_sample.h'),
-                    os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'))
-        with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
-            file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
-
-        path = os.path.join(self.build_folder, "pjproject-vs14.sln")
-
-        # Upgrade sln to current build system
-        self.output.info('converting visual studio project if necessary')
-        self.run('devenv %s /upgrade' % path, ignore_errors=True, quiet=True)
-
-        # build pjsua
-        msbuild = MSBuild(self)
-        if self.settings.build_type == 'Release':
-            msbuild.build_type = 'Release-Dynamic'
-        elif self.settings.build_type == 'Debug':
-            msbuild.build_type = 'Debug-Dynamic'
-        else:
-            raise ConanInvalidConfiguration("Unsupported build_type %s" % self.settings.build_type)
-        msbuild.build(path, targets=["pjsua", "libspeex", "libsrtp"])
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def buildAutotools(self):
         autotools = Autotools(self)
@@ -185,10 +176,12 @@ class PjSIPConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         if self.settings.os == "Windows":            
-            for lib in ['pjlib', 'pjsip', 'pjlib-util', 'pjmedia', 'pjnath', 'third_party']:
-                copy(self, "*.h", os.path.join(self.build_folder, "%s/include" % lib), os.path.join(self.package_folder, "include"))
-                copy(self, "*.hpp", os.path.join(self.build_folder, "%s/include" % lib), os.path.join(self.package_folder, "include"))
-                copy(self, "*.lib", os.path.join(self.build_folder, "%s/lib" % lib), os.path.join(self.package_folder, "lib"))
+            cmake = CMake(self)
+            cmake.install()
+
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             return
 
         autotools = Autotools(self)
@@ -205,15 +198,15 @@ class PjSIPConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "stdc++", "rt", "m"]
 
+        if self.options.get_safe("endianness") == "big":
+            self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+        else:
+            self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+
         if self.settings.os == "Windows":
             self.cpp_info.libs = collect_libs(self)
 
         else:
-            if self.options.get_safe("endianness") == "big":
-                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
-            else:
-                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
-
             libs = []
             installed_libs = collect_libs(self)
             installed_libs.sort(key=len)
