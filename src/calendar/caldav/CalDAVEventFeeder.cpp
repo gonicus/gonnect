@@ -136,12 +136,13 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             // Location
             QString location = icalcomponent_get_location(event);
             QString jitsiRoom = manager.getJitsiRoomFromLocation(location);
+            QUrl otherLink = QUrl(location, QUrl::StrictMode);
             bool isJitsiMeeting = false;
             bool isOtherLink = false;
             if (!jitsiRoom.isEmpty()) {
                 location = jitsiRoom;
                 isJitsiMeeting = true;
-            } else if (QUrl(location).isValid()) {
+            } else if (otherLink.isValid() && otherLink.scheme() == "https") {
                 isOtherLink = true;
             }
 

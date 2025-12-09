@@ -378,12 +378,13 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             // Location
             QString location = i_cal_component_get_location(component);
             QString jitsiRoom = manager.getJitsiRoomFromLocation(location);
+            QUrl otherLink = QUrl(location, QUrl::StrictMode);
             bool isJitsiMeeting = false;
             bool isOtherLink = false;
             if (!jitsiRoom.isEmpty()) {
                 location = jitsiRoom;
                 isJitsiMeeting = true;
-            } else if (QUrl(location).isValid()) {
+            } else if (otherLink.isValid() && otherLink.scheme() == "https") {
                 isOtherLink = true;
             }
 
