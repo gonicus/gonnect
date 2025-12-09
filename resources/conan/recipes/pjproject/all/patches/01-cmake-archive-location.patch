@@ -65,23 +65,6 @@ index 142fb5641..000000000
 -  endif()
 -endif()
 -
-diff --git a/pjmedia/src/pjmedia-codec/opus.c b/pjmedia/src/pjmedia-codec/opus.c
-index dedc795b1..4ecc80286 100644
---- a/pjmedia/src/pjmedia-codec/opus.c
-+++ b/pjmedia/src/pjmedia-codec/opus.c
-@@ -1248,12 +1248,4 @@ static pj_status_t  codec_recover( pjmedia_codec *codec,
-     return PJ_SUCCESS;
- }
- 
--#if defined(_MSC_VER)
--#  if 1 /* Change to 0 if Opus lib name is "opus.lib" */
--#    pragma comment(lib, "libopus.a")
--#  else
--#    pragma comment(lib, "opus.lib")
--#  endif
--#endif
--
- #endif /* PJMEDIA_HAS_OPUS_CODEC */
 diff --git a/third_party/CMakeLists.txt b/third_party/CMakeLists.txt
 index abf9243c2..0e547ccf9 100644
 --- a/third_party/CMakeLists.txt
@@ -120,3 +103,32 @@ index abf9243c2..0e547ccf9 100644
          COMPONENT PjDevelopment
          OPTIONAL
      )
+diff --git a/third_party/srtp/CMakeLists.txt b/third_party/srtp/CMakeLists.txt
+index 106b67d4f..81870e8de 100644
+--- a/third_party/srtp/CMakeLists.txt
++++ b/third_party/srtp/CMakeLists.txt
+@@ -8,23 +8,7 @@ if(SRTP_WITH_OPENSSL)
+     find_package(OpenSSL COMPONENTS Crypto SSL)
+   endif()
+   if(OPENSSL_FOUND)
+-    # check GCM support
+-    include(CheckCSourceCompiles)
+-    include(CMakePushCheckState)
+-
+-    cmake_push_check_state(RESET)
+-      set(CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCLUDE_DIR}")
+-      set(CMAKE_REQUIRED_LIBRARIES "${OPENSSL_LIBRARIES}")
+-      check_c_source_compiles([=[
+-        #include <openssl/evp.h>
+-
+-        int main(void) {
+-          EVP_CIPHER_CTX *ctx;
+-          EVP_aes_128_gcm();
+-          return 0;
+-        }
+-      ]=] OPENSSL_HAS_GCM)
+-    cmake_pop_check_state()
++    set(OPENSSL_HAS_GCM ON)
+   else()
+     set(SRTP_WITH_OPENSSL OFF CACHE BOOL "OpenSSL not found" FORCE)
+   endif()

@@ -15,35 +15,30 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml)
 
 find_package(Qca-qt6 REQUIRED)
+find_package(pjproject REQUIRED)
 
 if(UNIX)
     include(FindPkgConfig)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
-    pkg_check_modules(PJSIP REQUIRED libpjproject)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
     list(APPEND PLATFORM_LIBRARIES
-        ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI)
-
-    add_definitions(${PJSIP_STATIC_CFLAGS} -DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
-    include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
-    link_directories(${PJSIP_STATIC_LIBRARY_DIRS})
 else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
-    find_package(pjproject REQUIRED)
     find_package(wintoast REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         hidapi::hidapi
-        pjproject::pjproject
         libusb::libusb
         wintoast::wintoast)
 endif()
+
+add_definitions(-DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
 
 set(APP_SOURCES main.cpp)
 set(APP_OUTPUT_NAME gonnect)
@@ -726,6 +721,7 @@ target_link_libraries(gonnect
         Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
+        pjproject::pjproject
         qca-qt6
         qt6keychain
         hid-rp
