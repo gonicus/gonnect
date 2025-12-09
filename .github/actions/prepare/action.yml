@@ -4,7 +4,7 @@ inputs:
   qt-version:
     description: 'QT version'
     required: true
-    default: '6.9.3'
+    default: '6.10.1'
   qt-only:
     description: 'Install Qt only, skip other steps'
     default: 'false'
