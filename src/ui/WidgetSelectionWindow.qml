@@ -66,6 +66,10 @@ BaseWindow {
                     name: "History"
                     description: qsTr("A searchable call/conference history")
                 }
+                ListElement {
+                    name: "Webview"
+                    description: qsTr("A web-based content display")
+                }
             }
 
             delegate: ItemDelegate {
@@ -177,6 +181,9 @@ BaseWindow {
                             break
                         case CommonWidgets.Type.History:
                             widget = widgets.history.createObject(control.widgetRoot.grid, widgetProperties)
+                            break
+                        case CommonWidgets.Type.Webview:
+                            widget = widgets.webview.createObject(control.widgetRoot.grid, widgetProperties)
                             break
                         default:
                             widget = null

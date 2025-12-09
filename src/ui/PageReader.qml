@@ -146,6 +146,9 @@ Item {
             case CommonWidgets.Type.History:
                 widget = widgets.history.createObject(page.grid, widgetProperties)
                 break
+            case CommonWidgets.Type.Webview:
+                widget = widgets.webview.createObject(page.grid, widgetProperties)
+                break
             default:
                 console.error(`Widget type ${widgetType} unknown`)
         }

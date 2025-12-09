@@ -1,5 +1,6 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
+#include <QtWebView>
 #include <QtWebEngineQuick>
 #include "Application.h"
 
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
             "depth=3}%{endif}%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
     setup_unix_signal_handlers();
 
+    QtWebView::initialize();
     QtWebEngineQuick::initialize();
 
 #ifdef WITH_DBUS
