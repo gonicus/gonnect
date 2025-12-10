@@ -131,13 +131,14 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         QDateTime start = event->dtStart().toLocalTime();
                         QDateTime end = event->dtEnd().toLocalTime();
 
-                        // Location
+                        QString summary = event->summary();
                         QString location = event->location();
                         QString description = event->description();
 
                         // Status filter
-                        bool isCancelled = (event->status()
-                                            == KCalendarCore::Incidence::Status::StatusCanceled);
+                        bool isCancelled =
+                                (event->status() == KCalendarCore::Incidence::Status::StatusCanceled
+                                 || summary.contains("Canceled:"));
 
                         // Skip non-recurrent events that are cancelled / outside of our date range
                         // as well as any events without a jitsi meeting as a location
@@ -146,8 +147,6 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                             && !isRecurrent && !isUpdatedRecurrence) {
                             continue;
                         }
-
-                        QString summary = event->summary();
 
                         // Get EXDATE's
                         QList<QDateTime> exdates;

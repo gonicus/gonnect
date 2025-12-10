@@ -133,14 +133,14 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             icaltimetype dtend = icalcomponent_get_dtend(event);
             QDateTime end = createDateTimeFromTimeType(dtend);
 
-            // Location
+            QString summary = icalcomponent_get_summary(event);
             QString location = icalcomponent_get_location(event);
             QString description = icalcomponent_get_description(event);
 
             // Status filter
             icalproperty_status status = icalcomponent_get_status(event);
             bool isCancelled = (status == ICAL_STATUS_CANCELLED || status == ICAL_STATUS_FAILED
-                                || status == ICAL_STATUS_DELETED);
+                                || status == ICAL_STATUS_DELETED || summary.contains("Canceled:"));
 
             // Skip non-recurrent events that are cancelled / outside of our date range
             // as well as any events without a jitsi meeting as a location
@@ -149,8 +149,6 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 && !isRecurrent && !isUpdatedRecurrence) {
                 continue;
             }
-
-            QString summary = icalcomponent_get_summary(event);
 
             // Get EXDATE's
             icaltimetype exdate = {};
