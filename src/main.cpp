@@ -2,6 +2,8 @@
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
 #include "Application.h"
+#include <vector>
+#include "GlobalInfo.h"
 
 #ifdef Q_OS_LINUX
 #  include <QDBusConnection>
@@ -56,8 +58,21 @@ int main(int argc, char *argv[])
 #endif
 
     qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", "7000"); // Workaround bad scrolling
-    qputenv("QTWEBENGINE_CHROMIUM_FLAGS",
-            "--use-fake-ui-for-media-stream"); // Workaround for QTBUG-134637
+
+    // Assemble the Qt web engine flags
+    std::vector<std::string> chromiumFlags;
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
+    chromiumFlags.push_back("--use-fake-ui-for-media-stream");
+#endif
+    if (!GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
+        chromiumFlags.push_back("--disable-gpu");
+    }
+    if (chromiumFlags.size() > 0) {
+        std::string flags = std::accumulate(
+                std::next(chromiumFlags.begin()), chromiumFlags.end(), chromiumFlags[0],
+                [](std::string a, std::string b) { return a + " " + b; });
+        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", flags.c_str());
+    }
 
     int exitCode = 0;
 

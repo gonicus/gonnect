@@ -1,9 +1,9 @@
 id: de.gonicus.gonnect
 runtime: org.kde.Platform
-runtime-version: '6.9'
+runtime-version: '6.10'
 sdk: org.kde.Sdk
 base: io.qt.qtwebengine.BaseApp
-base-version: '6.9'
+base-version: '6.10'
 command: gonnect
 
 finish-args:
@@ -47,6 +47,7 @@ modules:
       - /bin
       - /share/et
       - /share/examples
+      - /share/man
     post-install:
       - install -Dm644 ../krb5.conf -t ${FLATPAK_DEST}/etc/
     sources:
@@ -87,10 +88,11 @@ modules:
       - --with-tls=openssl
     cleanup:
       - /bin
+      - /share/man
     sources:
       - type: archive
-        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.9.tgz
-        sha256: 2cb7dc73e9c8340dff0d99357fbaa578abf30cc6619f0521972c555681e6b2ff
+        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.10.tgz
+        sha256: c065f04aad42737aebd60b2fe4939704ac844266bc0aeaa1609f0cad987be516
         x-checker-data:
           type: anitya
           stable-only: true
@@ -123,6 +125,9 @@ modules:
           type: gnome
           name: libsecret
           stable-only: true
+    cleanup:
+    - /bin
+    - /share/man
 
   - name: qtkeychain
     buildsystem: cmake-ninja
@@ -141,6 +146,7 @@ modules:
   - name: libical
     cleanup:
       - /lib/cmake
+      - /libexec
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
@@ -162,9 +168,13 @@ modules:
   - name: evolution-data-server
     cleanup:
       - /lib/cmake
+      - /lib/systemd
       - /lib/evolution-data-server/*-backends
       - /libexec
+      - /share/applications
       - /share/dbus-1/services
+      - /share/evolution-data-server
+      - /share/pixmaps
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DENABLE_GTK=OFF
@@ -186,8 +196,8 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        url: https://download.gnome.org/sources/evolution-data-server/3.58/evolution-data-server-3.58.0.tar.xz
-        sha256: a2b5a0b8db11b728edc1d6f1c229dc2711962b7a87c0384221dac8d96000cef7
+        url: https://download.gnome.org/sources/evolution-data-server/3.58/evolution-data-server-3.58.1.tar.xz
+        sha256: a914928814ef887f0979ba78ea8d7bcc98f96cf07cbb70b0051980bd90ec35f0
         x-checker-data:
           type: gnome
           name: evolution-data-server
@@ -229,7 +239,7 @@ modules:
     - type: dir
       path: ../..
     cleanup:
-    - rm /app/bin/update-emojis
+    - rm /bin/update-emojis
 
 cleanup-commands:
   - /app/cleanup-BaseApp.sh

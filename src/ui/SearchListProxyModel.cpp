@@ -3,8 +3,10 @@
 
 SearchListProxyModel::SearchListProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
-    connect(this, &SearchListProxyModel::sourceDisplayNameChanged, this,
-            [this]() { invalidateRowsFilter(); });
+    connect(this, &SearchListProxyModel::sourceDisplayNameChanged, this, [this]() {
+        beginFilterChange();
+        endFilterChange();
+    });
 }
 
 bool SearchListProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &parentIndex) const

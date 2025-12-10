@@ -33,8 +33,6 @@ SecretPortal::SecretPortal(QObject *parent)
 void SecretPortal::initialize()
 {
     if (!isValid()) {
-        qCFatal(lcSecretPortal)
-                << "secret portal not available - storing secrets will not be possible";
         return;
     }
 

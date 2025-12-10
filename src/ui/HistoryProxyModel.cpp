@@ -4,9 +4,18 @@
 
 HistoryProxyModel::HistoryProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
-    connect(this, &HistoryProxyModel::filterTextChanged, this, [this]() { invalidateFilter(); });
-    connect(this, &HistoryProxyModel::typeFilterChanged, this, [this]() { invalidateFilter(); });
-    connect(this, &HistoryProxyModel::mediumFilterChanged, this, [this]() { invalidateFilter(); });
+    connect(this, &HistoryProxyModel::filterTextChanged, this, [this]() {
+        beginFilterChange();
+        endFilterChange();
+    });
+    connect(this, &HistoryProxyModel::typeFilterChanged, this, [this]() {
+        beginFilterChange();
+        endFilterChange();
+    });
+    connect(this, &HistoryProxyModel::mediumFilterChanged, this, [this]() {
+        beginFilterChange();
+        endFilterChange();
+    });
 }
 
 bool HistoryProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
