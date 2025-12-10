@@ -12,12 +12,11 @@ Item {
 
     property bool showPrimary: true
 
+    // Segfaults... Needs QTWEBENGINE_DISABLE_SANDBOX=1 and --no-sandbox in contaier??
     WebView {
         id: webView
         url: control.showPrimary ? control.primaryUrl : control.secondaryUrl
-        anchors.right: parent.left
-        anchors.left: parent.left
-        height: parent.height
+        anchors.fill: parent
 
         onLoadingChanged: function(loadRequest) {
             if (loadRequest.errorString) {
