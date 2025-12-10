@@ -60,6 +60,9 @@ int main(int argc, char *argv[])
 #if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS",
             "--use-fake-ui-for-media-stream --disable-gpu"); // Workaround for QTBUG-134637
+#else
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS",
+            "--disable-gpu");
 #endif
 
     int exitCode = 0;
