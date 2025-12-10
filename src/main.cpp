@@ -68,7 +68,9 @@ int main(int argc, char *argv[])
         chromiumFlags.push_back("--disable-gpu");
     }
     if (chromiumFlags.size() > 0) {
-        std::string flags = std::accumulate(std::next(chromiumFlags.begin()), chromiumFlags.end(), chromiumFlags[0], [](std::string a, std::string b) { return a + " " + b; });
+        std::string flags = std::accumulate(
+                std::next(chromiumFlags.begin()), chromiumFlags.end(), chromiumFlags[0],
+                [](std::string a, std::string b) { return a + " " + b; });
         qputenv("QTWEBENGINE_CHROMIUM_FLAGS", flags.c_str());
     }
 
