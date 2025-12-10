@@ -73,6 +73,7 @@ ListView {
         required property date endDateTime
         required property string summary
         required property string roomName
+        required property string link
         required property bool isJitsiMeeting
         required property bool isOtherLink
 
@@ -222,7 +223,7 @@ ListView {
                 if (delg.isJitsiMeeting) {
                     ViewHelper.requestMeeting(delg.roomName)
                 } else if (delg.isOtherLink) {
-                    Qt.openUrlExternally(delg.roomName)
+                    Qt.openUrlExternally(delg.link)
                 }
             }
             onTapped: (_, mouseButton) => {

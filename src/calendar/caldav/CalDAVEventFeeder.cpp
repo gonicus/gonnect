@@ -135,16 +135,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
 
             // Location
             QString location = icalcomponent_get_location(event);
-            QString jitsiRoom = manager.getJitsiRoomFromLocation(location);
-            QUrl otherLink = QUrl(location, QUrl::StrictMode);
-            bool isJitsiMeeting = false;
-            bool isOtherLink = false;
-            if (!jitsiRoom.isEmpty()) {
-                location = jitsiRoom;
-                isJitsiMeeting = true;
-            } else if (otherLink.isValid() && otherLink.scheme() == "https") {
-                isOtherLink = true;
-            }
+            QString description = icalcomponent_get_description(event);
 
             // Status filter
             icalproperty_status status = icalcomponent_get_status(event);
@@ -195,7 +186,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
                             manager.addDateEvent(new DateEvent(nid, m_config.source, recurStart,
                                                                recurEnd, summary, location,
-                                                               isJitsiMeeting, isOtherLink));
+                                                               description));
                         }
                     }
 
@@ -210,16 +201,16 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 } else if (manager.isAddedDateEvent(id)) {
                     // Exists but modified
                     manager.modifyDateEvent(id, m_config.source, start, end, summary, location,
-                                            isJitsiMeeting);
+                                            description);
                 } else {
                     // Does not exist, e.g. moved from past to future, different day
                     manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                       location, isJitsiMeeting, isOtherLink));
+                                                       location, description));
                 }
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
                 manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                   location, isJitsiMeeting, isOtherLink));
+                                                   location, description));
             }
         }
     } else {

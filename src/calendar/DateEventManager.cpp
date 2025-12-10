@@ -4,7 +4,6 @@
 #include "DateEvent.h"
 #include "NotificationManager.h"
 #include "ViewHelper.h"
-#include "GlobalInfo.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -16,7 +15,6 @@ using namespace std::chrono_literals;
 
 DateEventManager::DateEventManager(QObject *parent) : QObject{ parent }
 {
-    m_jitsiUrl = QRegularExpression::escape(GlobalInfo::instance().jitsiUrl());
     m_lastCheckedTime = QTime::currentTime();
     m_minuteTimer.setInterval(5s);
     m_minuteTimer.callOnTimeout(this, &DateEventManager::onTimerTimeout);
@@ -43,23 +41,6 @@ DateEventManager::~DateEventManager()
     for (const auto &tag : std::as_const(m_notificationIds)) {
         notMan.remove(tag);
     }
-}
-
-QString DateEventManager::getJitsiRoomFromLocation(QString location)
-{
-    if (location.isEmpty()) {
-        return "";
-    }
-
-    static const QRegularExpression jitsiRoomRegex(QString("%1/(.*)$").arg(m_jitsiUrl),
-                                                   QRegularExpression::CaseInsensitiveOption);
-
-    const auto matchResult = jitsiRoomRegex.match(location);
-    if (matchResult.hasMatch()) {
-        return matchResult.captured(1);
-    }
-
-    return "";
 }
 
 void DateEventManager::addDateEvent(DateEvent *dateEvent)
@@ -102,7 +83,7 @@ void DateEventManager::addDateEvent(DateEvent *dateEvent)
 void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
                                        const QDateTime &start, const QDateTime &end,
                                        const QString &summary, const QString &roomName,
-                                       bool isJitsiMeeting)
+                                       const QString &description)
 {
     QMutexLocker lock(&m_feederMutex);
 
@@ -115,8 +96,8 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
             event->setStart(start);
             event->setEnd(end);
             event->setSummary(summary);
-            event->setRoomName(roomName);
-            event->setIsJitsiMeeting(isJitsiMeeting);
+            event->setLocation(roomName);
+            event->setDescription(description);
         }
     }
 

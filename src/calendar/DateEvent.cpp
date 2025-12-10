@@ -1,20 +1,23 @@
 #include "DateEvent.h"
 
 #include <QHash>
+#include <QUrl>
+#include <QRegularExpression>
+#include "GlobalInfo.h"
 
 DateEvent::DateEvent(const QString &id, const QString &source, const QDateTime &start,
-                     const QDateTime &end, const QString &summary, const QString &roomName,
-                     bool isJitsiMeeting, bool isOtherLink, QObject *parent)
+                     const QDateTime &end, const QString &summary, const QString &location,
+                     QString &description, QObject *parent)
     : QObject{ parent },
       m_id{ id },
       m_source{ source },
       m_start{ start },
       m_end{ end },
       m_summary{ summary },
-      m_roomName{ roomName },
-      m_isJitsiMeeting{ isJitsiMeeting },
-      m_isOtherLink{ isOtherLink }
+      m_location{ location },
+      m_description{ description }
 {
+    checkForLinks();
 }
 
 void DateEvent::setId(const QString &id)
@@ -42,19 +45,21 @@ void DateEvent::setSummary(const QString &summary)
     m_summary = summary;
 }
 
-void DateEvent::setRoomName(const QString &roomName)
+void DateEvent::setLocation(const QString &location)
 {
-    m_roomName = roomName;
+    m_location = location;
+    checkForLinks();
+}
+
+void DateEvent::setDescription(const QString &description)
+{
+    m_description = description;
+    checkForLinks();
 }
 
 void DateEvent::setIsJitsiMeeting(bool isJitsiMeeting)
 {
     m_isJitsiMeeting = isJitsiMeeting;
-}
-
-void DateEvent::setIsOtherLink(bool isOtherLink)
-{
-    m_isOtherLink = isOtherLink;
 }
 
 size_t DateEvent::getHash()
@@ -64,8 +69,44 @@ size_t DateEvent::getHash()
     sum ^= qHash(m_start);
     sum ^= qHash(m_end);
     sum ^= qHash(m_summary);
-    sum ^= qHash(m_roomName);
+    sum ^= qHash(m_location);
     return sum;
+}
+
+void DateEvent::checkForLinks()
+{
+    static const QRegularExpression jitsiRoomRegex(
+            QString("%1/(.*)$").arg(QRegularExpression::escape(GlobalInfo::instance().jitsiUrl())),
+            QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression teamsRegex(
+            QString("<(%1/([^>]*))>")
+                    .arg(QRegularExpression::escape(GlobalInfo::instance().jitsiUrl())),
+            QRegularExpression::CaseInsensitiveOption);
+
+    m_link = "";
+    m_isOtherLink = false;
+    m_isJitsiMeeting = false;
+
+    const auto matchResult = jitsiRoomRegex.match(m_location);
+    if (matchResult.hasMatch()) {
+        m_link = matchResult.captured(1);
+        m_isJitsiMeeting = true;
+    } else {
+        QUrl otherLink = QUrl(m_location, QUrl::StrictMode);
+        if (otherLink.isValid() && otherLink.scheme() == "https") {
+            m_link = otherLink.toString();
+            m_isOtherLink = true;
+        }
+    }
+
+    // Check for other well known links in the description if nothing is found in the location
+    if (m_link.isEmpty()) {
+        const auto matchResult = teamsRegex.match(m_description);
+        if (matchResult.hasMatch()) {
+            m_link = matchResult.captured(1);
+            m_isOtherLink = true;
+        }
+    }
 }
 
 QDebug operator<<(QDebug debug, const DateEvent &dateEvent)
@@ -79,6 +120,7 @@ QDebug operator<<(QDebug debug, const DateEvent &dateEvent)
                               << "summary=" << dateEvent.summary() << ","
                               << "isJitsiMeeting=" << dateEvent.isJitsiMeeting() << ","
                               << "isOtherLink=" << dateEvent.isOtherLink() << ","
+                              << "link=" << dateEvent.link() << ","
                               << "source=" << dateEvent.source() << ")";
     return debug;
 }
