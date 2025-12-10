@@ -17,7 +17,7 @@ public:
     QDateTime start() const { return m_start; }
     QDateTime end() const { return m_end; }
     QString summary() const { return m_summary; }
-    QString roomName() const { return m_location; }
+    QString location() const { return m_location; }
     QString link() const { return m_link; }
     bool isJitsiMeeting() const { return m_isJitsiMeeting; }
     bool isOtherLink() const { return m_isOtherLink; }

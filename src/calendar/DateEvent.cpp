@@ -83,6 +83,7 @@ void DateEvent::checkForLinks()
                     .arg(QRegularExpression::escape(GlobalInfo::instance().teamsUrl())),
             QRegularExpression::CaseInsensitiveOption);
 
+    // INFO: "Link" will either be a Jitsi room name or a fully qualified external link
     m_link = "";
     m_isOtherLink = false;
     m_isJitsiMeeting = false;
@@ -116,7 +117,7 @@ QDebug operator<<(QDebug debug, const DateEvent &dateEvent)
                               << "id=" << dateEvent.id() << ","
                               << "start=" << dateEvent.start() << ","
                               << "end=" << dateEvent.end() << ","
-                              << "roomName=" << dateEvent.roomName() << ","
+                              << "location=" << dateEvent.location() << ","
                               << "summary=" << dateEvent.summary() << ","
                               << "isJitsiMeeting=" << dateEvent.isJitsiMeeting() << ","
                               << "isOtherLink=" << dateEvent.isOtherLink() << ","

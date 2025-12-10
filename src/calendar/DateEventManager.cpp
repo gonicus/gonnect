@@ -82,7 +82,7 @@ void DateEventManager::addDateEvent(DateEvent *dateEvent)
 
 void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
                                        const QDateTime &start, const QDateTime &end,
-                                       const QString &summary, const QString &roomName,
+                                       const QString &summary, const QString &location,
                                        const QString &description)
 {
     QMutexLocker lock(&m_feederMutex);
@@ -96,7 +96,7 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
             event->setStart(start);
             event->setEnd(end);
             event->setSummary(summary);
-            event->setLocation(roomName);
+            event->setLocation(location);
             event->setDescription(description);
         }
     }
@@ -198,8 +198,7 @@ DateEvent *DateEventManager::currentDateEventByRoomName(const QString &roomName)
     const auto now = QDateTime::currentDateTime();
 
     for (const auto dateEvent : std::as_const(m_dateEvents)) {
-        if (dateEvent->start() < now && now < dateEvent->end()
-            && dateEvent->roomName() == roomName) {
+        if (dateEvent->start() < now && now < dateEvent->end() && dateEvent->link() == roomName) {
             return dateEvent;
         }
     }
@@ -212,7 +211,7 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
 
     QMutexLocker lock(&m_feederMutex);
     for (auto dateEvent : std::as_const(m_dateEvents)) {
-        if (dateEvent->roomName() == roomName) {
+        if (dateEvent->link() == roomName) {
             foundDateEvent = dateEvent;
             break;
         }
@@ -249,7 +248,7 @@ void DateEventManager::onTimerTimeout()
             const auto eventHash = dateEvent->getHash();
             const auto start = dateEvent->start();
             const auto summary = dateEvent->summary();
-            const auto roomName = dateEvent->roomName();
+            const auto link = dateEvent->link();
             const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
             const auto isOtherLink = dateEvent->isOtherLink();
 
@@ -270,17 +269,17 @@ void DateEventManager::onTimerTimeout()
                 const auto notificationId = notMan.add(notification);
 
                 connect(notification, &Notification::actionInvoked, this,
-                        [this, eventHash, roomName, notificationId](QString action, QVariantList) {
+                        [this, eventHash, link, notificationId](QString action, QVariantList) {
                             if (action == "join-meeting") {
                                 NotificationManager::instance().remove(notificationId);
                                 m_notificationIds.remove(eventHash);
 
-                                ViewHelper::instance().requestMeeting(roomName);
+                                ViewHelper::instance().requestMeeting(link);
                             } else if (action == "open-link") {
                                 NotificationManager::instance().remove(notificationId);
                                 m_notificationIds.remove(eventHash);
 
-                                QDesktopServices::openUrl(roomName);
+                                QDesktopServices::openUrl(link);
                             }
                         });
 

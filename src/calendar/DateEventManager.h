@@ -27,7 +27,7 @@ public:
     void addDateEvent(DateEvent *dateEvent);
 
     void modifyDateEvent(const QString &id, const QString &source, const QDateTime &start,
-                         const QDateTime &end, const QString &summary, const QString &roomName,
+                         const QDateTime &end, const QString &summary, const QString &location,
                          const QString &description);
     void removeDateEvent(const QString &id);
 
