@@ -56,8 +56,11 @@ int main(int argc, char *argv[])
 #endif
 
     qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", "7000"); // Workaround bad scrolling
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS",
-            "--use-fake-ui-for-media-stream"); // Workaround for QTBUG-134637
+            "--use-fake-ui-for-media-stream --disable-gpu"); // Workaround for QTBUG-134637
+#endif
 
     int exitCode = 0;
 
