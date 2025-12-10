@@ -80,7 +80,7 @@ void DateEvent::checkForLinks()
             QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression teamsRegex(
             QString("<(%1/([^>]*))>")
-                    .arg(QRegularExpression::escape(GlobalInfo::instance().jitsiUrl())),
+                    .arg(QRegularExpression::escape(GlobalInfo::instance().teamsUrl())),
             QRegularExpression::CaseInsensitiveOption);
 
     m_link = "";
