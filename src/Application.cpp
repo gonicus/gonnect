@@ -215,12 +215,23 @@ QString Application::logFileName()
     return fileName;
 }
 
+QtMessageHandler s_originalMessageHandler = nullptr;
+
 void Application::initLogging()
 {
-    qInstallMessageHandler(Application::logQtMessages);
+    bool replaceMessageHandler = false;
 
     AppSettings settings;
     m_isDebugRun = settings.value("generic/nextDebugRun", false).toBool();
+#ifndef Q_OS_LINUX
+    replaceMessageHandler = true;
+#else
+    replaceMessageHandler = m_isDebugRun;
+#endif
+
+    if (replaceMessageHandler) {
+        s_originalMessageHandler = qInstallMessageHandler(Application::logQtMessages);
+    }
 
     if (m_isDebugRun) {
         settings.setValue("generic/nextDebugRun", false);
@@ -231,13 +242,12 @@ void Application::initLogging()
             qCInfo(lcApplication) << "5 minutes are up; debug run will end automatically.";
             StateManager::instance().restart();
         });
-    } else {
-        logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(std::clog, logfault::LogLevel::INFO));
     }
 
 #ifdef Q_OS_WINDOWS
     std::unique_ptr<logfault::Handler> eventhandler{new WindowsEventLogHandler("GOnnect", logfault::LogLevel::WARN)};
     logfault::LogManager::Instance().AddHandler(std::move(eventhandler));
+    s_originalMessageHandler = nullptr;
 #endif // Q_OS_WINDOWS
 
 #ifdef Q_OS_DARWIN
@@ -250,9 +260,7 @@ void Application::initLogging()
 
 void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context, const QString &rawMsg)
 {
-    //auto msg = qFormatLogMessage(type, context, rawMsg).toUtf8().constData();
     auto msg =  rawMsg.toUtf8().constData();
-    //msg.replace('\n', ' ');
 
     switch (type) {
     case QtDebugMsg:
@@ -279,5 +287,9 @@ void Application::logQtMessages(QtMsgType type, const QMessageLogContext &contex
         LFLOG_ERROR << "[**FATAL**] " << msg;
         exit(-1);
         break;
+    }
+
+    if (s_originalMessageHandler) {
+        s_originalMessageHandler(type, context, rawMsg);
     }
 }

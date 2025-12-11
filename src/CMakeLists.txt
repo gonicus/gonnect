@@ -23,11 +23,13 @@ if(UNIX)
     pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
+    pkg_check_modules(LIBLOGFAULT REQUIRED logfault IMPORTED_TARGET)
     list(APPEND PLATFORM_LIBRARIES
         ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
-        PkgConfig::LIBHIDAPI)
+        PkgConfig::LIBHIDAPI
+        PkgConfig::LIBLOGFAULT)
 
     add_definitions(${PJSIP_STATIC_CFLAGS})
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
