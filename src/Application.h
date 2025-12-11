@@ -46,8 +46,8 @@ public Q_SLOTS:
     void shutdown();
 
 private:
-    static void logQtMessages(QtMsgType type, const QMessageLogContext &context, 
-                                   const QString &rawMsg);
+    static void logQtMessages(QtMsgType type, const QMessageLogContext &context,
+                              const QString &rawMsg);
 
     void initLogging();
     void initialize();

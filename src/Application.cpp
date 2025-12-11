@@ -23,12 +23,12 @@
 #include <iostream>
 
 #ifdef Q_OS_DARWIN
-#   define LOGFAULT_USE_OS_LOG
+#  define LOGFAULT_USE_OS_LOG
 #endif
 #include "logfault/logfault.h"
 
 #ifdef Q_OS_WINDOWS
-#   include "windows/WindowsEventLogHandler.h"
+#  include "windows/WindowsEventLogHandler.h"
 #endif
 
 #ifdef Q_OS_LINUX
@@ -236,7 +236,8 @@ void Application::initLogging()
     if (m_isDebugRun) {
         settings.setValue("generic/nextDebugRun", false);
         auto filePath = Application::logFilePath().toStdString();
-        logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(filePath, logfault::LogLevel::TRACE, false));
+        logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(
+                filePath, logfault::LogLevel::TRACE, false));
 
         QTimer::singleShot(5 * 60 * 1000, this, []() {
             qCInfo(lcApplication) << "5 minutes are up; debug run will end automatically.";
@@ -245,22 +246,23 @@ void Application::initLogging()
     }
 
 #ifdef Q_OS_WINDOWS
-    std::unique_ptr<logfault::Handler> eventhandler{new WindowsEventLogHandler("GOnnect", logfault::LogLevel::WARN)};
+    std::unique_ptr<logfault::Handler> eventhandler{ new WindowsEventLogHandler(
+            "GOnnect", logfault::LogLevel::WARN) };
     logfault::LogManager::Instance().AddHandler(std::move(eventhandler));
     s_originalMessageHandler = nullptr;
 #endif // Q_OS_WINDOWS
 
 #ifdef Q_OS_DARWIN
     logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::OsLogHandler>(
-        "oslog",
-        logfault::LogLevel::WARN,
-        logfault::OsLogHandler::Options{"de.gonicus.gonnect"}));
+            "oslog", logfault::LogLevel::WARN,
+            logfault::OsLogHandler::Options{ "de.gonicus.gonnect" }));
 #endif // Q_OS_DARWIN
 }
 
-void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context, const QString &rawMsg)
+void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context,
+                                const QString &rawMsg)
 {
-    auto msg =  rawMsg.toUtf8().constData();
+    auto msg = rawMsg.toStdWString();
 
     switch (type) {
     case QtDebugMsg:
@@ -271,15 +273,17 @@ void Application::logQtMessages(QtMsgType type, const QMessageLogContext &contex
         break;
     case QtWarningMsg: {
         // remove spam messages
-        static const QRegularExpression filter{"is neither a default constructible QObject"
-                                               "|Cannot anchor to an item that isn't a parent or sibling"
-                                               "|Detected anchors on an item that is managed by a layout"};
+        static const QRegularExpression filter{
+            "is neither a default constructible QObject"
+            "|Cannot anchor to an item that isn't a parent or sibling"
+            "|Detected anchors on an item that is managed by a layout"
+        };
         if (filter.match(msg).hasMatch()) {
             LFLOG_TRACE << msg;
             break;
         }
         LFLOG_WARN << msg;
-        } break;
+    } break;
     case QtCriticalMsg:
         LFLOG_ERROR << msg;
         break;

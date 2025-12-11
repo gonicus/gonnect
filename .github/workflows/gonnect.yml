@@ -119,6 +119,7 @@ jobs:
         with:
           clang-format-version: '19'
           check-path: 'src'
+          exclude-regex: '^src/platform/windows/Event_log.h$' # generated file
 
   clang:
     runs-on: ubuntu-24.04
