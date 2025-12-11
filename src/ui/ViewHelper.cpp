@@ -15,6 +15,7 @@
 #include "GlobalCallState.h"
 #include "DateEventManager.h"
 #include "DateEvent.h"
+#include "PhoneNumberUtil.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -334,6 +335,7 @@ void ViewHelper::respondUserVerification(const QString &id, bool isAccepted)
 
 bool ViewHelper::isPhoneNumber(const QString &number) const
 {
+    const auto cleanedNumber = PhoneNumberUtil::cleanPhoneNumber(number);
     static const QRegularExpression numberRegEx(R"(^[+#*0-9 ]+$)");
     return numberRegEx.match(number).hasMatch();
 }

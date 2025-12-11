@@ -13,6 +13,7 @@ void ContactsTest::testCleanPhoneNumber()
     // Strip whitespace and -
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  +49 2931 9160   "), QString("+4929319160"));
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  +49-2931-9160   "), QString("+4929319160"));
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("(+49) 2931-9160"), QString("+4929319160"));
 
     // 00 at beginning is replaced with +
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("0029319160"), QString("+29319160"));
