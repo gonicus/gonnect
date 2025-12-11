@@ -2,7 +2,6 @@
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
 #include "Application.h"
-#include <vector>
 #include "GlobalInfo.h"
 
 #ifdef Q_OS_LINUX
@@ -60,7 +59,7 @@ int main(int argc, char *argv[])
     qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", "7000"); // Workaround bad scrolling
 
     // Assemble the Qt web engine flags
-    std::vector<std::string> chromiumFlags;
+    QStringList chromiumFlags;
 #if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     chromiumFlags.push_back("--use-fake-ui-for-media-stream");
 #endif
@@ -68,10 +67,7 @@ int main(int argc, char *argv[])
         chromiumFlags.push_back("--disable-gpu");
     }
     if (chromiumFlags.size() > 0) {
-        std::string flags = std::accumulate(
-                std::next(chromiumFlags.begin()), chromiumFlags.end(), chromiumFlags[0],
-                [](std::string a, std::string b) { return a + " " + b; });
-        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", flags.c_str());
+        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
     }
 
     int exitCode = 0;
