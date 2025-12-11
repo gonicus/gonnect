@@ -66,6 +66,9 @@ int main(int argc, char *argv[])
     if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
         chromiumFlags.push_back("--disable-gpu");
     }
+    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
+        chromiumFlags.push_back("--disable-renderer-accessibility");
+    }
     if (chromiumFlags.size() > 0) {
         qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
     }
