@@ -31,23 +31,23 @@ if(WIN32)
     configure_file("${CMAKE_SOURCE_DIR}/resources/windows/install.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/install.nsi" @ONLY)
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "!include \"${DOS_STYLE_BINARY_DIR}\\install.nsi\"")
     configure_file("${CMAKE_SOURCE_DIR}/resources/windows/uninstall.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/uninstall.nsi" @ONLY)
-    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "!include \"${DOS_STYLE_BINARY_DIR}\\uninstall.nsi\"")
-
-    set(CPACK_NSIS_DEFINES "!include \"x64.nsh\"")
-    list(APPEND CPACK_NSIS_DEFINES "!include \"FileFunc.nsh\"")
     
-    # convert list to multiline strings
-    string (REPLACE ";" "\n" CPACK_NSIS_DEFINES "${CPACK_NSIS_DEFINES}")
+    set(CPACK_NSIS_DEFINES "\
+  !include \"x64.nsh\"
+  !include \"FileFunc.nsh\"
+    ")
 
     set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "\
   \$\{If\} \$\{RunningX64\}
     SetRegView 64
   \$\{EndIf\} \
     ")
-    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "\
+
+    list(APPEND CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "\
   \$\{If\} \$\{RunningX64\}
     SetRegView 64
-  \$\{EndIf\} \
+  \$\{EndIf\}
+  !include \"${DOS_STYLE_BINARY_DIR}\\uninstall.nsi\"
     ")
     
     install(FILES "${CMAKE_SOURCE_DIR}/resources/windows/Event_log.dll" DESTINATION ${CPACK_NSIS_EXECUTABLES_DIRECTORY})
