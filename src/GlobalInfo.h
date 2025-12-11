@@ -12,7 +12,7 @@ class GlobalInfo : public QObject
     Q_PROPERTY(bool hasEmergencyNumbers READ hasEmergencyNumbers CONSTANT FINAL)
 
 public:
-    enum class WorkaroundId { GOW_001 };
+    enum class WorkaroundId { GOW_001, GOW_002 };
     Q_ENUM(WorkaroundId)
 
     static QString workaroundIdToString(const WorkaroundId enumValue)
