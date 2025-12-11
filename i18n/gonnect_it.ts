@@ -572,12 +572,17 @@
 <context>
     <name>DateEventManager</name>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="275"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="276"/>
         <source>Conference starting soon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="279"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="277"/>
+        <source>Appointment starting soon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/calendar/DateEventManager.cpp" line="283"/>
         <source>Join</source>
         <translation type="unfinished"></translation>
     </message>
@@ -585,49 +590,49 @@
 <context>
     <name>DateEventsList</name>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="30"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="31"/>
         <source>Today - %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="30"/>
-        <location filename="../src/ui/components/DateEventsList.qml" line="33"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="31"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="34"/>
         <source>yyyy/MM/dd</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="33"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="34"/>
         <source>Tomorrow - %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="35"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="36"/>
         <source>dddd - yyyy/MM/dd</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="139"/>
-        <location filename="../src/ui/components/DateEventsList.qml" line="150"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="143"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="154"/>
         <source>hh:mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="150"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="154"/>
         <source>till %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="151"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="155"/>
         <source>in %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="161"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="185"/>
         <source>Join</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="166"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="190"/>
         <source>Copy room link</source>
         <translation type="unfinished"></translation>
     </message>
@@ -636,12 +641,12 @@
     <name>DateEventsWidget</name>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="23"/>
-        <source>Conferences</source>
+        <source>Appointments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="49"/>
-        <source>No upcoming conferences to display</source>
+        <source>No upcoming appointments</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3340,17 +3345,17 @@
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="59"/>
-        <source>A list of upcoming conferences</source>
+        <source>A list of upcoming appointments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="63"/>
-        <source>A list of your favorite contacts and conferences</source>
+        <source>A list of your favorite contacts and appointments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="67"/>
-        <source>A searchable call/conference history</source>
+        <source>A searchable call/appointment history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

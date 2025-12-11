@@ -18,6 +18,7 @@ class EDSEventFeeder : public QObject, public IDateEventFeeder
 
 public:
     explicit EDSEventFeeder(QObject *parent = nullptr, const QString &source = "",
+                            const QDateTime &currentTime = QDateTime(),
                             const QDateTime &timeRangeStart = QDateTime(),
                             const QDateTime &timeRangeEnd = QDateTime());
     ~EDSEventFeeder();
@@ -51,6 +52,7 @@ private:
     void processEvents(QString clientName, QString clientUid, GSList *components);
 
     QString m_source;
+    QDateTime m_currentTime;
     QDateTime m_timeRangeStart;
     QDateTime m_timeRangeEnd;
 

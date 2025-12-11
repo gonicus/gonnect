@@ -20,7 +20,7 @@ BaseWidget {
         CardHeading {
             id: dateHeading
             visible: true
-            text: qsTr("Conferences")
+            text: qsTr("Appointments")
             anchors {
                 top: parent.top
                 left: parent.left
@@ -46,7 +46,7 @@ BaseWidget {
             id: dateInfo
             color: Theme.secondaryTextColor
             visible: dateList.count > 0 ? false : true
-            text: qsTr("No upcoming conferences to display")
+            text: qsTr("No upcoming appointments")
             wrapMode: Label.Wrap
             width: dateList.width
             horizontalAlignment: Text.AlignHCenter

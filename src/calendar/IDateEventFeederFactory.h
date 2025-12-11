@@ -14,6 +14,7 @@ public:
     virtual QString name() const = 0;
     virtual QStringList configurations() const = 0;
     virtual IDateEventFeeder *createFeeder(const QString &settingsGroup,
+                                           const QDateTime &currentTime,
                                            const QDateTime &timeRangeStart,
                                            const QDateTime &timeRangeEnd,
                                            DateEventFeederManager *feederManager) const = 0;
