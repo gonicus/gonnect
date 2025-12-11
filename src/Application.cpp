@@ -264,10 +264,10 @@ void Application::logQtMessages(QtMsgType type, const QMessageLogContext &contex
 
     switch (type) {
     case QtDebugMsg:
-        LFLOG_TRACE << msg;
+        LFLOG_DEBUG << msg;
         break;
     case QtInfoMsg:
-        LFLOG_DEBUG << msg;
+        LFLOG_INFO << msg;
         break;
     case QtWarningMsg: {
         // remove spam messages
