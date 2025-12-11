@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.0.8" date="2025-12-11">
+    <description>
+      <p>Bug Fixes:</p>
+      <ul>
+        <li>allow enabling GPU in chromium</li>
+        <li>disable GPU for Qt 6.9 builds</li>
+        <li>don't bail out if there is no secret portal</li>
+      </ul>
+    </description>
+  </release>
   <release version="2.0.7" date="2025-11-07">
     <description>
       <p>Changes:</p>
