@@ -44,4 +44,4 @@ runs:
       run: |
         conan config install resources/conan
         conan export-dependencies .
-        conan install . --build=missing
+        conan install . --build=missing -s compiler.cppstd=17
