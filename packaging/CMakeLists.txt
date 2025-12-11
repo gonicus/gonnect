@@ -34,6 +34,11 @@ if(WIN32)
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "!include \"${DOS_STYLE_BINARY_DIR}\\uninstall.nsi\"")
 
     set(CPACK_NSIS_DEFINES "!include \"x64.nsh\"")
+    list(APPEND CPACK_NSIS_DEFINES "!include \"FileFunc.nsh\"")
+    
+    # convert list to multiline strings
+    string (REPLACE ";" "\n" CPACK_NSIS_DEFINES "${CPACK_NSIS_DEFINES}")
+
     set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "\
   \$\{If\} \$\{RunningX64\}
     SetRegView 64
@@ -44,6 +49,8 @@ if(WIN32)
     SetRegView 64
   \$\{EndIf\} \
     ")
+    
+    install(FILES "${CMAKE_SOURCE_DIR}/resources/windows/Event_log.dll" DESTINATION ${CPACK_NSIS_EXECUTABLES_DIRECTORY})
 
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
