@@ -18,6 +18,6 @@ foreach (_name ${_variableNames})
 endforeach()
 
 if(ENABLED_WORKAROUNDS)
-    STRING(REPLACE ";" ":" ENABLED_WORKAROUNDS ${ENABLED_WORKAROUNDS})
+    STRING(REPLACE ";" ":" ENABLED_WORKAROUNDS "${ENABLED_WORKAROUNDS}")
     add_compile_definitions(-DENABLED_WORKAROUNDS="${ENABLED_WORKAROUNDS}")
 endif()
