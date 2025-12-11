@@ -1,6 +1,5 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
-#include <QtWebView>
 #include <QtWebEngineQuick>
 #include "Application.h"
 #include "GlobalInfo.h"
@@ -49,7 +48,6 @@ int main(int argc, char *argv[])
             "depth=3}%{endif}%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
     setup_unix_signal_handlers();
 
-    QtWebView::initialize();
     QtWebEngineQuick::initialize();
 
 #ifdef WITH_DBUS
@@ -68,6 +66,12 @@ int main(int argc, char *argv[])
     if (!GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
         chromiumFlags.push_back("--disable-gpu");
     }
+
+    // TEST
+    chromiumFlags.push_back("--no-sandbox");
+    chromiumFlags.push_back("--disable-gpu");
+    chromiumFlags.push_back("--disable-renderer-accessibility");
+
     if (chromiumFlags.size() > 0) {
         qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
     }

@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtWebView
+import QtWebEngine
 import base
 
 Item {
@@ -28,10 +28,13 @@ Item {
             }
         }
 
-        // Segfaults... Needs QTWEBENGINE_DISABLE_SANDBOX=1 and --no-sandbox in contaier??
-        // https://chromium.googlesource.com/chromium/src/+/master/base/memory/ref_counted.h#445
         /*
-        WebView {
+            INFO: Segfaults... ttps://chromium.googlesource.com/chromium/src/+/master/base/memory/ref_counted.h#445
+            See TEST flags in main.cpp
+
+            TODO: "Cannot find any Pyroscope data source! Please add and configure a Pyroscope data source to your Grafana instance."
+        */
+        WebEngineView {
             id: webView
             url: control.showPrimary ? control.primaryUrl : control.secondaryUrl
 
@@ -41,6 +44,16 @@ Item {
                 }
             }
 
+            onCertificateError: function(error) {
+                console.log("Certificate Error encountered:", error.description);
+
+                // Self hosted stuff
+                error.acceptCertificate();
+
+                // Do not jump to default behaviour
+                return true;
+            }
+
             Component.onCompleted: {
                 webView.settings.javaScriptEnabled = Qt.Checked
                 webView.settings.localStorageEnabled = Qt.Checked
@@ -48,6 +61,5 @@ Item {
                 webView.settings.localContentCanAccessFileUrls = Qt.Checked
             }
         }
-        */
     }
 }
