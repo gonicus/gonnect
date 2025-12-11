@@ -83,14 +83,12 @@ void DateEvent::checkForLinks()
                     .arg(QRegularExpression::escape(GlobalInfo::instance().teamsUrl())),
             QRegularExpression::CaseInsensitiveOption);
 
-    // INFO: "Link" will either be a Jitsi room name or a fully qualified external link
     m_link = "";
-    m_isOtherLink = false;
-    m_isJitsiMeeting = false;
+    m_roomName = "";
 
     const auto matchResult = jitsiRoomRegex.match(m_location);
     if (matchResult.hasMatch()) {
-        m_link = matchResult.captured(1);
+        m_roomName = matchResult.captured(1);
         m_isJitsiMeeting = true;
     } else {
         QUrl otherLink = QUrl(m_location, QUrl::StrictMode);
@@ -115,13 +113,15 @@ QDebug operator<<(QDebug debug, const DateEvent &dateEvent)
     QDebugStateSaver saver(debug);
     debug.nospace().noquote() << "DateEvent("
                               << "id=" << dateEvent.id() << ","
+                              << "source=" << dateEvent.source() << ","
                               << "start=" << dateEvent.start() << ","
                               << "end=" << dateEvent.end() << ","
-                              << "location=" << dateEvent.location() << ","
                               << "summary=" << dateEvent.summary() << ","
-                              << "isJitsiMeeting=" << dateEvent.isJitsiMeeting() << ","
-                              << "isOtherLink=" << dateEvent.isOtherLink() << ","
+                              << "location=" << dateEvent.location() << ","
+                              << "description=" << dateEvent.description() << ","
+                              << "roomName=" << dateEvent.roomName() << ","
                               << "link=" << dateEvent.link() << ","
-                              << "source=" << dateEvent.source() << ")";
+                              << "isJitsiMeeting=" << dateEvent.isJitsiMeeting() << ","
+                              << "isOtherLink=" << dateEvent.isOtherLink() << ")";
     return debug;
 }

@@ -198,7 +198,8 @@ DateEvent *DateEventManager::currentDateEventByRoomName(const QString &roomName)
     const auto now = QDateTime::currentDateTime();
 
     for (const auto dateEvent : std::as_const(m_dateEvents)) {
-        if (dateEvent->start() < now && now < dateEvent->end() && dateEvent->link() == roomName) {
+        if (dateEvent->start() < now && now < dateEvent->end()
+            && dateEvent->roomName() == roomName) {
             return dateEvent;
         }
     }
@@ -211,7 +212,7 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
 
     QMutexLocker lock(&m_feederMutex);
     for (auto dateEvent : std::as_const(m_dateEvents)) {
-        if (dateEvent->link() == roomName) {
+        if (dateEvent->roomName() == roomName) {
             foundDateEvent = dateEvent;
             break;
         }
@@ -248,6 +249,7 @@ void DateEventManager::onTimerTimeout()
             const auto eventHash = dateEvent->getHash();
             const auto start = dateEvent->start();
             const auto summary = dateEvent->summary();
+            const auto roomName = dateEvent->roomName();
             const auto link = dateEvent->link();
             const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
             const auto isOtherLink = dateEvent->isOtherLink();
@@ -269,12 +271,13 @@ void DateEventManager::onTimerTimeout()
                 const auto notificationId = notMan.add(notification);
 
                 connect(notification, &Notification::actionInvoked, this,
-                        [this, eventHash, link, notificationId](QString action, QVariantList) {
+                        [this, eventHash, roomName, link, notificationId](QString action,
+                                                                          QVariantList) {
                             if (action == "join-meeting") {
                                 NotificationManager::instance().remove(notificationId);
                                 m_notificationIds.remove(eventHash);
 
-                                ViewHelper::instance().requestMeeting(link);
+                                ViewHelper::instance().requestMeeting(roomName);
                             } else if (action == "open-link") {
                                 NotificationManager::instance().remove(notificationId);
                                 m_notificationIds.remove(eventHash);

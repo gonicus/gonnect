@@ -18,6 +18,8 @@ public:
     QDateTime end() const { return m_end; }
     QString summary() const { return m_summary; }
     QString location() const { return m_location; }
+    QString description() const { return m_description; }
+    QString roomName() const { return m_roomName; }
     QString link() const { return m_link; }
     bool isJitsiMeeting() const { return m_isJitsiMeeting; }
     bool isOtherLink() const { return m_isOtherLink; }
@@ -43,9 +45,10 @@ private:
     QString m_summary;
     QString m_location;
     QString m_description;
+    QString m_roomName;
     QString m_link;
-    bool m_isJitsiMeeting;
-    bool m_isOtherLink;
+    bool m_isJitsiMeeting = false;
+    bool m_isOtherLink = false;
 };
 
 QDebug operator<<(QDebug debug, const DateEvent &dateEvent);
