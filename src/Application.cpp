@@ -262,7 +262,8 @@ void Application::initLogging()
 void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context,
                                 const QString &rawMsg)
 {
-    auto msg = rawMsg.toStdWString();
+    auto msg = rawMsg;
+    msg.replace('\n', ' ');
 
     switch (type) {
     case QtDebugMsg:
