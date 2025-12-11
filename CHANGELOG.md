@@ -1,3 +1,12 @@
+## [2.0.8](https://github.com/gonicus/gonnect/compare/v2.0.7...v2.0.8) (2025-12-11)
+
+
+### Bug Fixes
+
+* allow enabling GPU in chromium ([8decb97](https://github.com/gonicus/gonnect/commit/8decb974a7859d7d9cc731ec2fe56bc05ab8b45e))
+* disable GPU for Qt 6.9 builds ([a7c01ae](https://github.com/gonicus/gonnect/commit/a7c01ae751e429baa17302aad531bcd4c0a7da04))
+* don't bail out if there is no secret portal ([0bd1dc4](https://github.com/gonicus/gonnect/commit/0bd1dc41c2cba16e61b15c3aab8dd385e1acb54b))
+
 ## [2.0.7](https://github.com/gonicus/gonnect/compare/v2.0.6...v2.0.7) (2025-11-07)
 
 ### Bug Fixes
