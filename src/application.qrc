@@ -79,6 +79,7 @@
         <file alias="office-chart-line.svg">../resources/artwork/icons/office-chart-line.svg</file> 
         <file alias="office-chart-pie.svg">../resources/artwork/icons/office-chart-pie.svg</file>
         <file alias="object-select-symbolic.svg">../resources/artwork/icons/object-select-symbolic.svg</file>
+        <file alias="open-link.svg">../resources/artwork/icons/open-link.svg</file>
         <file alias="settings-configure.svg">../resources/artwork/icons/settings-configure.svg</file>
         <file alias="showinfo.svg">../resources/artwork/icons/showinfo.svg</file>
         <file alias="smartphone.svg">../resources/artwork/icons/smartphone.svg</file>
@@ -150,6 +151,7 @@
         <file alias="office-chart-bar.svg">../resources/artwork/icons/dark/office-chart-bar.svg</file> 
         <file alias="office-chart-line.svg">../resources/artwork/icons/dark/office-chart-line.svg</file> 
         <file alias="office-chart-pie.svg">../resources/artwork/icons/dark/office-chart-pie.svg</file>
+        <file alias="open-link.svg">../resources/artwork/icons/dark/open-link.svg</file>
         <file alias="settings-configure.svg">../resources/artwork/icons/dark/settings-configure.svg</file>
         <file alias="showinfo.svg">../resources/artwork/icons/dark/showinfo.svg</file>
         <file alias="smartphone.svg">../resources/artwork/icons/dark/smartphone.svg</file>

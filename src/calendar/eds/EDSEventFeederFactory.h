@@ -16,6 +16,7 @@ public:
     virtual QString name() const override { return "EDS"; };
     virtual QStringList configurations() const override;
     virtual IDateEventFeeder *createFeeder(const QString &settingsGroup,
+                                           const QDateTime &currentTime,
                                            const QDateTime &timeRangeStart,
                                            const QDateTime &timeRangeEnd,
                                            DateEventFeederManager *feederManager) const override;
