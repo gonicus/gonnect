@@ -46,10 +46,10 @@ public Q_SLOTS:
     void shutdown();
 
 private:
-    static void fileMessageHandler(QtMsgType type, const QMessageLogContext &context,
-                                   const QString &msg);
+    static void logQtMessages(QtMsgType type, const QMessageLogContext &context, 
+                                   const QString &rawMsg);
 
-    void initDebugRun();
+    void initLogging();
     void initialize();
     void initializeSIP();
     void installTranslations();

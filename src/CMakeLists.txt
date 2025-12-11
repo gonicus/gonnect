@@ -37,12 +37,14 @@ else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
     find_package(wintoast REQUIRED)
+    find_package(logfault REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
-        wintoast::wintoast)
+        wintoast::wintoast
+        logfault::logfault)
 endif()
 
 add_definitions(-DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
@@ -269,6 +271,8 @@ elseif(WIN32)
         platform/dummy/DummyBackgroundManager.h
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
+        platform/windows/Event_log.h
+        platform/windows/WindowsEventLogHandler.h
         platform/windows/WindowsNetworkHelper.cpp
         platform/windows/WindowsNetworkHelper.h
         platform/windows/WindowsNotificationManager.h

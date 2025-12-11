@@ -9,3 +9,5 @@ DeleteRegKey HKCR "@APPLICATION_NAME@.sip"
 DeleteRegKey HKCR "@APPLICATION_NAME@.sips"
 DeleteRegKey HKCR "@APPLICATION_NAME@.tel"
 DeleteRegKey HKCR "@APPLICATION_NAME@.callto"
+
+DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@"
