@@ -15,6 +15,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml)
 
 find_package(Qca-qt6 REQUIRED)
+find_package(logfault CONFIG REQUIRED)
 
 if(UNIX)
     include(FindPkgConfig)
@@ -23,13 +24,11 @@ if(UNIX)
     pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
-    pkg_check_modules(LIBLOGFAULT REQUIRED logfault IMPORTED_TARGET)
     list(APPEND PLATFORM_LIBRARIES
         ${PJSIP_STATIC_LIBRARIES}
         PkgConfig::LIBUUID
         PkgConfig::LIBUSB1
-        PkgConfig::LIBHIDAPI
-        PkgConfig::LIBLOGFAULT)
+        PkgConfig::LIBHIDAPI)
 
     add_definitions(${PJSIP_STATIC_CFLAGS})
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
@@ -39,14 +38,12 @@ else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
     find_package(wintoast REQUIRED)
-    find_package(logfault REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
-        wintoast::wintoast
-        logfault::logfault)
+        wintoast::wintoast)
 endif()
 
 add_definitions(-DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
@@ -774,6 +771,7 @@ target_include_directories(gonnect
     usb/busylight
     media
     platform
+    ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
