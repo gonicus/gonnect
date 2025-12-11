@@ -16,6 +16,8 @@ public:
         EndDateTime,
         Summary,
         Location,
+        Description,
+        RoomName,
         Link,
         IsJitsiMeeting,
         IsOtherLink

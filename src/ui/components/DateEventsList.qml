@@ -72,7 +72,7 @@ ListView {
         required property date dateTime
         required property date endDateTime
         required property string summary
-        required property string location
+        required property string roomName
         required property string link
         required property bool isJitsiMeeting
         required property bool isOtherLink
@@ -188,7 +188,7 @@ ListView {
                     text: delg.isJitsiMeeting ? qsTr('Join') : qsTr('Open')
                     onTriggered: () => {
                         if (delg.isJitsiMeeting) {
-                            ViewHelper.requestMeeting(delg.link)
+                            ViewHelper.requestMeeting(delg.roomName)
                         } else {
                             Qt.openUrlExternally(delg.link)
                         }
@@ -199,7 +199,7 @@ ListView {
                     text: delg.isJitsiMeeting ? qsTr('Copy room link') :  qsTr('Copy link')
                     onTriggered: () => {
                         if (delg.isJitsiMeeting) {
-                            ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.link}`)
+                            ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
                         } else {
                             ViewHelper.copyToClipboard(delg.link)
                         }
@@ -221,7 +221,7 @@ ListView {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onDoubleTapped: () => {
                 if (delg.isJitsiMeeting) {
-                    ViewHelper.requestMeeting(delg.link)
+                    ViewHelper.requestMeeting(delg.roomName)
                 } else if (delg.isOtherLink) {
                     Qt.openUrlExternally(delg.link)
                 }
