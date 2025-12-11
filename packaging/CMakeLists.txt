@@ -31,7 +31,7 @@ if(WIN32)
     configure_file("${CMAKE_SOURCE_DIR}/resources/windows/install.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/install.nsi" @ONLY)
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "!include \"${DOS_STYLE_BINARY_DIR}\\install.nsi\"")
     configure_file("${CMAKE_SOURCE_DIR}/resources/windows/uninstall.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/uninstall.nsi" @ONLY)
-    
+
     set(CPACK_NSIS_DEFINES "\
   !include \"x64.nsh\"
   !include \"FileFunc.nsh\"
@@ -49,7 +49,7 @@ if(WIN32)
   \$\{EndIf\}
   !include \"${DOS_STYLE_BINARY_DIR}\\uninstall.nsi\"
     ")
-    
+
     install(FILES "${CMAKE_SOURCE_DIR}/resources/windows/Event_log.dll" DESTINATION ${CPACK_NSIS_EXECUTABLES_DIRECTORY})
 
 elseif(APPLE)
