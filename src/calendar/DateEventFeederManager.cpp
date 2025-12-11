@@ -13,7 +13,30 @@
 
 Q_LOGGING_CATEGORY(lcDateEventFeederManager, "gonnect.app.dateevents.feeder.manager")
 
-DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ parent } { }
+DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ parent }
+{
+    setTimeData();
+
+    connect(&m_nextDayRefreshTimer, &QTimer::timeout, this, [this]() {
+        qCWarning(lcDateEventFeederManager) << "REFRESH";
+        setTimeData();
+        initFeederConfigs();
+        reload();
+    });
+    m_nextDayRefreshTimer.start();
+}
+
+void DateEventFeederManager::setTimeData()
+{
+    // Event filter options
+    m_currentTime = QDateTime::currentDateTime();
+    m_timeRangeStart = m_currentTime.date().startOfDay(m_currentTime.timeZone());
+    m_timeRangeEnd = m_timeRangeStart.addDays(3);
+
+    m_nextDayTime = m_timeRangeStart.addDays(1);
+    m_nextDayDuration = m_currentTime.msecsTo(m_nextDayTime);
+    m_nextDayRefreshTimer.setInterval(m_nextDayDuration);
+}
 
 void DateEventFeederManager::reload()
 {
@@ -74,10 +97,6 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
 void DateEventFeederManager::initFeederConfigs()
 {
-    // Event filter options
-    QDateTime timeRangeStart = QDateTime::currentDateTime();
-    QDateTime timeRangeEnd = timeRangeStart.addDays(3);
-
     const QObjectList &staticPlugins = QPluginLoader::staticInstances();
 
     for (QObject *obj : std::as_const(staticPlugins)) {
@@ -88,8 +107,9 @@ void DateEventFeederManager::initFeederConfigs()
                     << plugin->name();
 
             for (auto &cfg : std::as_const(configs)) {
-                m_dateEventFeeders.insert(
-                        cfg, plugin->createFeeder(cfg, timeRangeStart, timeRangeEnd, this));
+                m_dateEventFeeders.insert(cfg,
+                                          plugin->createFeeder(cfg, m_currentTime, m_timeRangeStart,
+                                                               m_timeRangeEnd, this));
             }
         }
     }
