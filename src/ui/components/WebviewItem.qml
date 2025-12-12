@@ -17,10 +17,12 @@ Item {
     Column {
         id: webviewLayout
         anchors.fill: parent
-        spacing: 10
+        spacing: 5
 
         Button {
             id: toggleButton
+            width: 50
+            height: 25
             text: control.showPrimary ? "1" : "2"
 
             onClicked: () => {
@@ -31,34 +33,45 @@ Item {
         /*
             INFO: Segfaults... ttps://chromium.googlesource.com/chromium/src/+/master/base/memory/ref_counted.h#445
             See TEST flags in main.cpp
-
-            TODO: "Cannot find any Pyroscope data source! Please add and configure a Pyroscope data source to your Grafana instance."
         */
-        WebEngineView {
-            id: webView
-            url: control.showPrimary ? control.primaryUrl : control.secondaryUrl
+        Rectangle {
+            id: webviewContainer
+            width: parent.width
+            height: parent.height - toggleButton.height
 
-            onLoadingChanged: function(loadRequest) {
-                if (loadRequest.errorString) {
-                    console.error(loadRequest.errorString)
+            WebEngineView {
+                id: webView
+                width: parent.width - 25
+                height: parent.height - 25
+                anchors.centerIn: parent
+
+                url: control.showPrimary ? control.primaryUrl : control.secondaryUrl
+                settings {
+                    autoLoadImages: true
+                    errorPageEnabled: true
+                    javascriptEnabled: true
+                    localStorageEnabled: true
+                    localContentCanAccessFileUrls: true
                 }
-            }
 
-            onCertificateError: function(error) {
-                console.log("Certificate Error encountered:", error.description);
+                onLoadingChanged: function(loadRequest) {
+                    if (loadRequest.status === WebEngineView.LoadFailedStatus) {
+                        console.error("Page load failed for URL:", loadRequest.url);
+                        console.error("Error message:", loadRequest.errorString);
+                    } else if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
+                        console.log("Page loaded successfully!");
+                    }
+                }
 
-                // Self hosted stuff
-                error.acceptCertificate();
+                onCertificateError: function(error) {
+                    console.log("Certificate Error encountered:", error.description);
 
-                // Do not jump to default behaviour
-                return true;
-            }
+                    // Self hosted stuff
+                    error.acceptCertificate();
 
-            Component.onCompleted: {
-                webView.settings.javaScriptEnabled = Qt.Checked
-                webView.settings.localStorageEnabled = Qt.Checked
-                webView.settings.allowFileAccess = Qt.Checked
-                webView.settings.localContentCanAccessFileUrls = Qt.Checked
+                    // Do not jump to default behaviour
+                    return true;
+                }
             }
         }
     }
