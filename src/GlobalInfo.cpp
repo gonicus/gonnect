@@ -35,13 +35,31 @@ QString GlobalInfo::teamsUrl()
 
 bool GlobalInfo::isWorkaroundActive(const WorkaroundId id)
 {
+    bool isCMakePreset = false;
+
     if (m_workaroundActiveCache.contains(id)) {
         return m_workaroundActiveCache.value(id);
     }
 
-    ReadOnlyConfdSettings settings;
     const auto idStr = GlobalInfo::workaroundIdToString(id);
-    const bool value = settings.value("workarounds/" + idStr, false).toBool();
+
+#if defined(ENABLED_WORKAROUNDS)
+    QString workarounds(ENABLED_WORKAROUNDS);
+    QStringList wids = workarounds.split(":");
+
+    for (const auto &wid : std::as_const(wids)) {
+        if (wid == idStr) {
+            isCMakePreset = true;
+            break;
+        }
+    }
+#endif
+
+    ReadOnlyConfdSettings settings;
+    const bool value = settings.value("workarounds/" + idStr, isCMakePreset).toBool();
+    if (value) {
+        qCWarning(lcGlobalInfo) << "Workaround" << idStr << "is active";
+    }
     m_workaroundActiveCache.insert(id, value);
     return value;
 }

@@ -1,0 +1,23 @@
+option(ENABLE_GOW_001 "Enable hook off timer for headsets" OFF)
+option(ENABLE_GOW_002 "Disable web engine GPU support" OFF)
+option(ENABLE_GOW_003 "Disable web engine renderer accessibility support" OFF)
+
+set(ENABLED_WORKAROUNDS "")
+
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_name ${_variableNames})
+    string(FIND "${_name}" "ENABLE_GOW_" out)
+    if("${out}" EQUAL 0)
+        if(${${_name}})
+            string(SUBSTRING ${_name} 7 -1 out)
+            message(STATUS "Workaround ${out} is enabled")
+            list(APPEND ENABLED_WORKAROUNDS ${out})
+        endif()
+    endif()
+endforeach()
+
+if(ENABLED_WORKAROUNDS)
+    STRING(REPLACE ";" ":" ENABLED_WORKAROUNDS "${ENABLED_WORKAROUNDS}")
+    add_compile_definitions(-DENABLED_WORKAROUNDS="${ENABLED_WORKAROUNDS}")
+endif()

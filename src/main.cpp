@@ -63,8 +63,11 @@ int main(int argc, char *argv[])
 #if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     chromiumFlags.push_back("--use-fake-ui-for-media-stream");
 #endif
-    if (!GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
+    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
         chromiumFlags.push_back("--disable-gpu");
+    }
+    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
+        chromiumFlags.push_back("--disable-renderer-accessibility");
     }
 
     // TEST
