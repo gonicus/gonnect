@@ -22,8 +22,8 @@
 #include <QtWebEngineQuick>
 #include <iostream>
 
-#ifdef Q_OS_MACOS
-#  define LOGFAULT_USE_OS_LOG
+#ifdef Q_OS_APPLE
+#  define LOGFAULT_WITH_OS_LOG
 #endif
 #include "logfault/logfault.h"
 
@@ -252,11 +252,11 @@ void Application::initLogging()
     s_originalMessageHandler = nullptr;
 #endif // Q_OS_WINDOWS
 
-#ifdef Q_OS_MACOS
+#ifdef Q_OS_APPLE
     logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::OsLogHandler>(
             "oslog", logfault::LogLevel::WARN,
             logfault::OsLogHandler::Options{ "de.gonicus.gonnect" }));
-#endif // Q_OS_MACOS
+#endif // Q_OS_APPLE
 }
 
 void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context,
