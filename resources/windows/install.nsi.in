@@ -28,7 +28,7 @@ WriteRegStr HKCU "Software\Classes\Local Settings\Software\Microsoft\Windows\She
 
 # event log registration
 WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@" "" ""
-WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@" "EventMessageFile" "$INSTDIR\bin\Event_log.dll"
+WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@" "EventMessageFile" "$INSTDIR\bin\EventLog.dll"
 # EVENTLOG_ERROR_TYPE (0x0001) | EVENTLOG_WARNING_TYPE (0x0002) | EVENTLOG_INFORMATION_TYPE (0x0004) = 0x0007
 WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@" "TypesSupported" 0x0007
 

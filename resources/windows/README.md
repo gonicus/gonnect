@@ -6,8 +6,8 @@
 
 ```powershell
 cd resources/windows
-mc -c .\Event_log.mc
-rc .\Event_log.rc
-link -dll -noentry .\Event_log.res
-move .\Event_log.h ..\..\src\platform\windows\
+mc -c .\EventLog.mc
+rc .\EventLog.rc
+link -dll -noentry .\EventLog.res
+move .\EventLog.h ..\..\src\platform\windows\
 ```

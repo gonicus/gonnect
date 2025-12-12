@@ -22,7 +22,7 @@
 #include <QtWebEngineQuick>
 #include <iostream>
 
-#ifdef Q_OS_DARWIN
+#ifdef Q_OS_MACOS
 #  define LOGFAULT_USE_OS_LOG
 #endif
 #include "logfault/logfault.h"
@@ -252,7 +252,7 @@ void Application::initLogging()
     s_originalMessageHandler = nullptr;
 #endif // Q_OS_WINDOWS
 
-#ifdef Q_OS_DARWIN
+#ifdef Q_OS_MACOS
     logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::OsLogHandler>(
             "oslog", logfault::LogLevel::WARN,
             logfault::OsLogHandler::Options{ "de.gonicus.gonnect" }));
@@ -262,15 +262,12 @@ void Application::initLogging()
 void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context,
                                 const QString &rawMsg)
 {
-    auto msg = rawMsg;
-    msg.replace('\n', ' ');
-
     switch (type) {
     case QtDebugMsg:
-        LFLOG_DEBUG << msg;
+        LFLOG_DEBUG << rawMsg;
         break;
     case QtInfoMsg:
-        LFLOG_INFO << msg;
+        LFLOG_INFO << rawMsg;
         break;
     case QtWarningMsg: {
         // remove spam messages
@@ -279,17 +276,18 @@ void Application::logQtMessages(QtMsgType type, const QMessageLogContext &contex
             "|Cannot anchor to an item that isn't a parent or sibling"
             "|Detected anchors on an item that is managed by a layout"
         };
-        if (filter.match(msg).hasMatch()) {
-            LFLOG_TRACE << msg;
+        if (filter.match(rawMsg).hasMatch()) {
+            LFLOG_TRACE << rawMsg;
             break;
         }
-        LFLOG_WARN << msg;
-    } break;
+        LFLOG_WARN << rawMsg;
+    break;
+    } 
     case QtCriticalMsg:
-        LFLOG_ERROR << msg;
+        LFLOG_ERROR << rawMsg;
         break;
     case QtFatalMsg:
-        LFLOG_ERROR << "[**FATAL**] " << msg;
+        LFLOG_ERROR << "[**FATAL**] " << rawMsg;
         exit(-1);
         break;
     }

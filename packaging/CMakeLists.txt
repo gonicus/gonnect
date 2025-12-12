@@ -50,7 +50,7 @@ if(WIN32)
   !include \"${DOS_STYLE_BINARY_DIR}\\uninstall.nsi\"
     ")
 
-    install(FILES "${CMAKE_SOURCE_DIR}/resources/windows/Event_log.dll" DESTINATION ${CPACK_NSIS_EXECUTABLES_DIRECTORY})
+    install(FILES "${CMAKE_SOURCE_DIR}/resources/windows/EventLog.dll" DESTINATION "${CPACK_NSIS_EXECUTABLES_DIRECTORY}")
 
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")

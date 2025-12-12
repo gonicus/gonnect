@@ -270,7 +270,7 @@ elseif(WIN32)
         platform/dummy/DummyBackgroundManager.h
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
-        platform/windows/Event_log.h
+        platform/windows/EventLog.h
         platform/windows/WindowsEventLogHandler.h
         platform/windows/WindowsNetworkHelper.cpp
         platform/windows/WindowsNetworkHelper.h

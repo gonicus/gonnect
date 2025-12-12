@@ -1,5 +1,5 @@
 #include "logfault/logfault.h"
-#include "windows/Event_log.h"
+#include "windows/EventLog.h"
 #include <windows.h>
 #include <string>
 #include <codecvt>
