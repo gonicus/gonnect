@@ -237,7 +237,7 @@ void Application::initLogging()
         settings.setValue("generic/nextDebugRun", false);
         auto filePath = Application::logFilePath().toStdString();
         logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(
-                filePath, logfault::LogLevel::TRACE, false));
+                filePath, logfault::LogLevel::TRACE, true));
 
         QTimer::singleShot(5 * 60 * 1000, this, []() {
             qCInfo(lcApplication) << "5 minutes are up; debug run will end automatically.";
@@ -256,7 +256,7 @@ void Application::initLogging()
     logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::OsLogHandler>(
             "oslog", logfault::LogLevel::WARN,
             logfault::OsLogHandler::Options{ "de.gonicus.gonnect" }));
-#endif // Q_OS_DARWIN
+#endif // Q_OS_MACOS
 }
 
 void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context,
@@ -281,8 +281,8 @@ void Application::logQtMessages(QtMsgType type, const QMessageLogContext &contex
             break;
         }
         LFLOG_WARN << rawMsg;
-    break;
-    } 
+        break;
+    }
     case QtCriticalMsg:
         LFLOG_ERROR << rawMsg;
         break;
