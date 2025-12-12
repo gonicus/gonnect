@@ -22,7 +22,7 @@
 #include <QtWebEngineQuick>
 #include <iostream>
 
-#ifdef Q_OS_APPLE
+#ifdef Q_OS_MACOS
 #  define LOGFAULT_WITH_OS_LOG
 #endif
 #include "logfault/logfault.h"
