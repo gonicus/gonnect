@@ -252,11 +252,11 @@ void Application::initLogging()
     s_originalMessageHandler = nullptr;
 #endif // Q_OS_WINDOWS
 
-#ifdef Q_OS_APPLE
-    logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::OsLogHandler>(
+#ifdef Q_OS_MACOS
+    logfault::LogManager::Instance().AddHandler(std::make_unique<OsLogHandler>(
             "oslog", logfault::LogLevel::WARN,
             logfault::OsLogHandler::Options{ "de.gonicus.gonnect" }));
-#endif // Q_OS_APPLE
+#endif // Q_OS_MACOS
 }
 
 void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context,
