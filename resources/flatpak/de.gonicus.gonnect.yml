@@ -257,6 +257,7 @@ modules:
     - -DCMAKE_UNITY_BUILD=ON
     - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
     - -DENABLE_GOW_002=ON
+    - -DENABLE_GOW_003=ON
     - -DENABLE_PCH=ON
     sources:
     - type: dir
