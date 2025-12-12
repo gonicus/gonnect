@@ -253,7 +253,7 @@ void Application::initLogging()
 #endif // Q_OS_WINDOWS
 
 #ifdef Q_OS_MACOS
-    logfault::LogManager::Instance().AddHandler(std::make_unique<OsLogHandler>(
+    logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::OsLogHandler>(
             "oslog", logfault::LogLevel::WARN,
             logfault::OsLogHandler::Options{ "de.gonicus.gonnect" }));
 #endif // Q_OS_MACOS
