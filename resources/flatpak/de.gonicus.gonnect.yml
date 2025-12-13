@@ -73,11 +73,6 @@ modules:
       - type: file
         path: krb5.conf
 
-  - name: hello
-    buildsystem: simple
-    build-commands:
-      - set
-
   - name: pjsip
     buildsystem: autotools
     config-opts:
@@ -241,6 +236,17 @@ modules:
         x-checker-data:
           type: git
           tag-pattern: ^(hidapi-[0-9.]+)$
+
+  - name: logfault
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/jgaa/logfault.git
+        tag: v0.8.1
+        commit: 9851bceb50e53de21cbbf27fef0b79c19667d3ec
+        x-checker-data:
+          type: git
+          tag-pattern: ^(v[0-9.]+)$
 
   - name: gonnect
     buildsystem: cmake-ninja

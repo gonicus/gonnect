@@ -119,6 +119,7 @@ jobs:
         with:
           clang-format-version: '19'
           check-path: 'src'
+          exclude-regex: '^src/platform/windows/EventLog.h$' # generated file
 
   clang:
     runs-on: ubuntu-24.04
@@ -200,7 +201,9 @@ jobs:
         id: cache-conan-packages
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
-          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-clazy
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-${{ hashFiles('./conanfile.py') }}
+          restore-keys: |
+            conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-
 
       - name: Install Conan dependencies
         run: |
