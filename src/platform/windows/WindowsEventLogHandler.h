@@ -18,7 +18,7 @@ public:
 
     ~WindowsEventLogHandler() { DeregisterEventSource(m_h); }
 
-    void LogMessage(const logfault::Message &msg) override LOGFAULT_NOEXCEPT = 0
+    void LogMessage(const logfault::Message &msg) LOGFAULT_NOEXCEPT override
     {
         if (!m_h) {
             return;
