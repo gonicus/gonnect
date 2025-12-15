@@ -447,9 +447,10 @@ void SystemTrayMenu::resetTrayIcon()
     // Try to use some kind of light/dark default based on what the system
     // delivers by default.
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
-    bool darkIconDefault = true;
+    const bool darkIconDefault = true;
 #else
-    bool darkIconDefault = false;
+    const auto desktop = QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower();
+    const bool darkIconDefault = desktop.contains("kde");
 #endif
 
     QString noteDot = m_missedCallsCount ? "_note" : "";
