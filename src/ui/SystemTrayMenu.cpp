@@ -10,6 +10,7 @@
 #include "TogglerManager.h"
 #include "Toggler.h"
 #include "Application.h"
+#include "Theme.h"
 
 using namespace std::chrono_literals;
 
@@ -443,12 +444,25 @@ void SystemTrayMenu::ringTimerCallback()
 
 void SystemTrayMenu::resetTrayIcon()
 {
+    // Try to use some kind of light/dark default based on what the system
+    // delivers by default.
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
+    bool darkIconDefault = true;
+#else
+    bool darkIconDefault = false;
+
+    const auto desktop = QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower();
+    if (desktop.contains("kde")) {
+        darkIconDefault = !Theme::instance().isDarkMode();
+    }
+#endif
+
     QString noteDot = m_missedCallsCount ? "_note" : "";
 
     if (m_hasEstablishedCalls) {
         m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
     } else {
-        if (m_settings.value("generic/trayIconDark", false).toBool()) {
+        if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
             m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
         } else {
             m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
