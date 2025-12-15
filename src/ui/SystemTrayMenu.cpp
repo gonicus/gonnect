@@ -450,11 +450,6 @@ void SystemTrayMenu::resetTrayIcon()
     bool darkIconDefault = true;
 #else
     bool darkIconDefault = false;
-
-    const auto desktop = QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower();
-    if (desktop.contains("kde")) {
-        darkIconDefault = !Theme::instance().isDarkMode();
-    }
 #endif
 
     QString noteDot = m_missedCallsCount ? "_note" : "";
