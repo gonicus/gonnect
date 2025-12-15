@@ -29,6 +29,7 @@ class ViewHelper : public QObject
     Q_PROPERTY(QObject *topDrawer MEMBER m_topDrawer NOTIFY topDrawerChanged FINAL)
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
     Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
+    Q_PROPERTY(bool canSyncSystemMute READ canSyncSystemMute CONSTANT FINAL)
 
 public:
     static ViewHelper &instance()
@@ -107,6 +108,7 @@ public:
     Q_INVOKABLE bool isValidJitsiRoomName(const QString &name) const;
 
     bool isUnsupportedPlatform() const;
+    bool canSyncSystemMute() const;
 
     Q_INVOKABLE void
     requestMeeting(const QString &roomName,
