@@ -56,15 +56,15 @@ BaseWindow {
                 id: widgetEntries
                 ListElement {
                     name: "DateEvents"
-                    description: qsTr("A list of upcoming conferences")
+                    description: qsTr("List of upcoming appointments")
                 }
                 ListElement {
                     name: "Favorites"
-                    description: qsTr("A list of your favorite contacts and conferences")
+                    description: qsTr("Quick dial for your favorite conacts and conferences")
                 }
                 ListElement {
                     name: "History"
-                    description: qsTr("A searchable call/conference history")
+                    description: qsTr("Searchable call and conference history")
                 }
             }
 

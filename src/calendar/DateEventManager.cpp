@@ -4,10 +4,10 @@
 #include "DateEvent.h"
 #include "NotificationManager.h"
 #include "ViewHelper.h"
-#include "GlobalInfo.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
+#include <QDesktopServices>
 
 Q_LOGGING_CATEGORY(lcDateEventManager, "gonnect.app.dateevents.manager")
 
@@ -15,7 +15,6 @@ using namespace std::chrono_literals;
 
 DateEventManager::DateEventManager(QObject *parent) : QObject{ parent }
 {
-    m_jitsiUrl = QRegularExpression::escape(GlobalInfo::instance().jitsiUrl());
     m_lastCheckedTime = QTime::currentTime();
     m_minuteTimer.setInterval(5s);
     m_minuteTimer.callOnTimeout(this, &DateEventManager::onTimerTimeout);
@@ -42,23 +41,6 @@ DateEventManager::~DateEventManager()
     for (const auto &tag : std::as_const(m_notificationIds)) {
         notMan.remove(tag);
     }
-}
-
-QString DateEventManager::getJitsiRoomFromLocation(QString location)
-{
-    if (location.isEmpty()) {
-        return "";
-    }
-
-    static const QRegularExpression jitsiRoomRegex(QString("%1/(.*)$").arg(m_jitsiUrl),
-                                                   QRegularExpression::CaseInsensitiveOption);
-
-    const auto matchResult = jitsiRoomRegex.match(location);
-    if (matchResult.hasMatch()) {
-        return matchResult.captured(1);
-    }
-
-    return "";
 }
 
 void DateEventManager::addDateEvent(DateEvent *dateEvent)
@@ -100,8 +82,8 @@ void DateEventManager::addDateEvent(DateEvent *dateEvent)
 
 void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
                                        const QDateTime &start, const QDateTime &end,
-                                       const QString &summary, const QString &roomName,
-                                       bool isConfirmed)
+                                       const QString &summary, const QString &location,
+                                       const QString &description)
 {
     QMutexLocker lock(&m_feederMutex);
 
@@ -114,8 +96,8 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
             event->setStart(start);
             event->setEnd(end);
             event->setSummary(summary);
-            event->setRoomName(roomName);
-            event->setIsConfirmed(isConfirmed);
+            event->setLocation(location);
+            event->setDescription(description);
         }
     }
 
@@ -268,24 +250,39 @@ void DateEventManager::onTimerTimeout()
             const auto start = dateEvent->start();
             const auto summary = dateEvent->summary();
             const auto roomName = dateEvent->roomName();
+            const auto link = dateEvent->link();
+            const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
+            const auto isOtherLink = dateEvent->isOtherLink();
 
             if (!m_alreadyNotifiedDates.contains(eventHash)
                 && !m_notificationIds.contains(eventHash) && start.date() == today
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
-                auto notification = new Notification(tr("Conference starting soon"), summary,
-                                                     Notification::Priority::high, &notMan);
+                QString message = isJitsiMeeting ? tr("Conference starting soon")
+                                                 : tr("Appointment starting soon");
+                auto notification =
+                        new Notification(message, summary, Notification::Priority::high, &notMan);
 
                 notification->setIcon(":/icons/gonnect.svg");
-                notification->addButton(tr("Join"), "join-meeting", "", {});
+                if (isJitsiMeeting) {
+                    notification->addButton(tr("Join"), "join-meeting", "", {});
+                } else if (isOtherLink) {
+                    notification->addButton(tr("Open"), "open-link", "", {});
+                }
                 const auto notificationId = notMan.add(notification);
 
                 connect(notification, &Notification::actionInvoked, this,
-                        [this, eventHash, roomName, notificationId](QString action, QVariantList) {
+                        [this, eventHash, roomName, link, notificationId](QString action,
+                                                                          QVariantList) {
                             if (action == "join-meeting") {
                                 NotificationManager::instance().remove(notificationId);
                                 m_notificationIds.remove(eventHash);
 
                                 ViewHelper::instance().requestMeeting(roomName);
+                            } else if (action == "open-link") {
+                                NotificationManager::instance().remove(notificationId);
+                                m_notificationIds.remove(eventHash);
+
+                                QDesktopServices::openUrl(link);
                             }
                         });
 

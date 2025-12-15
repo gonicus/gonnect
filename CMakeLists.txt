@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.26)
-project(GOnnect VERSION 2.0.7 LANGUAGES CXX)
+project(GOnnect VERSION 2.0.8 LANGUAGES CXX)
 include(cmake/CCache.cmake)
+include(cmake/Workarounds.cmake)
 useCompilerCache()
 
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
