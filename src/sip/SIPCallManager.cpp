@@ -315,13 +315,19 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
                              const QString &contactId, const QString &preferredIdentity,
                              bool silent)
 {
+    const auto phoneNumber = PhoneNumberUtil::isSipUri(number)
+            ? number
+            : PhoneNumberUtil::cleanPhoneNumber(number);
     initBridge();
 
     // Check if there is already a call for that target number
     for (auto call : std::as_const(m_calls)) {
         auto callRemoteNumber = PhoneNumberUtil::numberFromSipUrl(
                 QString::fromStdString(call->getInfo().remoteUri));
-        if (number == callRemoteNumber) {
+        if (!PhoneNumberUtil::isSipUri(callRemoteNumber)) {
+            callRemoteNumber = PhoneNumberUtil::cleanPhoneNumber(callRemoteNumber);
+        }
+        if (phoneNumber == callRemoteNumber) {
             qCInfo(lcSIPCallManager) << "skipping additional call to already connected URI"
                                      << call->getInfo().remoteUri;
             return "";
@@ -336,7 +342,7 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
     auto account = SIPAccountManager::instance().getAccount(accountId);
 
     if (account) {
-        return account->call(number, contactId, preferredIdentity, silent);
+        return account->call(phoneNumber, contactId, preferredIdentity, silent);
     }
 
     qCCritical(lcSIPCallManager) << "not starting call - unknown account:" << accountId;
