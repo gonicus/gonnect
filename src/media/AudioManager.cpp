@@ -50,13 +50,13 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
 #ifdef Q_OS_LINUX
     if (!noSyncSystemMute()) {
-    connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
-        if (m_captureAudioPort) {
-            paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
-        } else {
-            qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
-        }
-    });
+        connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
+            if (m_captureAudioPort) {
+                paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
+            } else {
+                qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
+            }
+        });
     }
 #endif
 
@@ -187,8 +187,7 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
                 if (dev->isDefault()) {
                     m_settings.remove(QString("audio%1/playback").arg(m_currentAudioProfile));
                 } else {
-                    m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile),
-                                         id);
+                    m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile), id);
                 }
             }
 
@@ -301,7 +300,7 @@ void AudioManager::setExternalRinger(bool flag)
 {
     if (m_externalRinger != flag) {
         m_settings.setValue(QString("audio%1/preferExternalRinger").arg(m_currentAudioProfile),
-                             flag);
+                            flag);
         qCInfo(lcAudioManager) << "set external ringer to" << flag;
         Q_EMIT externalRingerChanged();
     }
@@ -340,8 +339,7 @@ void AudioManager::doProfileElection()
             captureHash = m_settings.value(QString("%1/capture").arg(group)).toString();
             ringHash = m_settings.value(QString("%1/ringing").arg(group)).toString();
             m_externalRinger =
-                    m_settings.value(QString("%1/preferExternalRinger").arg(group), false)
-                            .toBool();
+                    m_settings.value(QString("%1/preferExternalRinger").arg(group), false).toBool();
 
             // Check if all audio hashes are available for this profile
             if (isDeviceAvailable(playbackHash) && isDeviceAvailable(captureHash)
