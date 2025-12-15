@@ -65,7 +65,7 @@ class GOnnectRecipe(ConanFile):
         self.requires("openldap/2.6.10")
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
-        self.requires("logfault/0.8.1")
+        self.requires("logfault/0.8.1-1")
 
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")

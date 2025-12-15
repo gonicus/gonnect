@@ -220,7 +220,7 @@ cd <to where you have cloned this repository>
 conan config install resources/conan
 conan export-dependencies .
 conan profile detect
-conan install . --build=missing
+conan install . --build=missing -s compiler.cppstd=17
 
 # build gonnect
 cmake --preset conan-default .
