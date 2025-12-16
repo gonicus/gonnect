@@ -268,8 +268,8 @@ elseif(WIN32)
         platform/dummy/DummyExternalMediaManager.h
         platform/dummy/DummyBackgroundManager.cpp
         platform/dummy/DummyBackgroundManager.h
-        platform/dummy/DummyThemeManager.cpp
-        platform/dummy/DummyThemeManager.h
+        platform/windows/WindowsThemeManager.cpp
+        platform/windows/WindowsThemeManager.h
         platform/windows/EventLog.h
         platform/windows/WindowsEventLogHandler.h
         platform/windows/WindowsNetworkHelper.cpp
@@ -595,6 +595,7 @@ qt_add_qml_module(gonnect
         platform/ExternalMediaManager.h
         platform/BackgroundManager.h
         platform/ThemeManager.h
+        platform/ThemeManager.cpp
         platform/NetworkHelper.h
         platform/InhibitHelper.h
         platform/GlobalShortcuts.h

@@ -13,7 +13,12 @@ ThemeManager &ThemeManager::instance()
     return *_instance;
 }
 
-FlatpakThemeManager::FlatpakThemeManager() : ThemeManager{}
+FlatpakThemeManager::FlatpakThemeManager() : ThemeManager()
+{
+    FlatpakThemeManager::initColorThemeDetection();
+}
+
+FlatpakThemeManager::initColorThemeDetection()
 {
     m_settingsPortal = &SettingsPortal::instance();
 

@@ -11,6 +11,7 @@
 #include "Toggler.h"
 #include "Application.h"
 #include "Theme.h"
+#include "ThemeManager.h"
 
 using namespace std::chrono_literals;
 
@@ -34,6 +35,10 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
                     Q_EMIT ViewHelper::instance().activateSearch();
                 }
             });
+
+    auto themeManager = &ThemeManager::instance();
+    connect(themeManager, &ThemeManager::trayColorSchemeChanged, this,
+            &SystemTrayMenu::resetTrayIcon);
 
     updateMenu();
 
@@ -444,14 +449,8 @@ void SystemTrayMenu::ringTimerCallback()
 
 void SystemTrayMenu::resetTrayIcon()
 {
-    // Try to use some kind of light/dark default based on what the system
-    // delivers by default.
-#if defined(Q_OS_WINDOWS) || defined(Q_OS_MACOS)
-    const bool darkIconDefault = true;
-#else
-    const auto desktop = QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower();
-    const bool darkIconDefault = desktop.contains("kde");
-#endif
+    const bool darkIconDefault =
+            ThemeManager::instance().trayColorScheme() != ThemeManager::ColorScheme::DARK;
 
     QString noteDot = m_missedCallsCount ? "_note" : "";
 
