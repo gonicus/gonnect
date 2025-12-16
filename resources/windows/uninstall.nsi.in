@@ -1,3 +1,24 @@
+Var /GLOBAL processFound
+ExecDos::exec "tasklist /NH /FI $\"IMAGENAME eq @CPACK_NSIS_MUI_FINISHPAGE_RUN@$\"" 
+Pop $0 ; The handle for the process
+ExecDos::wait $0
+Pop $processFound ; The exit code
+
+StrCmp $processFound "0" 0 notRunning
+    MessageBox MB_YESNO "@APPLICATION_NAME@ is running. Do you want to close it?" /SD IDYES IDYES continue IDNO abort
+        continue:
+            ExecDos::exec /TIMEOUT=2000 "taskkill.exe /F /T /IM @CPACK_NSIS_MUI_FINISHPAGE_RUN@"
+            Pop $0 ; The handle for the process
+            ExecDos::wait $0
+            Sleep 2000 ; wait some time, otherwise deleting files used by just killed process does not work
+            Goto uninstall
+        abort:
+    Quit
+notRunning:
+    MessageBox MB_OK "Not running: @APPLICATION_NAME@ $processFound"
+
+uninstall:
+
 ## Application
 
 DeleteRegKey SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@"

@@ -19,6 +19,11 @@ runs:
       with:
         nsis-version: '3.11'
 
+    - name: Install `ExecDos` NSIS-plugin
+      uses: negrutiu/nsis-install-plugin@v1
+      with:
+        url: https://nsis.sourceforge.io/mediawiki/images/0/0f/ExecDos.zip
+
     - name: Get QT-Version
       id: get-qt
       uses: ./.github/actions/get-qt-version
