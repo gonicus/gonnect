@@ -82,8 +82,10 @@ Item {
             onHangupClicked: () => {
                 if (SIPCallManager.isConferenceMode) {
                     SIPCallManager.endConference()
-                } else {
+                } else if (topBar.callItem) {
                     SIPCallManager.endCall(topBar.callItem.accountId, topBar.callItem.callId)
+                } else {
+                    console.error("Cannot hang up because missing call item")
                 }
             }
 
