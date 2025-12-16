@@ -8,7 +8,8 @@ ThemeManager::ThemeManager() : QObject()
     ThemeManager::initColorThemeDetection();
 }
 
-void ThemeManager::initColorThemeDetection() {
+void ThemeManager::initColorThemeDetection()
+{
     auto styleHints = QGuiApplication::styleHints();
     connect(styleHints, &QStyleHints::colorSchemeChanged, this,
             &ThemeManager::handleColorSchemeChange);

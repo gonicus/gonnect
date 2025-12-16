@@ -18,7 +18,7 @@ FlatpakThemeManager::FlatpakThemeManager() : ThemeManager()
     FlatpakThemeManager::initColorThemeDetection();
 }
 
-FlatpakThemeManager::initColorThemeDetection()
+void FlatpakThemeManager::initColorThemeDetection()
 {
     m_settingsPortal = &SettingsPortal::instance();
 
