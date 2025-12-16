@@ -15,9 +15,8 @@ runs:
         cmake-version: 'latest'
 
     - name: Install NSIS
-      uses: repolevedavaj/install-nsis@a55ed92772254d1e51d880f85ce9b5719f907801 # v1.1.0
-      with:
-        nsis-version: '3.11'
+      id: nsis
+      uses: negrutiu/nsis-install@v2
 
     - name: Install `ExecDos` NSIS-plugin
       uses: negrutiu/nsis-install-plugin@v1
