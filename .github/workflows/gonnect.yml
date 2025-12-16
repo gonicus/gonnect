@@ -52,7 +52,7 @@ jobs:
         run: cmake --build --preset conan-release --parallel $(nproc --all)
 
       - name: Upload Test artifacts
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: gonnect-tests
           path: build/Release/tests/contactsTest
@@ -84,7 +84,7 @@ jobs:
         run: cd build && cpack ${{github.workspace}}
 
       - name: Save installer
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: windows-installer.zip
           compression-level: 0
@@ -147,7 +147,7 @@ jobs:
           scripts/static-clang-analyzer.sh
 
       - name: Save Report
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: clang-report
           path: /tmp/build.log
@@ -269,7 +269,7 @@ jobs:
           conan: false
 
       - name: Download Test artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: gonnect-tests
 

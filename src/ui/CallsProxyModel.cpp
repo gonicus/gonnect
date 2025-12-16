@@ -42,13 +42,15 @@ bool CallsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceP
     const auto index = model->index(sourceRow, 0, sourceParent);
     const bool isEstablished =
             model->data(index, static_cast<int>(CallsModel::Roles::IsEstablished)).toBool();
+    const bool isIncoming =
+            model->data(index, static_cast<int>(CallsModel::Roles::IsIncoming)).toBool();
 
     if (!isEstablished) {
         if (m_onlyEstablishedCalls) {
             return false;
         }
 
-        if (m_hideIncomingSecondaryCallOnBusy
+        if (m_hideIncomingSecondaryCallOnBusy && isIncoming
             && SIPCallManager::instance().beBusyOnNextIncomingCall()) {
             return false;
         }
