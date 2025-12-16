@@ -39,6 +39,7 @@ Item {
         property alias headsetHookOff: headsetHookOffCheckBox.checked
         property alias disableMutePropagation: disableMutePropagationCheckBox.checked
         property alias useHeadset: headsetCheckBox.checked
+        property alias noSyncSystemMute: disableSystemMutePropagationCheckBox.checked
         property alias jitsiChatAsNotifications: jitsiChatAsNotificationsCheckBox.checked
     }
 
@@ -196,6 +197,16 @@ Item {
                         }
 
                         CheckBox {
+                            id: disableSystemMutePropagationCheckBox
+                            text: qsTr('Disable synchronisation with the system mute state')  + " (" + qsTr("restart required") + ")"
+                            enabled: ViewHelper.canSyncSystemMute
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                        }
+
+                        CheckBox {
                             id: headsetHookOffCheckBox
                             text: qsTr('Show dial window on USB headset pick up')
                             enabled: headsetCheckBox.checked
@@ -217,7 +228,7 @@ Item {
 
                     CheckBox {
                         id: windowDeocorationCheckbox
-                        text: qsTr("Use custom window decoration (restart required)")
+                        text: qsTr("Use custom window decoration") + " (" + qsTr("restart required") + ")"
                         checked: Theme.useOwnDecoration
                         anchors {
                             left: parent.left

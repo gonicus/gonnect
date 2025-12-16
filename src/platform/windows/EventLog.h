@@ -30,15 +30,13 @@
 // Define the facility codes
 //
 
-
 //
 // Define the severity codes
 //
-#define STATUS_SEVERITY_SUCCESS          0x0
-#define STATUS_SEVERITY_INFORMATIONAL    0x1
-#define STATUS_SEVERITY_WARNING          0x2
-#define STATUS_SEVERITY_ERROR            0x3
-
+#define STATUS_SEVERITY_SUCCESS 0x0
+#define STATUS_SEVERITY_INFORMATIONAL 0x1
+#define STATUS_SEVERITY_WARNING 0x2
+#define STATUS_SEVERITY_ERROR 0x3
 
 //
 // MessageId: MSG_INFO_1
@@ -47,7 +45,7 @@
 //
 // %1
 //
-#define MSG_INFO_1                       ((DWORD)0x60000100L)
+#define MSG_INFO_1 ((DWORD)0x60000100L)
 
 //
 // MessageId: MSG_WARNING_1
@@ -56,7 +54,7 @@
 //
 // %1
 //
-#define MSG_WARNING_1                    ((DWORD)0xA0000101L)
+#define MSG_WARNING_1 ((DWORD)0xA0000101L)
 
 //
 // MessageId: MSG_ERROR_1
@@ -65,7 +63,7 @@
 //
 // %1
 //
-#define MSG_ERROR_1                      ((DWORD)0xE0000102L)
+#define MSG_ERROR_1 ((DWORD)0xE0000102L)
 
 //
 // MessageId: MSG_SUCCESS_1
@@ -74,6 +72,6 @@
 //
 // %1
 //
-#define MSG_SUCCESS_1                    ((DWORD)0x20000103L)
+#define MSG_SUCCESS_1 ((DWORD)0x20000103L)
 
 #endif
