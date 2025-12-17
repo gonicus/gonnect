@@ -25,7 +25,7 @@ void WindowsThemeManager::initColorThemeDetection()
 {
     ThemeManager::initColorThemeDetection();
     m_themeSettings = new QSettings(
-            LR"(HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize)",
+            "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
             QSettings::NativeFormat);
 
     startThemeWatcher();
