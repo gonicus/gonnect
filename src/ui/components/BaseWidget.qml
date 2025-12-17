@@ -14,6 +14,8 @@ Item {
     required property int type
     required property var page
 
+    property AdditionalSettings config: AdditionalSettings { id: abcd }
+
     property real gridWidth
     property real gridHeight
     property real gridCellWidth
