@@ -10,6 +10,8 @@
 #include "TogglerManager.h"
 #include "Toggler.h"
 #include "Application.h"
+#include "Theme.h"
+#include "ThemeManager.h"
 
 using namespace std::chrono_literals;
 
@@ -33,6 +35,10 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
                     Q_EMIT ViewHelper::instance().activateSearch();
                 }
             });
+
+    auto themeManager = &ThemeManager::instance();
+    connect(themeManager, &ThemeManager::trayColorSchemeChanged, this,
+            &SystemTrayMenu::resetTrayIcon);
 
     updateMenu();
 
@@ -443,12 +449,14 @@ void SystemTrayMenu::ringTimerCallback()
 
 void SystemTrayMenu::resetTrayIcon()
 {
+    const bool darkIconDefault =
+            ThemeManager::instance().trayColorScheme() == ThemeManager::ColorScheme::DARK;
     QString noteDot = m_missedCallsCount ? "_note" : "";
 
     if (m_hasEstablishedCalls) {
         m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
     } else {
-        if (m_settings.value("generic/trayIconDark", false).toBool()) {
+        if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
             m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
         } else {
             m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));

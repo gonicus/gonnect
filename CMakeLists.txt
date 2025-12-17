@@ -4,6 +4,13 @@ include(cmake/CCache.cmake)
 include(cmake/Workarounds.cmake)
 useCompilerCache()
 
+set(APPLICATION_NAME       "${PROJECT_NAME}" )
+set(APPLICATION_SHORTNAME  "${PROJECT_NAME}" )
+set(APPLICATION_EXECUTABLE "gonnect" )
+set(APPLICATION_VENDOR "GONICUS GmbH")
+set(APPLICATION_ICON_NAME  "${APPLICATION_SHORTNAME}" )
+set(APPLICATION_URL "https://www.gonnect-project.org")
+
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED OFF)
