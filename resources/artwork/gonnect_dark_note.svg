@@ -7,16 +7,16 @@
    xmlns:svg="http://www.w3.org/2000/svg">
   <style type="text/css" id="current-color-scheme">
     .ColorScheme-Text {
-      color:#1a1a1a;
-    }
-    .ColorScheme-Background {
       color:#fff;
     }
-    .ColorScheme-Accent {
+    .ColorScheme-Background {
       color:#1a1a1a;
     }
+    .ColorScheme-Accent {
+      color:#fff;
+    }
     .ColorScheme-ButtonText {
-      color:#1a1a1a;
+      color:#fff;
     }
   </style>
   <path

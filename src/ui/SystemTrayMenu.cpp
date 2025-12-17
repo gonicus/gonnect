@@ -450,8 +450,7 @@ void SystemTrayMenu::ringTimerCallback()
 void SystemTrayMenu::resetTrayIcon()
 {
     const bool darkIconDefault =
-            ThemeManager::instance().trayColorScheme() != ThemeManager::ColorScheme::DARK;
-
+            ThemeManager::instance().trayColorScheme() == ThemeManager::ColorScheme::DARK;
     QString noteDot = m_missedCallsCount ? "_note" : "";
 
     if (m_hasEstablishedCalls) {
