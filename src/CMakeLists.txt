@@ -16,12 +16,13 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml)
 
 find_package(Qca-qt6 REQUIRED)
+find_package(logfault CONFIG REQUIRED)
 
 if(UNIX)
     include(FindPkgConfig)
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
     pkg_check_modules(PJSIP REQUIRED libpjproject)
+    pkg_check_modules(LIBUUID REQUIRED uuid IMPORTED_TARGET)
     pkg_check_modules(LIBUSB1 REQUIRED libusb-1.0 IMPORTED_TARGET)
     pkg_check_modules(LIBHIDAPI REQUIRED hidapi-hidraw IMPORTED_TARGET)
     list(APPEND PLATFORM_LIBRARIES
@@ -30,21 +31,23 @@ if(UNIX)
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI)
 
-    add_definitions(${PJSIP_STATIC_CFLAGS} -DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
+    add_definitions(${PJSIP_STATIC_CFLAGS})
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
     link_directories(${PJSIP_STATIC_LIBRARY_DIRS})
 else()
+    find_package(pjproject REQUIRED)
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
-    find_package(pjproject REQUIRED)
     find_package(wintoast REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
-        hidapi::hidapi
         pjproject::pjproject
+        hidapi::hidapi
         libusb::libusb
         wintoast::wintoast)
 endif()
+
+add_definitions(-DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
 
 set(APP_SOURCES main.cpp)
 set(APP_OUTPUT_NAME gonnect)
@@ -266,8 +269,10 @@ elseif(WIN32)
         platform/dummy/DummyExternalMediaManager.h
         platform/dummy/DummyBackgroundManager.cpp
         platform/dummy/DummyBackgroundManager.h
-        platform/dummy/DummyThemeManager.cpp
-        platform/dummy/DummyThemeManager.h
+        platform/windows/WindowsThemeManager.cpp
+        platform/windows/WindowsThemeManager.h
+        platform/windows/EventLog.h
+        platform/windows/WindowsEventLogHandler.h
         platform/windows/WindowsNetworkHelper.cpp
         platform/windows/WindowsNetworkHelper.h
         platform/windows/WindowsNotificationManager.h
@@ -593,6 +598,7 @@ qt_add_qml_module(gonnect
         platform/ExternalMediaManager.h
         platform/BackgroundManager.h
         platform/ThemeManager.h
+        platform/ThemeManager.cpp
         platform/NetworkHelper.h
         platform/InhibitHelper.h
         platform/GlobalShortcuts.h
@@ -770,6 +776,7 @@ target_include_directories(gonnect
     usb/busylight
     media
     platform
+    ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 

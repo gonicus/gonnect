@@ -272,6 +272,14 @@ bool ViewHelper::isUnsupportedPlatform() const
     return true;
 }
 
+bool ViewHelper::canSyncSystemMute() const
+{
+#ifdef Q_OS_LINUX
+    return true;
+#endif
+    return false;
+}
+
 void ViewHelper::quitApplication()
 {
     if (GlobalCallState::instance().globalCallState() & ICallState::State::CallActive) {

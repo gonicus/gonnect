@@ -14,21 +14,14 @@ runs:
       with:
         cmake-version: 'latest'
 
-    - name: Install MSVC 2015 (v140) and Windows 8.1 SDK
-      shell: powershell
-      run: |
-        $VS_BTOOLS_EXE="vs_buildtools.exe"
-        $VS_BTOOLS_URI="https://aka.ms/vs/15/release/vs_buildtools.exe"
-        Invoke-WebRequest -Uri $VS_BTOOLS_URI -OutFile $VS_BTOOLS_EXE
-        Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList `
-        "--add", "Microsoft.VisualStudio.Component.VC.140", `
-        "--add", "Microsoft.VisualStudio.Component.Windows81SDK", `
-        "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
-
     - name: Install NSIS
-      uses: repolevedavaj/install-nsis@a55ed92772254d1e51d880f85ce9b5719f907801 # v1.1.0
+      id: nsis
+      uses: negrutiu/nsis-install@f3339c88dba6fd08910d5275a943f8f746d94876 # v2
+
+    - name: Install `ExecDos` NSIS-plugin
+      uses: negrutiu/nsis-install-plugin@c7f666810808b77249537bec2f7110e7ad9340b1 # v1
       with:
-        nsis-version: '3.11'
+        url: https://nsis.sourceforge.io/mediawiki/images/0/0f/ExecDos.zip
 
     - name: Get QT-Version
       id: get-qt
@@ -55,4 +48,4 @@ runs:
       run: |
         conan config install resources/conan
         conan export-dependencies .
-        conan install . --build=missing
+        conan install . --build=missing -s compiler.cppstd=17
