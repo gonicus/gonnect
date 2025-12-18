@@ -57,7 +57,7 @@ Popup {
 
     SearchListModel {
         id: searchListModel
-        searchPhrase: control.searchText
+        searchPhrase: ViewHelper.preprocessSearchText(control.searchText)
     }
 
     contentItem: Item {
@@ -199,7 +199,7 @@ Popup {
 
                         SearchResultItem {
                             id: callDirectItem
-                            mainText: qsTr('Call "%1"').arg(control.searchText)
+                            mainText: qsTr('Call "%1"').arg(searchListModel.searchPhrase)
                             width: control.colWidth
                             visible: callDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === callDirectItem
@@ -211,20 +211,20 @@ Popup {
                                 }
                             }
 
-                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(control.searchText)
+                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(searchListModel.searchPhrase)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(callDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                SIPCallManager.call("account0", control.searchText, "", identitySelector.currentValue)
+                                SIPCallManager.call("account0", searchListModel.searchPhrase, "", identitySelector.currentValue)
                                 control.primaryActionTriggered()
                             }
                         }
 
                         SearchResultItem {
                             id: roomDirectItem
-                            mainText: qsTr('Open room "%1"').arg(control.searchText)
+                            mainText: qsTr('Open room "%1"').arg(searchListModel.searchPhrase)
                             width: control.colWidth
                             visible: roomDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === roomDirectItem
@@ -238,13 +238,13 @@ Popup {
 
                             readonly property bool shallBeVisible: ViewHelper.isJitsiAvailable
                                                                    && !ViewHelper.isActiveVideoCall
-                                                                   && ViewHelper.isValidJitsiRoomName(control.searchText)
+                                                                   && ViewHelper.isValidJitsiRoomName(searchListModel.searchPhrase)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(roomDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                ViewHelper.requestMeeting(control.searchText)
+                                ViewHelper.requestMeeting(searchListModel.searchPhrase)
                                 control.primaryActionTriggered()
                             }
                         }
@@ -267,7 +267,7 @@ Popup {
                                 showJitsi: ViewHelper.isJitsiAvailable
 
                                 HistoryContactSearchModel {
-                                    searchText: control.searchText
+                                    searchText: searchListModel.searchPhrase
                                 }
                             }
                             delegate: SearchResultItem {

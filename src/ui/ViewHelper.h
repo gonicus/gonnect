@@ -67,6 +67,8 @@ public:
     Q_INVOKABLE void copyToClipboard(const QString &str) const;
     Q_INVOKABLE void reloadAddressBook() const;
 
+    Q_INVOKABLE QString preprocessSearchText(const QString &in) const;
+
     /// Returns the contact id for the phone number if such contact exists or empty string
     Q_INVOKABLE QString contactIdByNumber(const QString &phoneNumber) const;
 
@@ -139,6 +141,9 @@ private Q_SLOTS:
 
 private:
     explicit ViewHelper(QObject *parent = nullptr);
+    void initializeReplacers();
+
+    QHash<QRegularExpression, QString> m_preprocessRegexs;
 
     bool m_isPlayingRingTone = false;
     Ringer *m_ringer = nullptr;
