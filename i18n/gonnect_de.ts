@@ -2965,8 +2965,8 @@
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="250"/>
-        <source>Use dark tray icon</source>
-        <translation>Dunkles Systemtray-Icon benutzen</translation>
+        <source>Use dark mode tray icon</source>
+        <translation>Systemtray-Icon für Dark Mode benutzen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="191"/>
