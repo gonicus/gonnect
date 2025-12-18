@@ -348,6 +348,7 @@ qt_add_qml_module(gonnect
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
         ui/components/WebviewWidget.qml
+        ui/components/AdditionalSettings.qml
 
         ui/components/pages/Call.qml
         ui/components/pages/Chats.qml
@@ -403,7 +404,6 @@ qt_add_qml_module(gonnect
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
         ui/components/WindowHeader.qml
-        ui/components/WebviewItem.qml
         # Dynamic UI
         ui/components/EditModeOptions.qml
 

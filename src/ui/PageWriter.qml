@@ -26,7 +26,7 @@ Item {
         onTriggered: () => {
             // Widgets
             const widgets = model.items()
-            for (const widget of widgets) {
+            for (let widget of widgets) {
                 const widgetId = widget.widgetId
 
                 UISettings.setUISetting(widgetId, "name", widget.name)
@@ -35,6 +35,11 @@ Item {
                 UISettings.setUISetting(widgetId, "yGrid", widget.yGrid)
                 UISettings.setUISetting(widgetId, "widthGrid", widget.widthGrid)
                 UISettings.setUISetting(widgetId, "heightGrid", widget.heightGrid)
+
+                // TODO: no method access, gotta love qml
+                let additionalOptions = widget.config.entries()
+                console.log("???", typeof widget.config, typeof widget.config.entries)
+                UISettings.setUISetting(widgetId, "additionalOptions", additionalOptions)
             }
 
             // Page
