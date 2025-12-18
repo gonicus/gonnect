@@ -14,7 +14,14 @@ Item {
     required property int type
     required property var page
 
-    property AdditionalSettings config: AdditionalSettings { id: abcd }
+    property AdditionalSettings config: AdditionalSettings {}
+
+    Connections {
+        target: control.config
+        function onParametersUpdated() {
+            control.page?.writer.save()
+        }
+    }
 
     property real gridWidth
     property real gridHeight

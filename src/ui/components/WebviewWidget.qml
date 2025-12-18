@@ -14,7 +14,6 @@ BaseWidget {
 
     onPrimaryUrlChanged: {
         control.config.set("primaryUrl", control.primaryUrl)
-        console.error(control.config.entries())
     }
 
     onSecondaryUrlChanged: {

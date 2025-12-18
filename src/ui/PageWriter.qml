@@ -36,10 +36,9 @@ Item {
                 UISettings.setUISetting(widgetId, "widthGrid", widget.widthGrid)
                 UISettings.setUISetting(widgetId, "heightGrid", widget.heightGrid)
 
-                // TODO: no method access, gotta love qml
+                // TODO: Persist settings individually
                 let additionalOptions = widget.config.entries()
-                console.log("???", typeof widget.config, typeof widget.config.entries)
-                UISettings.setUISetting(widgetId, "additionalOptions", additionalOptions)
+                UISettings.setUISetting(widgetId, "additionalSettings", additionalOptions)
             }
 
             // Page
