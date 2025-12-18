@@ -52,5 +52,6 @@ ThemeManager::ColorScheme ThemeManager::trayColorScheme() const
     if (m_trayColorScheme != ThemeManager::ColorScheme::NO_PREFERENCE) {
         return m_trayColorScheme;
     }
+
     return m_colorScheme;
 }
