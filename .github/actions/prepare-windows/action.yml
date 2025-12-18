@@ -16,10 +16,10 @@ runs:
 
     - name: Install NSIS
       id: nsis
-      uses: negrutiu/nsis-install@v2
+      uses: negrutiu/nsis-install@f3339c88dba6fd08910d5275a943f8f746d94876 # v2
 
     - name: Install `ExecDos` NSIS-plugin
-      uses: negrutiu/nsis-install-plugin@v1
+      uses: negrutiu/nsis-install-plugin@c7f666810808b77249537bec2f7110e7ad9340b1 # v1
       with:
         url: https://nsis.sourceforge.io/mediawiki/images/0/0f/ExecDos.zip
 
