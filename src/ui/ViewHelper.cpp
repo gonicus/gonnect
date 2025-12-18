@@ -53,25 +53,30 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
     initializeReplacers();
 }
 
-void ViewHelper::initializeReplacers() {
+void ViewHelper::initializeReplacers()
+{
     ReadOnlyConfdSettings settings;
-    static QRegularExpression isPreSearchReplacer = QRegularExpression("^pre_search_replacer[0-9]+$");
+    static QRegularExpression isPreSearchReplacer =
+            QRegularExpression("^pre_search_replacer[0-9]+$");
 
     QStringList groups = settings.childGroups();
     for (auto &group : std::as_const(groups)) {
         if (isPreSearchReplacer.match(group).hasMatch()) {
             if (settings.contains(group + "/in") && settings.contains(group + "/out")) {
-                QRegularExpression regIn = QRegularExpression(settings.value(group + "/in").toString());
+                QRegularExpression regIn =
+                        QRegularExpression(settings.value(group + "/in").toString());
                 QString regOut = settings.value(group + "/out").toString();
 
                 if (!regIn.isValid()) {
-                    qCWarning(lcViewHelper) << "config group" << group << "contains an invalid regular expression";
+                    qCWarning(lcViewHelper)
+                            << "config group" << group << "contains an invalid regular expression";
                     continue;
                 }
 
                 m_preprocessRegexs.insert(regIn, regOut);
             } else {
-                qCWarning(lcViewHelper) << "config group" << group << "needs 'in' and 'out' keys - ignoring";
+                qCWarning(lcViewHelper)
+                        << "config group" << group << "needs 'in' and 'out' keys - ignoring";
             }
         }
     }
@@ -374,8 +379,8 @@ QString ViewHelper::preprocessSearchText(const QString &in) const
     while (it.hasNext()) {
         it.next();
 
-        const auto& reg = it.key();
-        const QString& repl = it.value();
+        const auto &reg = it.key();
+        const QString &repl = it.value();
 
         if (reg.match(in).hasMatch()) {
             result.replace(reg, repl);
