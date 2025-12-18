@@ -153,10 +153,19 @@ Item {
                 console.error(`Widget type ${widgetType} unknown`)
         }
 
-        if (widget) {
-            page.model.add(widget)
-        } else {
+        if (!widget){
             console.error("Could not create widget component", widgetId)
         }
+
+        // Load widget-specific settings
+        let additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",")
+        for (let setting of additionalSettings) {
+            let value = UISettings.getUISetting(widgetId, setting, "")
+            if (value !== "") {
+                widget.config.set(setting, value)
+            }
+        }
+
+        page.model.add(widget)
     }
 }

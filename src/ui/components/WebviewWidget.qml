@@ -12,6 +12,7 @@ BaseWidget {
     property string primaryUrl
     property string secondaryUrl
 
+    // TODO: Use map settings directly?
     onPrimaryUrlChanged: {
         control.config.set("primaryUrl", control.primaryUrl)
     }

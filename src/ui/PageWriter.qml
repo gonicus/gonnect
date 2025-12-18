@@ -36,9 +36,12 @@ Item {
                 UISettings.setUISetting(widgetId, "widthGrid", widget.widthGrid)
                 UISettings.setUISetting(widgetId, "heightGrid", widget.heightGrid)
 
-                // TODO: Persist settings individually
-                let additionalOptions = widget.config.entries()
-                UISettings.setUISetting(widgetId, "additionalSettings", additionalOptions)
+                // Additional per-widget settings
+                let additionalSettings = widget.config.entries()
+                UISettings.setUISetting(widgetId, "additionalSettings", additionalSettings.join(","))
+                for (let setting of additionalSettings) {
+                    UISettings.setUISetting(widgetId, setting, widget.config.get(setting))
+                }
             }
 
             // Page

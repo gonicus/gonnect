@@ -16,7 +16,7 @@ Item {
         control.parametersUpdated()
     }
 
-    function get(key : string) {
+    function get(key : string): variant {
         return control.parameters[key]
     }
 
@@ -29,8 +29,7 @@ Item {
     }
 
     function entries() {
-        var keys = Object.keys(control.parameters)
-        return keys.join(",")
+        return Object.keys(control.parameters)
     }
 
     function data() {
