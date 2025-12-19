@@ -178,7 +178,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                             continue;
                         }
 
-                        if (!exdates.contains(recurStart)
+                        if (!exdates.contains(recurStart) && !isCancelled
                             && recurStart >= m_config.timeRangeStart) {
                             QString nid =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());

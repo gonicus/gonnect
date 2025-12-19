@@ -423,7 +423,8 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                             continue;
                         }
 
-                        if (!exdates.contains(recurStart) && recurStart >= m_timeRangeStart) {
+                        if (!exdates.contains(recurStart) && !isCancelled
+                            && recurStart >= m_timeRangeStart) {
                             QString nid =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
                             manager.addDateEvent(new DateEvent(nid, concreteSource, recurStart,

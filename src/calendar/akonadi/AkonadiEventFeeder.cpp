@@ -168,7 +168,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                     continue;
                                 }
 
-                                if (!exdates.contains(recurStart)
+                                if (!exdates.contains(recurStart) && !isCancelled
                                     && recurStart >= m_timeRangeStart) {
                                     QString nid = QString("%1-%2").arg(id).arg(
                                             recurStart.toMSecsSinceEpoch());
