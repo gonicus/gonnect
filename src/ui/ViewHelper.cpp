@@ -49,6 +49,37 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
     auto &hds = USBDevices::instance();
     auto dev = hds.getHeadsetDeviceProxy();
     connect(dev, &HeadsetDeviceProxy::teamsButton, this, &ViewHelper::activateSearch);
+
+    initializeReplacers();
+}
+
+void ViewHelper::initializeReplacers()
+{
+    ReadOnlyConfdSettings settings;
+    static QRegularExpression isPreSearchReplacer =
+            QRegularExpression("^pre_search_replacer[0-9]+$");
+
+    QStringList groups = settings.childGroups();
+    for (auto &group : std::as_const(groups)) {
+        if (isPreSearchReplacer.match(group).hasMatch()) {
+            if (settings.contains(group + "/in") && settings.contains(group + "/out")) {
+                QRegularExpression regIn =
+                        QRegularExpression(settings.value(group + "/in").toString());
+                QString regOut = settings.value(group + "/out").toString();
+
+                if (!regIn.isValid()) {
+                    qCWarning(lcViewHelper)
+                            << "config group" << group << "contains an invalid regular expression";
+                    continue;
+                }
+
+                m_preprocessRegexs.insert(regIn, regOut);
+            } else {
+                qCWarning(lcViewHelper)
+                        << "config group" << group << "needs 'in' and 'out' keys - ignoring";
+            }
+        }
+    }
 }
 
 bool ViewHelper::isSystrayAvailable() const
@@ -340,9 +371,28 @@ void ViewHelper::respondUserVerification(const QString &id, bool isAccepted)
     Q_EMIT userVerificationResponded(id, isAccepted);
 }
 
+QString ViewHelper::preprocessSearchText(const QString &in) const
+{
+    QString result = in;
+
+    QHashIterator it(m_preprocessRegexs);
+    while (it.hasNext()) {
+        it.next();
+
+        const auto &reg = it.key();
+        const QString &repl = it.value();
+
+        if (reg.match(in).hasMatch()) {
+            result.replace(reg, repl);
+        }
+    }
+
+    return result;
+}
+
 bool ViewHelper::isPhoneNumber(const QString &number) const
 {
-    static const QRegularExpression numberRegEx(R"(^[+#*0-9 ]+$)");
+    static const QRegularExpression numberRegEx(R"(^[+#*0-9 ()/-]+$)");
     return numberRegEx.match(number).hasMatch();
 }
 
