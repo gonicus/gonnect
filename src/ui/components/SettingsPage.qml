@@ -247,7 +247,7 @@ Item {
 
                     CheckBox {
                         id: trayIconDark
-                        text: qsTr('Use dark tray icon')
+                        text: qsTr('Use dark mode tray icon')
                         anchors {
                             left: parent.left
                             right: parent.right

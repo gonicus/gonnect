@@ -11,5 +11,5 @@ ThemeManager &ThemeManager::instance()
 
 DummyThemeManager::DummyThemeManager() : ThemeManager()
 {
-    DummyThemeManager::initColorThemeDetection();
+    initColorThemeDetection();
 }
