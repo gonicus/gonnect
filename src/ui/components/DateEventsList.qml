@@ -149,7 +149,7 @@ ListView {
 
                     Label {
                         id: remainingMinutesLabel
-                        visible: delg.isToday && !delg.isInPast
+                        visible: delg.isToday && !delg.isInPast && !delg.isAllDayEvent
                                  && ((delg.minutesRemainingToStart >= 0 && delg.minutesRemainingToStart < 120)
                                      || delg.isCurrentlyTakingPlace)
                         font.weight: summaryLabel.font.weight
