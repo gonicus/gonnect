@@ -375,6 +375,8 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             ICalTime *dtend = i_cal_component_get_dtend(component);
             QDateTime end = createDateTimeFromTimeType(dtend);
 
+            bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0;
+
             QString summary = i_cal_component_get_summary(component);
             QString location = i_cal_component_get_location(component);
             QString description = i_cal_component_get_description(component);
@@ -385,10 +387,9 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                                 || status == I_CAL_STATUS_DELETED || summary.contains("Canceled:"));
 
             // Skip non-recurrent events that are cancelled / outside of our date range
-            // as well as any events without a jitsi meeting as a location
             if ((start < m_timeRangeStart || start > m_timeRangeEnd || end < m_currentTime
                  || isCancelled)
-                && !isRecurrent && !isUpdatedRecurrence) {
+                && !isRecurrent && !isUpdatedRecurrence && !isMultiDay) {
                 continue;
             }
 

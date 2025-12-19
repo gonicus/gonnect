@@ -36,6 +36,7 @@ private:
 
     bool responseDataChanged(const QByteArray &data);
     QDateTime createDateTimeFromTimeType(const icaltimetype &datetime);
+    QList<QPair<QDateTime, QDateTime>> createDaysFromRange(const QDateTime start, const QDateTime end);
 
     QList<size_t> m_checksums;
 

@@ -131,6 +131,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         QDateTime start = event->dtStart().toLocalTime();
                         QDateTime end = event->dtEnd().toLocalTime();
 
+                        bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0;
+
                         QString summary = event->summary();
                         QString location = event->location();
                         QString description = event->description();
@@ -141,10 +143,9 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                  || summary.contains("Canceled:"));
 
                         // Skip non-recurrent events that are cancelled / outside of our date range
-                        // as well as any events without a jitsi meeting as a location
                         if ((start < m_timeRangeStart || start > m_timeRangeEnd
                              || end < m_currentTime || isCancelled)
-                            && !isRecurrent && !isUpdatedRecurrence) {
+                            && !isRecurrent && !isUpdatedRecurrence && !isMultiDay) {
                             continue;
                         }
 

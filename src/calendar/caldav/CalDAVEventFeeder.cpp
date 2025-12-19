@@ -133,6 +133,9 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             icaltimetype dtend = icalcomponent_get_dtend(event);
             QDateTime end = createDateTimeFromTimeType(dtend);
 
+            // TODO: Multi-day event processing!
+            bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_config.currentTime;
+
             QString summary = icalcomponent_get_summary(event);
             QString location = icalcomponent_get_location(event);
             QString description = icalcomponent_get_description(event);
@@ -143,10 +146,9 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                                 || status == ICAL_STATUS_DELETED || summary.contains("Canceled:"));
 
             // Skip non-recurrent events that are cancelled / outside of our date range
-            // as well as any events without a jitsi meeting as a location
             if ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd
                  || end < m_config.currentTime || isCancelled)
-                && !isRecurrent && !isUpdatedRecurrence) {
+                && !isRecurrent && !isUpdatedRecurrence && !isMultiDay) {
                 continue;
             }
 
@@ -207,8 +209,18 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 }
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
-                manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                   location, description));
+                if (isMultiDay) {
+                    const auto days = createDaysFromRange(start, end);
+                    for (auto &day : days) {
+                        QString nid =
+                                QString("%1-%2").arg(id).arg(day.first.toMSecsSinceEpoch());
+                        manager.addDateEvent(new DateEvent(nid, m_config.source, day.first, day.second, summary,
+                                                           location, description));
+                    }
+                } else {
+                    manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
+                                                       location, description));
+                }
             }
         }
     } else {
@@ -269,4 +281,34 @@ QDateTime CalDAVEventFeeder::createDateTimeFromTimeType(const icaltimetype &date
         return QDateTime(QDate(datetime.year, datetime.month, datetime.day),
                          QTime(datetime.hour, datetime.minute, datetime.second));
     }
+}
+
+QList<QPair<QDateTime, QDateTime>> CalDAVEventFeeder::createDaysFromRange(const QDateTime start, const QDateTime end)
+{
+    QList<QPair<QDateTime, QDateTime>> days;
+
+    // TODO: Might be better to test in the actual feeder loop
+    if (!start.isValid() || !end.isValid() || start >= end) {
+        return days;
+    }
+
+    QDateTime currentStart = start;
+    while (currentStart < end) {
+        QDateTime endOfDay = currentStart;
+        endOfDay.setTime(QTime(23, 59, 59, 999));
+
+        QDateTime currentEnd;
+        if (endOfDay < end) {
+            currentEnd = endOfDay;
+        } else {
+            currentEnd = end;
+        }
+
+        days.append(qMakePair(currentStart, currentEnd));
+
+        // Set it to 00:00:00.000
+        currentStart = endOfDay.addMSecs(1);
+    }
+
+    return days;
 }
