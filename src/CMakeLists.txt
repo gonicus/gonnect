@@ -252,8 +252,8 @@ elseif(APPLE)
         platform/dummy/DummyBackgroundManager.h
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
-        platform/dummy/DummyNetworkHelper.cpp
-        platform/dummy/DummyNetworkHelper.h
+        platform/macos/MacOSNetworkHelper.cpp
+        platform/macos/MacOSNetworkHelper.h
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h

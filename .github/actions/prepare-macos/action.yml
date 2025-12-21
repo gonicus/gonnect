@@ -30,7 +30,7 @@ runs:
         version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'mac'
         target: 'desktop'
-        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
+        modules: 'qt5compat qtshadertools qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtimageformats'
         arch: 'clang_64'
         cache: true
 
