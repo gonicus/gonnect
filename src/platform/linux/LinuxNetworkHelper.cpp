@@ -1,4 +1,4 @@
-#include "MacOSNetworkHelper.h"
+#include "LinuxNetworkHelper.h"
 
 Q_DECLARE_LOGGING_CATEGORY(lcNetwork)
 
@@ -6,17 +6,17 @@ NetworkHelper &NetworkHelper::instance()
 {
     static NetworkHelper *_instance = nullptr;
     if (!_instance) {
-        _instance = new MacOSNetworkHelper;
+        _instance = new LinuxNetworkHelper;
     }
     return *_instance;
 }
 
-MacOSNetworkHelper::MacOSNetworkHelper() : NetworkHelper{}
-{
-}
+LinuxNetworkHelper::LinuxNetworkHelper() : NetworkHelper{} {}
 
-bool MacOSNetworkHelper::isReachable(const QUrl &url)
-{
+bool LinuxNetworkHelper::isReachable(const QUrl &url) {
     Q_UNUSED(url)
+
+    // TODO
+
     return true;
 }

@@ -1,12 +1,11 @@
 #include "WindowsNetworkHelper.h"
-#include <QLoggingCategory>
 #include <winsock2.h>
 #include <iphlpapi.h>
 #include <stdio.h>
 #include <ws2tcpip.h>
 #include <windows.h>
 
-Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
+Q_DECLARE_LOGGING_CATEGORY(lcNetwork)
 
 NetworkHelper &NetworkHelper::instance()
 {
