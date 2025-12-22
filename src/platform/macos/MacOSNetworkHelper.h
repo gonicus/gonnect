@@ -10,6 +10,4 @@ class MacOSNetworkHelper : public NetworkHelper
 public:
     explicit MacOSNetworkHelper();
     ~MacOSNetworkHelper() = default;
-
-    bool isReachable(const QUrl &url) override;
 };

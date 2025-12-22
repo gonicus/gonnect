@@ -18,12 +18,6 @@ NetworkHelper &NetworkHelper::instance()
 
 WindowsNetworkHelper::WindowsNetworkHelper() : NetworkHelper{} { }
 
-bool WindowsNetworkHelper::isReachable(const QUrl &url)
-{
-    // FIXME: Do something useful here
-    return true;
-}
-
 QStringList WindowsNetworkHelper::nameservers() const
 {
     // start with 64k

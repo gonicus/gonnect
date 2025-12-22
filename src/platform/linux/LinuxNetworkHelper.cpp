@@ -1,4 +1,5 @@
 #include "LinuxNetworkHelper.h"
+#include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(lcNetwork)
 
@@ -11,12 +12,4 @@ NetworkHelper &NetworkHelper::instance()
     return *_instance;
 }
 
-LinuxNetworkHelper::LinuxNetworkHelper() : NetworkHelper{} {}
-
-bool LinuxNetworkHelper::isReachable(const QUrl &url) {
-    Q_UNUSED(url)
-
-    // TODO
-
-    return true;
-}
+LinuxNetworkHelper::LinuxNetworkHelper() : NetworkHelper{} { }

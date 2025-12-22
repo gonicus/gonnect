@@ -1,25 +1,45 @@
 #include "NetworkHelper.h"
 #include <QLoggingCategory>
 #include <QFile>
+#include <QUrl>
 #include <QHostAddress>
+#include <QTcpSocket>
 
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
 
-NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent) {
+NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
+{
     if (!QNetworkInformation::loadDefaultBackend()) {
         qCWarning(lcNetwork) << "QNetworkInformation is not supported on this platform or backend";
         return;
     }
 
-    QNetworkInformation* netInfo = QNetworkInformation::instance();
+    QNetworkInformation *netInfo = QNetworkInformation::instance();
 
     connect(netInfo, &QNetworkInformation::reachabilityChanged, this,
-                     &NetworkHelper::onReachabilityChanged);
+            &NetworkHelper::onReachabilityChanged);
 
     onReachabilityChanged(netInfo->reachability());
 }
 
-void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reachability) {
+bool NetworkHelper::isReachable(const QUrl &url)
+{
+    QTcpSocket testSocket;
+    testSocket.connectToHost(url.host(), url.port());
+    testSocket.waitForConnected(1000);
+
+    bool state = testSocket.state() == QTcpSocket::UnconnectedState;
+    testSocket.close();
+
+    if (!state) {
+        qCWarning(lcNetwork) << url << "is not reachable";
+    }
+
+    return state;
+}
+
+void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reachability)
+{
     bool connected = false;
 
     switch (reachability) {
@@ -49,7 +69,8 @@ void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reac
     }
 }
 
-QStringList NetworkHelper::parseResolvConf(const QString& resolvConf) const {
+QStringList NetworkHelper::parseResolvConf(const QString &resolvConf) const
+{
     QStringList servers;
     QFile resolvconf;
     resolvconf.setFileName(resolvConf);
@@ -75,7 +96,8 @@ QStringList NetworkHelper::parseResolvConf(const QString& resolvConf) const {
     return servers;
 }
 
-QStringList NetworkHelper::nameservers() const {
+QStringList NetworkHelper::nameservers() const
+{
     QStringList result;
 
     result.append(parseResolvConf("/etc/resolv.conf"));

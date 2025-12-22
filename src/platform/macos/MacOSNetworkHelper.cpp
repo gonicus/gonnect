@@ -11,12 +11,4 @@ NetworkHelper &NetworkHelper::instance()
     return *_instance;
 }
 
-MacOSNetworkHelper::MacOSNetworkHelper() : NetworkHelper{}
-{
-}
-
-bool MacOSNetworkHelper::isReachable(const QUrl &url)
-{
-    Q_UNUSED(url)
-    return true;
-}
+MacOSNetworkHelper::MacOSNetworkHelper() : NetworkHelper{} { }

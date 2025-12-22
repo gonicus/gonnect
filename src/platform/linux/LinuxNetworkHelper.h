@@ -10,7 +10,5 @@ class LinuxNetworkHelper : public NetworkHelper
 public:
     explicit LinuxNetworkHelper();
 
-    bool isReachable(const QUrl &url) override;
-
     ~LinuxNetworkHelper() = default;
 };
