@@ -23,6 +23,9 @@ public:
     }
     ~DateEventManager();
 
+    QList<QPair<QDateTime, QDateTime>> createDaysFromRange(const QDateTime start,
+                                                           const QDateTime end);
+
     /// Add date event; DateEventManager takes ownership of the given object!
     void addDateEvent(DateEvent *dateEvent);
 

@@ -20,6 +20,32 @@ DateEventManager::DateEventManager(QObject *parent) : QObject{ parent }
     m_minuteTimer.callOnTimeout(this, &DateEventManager::onTimerTimeout);
 }
 
+QList<QPair<QDateTime, QDateTime>> DateEventManager::createDaysFromRange(const QDateTime start,
+                                                                         const QDateTime end)
+{
+    QList<QPair<QDateTime, QDateTime>> days;
+
+    QDateTime currentStart = start;
+    while (currentStart < end) {
+        QDateTime endOfDay = currentStart;
+        endOfDay.setTime(QTime(23, 59, 59, 999));
+
+        QDateTime currentEnd;
+        if (endOfDay < end) {
+            currentEnd = endOfDay;
+        } else {
+            currentEnd = end;
+        }
+
+        days.append(qMakePair(currentStart, currentEnd));
+
+        // Set it to 00:00:00.000
+        currentStart = endOfDay.addMSecs(1);
+    }
+
+    return days;
+}
+
 DateEvent *DateEventManager::findDateEventByHash(const size_t &eventHash) const
 {
     for (auto dateEvent : std::as_const(m_dateEvents)) {
