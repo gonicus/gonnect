@@ -12,7 +12,6 @@ class FlatpakInhibitHelper : public InhibitHelper
 public:
     explicit FlatpakInhibitHelper();
 
-    void queryEndResponse() override;
     void inhibit(unsigned int flags, const QString &reason) override;
     void release() override;
 
@@ -20,6 +19,8 @@ public:
     void releaseScreenSaver() override;
 
 private:
+    void queryEndResponse();
+
     InhibitPortal *m_portal = nullptr;
     OrgFreedesktopScreenSaverInterface *m_screenSaverInterface = nullptr;
 
