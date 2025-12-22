@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(lcNetwork)
 
