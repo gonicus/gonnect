@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
     QtWebEngineQuick::initialize();
 
-#ifdef WITH_DBUS
+#ifdef Q_OS_LINUX
     qDBusRegisterMetaType<QList<QVariantMap>>();
     qDBusRegisterMetaType<QPair<QString, QVariantMap>>();
     qDBusRegisterMetaType<QList<QPair<QString, QVariantMap>>>();

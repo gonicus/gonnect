@@ -2920,7 +2920,7 @@
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="250"/>
-        <source>Use dark tray icon</source>
+        <source>Use dark mode tray icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

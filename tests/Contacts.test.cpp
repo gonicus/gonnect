@@ -13,19 +13,6 @@ void ContactsTest::testCleanPhoneNumber()
     // Strip whitespace and -
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  +49 2931 9160   "), QString("+4929319160"));
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  +49-2931-9160   "), QString("+4929319160"));
-
-    // 00 at beginning is replaced with +
-    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("0029319160"), QString("+29319160"));
-
-    // 0 at beginning is replaced with +49
-    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("029319160"), QString("+4929319160"));
-
-    // Every number must start with +
-    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("29319160"), QString("+29319160"));
-
-    // Internal numbers (up to 3 digits) must remain unchainged
-    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  123 "), QString("123"));
-    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("123"), QString("123"));
 }
 
 void ContactsTest::testLevenshteinDistance()

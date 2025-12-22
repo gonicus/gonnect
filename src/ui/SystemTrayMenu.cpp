@@ -10,7 +10,6 @@
 #include "TogglerManager.h"
 #include "Toggler.h"
 #include "Application.h"
-#include "Theme.h"
 #include "ThemeManager.h"
 
 using namespace std::chrono_literals;
@@ -26,7 +25,6 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
     m_trayIcon = new QSystemTrayIcon(this);
     m_trayIcon->setContextMenu(m_trayIconMenu);
     m_trayIcon->show();
-    resetTrayIcon();
 
     connect(m_trayIcon, &QSystemTrayIcon::activated, this,
             [](QSystemTrayIcon::ActivationReason reason) {
@@ -74,6 +72,8 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateTogglers);
     connect(&TogglerManager::instance(), &TogglerManager::togglerBusyChanged, this,
             &SystemTrayMenu::updateTogglers);
+
+    resetTrayIcon();
 }
 
 SystemTrayMenu::~SystemTrayMenu()
