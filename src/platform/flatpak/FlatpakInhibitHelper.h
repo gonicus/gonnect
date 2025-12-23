@@ -18,6 +18,8 @@ public:
     void inhibitScreenSaver(const QString &applicationName, const QString &reason) override;
     void releaseScreenSaver() override;
 
+    bool inhibitActive() const override { return m_inhibitActive; }
+
 private:
     void queryEndResponse();
 
@@ -26,4 +28,5 @@ private:
 
     unsigned m_screenSaverCookie = 0;
     bool m_screenSaverIsInhibited = false;
+    bool m_inhibitActive = false;
 };

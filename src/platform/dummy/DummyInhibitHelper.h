@@ -22,4 +22,6 @@ public:
         Q_UNUSED(reason);
     }
     void releaseScreenSaver() override { }
+
+    bool inhibitActive() const override { return false; }
 };

@@ -1,9 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QLoggingCategory>
 
-Q_DECLARE_LOGGING_CATEGORY(lcInhibit)
 
 class InhibitHelper : public QObject
 {
@@ -27,6 +25,8 @@ public:
 
     virtual void inhibitScreenSaver(const QString &applicationName, const QString &reason) = 0;
     virtual void releaseScreenSaver() = 0;
+
+    virtual bool inhibitActive() const = 0;
 
 Q_SIGNALS:
     void stateChanged(bool screensaverActive, InhibitHelper::InhibitState state);
