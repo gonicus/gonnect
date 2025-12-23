@@ -262,8 +262,8 @@ elseif(APPLE)
         platform/dummy/DummySearchProvider.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
-	    platform/windows/WindowsUserInfo.cpp
-	    platform/windows/WindowsUserInfo.h
+        platform/windows/WindowsUserInfo.cpp
+        platform/windows/WindowsUserInfo.h
         platform/dummy/DummyExternalMediaManager.cpp
         platform/dummy/DummyExternalMediaManager.h
         platform/dummy/DummyBackgroundManager.cpp
@@ -276,8 +276,8 @@ elseif(WIN32)
         platform/windows/WindowsNetworkHelper.h
         platform/windows/WindowsNotificationManager.h
         platform/windows/WindowsNotificationManager.cpp
-        platform/dummy/DummyInhibitHelper.h
-        platform/dummy/DummyInhibitHelper.cpp
+        platform/windows/WindowsInhibitHelper.h
+        platform/windows/WindowsInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h
         platform/dummy/DummyGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h

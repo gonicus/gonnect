@@ -2,6 +2,9 @@
 #include "InhibitHelper.h"
 #include "InhibitPortal.h"
 #include "ScreenSaverInterface.h"
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcInhibit, "gonnect.session.inhibit")
 
 InhibitHelper &InhibitHelper::instance()
 {
@@ -38,6 +41,7 @@ void FlatpakInhibitHelper::inhibit(unsigned int flags, const QString &reason)
             qCCritical(lcInhibit) << "failed to inhibit session: response code" << code;
         } else {
             m_portal->queryEndResponse();
+            m_inhibitActive = true;
         }
     });
 }
@@ -45,6 +49,7 @@ void FlatpakInhibitHelper::inhibit(unsigned int flags, const QString &reason)
 void FlatpakInhibitHelper::release()
 {
     m_portal->release();
+    m_inhibitActive = false;
 }
 
 void FlatpakInhibitHelper::inhibitScreenSaver(const QString &applicationName, const QString &reason)

@@ -109,6 +109,16 @@ jobs:
       - name: Build
         run: cmake --build --preset conan-release
 
+      - name: Package
+        run: cd build/Release && cpack ${{github.workspace}}
+
+      - name: Save installer
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: mac-installer.dmg
+          compression-level: 0
+          path: build/Release/GOnnect*.dmg
+
   format:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
