@@ -12,8 +12,6 @@ BaseWidget {
     property string primaryUrl
     property string secondaryUrl
 
-    signal additionalSettingsUpdated()
-
     onAdditionalSettingsLoaded: {
         control.primaryUrl = control.config.get("primaryUrl")
         control.secondaryUrl = control.config.get("secondaryUrl")

@@ -17,6 +17,7 @@ Item {
     property AdditionalSettings config: AdditionalSettings {}
 
     signal additionalSettingsLoaded()
+    signal additionalSettingsUpdated()
 
     Connections {
         target: control.config
