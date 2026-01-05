@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <QNetworkInformation>
 
 class NetworkHelper : public QObject
 {
@@ -7,26 +8,25 @@ class NetworkHelper : public QObject
     Q_DISABLE_COPY(NetworkHelper)
 
 public:
-    explicit NetworkHelper(QObject *parent = nullptr) : QObject(parent) { }
+    explicit NetworkHelper(QObject *parent = nullptr);
 
     static NetworkHelper &instance();
 
-    virtual bool hasConnectivity() const = 0;
-    virtual bool localNetworkAvailable() const = 0;
-    virtual bool limitedNetworkAvailable() const = 0;
-    virtual bool captiveNetworkAvailable() const = 0;
-    virtual bool fullNetworkAvailable() const = 0;
+    virtual bool hasConnectivity() const { return m_connectivity; }
+    virtual bool isReachable(const QUrl &url);
 
-    virtual bool isReachable(const QUrl &url) = 0;
-
-    virtual QStringList nameservers() const = 0;
+    virtual QStringList nameservers() const;
 
     ~NetworkHelper() = default;
 
 Q_SIGNALS:
     void connectivityChanged();
-    void localNetworkAvailableChanged();
-    void limitedNetworkAvailableChanged();
-    void captiveNetworkAvailableChanged();
-    void fullNetworkAvailableChanged();
+
+protected:
+    bool m_connectivity = false;
+
+private:
+    void onReachabilityChanged(QNetworkInformation::Reachability reachability);
+
+    QStringList parseResolvConf(const QString &resolvConf) const;
 };

@@ -1,12 +1,12 @@
 #include "WindowsNetworkHelper.h"
-#include <QLoggingCategory>
 #include <winsock2.h>
 #include <iphlpapi.h>
 #include <stdio.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#include <QLoggingCategory>
 
-Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
+Q_DECLARE_LOGGING_CATEGORY(lcNetwork)
 
 NetworkHelper &NetworkHelper::instance()
 {
@@ -18,12 +18,6 @@ NetworkHelper &NetworkHelper::instance()
 }
 
 WindowsNetworkHelper::WindowsNetworkHelper() : NetworkHelper{} { }
-
-bool WindowsNetworkHelper::isReachable(const QUrl &url)
-{
-    // FIXME: Do something useful here
-    return true;
-}
 
 QStringList WindowsNetworkHelper::nameservers() const
 {
