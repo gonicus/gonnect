@@ -166,6 +166,7 @@ Item {
             }
         }
 
+        widget.additionalSettingsLoaded()
         page.model.add(widget)
     }
 }
