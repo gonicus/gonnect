@@ -19,10 +19,15 @@ public:
     QUrl networkCheckURL() const override;
 
 Q_SIGNALS:
+    /// Private signal
     void newContactReady(const QString &dn, const QString &sourceUid,
                          const Contact::ContactSourceInfo &contactSourceInfo, const QString &name,
                          const QString &company, const QString &mail, const QDateTime &lastModified,
                          const QList<Contact::PhoneNumber> &phoneNumbers, QPrivateSignal);
+
+    /// Private signal
+    void newExternalImageAdded(const QString &id, const QByteArray &data, const QDateTime &modified,
+                               QPrivateSignal);
 
 private:
     void clearCStringlist(char **attrs) const;
