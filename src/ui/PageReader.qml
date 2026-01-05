@@ -159,6 +159,7 @@ Item {
 
         // Load widget-specific settings
         let additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",")
+        let hasCustomSettings = additionalSettings !== "" ? true : false
         for (let setting of additionalSettings) {
             let value = UISettings.getUISetting(widgetId, setting, "")
             if (value !== "") {
@@ -166,7 +167,10 @@ Item {
             }
         }
 
-        widget.additionalSettingsLoaded()
+        if (hasCustomSettings) {
+            widget.additionalSettingsLoaded()
+        }
+
         page.model.add(widget)
     }
 }
