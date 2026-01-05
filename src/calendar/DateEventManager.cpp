@@ -28,7 +28,7 @@ QList<QPair<QDateTime, QDateTime>> DateEventManager::createDaysFromRange(const Q
     QDateTime currentStart = start;
     while (currentStart < end) {
         QDateTime endOfDay = currentStart;
-        endOfDay.setTime(QTime(23, 59, 59, 999));
+        endOfDay.setTime(QTime(0, 0, 0, 0));
 
         QDateTime currentEnd;
         if (endOfDay < end) {
@@ -38,9 +38,9 @@ QList<QPair<QDateTime, QDateTime>> DateEventManager::createDaysFromRange(const Q
         }
 
         days.append(qMakePair(currentStart, currentEnd));
+        qCCritical(lcDateEventManager) << "EVENT:" << currentStart << currentEnd;
 
-        // Set it to 00:00:00.000
-        currentStart = endOfDay.addMSecs(1);
+        currentStart = endOfDay;
     }
 
     return days;

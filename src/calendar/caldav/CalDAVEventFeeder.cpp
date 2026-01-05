@@ -209,7 +209,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
                 if (isMultiDay) {
-                    const auto days = createDaysFromRange(start, end);
+                    const auto days = manager.createDaysFromRange(start, end);
                     for (auto &day : days) {
                         QString nid = QString("%1-%2").arg(id).arg(day.first.toMSecsSinceEpoch());
                         manager.addDateEvent(new DateEvent(nid, m_config.source, day.first,
