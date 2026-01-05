@@ -12,16 +12,15 @@ BaseWidget {
     property string primaryUrl
     property string secondaryUrl
 
+    signal additionalSettingsUpdated()
+
     onAdditionalSettingsLoaded: {
         control.primaryUrl = control.config.get("primaryUrl")
         control.secondaryUrl = control.config.get("secondaryUrl")
     }
 
-    onPrimaryUrlChanged: {
+    onAdditionalSettingsUpdated: {
         control.config.set("primaryUrl", control.primaryUrl)
-    }
-
-    onSecondaryUrlChanged: {
         control.config.set("secondaryUrl", control.secondaryUrl)
     }
 
@@ -97,6 +96,7 @@ BaseWidget {
             }
 
             url: control.showPrimary ? control.primaryUrl : control.secondaryUrl
+            backgroundColor: Theme.backgroundColor
             settings {
                 autoLoadImages: true
                 errorPageEnabled: true
@@ -164,6 +164,7 @@ BaseWidget {
 
                     TextField {
                         id: primaryUrlInput
+                        text: control.primaryUrl
                         Layout.fillWidth: true
                     }
                 }
@@ -179,6 +180,7 @@ BaseWidget {
 
                     TextField {
                         id: secondaryUrlInput
+                        text: control.secondaryUrl
                         Layout.fillWidth: true
                     }
                 }
@@ -206,6 +208,8 @@ BaseWidget {
                         onClicked: {
                             control.primaryUrl = primaryUrlInput.text
                             control.secondaryUrl = secondaryUrlInput.text
+
+                            control.additionalSettingsUpdated()
 
                             webviewSettings.close()
                         }
