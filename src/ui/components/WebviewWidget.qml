@@ -72,7 +72,8 @@ BaseWidget {
                 height: 40
 
                 onClicked: () => {
-                    urlEntryDialog.open()
+                    const item = webviewSettingsComponent.createObject(control, {})
+                    item.show()
                 }
             }
         }
@@ -124,57 +125,85 @@ BaseWidget {
         }
     }
 
-    Dialog {
-        id: urlEntryDialog
-        title: qsTr("Set URL's")
+    Component {
+        id: webviewSettingsComponent
 
-        x: parent.width / 2
-        y: parent.height / 2
+        BaseWindow {
+            id: webviewSettings
+            objectName: "webviewSettingsWindow"
+            title: qsTr("Set URL's")
+            width: 600
+            height: 340
+            visible: true
+            resizable: false
+            showMinimizeButton: false
+            showMaximizeButton: false
 
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-
-        ColumnLayout {
-            anchors.fill: parent
-            spacing: 15
-
-            ColumnLayout {
-                spacing: 4
-
-                Label {
-                    text: qsTr("Primary URL")
-                }
-
-                TextField {
-                    id: primaryUrlInput
-                    Layout.fillWidth: true
-                }
-            }
+            minimumWidth: webviewSettings.width
+            minimumHeight: webviewSettings.height
+            maximumWidth: webviewSettings.width
+            maximumHeight: webviewSettings.height
 
             ColumnLayout {
-                spacing: 4
+                anchors {
+                    fill: parent
+                    margins: 20
+                }
+                spacing: 15
 
-                Label {
-                    text: qsTr("Secondary URL")
+                ColumnLayout {
+                    spacing: 4
+
+                    Label {
+                        text: qsTr("Primary URL")
+                    }
+
+                    TextField {
+                        id: primaryUrlInput
+                        Layout.fillWidth: true
+                    }
                 }
 
-                TextField {
-                    id: secondaryUrlInput
+                ColumnLayout {
+                    spacing: 4
+
+                    Label {
+                        text: qsTr("Secondary URL")
+                    }
+
+                    TextField {
+                        id: secondaryUrlInput
+                        Layout.fillWidth: true
+                    }
+                }
+
+                RowLayout {
+                    id: pageButtons
+                    spacing: 10
                     Layout.fillWidth: true
-                }
-            }
+                    layoutDirection: Qt.RightToLeft
+                    Layout.alignment: Qt.AlignRight | Qt.AlignBottom
 
-            Button {
-                text: "Done"
-                Layout.fillWidth: true
-                Layout.topMargin: 10
+                    Button {
+                        id: pageCancel
+                        text: qsTr("Cancel")
 
-                onClicked: {
-                    control.primaryUrl = primaryUrlInput.text
-                    control.secondaryUrl = secondaryUrlInput.text
+                        onClicked: () => webviewSettings.close()
+                    }
 
-                    urlEntryDialog.close()
+                    Button {
+                        id: pageConfirm
+                        highlighted: true
+                        icon.source: Icons.checkbox
+                        text: qsTr("Done")
+
+                        onClicked: {
+                            control.primaryUrl = primaryUrlInput.text
+                            control.secondaryUrl = secondaryUrlInput.text
+
+                            webviewSettings.close()
+                        }
+                    }
                 }
             }
         }
