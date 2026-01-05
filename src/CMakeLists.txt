@@ -222,6 +222,8 @@ elseif(LINUX)
         platform/linux/LinuxUserInfo.cpp
         platform/linux/LinuxNotificationManager.h
         platform/linux/LinuxNotificationManager.cpp
+        platform/linux/LinuxNetworkHelper.cpp
+        platform/linux/LinuxNetworkHelper.h
         platform/linux/MPRISExternalMediaManager.cpp
         platform/linux/MPRISExternalMediaManager.h
 
@@ -232,8 +234,6 @@ elseif(LINUX)
 
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
-        platform/dummy/DummyNetworkHelper.cpp
-        platform/dummy/DummyNetworkHelper.h
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
 
@@ -252,8 +252,8 @@ elseif(APPLE)
         platform/dummy/DummyBackgroundManager.h
         platform/dummy/DummyThemeManager.cpp
         platform/dummy/DummyThemeManager.h
-        platform/dummy/DummyNetworkHelper.cpp
-        platform/dummy/DummyNetworkHelper.h
+        platform/macos/MacOSNetworkHelper.cpp
+        platform/macos/MacOSNetworkHelper.h
         platform/dummy/DummyInhibitHelper.h
         platform/dummy/DummyInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h
@@ -596,6 +596,7 @@ qt_add_qml_module(gonnect
         platform/BackgroundManager.h
         platform/ThemeManager.h
         platform/ThemeManager.cpp
+        platform/NetworkHelper.cpp
         platform/NetworkHelper.h
         platform/InhibitHelper.h
         platform/GlobalShortcuts.h

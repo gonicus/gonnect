@@ -19,6 +19,8 @@ void ThemeManager::initColorThemeDetection()
     const auto desktop = QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower();
     if (desktop.contains("kde")) {
         m_trayColorScheme = ThemeManager::ColorScheme::LIGHT;
+    } else if (desktop.contains("gnome")) {
+        m_trayColorScheme = ThemeManager::ColorScheme::DARK;
     }
 #endif
 }
@@ -50,5 +52,6 @@ ThemeManager::ColorScheme ThemeManager::trayColorScheme() const
     if (m_trayColorScheme != ThemeManager::ColorScheme::NO_PREFERENCE) {
         return m_trayColorScheme;
     }
+
     return m_colorScheme;
 }

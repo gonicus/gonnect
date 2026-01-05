@@ -30,12 +30,12 @@ runs:
         version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'mac'
         target: 'desktop'
-        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
+        modules: 'qt5compat qtshadertools qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtimageformats'
         arch: 'clang_64'
         cache: true
 
     - name: Install Conan
-      uses: conan-io/setup-conan@09566912d661de90608308897a4d513e850c04e8 # v1
+      uses: conan-io/setup-conan@2f4bd34e8e0af00e1a77a66e1d284e06d71d703f # v1
       with:
         version: 2.22.2
         cache_packages: true
