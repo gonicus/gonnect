@@ -57,7 +57,8 @@ BaseWidget {
 
             Button {
                 id: switchButton
-                text: control.showPrimary == true ? "1" : "2"
+                icon.source: Icons.viewRefresh
+                text: qsTr("Switch")
                 height: 40
 
                 onClicked: () => {
@@ -145,6 +146,7 @@ BaseWidget {
             maximumHeight: webviewSettings.height
 
             ColumnLayout {
+                id: mainLayout
                 anchors {
                     fill: parent
                     margins: 20
@@ -152,9 +154,11 @@ BaseWidget {
                 spacing: 15
 
                 ColumnLayout {
+                    id: primaryUrlLayout
                     spacing: 4
 
                     Label {
+                        id: primaryUrlLabel
                         text: qsTr("Primary URL")
                     }
 
@@ -165,9 +169,11 @@ BaseWidget {
                 }
 
                 ColumnLayout {
+                    id: secondaryUrlLayout
                     spacing: 4
 
                     Label {
+                        id: secondaryUrlLabel
                         text: qsTr("Secondary URL")
                     }
 
