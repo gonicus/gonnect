@@ -2,14 +2,13 @@
 
 #include <QObject>
 #include <QHash>
-#include <QRunnable>
 #include "IAddressBookFeeder.h"
 #include "LDAPInitializer.h"
 #include "Contact.h"
 
 class AddressBookManager;
 
-class LDAPAddressBookFeeder : public QObject, public QRunnable, public IAddressBookFeeder
+class LDAPAddressBookFeeder : public QObject, public IAddressBookFeeder
 {
     Q_OBJECT
 
@@ -19,14 +18,11 @@ public:
     void process() override;
     QUrl networkCheckURL() const override;
 
-    // QRunnable interface
-    virtual void run() override;
-
 Q_SIGNALS:
     void newContactReady(const QString &dn, const QString &sourceUid,
                          const Contact::ContactSourceInfo &contactSourceInfo, const QString &name,
                          const QString &company, const QString &mail, const QDateTime &lastModified,
-                         const QList<Contact::PhoneNumber> &phoneNumbers);
+                         const QList<Contact::PhoneNumber> &phoneNumbers, QPrivateSignal);
 
 private:
     void clearCStringlist(char **attrs) const;
@@ -37,6 +33,7 @@ private:
     void loadAllAvatars(const LDAPInitializer::Config &ldapConfig);
     void processImpl(const QString &password);
     void processResult(LDAPMessage *ldapMessage);
+    void startContactQuery();
 
     LDAPInitializer::Config m_ldapConfig;
 

@@ -18,9 +18,8 @@
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
 LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookManager *parent)
-    : QObject(parent), QRunnable(), m_group(group)
+    : QObject(parent), m_group(group)
 {
-    setAutoDelete(false);
     m_manager = qobject_cast<AddressBookManager *>(parent);
 
     connect(this, &LDAPAddressBookFeeder::newContactReady, this,
@@ -174,8 +173,7 @@ void LDAPAddressBookFeeder::feedAddressBook()
     clearCStringlist(attrs);
 
     if (result == LDAP_SUCCESS) {
-        // Start thread to poll the results until async search has finished
-        QThreadPool::globalInstance()->start(this);
+        startContactQuery();
 
     } else {
         qCCritical(lcLDAPAddressBookFeeder)
@@ -349,30 +347,31 @@ QUrl LDAPAddressBookFeeder::networkCheckURL() const
     return QUrl(url);
 }
 
-void LDAPAddressBookFeeder::run()
+void LDAPAddressBookFeeder::startContactQuery()
 {
+    QThread::create([this]() {
+        timeval timeout;
+        timeout.tv_sec = 3;
+        timeout.tv_usec = 0;
 
-    timeval timeout;
-    timeout.tv_sec = 3;
-    timeout.tv_usec = 0;
+        LDAPMessage *msg = nullptr;
 
-    LDAPMessage *msg = nullptr;
+        const int ldapResult = ldap_result(m_ldap, m_ldapSearchMessageId, true, &timeout, &msg);
 
-    const int ldapResult = ldap_result(m_ldap, m_ldapSearchMessageId, true, &timeout, &msg);
+        if (ldapResult > 0) { // Success
+            processResult(msg);
+        } else if (ldapResult == 0) { // Timeout
+            qCCritical(lcLDAPAddressBookFeeder)
+                    << "Timeout on search request: " << ldap_err2string(ldapResult);
+            ErrorBus::instance().addError(tr("LDAP timeout: %1").arg(ldap_err2string(ldapResult)));
+        } else { // Error
+            qCCritical(lcLDAPAddressBookFeeder)
+                    << "Error on search request: " << ldap_err2string(ldapResult);
+            ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(ldapResult)));
+        }
 
-    if (ldapResult > 0) { // Success
-        processResult(msg);
-    } else if (ldapResult == 0) { // Timeout
-        qCCritical(lcLDAPAddressBookFeeder)
-                << "Timeout on search request: " << ldap_err2string(ldapResult);
-        ErrorBus::instance().addError(tr("LDAP timeout: %1").arg(ldap_err2string(ldapResult)));
-    } else { // Error
-        qCCritical(lcLDAPAddressBookFeeder)
-                << "Error on search request: " << ldap_err2string(ldapResult);
-        ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(ldapResult)));
-    }
-
-    QThread::currentThread()->quit();
+        QThread::currentThread()->quit();
+    })->start();
 }
 
 void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
@@ -464,7 +463,7 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
 
             Q_EMIT newContactReady(dn, sourceUid, { m_priority, m_displayName }, cn, company, mail,
                                    QDateTime::fromString(modifyTimestamp, "yyyyMMddhhmmsst"),
-                                   phoneNumbers);
+                                   phoneNumbers, QPrivateSignal());
 
             a = nullptr;
 
