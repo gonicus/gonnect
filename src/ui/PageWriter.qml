@@ -26,7 +26,7 @@ Item {
         onTriggered: () => {
             // Widgets
             const widgets = model.items()
-            for (let widget of widgets) {
+            for (const widget of widgets) {
                 const widgetId = widget.widgetId
 
                 UISettings.setUISetting(widgetId, "name", widget.name)

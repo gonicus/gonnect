@@ -137,7 +137,7 @@ class GOnnectRecipe(ConanFile):
             self.options["qt/*"].qthttpserver=True
             self.options["qt/*"].qtscxml=False
             self.options["qt/*"].qtmqtt=False
-            self.options["qt/*"].qtwebview=True
+            self.options["qt/*"].qtwebview=False
             self.options["qt/*"].qtcharts=False
             self.options["qt/*"].qtdatavis3d=False
             self.options["qt/*"].qtvirtualkeyboard=False

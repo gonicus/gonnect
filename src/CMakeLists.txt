@@ -10,7 +10,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     Network
     NetworkAuth
     Widgets
-    WebView
     WebEngineCore
     WebEngineQuick
     Xml)
@@ -731,7 +730,6 @@ target_link_libraries(gonnect
         Qt6::Sql
         Qt6::Network
         Qt6::NetworkAuth
-        Qt6::WebView
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
         Qt6::Core5Compat
