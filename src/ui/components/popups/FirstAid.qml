@@ -67,7 +67,7 @@ Item {
 
             Button {
                 id: firstAidExit
-                text: qsTr("Cancel")
+                text: qsTr("Close")
                 Layout.preferredWidth: control.implicitWidth / 2
                 Layout.alignment: Qt.AlignHCenter
 
