@@ -52,6 +52,7 @@ public:
 
     Q_INVOKABLE void holdAllCalls(const ICallState *stateObjectToSkip = nullptr) const;
     Q_INVOKABLE void unholdOtherCall() const;
+    Q_INVOKABLE void unholdAllCalls() const;
 
 private Q_SLOTS:
     void updateGlobalCallState();
