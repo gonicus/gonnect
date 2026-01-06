@@ -5,7 +5,7 @@
 #include <ldap.h>
 #include <QDebug>
 #include <QLoggingCategory>
-#include <QThreadPool>
+#include <QThread>
 
 #include "LDAPAddressBookFeeder.h"
 #include "AddressBook.h"
@@ -118,16 +118,12 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
 
     feedAddressBook();
 
-    connect(&AvatarManager::instance(), &AvatarManager::avatarManagerInitialized, this,
-            [this](QList<const Contact *> dirtyContacts) {
-                if (dirtyContacts.isEmpty()) {
-                    loadAllAvatars(m_ldapConfig);
-                } else {
-                    loadAvatars(dirtyContacts);
-                }
-            });
-
-    AvatarManager::instance().initialLoad();
+    const auto dirtyContacts = AvatarManager::instance().initialLoad();
+    if (dirtyContacts.isEmpty()) {
+        loadAllAvatars(m_ldapConfig);
+    } else {
+        loadAvatars(dirtyContacts);
+    }
 
     settings.endGroup();
 }
@@ -199,6 +195,7 @@ void LDAPAddressBookFeeder::loadAvatars(const QList<const Contact *> &contacts)
     LDAPInitializer::Config newConfig(m_ldapConfig);
     newConfig.ldapFilter =
             QString("(& %1 (| %2))").arg(m_ldapConfig.ldapFilter, filterList.join(' '));
+
     loadAllAvatars(newConfig);
 }
 
