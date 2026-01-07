@@ -38,6 +38,7 @@ void FlatpakNetworkHelper::updateNetworkState()
 
     if (reply.isError()) {
         qCCritical(lcNetwork) << "failed to query network status:" << reply.error().message();
+        connected = true; // TODO: remove me
     } else if (reply.isValid()) {
         QVariantMap res = reply.value();
 
