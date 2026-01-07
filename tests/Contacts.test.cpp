@@ -13,6 +13,10 @@ void ContactsTest::testCleanPhoneNumber()
     // Strip whitespace and -
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  +49 2931 9160   "), QString("+4929319160"));
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  +49-2931-9160   "), QString("+4929319160"));
+    // Leave number as is
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("0012345"), QString("0012345"));
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("012345"), QString("012345"));
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("12345"), QString("12345"));
 }
 
 void ContactsTest::testLevenshteinDistance()
