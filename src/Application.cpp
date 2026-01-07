@@ -249,6 +249,12 @@ void Application::initLogging()
     std::unique_ptr<logfault::Handler> eventhandler{ new WindowsEventLogHandler(
             "GOnnect", logfault::LogLevel::WARN) };
     logfault::LogManager::Instance().AddHandler(std::move(eventhandler));
+    if (!m_isDebugRun) {
+        auto filePath = Application::logFilePath().toStdString();
+        logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(
+            filePath, logfault::LogLevel::TRACE, true));
+    }
+
     s_originalMessageHandler = nullptr;
 #endif // Q_OS_WINDOWS
 
