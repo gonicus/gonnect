@@ -64,7 +64,7 @@ void AvatarManager::updateContacts()
     Q_EMIT avatarsLoaded();
 }
 
-void AvatarManager::initialLoad()
+QList<const Contact *> AvatarManager::initialLoad()
 {
     QList<const Contact *> dirtyContacts;
     QDir avatarDir(m_avatarImageDirPath);
@@ -85,8 +85,9 @@ void AvatarManager::initialLoad()
         }
     }
 
-    Q_EMIT avatarManagerInitialized(dirtyContacts);
     Q_EMIT avatarsLoaded();
+
+    return dirtyContacts;
 }
 
 QString AvatarManager::avatarPathFor(const QString &id)
