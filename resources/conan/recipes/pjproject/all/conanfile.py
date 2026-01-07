@@ -4,11 +4,14 @@ from conan import ConanFile
 from conan.tools.files import get, replace_in_file, rmdir, copy, apply_conandata_patches, export_conandata_patches, collect_libs
 from conan.tools.build import cross_building
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import MSBuild
+from conan.tools.microsoft import MSBuildToolchain
+from conan.tools.microsoft import MSBuildDeps
 
 required_conan_version = ">=2"
 
@@ -31,11 +34,8 @@ class PjSIPConan(ConanFile):
         "with_samplerate": [True, False],
         "with_ext_sound": [True, False],
         "with_video": [True, False],
-        "with_libyuv": [True, False],
-        "with_ffmpeg": [True, False],
         "with_floatingpoint": [True, False],
         "endianness": ["big", "little"],
-        "io_queue": ["select", "kqueue", "epoll", "iocp"]
     }
     default_options = {
         "shared": False,
@@ -45,27 +45,18 @@ class PjSIPConan(ConanFile):
         "with_samplerate": False,
         "with_ext_sound": True,
         "with_video": False,
-        "with_libyuv": False,
-        "with_ffmpeg": False,
         "with_floatingpoint": True,
         "endianness": "little",
-        "io_queue": "select",
     }
 
     languages = "C"
 
     def requirements(self):
-        self.requires("zlib/1.3.1")
-
         if self.settings.os != "Macos":
             self.requires("openssl/3.5.4")
 
         if self.options.with_uuid:
             self.requires("libuuid/1.0.3")
-        if self.options.with_video and self.options.with_yuv:
-            self.requires("libyuv/1892")
-        if self.options.with_video and self.options.with_ffmpeg:
-            self.requires("ffmpeg/8.0.1")
         if self.options.with_samplerate:
             self.requires("libsamplerate/0.2.2")
         if self.options.with_opus:
@@ -76,10 +67,7 @@ class PjSIPConan(ConanFile):
             del self.options.fPIC
 
     def layout(self):
-        if self.settings.os == "Windows":
-            cmake_layout(self)
-        else:
-            basic_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -88,16 +76,18 @@ class PjSIPConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        vbe = VirtualBuildEnv(self)
-        vbe.generate()
-        if not cross_building(self):
-            vre = VirtualRunEnv(self)
-            vre.generate(scope="build")
+        if self.settings.os == "Windows":
+            bd = MSBuildDeps(self)
+            if self.settings.build_type == 'Release':
+                bd.configuration  = 'Release-Dynamic'
+            elif self.settings.build_type == 'Debug':
+                bd.configuration  = 'Debug-Dynamic'
 
-        env = Environment()
-        env.unset("VCPKG_ROOT")
-        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-        env.vars(self).save_script("conanbuildenv_pkg_config_path")
+            bd.generate()
+
+            tc = MSBuildToolchain(self)
+            tc.generate()
+            return
 
         if not cross_building(self):
             # Expose LD_LIBRARY_PATH when there are shared dependencies,
@@ -105,150 +95,108 @@ class PjSIPConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
-        if self.settings.os == "Windows":
-            deps = CMakeDeps(self)
-            deps.set_property("opus", "cmake_target_name", "OPUS::OPUS")
-            deps.set_property("opus", "cmake_file_name", "OPUS")
-            deps.set_property("libuuid", "cmake_target_name", "UUID::UUID")
-            deps.set_property("libuuid", "cmake_file_name", "UUID")
-            deps.generate()
-
-            tc = CMakeToolchain(self)
-    
-            tc.variables['PJ_SKIP_EXPERIMENTAL_NOTICE'] = True
-            tc.variables['BUILD_TESTING'] = False
-
-            tc.variables['PJSIP_WITH_TLS'] = True
-            tc.variables['PJNATH_WITH_UPNP'] = False
-
-            tc.variables['PJLIB_WITH_LIBUUID'] = self.options.with_uuid
-            tc.variables['PJLIB_WITH_FLOATING_POINT'] = self.options.with_floatingpoint
-            tc.variables['PJLIB_WITH_IOQUEUE'] = self.options.io_queue
-
-            tc.variables['PJLIB_WITH_OPUS'] = self.options.with_opus
-
-            tc.variables['PJMEDIA_WITH_SRTP'] = True
-
-            tc.variables['PJMEDIA_WITH_VIDEODEV'] = True
-            tc.variables['PJMEDIA_WITH_LIBYUV'] = self.options.with_video and self.options.with_libyuv
-            tc.variables['PJMEDIA_WITH_FFMPEG'] = self.options.with_video and self.options.with_ffmpeg
-            
-            tc.variables['PJMEDIA_WITH_AUDIODEV'] = False
-
-            # These are special or outdated
-            tc.variables['PJMEDIA_WITH_SPEEX_AEC'] = False
-            tc.variables['PJMEDIA_WITH_SPEEX_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_L16_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_GSM_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_ILBC_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_OPENCORE_AMRNB_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_OPENCORE_AMRWB_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_SILK_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_BCG729_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_LYRA_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_ANDROID_MEDIACODEC_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_VPX_CODEC'] = False
-            tc.variables['PJMEDIA_WITH_OPEN_H264_CODEC'] = False
-
-            # Pick these
-            tc.variables['PJMEDIA_WITH_WEBRTC_AEC'] = True
-            tc.variables['PJMEDIA_WITH_WEBRTC_AEC3'] = True
-            tc.variables['PJMEDIA_WITH_G711_CODEC'] = True
-            tc.variables['PJMEDIA_WITH_G722_CODEC'] = True
-            tc.variables['PJMEDIA_WITH_OPUS_CODEC'] = True
-            tc.variables['PJMEDIA_WITH_G7221_CODEC'] = True
-
-            if self.settings.os == "Macos":
-                tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
-                tc.extra_cflags.append("-DPJ_SSL_SOCK_IMP=PJ_SSL_SOCK_IMP_APPLE")
-                tc.extra_cxxflags.append("-DPJ_HAS_SSL_SOCK=1")
-                tc.extra_cxxflags.append("-DPJ_SSL_SOCK_IMP=PJ_SSL_SOCK_IMP_APPLE")
-                tc.extra_exelinkflags.append("-Wl,-framework,Security")
-                tc.extra_exelinkflags.append("-Wl,-framework,Network")
-
-            elif self.settings.os == "Windows":
-                tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
-                tc.extra_cxxflags.append("-DPJ_HAS_SSL_SOCK=1")
-
-            elif self.settings.os == "Linux":
-                tc.variables['PJLIB_WITH_SSL'] = "openssl"
-                tc.variables['SRTP_WITH_OPENSSL'] = True
-
-            tc.extra_cxxflags.append("-DPJSIP_MAX_PKT_LEN=8192")
-            tc.extra_cxxflags.append("-DPJ_HAS_IPV6=1")
-            tc.extra_cflags.append("-DPJSIP_MAX_PKT_LEN=8192")
-            tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
-    
-            tc.generate()
-
+        tc = AutotoolsToolchain(self)
+#        if self.options.shared:
+#            tc.configure_args.append("--enable-shared")
+        if not self.options.with_uuid:
+            tc.configure_args.append("--disable-uuid")
+        if not self.options.with_opus:
+            tc.configure_args.append("--disable-opus")
         else:
-            tc = AutotoolsToolchain(self)
-            if not self.options.with_uuid:
-                tc.configure_args.append("--disable-uuid")
-            if not self.options.with_opus:
-                tc.configure_args.append("--disable-opus")
-            else:
-                tc.configure_args.append("--with-opus=%s" % self.dependencies["opus"].package_folder)
-            if self.options.with_samplerate:
-                tc.configure_args.append("--enable-libsamplerate")
-            if not self.options.with_video:
-                tc.configure_args.append("--disable-video")
-            if not self.options.with_floatingpoint:
-                tc.configure_args.append("--disable-floating-point")
-            if self.options.with_ext_sound:
-                tc.configure_args.append("--enable-ext-sound")
+            tc.configure_args.append("--with-opus=%s" % self.dependencies["opus"].package_folder)
+        if self.options.with_samplerate:
+            tc.configure_args.append("--enable-libsamplerate")
+        if not self.options.with_video:
+            tc.configure_args.append("--disable-video")
+        if not self.options.with_floatingpoint:
+            tc.configure_args.append("--disable-floating-point")
+        if self.options.with_ext_sound:
+            tc.configure_args.append("--enable-ext-sound")
+        if self.settings.os == "Macos":
+            tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
+            tc.extra_cflags.append("-DPJ_SSL_SOCK_IMP=PJ_SSL_SOCK_IMP_APPLE")
+            tc.extra_ldflags.append("-Wl,-framework,Security")
+            tc.extra_ldflags.append("-Wl,-framework,Network")
+        else:
+            tc.configure_args.append("--with-ssl=%s" % self.dependencies["openssl"].package_folder)
 
-            if self.settings.os == "Macos":
-                tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
-                tc.extra_cflags.append("-DPJ_SSL_SOCK_IMP=PJ_SSL_SOCK_IMP_APPLE")
-                tc.extra_ldflags.append("-Wl,-framework,Security")
-                tc.extra_ldflags.append("-Wl,-framework,Network")
-            else:
-                tc.configure_args.append("--with-ssl=%s" % self.dependencies["openssl"].package_folder)
+        if cross_building(self):
+            tc.configure_args.append("bash_cv_wcwidth_broken=yes")
 
-            if cross_building(self):
-                tc.configure_args.append("bash_cv_wcwidth_broken=yes")
+        tc.configure_args.append("--disable-install-examples")
+        tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
 
-            tc.configure_args.append("--disable-install-examples")
-            tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
-
-            tc.generate()
+        tc.generate()
 
         deps = AutotoolsDeps(self)
         deps.generate()
 
+    def injectConanPropsFile(self):
+        search = '<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">'
+        prop = os.path.join(self.generators_folder, 'conan_openssl.props')
+        replace_in_file(self,
+                        os.path.join(self.build_folder, 'build/vs/pjproject-vs14-common-config.props'),
+                        search,
+                        search + '\r\n<Import Project="../../conan/conan_openssl.props"/>')
+
+
+    def buildWindows(self):
+        if self.options.shared:
+            raise ConanInvalidConfiguration("Shared libraries not supported for Windows")
+
+        self.injectConanPropsFile()
+
+        shutil.copy(os.path.join(self.build_folder, 'pjlib/include/pj/config_site_sample.h'),
+                    os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'))
+        with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
+            file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
+
+        path = os.path.join(self.build_folder, "pjproject-vs14.sln")
+
+        # Upgrade sln to current build system
+        self.output.info('converting visual studio project if necessary')
+        self.run('devenv %s /upgrade' % path, ignore_errors=True, quiet=True)
+
+        # build pjsua
+        msbuild = MSBuild(self)
+        if self.settings.build_type == 'Release':
+            msbuild.build_type = 'Release-Dynamic'
+        elif self.settings.build_type == 'Debug':
+            msbuild.build_type = 'Debug-Dynamic'
+        else:
+            raise ConanInvalidConfiguration("Unsupported build_type %s" % self.settings.build_type)
+        msbuild.build(path, targets=["pjsua", "libspeex", "libsrtp"])
+
+    def buildAutotools(self):
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
     def build(self):
         apply_conandata_patches(self)
-
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Shared libraries not supported for Windows")
+        shutil.copytree(self.source_folder, self.build_folder, dirs_exist_ok=True)
 
         if self.settings.os == "Windows":
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
+            self.buildWindows()
         else:
-            shutil.copytree(self.source_folder, self.build_folder, dirs_exist_ok=True)
-            autotools = Autotools(self)
-            autotools.configure()
-            autotools.make()
+            self.buildAutotools()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         if self.settings.os == "Windows":
-            cmake = CMake(self)
-            cmake.install()
-        else:
-            autotools = Autotools(self)
-            autotools.install()
+            for lib in ['pjlib', 'pjsip', 'pjlib-util', 'pjmedia', 'pjnath', 'third_party']:
+                copy(self, "*.h", os.path.join(self.build_folder, "%s/include" % lib), os.path.join(self.package_folder, "include"))
+                copy(self, "*.hpp", os.path.join(self.build_folder, "%s/include" % lib), os.path.join(self.package_folder, "include"))
+                copy(self, "*.lib", os.path.join(self.build_folder, "%s/lib" % lib), os.path.join(self.package_folder, "lib"))
+            return
 
-            fix_apple_shared_install_name(self)
+        autotools = Autotools(self)
+        autotools.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "pjproject")
@@ -257,36 +205,20 @@ class PjSIPConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "stdc++", "rt", "m"]
 
-        self.cpp_info.cxxflags = [
-            '-DPJ_AUTOCONF=1',
-            '-DPJMEDIA_HAS_RTCP_XR=1',
-            '-DPJMEDIA_STREAM_ENABLE_XR=1',
-            '-DPJSIP_MAX_PKT_LEN=8192',
-            '-DPJ_HAS_IPV6=1',
-        ]
-        if self.settings.os == "Macos":
-            self.cpp_info.cxxflags.append("-DPJ_HAS_SSL_SOCK=1")
-            self.cpp_info.cxxflags.append("-DPJ_SSL_SOCK_IMP=PJ_SSL_SOCK_IMP_APPLE")
-
-        if self.settings.os == "Windows":
-            self.cpp_info.cxxflags.append("-DPJ_HAS_SSL_SOCK=1")
-
-        if self.options.get_safe("endianness") == "big":
-            self.cpp_info.cxxflags.extend(['-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0'])
-        else:
-            self.cpp_info.cxxflags.extend(['-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1'])
-
-        self.cpp_info.cflags = self.cpp_info.cxxflags
-
         if self.settings.os == "Windows":
             self.cpp_info.libs = collect_libs(self)
 
         else:
+            if self.options.get_safe("endianness") == "big":
+                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+            else:
+                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+
             libs = []
             installed_libs = collect_libs(self)
             installed_libs.sort(key=len)
 
-            lib_basenames = ["pjsua2", "pjsua", "pjsua-lib", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "ilbccodec", "srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "webrtc_aec3", "pjnath", "pjlib-util", "pjlib", "pj", "gsm", "yuv", "ilbc", "srtp", "g7221"]
+            lib_basenames = ["pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "ilbccodec", "srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "pjnath", "pjlib-util", "pj"]
 
             for basename in lib_basenames:
                 for installed in installed_libs:
