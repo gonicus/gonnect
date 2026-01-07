@@ -160,7 +160,7 @@ Item {
         // Load widget-specific settings
         let additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",").filter(item => item !== "")
         let hasCustomSettings = additionalSettings.length > 0
-        for (let setting of additionalSettings) {
+        for (const setting of additionalSettings) {
             let value = UISettings.getUISetting(widgetId, setting, "")
             if (value !== "") {
                 widget.config.set(setting, value)

@@ -76,10 +76,6 @@ BaseWidget {
             }
         }
 
-        /*
-            INFO: Segfaults... ttps://chromium.googlesource.com/chromium/src/+/master/base/memory/ref_counted.h#445
-            See TEST flags in main.cpp
-        */
         WebEngineView {
             id: webView
             anchors {

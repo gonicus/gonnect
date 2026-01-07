@@ -70,9 +70,6 @@ int main(int argc, char *argv[])
         chromiumFlags.push_back("--disable-renderer-accessibility");
     }
 
-    // TODO: Needed for WebEngineView widget
-    chromiumFlags.push_back("--no-sandbox");
-
     if (chromiumFlags.size() > 0) {
         qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
     }

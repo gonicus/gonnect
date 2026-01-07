@@ -39,7 +39,7 @@ Item {
                 // Additional per-widget settings
                 let additionalSettings = widget.config.entries()
                 UISettings.setUISetting(widgetId, "additionalSettings", additionalSettings.join(","))
-                for (let setting of additionalSettings) {
+                for (const setting of additionalSettings) {
                     UISettings.setUISetting(widgetId, setting, widget.config.get(setting))
                 }
             }
