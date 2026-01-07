@@ -280,14 +280,14 @@ Item {
                         if (level >= 2) {
                             console.error("# " + message + ": " + source + " +" + line)
                         } else if (level === 1) {
-                            console.error("# " + message + ": " + source + " +" + line)
+                            console.warn("# " + message + ": " + source + " +" + line)
                         } else {
-                            console.error("# " + message + ": " + source + " +" + line)
+                            console.log("# " + message + ": " + source + " +" + line)
                         }
                     }
 
                     onPermissionRequested: (permission) => {
-                        console.error("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
+                        console.log("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
                         permission.grant()
                     }
 
