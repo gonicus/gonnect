@@ -23,9 +23,7 @@ private:
     bool m_inhibit = false;
 };
 
-
-class WindowsEventFilter
-    : public QAbstractNativeEventFilter
+class WindowsEventFilter : public QAbstractNativeEventFilter
 {
 public:
     bool nativeEventFilter(const QByteArray &eventType, void *message, long long *) override;
