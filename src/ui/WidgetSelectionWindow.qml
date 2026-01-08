@@ -168,7 +168,7 @@ BaseWindow {
                     model: []
                     delegate: ColumnLayout {
                         id: widgetSettingsDelegate
-                        spacing: 5
+                        spacing: 10
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
