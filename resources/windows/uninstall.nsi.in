@@ -1,11 +1,8 @@
-Var /GLOBAL processFound
-ExecDos::exec "tasklist /NH /FI $\"IMAGENAME eq @CPACK_NSIS_MUI_FINISHPAGE_RUN@$\"" 
-Pop $0 ; The handle for the process
-ExecDos::wait $0
-Pop $processFound ; The exit code
+!insertmacro FindProc
 
-StrCmp $processFound "0" 0 notRunning
-    MessageBox MB_YESNO "@APPLICATION_NAME@ is running. Do you want to close it?" /SD IDYES IDYES continue IDNO abort
+; 0 = found, 1 = not found
+StrCmp $processFound "0" 0 uninstall
+    MessageBox MB_YESNO "$(CLOSE_ON_UNINSTALL)" /SD IDYES IDYES continue IDNO abort
         continue:
             ExecDos::exec /TIMEOUT=2000 "taskkill.exe /F /T /IM @CPACK_NSIS_MUI_FINISHPAGE_RUN@"
             Pop $0 ; The handle for the process
@@ -14,8 +11,6 @@ StrCmp $processFound "0" 0 notRunning
             Goto uninstall
         abort:
     Quit
-notRunning:
-    MessageBox MB_OK "Not running: @APPLICATION_NAME@ $processFound"
 
 uninstall:
 
@@ -32,3 +27,8 @@ DeleteRegKey HKCR "@APPLICATION_NAME@.tel"
 DeleteRegKey HKCR "@APPLICATION_NAME@.callto"
 
 DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@"
+
+; Autostart
+DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "@APPLICATION_EXECUTABLE@"
+
+Delete "$INSTDIR\GOnnect.lnk"

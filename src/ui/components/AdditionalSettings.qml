@@ -10,7 +10,7 @@ Item {
 
     signal parametersUpdated()
 
-    function set(key : string, value : string) {
+    function set(key : string, value : variant) {
         control.parameters[key] = value
 
         control.parametersUpdated()

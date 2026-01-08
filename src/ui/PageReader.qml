@@ -11,6 +11,12 @@ Item {
     required property var pageRoot // Where to parent the pages to
     required property PageModel model
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.PageReader"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     CommonPages {
         id: pages
     }
@@ -32,7 +38,7 @@ Item {
                                                      iconId: pageIconId
                                                  })
             if (!page) {
-                console.log("Could not create page component", pageId)
+                console.error(category, "could not create page component", pageId)
                 continue
             }
 
@@ -150,27 +156,28 @@ Item {
                 widget = widgets.webview.createObject(page.grid, widgetProperties)
                 break
             default:
-                console.error(`Widget type ${widgetType} unknown`)
+                console.error(category, `widget type ${widgetType} unknown`)
         }
 
-        if (!widget){
-            console.error("Could not create widget component", widgetId)
-        }
+        if (widget) {
+            // Load widget-specific settings
+            let additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",").filter(item => item !== "")
+            let hasCustomSettings = additionalSettings.length > 0
 
-        // Load widget-specific settings
-        let additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",").filter(item => item !== "")
-        let hasCustomSettings = additionalSettings.length > 0
-        for (const setting of additionalSettings) {
-            let value = UISettings.getUISetting(widgetId, setting, "")
-            if (value !== "") {
-                widget.config.set(setting, value)
+            if (hasCustomSettings) {
+                for (const setting of additionalSettings) {
+                    let value = UISettings.getUISetting(widgetId, setting, "")
+                    if (value !== "") {
+                        widget.config.set(setting, value)
+                    }
+                }
+
+                widget.additionalSettingsLoaded()
             }
-        }
 
-        if (hasCustomSettings) {
-            widget.additionalSettingsLoaded()
+            page.model.add(widget)
+        } else {
+            console.error(category, "could not create widget component", widgetId)
         }
-
-        page.model.add(widget)
     }
 }

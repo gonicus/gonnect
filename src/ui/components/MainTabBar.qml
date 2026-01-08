@@ -10,6 +10,12 @@ Item {
     implicitWidth: 54 + 2 * 8
     implicitHeight: topMenuCol.implicitHeight
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.MainTabBar"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     property string selectedPageId: ""
     property int selectedPageType: -1
     property var attachedData: null
@@ -49,7 +55,7 @@ Item {
         const page = control.mainWindow.getPage(id)
 
         if (!page) {
-            console.error("Unable to find page with id", id)
+            console.error(category, "unable to find page with id", id)
             return
         }
 
@@ -85,7 +91,7 @@ Item {
                                                      attachedData: null
                                                  })
         if (tabButton === null) {
-            console.log("Could not create tab button component")
+            console.error(category, "could not create tab button component")
             return
         }
 

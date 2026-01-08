@@ -19,6 +19,12 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
+    readonly property LoggingCategory lc: LoggingCategory {
+        id: category
+        name: "gonnect.qml.SipTemplateWizard"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     function finishWizard() {
         const result = sipTemplateController.createConfig(templateModel.templateId, control.values)
 
@@ -226,7 +232,7 @@ BaseWindow {
                                 return base + "TemplateFieldFile.qml"
                         }
 
-                        console.error("Error: Unknown template field type:", delg.type)
+                        console.error(category, "unknown template field type:", delg.type)
                         return ""
                     }
 
