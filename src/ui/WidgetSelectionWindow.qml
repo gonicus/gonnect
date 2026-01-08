@@ -26,6 +26,12 @@ BaseWindow {
 
     required property var widgetRoot
 
+    readonly property LoggingCategory lc: LoggingCategory {
+        id: category
+        name: "gonnect.qml.WidgetSelectionWindow"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     CommonWidgets {
         id: widgets
     }
