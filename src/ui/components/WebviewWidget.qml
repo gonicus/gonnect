@@ -9,20 +9,32 @@ import base
 BaseWidget {
     id: control
 
-    property string primaryUrl
-    property string secondaryUrl
+    // TODO: Map enum to list of strings to avoid plain string defition in WidgetSelectionWindow?
+    enum Settings {
+        HeaderTitle,
+        DarkModeUrl,
+        LightModeUrl,
+        AcceptAllCerts
+    }
+
+    property string headerTitle
+    property string darkModeUrl
+    property string lightModeUrl
+    property bool acceptAllCerts
 
     onAdditionalSettingsLoaded: {
-        control.primaryUrl = control.config.get("primaryUrl")
-        control.secondaryUrl = control.config.get("secondaryUrl")
+        control.headerTitle = control.config.get("headerTitle")
+        control.darkModeUrl = control.config.get("darkModeUrl")
+        control.lightModeUrl = control.config.get("lightModeUrl")
+        control.acceptAllCerts = control.config.get("acceptAllCerts")
     }
 
     onAdditionalSettingsUpdated: {
-        control.config.set("primaryUrl", control.primaryUrl)
-        control.config.set("secondaryUrl", control.secondaryUrl)
+        control.config.set("headerTitle", control.headerTitle)
+        control.config.set("darkModeUrl", control.darkModeUrl)
+        control.config.set("lightModeUrl", control.lightModeUrl)
+        control.config.set("acceptAllCerts", control.acceptAllCerts)
     }
-
-    property bool showPrimary: true
 
     Rectangle {
         id: webviewWidget
@@ -36,7 +48,7 @@ BaseWidget {
         CardHeading {
             id: webviewHeading
             visible: true
-            text: qsTr("Tracker")
+            text: control.headerTitle
             anchors {
                 top: parent.top
                 left: parent.left
@@ -44,52 +56,21 @@ BaseWidget {
             }
         }
 
-        Row {
-            id: webviewControl
-            spacing: 5
-            anchors {
-                top: webviewHeading.bottom
-                horizontalCenter: parent.horizontalCenter
-            }
-
-            Button {
-                id: switchButton
-                icon.source: Icons.viewRefresh
-                text: qsTr("Switch")
-                height: 40
-
-                onClicked: () => {
-                    control.showPrimary = !control.showPrimary
-                }
-            }
-
-            Button {
-                id: editButton
-                icon.source: Icons.editor
-                text: qsTr("Edit")
-                height: 40
-
-                onClicked: () => {
-                    const item = webviewSettingsComponent.createObject(control, {})
-                    item.show()
-                }
-            }
-        }
-
         WebEngineView {
             id: webView
             anchors {
-                top: webviewControl.bottom
+                top: webviewHeading.bottom
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
 
-                bottomMargin: 20
-                leftMargin: 20
-                rightMargin: 20
+                topMargin: 15
+                bottomMargin: 15
+                leftMargin: 15
+                rightMargin: 15
             }
 
-            url: control.showPrimary ? control.primaryUrl : control.secondaryUrl
+            url: Theme.isDarkMode ? control.darkModeUrl : control.lightModeUrl
             backgroundColor: Theme.backgroundColor
             settings {
                 autoLoadImages: true
@@ -101,114 +82,23 @@ BaseWidget {
 
             onLoadingChanged: function(loadRequest) {
                 if (loadRequest.status === WebEngineView.LoadFailedStatus) {
-                    console.error("Page load failed for URL:", loadRequest.url);
-                    console.error("Error message:", loadRequest.errorString);
-                } else if (loadRequest.status === WebEngineView.LoadSucceededStatus) {
-                    console.log("Page loaded successfully!");
+                    console.error("Failed to load page:", loadRequest.url,
+                                  ", error message:", loadRequest.errorString)
                 }
             }
 
             onCertificateError: function(error) {
-                console.log("Certificate Error encountered:", error.description);
+                console.log("Certificate error encountered:", error.description);
 
-                // Self hosted stuff
-                error.acceptCertificate();
+                if (control.acceptAllCerts) {
+                    // Self hosted stuff
+                    error.acceptCertificate()
 
-                // Do not jump to default behaviour
-                return true;
-            }
-        }
-    }
-
-    Component {
-        id: webviewSettingsComponent
-
-        BaseWindow {
-            id: webviewSettings
-            objectName: "webviewSettingsWindow"
-            title: qsTr("Set URL's")
-            width: 600
-            height: 340
-            visible: true
-            resizable: false
-            showMinimizeButton: false
-            showMaximizeButton: false
-
-            minimumWidth: webviewSettings.width
-            minimumHeight: webviewSettings.height
-            maximumWidth: webviewSettings.width
-            maximumHeight: webviewSettings.height
-
-            ColumnLayout {
-                id: mainLayout
-                anchors {
-                    fill: parent
-                    margins: 20
-                }
-                spacing: 15
-
-                ColumnLayout {
-                    id: primaryUrlLayout
-                    spacing: 4
-
-                    Label {
-                        id: primaryUrlLabel
-                        text: qsTr("Primary URL")
-                    }
-
-                    TextField {
-                        id: primaryUrlInput
-                        text: control.primaryUrl
-                        Layout.fillWidth: true
-                    }
+                    // Do not jump to default behaviour
+                    return true
                 }
 
-                ColumnLayout {
-                    id: secondaryUrlLayout
-                    spacing: 4
-
-                    Label {
-                        id: secondaryUrlLabel
-                        text: qsTr("Secondary URL")
-                    }
-
-                    TextField {
-                        id: secondaryUrlInput
-                        text: control.secondaryUrl
-                        Layout.fillWidth: true
-                    }
-                }
-
-                RowLayout {
-                    id: pageButtons
-                    spacing: 10
-                    Layout.fillWidth: true
-                    layoutDirection: Qt.RightToLeft
-                    Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-
-                    Button {
-                        id: pageCancel
-                        text: qsTr("Cancel")
-
-                        onClicked: () => webviewSettings.close()
-                    }
-
-                    Button {
-                        id: pageConfirm
-                        highlighted: true
-                        icon.source: Icons.checkbox
-                        text: qsTr("Done")
-
-                        onClicked: {
-                            control.primaryUrl = primaryUrlInput.text
-                            control.secondaryUrl = secondaryUrlInput.text
-
-                            control.additionalSettingsUpdated()
-
-                            webviewSettings.close()
-                        }
-                    }
-                }
+                return false
             }
         }
     }
