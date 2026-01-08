@@ -160,25 +160,23 @@ Item {
         }
 
         if (widget) {
+            // Load widget-specific settings
+            let additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",").filter(item => item !== "")
+            let hasCustomSettings = additionalSettings.length > 0
+            for (const setting of additionalSettings) {
+                let value = UISettings.getUISetting(widgetId, setting, "")
+                if (value !== "") {
+                    widget.config.set(setting, value)
+                }
+            }
+
+            if (hasCustomSettings) {
+                widget.additionalSettingsLoaded()
+            }
+
             page.model.add(widget)
         } else {
             console.error(category, "could not create widget component", widgetId)
         }
-
-        // Load widget-specific settings
-        let additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",").filter(item => item !== "")
-        let hasCustomSettings = additionalSettings.length > 0
-        for (const setting of additionalSettings) {
-            let value = UISettings.getUISetting(widgetId, setting, "")
-            if (value !== "") {
-                widget.config.set(setting, value)
-            }
-        }
-
-        if (hasCustomSettings) {
-            widget.additionalSettingsLoaded()
-        }
-
-        page.model.add(widget)
     }
 }
