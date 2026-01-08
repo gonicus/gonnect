@@ -242,7 +242,7 @@ void Application::initLogging()
         });
     }
 
-    if (m_isDebugRun || Application::platformName().toLower() == "windows") {
+    if (m_isDebugRun || settings.value("logging/writeToFile", false).toBool()) {
         auto filePath = Application::logFilePath().toStdString();
         logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(
                 filePath, logfault::LogLevel::TRACE, true));
