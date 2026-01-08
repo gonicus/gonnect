@@ -33,15 +33,39 @@ if(WIN32)
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "!include \"${DOS_STYLE_BINARY_DIR}\\install.nsi\"")
     configure_file("${CMAKE_SOURCE_DIR}/resources/windows/uninstall.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/uninstall.nsi" @ONLY)
 
+    configure_file("${CMAKE_SOURCE_DIR}/resources/windows/strings.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/strings.nsi" @ONLY)
+    
+    # not really the correct variable, but it is the right place (and unused)
+    set(CPACK_NSIS_INSTALLATION_TYPES "!include \"${DOS_STYLE_BINARY_DIR}\\strings.nsi\"")
+    
     set(CPACK_NSIS_DEFINES "\
   !include \"x64.nsh\"
   !include \"FileFunc.nsh\"
+
+  !define MUI_FINISHPAGE_SHOWREADME
+  !define MUI_FINISHPAGE_SHOWREADME_TEXT \"$(ADD_AUTOSTART)\"
+  !define MUI_FINISHPAGE_SHOWREADME_FUNCTION \"Add_Autostart\"
+  
+  Var processFound
+
+  !macro FindProc
+      ExecDos::exec /TOSTACK 'cmd /C tasklist /NH /FI \"IMAGENAME eq ${APPLICATION_EXECUTABLE}.exe\" | find /I \"${APPLICATION_EXECUTABLE}.exe\"\'
+      Pop $processFound ; The exit code      
+  !macroend
+
+  Function Add_Autostart
+    SetOutPath \"$INSTDIR\"    
+    WriteRegStr HKCU \"Software\\Microsoft\\Windows\\CurrentVersion\\Run\" \"${APPLICATION_EXECUTABLE}\" \"$INSTDIR\\GOnnect.lnk\"
+  FunctionEnd
+  
     ")
 
+    configure_file("${CMAKE_SOURCE_DIR}/resources/windows/pre-install.nsi.in" "${CMAKE_CURRENT_BINARY_DIR}/pre-install.nsi" @ONLY)
     set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "\
   \$\{If\} \$\{RunningX64\}
     SetRegView 64
-  \$\{EndIf\} \
+  \$\{EndIf\}
+  !include \"${DOS_STYLE_BINARY_DIR}\\pre-install.nsi\"
     ")
 
     list(APPEND CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "\

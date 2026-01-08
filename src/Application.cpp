@@ -235,9 +235,6 @@ void Application::initLogging()
 
     if (m_isDebugRun) {
         settings.setValue("generic/nextDebugRun", false);
-        auto filePath = Application::logFilePath().toStdString();
-        logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(
-                filePath, logfault::LogLevel::TRACE, true));
 
         QTimer::singleShot(5 * 60 * 1000, this, []() {
             qCInfo(lcApplication) << "5 minutes are up; debug run will end automatically.";
@@ -245,10 +242,17 @@ void Application::initLogging()
         });
     }
 
+    if (m_isDebugRun || settings.value("logging/writeToFile", false).toBool()) {
+        auto filePath = Application::logFilePath().toStdString();
+        logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(
+                filePath, logfault::LogLevel::TRACE, true));
+    }
+
 #ifdef Q_OS_WINDOWS
     std::unique_ptr<logfault::Handler> eventhandler{ new WindowsEventLogHandler(
             "GOnnect", logfault::LogLevel::WARN) };
     logfault::LogManager::Instance().AddHandler(std::move(eventhandler));
+
     s_originalMessageHandler = nullptr;
 #endif // Q_OS_WINDOWS
 
