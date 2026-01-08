@@ -41,6 +41,8 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
             &ViewHelper::updateCurrentUser);
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this,
+            &ViewHelper::updateCurrentUser);
     connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
             &ViewHelper::updateCurrentUser);
     updateCurrentUser();
