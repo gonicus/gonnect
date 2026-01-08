@@ -16,6 +16,12 @@ Item {
         property bool shareFullScreen
     }
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Conference"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     states: [
         State {
             when: callSideBar.extended
@@ -278,16 +284,15 @@ Item {
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
                         if (level >= 2) {
-                            console.error("# " + message + ": " + source + " +" + line)
+                            console.error(message + ": " + source + " +" + line)
                         } else if (level === 1) {
-                            console.warn("# " + message + ": " + source + " +" + line)
+                            console.warn(message + ": " + source + " +" + line)
                         } else {
-                            console.log("# " + message + ": " + source + " +" + line)
+                            console.log(message + ": " + source + " +" + line)
                         }
                     }
 
                     onPermissionRequested: (permission) => {
-                        console.log("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
                         permission.grant()
                     }
 
@@ -295,10 +300,8 @@ Item {
                     //      see ConferenceButtonBar.qml +228
                     //onDesktopMediaRequested: (request) => {
                     //    if (internal.shareFullScreen) {
-                    //        console.error("### send selectScreen(0)")
                     //        request.selectScreen(request.screensModel.index(0, 0))
                     //    } else {
-                    //        console.error("### send selectWindow(0)")
                     //        request.selectWindow(request.windowsModel.index(0, 0))
                     //    }
                     //}
@@ -307,7 +310,7 @@ Item {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
                             jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
                         } else {
-                            console.error(`Failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
+                            console.error(`failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
                         }
                     }
 

@@ -7,6 +7,12 @@ Item {
     id: control
     implicitHeight: messageLabel.visible ? messageLabel.height : messageImage.height
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.ChatMessageListItem"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     required property date timestamp
     required property string nickName
     required property string message
@@ -14,7 +20,7 @@ Item {
 
     Component.onCompleted: () => {
         if (!control.message) {
-            console.error("===>", control.imageUrl)
+            console.debug("image URL", control.imageUrl)
         }
     }
 
@@ -57,20 +63,18 @@ Item {
         }
         onStatusChanged: () => {
             if (messageImage.visible) {
-                console.error('===>', messageImage.source)
-
                 switch (messageImage.status) {
                     case Image.Null:
-                        console.error('   ===> NULL')
+                        console.warn('image', messageImage.source, 'NULL')
                         break
                     case Image.Ready:
-                        console.error('   ===> READY')
+                        console.info('image', messageImage.source, 'READY')
                         break
                     case Image.Loading:
-                        console.error('   ===> LOADING')
+                        console.info('image', messageImage.source, 'LOADING')
                         break
                     case Image.Error:
-                        console.error('   ===> ERROR')
+                        console.error('image', messageImage.source, 'ERROR')
                         break
                 }
             }

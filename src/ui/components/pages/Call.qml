@@ -8,6 +8,12 @@ Item {
     id: control
     focus: true
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Call"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     readonly property alias selectedCallItem: callSideBar.selectedCallItem
 
     Keys.onPressed: (event) => {
@@ -85,7 +91,7 @@ Item {
                 } else if (topBar.callItem) {
                     SIPCallManager.endCall(topBar.callItem.accountId, topBar.callItem.callId)
                 } else {
-                    console.error("Cannot hang up because missing call item")
+                    console.error("cannot hang up because missing call item")
                 }
             }
 

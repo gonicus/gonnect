@@ -26,6 +26,12 @@ BaseWindow {
 
     required property var widgetRoot
 
+    readonly property LoggingCategory lc: LoggingCategory {
+        id: category
+        name: "gonnect.qml.WidgetSelectionWindow"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     CommonWidgets {
         id: widgets
     }
@@ -180,14 +186,14 @@ BaseWindow {
                             break
                         default:
                             widget = null
-                            console.error(`Widget type ${selection} unknown`)
+                            console.error(`widget type ${selection} unknown`)
                     }
 
                     if (widget) {
                         control.widgetRoot.resetWidgetElevation()
                         control.widgetRoot.model.add(widget)
                     } else {
-                        console.log("Could not create widget component")
+                        console.error("could not create widget component")
                     }
 
                     control.close()
