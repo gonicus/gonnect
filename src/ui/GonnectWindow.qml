@@ -15,6 +15,12 @@ BaseWindow {
     title: "GOnnect"
     resizable: true
 
+    readonly property LoggingCategory lc: LoggingCategory {
+        id: category
+        name: "gonnect.qml.GonnectWindow"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     windowHeaderComponent: Component {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
@@ -161,7 +167,7 @@ BaseWindow {
                                                editMode: true
                                            })
         if (page === null) {
-            console.log("Could not create page component", pageId)
+            console.error("could not create page component", pageId)
         }
 
         pageModel.add(page)

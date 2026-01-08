@@ -11,6 +11,12 @@ Item {
     required property var pageRoot // Where to parent the pages to
     required property PageModel model
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.PageReader"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     CommonPages {
         id: pages
     }
@@ -32,7 +38,7 @@ Item {
                                                      iconId: pageIconId
                                                  })
             if (!page) {
-                console.log("Could not create page component", pageId)
+                console.error("could not create page component", pageId)
                 continue
             }
 
@@ -147,13 +153,13 @@ Item {
                 widget = widgets.history.createObject(page.grid, widgetProperties)
                 break
             default:
-                console.error(`Widget type ${widgetType} unknown`)
+                console.error(`widget type ${widgetType} unknown`)
         }
 
         if (widget) {
             page.model.add(widget)
         } else {
-            console.error("Could not create widget component", widgetId)
+            console.error("could not create widget component", widgetId)
         }
     }
 }

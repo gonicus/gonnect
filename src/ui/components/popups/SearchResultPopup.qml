@@ -20,6 +20,12 @@ Popup {
     exit: null
     visible: !!control.searchText.length
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.SearchResultPopup"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     Material.accent: Theme.accentColor
     Material.theme: Theme.isDarkMode ? Material.Dark : Material.Light
 
@@ -41,7 +47,7 @@ Popup {
             keyNavigator.selectedItem.triggerPrimaryAction()
             control.primaryActionTriggered()
         } else {
-            console.error('Cannot find selected item to trigger primary action on')
+            console.error('cannot find selected item to trigger primary action on')
         }
     }
 
@@ -51,7 +57,7 @@ Popup {
         } else if (keyNavigator.selectedItem) {
             keyNavigator.selectedItem.triggerSecondaryAction()
         } else {
-            console.error('Cannot find selected item to trigger secondary action on')
+            console.error('cannot find selected item to trigger secondary action on')
         }
     }
 
