@@ -232,7 +232,7 @@ BaseWindow {
                                 return base + "TemplateFieldFile.qml"
                         }
 
-                        console.error("unknown template field type:", delg.type)
+                        console.error(category, "unknown template field type:", delg.type)
                         return ""
                     }
 

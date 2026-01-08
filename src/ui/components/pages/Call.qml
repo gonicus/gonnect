@@ -91,7 +91,7 @@ Item {
                 } else if (topBar.callItem) {
                     SIPCallManager.endCall(topBar.callItem.accountId, topBar.callItem.callId)
                 } else {
-                    console.error("cannot hang up because missing call item")
+                    console.error(category, "cannot hang up because missing call item")
                 }
             }
 

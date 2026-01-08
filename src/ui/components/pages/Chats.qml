@@ -138,11 +138,11 @@ Item {
 
             onJavaScriptConsoleMessage: (level, message, line, source) => {
                 if (level >= 2) {
-                    console.error(message + ": " + source + " +" + line)
+                    console.error(category, message + ": " + source + " +" + line)
                 } else if (level === 1) {
-                    console.warn(message + ": " + source + " +" + line)
+                    console.warn(category, message + ": " + source + " +" + line)
                 } else {
-                    console.log(message + ": " + source + " +" + line)
+                    console.log(category, message + ": " + source + " +" + line)
                 }
             }
 

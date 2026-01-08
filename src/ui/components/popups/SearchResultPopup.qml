@@ -47,7 +47,7 @@ Popup {
             keyNavigator.selectedItem.triggerPrimaryAction()
             control.primaryActionTriggered()
         } else {
-            console.error('cannot find selected item to trigger primary action on')
+            console.error(category, 'cannot find selected item to trigger primary action on')
         }
     }
 
@@ -57,7 +57,7 @@ Popup {
         } else if (keyNavigator.selectedItem) {
             keyNavigator.selectedItem.triggerSecondaryAction()
         } else {
-            console.error('cannot find selected item to trigger secondary action on')
+            console.error(category, 'cannot find selected item to trigger secondary action on')
         }
     }
 
@@ -533,7 +533,7 @@ Popup {
             //     }
 
             //     TapHandler {
-            //         onTapped: () => console.log('TODO')
+            //         onTapped: () => console.log(category, 'TODO')
             //     }
             // }
         }

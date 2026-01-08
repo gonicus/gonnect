@@ -38,7 +38,7 @@ Item {
                                                      iconId: pageIconId
                                                  })
             if (!page) {
-                console.error("could not create page component", pageId)
+                console.error(category, "could not create page component", pageId)
                 continue
             }
 
@@ -153,13 +153,13 @@ Item {
                 widget = widgets.history.createObject(page.grid, widgetProperties)
                 break
             default:
-                console.error(`widget type ${widgetType} unknown`)
+                console.error(category, `widget type ${widgetType} unknown`)
         }
 
         if (widget) {
             page.model.add(widget)
         } else {
-            console.error("could not create widget component", widgetId)
+            console.error(category, "could not create widget component", widgetId)
         }
     }
 }

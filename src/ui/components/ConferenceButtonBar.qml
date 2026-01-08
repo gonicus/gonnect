@@ -181,7 +181,7 @@ Item {
 
                     // MenuItem {
                     //     text: qsTr("Send link via email")
-                    //     onTriggered: () => console.log('TODO: Send invitation link via mail')
+                    //     onTriggered: () => console.log(category, 'TODO: Send invitation link via mail')
                     // }
                 }
             }

@@ -167,7 +167,7 @@ BaseWindow {
                                                editMode: true
                                            })
         if (page === null) {
-            console.error("could not create page component", pageId)
+            console.error(category, "could not create page component", pageId)
         }
 
         pageModel.add(page)
@@ -428,7 +428,7 @@ BaseWindow {
         target: ViewHelper
         function onShowDialPad() {
             const item = drawerStackView.push("qrc:/qt/qml/base/ui/components/controls/DtmfDialer.qml")
-            item.dialed.connect(button => console.log("TODO: DIAL", button))
+            item.dialed.connect(button => console.log(category, "TODO: DIAL", button))
         }
         function onShowFirstAid() {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FirstAid.qml")

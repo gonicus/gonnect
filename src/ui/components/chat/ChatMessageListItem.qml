@@ -20,7 +20,7 @@ Item {
 
     Component.onCompleted: () => {
         if (!control.message) {
-            console.debug("image URL", control.imageUrl)
+            console.debug(category, "image URL", control.imageUrl)
         }
     }
 
@@ -65,16 +65,16 @@ Item {
             if (messageImage.visible) {
                 switch (messageImage.status) {
                     case Image.Null:
-                        console.warn('image', messageImage.source, 'NULL')
+                        console.warn(category, 'image', messageImage.source, 'NULL')
                         break
                     case Image.Ready:
-                        console.info('image', messageImage.source, 'READY')
+                        console.info(category, 'image', messageImage.source, 'READY')
                         break
                     case Image.Loading:
-                        console.info('image', messageImage.source, 'LOADING')
+                        console.info(category, 'image', messageImage.source, 'LOADING')
                         break
                     case Image.Error:
-                        console.error('image', messageImage.source, 'ERROR')
+                        console.error(category, 'image', messageImage.source, 'ERROR')
                         break
                 }
             }

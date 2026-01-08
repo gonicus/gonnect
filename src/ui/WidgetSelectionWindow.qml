@@ -186,14 +186,14 @@ BaseWindow {
                             break
                         default:
                             widget = null
-                            console.error(`widget type ${selection} unknown`)
+                            console.error(category, `widget type ${selection} unknown`)
                     }
 
                     if (widget) {
                         control.widgetRoot.resetWidgetElevation()
                         control.widgetRoot.model.add(widget)
                     } else {
-                        console.error("could not create widget component")
+                        console.error(category, "could not create widget component")
                     }
 
                     control.close()

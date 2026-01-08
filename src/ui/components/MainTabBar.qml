@@ -55,7 +55,7 @@ Item {
         const page = control.mainWindow.getPage(id)
 
         if (!page) {
-            console.error("unable to find page with id", id)
+            console.error(category, "unable to find page with id", id)
             return
         }
 
@@ -91,7 +91,7 @@ Item {
                                                      attachedData: null
                                                  })
         if (tabButton === null) {
-            console.error("could not create tab button component")
+            console.error(category, "could not create tab button component")
             return
         }
 

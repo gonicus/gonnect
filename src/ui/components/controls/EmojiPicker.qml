@@ -28,7 +28,7 @@ Item {
             }
         }
 
-        console.warn("unable to find rendered group item for group", groupIndex)
+        console.warn(category, "unable to find rendered group item for group", groupIndex)
     }
 
     Flickable {
