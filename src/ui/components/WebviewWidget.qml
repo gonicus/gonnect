@@ -9,14 +9,6 @@ import base
 BaseWidget {
     id: control
 
-    // TODO: Map enum to list of strings to avoid plain string defition in WidgetSelectionWindow?
-    enum Settings {
-        HeaderTitle,
-        DarkModeUrl,
-        LightModeUrl,
-        AcceptAllCerts
-    }
-
     property string headerTitle
     property string darkModeUrl
     property string lightModeUrl
