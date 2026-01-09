@@ -120,7 +120,7 @@ private Q_SLOTS:
 #endif
 
 private:
-    bool noSyncSystemMute() { return m_settings.value("generic/useHeadset", true).toBool(); }
+    bool noSyncSystemMute() { return m_settings.value("generic/useHeadset", false).toBool(); }
 
     AudioManager(QObject *parent = nullptr);
     void refreshAudioDevices();
