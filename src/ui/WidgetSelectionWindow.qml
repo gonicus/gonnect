@@ -39,8 +39,6 @@ BaseWindow {
     property string name: ""
     property int selection: -1
 
-    property var additionalSettings: ({})
-
     Flickable {
         anchors.fill: parent
         contentHeight: widgetOptions.implicitHeight
@@ -143,7 +141,6 @@ BaseWindow {
                     control.name = widgetEntries.get(currentIndex).name
                     control.selection = currentIndex
 
-                    control.additionalSettings = ({})
                     widgetSettingsModel.clear()
 
                     switch (currentIndex) {
@@ -185,6 +182,8 @@ BaseWindow {
 
                         required property int index
 
+                        property alias value: delgInput.text
+
                         Label {
                             id: delgLabel
                             text: widgetSettingsModel.get(widgetSettingsDelegate.index).name
@@ -193,9 +192,6 @@ BaseWindow {
                         TextField {
                             id: delgInput
                             Layout.fillWidth: true
-                            onTextEdited: { // TODO: Maybe use something less aggressive?
-                                control.additionalSettings[widgetSettingsModel.get(widgetSettingsDelegate.index).setting] = delgInput.text
-                            }
                         }
                     }
                 }
@@ -260,10 +256,14 @@ BaseWindow {
 
                         if (widget) {
                             // Per-widget settings
-                            Object.entries(control.additionalSettings).forEach(([key, value]) => {
-                                widget.config.set(key, value)
-                            })
-                           widget.additionalSettingsLoaded()
+                            for (let i = 0; i < widgetSettingsInput.count; i++) {
+                                const key = widgetSettingsModel.get(i).setting
+                                const value = widgetSettingsInput.itemAt(i).value
+                                if (key && value) {
+                                    widget.config.set(key, value)
+                                }
+                            }
+                            widget.additionalSettingsLoaded()
 
                             control.widgetRoot.resetWidgetElevation()
                             control.widgetRoot.model.add(widget)
