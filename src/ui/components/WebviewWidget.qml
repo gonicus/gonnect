@@ -14,10 +14,19 @@ BaseWidget {
     property string lightModeUrl
     property bool acceptAllCerts
 
+    // INFO: WebEngineView's will freeze/crash on widget destruction if an invalid URL is used...
+    function checkUrl(url : string) : string {
+        try {
+            const check = new URL(url)
+            return url
+        } catch (e) {
+            return "about:blank"
+        }
+    }
     onAdditionalSettingsLoaded: {
         control.headerTitle = control.config.get("headerTitle")
-        control.darkModeUrl = control.config.get("darkModeUrl")
-        control.lightModeUrl = control.config.get("lightModeUrl")
+        control.darkModeUrl = control.checkUrl(control.config.get("darkModeUrl"))
+        control.lightModeUrl = control.checkUrl(control.config.get("lightModeUrl"))
         control.acceptAllCerts = control.config.get("acceptAllCerts")
     }
 
