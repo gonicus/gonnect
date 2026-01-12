@@ -408,6 +408,8 @@ bool ViewHelper::isValidJitsiRoomName(const QString &name) const
 void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryItem> callHistoryItem,
                                 const QString &displayName)
 {
+    DateEventManager::instance().removeNotificationByRoomName(roomName);
+
     qCInfo(lcViewHelper).nospace().noquote()
             << "Requesting meeting for " << roomName << " (" << displayName
             << ") with flags:" << m_nextMeetingStartFlags;
