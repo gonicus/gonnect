@@ -68,19 +68,19 @@ BaseWindow {
                 model: ListModel {
                     id: widgetEntries
                     ListElement {
-                        name: "DateEvents"
+                        name: qsTr("Date Events")
                         description: qsTr("List of upcoming appointments")
                     }
                     ListElement {
-                        name: "Favorites"
+                        name: qsTr("Favorites")
                         description: qsTr("Quick dial for your favorite contacts and conferences")
                     }
                     ListElement {
-                        name: "History"
+                        name: qsTr("History")
                         description: qsTr("Searchable call and conference history")
                     }
                     ListElement {
-                        name: "Webview"
+                        name: qsTr("Web View")
                         description: qsTr("A web-based content display")
                     }
                 }
@@ -111,8 +111,8 @@ BaseWindow {
                             Layout.fillWidth: true
 
                             textFormat: Text.RichText
-                            text: "<b>" + qsTr(widgetDelg.name) + "</b><br>"
-                                  + qsTr(widgetDelg.description)
+                            text: "<b>" + widgetDelg.name + "</b><br>"
+                                  + widgetDelg.description
                         }
                     }
                 }
@@ -135,8 +135,8 @@ BaseWindow {
                     Label {
                         Layout.fillWidth: true
                         textFormat: Text.RichText
-                        text: "<b>" + qsTr(widgetEntries.get(widgetSelection.currentIndex).name) + "</b><br>"
-                              + qsTr(widgetEntries.get(widgetSelection.currentIndex).description)
+                        text: "<b>" + widgetEntries.get(widgetSelection.currentIndex).name + "</b><br>"
+                              + widgetEntries.get(widgetSelection.currentIndex).description
                     }
                 }
 
@@ -147,12 +147,12 @@ BaseWindow {
                     widgetSettingsModel.clear()
 
                     switch (currentIndex) {
-                        case CommonWidgets.Type.Webview:
+                        case CommonWidgets.Type.WebView:
                             const newSettings = [
-                                { name: "Header Title", setting: "headerTitle" },
-                                { name: "Dark Mode URL", setting: "darkModeUrl" },
-                                { name: "Light Mode URL", setting: "lightModeUrl" },
-                                { name: "Accept All Certificates", setting: "acceptAllCerts" }
+                                { name: qsTr("Header title"), setting: "headerTitle" },
+                                { name: qsTr("Dark mode URL"), setting: "darkModeUrl" },
+                                { name: qsTr("Light mode URL"), setting: "lightModeUrl" },
+                                { name: qsTr("Accept all certificates"), setting: "acceptAllCerts" }
                             ]
 
                             newSettings.forEach(item => widgetSettingsModel.append(item))
@@ -252,7 +252,7 @@ BaseWindow {
                             case CommonWidgets.Type.History:
                                 widget = widgets.history.createObject(control.widgetRoot.grid, widgetProperties)
                                 break
-                            case CommonWidgets.Type.Webview:
+                            case CommonWidgets.Type.WebView:
                                 widget = widgets.webview.createObject(control.widgetRoot.grid, widgetProperties)
                                 break
                             default:
