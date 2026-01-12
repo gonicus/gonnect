@@ -16,7 +16,7 @@ Item {
         DateEvents,
         Favorites,
         History,
-        Webview
+        WebView
     }
 
     Component {
@@ -49,9 +49,9 @@ Item {
     Component {
         id: compWebview
 
-        WebviewWidget {
+        WebViewWidget {
             id: widgetWebview
-            type: CommonWidgets.Type.Webview
+            type: CommonWidgets.Type.WebView
         }
     }
 }

@@ -68,7 +68,7 @@ BaseWindow {
                 model: ListModel {
                     id: widgetEntries
                     ListElement {
-                        name: qsTr("DateEvents")
+                        name: qsTr("Date Events")
                         description: qsTr("List of upcoming appointments")
                     }
                     ListElement {
@@ -80,7 +80,7 @@ BaseWindow {
                         description: qsTr("Searchable call and conference history")
                     }
                     ListElement {
-                        name: qsTr("Webview")
+                        name: qsTr("Web View")
                         description: qsTr("A web-based content display")
                     }
                 }
@@ -147,7 +147,7 @@ BaseWindow {
                     widgetSettingsModel.clear()
 
                     switch (currentIndex) {
-                        case CommonWidgets.Type.Webview:
+                        case CommonWidgets.Type.WebView:
                             const newSettings = [
                                 { name: qsTr("Header title"), setting: "headerTitle" },
                                 { name: qsTr("Dark mode URL"), setting: "darkModeUrl" },
@@ -252,7 +252,7 @@ BaseWindow {
                             case CommonWidgets.Type.History:
                                 widget = widgets.history.createObject(control.widgetRoot.grid, widgetProperties)
                                 break
-                            case CommonWidgets.Type.Webview:
+                            case CommonWidgets.Type.WebView:
                                 widget = widgets.webview.createObject(control.widgetRoot.grid, widgetProperties)
                                 break
                             default:
