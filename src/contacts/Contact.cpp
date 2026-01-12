@@ -166,6 +166,17 @@ qreal Contact::matchesSearch(const QString &searchString) const
 {
     qreal maxDist = 0;
 
+    // Phone number
+    if (((searchString.startsWith("+") || searchString.startsWith("0"))
+         && searchString.length() > 4)
+        || (!searchString.startsWith("+") && searchString.length() > 2)) {
+        for (const auto &phoneNumber : std::as_const(m_phoneNumbers)) {
+            if (phoneNumber.number.contains(searchString)) {
+                return 1.0;
+            }
+        }
+    }
+
     // Full name
     const auto fullName = m_splittedName.join(' ');
     if (searchString.compare(fullName, Qt::CaseSensitivity::CaseInsensitive) == 0) {
@@ -193,15 +204,6 @@ qreal Contact::matchesSearch(const QString &searchString) const
         }
 
         const qreal dist = FuzzyCompare::jaroWinklerDistance(str, searchString);
-        maxDist = std::max(dist, maxDist);
-        if (maxDist == 1.0) {
-            return maxDist;
-        }
-    }
-
-    // Phone number
-    for (const auto &phoneNumber : std::as_const(m_phoneNumbers)) {
-        const qreal dist = FuzzyCompare::jaroWinklerDistance(phoneNumber.number, searchString);
         maxDist = std::max(dist, maxDist);
         if (maxDist == 1.0) {
             return maxDist;
