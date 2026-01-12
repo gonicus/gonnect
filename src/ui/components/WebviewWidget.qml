@@ -9,14 +9,6 @@ import base
 BaseWidget {
     id: control
 
-    // TODO: Map enum to list of strings to avoid plain string defition in WidgetSelectionWindow?
-    enum Settings {
-        HeaderTitle,
-        DarkModeUrl,
-        LightModeUrl,
-        AcceptAllCerts
-    }
-
     property string headerTitle
     property string darkModeUrl
     property string lightModeUrl
@@ -34,6 +26,12 @@ BaseWidget {
         control.config.set("darkModeUrl", control.darkModeUrl)
         control.config.set("lightModeUrl", control.lightModeUrl)
         control.config.set("acceptAllCerts", control.acceptAllCerts)
+    }
+
+    onCleanupRequested: {
+        // INFO: Avoid WebEngineView freezes on deletion, especially with invalid URL's
+        webView.stop()
+        webView.url = "about:blank"
     }
 
     Rectangle {

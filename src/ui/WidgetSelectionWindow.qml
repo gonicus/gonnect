@@ -39,19 +39,20 @@ BaseWindow {
     property string name: ""
     property int selection: -1
 
-    property var additionalSettings: ({})
-
     Flickable {
-        anchors.fill: parent
+        id: widgetFlickable
+        anchors {
+            fill: parent
+            margins: 20
+        }
         contentHeight: widgetOptions.implicitHeight
+        clip: true
 
         ColumnLayout {
             id: widgetOptions
             spacing: 5
-            anchors {
-                fill: parent
-                margins: 20
-            }
+            width: parent.width
+            Layout.fillHeight: true
 
             Label {
                 id: titleLabel
@@ -110,8 +111,8 @@ BaseWindow {
                             Layout.fillWidth: true
 
                             textFormat: Text.RichText
-                            text: qsTr("<b>%1</b><br>%2").arg(widgetDelg.name)
-                                                         .arg(widgetDelg.description)
+                            text: "<b>" + qsTr(widgetDelg.name) + "</b><br>"
+                                  + qsTr(widgetDelg.description)
                         }
                     }
                 }
@@ -134,8 +135,8 @@ BaseWindow {
                     Label {
                         Layout.fillWidth: true
                         textFormat: Text.RichText
-                        text: qsTr("<b>%1</b><br>%2").arg(widgetEntries.get(widgetSelection.currentIndex).name)
-                                                     .arg(widgetEntries.get(widgetSelection.currentIndex).description)
+                        text: "<b>" + qsTr(widgetEntries.get(widgetSelection.currentIndex).name) + "</b><br>"
+                              + qsTr(widgetEntries.get(widgetSelection.currentIndex).description)
                     }
                 }
 
@@ -143,14 +144,19 @@ BaseWindow {
                     control.name = widgetEntries.get(currentIndex).name
                     control.selection = currentIndex
 
-                    control.additionalSettings = ({})
+                    widgetSettingsModel.clear()
 
                     switch (currentIndex) {
                         case CommonWidgets.Type.Webview:
-                            widgetSettingsInput.model = ["headerTitle", "darkModeUrl", "lightModeUrl", "acceptAllCerts"]
+                            const newSettings = [
+                                { name: "Header Title", setting: "headerTitle" },
+                                { name: "Dark Mode URL", setting: "darkModeUrl" },
+                                { name: "Light Mode URL", setting: "lightModeUrl" },
+                                { name: "Accept All Certificates", setting: "acceptAllCerts" }
+                            ]
+
+                            newSettings.forEach(item => widgetSettingsModel.append(item))
                             break
-                        default:
-                            widgetSettingsInput.model = []
                     }
                 }
             }
@@ -163,9 +169,13 @@ BaseWindow {
                 Layout.topMargin: 20
                 Layout.bottomMargin: 20
 
+                ListModel {
+                    id: widgetSettingsModel
+                }
+
                 Repeater {
                     id: widgetSettingsInput
-                    model: []
+                    model: widgetSettingsModel
                     delegate: ColumnLayout {
                         id: widgetSettingsDelegate
                         spacing: 10
@@ -173,19 +183,19 @@ BaseWindow {
                         Layout.fillHeight: true
 
                         required property int index
-                        required property string modelData
+
+                        property alias value: delgInput.text
 
                         Label {
                             id: delgLabel
-                            text: widgetSettingsDelegate.modelData
+                            text: widgetSettingsModel.count > 0
+                                  ? widgetSettingsModel.get(widgetSettingsDelegate.index).name
+                                  : ""
                         }
 
                         TextField {
                             id: delgInput
                             Layout.fillWidth: true
-                            onTextEdited: { // TODO: Maybe use something less aggressive?
-                                control.additionalSettings[delgLabel.text] = delgInput.text
-                            }
                         }
                     }
                 }
@@ -196,7 +206,9 @@ BaseWindow {
                 spacing: 10
                 Layout.fillWidth: true
                 layoutDirection: Qt.RightToLeft
-                Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+                Layout.alignment: Qt.AlignRight
+                Layout.topMargin: 20
+                Layout.bottomMargin: 20
 
                 Button {
                     id: widgetCancel
@@ -250,11 +262,19 @@ BaseWindow {
 
                         if (widget) {
                             // Per-widget settings
-                            Object.entries(control.additionalSettings).forEach(([key, value]) => {
-                                console.error(key + ": " + value)
-                                widget.config.set(key, value)
-                            })
-                           widget.additionalSettingsLoaded()
+                            const additionalSettings = widgetSettingsInput.count
+                            const hasCustomSettings = additionalSettings > 0
+
+                            if (hasCustomSettings) {
+                                for (let i = 0; i < additionalSettings; i++) {
+                                    const key = widgetSettingsModel.get(i).setting
+                                    const value = widgetSettingsInput.itemAt(i).value
+                                    if (key && value) {
+                                        widget.config.set(key, value)
+                                    }
+                                }
+                                widget.additionalSettingsLoaded()
+                            }
 
                             control.widgetRoot.resetWidgetElevation()
                             control.widgetRoot.model.add(widget)

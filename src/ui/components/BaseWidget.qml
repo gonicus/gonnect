@@ -19,6 +19,8 @@ Item {
     signal additionalSettingsLoaded()
     signal additionalSettingsUpdated()
 
+    signal cleanupRequested()
+
     Connections {
         target: control.config
         function onParametersUpdated() {
@@ -171,6 +173,7 @@ Item {
                     height: 32
                 }
                 onClicked: () => {
+                    control.cleanupRequested()
                     control.page.model.remove(control)
                     control.destroy()
                 }
