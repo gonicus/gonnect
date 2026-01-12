@@ -243,7 +243,7 @@ BaseWindow {
 
                             const val = {}
                             val[delg.target] = item.value
-                            control.values = Object.assign(control.values, val)
+                            control.values = Object.assign({}, control.values, val)
                         }
                     }
 
@@ -266,7 +266,7 @@ BaseWindow {
                         function onValueChanged() {
                             const val = {}
                             val[delg.target] = widgetLoader.item?.value
-                            control.values = Object.assign(control.values, val)
+                            control.values = Object.assign({}, control.values, val)
                         }
                     }
                 }
