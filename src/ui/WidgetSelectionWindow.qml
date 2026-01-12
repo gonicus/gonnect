@@ -149,9 +149,9 @@ BaseWindow {
                     switch (currentIndex) {
                         case CommonWidgets.Type.WebView:
                             const newSettings = [
-                                { name: qsTr("Header title"), setting: "headerTitle" },
-                                { name: qsTr("Dark mode URL"), setting: "darkModeUrl" },
-                                { name: qsTr("Light mode URL"), setting: "lightModeUrl" },
+                                { name: qsTr("Title"), setting: "headerTitle" },
+                                { name: qsTr("URL"), setting: "lightModeUrl" },
+                                { name: qsTr("URL (dark mode)"), setting: "darkModeUrl" },
                                 { name: qsTr("Accept all certificates"), setting: "acceptAllCerts" }
                             ]
 
