@@ -167,7 +167,9 @@ qreal Contact::matchesSearch(const QString &searchString) const
     qreal maxDist = 0;
 
     // Phone number
-    if ((searchString.startsWith("+") && searchString.length() > 4) || (!searchString.startsWith("+") && searchString.length() > 2)) {
+    if (((searchString.startsWith("+") || searchString.startsWith("0"))
+         && searchString.length() > 4)
+        || (!searchString.startsWith("+") && searchString.length() > 2)) {
         for (const auto &phoneNumber : std::as_const(m_phoneNumbers)) {
             if (phoneNumber.number.contains(searchString)) {
                 return 1.0;
