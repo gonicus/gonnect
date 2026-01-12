@@ -468,7 +468,7 @@ void SIPCall::toggleHoldImpl()
 void SIPCall::setIsHolding(bool value)
 {
     if (m_isHolding != value) {
-        if (!value) {
+        if (!value && !SIPCallManager::instance().isConferenceMode()) {
             GlobalCallState::instance().holdAllCalls(this);
         }
 
