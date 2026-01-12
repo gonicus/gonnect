@@ -36,6 +36,8 @@ Popup {
 
     readonly property int colWidth: flickableContainer.width / 3
 
+    onSearchTextChanged: () => Qt.callLater(keyNavigator.keyDown)
+
     function initialKeyDown() { keyNavigator.keyDown() }
     function initialKeyUp() { keyNavigator.keyUp() }
 
