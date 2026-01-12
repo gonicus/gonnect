@@ -9,6 +9,12 @@ Item {
     width: 400
     height: 400
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.EmojiPicker"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     EmojiModel { id: emojiModel }
 
     signal emojiPicked(string emoji)
@@ -22,7 +28,7 @@ Item {
             }
         }
 
-        console.warn("Unable to find rendered group item for group", groupIndex)
+        console.warn(category, "unable to find rendered group item for group", groupIndex)
     }
 
     Flickable {

@@ -18,7 +18,7 @@ public:
         return *_instance;
     }
 
-    void initialLoad();
+    QList<const Contact *> initialLoad();
 
     QString avatarPathFor(const QString &id);
 
@@ -45,7 +45,6 @@ private Q_SLOTS:
     void updateContacts();
 
 Q_SIGNALS:
-    void avatarManagerInitialized(QList<const Contact *> dirtyContacts);
     void avatarsLoaded();
     void avatarAdded(QString contactId);
     void avatarRemoved(QString contactId);

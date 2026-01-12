@@ -20,6 +20,12 @@ Popup {
     exit: null
     visible: !!control.searchText.length
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.SearchResultPopup"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     Material.accent: Theme.accentColor
     Material.theme: Theme.isDarkMode ? Material.Dark : Material.Light
 
@@ -29,6 +35,8 @@ Popup {
     signal returnFocus
 
     readonly property int colWidth: flickableContainer.width / 3
+
+    onSearchTextChanged: () => Qt.callLater(keyNavigator.keyDown)
 
     function initialKeyDown() { keyNavigator.keyDown() }
     function initialKeyUp() { keyNavigator.keyUp() }
@@ -41,7 +49,7 @@ Popup {
             keyNavigator.selectedItem.triggerPrimaryAction()
             control.primaryActionTriggered()
         } else {
-            console.error('Cannot find selected item to trigger primary action on')
+            console.error(category, 'cannot find selected item to trigger primary action on')
         }
     }
 
@@ -51,7 +59,7 @@ Popup {
         } else if (keyNavigator.selectedItem) {
             keyNavigator.selectedItem.triggerSecondaryAction()
         } else {
-            console.error('Cannot find selected item to trigger secondary action on')
+            console.error(category, 'cannot find selected item to trigger secondary action on')
         }
     }
 
@@ -527,7 +535,7 @@ Popup {
             //     }
 
             //     TapHandler {
-            //         onTapped: () => console.log('TODO')
+            //         onTapped: () => console.log(category, 'TODO')
             //     }
             // }
         }
