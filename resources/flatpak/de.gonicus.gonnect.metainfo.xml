@@ -98,10 +98,11 @@
       <keyword>Videokonference</keyword>
   </keywords>
 
-  <url type="homepage">https://github.com/gonicus/gonnect</url>
+  <url type="homepage">https://www.gonnect-project.org</url>
   <url type="bugtracker">https://github.com/gonicus/gonnect/issues</url>
   <url type="help">https://docs.gonicus.de/gonnect/v2.x</url>
   <url type="contact">https://gonnect-project.org</url>
+  <url type="vcs-browser">https://github.com/gonicus/gonnect</url>
 
   <provides>
     <binary>gonnect</binary>
