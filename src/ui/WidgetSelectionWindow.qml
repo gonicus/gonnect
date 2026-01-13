@@ -149,10 +149,10 @@ BaseWindow {
                     switch (currentIndex) {
                         case CommonWidgets.Type.WebView:
                             const newSettings = [
-                                { name: qsTr("Title"), setting: "headerTitle" },
-                                { name: qsTr("URL"), setting: "lightModeUrl" },
-                                { name: qsTr("URL (dark mode)"), setting: "darkModeUrl" },
-                                { name: qsTr("Accept all certificates"), setting: "acceptAllCerts" }
+                                { name: qsTr("Title"), setting: "headerTitle", checkable: 0 },
+                                { name: qsTr("URL"), setting: "lightModeUrl", checkable: 0 },
+                                { name: qsTr("URL (dark mode)"), setting: "darkModeUrl", checkable: 0 },
+                                { name: qsTr("Accept all certificates"), setting: "acceptAllCerts", checkable: 1 }
                             ]
 
                             newSettings.forEach(item => widgetSettingsModel.append(item))
@@ -169,6 +169,8 @@ BaseWindow {
                 Layout.topMargin: 20
                 Layout.bottomMargin: 20
 
+                signal settingsFinished
+
                 ListModel {
                     id: widgetSettingsModel
                 }
@@ -181,10 +183,42 @@ BaseWindow {
                         spacing: 10
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        Layout.bottomMargin: 10
 
                         required property int index
 
-                        property alias value: delgInput.text
+                        property string value
+
+                        Component {
+                            id: delgInputComp
+
+                            TextField {
+                                id: delgInput
+                                text: ""
+
+                                Connections {
+                                    target: widgetSettings
+                                    function onSettingsFinished() {
+                                        widgetSettingsDelegate.value = delgInput.text
+                                    }
+                                }
+                            }
+                        }
+
+                        Component {
+                            id: delgCheckComp
+
+                            CheckBox {
+                                id: delgCheck
+
+                                Connections {
+                                    target: widgetSettings
+                                    function onSettingsFinished() {
+                                        widgetSettingsDelegate.value = delgCheck.checked.toString()
+                                    }
+                                }
+                            }
+                        }
 
                         Label {
                             id: delgLabel
@@ -193,9 +227,14 @@ BaseWindow {
                                   : ""
                         }
 
-                        TextField {
-                            id: delgInput
-                            Layout.fillWidth: true
+                        Loader {
+                            id: delgLoader
+                            Layout.fillWidth: !delgLoader.isCheckable
+                            sourceComponent: delgLoader.isCheckable
+                                             ? delgCheckComp
+                                             : delgInputComp
+
+                            property bool isCheckable: widgetSettingsModel.get(widgetSettingsDelegate.index).checkable
                         }
                     }
                 }
@@ -266,10 +305,11 @@ BaseWindow {
                             const hasCustomSettings = additionalSettings > 0
 
                             if (hasCustomSettings) {
+                                widgetSettings.settingsFinished()
                                 for (let i = 0; i < additionalSettings; i++) {
                                     const key = widgetSettingsModel.get(i).setting
                                     const value = widgetSettingsInput.itemAt(i).value
-                                    if (key && value) {
+                                    if (key) {
                                         widget.config.set(key, value)
                                     }
                                 }

@@ -17,7 +17,10 @@ Item {
     }
 
     function get(key : string): variant {
-        return control.parameters[key]
+        if (key in control.parameters) {
+            return control.parameters[key]
+        }
+        return ""
     }
 
     function remove(key : string) {
