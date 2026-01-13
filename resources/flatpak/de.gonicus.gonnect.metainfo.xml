@@ -5,42 +5,40 @@
   <project_license>GPL-2.0-or-later</project_license>
   <metadata_license>MIT</metadata_license>
 
-  <summary>Make SIP calls</summary>
-  <summary xml:lang="de">Sip-Anrufe tätigen</summary>
+  <summary>Make phone calls and hold video conferences</summary>
+  <summary xml:lang="de">Telefoniere und halte Videokonferenzen ab</summary>
   <developer id="de.gonicus">
     <name>GONICUS GmbH</name>
   </developer>
   <content_rating type="oars-1.1" />
   <description>
     <p>
-      GOnnect is a UC client designed for Linux / Flatpak -based installations.
-      It makes use of various Flatpak portals and is meant to integrate well with
-      modern desktop environments like KDE or GNOME.
+      GOnnect combines telephony and video conferencing in one application. It offers
+      seamless integration with your desktop and supports the buttons on your headset.
     </p>
     <p xml:lang="de">
-      GOnnect ist UC-Client, der für Flatpak-basierte Installationen konzipiert wurde.
-      Er benutzt diverse Flatpak-Portale und integriert sich gut in moderne Desktops
-      wie KDE oder GNOME.
+      GOnnect vereint Telefonie und Videokonferenzen in einer Anwendung. Es bietet
+      eine nahtlose Integration in deinen Desktop und unterstützt die Tasten an deinem Headset.
     </p>
     <p>
-      With GOnnect, you can make VoIP calls from your workplace, transfer calls,
-      make enquiries and hold conferences with up to three parties. Video conferences
-      can be started as easily as a phone call. It also includes functions that support
-      your work with telephony.
+      You can search in your contacts, make phone calls from your workplace or transfer calls.
+      You also can start or join video conferences with Jitsi Meet or even upgrade from a phone
+      call to a video conference.
     </p>
     <p xml:lang="de">
-      Mit GOnnect kannst du VoIP Anrufe von deinem Arbeitsplatz starten, Anrufe weiterleiten,
-      Rückfragen machen und Konferenzen mit drei Teilnehmern durchführen. Videokonferenzen
-      können genau so leicht gestartet werden, wie ein Telefonanruf. Es sind Funktionen
-      enthalten, welche dir die Arbeit bei der Komunikation erleichtern.
+      Du suchst in deinen Kontakten, telefonierst direkt von deinem Arbeitsplatz oder vermittelst Gespräche.
+      Du kannst auch Jitsi Meet Videokonferenzen starten oder ihnen beitreten oder sogar ein
+      Telefonat in eine Videokonferenz überführen.
     </p>
     <p>
-      These include:
+      Phone features:
     </p>
     <p xml:lang="de">
-      Das sind zum Beispiel:
+      Telefonfunktionen:
     </p>
     <ul>
+      <li>Supports almost any SIP provider</li>
+      <li xml:lang="de">Unterstützt fast alle SIP Provider</li>
       <li>Call forwarding</li>
       <li xml:lang="de">Anrufweiterleitung</li>
       <li>Conference calls with three parties</li>
@@ -57,6 +55,28 @@
       <li xml:lang="de">Konfigurierbare Schalter (z.B. für Anrufwarteschlangen, CFNL, etc.)</li>
       <li>Upgrade call to Jitsi Meet session</li>
       <li xml:lang="de">Anruf in Jitsi Meet weiterführen</li>
+    </ul>
+    <p>
+      Video conference features:
+    </p>
+    <p xml:lang="de">
+      Videokonferenz-Funktionen:
+    </p>
+    <ul>
+      <li>Connects to Jitsi Meet</li>
+      <li xml:lang="de">Verbindet sich mit Jitsi Meet</li>
+      <li>Same UI as for telephony</li>
+      <li xml:lang="de">Die gleiche Benutzeroberfläche wie für die Telefonie</li>
+      <li>Make enquiries between other video conference or phone call</li>
+      <li xml:lang="de">Rückfrage in andere Videokonferenz oder anderes Telefonat</li>
+    </ul>
+    <p>
+      More features:
+    </p>
+    <p xml:lang="de">
+      Weitere Funktionen:
+    </p>
+    <ul>
       <li>Support for various hardware headsets (i.e. Yealink, Jabra)</li>
       <li xml:lang="de">Unterstützung für diverse Headsets (z.B. Yealink, Jabra)</li>
       <li>Support for various busylights</li>
@@ -87,21 +107,29 @@
   <launchable type="desktop-id">de.gonicus.gonnect.desktop</launchable>
 
   <categories>
-    <category>Utility</category>
+    <category>Network</category>
+    <category>Telephony</category>
+    <category>VideoConference</category>
   </categories>
 
   <keywords>
       <keyword>VoIP</keyword>
       <keyword>SIP</keyword>
-      <keyword>GOnnect</keyword>
-      <keyword>phone</keyword>
-      <keyword>Videokonference</keyword>
+      <keyword>Phone</keyword>
+      <keyword>Telephony</keyword>
+      <keyword>Softphone</keyword>
+      <keyword>Video conference</keyword>
+      <keyword>Teams</keyword>
+      <keyword>Collaboration</keyword>
+      <keyword>Headset</keyword>
   </keywords>
 
   <url type="homepage">https://github.com/gonicus/gonnect</url>
   <url type="bugtracker">https://github.com/gonicus/gonnect/issues</url>
   <url type="help">https://docs.gonicus.de/gonnect/v2.x</url>
   <url type="contact">https://gonnect-project.org</url>
+  <url type="translate">https://hosted.weblate.org/engage/gonnect/</url>
+  <url type="contribute">https://github.com/gonicus/gonnect#contributing-ov-file</url>
   <url type="vcs-browser">https://github.com/gonicus/gonnect</url>
 
   <provides>
