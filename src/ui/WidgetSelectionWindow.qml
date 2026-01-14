@@ -42,7 +42,6 @@ BaseWindow {
         id: widgets
     }
 
-    property string name: ""
     property int selection: -1
 
     Flickable {
@@ -153,7 +152,6 @@ BaseWindow {
                 }
 
                 onCurrentIndexChanged: {
-                    control.name = widgetEntries.get(currentIndex).name
                     control.selection = currentIndex
 
                     widgetSettingsModel.clear()
@@ -276,12 +274,10 @@ BaseWindow {
 
                     onPressed: {
                         const id = `-widget_${UISettings.generateUuid()}`
-                        const name = control.name
                         const selection = control.selection
 
                         const widgetProperties = {
                             widgetId: control.widgetRoot.pageId + id,
-                            name: name.toLowerCase(),
                             page: control.widgetRoot,
                             gridWidth: Qt.binding(() => control.widgetRoot.gridWidth),
                             gridHeight: Qt.binding(() => control.widgetRoot.gridHeight),

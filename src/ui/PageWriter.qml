@@ -29,7 +29,6 @@ Item {
             for (const widget of widgets) {
                 const widgetId = widget.widgetId
 
-                UISettings.setUISetting(widgetId, "name", widget.name)
                 UISettings.setUISetting(widgetId, "type", widget.type)
                 UISettings.setUISetting(widgetId, "xGrid", widget.xGrid)
                 UISettings.setUISetting(widgetId, "yGrid", widget.yGrid)
