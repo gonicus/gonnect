@@ -9,6 +9,12 @@ import base
 Item {
     id: control
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Chats"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     states: [
         State {
             when: !!(control.attachedData?.isSecretInitalized && !!control.attachedData?.accessToken)
@@ -132,16 +138,15 @@ Item {
 
             onJavaScriptConsoleMessage: (level, message, line, source) => {
                 if (level >= 2) {
-                    console.error("# " + message + ": " + source + " +" + line)
+                    console.error(category, message + ": " + source + " +" + line)
                 } else if (level === 1) {
-                    console.warn("# " + message + ": " + source + " +" + line)
+                    console.warn(category, message + ": " + source + " +" + line)
                 } else {
-                    console.log("# " + message + ": " + source + " +" + line)
+                    console.log(category, message + ": " + source + " +" + line)
                 }
             }
 
             onPermissionRequested: (permission) => {
-                console.error("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
                 permission.grant()
             }
         }

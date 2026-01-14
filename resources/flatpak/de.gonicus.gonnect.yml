@@ -207,8 +207,8 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        url: https://download.gnome.org/sources/evolution-data-server/3.58/evolution-data-server-3.58.1.tar.xz
-        sha256: a914928814ef887f0979ba78ea8d7bcc98f96cf07cbb70b0051980bd90ec35f0
+        url: https://download.gnome.org/sources/evolution-data-server/3.59/evolution-data-server-3.59.1.tar.xz
+        sha256: f4c178f6f87b4a44ddc553da636b7e874eb3ab93661d3f5ca3400ec9cb1c5f50
         x-checker-data:
           type: gnome
           name: evolution-data-server
@@ -256,6 +256,7 @@ modules:
     - -DCMAKE_INSTALL_RPATH=/usr/lib
     - -DCMAKE_UNITY_BUILD=ON
     - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
+    - -DENABLE_GOW_001=ON
     - -DENABLE_GOW_002=ON
     - -DENABLE_GOW_003=ON
     - -DENABLE_PCH=ON

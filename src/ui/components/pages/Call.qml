@@ -8,6 +8,12 @@ Item {
     id: control
     focus: true
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Call"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     readonly property alias selectedCallItem: callSideBar.selectedCallItem
 
     Keys.onPressed: (event) => {
@@ -18,7 +24,7 @@ Item {
                         }
 
                         const key = event.text.toUpperCase()
-                        const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "+", "A", "B", "C", "D", "," ]
+                        const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "A", "B", "C", "D" ]
 
                         if (dtmfKeys.includes(key)) {
                             event.accepted = true
@@ -85,7 +91,7 @@ Item {
                 } else if (topBar.callItem) {
                     SIPCallManager.endCall(topBar.callItem.accountId, topBar.callItem.callId)
                 } else {
-                    console.error("Cannot hang up because missing call item")
+                    console.error(category, "cannot hang up because missing call item")
                 }
             }
 
