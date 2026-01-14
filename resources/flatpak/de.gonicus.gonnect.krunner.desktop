@@ -1,13 +1,14 @@
 [Desktop Entry]
-Name=VoIP Phone
-Name[de]=VoIP Telefon
-Comment=Call your contacts
-Comment[de]=Ruf Deine Kontakte an
+Name=GOnnect
+GenericName=UC Client
+GenericName[de]=UC Client
+Comment=Make phone calls and hold video conferences
+Comment[de]=Telefoniere und halte Videokonferenzen ab
 X-KDE-ServiceTypes=Plasma/Runner
 Type=Service
 Icon=de.gonicus.gonnect
 X-KDE-ServiceTypes=Plasma/Runner
-X-KDE-PluginInfo-Author=GONICUS Gmbh
+X-KDE-PluginInfo-Author=GONICUS GmbH
 X-KDE-PluginInfo-Email=info@gonicus.de
 X-KDE-PluginInfo-Name=GOnnect
 X-KDE-PluginInfo-Version=1.0
