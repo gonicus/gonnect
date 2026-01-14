@@ -68,7 +68,7 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         auto &globalCallState = GlobalCallState::instance();
         Q_EMIT globalCallState.callStarted(false);
 
-        if (callId <= 0) { // Call is outgoing
+        if (callId < 0) { // Call is outgoing
             globalCallState.holdAllCalls(this);
         }
     }
