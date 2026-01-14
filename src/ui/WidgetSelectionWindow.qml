@@ -41,18 +41,25 @@ BaseWindow {
 
     Flickable {
         id: widgetFlickable
+        clip: true
+        contentHeight: widgetOptions.implicitHeight
         anchors {
             fill: parent
-            margins: 20
         }
-        contentHeight: widgetOptions.implicitHeight
-        clip: true
+
+        ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AsNeeded
+            width: 10
+        }
 
         ColumnLayout {
             id: widgetOptions
             spacing: 5
-            width: parent.width
-            Layout.fillHeight: true
+            width: control.implicitWidth
+            anchors {
+                fill: parent
+                margins: 20
+            }
 
             Label {
                 id: titleLabel
@@ -234,7 +241,9 @@ BaseWindow {
                                              ? delgCheckComp
                                              : delgInputComp
 
-                            property bool isCheckable: widgetSettingsModel.get(widgetSettingsDelegate.index).checkable
+                            property bool isCheckable: widgetSettingsModel.count > 0
+                                                       ? widgetSettingsModel.get(widgetSettingsDelegate.index).checkable
+                                                       : false
                         }
                     }
                 }

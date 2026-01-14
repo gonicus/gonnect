@@ -43,26 +43,20 @@ BaseWidget {
             fill: parent
         }
 
-        Component {
-            id: webviewHeadingComp
-
-            CardHeading {
-                id: webviewHeading
-                visible: true
-                text: control.headerTitle
+        CardHeading {
+            id: webviewHeading
+            visible: true
+            text: control.headerTitle
+            anchors {
+                left: parent.left
+                right: parent.right
             }
-        }
-
-        Loader {
-            id: headerLoader
-            width: parent.width
-            sourceComponent: control.headerTitle != "" ? webviewHeadingComp : null
         }
 
         WebEngineView {
             id: webView
             anchors {
-                top: headerLoader.bottom
+                top: webviewHeading.bottom
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
