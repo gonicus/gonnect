@@ -20,9 +20,15 @@ BaseWindow {
     showMaximizeButton: false
 
     minimumWidth: control.width
-    minimumHeight: control.height
     maximumWidth: control.width
-    maximumHeight: control.height
+
+    minimumHeight: control.dynamicHeight
+    maximumHeight: control.dynamicHeight
+
+    property int maxHeight: 700
+    property int dynamicHeight: widgetOptions.implicitHeight > control.maxHeight
+                            ? control.maxHeight
+                            : widgetOptions.implicitHeight
 
     required property var widgetRoot
 
@@ -55,7 +61,6 @@ BaseWindow {
         ColumnLayout {
             id: widgetOptions
             spacing: 5
-            width: control.implicitWidth
             anchors {
                 fill: parent
                 margins: 20
@@ -252,11 +257,10 @@ BaseWindow {
             RowLayout {
                 id: widgetButtons
                 spacing: 10
+                Layout.preferredHeight: 90
                 Layout.fillWidth: true
                 layoutDirection: Qt.RightToLeft
                 Layout.alignment: Qt.AlignRight
-                Layout.topMargin: 20
-                Layout.bottomMargin: 20
 
                 Button {
                     id: widgetCancel
