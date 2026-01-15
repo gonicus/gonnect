@@ -222,10 +222,10 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
         return;
     }
 
-    // Already joined, do not create a notification in the future
-    foundDateEvent->setIsNotifiable(false);
-
     const auto eventHash = foundDateEvent->getHash();
+
+    // Already joined, do not create a notification in the future
+    m_alreadyNotifiedDates.insert(eventHash);
 
     auto notificationId = m_notificationIds.value(eventHash);
     if (notificationId.isEmpty()) {
@@ -252,10 +252,10 @@ void DateEventManager::removeNotificationByLink(const QString &link)
         return;
     }
 
-    // Already joined, do not create a notification in the future
-    foundDateEvent->setIsNotifiable(false);
-
     const auto eventHash = foundDateEvent->getHash();
+
+    // Already joined, do not create a notification in the future
+    m_alreadyNotifiedDates.insert(eventHash);
 
     auto notificationId = m_notificationIds.value(eventHash);
     if (notificationId.isEmpty()) {
@@ -286,9 +286,8 @@ void DateEventManager::onTimerTimeout()
             const auto link = dateEvent->link();
             const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
             const auto isOtherLink = dateEvent->isOtherLink();
-            const auto isNotifiable = dateEvent->isNotifiable();
 
-            if (isNotifiable && !m_alreadyNotifiedDates.contains(eventHash)
+            if (!m_alreadyNotifiedDates.contains(eventHash)
                 && !m_notificationIds.contains(eventHash) && start.date() == today
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
                 QString message = isJitsiMeeting ? tr("Conference starting soon")
