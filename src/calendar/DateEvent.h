@@ -23,6 +23,7 @@ public:
     QString link() const { return m_link; }
     bool isJitsiMeeting() const { return m_isJitsiMeeting; }
     bool isOtherLink() const { return m_isOtherLink; }
+    bool isNotifiable() const { return m_isNotifiable; }
 
     void setId(const QString &id);
     void setSource(const QString &source);
@@ -32,6 +33,7 @@ public:
     void setLocation(const QString &location);
     void setDescription(const QString &description);
     void setIsJitsiMeeting(bool isJitsiMeeting);
+    void setIsNotifiable(bool isNotifiable);
 
     size_t getHash();
 
@@ -49,6 +51,7 @@ private:
     QString m_link;
     bool m_isJitsiMeeting = false;
     bool m_isOtherLink = false;
+    bool m_isNotifiable = true;
 };
 
 QDebug operator<<(QDebug debug, const DateEvent &dateEvent);

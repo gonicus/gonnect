@@ -117,7 +117,6 @@ public:
                    QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
                    const QString &displayName = "");
 
-    // TODO: Remove notification by hash (?), open URL externally
     Q_INVOKABLE void requestExternalAppointment();
 
     Q_INVOKABLE void setCallInForegroundByIds(const QString &accountId, int callId);

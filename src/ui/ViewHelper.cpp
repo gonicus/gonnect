@@ -408,8 +408,6 @@ bool ViewHelper::isValidJitsiRoomName(const QString &name) const
 void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryItem> callHistoryItem,
                                 const QString &displayName)
 {
-    DateEventManager::instance().removeNotificationByRoomName(roomName);
-
     qCInfo(lcViewHelper).nospace().noquote()
             << "Requesting meeting for " << roomName << " (" << displayName
             << ") with flags:" << m_nextMeetingStartFlags;
@@ -417,6 +415,11 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
     Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
     setProperty("nextMeetingStartFlags",
                 QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
+}
+
+void ViewHelper::requestExternalAppointment()
+{
+    // TODO: Remove notification by hash (?), open URL externally
 }
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)

@@ -62,6 +62,11 @@ void DateEvent::setIsJitsiMeeting(bool isJitsiMeeting)
     m_isJitsiMeeting = isJitsiMeeting;
 }
 
+void DateEvent::setIsNotifiable(bool isNotifiable)
+{
+    m_isNotifiable = isNotifiable;
+}
+
 size_t DateEvent::getHash()
 {
     size_t sum = 0;

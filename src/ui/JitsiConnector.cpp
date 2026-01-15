@@ -1137,7 +1137,6 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
         toggleHold();
     }
 
-    // TODO: Not triggered?
     DateEventManager::instance().removeNotificationByRoomName(displayName);
 
     m_startWithVideo = startFlags & IConferenceConnector::StartFlag::VideoActive;

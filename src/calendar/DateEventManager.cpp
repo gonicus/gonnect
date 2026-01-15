@@ -224,6 +224,9 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
 
     const auto eventHash = foundDateEvent->getHash();
 
+    // Already joined, do not create a notification in the future
+    foundDateEvent->setIsNotifiable(false);
+
     auto notificationId = m_notificationIds.value(eventHash);
     if (notificationId.isEmpty()) {
         return;
@@ -253,8 +256,9 @@ void DateEventManager::onTimerTimeout()
             const auto link = dateEvent->link();
             const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
             const auto isOtherLink = dateEvent->isOtherLink();
+            const auto isNotifiable = dateEvent->isNotifiable();
 
-            if (!m_alreadyNotifiedDates.contains(eventHash)
+            if (isNotifiable && !m_alreadyNotifiedDates.contains(eventHash)
                 && !m_notificationIds.contains(eventHash) && start.date() == today
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
                 QString message = isJitsiMeeting ? tr("Conference starting soon")
