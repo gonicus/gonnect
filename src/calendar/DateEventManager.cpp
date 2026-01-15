@@ -222,10 +222,10 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
         return;
     }
 
-    const auto eventHash = foundDateEvent->getHash();
-
     // Already joined, do not create a notification in the future
     foundDateEvent->setIsNotifiable(false);
+
+    const auto eventHash = foundDateEvent->getHash();
 
     auto notificationId = m_notificationIds.value(eventHash);
     if (notificationId.isEmpty()) {
