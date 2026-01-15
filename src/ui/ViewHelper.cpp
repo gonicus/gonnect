@@ -18,6 +18,7 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <QDesktopServices>
 #include <QMediaFormat>
 #include <QFileDialog>
 #include <QSystemTrayIcon>
@@ -417,9 +418,12 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
                 QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
 }
 
-void ViewHelper::requestExternalAppointment()
+void ViewHelper::requestExternalAppointment(const QString &link)
 {
-    // TODO: Remove notification by hash (?), open URL externally
+    DateEventManager::instance().removeNotificationByRoomName(link);
+
+    const bool result = QDesktopServices::openUrl(link);
+    qCInfo(lcViewHelper) << "Browser opened:" << result;
 }
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)

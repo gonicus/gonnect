@@ -117,7 +117,7 @@ public:
                    QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
                    const QString &displayName = "");
 
-    Q_INVOKABLE void requestExternalAppointment();
+    Q_INVOKABLE void requestExternalAppointment(const QString &link);
 
     Q_INVOKABLE void setCallInForegroundByIds(const QString &accountId, int callId);
 

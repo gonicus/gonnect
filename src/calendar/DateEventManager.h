@@ -45,6 +45,7 @@ public:
     DateEvent *currentDateEventByRoomName(const QString &roomName) const;
 
     void removeNotificationByRoomName(const QString &roomName);
+    void removeNotificationByLink(const QString &link);
 
 private Q_SLOTS:
     void onTimerTimeout();
