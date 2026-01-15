@@ -19,7 +19,7 @@ Window {
     property bool showMinimizeButton: true
     property bool showMaximizeButton: true
 
-    property int windowHeaderHeight: containerPage.height - innerContainer.height
+    property int windowHeaderPadding: windowHeaderLoader.height + 2 * control.shadowMargin
 
     default property alias content: innerContainer.children
 
