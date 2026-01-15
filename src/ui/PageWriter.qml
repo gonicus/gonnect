@@ -36,10 +36,9 @@ Item {
                 UISettings.setUISetting(widgetId, "heightGrid", widget.heightGrid)
 
                 // Additional per-widget settings
-                let additionalSettings = widget.config.entries()
-                let hasCustomSettings = additionalSettings.length > 0
+                const additionalSettings = widget.config.entries()
 
-                if (hasCustomSettings) {
+                if (additionalSettings.length > 0) {
                     UISettings.setUISetting(widgetId, "additionalSettings", additionalSettings.join(","))
                     for (const setting of additionalSettings) {
                         UISettings.setUISetting(widgetId, setting, widget.config.get(setting))

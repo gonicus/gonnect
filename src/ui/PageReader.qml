@@ -156,12 +156,11 @@ Item {
 
         if (widget) {
             // Load widget-specific settings
-            let additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",").filter(item => item !== "")
-            let hasCustomSettings = additionalSettings.length > 0
+            const additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",").filter(item => item !== "")
 
-            if (hasCustomSettings) {
+            if (additionalSettings.length > 0) {
                 for (const setting of additionalSettings) {
-                    let value = UISettings.getUISetting(widgetId, setting, "")
+                    const value = UISettings.getUISetting(widgetId, setting, "")
                     if (value !== "") {
                         widget.config.set(setting, value)
                     }

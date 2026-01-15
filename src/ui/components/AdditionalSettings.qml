@@ -17,14 +17,14 @@ Item {
     }
 
     function get(key : string): variant {
-        if (key in control.parameters) {
+        if (control.parameters.hasOwnProperty(key)) {
             return control.parameters[key]
         }
         return ""
     }
 
     function remove(key : string) {
-        if (key in control.parameters) {
+        if (control.parameters.hasOwnProperty(key)) {
             delete control.parameters[key]
 
             control.parametersUpdated()
