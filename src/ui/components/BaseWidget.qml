@@ -10,9 +10,22 @@ Item {
     id: control
 
     required property string widgetId
-    required property string name
     required property int type
     required property var page
+
+    property AdditionalSettings config: AdditionalSettings {}
+
+    signal additionalSettingsLoaded()
+    signal additionalSettingsUpdated()
+
+    signal cleanupRequested()
+
+    Connections {
+        target: control.config
+        function onParametersUpdated() {
+            control.page?.writer.save()
+        }
+    }
 
     property real gridWidth
     property real gridHeight
@@ -159,6 +172,7 @@ Item {
                     height: 32
                 }
                 onClicked: () => {
+                    control.cleanupRequested()
                     control.page.model.remove(control)
                     control.destroy()
                 }

@@ -29,12 +29,21 @@ Item {
             for (const widget of widgets) {
                 const widgetId = widget.widgetId
 
-                UISettings.setUISetting(widgetId, "name", widget.name)
                 UISettings.setUISetting(widgetId, "type", widget.type)
                 UISettings.setUISetting(widgetId, "xGrid", widget.xGrid)
                 UISettings.setUISetting(widgetId, "yGrid", widget.yGrid)
                 UISettings.setUISetting(widgetId, "widthGrid", widget.widthGrid)
                 UISettings.setUISetting(widgetId, "heightGrid", widget.heightGrid)
+
+                // Additional per-widget settings
+                const additionalSettings = widget.config.entries()
+
+                if (additionalSettings.length > 0) {
+                    UISettings.setUISetting(widgetId, "additionalSettings", additionalSettings.join(","))
+                    for (const setting of additionalSettings) {
+                        UISettings.setUISetting(widgetId, setting, widget.config.get(setting))
+                    }
+                }
             }
 
             // Page
