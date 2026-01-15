@@ -351,6 +351,8 @@ qt_add_qml_module(gonnect
         ui/components/DateEventsWidget.qml
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
+        ui/components/WebViewWidget.qml
+        ui/components/AdditionalSettings.qml
 
         ui/components/pages/Call.qml
         ui/components/pages/Chats.qml
