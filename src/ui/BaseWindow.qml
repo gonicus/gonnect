@@ -19,6 +19,8 @@ Window {
     property bool showMinimizeButton: true
     property bool showMaximizeButton: true
 
+    property int windowHeaderHeight: containerPage.height - innerContainer.height
+
     default property alias content: innerContainer.children
 
     readonly property bool isMaximized: [ Window.Maximized, Window.FullScreen ].includes(control.visibility)

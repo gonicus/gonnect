@@ -13,7 +13,6 @@ BaseWindow {
     objectName: "widgetSelectionWindow"
     title: qsTr("Add widget")
     width: 600
-    height: 340
     visible: true
     resizable: false
     showMinimizeButton: false
@@ -25,10 +24,11 @@ BaseWindow {
     minimumHeight: control.dynamicHeight
     maximumHeight: control.dynamicHeight
 
-    property int maxHeight: 700
-    property int dynamicHeight: widgetOptions.implicitHeight > control.maxHeight
+    property int currentHeight: widgetOptions.implicitHeight + control.windowHeaderHeight
+    property int maxHeight: 700 + control.windowHeaderHeight
+    property int dynamicHeight: control.currentHeight > control.maxHeight
                             ? control.maxHeight
-                            : widgetOptions.implicitHeight
+                            : control.currentHeight
 
     required property var widgetRoot
 
