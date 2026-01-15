@@ -68,7 +68,6 @@ Item {
             for (const widgetId of widgetIds) {
                 control.createWidget(widgetId, page)
             }
-
         } else {
             // Default page layout
             const baseId = `${pageId}-widget_`
@@ -82,7 +81,6 @@ Item {
             const history = widgets.history.createObject(page.grid,
                                                          Object.assign({
                                                              widgetId: baseId + UISettings.generateUuid(),
-                                                             name: "history",
                                                              page: page,
                                                              xGrid: 0,
                                                              yGrid: 0,
@@ -96,7 +94,6 @@ Item {
             const favorites = widgets.favorites.createObject(page.grid,
                                                              Object.assign({
                                                                  widgetId: baseId + UISettings.generateUuid(),
-                                                                 name: "favorites",
                                                                  page: page,
                                                                  xGrid: 33,
                                                                  yGrid: 0,
@@ -110,7 +107,6 @@ Item {
             const dateEvents = widgets.dateEvents.createObject(page.grid,
                                                                Object.assign({
                                                                    widgetId: baseId + UISettings.generateUuid(),
-                                                                   name: "dateevents",
                                                                    page: page,
                                                                    xGrid: 33,
                                                                    yGrid: 28,
@@ -127,7 +123,6 @@ Item {
         const widgetType = Number(UISettings.getUISetting(widgetId, "type", 0))
         const widgetProperties = {
             widgetId: widgetId,
-            name: UISettings.getUISetting(widgetId, "name", ""),
             page: page,
 
             xGrid: UISettings.getUISetting(widgetId, "xGrid", 0),
@@ -152,11 +147,28 @@ Item {
             case CommonWidgets.Type.History:
                 widget = widgets.history.createObject(page.grid, widgetProperties)
                 break
+            case CommonWidgets.Type.WebView:
+                widget = widgets.webview.createObject(page.grid, widgetProperties)
+                break
             default:
                 console.error(category, `widget type ${widgetType} unknown`)
         }
 
         if (widget) {
+            // Load widget-specific settings
+            const additionalSettings = UISettings.getUISetting(widgetId, "additionalSettings", "").split(",").filter(item => item !== "")
+
+            if (additionalSettings.length > 0) {
+                for (const setting of additionalSettings) {
+                    const value = UISettings.getUISetting(widgetId, setting, "")
+                    if (value !== "") {
+                        widget.config.set(setting, value)
+                    }
+                }
+
+                widget.additionalSettingsLoaded()
+            }
+
             page.model.add(widget)
         } else {
             console.error(category, "could not create widget component", widgetId)
