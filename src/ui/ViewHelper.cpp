@@ -420,7 +420,7 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
 
 void ViewHelper::requestExternalAppointment(const QString &link)
 {
-    DateEventManager::instance().removeNotificationByRoomName(link);
+    DateEventManager::instance().removeNotificationByLink(link);
 
     const bool result = QDesktopServices::openUrl(link);
     qCInfo(lcViewHelper) << "Browser opened:" << result;
