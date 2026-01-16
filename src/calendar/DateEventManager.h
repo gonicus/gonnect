@@ -26,13 +26,15 @@ public:
     QList<QPair<QDateTime, QDateTime>> createDaysFromRange(const QDateTime start,
                                                            const QDateTime end);
 
-    /// Add date event; DateEventManager takes ownership of the given object!
-    void addDateEvent(DateEvent *dateEvent);
+    void addDateEvent(const QString &id, const QString &source, const QDateTime &start,
+                      const QDateTime &end, const QString &summary, const QString &location,
+                      const QString &description);
 
     void modifyDateEvent(const QString &id, const QString &source, const QDateTime &start,
                          const QDateTime &end, const QString &summary, const QString &location,
                          const QString &description);
-    void removeDateEvent(const QString &id);
+
+    void removeDateEvent(const QString &id, const QDateTime &start, const QDateTime &end);
 
     /// Delete all date events
     void resetDateEvents();
@@ -70,7 +72,8 @@ private:
 
 Q_SIGNALS:
     void dateEventAdded(qsizetype index, DateEvent *dateEvent);
-    void dateEventModified();
     void dateEventRemoved(qsizetype index);
+
+    void dateEventsModified();
     void dateEventsCleared();
 };

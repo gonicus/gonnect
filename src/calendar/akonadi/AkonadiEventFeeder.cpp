@@ -173,9 +173,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                     && recurStart >= m_timeRangeStart) {
                                     QString nid = QString("%1-%2").arg(id).arg(
                                             recurStart.toMSecsSinceEpoch());
-                                    manager.addDateEvent(new DateEvent(nid, m_source, recurStart,
-                                                                       recurEnd, summary, location,
-                                                                       description));
+                                    manager.addDateEvent(nid, m_source, recurStart, recurEnd,
+                                                         summary, location, description);
                                 }
                             }
                         } else if (isUpdatedRecurrence) {
@@ -183,20 +182,20 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                             if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd
                                 || end < m_currentTime) {
                                 // Updated recurrence doesn't match our criteria anymore
-                                manager.removeDateEvent(id);
+                                manager.removeDateEvent(id, start, end);
                             } else if (manager.isAddedDateEvent(id)) {
                                 // Exists but modified
                                 manager.modifyDateEvent(id, m_source, start, end, summary, location,
                                                         description);
                             } else {
                                 // Does not exist, e.g. moved from past to future, different day
-                                manager.addDateEvent(new DateEvent(id, m_source, start, end,
-                                                                   summary, location, description));
+                                manager.addDateEvent(id, m_source, start, end, summary, location,
+                                                     description);
                             }
                         } else {
                             // Normal event, no recurrence, or update of a recurrent instance
-                            manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
-                                                               location, description));
+                            manager.addDateEvent(id, m_source, start, end, summary, location,
+                                                 description);
                         }
                     }
                 }

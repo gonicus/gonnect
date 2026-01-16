@@ -2,7 +2,6 @@
 #include <QRegularExpression>
 
 #include "CalDAVEventFeeder.h"
-#include "DateEvent.h"
 #include "DateEventFeederManager.h"
 #include "DateEventManager.h"
 
@@ -183,9 +182,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                             && recurStart >= m_config.timeRangeStart) {
                             QString nid =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
-                            manager.addDateEvent(new DateEvent(nid, m_config.source, recurStart,
-                                                               recurEnd, summary, location,
-                                                               description));
+                            manager.addDateEvent(nid, m_config.source, recurStart, recurEnd,
+                                                 summary, location, description);
                         }
                     }
 
@@ -196,29 +194,28 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 if (isCancelled || start < m_config.timeRangeStart || start > m_config.timeRangeEnd
                     || end < m_config.currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
-                    manager.removeDateEvent(id);
+                    manager.removeDateEvent(id, start, end);
                 } else if (manager.isAddedDateEvent(id)) {
                     // Exists but modified
                     manager.modifyDateEvent(id, m_config.source, start, end, summary, location,
                                             description);
                 } else {
                     // Does not exist, e.g. moved from past to future, different day
-                    manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                       location, description));
+                    manager.addDateEvent(id, m_config.source, start, end, summary, location,
+                                         description);
                 }
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
-                if (isMultiDay) {
+                if (isMultiDay) { // TODO: move to addDateEvent etc.
                     const auto days = manager.createDaysFromRange(start, end);
                     for (auto &day : days) {
                         QString nid = QString("%1-%2").arg(id).arg(day.first.toMSecsSinceEpoch());
-                        manager.addDateEvent(new DateEvent(nid, m_config.source, day.first,
-                                                           day.second, summary, location,
-                                                           description));
+                        manager.addDateEvent(nid, m_config.source, day.first, day.second, summary,
+                                             location, description);
                     }
                 } else {
-                    manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                       location, description));
+                    manager.addDateEvent(id, m_config.source, start, end, summary, location,
+                                         description);
                 }
             }
         }

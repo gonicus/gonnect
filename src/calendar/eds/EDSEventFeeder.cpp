@@ -428,9 +428,8 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                             && recurStart >= m_timeRangeStart) {
                             QString nid =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
-                            manager.addDateEvent(new DateEvent(nid, concreteSource, recurStart,
-                                                               recurEnd, summary, location,
-                                                               description));
+                            manager.addDateEvent(nid, concreteSource, recurStart, recurEnd, summary,
+                                                 location, description);
                         }
                     }
 
@@ -441,20 +440,20 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd
                     || end < m_currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
-                    manager.removeDateEvent(id);
+                    manager.removeDateEvent(id, start, end);
                 } else if (manager.isAddedDateEvent(id)) {
                     // Exists but modified
                     manager.modifyDateEvent(id, concreteSource, start, end, summary, location,
                                             description);
                 } else {
                     // Does not exist, e.g. moved from past to future, different day
-                    manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
-                                                       location, description));
+                    manager.addDateEvent(id, concreteSource, start, end, summary, location,
+                                         description);
                 }
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
-                manager.addDateEvent(new DateEvent(id, concreteSource, start, end, summary,
-                                                   location, description));
+                manager.addDateEvent(id, concreteSource, start, end, summary, location,
+                                     description);
             }
         }
     }
