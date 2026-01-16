@@ -18,7 +18,6 @@ DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ paren
     setTimeData();
 
     connect(&m_nextDayRefreshTimer, &QTimer::timeout, this, [this]() {
-        qCWarning(lcDateEventFeederManager) << "REFRESH";
         setTimeData();
         initFeederConfigs();
         reload();

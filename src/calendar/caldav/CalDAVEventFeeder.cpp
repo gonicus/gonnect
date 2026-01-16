@@ -131,7 +131,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             icaltimetype dtend = icalcomponent_get_dtend(event);
             QDateTime end = createDateTimeFromTimeType(dtend);
 
-            // TODO: Multi-day event processing!
+            // TODO: If true, limit dtend to timeRangeEnd if it's longer than that
             bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_config.currentTime;
 
             QString summary = icalcomponent_get_summary(event);
@@ -141,7 +141,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             // Status filter
             icalproperty_status status = icalcomponent_get_status(event);
             bool isCancelled = (status == ICAL_STATUS_CANCELLED || status == ICAL_STATUS_FAILED
-                                || status == ICAL_STATUS_DELETED || summary.contains("Canceled:"));
+                                || status == ICAL_STATUS_DELETED);
 
             // Skip non-recurrent events that are cancelled / outside of our date range
             if ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd
@@ -172,6 +172,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                          next = icalrecur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
                         QDateTime recurEnd = recurStart.addSecs(duration);
+                        bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                && recurEnd > m_config.currentTime;
                         if (recurStart > m_config.timeRangeEnd) {
                             break;
                         } else if (recurEnd < m_config.currentTime) {
@@ -179,7 +181,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                         }
 
                         if (!exdates.contains(recurStart) && !isCancelled
-                            && recurStart >= m_config.timeRangeStart) {
+                            && (recurStart >= m_config.timeRangeStart || recurMultiDay)) {
                             QString nid =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
                             manager.addDateEvent(nid, m_config.source, recurStart, recurEnd,
@@ -191,8 +193,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 }
             } else if (isUpdatedRecurrence) {
                 // Updates of a recurrent event instance
-                if (isCancelled || start < m_config.timeRangeStart || start > m_config.timeRangeEnd
-                    || end < m_config.currentTime) {
+                if (isCancelled || (start < m_config.timeRangeStart && !isMultiDay)
+                    || start > m_config.timeRangeEnd || end < m_config.currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
                     manager.removeDateEvent(id, start, end);
                 } else if (manager.isAddedDateEvent(id)) {
@@ -206,17 +208,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 }
             } else {
                 // Normal event, no recurrence, or update of a recurrent instance
-                if (isMultiDay) { // TODO: move to addDateEvent etc.
-                    const auto days = manager.createDaysFromRange(start, end);
-                    for (auto &day : days) {
-                        QString nid = QString("%1-%2").arg(id).arg(day.first.toMSecsSinceEpoch());
-                        manager.addDateEvent(nid, m_config.source, day.first, day.second, summary,
-                                             location, description);
-                    }
-                } else {
-                    manager.addDateEvent(id, m_config.source, start, end, summary, location,
-                                         description);
-                }
+                manager.addDateEvent(id, m_config.source, start, end, summary, location,
+                                     description);
             }
         }
     } else {

@@ -131,16 +131,15 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         QDateTime start = event->dtStart().toLocalTime();
                         QDateTime end = event->dtEnd().toLocalTime();
 
-                        bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0;
+                        bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_currentTime;
 
                         QString summary = event->summary();
                         QString location = event->location();
                         QString description = event->description();
 
                         // Status filter
-                        bool isCancelled =
-                                (event->status() == KCalendarCore::Incidence::Status::StatusCanceled
-                                 || summary.contains("Canceled:"));
+                        bool isCancelled = (event->status()
+                                            == KCalendarCore::Incidence::Status::StatusCanceled);
 
                         // Skip non-recurrent events that are cancelled / outside of our date range
                         if ((start < m_timeRangeStart || start > m_timeRangeEnd
@@ -163,6 +162,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                  next = rrule->getNextDate(next)) {
                                 QDateTime recurStart = next.toLocalTime();
                                 QDateTime recurEnd = recurStart.addSecs(duration);
+                                bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                        && recurEnd > m_currentTime;
                                 if (recurStart > m_timeRangeEnd) {
                                     break;
                                 } else if (recurEnd < m_currentTime) {
@@ -170,7 +171,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                 }
 
                                 if (!exdates.contains(recurStart) && !isCancelled
-                                    && recurStart >= m_timeRangeStart) {
+                                    && (recurStart >= m_timeRangeStart || recurMultiDay)) {
                                     QString nid = QString("%1-%2").arg(id).arg(
                                             recurStart.toMSecsSinceEpoch());
                                     manager.addDateEvent(nid, m_source, recurStart, recurEnd,
@@ -179,8 +180,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                             }
                         } else if (isUpdatedRecurrence) {
                             // Updates of a recurrent event instance
-                            if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd
-                                || end < m_currentTime) {
+                            if (isCancelled || (start < m_timeRangeStart && !isMultiDay)
+                                || start > m_timeRangeEnd || end < m_currentTime) {
                                 // Updated recurrence doesn't match our criteria anymore
                                 manager.removeDateEvent(id, start, end);
                             } else if (manager.isAddedDateEvent(id)) {

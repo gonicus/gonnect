@@ -78,6 +78,7 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
     QList<QString> dateEventIds;
     if (days.count() > 1) {
         for (int i = 0; i < days.count(); i++) {
+            // Multi-day events will share the same base ID with counter added to it
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
     } else {
@@ -185,7 +186,7 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
 
     QMutexLocker lock(&m_feederMutex);
 
-    for (auto dateEventId : dateEventIds) {
+    for (auto &dateEventId : dateEventIds) {
         qsizetype i = 0;
         QMutableListIterator it(m_dateEvents);
         while (it.hasNext()) {
