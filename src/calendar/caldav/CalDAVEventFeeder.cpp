@@ -131,8 +131,11 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             icaltimetype dtend = icalcomponent_get_dtend(event);
             QDateTime end = createDateTimeFromTimeType(dtend);
 
-            // TODO: If true, limit dtend to timeRangeEnd if it's longer than that
+            // Multi-day handling
             bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_config.currentTime;
+            if (isMultiDay && end > m_config.timeRangeEnd) {
+                end = m_config.timeRangeEnd;
+            }
 
             QString summary = icalcomponent_get_summary(event);
             QString location = icalcomponent_get_location(event);
@@ -172,12 +175,17 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                          next = icalrecur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
                         QDateTime recurEnd = recurStart.addSecs(duration);
-                        bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
-                                && recurEnd > m_config.currentTime;
                         if (recurStart > m_config.timeRangeEnd) {
                             break;
                         } else if (recurEnd < m_config.currentTime) {
                             continue;
+                        }
+
+                        // Recurrent multi-day handling
+                        bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                && recurEnd > m_config.currentTime;
+                        if (recurMultiDay && recurEnd > m_config.timeRangeEnd) {
+                            recurEnd = m_config.timeRangeEnd;
                         }
 
                         if (!exdates.contains(recurStart) && !isCancelled

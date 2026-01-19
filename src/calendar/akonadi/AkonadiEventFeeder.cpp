@@ -131,7 +131,11 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         QDateTime start = event->dtStart().toLocalTime();
                         QDateTime end = event->dtEnd().toLocalTime();
 
+                        // Multi-day handling
                         bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_currentTime;
+                        if (isMultiDay && end > m_timeRangeEnd) {
+                            end = m_timeRangeEnd;
+                        }
 
                         QString summary = event->summary();
                         QString location = event->location();
@@ -162,12 +166,17 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                  next = rrule->getNextDate(next)) {
                                 QDateTime recurStart = next.toLocalTime();
                                 QDateTime recurEnd = recurStart.addSecs(duration);
-                                bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
-                                        && recurEnd > m_currentTime;
                                 if (recurStart > m_timeRangeEnd) {
                                     break;
                                 } else if (recurEnd < m_currentTime) {
                                     continue;
+                                }
+
+                                // Recurrent multi-day handling
+                                bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                        && recurEnd > m_currentTime;
+                                if (recurMultiDay && recurEnd > m_timeRangeEnd) {
+                                    recurEnd = m_timeRangeEnd;
                                 }
 
                                 if (!exdates.contains(recurStart) && !isCancelled

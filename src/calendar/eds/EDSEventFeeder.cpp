@@ -375,7 +375,11 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             ICalTime *dtend = i_cal_component_get_dtend(component);
             QDateTime end = createDateTimeFromTimeType(dtend);
 
+            // Multi-day handling
             bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_currentTime;
+            if (isMultiDay && end > m_timeRangeEnd) {
+                end = m_timeRangeEnd;
+            }
 
             QString summary = i_cal_component_get_summary(component);
             QString location = i_cal_component_get_location(component);
@@ -416,14 +420,19 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                          next = i_cal_recur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
                         QDateTime recurEnd = recurStart.addSecs(duration);
-                        bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
-                                && recurEnd > m_currentTime;
                         if (recurStart > m_timeRangeEnd) {
                             // Recurrence instances outside of date range
                             break;
                         } else if (recurEnd < m_currentTime) {
                             // Recurrence instance ended earlier today
                             continue;
+                        }
+
+                        // Recurrent multi-day handling
+                        bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                && recurEnd > m_currentTime;
+                        if (recurMultiDay && recurEnd > m_timeRangeEnd) {
+                            recurEnd = m_timeRangeEnd;
                         }
 
                         if (!exdates.contains(recurStart) && !isCancelled
