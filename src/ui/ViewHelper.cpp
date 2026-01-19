@@ -422,8 +422,9 @@ void ViewHelper::requestExternalAppointment(const QString &link)
 {
     DateEventManager::instance().removeNotificationByLink(link);
 
-    const bool result = QDesktopServices::openUrl(link);
-    qCInfo(lcViewHelper) << "Browser opened:" << result;
+    if (!QDesktopServices::openUrl(link)) {
+        qCWarning(lcViewHelper) << "Opening" << link << "failed";
+    }
 }
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
