@@ -151,9 +151,10 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                                 || status == ICAL_STATUS_DELETED || isCancelledRecurrence);
 
             // Skip cancelled or non-recurrent events that are outside of our date range
-            if (isCancelled || (!isRecurrent && !isUpdatedRecurrence
-                && ((start < m_config.timeRangeStart && !isMultiDay)
-                    || start > m_config.timeRangeEnd || end < m_config.currentTime))) {
+            if (isCancelled
+                || (!isRecurrent && !isUpdatedRecurrence
+                    && ((start < m_config.timeRangeStart && !isMultiDay)
+                        || start > m_config.timeRangeEnd || end < m_config.currentTime))) {
                 continue;
             }
 
