@@ -298,6 +298,39 @@ void DateEventManager::removeNotificationByRoomName(const QString &roomName)
 
     const auto eventHash = foundDateEvent->getHash();
 
+    // Already joined, do not create a notification in the future
+    m_alreadyNotifiedDates.insert(eventHash);
+
+    auto notificationId = m_notificationIds.value(eventHash);
+    if (notificationId.isEmpty()) {
+        return;
+    }
+
+    NotificationManager::instance().remove(notificationId);
+    m_notificationIds.remove(eventHash);
+}
+
+void DateEventManager::removeNotificationByLink(const QString &link)
+{
+    DateEvent *foundDateEvent = nullptr;
+
+    QMutexLocker lock(&m_feederMutex);
+    for (auto dateEvent : std::as_const(m_dateEvents)) {
+        if (dateEvent->link() == link) {
+            foundDateEvent = dateEvent;
+            break;
+        }
+    }
+
+    if (!foundDateEvent) {
+        return;
+    }
+
+    const auto eventHash = foundDateEvent->getHash();
+
+    // Already joined, do not create a notification in the future
+    m_alreadyNotifiedDates.insert(eventHash);
+
     auto notificationId = m_notificationIds.value(eventHash);
     if (notificationId.isEmpty()) {
         return;

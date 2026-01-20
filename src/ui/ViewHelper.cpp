@@ -18,6 +18,7 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <QDesktopServices>
 #include <QMediaFormat>
 #include <QFileDialog>
 #include <QSystemTrayIcon>
@@ -415,6 +416,15 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
     Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
     setProperty("nextMeetingStartFlags",
                 QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
+}
+
+void ViewHelper::requestExternalAppointment(const QString &link)
+{
+    DateEventManager::instance().removeNotificationByLink(link);
+
+    if (!QDesktopServices::openUrl(link)) {
+        qCWarning(lcViewHelper) << "Opening" << link << "failed";
+    }
 }
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)

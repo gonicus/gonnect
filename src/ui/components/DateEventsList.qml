@@ -192,7 +192,7 @@ ListView {
                         if (delg.isJitsiMeeting) {
                             ViewHelper.requestMeeting(delg.roomName)
                         } else {
-                            Qt.openUrlExternally(delg.link)
+                            ViewHelper.requestExternalAppointment(delg.link)
                         }
                     }
                 }
@@ -225,7 +225,7 @@ ListView {
                 if (delg.isJitsiMeeting) {
                     ViewHelper.requestMeeting(delg.roomName)
                 } else if (delg.isOtherLink) {
-                    Qt.openUrlExternally(delg.link)
+                    ViewHelper.requestExternalAppointment(delg.link)
                 }
             }
             onTapped: (_, mouseButton) => {
