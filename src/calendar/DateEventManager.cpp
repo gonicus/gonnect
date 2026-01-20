@@ -78,7 +78,7 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
     QList<QString> dateEventIds;
     if (days.count() > 1) {
         for (int i = 0; i < days.count(); i++) {
-            // Multi-day events will share the same base ID with counter added to it
+            // Multi-day events will share the same base ID with a counter added to it
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
     } else {
@@ -108,15 +108,15 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
 
         dateEvent->setParent(this);
 
-        qsizetype j = 0;
-        for (; j < m_dateEvents.size(); ++j) {
-            if (dateEvent->start() < m_dateEvents.at(j)->start()) {
+        qsizetype index = 0;
+        for (; index < m_dateEvents.size(); ++index) {
+            if (dateEvent->start() < m_dateEvents.at(index)->start()) {
                 break;
             }
         }
 
-        m_dateEvents.insert(j, dateEvent);
-        Q_EMIT dateEventAdded(j, dateEvent);
+        m_dateEvents.insert(index, dateEvent);
+        Q_EMIT dateEventAdded(index, dateEvent);
     }
 
     if (!m_minuteTimer.isActive()) {
@@ -187,10 +187,10 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
     QMutexLocker lock(&m_feederMutex);
 
     for (auto &dateEventId : dateEventIds) {
-        qsizetype i = 0;
+        qsizetype index = 0;
         QMutableListIterator it(m_dateEvents);
         while (it.hasNext()) {
-            i++;
+            index++;
             const auto item = it.next();
             if (item && item->id() == dateEventId) {
                 const auto eventHash = item->getHash();
@@ -203,7 +203,7 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
                 item->deleteLater();
                 it.remove();
 
-                Q_EMIT dateEventRemoved(i);
+                Q_EMIT dateEventRemoved(index);
             }
         }
     }

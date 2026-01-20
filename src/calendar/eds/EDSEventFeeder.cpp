@@ -446,9 +446,9 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
                         if (!exdates.contains(recurStart)
                             && (recurStart >= m_timeRangeStart || recurMultiDay)) {
-                            QString nid =
+                            QString recurId =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
-                            manager.addDateEvent(nid, concreteSource, recurStart, recurEnd, summary,
+                            manager.addDateEvent(recurId, concreteSource, recurStart, recurEnd, summary,
                                                  location, description);
                         }
                     }

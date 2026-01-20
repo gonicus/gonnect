@@ -166,6 +166,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         for (auto &exdate : recurrence->exDateTimes()) {
                             exdates.append(exdate.toLocalTime());
                         }
+                        exdatesById[id] = exdates;
 
                         if (isRecurrent) {
                             // Recurrent origin event, parsed first
@@ -190,9 +191,9 @@ void AkonadiEventFeeder::processCollections(KJob *job)
 
                                 if (!exdates.contains(recurStart)
                                     && (recurStart >= m_timeRangeStart || recurMultiDay)) {
-                                    QString nid = QString("%1-%2").arg(id).arg(
+                                    QString recurId = QString("%1-%2").arg(id).arg(
                                             recurStart.toMSecsSinceEpoch());
-                                    manager.addDateEvent(nid, m_source, recurStart, recurEnd,
+                                    manager.addDateEvent(recurId, m_source, recurStart, recurEnd,
                                                          summary, location, description);
                                 }
                             }
