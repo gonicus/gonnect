@@ -405,22 +405,20 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             QString location = i_cal_component_get_location(component);
             QString description = i_cal_component_get_description(component);
 
-            // Get EXDATE's
-            ICalTime *exdate = nullptr;
-            QList<QDateTime> exdates;
-            for (ICalProperty *prop =
-                         i_cal_component_get_first_property(component, I_CAL_EXDATE_PROPERTY);
-                 prop != nullptr;
-                 prop = i_cal_component_get_next_property(component, I_CAL_EXDATE_PROPERTY)) {
-                exdate = i_cal_property_get_exdate(prop);
-                exdates.append(createDateTimeFromTimeType(exdate));
-            }
-            exdatesById[id] = exdates;
+            if (isRecurrent) { // Recurrent origin event, parsed first
+                // Get EXDATE's
+                ICalTime *exdate = nullptr;
+                QList<QDateTime> exdates;
+                for (ICalProperty *prop =
+                             i_cal_component_get_first_property(component, I_CAL_EXDATE_PROPERTY);
+                     prop != nullptr;
+                     prop = i_cal_component_get_next_property(component, I_CAL_EXDATE_PROPERTY)) {
+                    exdate = i_cal_property_get_exdate(prop);
+                    exdates.append(createDateTimeFromTimeType(exdate));
+                }
+                exdatesById[id] = exdates;
 
-            if (isRecurrent) {
-                // Recurrent origin event, parsed first
                 ICalRecurIterator *recurrenceIter = i_cal_recur_iterator_new(rrule, dtstart);
-
                 if (recurrenceIter) {
                     qint64 duration = start.secsTo(end);
 
@@ -448,15 +446,14 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                             && (recurStart >= m_timeRangeStart || recurMultiDay)) {
                             QString recurId =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
-                            manager.addDateEvent(recurId, concreteSource, recurStart, recurEnd, summary,
-                                                 location, description);
+                            manager.addDateEvent(recurId, concreteSource, recurStart, recurEnd,
+                                                 summary, location, description);
                         }
                     }
 
                     i_cal_recur_iterator_free(recurrenceIter);
                 }
-            } else if (isUpdatedRecurrence) {
-                // Updates of a recurrent event instance
+            } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
                 if ((start < m_timeRangeStart && !isMultiDay) || start > m_timeRangeEnd
                     || end < m_currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
@@ -470,8 +467,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                     manager.addDateEvent(id, concreteSource, start, end, summary, location,
                                          description);
                 }
-            } else {
-                // Normal event, no recurrence, or update of a recurrent instance
+            } else { // Normal event, no recurrence, or update of a recurrent instance
                 manager.addDateEvent(id, concreteSource, start, end, summary, location,
                                      description);
             }

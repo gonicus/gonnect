@@ -161,15 +161,14 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         QString location = event->location();
                         QString description = event->description();
 
-                        // Get EXDATE's
-                        QList<QDateTime> exdates;
-                        for (auto &exdate : recurrence->exDateTimes()) {
-                            exdates.append(exdate.toLocalTime());
-                        }
-                        exdatesById[id] = exdates;
+                        if (isRecurrent) { // Recurrent origin event, parsed first
+                            // Get EXDATE's
+                            QList<QDateTime> exdates;
+                            for (auto &exdate : recurrence->exDateTimes()) {
+                                exdates.append(exdate.toLocalTime());
+                            }
+                            exdatesById[id] = exdates;
 
-                        if (isRecurrent) {
-                            // Recurrent origin event, parsed first
                             qint64 duration = start.secsTo(end);
 
                             for (auto next = rrule->getNextDate(m_timeRangeStart); next.isValid();
@@ -197,8 +196,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                                          summary, location, description);
                                 }
                             }
-                        } else if (isUpdatedRecurrence) {
-                            // Updates of a recurrent event instance
+                        } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
                             if ((start < m_timeRangeStart && !isMultiDay) || start > m_timeRangeEnd
                                 || end < m_currentTime) {
                                 // Updated recurrence doesn't match our criteria anymore
@@ -212,8 +210,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                 manager.addDateEvent(id, m_source, start, end, summary, location,
                                                      description);
                             }
-                        } else {
-                            // Normal event, no recurrence, or update of a recurrent instance
+                        } else { // Normal event, no recurrence, or update of a recurrent instance
                             manager.addDateEvent(id, m_source, start, end, summary, location,
                                                  description);
                         }

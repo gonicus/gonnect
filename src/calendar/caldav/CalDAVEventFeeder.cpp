@@ -162,21 +162,20 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             QString location = icalcomponent_get_location(event);
             QString description = icalcomponent_get_description(event);
 
-            // Get EXDATE's
-            icaltimetype exdate = {};
-            QList<QDateTime> exdates;
-            for (icalproperty *prop = icalcomponent_get_first_property(event, ICAL_EXDATE_PROPERTY);
-                 prop != nullptr;
-                 prop = icalcomponent_get_next_property(event, ICAL_EXDATE_PROPERTY)) {
-                exdate = icalproperty_get_exdate(prop);
-                exdates.append(createDateTimeFromTimeType(exdate));
-            }
-            exdatesById[id] = exdates;
+            if (isRecurrent) { // Recurrent origin event, parsed first
+                // Get EXDATE's
+                icaltimetype exdate = {};
+                QList<QDateTime> exdates;
+                for (icalproperty *prop =
+                             icalcomponent_get_first_property(event, ICAL_EXDATE_PROPERTY);
+                     prop != nullptr;
+                     prop = icalcomponent_get_next_property(event, ICAL_EXDATE_PROPERTY)) {
+                    exdate = icalproperty_get_exdate(prop);
+                    exdates.append(createDateTimeFromTimeType(exdate));
+                }
+                exdatesById[id] = exdates;
 
-            if (isRecurrent) {
-                // Recurrent origin event, parsed first
                 icalrecur_iterator *recurrenceIter = icalrecur_iterator_new(rrule, dtstart);
-
                 if (recurrenceIter) {
                     qint64 duration = start.secsTo(end);
 
@@ -209,8 +208,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
 
                     icalrecur_iterator_free(recurrenceIter);
                 }
-            } else if (isUpdatedRecurrence) {
-                // Updates of a recurrent event instance
+            } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
                 if ((start < m_config.timeRangeStart && !isMultiDay)
                     || start > m_config.timeRangeEnd || end < m_config.currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
@@ -224,8 +222,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                     manager.addDateEvent(id, m_config.source, start, end, summary, location,
                                          description);
                 }
-            } else {
-                // Normal event, no recurrence, or update of a recurrent instance
+            } else { // Normal event, no recurrence, or update of a recurrent instance
                 manager.addDateEvent(id, m_config.source, start, end, summary, location,
                                      description);
             }
