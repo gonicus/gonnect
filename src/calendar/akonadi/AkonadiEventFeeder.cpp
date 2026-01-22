@@ -153,7 +153,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         if (isCancelled
                             || (!isRecurrent && !isUpdatedRecurrence
                                 && ((start < m_timeRangeStart && !isMultiDay)
-                                    || start > m_timeRangeEnd || end < m_currentTime))) {
+                                    || start >= m_timeRangeEnd || end < m_currentTime))) {
                             continue;
                         }
 
@@ -175,7 +175,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                  next = rrule->getNextDate(next)) {
                                 QDateTime recurStart = next.toLocalTime();
                                 QDateTime recurEnd = recurStart.addSecs(duration);
-                                if (recurStart > m_timeRangeEnd) {
+                                if (recurStart >= m_timeRangeEnd) {
                                     break;
                                 } else if (recurEnd < m_currentTime) {
                                     continue;
@@ -197,7 +197,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                                 }
                             }
                         } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
-                            if ((start < m_timeRangeStart && !isMultiDay) || start > m_timeRangeEnd
+                            if ((start < m_timeRangeStart && !isMultiDay) || start >= m_timeRangeEnd
                                 || end < m_currentTime) {
                                 // Updated recurrence doesn't match our criteria anymore
                                 manager.removeDateEvent(id, start, end);

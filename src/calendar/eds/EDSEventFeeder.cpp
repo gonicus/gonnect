@@ -396,7 +396,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             // Skip cancelled or non-recurrent events that are outside of our date range
             if (isCancelled
                 || (!isRecurrent && !isUpdatedRecurrence
-                    && ((start < m_timeRangeStart && !isMultiDay) || start > m_timeRangeEnd
+                    && ((start < m_timeRangeStart && !isMultiDay) || start >= m_timeRangeEnd
                         || end < m_currentTime))) {
                 continue;
             }
@@ -427,7 +427,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                          next = i_cal_recur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
                         QDateTime recurEnd = recurStart.addSecs(duration);
-                        if (recurStart > m_timeRangeEnd) {
+                        if (recurStart >= m_timeRangeEnd) {
                             // Recurrence instances outside of date range
                             break;
                         } else if (recurEnd < m_currentTime) {
@@ -454,7 +454,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                     i_cal_recur_iterator_free(recurrenceIter);
                 }
             } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
-                if ((start < m_timeRangeStart && !isMultiDay) || start > m_timeRangeEnd
+                if ((start < m_timeRangeStart && !isMultiDay) || start >= m_timeRangeEnd
                     || end < m_currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
                     manager.removeDateEvent(id, start, end);

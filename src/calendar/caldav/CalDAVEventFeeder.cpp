@@ -154,7 +154,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
             if (isCancelled
                 || (!isRecurrent && !isUpdatedRecurrence
                     && ((start < m_config.timeRangeStart && !isMultiDay)
-                        || start > m_config.timeRangeEnd || end < m_config.currentTime))) {
+                        || start >= m_config.timeRangeEnd || end < m_config.currentTime))) {
                 continue;
             }
 
@@ -184,7 +184,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                          next = icalrecur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
                         QDateTime recurEnd = recurStart.addSecs(duration);
-                        if (recurStart > m_config.timeRangeEnd) {
+                        if (recurStart >= m_config.timeRangeEnd) {
                             break;
                         } else if (recurEnd < m_config.currentTime) {
                             continue;
@@ -210,7 +210,7 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 }
             } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
                 if ((start < m_config.timeRangeStart && !isMultiDay)
-                    || start > m_config.timeRangeEnd || end < m_config.currentTime) {
+                    || start >= m_config.timeRangeEnd || end < m_config.currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
                     manager.removeDateEvent(id, start, end);
                 } else if (manager.isAddedDateEvent(id)) {
