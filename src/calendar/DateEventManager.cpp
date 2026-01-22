@@ -99,11 +99,16 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
             continue;
         }
 
+        bool isAdded = false;
         for (const auto &event : std::as_const(m_dateEvents)) {
             if (event && event->id() == dateEvent->id()) {
-                qCWarning(lcDateEventManager) << "DateEvent already in list - ignoring";
+                isAdded = true;
                 break;
             }
+        }
+        if (isAdded) {
+            qCWarning(lcDateEventManager) << "DateEvent already in list - ignoring";
+            continue;
         }
 
         dateEvent->setParent(this);
