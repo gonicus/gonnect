@@ -39,7 +39,7 @@ void Ringer::start(qreal customVolume)
     // Determine ring tone path
     auto source = settings.value(QString("audio%1/ringtone").arg(currentProfile), "").toString();
     if (source.isEmpty()) {
-        source = "qrc:/audio/phone-incoming-call.oga";
+        source = "qrc:/audio/phone-incoming-call.mp3";
     }
 
     if (source.isEmpty()) {

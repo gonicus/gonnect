@@ -5,13 +5,19 @@ import QtQuick
 QtObject {
     id: control
 
+    readonly property LoggingCategory lc: LoggingCategory {
+        id: category
+        name: "gonnect.qml.DialogFactory"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     property Item rootItem
 
     function createDialog(url, args) {
         const component = Qt.createComponent(url)
 
         if (component.status === Component.Error) {
-            console.error('Error onloading component "' + url + '":', component.errorString())
+            console.error(category, 'failed to load component "' + url + '":', component.errorString())
             return
         }
 

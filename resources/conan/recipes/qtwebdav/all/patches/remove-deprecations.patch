@@ -1,0 +1,24 @@
+diff -Naur a/qnaturalsort.cpp b/qnaturalsort.cpp
+--- a/qnaturalsort.cpp	2025-03-16 14:04:06.000000000 +0100
++++ b/qnaturalsort.cpp	2025-10-26 10:57:52.977824858 +0100
+@@ -67,7 +67,7 @@
+   */
+ int QNaturalSort::naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs)
+ {
+-    for (int l1 = 0, l2 = 0; l1 <= s1.count() && l2 <= s2.count(); ++l1, ++l2) {
++    for (int l1 = 0, l2 = 0; l1 <= s1.length() && l2 <= s2.length(); ++l1, ++l2) {
+         // skip spaces, tabs and 0's
+         QChar c1 = getNextChar(s1, l1);
+         while (c1.isSpace())
+diff -Naur a/qwebdavdirparser.cpp b/qwebdavdirparser.cpp
+--- a/qwebdavdirparser.cpp	2025-03-16 14:04:06.000000000 +0100
++++ b/qwebdavdirparser.cpp	2025-10-26 11:02:55.378997375 +0100
+@@ -277,7 +277,7 @@
+         return;
+ 
+     QDomDocument multiResponse;
+-    multiResponse.setContent(data, true);
++    multiResponse.setContent(data, QDomDocument::ParseOption::UseNamespaceProcessing);
+ 
+     for(QDomNode n = multiResponse.documentElement().firstChild(); !n.isNull(); n = n.nextSibling())
+     {

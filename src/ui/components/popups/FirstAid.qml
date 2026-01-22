@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Controls.Material
 import base
 
@@ -13,35 +14,30 @@ Item {
         anchors.fill: parent
         clip: true
         flickableDirection: Flickable.AutoFlickIfNeeded
-        contentHeight: container.implicitHeight
-
+        contentHeight: options.implicitHeight
         ScrollBar.vertical: ScrollBar { width: 10 }
 
-        Column {
-            id: container
+        Shortcut {
+            sequence: "Esc"
+            onActivated: control.StackView.view.popCurrentItem(StackView.Immediate)
+        }
+
+        ColumnLayout {
+            id: options
             spacing: 20
-            anchors {
-                left: parent.left
-                right: parent.right
-            }
+            anchors.fill: parent
 
             Label {
+                id: firstAidHeader
                 text: qsTr("First Aid")
                 font.pixelSize: 32
                 wrapMode: Label.Wrap
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                }
             }
 
             Label {
+                id: firstAidDescription
                 text: qsTr("Clicking one of these buttons will end all current calls and start an emergency call.")
                 wrapMode: Label.Wrap
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                }
             }
 
             Repeater {
@@ -49,9 +45,10 @@ Item {
                 delegate: Button {
                     id: delg
                     text: delg.displayName
-                    anchors.horizontalCenter: parent.horizontalCenter
                     highlighted: true
                     Material.accent: Theme.redColor
+                    Layout.preferredWidth: control.implicitWidth / 2
+                    Layout.alignment: Qt.AlignHCenter
 
                     onClicked: () => {
                         SIPCallManager.endAllCalls()
@@ -61,6 +58,21 @@ Item {
 
                     required property string number
                     required property string displayName
+                }
+            }
+
+            Item {
+                Layout.preferredHeight: 20
+            }
+
+            Button {
+                id: firstAidExit
+                text: qsTr("Close")
+                Layout.preferredWidth: control.implicitWidth / 2
+                Layout.alignment: Qt.AlignHCenter
+
+                onClicked: {
+                    control.StackView.view.popCurrentItem(StackView.Immediate)
                 }
             }
         }

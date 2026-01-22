@@ -1,0 +1,49 @@
+# Application details
+
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@" "" ""
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@" "" ""
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "ApplicationDescription" "@APPLICATION_DESCRIPTION@"
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "ApplicationName" "@APPLICATION_NAME@"
+WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities" "FriendlyAppName" "@APPLICATION_NAME@"
+WriteRegStr SHCTX "SOFTWARE\RegisteredApplications" "@APPLICATION_NAME@" "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities"
+# name for the list entry in e.g. "open with" list
+WriteRegStr HKCU "Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache" "$INSTDIR\bin\@APPLICATION_EXECUTABLE@.exe.FriendlyAppName" "@APPLICATION_NAME@"
+
+!macro registerForProtocol _name
+    WriteRegStr HKCR "${_name}" "" "URL:${_name}"
+    WriteRegStr HKCR "${_name}" "URL Protocol" ""
+
+    WriteRegStr HKCR "@APPLICATION_NAME@.${_name}" "" "@APPLICATION_NAME@ ${_name} Protocol"
+    WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell" "" ""
+    WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell\Open" "" ""
+    WriteRegStr HKCR "@APPLICATION_NAME@.${_name}\Shell\Open\Command" "" "$INSTDIR\bin\@APPLICATION_EXECUTABLE@.exe $\"%1$\""
+    WriteRegStr SHCTX "SOFTWARE\@APPLICATION_VENDOR@\@APPLICATION_NAME@\Capabilities\URLAssociations" "${_name}" "@APPLICATION_NAME@.${_name}"
+!macroend
+
+# PROTOCOL registration
+!insertmacro registerForProtocol "sip"
+!insertmacro registerForProtocol "sips"
+!insertmacro registerForProtocol "tel"
+!insertmacro registerForProtocol "callto"
+
+# event log registration
+WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@" "" ""
+WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@" "EventMessageFile" "$INSTDIR\bin\EventLog.dll"
+# EVENTLOG_ERROR_TYPE (0x0001) | EVENTLOG_WARNING_TYPE (0x0002) | EVENTLOG_INFORMATION_TYPE (0x0004) = 0x0007
+WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Services\EventLog\Application\@APPLICATION_NAME@" "TypesSupported" 0x0007
+
+# calculate size for uninstaller
+; get cumulative size of all files in and under install dir
+; report the total in KB (decimal)
+; place the answer into $0  (ignore $1 $2)
+${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+
+; Convert the decimal KB value in $0 to DWORD
+; put it right back into $0
+IntFmt $0 "0x%08X" $0
+
+; Create/Write the reg key with the dword value
+WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@APPLICATION_NAME@" "EstimatedSize" "$0"
+
+; Needed for autostart call
+CreateShortCut "$INSTDIR\GOnnect.lnk" "$INSTDIR\bin\gonnect.exe"

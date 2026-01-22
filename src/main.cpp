@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
     QtWebEngineQuick::initialize();
 
-#ifdef WITH_DBUS
+#ifdef Q_OS_LINUX
     qDBusRegisterMetaType<QList<QVariantMap>>();
     qDBusRegisterMetaType<QPair<QString, QVariantMap>>();
     qDBusRegisterMetaType<QList<QPair<QString, QVariantMap>>>();
@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
     if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
         chromiumFlags.push_back("--disable-renderer-accessibility");
     }
+
     if (chromiumFlags.size() > 0) {
         qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
     }
@@ -81,6 +82,8 @@ int main(int argc, char *argv[])
         app.sendArguments();
         return 2;
     }
+
+    app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
 
     // Fonts
     const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };

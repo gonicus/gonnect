@@ -21,7 +21,7 @@ Item {
     signal setOnHold(value : bool)
     signal setAudioMuted(value : bool)
     signal setVideoMuted(value : bool)
-    signal setScreenShare(value : bool)
+    signal setScreenShare(value : bool, screen: bool)
     signal setTileView(value : bool)
     signal setRaiseHand(value : bool)
     signal showVirtualBackgroundDialog
@@ -181,7 +181,7 @@ Item {
 
                     // MenuItem {
                     //     text: qsTr("Send link via email")
-                    //     onTriggered: () => console.log('TODO: Send invitation link via mail')
+                    //     onTriggered: () => console.log(category, 'TODO: Send invitation link via mail')
                     // }
                 }
             }
@@ -219,7 +219,31 @@ Item {
                 enabled: !control.isOnHold
                 text: qsTr("Screen")
                 iconPath: control.isSharingScreen ? Icons.mediaPlaybackStopped : Icons.inputTouchscreen
-                onClicked: () => control.setScreenShare(!control.isSharingScreen)
+                onClicked: () => {
+                    if (control.isSharingScreen) {
+                        control.setScreenShare(false, false)
+                    } else {
+                        control.setScreenShare(true, true)
+
+                        //TODO: this can be re-enabled after QTBUG-142040 / QTBUG-142040 are fixed
+                        //      see Conference.qml +293
+                        //screenShareMenu.popup(screenShareButton, -screenShareButton.width + screenShareButton.width, screenShareButton.height)
+                    }
+                }
+
+                Menu {
+                    id: screenShareMenu
+                    MenuItem {
+                        icon.source: Icons.window
+                        text: qsTr("Share window")
+                        onTriggered: () => control.setScreenShare(true, false)
+                    }
+                    MenuItem {
+                        icon.source: Icons.screen
+                        text: qsTr("Share screen")
+                        onTriggered: () => control.setScreenShare(true, true)
+                    }
+                }
             }
 
             BarButton {
@@ -303,6 +327,12 @@ Item {
                         visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Subtitles)
                         icon.source: control.iConferenceConnector.isSubtitlesEnabled ? Icons.checkbox : ""
                         onClicked: () => control.iConferenceConnector.setSubtitlesEnabled(!control.iConferenceConnector.isSubtitlesEnabled)
+                    }
+
+                    MenuItem {
+                        text: qsTr("Toggle whiteboard")
+                        visible: control.iConferenceConnector.hasWhiteboard
+                        onClicked: () => control.iConferenceConnector.toggleWhiteboard()
                     }
 
                     MenuItem {

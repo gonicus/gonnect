@@ -26,11 +26,11 @@ QStringList AkonadiEventFeederFactory::configurations() const
 }
 
 IDateEventFeeder *AkonadiEventFeederFactory::createFeeder(
-        const QString &settingsGroup, const QDateTime &timeRangeStart,
+        const QString &settingsGroup, const QDateTime &currentTime, const QDateTime &timeRangeStart,
         const QDateTime &timeRangeEnd, DateEventFeederManager *feederManager) const
 {
     ReadOnlyConfdSettings settings;
     settings.beginGroup(settingsGroup);
 
-    return new AkonadiEventFeeder(feederManager, name(), timeRangeStart, timeRangeEnd);
+    return new AkonadiEventFeeder(feederManager, name(), currentTime, timeRangeStart, timeRangeEnd);
 }

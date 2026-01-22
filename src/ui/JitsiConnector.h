@@ -58,6 +58,9 @@ public:
     virtual bool hasCapability(const Capability capabilityToCheck) const override;
     virtual bool isInitialized() override { return m_isApiLoadingFinished; }
     virtual bool isInConference() const override { return m_isInConference; }
+    virtual bool hasWhiteboard() const override { return m_hasWhiteboard; }
+    virtual void toggleWhiteboard() override;
+    virtual bool hasTextpad() const override { return m_hasTextpad; }
     virtual bool isPasswordRequired() const override { return m_isPasswordRequired; }
     virtual QString roomPassword() const override { return m_roomPassword; }
     virtual void setRoomPassword(QString value) override;
@@ -125,6 +128,10 @@ private:
     // instead.
     void toggleMute();
 
+    void checkJitsiBackendFeatures();
+
+    void setHasWhiteboard(bool value);
+    void setHasTextpad(bool value);
     void setConferenceName(const QString &name);
     void setIsInConference(bool value);
     void setIsOnHold(bool value);
@@ -163,6 +170,8 @@ private:
     bool m_isPasswordRequired = false;
     bool m_isApiLoadingFinished = false;
     bool m_isToggleScreenSharePending = false;
+    bool m_hasWhiteboard = false;
+    bool m_hasTextpad = false;
     QString m_roomPassword;
     VideoQuality m_videoQuality = VideoQuality::Average;
 
@@ -193,6 +202,7 @@ Q_SIGNALS:
     void executeToggleTileViewCommand();
     void executeToggleRaiseHandCommand();
     void executeToggleSubtitlesCommand();
+    void executeToggleWhiteboardCommand();
     void executeSetAudioInputDeviceCommand(QString devicId);
     void executeSetAudioOutputDeviceCommand(QString devicId);
     void executeSetVideoInputDeviceCommand(QString devicId);

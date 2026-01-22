@@ -30,8 +30,9 @@ public:
     }
 
     Q_INVOKABLE QString jitsiUrl();
+    Q_INVOKABLE QString teamsUrl();
 
-    Q_INVOKABLE bool isWorkaroundActive(const WorkaroundId id);
+    Q_INVOKABLE bool isWorkaroundActive(const GlobalInfo::WorkaroundId id);
 
     bool hasEmergencyNumbers();
     const QList<EmergencyContact *> &emergencyContacts();
@@ -41,12 +42,14 @@ private:
     void initEmergencyContacts();
 
     bool m_isJitsiUrlInitialized = false;
+    bool m_isTeamsUrlInitialized = false;
 
     QHash<WorkaroundId, bool> m_workaroundActiveCache;
 
     bool m_hasEmergencyNumbersInitialized = false;
 
     QString m_jitsiUrl;
+    QString m_teamsUrl;
     QList<EmergencyContact *> m_emergencyContacts;
 };
 

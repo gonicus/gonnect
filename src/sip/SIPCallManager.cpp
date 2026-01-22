@@ -391,7 +391,7 @@ void SIPCallManager::holdAllCalls() const
 
 void SIPCallManager::unholdAllCalls() const
 {
-    GlobalCallState::instance().unholdOtherCall();
+    GlobalCallState::instance().unholdAllCalls();
 }
 
 void SIPCallManager::toggleHoldCall(const QString &accountId, const int callId)
@@ -596,6 +596,7 @@ void SIPCallManager::startConference()
     if (!m_isConferenceMode) {
         Q_ASSERT(m_calls.size() == 2);
 
+        m_isConferenceMode = true;
         unholdAllCalls();
 
         QTimer::singleShot(100, this, [this]() {
@@ -620,7 +621,6 @@ void SIPCallManager::startConference()
                         << "  file and line:" << err.srcFile << err.srcLine << "\n";
             }
 
-            m_isConferenceMode = true;
             GlobalCallState::instance().setIsPhoneConference(true);
             Q_EMIT isConferenceModeChanged();
         });

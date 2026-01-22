@@ -1,0 +1,151 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 95b88916f..6f51917a3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -123,7 +123,7 @@ install(
+     COMPONENT PjRuntime
+     NAMELINK_COMPONENT PjDevelopment
+   ARCHIVE
+-    DESTINATION  "${CMAKE_INSTALL_BINDIR}"
++    DESTINATION  "${CMAKE_INSTALL_LIBDIR}"
+     COMPONENT PjDevelopment
+ )
+ 
+diff --git a/cmake/FindOPUS.cmake b/cmake/FindOPUS.cmake
+deleted file mode 100644
+index 142fb5641..000000000
+--- a/cmake/FindOPUS.cmake
++++ /dev/null
+@@ -1,48 +0,0 @@
+-find_package(PkgConfig QUIET)
+-if(PKG_CONFIG_FOUND)
+-  pkg_check_modules(PC_OPUS QUIET opus)
+-  set(OPUS_VERSION ${PC_OPUS_VERSION})
+-endif()
+-
+-find_path(OPUS_INCLUDE_DIR
+-  NAMES
+-    "opus/opus.h"
+-  HINTS
+-    ${PC_OPUS_INCLUDEDIR}
+-    ${PC_OPUS_INCLUDE_DIRS}
+-)
+-mark_as_advanced(OPUS_INCLUDE_DIR)
+-
+-find_library(OPUS_LIBRARY
+-  NAMES
+-    opus
+-  HINTS
+-    ${PC_OPUS_LIBDIR}
+-    ${PC_OPUS_LIBRARY_DIRS}
+-)
+-mark_as_advanced(OPUS_LIBRARY)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(OPUS
+-  REQUIRED_VARS
+-    OPUS_LIBRARY
+-    OPUS_INCLUDE_DIR
+-  VERSION_VAR
+-    OPUS_VERSION
+-)
+-
+-if(OPUS_FOUND)
+-  set(OPUS_LIBRARIES "${OPUS_LIBRARY}")
+-  set(OPUS_INCLUDE_DIRS "${OPUS_INCLUDE_DIR}")
+-  set(OPUS_DEFINITIONS "${PC_OPUS_CFLAGS_OTHER}")
+-
+-  if(NOT TARGET OPUS::OPUS)
+-    add_library(OPUS::OPUS UNKNOWN IMPORTED)
+-    set_target_properties(OPUS::OPUS PROPERTIES
+-      IMPORTED_LOCATION "${OPUS_LIBRARIES}"
+-      INTERFACE_INCLUDE_DIRECTORIES "${OPUS_INCLUDE_DIRS}"
+-      INTERFACE_COMPILE_OPTIONS "${OPUS_DEFINITIONS}"
+-    )
+-  endif()
+-endif()
+-
+diff --git a/pjmedia/src/pjmedia-codec/opus.c b/pjmedia/src/pjmedia-codec/opus.c
+index dedc795b1..4ecc80286 100644
+--- a/pjmedia/src/pjmedia-codec/opus.c
++++ b/pjmedia/src/pjmedia-codec/opus.c
+@@ -1248,12 +1248,4 @@ static pj_status_t  codec_recover( pjmedia_codec *codec,
+     return PJ_SUCCESS;
+ }
+
+-#if defined(_MSC_VER)
+-#  if 1 /* Change to 0 if Opus lib name is "opus.lib" */
+-#    pragma comment(lib, "libopus.a")
+-#  else
+-#    pragma comment(lib, "opus.lib")
+-#  endif
+-#endif
+-
+ #endif /* PJMEDIA_HAS_OPUS_CODEC */
+diff --git a/third_party/CMakeLists.txt b/third_party/CMakeLists.txt
+index abf9243c2..0e547ccf9 100644
+--- a/third_party/CMakeLists.txt
++++ b/third_party/CMakeLists.txt
+@@ -106,12 +106,11 @@ endforeach()
+ 
+ # install selected sub-diriectories
+ if(install_subdirs)
+-  # append `$ORIGIN/pjproject/third_party` to RPATH
+   if(BUILD_SHARED_LIBS)
+     if(APPLE)
+-      list(APPEND CMAKE_INSTALL_RPATH "@loader_path/pjproject/third_party")
++      list(APPEND CMAKE_INSTALL_RPATH "@loader_path")
+     elseif(UNIX)
+-      list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN/pjproject/third_party")
++      list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN")
+     endif()
+     set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} PARENT_SCOPE)
+   endif()
+@@ -121,15 +120,15 @@ if(install_subdirs)
+     install(TARGETS ${subdir}
+       EXPORT PjTargets
+       LIBRARY
+-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pjproject/third_party"
++        DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+         COMPONENT PjRuntime
+         OPTIONAL
+       ARCHIVE
+-        DESTINATION  "${CMAKE_INSTALL_BINDIR}/pjproject/third_party"
++        DESTINATION  "${CMAKE_INSTALL_LIBDIR}"
+         COMPONENT PjDevelopment
+         OPTIONAL
+       FILE_SET HEADERS
+-        DESTINATION  "${CMAKE_INSTALL_INCLUDEDIR}/pjproject/third_party/${subdir}"
++        DESTINATION  "${CMAKE_INSTALL_INCLUDEDIR}/${subdir}"
+         COMPONENT PjDevelopment
+         OPTIONAL
+     )
+diff --git a/third_party/srtp/CMakeLists.txt b/third_party/srtp/CMakeLists.txt
+index 106b67d4f..81870e8de 100644
+--- a/third_party/srtp/CMakeLists.txt
++++ b/third_party/srtp/CMakeLists.txt
+@@ -8,23 +8,7 @@ if(SRTP_WITH_OPENSSL)
+     find_package(OpenSSL COMPONENTS Crypto SSL)
+   endif()
+   if(OPENSSL_FOUND)
+-    # check GCM support
+-    include(CheckCSourceCompiles)
+-    include(CMakePushCheckState)
+-
+-    cmake_push_check_state(RESET)
+-      set(CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCLUDE_DIR}")
+-      set(CMAKE_REQUIRED_LIBRARIES "${OPENSSL_LIBRARIES}")
+-      check_c_source_compiles([=[
+-        #include <openssl/evp.h>
+-
+-        int main(void) {
+-          EVP_CIPHER_CTX *ctx;
+-          EVP_aes_128_gcm();
+-          return 0;
+-        }
+-      ]=] OPENSSL_HAS_GCM)
+-    cmake_pop_check_state()
++    set(OPENSSL_HAS_GCM ON)
+   else()
+     set(SRTP_WITH_OPENSSL OFF CACHE BOOL "OpenSSL not found" FORCE)
+   endif()

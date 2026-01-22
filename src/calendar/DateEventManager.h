@@ -23,14 +23,12 @@ public:
     }
     ~DateEventManager();
 
-    QString getJitsiRoomFromLocation(QString location);
-
     /// Add date event; DateEventManager takes ownership of the given object!
     void addDateEvent(DateEvent *dateEvent);
 
     void modifyDateEvent(const QString &id, const QString &source, const QDateTime &start,
-                         const QDateTime &end, const QString &summary, const QString &roomName,
-                         bool isConfirmed);
+                         const QDateTime &end, const QString &summary, const QString &location,
+                         const QString &description);
     void removeDateEvent(const QString &id);
 
     /// Delete all date events
@@ -47,6 +45,7 @@ public:
     DateEvent *currentDateEventByRoomName(const QString &roomName) const;
 
     void removeNotificationByRoomName(const QString &roomName);
+    void removeNotificationByLink(const QString &link);
 
 private Q_SLOTS:
     void onTimerTimeout();
@@ -58,7 +57,6 @@ private:
     bool isTooOld(const DateEvent &dateEvent) const;
     bool isOver(const DateEvent &dateEvent) const;
 
-    QString m_jitsiUrl;
     QList<DateEvent *> m_dateEvents;
     QHash<size_t, QString> m_notificationIds;
     QSet<size_t> m_alreadyNotifiedDates;

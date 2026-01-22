@@ -10,6 +10,7 @@ class ChatMessage
 
 public:
     enum class Flag {
+        Unknown = 0,
         PrivateMessage = 1 << 0,
         SystemMessage = 1 << 1,
         OwnMessage = 1 << 2,

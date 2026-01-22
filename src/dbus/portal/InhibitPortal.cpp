@@ -1,6 +1,6 @@
 #include "InhibitPortal.h"
 
-Q_LOGGING_CATEGORY(lcInhibit, "gonnect.session.inhibit")
+Q_DECLARE_LOGGING_CATEGORY(lcInhibit)
 
 InhibitPortal::InhibitPortal(QObject *parent)
     : AbstractPortal{ FREEDESKTOP_DBUS_PORTAL_SERVICE, FREEDESKTOP_DBUS_PORTAL_PATH,

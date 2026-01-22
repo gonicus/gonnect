@@ -13,8 +13,8 @@ class Contact : public QObject
     QML_UNCREATABLE("")
 
     Q_PROPERTY(QString name READ name CONSTANT FINAL)
-    Q_PROPERTY(bool hasAvatar READ hasAvatar CONSTANT FINAL)
-    Q_PROPERTY(QString avatarPath READ avatarPath CONSTANT FINAL)
+    Q_PROPERTY(bool hasAvatar READ hasAvatar NOTIFY avatarChanged FINAL)
+    Q_PROPERTY(QString avatarPath READ avatarPath NOTIFY avatarChanged FINAL)
     Q_PROPERTY(bool hasBuddyState READ sipStatusSubscriptable CONSTANT FINAL)
     Q_PROPERTY(QString subscriptableNumber READ subscriptableNumber CONSTANT FINAL)
 

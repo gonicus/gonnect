@@ -4,7 +4,7 @@
 #include "KeychainSettings.h"
 #include "Credentials.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
 #  include "SecretPortal.h"
 #endif
 
@@ -12,14 +12,14 @@ Q_LOGGING_CATEGORY(lcCredentials, "gonnect.credentials")
 
 Credentials::Credentials(QObject *parent) : QObject(parent)
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
     SecretPortal::instance().initialize();
 #endif
 }
 
 void Credentials::initialize()
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
     auto &sp = SecretPortal::instance();
     if (sp.isValid()) {
         if (sp.isInitialized()) {
@@ -51,17 +51,21 @@ void Credentials::set(const QString &key, const QString &secret, CredentialsResp
     writeJob->setKey(key);
     m_writeCredentialJobs.push_back(writeJob);
 
-    connect(writeJob, &QKeychain::WritePasswordJob::finished, this, [this, writeJob, callback]() {
-        if (writeJob->error()) {
-            callback(true,
-                     tr("storing credentials failed: %1").arg(qPrintable(writeJob->errorString())));
-        } else {
-            callback(false, "");
-        }
+    connect(
+            writeJob, &QKeychain::WritePasswordJob::finished, this,
+            [this, writeJob, callback]() {
+                if (writeJob->error()) {
+                    callback(true,
+                             tr("storing credentials failed: %1")
+                                     .arg(qPrintable(writeJob->errorString())));
+                } else {
+                    callback(false, "");
+                }
 
-        m_writeCredentialJobs.removeAll(writeJob);
-        delete writeJob;
-    });
+                m_writeCredentialJobs.removeAll(writeJob);
+                writeJob->deleteLater();
+            },
+            Qt::QueuedConnection);
 
     writeJob->setTextData(secret);
     writeJob->start();
@@ -75,7 +79,8 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
     m_readCredentialJobs.push_back(readJob);
 
     QObject::connect(
-            readJob, &QKeychain::ReadPasswordJob::finished, this, [this, readJob, key, callback]() {
+            readJob, &QKeychain::ReadPasswordJob::finished, this,
+            [this, readJob, key, callback]() {
                 auto error = readJob->error();
                 QString secret = readJob->textData();
 
@@ -83,7 +88,7 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                 if (error == QKeychain::EntryNotFound || secret.isEmpty()) {
                     KeychainSettings keychainSettings;
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
                     auto &sp = SecretPortal::instance();
                     if (sp.isValid()) {
                         const auto encryptedSecret = keychainSettings.value(key, "").toString();
@@ -112,8 +117,9 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                 }
 
                 m_readCredentialJobs.removeAll(readJob);
-                delete readJob;
-            });
+                readJob->deleteLater();
+            },
+            Qt::QueuedConnection);
 
     readJob->start();
 }

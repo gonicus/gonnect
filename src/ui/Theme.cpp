@@ -38,9 +38,13 @@ bool Theme::useOwnDecoration()
                 settings.value("generic/useOwnWindowDecoration", "auto").toString();
 
         if (settingsVal == "auto") {
+#ifdef Q_OS_LINUX
             const auto desktop =
                     QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower(); // gnome|kde
             m_useOwnDecoration = desktop.contains("gnome");
+#else
+            m_useOwnDecoration = true;
+#endif
         } else {
             m_useOwnDecoration = settingsVal == "true";
         }
@@ -108,6 +112,7 @@ void Theme::updateColorPalette()
     m_borderHeaderIconHovered = QColor(206, 201, 196);
     m_highlightColor = QColor(30, 57, 143, 76);
     m_paneColor = QColor(246, 245, 244);
+    m_highContrastColor = QColor(0, 0, 0);
     m_backgroundColor = QColor(255, 255, 255);
     m_backgroundSecondaryColor = QColor(250, 250, 250);
     m_backgroundOffsetColor = QColor(0, 0, 0, 20);

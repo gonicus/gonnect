@@ -23,6 +23,9 @@
 #include "ChatMessage.h"
 
 #include <QLoggingCategory>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QRegularExpression>
 
 Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
 
@@ -67,6 +70,8 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
                     m_muteTag.clear();
                 }
             });
+
+    checkJitsiBackendFeatures();
 }
 
 JitsiConnector::~JitsiConnector()
@@ -140,7 +145,7 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
                              << "from" << fromId << nickName << "at" << stamp
                              << "as private message:" << isPrivateMessage << ":" << message;
 
-    ChatMessage::Flags flags = static_cast<ChatMessage::Flag>(0);
+    ChatMessage::Flags flags = ChatMessage::Flag::Unknown;
     if (isPrivateMessage) {
         flags |= ChatMessage::Flag::PrivateMessage;
     }
@@ -156,6 +161,8 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     if (settings.value("generic/jitsiChatAsNotifications", true).toBool()) {
         auto notification = new Notification(tr("New chat message"), message,
                                              Notification::Priority::normal, this);
+        notification->setIcon(":/icons/gonnect.svg");
+
         m_chatNotifications.append(notification);
         NotificationManager::instance().add(notification);
 
@@ -308,6 +315,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("toggleSubtitles")
     })
 
+    jitsiConn.executeToggleWhiteboardCommand.connect(() => {
+        api.executeCommand("toggleWhiteboard")
+    })
+
     jitsiConn.executeSetNoiseSupressionCommand.connect((value) => {
         api.executeCommand("setNoiseSuppressionEnabled", { enabled: value })
     })
@@ -446,6 +457,50 @@ void JitsiConnector::toggleMute()
 {
     m_didExecuteAudioMuteToggle = true;
     Q_EMIT executeToggleAudioCommand();
+}
+
+void JitsiConnector::checkJitsiBackendFeatures()
+{
+    auto manager = new QNetworkAccessManager(this);
+
+    QNetworkRequest request;
+    request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
+
+    auto reply = manager->get(request);
+    connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err) {
+        qCCritical(lcJitsiConnector) << "Error on fetching config js:" << err;
+    });
+    connect(reply, &QNetworkReply::sslErrors, this, [](const QList<QSslError> &errors) {
+        qCCritical(lcJitsiConnector) << "SSL errors on fetching config js:";
+        for (const auto &err : errors) {
+            qCCritical(lcJitsiConnector) << "  " << err.errorString();
+        }
+    });
+    connect(reply, &QIODevice::readyRead, this, [reply, this]() {
+        static const QRegularExpression whiteboardRegex(
+                R"(whiteboard\s*=\s*{\s*enabled\s*:\s*true)");
+        static const QRegularExpression etherpadRegex(R"(etherpad_base\s*=\s*['"])");
+        const auto txt = reply->readAll();
+
+        setHasWhiteboard(whiteboardRegex.match(txt).hasMatch());
+        setHasTextpad(etherpadRegex.match(txt).hasMatch());
+    });
+}
+
+void JitsiConnector::setHasWhiteboard(bool value)
+{
+    if (hasCapability(Capability::Whiteboard) && m_hasWhiteboard != value) {
+        m_hasWhiteboard = value;
+        Q_EMIT hasWhiteboardChanged();
+    }
+}
+
+void JitsiConnector::setHasTextpad(bool value)
+{
+    if (hasCapability(Capability::Textpad) && m_hasTextpad != value) {
+        m_hasTextpad = value;
+        Q_EMIT hasTextpadChanged();
+    }
 }
 
 void JitsiConnector::setLargeVideoParticipantById(const QString &id)
@@ -1055,11 +1110,18 @@ bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
         Capability::ParticipantKickable,
         Capability::RoomPassword,
         Capability::ShareUrl,
+        Capability::Textpad,
         Capability::TileView,
+        Capability::Whiteboard,
         Capability::VideoMute,
         Capability::VideoQualityAdjustable,
     };
     return m_capabilites.contains(capabilityToCheck);
+}
+
+void JitsiConnector::toggleWhiteboard()
+{
+    Q_EMIT executeToggleWhiteboardCommand();
 }
 
 void JitsiConnector::joinConference(const QString &conferenceId, const QString &displayName,
@@ -1075,7 +1137,7 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
         toggleHold();
     }
 
-    DateEventManager::instance().removeNotificationByRoomName(displayName);
+    DateEventManager::instance().removeNotificationByRoomName(conferenceId);
 
     m_startWithVideo = startFlags & IConferenceConnector::StartFlag::VideoActive;
 
@@ -1106,6 +1168,7 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
                                                | Notification::hideContentOnLockScreen);
     m_inConferenceNotification->setCategory("call.ongoing");
     m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
+    m_inConferenceNotification->setIcon(":/icons/gonnect.svg");
 
     QString ref = NotificationManager::instance().add(m_inConferenceNotification);
     connect(m_inConferenceNotification, &Notification::actionInvoked, this,
@@ -1163,6 +1226,8 @@ void JitsiConnector::leaveConference()
         m_inConferenceNotification = nullptr;
     }
 
+    m_chatRoom->clear();
+
     Q_EMIT executeLeaveRoomCommand();
     setConferenceName("");
     setDisplayName("");
@@ -1183,6 +1248,8 @@ void JitsiConnector::terminateConference()
         m_inConferenceNotification->deleteLater();
         m_inConferenceNotification = nullptr;
     }
+
+    m_chatRoom->clear();
 
     Q_EMIT executeEndConferenceCommand();
     setConferenceName("");

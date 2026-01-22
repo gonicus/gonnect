@@ -1,0 +1,10 @@
+versions:
+  "cci.20250408":
+    folder: all
+updater:
+  source: github
+  id: ivanenko/vCard
+  branch: master
+  prefix: cci.
+  pattern: (?P<major>\d{4})-?(?P<minor>\d{2})-?(?P<patch>\d{2})
+  url-pattern: https://github.com/ivanenko/vCard/archive/${sha}.tar.gz

@@ -36,8 +36,6 @@ public:
     static QString logFilePath();
     static QString logFileName();
 
-    static bool isFlatpak();
-
 public Q_SLOTS:
 
 #ifdef Q_OS_LINUX
@@ -48,10 +46,10 @@ public Q_SLOTS:
     void shutdown();
 
 private:
-    static void fileMessageHandler(QtMsgType type, const QMessageLogContext &context,
-                                   const QString &msg);
+    static void logQtMessages(QtMsgType type, const QMessageLogContext &context,
+                              const QString &rawMsg);
 
-    void initDebugRun();
+    void initLogging();
     void initialize();
     void initializeSIP();
     void installTranslations();
