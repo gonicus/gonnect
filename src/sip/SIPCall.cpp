@@ -68,7 +68,7 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         auto &globalCallState = GlobalCallState::instance();
         Q_EMIT globalCallState.callStarted(false);
 
-        if (callId <= 0) { // Call is outgoing
+        if (callId < 0) { // Call is outgoing
             globalCallState.holdAllCalls(this);
         }
     }
@@ -468,7 +468,7 @@ void SIPCall::toggleHoldImpl()
 void SIPCall::setIsHolding(bool value)
 {
     if (m_isHolding != value) {
-        if (!value) {
+        if (!value && !SIPCallManager::instance().isConferenceMode()) {
             GlobalCallState::instance().holdAllCalls(this);
         }
 

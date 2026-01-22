@@ -1,3 +1,10 @@
+## [2.0.9](https://github.com/gonicus/gonnect/compare/v2.0.8...v2.0.9) (2026-01-21)
+
+
+### Bug Fixes
+
+* **ui:** next button in template wizard never enabled ([c11f4ed](https://github.com/gonicus/gonnect/commit/c11f4ed24cacc201a58c8847971eedf3cf6ae0fc))
+
 ## [2.0.8](https://github.com/gonicus/gonnect/compare/v2.0.7...v2.0.8) (2025-12-11)
 
 

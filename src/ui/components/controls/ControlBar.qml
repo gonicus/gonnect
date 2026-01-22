@@ -39,6 +39,8 @@ Item {
             resultPopup.initialKeyUp()
             resultPopup.forceActiveFocus()
         }
+        Keys.onEnterPressed: () => resultPopup.triggerPrimaryAction()
+        Keys.onReturnPressed: () => resultPopup.triggerPrimaryAction()
         Keys.onEscapePressed: () => {
             if (searchField.text.trim() === "") {
                 const nextItem = searchField.nextItemInFocusChain(true)

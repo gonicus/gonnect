@@ -38,7 +38,7 @@
 <context>
     <name>ViewHelper</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="105"/>
+        <location filename="../../../src/ui/ViewHelper.cpp" line="138"/>
         <source>%n minute(s)</source>
         <translation>
             <numerusform>%n Minute</numerusform>
@@ -46,7 +46,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="108"/>
+        <location filename="../../../src/ui/ViewHelper.cpp" line="141"/>
         <source>1 hour and %n minute(s)</source>
         <translation>
             <numerusform>1 Stunde und %n Minute</numerusform>
@@ -54,7 +54,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="110"/>
+        <location filename="../../../src/ui/ViewHelper.cpp" line="143"/>
         <source>%n hour(s)</source>
         <translation>
             <numerusform>eine Stunde</numerusform>

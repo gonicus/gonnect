@@ -44,3 +44,6 @@ IntFmt $0 "0x%08X" $0
 
 ; Create/Write the reg key with the dword value
 WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@APPLICATION_NAME@" "EstimatedSize" "$0"
+
+; Needed for autostart call
+CreateShortCut "$INSTDIR\GOnnect.lnk" "$INSTDIR\bin\gonnect.exe"
