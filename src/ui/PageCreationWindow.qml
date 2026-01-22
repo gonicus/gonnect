@@ -40,6 +40,15 @@ BaseWindow {
         titleEntry.forceActiveFocus()
     }
 
+    readonly property Connections editModeConnections: Connections {
+        target: SM
+        function onUiEditModeChanged() {
+            if (!SM.uiEditMode) {
+                control.close()
+            }
+        }
+    }
+
     ColumnLayout {
         id: pageOptions
         spacing: 5
