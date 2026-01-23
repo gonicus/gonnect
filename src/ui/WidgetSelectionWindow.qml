@@ -54,8 +54,6 @@ BaseWindow {
         }
     }
 
-    Component.onDestruction: () => SM.uiHasActiveEditDialog = false
-
     CommonWidgets {
         id: widgets
     }
