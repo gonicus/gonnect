@@ -37,6 +37,11 @@ Item {
     }
 
     function openPageCreationDialog() {
+        if (SM.uiHasActiveEditDialog) {
+            return
+        }
+        SM.uiHasActiveEditDialog = true
+
         // INFO: Artificial limitation to avoid tab bar clutter
         if (control.dynamicPageCount >= control.dynamicPageLimit) {
             return
@@ -52,6 +57,11 @@ Item {
     }
 
     function openPageEditDialog(id : string, newPage : bool) {
+        if (SM.uiHasActiveEditDialog) {
+            return
+        }
+        SM.uiHasActiveEditDialog = true
+
         const page = control.mainWindow.getPage(id)
 
         if (!page) {

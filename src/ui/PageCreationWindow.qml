@@ -49,6 +49,13 @@ BaseWindow {
         }
     }
 
+    readonly property Connections windowConnections: Connections {
+        target: control
+        function onClosing() {
+            SM.uiHasActiveEditDialog = false
+        }
+    }
+
     ColumnLayout {
         id: pageOptions
         spacing: 5

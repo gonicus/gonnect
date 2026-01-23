@@ -47,6 +47,15 @@ BaseWindow {
         }
     }
 
+    readonly property Connections windowConnections: Connections {
+        target: control
+        function onClosing() {
+            SM.uiHasActiveEditDialog = false
+        }
+    }
+
+    Component.onDestruction: () => SM.uiHasActiveEditDialog = false
+
     CommonWidgets {
         id: widgets
     }
