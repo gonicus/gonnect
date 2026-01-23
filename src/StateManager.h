@@ -15,7 +15,8 @@ class StateManager : public QObject
     Q_PROPERTY(bool globalShortcutsSupported READ globalShortcutsSupported NOTIFY
                        globalShortcutsSupportedChanged FINAL)
     Q_PROPERTY(bool uiEditMode MEMBER m_uiEditMode NOTIFY uiEditModeChanged FINAL)
-    Q_PROPERTY(bool uiHasActiveEditDialog MEMBER m_uiHasActiveEditDialog NOTIFY uiHasActiveEditDialogChanged FINAL)
+    Q_PROPERTY(bool uiHasActiveEditDialog MEMBER m_uiHasActiveEditDialog NOTIFY
+                       uiHasActiveEditDialogChanged FINAL)
     Q_PROPERTY(QVariantMap globalShortcuts READ globalShortcuts NOTIFY globalShortcutsChanged FINAL)
 
 public:
