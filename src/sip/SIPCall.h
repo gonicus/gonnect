@@ -28,6 +28,7 @@ public:
     virtual void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
     virtual void onInstantMessage(pj::OnInstantMessageParam &prm) override;
     virtual void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
+    virtual void onDtmfDigit(pj::OnDtmfDigitParam &prm) override;
     virtual void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
 
     SIPAccount *account() const { return m_account; };

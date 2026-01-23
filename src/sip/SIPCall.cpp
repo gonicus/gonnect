@@ -348,6 +348,11 @@ void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
     qCWarning(lcSIPCall) << "failed to send message:" << prm.code << prm.reason;
 }
 
+void SIPCall::onDtmfDigit(pj::OnDtmfDigitParam &prm)
+{
+    qCWarning(lcSIPCall) << "GOT DTMF:" << prm.digit;
+}
+
 pj::AudioMedia *SIPCall::audioMedia() const
 {
     const auto callInfo = getInfo();

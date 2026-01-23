@@ -253,7 +253,7 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
     }
 
     if (m_io.isNull()) {
-        qCWarning(lcAudioPort) << "frame received, but no IO available";
+        //qCWarning(lcAudioPort) << "frame received, but no IO available";
         return;
     }
 
