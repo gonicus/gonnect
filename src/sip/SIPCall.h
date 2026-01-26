@@ -51,6 +51,19 @@ public:
     bool hasMetadata() const { return m_hasMetadata; }
     QList<ResponseItem *> metadata() { return m_metadata; };
 
+    // TODO: Move someplace else
+    // In SIPCall loop (e.g. its timer) run 10 sec metadata loop, send dtmf + timestamp and IM
+    // Wait for answer, add to debug() list
+    struct CallMetadata
+    {
+        QDateTime sent;
+        QDateTime received;
+        qint64 delay;
+        QChar digit;
+    };
+
+    QList<CallMetadata *> debug() { return m_debug; }
+
     bool hold();
     bool unhold();
     bool isHolding() const { return m_isHolding; }
@@ -99,6 +112,8 @@ private:
     QDateTime m_establishedTime;
 
     QList<ResponseItem *> m_metadata;
+
+    QList<CallMetadata *> m_debug;
 
     pj::AudioMedia *m_aud_med = NULL;
     IMHandler *m_imHandler = nullptr;

@@ -353,18 +353,6 @@ void SIPCall::onDtmfDigit(pj::OnDtmfDigitParam &prm)
     qCWarning(lcSIPCall) << "GOT DTMF:" << prm.digit;
 }
 
-pj::AudioMedia *SIPCall::audioMedia() const
-{
-    const auto callInfo = getInfo();
-
-    for (unsigned i = 0; i < callInfo.media.size(); ++i) {
-        if (callInfo.media[i].type == PJMEDIA_TYPE_AUDIO) {
-            return static_cast<pj::AudioMedia *>(getMedia(i));
-        }
-    }
-    return nullptr;
-}
-
 void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
 {
     const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
@@ -380,6 +368,18 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
             qCDebug(lcSIPCall) << "New call participant identity found:" << newIdentity;
         }
     }
+}
+
+pj::AudioMedia *SIPCall::audioMedia() const
+{
+    const auto callInfo = getInfo();
+
+    for (unsigned i = 0; i < callInfo.media.size(); ++i) {
+        if (callInfo.media[i].type == PJMEDIA_TYPE_AUDIO) {
+            return static_cast<pj::AudioMedia *>(getMedia(i));
+        }
+    }
+    return nullptr;
 }
 
 bool SIPCall::hold()
