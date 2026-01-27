@@ -88,6 +88,33 @@ bool IMHandler::process(const QString &contentType, const QString &message)
         return true;
     }
 
+    // Call delays
+    else if (path == "callDelay") {
+        bool validTimestamp = false;
+        qint64 timestamp;
+        QString digit;
+        QUrlQuery q(callUrl);
+        auto qitems = q.queryItems();
+
+        for (auto &qi : std::as_const(qitems)) {
+            if (qi.first == "timestamp") {
+                timestamp = qi.second.toLongLong(&validTimestamp);
+            }
+            if (qi.first == "digit") {
+                digit = qi.second;
+            }
+        }
+
+        if (!validTimestamp) {
+            qCWarning(lcIMHandler) << "invalid call delay timestamp received";
+            return false;
+        }
+
+        m_call->initializeCallDelay(timestamp, digit);
+
+        return true;
+    }
+
     return false;
 }
 

@@ -72,6 +72,9 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
             globalCallState.holdAllCalls(this);
         }
     }
+
+    m_callDelayCycleTimer.setInterval(10s);
+    connect(&m_callDelayCycleTimer, &QTimer::timeout, this, [this]() { /* TODO: Some IM + DTMF init sender */ });
 }
 
 SIPCall::~SIPCall()
@@ -350,7 +353,8 @@ void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 
 void SIPCall::onDtmfDigit(pj::OnDtmfDigitParam &prm)
 {
-    qCWarning(lcSIPCall) << "GOT DTMF:" << prm.digit;
+    // TODO: Don't just block all dtmf receivals for delay checks?
+    calculateCallDelay(QDateTime::currentMSecsSinceEpoch(), QString::fromStdString(prm.digit));
 }
 
 void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
@@ -650,4 +654,21 @@ void SIPCall::addMetadata(const QString &data)
     }
 
     Q_EMIT metadataChanged();
+}
+
+void SIPCall::initializeCallDelay(qint64 timestamp, QString digit)
+{
+    m_callDelay.sent = timestamp;
+    m_callDelay.digit = digit;
+}
+
+void SIPCall::calculateCallDelay(qint64 timestamp, QString digit)
+{
+    m_callDelay.received = timestamp;
+
+    if (digit != m_callDelay.digit) {
+        m_callDelay.latency = -1;
+    } else {
+        m_callDelay.latency = m_callDelay.received - m_callDelay.sent;
+    }
 }
