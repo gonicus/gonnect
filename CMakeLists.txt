@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 project(GOnnect VERSION 2.0.9 LANGUAGES CXX)
 include(cmake/CCache.cmake)
 include(cmake/Workarounds.cmake)
+include(cmake/Versioning.cmake)
 useCompilerCache()
 
 set(APPLICATION_NAME       "${PROJECT_NAME}" )
@@ -10,6 +11,8 @@ set(APPLICATION_EXECUTABLE "gonnect" )
 set(APPLICATION_VENDOR "GONICUS GmbH")
 set(APPLICATION_ICON_NAME  "${APPLICATION_SHORTNAME}" )
 set(APPLICATION_URL "https://www.gonnect-project.org")
+
+#GOnnect_VERSION -> override from git tag
 
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_STANDARD 23)
