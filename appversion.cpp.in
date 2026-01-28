@@ -1,5 +1,5 @@
 #include "appversion.h"
 
 std::string getVersion() {
-    return "@GOnnect_VERSION@";
+    return "@VERSION@";
 }
