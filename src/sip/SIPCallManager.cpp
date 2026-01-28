@@ -896,7 +896,6 @@ void SIPCallManager::dispatchDtmfBuffer()
                             m_dtmfGen = new DtmfGenerator(this);
                         }
 
-                        qCCritical(lcSIPCallManager) << "SENT DTMF:" << val.first(1).toStdString();
                         m_dtmfGen->playDtmf(val.front());
                         call->dialDtmf(val.first(1).toStdString());
 

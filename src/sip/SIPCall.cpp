@@ -227,6 +227,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                     hold();
                 }
             });
+
+            m_callDelayCycleTimer.start();
         }
 
         // Send DTMF post tasks if present
@@ -274,6 +276,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_account->removeCall(this);
         m_isEstablished = false;
         m_earlyCallState = false;
+
+        m_callDelayCycleTimer.stop();
 
         break;
 
@@ -699,8 +703,9 @@ void SIPCall::setCallDelayTx(qint64 timestamp, QString digit)
 void SIPCall::setCallDelayRx(qint64 timestamp, QString digit)
 {
     m_callDelayRx.first = timestamp;
+    m_callDelayRx.second = digit;
 
-    if (digit != m_callDelayRx.second) {
+    if (m_callDelayRx.second != m_callDelayTx.second) {
         m_callDelay = -1;
     } else {
         m_callDelay = m_callDelayRx.first - m_callDelayTx.first;
