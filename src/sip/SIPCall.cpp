@@ -1,5 +1,7 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QUrl>
+#include <qurlquery.h>
 
 #include "SIPCall.h"
 #include "SIPCallManager.h"
@@ -74,7 +76,12 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     }
 
     m_callDelayCycleTimer.setInterval(10s);
-    connect(&m_callDelayCycleTimer, &QTimer::timeout, this, [this]() { /* TODO: Some IM + DTMF init sender */ });
+    connect(&m_callDelayCycleTimer, &QTimer::timeout, this, [this]() {
+        QString digit = QString("%1").arg((m_callDelayCounter % 9) + 1);
+        m_callDelayCounter++;
+
+        requestCallDelay(digit);
+    });
 }
 
 SIPCall::~SIPCall()
@@ -354,7 +361,7 @@ void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 void SIPCall::onDtmfDigit(pj::OnDtmfDigitParam &prm)
 {
     // TODO: Don't just block all dtmf receivals for delay checks?
-    calculateCallDelay(QDateTime::currentMSecsSinceEpoch(), QString::fromStdString(prm.digit));
+    setCallDelayRx(QDateTime::currentMSecsSinceEpoch(), QString::fromStdString(prm.digit));
 }
 
 void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
@@ -656,19 +663,48 @@ void SIPCall::addMetadata(const QString &data)
     Q_EMIT metadataChanged();
 }
 
-void SIPCall::initializeCallDelay(qint64 timestamp, QString digit)
+void SIPCall::requestCallDelay(QString digit)
 {
-    m_callDelay.sent = timestamp;
-    m_callDelay.digit = digit;
+    // DMTF
+    QString timestamp = QString("%1").arg(QDateTime::currentMSecsSinceEpoch());
+    auto &cm = SIPCallManager::instance();
+    cm.sendDtmf(m_account->id(), getId(), digit);
+
+    // IM
+    pj::SendInstantMessageParam prm;
+    prm.contentType = "application/x-www-form-urlencoded";
+
+    QUrlQuery q;
+    q.addQueryItem("timestamp", timestamp);
+    q.addQueryItem("digit", digit);
+
+    QUrl delayUrl("gonnect:");
+    delayUrl.setPath("callDelay");
+    delayUrl.setQuery(q);
+    prm.content = delayUrl.toString().toStdString();
+
+    try {
+        sendInstantMessage(prm);
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to send call delay data:" << err.info();
+    }
 }
 
-void SIPCall::calculateCallDelay(qint64 timestamp, QString digit)
+void SIPCall::setCallDelayTx(qint64 timestamp, QString digit)
 {
-    m_callDelay.received = timestamp;
+    m_callDelayTx.first = timestamp;
+    m_callDelayTx.second = digit;
+}
 
-    if (digit != m_callDelay.digit) {
-        m_callDelay.latency = -1;
+void SIPCall::setCallDelayRx(qint64 timestamp, QString digit)
+{
+    m_callDelayRx.first = timestamp;
+
+    if (digit != m_callDelayRx.second) {
+        m_callDelay = -1;
     } else {
-        m_callDelay.latency = m_callDelay.received - m_callDelay.sent;
+        m_callDelay = m_callDelayRx.first - m_callDelayTx.first;
     }
+
+    qCWarning(lcSIPCall) << "call delay is" << m_callDelay << "ms";
 }

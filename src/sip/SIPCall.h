@@ -52,11 +52,11 @@ public:
     bool hasMetadata() const { return m_hasMetadata; }
     QList<ResponseItem *> metadata() { return m_metadata; };
 
-
+    void requestCallDelay(QString digit);
     /// Call party send IM with timestamp and dtmf digit it has sent
-    void initializeCallDelay(qint64 timestamp, QString digit);
+    void setCallDelayTx(qint64 timestamp, QString digit);
     /// Dtmf digit receival is logged with timestamp, followed by determining the delay
-    void calculateCallDelay(qint64 timestamp, QString digit);
+    void setCallDelayRx(qint64 timestamp, QString digit);
 
     bool hold();
     bool unhold();
@@ -108,16 +108,10 @@ private:
     QList<ResponseItem *> m_metadata;
 
     QTimer m_callDelayCycleTimer;
-
-    struct CallDelay
-    {
-        qint64 sent;
-        qint64 received;
-        qint64 latency;
-        QString digit;
-    };
-
-    CallDelay m_callDelay;
+    QPair<qint64, QString> m_callDelayTx;
+    QPair<qint64, QString> m_callDelayRx;
+    int m_callDelayCounter = 0;
+    qint64 m_callDelay;
 
     pj::AudioMedia *m_aud_med = NULL;
     IMHandler *m_imHandler = nullptr;

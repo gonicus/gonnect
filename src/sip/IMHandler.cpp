@@ -110,7 +110,7 @@ bool IMHandler::process(const QString &contentType, const QString &message)
             return false;
         }
 
-        m_call->initializeCallDelay(timestamp, digit);
+        m_call->setCallDelayTx(timestamp, digit);
 
         return true;
     }
