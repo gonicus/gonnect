@@ -71,6 +71,7 @@ public:
     bool isEstablished() const { return m_isEstablished; }
     /// The time when the call was established (i.e. answered); invalid QDateTime if not established
     QDateTime establishedTime() const { return m_establishedTime; }
+    qint64 callDelay() const { return m_callDelay; }
 
     bool earlyCallState() const { return m_earlyCallState; }
 
@@ -111,7 +112,7 @@ private:
     QPair<qint64, QString> m_callDelayTx;
     QPair<qint64, QString> m_callDelayRx;
     int m_callDelayCounter = 0;
-    qint64 m_callDelay;
+    qint64 m_callDelay = -1;
 
     pj::AudioMedia *m_aud_med = NULL;
     IMHandler *m_imHandler = nullptr;

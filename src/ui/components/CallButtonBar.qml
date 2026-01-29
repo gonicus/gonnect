@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
 import QtQuick.Controls.Material
 import base
@@ -49,6 +50,14 @@ Item {
         }
     }
 
+    Settings {
+        id: settings
+        location: ViewHelper.userConfigPath
+        category: "generic"
+
+        property bool dtmfDebugEnabled
+    }
+
     Rectangle {
         id: topBorder
         height: 1
@@ -60,14 +69,32 @@ Item {
         }
     }
 
-    Label {
-        id: elapsedTimeLabel
-        color: Theme.secondaryTextColor
-        text: "🕓  " + ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+    Row {
+        spacing: 5
+        leftPadding: 20
         anchors {
-            verticalCenter: parent.verticalCenter
+            top: parent.top
+            bottom: parent.bottom
             left: parent.left
-            leftMargin: 20
+        }
+
+        Label {
+            id: elapsedTimeLabel
+            color: Theme.secondaryTextColor
+            text: "🕓  " + ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+            anchors {
+                verticalCenter: parent.verticalCenter
+            }
+        }
+
+        Label {
+            id: dtmfDebugLabel
+            visible: settings.dtmfDebugEnabled
+            color: Theme.secondaryTextColor
+            text: "⚠  " + (control.callItem?.callDelay ?? -1) + " ms"
+            anchors {
+                verticalCenter: parent.verticalCenter
+            }
         }
     }
 
