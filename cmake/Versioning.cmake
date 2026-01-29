@@ -10,7 +10,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     OUTPUT_VARIABLE VERSION)
     if(NOT GIT_RESULT EQUAL "0")
-        message(FATAL_ERROR "unable to retrieve project version from git")
+        message("unable to retrieve project version from git")
     endif()
 
     # If there's a version - take it
