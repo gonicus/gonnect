@@ -8,7 +8,6 @@
 
 #include "SIPCall.h"
 #include "SIPAccount.h"
-#include "UserInfo.h"
 #include "IMHandler.h"
 #include "ViewHelper.h"
 
@@ -19,13 +18,14 @@ IMHandler::IMHandler(SIPCall *parent) : QObject(parent), m_call(parent)
     ReadOnlyConfdSettings settings;
 
     if (settings.contains("jitsi/url")) {
-
         settings.beginGroup("jitsi");
         m_jitsiBaseURL = settings.value("url", "").toString();
         m_jitsiPreconfig = settings.value("preconfig", false).toBool();
 
         settings.endGroup();
     }
+
+    m_dtmfDebugEnabled = settings.value("generic/dtmfDebugEnabled", false).toBool();
 }
 
 bool IMHandler::process(const QString &contentType, const QString &message)
@@ -89,7 +89,7 @@ bool IMHandler::process(const QString &contentType, const QString &message)
     }
 
     // Call delays
-    else if (path == "callDelay") {
+    else if (path == "callDelay" && dtmfDebugEnabled()) {
         bool validTimestamp = false;
         qint64 timestamp;
         QString digit;

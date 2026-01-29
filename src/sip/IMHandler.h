@@ -18,6 +18,11 @@ public:
     {
         return !m_jitsiBaseURL.isEmpty() && m_capabilities.contains("jitsi");
     }
+    bool dtmfDebugEnabled() const
+    {
+        return m_dtmfDebugEnabled;
+    }
+
     bool process(const QString &contentType, const QString &message);
 
     bool capabilitiesSent() const { return m_capabilitiesSent; }
@@ -51,6 +56,7 @@ private:
 
     unsigned m_capabilitySendingTries = 3;
 
+    bool m_dtmfDebugEnabled = false;
     bool m_capabilitiesSent = false;
     bool m_jitsiPreconfig = false;
 };

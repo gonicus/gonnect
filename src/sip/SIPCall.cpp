@@ -228,7 +228,9 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                 }
             });
 
-            m_callDelayCycleTimer.start();
+            if (m_imHandler->dtmfDebugEnabled()) {
+                m_callDelayCycleTimer.start();
+            }
         }
 
         // Send DTMF post tasks if present
@@ -277,7 +279,9 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_isEstablished = false;
         m_earlyCallState = false;
 
-        m_callDelayCycleTimer.stop();
+        if (m_imHandler->dtmfDebugEnabled() && m_callDelayCycleTimer.isActive()) {
+            m_callDelayCycleTimer.stop();
+        }
 
         break;
 
