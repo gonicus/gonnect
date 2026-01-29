@@ -71,7 +71,14 @@ Item {
     }
 
     function widgetCreationDialog() {
-        widgetSelectionWindowComponent.createObject(control).show()
+        if (!SM.uiHasActiveEditDialog) {
+            const item = widgetSelectionWindowComponent.createObject(control)
+            if (item) {
+                SM.uiHasActiveEditDialog = true
+
+                item.show()
+            }
+        }
     }
 
     Item {
