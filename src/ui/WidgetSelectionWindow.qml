@@ -38,6 +38,22 @@ BaseWindow {
         defaultLogLevel: LoggingCategory.Warning
     }
 
+    readonly property Connections editModeConnections: Connections {
+        target: SM
+        function onUiEditModeChanged() {
+            if (!SM.uiEditMode) {
+                control.close()
+            }
+        }
+    }
+
+    readonly property Connections windowConnections: Connections {
+        target: control
+        function onClosing() {
+            SM.uiHasActiveEditDialog = false
+        }
+    }
+
     CommonWidgets {
         id: widgets
     }

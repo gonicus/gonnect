@@ -18,7 +18,6 @@ DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ paren
     setTimeData();
 
     connect(&m_nextDayRefreshTimer, &QTimer::timeout, this, [this]() {
-        qCWarning(lcDateEventFeederManager) << "REFRESH";
         setTimeData();
         initFeederConfigs();
         reload();
@@ -30,7 +29,7 @@ void DateEventFeederManager::setTimeData()
 {
     // Event filter options
     m_currentTime = QDateTime::currentDateTime();
-    m_timeRangeStart = m_currentTime.date().startOfDay(m_currentTime.timeZone());
+    m_timeRangeStart = QDateTime(m_currentTime.date(), QTime(0, 0, 0, 0));
     m_timeRangeEnd = m_timeRangeStart.addDays(3);
 
     m_nextDayTime = m_timeRangeStart.addDays(1);

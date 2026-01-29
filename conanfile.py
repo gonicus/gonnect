@@ -78,7 +78,7 @@ class GOnnectRecipe(ConanFile):
             self.requires("libpulse/system")
 
         if self.options.with_conan_qt:
-            self.requires("qt/6.10.1")
+            self.requires("qt/6.10.2")
             self.requires("mpg123/1.33.0", override=True)
             self.requires("wayland/1.23.92", override=True)
 

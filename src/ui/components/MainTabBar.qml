@@ -37,6 +37,10 @@ Item {
     }
 
     function openPageCreationDialog() {
+        if (SM.uiHasActiveEditDialog) {
+            return
+        }
+
         // INFO: Artificial limitation to avoid tab bar clutter
         if (control.dynamicPageCount >= control.dynamicPageLimit) {
             return
@@ -44,37 +48,49 @@ Item {
 
         const id = `page_${UISettings.generateUuid()}`
         const item = pageCreationWindowComponent.createObject(control, { pageId: id, newPage: true })
-        item.accepted.connect((name, iconId) => {
-                                  control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
-                                  control.mainWindow.createPage(id, iconId, name)
-                              })
-        item.show()
+        if (item) {
+            SM.uiHasActiveEditDialog = true
+
+            item.accepted.connect((name, iconId) => {
+                                      control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
+                                      control.mainWindow.createPage(id, iconId, name)
+                                  })
+            item.show()
+        }
     }
 
     function openPageEditDialog(id : string, newPage : bool) {
-        const page = control.mainWindow.getPage(id)
+        if (SM.uiHasActiveEditDialog) {
+            return
+        }
 
+        const page = control.mainWindow.getPage(id)
         if (!page) {
             console.error(category, "unable to find page with id", id)
             return
         }
 
         const item = pageCreationWindowComponent.createObject(control, { pageId: id, newPage: newPage })
-        item.accepted.connect((name, iconId) => {
-                                  page.iconId = iconId
-                                  page.name = name
+        if (item) {
+            SM.uiHasActiveEditDialog = true
 
-                                  // Update tab button
-                                  const tabList = control.getTabList()
-                                  for (const tab of tabList) {
-                                      if (tab.pageId === id) {
-                                          tab.iconSource = Icons[iconId]
-                                          tab.labelText = name
+            item.accepted.connect((name, iconId) => {
+                                      page.iconId = iconId
+                                      page.name = name
+
+                                      // Update tab button
+                                      const tabList = control.getTabList()
+                                      for (const tab of tabList) {
+                                          if (tab.pageId === id) {
+                                              tab.iconSource = Icons[iconId]
+                                              tab.labelText = name
+                                              break
+                                          }
                                       }
-                                  }
-                              })
-        item.prefill(page.iconId, page.name)
-        item.show()
+                                  })
+            item.prefill(page.iconId, page.name)
+            item.show()
+        }
     }
 
     function createTab(id : string, type : int, iconId : string, name : string) {

@@ -60,4 +60,4 @@ class QtKeychain(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Qt6Keychain")
         self.cpp_info.set_property("cmake_target_name", "qt6keychain")
         self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.libs = ["qt6keychain"]
+        self.cpp_info.libs = ["qt6keychaind" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else "qt6keychain"]

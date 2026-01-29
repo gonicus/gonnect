@@ -1,9 +1,8 @@
+#include <QMap>
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
 #include "CalDAVEventFeeder.h"
-#include "DateEvent.h"
-#include "DateEventManager.h"
 #include "DateEventFeederManager.h"
 #include "DateEventManager.h"
 
@@ -100,6 +99,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
 {
     DateEventManager &manager = DateEventManager::instance();
 
+    QMap<QString, QList<QDateTime>> exdatesById;
+
     icalcomponent *calendar = icalparser_parse_string(data.toStdString().data());
     if (calendar) {
         // VEVENT's
@@ -107,6 +108,14 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                      icalcomponent_get_first_component(calendar, ICAL_VEVENT_COMPONENT);
              event != nullptr;
              event = icalcomponent_get_next_component(calendar, ICAL_VEVENT_COMPONENT)) {
+            QString id = icalcomponent_get_uid(event);
+
+            icaltimetype dtstart = icalcomponent_get_dtstart(event);
+            QDateTime start = createDateTimeFromTimeType(dtstart);
+
+            icaltimetype dtend = icalcomponent_get_dtend(event);
+            QDateTime end = createDateTimeFromTimeType(dtend);
+
             // RRULE
             bool isRecurrent = false;
             icalproperty *prop = icalcomponent_get_first_property(event, ICAL_RRULE_PROPERTY);
@@ -116,54 +125,57 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 rrule = icalproperty_get_rrule(prop);
             }
 
-            QString id = icalcomponent_get_uid(event);
-
             // RID: The first ever recorded time of a recurrent event instance. We'll use
             // 'UID-UNIX_TIMESTAMP' as ID.
             bool isUpdatedRecurrence = false;
+            bool isCancelledRecurrence = false;
             icaltimetype rid = icalcomponent_get_recurrenceid(event);
             if (!icaltime_is_null_time(rid)) {
-                isUpdatedRecurrence = true;
-                id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+                if (exdatesById.value(id).contains(start)) {
+                    isCancelledRecurrence = true;
+                } else {
+                    isUpdatedRecurrence = true;
+                    id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+                }
             }
 
-            icaltimetype dtstart = icalcomponent_get_dtstart(event);
-            QDateTime start = createDateTimeFromTimeType(dtstart);
+            // Multi-day handling
+            bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_config.currentTime;
+            if (isMultiDay && end > m_config.timeRangeEnd) {
+                end = m_config.timeRangeEnd;
+            }
 
-            icaltimetype dtend = icalcomponent_get_dtend(event);
-            QDateTime end = createDateTimeFromTimeType(dtend);
+            // Status filter
+            icalproperty_status status = icalcomponent_get_status(event);
+            bool isCancelled = (status == ICAL_STATUS_CANCELLED || status == ICAL_STATUS_FAILED
+                                || status == ICAL_STATUS_DELETED || isCancelledRecurrence);
+
+            // Skip cancelled or non-recurrent events that are outside of our date range
+            if (isCancelled
+                || (!isRecurrent && !isUpdatedRecurrence
+                    && ((start < m_config.timeRangeStart && !isMultiDay)
+                        || start >= m_config.timeRangeEnd || end < m_config.currentTime))) {
+                continue;
+            }
 
             QString summary = icalcomponent_get_summary(event);
             QString location = icalcomponent_get_location(event);
             QString description = icalcomponent_get_description(event);
 
-            // Status filter
-            icalproperty_status status = icalcomponent_get_status(event);
-            bool isCancelled = (status == ICAL_STATUS_CANCELLED || status == ICAL_STATUS_FAILED
-                                || status == ICAL_STATUS_DELETED || summary.contains("Canceled:"));
+            if (isRecurrent) { // Recurrent origin event, parsed first
+                // Get EXDATE's
+                icaltimetype exdate = {};
+                QList<QDateTime> exdates;
+                for (icalproperty *prop =
+                             icalcomponent_get_first_property(event, ICAL_EXDATE_PROPERTY);
+                     prop != nullptr;
+                     prop = icalcomponent_get_next_property(event, ICAL_EXDATE_PROPERTY)) {
+                    exdate = icalproperty_get_exdate(prop);
+                    exdates.append(createDateTimeFromTimeType(exdate));
+                }
+                exdatesById[id] = exdates;
 
-            // Skip non-recurrent events that are cancelled / outside of our date range
-            // as well as any events without a jitsi meeting as a location
-            if ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd
-                 || end < m_config.currentTime || isCancelled)
-                && !isRecurrent && !isUpdatedRecurrence) {
-                continue;
-            }
-
-            // Get EXDATE's
-            icaltimetype exdate = {};
-            QList<QDateTime> exdates;
-            for (icalproperty *prop = icalcomponent_get_first_property(event, ICAL_EXDATE_PROPERTY);
-                 prop != nullptr;
-                 prop = icalcomponent_get_next_property(event, ICAL_EXDATE_PROPERTY)) {
-                exdate = icalproperty_get_exdate(prop);
-                exdates.append(createDateTimeFromTimeType(exdate));
-            }
-
-            if (isRecurrent && !isUpdatedRecurrence) {
-                // Recurrent origin event, parsed first
                 icalrecur_iterator *recurrenceIter = icalrecur_iterator_new(rrule, dtstart);
-
                 if (recurrenceIter) {
                     qint64 duration = start.secsTo(end);
 
@@ -172,43 +184,47 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                          next = icalrecur_iterator_next(recurrenceIter)) {
                         QDateTime recurStart = createDateTimeFromTimeType(next);
                         QDateTime recurEnd = recurStart.addSecs(duration);
-                        if (recurStart > m_config.timeRangeEnd) {
+                        if (recurStart >= m_config.timeRangeEnd) {
                             break;
                         } else if (recurEnd < m_config.currentTime) {
                             continue;
                         }
 
+                        // Recurrent multi-day handling
+                        bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                && recurEnd > m_config.currentTime;
+                        if (recurMultiDay && recurEnd > m_config.timeRangeEnd) {
+                            recurEnd = m_config.timeRangeEnd;
+                        }
+
                         if (!exdates.contains(recurStart)
-                            && recurStart >= m_config.timeRangeStart) {
-                            QString nid =
+                            && (recurStart >= m_config.timeRangeStart || recurMultiDay)) {
+                            QString recurId =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
-                            manager.addDateEvent(new DateEvent(nid, m_config.source, recurStart,
-                                                               recurEnd, summary, location,
-                                                               description));
+                            manager.addDateEvent(recurId, m_config.source, recurStart, recurEnd,
+                                                 summary, location, description);
                         }
                     }
 
                     icalrecur_iterator_free(recurrenceIter);
                 }
-            } else if (isUpdatedRecurrence) {
-                // Updates of a recurrent event instance
-                if (isCancelled || start < m_config.timeRangeStart || start > m_config.timeRangeEnd
-                    || end < m_config.currentTime) {
+            } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
+                if ((start < m_config.timeRangeStart && !isMultiDay)
+                    || start >= m_config.timeRangeEnd || end < m_config.currentTime) {
                     // Updated recurrence doesn't match our criteria anymore
-                    manager.removeDateEvent(id);
+                    manager.removeDateEvent(id, start, end);
                 } else if (manager.isAddedDateEvent(id)) {
                     // Exists but modified
                     manager.modifyDateEvent(id, m_config.source, start, end, summary, location,
                                             description);
                 } else {
                     // Does not exist, e.g. moved from past to future, different day
-                    manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                       location, description));
+                    manager.addDateEvent(id, m_config.source, start, end, summary, location,
+                                         description);
                 }
-            } else {
-                // Normal event, no recurrence, or update of a recurrent instance
-                manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                   location, description));
+            } else { // Normal event, no recurrence, or update of a recurrent instance
+                manager.addDateEvent(id, m_config.source, start, end, summary, location,
+                                     description);
             }
         }
     } else {
