@@ -7,7 +7,7 @@
 
 DateEvent::DateEvent(const QString &id, const QString &source, const QDateTime &start,
                      const QDateTime &end, const QString &summary, const QString &location,
-                     QString &description, QObject *parent)
+                     const QString &description, QObject *parent)
     : QObject{ parent },
       m_id{ id },
       m_source{ source },

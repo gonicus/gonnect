@@ -80,6 +80,7 @@ ListView {
         property bool isToday
         property bool isInPast
         property bool isCurrentlyTakingPlace
+        property bool isAllDayEvent
         property int minutesRemainingToStart
         property int minutesRemainingToEnd
 
@@ -93,6 +94,7 @@ ListView {
             delg.isToday = ViewHelper.isToday(delg.dateTime)
             delg.isInPast = delg.endDateTime.getTime() < now.getTime()
             delg.isCurrentlyTakingPlace = delg.dateTime.getTime() < now.getTime() && now.getTime() < delg.endDateTime.getTime()
+            delg.isAllDayEvent = delg.dateTime.getDate() + 1 === delg.endDateTime.getDate() && delg.dateTime.getHours() === 0
         }
 
         Connections {
@@ -142,12 +144,12 @@ ListView {
                     Label {
                         id: timeLabel
                         font.weight: summaryLabel.font.weight
-                        text: delg.dateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm"))
+                        text: delg.isAllDayEvent ? qsTr("All day") : delg.dateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm"))
                     }
 
                     Label {
                         id: remainingMinutesLabel
-                        visible: delg.isToday && !delg.isInPast
+                        visible: delg.isToday && !delg.isInPast && !delg.isAllDayEvent
                                  && ((delg.minutesRemainingToStart >= 0 && delg.minutesRemainingToStart < 120)
                                      || delg.isCurrentlyTakingPlace)
                         font.weight: summaryLabel.font.weight

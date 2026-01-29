@@ -10,7 +10,7 @@ class DateEvent : public QObject
 public:
     explicit DateEvent(const QString &id, const QString &source, const QDateTime &start,
                        const QDateTime &end, const QString &summary, const QString &location,
-                       QString &description, QObject *parent = nullptr);
+                       const QString &description, QObject *parent = nullptr);
 
     QString id() const { return m_id; }
     QString source() const { return m_source; }
