@@ -23,6 +23,7 @@ Item {
     readonly property bool isFinished: control.callItem?.isFinished ?? false
     readonly property bool isIncoming: control.callItem?.isIncoming ?? false
     readonly property bool hasCapabilityJitsi: control.callItem?.hasCapabilityJitsi ?? false
+    readonly property int callDelay: control.callItem?.callDelay ?? -1
 
     readonly property bool areInCallButtonsEnabled: control.isEstablished && !control.isFinished
 
@@ -48,14 +49,6 @@ Item {
             interval: 100
             onTriggered: () => internal.updateElapsedTime()
         }
-    }
-
-    Settings {
-        id: settings
-        location: ViewHelper.userConfigPath
-        category: "generic"
-
-        property bool dtmfDebugEnabled
     }
 
     Rectangle {
@@ -89,9 +82,9 @@ Item {
 
         Label {
             id: dtmfDebugLabel
-            visible: settings.dtmfDebugEnabled
+            visible: control.callDelay > 0
             color: Theme.secondaryTextColor
-            text: "⚠  " + (control.callItem?.callDelay ?? -1) + " ms"
+            text: "⚠  " + control.callDelay + " ms"
             anchors {
                 verticalCenter: parent.verticalCenter
             }

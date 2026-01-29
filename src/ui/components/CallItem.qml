@@ -24,6 +24,7 @@ Rectangle {
     required property bool isIncoming
     required property bool isEstablished
     required property date establishedTime
+    required property int callDelay
     required property bool isHolding
     required property bool isFinished
     required property bool hasCapabilityJitsi
@@ -40,7 +41,6 @@ Rectangle {
     property int padding: 12
 
     signal clicked
-
 
     states: [
         State {

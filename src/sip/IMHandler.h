@@ -20,7 +20,7 @@ public:
     }
     bool dtmfDebugEnabled() const
     {
-        return m_dtmfDebugEnabled;
+        return m_capabilities.contains("callDelay");
     }
 
     bool process(const QString &contentType, const QString &message);
@@ -56,7 +56,6 @@ private:
 
     unsigned m_capabilitySendingTries = 3;
 
-    bool m_dtmfDebugEnabled = false;
     bool m_capabilitiesSent = false;
     bool m_jitsiPreconfig = false;
 };

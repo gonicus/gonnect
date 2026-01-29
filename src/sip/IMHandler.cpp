@@ -24,8 +24,6 @@ IMHandler::IMHandler(SIPCall *parent) : QObject(parent), m_call(parent)
 
         settings.endGroup();
     }
-
-    m_dtmfDebugEnabled = settings.value("generic/dtmfDebugEnabled", false).toBool();
 }
 
 bool IMHandler::process(const QString &contentType, const QString &message)
@@ -179,6 +177,9 @@ bool IMHandler::sendCapabilities()
         q.addQueryItem("jitsi", "1");
         m_ownCapabilities.push_back("jitsi");
     }
+
+    q.addQueryItem("callDelay", "1");
+    m_ownCapabilities.push_back("callDelay");
 
     QUrl jitsiUrl("gonnect:");
     jitsiUrl.setPath("capabilities");
