@@ -20,6 +20,31 @@ DateEventManager::DateEventManager(QObject *parent) : QObject{ parent }
     m_minuteTimer.callOnTimeout(this, &DateEventManager::onTimerTimeout);
 }
 
+QList<QPair<QDateTime, QDateTime>> DateEventManager::createDaysFromRange(const QDateTime start,
+                                                                         const QDateTime end)
+{
+    QList<QPair<QDateTime, QDateTime>> days;
+
+    QDateTime currentStart = start;
+    while (currentStart < end) {
+        QDateTime endOfDay = currentStart.addDays(1);
+        endOfDay.setTime(QTime(0, 0, 0, 0));
+
+        QDateTime currentEnd;
+        if (endOfDay < end) {
+            currentEnd = endOfDay;
+        } else {
+            currentEnd = end;
+        }
+
+        days.append(qMakePair(currentStart, currentEnd));
+
+        currentStart = endOfDay;
+    }
+
+    return days;
+}
+
 DateEvent *DateEventManager::findDateEventByHash(const size_t &eventHash) const
 {
     for (auto dateEvent : std::as_const(m_dateEvents)) {
@@ -43,37 +68,61 @@ DateEventManager::~DateEventManager()
     }
 }
 
-void DateEventManager::addDateEvent(DateEvent *dateEvent)
+void DateEventManager::addDateEvent(const QString &id, const QString &source,
+                                    const QDateTime &start, const QDateTime &end,
+                                    const QString &summary, const QString &location,
+                                    const QString &description)
 {
-    if (!dateEvent) {
-        qCCritical(lcDateEventManager) << "nullptr received as dateEvent - ignoring";
-        return;
-    }
-    if (isTooOld(*dateEvent)) {
-        qCWarning(lcDateEventManager) << "DateEvent is too old and will be ignored";
-        return;
-    }
+    auto days = createDaysFromRange(start, end);
 
-    for (const auto &event : std::as_const(m_dateEvents)) {
-        if (event && event->id() == dateEvent->id()) {
-            qCWarning(lcDateEventManager) << "DateEvent already in list - ignoring";
-            return;
+    QList<QString> dateEventIds;
+    if (days.count() > 1) {
+        for (int i = 0; i < days.count(); i++) {
+            // Multi-day events will share the same base ID with a counter added to it
+            dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
+    } else {
+        dateEventIds.append(id);
     }
-
-    dateEvent->setParent(this);
 
     QMutexLocker lock(&m_feederMutex);
 
-    qsizetype i = 0;
-    for (; i < m_dateEvents.size(); ++i) {
-        if (dateEvent->start() < m_dateEvents.at(i)->start()) {
-            break;
-        }
-    }
+    for (int i = 0; i < dateEventIds.count(); i++) {
+        const auto eventId = dateEventIds.at(i);
+        const auto eventTime = days.at(i);
 
-    m_dateEvents.insert(i, dateEvent);
-    Q_EMIT dateEventAdded(i, dateEvent);
+        auto dateEvent = new DateEvent(eventId, source, eventTime.first, eventTime.second, summary,
+                                       location, description);
+
+        if (isTooOld(*dateEvent)) {
+            qCWarning(lcDateEventManager) << "DateEvent is too old and will be ignored";
+            continue;
+        }
+
+        bool isAdded = false;
+        for (const auto &event : std::as_const(m_dateEvents)) {
+            if (event && event->id() == dateEvent->id()) {
+                isAdded = true;
+                break;
+            }
+        }
+        if (isAdded) {
+            qCWarning(lcDateEventManager) << "DateEvent already in list - ignoring";
+            continue;
+        }
+
+        dateEvent->setParent(this);
+
+        qsizetype index = 0;
+        for (; index < m_dateEvents.size(); ++index) {
+            if (dateEvent->start() < m_dateEvents.at(index)->start()) {
+                break;
+            }
+        }
+
+        m_dateEvents.insert(index, dateEvent);
+        Q_EMIT dateEventAdded(index, dateEvent);
+    }
 
     if (!m_minuteTimer.isActive()) {
         m_minuteTimer.start();
@@ -85,19 +134,35 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
                                        const QString &summary, const QString &location,
                                        const QString &description)
 {
+    auto days = createDaysFromRange(start, end);
+
+    QList<QString> dateEventIds;
+    if (days.count() > 1) {
+        for (int i = 0; i < days.count(); i++) {
+            dateEventIds.append(QString("%1-%2").arg(id).arg(i));
+        }
+    } else {
+        dateEventIds.append(id);
+    }
+
     QMutexLocker lock(&m_feederMutex);
 
-    QMutableListIterator it(m_dateEvents);
-    while (it.hasNext()) {
-        const auto event = it.next();
-        if (event && event->id() == id) {
-            event->setId(id);
-            event->setSource(source);
-            event->setStart(start);
-            event->setEnd(end);
-            event->setSummary(summary);
-            event->setLocation(location);
-            event->setDescription(description);
+    for (int i = 0; i < dateEventIds.count(); i++) {
+        const auto eventId = dateEventIds.at(i);
+        const auto eventTime = days.at(i);
+
+        QMutableListIterator it(m_dateEvents);
+        while (it.hasNext()) {
+            const auto event = it.next();
+            if (event && event->id() == eventId) {
+                event->setId(eventId);
+                event->setSource(source);
+                event->setStart(eventTime.first);
+                event->setEnd(eventTime.second);
+                event->setSummary(summary);
+                event->setLocation(location);
+                event->setDescription(description);
+            }
         }
     }
 
@@ -105,32 +170,46 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
     std::sort(m_dateEvents.begin(), m_dateEvents.end(),
               [](const DateEvent *a, const DateEvent *b) { return a->start() < b->start(); });
 
-    Q_EMIT dateEventModified();
+    Q_EMIT dateEventsModified();
 }
 
-void DateEventManager::removeDateEvent(const QString &id)
+void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start,
+                                       const QDateTime &end)
 {
     auto &notMan = NotificationManager::instance();
 
-    qsizetype i = 0;
+    auto days = createDaysFromRange(start, end);
+
+    QList<QString> dateEventIds;
+    if (days.count() > 1) {
+        for (int i = 0; i < days.count(); i++) {
+            dateEventIds.append(QString("%1-%2").arg(id).arg(i));
+        }
+    } else {
+        dateEventIds.append(id);
+    }
+
     QMutexLocker lock(&m_feederMutex);
 
-    QMutableListIterator it(m_dateEvents);
-    while (it.hasNext()) {
-        i++;
-        const auto item = it.next();
-        if (item && item->id() == id) {
-            const auto eventHash = item->getHash();
-            m_alreadyNotifiedDates.remove(eventHash);
+    for (auto &dateEventId : dateEventIds) {
+        qsizetype index = 0;
+        QMutableListIterator it(m_dateEvents);
+        while (it.hasNext()) {
+            index++;
+            const auto item = it.next();
+            if (item && item->id() == dateEventId) {
+                const auto eventHash = item->getHash();
+                m_alreadyNotifiedDates.remove(eventHash);
 
-            const auto &tag = m_notificationIds[eventHash];
-            notMan.remove(tag);
-            m_notificationIds.remove(eventHash);
+                const auto &tag = m_notificationIds[eventHash];
+                notMan.remove(tag);
+                m_notificationIds.remove(eventHash);
 
-            item->deleteLater();
-            it.remove();
+                item->deleteLater();
+                it.remove();
 
-            Q_EMIT dateEventRemoved(i);
+                Q_EMIT dateEventRemoved(index);
+            }
         }
     }
 }

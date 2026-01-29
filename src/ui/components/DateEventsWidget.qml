@@ -17,6 +17,10 @@ BaseWidget {
             fill: parent
         }
 
+        property bool isInitializing: true
+
+        Component.onCompleted: () => dateStatus.start()
+
         CardHeading {
             id: dateHeading
             visible: true
@@ -45,14 +49,25 @@ BaseWidget {
         Label {
             id: dateInfo
             color: Theme.secondaryTextColor
-            visible: dateList.count > 0 ? false : true
-            text: qsTr("No upcoming appointments")
+            visible: !dateList.count > 0
+            text: dateWidget.isInitializing ? qsTr("Loading appointments...")
+                                            : qsTr("No upcoming appointments")
             wrapMode: Label.Wrap
             width: dateList.width
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             anchors {
                 centerIn: dateList
+            }
+        }
+
+        Timer {
+            id: dateStatus
+            interval: 30000
+            repeat: false
+
+            onTriggered: {
+                dateWidget.isInitializing = false
             }
         }
     }

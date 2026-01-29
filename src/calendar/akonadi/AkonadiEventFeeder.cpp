@@ -1,7 +1,7 @@
+#include <QMap>
 #include <QLoggingCategory>
 
 #include "AkonadiEventFeeder.h"
-#include "DateEvent.h"
 #include "DateEventManager.h"
 
 Q_LOGGING_CATEGORY(lcAkonadiEventFeeder, "gonnect.app.dateevents.feeder.akonadi")
@@ -106,96 +106,113 @@ void AkonadiEventFeeder::processCollections(KJob *job)
 
                 DateEventManager &manager = DateEventManager::instance();
 
+                QMap<QString, QList<QDateTime>> exdatesById;
+
                 const Akonadi::Item::List items =
                         static_cast<Akonadi::ItemFetchJob *>(job)->items();
                 for (const auto &item : items) {
                     if (item.hasPayload<KCalendarCore::Event::Ptr>()) {
                         KCalendarCore::Event::Ptr event = item.payload<KCalendarCore::Event::Ptr>();
 
+                        QString id = event->uid();
+
+                        QDateTime start = event->dtStart().toLocalTime();
+                        QDateTime end = event->dtEnd().toLocalTime();
+
                         // RRULE
                         bool isRecurrent = event->recurs();
                         KCalendarCore::Recurrence *recurrence = event->recurrence();
                         KCalendarCore::RecurrenceRule *rrule = recurrence->defaultRRule();
 
-                        QString id = event->uid();
-
                         // RID: The first ever recorded time of a recurrent event instance. We'll
                         // use 'UID-UNIX_TIMESTAMP' as ID.
                         bool isUpdatedRecurrence = false;
+                        bool isCancelledRecurrence = false;
                         QDateTime rid = event->recurrenceId().toLocalTime();
                         if (rid.isValid()) {
-                            isUpdatedRecurrence = true;
-                            id += QString("-%1").arg(rid.toMSecsSinceEpoch());
+                            if (exdatesById.value(id).contains(start)) {
+                                isCancelledRecurrence = true;
+                            } else {
+                                isUpdatedRecurrence = true;
+                                id += QString("-%1").arg(rid.toMSecsSinceEpoch());
+                            }
                         }
 
-                        QDateTime start = event->dtStart().toLocalTime();
-                        QDateTime end = event->dtEnd().toLocalTime();
+                        // Multi-day handling
+                        bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_currentTime;
+                        if (isMultiDay && end > m_timeRangeEnd) {
+                            end = m_timeRangeEnd;
+                        }
+
+                        // Status filter
+                        bool isCancelled =
+                                (event->status() == KCalendarCore::Incidence::Status::StatusCanceled
+                                 || isCancelledRecurrence);
+
+                        // Skip cancelled or non-recurrent events that are outside of our date range
+                        if (isCancelled
+                            || (!isRecurrent && !isUpdatedRecurrence
+                                && ((start < m_timeRangeStart && !isMultiDay)
+                                    || start >= m_timeRangeEnd || end < m_currentTime))) {
+                            continue;
+                        }
 
                         QString summary = event->summary();
                         QString location = event->location();
                         QString description = event->description();
 
-                        // Status filter
-                        bool isCancelled =
-                                (event->status() == KCalendarCore::Incidence::Status::StatusCanceled
-                                 || summary.contains("Canceled:"));
+                        if (isRecurrent) { // Recurrent origin event, parsed first
+                            // Get EXDATE's
+                            QList<QDateTime> exdates;
+                            for (auto &exdate : recurrence->exDateTimes()) {
+                                exdates.append(exdate.toLocalTime());
+                            }
+                            exdatesById[id] = exdates;
 
-                        // Skip non-recurrent events that are cancelled / outside of our date range
-                        // as well as any events without a jitsi meeting as a location
-                        if ((start < m_timeRangeStart || start > m_timeRangeEnd
-                             || end < m_currentTime || isCancelled)
-                            && !isRecurrent && !isUpdatedRecurrence) {
-                            continue;
-                        }
-
-                        // Get EXDATE's
-                        QList<QDateTime> exdates;
-                        for (auto &exdate : recurrence->exDateTimes()) {
-                            exdates.append(exdate.toLocalTime());
-                        }
-
-                        if (isRecurrent && !isUpdatedRecurrence) {
-                            // Recurrent origin event, parsed first
                             qint64 duration = start.secsTo(end);
 
                             for (auto next = rrule->getNextDate(m_timeRangeStart); next.isValid();
                                  next = rrule->getNextDate(next)) {
                                 QDateTime recurStart = next.toLocalTime();
                                 QDateTime recurEnd = recurStart.addSecs(duration);
-                                if (recurStart > m_timeRangeEnd) {
+                                if (recurStart >= m_timeRangeEnd) {
                                     break;
                                 } else if (recurEnd < m_currentTime) {
                                     continue;
                                 }
 
+                                // Recurrent multi-day handling
+                                bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                        && recurEnd > m_currentTime;
+                                if (recurMultiDay && recurEnd > m_timeRangeEnd) {
+                                    recurEnd = m_timeRangeEnd;
+                                }
+
                                 if (!exdates.contains(recurStart)
-                                    && recurStart >= m_timeRangeStart) {
-                                    QString nid = QString("%1-%2").arg(id).arg(
+                                    && (recurStart >= m_timeRangeStart || recurMultiDay)) {
+                                    QString recurId = QString("%1-%2").arg(id).arg(
                                             recurStart.toMSecsSinceEpoch());
-                                    manager.addDateEvent(new DateEvent(nid, m_source, recurStart,
-                                                                       recurEnd, summary, location,
-                                                                       description));
+                                    manager.addDateEvent(recurId, m_source, recurStart, recurEnd,
+                                                         summary, location, description);
                                 }
                             }
-                        } else if (isUpdatedRecurrence) {
-                            // Updates of a recurrent event instance
-                            if (isCancelled || start < m_timeRangeStart || start > m_timeRangeEnd
+                        } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
+                            if ((start < m_timeRangeStart && !isMultiDay) || start >= m_timeRangeEnd
                                 || end < m_currentTime) {
                                 // Updated recurrence doesn't match our criteria anymore
-                                manager.removeDateEvent(id);
+                                manager.removeDateEvent(id, start, end);
                             } else if (manager.isAddedDateEvent(id)) {
                                 // Exists but modified
                                 manager.modifyDateEvent(id, m_source, start, end, summary, location,
                                                         description);
                             } else {
                                 // Does not exist, e.g. moved from past to future, different day
-                                manager.addDateEvent(new DateEvent(id, m_source, start, end,
-                                                                   summary, location, description));
+                                manager.addDateEvent(id, m_source, start, end, summary, location,
+                                                     description);
                             }
-                        } else {
-                            // Normal event, no recurrence, or update of a recurrent instance
-                            manager.addDateEvent(new DateEvent(id, m_source, start, end, summary,
-                                                               location, description));
+                        } else { // Normal event, no recurrence, or update of a recurrent instance
+                            manager.addDateEvent(id, m_source, start, end, summary, location,
+                                                 description);
                         }
                     }
                 }

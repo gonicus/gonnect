@@ -16,7 +16,7 @@ DateEventsModel::DateEventsModel(QObject *parent) : QAbstractListModel{ parent }
         endResetModel();
     });
 
-    connect(&manager, &DateEventManager::dateEventModified, this, [this]() {
+    connect(&manager, &DateEventManager::dateEventsModified, this, [this]() {
         beginResetModel();
         endResetModel();
     });
