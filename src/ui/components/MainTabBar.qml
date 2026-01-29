@@ -84,6 +84,7 @@ Item {
                                           if (tab.pageId === id) {
                                               tab.iconSource = Icons[iconId]
                                               tab.labelText = name
+                                              break
                                           }
                                       }
                                   })
