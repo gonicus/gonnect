@@ -284,7 +284,7 @@ Popup {
                                 mainText: historyDelg.displayName || historyDelg.url
                                 secondaryText: historyDelg.displayName ? historyDelg.url : ""
                                 highlighted: keyNavigator.selectedItem === historyDelg
-                                enabled: ViewHelper.isJitsiAvailable || !historyDelg.isPhoneNumber
+                                enabled: historyDelg.isPhoneNumber || ViewHelper.isJitsiAvailable
                                 mainRowLeftInsetLoader.sourceComponent: IconLabel {
                                     color: Theme.primaryTextColor
                                     icon {
