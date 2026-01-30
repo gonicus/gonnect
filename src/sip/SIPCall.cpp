@@ -82,6 +82,12 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
 
         requestCallDelay(digit);
     });
+
+    connect(this, &SIPCall::capabilitiesChanged, [this]() {
+        if (m_imHandler->dtmfDebugEnabled() && isEstablished() && !m_callDelayCycleTimer.isActive()) {
+            m_callDelayCycleTimer.start();
+        }
+    });
 }
 
 SIPCall::~SIPCall()
@@ -227,8 +233,6 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                     hold();
                 }
             });
-
-            m_callDelayCycleTimer.start();
         }
 
         // Send DTMF post tasks if present
@@ -277,7 +281,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_isEstablished = false;
         m_earlyCallState = false;
 
-        if (m_callDelayCycleTimer.isActive()) {
+        if (m_imHandler->dtmfDebugEnabled() && m_callDelayCycleTimer.isActive()) {
             m_callDelayCycleTimer.stop();
         }
 
@@ -366,9 +370,7 @@ void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 
 void SIPCall::onDtmfDigit(pj::OnDtmfDigitParam &prm)
 {
-    qCWarning(lcSIPCall) << "???";
-
-    // TODO: Don't just block all dtmf receivals for delay checks?
+    // INFO: Currently only used for DTMF call latency debugging
     setCallDelayRx(QDateTime::currentMSecsSinceEpoch(), QString::fromStdString(prm.digit));
 }
 
@@ -714,8 +716,6 @@ void SIPCall::setCallDelayRx(qint64 timestamp, QString digit)
     } else {
         m_callDelay = m_callDelayRx.first - m_callDelayTx.first;
     }
-
-    qCWarning(lcSIPCall) << "call delay is" << m_callDelay << "ms";
 
     Q_EMIT callDelayChanged();
 }

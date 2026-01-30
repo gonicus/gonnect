@@ -63,7 +63,7 @@ Item {
     }
 
     Row {
-        spacing: 5
+        spacing: 20
         leftPadding: 20
         anchors {
             top: parent.top

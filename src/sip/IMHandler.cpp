@@ -24,6 +24,8 @@ IMHandler::IMHandler(SIPCall *parent) : QObject(parent), m_call(parent)
 
         settings.endGroup();
     }
+
+    m_dtmfDebugConfigured = settings.value("generic/dtmfDebug", false).toBool();
 }
 
 bool IMHandler::process(const QString &contentType, const QString &message)
