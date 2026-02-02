@@ -40,7 +40,7 @@ runs:
     - name: Install Conan
       uses: conan-io/setup-conan@2f4bd34e8e0af00e1a77a66e1d284e06d71d703f # v1
       with:
-        version: 2.22.2
+        version: 2.25.1
         cache_packages: true
 
     - name: Install Conan dependencies
