@@ -133,6 +133,7 @@ elseif(WIN32)
 endif()
 
 qt_add_big_resources(APP_SOURCES application.qrc)
+qt_add_big_resources(APP_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/icons.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
 qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
 
