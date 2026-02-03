@@ -17,31 +17,40 @@ Credentials::Credentials(QObject *parent) : QObject(parent)
 #endif
 }
 
+void Credentials::setIsInitialized(bool value)
+{
+    if (m_initialized != value) {
+        m_initialized = value;
+        Q_EMIT initializedChanged();
+    }
+}
+
 void Credentials::initialize()
 {
 #ifdef Q_OS_FLATPAK
     auto &sp = SecretPortal::instance();
     if (sp.isValid()) {
         if (sp.isInitialized()) {
-            m_initialized = true;
-            Q_EMIT initializedChanged();
-        } else {
+            m_isSecretPortalInitialized = true;
+            setIsInitialized(true);
+            return;
+
+        } else if (!sp.hasTriedInitialization()) {
             connect(
                     &sp, &SecretPortal::initializedChanged, this,
                     [this]() {
-                        bool isInitialized = SecretPortal::instance().isInitialized();
-                        if (isInitialized != m_initialized) {
-                            m_initialized = isInitialized;
-                            Q_EMIT initializedChanged();
-                        }
+                        m_isSecretPortalInitialized = SecretPortal::instance().isInitialized();
+
+                        // Regular QKeychain is available anyway
+                        setIsInitialized(true);
                     },
                     Qt::ConnectionType::SingleShotConnection);
+            return;
         }
     }
-#else
-    m_initialized = true;
-    Q_EMIT initializedChanged();
 #endif
+
+    setIsInitialized(true);
 }
 
 void Credentials::set(const QString &key, const QString &secret, CredentialsResponse callback)
@@ -85,7 +94,8 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                 QString secret = readJob->textData();
 
                 // Key is not present in keychain? Try to update it from Flatpak portal
-                if (error == QKeychain::EntryNotFound || secret.isEmpty()) {
+                if (m_isSecretPortalInitialized
+                    && (error == QKeychain::EntryNotFound || secret.isEmpty())) {
                     KeychainSettings keychainSettings;
 
 #ifdef Q_OS_FLATPAK
