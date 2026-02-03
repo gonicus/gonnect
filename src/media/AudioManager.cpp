@@ -142,6 +142,7 @@ void AudioManager::paInputMuteStateCallback(pa_context *, const pa_source_info *
     if (!end && instance.m_captureAudioPort->getSystemDeviceID() == QString(source->name)) {
         auto &gms = GlobalMuteState::instance();
         if (source->mute != gms.isMuted()) {
+            qCDebug(lcAudioManager) << "received mute change from system:" << source->mute << "- global mute state is" << gms.isMuted();
             gms.toggleMute();
         }
     }
