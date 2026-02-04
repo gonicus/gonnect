@@ -49,4 +49,5 @@ private:
     QString m_group;
     QString m_baseNumber;
     QStringList m_sipStatusSubscriptableAttributes;
+    bool m_block = false;
 };

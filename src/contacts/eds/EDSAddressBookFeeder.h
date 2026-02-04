@@ -53,6 +53,7 @@ private:
     void processContacts(QString clientInfo, GSList *contacts);
 
     QString m_group;
+    bool m_block = false;
 
     ESourceRegistry *m_registry = nullptr;
     GList *m_sources = nullptr;

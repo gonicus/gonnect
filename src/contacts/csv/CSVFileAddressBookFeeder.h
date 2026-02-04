@@ -19,4 +19,5 @@ private:
 
     QString m_filePath;
     QString m_group;
+    bool m_block = false;
 };

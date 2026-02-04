@@ -121,6 +121,7 @@ void EDSAddressBookFeeder::process()
 
     settings.beginGroup(m_group);
     m_displayName = settings.value("displayName", "").toString();
+    m_block = settings.value("block", false).toBool();
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {
@@ -246,7 +247,7 @@ void EDSAddressBookFeeder::processContactsAdded(GSList *contacts)
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
                     getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
-                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers);
+                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers, m_block);
 
             addAvatar(contact->id(), eContact, changed);
         }
@@ -423,7 +424,7 @@ void EDSAddressBookFeeder::processContacts(QString clientInfo, GSList *contacts)
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
                     getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
-                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers);
+                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers, m_block);
 
             addAvatar(contact->id(), eContact, changed);
 

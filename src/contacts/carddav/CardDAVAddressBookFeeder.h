@@ -48,4 +48,5 @@ private:
     QHash<QString, QDateTime> m_ignoredIds;
 
     QString m_group;
+    bool m_block = false;
 };

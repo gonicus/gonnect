@@ -23,7 +23,7 @@ public:
     Contact *addContact(const QString &dn, const QString &sourceUid,
                         const Contact::ContactSourceInfo &contactSourceInfo, const QString &name,
                         const QString &company, const QString &mail, const QDateTime &lastModified,
-                        const QList<Contact::PhoneNumber> &phoneNumbers);
+                        const QList<Contact::PhoneNumber> &phoneNumbers, bool block);
 
     void addContact(Contact *contact);
 
@@ -37,7 +37,7 @@ public:
     QHash<QString, Contact *> contacts() const;
     void reserve(qsizetype size);
 
-    QList<Contact *> search(const QString &searchString) const;
+    QList<Contact *> search(const QString &searchString, bool includeBlocked = false) const;
     Contact *lookupBySipUrl(const QString &sipUrl) const;
     Contact *lookupByNumber(const QString &number) const;
     Contact *lookupByContactId(const QString &contactId) const;
