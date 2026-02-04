@@ -15,7 +15,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 
     # If there's a version - take it
     if(NOT VERSION STREQUAL "")
-        string(REGEX MATCH "(v[0-9a-z.+-]*)" _ ${VERSION})
+        string(REGEX MATCH "v([0-9a-z.+-]*)" _ ${VERSION})
         set(VERSION "${CMAKE_MATCH_1}")
     endif()
 endif()
