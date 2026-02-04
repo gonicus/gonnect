@@ -44,7 +44,7 @@ option(ENABLE_CSV "Enable CSV plugin" ON)
 option(ENABLE_MSGRAPH "Enable MS Graph plugin" OFF)
 
 set(APP_ID "de.gonicus.gonnect")
-    add_definitions(-DAPP_ID="${APP_ID}")
+add_definitions(-DAPP_ID="${APP_ID}")
 if(FLATPAK)
     add_definitions(-DQ_OS_FLATPAK)
 endif()
