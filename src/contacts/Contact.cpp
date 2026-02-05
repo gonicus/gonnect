@@ -1,7 +1,6 @@
 #include "Contact.h"
 #include "FuzzyCompare.h"
 #include "PhoneNumberUtil.h"
-#include "BlockInfo.h"
 
 #ifndef APP_TESTS
 #  include "AvatarManager.h"

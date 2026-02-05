@@ -5,7 +5,9 @@
 #include <QDateTime>
 #include <qqmlregistration.h>
 
-#include "BlockInfo.h"
+#ifndef APP_TESTS
+#  include "BlockInfo.h"
+#endif
 
 class Contact : public QObject
 {
