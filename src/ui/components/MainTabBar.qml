@@ -336,7 +336,7 @@ Item {
                         labelText: qsTr("Conference"),
                         disabledTooltipText: qsTr("No active conference"),
                         isEnabled: control.hasActiveConference,
-                        showRedDot: false,
+                        showRedDot: control.hasActiveConference,
                         attachedData: null
                     }, {
                         pageId: control.mainWindow.callPageId,
@@ -345,7 +345,7 @@ Item {
                         labelText: qsTr("Call"),
                         disabledTooltipText: qsTr("No active call"),
                         isEnabled: control.hasActiveCall,
-                        showRedDot: false,
+                        showRedDot: control.hasActiveCall,
                         attachedData: null
                     }
                 ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
