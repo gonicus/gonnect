@@ -8,10 +8,10 @@
 #include <QMetaEnum>
 
 Contact::Contact(const QString &id, const QString &dn, const QString &sourceUid,
-                 const ContactSourceInfo &contactSourceInfo, const QString &name, bool block,
-                 QObject *parent)
+                 const ContactSourceInfo &contactSourceInfo, const QString &name,
+                 BlockInfo blockInfo, QObject *parent)
     : QObject{ parent },
-      m_block{ block },
+      m_blockInfo{ blockInfo },
       m_id{ id },
       m_dn{ dn },
       m_sourceUid{ sourceUid },
@@ -26,9 +26,10 @@ Contact::Contact(QObject *parent) : QObject{ parent } { }
 Contact::Contact(const QString &id, const QString &dn, const QString &sourceUid,
                  const ContactSourceInfo &contactSourceInfo, const QString &name,
                  const QString &company, const QString &mail, const QDateTime &lastModified,
-                 const QList<Contact::PhoneNumber> &phoneNumbers, bool block, QObject *parent)
+                 const QList<Contact::PhoneNumber> &phoneNumbers, BlockInfo blockInfo,
+                 QObject *parent)
     : QObject{ parent },
-      m_block{ block },
+      m_blockInfo{ blockInfo },
       m_id{ id },
       m_dn{ dn },
       m_sourceUid{ sourceUid },
@@ -44,7 +45,7 @@ Contact::Contact(const QString &id, const QString &dn, const QString &sourceUid,
 
 Contact::Contact(const Contact &other) : QObject{ other.parent() }
 {
-    m_block = other.m_block;
+    m_blockInfo = other.m_blockInfo;
     m_id = other.m_id;
     m_dn = other.m_dn;
     m_sourceUid = other.m_sourceUid;
@@ -60,7 +61,7 @@ Contact::Contact(const Contact &other) : QObject{ other.parent() }
 
 Contact &Contact::operator=(const Contact &other)
 {
-    m_block = other.m_block;
+    m_blockInfo = other.m_blockInfo;
     m_id = other.m_id;
     m_dn = other.m_dn;
     m_sourceUid = other.m_sourceUid;
@@ -95,9 +96,9 @@ QString Contact::name() const
     return m_name;
 }
 
-bool Contact::block() const
+BlockInfo Contact::blockInfo() const
 {
-    return m_block;
+    return m_blockInfo;
 }
 
 const Contact::ContactSourceInfo &Contact::contactSourceInfo() const
@@ -315,7 +316,7 @@ QDataStream &operator<<(QDataStream &out, const Contact &contact)
     out << contact.id() << contact.dn() << contact.sourceUid() << contact.name()
         << contactSourceInfo.prio << contactSourceInfo.displayName << contact.company()
         << contact.mail() << contact.lastModified() << contact.sipStatusSubscriptable()
-        << contact.phoneNumbers() << contact.block();
+        << contact.phoneNumbers() << contact.blockInfo();
     return out;
 }
 
@@ -331,13 +332,13 @@ QDataStream &operator>>(QDataStream &in, Contact &contact)
     QString mail;
     QDateTime lastModified;
     bool sipStatusSubscriptable;
-    bool block;
+    BlockInfo blockInfo;
     QList<Contact::PhoneNumber> phoneNumbers;
 
     in >> id >> dn >> sourceUid >> name >> prio >> displayName >> company >> mail >> lastModified
-            >> sipStatusSubscriptable >> phoneNumbers >> block;
+            >> sipStatusSubscriptable >> phoneNumbers >> blockInfo;
     contact = Contact(id, dn, sourceUid, { prio, displayName }, name, company, mail, lastModified,
-                      phoneNumbers, block);
+                      phoneNumbers, blockInfo);
 
     return in;
 }

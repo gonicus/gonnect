@@ -158,9 +158,9 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
     const auto c = contactInfo.contact;
 
     // Check if number is blocked (i.e. a blacklisted contact)
-    if (c && c->block()) {
+    if (c && c->blockInfo().isBlocking) {
         pj::CallOpParam prm;
-        prm.statusCode = PJSIP_SC_BUSY_HERE;
+        prm.statusCode = static_cast<pjsip_status_code>(c->blockInfo().responseCode);
         call->answer(prm);
         return;
     }
@@ -843,7 +843,7 @@ bool SIPCallManager::isContactBlocked(const QString &contactId) const
     }
 
     const auto *contact = AddressBook::instance().lookupByContactId(contactId);
-    if (contact && contact->block()) {
+    if (contact && contact->blockInfo().isBlocking) {
         return true;
     }
 

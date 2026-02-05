@@ -10,6 +10,7 @@
 #include <QPromise>
 
 #include "IAddressBookFeeder.h"
+#include "BlockInfo.h"
 
 class AddressBookManager;
 
@@ -53,7 +54,7 @@ private:
     void processContacts(QString clientInfo, GSList *contacts);
 
     QString m_group;
-    bool m_block = false;
+    BlockInfo m_blockInfo;
 
     ESourceRegistry *m_registry = nullptr;
     GList *m_sources = nullptr;

@@ -122,7 +122,7 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
         if (!uuid.isEmpty() && !name.isEmpty() && !phoneNumbers.isEmpty()) {
             Contact *contact = AddressBook::instance().addContact(
                     uuid, remoteUid, { m_priority, m_displayName }, name, org, email, modifiedDate,
-                    phoneNumbers, m_block);
+                    phoneNumbers, m_blockInfo);
             m_cachedContacts.insert(uuid, contact);
 
             processPhotoProperty(contact->id(), photoData, modifiedDate);
@@ -301,7 +301,10 @@ void CardDAVAddressBookFeeder::processImpl(const QString &password)
 
     const bool useSSL = settings.value("useSSL", false).toBool();
 
-    m_block = settings.value("block", false).toBool();
+    m_blockInfo.isBlocking = settings.value("block", false).toBool();
+    m_blockInfo.responseCode =
+            settings.value("blockSipCode", GONNECT_DEFAULT_BLOCK_SIP_CODE).toUInt();
+
     m_displayName = settings.value("displayName", "").toString();
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);

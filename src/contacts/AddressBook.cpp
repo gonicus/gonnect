@@ -54,7 +54,8 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
                                  const Contact::ContactSourceInfo &contactSourceInfo,
                                  const QString &name, const QString &company, const QString &mail,
                                  const QDateTime &lastModified,
-                                 const QList<Contact::PhoneNumber> &phoneNumbers, bool block)
+                                 const QList<Contact::PhoneNumber> &phoneNumbers,
+                                 BlockInfo blockInfo)
 {
 
     const auto hid = hashifyCn(dn);
@@ -66,7 +67,7 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
     Contact *contact = m_contacts.value(hid, nullptr);
     if (!contact) {
         newContactCreated = true;
-        contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, block, this);
+        contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, blockInfo, this);
         m_contacts.insert(hid, contact);
         m_contactsBySourceId.insert(sourceUid, contact);
     }
@@ -163,7 +164,7 @@ QList<Contact *> AddressBook::search(const QString &searchString, bool includeBl
     const auto cleanSearchString = PhoneNumberUtil::clearInternationalChars(searchString);
 
     for (auto contact : std::as_const(m_contacts)) {
-        if (!includeBlocked && contact->block()) {
+        if (!includeBlocked && contact->blockInfo().isBlocking) {
             continue;
         }
 

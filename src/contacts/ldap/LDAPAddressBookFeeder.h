@@ -5,6 +5,7 @@
 #include "IAddressBookFeeder.h"
 #include "LDAPInitializer.h"
 #include "Contact.h"
+#include "BlockInfo.h"
 
 class AddressBookManager;
 
@@ -49,5 +50,5 @@ private:
     QString m_group;
     QString m_baseNumber;
     QStringList m_sipStatusSubscriptableAttributes;
-    bool m_block = false;
+    BlockInfo m_blockInfo;
 };

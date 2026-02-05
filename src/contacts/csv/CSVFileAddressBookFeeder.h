@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include "IAddressBookFeeder.h"
+#include "BlockInfo.h"
 
 class AddressBookManager;
 
@@ -19,5 +20,5 @@ private:
 
     QString m_filePath;
     QString m_group;
-    bool m_block = false;
+    BlockInfo m_blockInfo;
 };

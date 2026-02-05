@@ -23,7 +23,7 @@ public:
     Contact *addContact(const QString &dn, const QString &sourceUid,
                         const Contact::ContactSourceInfo &contactSourceInfo, const QString &name,
                         const QString &company, const QString &mail, const QDateTime &lastModified,
-                        const QList<Contact::PhoneNumber> &phoneNumbers, bool block);
+                        const QList<Contact::PhoneNumber> &phoneNumbers, BlockInfo blockInfo);
 
     void addContact(Contact *contact);
 

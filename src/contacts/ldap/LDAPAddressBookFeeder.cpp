@@ -28,7 +28,7 @@ LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookMa
                    const QString &company, const QString &mail, const QDateTime &lastModified,
                    const QList<Contact::PhoneNumber> &phoneNumbers, QPrivateSignal) {
                 AddressBook::instance().addContact(dn, sourceUid, contactSourceInfo, name, company,
-                                                   mail, lastModified, phoneNumbers, m_block);
+                                                   mail, lastModified, phoneNumbers, m_blockInfo);
             });
 
     connect(this, &LDAPAddressBookFeeder::newExternalImageAdded, this,
@@ -60,7 +60,9 @@ void LDAPAddressBookFeeder::process()
         m_priority = 0;
     }
 
-    m_block = settings.value("block", false).toBool();
+    m_blockInfo.isBlocking = settings.value("block", false).toBool();
+    m_blockInfo.responseCode =
+            settings.value("blockSipCode", GONNECT_DEFAULT_BLOCK_SIP_CODE).toUInt();
 
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
 
