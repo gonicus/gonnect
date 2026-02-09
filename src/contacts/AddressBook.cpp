@@ -54,7 +54,8 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
                                  const Contact::ContactSourceInfo &contactSourceInfo,
                                  const QString &name, const QString &company, const QString &mail,
                                  const QDateTime &lastModified,
-                                 const QList<Contact::PhoneNumber> &phoneNumbers)
+                                 const QList<Contact::PhoneNumber> &phoneNumbers,
+                                 BlockInfo blockInfo)
 {
 
     const auto hid = hashifyCn(dn);
@@ -66,7 +67,7 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
     Contact *contact = m_contacts.value(hid, nullptr);
     if (!contact) {
         newContactCreated = true;
-        contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, this);
+        contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, blockInfo, this);
         m_contacts.insert(hid, contact);
         m_contactsBySourceId.insert(sourceUid, contact);
     }
@@ -152,7 +153,7 @@ void AddressBook::reserve(qsizetype size)
     m_contactsBySourceId.reserve(size);
 }
 
-QList<Contact *> AddressBook::search(const QString &searchString) const
+QList<Contact *> AddressBook::search(const QString &searchString, bool includeBlocked) const
 {
     QList<Contact *> results;
     QList<qreal> weights;
@@ -163,6 +164,10 @@ QList<Contact *> AddressBook::search(const QString &searchString) const
     const auto cleanSearchString = PhoneNumberUtil::clearInternationalChars(searchString);
 
     for (auto contact : std::as_const(m_contacts)) {
+        if (!includeBlocked && contact->blockInfo().isBlocking) {
+            continue;
+        }
+
         const qreal weight = contact->matchesSearch(cleanSearchString);
         if (weight > 0.863) {
             weights.append(1.0 - weight);
