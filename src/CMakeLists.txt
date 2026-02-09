@@ -553,6 +553,8 @@ qt_add_qml_module(gonnect
         contacts/AddressBookManager.h
         contacts/AvatarManager.cpp
         contacts/AvatarManager.h
+        contacts/BlockInfo.cpp
+        contacts/BlockInfo.h
         contacts/Contact.cpp
         contacts/Contact.h
         contacts/ContactSerializer.cpp

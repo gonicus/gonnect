@@ -156,6 +156,15 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
     const auto contactInfo =
             PhoneNumberUtil::instance().contactInfoBySipUrl(QString::fromStdString(ci.remoteUri));
     const auto c = contactInfo.contact;
+
+    // Check if number is blocked (i.e. a blacklisted contact)
+    if (c && c->blockInfo().isBlocking) {
+        pj::CallOpParam prm;
+        prm.statusCode = static_cast<pjsip_status_code>(c->blockInfo().responseCode);
+        call->answer(prm);
+        return;
+    }
+
     QStringList bodyParts;
     QString displayName = contactInfo.phoneNumber;
     auto numberType = contactInfo.numberType;
@@ -832,6 +841,12 @@ bool SIPCallManager::isContactBlocked(const QString &contactId) const
             return true;
         }
     }
+
+    const auto *contact = AddressBook::instance().lookupByContactId(contactId);
+    if (contact && contact->blockInfo().isBlocking) {
+        return true;
+    }
+
     return false;
 }
 

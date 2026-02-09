@@ -106,7 +106,7 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
         }
 
         addressBook.addContact(contactId, "", { 1, "Outlook" }, name, company, email, QDateTime(),
-                               phoneNumbers);
+                               phoneNumbers, BlockInfo());
     }
 
     if (doc.object().contains("@odata.nextLink")) {
