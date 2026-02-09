@@ -84,7 +84,8 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     });
 
     connect(this, &SIPCall::capabilitiesChanged, [this]() {
-        if (m_imHandler->dtmfDebugEnabled() && isEstablished() && !m_callDelayCycleTimer.isActive()) {
+        if (m_imHandler->dtmfDebugEnabled() && isEstablished()
+            && !m_callDelayCycleTimer.isActive()) {
             m_callDelayCycleTimer.start();
         }
     });
