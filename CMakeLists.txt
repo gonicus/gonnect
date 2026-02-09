@@ -3,6 +3,7 @@ project(GOnnect VERSION 2.0.9 LANGUAGES CXX)
 include(cmake/CCache.cmake)
 include(cmake/Workarounds.cmake)
 include(cmake/Versioning.cmake)
+include(cmake/Icons.cmake)
 useCompilerCache()
 
 set(APPLICATION_NAME       "${PROJECT_NAME}" )

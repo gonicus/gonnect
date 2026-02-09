@@ -3423,7 +3423,7 @@
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="80"/>
         <source>Searchable call and conference history</source>
-        <translation>Durchsichbarer Anruf- und Konferenzverlauf</translation>
+        <translation>Durchsuchbarer Anruf- und Konferenzverlauf</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="152"/>

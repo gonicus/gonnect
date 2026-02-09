@@ -1,0 +1,21 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="gonnect.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect.svg</file>
+        <file alias="gonnect_light.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect_light.svg</file>
+        <file alias="gonnect_dark.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect_dark.svg</file>
+        <file alias="gonnect_ring.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect_ring.svg</file>
+        <file alias="gonnect_line.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect_line.svg</file>
+        <file alias="gonnect_dark_note.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect_dark_note.svg</file>
+        <file alias="gonnect_light_note.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect_light_note.svg</file>
+        <file alias="gonnect_line_note.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect_line_note.svg</file>
+        <file alias="gonnect_ring_note.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect_ring_note.svg</file>
+        <file alias="jitsi.svg">@PROJECT_SOURCE_DIR@/resources/artwork/jitsi.svg</file>
+        @ICONS@
+    </qresource>
+    <qresource prefix="/icons/dark">
+        <file alias="gonnect.svg">@PROJECT_SOURCE_DIR@/resources/artwork/gonnect.svg</file>
+        <file alias="jitsi.svg">@PROJECT_SOURCE_DIR@/resources/artwork/jitsi.svg</file>
+        @ICONS_DARK@
+    </qresource>
+</RCC>

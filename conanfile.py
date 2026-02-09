@@ -62,7 +62,7 @@ class GOnnectRecipe(ConanFile):
     def requirements(self):
         self.requires("hidapi/0.15.0")
         self.requires("pjproject/2.16")
-        self.requires("openldap/2.6.10")
+        self.requires("openldap/2.6.12")
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
         self.requires("logfault/0.8.1-1")
@@ -82,7 +82,7 @@ class GOnnectRecipe(ConanFile):
             self.requires("mpg123/1.33.0", override=True)
             self.requires("wayland/1.23.92", override=True)
 
-        self.requires("openssl/3.5.4", override=True)
+        self.requires("openssl/3.5.5", override=True)
         self.requires("qca/2.3.10")
         self.requires("qtwebdav/2025-03-16")
         self.requires("qtkeychain/0.15.0")

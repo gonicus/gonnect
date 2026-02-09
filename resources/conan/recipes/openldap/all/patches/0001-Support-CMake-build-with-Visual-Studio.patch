@@ -1,14 +1,6 @@
-commit 7e47519aeaa3e2258d2f823e727485c007d9af60
-Author: Windows User <someone@windows-machine.arg>
-Date:   Sat Sep 27 17:08:39 2025 +0200
-
-    Support CMake build with Visual Studio
-
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-new file mode 100644
-index 0000000000..b8491610c4
---- /dev/null
-+++ b/CMakeLists.txt
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	1970-01-01 01:00:00
++++ b/CMakeLists.txt	2026-02-01 23:27:15
 @@ -0,0 +1,212 @@
 +cmake_minimum_required(VERSION 3.18.0)
 +project(libopenldap C)
@@ -222,11 +214,10 @@ index 0000000000..b8491610c4
 +    FILE_SET HEADERS
 +    FILE_SET HEADERS_GENERATED
 +)
-diff --git a/include/ac/socket.h b/include/ac/socket.h
-index a80254120f..b543915bad 100644
---- a/include/ac/socket.h
-+++ b/include/ac/socket.h
-@@ -221,6 +221,7 @@ LDAP_F (int) ldap_pvt_inet_aton LDAP_P(( const char *, struct in_addr * ));
+diff -Naur a/include/ac/socket.h b/include/ac/socket.h
+--- a/include/ac/socket.h	2026-01-29 23:21:21
++++ b/include/ac/socket.h	2026-02-01 23:27:15
+@@ -222,6 +222,7 @@
  #	define LDAP_PF_LOCAL_SENDMSG 1
  #endif
  
@@ -234,7 +225,7 @@ index a80254120f..b543915bad 100644
  #ifdef HAVE_GETPEEREID
  #define	LUTIL_GETPEEREID( s, uid, gid, bv )	getpeereid( s, uid, gid )
  #elif defined(LDAP_PF_LOCAL_SENDMSG)
-@@ -231,6 +232,8 @@ LDAP_LUTIL_F( int ) lutil_getpeereid( int s, uid_t *, gid_t *, struct berval *bv
+@@ -232,6 +233,8 @@
  LDAP_LUTIL_F( int ) lutil_getpeereid( int s, uid_t *, gid_t * );
  #define	LUTIL_GETPEEREID( s, uid, gid, bv )	lutil_getpeereid( s, uid, gid )
  #endif
@@ -243,11 +234,9 @@ index a80254120f..b543915bad 100644
  
  typedef union Sockaddr {
  	struct sockaddr sa_addr;
-diff --git a/include/lber_types.h.win b/include/lber_types.h.win
-new file mode 100644
-index 0000000000..925c33541d
---- /dev/null
-+++ b/include/lber_types.h.win
+diff -Naur a/include/lber_types.h.win b/include/lber_types.h.win
+--- a/include/lber_types.h.win	1970-01-01 01:00:00
++++ b/include/lber_types.h.win	2026-02-01 23:27:15
 @@ -0,0 +1,64 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -313,11 +302,9 @@ index 0000000000..925c33541d
 +LDAP_END_DECL
 +
 +#endif /* _LBER_TYPES_H */
-diff --git a/include/ldap_config.h.win b/include/ldap_config.h.win
-new file mode 100644
-index 0000000000..b6ce2de41b
---- /dev/null
-+++ b/include/ldap_config.h.win
+diff -Naur a/include/ldap_config.h.win b/include/ldap_config.h.win
+--- a/include/ldap_config.h.win	1970-01-01 01:00:00
++++ b/include/ldap_config.h.win	2026-02-01 23:27:15
 @@ -0,0 +1,73 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -392,11 +379,9 @@ index 0000000000..b6ce2de41b
 +
 +
 +#endif /* _LDAP_CONFIG_H */
-diff --git a/include/ldap_features.h.win b/include/ldap_features.h.win
-new file mode 100644
-index 0000000000..73ebb19091
---- /dev/null
-+++ b/include/ldap_features.h.win
+diff -Naur a/include/ldap_features.h.win b/include/ldap_features.h.win
+--- a/include/ldap_features.h.win	1970-01-01 01:00:00
++++ b/include/ldap_features.h.win	2026-02-01 23:27:15
 @@ -0,0 +1,55 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -453,11 +438,9 @@ index 0000000000..73ebb19091
 +//#undef LDAP_API_FEATURE_X_OPENLDAP_V2_REFERRALS
 +
 +#endif /* LDAP_FEATURES */
-diff --git a/include/portable.h.win b/include/portable.h.win
-new file mode 100644
-index 0000000000..5bebe4ff73
---- /dev/null
-+++ b/include/portable.h.win
+diff -Naur a/include/portable.h.win b/include/portable.h.win
+--- a/include/portable.h.win	1970-01-01 01:00:00
++++ b/include/portable.h.win	2026-02-01 23:27:15
 @@ -0,0 +1,123 @@
 +/* include/portable.hin.  Generated from configure.ac by autoheader.  */
 +
@@ -582,11 +565,10 @@ index 0000000000..5bebe4ff73
 +#endif /* _LDAP_PORTABLE_H */
 +/* end of portable.h.post */
 +
-diff --git a/libraries/liblber/sockbuf.c b/libraries/liblber/sockbuf.c
-index 89d037bcad..638658a5e8 100644
---- a/libraries/liblber/sockbuf.c
-+++ b/libraries/liblber/sockbuf.c
-@@ -339,7 +339,10 @@ ber_pvt_sb_do_write( Sockbuf_IO_Desc *sbiod, Sockbuf_Buf *buf_out )
+diff -Naur a/libraries/liblber/sockbuf.c b/libraries/liblber/sockbuf.c
+--- a/libraries/liblber/sockbuf.c	2026-01-29 23:21:21
++++ b/libraries/liblber/sockbuf.c	2026-02-01 23:27:15
+@@ -339,7 +339,10 @@
  int
  ber_pvt_socket_set_nonblock( ber_socket_t sd, int nb )
  {

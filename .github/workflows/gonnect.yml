@@ -35,7 +35,7 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -63,7 +63,7 @@ jobs:
     name: "Build GOnnect (Windows)"
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -95,7 +95,7 @@ jobs:
     name: "Build GOnnect (MacOS)"
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -123,7 +123,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Run clang-format style check for C/C++/Protobuf programs.
         uses: jidicula/clang-format-action@6cd220de46c89139a0365edae93eee8eb30ca8fe # v4.16.0
         with:
@@ -139,7 +139,7 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -178,7 +178,7 @@ jobs:
           libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA \
           pip python3-devel nodejs
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -207,7 +207,7 @@ jobs:
           conan profile detect || true
 
       - name: Restore cached Conan packages
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-conan-packages
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
@@ -222,7 +222,7 @@ jobs:
           conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
 
       - name: Cached Conan packages
-        uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         if: always() && steps.cache-conan-packages.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
@@ -245,7 +245,7 @@ jobs:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
       options: --privileged
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -270,7 +270,7 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Prepare
         uses: ./.github/actions/prepare-linux
