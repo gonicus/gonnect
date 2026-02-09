@@ -23,12 +23,12 @@ LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookMa
     m_manager = qobject_cast<AddressBookManager *>(parent);
 
     connect(this, &LDAPAddressBookFeeder::newContactReady, this,
-            [](const QString &dn, const QString &sourceUid,
-               const Contact::ContactSourceInfo &contactSourceInfo, const QString &name,
-               const QString &company, const QString &mail, const QDateTime &lastModified,
-               const QList<Contact::PhoneNumber> &phoneNumbers, QPrivateSignal) {
+            [this](const QString &dn, const QString &sourceUid,
+                   const Contact::ContactSourceInfo &contactSourceInfo, const QString &name,
+                   const QString &company, const QString &mail, const QDateTime &lastModified,
+                   const QList<Contact::PhoneNumber> &phoneNumbers, QPrivateSignal) {
                 AddressBook::instance().addContact(dn, sourceUid, contactSourceInfo, name, company,
-                                                   mail, lastModified, phoneNumbers);
+                                                   mail, lastModified, phoneNumbers, m_blockInfo);
             });
 
     connect(this, &LDAPAddressBookFeeder::newExternalImageAdded, this,
@@ -59,6 +59,10 @@ void LDAPAddressBookFeeder::process()
         qCWarning(lcLDAPAddressBookFeeder) << "Could not parse priority value for" << m_group;
         m_priority = 0;
     }
+
+    m_blockInfo.isBlocking = settings.value("block", false).toBool();
+    m_blockInfo.responseCode =
+            settings.value("blockSipCode", GONNECT_DEFAULT_BLOCK_SIP_CODE).toUInt();
 
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
 
