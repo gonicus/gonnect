@@ -23,6 +23,10 @@ void CsvFileAddressBookFeeder::process()
     m_filePath = settings.value("path", "").toString();
     m_displayName = settings.value("displayName", "").toString();
 
+    m_blockInfo.isBlocking = settings.value("block", false).toBool();
+    m_blockInfo.responseCode =
+            settings.value("blockSipCode", GONNECT_DEFAULT_BLOCK_SIP_CODE).toUInt();
+
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {
@@ -85,7 +89,8 @@ void CsvFileAddressBookFeeder::feedAddressBook()
         }
 
         addressbook.addContact(splitted.at(0) + splitted.at(1), "", { m_priority, m_displayName },
-                               splitted.at(0), splitted.at(1), "", QDateTime(), phoneNumbers);
+                               splitted.at(0), splitted.at(1), "", QDateTime(), phoneNumbers,
+                               m_blockInfo);
         ++contactCount;
     }
 

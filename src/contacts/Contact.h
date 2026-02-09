@@ -5,6 +5,8 @@
 #include <QDateTime>
 #include <qqmlregistration.h>
 
+#include "BlockInfo.h"
+
 class Contact : public QObject
 {
     Q_OBJECT
@@ -43,11 +45,12 @@ public:
 
     explicit Contact(const QString &id, const QString &dn, const QString &sourceUid,
                      const ContactSourceInfo &contactSourceInfo, const QString &name,
-                     QObject *parent = nullptr);
+                     BlockInfo blockInfo, QObject *parent = nullptr);
     explicit Contact(const QString &id, const QString &dn, const QString &sourceUid,
                      const ContactSourceInfo &contactSourceInfo, const QString &name,
                      const QString &company, const QString &mail, const QDateTime &lastModified,
-                     const QList<Contact::PhoneNumber> &phoneNumbers, QObject *parent = nullptr);
+                     const QList<Contact::PhoneNumber> &phoneNumbers, BlockInfo blockInfo,
+                     QObject *parent = nullptr);
 
     explicit Contact(QObject *parent = nullptr);
     explicit Contact(const Contact &other);
@@ -58,6 +61,7 @@ public:
     QString dn() const;
     QString sourceUid() const;
     QString name() const;
+    BlockInfo blockInfo() const;
     const ContactSourceInfo &contactSourceInfo() const;
     QString company() const;
     QString mail() const;
@@ -91,6 +95,7 @@ private:
     bool isNumberValid(const QString &number) const;
 
     bool m_hasAvatar = false;
+    BlockInfo m_blockInfo;
     QString m_id;
     QString m_dn;
     QString m_sourceUid;
