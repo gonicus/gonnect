@@ -29,7 +29,7 @@ public:
     void process();
 
 private:
-    QDateTime createDateTimeFromTimeType(const ICalTime *datetime);
+    QDateTime createDateTimeFromTimeType(ICalTime *datetime);
 
     static void onEcalClientConnected(GObject *source_object, GAsyncResult *result,
                                       gpointer user_data);

@@ -35,7 +35,7 @@ private:
     void processResponse(const QByteArray &data);
 
     bool responseDataChanged(const QByteArray &data);
-    QDateTime createDateTimeFromTimeType(const icaltimetype &datetime);
+    QDateTime createDateTimeFromTimeType(icaltimetype &datetime);
 
     QList<size_t> m_checksums;
 

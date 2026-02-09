@@ -2,6 +2,7 @@
 #include "DateEventManager.h"
 
 #include <QMap>
+#include <QTimeZone>
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
@@ -121,22 +122,22 @@ void EDSEventFeeder::process()
     }
 }
 
-QDateTime EDSEventFeeder::createDateTimeFromTimeType(const ICalTime *datetime)
+QDateTime EDSEventFeeder::createDateTimeFromTimeType(ICalTime *datetime)
 {
     if (!datetime) {
         return QDateTime();
     }
 
-    QString zone = i_cal_time_get_tzid(datetime);
-    if (zone == "UTC") {
-        return QDateTime::fromString(QString("%1-%2-%3T%4:%5:%6Z")
-                                             .arg(i_cal_time_get_year(datetime), 4, 10, '0')
-                                             .arg(i_cal_time_get_month(datetime), 2, 10, '0')
-                                             .arg(i_cal_time_get_day(datetime), 2, 10, '0')
-                                             .arg(i_cal_time_get_hour(datetime), 2, 10, '0')
-                                             .arg(i_cal_time_get_minute(datetime), 2, 10, '0')
-                                             .arg(i_cal_time_get_second(datetime), 2, 10, '0'),
-                                     Qt::ISODate)
+    int daylight = i_cal_time_is_daylight(datetime);
+    int offset =
+            i_cal_timezone_get_utc_offset(i_cal_time_get_timezone(datetime), datetime, &daylight);
+    QTimeZone convertZone(offset);
+    if (convertZone.isValid() && convertZone != QTimeZone::LocalTime) {
+        return QDateTime(QDate(i_cal_time_get_year(datetime), i_cal_time_get_month(datetime),
+                               i_cal_time_get_day(datetime)),
+                         QTime(i_cal_time_get_hour(datetime), i_cal_time_get_minute(datetime),
+                               i_cal_time_get_second(datetime)),
+                         convertZone)
                 .toLocalTime();
     } else {
         return QDateTime(QDate(i_cal_time_get_year(datetime), i_cal_time_get_month(datetime),
