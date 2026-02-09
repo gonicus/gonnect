@@ -189,6 +189,7 @@ Item {
             required property int pageType
             required property bool isEnabled
             required property bool showRedDot
+            required property bool showActiveBorder
             required property string labelText
             required property string disabledTooltipText
             required property string iconSource
@@ -200,7 +201,7 @@ Item {
                 id: hoverBackground
                 visible: delg.isSelected
                          || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
-                radius: 4
+                radius: 8
                 color: Theme.backgroundSecondaryColor
                 anchors {
                     fill: parent
@@ -242,6 +243,38 @@ Item {
                             optionMenu.selectedTabButton = delg
                             optionMenu.open()
                         }
+                    }
+                }
+            }
+
+            Rectangle {
+                id: activeBg
+                radius: 8
+                color: 'transparent'
+                anchors.fill: hoverBackground
+                visible: delg.showActiveBorder
+                border {
+                    width: 3
+                    color: Theme.redColor
+                }
+
+                SequentialAnimation {
+                    running: activeBg.visible
+                    loops: Animation.Infinite
+
+                    NumberAnimation {
+                        target: activeBg
+                        property: "opacity"
+                        from: 1.0
+                        to: 0.0
+                        duration: 2000
+                    }
+                    NumberAnimation {
+                        target: activeBg
+                        property: "opacity"
+                        from: 0.0
+                        to: 1.0
+                        duration: 2000
                     }
                 }
             }
@@ -328,6 +361,7 @@ Item {
                         disabledTooltipText: qsTr("Home"),
                         isEnabled: true,
                         showRedDot: false,
+                        showActiveBorder: false,
                         attachedData: null
                     }, {
                         pageId: control.mainWindow.conferencePageId,
@@ -336,7 +370,8 @@ Item {
                         labelText: qsTr("Conference"),
                         disabledTooltipText: qsTr("No active conference"),
                         isEnabled: control.hasActiveConference,
-                        showRedDot: control.hasActiveConference,
+                        showRedDot: false,
+                        showActiveBorder: control.hasActiveConference,
                         attachedData: null
                     }, {
                         pageId: control.mainWindow.callPageId,
@@ -345,7 +380,8 @@ Item {
                         labelText: qsTr("Call"),
                         disabledTooltipText: qsTr("No active call"),
                         isEnabled: control.hasActiveCall,
-                        showRedDot: control.hasActiveCall,
+                        showRedDot: false,
+                        showActiveBorder: control.hasActiveCall,
                         attachedData: null
                     }
                 ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
@@ -379,6 +415,7 @@ Item {
                     disabledTooltipText: qsTr("Settings"),
                     isEnabled: true,
                     showRedDot: false,
+                    showActiveBorder: false,
                     attachedData: null
                 }
             ]
