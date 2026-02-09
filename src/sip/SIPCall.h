@@ -53,9 +53,8 @@ public:
     QList<ResponseItem *> metadata() { return m_metadata; };
 
     void requestCallDelay(QString digit);
-    /// Call party send IM with timestamp and dtmf digit it has sent
+
     void setCallDelayTx(qint64 timestamp, QString digit);
-    /// Dtmf digit receival is logged with timestamp, followed by determining the delay
     void setCallDelayRx(qint64 timestamp, QString digit);
 
     bool hold();
