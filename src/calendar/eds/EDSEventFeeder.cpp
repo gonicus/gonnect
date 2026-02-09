@@ -132,7 +132,7 @@ QDateTime EDSEventFeeder::createDateTimeFromTimeType(ICalTime *datetime)
     int offset =
             i_cal_timezone_get_utc_offset(i_cal_time_get_timezone(datetime), datetime, &daylight);
     QTimeZone convertZone(offset);
-    if (convertZone.isValid() && convertZone != QTimeZone::LocalTime) {
+    if (convertZone.isValid()) {
         return QDateTime(QDate(i_cal_time_get_year(datetime), i_cal_time_get_month(datetime),
                                i_cal_time_get_day(datetime)),
                          QTime(i_cal_time_get_hour(datetime), i_cal_time_get_minute(datetime),
