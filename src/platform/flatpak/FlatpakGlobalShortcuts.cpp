@@ -35,11 +35,13 @@ bool FlatpakGlobalShortcuts::isSupported() const
 
 void FlatpakGlobalShortcuts::setShortcuts(Shortcuts &shortcuts)
 {
-    m_portal->setShortcuts(shortcuts);
-    m_portal->initialize();
+    if (m_portal) {
+        m_portal->setShortcuts(shortcuts);
+        m_portal->initialize();
+    }
 }
 
 QList<ShortcutItem *> FlatpakGlobalShortcuts::shortcuts() const
 {
-    return m_portal->shortcuts();
+    return m_portal ? m_portal->shortcuts() : QList<ShortcutItem *>();
 }
