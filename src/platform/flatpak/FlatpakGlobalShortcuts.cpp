@@ -15,7 +15,7 @@ GlobalShortcuts &GlobalShortcuts::instance()
 FlatpakGlobalShortcuts::FlatpakGlobalShortcuts() : GlobalShortcuts{}
 {
     ReadOnlyConfdSettings settings;
-    
+
     if (!settings.value("generic/disableGlobalShortcuts", false).toBool()) {
         m_portal = new GlobalShortcutPortal(this);
 

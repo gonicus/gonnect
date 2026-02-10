@@ -48,7 +48,8 @@ class Theme : public QObject
     Q_PROPERTY(QColor backgroundInitials READ backgroundInitials NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor shadowColor READ shadowColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor redColor READ redColor NOTIFY colorPaletteChanged FINAL)
-    Q_PROPERTY(QColor activeIndicatorColor READ activeIndicatorColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(
+            QColor activeIndicatorColor READ activeIndicatorColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor greenColor READ greenColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor darkGreenColor READ darkGreenColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor paneColor READ paneColor NOTIFY colorPaletteChanged FINAL)
