@@ -31,6 +31,7 @@ BaseWindow {
             }
 
             Label {
+                id: audioDeviceError
                 text: qsTr("No fitting audio environment could be found. Please select the desired audio devices.")
                 font.pixelSize: 16
                 wrapMode: Label.Wrap
@@ -38,6 +39,10 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Audio environment error")
+                Accessible.description: audioDeviceError.text
             }
 
             Column {
