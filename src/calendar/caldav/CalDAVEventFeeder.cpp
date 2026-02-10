@@ -255,31 +255,28 @@ bool CalDAVEventFeeder::responseDataChanged(const QByteArray &data)
     return true;
 }
 
-QDateTime CalDAVEventFeeder::createDateTimeFromTimeType(const icaltimetype &datetime)
+QDateTime CalDAVEventFeeder::createDateTimeFromTimeType(icaltimetype &datetime)
 {
-    QString zone = icaltimezone_get_tzid(const_cast<icaltimezone *>(datetime.zone));
-    if (zone == "UTC") {
-        /*
-            Qt expects an ISO 8601 format with '-' and '.' delimiters, iCal omits them.
+    /*
+        Datetime values that feature a non-local VTIMEZONE / TZID
+        (e.g. TZID=America/New_York:19980119T020000, or TZID=UTC:) will have to be
+        converted to local time.
 
-            This only needs to be done for UTC datetime (19980119T070000Z) values, as datetime
-            values that include a TZID (TZID=America/New_York:19980119T020000) will already
-            report the correct time.
+        We'll check if we can extract a valid timezone, otherwise we'll
+        treat it as local/floating.
 
-            This doesn't have to be done on "floating" datetimes as well, because "20220816T054500"
-            simply applies to the current timezone. Events with participants that are located in
-            different timezones would hence take place "several times" on a given day.
+        A floating 20220816T054500 simply applies to the current timezone.
+        Events with participants that are located in different timezones would
+        hence take place "several times" on a given day.
 
-            See: https://www.rfc-editor.org/rfc/rfc5545#section-3.3.5
-        */
-        return QDateTime::fromString(QString("%1-%2-%3T%4:%5:%6Z")
-                                             .arg(datetime.year, 4, 10, '0')
-                                             .arg(datetime.month, 2, 10, '0')
-                                             .arg(datetime.day, 2, 10, '0')
-                                             .arg(datetime.hour, 2, 10, '0')
-                                             .arg(datetime.minute, 2, 10, '0')
-                                             .arg(datetime.second, 2, 10, '0'),
-                                     Qt::ISODate)
+        See: https://www.rfc-editor.org/rfc/rfc5545#section-3.3.5
+    */
+    int offset = icaltimezone_get_utc_offset(const_cast<icaltimezone *>(datetime.zone), &datetime,
+                                             &datetime.is_daylight);
+    QTimeZone convertZone(offset);
+    if (convertZone.isValid()) {
+        return QDateTime(QDate(datetime.year, datetime.month, datetime.day),
+                         QTime(datetime.hour, datetime.minute, datetime.second), convertZone)
                 .toLocalTime();
     } else {
         return QDateTime(QDate(datetime.year, datetime.month, datetime.day),
