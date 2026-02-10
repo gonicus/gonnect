@@ -91,7 +91,7 @@ bool IMHandler::process(const QString &contentType, const QString &message)
     // Call delays
     else if (path == "callDelay" && dtmfDebugEnabled()) {
         bool validTimestamp = false;
-        qint64 timestamp;
+        qint64 timestamp = 0;
         QString digit;
         QUrlQuery q(callUrl);
         auto qitems = q.queryItems();
