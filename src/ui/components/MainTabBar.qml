@@ -250,13 +250,9 @@ Item {
             Rectangle {
                 id: activeBg
                 radius: 8
-                color: 'transparent'
+                color: Theme.activeIndicatorColor
                 anchors.fill: hoverBackground
                 visible: delg.showActiveBorder
-                border {
-                    width: 3
-                    color: Theme.redColor
-                }
 
                 SequentialAnimation {
                     running: activeBg.visible
@@ -371,7 +367,7 @@ Item {
                         disabledTooltipText: qsTr("No active conference"),
                         isEnabled: control.hasActiveConference,
                         showRedDot: false,
-                        showActiveBorder: control.hasActiveConference,
+                        showActiveBorder: control.hasActiveConference && control.selectedPageId !== control.mainWindow.conferencePageId,
                         attachedData: null
                     }, {
                         pageId: control.mainWindow.callPageId,
@@ -381,7 +377,7 @@ Item {
                         disabledTooltipText: qsTr("No active call"),
                         isEnabled: control.hasActiveCall,
                         showRedDot: false,
-                        showActiveBorder: control.hasActiveCall,
+                        showActiveBorder: control.hasActiveCall && control.selectedPageId !== control.mainWindow.callPageId,
                         attachedData: null
                     }
                 ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
