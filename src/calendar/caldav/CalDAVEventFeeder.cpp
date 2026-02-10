@@ -271,10 +271,10 @@ QDateTime CalDAVEventFeeder::createDateTimeFromTimeType(icaltimetype &datetime)
 
         See: https://www.rfc-editor.org/rfc/rfc5545#section-3.3.5
     */
-    int offset = icaltimezone_get_utc_offset(const_cast<icaltimezone *>(datetime.zone), &datetime,
-                                             &datetime.is_daylight);
+    icaltimezone *zone = const_cast<icaltimezone *>(datetime.zone);
+    int offset = icaltimezone_get_utc_offset(zone, &datetime, &datetime.is_daylight);
     QTimeZone convertZone(offset);
-    if (convertZone.isValid()) {
+    if (zone && convertZone.isValid()) {
         return QDateTime(QDate(datetime.year, datetime.month, datetime.day),
                          QTime(datetime.hour, datetime.minute, datetime.second), convertZone)
                 .toLocalTime();
