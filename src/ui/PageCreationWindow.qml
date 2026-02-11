@@ -24,6 +24,10 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
+    Accessible.role: Accessible.Window
+    Accessible.name: control.title
+    Accessible.description: qsTr("Window for creating a new dashboard page")
+
     required property string pageId
 
     property bool newPage: false
@@ -67,6 +71,9 @@ BaseWindow {
         Label {
             id: titleLabel
             text: qsTr("Name")
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("Page name label")
         }
 
         TextField {
@@ -78,6 +85,9 @@ BaseWindow {
         Label {
             id: iconLabel
             text: qsTr("Icon")
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("Page icon label")
         }
 
         ComboBox {
@@ -102,9 +112,19 @@ BaseWindow {
                 ListElement { iconId: "dialogMessages" }
             }
 
+            Accessible.role: Accessible.ComboBox
+            Accessible.name: qsTr("Page icon selection box")
+            Accessible.description: qsTr("Select the page icon for the dashboard page")
+
             delegate: ItemDelegate {
                 id: iconDelg
                 width: parent.width
+
+                // TODO: Describe icon?
+                Accessible.role: Accessible.ListItem
+                Accessible.description: qsTr("Currently selected page icon option")
+                Accessible.focusable: true
+
                 contentItem: RowLayout {
                     spacing: 10
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
@@ -155,6 +175,12 @@ BaseWindow {
                 text: qsTr("Cancel")
 
                 onClicked: () => control.close()
+
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("Cancel page modifcation")
+                Accessible.description: qsTr("Cancel button to exit the page creation/update window")
+                Accessible.focusable: true
+                Accessible.onPressAction: () => control.close()
             }
 
             Button {
@@ -163,7 +189,17 @@ BaseWindow {
                 icon.source: Icons.checkbox
                 text: control.newPage ? qsTr("Create") : qsTr("Save")
 
-                onClicked: () => {
+                onClicked: () => pageConfirm.apply()
+
+                Accessible.role: Accessible.Button
+                Accessible.name: pageConfirm.text + qsTr("page")
+                Accessible.description: control.newPage
+                                        ? qsTr("Confirmation button to create the new dashboard page")
+                                        : qsTr("Confirmation button to apply changes to the dashboard page")
+                Accessible.focusable: true
+                Accessible.onPressAction: () => pageConfirm.apply()
+
+                function apply() {
                     control.accepted(titleEntry.text.trim(),
                                      iconEntries.get(iconSelection.currentIndex).iconId)
                     control.close()

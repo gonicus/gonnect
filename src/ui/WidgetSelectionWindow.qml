@@ -24,6 +24,10 @@ BaseWindow {
     minimumHeight: control.dynamicHeight
     maximumHeight: control.dynamicHeight
 
+    Accessible.role: Accessible.Window
+    Accessible.name: control.title
+    Accessible.description: qsTr("Window for creating a new dashboard widget")
+
     property int currentHeight: widgetOptions.implicitHeight + control.windowHeaderPadding
     property int maxHeight: 700 + control.windowHeaderPadding
     property int dynamicHeight: control.currentHeight > control.maxHeight
@@ -85,6 +89,9 @@ BaseWindow {
                 id: titleLabel
                 text: qsTr("Widget")
                 Layout.alignment: Qt.AlignTop
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Widget selection header")
             }
 
             ComboBox {
@@ -112,9 +119,18 @@ BaseWindow {
                     }
                 }
 
+                Accessible.role: Accessible.ComboBox
+                Accessible.name: qsTr("Widget selection box")
+                Accessible.description: qsTr("Select the widget that should be added to the current dashboard page")
+
                 delegate: ItemDelegate {
                     id: widgetDelg
                     width: parent.width
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: widgetDelg.name
+                    Accessible.description: qsTr("Currently selected widget option")
+                    Accessible.focusable: true
 
                     required property string name
                     required property string description
@@ -222,6 +238,11 @@ BaseWindow {
                                 id: delgInput
                                 text: ""
 
+                                Accessible.role: Accessible.EditableText
+                                Accessible.name: qsTr("Settings text input")
+                                Accessible.description: qsTr("Input for widget setting ") + delgLabel.text
+                                Accessible.focusable: true
+
                                 Connections {
                                     target: widgetSettings
                                     function onSettingsFinished() {
@@ -237,6 +258,11 @@ BaseWindow {
                             CheckBox {
                                 id: delgCheck
 
+                                Accessible.role: Accessible.CheckBox
+                                Accessible.name: qsTr("Settings checkbox")
+                                Accessible.description: qsTr("Ceckbox for widget setting ") + delgLabel.text
+                                Accessible.focusable: true
+
                                 Connections {
                                     target: widgetSettings
                                     function onSettingsFinished() {
@@ -251,6 +277,10 @@ BaseWindow {
                             text: widgetSettingsModel.count > 0
                                   ? widgetSettingsModel.get(widgetSettingsDelegate.index).name
                                   : ""
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: qsTr("Settings label")
+                            Accessible.description: qsTr("Label for widget setting ") + delgLabel.text
                         }
 
                         Loader {
@@ -281,6 +311,12 @@ BaseWindow {
                     text: qsTr("Cancel")
 
                     onPressed: control.close()
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Cancel widget selection")
+                    Accessible.description: qsTr("Cancel button to exit widget selection selection without changes")
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => control.close()
                 }
 
                 Button {
@@ -288,7 +324,15 @@ BaseWindow {
                     icon.source: Icons.listAdd
                     text: qsTr("Add")
 
-                    onPressed: {
+                    onPressed: () => widgetConfirm.createWidget()
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Confirm widget selection")
+                    Accessible.description: qsTr("Confirmation button to create and add the selected widget to the current dashboard")
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => widgetConfirm.createWidget()
+
+                    function createWidget() {
                         const id = `-widget_${UISettings.generateUuid()}`
                         const selection = control.selection
 
