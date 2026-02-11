@@ -56,6 +56,8 @@ public:
 
     void setCredentials(const QString &password);
 
+    bool isSignalingEncrypted();
+
     static intptr_t runningMessageIndex;
 
     ~SIPAccount();
