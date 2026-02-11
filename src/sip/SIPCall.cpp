@@ -27,50 +27,6 @@ Q_LOGGING_CATEGORY(lcSIPCall, "gonnect.sip.call")
 
 using namespace std::chrono_literals;
 
-
-// Temporary test function
-float calculateMos(const pj::RtcpStreamStat &stat, int mean) {
-    //TODO: in die Klasse übernehmen und loss / pkg z.B. als 5s delta verwenden
-    //      minimum wert für UI anzeige verwenden
-
-    // MOS              4.0-4.5 grün    3.5-3.9 gelb    < 3.5 rot
-    // RTT (Latenz)	< 150 ms	150 – 300 ms	> 400 ms
-    // Packet Loss	< 1%	        1% – 5%         > 5%
-    // Jitter           < 20 ms         20 – 50 ms      > 50 ms
-
-    // Rohdaten extrahieren
-    double loss = (double)stat.loss / (double)stat.pkt;               // Packet loss (0.0 bis 1.0)
-    double jitter = stat.jitterUsec.mean / 1000.0; // Jitter in ms
-    double rtt = mean / 1000.0;             // RTT in ms
-
-    double effective_delay = rtt + (jitter * 2.0) + 10.0;
-
-    qCritical() << "# loss" << loss * 100 << "%";
-    qCritical() << "# jitter" << jitter << "ms";
-    qCritical() << "# rtt" << rtt << "ms";
-    qCritical() << "# effective delay" << effective_delay << "ms";
-
-    // 2. R-Faktor (Basiswert 93.2)
-    double R = 93.2;
-
-    // Abzug für Verzögerung (Delay)
-    if (effective_delay > 160.0) {
-        R -= (effective_delay - 160.0) / 10.0;
-    } else {
-        R -= effective_delay / 40.0;
-    }
-
-    // Abzug für Paketverlust (Loss)
-    R -= (loss * 100.0) * 2.5;
-
-    // 3. Umrechnung R-Faktor in MOS (Skala 1.0 - 4.5)
-    if (R < 0) return 1.0f;
-    if (R > 100) return 4.5f;
-
-    float mos = 1.0f + (0.035f * R) + (0.000007f * R * (R - 60.0f) * (100.0f - R));
-    return mos;
-}
-
 SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool silent)
     : ICallState(account),
       pj::Call(*account, callId),
@@ -118,45 +74,9 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         }
     }
 
-    // Test
-    auto t = new QTimer(this);
-    t->setInterval(1000);
-
-    connect(t, &QTimer::timeout, this, [this](){
-        pj::CallInfo ci = getInfo();
-
-        for (unsigned i = 0; i < ci.media.size(); ++i) {
-            if (ci.media[i].type == PJMEDIA_TYPE_AUDIO) {
-                pj::StreamStat st = getStreamStat(i);
-
-                qCritical() << "### ------------------------------>" << i;
-                qCritical() << "### mos tx:" << calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.mean);
-                qCritical() << "### mos rx:" << calculateMos(st.rtcp.rxStat, st.rtcp.rttUsec.mean);
-
-                pjsua_call_info pj_ci;
-                pjsua_call_get_info(getId(), &pj_ci);
-
-                pjsua_call *call = &pjsua_var.calls[getId()];
-                pjsua_call_media *call_med = &call->media[i];
-
-                pjmedia_rtcp_xr_stat xr_stat;
-                if (pjmedia_stream_get_stat_xr(call_med->strm.a.stream,
-                                               &xr_stat) != PJ_SUCCESS) {
-                    continue;
-                }
-
-                qCritical() << "### xr_lq tx" << xr_stat.tx.voip_mtc.mos_lq;
-                qCritical() << "### xr_cq tx" << xr_stat.tx.voip_mtc.mos_cq;
-                qCritical() << "### xr_lq rx" << xr_stat.rx.voip_mtc.mos_lq;
-                qCritical() << "### xr_cq rx" << xr_stat.rx.voip_mtc.mos_cq;
-
-                qCritical() << "### xr_loss rate tx" << xr_stat.tx.voip_mtc.loss_rate;
-                qCritical() << "### xr_loss rate rx" << xr_stat.rx.voip_mtc.loss_rate;
-            }
-        }
-    });
-
-    t->start();
+    // Setup stats updater
+    m_statsTimer.setInterval(5s);
+    connect(&m_statsTimer, &QTimer::timeout, this, &SIPCall::updateRtcpStats);
 }
 
 SIPCall::~SIPCall()
@@ -302,6 +222,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                     hold();
                 }
             });
+
+            m_statsTimer.start();
         }
 
         // Send DTMF post tasks if present
@@ -350,6 +272,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_isEstablished = false;
         m_earlyCallState = false;
 
+        m_statsTimer.stop();
         break;
 
     default:
@@ -730,4 +653,115 @@ void SIPCall::addMetadata(const QString &data)
     }
 
     Q_EMIT metadataChanged();
+}
+
+void SIPCall::updateRtcpStats()
+{
+    pj::CallInfo ci = getInfo();
+
+    for (unsigned i = 0; i < ci.media.size(); ++i) {
+        if (ci.media[i].type == PJMEDIA_TYPE_AUDIO) {
+
+            pj::StreamStat st = getStreamStat(i);
+            pj::StreamInfo si = getStreamInfo(i);
+
+            // Update basic information
+            if (m_codec != si.codecName) {
+                m_codec = QString::fromStdString(si.codecName);
+                m_clockRate = si.codecClockRate;
+                m_mediaEncrypted = si.proto & PJMEDIA_TP_PROFILE_SRTP;
+                m_signalingEncrypted = m_account->isSignalingEncrypted();
+
+                qCritical() << "###" << m_codec << m_clockRate
+                            << (m_mediaEncrypted ? "secure media" : "")
+                            << (m_signalingEncrypted ? "secure signaling" : "");
+            }
+
+            m_mosTx = calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.last, m_jitterTx, m_effDelayTx);
+            m_mosRx = calculateMos(st.rtcp.rxStat, st.rtcp.rttUsec.last, m_jitterRx, m_effDelayRx);
+
+            // Go for RTCP XR information - if available
+            pjsua_call_info pj_ci;
+            pjsua_call_get_info(getId(), &pj_ci);
+
+            pjsua_call *call = &pjsua_var.calls[getId()];
+            pjsua_call_media *call_med = &call->media[i];
+
+            pjmedia_rtcp_xr_stat xr_stat;
+            if (pjmedia_stream_get_stat_xr(call_med->strm.a.stream, &xr_stat) == PJ_SUCCESS
+                && xr_stat.tx.voip_mtc.mos_lq != 127) {
+
+                m_mosTxLq = xr_stat.tx.voip_mtc.mos_lq;
+                m_mosRxLq = xr_stat.rx.voip_mtc.mos_lq;
+                m_mosTxCq = xr_stat.tx.voip_mtc.mos_cq;
+                m_mosRxCq = xr_stat.rx.voip_mtc.mos_cq;
+                m_jitterBufferTxDelay = double(xr_stat.tx.voip_mtc.jb_nom) / 1000.0;
+                m_jitterBufferRxDelay = double(xr_stat.rx.voip_mtc.jb_nom) / 1000.0;
+
+                m_rtt = double(xr_stat.rtt.last) / 1000.0;
+                m_lossRateTx = xr_stat.tx.voip_mtc.loss_rate;
+                m_lossRateRx = xr_stat.rx.voip_mtc.loss_rate;
+            }
+
+            // TODO: wire parts to the GUI
+            // codec/clock raate
+            // media/signaling encrypted
+            // MOS            4.0-4.5 green  3.5-3.9 yellow   < 3.5 red
+            // RTT (latency)  < 150 ms       150 – 300 ms     > 400 ms
+            // Packet Loss    < 1%	    1% – 5%          > 5%
+            // Jitter         < 20 ms      20 – 50 ms       > 50 ms
+
+            qCDebug(lcSIPCall) << "---- Call quality info for media #" << i << "----";
+            qCDebug(lcSIPCall) << "- TX -> mos:" << m_mosTx << "loss:" << m_lossTx
+                               << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
+            qCDebug(lcSIPCall) << "- RX -> mos:" << m_mosTx << "loss:" << m_lossRx
+                               << "jitter:" << m_jitterRx << "effective delay:" << m_effDelayRx;
+
+            Q_EMIT rtcpStatsChanged();
+
+            // Look at first audio stream, only
+            break;
+        }
+    }
+}
+
+float SIPCall::calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
+                            double &effectiveDelay)
+{
+    double loss = 0.0;
+
+    if (stat.pkt != m_lastPkt) {
+        loss = 100.0 * (double)(stat.loss - m_lastLoss) / (double)(stat.pkt - m_lastPkt);
+    }
+
+    jitter = stat.jitterUsec.mean / 1000.0;
+    double rtt = rttLast / 1000.0;
+
+    m_lastLoss = stat.loss;
+    m_lastPkt = stat.pkt;
+
+    effectiveDelay = rtt + (jitter * 2.0) + 10.0;
+
+    // R-factor base value
+    double R = 93.2;
+
+    // Remove delay
+    if (effectiveDelay > 160.0) {
+        R -= (effectiveDelay - 160.0) / 10.0;
+    } else {
+        R -= effectiveDelay / 40.0;
+    }
+
+    // Remove loss
+    R -= loss * 2.5;
+
+    // Adjust to mos scale
+    if (R < 0) {
+        return 1.0f;
+    }
+    if (R > 100) {
+        return 4.5f;
+    }
+
+    return 1.0f + (0.035f * R) + (0.000007f * R * (R - 60.0f) * (100.0f - R));
 }
