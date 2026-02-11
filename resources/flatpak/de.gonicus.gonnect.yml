@@ -83,7 +83,7 @@ modules:
       - --disable-video
       - --enable-ext-sound
       - --with-opus
-      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1 -DPJSIP_MAX_PKT_LEN=8192
+      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1 -DPJSIP_MAX_PKT_LEN=8192 -DPJMEDIA_HAS_RTCP_XR=1
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git

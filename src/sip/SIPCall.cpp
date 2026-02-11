@@ -20,11 +20,56 @@
 #include "AvatarManager.h"
 #include "GlobalCallState.h"
 
-#include "pjsua-lib/pjsua.h"
+#include <pjsua-lib/pjsua.h>
+#include <pjsua-lib/pjsua_internal.h>
 
 Q_LOGGING_CATEGORY(lcSIPCall, "gonnect.sip.call")
 
 using namespace std::chrono_literals;
+
+
+// Temporary test function
+float calculateMos(const pj::RtcpStreamStat &stat, int mean) {
+    //TODO: in die Klasse übernehmen und loss / pkg z.B. als 5s delta verwenden
+    //      minimum wert für UI anzeige verwenden
+
+    // MOS              4.0-4.5 grün    3.5-3.9 gelb    < 3.5 rot
+    // RTT (Latenz)	< 150 ms	150 – 300 ms	> 400 ms
+    // Packet Loss	< 1%	        1% – 5%         > 5%
+    // Jitter           < 20 ms         20 – 50 ms      > 50 ms
+
+    // Rohdaten extrahieren
+    double loss = (double)stat.loss / (double)stat.pkt;               // Packet loss (0.0 bis 1.0)
+    double jitter = stat.jitterUsec.mean / 1000.0; // Jitter in ms
+    double rtt = mean / 1000.0;             // RTT in ms
+
+    double effective_delay = rtt + (jitter * 2.0) + 10.0;
+
+    qCritical() << "# loss" << loss * 100 << "%";
+    qCritical() << "# jitter" << jitter << "ms";
+    qCritical() << "# rtt" << rtt << "ms";
+    qCritical() << "# effective delay" << effective_delay << "ms";
+
+    // 2. R-Faktor (Basiswert 93.2)
+    double R = 93.2;
+
+    // Abzug für Verzögerung (Delay)
+    if (effective_delay > 160.0) {
+        R -= (effective_delay - 160.0) / 10.0;
+    } else {
+        R -= effective_delay / 40.0;
+    }
+
+    // Abzug für Paketverlust (Loss)
+    R -= (loss * 100.0) * 2.5;
+
+    // 3. Umrechnung R-Faktor in MOS (Skala 1.0 - 4.5)
+    if (R < 0) return 1.0f;
+    if (R > 100) return 4.5f;
+
+    float mos = 1.0f + (0.035f * R) + (0.000007f * R * (R - 60.0f) * (100.0f - R));
+    return mos;
+}
 
 SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool silent)
     : ICallState(account),
@@ -72,6 +117,46 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
             globalCallState.holdAllCalls(this);
         }
     }
+
+    // Test
+    auto t = new QTimer(this);
+    t->setInterval(1000);
+
+    connect(t, &QTimer::timeout, this, [this](){
+        pj::CallInfo ci = getInfo();
+
+        for (unsigned i = 0; i < ci.media.size(); ++i) {
+            if (ci.media[i].type == PJMEDIA_TYPE_AUDIO) {
+                pj::StreamStat st = getStreamStat(i);
+
+                qCritical() << "### ------------------------------>" << i;
+                qCritical() << "### mos tx:" << calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.mean);
+                qCritical() << "### mos rx:" << calculateMos(st.rtcp.rxStat, st.rtcp.rttUsec.mean);
+
+                pjsua_call_info pj_ci;
+                pjsua_call_get_info(getId(), &pj_ci);
+
+                pjsua_call *call = &pjsua_var.calls[getId()];
+                pjsua_call_media *call_med = &call->media[i];
+
+                pjmedia_rtcp_xr_stat xr_stat;
+                if (pjmedia_stream_get_stat_xr(call_med->strm.a.stream,
+                                               &xr_stat) != PJ_SUCCESS) {
+                    continue;
+                }
+
+                qCritical() << "### xr_lq tx" << xr_stat.tx.voip_mtc.mos_lq;
+                qCritical() << "### xr_cq tx" << xr_stat.tx.voip_mtc.mos_cq;
+                qCritical() << "### xr_lq rx" << xr_stat.rx.voip_mtc.mos_lq;
+                qCritical() << "### xr_cq rx" << xr_stat.rx.voip_mtc.mos_cq;
+
+                qCritical() << "### xr_loss rate tx" << xr_stat.tx.voip_mtc.loss_rate;
+                qCritical() << "### xr_loss rate rx" << xr_stat.rx.voip_mtc.loss_rate;
+            }
+        }
+    });
+
+    t->start();
 }
 
 SIPCall::~SIPCall()
