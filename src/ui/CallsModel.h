@@ -13,6 +13,7 @@ class CallsModel : public QAbstractListModel
     Q_OBJECT
     QML_ELEMENT
 
+    Q_PROPERTY(int unfinishedCount READ unfinishedCount NOTIFY unfinishedCountChanged FINAL)
     Q_PROPERTY(int count READ count NOTIFY countChanged FINAL)
 
 public:
@@ -61,12 +62,14 @@ public:
     virtual ~CallsModel();
 
     qsizetype count() const { return m_calls.size(); }
+    int unfinishedCount() const;
     virtual int rowCount(const QModelIndex &parent) const override;
     virtual QVariant data(const QModelIndex &index, int role) const override;
     virtual QHash<int, QByteArray> roleNames() const override;
 
 Q_SIGNALS:
     void countChanged();
+    void unfinishedCountChanged();
 
 private Q_SLOTS:
     void updateCalls();

@@ -26,6 +26,7 @@ Item {
     property int dynamicPageLimit: 5
 
     property bool hasActiveCall
+    property bool hasActiveUnfinishedCall
     property bool hasActiveConference
 
     property alias backgroundColor: filler.color
@@ -377,7 +378,7 @@ Item {
                         disabledTooltipText: qsTr("No active call"),
                         isEnabled: control.hasActiveCall,
                         showRedDot: false,
-                        showActiveBorder: control.hasActiveCall && control.selectedPageId !== control.mainWindow.callPageId,
+                        showActiveBorder: control.hasActiveUnfinishedCall && control.selectedPageId !== control.mainWindow.callPageId,
                         attachedData: null
                     }
                 ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)

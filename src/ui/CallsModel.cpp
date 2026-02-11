@@ -122,6 +122,17 @@ CallsModel::~CallsModel()
     m_calls.clear();
 }
 
+int CallsModel::unfinishedCount() const
+{
+    int result = 0;
+    for (const auto *call : std::as_const(m_calls)) {
+        if (!call->isFinished) {
+            ++result;
+        }
+    }
+    return result;
+}
+
 QHash<int, QByteArray> CallsModel::roleNames() const
 {
     return {
@@ -229,6 +240,7 @@ void CallsModel::updateCalls()
     if (oldCount != m_calls.size()) {
         Q_EMIT countChanged();
     }
+    Q_EMIT unfinishedCountChanged();
 }
 
 int CallsModel::rowCount(const QModelIndex &parent) const
