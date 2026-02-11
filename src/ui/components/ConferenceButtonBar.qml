@@ -27,6 +27,7 @@ Item {
     signal showVirtualBackgroundDialog
     signal openSetPasswordDialog
     signal openVideoQualityDialog
+    signal openDialInInfoDialog(numbers : variant, code : string)
     signal hangup
     signal finishForAll
 
@@ -64,6 +65,13 @@ Item {
             repeat: true
             interval: 100
             onTriggered: () => internal.updateElapsedTime()
+        }
+
+        readonly property Connections conferenceConnections: Connections {
+            target: control.iConferenceConnector
+            function onDialInfoReceived(numbersMap : object, code : string) {
+                control.openDialInInfoDialog(numbersMap, code)
+            }
         }
     }
 
@@ -177,6 +185,11 @@ Item {
                     MenuItem {
                         text: qsTr("Open in browser")
                         onTriggered: () => Qt.openUrlExternally(control.iConferenceConnector.conferenceUrl)
+                    }
+                    MenuItem {
+                        text: qsTr("Show phone number")
+                        enabled: control.iConferenceConnector.hasDialIn
+                        onTriggered: () => control.iConferenceConnector.requestDialInInfo()
                     }
 
                     // MenuItem {

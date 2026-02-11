@@ -61,6 +61,8 @@ public:
     virtual bool hasWhiteboard() const override { return m_hasWhiteboard; }
     virtual void toggleWhiteboard() override;
     virtual bool hasTextpad() const override { return m_hasTextpad; }
+    virtual bool hasDialIn() const override;
+    virtual void requestDialInInfo() override;
     virtual bool isPasswordRequired() const override { return m_isPasswordRequired; }
     virtual QString roomPassword() const override { return m_roomPassword; }
     virtual void setRoomPassword(QString value) override;
@@ -172,6 +174,8 @@ private:
     bool m_isToggleScreenSharePending = false;
     bool m_hasWhiteboard = false;
     bool m_hasTextpad = false;
+    QUrl m_dialInConfCodeUrl;
+    QUrl m_dialInNumbersUrl;
     QString m_roomPassword;
     VideoQuality m_videoQuality = VideoQuality::Average;
 

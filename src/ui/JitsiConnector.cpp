@@ -1,4 +1,5 @@
 #include "JitsiConnector.h"
+#include "NetworkHelper.h"
 #include "Notification.h"
 #include "ViewHelper.h"
 #include "Contact.h"
@@ -26,8 +27,15 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QRegularExpression>
+#include <QtConcurrent>
 
 Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
+
+#define GONNECT_ASSERT(condition, failMessage)                              \
+    if (!(condition)) {                                                     \
+        qCCritical(lcJitsiConnector) << "Assertion failed:" << failMessage; \
+        return;                                                             \
+    }
 
 JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 {
@@ -464,7 +472,8 @@ void JitsiConnector::checkJitsiBackendFeatures()
     auto manager = new QNetworkAccessManager(this);
 
     QNetworkRequest request;
-    request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
+    // request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
+    request.setUrl(QUrl(QString("%1/config.js").arg("https://meet.jit.si")));
 
     auto reply = manager->get(request);
     connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err) {
@@ -478,12 +487,31 @@ void JitsiConnector::checkJitsiBackendFeatures()
     });
     connect(reply, &QIODevice::readyRead, this, [reply, this]() {
         static const QRegularExpression whiteboardRegex(
-                R"(whiteboard\s*=\s*{\s*enabled\s*:\s*true)");
-        static const QRegularExpression etherpadRegex(R"(etherpad_base\s*=\s*['"])");
+                R"(whiteboard\s*(?:=|:)\s*{\s*enabled\s*:\s*true)");
+        static const QRegularExpression etherpadRegex(R"(etherpad_base\s*(?:=|:)\s*['"])");
+        static const QRegularExpression dialInConfCodeUrl(
+                R"(dialInConfCodeUrl\s*(?:=|:)\s*['"](?<url>.*)['"])");
+        static const QRegularExpression dialInNumbersUrl(
+                R"(dialInNumbersUrl\s*(?:=|:)\s*['"](?<url>.*)['"])");
+
         const auto txt = reply->readAll();
 
         setHasWhiteboard(whiteboardRegex.match(txt).hasMatch());
         setHasTextpad(etherpadRegex.match(txt).hasMatch());
+
+        const auto dialInConfCodeUrlMatch = dialInConfCodeUrl.match(txt);
+        if (dialInConfCodeUrlMatch.hasMatch()) {
+            m_dialInConfCodeUrl = dialInConfCodeUrlMatch.captured("url");
+        }
+
+        const auto dialInNumbersUrlMatch = dialInNumbersUrl.match(txt);
+        if (dialInNumbersUrlMatch.hasMatch()) {
+            m_dialInNumbersUrl = dialInNumbersUrlMatch.captured("url");
+        }
+
+        if (hasDialIn()) {
+            Q_EMIT hasDialInChanged();
+        }
     });
 }
 
@@ -1124,6 +1152,65 @@ void JitsiConnector::toggleWhiteboard()
     Q_EMIT executeToggleWhiteboardCommand();
 }
 
+bool JitsiConnector::hasDialIn() const
+{
+    return m_dialInConfCodeUrl.isValid() && m_dialInNumbersUrl.isValid();
+}
+
+void JitsiConnector::requestDialInInfo()
+{
+    if (!hasDialIn()) {
+        qCWarning(lcJitsiConnector) << "Dial in feature is not available";
+        return;
+    }
+    if (!isInConference()) {
+        qCWarning(lcJitsiConnector) << "Currently no active conference";
+        return;
+    }
+
+    QUrlQuery numbersQuery(m_dialInNumbersUrl);
+    numbersQuery.addQueryItem("conference", m_roomName);
+    QUrl numbersUrl = m_dialInNumbersUrl;
+    numbersUrl.setQuery(numbersQuery);
+    auto numberFuture = NetworkHelper::fetchUrlAsJson(numbersUrl);
+
+    QUrlQuery codeQuery(m_dialInConfCodeUrl);
+    codeQuery.addQueryItem("conference", m_roomName);
+    QUrl codeUrl = m_dialInConfCodeUrl;
+    codeUrl.setQuery(codeQuery);
+    auto pinFuture = NetworkHelper::fetchUrlAsJson(codeUrl);
+
+    QFuture<void> combinedFuture = QtConcurrent::run([this, numberFuture, pinFuture]() {
+        const QJsonDocument numberDoc = numberFuture.result();
+        const QJsonDocument pinDoc = pinFuture.result();
+
+        // Phone numbers
+        GONNECT_ASSERT(!numberDoc.isNull(), "JSON result for phone number is invalid")
+        GONNECT_ASSERT(numberDoc.isObject(), "Received json must be an object")
+        const auto numberObj = numberDoc.object();
+        GONNECT_ASSERT(numberObj.contains("numbers"), "Number JSON must have field 'numbers'")
+        const auto numbersVal = numberObj.value("numbers");
+        GONNECT_ASSERT(numbersVal.isObject(), "'numbers' field must be an object")
+        const auto numbersObj = numbersVal.toObject();
+        GONNECT_ASSERT(!numbersObj.isEmpty(), "'numbers' field must be empty")
+
+        QVariantMap numbersMap;
+        for (auto it = numbersObj.constBegin(); it != numbersObj.constEnd(); ++it) {
+            GONNECT_ASSERT(it.value().isArray(), "Numbers entry must be an array")
+            numbersMap.insert(it.key(), it.value().toArray().toVariantList());
+        }
+
+        // Conference code
+        GONNECT_ASSERT(!pinDoc.isNull(), "JSON result for conference code is invalid")
+        GONNECT_ASSERT(pinDoc.isObject(), "Received json must be an object")
+        const auto pinObj = pinDoc.object();
+        GONNECT_ASSERT(pinObj.contains("id"), "JSON must contain field 'id'")
+        GONNECT_ASSERT(pinObj.contains("conference"), "JSON must contain field 'conference'")
+
+        Q_EMIT dialInfoReceived(numbersMap, QString::number(pinObj.value("id").toInteger()));
+    });
+}
+
 void JitsiConnector::joinConference(const QString &conferenceId, const QString &displayName,
                                     IConferenceConnector::StartFlags startFlags)
 {
@@ -1394,3 +1481,5 @@ QUrl JitsiConnector::conferenceUrl() const
 {
     return QUrl(QString("%1/%2").arg(GlobalInfo::instance().jitsiUrl(), conferenceName()));
 }
+
+#undef GONNECT_ASSERT
