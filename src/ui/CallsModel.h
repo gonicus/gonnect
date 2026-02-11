@@ -30,6 +30,7 @@ public:
         qreal incomingAudioLevel = 0.0;
         bool hasMetadata = false;
         QDateTime established;
+        int callDelay = -1;
         ContactInfo contactInfo;
         pjsip_status_code statusCode = PJSIP_SC_NULL;
     };
@@ -46,6 +47,7 @@ public:
         Company,
         IsEstablished,
         EstablishedTime,
+        CallDelay,
         IsHolding,
         IsBlocked,
         StatusCode,

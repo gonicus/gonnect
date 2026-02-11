@@ -687,6 +687,8 @@ void SIPCallManager::addCall(SIPCall *call)
             [call, this]() { Q_EMIT callContactChanged(call); });
     connect(call, &SIPCall::metadataChanged, this,
             [call, this]() { Q_EMIT metadataChanged(call); });
+    connect(call, &SIPCall::callDelayChanged, this,
+            [call, this]() { Q_EMIT callDelayChanged(call); });
 
     connect(call, &SIPCall::missed, this, [this, call]() {
         if (call->isBlocked()) {

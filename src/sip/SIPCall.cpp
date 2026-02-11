@@ -1,5 +1,7 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QUrl>
+#include <qurlquery.h>
 
 #include "SIPCall.h"
 #include "SIPCallManager.h"
@@ -72,6 +74,21 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
             globalCallState.holdAllCalls(this);
         }
     }
+
+    m_callDelayCycleTimer.setInterval(10s);
+    connect(&m_callDelayCycleTimer, &QTimer::timeout, this, [this]() {
+        QString digit = QString("%1").arg((m_callDelayCounter % 9) + 1);
+        m_callDelayCounter++;
+
+        requestCallDelay(digit);
+    });
+
+    connect(this, &SIPCall::capabilitiesChanged, [this]() {
+        if (m_imHandler->dtmfDebugEnabled() && isEstablished()
+            && !m_callDelayCycleTimer.isActive()) {
+            m_callDelayCycleTimer.start();
+        }
+    });
 }
 
 SIPCall::~SIPCall()
@@ -265,6 +282,10 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_isEstablished = false;
         m_earlyCallState = false;
 
+        if (m_imHandler->dtmfDebugEnabled() && m_callDelayCycleTimer.isActive()) {
+            m_callDelayCycleTimer.stop();
+        }
+
         break;
 
     default:
@@ -348,16 +369,10 @@ void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
     qCWarning(lcSIPCall) << "failed to send message:" << prm.code << prm.reason;
 }
 
-pj::AudioMedia *SIPCall::audioMedia() const
+void SIPCall::onDtmfDigit(pj::OnDtmfDigitParam &prm)
 {
-    const auto callInfo = getInfo();
-
-    for (unsigned i = 0; i < callInfo.media.size(); ++i) {
-        if (callInfo.media[i].type == PJMEDIA_TYPE_AUDIO) {
-            return static_cast<pj::AudioMedia *>(getMedia(i));
-        }
-    }
-    return nullptr;
+    // INFO: Currently only used for DTMF call latency debugging
+    setCallDelayRx(QDateTime::currentMSecsSinceEpoch(), QString::fromStdString(prm.digit));
 }
 
 void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
@@ -375,6 +390,18 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
             qCDebug(lcSIPCall) << "New call participant identity found:" << newIdentity;
         }
     }
+}
+
+pj::AudioMedia *SIPCall::audioMedia() const
+{
+    const auto callInfo = getInfo();
+
+    for (unsigned i = 0; i < callInfo.media.size(); ++i) {
+        if (callInfo.media[i].type == PJMEDIA_TYPE_AUDIO) {
+            return static_cast<pj::AudioMedia *>(getMedia(i));
+        }
+    }
+    return nullptr;
 }
 
 bool SIPCall::hold()
@@ -645,4 +672,51 @@ void SIPCall::addMetadata(const QString &data)
     }
 
     Q_EMIT metadataChanged();
+}
+
+void SIPCall::requestCallDelay(QString digit)
+{
+    // DMTF
+    QString timestamp = QString("%1").arg(QDateTime::currentMSecsSinceEpoch());
+    auto &cm = SIPCallManager::instance();
+    cm.sendDtmf(m_account->id(), getId(), digit);
+
+    // IM
+    pj::SendInstantMessageParam prm;
+    prm.contentType = "application/x-www-form-urlencoded";
+
+    QUrlQuery q;
+    q.addQueryItem("timestamp", timestamp);
+    q.addQueryItem("digit", digit);
+
+    QUrl delayUrl("gonnect:");
+    delayUrl.setPath("callDelay");
+    delayUrl.setQuery(q);
+    prm.content = delayUrl.toString().toStdString();
+
+    try {
+        sendInstantMessage(prm);
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to send call delay data:" << err.info();
+    }
+}
+
+void SIPCall::setCallDelayTx(qint64 timestamp, QString digit)
+{
+    m_callDelayTx.first = timestamp;
+    m_callDelayTx.second = digit;
+}
+
+void SIPCall::setCallDelayRx(qint64 timestamp, QString digit)
+{
+    m_callDelayRx.first = timestamp;
+    m_callDelayRx.second = digit;
+
+    if (m_callDelayRx.second != m_callDelayTx.second) {
+        m_callDelay = -1;
+    } else {
+        m_callDelay = m_callDelayRx.first - m_callDelayTx.first;
+    }
+
+    Q_EMIT callDelayChanged();
 }

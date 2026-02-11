@@ -18,6 +18,11 @@ public:
     {
         return !m_jitsiBaseURL.isEmpty() && m_capabilities.contains("jitsi");
     }
+    bool dtmfDebugEnabled() const
+    {
+        return m_dtmfDebugConfigured && m_capabilities.contains("callDelay");
+    }
+
     bool process(const QString &contentType, const QString &message);
 
     bool capabilitiesSent() const { return m_capabilitiesSent; }
@@ -53,4 +58,5 @@ private:
 
     bool m_capabilitiesSent = false;
     bool m_jitsiPreconfig = false;
+    bool m_dtmfDebugConfigured = false;
 };

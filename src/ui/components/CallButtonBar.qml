@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
 import QtQuick.Controls.Material
 import base
@@ -22,6 +23,7 @@ Item {
     readonly property bool isFinished: control.callItem?.isFinished ?? false
     readonly property bool isIncoming: control.callItem?.isIncoming ?? false
     readonly property bool hasCapabilityJitsi: control.callItem?.hasCapabilityJitsi ?? false
+    readonly property int callDelay: control.callItem?.callDelay ?? -1
 
     readonly property bool areInCallButtonsEnabled: control.isEstablished && !control.isFinished
 
@@ -60,14 +62,32 @@ Item {
         }
     }
 
-    Label {
-        id: elapsedTimeLabel
-        color: Theme.secondaryTextColor
-        text: "🕓  " + ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+    Row {
+        spacing: 20
+        leftPadding: 20
         anchors {
-            verticalCenter: parent.verticalCenter
+            top: parent.top
+            bottom: parent.bottom
             left: parent.left
-            leftMargin: 20
+        }
+
+        Label {
+            id: elapsedTimeLabel
+            color: Theme.secondaryTextColor
+            text: "🕓  " + ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+            anchors {
+                verticalCenter: parent.verticalCenter
+            }
+        }
+
+        Label {
+            id: dtmfDebugLabel
+            visible: control.callDelay > 0
+            color: Theme.secondaryTextColor
+            text: "⚠  " + control.callDelay + " ms"
+            anchors {
+                verticalCenter: parent.verticalCenter
+            }
         }
     }
 

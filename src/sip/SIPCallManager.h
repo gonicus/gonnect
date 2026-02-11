@@ -116,6 +116,7 @@ Q_SIGNALS:
     void isConferenceModeChanged();
     void callContactChanged(SIPCall *call);
     void metadataChanged(SIPCall *call);
+    void callDelayChanged(SIPCall *call);
     void capabilitiesChanged(SIPCall *call);
     void audioLevelChanged(SIPCall *call, qreal level);
     void showCallWindow();

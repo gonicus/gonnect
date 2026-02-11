@@ -23,6 +23,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         if (index >= 0) {
             callInfo->isEstablished = call->isEstablished();
             callInfo->established = call->establishedTime();
+            callInfo->callDelay = call->callDelay();
             callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && callInfo->isEstablished;
 
             auto idx = createIndex(index, 0);
@@ -30,8 +31,20 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                                {
                                        static_cast<int>(Roles::IsEstablished),
                                        static_cast<int>(Roles::EstablishedTime),
+                                       static_cast<int>(Roles::CallDelay),
                                        static_cast<int>(Roles::HasCapabilityJitsi),
                                });
+        }
+    });
+
+    connect(&callManager, &SIPCallManager::callDelayChanged, this, [this](SIPCall *call) {
+        auto callInfo = m_callsHash.value(call->getId());
+        const auto index = m_calls.indexOf(callInfo);
+        if (index >= 0) {
+            callInfo->callDelay = call->callDelay();
+
+            auto idx = createIndex(index, 0);
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::CallDelay) });
         }
     });
 
@@ -136,6 +149,7 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::Company), "company" },
         { static_cast<int>(Roles::IsEstablished), "isEstablished" },
         { static_cast<int>(Roles::EstablishedTime), "establishedTime" },
+        { static_cast<int>(Roles::CallDelay), "callDelay" },
         { static_cast<int>(Roles::IsHolding), "isHolding" },
         { static_cast<int>(Roles::IsBlocked), "isBlocked" },
         { static_cast<int>(Roles::StatusCode), "statusCode" },
@@ -179,6 +193,7 @@ void CallsModel::updateCalls()
         callInfo->accountId = qobject_cast<SIPAccount *>(call->parent())->id();
         callInfo->remoteUri = call->sipUrl();
         callInfo->established = call->establishedTime();
+        callInfo->callDelay = call->callDelay();
         callInfo->isEstablished = call->isEstablished();
         callInfo->isIncoming = call->isIncoming();
         callInfo->isBlocked = call->isBlocked();
@@ -254,6 +269,9 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::EstablishedTime):
         return callInfo->established;
+
+    case static_cast<int>(Roles::CallDelay):
+        return callInfo->callDelay;
 
     case static_cast<int>(Roles::IsIncoming):
         return callInfo->isIncoming;
