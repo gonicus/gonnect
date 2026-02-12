@@ -19,9 +19,9 @@ class JitsiConnector : public IConferenceConnector
 
 public:
     explicit JitsiConnector(QObject *parent = nullptr);
-    virtual ~JitsiConnector();
+    ~JitsiConnector();
 
-    virtual QString ownDisplayName() override;
+    QString ownDisplayName() override;
 
     // INTERNAL API
     // These methods are meant to be called by the JS code
@@ -53,70 +53,70 @@ public:
     Q_INVOKABLE void setLargeVideoParticipantById(const QString &id);
 
     // Interface methods
-    virtual ContactInfo remoteContactInfo() const override;
+    ContactInfo remoteContactInfo() const override;
 
-    virtual bool hasCapability(const Capability capabilityToCheck) const override;
-    virtual bool isInitialized() override { return m_isApiLoadingFinished; }
-    virtual bool isInConference() const override { return m_isInConference; }
-    virtual bool hasWhiteboard() const override { return m_hasWhiteboard; }
-    virtual void toggleWhiteboard() override;
-    virtual bool hasTextpad() const override { return m_hasTextpad; }
-    virtual bool isPasswordRequired() const override { return m_isPasswordRequired; }
-    virtual QString roomPassword() const override { return m_roomPassword; }
-    virtual void setRoomPassword(QString value) override;
-    virtual void joinConference(const QString &conferenceId, const QString &displayName,
+    bool hasCapability(const Capability capabilityToCheck) const override;
+    bool isInitialized() override { return m_isApiLoadingFinished; }
+    bool isInConference() const override { return m_isInConference; }
+    bool hasWhiteboard() const override { return m_hasWhiteboard; }
+    void toggleWhiteboard() override;
+    bool hasTextpad() const override { return m_hasTextpad; }
+    bool isPasswordRequired() const override { return m_isPasswordRequired; }
+    QString roomPassword() const override { return m_roomPassword; }
+    void setRoomPassword(QString value) override;
+    void joinConference(const QString &conferenceId, const QString &displayName,
                                 IConferenceConnector::StartFlags startFlags) override;
-    virtual void enterPassword(const QString &password, bool rememberPassword) override;
-    virtual void leaveConference() override;
-    virtual void terminateConference() override;
-    virtual QDateTime establishedDateTime() const override { return m_establishedDateTime; };
-    inline virtual bool isAudioAvailable() const override { return true; }
-    virtual bool isOnHold() const override { return m_isOnHold; }
-    virtual void setOnHold(bool shallHold) override;
-    virtual void setAudioMuted(bool shallMute) override;
-    virtual bool isAudioMuted() const override { return m_isAudioMuted; }
-    virtual bool isVideoAvailable() const override { return m_isVideoAvailable; };
-    virtual bool isVideoMuted() const override { return m_isVideoMuted; }
-    virtual void setVideoMuted(bool shallMute) override;
-    virtual void setHandRaised(bool handRaised) override;
-    virtual void setTileView(bool showTileView) override;
-    virtual bool isHandRaised() const override { return m_isHandRaised; }
-    virtual bool isTileView() const override { return m_isTileView; }
-    virtual void setNoiseSuppressionEnabled(bool enabled) override;
-    virtual bool isNoiseSuppressionEnabled() const override { return m_isNoiseSupression; }
-    virtual void setSubtitlesEnabled(bool enabled) override;
-    virtual bool isSubtitlesEnabled() const override { return m_isSubtitles; }
-    virtual IChatRoom *chatRoom() override { return m_chatRoom; }
-    virtual QString ownId() const override { return m_jitsiId; }
-    virtual ConferenceParticipant::Role ownRole() const override;
-    virtual QList<ConferenceParticipant *> participants() const override { return m_participants; }
-    virtual uint numberOfParticipants() const override { return m_participants.size(); }
-    virtual void kickParticipant(const QString &id) override;
-    virtual void kickParticipant(ConferenceParticipant *participant) override;
-    virtual void grantParticipantRole(const QString &participantId,
+    void enterPassword(const QString &password, bool rememberPassword) override;
+    void leaveConference() override;
+    void terminateConference() override;
+    QDateTime establishedDateTime() const override { return m_establishedDateTime; };
+    inline bool isAudioAvailable() const override { return true; }
+    bool isOnHold() const override { return m_isOnHold; }
+    void setOnHold(bool shallHold) override;
+    void setAudioMuted(bool shallMute) override;
+    bool isAudioMuted() const override { return m_isAudioMuted; }
+    bool isVideoAvailable() const override { return m_isVideoAvailable; };
+    bool isVideoMuted() const override { return m_isVideoMuted; }
+    void setVideoMuted(bool shallMute) override;
+    void setHandRaised(bool handRaised) override;
+    void setTileView(bool showTileView) override;
+    bool isHandRaised() const override { return m_isHandRaised; }
+    bool isTileView() const override { return m_isTileView; }
+    void setNoiseSuppressionEnabled(bool enabled) override;
+    bool isNoiseSuppressionEnabled() const override { return m_isNoiseSupression; }
+    void setSubtitlesEnabled(bool enabled) override;
+    bool isSubtitlesEnabled() const override { return m_isSubtitles; }
+    IChatRoom *chatRoom() override { return m_chatRoom; }
+    QString ownId() const override { return m_jitsiId; }
+    ConferenceParticipant::Role ownRole() const override;
+    QList<ConferenceParticipant *> participants() const override { return m_participants; }
+    uint numberOfParticipants() const override { return m_participants.size(); }
+    void kickParticipant(const QString &id) override;
+    void kickParticipant(ConferenceParticipant *participant) override;
+    void grantParticipantRole(const QString &participantId,
                                       ConferenceParticipant::Role newRole) override;
-    virtual void grantParticipantRole(ConferenceParticipant *participant,
+    void grantParticipantRole(ConferenceParticipant *participant,
                                       ConferenceParticipant::Role newRole) override;
-    virtual ConferenceParticipant *largeVideoParticipant() const override
+    ConferenceParticipant *largeVideoParticipant() const override
     {
         return m_largeVideoParticipant;
     };
-    virtual void setLargeVideoParticipant(ConferenceParticipant *participant) override;
-    virtual void muteAll() override;
-    virtual void setCallHistoryItem(
+    void setLargeVideoParticipant(ConferenceParticipant *participant) override;
+    void muteAll() override;
+    void setCallHistoryItem(
             QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>()) override;
-    virtual QString displayName() const override { return m_displayName; }
-    virtual QString conferenceName() const override { return m_roomName; }
-    virtual QUrl conferenceUrl() const override;
-    virtual void setDisplayName(const QString &displayName) override;
-    virtual void setSharingScreen(bool shareScreen) override;
-    virtual bool isSharingScreen() const override { return m_isSharingScreen; }
-    virtual void setVideoQuality(VideoQuality) override;
-    virtual VideoQuality videoQuality() const override { return m_videoQuality; }
-    virtual void showVirtualBackgroundDialog() override;
+    QString displayName() const override { return m_displayName; }
+    QString conferenceName() const override { return m_roomName; }
+    QUrl conferenceUrl() const override;
+    void setDisplayName(const QString &displayName) override;
+    void setSharingScreen(bool shareScreen) override;
+    bool isSharingScreen() const override { return m_isSharingScreen; }
+    void setVideoQuality(VideoQuality) override;
+    VideoQuality videoQuality() const override { return m_videoQuality; }
+    void showVirtualBackgroundDialog() override;
 
 protected:
-    virtual void toggleHoldImpl() override;
+    void toggleHoldImpl() override;
 
 private Q_SLOTS:
     void onHeadsetHookSwitchChanged();

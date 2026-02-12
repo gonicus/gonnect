@@ -24,11 +24,11 @@ public:
 
     void initialize();
 
-    virtual void onIncomingCall(pj::OnIncomingCallParam &prm) override;
-    virtual void onRegState(pj::OnRegStateParam &prm) override;
-    virtual void onSendRequest(pj::OnSendRequestParam &prm) override;
-    virtual void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
-    virtual void onInstantMessage(pj::OnInstantMessageParam &prm) override;
+    void onIncomingCall(pj::OnIncomingCallParam &prm) override;
+    void onRegState(pj::OnRegStateParam &prm) override;
+    void onSendRequest(pj::OnSendRequestParam &prm) override;
+    void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
+    void onInstantMessage(pj::OnInstantMessageParam &prm) override;
 
     bool isRegistered() const { return m_isRegistered; }
     bool isInstantMessagingAllowed() const;

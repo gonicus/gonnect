@@ -68,13 +68,13 @@ public:
 
     bool earlyCallState() const { return m_earlyCallState; }
 
-    virtual ContactInfo remoteContactInfo() const override { return m_contactInfo; }
+    ContactInfo remoteContactInfo() const override { return m_contactInfo; }
 
     SIPCallManager::QualityLevel qualityLevel() const { return m_qualityLevel; }
     SIPCallManager::SecurityLevel securityLevel() const { return m_securityLevel; }
 
 protected:
-    virtual void toggleHoldImpl() override;
+    void toggleHoldImpl() override;
 
 Q_SIGNALS:
     void missed();

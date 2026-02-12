@@ -62,13 +62,13 @@ public:
     };
 
     explicit CallsModel(QObject *parent = nullptr);
-    virtual ~CallsModel();
+    ~CallsModel();
 
     qsizetype count() const { return m_calls.size(); }
     int unfinishedCount() const;
-    virtual int rowCount(const QModelIndex &parent) const override;
-    virtual QVariant data(const QModelIndex &index, int role) const override;
-    virtual QHash<int, QByteArray> roleNames() const override;
+    int rowCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
 Q_SIGNALS:
     void countChanged();
