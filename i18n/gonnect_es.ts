@@ -73,12 +73,12 @@
 <context>
     <name>AudioManager</name>
     <message>
-        <location filename="../src/media/AudioManager.cpp" line="155"/>
+        <location filename="../src/media/AudioManager.cpp" line="156"/>
         <source>Default input</source>
         <translation>Entrada predeterminada</translation>
     </message>
     <message>
-        <location filename="../src/media/AudioManager.cpp" line="156"/>
+        <location filename="../src/media/AudioManager.cpp" line="157"/>
         <source>Default output</source>
         <translation>Salida predeterminada</translation>
     </message>
@@ -94,7 +94,7 @@
 <context>
     <name>BasePage</name>
     <message>
-        <location filename="../src/ui/components/pages/BasePage.qml" line="91"/>
+        <location filename="../src/ui/components/pages/BasePage.qml" line="98"/>
         <source>Add widgets</source>
         <translation type="unfinished"></translation>
     </message>
@@ -312,84 +312,84 @@
         <translation>Por favor, autentifíquese en la ventana del navegador abierta...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="357"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="362"/>
         <source>This conference is protected by a password. Please enter it to join the room.</source>
         <translation>Esta conferencia está protegida por una contraseña. Por favor, introdúzcala para entrar en la sala.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="368"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="511"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="373"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="522"/>
         <source>Password</source>
         <translation>Contraseña</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="382"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="387"/>
         <source>Remember password</source>
         <translation>Recordar contraseña</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="394"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="561"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="399"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="572"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="401"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="406"/>
         <source>Join Room</source>
         <translation>Entrar en la sala</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="471"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="482"/>
         <source>Enter a password to protect this conference room. Other participants must enter it before taking part in the session.</source>
         <translation>Introduzca una contraseña para proteger esta sala de conferencias. Los demás participantes deben introducirla antes de participar en la sesión.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="482"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="493"/>
         <source>This password has been set for the conference room and must be entered by participants before taking part in the session.</source>
         <translation>Esta contraseña se ha establecido para la sala de conferencias y los participantes deben introducirla antes de participar en la sesión.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="493"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="504"/>
         <source>The room password has been set by someone else.</source>
         <translation>La contraseña de la sala ha sido establecida por otra persona.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="549"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="560"/>
         <source>Show password</source>
         <translation>Mostrar contraseña</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="569"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="580"/>
         <source>Remove</source>
         <translation>Eliminar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="575"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="586"/>
         <source>Save</source>
         <translation>Guardar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="617"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="628"/>
         <source>No video (audio only)</source>
         <translation>Sin vídeo (solo audio)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="622"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="633"/>
         <source>Lowest quality</source>
         <translation>Calidad inferior</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="627"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="638"/>
         <source>Standard quality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="632"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="643"/>
         <source>Highest quality</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="637"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="648"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -397,7 +397,7 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="101"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="109"/>
         <source>%n minutes left</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -405,122 +405,127 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="116"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="124"/>
         <source>Conference room</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="156"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="164"/>
         <source>Share</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="170"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="178"/>
         <source>Copy room name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="174"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="182"/>
         <source>Copy room link</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="178"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="186"/>
         <source>Open in browser</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="193"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="190"/>
+        <source>Show phone number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="206"/>
         <source>Raise</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="202"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="215"/>
         <source>Resume</source>
         <translation type="unfinished">Continuar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="202"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="215"/>
         <source>Hold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="211"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="224"/>
         <source>View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="220"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="233"/>
         <source>Screen</source>
         <translation type="unfinished">Pantalla</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="238"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="251"/>
         <source>Share window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="243"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="256"/>
         <source>Share screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="253"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="266"/>
         <source>Camera</source>
         <translation type="unfinished">Cámera</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="271"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="284"/>
         <source>Micro</source>
         <translation type="unfinished">Micrófono</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="290"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="303"/>
         <source>Output</source>
         <translation type="unfinished">Salida</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="308"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="321"/>
         <source>More</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="320"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="333"/>
         <source>Noise supression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="326"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="339"/>
         <source>Toggle subtitles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="333"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="346"/>
         <source>Toggle whiteboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="339"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="352"/>
         <source>Video quality...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="348"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="361"/>
         <source>Set room password...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="355"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="368"/>
         <source>Mute everyone</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="410"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="423"/>
         <source>Leave conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="418"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="431"/>
         <source>End conference for all</source>
         <translation type="unfinished"></translation>
     </message>
@@ -536,12 +541,12 @@
 <context>
     <name>Credentials</name>
     <message>
-        <location filename="../src/platform/Credentials.cpp" line="59"/>
+        <location filename="../src/platform/Credentials.cpp" line="68"/>
         <source>storing credentials failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/platform/Credentials.cpp" line="113"/>
+        <location filename="../src/platform/Credentials.cpp" line="123"/>
         <source>reading credentials failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -572,22 +577,22 @@
 <context>
     <name>DateEventManager</name>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="260"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="372"/>
         <source>Conference starting soon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="261"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="373"/>
         <source>Appointment starting soon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="267"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="379"/>
         <source>Join</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="269"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="381"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
@@ -616,38 +621,43 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="145"/>
-        <location filename="../src/ui/components/DateEventsList.qml" line="156"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="147"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="158"/>
         <source>hh:mm</source>
         <translation>hh:mm</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="156"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="147"/>
+        <source>All day</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/DateEventsList.qml" line="158"/>
         <source>till %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="157"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="159"/>
         <source>in %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="188"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="190"/>
         <source>Join</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="188"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="190"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="199"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="201"/>
         <source>Copy room link</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="199"/>
+        <location filename="../src/ui/components/DateEventsList.qml" line="201"/>
         <source>Copy link</source>
         <translation type="unfinished"></translation>
     </message>
@@ -655,13 +665,31 @@
 <context>
     <name>DateEventsWidget</name>
     <message>
-        <location filename="../src/ui/components/DateEventsWidget.qml" line="23"/>
+        <location filename="../src/ui/components/DateEventsWidget.qml" line="27"/>
         <source>Appointments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/DateEventsWidget.qml" line="49"/>
+        <location filename="../src/ui/components/DateEventsWidget.qml" line="53"/>
+        <source>Loading appointments...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/DateEventsWidget.qml" line="54"/>
         <source>No upcoming appointments</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DialInInfo</name>
+    <message>
+        <location filename="../src/ui/components/popups/DialInInfo.qml" line="29"/>
+        <source>Call one of the phone numbers below and use this code for authentication:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/DialInInfo.qml" line="121"/>
+        <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1118,32 +1146,32 @@
 <context>
     <name>JitsiConnector</name>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="162"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="170"/>
         <source>New chat message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="206"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="214"/>
         <source>Unnamed participant</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1165"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1251"/>
         <source>Active conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1170"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1256"/>
         <source>Hang up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="761"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="788"/>
         <source>%1 has joined the conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="775"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="802"/>
         <source>%1 has left the conference</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1174,30 +1202,30 @@
 <context>
     <name>LDAPAddressBookFeeder</name>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="160"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="164"/>
         <source>Failed to initialize LDAP connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="181"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="253"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="372"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="185"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="257"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="376"/>
         <source>LDAP error: %1</source>
         <translation type="unfinished">Error LDAP: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="326"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="483"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="330"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="487"/>
         <source>Parse error: %1</source>
         <translation>Error de sintaxis: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="368"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="372"/>
         <source>LDAP timeout: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="239"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="243"/>
         <source>Failed to initialize LDAP connection: %1</source>
         <translation type="unfinished">No se pudo inicializar la conexión LDAP: %1</translation>
     </message>
@@ -1276,54 +1304,54 @@
 <context>
     <name>MainTabBar</name>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="311"/>
-        <location filename="../src/ui/components/MainTabBar.qml" line="312"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="327"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="328"/>
         <source>Home</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="320"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="336"/>
         <source>Conference</source>
         <translation type="unfinished">Conferencia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="321"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="337"/>
         <source>No active conference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="330"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="346"/>
         <source>No active call</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="410"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="426"/>
         <source>Move up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="439"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="455"/>
         <source>Move down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="468"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="484"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="476"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="492"/>
         <source>Delete</source>
         <translation type="unfinished">Borrar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="329"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="345"/>
         <source>Call</source>
         <translation>Llamar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="362"/>
-        <location filename="../src/ui/components/MainTabBar.qml" line="363"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="378"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="379"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1359,27 +1387,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="53"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="69"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="64"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="80"/>
         <source>Icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="139"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="155"/>
         <source>Cancel</source>
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="148"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="164"/>
         <source>Create</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="148"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="164"/>
         <source>Save</source>
         <translation type="unfinished">Guardar</translation>
     </message>
@@ -2781,34 +2809,34 @@
 <context>
     <name>SIPCallManager</name>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="174"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="183"/>
         <source>%1 is calling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="176"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="185"/>
         <source>%1 (%2) is calling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="202"/>
-        <location filename="../src/sip/SIPCallManager.cpp" line="206"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="211"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="215"/>
         <source>Reject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="203"/>
-        <location filename="../src/sip/SIPCallManager.cpp" line="205"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="212"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="214"/>
         <source>Accept</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="699"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="708"/>
         <source>Missed call from %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="733"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="742"/>
         <source>Call back</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3334,12 +3362,12 @@
 <context>
     <name>ViewHelper</name>
     <message>
-        <location filename="../src/ui/ViewHelper.cpp" line="117"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="118"/>
         <source>Save File</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="138"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="139"/>
         <source>%n minute(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -3347,7 +3375,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="141"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="142"/>
         <source>1 hour and %n minute(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -3355,7 +3383,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="143"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="144"/>
         <source>%n hour(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
@@ -3363,7 +3391,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/ViewHelper.cpp" line="225"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="226"/>
         <source>Audio Files (%1)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3376,77 +3404,77 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="59"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="86"/>
         <source>Widget</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="71"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="98"/>
         <source>Date Events</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="72"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="99"/>
         <source>List of upcoming appointments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="75"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="102"/>
         <source>Favorites</source>
         <translation type="unfinished">Favoritos</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="76"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="103"/>
         <source>Quick dial for your favorite contacts and conferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="79"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="106"/>
         <source>History</source>
         <translation type="unfinished">Historia</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="83"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="110"/>
         <source>Web View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="84"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="111"/>
         <source>A web-based content display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="155"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="181"/>
         <source>Accept all certificates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="80"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="107"/>
         <source>Searchable call and conference history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="152"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="178"/>
         <source>Title</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="153"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="179"/>
         <source>URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="154"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="180"/>
         <source>URL (dark mode)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="215"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="281"/>
         <source>Cancel</source>
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="223"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="289"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>

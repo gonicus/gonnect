@@ -15,7 +15,7 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/components/ConferenceButtonBar.qml" line="101"/>
+        <location filename="../../../src/ui/components/ConferenceButtonBar.qml" line="109"/>
         <source>%n minutes left</source>
         <translation>
             <numerusform>%n minute left</numerusform>
@@ -38,7 +38,7 @@
 <context>
     <name>ViewHelper</name>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="138"/>
+        <location filename="../../../src/ui/ViewHelper.cpp" line="139"/>
         <source>%n minute(s)</source>
         <translation>
             <numerusform>%n Minute</numerusform>
@@ -46,7 +46,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="141"/>
+        <location filename="../../../src/ui/ViewHelper.cpp" line="142"/>
         <source>1 hour and %n minute(s)</source>
         <translation>
             <numerusform>1 Stunde und %n Minute</numerusform>
@@ -54,7 +54,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../src/ui/ViewHelper.cpp" line="143"/>
+        <location filename="../../../src/ui/ViewHelper.cpp" line="144"/>
         <source>%n hour(s)</source>
         <translation>
             <numerusform>eine Stunde</numerusform>
