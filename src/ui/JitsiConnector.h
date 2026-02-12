@@ -65,7 +65,7 @@ public:
     QString roomPassword() const override { return m_roomPassword; }
     void setRoomPassword(QString value) override;
     void joinConference(const QString &conferenceId, const QString &displayName,
-                                IConferenceConnector::StartFlags startFlags) override;
+                        IConferenceConnector::StartFlags startFlags) override;
     void enterPassword(const QString &password, bool rememberPassword) override;
     void leaveConference() override;
     void terminateConference() override;
@@ -94,9 +94,9 @@ public:
     void kickParticipant(const QString &id) override;
     void kickParticipant(ConferenceParticipant *participant) override;
     void grantParticipantRole(const QString &participantId,
-                                      ConferenceParticipant::Role newRole) override;
+                              ConferenceParticipant::Role newRole) override;
     void grantParticipantRole(ConferenceParticipant *participant,
-                                      ConferenceParticipant::Role newRole) override;
+                              ConferenceParticipant::Role newRole) override;
     ConferenceParticipant *largeVideoParticipant() const override
     {
         return m_largeVideoParticipant;

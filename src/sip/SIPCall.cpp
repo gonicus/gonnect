@@ -691,8 +691,10 @@ void SIPCall::updateRtcpStats()
                 m_signalingEncrypted = m_account->isSignalingEncrypted();
             }
 
-            m_mosTx = calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.last, m_jitterTx, m_effDelayTx);
-            m_mosRx = calculateMos(st.rtcp.rxStat, st.rtcp.rttUsec.last, m_jitterRx, m_effDelayRx);
+            m_mosTx = calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.last, m_jitterTx, m_effDelayTx,
+                                   m_lastLossTx, m_lastPktTx);
+            m_mosRx = calculateMos(st.rtcp.rxStat, st.rtcp.rttUsec.last, m_jitterRx, m_effDelayRx,
+                                   m_lastLossRx, m_lastPktRx);
 
             // Go for RTCP XR information - if available
             pjsua_call_info pj_ci;
@@ -703,6 +705,7 @@ void SIPCall::updateRtcpStats()
 
             qCDebug(lcSIPCall) << "---- Call quality info for media #" << i << "----";
 
+#if defined(PJMEDIA_HAS_RTCP_XR) && (PJMEDIA_HAS_RTCP_XR != 0)
             pjmedia_rtcp_xr_stat xr_stat;
             if (pjmedia_stream_get_stat_xr(call_med->strm.a.stream, &xr_stat) == PJ_SUCCESS
                 && xr_stat.tx.voip_mtc.mos_lq != 127) {
@@ -726,13 +729,14 @@ void SIPCall::updateRtcpStats()
                         << "jitter:" << m_jitterBufferRxDelay << "loss rate:" << m_lossRateRx;
                 qCDebug(lcSIPCall) << "- RTCP-XR RTT" << m_rtt;
             }
+#endif
 
             qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << m_lossTx
                                << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
-            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosTx << "loss:" << m_lossRx
+            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosRx << "loss:" << m_lossRx
                                << "jitter:" << m_jitterRx << "effective delay:" << m_effDelayRx;
 
-            double mos = qMin(m_mosTx, m_mosRx);
+            double mos = std::min(m_mosTx, m_mosRx);
             if (mos >= 4.0) {
                 setQualityLevel(SIPCallManager::QualityLevel::High);
             } else if (mos < 4.0 && mos >= 3.5) {
@@ -758,34 +762,34 @@ void SIPCall::updateRtcpStats()
 }
 
 float SIPCall::calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
-                            double &effectiveDelay)
+                            double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss)
 {
     double loss = 0.0;
 
-    if (stat.pkt != m_lastPkt) {
-        loss = 100.0 * (double)(stat.loss - m_lastLoss) / (double)(stat.pkt - m_lastPkt);
+    if (stat.pkt != lastPkt) {
+        loss = 100.0 * (double)(stat.loss - lastLoss) / (double)(stat.pkt - lastPkt);
     }
 
     jitter = stat.jitterUsec.mean / 1000.0;
     double rtt = rttLast / 1000.0;
 
-    m_lastLoss = stat.loss;
-    m_lastPkt = stat.pkt;
+    lastLoss = stat.loss;
+    lastPkt = stat.pkt;
 
-    effectiveDelay = rtt + (jitter * 2.0) + 10.0;
+    effectiveDelay = rtt / 2.0 + (jitter * 2.0) + 10.0;
 
     // R-factor base value
     double R = 93.2;
 
     // Remove delay
     if (effectiveDelay > 160.0) {
-        R -= (effectiveDelay - 160.0) / 10.0;
+        R -= (effectiveDelay - 120.0) / 10.0;
     } else {
         R -= effectiveDelay / 40.0;
     }
 
     // Remove loss
-    R -= loss * 2.5;
+    R -= loss;
 
     // Adjust to mos scale
     if (R < 0) {

@@ -103,7 +103,7 @@ private:
     void setSecurityLevel(SIPCallManager::SecurityLevel securityLevel);
     void createOngoingCallNotification();
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
-                       double &effectiveDelay);
+                       double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
 
     QTimer m_statsTimer;
     ContactInfo m_contactInfo;
@@ -135,12 +135,14 @@ private:
     QString m_postTask;
 
     SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::High;
-    SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::Low;
+    SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::High;
 
     QString m_codec;
     quint32 m_clockRate = 0;
-    quint32 m_lastLoss = 0;
-    quint32 m_lastPkt = 0;
+    quint32 m_lastLossRx = 0;
+    quint32 m_lastPktRx = 0;
+    quint32 m_lastLossTx = 0;
+    quint32 m_lastPktTx = 0;
 
     double m_mosRx = 0;
     double m_mosTx = 0;
