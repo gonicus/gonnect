@@ -80,13 +80,46 @@ Item {
     }
 
     Column {
+        id: roomNameColumn
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left
+            leftMargin: 20
+        }
+
+        Label {
+            anchors.left: parent.left
+            text: qsTr("Conference room")
+            color: Theme.secondaryTextColor
+        }
+
+        Label {
+            id: roomNameLabel
+            text: control.iConferenceConnector.displayName || control.iConferenceConnector.conferenceName
+            anchors.left: parent.left
+        }
+    }
+
+    Rectangle {
+        id: timeLabelSeparator
+        height: 32
+        width: 1
+        color: Theme.borderColor
+        anchors {
+            left: roomNameColumn.right
+            leftMargin: 20
+            verticalCenter: parent.verticalCenter
+        }
+    }
+
+    Column {
         id: timeLabelContainer
         width: remainingTimeLabel.visible
                ? Math.max(elapsedTimeLabel.implicitWidth, remainingTimeLabel.implicitWidth)
                : elapsedTimeLabel.implicitWidth
         anchors {
             verticalCenter: parent.verticalCenter
-            left: parent.left
+            left: timeLabelSeparator.right
             leftMargin: 20
         }
 
@@ -94,7 +127,6 @@ Item {
             id: elapsedTimeLabel
             color: Theme.secondaryTextColor
             text: ViewHelper.secondsToNiceText(internal.elapsedSeconds)
-            anchors.centerIn: parent
             spacing: 4
             icon {
                 color: Theme.secondaryTextColor
@@ -112,30 +144,9 @@ Item {
         }
     }
 
-    Column {
-        id: roomNameColumn
-        anchors {
-            verticalCenter: parent.verticalCenter
-            left: timeLabelContainer.right
-            leftMargin: 20
-        }
-
-        Label {
-            anchors.left: parent.left
-            text: qsTr("Conference room")
-            color: Theme.secondaryTextColor
-        }
-
-        Label {
-            id: roomNameLabel
-            text: control.iConferenceConnector.displayName || control.iConferenceConnector.conferenceName
-            anchors.left: parent.left
-        }
-    }
-
     Flickable {
         id: rowFlickable
-        width: Math.min(buttonRow.implicitWidth, control.width - (roomNameColumn.x + roomNameColumn.width) - rightStickyButtonRow.implicitWidth)
+        width: Math.min(buttonRow.implicitWidth, control.width - (timeLabelContainer.x + timeLabelContainer.width) - rightStickyButtonRow.implicitWidth)
         contentWidth: buttonRow.implicitWidth
         clip: true
         anchors {

@@ -111,12 +111,28 @@ Item {
         }
     }
 
+    Rectangle {
+        id: elabsedTimeSeparator
+        height: 32
+        width: 1
+        color: Theme.borderColor
+        anchors {
+            left: callQualityIcon.right
+            leftMargin: 20
+            verticalCenter: parent.verticalCenter
+        }
+    }
+
     IconLabel {
         id: elapsedTimeLabel
         color: Theme.secondaryTextColor
         text: ViewHelper.secondsToNiceText(internal.elapsedSeconds)
-        anchors.centerIn: parent
         spacing: 4
+        anchors {
+            left: elabsedTimeSeparator.right
+            leftMargin: 20
+            verticalCenter: parent.verticalCenter
+        }
         icon {
             color: Theme.secondaryTextColor
             source: Icons.acceptTimeEvent
