@@ -177,6 +177,15 @@ void EDSEventFeeder::connectViewCompleteSignal(ECalClientView *view)
 
 void EDSEventFeeder::onViewComplete(ECalClientView *view, GError *error, gpointer user_data)
 {
+    /*
+        INFO: The "complete" signal is only needed on first startup to wait for the initial
+        stream of all objects to the view, we'll disconnect it here.
+        Otherwise, future view updates would cause duplicate signal connections.
+    */
+    guint signalId = g_signal_lookup("complete", G_OBJECT_TYPE(view));
+    g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_ID, signalId, 0, nullptr, nullptr,
+                                         nullptr);
+
     if (error) {
         qCCritical(lcEDSEventFeeder) << "Failed to wait for view completion, unable to subscribe "
                                         "to live calendar updates:"
