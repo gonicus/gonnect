@@ -472,8 +472,7 @@ void JitsiConnector::checkJitsiBackendFeatures()
     auto manager = new QNetworkAccessManager(this);
 
     QNetworkRequest request;
-    // request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
-    request.setUrl(QUrl(QString("%1/config.js").arg("https://meet.jit.si")));
+    request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
 
     auto reply = manager->get(request);
     connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err) {
