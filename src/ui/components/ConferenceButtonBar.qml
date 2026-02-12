@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.impl
 import QtQuick.Controls.Material
 import base
 
@@ -89,10 +90,18 @@ Item {
             leftMargin: 20
         }
 
-        Label {
+        IconLabel {
             id: elapsedTimeLabel
             color: Theme.secondaryTextColor
-            text: "🕓 " + ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+            text: ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+            anchors.centerIn: parent
+            spacing: 4
+            icon {
+                color: Theme.secondaryTextColor
+                source: Icons.acceptTimeEvent
+                width: 20
+                height: 20
+            }
         }
 
         Label {

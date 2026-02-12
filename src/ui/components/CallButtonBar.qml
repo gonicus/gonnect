@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.impl
 import QtQuick.Controls.Material
 import base
 
@@ -22,6 +23,8 @@ Item {
     readonly property bool isFinished: control.callItem?.isFinished ?? false
     readonly property bool isIncoming: control.callItem?.isIncoming ?? false
     readonly property bool hasCapabilityJitsi: control.callItem?.hasCapabilityJitsi ?? false
+    readonly property int qualityLevel: control.callItem?.qualityLevel ?? SIPCallManager.QualityLevel.Low
+    readonly property int securityLevel: control.callItem?.securityLevel ?? SIPCallManager.SecurityLevel.Low
 
     readonly property bool areInCallButtonsEnabled: control.isEstablished && !control.isFinished
 
@@ -60,14 +63,65 @@ Item {
         }
     }
 
-    Label {
-        id: elapsedTimeLabel
-        color: Theme.secondaryTextColor
-        text: "🕓  " + ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+    IconLabel {
+        id: securityLevelIcon
         anchors {
-            verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: 20
+            verticalCenter: parent.verticalCenter
+        }
+        icon {
+            width: 24
+            height: 24
+            source: {
+                switch (control.securityLevel) {
+                    case SIPCallManager.SecurityLevel.Low:
+                        return Icons.securityLow
+                    case SIPCallManager.SecurityLevel.Medium:
+                        return Icons.securityMedium
+                    case SIPCallManager.SecurityLevel.High:
+                        return Icons.securityHigh
+                }
+                throw new Error("Unknown security level value: " + control.securityLevel)
+            }
+        }
+    }
+
+    IconLabel {
+        id: callQualityIcon
+        anchors {
+            left: securityLevelIcon.right
+            leftMargin: 20
+            verticalCenter: parent.verticalCenter
+        }
+        icon {
+            width: 24
+            height: 24
+            source: {
+                switch (control.qualityLevel) {
+                    case SIPCallManager.QualityLevel.Low:
+                        return Icons.callQualityLow
+                    case SIPCallManager.QualityLevel.Medium:
+                        return Icons.callQualityMed
+                    case SIPCallManager.QualityLevel.High:
+                        return Icons.callQualityHigh
+                }
+                throw new Error("Unknown quality level value: " + control.qualityLevel)
+            }
+        }
+    }
+
+    IconLabel {
+        id: elapsedTimeLabel
+        color: Theme.secondaryTextColor
+        text: ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+        anchors.centerIn: parent
+        spacing: 4
+        icon {
+            color: Theme.secondaryTextColor
+            source: Icons.acceptTimeEvent
+            width: 20
+            height: 20
         }
     }
 

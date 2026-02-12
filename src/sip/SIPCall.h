@@ -7,6 +7,7 @@
 
 #include "ICallState.h"
 #include "ResponseItem.h"
+#include "SIPCallManager.h"
 
 class SIPAccount;
 class CallHistoryItem;
@@ -69,6 +70,9 @@ public:
 
     virtual ContactInfo remoteContactInfo() const override { return m_contactInfo; }
 
+    SIPCallManager::QualityLevel qualityLevel() const { return m_qualityLevel; }
+    SIPCallManager::SecurityLevel securityLevel() const { return m_securityLevel; }
+
 protected:
     virtual void toggleHoldImpl() override;
 
@@ -83,6 +87,8 @@ Q_SIGNALS:
     void contactChanged();
     void metadataChanged();
     void rtcpStatsChanged();
+    void qualityLevelChanged();
+    void securityLevelChanged();
 
 private Q_SLOTS:
     void updateIsBlocked();
@@ -93,6 +99,8 @@ private:
     void setIsHolding(bool value);
     void setIsBlocked(bool value);
     void setContactInfo(const QString &sipUrl, bool isIncoming = true);
+    void setQualityLevel(SIPCallManager::QualityLevel qualityLevel);
+    void setSecurityLevel(SIPCallManager::SecurityLevel securityLevel);
     void createOngoingCallNotification();
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
                        double &effectiveDelay);
@@ -125,6 +133,9 @@ private:
     QString m_contactId;
     QString m_notificationRef;
     QString m_postTask;
+
+    SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::Low;
+    SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::Low;
 
     QString m_codec;
     quint32 m_clockRate = 0;

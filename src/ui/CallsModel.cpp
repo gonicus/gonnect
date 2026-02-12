@@ -85,6 +85,30 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                 }
             });
 
+    connect(&callManager, &SIPCallManager::qualityLevelChanged, this,
+            [this](SIPCall *call, SIPCallManager::QualityLevel qualityLevel) {
+                auto callInfo = m_callsHash.value(call->getId());
+                const auto index = m_calls.indexOf(callInfo);
+
+                if (callInfo && index >= 0) {
+                    callInfo->qualityLevel = qualityLevel;
+                    const auto idx = createIndex(index, 0);
+                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::QualityLevel) });
+                }
+            });
+
+    connect(&callManager, &SIPCallManager::securityLevelChanged, this,
+            [this](SIPCall *call, SIPCallManager::SecurityLevel securityLevel) {
+                auto callInfo = m_callsHash.value(call->getId());
+                const auto index = m_calls.indexOf(callInfo);
+
+                if (callInfo && index >= 0) {
+                    callInfo->securityLevel = securityLevel;
+                    const auto idx = createIndex(index, 0);
+                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::SecurityLevel) });
+                }
+            });
+
     connect(&callManager, &SIPCallManager::callState, this, [this](int callId, int statusCode) {
         auto callInfo = m_callsHash.value(callId);
         const auto index = m_calls.indexOf(callInfo);
@@ -156,6 +180,8 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::HasMetadata), "hasMetadata" },
         { static_cast<int>(Roles::HasAvatar), "hasAvatar" },
         { static_cast<int>(Roles::AvatarPath), "avatarPath" },
+        { static_cast<int>(Roles::QualityLevel), "qualityLevel" },
+        { static_cast<int>(Roles::SecurityLevel), "securityLevel" },
     };
 }
 
@@ -198,6 +224,8 @@ void CallsModel::updateCalls()
                 PhoneNumberUtil::instance().contactInfoBySipUrl(callInfo->remoteUri);
         callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && call->isEstablished();
         callInfo->hasMetadata = call->hasMetadata();
+        callInfo->qualityLevel = call->qualityLevel();
+        callInfo->securityLevel = call->securityLevel();
 
         if (!exists) {
             m_calls.append(callInfo);
@@ -315,6 +343,12 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::HasMetadata):
         return callInfo->hasMetadata;
+
+    case static_cast<int>(Roles::QualityLevel):
+        return QVariant::fromValue(callInfo->qualityLevel);
+
+    case static_cast<int>(Roles::SecurityLevel):
+        return QVariant::fromValue(callInfo->securityLevel);
 
     case static_cast<int>(Roles::RemoteUri):
     default:

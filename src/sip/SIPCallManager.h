@@ -5,8 +5,8 @@
 #include <QtQml/qqmlregistration.h>
 
 #include "AppSettings.h"
-#include "SIPCall.h"
 
+class SIPCall;
 class DtmfGenerator;
 
 class SIPCallManager : public QObject
@@ -19,6 +19,12 @@ class SIPCallManager : public QObject
     Q_DISABLE_COPY(SIPCallManager)
 
 public:
+    enum class QualityLevel { Low, Medium, High };
+    Q_ENUM(QualityLevel)
+
+    enum class SecurityLevel { Low, Medium, High };
+    Q_ENUM(SecurityLevel)
+
     Q_REQUIRED_RESULT static SIPCallManager &instance()
     {
         static SIPCallManager *_instance = nullptr;
@@ -118,6 +124,8 @@ Q_SIGNALS:
     void metadataChanged(SIPCall *call);
     void capabilitiesChanged(SIPCall *call);
     void audioLevelChanged(SIPCall *call, qreal level);
+    void qualityLevelChanged(SIPCall *call, SIPCallManager::QualityLevel qualityLevel);
+    void securityLevelChanged(SIPCall *call, SIPCallManager::SecurityLevel securityLevel);
     void showCallWindow();
     void blocksChanged();
     void isBlockedChanged(SIPCall *call);

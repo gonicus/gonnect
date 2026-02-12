@@ -529,6 +529,24 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
     }
 }
 
+void SIPCall::setQualityLevel(SIPCallManager::QualityLevel qualityLevel)
+{
+    if (m_qualityLevel != qualityLevel) {
+        m_qualityLevel = qualityLevel;
+        Q_EMIT qualityLevelChanged();
+        Q_EMIT SIPCallManager::instance().qualityLevelChanged(this, qualityLevel);
+    }
+}
+
+void SIPCall::setSecurityLevel(SIPCallManager::SecurityLevel securityLevel)
+{
+    if (m_securityLevel != securityLevel) {
+        m_securityLevel = securityLevel;
+        Q_EMIT securityLevelChanged();
+        Q_EMIT SIPCallManager::instance().securityLevelChanged(this, securityLevel);
+    }
+}
+
 void SIPCall::updateIsBlocked()
 {
     bool isBlocked = false;

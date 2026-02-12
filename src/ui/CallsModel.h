@@ -5,8 +5,7 @@
 #include <QQmlEngine>
 #include <pjsip/sip_msg.h>
 #include "PhoneNumberUtil.h"
-
-class SIPCall;
+#include "SIPCall.h"
 
 class CallsModel : public QAbstractListModel
 {
@@ -33,6 +32,8 @@ public:
         QDateTime established;
         ContactInfo contactInfo;
         pjsip_status_code statusCode = PJSIP_SC_NULL;
+        SIPCallManager::QualityLevel qualityLevel = SIPCallManager::QualityLevel::Low;
+        SIPCallManager::SecurityLevel securityLevel = SIPCallManager::SecurityLevel::Low;
     };
 
     enum class Roles {
@@ -55,7 +56,9 @@ public:
         HasIncomingAudioLevel,
         HasMetadata,
         HasAvatar,
-        AvatarPath
+        AvatarPath,
+        QualityLevel,
+        SecurityLevel
     };
 
     explicit CallsModel(QObject *parent = nullptr);
