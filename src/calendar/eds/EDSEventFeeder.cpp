@@ -170,6 +170,26 @@ void EDSEventFeeder::onEcalClientConnected(GObject *source_object, GAsyncResult 
     }
 }
 
+void EDSEventFeeder::connectViewCompleteSignal(ECalClientView *view)
+{
+    g_signal_connect(view, "complete", G_CALLBACK(onViewComplete), this);
+}
+
+void EDSEventFeeder::onViewComplete(ECalClientView *view, GError *error, gpointer user_data)
+{
+    if (error) {
+        qCCritical(lcEDSEventFeeder) << "Failed to wait for view completion, unable to subscribe "
+                                        "to live calendar updates:"
+                                     << error->message;
+        return;
+    }
+
+    EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
+    if (feeder) {
+        feeder->connectCalendarSignals(view);
+    }
+}
+
 void EDSEventFeeder::connectCalendarSignals(ECalClientView *view)
 {
     g_signal_connect(view, "objects-added", G_CALLBACK(onEventsAdded), this);
@@ -295,7 +315,7 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
             return;
         }
 
-        feeder->connectCalendarSignals(view);
+        feeder->connectViewCompleteSignal(view);
         e_cal_client_view_start(view, &error);
         if (error) {
             qCCritical(lcEDSEventFeeder) << "Can't start view:" << error->message;
