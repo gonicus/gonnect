@@ -50,6 +50,18 @@ finish-args:
   # Kerberos socket
   - --filesystem=/run/.heim_org.h5l.kcm-socket
 
+cleanup:
+  - '*.la'
+  - '*.a'
+  - '*.qml'
+  - /share/gir-1.0
+  - /resources/qtwebengine_devtools_resources.pak
+
+cleanup-commands:
+  - /app/cleanup-BaseApp.sh
+  - mkdir -p ${FLATPAK_DEST}/plugins
+  - mkdir -p ${FLATPAK_DEST}/etc/gonnect
+
 modules:
   - name: kerberos
     subdir: src
@@ -250,8 +262,3 @@ modules:
       path: ../..
     cleanup:
     - /bin/update-emojis
-
-cleanup-commands:
-  - /app/cleanup-BaseApp.sh
-  - mkdir -p ${FLATPAK_DEST}/plugins
-  - mkdir -p ${FLATPAK_DEST}/etc/gonnect

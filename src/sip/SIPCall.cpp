@@ -689,10 +689,6 @@ void SIPCall::updateRtcpStats()
                 m_clockRate = si.codecClockRate;
                 m_mediaEncrypted = si.proto & PJMEDIA_TP_PROFILE_SRTP;
                 m_signalingEncrypted = m_account->isSignalingEncrypted();
-
-                qCritical() << "###" << m_codec << m_clockRate
-                            << (m_mediaEncrypted ? "secure media" : "")
-                            << (m_signalingEncrypted ? "secure signaling" : "");
             }
 
             m_mosTx = calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.last, m_jitterTx, m_effDelayTx);
@@ -723,17 +719,33 @@ void SIPCall::updateRtcpStats()
 
             // TODO: wire parts to the GUI
             // codec/clock raate
-            // media/signaling encrypted
-            // MOS            4.0-4.5 green  3.5-3.9 yellow   < 3.5 red
-            // RTT (latency)  < 150 ms       150 – 300 ms     > 400 ms
-            // Packet Loss    < 1%	    1% – 5%          > 5%
-            // Jitter         < 20 ms      20 – 50 ms       > 50 ms
+            // MOS            value
+            // RTT (latency)  ms
+            // Packet Loss    %
+            // Jitter         ms
 
             qCDebug(lcSIPCall) << "---- Call quality info for media #" << i << "----";
             qCDebug(lcSIPCall) << "- TX -> mos:" << m_mosTx << "loss:" << m_lossTx
                                << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
             qCDebug(lcSIPCall) << "- RX -> mos:" << m_mosTx << "loss:" << m_lossRx
                                << "jitter:" << m_jitterRx << "effective delay:" << m_effDelayRx;
+
+            double mos = qMin(m_mosTx, m_mosRx);
+            if (mos >= 4.0) {
+                setQualityLevel(SIPCallManager::QualityLevel::High);
+            } else if (mos < 4.0 && mos >= 3.5) {
+                setQualityLevel(SIPCallManager::QualityLevel::Medium);
+            } else {
+                setQualityLevel(SIPCallManager::QualityLevel::Low);
+            }
+
+            if (m_mediaEncrypted && m_signalingEncrypted) {
+                setSecurityLevel(SIPCallManager::SecurityLevel::High);
+            } else if (m_mediaEncrypted || m_signalingEncrypted) {
+                setSecurityLevel(SIPCallManager::SecurityLevel::Medium);
+            } else {
+                setSecurityLevel(SIPCallManager::SecurityLevel::Low);
+            }
 
             Q_EMIT rtcpStatsChanged();
 
