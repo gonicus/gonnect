@@ -16,10 +16,6 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
-    Accessible.role: Accessible.Window
-    Accessible.name: control.title
-    Accessible.description: qsTr("Window for manual audio environment configuration")
-
     Item {
         anchors.fill: parent
 

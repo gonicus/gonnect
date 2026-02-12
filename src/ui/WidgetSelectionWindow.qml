@@ -24,10 +24,6 @@ BaseWindow {
     minimumHeight: control.dynamicHeight
     maximumHeight: control.dynamicHeight
 
-    Accessible.role: Accessible.Window
-    Accessible.name: control.title
-    Accessible.description: qsTr("Window for creating a new dashboard widget")
-
     property int currentHeight: widgetOptions.implicitHeight + control.windowHeaderPadding
     property int maxHeight: 700 + control.windowHeaderPadding
     property int dynamicHeight: control.currentHeight > control.maxHeight

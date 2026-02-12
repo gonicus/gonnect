@@ -24,10 +24,6 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
-    Accessible.role: Accessible.Window
-    Accessible.name: control.title
-    Accessible.description: qsTr("Window for creating a new dashboard page")
-
     required property string pageId
 
     property bool newPage: false
