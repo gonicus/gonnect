@@ -336,7 +336,7 @@ void SIPAccount::initialize()
     m_accountConfig.natConfig.contactRewriteUse = 0;
 
     m_accountConfig.mediaConfig.rtcpXrEnabled = true;
-    // m_accountConfig.mediaConfig.rtcpMuxEnabled = true;
+    m_accountConfig.mediaConfig.rtcpMuxEnabled = true;
 
     m_settings.endGroup();
 

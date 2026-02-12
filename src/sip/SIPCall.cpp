@@ -727,13 +727,6 @@ void SIPCall::updateRtcpStats()
                 qCDebug(lcSIPCall) << "- RTCP-XR RTT" << m_rtt;
             }
 
-            // TODO: wire parts to the GUI
-            // codec/clock raate
-            // MOS            value
-            // RTT (latency)  ms
-            // Packet Loss    %
-            // Jitter         ms
-
             qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << m_lossTx
                                << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
             qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosTx << "loss:" << m_lossRx
