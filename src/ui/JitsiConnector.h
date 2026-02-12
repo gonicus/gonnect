@@ -80,6 +80,8 @@ public:
     void setVideoMuted(bool shallMute) override;
     void setHandRaised(bool handRaised) override;
     void setTileView(bool showTileView) override;
+    bool hasDialIn() const override;
+    void requestDialInInfo() override;
     bool isHandRaised() const override { return m_isHandRaised; }
     bool isTileView() const override { return m_isTileView; }
     void setNoiseSuppressionEnabled(bool enabled) override;
@@ -172,6 +174,8 @@ private:
     bool m_isToggleScreenSharePending = false;
     bool m_hasWhiteboard = false;
     bool m_hasTextpad = false;
+    QUrl m_dialInConfCodeUrl;
+    QUrl m_dialInNumbersUrl;
     QString m_roomPassword;
     VideoQuality m_videoQuality = VideoQuality::Average;
 

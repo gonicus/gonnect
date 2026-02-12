@@ -4,8 +4,64 @@
 #include <QUrl>
 #include <QHostAddress>
 #include <QTcpSocket>
+#include <QJsonDocument>
+#include <QtConcurrent>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
 
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
+
+QFuture<QString> NetworkHelper::fetchUrlAsString(const QUrl &url)
+{
+    return QtConcurrent::run([url]() -> QString {
+        QNetworkAccessManager manager;
+        QNetworkRequest request(url);
+        QNetworkReply *reply = manager.get(request);
+
+        QEventLoop loop;
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        loop.exec();
+
+        QString result;
+        if (reply->error() == QNetworkReply::NoError) {
+            result = reply->readAll();
+        } else {
+            qCCritical(lcNetwork) << "Error while fetching" << url << ":" << reply->errorString();
+        }
+
+        reply->deleteLater();
+        return result;
+    });
+}
+
+QFuture<QJsonDocument> NetworkHelper::fetchUrlAsJson(const QUrl &url)
+{
+    return QtConcurrent::run([url]() -> QJsonDocument {
+        QNetworkAccessManager manager;
+        QNetworkRequest request(url);
+        QNetworkReply *reply = manager.get(request);
+
+        QEventLoop loop;
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        loop.exec();
+
+        QJsonDocument result;
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonParseError parseError;
+            result = QJsonDocument::fromJson(reply->readAll(), &parseError);
+            if (result.isNull()) {
+                qCCritical(lcNetwork) << "Error while parsing url:" << parseError.errorString();
+            }
+        } else {
+            qCCritical(lcNetwork) << "Error while fetching" << url << ":" << reply->errorString();
+        }
+
+        reply->deleteLater();
+        return result;
+    });
+}
 
 NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 {
