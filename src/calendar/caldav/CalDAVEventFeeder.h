@@ -22,8 +22,8 @@ public:
 
     ~CalDAVEventFeeder();
 
-    virtual void init() override;
-    virtual QUrl networkCheckURL() const override;
+    void init() override;
+    QUrl networkCheckURL() const override;
 
     void process();
 

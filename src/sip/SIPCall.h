@@ -2,10 +2,12 @@
 #include <QObject>
 #include <QPointer>
 #include <QDateTime>
+#include <QTimer>
 #include <pjsua2.hpp>
 
 #include "ICallState.h"
 #include "ResponseItem.h"
+#include "SIPCallManager.h"
 
 class SIPAccount;
 class CallHistoryItem;
@@ -20,15 +22,15 @@ class SIPCall : public ICallState, public pj::Call
 public:
     explicit SIPCall(SIPAccount *account, int callId = PJSUA_INVALID_ID,
                      const QString &contactId = "", bool silent = false);
-    virtual ~SIPCall();
+    ~SIPCall();
 
-    virtual void onCallState(pj::OnCallStateParam &prm) override;
-    virtual void onCallTransferRequest(pj::OnCallTransferRequestParam &prm) override;
-    virtual void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm) override;
-    virtual void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
-    virtual void onInstantMessage(pj::OnInstantMessageParam &prm) override;
-    virtual void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
-    virtual void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
+    void onCallState(pj::OnCallStateParam &prm) override;
+    void onCallTransferRequest(pj::OnCallTransferRequestParam &prm) override;
+    void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm) override;
+    void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
+    void onInstantMessage(pj::OnInstantMessageParam &prm) override;
+    void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
+    void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
 
     SIPAccount *account() const { return m_account; };
     pj::AudioMedia *audioMedia() const;
@@ -66,10 +68,13 @@ public:
 
     bool earlyCallState() const { return m_earlyCallState; }
 
-    virtual ContactInfo remoteContactInfo() const override { return m_contactInfo; }
+    ContactInfo remoteContactInfo() const override { return m_contactInfo; }
+
+    SIPCallManager::QualityLevel qualityLevel() const { return m_qualityLevel; }
+    SIPCallManager::SecurityLevel securityLevel() const { return m_securityLevel; }
 
 protected:
-    virtual void toggleHoldImpl() override;
+    void toggleHoldImpl() override;
 
 Q_SIGNALS:
     void missed();
@@ -81,17 +86,26 @@ Q_SIGNALS:
     void capabilitiesChanged();
     void contactChanged();
     void metadataChanged();
+    void rtcpStatsChanged();
+    void qualityLevelChanged();
+    void securityLevelChanged();
 
 private Q_SLOTS:
     void updateIsBlocked();
     void updateMutedState();
+    void updateRtcpStats();
 
 private:
     void setIsHolding(bool value);
     void setIsBlocked(bool value);
     void setContactInfo(const QString &sipUrl, bool isIncoming = true);
+    void setQualityLevel(SIPCallManager::QualityLevel qualityLevel);
+    void setSecurityLevel(SIPCallManager::SecurityLevel securityLevel);
     void createOngoingCallNotification();
+    float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
+                       double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
 
+    QTimer m_statsTimer;
     ContactInfo m_contactInfo;
     SIPAccount *m_account = nullptr;
     QPointer<CallHistoryItem> m_historyItem;
@@ -119,4 +133,36 @@ private:
     QString m_contactId;
     QString m_notificationRef;
     QString m_postTask;
+
+    SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::High;
+    SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::High;
+
+    QString m_codec;
+    quint32 m_clockRate = 0;
+    quint32 m_lastLossRx = 0;
+    quint32 m_lastPktRx = 0;
+    quint32 m_lastLossTx = 0;
+    quint32 m_lastPktTx = 0;
+
+    double m_mosRx = 0;
+    double m_mosTx = 0;
+    double m_lossTx = 0;
+    double m_lossRx = 0;
+    double m_jitterTx = 0;
+    double m_jitterRx = 0;
+    double m_effDelayTx = 0;
+    double m_effDelayRx = 0;
+    double m_mosTxLq = 0;
+    double m_mosRxLq = 0;
+    double m_mosTxCq = 0;
+    double m_mosRxCq = 0;
+    double m_jitterBufferTxDelay = 0;
+    double m_jitterBufferRxDelay = 0;
+
+    double m_rtt = 0;
+    double m_lossRateTx = 0;
+    double m_lossRateRx = 0;
+
+    bool m_signalingEncrypted = false;
+    bool m_mediaEncrypted = false;
 };

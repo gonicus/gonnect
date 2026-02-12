@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.impl
 import QtQuick.Controls.Material
 import base
 
@@ -79,35 +80,10 @@ Item {
     }
 
     Column {
-        id: timeLabelContainer
-        width: remainingTimeLabel.visible
-               ? Math.max(elapsedTimeLabel.implicitWidth, remainingTimeLabel.implicitWidth)
-               : elapsedTimeLabel.implicitWidth
-        anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.left
-            leftMargin: 20
-        }
-
-        Label {
-            id: elapsedTimeLabel
-            color: Theme.secondaryTextColor
-            text: "🕓 " + ViewHelper.secondsToNiceText(internal.elapsedSeconds)
-        }
-
-        Label {
-            id: remainingTimeLabel
-            visible: internal.hasOngoingDateEvent
-            text: "(" + qsTr("%n minutes left", "", internal.minutesRemaining) + ")"
-            color: Theme.secondaryTextColor
-        }
-    }
-
-    Column {
         id: roomNameColumn
         anchors {
             verticalCenter: parent.verticalCenter
-            left: timeLabelContainer.right
+            left: parent.left
             leftMargin: 20
         }
 
@@ -124,9 +100,53 @@ Item {
         }
     }
 
+    Rectangle {
+        id: timeLabelSeparator
+        height: 32
+        width: 1
+        color: Theme.borderColor
+        anchors {
+            left: roomNameColumn.right
+            leftMargin: 20
+            verticalCenter: parent.verticalCenter
+        }
+    }
+
+    Column {
+        id: timeLabelContainer
+        width: remainingTimeLabel.visible
+               ? Math.max(elapsedTimeLabel.implicitWidth, remainingTimeLabel.implicitWidth)
+               : elapsedTimeLabel.implicitWidth
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: timeLabelSeparator.right
+            leftMargin: 20
+        }
+
+        IconLabel {
+            id: elapsedTimeLabel
+            color: Theme.secondaryTextColor
+            text: ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+            spacing: 4
+            icon {
+                color: Theme.secondaryTextColor
+                source: Icons.acceptTimeEvent
+                width: 20
+                height: 20
+            }
+        }
+
+        Label {
+            id: remainingTimeLabel
+            visible: internal.hasOngoingDateEvent
+            text: "(" + qsTr("%n minutes left", "", internal.minutesRemaining) + ")"
+            color: Theme.secondaryTextColor
+        }
+    }
+
     Flickable {
         id: rowFlickable
-        width: Math.min(buttonRow.implicitWidth, control.width - (roomNameColumn.x + roomNameColumn.width) - rightStickyButtonRow.implicitWidth)
+        width: Math.min(buttonRow.implicitWidth, control.width - (timeLabelContainer.x + timeLabelContainer.width) - rightStickyButtonRow.implicitWidth)
         contentWidth: buttonRow.implicitWidth
         clip: true
         anchors {

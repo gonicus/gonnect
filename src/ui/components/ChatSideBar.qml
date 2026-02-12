@@ -127,7 +127,7 @@ Item {
                     font.pixelSize: 14
                     textFormat: Text.StyledText
                     color: Theme.secondaryTextColor
-                    text: delg.nickName ? `${delg.nickName}, ${delg.timeFormatted}` : delg.timeFormatted
+                    text: delg.nickName ? `${delg.nickName}, ${delgtimeFormatted}` : delg.timeFormatted
                     visible: !delg.prevDelg
                              || delg.prevDelg.fromId !== delg.fromId
                              || delg.prevDelg.timeFormatted !== delg.timeFormatted
