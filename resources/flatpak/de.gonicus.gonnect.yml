@@ -221,8 +221,6 @@ modules:
       - type: patch
         path: patches/vcard-cmake.patch
 
-  - shared-modules/libusb/libusb.json
-
   - name: hidapi
     buildsystem: cmake-ninja
     sources:
