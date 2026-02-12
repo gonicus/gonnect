@@ -55,10 +55,10 @@ cleanup:
   - '*.a'
   - '*.qml'
   - /share/gir-1.0
-  - /resources/qtwebengine_devtools_resources.pak
 
 cleanup-commands:
   - /app/cleanup-BaseApp.sh
+  - rm /app/resources/qtwebengine_devtools_resources.pak
   - mkdir -p ${FLATPAK_DEST}/plugins
   - mkdir -p ${FLATPAK_DEST}/etc/gonnect
 

@@ -134,7 +134,7 @@ private:
     QString m_notificationRef;
     QString m_postTask;
 
-    SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::Low;
+    SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::High;
     SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::Low;
 
     QString m_codec;

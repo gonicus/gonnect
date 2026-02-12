@@ -224,6 +224,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             });
 
             m_statsTimer.start();
+            updateRtcpStats();
         }
 
         // Send DTMF post tasks if present
@@ -272,7 +273,6 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_isEstablished = false;
         m_earlyCallState = false;
 
-        m_statsTimer.stop();
         break;
 
     default:
@@ -701,6 +701,8 @@ void SIPCall::updateRtcpStats()
             pjsua_call *call = &pjsua_var.calls[getId()];
             pjsua_call_media *call_med = &call->media[i];
 
+            qCDebug(lcSIPCall) << "---- Call quality info for media #" << i << "----";
+
             pjmedia_rtcp_xr_stat xr_stat;
             if (pjmedia_stream_get_stat_xr(call_med->strm.a.stream, &xr_stat) == PJ_SUCCESS
                 && xr_stat.tx.voip_mtc.mos_lq != 127) {
@@ -715,6 +717,14 @@ void SIPCall::updateRtcpStats()
                 m_rtt = double(xr_stat.rtt.last) / 1000.0;
                 m_lossRateTx = xr_stat.tx.voip_mtc.loss_rate;
                 m_lossRateRx = xr_stat.rx.voip_mtc.loss_rate;
+
+                qCDebug(lcSIPCall)
+                        << "- RTCP-XR TX -> mosLQ:" << m_mosTxLq << "mosCQ:" << m_mosTxCq
+                        << "jitter:" << m_jitterBufferTxDelay << "loss rate:" << m_lossRateTx;
+                qCDebug(lcSIPCall)
+                        << "- RTCP-XR RX -> mosLQ:" << m_mosRxLq << "mosCQ:" << m_mosRxCq
+                        << "jitter:" << m_jitterBufferRxDelay << "loss rate:" << m_lossRateRx;
+                qCDebug(lcSIPCall) << "- RTCP-XR RTT" << m_rtt;
             }
 
             // TODO: wire parts to the GUI
@@ -724,10 +734,9 @@ void SIPCall::updateRtcpStats()
             // Packet Loss    %
             // Jitter         ms
 
-            qCDebug(lcSIPCall) << "---- Call quality info for media #" << i << "----";
-            qCDebug(lcSIPCall) << "- TX -> mos:" << m_mosTx << "loss:" << m_lossTx
+            qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << m_lossTx
                                << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
-            qCDebug(lcSIPCall) << "- RX -> mos:" << m_mosTx << "loss:" << m_lossRx
+            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosTx << "loss:" << m_lossRx
                                << "jitter:" << m_jitterRx << "effective delay:" << m_effDelayRx;
 
             double mos = qMin(m_mosTx, m_mosRx);
