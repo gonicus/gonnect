@@ -1167,14 +1167,23 @@ void JitsiConnector::requestDialInInfo()
         return;
     }
 
+    const QString muc = GlobalInfo::instance().jitsiMuc();
+
+    QString roomName;
+    if (muc.isEmpty()) {
+        roomName = m_roomName;
+    } else {
+        roomName = QString("%1@%2").arg(m_roomName, muc);
+    }
+
     QUrlQuery numbersQuery(m_dialInNumbersUrl);
-    numbersQuery.addQueryItem("conference", m_roomName);
+    numbersQuery.addQueryItem("conference", roomName);
     QUrl numbersUrl = m_dialInNumbersUrl;
     numbersUrl.setQuery(numbersQuery);
     auto numberFuture = NetworkHelper::fetchUrlAsJson(numbersUrl);
 
     QUrlQuery codeQuery(m_dialInConfCodeUrl);
-    codeQuery.addQueryItem("conference", m_roomName);
+    codeQuery.addQueryItem("conference", roomName);
     QUrl codeUrl = m_dialInConfCodeUrl;
     codeUrl.setQuery(codeQuery);
     auto pinFuture = NetworkHelper::fetchUrlAsJson(codeUrl);
