@@ -2,6 +2,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Core
     CorePrivate
     GuiPrivate
+    Concurrent
     Core5Compat
     Quick
     QuickControls2
@@ -363,6 +364,7 @@ qt_add_qml_module(gonnect
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
+        ui/components/popups/DialInInfo.qml
         ui/components/popups/FirstAid.qml
         ui/components/popups/HistoryListContextMenu.qml
         ui/components/popups/JitsiHistoryListContextMenu.qml
@@ -723,6 +725,7 @@ target_link_libraries(gonnect
     PRIVATE
         Qt6::Core
         Qt6::CorePrivate
+        Qt6::Concurrent
         Qt6::Gui
         Qt6::Widgets
         Qt6::GuiPrivate
