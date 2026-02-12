@@ -39,6 +39,7 @@ class IConferenceConnector : public ICallState
 
     Q_PROPERTY(bool hasWhiteboard READ hasWhiteboard NOTIFY hasWhiteboardChanged FINAL)
     Q_PROPERTY(bool hasTextpad READ hasTextpad NOTIFY hasTextpadChanged FINAL)
+    Q_PROPERTY(bool hasDialIn READ hasDialIn NOTIFY hasDialInChanged FINAL)
 
     Q_PROPERTY(IConferenceConnector::VideoQuality videoQuality READ videoQuality NOTIFY
                        videoQualityChanged FINAL)
@@ -146,6 +147,9 @@ public:
 
     virtual bool hasTextpad() const = 0;
 
+    virtual bool hasDialIn() const = 0;
+    Q_INVOKABLE virtual void requestDialInInfo() = 0;
+
     virtual QList<ConferenceParticipant *> participants() const = 0;
     virtual uint numberOfParticipants() const = 0;
     Q_INVOKABLE virtual void kickParticipant(const QString &participantId) = 0;
@@ -165,6 +169,7 @@ Q_SIGNALS:
     void isInConferenceChanged();
     void hasWhiteboardChanged();
     void hasTextpadChanged();
+    void hasDialInChanged();
     void isPasswordRequiredChanged();
     void roomPasswordChanged();
     void displayNameChanged();
@@ -190,4 +195,5 @@ Q_SIGNALS:
     void participantsCleared();
     void numberOfParticipantsChanged();
     void largeVideoParticipantChanged();
+    void dialInfoReceived(QVariantMap numbers, QString code);
 };

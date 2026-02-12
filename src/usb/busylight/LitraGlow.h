@@ -13,9 +13,9 @@ public:
     LitraGlow(const hid_device_info &deviceInfo, QObject *parent = nullptr)
         : IBusylightDevice{ deviceInfo, parent } { };
 
-    virtual QSet<SupportedCommands> supportedCommands() override;
-    virtual void switchStreamlight(bool on) override;
+    QSet<SupportedCommands> supportedCommands() override;
+    void switchStreamlight(bool on) override;
 
 protected:
-    virtual void send(bool on) override;
+    void send(bool on) override;
 };

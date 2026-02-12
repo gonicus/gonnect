@@ -118,6 +118,8 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
 #endif
 
                     callback(false, secret);
+                } else if (error == QKeychain::EntryNotFound) {
+                    callback(false, "inval!d");
                 } else if (error != QKeychain::NoError) {
                     callback(true,
                              tr("reading credentials failed: %1")

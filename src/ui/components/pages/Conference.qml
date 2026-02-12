@@ -257,6 +257,11 @@ Item {
                     onShowVirtualBackgroundDialog: () => confConn.showVirtualBackgroundDialog()
                     onOpenSetPasswordDialog: () => ViewHelper.topDrawer.loader.sourceComponent = setPasswordItemComponent
                     onOpenVideoQualityDialog: () => ViewHelper.topDrawer.loader.sourceComponent = videoQualityComponent
+                    onOpenDialInInfoDialog: (numbers, code) => {
+                        ViewHelper.topDrawer.loader.sourceComponent = dialInInfoComponent
+                        ViewHelper.topDrawer.loader.item.numbers = numbers
+                        ViewHelper.topDrawer.loader.item.code = code
+                    }
                     onHangup: () => confConn.leaveConference()
                     onFinishForAll: () => confConn.terminateConference()
                 }
@@ -407,6 +412,12 @@ Item {
                             }
                         }
                     }
+                }
+
+                Component {
+                    id: dialInInfoComponent
+
+                    DialInInfo {}
                 }
 
                 Component {

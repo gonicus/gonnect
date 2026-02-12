@@ -12,6 +12,7 @@
 #include "HeadsetDeviceProxy.h"
 #include "SystemTrayMenu.h"
 #include "SIPCallManager.h"
+#include "SIPCall.h"
 #include "GlobalCallState.h"
 #include "DateEventManager.h"
 #include "DateEvent.h"
