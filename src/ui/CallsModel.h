@@ -5,14 +5,14 @@
 #include <QQmlEngine>
 #include <pjsip/sip_msg.h>
 #include "PhoneNumberUtil.h"
-
-class SIPCall;
+#include "SIPCall.h"
 
 class CallsModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_ELEMENT
 
+    Q_PROPERTY(int unfinishedCount READ unfinishedCount NOTIFY unfinishedCountChanged FINAL)
     Q_PROPERTY(int count READ count NOTIFY countChanged FINAL)
 
 public:
@@ -32,6 +32,8 @@ public:
         QDateTime established;
         ContactInfo contactInfo;
         pjsip_status_code statusCode = PJSIP_SC_NULL;
+        SIPCallManager::QualityLevel qualityLevel = SIPCallManager::QualityLevel::Low;
+        SIPCallManager::SecurityLevel securityLevel = SIPCallManager::SecurityLevel::Low;
     };
 
     enum class Roles {
@@ -54,19 +56,23 @@ public:
         HasIncomingAudioLevel,
         HasMetadata,
         HasAvatar,
-        AvatarPath
+        AvatarPath,
+        QualityLevel,
+        SecurityLevel
     };
 
     explicit CallsModel(QObject *parent = nullptr);
-    virtual ~CallsModel();
+    ~CallsModel();
 
     qsizetype count() const { return m_calls.size(); }
-    virtual int rowCount(const QModelIndex &parent) const override;
-    virtual QVariant data(const QModelIndex &index, int role) const override;
-    virtual QHash<int, QByteArray> roleNames() const override;
+    int unfinishedCount() const;
+    int rowCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
 Q_SIGNALS:
     void countChanged();
+    void unfinishedCountChanged();
 
 private Q_SLOTS:
     void updateCalls();

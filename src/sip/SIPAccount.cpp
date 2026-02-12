@@ -335,6 +335,9 @@ void SIPAccount::initialize()
 
     m_accountConfig.natConfig.contactRewriteUse = 0;
 
+    m_accountConfig.mediaConfig.rtcpXrEnabled = true;
+    m_accountConfig.mediaConfig.rtcpMuxEnabled = true;
+
     m_settings.endGroup();
 
     // Authentication setup
@@ -816,6 +819,11 @@ void SIPAccount::setCredentials(const QString &password)
                     qCCritical(lcSIPAccount) << "failed to set credentials:" << data;
                 }
             });
+}
+
+bool SIPAccount::isSignalingEncrypted()
+{
+    return m_transportType == TRANSPORT_TYPE::TLS;
 }
 
 SIPAccount::~SIPAccount()

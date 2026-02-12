@@ -125,6 +125,7 @@ class PjSIPConan(ConanFile):
 
         tc.configure_args.append("--disable-install-examples")
         tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
+        tc.extra_cflags.append("-DPJMEDIA_HAS_RTCP_XR=1")
 
         tc.generate()
 
@@ -150,6 +151,7 @@ class PjSIPConan(ConanFile):
                     os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'))
         with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
             file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
+            file.write('\n\n#define PJMEDIA_HAS_RTCP_XR 1\n')
 
         path = os.path.join(self.build_folder, "pjproject-vs14.sln")
 
@@ -210,9 +212,9 @@ class PjSIPConan(ConanFile):
 
         else:
             if self.options.get_safe("endianness") == "big":
-                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1']
             else:
-                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1']
 
             libs = []
             installed_libs = collect_libs(self)

@@ -16,7 +16,7 @@ public:
 
     Q_INVOKABLE bool hasFields(const QString &id) const;
 
-    virtual QHash<int, QByteArray> roleNames() const override;
-    virtual int rowCount(const QModelIndex &parent) const override;
-    virtual QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+    int rowCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
 };

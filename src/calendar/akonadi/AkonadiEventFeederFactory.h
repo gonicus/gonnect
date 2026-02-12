@@ -14,11 +14,9 @@ class AkonadiEventFeederFactory : public QObject, IDateEventFeederFactory
 public:
     AkonadiEventFeederFactory(QObject *parent = nullptr);
 
-    virtual QString name() const override { return "Akonadi"; };
-    virtual QStringList configurations() const override;
-    virtual IDateEventFeeder *createFeeder(const QString &settingsGroup,
-                                           const QDateTime &currentTime,
-                                           const QDateTime &timeRangeStart,
-                                           const QDateTime &timeRangeEnd,
-                                           DateEventFeederManager *feederManager) const override;
+    QString name() const override { return "Akonadi"; };
+    QStringList configurations() const override;
+    IDateEventFeeder *createFeeder(const QString &settingsGroup, const QDateTime &currentTime,
+                                   const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd,
+                                   DateEventFeederManager *feederManager) const override;
 };
