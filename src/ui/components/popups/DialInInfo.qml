@@ -26,7 +26,7 @@ Item {
         }
 
         Label {
-            text: qsTr("Call one of the phone numbers below and use this code for authentication.")
+            text: qsTr("Call one of the phone numbers below and use this code for authentication:")
             wrapMode: Text.Wrap
             anchors {
                 left: parent.left
