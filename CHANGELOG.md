@@ -1,3 +1,20 @@
+# [2.1.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2026-02-13)
+
+
+### Bug Fixes
+
+* always parse UTC offset / timezone ([#329](https://github.com/gonicus/gonnect/issues/329)) ([c74e7d5](https://github.com/gonicus/gonnect/commit/c74e7d53238669fbb3f46c18fb99267ca7d8e315))
+* avoid local time conversion for unknown timezones ([#333](https://github.com/gonicus/gonnect/issues/333)) ([bb45139](https://github.com/gonicus/gonnect/commit/bb45139b1debf06ffc7ca689a8afea2097e1f7fb))
+* remove custom libusb building ([658daa1](https://github.com/gonicus/gonnect/commit/658daa1601ff10be0b4959c7399e074b3b9de601))
+
+
+### Features
+
+* blocking address sources ([#325](https://github.com/gonicus/gonnect/issues/325)) ([ac61c48](https://github.com/gonicus/gonnect/commit/ac61c4840d2321cc1a8f5105ce9e01df303bd1d8)), closes [#312](https://github.com/gonicus/gonnect/issues/312)
+* configure jitsi MCU via config ([#337](https://github.com/gonicus/gonnect/issues/337)) ([522de41](https://github.com/gonicus/gonnect/commit/522de41809fca9ad74d78eadf87331a617933e50))
+* retrieve and show phone numbers for joining jitsi conference ([#334](https://github.com/gonicus/gonnect/issues/334)) ([ec2804c](https://github.com/gonicus/gonnect/commit/ec2804c01736e9b82e621626a2bfc120d9ec5f4f))
+* **ui:** show red dot on active main tab bar button ([#326](https://github.com/gonicus/gonnect/issues/326)) ([676f283](https://github.com/gonicus/gonnect/commit/676f2836aeedb7f2c34a82a82f280943b2fd6073))
+
 # [2.1.0-beta.1](https://github.com/gonicus/gonnect/compare/v2.0.8...v2.1.0-beta.1) (2026-02-09)
 
 
