@@ -1,0 +1,11 @@
+diff -Naur a/include/logfault/logfault.h b/include/logfault/logfault.h
+--- a/include/logfault/logfault.h	2025-09-02 10:16:15.000000000 +0200
++++ b/include/logfault/logfault.h	2025-12-12 16:20:40.305072772 +0100
+@@ -190,6 +190,7 @@
+ template <typename T>
+ std::pair<bool /* json */, std::string /* content or json */>
+ toLog(const T& data, const bool want_json = false) {
++    (void)want_json;
+     if constexpr (std::is_same_v<T, std::string_view> || std::is_same_v<T, std::string>) {
+         return {false, data};
+     } else if constexpr (!std::is_same_v<T, std::string_view> && !std::is_same_v<T, std::string>) {

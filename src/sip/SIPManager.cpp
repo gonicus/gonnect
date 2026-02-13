@@ -66,7 +66,8 @@ void SIPManager::initialize()
     if (app->isDebugRun()) {
         epConfig.logConfig.level = 6;
     } else {
-        epConfig.logConfig.level = m_settings->value("logging/level", 1).toUInt();
+        ReadOnlyConfdSettings settings;
+        epConfig.logConfig.level = settings.value("logging/level", 1).toUInt();
     }
 
     if (epConfig.logConfig.level >= 4) {

@@ -3,14 +3,9 @@
 #include <QObject>
 #include <QQmlEngine>
 
-#include "JsChatConnector.h"
-
 class ChatConnectorManager : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool isJsChatAvailable READ isJsChatAvailable NOTIFY jsChatConnectorsChanged FINAL)
-    Q_PROPERTY(QList<JsChatConnector *> jsChatConnectors READ jsChatConnectors NOTIFY
-                       jsChatConnectorsChanged FINAL)
 
 public:
     static ChatConnectorManager &instance()
@@ -23,8 +18,6 @@ public:
     }
 
     bool isInitialized() const { return m_isInitialized; }
-    bool isJsChatAvailable() const { return !m_connectors.isEmpty(); }
-    QList<JsChatConnector *> jsChatConnectors() const { return m_connectors; };
 
     void saveRecoveryKey(const QString &settingsGroup, const QString &key) const;
     void saveAccessToken(const QString &settingsGroup, const QString &token) const;
@@ -34,16 +27,9 @@ private Q_SLOTS:
 
 private:
     explicit ChatConnectorManager(QObject *parent = nullptr);
-    void checkConfigAfterCallback(const QString &settingsGroup);
 
     bool m_isInitialized = false;
-    bool m_isJsChatAvailable = false;
-    QList<JsChatConnector *> m_connectors;
     QHash<QString, quint8> m_waitingCallbackCount;
-    QHash<QString, JsConnectorConfig *> m_waitingCallbackConfigs;
-
-Q_SIGNALS:
-    void jsChatConnectorsChanged();
 };
 
 class ChatConnectorManagerWrapper

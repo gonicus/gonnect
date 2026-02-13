@@ -14,6 +14,9 @@ class StateManager : public QObject
     Q_OBJECT
     Q_PROPERTY(bool globalShortcutsSupported READ globalShortcutsSupported NOTIFY
                        globalShortcutsSupportedChanged FINAL)
+    Q_PROPERTY(bool uiEditMode MEMBER m_uiEditMode NOTIFY uiEditModeChanged FINAL)
+    Q_PROPERTY(bool uiHasActiveEditDialog MEMBER m_uiHasActiveEditDialog NOTIFY
+                       uiHasActiveEditDialogChanged FINAL)
     Q_PROPERTY(QVariantMap globalShortcuts READ globalShortcuts NOTIFY globalShortcutsChanged FINAL)
 
 public:
@@ -47,6 +50,8 @@ public:
     bool isFirstInstance() const { return m_isFirstInstance; }
 
 Q_SIGNALS:
+    void uiEditModeChanged();
+    void uiHasActiveEditDialogChanged();
     void globalShortcutsSupportedChanged();
     void globalShortcutsChanged();
 
@@ -63,12 +68,11 @@ private:
     void updateInhibitState();
 
     InhibitHelper *m_inhibitHelper = nullptr;
-
     DBusActivationAdapter *m_activationAdapter = nullptr;
     GOnnectDBusAPI *m_apiEndpoint = nullptr;
-
     ICallState::States m_oldCallState = ICallState::State::Idle;
-
+    bool m_uiEditMode = false;
+    bool m_uiHasActiveEditDialog = false;
     bool m_isFirstInstance = true;
 };
 

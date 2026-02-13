@@ -17,8 +17,30 @@ QString GlobalInfo::jitsiUrl()
         ReadOnlyConfdSettings settings;
         settings.beginGroup("jitsi");
         m_jitsiUrl = settings.value("url", "").toString();
+        m_jitsiMuc = settings.value("muc", "").toString();
     }
     return m_jitsiUrl;
+}
+
+QString GlobalInfo::jitsiMuc()
+{
+    if (!m_isJitsiUrlInitialized) {
+        jitsiUrl();
+    }
+
+    return m_jitsiMuc;
+}
+
+QString GlobalInfo::teamsUrl()
+{
+    if (!m_isTeamsUrlInitialized) {
+        m_isTeamsUrlInitialized = true;
+
+        ReadOnlyConfdSettings settings;
+        settings.beginGroup("teams");
+        m_teamsUrl = settings.value("url", "https://teams.microsoft.com/l/meetup-join").toString();
+    }
+    return m_teamsUrl;
 }
 
 bool GlobalInfo::isWorkaroundActive(const WorkaroundId id)

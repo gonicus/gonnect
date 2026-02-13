@@ -14,7 +14,7 @@ class AkonadiAddressBookFeeder : public QObject, public IAddressBookFeeder
 public:
     explicit AkonadiAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
 
-    virtual void process() override;
+    void process() override;
     ~AkonadiAddressBookFeeder();
 
 private Q_SLOTS:

@@ -6,6 +6,7 @@
 #include <QtWebDAV/qwebdavdirparser.h>
 
 #include "Contact.h"
+#include "BlockInfo.h"
 
 class AddressBook;
 class AddressBookManager;
@@ -48,4 +49,5 @@ private:
     QHash<QString, QDateTime> m_ignoredIds;
 
     QString m_group;
+    BlockInfo m_blockInfo;
 };

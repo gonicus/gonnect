@@ -1,3 +1,60 @@
+# [2.1.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2026-02-13)
+
+
+### Bug Fixes
+
+* always parse UTC offset / timezone ([#329](https://github.com/gonicus/gonnect/issues/329)) ([c74e7d5](https://github.com/gonicus/gonnect/commit/c74e7d53238669fbb3f46c18fb99267ca7d8e315))
+* avoid local time conversion for unknown timezones ([#333](https://github.com/gonicus/gonnect/issues/333)) ([bb45139](https://github.com/gonicus/gonnect/commit/bb45139b1debf06ffc7ca689a8afea2097e1f7fb))
+* remove custom libusb building ([658daa1](https://github.com/gonicus/gonnect/commit/658daa1601ff10be0b4959c7399e074b3b9de601))
+
+
+### Features
+
+* blocking address sources ([#325](https://github.com/gonicus/gonnect/issues/325)) ([ac61c48](https://github.com/gonicus/gonnect/commit/ac61c4840d2321cc1a8f5105ce9e01df303bd1d8)), closes [#312](https://github.com/gonicus/gonnect/issues/312)
+* configure jitsi MCU via config ([#337](https://github.com/gonicus/gonnect/issues/337)) ([522de41](https://github.com/gonicus/gonnect/commit/522de41809fca9ad74d78eadf87331a617933e50))
+* retrieve and show phone numbers for joining jitsi conference ([#334](https://github.com/gonicus/gonnect/issues/334)) ([ec2804c](https://github.com/gonicus/gonnect/commit/ec2804c01736e9b82e621626a2bfc120d9ec5f4f))
+* **ui:** show red dot on active main tab bar button ([#326](https://github.com/gonicus/gonnect/issues/326)) ([676f283](https://github.com/gonicus/gonnect/commit/676f2836aeedb7f2c34a82a82f280943b2fd6073))
+
+# [2.1.0-beta.1](https://github.com/gonicus/gonnect/compare/v2.0.8...v2.1.0-beta.1) (2026-02-09)
+
+
+### Bug Fixes
+
+* add missing export for CSV addressbook ([3fd2e92](https://github.com/gonicus/gonnect/commit/3fd2e92f61b77d4acd018521a12c2820ac050e89))
+* default setting for mute system forwarding ([#293](https://github.com/gonicus/gonnect/issues/293)) ([4a90bd5](https://github.com/gonicus/gonnect/commit/4a90bd5656590f70c106badd78946137c97ac9c0))
+* **deps:** update EDS to 3.59.1 ([#285](https://github.com/gonicus/gonnect/issues/285)) ([8e3297b](https://github.com/gonicus/gonnect/commit/8e3297b0eb40988bc0bd8d54f7aeed0d765662bb))
+* first aid menu improvements ([#283](https://github.com/gonicus/gonnect/issues/283)) ([4680755](https://github.com/gonicus/gonnect/commit/46807554fe6aeb3535d306900c51acf4bb8d7242))
+* init Credentials class in flatpak if no SecretPortal ([#322](https://github.com/gonicus/gonnect/issues/322)) ([cb11ef2](https://github.com/gonicus/gonnect/commit/cb11ef20c94a18e4a1c2a178afa79d009f17f330))
+* limit active ui edit mode dialogs to one & close on exiting edit mode ([#309](https://github.com/gonicus/gonnect/issues/309)) ([f2904ad](https://github.com/gonicus/gonnect/commit/f2904ad673adba9f4a6694907df244084ce48c9c))
+* local shortcuts and help dialog ([#230](https://github.com/gonicus/gonnect/issues/230)) ([55e2133](https://github.com/gonicus/gonnect/commit/55e213300b94cde1a222c8174049661b7dad11ff))
+* optimize search for pure numbers ([0201a25](https://github.com/gonicus/gonnect/commit/0201a259bbcbfe2e38ac2034b9c76644d035879f))
+* platform updates ([#259](https://github.com/gonicus/gonnect/issues/259)) ([84d515e](https://github.com/gonicus/gonnect/commit/84d515e61d2467ff2b8f3b450c3591e110da09b0))
+* prevent entering of invalid DTMF chars to prevent crash ([#287](https://github.com/gonicus/gonnect/issues/287)) ([42cb3df](https://github.com/gonicus/gonnect/commit/42cb3dfd548c8a607db20c3f473f62558e051132))
+* prevent hold of ongoing call on incoming when busyOnBusy ([#297](https://github.com/gonicus/gonnect/issues/297)) ([e061657](https://github.com/gonicus/gonnect/commit/e0616576501dfe01cc961345be2505b4674b9b22))
+* **ui:** copy full url to clipboard not just room name (DateEventsList) ([#218](https://github.com/gonicus/gonnect/issues/218)) ([9452bfa](https://github.com/gonicus/gonnect/commit/9452bfada7177d4842fd8afc40f3470a48654f21))
+* **ui:** do not disable history items in search list (if number) ([#314](https://github.com/gonicus/gonnect/issues/314)) ([c44b1b2](https://github.com/gonicus/gonnect/commit/c44b1b20bc56d88599c6fd05cf8df901b294b0fe)), closes [#311](https://github.com/gonicus/gonnect/issues/311)
+* **ui:** fixed selection behaviour in call list ([#271](https://github.com/gonicus/gonnect/issues/271)) ([734c9d8](https://github.com/gonicus/gonnect/commit/734c9d84677facc8d1dc3d345ba1fb3d0008dc66))
+* **ui:** jitsi meet chat now cleared when leaving room ([#239](https://github.com/gonicus/gonnect/issues/239)) ([50c6bc5](https://github.com/gonicus/gonnect/commit/50c6bc51d2e700c9f5c0369d0aa13239642fa00b))
+* **ui:** loading of own avatar ([#290](https://github.com/gonicus/gonnect/issues/290)) ([f11c4bc](https://github.com/gonicus/gonnect/commit/f11c4bc0817e06c34cdbbc75b044bf8d0c799346)), closes [#276](https://github.com/gonicus/gonnect/issues/276)
+* **ui:** next button in template wizard never enabled ([c11f4ed](https://github.com/gonicus/gonnect/commit/c11f4ed24cacc201a58c8847971eedf3cf6ae0fc))
+* **ui:** next button in template wizard never enabled ([#291](https://github.com/gonicus/gonnect/issues/291)) ([3107665](https://github.com/gonicus/gonnect/commit/310766560bd0fa8f495524e63261f3bab85d2955))
+* unhold other call when starting conference ([#286](https://github.com/gonicus/gonnect/issues/286)) ([33c43ec](https://github.com/gonicus/gonnect/commit/33c43ec6f07a9b76e4e15e33ccbeafb8fa41d49a))
+
+
+### Features
+
+* add inhibit to windows ([#280](https://github.com/gonicus/gonnect/issues/280)) ([6e67f93](https://github.com/gonicus/gonnect/commit/6e67f938c830738767d5f691084a4e0b2bbd0f3d))
+* allow pre-processing of search strings ([#274](https://github.com/gonicus/gonnect/issues/274)) ([ac104e4](https://github.com/gonicus/gonnect/commit/ac104e40c8b30d4a0fba747e400c2d4c2044e768))
+* calendar expansion ([#250](https://github.com/gonicus/gonnect/issues/250)) ([9cfdb2d](https://github.com/gonicus/gonnect/commit/9cfdb2d9d52b1c85e846c1f1c55b769679f198e2))
+* do not send notifications for conferences/appointments that have been joined early ([#298](https://github.com/gonicus/gonnect/issues/298)) ([91ce62e](https://github.com/gonicus/gonnect/commit/91ce62e9613c5675d2d26fc5eaebc6afc9245f11))
+* dynamic widget pages/dashboards ([#251](https://github.com/gonicus/gonnect/issues/251)) ([829952b](https://github.com/gonicus/gonnect/commit/829952b9a0389de1f3a6227f9d7aa76770fce430))
+* improved handling of full- and multi-day conferences/appointments ([#302](https://github.com/gonicus/gonnect/issues/302)) ([e55f897](https://github.com/gonicus/gonnect/commit/e55f89735e9e1a0e2a77f8827cab7af34c2c8022))
+* introduce custom widget settings and a new web display widget ([#284](https://github.com/gonicus/gonnect/issues/284)) ([30055e5](https://github.com/gonicus/gonnect/commit/30055e5edb007a7463fb0fc628519e1cb74a5ab2))
+* packaging tuner ([#261](https://github.com/gonicus/gonnect/issues/261)) ([6bc1792](https://github.com/gonicus/gonnect/commit/6bc1792455d8c67524e99259d953536cc904a219))
+* support more platforms ([#233](https://github.com/gonicus/gonnect/issues/233)) ([19fff59](https://github.com/gonicus/gonnect/commit/19fff592caead967c73517deed84d01d4dfbe690))
+* toggle whiteboard in jitsi meet ([#235](https://github.com/gonicus/gonnect/issues/235)) ([23df6a2](https://github.com/gonicus/gonnect/commit/23df6a2a11fa3f1eff1316ddd1116ec5e6a8ccf2))
+* **ui:** automatically select first search item in global search ([#292](https://github.com/gonicus/gonnect/issues/292)) ([117945a](https://github.com/gonicus/gonnect/commit/117945a6dbfb5b398459117ec87d03c05d571e0d))
+
 ## [2.0.9](https://github.com/gonicus/gonnect/compare/v2.0.8...v2.0.9) (2026-01-21)
 
 

@@ -14,10 +14,18 @@ Item {
     property bool showHoldButton: true
 
     onCountChanged: () => {
-                        if (control.count === 1) {
-                            control.selectedItem = callListView.itemAtIndex(0)
-                        }
+        if (control.count) {
+            if (control.selectedItem) {
+                for (let i = 0; i < callListView.count; ++i) {
+                    if (callListView.itemAtIndex(i) === control.selectedItem) {
+                        return
                     }
+                }
+            }
+
+            control.selectedItem = callListView.itemAtIndex(0)
+        }
+    }
 
     readonly property alias count: callListView.count
 

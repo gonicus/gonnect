@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "StateManager.h"
 #include "SearchProvider.h"
+#include "UISettings.h"
 #include "NotificationManager.h"
 #include "appversion.h"
 #include "SIPManager.h"
@@ -19,6 +20,16 @@
 #include <QQmlContext>
 #include <QDesktopServices>
 #include <QtWebEngineQuick>
+#include <iostream>
+
+#ifdef Q_OS_MACOS
+#  define LOGFAULT_WITH_OS_LOG
+#endif
+#include "logfault/logfault.h"
+
+#ifdef Q_OS_WINDOWS
+#  include "windows/WindowsEventLogHandler.h"
+#endif
 
 #ifdef Q_OS_LINUX
 #  include <sys/socket.h>
@@ -51,7 +62,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     installTranslations();
 
-    initDebugRun();
+    initLogging();
 
     AddressBookManager::instance().initAddressBookConfigs();
     DateEventFeederManager::instance().initFeederConfigs();
@@ -62,6 +73,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     StateManager::instance().setParent(this);
     SearchProvider::instance().setParent(this);
+    UISettings::instance().setParent(this);
 
 #ifdef Q_OS_LINUX
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, s_sighupFd)) {
@@ -205,39 +217,86 @@ QString Application::logFileName()
 
 QtMessageHandler s_originalMessageHandler = nullptr;
 
-void Application::fileMessageHandler(QtMsgType type, const QMessageLogContext &context,
-                                     const QString &msg)
+void Application::initLogging()
 {
-    const QString message = qFormatLogMessage(type, context, msg);
+    bool replaceMessageHandler = false;
 
-    static FILE *f = fopen(Application::logFilePath().toLatin1(), "a");
-    if (f) {
-        fprintf(f, "%s\n", qPrintable(message));
-        fflush(f);
-    }
-
-    if (s_originalMessageHandler) {
-        s_originalMessageHandler(type, context, msg);
-    }
-}
-
-void Application::initDebugRun()
-{
     AppSettings settings;
     m_isDebugRun = settings.value("generic/nextDebugRun", false).toBool();
+#ifndef Q_OS_LINUX
+    replaceMessageHandler = true;
+#else
+    replaceMessageHandler = m_isDebugRun;
+#endif
+
+    if (replaceMessageHandler) {
+        s_originalMessageHandler = qInstallMessageHandler(Application::logQtMessages);
+    }
 
     if (m_isDebugRun) {
         settings.setValue("generic/nextDebugRun", false);
-        s_originalMessageHandler = qInstallMessageHandler(Application::fileMessageHandler);
 
         QTimer::singleShot(5 * 60 * 1000, this, []() {
             qCInfo(lcApplication) << "5 minutes are up; debug run will end automatically.";
             StateManager::instance().restart();
         });
     }
+
+    if (m_isDebugRun || settings.value("logging/writeToFile", false).toBool()) {
+        auto filePath = Application::logFilePath().toStdString();
+        logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::StreamHandler>(
+                filePath, logfault::LogLevel::TRACE, true));
+    }
+
+#ifdef Q_OS_WINDOWS
+    std::unique_ptr<logfault::Handler> eventhandler{ new WindowsEventLogHandler(
+            "GOnnect", logfault::LogLevel::WARN) };
+    logfault::LogManager::Instance().AddHandler(std::move(eventhandler));
+
+    s_originalMessageHandler = nullptr;
+#endif // Q_OS_WINDOWS
+
+#ifdef Q_OS_MACOS
+    logfault::LogManager::Instance().AddHandler(std::make_unique<logfault::OsLogHandler>(
+            "oslog", logfault::LogLevel::WARN,
+            logfault::OsLogHandler::Options{ "de.gonicus.gonnect" }));
+#endif // Q_OS_MACOS
 }
 
-bool Application::isFlatpak()
+void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context,
+                                const QString &rawMsg)
 {
-    return qEnvironmentVariable("container") == "flatpak";
+    switch (type) {
+    case QtDebugMsg:
+        LFLOG_DEBUG << rawMsg;
+        break;
+    case QtInfoMsg:
+        LFLOG_INFO << rawMsg;
+        break;
+    case QtWarningMsg: {
+        // remove spam messages
+        static const QRegularExpression filter{
+            "is neither a default constructible QObject"
+            "|Cannot anchor to an item that isn't a parent or sibling"
+            "|Detected anchors on an item that is managed by a layout"
+        };
+        if (filter.match(rawMsg).hasMatch()) {
+            LFLOG_TRACE << rawMsg;
+            break;
+        }
+        LFLOG_WARN << rawMsg;
+        break;
+    }
+    case QtCriticalMsg:
+        LFLOG_ERROR << rawMsg;
+        break;
+    case QtFatalMsg:
+        LFLOG_ERROR << "[**FATAL**] " << rawMsg;
+        exit(-1);
+        break;
+    }
+
+    if (s_originalMessageHandler) {
+        s_originalMessageHandler(type, context, rawMsg);
+    }
 }

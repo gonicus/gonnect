@@ -1,0 +1,8 @@
+LangString CLOSE_ON_INSTALL ${LANG_ENGLISH} "@APPLICATION_NAME@ is currently running. It will be closed automatically if you proceed."
+LangString CLOSE_ON_INSTALL ${LANG_GERMAN} "@APPLICATION_NAME@ wird gerade ausgeführt. Es wird automatisch geschlossen, wenn Sie fortfahren."
+
+LangString CLOSE_ON_UNINSTALL ${LANG_ENGLISH} "@APPLICATION_NAME@ is currently running. Do you want to close it?"
+LangString CLOSE_ON_UNINSTALL ${LANG_GERMAN} "@APPLICATION_NAME@ wird gerade ausgeführt. Möchten Sie es schließen?"
+
+LangString ADD_AUTOSTART ${LANG_ENGLISH} "Add to autostart"
+LangString ADD_AUTOSTART ${LANG_GERMAN} "Zum Autostart hinzufügen"

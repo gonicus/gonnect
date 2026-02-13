@@ -1,0 +1,8 @@
+versions:
+  "0.15.0":
+    folder: all
+
+updater:
+  source: anitya
+  id: 381807
+  url-pattern: https://github.com/frankosterfeld/qtkeychain/archive/refs/tags/${version}.zip

@@ -85,6 +85,7 @@ void ContactSerializer::loadAddressBook(AddressBook &addressBook)
             QDateTime lastModified;
             bool sipStatusSubscriptable;
             QList<Contact::PhoneNumber> phoneNumbers;
+            BlockInfo blockInfo;
 
             in >> id;
             in >> dn;
@@ -97,9 +98,11 @@ void ContactSerializer::loadAddressBook(AddressBook &addressBook)
             in >> lastModified;
             in >> sipStatusSubscriptable;
             in >> phoneNumbers;
+            in >> blockInfo;
 
-            Contact *contact = new Contact(id, dn, sourceUid, { prio, displayName }, name, company,
-                                           mail, lastModified, phoneNumbers, &addressBook);
+            Contact *contact =
+                    new Contact(id, dn, sourceUid, { prio, displayName }, name, company, mail,
+                                lastModified, phoneNumbers, blockInfo, &addressBook);
             addressBook.addContact(contact);
         }
 

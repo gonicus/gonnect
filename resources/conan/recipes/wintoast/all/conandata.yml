@@ -1,0 +1,8 @@
+sources:
+  "1.3.2":
+    url: "https://github.com/mohabouje/WinToast/archive/refs/tags/v1.3.2.zip"
+    sha256: "815e4bbd15375d652cb1e609c0f41706ac286ab5892d51dbca7c062690cb1ead"
+patches:
+  "1.3.2":
+    - patch_file: "patches/install.patch"
+  
