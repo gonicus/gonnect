@@ -196,6 +196,12 @@ Item {
 
             readonly property bool isSelected: control.selectedPageId === delg.pageId
 
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Selected tab")
+            Accessible.description: qsTr("The currently selected tab")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => delg.switchPage()
+
             Rectangle {
                 id: hoverBackground
                 visible: delg.isSelected
@@ -220,8 +226,13 @@ Item {
                     anchors.margins: 2
                     z: 1
 
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Selected tab options")
+                    Accessible.description: qsTr("The settings of the currently selected tab")
+                    Accessible.focusable: true
+
                     IconLabel {
-                        id: removeIcon
+                        id: optionIcon
                         anchors.centerIn: parent
                         icon {
                             source: Icons.goDown
@@ -295,12 +306,14 @@ Item {
             }
 
             TapHandler {
-                onTapped: () => {
-                    if (delg.isEnabled) {
-                        control.selectedPageId = delg.pageId
-                        control.selectedPageType = delg.pageType
-                        control.attachedData = delg.attachedData
-                    }
+                onTapped: () => delg.switchPage()
+            }
+
+            function switchPage() {
+                if (delg.isEnabled) {
+                    control.selectedPageId = delg.pageId
+                    control.selectedPageType = delg.pageType
+                    control.attachedData = delg.attachedData
                 }
             }
         }
@@ -385,7 +398,7 @@ Item {
         }
     }
 
-    Menu {
+    Menu { // ...
         id: optionMenu
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 

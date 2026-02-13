@@ -41,7 +41,6 @@ Rectangle {
 
     signal clicked
 
-
     states: [
         State {
             when: control.isHolding
@@ -51,7 +50,6 @@ Rectangle {
             }
         }
     ]
-
 
     VerticalLevelMeter {
         id: levelMeter
@@ -104,6 +102,10 @@ Rectangle {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: nameLabel.text
+            Accessible.description: qsTr("The name or phone number of the caller")
         }
 
         Label {
@@ -116,6 +118,10 @@ Rectangle {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: companyLabel.text
+            Accessible.description: qsTr("The company the caller is a part of")
         }
 
         Label {
@@ -128,6 +134,10 @@ Rectangle {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: companyLabel.text
+            Accessible.description: qsTr("The city the caller is in as determined by the phone prefix / area code")
         }
     }
 
@@ -142,6 +152,12 @@ Rectangle {
             right: parent.right
             rightMargin: control.padding
         }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name:  qsTr("Hangup button")
+        Accessible.description: qsTr("Pressing this will end the call")
+        Accessible.focusable: true
+        Accessible.onPressAction: SIPCallManager.endCall(control.accountId, control.callId)
 
         IconLabel {
             anchors.centerIn: parent

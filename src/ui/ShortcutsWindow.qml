@@ -39,6 +39,10 @@ BaseWindow {
                 top: parent.top
                 left: parent.left
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("Shortcut key")
+            Accessible.description: keyLabel.text
         }
 
         Label {
@@ -52,6 +56,10 @@ BaseWindow {
                 leftMargin: 20
                 rightMargin: 10
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("Shortcut description")
+            Accessible.description: descriptionLabel.text
         }
     }
 
@@ -75,6 +83,7 @@ BaseWindow {
             }
 
             Label {
+                id: localShortcutsHeading
                 text: qsTr("Local shortcuts (work only when app is focused)")
                 font.pixelSize: 16
                 font.weight: Font.Medium
@@ -85,6 +94,10 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Local shortcuts")
+                Accessible.description: localShortcutsHeading.text
             }
 
 
@@ -119,6 +132,10 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Global shortcuts")
+                Accessible.description: globalShortcutsHeading.text
             }
 
             Repeater {

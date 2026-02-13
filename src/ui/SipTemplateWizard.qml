@@ -340,6 +340,7 @@ BaseWindow {
             Accessible.role: Accessible.Button
             Accessible.name: templateBack.text
             Accessible.description: qsTr("Back button to return to the template selection menu")
+            Accessible.focusable: true
             Accessible.onPressAction: () => templateModel.templateId = ""
         }
 
@@ -358,6 +359,7 @@ BaseWindow {
             Accessible.role: Accessible.Button
             Accessible.name: templateFinish.text
             Accessible.description: qsTr("Confirmation button to apply the changes to the SIP template")
+            Accessible.focusable: true
             Accessible.onPressAction: () => control.finishWizard()
         }
     }
@@ -393,16 +395,24 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Successful configuration file creation")
+                Accessible.description: wizardInstallationLabel.text
             }
 
             Label {
                 id: wizardInstallationSaveLabel
-                text: qsTr("The configuration has been saved to:")
+                text: qsTr("The configuration has been saved to: ")
                 wrapMode: Label.Wrap
                 anchors {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Configuration file location")
+                Accessible.description: wizardInstallationSaveLabel.text + configPathLabel.text
             }
 
             Item {
@@ -414,6 +424,10 @@ BaseWindow {
                 Label {
                     id: configPathLabel
                     font.family: "Courier"
+
+                    Accessible.role: Accessible.StaticText
+                    Accessible.name: qsTr("Configuration file location")
+                    Accessible.description: configPathLabel.text
                 }
 
                 ClipboardButton {
@@ -424,6 +438,11 @@ BaseWindow {
                         leftMargin: 20
                         verticalCenter: parent.verticalCenter
                     }
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Copy to clipboard")
+                    Accessible.description: qsTr("Copy the full path of the configuration file to the clipboard")
+                    Accessible.focusable: true
                 }
             }
         }
@@ -438,6 +457,12 @@ BaseWindow {
             }
 
             onClicked: () => SM.restart()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Finish wizard")
+            Accessible.description: qsTr("Finish the SIP configuration wizard")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => SM.restart()
         }
     }
 }

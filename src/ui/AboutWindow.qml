@@ -50,9 +50,14 @@ BaseWindow {
         }
 
         Label {
+            id: appHeader
             text: "GOnnect - your friendly VoIP client that connects people"
             font.weight: Font.DemiBold
             anchors.horizontalCenter: parent.horizontalCenter
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("Gonnect headline")
+            Accessible.description: appHeader.text
         }
 
         Item {
@@ -64,6 +69,10 @@ BaseWindow {
             Label {
                 id: appLabel
                 text: qsTr("Version: v%1").arg(ViewHelper.appVersion())
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Gonnect version")
+                Accessible.description: appLabel.text
             }
 
             ClipboardButton {
@@ -74,6 +83,11 @@ BaseWindow {
                     leftMargin: 20
                     verticalCenter: parent.verticalCenter
                 }
+
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("Copy to clipboard")
+                Accessible.description: qsTr("Copy the currently used version of Gonnect to the clipboard")
+                Accessible.focusable: true
             }
         }
 
@@ -86,7 +100,6 @@ BaseWindow {
             }
         }
 
-
         Row {
             spacing: 20
             anchors.horizontalCenter: parent.horizontalCenter
@@ -97,27 +110,41 @@ BaseWindow {
                     .replace('%2', qsTr('Homepage'))
                 onLinkActivated: link => Qt.openUrlExternally(link)
 
-                HoverHandler {
-                    enabled: parent.hoveredLink
-                    cursorShape: Qt.PointingHandCursor
-                }
-            }
-            Label {
-                text: '<a href="%1">%2</a>'
-                    .replace('%1', genericSettings.issueTrackerURL)
-                    .replace('%2', qsTr('Bug Tracker'))
-                onLinkActivated: link => Qt.openUrlExternally(link)
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr('Homepage')
+                Accessible.description: qsTr("Visit the project homepage")
 
                 HoverHandler {
                     enabled: parent.hoveredLink
                     cursorShape: Qt.PointingHandCursor
                 }
             }
+
+            Label {
+                text: '<a href="%1">%2</a>'
+                    .replace('%1', genericSettings.issueTrackerURL)
+                    .replace('%2', qsTr('Bug Tracker'))
+                onLinkActivated: link => Qt.openUrlExternally(link)
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr('Homepage')
+                Accessible.description: qsTr("Visit the project bug tracker")
+
+                HoverHandler {
+                    enabled: parent.hoveredLink
+                    cursorShape: Qt.PointingHandCursor
+                }
+            }
+
             Label {
                 text: '<a href="%1">%2</a>'
                     .replace('%1', genericSettings.documentationURL)
                     .replace('%2', qsTr('Documentation'))
                 onLinkActivated: link => Qt.openUrlExternally(link)
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr('Homepage')
+                Accessible.description: qsTr("Visit the online project documentation")
 
                 HoverHandler {
                     enabled: parent.hoveredLink
