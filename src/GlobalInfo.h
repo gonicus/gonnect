@@ -30,6 +30,7 @@ public:
     }
 
     Q_INVOKABLE QString jitsiUrl();
+    QString jitsiMuc();
     Q_INVOKABLE QString teamsUrl();
 
     Q_INVOKABLE bool isWorkaroundActive(const GlobalInfo::WorkaroundId id);
@@ -49,6 +50,7 @@ private:
     bool m_hasEmergencyNumbersInitialized = false;
 
     QString m_jitsiUrl;
+    QString m_jitsiMuc;
     QString m_teamsUrl;
     QList<EmergencyContact *> m_emergencyContacts;
 };
