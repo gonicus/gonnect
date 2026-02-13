@@ -2,7 +2,10 @@ name: GOnnect Release
 
 on:
   workflow_dispatch:  # can be manually dispatched under GitHub's "Actions" tab
-
+    inputs:
+      dryRun:
+        description: 'Dry run'
+        type: 'boolean'
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
@@ -41,4 +44,5 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
-        run: npx --package=semantic-release --package=@semantic-release/changelog --package=@semantic-release/git --package=@semantic-release/exec -- semantic-release
+          DRY_RUN_OPTION: ${{ inputs.dryRun == true && '--dry-run' || '' }}
+        run: npx --package=semantic-release --package=@semantic-release/changelog --package=@semantic-release/git --package=@semantic-release/exec -- semantic-release $DRY_RUN_OPTION
