@@ -36,6 +36,10 @@ private:
     static void onEbookClientConnected(GObject *source_object, GAsyncResult *result,
                                        gpointer user_data);
 
+    void connectViewCompleteSignal(EBookClientView *view);
+
+    static void onViewComplete(EBookClientView *view, GError *error, gpointer user_data);
+
     void connectContactSignals(EBookClientView *view);
 
     static void onContactsAdded(EBookClientView *view, GSList *contacts, gpointer user_data);

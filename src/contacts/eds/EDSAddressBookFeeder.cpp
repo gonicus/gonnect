@@ -181,6 +181,36 @@ QStringList EDSAddressBookFeeder::getList(EContact *contact, EContactField id)
     return results;
 }
 
+void EDSAddressBookFeeder::connectViewCompleteSignal(EBookClientView *view)
+{
+    g_signal_connect(view, "complete", G_CALLBACK(onViewComplete), this);
+}
+
+void EDSAddressBookFeeder::onViewComplete(EBookClientView *view, GError *error, gpointer user_data)
+{
+    /*
+        INFO: The "complete" signal is only needed on first startup to wait for the initial
+        stream of all objects to the view, we'll disconnect it here.
+        Otherwise, future view updates would cause duplicate signal connections.
+    */
+    guint signalId = g_signal_lookup("complete", G_OBJECT_TYPE(view));
+    g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_ID, signalId, 0, nullptr, nullptr,
+                                         nullptr);
+
+    if (error) {
+        qCCritical(lcEDSAddressBookFeeder)
+                << "Failed to wait for view completion, unable to subscribe "
+                   "to live contact updates:"
+                << error->message;
+        return;
+    }
+
+    EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
+    if (feeder) {
+        feeder->connectContactSignals(view);
+    }
+}
+
 void EDSAddressBookFeeder::connectContactSignals(EBookClientView *view)
 {
     // INFO: g_signal_connect(): The last argument is an instance of the EDS class (gpointer
@@ -353,7 +383,7 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
             return;
         }
 
-        feeder->connectContactSignals(view);
+        feeder->connectViewCompleteSignal(view);
         e_book_client_view_start(view, &error);
         if (error) {
             qCCritical(lcEDSAddressBookFeeder) << "Can't start view:" << error->message;
