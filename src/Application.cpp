@@ -95,9 +95,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     QTimer::singleShot(0, this, &Application::initialize);
 
 #ifdef Q_OS_WINDOWS
-    QObject::connect(this, &QGuiApplication::commitDataRequest, [](QSessionManager &manager) {
-        manager.cancel();
-    });
+    QObject::connect(this, &QGuiApplication::commitDataRequest,
+                     [](QSessionManager &manager) { manager.cancel(); });
 #endif
 }
 
@@ -118,7 +117,8 @@ void Application::installTranslations()
     }
 }
 
-void Application::setRootWindow(QQuickWindow *win) {
+void Application::setRootWindow(QQuickWindow *win)
+{
     if (!m_rootWindow) {
 #ifdef Q_OS_WINDOWS
         auto wFilter = new WindowsEventFilter();
@@ -127,7 +127,6 @@ void Application::setRootWindow(QQuickWindow *win) {
         m_rootWindow = win;
     }
 }
-
 
 void Application::initialize()
 {

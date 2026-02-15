@@ -39,9 +39,7 @@ bool WindowsEventFilter::nativeEventFilter(const QByteArray &eventType, void *me
     return false;
 }
 
-WindowsInhibitHelper::WindowsInhibitHelper() : InhibitHelper{}
-{
-}
+WindowsInhibitHelper::WindowsInhibitHelper() : InhibitHelper{} { }
 
 bool WindowsInhibitHelper::inhibitActive() const
 {
