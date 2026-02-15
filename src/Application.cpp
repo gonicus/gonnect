@@ -29,6 +29,7 @@
 
 #ifdef Q_OS_WINDOWS
 #  include "windows/WindowsEventLogHandler.h"
+#  include "windows/WindowsInhibitHelper.h"
 #endif
 
 #ifdef Q_OS_LINUX
@@ -94,11 +95,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     QTimer::singleShot(0, this, &Application::initialize);
 
 #ifdef Q_OS_WINDOWS
-    QObject::connect(&app, &QGuiApplication::commitDataRequest, [](QSessionManager &manager) {
+    QObject::connect(this, &QGuiApplication::commitDataRequest, [](QSessionManager &manager) {
         manager.cancel();
     });
-
-    app.setFallbackSessionManagementEnabled(false);
 #endif
 }
 
@@ -118,6 +117,15 @@ void Application::installTranslations()
         installTranslator(&m_appTranslator);
     }
 }
+
+void Application::setRootWindow(QQuickWindow *win) {
+    if (!m_rootWindow) {
+        auto wFilter = new WindowsEventFilter();
+        installNativeEventFilter(wFilter);
+        m_rootWindow = win;
+    }
+}
+
 
 void Application::initialize()
 {
