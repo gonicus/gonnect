@@ -18,23 +18,28 @@ InhibitHelper &InhibitHelper::instance()
 bool WindowsEventFilter::nativeEventFilter(const QByteArray &eventType, void *message,
                                            long long *result)
 {
-    if (eventType == "windows_dispatcher_MSG" || eventType == "windows_generic_MSG") {
+    if (eventType == "windows_generic_MSG") {
         MSG *msg = static_cast<MSG *>(message);
+        bool blocking = InhibitHelper::instance().inhibitActive();
 
         if (msg->message == WM_QUERYENDSESSION) {
-            *result = !InhibitHelper::instance().inhibitActive();
+            if (blocking) {
+                *result = false;
+            }
             return true;
+        }
+
+        if (msg->message == WM_ENDSESSION) {
+            if (blocking && msg->wParam == FALSE) {
+                return true;
+            }
         }
     }
 
     return false;
 }
 
-WindowsInhibitHelper::WindowsInhibitHelper() : InhibitHelper{}
-{
-    auto wFilter = new WindowsEventFilter();
-    Application::instance()->installNativeEventFilter(wFilter);
-}
+WindowsInhibitHelper::WindowsInhibitHelper() : InhibitHelper{} { }
 
 bool WindowsInhibitHelper::inhibitActive() const
 {

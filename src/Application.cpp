@@ -29,6 +29,7 @@
 
 #ifdef Q_OS_WINDOWS
 #  include "windows/WindowsEventLogHandler.h"
+#  include "windows/WindowsInhibitHelper.h"
 #endif
 
 #ifdef Q_OS_LINUX
@@ -92,6 +93,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // Take care for running "initialize" after exec() is called
     QTimer::singleShot(0, this, &Application::initialize);
+
+#ifdef Q_OS_WINDOWS
+    QObject::connect(this, &QGuiApplication::commitDataRequest,
+                     [](QSessionManager &manager) { manager.cancel(); });
+#endif
 }
 
 void Application::installTranslations()
@@ -108,6 +114,17 @@ void Application::installTranslations()
 
     if (m_appTranslator.load(QLocale(), "gonnect"_L1, "_"_L1, ":/i18n"_L1)) {
         installTranslator(&m_appTranslator);
+    }
+}
+
+void Application::setRootWindow(QQuickWindow *win)
+{
+    if (!m_rootWindow) {
+#ifdef Q_OS_WINDOWS
+        auto wFilter = new WindowsEventFilter();
+        installNativeEventFilter(wFilter);
+#endif
+        m_rootWindow = win;
     }
 }
 
