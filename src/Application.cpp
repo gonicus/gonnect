@@ -92,6 +92,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // Take care for running "initialize" after exec() is called
     QTimer::singleShot(0, this, &Application::initialize);
+
+#ifdef Q_OS_WINDOWS
+    QObject::connect(&app, &QGuiApplication::commitDataRequest, [](QSessionManager &manager) {
+        manager.cancel();
+    });
+
+    app.setFallbackSessionManagementEnabled(false);
+#endif
 }
 
 void Application::installTranslations()
