@@ -20,7 +20,7 @@ bool WindowsEventFilter::nativeEventFilter(const QByteArray &eventType, void *me
 {
     if (eventType == "windows_generic_MSG") {
         MSG *msg = static_cast<MSG *>(message);
-        bool blocking = m_inhibit;
+        bool blocking = InhibitHelper::instance().inhibitActive();
 
         if (msg->message == WM_QUERYENDSESSION) {
             if (blocking) {

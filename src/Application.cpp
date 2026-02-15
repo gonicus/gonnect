@@ -120,8 +120,10 @@ void Application::installTranslations()
 
 void Application::setRootWindow(QQuickWindow *win) {
     if (!m_rootWindow) {
+#ifdef Q_OS_WINDOWS
         auto wFilter = new WindowsEventFilter();
         installNativeEventFilter(wFilter);
+#endif
         m_rootWindow = win;
     }
 }
