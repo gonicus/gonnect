@@ -398,7 +398,7 @@ Item {
         }
     }
 
-    Menu { // ...
+    Menu {
         id: optionMenu
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
@@ -436,11 +436,20 @@ Item {
         }
 
         Action {
+            id: moveUpAction
             text: qsTr("Move up")
             icon.source: Icons.arrowUp
             enabled: !menuInternal.isFirst
 
-            onTriggered: {
+            onTriggered: () => moveUpAction.moveTabUp()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Move tab up")
+            Accessible.description: qsTr("Moves the currently selected tab up by one")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => moveUpAction.moveTabUp()
+
+            function moveTabUp() {
                 if (optionMenu.selectedTabButton !== null) {
                     const newOrder = control.getTabList()
                     const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
@@ -465,11 +474,20 @@ Item {
         }
 
         Action {
+            id: moveDownAction
             text: qsTr("Move down")
             icon.source: Icons.arrowDown
             enabled: !menuInternal.isLast
 
-            onTriggered: {
+            onTriggered: () => moveDownAction.moveTabDown()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Move tab down")
+            Accessible.description: qsTr("Moves the currently selected tab down by one")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => moveDownAction.moveTabDown()
+
+            function moveTabDown() {
                 if (optionMenu.selectedTabButton !== null) {
                     const newOrder = control.getTabList()
                     const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
@@ -494,20 +512,36 @@ Item {
         }
 
         Action {
+            id: editPageAction
             text: qsTr("Edit")
             icon.source: Icons.editor
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
             onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Edit page")
+            Accessible.description: qsTr("Edit the currently selected dashboard page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
         }
 
         Action {
+            id: deletePageAction
             text: qsTr("Delete")
             icon.source: Icons.editDelete
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
 
-            onTriggered: {
+            onTriggered: () => deletePageAction.deletePage()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Delete page")
+            Accessible.description: qsTr("Delete the currently selected dashboard page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => deletePageAction.deletePage()
+
+            function deletePage() {
                 if (optionMenu.selectedTabButton !== null) {
                     let curIndex
                     let newIndex
