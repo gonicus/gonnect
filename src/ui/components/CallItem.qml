@@ -34,6 +34,8 @@ Rectangle {
     required property string avatarPath
     required property int qualityLevel
     required property int securityLevel
+    required property bool isSignalingEncrypted
+    required property bool isMediaEncrypted
 
     property bool selected: false
     property bool interactive: true

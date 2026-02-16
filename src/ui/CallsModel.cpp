@@ -109,6 +109,30 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                 }
             });
 
+    connect(&callManager, &SIPCallManager::isSignalingEncryptedChanged, this,
+            [this](SIPCall *call, bool isEncrypted) {
+                auto callInfo = m_callsHash.value(call->getId());
+                const auto index = m_calls.indexOf(callInfo);
+
+                if (callInfo && index >= 0) {
+                    callInfo->isSignalingEncrypted = isEncrypted;
+                    const auto idx = createIndex(index, 0);
+                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::IsSignalingEncrypted) });
+                }
+            });
+
+    connect(&callManager, &SIPCallManager::isMediaEncryptedChanged, this,
+            [this](SIPCall *call, bool isEncrypted) {
+                auto callInfo = m_callsHash.value(call->getId());
+                const auto index = m_calls.indexOf(callInfo);
+
+                if (callInfo && index >= 0) {
+                    callInfo->isMediaEncrypted = isEncrypted;
+                    const auto idx = createIndex(index, 0);
+                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::IsMediaEncrypted) });
+                }
+            });
+
     connect(&callManager, &SIPCallManager::callState, this, [this](int callId, int statusCode) {
         auto callInfo = m_callsHash.value(callId);
         const auto index = m_calls.indexOf(callInfo);
@@ -182,6 +206,8 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::AvatarPath), "avatarPath" },
         { static_cast<int>(Roles::QualityLevel), "qualityLevel" },
         { static_cast<int>(Roles::SecurityLevel), "securityLevel" },
+        { static_cast<int>(Roles::IsSignalingEncrypted), "isSignalingEncrypted" },
+        { static_cast<int>(Roles::IsMediaEncrypted), "isMediaEncrypted" },
     };
 }
 
@@ -226,6 +252,8 @@ void CallsModel::updateCalls()
         callInfo->hasMetadata = call->hasMetadata();
         callInfo->qualityLevel = call->qualityLevel();
         callInfo->securityLevel = call->securityLevel();
+        callInfo->isSignalingEncrypted = call->isSignalingEncrypted();
+        callInfo->isMediaEncrypted = call->isMediaEncrypted();
 
         if (!exists) {
             m_calls.append(callInfo);
@@ -349,6 +377,12 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::SecurityLevel):
         return QVariant::fromValue(callInfo->securityLevel);
+
+    case static_cast<int>(Roles::IsSignalingEncrypted):
+        return callInfo->isSignalingEncrypted;
+
+    case static_cast<int>(Roles::IsMediaEncrypted):
+        return callInfo->isMediaEncrypted;
 
     case static_cast<int>(Roles::RemoteUri):
     default:

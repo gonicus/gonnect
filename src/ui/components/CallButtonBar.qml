@@ -25,6 +25,8 @@ Item {
     readonly property bool hasCapabilityJitsi: control.callItem?.hasCapabilityJitsi ?? false
     readonly property int qualityLevel: control.callItem?.qualityLevel ?? SIPCallManager.QualityLevel.Low
     readonly property int securityLevel: control.callItem?.securityLevel ?? SIPCallManager.SecurityLevel.Low
+    readonly property bool isSignalingEncrypted: control.callItem?.isSignalingEncrypted ?? false
+    readonly property bool isMediaEncrypted: control.callItem?.isMediaEncrypted ?? false
 
     readonly property bool areInCallButtonsEnabled: control.isEstablished && !control.isFinished
 
@@ -83,6 +85,63 @@ Item {
                         return Icons.securityHigh
                 }
                 throw new Error("Unknown security level value: " + control.securityLevel)
+            }
+        }
+
+        HoverHandler {
+            id: securityLevelHoverHandler
+
+            property Popup securityLevelPopup: Popup {
+                y: securityLevelIcon.height
+
+                Column {
+                    spacing: 8
+
+                    IconLabel {
+                        text: control.isSignalingEncrypted ? qsTr("Signaling encrypted") : qsTr("Signaling unencrypted")
+                        spacing: 4
+                        icon {
+                            source: control.isSignalingEncrypted ? Icons.securityHigh : Icons.securityLow
+                            width: 24
+                            height: 24
+                        }
+                    }
+                    IconLabel {
+                        text: control.isMediaEncrypted ? qsTr("Media encrypted") : qsTr("Media unencrypted")
+                        spacing: 4
+                        icon {
+                            source: control.isMediaEncrypted ? Icons.securityHigh : Icons.securityLow
+                            width: 24
+                            height: 24
+                        }
+                    }
+                }
+            }
+
+            onHoveredChanged: () => {
+                const popup = securityLevelHoverHandler.securityLevelPopup
+                if (securityLevelHoverHandler.hovered) {
+                    popup.open()
+                } else {
+                    popup.close()
+                }
+            }
+        }
+    }
+
+    Component {
+        id: securityDetailsPopupComponent
+
+        Popup {
+            Column {
+                IconLabel {
+                    text: qsTr("Signaling encrypted")
+                    icon.source: SIPCallManager.SecurityLevel.High
+                }
+                IconLabel {
+                    text: qsTr("Media encrypted")
+                    icon.source: SIPCallManager.SecurityLevel.High
+                }
             }
         }
     }

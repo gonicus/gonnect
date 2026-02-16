@@ -72,6 +72,8 @@ public:
 
     SIPCallManager::QualityLevel qualityLevel() const { return m_qualityLevel; }
     SIPCallManager::SecurityLevel securityLevel() const { return m_securityLevel; }
+    bool isSignalingEncrypted() const { return m_signalingEncrypted; }
+    bool isMediaEncrypted() const { return m_mediaEncrypted; }
 
 protected:
     void toggleHoldImpl() override;
@@ -89,6 +91,8 @@ Q_SIGNALS:
     void rtcpStatsChanged();
     void qualityLevelChanged();
     void securityLevelChanged();
+    void isSignalingEncryptedChanged();
+    void isMediaEncryptedChanged();
 
 private Q_SLOTS:
     void updateIsBlocked();
@@ -101,6 +105,8 @@ private:
     void setContactInfo(const QString &sipUrl, bool isIncoming = true);
     void setQualityLevel(SIPCallManager::QualityLevel qualityLevel);
     void setSecurityLevel(SIPCallManager::SecurityLevel securityLevel);
+    void setIsSignalingEncrypted(bool value);
+    void setIsMediaEncrypted(bool value);
     void createOngoingCallNotification();
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);

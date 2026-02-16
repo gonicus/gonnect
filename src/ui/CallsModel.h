@@ -34,6 +34,8 @@ public:
         pjsip_status_code statusCode = PJSIP_SC_NULL;
         SIPCallManager::QualityLevel qualityLevel = SIPCallManager::QualityLevel::Low;
         SIPCallManager::SecurityLevel securityLevel = SIPCallManager::SecurityLevel::Low;
+        bool isSignalingEncrypted = false;
+        bool isMediaEncrypted = false;
     };
 
     enum class Roles {
@@ -58,7 +60,9 @@ public:
         HasAvatar,
         AvatarPath,
         QualityLevel,
-        SecurityLevel
+        SecurityLevel,
+        IsSignalingEncrypted,
+        IsMediaEncrypted
     };
 
     explicit CallsModel(QObject *parent = nullptr);

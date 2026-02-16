@@ -547,6 +547,24 @@ void SIPCall::setSecurityLevel(SIPCallManager::SecurityLevel securityLevel)
     }
 }
 
+void SIPCall::setIsSignalingEncrypted(bool value)
+{
+    if (m_signalingEncrypted != value) {
+        m_signalingEncrypted = value;
+        Q_EMIT isSignalingEncryptedChanged();
+        Q_EMIT SIPCallManager::instance().isSignalingEncryptedChanged(this, value);
+    }
+}
+
+void SIPCall::setIsMediaEncrypted(bool value)
+{
+    if (m_mediaEncrypted != value) {
+        m_mediaEncrypted = value;
+        Q_EMIT isMediaEncryptedChanged();
+        Q_EMIT SIPCallManager::instance().isMediaEncryptedChanged(this, value);
+    }
+}
+
 void SIPCall::updateIsBlocked()
 {
     bool isBlocked = false;
@@ -687,8 +705,8 @@ void SIPCall::updateRtcpStats()
             if (m_codec != si.codecName) {
                 m_codec = QString::fromStdString(si.codecName);
                 m_clockRate = si.codecClockRate;
-                m_mediaEncrypted = si.proto & PJMEDIA_TP_PROFILE_SRTP;
-                m_signalingEncrypted = m_account->isSignalingEncrypted();
+                setIsMediaEncrypted(si.proto & PJMEDIA_TP_PROFILE_SRTP);
+                setIsSignalingEncrypted(m_account->isSignalingEncrypted());
             }
 
             m_mosTx = calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.last, m_jitterTx, m_effDelayTx,
