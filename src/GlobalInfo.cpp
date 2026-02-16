@@ -17,8 +17,18 @@ QString GlobalInfo::jitsiUrl()
         ReadOnlyConfdSettings settings;
         settings.beginGroup("jitsi");
         m_jitsiUrl = settings.value("url", "").toString();
+        m_jitsiMuc = settings.value("muc", "").toString();
     }
     return m_jitsiUrl;
+}
+
+QString GlobalInfo::jitsiMuc()
+{
+    if (!m_isJitsiUrlInitialized) {
+        jitsiUrl();
+    }
+
+    return m_jitsiMuc;
 }
 
 QString GlobalInfo::teamsUrl()

@@ -9,10 +9,10 @@ if(NOT EXISTS ${PROJECT_BINARY_DIR}/src/icons.qrc)
     
         file(READ ${PROJECT_SOURCE_DIR}/${icon} ICON_DATA)
         string(REPLACE "#232629" "#d3dae3" ICON_DATA "${ICON_DATA}")
-        file(WRITE ${PROJECT_BINARY_DIR}/${icon} "${ICON_DATA}")
+        file(WRITE ${PROJECT_BINARY_DIR}/_/${icon} "${ICON_DATA}")
     
         list(APPEND icons_light "<file alias=\"${_icon}\">${PROJECT_SOURCE_DIR}/${icon}</file>")
-        list(APPEND icons_dark "<file alias=\"${_icon}\">${PROJECT_BINARY_DIR}/${icon}</file>")
+        list(APPEND icons_dark "<file alias=\"${_icon}\">${PROJECT_BINARY_DIR}/_/${icon}</file>")
     endforeach()
     
     string(REPLACE ";" "\n        " ICONS "${icons_light}")

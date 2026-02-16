@@ -276,7 +276,7 @@ Item {
                 Item {
                     id: timesContainer
                     implicitHeight: timeLabel.implicitHeight
-                    Layout.preferredWidth: 70
+                    Layout.preferredWidth: 60
                     Layout.rightMargin: 10
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
@@ -301,11 +301,13 @@ Item {
                             }
                         ]
 
-                        Label {
+                        IconLabel {
                             id: timeIconLabel
-                            width: 15
-                            text: "🕓"
-                            horizontalAlignment: Label.AlignHCenter
+                            icon {
+                                source: Icons.acceptTimeEvent
+                                width: 18
+                                height: 18
+                            }
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
@@ -333,10 +335,12 @@ Item {
                             top: parent.verticalCenter
                         }
 
-                        Label {
-                            text: "⌛"
-                            width: timeIconLabel.width
-                            horizontalAlignment: Label.AlignHCenter
+                        IconLabel {
+                            icon {
+                                source: Icons.chronometer
+                                width: 18
+                                height: 18
+                            }
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter

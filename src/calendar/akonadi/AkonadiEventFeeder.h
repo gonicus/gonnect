@@ -31,8 +31,8 @@ public:
 
     ~AkonadiEventFeeder();
 
-    virtual void init() override;
-    virtual QUrl networkCheckURL() const override { return QUrl(); };
+    void init() override;
+    QUrl networkCheckURL() const override { return QUrl(); };
 
     void process();
 

@@ -285,6 +285,7 @@ BaseWindow {
             mainWindow: control
 
             hasActiveCall: callsModel.count > 0
+            hasActiveUnfinishedCall: callsModel.unfinishedCount > 0
             hasActiveConference: conferencePage.iConferenceConnector.isInConference
             anchors {
                 left: parent.left

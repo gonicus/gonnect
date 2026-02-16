@@ -126,6 +126,7 @@ void Theme::updateColorPalette()
     m_redColor = QColor(224, 27, 36);
     m_greenColor = QColor(36, 181, 27);
     m_darkGreenColor = QColor(128, 128, 0);
+    m_activeIndicatorColor = QColor(255, 102, 0);
 
     // Dark mode overrides
     if (m_isDarkMode) {

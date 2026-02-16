@@ -1,6 +1,8 @@
 #pragma once
 #include <QObject>
 #include <QNetworkInformation>
+#include <QFuture>
+#include <QJsonDocument>
 
 class NetworkHelper : public QObject
 {
@@ -8,6 +10,9 @@ class NetworkHelper : public QObject
     Q_DISABLE_COPY(NetworkHelper)
 
 public:
+    static QFuture<QString> fetchUrlAsString(const QUrl &url);
+    static QFuture<QJsonDocument> fetchUrlAsJson(const QUrl &url);
+
     explicit NetworkHelper(QObject *parent = nullptr);
 
     static NetworkHelper &instance();

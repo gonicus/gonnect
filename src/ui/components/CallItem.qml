@@ -32,6 +32,8 @@ Rectangle {
     required property bool hasAvatar
     required property bool hasMetadata
     required property string avatarPath
+    required property int qualityLevel
+    required property int securityLevel
 
     property bool selected: false
     property bool interactive: true

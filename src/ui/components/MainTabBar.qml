@@ -26,6 +26,7 @@ Item {
     property int dynamicPageLimit: 5
 
     property bool hasActiveCall
+    property bool hasActiveUnfinishedCall
     property bool hasActiveConference
 
     property alias backgroundColor: filler.color
@@ -189,6 +190,7 @@ Item {
             required property int pageType
             required property bool isEnabled
             required property bool showRedDot
+            required property bool showActiveBorder
             required property string labelText
             required property string disabledTooltipText
             required property string iconSource
@@ -206,7 +208,7 @@ Item {
                 id: hoverBackground
                 visible: delg.isSelected
                          || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
-                radius: 4
+                radius: 8
                 color: Theme.backgroundSecondaryColor
                 anchors {
                     fill: parent
@@ -253,6 +255,34 @@ Item {
                             optionMenu.selectedTabButton = delg
                             optionMenu.open()
                         }
+                    }
+                }
+            }
+
+            Rectangle {
+                id: activeBg
+                radius: 8
+                color: Theme.activeIndicatorColor
+                anchors.fill: hoverBackground
+                visible: delg.showActiveBorder
+
+                SequentialAnimation {
+                    running: activeBg.visible
+                    loops: Animation.Infinite
+
+                    NumberAnimation {
+                        target: activeBg
+                        property: "opacity"
+                        from: 1.0
+                        to: 0.0
+                        duration: 2000
+                    }
+                    NumberAnimation {
+                        target: activeBg
+                        property: "opacity"
+                        from: 0.0
+                        to: 1.0
+                        duration: 2000
                     }
                 }
             }
@@ -341,6 +371,7 @@ Item {
                         disabledTooltipText: qsTr("Home"),
                         isEnabled: true,
                         showRedDot: false,
+                        showActiveBorder: false,
                         attachedData: null
                     }, {
                         pageId: control.mainWindow.conferencePageId,
@@ -350,6 +381,7 @@ Item {
                         disabledTooltipText: qsTr("No active conference"),
                         isEnabled: control.hasActiveConference,
                         showRedDot: false,
+                        showActiveBorder: control.hasActiveConference && control.selectedPageId !== control.mainWindow.conferencePageId,
                         attachedData: null
                     }, {
                         pageId: control.mainWindow.callPageId,
@@ -359,6 +391,7 @@ Item {
                         disabledTooltipText: qsTr("No active call"),
                         isEnabled: control.hasActiveCall,
                         showRedDot: false,
+                        showActiveBorder: control.hasActiveUnfinishedCall && control.selectedPageId !== control.mainWindow.callPageId,
                         attachedData: null
                     }
                 ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
@@ -392,6 +425,7 @@ Item {
                     disabledTooltipText: qsTr("Settings"),
                     isEnabled: true,
                     showRedDot: false,
+                    showActiveBorder: false,
                     attachedData: null
                 }
             ]

@@ -36,7 +36,7 @@ BaseWindow {
             location: ViewHelper.userConfigPath
             category: "generic"
 
-            property string homePageURL: "https://gonnect.gonicus.de"
+            property string homePageURL: "https://gonnect-project.org"
             property string issueTrackerURL: "https://github.com/gonicus/gonnect/issues"
             property string documentationURL: "https://docs.gonicus.de/"
         }
