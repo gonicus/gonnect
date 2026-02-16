@@ -85,6 +85,21 @@ make this list more complete by opening an [issue](https://github.com/gonicus/go
 | Yealink          | WH62                | AEMSLOR         |
 | Yealink          | WH66/WH67           | AEMSLORD        |
 
+The linux kernel currently has no concept of call flow, which (depending on the headset you
+have) may lead to problems with microphone mute loops: the headset keeps toggling mute,
+unmute, mute, etc. As GOnnect can take care of this, switching of the direct alsa feedback
+to the sound system mute state may help:
+
+```
+cat > /etc/udev/hwdb.d/90-usb-no-mute.hwdb <<EOF
+evdev:input:b0003*
+ KEYBOARD_KEY_b002f=reserved
+EOF
+
+systemd-hwdb update
+udevadm trigger
+```
+
 # Busylights known to be supported
 
 | Manufacturer | Model              |
