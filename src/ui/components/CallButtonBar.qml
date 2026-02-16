@@ -175,7 +175,7 @@ Item {
                     spacing: 8
 
                     Label {
-                        text: qsTr("Code: %1").arg(control.codec)
+                        text: qsTr("Codec: %1").arg(control.codec)
                     }
 
                     Row {
@@ -189,13 +189,13 @@ Item {
                                 text: qsTr("TX [mos %1]").arg(control.txMos)
                             }
                             Label {
-                                text: qsTr("Packet loss: %1 %").arg(control.txLossRate)
+                                text: qsTr("Packet loss: %1%").arg(control.txLossRate)
                             }
                             Label {
-                                text: qsTr("Jitter: %1 ms").arg(control.txJitter)
+                                text: qsTr("Jitter: %1ms").arg(control.txJitter)
                             }
                             Label {
-                                text: qsTr("Effective delay: %1 ms").arg(control.txEffectiveDelay)
+                                text: qsTr("Delay: %1ms").arg(control.txEffectiveDelay)
                             }
                         }
 
@@ -212,13 +212,13 @@ Item {
                                 text: qsTr("RX [mos %1]").arg(control.rxMos)
                             }
                             Label {
-                                text: qsTr("Packet loss: %1 %").arg(control.rxLossRate)
+                                text: qsTr("Packet loss: %1%").arg(control.rxLossRate)
                             }
                             Label {
-                                text: qsTr("Jitter: %1 ms").arg(control.rxJitter)
+                                text: qsTr("Jitter: %1ms").arg(control.rxJitter)
                             }
                             Label {
-                                text: qsTr("Effective delay: %1 ms").arg(control.rxEffectiveDelay)
+                                text: qsTr("Delay: %1ms").arg(control.rxEffectiveDelay)
                             }
                         }
                     }
