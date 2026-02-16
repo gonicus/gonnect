@@ -23,10 +23,23 @@ Item {
     readonly property bool isFinished: control.callItem?.isFinished ?? false
     readonly property bool isIncoming: control.callItem?.isIncoming ?? false
     readonly property bool hasCapabilityJitsi: control.callItem?.hasCapabilityJitsi ?? false
+
     readonly property int qualityLevel: control.callItem?.qualityLevel ?? SIPCallManager.QualityLevel.Low
     readonly property int securityLevel: control.callItem?.securityLevel ?? SIPCallManager.SecurityLevel.Low
     readonly property bool isSignalingEncrypted: control.callItem?.isSignalingEncrypted ?? false
     readonly property bool isMediaEncrypted: control.callItem?.isMediaEncrypted ?? false
+
+    readonly property string codec: control.callItem?.codec ?? ""
+
+    readonly property real txMos: control.callItem?.txMos ?? 0.0
+    readonly property real txLossRate: control.callItem?.txLossRate ?? 0.0
+    readonly property real txJitter: control.callItem?.txJitter ?? 0.0
+    readonly property real txEffectiveDelay: control.callItem?.txEffectiveDelay ?? 0.0
+
+    readonly property real rxMos: control.callItem?.rxMos ?? 0.0
+    readonly property real rxLossRate: control.callItem?.rxLossRate ?? 0.0
+    readonly property real rxJitter: control.callItem?.rxJitter ?? 0.0
+    readonly property real rxEffectiveDelay: control.callItem?.rxEffectiveDelay ?? 0.0
 
     readonly property bool areInCallButtonsEnabled: control.isEstablished && !control.isFinished
 
@@ -129,23 +142,6 @@ Item {
         }
     }
 
-    Component {
-        id: securityDetailsPopupComponent
-
-        Popup {
-            Column {
-                IconLabel {
-                    text: qsTr("Signaling encrypted")
-                    icon.source: SIPCallManager.SecurityLevel.High
-                }
-                IconLabel {
-                    text: qsTr("Media encrypted")
-                    icon.source: SIPCallManager.SecurityLevel.High
-                }
-            }
-        }
-    }
-
     IconLabel {
         id: callQualityIcon
         anchors {
@@ -166,6 +162,76 @@ Item {
                         return Icons.callQualityHigh
                 }
                 throw new Error("Unknown quality level value: " + control.qualityLevel)
+            }
+        }
+
+        HoverHandler {
+            id: callQualityHoverHandler
+
+            property Popup qualityLevelPopup: Popup {
+                y: callQualityIcon.height
+
+                Column {
+                    spacing: 8
+
+                    Label {
+                        text: qsTr("Code: %1").arg(control.codec)
+                    }
+
+                    Row {
+                        spacing: 8
+
+                        Column {
+                            id: txCol
+                            spacing: 8
+
+                            Label {
+                                text: qsTr("TX [mos %1]").arg(control.txMos)
+                            }
+                            Label {
+                                text: qsTr("Packet loss: %1 %").arg(control.txLossRate)
+                            }
+                            Label {
+                                text: qsTr("Jitter: %1 ms").arg(control.txJitter)
+                            }
+                            Label {
+                                text: qsTr("Effective delay: %1 ms").arg(control.txEffectiveDelay)
+                            }
+                        }
+
+                        Rectangle {
+                            width: 1
+                            height: txCol.height
+                            color: Theme.borderColor
+                        }
+
+                        Column {
+                            spacing: 8
+
+                            Label {
+                                text: qsTr("RX [mos %1]").arg(control.rxMos)
+                            }
+                            Label {
+                                text: qsTr("Packet loss: %1 %").arg(control.rxLossRate)
+                            }
+                            Label {
+                                text: qsTr("Jitter: %1 ms").arg(control.rxJitter)
+                            }
+                            Label {
+                                text: qsTr("Effective delay: %1 ms").arg(control.rxEffectiveDelay)
+                            }
+                        }
+                    }
+                }
+            }
+
+            onHoveredChanged: () => {
+                const popup = callQualityHoverHandler.qualityLevelPopup
+                if (callQualityHoverHandler.hovered) {
+                    popup.open()
+                } else {
+                    popup.close()
+                }
             }
         }
     }

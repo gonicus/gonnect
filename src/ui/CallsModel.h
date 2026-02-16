@@ -32,10 +32,23 @@ public:
         QDateTime established;
         ContactInfo contactInfo;
         pjsip_status_code statusCode = PJSIP_SC_NULL;
+
         SIPCallManager::QualityLevel qualityLevel = SIPCallManager::QualityLevel::Low;
         SIPCallManager::SecurityLevel securityLevel = SIPCallManager::SecurityLevel::Low;
         bool isSignalingEncrypted = false;
         bool isMediaEncrypted = false;
+
+        QString codec;
+
+        double txMos = 0.0;
+        double txLossRate = 0.0;
+        double txJitter = 0.0;
+        double txEffectiveDelay = 0.0;
+
+        double rxMos = 0.0;
+        double rxLossRate = 0.0;
+        double rxJitter = 0.0;
+        double rxEffectiveDelay = 0.0;
     };
 
     enum class Roles {
@@ -59,10 +72,23 @@ public:
         HasMetadata,
         HasAvatar,
         AvatarPath,
+
         QualityLevel,
         SecurityLevel,
         IsSignalingEncrypted,
-        IsMediaEncrypted
+        IsMediaEncrypted,
+
+        Codec,
+
+        TxMos,
+        TxLossRate,
+        TxJitter,
+        TxEffectiveDelay,
+
+        RxMos,
+        RxLossRate,
+        RxJitter,
+        RxEffectiveDelay
     };
 
     explicit CallsModel(QObject *parent = nullptr);

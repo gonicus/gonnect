@@ -771,6 +771,8 @@ void SIPCall::updateRtcpStats()
                 setSecurityLevel(SIPCallManager::SecurityLevel::Low);
             }
 
+            Q_EMIT callQualityInfoChanged();
+            Q_EMIT SIPCallManager::instance().callQualityInfoChanged(this);
             Q_EMIT rtcpStatsChanged();
 
             // Look at first audio stream, only

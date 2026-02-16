@@ -133,6 +133,41 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                 }
             });
 
+    connect(&callManager, &SIPCallManager::callQualityInfoChanged, this, [this](SIPCall *call) {
+        auto callInfo = m_callsHash.value(call->getId());
+        const auto index = m_calls.indexOf(callInfo);
+
+        if (callInfo && index >= 0) {
+            callInfo->codec = call->codec();
+
+            callInfo->txMos = call->txMos();
+            callInfo->txLossRate = call->txLossRate();
+            callInfo->txJitter = call->txJitter();
+            callInfo->txEffectiveDelay = call->txEffectiveDelay();
+
+            callInfo->rxMos = call->rxMos();
+            callInfo->rxLossRate = call->rxLossRate();
+            callInfo->rxJitter = call->rxJitter();
+            callInfo->rxEffectiveDelay = call->rxEffectiveDelay();
+
+            const auto idx = createIndex(index, 0);
+            Q_EMIT dataChanged(idx, idx,
+                               {
+                                       static_cast<int>(Roles::Codec),
+
+                                       static_cast<int>(Roles::TxMos),
+                                       static_cast<int>(Roles::TxLossRate),
+                                       static_cast<int>(Roles::TxJitter),
+                                       static_cast<int>(Roles::TxEffectiveDelay),
+
+                                       static_cast<int>(Roles::RxMos),
+                                       static_cast<int>(Roles::RxLossRate),
+                                       static_cast<int>(Roles::RxJitter),
+                                       static_cast<int>(Roles::RxEffectiveDelay),
+                               });
+        }
+    });
+
     connect(&callManager, &SIPCallManager::callState, this, [this](int callId, int statusCode) {
         auto callInfo = m_callsHash.value(callId);
         const auto index = m_calls.indexOf(callInfo);
@@ -204,10 +239,23 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::HasMetadata), "hasMetadata" },
         { static_cast<int>(Roles::HasAvatar), "hasAvatar" },
         { static_cast<int>(Roles::AvatarPath), "avatarPath" },
+
         { static_cast<int>(Roles::QualityLevel), "qualityLevel" },
         { static_cast<int>(Roles::SecurityLevel), "securityLevel" },
         { static_cast<int>(Roles::IsSignalingEncrypted), "isSignalingEncrypted" },
         { static_cast<int>(Roles::IsMediaEncrypted), "isMediaEncrypted" },
+
+        { static_cast<int>(Roles::Codec), "codec" },
+
+        { static_cast<int>(Roles::TxMos), "txMos" },
+        { static_cast<int>(Roles::TxLossRate), "txLossRate" },
+        { static_cast<int>(Roles::TxJitter), "txJitter" },
+        { static_cast<int>(Roles::TxEffectiveDelay), "txEffectiveDelay" },
+
+        { static_cast<int>(Roles::RxMos), "rxMos" },
+        { static_cast<int>(Roles::RxLossRate), "rxLossRate" },
+        { static_cast<int>(Roles::RxJitter), "rxJitter" },
+        { static_cast<int>(Roles::RxEffectiveDelay), "rxEffectiveDelay" },
     };
 }
 
@@ -250,10 +298,23 @@ void CallsModel::updateCalls()
                 PhoneNumberUtil::instance().contactInfoBySipUrl(callInfo->remoteUri);
         callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && call->isEstablished();
         callInfo->hasMetadata = call->hasMetadata();
+
         callInfo->qualityLevel = call->qualityLevel();
         callInfo->securityLevel = call->securityLevel();
         callInfo->isSignalingEncrypted = call->isSignalingEncrypted();
         callInfo->isMediaEncrypted = call->isMediaEncrypted();
+
+        callInfo->codec = call->codec();
+
+        callInfo->txMos = call->txMos();
+        callInfo->txLossRate = call->txLossRate();
+        callInfo->txJitter = call->txJitter();
+        callInfo->txEffectiveDelay = call->txEffectiveDelay();
+
+        callInfo->rxMos = call->rxMos();
+        callInfo->rxLossRate = call->rxLossRate();
+        callInfo->rxJitter = call->rxJitter();
+        callInfo->rxEffectiveDelay = call->rxEffectiveDelay();
 
         if (!exists) {
             m_calls.append(callInfo);
@@ -383,6 +444,27 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::IsMediaEncrypted):
         return callInfo->isMediaEncrypted;
+
+    case static_cast<int>(Roles::Codec):
+        return callInfo->codec;
+
+    case static_cast<int>(Roles::TxMos):
+        return callInfo->txMos;
+    case static_cast<int>(Roles::TxLossRate):
+        return callInfo->txLossRate;
+    case static_cast<int>(Roles::TxJitter):
+        return callInfo->txJitter;
+    case static_cast<int>(Roles::TxEffectiveDelay):
+        return callInfo->txEffectiveDelay;
+
+    case static_cast<int>(Roles::RxMos):
+        return callInfo->rxMos;
+    case static_cast<int>(Roles::RxLossRate):
+        return callInfo->rxLossRate;
+    case static_cast<int>(Roles::RxJitter):
+        return callInfo->rxJitter;
+    case static_cast<int>(Roles::RxEffectiveDelay):
+        return callInfo->rxEffectiveDelay;
 
     case static_cast<int>(Roles::RemoteUri):
     default:

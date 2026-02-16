@@ -32,10 +32,23 @@ Rectangle {
     required property bool hasAvatar
     required property bool hasMetadata
     required property string avatarPath
+
     required property int qualityLevel
     required property int securityLevel
     required property bool isSignalingEncrypted
     required property bool isMediaEncrypted
+
+    required property string codec
+
+    required property real txMos
+    required property real txLossRate
+    required property real txJitter
+    required property real txEffectiveDelay
+
+    required property real rxMos
+    required property real rxLossRate
+    required property real rxJitter
+    required property real rxEffectiveDelay
 
     property bool selected: false
     property bool interactive: true

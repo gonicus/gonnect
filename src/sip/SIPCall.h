@@ -75,6 +75,26 @@ public:
     bool isSignalingEncrypted() const { return m_signalingEncrypted; }
     bool isMediaEncrypted() const { return m_mediaEncrypted; }
 
+    /// \name SIP call quality information
+    ///@{
+
+    QString codec() const { return m_codec; }
+
+    double txMos() const { return m_mosTx; }
+    double txLossRate() const { return m_lossRateTx; }
+    double txJitter() const { return m_jitterTx; }
+    double txEffectiveDelay() const { return m_effDelayTx; }
+
+    double rxMos() const { return m_mosRx; }
+    double rxLossRate() const { return m_lossRateRx; }
+    double rxJitter() const { return m_jitterRx; }
+    double rxEffectiveDelay() const { return m_effDelayRx; }
+
+Q_SIGNALS:
+    void callQualityInfoChanged();
+
+    ///@}
+
 protected:
     void toggleHoldImpl() override;
 
