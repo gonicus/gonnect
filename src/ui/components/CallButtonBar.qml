@@ -174,11 +174,7 @@ Item {
                 y: callQualityIcon.height
 
                 Column {
-                    spacing: 8
-
-                    Label {
-                        text: qsTr("%1@%2 kHz").arg(control.codec, Math.round(control.codecClockRate / 1000))
-                    }
+                    spacing: 16
 
                     Row {
                         spacing: 22
@@ -189,6 +185,10 @@ Item {
 
                             Label {
                                 text: qsTr("Transmit")
+                                font {
+                                    weight: Font.DemiBold
+                                    pixelSize: 16
+                                }
                             }
                             Row {
                                 spacing: 8
@@ -243,6 +243,10 @@ Item {
 
                             Label {
                                 text: qsTr("Receive")
+                                font {
+                                    weight: Font.DemiBold
+                                    pixelSize: 16
+                                }
                             }
                             Row {
                                 spacing: 8
@@ -284,6 +288,28 @@ Item {
                                     text: Math.round(control.rxEffectiveDelay) + "ms"
                                 }
                             }
+                        }
+                    }
+
+                    Rectangle {
+                        color: Theme.borderColor
+                        height: 1
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                    }
+
+                    Row {
+                        spacing: 8
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                        Label {
+                            text: qsTr("Codec")
+                        }
+                        Label {
+                            text: qsTr("%1@%2 kHz").arg(control.codec).arg(Math.round(control.codecClockRate / 1000))
+                            color: Theme.secondaryTextColor
                         }
                     }
                 }

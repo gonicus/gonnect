@@ -39,6 +39,7 @@ Rectangle {
     required property bool isMediaEncrypted
 
     required property string codec
+    required property int codecClockRate
 
     required property real txMos
     required property real txLossRate
