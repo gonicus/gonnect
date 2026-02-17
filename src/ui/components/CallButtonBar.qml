@@ -115,7 +115,7 @@ Item {
                 Column {
                     spacing: 8
 
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Column
                     Accessible.name: qsTr("Call security details")
                     Accessible.description: qsTr("Detailed call security status: ")
                                             + signalingEncryption.text
@@ -254,7 +254,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: txLossLabel.text
-                                Accessible.description: qsTr("Precentage of packets lost in transmission: ")
+                                Accessible.description: qsTr("Percentage of packets lost in transmission: ")
                                                         + txLossValue.text
                             }
                             Row {
@@ -359,7 +359,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: rxLossLabel.text
-                                Accessible.description: qsTr("Precentage of packets lost in receival: ")
+                                Accessible.description: qsTr("Percentage of packets lost in receival: ")
                                                         + rxLossValue.text
                             }
                             Row {

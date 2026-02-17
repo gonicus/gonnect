@@ -153,6 +153,10 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: startInBackgroundCheckBox.text
+                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -162,6 +166,10 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: inverseAcceptRejectCheckBox.text
+                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -172,6 +180,10 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: jitsiChatAsNotificationsCheckBox.text
+                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -184,6 +196,10 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: headsetCheckBox.text
+                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -194,6 +210,10 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: disableMutePropagationCheckBox.text
+                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -204,6 +224,10 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: disableSystemMutePropagationCheckBox.text
+                            Accessible.focusable: true
                         }
 
                         CheckBox {
@@ -214,6 +238,10 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: headsetHookOffCheckBox.text
+                            Accessible.focusable: true
                         }
                     }
                 }
@@ -236,6 +264,11 @@ Item {
                         }
 
                         onToggled: () => Theme.setUseOwnDecoration(windowDeocorationCheckbox.checked)
+
+                        Accessible.role: Accessible.CheckBox
+                        Accessible.name: windowDeocorationCheckbox.text
+                        Accessible.focusable: true
+                        Accessible.onToggleAction: () => Theme.setUseOwnDecoration(windowDeocorationCheckbox.checked)
 
                         Connections {
                             target: Theme
@@ -265,7 +298,14 @@ Item {
                             trayIconDark.initialized = true
                         }
 
-                        onToggled: () => {
+                        onToggled: () => trayIconDark.setTrayIconTheme()
+
+                        Accessible.role: Accessible.CheckBox
+                        Accessible.name: trayIconDark.text
+                        Accessible.focusable: true
+                        Accessible.onToggleAction: () => trayIconDark.setTrayIconTheme()
+
+                        function setTrayIconTheme() {
                             if (trayIconDark.initialized) {
                                 genericSettings.setValue('trayIconDark', trayIconDark.checked)
                                 ViewHelper.resetTrayIcon()
@@ -281,14 +321,18 @@ Item {
                         }
 
                         Label {
+                            id: themeLabel
                             text: qsTr('Color scheme')
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: themeLabel.text
                         }
 
-                        ComboBox {
+                        ComboBox { // ->
                             id: darkModeComboBox
                             editable: false
                             textRole: 'displayName'
