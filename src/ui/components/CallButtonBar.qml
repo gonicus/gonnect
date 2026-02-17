@@ -23,8 +23,24 @@ Item {
     readonly property bool isFinished: control.callItem?.isFinished ?? false
     readonly property bool isIncoming: control.callItem?.isIncoming ?? false
     readonly property bool hasCapabilityJitsi: control.callItem?.hasCapabilityJitsi ?? false
+
     readonly property int qualityLevel: control.callItem?.qualityLevel ?? SIPCallManager.QualityLevel.Low
     readonly property int securityLevel: control.callItem?.securityLevel ?? SIPCallManager.SecurityLevel.Low
+    readonly property bool isSignalingEncrypted: control.callItem?.isSignalingEncrypted ?? false
+    readonly property bool isMediaEncrypted: control.callItem?.isMediaEncrypted ?? false
+
+    readonly property string codec: control.callItem?.codec ?? ""
+    readonly property int codecClockRate: control.callItem?.codecClockRate ?? 0
+
+    readonly property real txMos: control.callItem?.txMos ?? 0.0
+    readonly property real txLossRate: control.callItem?.txLossRate ?? 0.0
+    readonly property real txJitter: control.callItem?.txJitter ?? 0.0
+    readonly property real txEffectiveDelay: control.callItem?.txEffectiveDelay ?? 0.0
+
+    readonly property real rxMos: control.callItem?.rxMos ?? 0.0
+    readonly property real rxLossRate: control.callItem?.rxLossRate ?? 0.0
+    readonly property real rxJitter: control.callItem?.rxJitter ?? 0.0
+    readonly property real rxEffectiveDelay: control.callItem?.rxEffectiveDelay ?? 0.0
 
     readonly property bool areInCallButtonsEnabled: control.isEstablished && !control.isFinished
 
@@ -85,6 +101,46 @@ Item {
                 throw new Error("Unknown security level value: " + control.securityLevel)
             }
         }
+
+        HoverHandler {
+            id: securityLevelHoverHandler
+
+            property Popup securityLevelPopup: Popup {
+                y: securityLevelIcon.height
+
+                Column {
+                    spacing: 8
+
+                    IconLabel {
+                        text: control.isSignalingEncrypted ? qsTr("Signaling encrypted") : qsTr("Signaling unencrypted")
+                        spacing: 4
+                        icon {
+                            source: control.isSignalingEncrypted ? Icons.securityHigh : Icons.securityLow
+                            width: 24
+                            height: 24
+                        }
+                    }
+                    IconLabel {
+                        text: control.isMediaEncrypted ? qsTr("Media encrypted") : qsTr("Media unencrypted")
+                        spacing: 4
+                        icon {
+                            source: control.isMediaEncrypted ? Icons.securityHigh : Icons.securityLow
+                            width: 24
+                            height: 24
+                        }
+                    }
+                }
+            }
+
+            onHoveredChanged: () => {
+                const popup = securityLevelHoverHandler.securityLevelPopup
+                if (securityLevelHoverHandler.hovered) {
+                    popup.open()
+                } else {
+                    popup.close()
+                }
+            }
+        }
     }
 
     IconLabel {
@@ -107,6 +163,165 @@ Item {
                         return Icons.callQualityHigh
                 }
                 throw new Error("Unknown quality level value: " + control.qualityLevel)
+            }
+        }
+
+        HoverHandler {
+            id: callQualityHoverHandler
+
+            property Popup qualityLevelPopup: Popup {
+                padding: 20
+                y: callQualityIcon.height
+
+                Column {
+                    spacing: 16
+
+                    Row {
+                        spacing: 22
+
+                        Column {
+                            id: txCol
+                            spacing: 8
+
+                            Label {
+                                text: qsTr("Transmit")
+                                font {
+                                    weight: Font.DemiBold
+                                    pixelSize: 16
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("MOS")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: (control.txMos).toFixed(2)
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Packet loss")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.txLossRate) + "%"
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Jitter")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.txJitter) + " ms"
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Effective delay")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.txEffectiveDelay) + "ms"
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: 1
+                            height: txCol.height
+                            color: Theme.borderColor
+                        }
+
+                        Column {
+                            spacing: 8
+
+                            Label {
+                                text: qsTr("Receive")
+                                font {
+                                    weight: Font.DemiBold
+                                    pixelSize: 16
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("MOS")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: (control.rxMos).toFixed(2)
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Packet loss")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.rxLossRate) + "%"
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Jitter")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.rxJitter) + " ms"
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Effective delay")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.rxEffectiveDelay) + "ms"
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        color: Theme.borderColor
+                        height: 1
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                    }
+
+                    Row {
+                        spacing: 8
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                        Label {
+                            text: qsTr("Codec")
+                        }
+                        Label {
+                            text: qsTr("%1@%2 kHz").arg(control.codec).arg(Math.round(control.codecClockRate / 1000))
+                            color: Theme.secondaryTextColor
+                        }
+                    }
+                }
+            }
+
+            onHoveredChanged: () => {
+                const popup = callQualityHoverHandler.qualityLevelPopup
+                if (callQualityHoverHandler.hovered) {
+                    popup.open()
+                } else {
+                    popup.close()
+                }
             }
         }
     }
