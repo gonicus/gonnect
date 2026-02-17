@@ -121,6 +121,11 @@ void EDSAddressBookFeeder::process()
 
     settings.beginGroup(m_group);
     m_displayName = settings.value("displayName", "").toString();
+
+    m_blockInfo.isBlocking = settings.value("block", false).toBool();
+    m_blockInfo.responseCode =
+            settings.value("blockSipCode", GONNECT_DEFAULT_BLOCK_SIP_CODE).toUInt();
+
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {
@@ -174,6 +179,36 @@ QStringList EDSAddressBookFeeder::getList(EContact *contact, EContactField id)
     }
 
     return results;
+}
+
+void EDSAddressBookFeeder::connectViewCompleteSignal(EBookClientView *view)
+{
+    g_signal_connect(view, "complete", G_CALLBACK(onViewComplete), this);
+}
+
+void EDSAddressBookFeeder::onViewComplete(EBookClientView *view, GError *error, gpointer user_data)
+{
+    /*
+        INFO: The "complete" signal is only needed on first startup to wait for the initial
+        stream of all objects to the view, we'll disconnect it here.
+        Otherwise, future view updates would cause duplicate signal connections.
+    */
+    guint signalId = g_signal_lookup("complete", G_OBJECT_TYPE(view));
+    g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_ID, signalId, 0, nullptr, nullptr,
+                                         nullptr);
+
+    if (error) {
+        qCCritical(lcEDSAddressBookFeeder)
+                << "Failed to wait for view completion, unable to subscribe "
+                   "to live contact updates:"
+                << error->message;
+        return;
+    }
+
+    EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
+    if (feeder) {
+        feeder->connectContactSignals(view);
+    }
 }
 
 void EDSAddressBookFeeder::connectContactSignals(EBookClientView *view)
@@ -246,7 +281,7 @@ void EDSAddressBookFeeder::processContactsAdded(GSList *contacts)
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
                     getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
-                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers);
+                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers, m_blockInfo);
 
             addAvatar(contact->id(), eContact, changed);
         }
@@ -348,7 +383,7 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
             return;
         }
 
-        feeder->connectContactSignals(view);
+        feeder->connectViewCompleteSignal(view);
         e_book_client_view_start(view, &error);
         if (error) {
             qCCritical(lcEDSAddressBookFeeder) << "Can't start view:" << error->message;
@@ -423,7 +458,7 @@ void EDSAddressBookFeeder::processContacts(QString clientInfo, GSList *contacts)
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
                     getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
-                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers);
+                    getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers, m_blockInfo);
 
             addAvatar(contact->id(), eContact, changed);
 

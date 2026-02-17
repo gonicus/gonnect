@@ -3,6 +3,19 @@ on:
   schedule:
     - cron: "0 1 * * *" # every night at 1 o'clock (UTC)
   workflow_dispatch: # can be manually dispatched under GitHub's "Actions" tab
+    inputs:
+      dryRun:
+        description: 'Dry run'
+        type: 'boolean'
+
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'info'
+        type: choice
+        options:
+          - info
+          - debug
 
 permissions:
   contents: write
@@ -14,16 +27,48 @@ jobs:
     steps:
       - name: Get token
         id: get_token
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.14'
+          cache: 'pip' # caching pip dependencies
+          pip-install: -r resources/conan/requirements.txt
+
+      - name: Local Conan versiontracker
+        run: |
+          resources/conan/updater.py --renovate=tmp/renovate/ -v
+
+      - name: Serve Files
+        uses: Eun/http-server-action@f71cec1321f665652a46c40b6852f8e5a68bfcd4 # v1
+        with:
+          directory: ${{ github.workspace }}/tmp/renovate/
+          port: 8080
+          allowed-methods: |
+            ["GET", "HEAD"]
+          content-types: |
+            {
+              "json": "application/json"
+            }
 
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@e2421a9a80287bba9997b41a15ea1e5585d96925 # v43.0.16
+        uses: renovatebot/github-action@d65ef9e20512193cc070238b49c3873a361cd50c # v46.1.1
         with:
+          docker-cmd-file: .github/renovate-entrypoint.sh
+          docker-user: root
+          docker-volumes: |
+             /tmp:/tmp ;
+             ${{ github.workspace }}/resources/conan:/conan
+          docker-network: host
           token: "${{ steps.get_token.outputs.token }}"
           configurationFile: .github/renovate-config.json5
+          env-regex: "^(?:RENOVATE_\\w+|LOG_LEVEL)$"
+        env:
+          LOG_LEVEL: ${{ inputs.logLevel }}
+          RENOVATE_DRY_RUN: ${{ inputs.dryRun == true && 'full' || '' }}

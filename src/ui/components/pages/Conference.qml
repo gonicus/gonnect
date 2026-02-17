@@ -13,6 +13,13 @@ Item {
         id: internal
 
         property Button authButton
+        property bool shareFullScreen
+    }
+
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Conference"
+        defaultLogLevel: LoggingCategory.Warning
     }
 
     states: [
@@ -240,13 +247,21 @@ Item {
                     onSetOnHold: () => confConn.toggleHold()
                     onSetAudioMuted: (value) => GlobalMuteState.toggleMute()
                     onSetVideoMuted: (value) => confConn.setVideoMuted(value)
-                    onSetScreenShare: (value) => confConn.setSharingScreen(value)
+                    onSetScreenShare: (value, screen) => {
+                        internal.shareFullScreen = screen
+                        confConn.setSharingScreen(value)
+                    }
                     onSetTileView: (value) => confConn.setTileView(value)
                     onSetRaiseHand: (value) => confConn.setHandRaised(value)
 
                     onShowVirtualBackgroundDialog: () => confConn.showVirtualBackgroundDialog()
                     onOpenSetPasswordDialog: () => ViewHelper.topDrawer.loader.sourceComponent = setPasswordItemComponent
                     onOpenVideoQualityDialog: () => ViewHelper.topDrawer.loader.sourceComponent = videoQualityComponent
+                    onOpenDialInInfoDialog: (numbers, code) => {
+                        ViewHelper.topDrawer.loader.sourceComponent = dialInInfoComponent
+                        ViewHelper.topDrawer.loader.item.numbers = numbers
+                        ViewHelper.topDrawer.loader.item.code = code
+                    }
                     onHangup: () => confConn.leaveConference()
                     onFinishForAll: () => confConn.terminateConference()
                 }
@@ -274,24 +289,33 @@ Item {
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
                         if (level >= 2) {
-                            console.error("# " + message + ": " + source + " +" + line)
+                            console.error(category, message + ": " + source + " +" + line)
                         } else if (level === 1) {
-                            console.warn("# " + message + ": " + source + " +" + line)
+                            console.warn(category, message + ": " + source + " +" + line)
                         } else {
-                            console.log("# " + message + ": " + source + " +" + line)
+                            console.log(category, message + ": " + source + " +" + line)
                         }
                     }
 
                     onPermissionRequested: (permission) => {
-                        console.log("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
                         permission.grant()
                     }
+
+                    //TODO: this can be re-enabled after QTBUG-142040 / QTBUG-142040 are fixed
+                    //      see ConferenceButtonBar.qml +228
+                    //onDesktopMediaRequested: (request) => {
+                    //    if (internal.shareFullScreen) {
+                    //        request.selectScreen(request.screensModel.index(0, 0))
+                    //    } else {
+                    //        request.selectWindow(request.windowsModel.index(0, 0))
+                    //    }
+                    //}
 
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
                             jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
                         } else {
-                            console.error(`Failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
+                            console.error(category, `failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
                         }
                     }
 
@@ -388,6 +412,12 @@ Item {
                             }
                         }
                     }
+                }
+
+                Component {
+                    id: dialInInfoComponent
+
+                    DialInInfo {}
                 }
 
                 Component {

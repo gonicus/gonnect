@@ -1,0 +1,7 @@
+versions:
+  2.6.12:
+    folder: all
+updater:
+  source: anitya
+  id: 2551
+  url-pattern: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${version}.tgz

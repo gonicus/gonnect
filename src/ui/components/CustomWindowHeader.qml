@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.Material
 import base
 
 Rectangle {
@@ -19,8 +20,13 @@ Rectangle {
     readonly property var window: control.Window.window
     readonly property bool active: control.Window.window?.active ?? false
 
-    property int mainBarWidth: 0
-    property color mainBarColor
+    required property int mainBarWidth
+    required property color mainBarColor
+
+    required property bool showSearch
+
+    required property var tabRoot
+    required property var pageRoot
 
     function focusSearchBox() {
         searchField.giveFocus()
@@ -131,8 +137,18 @@ Rectangle {
         }
     }
 
+    EditModeOptions {
+        id: editControls
+        visible: !control.showSearch
+        anchors.centerIn: parent
+
+        tabRoot: control.tabRoot
+        pageRoot: control.pageRoot
+    }
+
     SearchField {
         id: searchField
+        visible: control.showSearch
         anchors.centerIn: parent
 
         Keys.onDownPressed: () => {
@@ -143,6 +159,8 @@ Rectangle {
             resultPopup.initialKeyUp()
             resultPopup.forceActiveFocus()
         }
+        Keys.onEnterPressed: () => resultPopup.triggerPrimaryAction()
+        Keys.onReturnPressed: () => resultPopup.triggerPrimaryAction()
         Keys.onEscapePressed: () => {
             if (searchField.text.trim() === "") {
                 const nextItem = searchField.nextItemInFocusChain(true)

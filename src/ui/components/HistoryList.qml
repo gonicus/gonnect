@@ -10,7 +10,7 @@ Item {
     id: control
 
     property alias limit: historyModel.limit
-    property int rightPadding: 0
+    property int listMargin: 20
 
     readonly property alias count: list.count
     readonly property bool hasPastCalls: list.count > 0
@@ -34,6 +34,7 @@ Item {
         ScrollBar.vertical: ScrollBar {
             id: verticalScrollBar
             width: 10
+            clip: true
         }
 
         model: HistoryProxyModel {
@@ -53,7 +54,9 @@ Item {
             anchors {
                 left: parent?.left
                 right: parent?.right
-                rightMargin: control.rightPadding
+
+                leftMargin: control.listMargin
+                rightMargin: control.listMargin
             }
 
             required property date section
@@ -71,7 +74,9 @@ Item {
             anchors {
                 left: parent?.left
                 right: parent?.right
-                rightMargin: control.rightPadding
+
+                leftMargin: control.listMargin
+                rightMargin: control.listMargin
             }
 
             required property int id
@@ -271,7 +276,7 @@ Item {
                 Item {
                     id: timesContainer
                     implicitHeight: timeLabel.implicitHeight
-                    Layout.preferredWidth: 70
+                    Layout.preferredWidth: 60
                     Layout.rightMargin: 10
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
@@ -296,11 +301,13 @@ Item {
                             }
                         ]
 
-                        Label {
+                        IconLabel {
                             id: timeIconLabel
-                            width: 15
-                            text: "🕓"
-                            horizontalAlignment: Label.AlignHCenter
+                            icon {
+                                source: Icons.acceptTimeEvent
+                                width: 18
+                                height: 18
+                            }
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
@@ -328,10 +335,12 @@ Item {
                             top: parent.verticalCenter
                         }
 
-                        Label {
-                            text: "⌛"
-                            width: timeIconLabel.width
-                            horizontalAlignment: Label.AlignHCenter
+                        IconLabel {
+                            icon {
+                                source: Icons.chronometer
+                                width: 18
+                                height: 18
+                            }
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter

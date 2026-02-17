@@ -11,10 +11,10 @@ class KuandoOmega : public IBusylightDevice
 
 public:
     explicit KuandoOmega(const hid_device_info &deviceInfo, QObject *parent = nullptr);
-    virtual QSet<SupportedCommands> supportedCommands() override;
+    QSet<SupportedCommands> supportedCommands() override;
 
 protected:
-    virtual void send(bool on) override;
+    void send(bool on) override;
 
 private:
     void sendKeepAlive() const;

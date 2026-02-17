@@ -16,7 +16,7 @@ DateEventsModel::DateEventsModel(QObject *parent) : QAbstractListModel{ parent }
         endResetModel();
     });
 
-    connect(&manager, &DateEventManager::dateEventModified, this, [this]() {
+    connect(&manager, &DateEventManager::dateEventsModified, this, [this]() {
         beginResetModel();
         endResetModel();
     });
@@ -34,8 +34,12 @@ QHash<int, QByteArray> DateEventsModel::roleNames() const
         { static_cast<int>(Roles::Date), "date" },
         { static_cast<int>(Roles::EndDateTime), "endDateTime" },
         { static_cast<int>(Roles::Summary), "summary" },
+        { static_cast<int>(Roles::Location), "location" },
+        { static_cast<int>(Roles::Description), "description" },
         { static_cast<int>(Roles::RoomName), "roomName" },
-        { static_cast<int>(Roles::IsConfirmed), "isConfirmed" },
+        { static_cast<int>(Roles::Link), "link" },
+        { static_cast<int>(Roles::IsJitsiMeeting), "isJitsiMeeting" },
+        { static_cast<int>(Roles::IsOtherLink), "isOtherLink" },
     };
 }
 
@@ -58,11 +62,23 @@ QVariant DateEventsModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::EndDateTime):
         return dateEvent->end();
 
+    case static_cast<int>(Roles::Location):
+        return dateEvent->location();
+
+    case static_cast<int>(Roles::Description):
+        return dateEvent->description();
+
     case static_cast<int>(Roles::RoomName):
         return dateEvent->roomName();
 
-    case static_cast<int>(Roles::IsConfirmed):
-        return dateEvent->isConfirmed();
+    case static_cast<int>(Roles::Link):
+        return dateEvent->link();
+
+    case static_cast<int>(Roles::IsJitsiMeeting):
+        return dateEvent->isJitsiMeeting();
+
+    case static_cast<int>(Roles::IsOtherLink):
+        return dateEvent->isOtherLink();
 
     case static_cast<int>(Roles::Summary):
     default:

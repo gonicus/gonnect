@@ -3,7 +3,6 @@
 #include "AddressBookManager.h"
 #include "Contact.h"
 #include "Application.h"
-#include "JsChatConnector.h"
 #include "NumberStats.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Ringer.h"
@@ -13,12 +12,14 @@
 #include "HeadsetDeviceProxy.h"
 #include "SystemTrayMenu.h"
 #include "SIPCallManager.h"
+#include "SIPCall.h"
 #include "GlobalCallState.h"
 #include "DateEventManager.h"
 #include "DateEvent.h"
 
 #include <QApplication>
 #include <QClipboard>
+#include <QDesktopServices>
 #include <QMediaFormat>
 #include <QFileDialog>
 #include <QSystemTrayIcon>
@@ -42,6 +43,8 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
             &ViewHelper::updateCurrentUser);
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this,
+            &ViewHelper::updateCurrentUser);
     connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
             &ViewHelper::updateCurrentUser);
     updateCurrentUser();
@@ -50,6 +53,37 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
     auto &hds = USBDevices::instance();
     auto dev = hds.getHeadsetDeviceProxy();
     connect(dev, &HeadsetDeviceProxy::teamsButton, this, &ViewHelper::activateSearch);
+
+    initializeReplacers();
+}
+
+void ViewHelper::initializeReplacers()
+{
+    ReadOnlyConfdSettings settings;
+    static QRegularExpression isPreSearchReplacer =
+            QRegularExpression("^pre_search_replacer[0-9]+$");
+
+    QStringList groups = settings.childGroups();
+    for (auto &group : std::as_const(groups)) {
+        if (isPreSearchReplacer.match(group).hasMatch()) {
+            if (settings.contains(group + "/in") && settings.contains(group + "/out")) {
+                QRegularExpression regIn =
+                        QRegularExpression(settings.value(group + "/in").toString());
+                QString regOut = settings.value(group + "/out").toString();
+
+                if (!regIn.isValid()) {
+                    qCWarning(lcViewHelper)
+                            << "config group" << group << "contains an invalid regular expression";
+                    continue;
+                }
+
+                m_preprocessRegexs.insert(regIn, regOut);
+            } else {
+                qCWarning(lcViewHelper)
+                        << "config group" << group << "needs 'in' and 'out' keys - ignoring";
+            }
+        }
+    }
 }
 
 bool ViewHelper::isSystrayAvailable() const
@@ -265,6 +299,22 @@ void ViewHelper::resetTrayIcon() const
     SystemTrayMenu::instance().resetTrayIcon();
 }
 
+bool ViewHelper::isUnsupportedPlatform() const
+{
+#ifdef Q_OS_LINUX
+    return false;
+#endif
+    return true;
+}
+
+bool ViewHelper::canSyncSystemMute() const
+{
+#ifdef Q_OS_LINUX
+    return true;
+#endif
+    return false;
+}
+
 void ViewHelper::quitApplication()
 {
     if (GlobalCallState::instance().globalCallState() & ICallState::State::CallActive) {
@@ -325,9 +375,28 @@ void ViewHelper::respondUserVerification(const QString &id, bool isAccepted)
     Q_EMIT userVerificationResponded(id, isAccepted);
 }
 
+QString ViewHelper::preprocessSearchText(const QString &in) const
+{
+    QString result = in;
+
+    QHashIterator it(m_preprocessRegexs);
+    while (it.hasNext()) {
+        it.next();
+
+        const auto &reg = it.key();
+        const QString &repl = it.value();
+
+        if (reg.match(in).hasMatch()) {
+            result.replace(reg, repl);
+        }
+    }
+
+    return result;
+}
+
 bool ViewHelper::isPhoneNumber(const QString &number) const
 {
-    static const QRegularExpression numberRegEx(R"(^[+#*0-9 ]+$)");
+    static const QRegularExpression numberRegEx(R"(^[+#*0-9 ()/-]+$)");
     return numberRegEx.match(number).hasMatch();
 }
 
@@ -348,6 +417,15 @@ void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryIte
     Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
     setProperty("nextMeetingStartFlags",
                 QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
+}
+
+void ViewHelper::requestExternalAppointment(const QString &link)
+{
+    DateEventManager::instance().removeNotificationByLink(link);
+
+    if (!QDesktopServices::openUrl(link)) {
+        qCWarning(lcViewHelper) << "Opening" << link << "failed";
+    }
 }
 
 void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
@@ -392,4 +470,9 @@ QDateTime ViewHelper::endTimeForOngoingDateEventByRoomName(const QString &roomNa
 void ViewHelper::toggleFullscreen()
 {
     Q_EMIT fullscreenToggle();
+}
+
+uint ViewHelper::numberOfGridCells() const
+{
+    return 50;
 }

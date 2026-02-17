@@ -1,4 +1,5 @@
 samples/callhistory.db
+.qtcreator
 
 
 # Used https://www.toptal.com/developers/gitignore/api/qtcreator,vim
@@ -9,9 +10,12 @@ samples/callhistory.db
 build/
 repo/
 .flatpak-builder/
+.qtcreator
 
 # CMake
+CMakeCache.txt
 CMakeLists.txt.user*
+CMakeUserPresets.json
 
 # A listing of all the files included in the project
 *.files
@@ -58,3 +62,8 @@ tags
 
 # Persistent undo
 [._]*.un~
+
+# Updater
+updater.sqlite
+__pycache__
+tmp/

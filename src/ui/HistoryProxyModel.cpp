@@ -5,16 +5,28 @@
 HistoryProxyModel::HistoryProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
     connect(this, &HistoryProxyModel::filterTextChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
     });
     connect(this, &HistoryProxyModel::typeFilterChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
     });
     connect(this, &HistoryProxyModel::mediumFilterChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
     });
 }
 

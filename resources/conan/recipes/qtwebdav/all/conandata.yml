@@ -1,0 +1,7 @@
+sources:
+  '2025-03-16':
+    url: https://github.com/QtWebDAV/QtWebDAV/archive/ac39687b8ae16118d385d3694e900becd108a0f2.zip
+    sha256: 059ef0c4d0f26c34eefb243c2bd9f7701dabd9e0bfc1793dd546f2410b646a1c
+patches:
+- patch_file: patches/fixcmake.patch
+- patch_file: patches/remove-deprecations.patch

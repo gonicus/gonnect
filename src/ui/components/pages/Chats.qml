@@ -9,7 +9,11 @@ import base
 Item {
     id: control
 
-    property JsChatConnector attachedData
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Chats"
+        defaultLogLevel: LoggingCategory.Warning
+    }
 
     states: [
         State {
@@ -33,7 +37,8 @@ Item {
     ]
 
     Connections {
-        target: control.attachedData
+        target: control.attachedData ?? null
+        ignoreUnknownSignals: true
         function onAccessTokenChanged() {
             webView.url = "about:blank"
             webView.loadUrl()
@@ -112,16 +117,15 @@ Item {
 
                 Component.onCompleted: () => {
                     if (control.attachedData) {
-                        chatWebChannel.registerObject("jsChatConnector", control.attachedData)
                         webView.loadUrl()
                     }
                 }
 
                 readonly property Connections controlConnections: Connections {
                     target: control
+                    ignoreUnknownSignals: true
                     function onAttachedDataChanged() {
                         if (control.attachedData) {
-                            chatWebChannel.registerObject("jsChatConnector", control.attachedData)
                             webView.loadUrl()
                         }
                     }
@@ -134,16 +138,15 @@ Item {
 
             onJavaScriptConsoleMessage: (level, message, line, source) => {
                 if (level >= 2) {
-                    console.error("# " + message + ": " + source + " +" + line)
+                    console.error(category, message + ": " + source + " +" + line)
                 } else if (level === 1) {
-                    console.warn("# " + message + ": " + source + " +" + line)
+                    console.warn(category, message + ": " + source + " +" + line)
                 } else {
-                    console.log("# " + message + ": " + source + " +" + line)
+                    console.log(category, message + ": " + source + " +" + line)
                 }
             }
 
             onPermissionRequested: (permission) => {
-                console.error("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
                 permission.grant()
             }
         }
@@ -162,7 +165,7 @@ Item {
 
         ChatRoomList {
             id: chatRoomList
-            chatProvider: control.attachedData
+            chatProvider: control.attachedData ?? null
             clip: true
             anchors {
                 fill: parent

@@ -1,0 +1,7 @@
+versions:
+  '2.16':
+    folder: all
+updater:
+  source: anitya
+  id: 379763
+  url-pattern: https://github.com/pjsip/pjproject/archive/refs/tags/${version}.tar.gz

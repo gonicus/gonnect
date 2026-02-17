@@ -26,7 +26,7 @@ Item {
                         }
 
                         const key = event.text.toUpperCase()
-                        const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "+", "A", "B", "C", "D", "," ]
+                        const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "A", "B", "C", "D" ]
 
                         if (dtmfKeys.includes(key)) {
                             event.accepted = true
@@ -176,7 +176,7 @@ Item {
         text: qsTr('Jitsi Meet')
         visible: control.hasCapabilityJitsi
         icon {
-            source: "qrc:/icons/jitsi.svg"
+            source: Icons.jitsi
             color: "transparent"
             height: 22
         }

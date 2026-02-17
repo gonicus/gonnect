@@ -22,8 +22,8 @@ public:
 
     ~CalDAVEventFeeder();
 
-    virtual void init() override;
-    virtual QUrl networkCheckURL() const override;
+    void init() override;
+    QUrl networkCheckURL() const override;
 
     void process();
 
@@ -35,7 +35,7 @@ private:
     void processResponse(const QByteArray &data);
 
     bool responseDataChanged(const QByteArray &data);
-    QDateTime createDateTimeFromTimeType(const icaltimetype &datetime);
+    QDateTime createDateTimeFromTimeType(icaltimetype &datetime);
 
     QList<size_t> m_checksums;
 

@@ -1,0 +1,48 @@
+name: 'GOnnect prepare action [MacOS build]'
+description: 'Recurring tasks for CI jobs'
+outputs:
+  qt-version:
+    description: 'QT version'
+    value: ${{ steps.get-qt.outputs.qt-version }}
+
+
+runs:
+  using: 'composite'
+  steps:
+
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@3a6cbe35ba64df7ca70c51365c4aff65db9a9037 # v2
+      with:
+        cmake-version: 'latest'
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        brew install cyrus-sasl
+
+    - name: Get QT-Version
+      id: get-qt
+      uses: ./.github/actions/get-qt-version
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ steps.get-qt.outputs.qt-version }}
+        host: 'mac'
+        target: 'desktop'
+        modules: 'qt5compat qtshadertools qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtimageformats'
+        arch: 'clang_64'
+        cache: true
+
+    - name: Install Conan
+      uses: conan-io/setup-conan@2f4bd34e8e0af00e1a77a66e1d284e06d71d703f # v1
+      with:
+        version: 2.25.1
+        cache_packages: true
+
+    - name: Install Conan dependencies
+      shell: bash
+      run: |
+        conan config install resources/conan
+        conan export-dependencies .
+        conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja

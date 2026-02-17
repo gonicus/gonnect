@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b8d0506..9842392 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,6 +3,8 @@ project(vCard VERSION 1.0.0 LANGUAGES CXX)
+ 
+ set(CMAKE_CXX_STANDARD 14)
+ 
++option(BUILD_SHARED_LIBS "Build dynamic library" ON)
++
+ include_directories(include)
+ 
+ add_subdirectory(src)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index f24ebe4..f56a56d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ 
+-add_library(${CMAKE_PROJECT_NAME} SHARED
++add_library(${CMAKE_PROJECT_NAME}
+ vcard.cpp
+ json_io.cpp
+ text_io.cpp

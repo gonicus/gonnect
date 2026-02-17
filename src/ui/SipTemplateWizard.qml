@@ -19,12 +19,18 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
+    readonly property LoggingCategory lc: LoggingCategory {
+        id: category
+        name: "gonnect.qml.SipTemplateWizard"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     function finishWizard() {
         const result = sipTemplateController.createConfig(templateModel.templateId, control.values)
 
         if (result.error) {
             wizardInstallationLabel.text = qsTr("Error: %1").arg(result.error)
-            wizardStatusImage.source = "qrc:/icons/data-error.svg"
+            wizardStatusImage.source = Icons.dataError
             wizardInstallationSaveLabel.visible = false
             wizardInstallItem.visible = false
             wizardFinishButton.enabled = false
@@ -100,7 +106,7 @@ BaseWindow {
             }
 
             Image {
-                source: "qrc:/icons/preferences-system-network.svg"
+                source: Icons.preferencesSystemNetwork
                 sourceSize.width: 128
                 sourceSize.height: 128
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -226,7 +232,7 @@ BaseWindow {
                                 return base + "TemplateFieldFile.qml"
                         }
 
-                        console.error("Error: Unknown template field type:", delg.type)
+                        console.error(category, "unknown template field type:", delg.type)
                         return ""
                     }
 
@@ -307,7 +313,7 @@ BaseWindow {
 
             Image {
                 id: wizardStatusImage
-                source: "qrc:/icons/data-success.svg"
+                source: Icons.dataSuccess
                 sourceSize.width: 128
                 sourceSize.height: 128
                 anchors.horizontalCenter: parent.horizontalCenter

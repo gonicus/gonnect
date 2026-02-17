@@ -15,22 +15,33 @@ Menu {
 
     Action {
         text: qsTr("Toggle fullscreen")
+        icon.source:  Icons.viewFullscreen
         onTriggered: () => ViewHelper.toggleFullscreen()
     }
 
     Action {
         text: qsTr("Shortcuts...")
-        enabled: SM.globalShortcutsSupported
+        icon.source: Icons.configureShortcuts
         onTriggered: () => ViewHelper.showShortcuts()
     }
 
     Action {
+        id: pageEditAction
+        text: qsTr("Customize UI")
+        icon.source: Icons.editor
+        enabled: !SM.uiEditMode
+        onTriggered: () => SM.uiEditMode = true
+    }
+
+    Action {
         text: qsTr("About...")
+        icon.source: Icons.showinfo
         onTriggered: () => ViewHelper.showAbout()
     }
 
     Action {
         text: qsTr("Quit")
+        icon.source: Icons.applicationExit
         onTriggered: () => ViewHelper.quitApplication()
     }
 

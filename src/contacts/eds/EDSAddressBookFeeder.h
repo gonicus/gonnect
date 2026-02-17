@@ -10,6 +10,7 @@
 #include <QPromise>
 
 #include "IAddressBookFeeder.h"
+#include "BlockInfo.h"
 
 class AddressBookManager;
 
@@ -35,6 +36,10 @@ private:
     static void onEbookClientConnected(GObject *source_object, GAsyncResult *result,
                                        gpointer user_data);
 
+    void connectViewCompleteSignal(EBookClientView *view);
+
+    static void onViewComplete(EBookClientView *view, GError *error, gpointer user_data);
+
     void connectContactSignals(EBookClientView *view);
 
     static void onContactsAdded(EBookClientView *view, GSList *contacts, gpointer user_data);
@@ -53,6 +58,7 @@ private:
     void processContacts(QString clientInfo, GSList *contacts);
 
     QString m_group;
+    BlockInfo m_blockInfo;
 
     ESourceRegistry *m_registry = nullptr;
     GList *m_sources = nullptr;

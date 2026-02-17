@@ -2,11 +2,13 @@ name: GOnnect Release
 
 on:
   workflow_dispatch:  # can be manually dispatched under GitHub's "Actions" tab
-
+    inputs:
+      dryRun:
+        description: 'Dry run'
+        type: 'boolean'
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  QT_VERSION: '6.10.1'
   EXT_BASE: ${{github.workspace}}
 
 jobs:
@@ -14,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Semantic Release
     # A release will only be triggered on the release, freeze and hotfix branches.
-    if: contains(fromJSON('["refs/heads/release", "refs/heads/freeze", "refs/heads/hotfix"]'), github.ref)
+    if: github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/freeze') || startsWith(github.ref, 'refs/heads/hotfix')
     permissions:
       contents: write       # to be able to publish a GitHub release
       issues: write         # to be able to comment on released issues
@@ -22,17 +24,17 @@ jobs:
     steps:
       - name: Get token
         id: get_token
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2
         with:
           app-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_KEY }}
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
           token: ${{ steps.get_token.outputs.token }}
       - name: Setup Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "lts/*"
       - name: Install dependencies
@@ -42,4 +44,5 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
-        run: npx --package=semantic-release --package=@semantic-release/changelog --package=@semantic-release/git --package=@semantic-release/exec -- semantic-release
+          DRY_RUN_OPTION: ${{ inputs.dryRun == true && '--dry-run' || '' }}
+        run: npx --package=semantic-release --package=@semantic-release/changelog --package=@semantic-release/git --package=@semantic-release/exec -- semantic-release $DRY_RUN_OPTION

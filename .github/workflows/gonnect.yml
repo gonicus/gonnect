@@ -13,10 +13,13 @@ on:
       - release
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  QT_VERSION: '6.10.1'
   EXT_BASE: ${{github.workspace}}
 
 permissions:
@@ -26,93 +29,242 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    name: "Build GOnnect"
+    name: "Build GOnnect (Linux)"
+    env:
+      CC: clang
+      CXX: clang++
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
+          lfs: 'true'
           submodules: 'recursive'
 
       - name: Prepare
-        uses: ./.github/actions/prepare
-        with:
-          qt-version: ${{ env.QT_VERSION }}
+        uses: ./.github/actions/prepare-linux
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=ON -DBUILD_DEPENDENCIES=ON -DCMAKE_PREFIX_PATH="${{github.workspace}}/pjproject;${{github.workspace}}/qca/lib/cmake"
+        env:
+          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
+        run: cmake --preset conan-release . -DBUILD_TESTING=ON
 
       - name: Build
-        # Build your program with the given configuration
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel $(nproc --all)
+        run: cmake --build --preset conan-release --parallel $(nproc --all)
 
       - name: Upload Test artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: gonnect-tests
-          path: build/tests/contactsTest
+          path: build/Release/tests/contactsTest
           retention-days: 1
 
+  build-windows:
+    runs-on: windows-2025
+    name: "Build GOnnect (Windows)"
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          lfs: 'true'
+          submodules: 'recursive'
+
+      - name: Prepare
+        uses: ./.github/actions/prepare-windows
+
+      - name: Configure CMake
+        shell: cmd
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON
+        env:
+          NSIS_USE_FAST_COMPRESSION: "1"
+
+      - name: Build
+        run: cmake --build --preset conan-release
+
+      - name: Package
+        run: cd build && cpack ${{github.workspace}}
+
+      - name: Save installer
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: windows-installer.zip
+          compression-level: 0
+          path: build/GOnnect*.exe
+
+  build-macos:
+    runs-on: macos-26
+    name: "Build GOnnect (MacOS)"
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          lfs: 'true'
+          submodules: 'recursive'
+
+      - name: Prepare
+        uses: ./.github/actions/prepare-macos
+
+      - name: Configure CMake
+        run: cmake --preset conan-release
+
+      - name: Build
+        run: cmake --build --preset conan-release
+
+      - name: Package
+        run: cd build/Release && cpack ${{github.workspace}}
+
+      - name: Save installer
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: mac-installer.dmg
+          compression-level: 0
+          path: build/Release/GOnnect*.dmg
+
   format:
+    # disable temporarily due to defect action: https://github.com/jidicula/clang-format-action/issues/267
+    if: false
     runs-on: ubuntu-24.04
     name: "Code Formatting"
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Run clang-format style check for C/C++/Protobuf programs.
-        uses: jidicula/clang-format-action@4726374d1aa3c6aecf132e5197e498979588ebc8 # v4.15.0
+        uses: jidicula/clang-format-action@9c5e6fbe768ab0db631f1ca2a7b2dac8af20a9d0 # v4.16.0
         with:
-          clang-format-version: '19'
+          clang-format-version: '21'
           check-path: 'src'
+          exclude-regex: '^src/platform/windows/EventLog.h$' # generated file
 
   clang:
     runs-on: ubuntu-24.04
-    name: "Static Code Analyzer"    
+    name: "Static Code Analyzer"
+    env:
+      CC: clang
+      CXX: clang++
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
+          lfs: 'true'
           submodules: 'recursive'
-          
-      - name: Prepare
-        uses: ./.github/actions/prepare
-        with:
-          qt-version: ${{ env.QT_VERSION }}
 
-      - name: Run clang
+      - name: Prepare
+        uses: ./.github/actions/prepare-linux
+
+      - name: Run static analyzer
         shell: bash
+        env:
+          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
         run: |
           pip install scan-build
           export ANALYZE_ARGS="--exclude ${QT_ROOT_DIR} --exclude ${{github.workspace}}/external"
           scripts/static-clang-analyzer.sh
-      
+
       - name: Save Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: clang-report
           path: /tmp/build.log
-              
 
-#  clazy:
-#    runs-on: ubuntu-24.04
-#    #needs: build
-#    name: "Qt Semantics"
-#
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          submodules: 'recursive'
-#
-#      - name: Prepare
-#        uses: ./.github/actions/prepare
-#        with:
-#          qt-version: ${{ env.QT_VERSION }}   
-#          for-clazy: 'true'             
-#
-#      - name: Run clazy
-#        shell: bash
-#        run: |
-#          find ~/.local/clazy/lib
-#          LD_LIBRARY_PATH=~/.local/clazy/lib scripts/static-clazy-analyzer.sh          
+  clazy:
+    runs-on: ubuntu-24.04
+    container: fedora:43
+    name: "Qt Semantics"
 
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf -y install git git-lfs clang clazy conan libnotify-devel libxkbfile libxcb-devel libXv-devel ninja-build alsa-lib-devel glew-devel \
+          libxcb-devel xcb-util-xrm-devel xcb-util-devel xcb-util-wm-devel xcb-util-image-devel xcb-util-cursor \
+          xcb-util-cursor-devel xcb-util-keysyms-devel xcb-util-renderutil-devel libusb1-devel hidapi-devel \
+          xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
+          libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
+          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA \
+          pip python3-devel nodejs
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          lfs: 'true'
+          submodules: 'recursive'
+
+      - name: Install action dependencies
+        shell: bash
+        run: npm install
+        working-directory: ./.github/actions/get-qt-version
+
+      - name: Get QT-Version
+        id: get-qt
+        uses: ./.github/actions/get-qt-version
+
+      - name: Install qt
+        run: |
+          pip install aqtinstall
+          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ steps.get-qt.outputs.qt-version }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
+          echo "PATH=$PATH:${{ github.workspace }}/Qt/${{ steps.get-qt.outputs.qt-version }}/gcc_64/bin" >> $GITHUB_ENV
+
+      - name: Prepare conan
+        shell: bash
+        id: conan-info
+        run: |
+          echo "conan-version=$(conan --version | cut -d' ' -f3)" >> $GITHUB_OUTPUT
+          echo "conan-home=$(conan config home)" >> $GITHUB_OUTPUT
+          conan profile detect || true
+
+      - name: Restore cached Conan packages
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        id: cache-conan-packages
+        with:
+          path: ${{ steps.conan-info.outputs.conan-home }}/p
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-${{ hashFiles('./conanfile.py') }}
+          restore-keys: |
+            conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-
+
+      - name: Install Conan dependencies
+        run: |
+          conan config install resources/conan
+          conan export-dependencies .
+          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
+
+      - name: Cached Conan packages
+        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        if: always() && steps.cache-conan-packages.outputs.cache-hit != 'true'
+        with:
+          path: ${{ steps.conan-info.outputs.conan-home }}/p
+          key: conan-${{ steps.conan-info.outputs.conan-version }}-${{ runner.os }}-clazy
+
+      - name: Run clazy
+        shell: bash
+        env:
+          PKG_CONFIG_PATH: /usr/lib64/pkgconfig
+          CC: clang
+          CXX: clang++
+
+        run: |
+          scripts/static-clazy-analyzer.sh
+
+  flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
+      options: --privileged
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          lfs: 'true'
+          submodules: 'recursive'
+
+      - name: Reading GOnnect version
+        shell: bash
+        id: var
+        run: |
+          echo "gonnect_version=$(grep -oP 'GOnnect VERSION ([0-9.]+)' CMakeLists.txt | awk '{ print $3 }')" >> $GITHUB_OUTPUT
+
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@92ae9851ad316786193b1fd3f40c4b51eb5cb101 # v6.6
+        with:
+          bundle: gonnect
+          build-bundle: 'true'
+          upload-artifact: 'true'
+          manifest-path: resources/flatpak/de.gonicus.gonnect.yml
+          cache-key: flatpak-builder-${{ steps.var.outputs.gonnect_version }}
 
   tests:
     runs-on: ubuntu-24.04
@@ -120,16 +272,16 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Prepare
-        uses: ./.github/actions/prepare
+        uses: ./.github/actions/prepare-linux
         with:
-          qt-version: ${{ env.QT_VERSION }}
-          qt-only: 'true'
+          deps: false
+          conan: false
 
       - name: Download Test artifacts
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: gonnect-tests
 
@@ -138,3 +290,8 @@ jobs:
         run: |
           chmod +x contactsTest
           LD_LIBRARY_PATH=${QT_ROOT_DIR}/lib ./contactsTest
+
+      - name: Cleanup
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
+        with:
+          name: gonnect-tests

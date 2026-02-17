@@ -39,8 +39,8 @@ Item {
         property alias headsetHookOff: headsetHookOffCheckBox.checked
         property alias disableMutePropagation: disableMutePropagationCheckBox.checked
         property alias useHeadset: headsetCheckBox.checked
+        property alias noSyncSystemMute: disableSystemMutePropagationCheckBox.checked
         property alias jitsiChatAsNotifications: jitsiChatAsNotificationsCheckBox.checked
-
     }
 
     Settings {
@@ -59,6 +59,7 @@ Item {
         anchors.fill: parent
         contentHeight: flickableContainer.implicitHeight
         bottomMargin: 20
+        clip: true
 
         ScrollBar.vertical: ScrollBar { width: 10 }
 
@@ -192,7 +193,16 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
+                            }
+                        }
 
+                        CheckBox {
+                            id: disableSystemMutePropagationCheckBox
+                            text: qsTr('Disable synchronisation with the system mute state')  + " (" + qsTr("restart required") + ")"
+                            enabled: ViewHelper.canSyncSystemMute
+                            anchors {
+                                left: parent.left
+                                right: parent.right
                             }
                         }
 
@@ -203,12 +213,10 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
                     }
                 }
-
 
                 CardList {
                     title: qsTr('Appearance')
@@ -220,7 +228,7 @@ Item {
 
                     CheckBox {
                         id: windowDeocorationCheckbox
-                        text: qsTr("Use custom window decoration (restart required)")
+                        text: qsTr("Use custom window decoration") + " (" + qsTr("restart required") + ")"
                         checked: Theme.useOwnDecoration
                         anchors {
                             left: parent.left
@@ -239,7 +247,7 @@ Item {
 
                     CheckBox {
                         id: trayIconDark
-                        text: qsTr('Use dark tray icon')
+                        text: qsTr('Use dark mode tray icon')
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -288,7 +296,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: [
                                 {
@@ -336,7 +343,6 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
-
                         }
                     }
 
@@ -438,7 +444,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -450,7 +455,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: [
                                 {
@@ -495,7 +499,6 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
-
                         }
 
                         Column {
@@ -666,7 +669,6 @@ Item {
                         anchors {
                             left: parent.left
                             right: parent.right
-
                         }
                     }
 
@@ -692,7 +694,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: AudioManager.devices.filter(device => device.isInput)
 
@@ -732,7 +733,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -744,7 +744,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
@@ -784,7 +783,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -796,7 +794,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
@@ -837,7 +834,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -938,7 +934,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -991,7 +986,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
                         }
 
@@ -1000,7 +994,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
 
                             Slider {

@@ -8,6 +8,12 @@ Item {
     id: control
     focus: true
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Call"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     readonly property alias selectedCallItem: callSideBar.selectedCallItem
 
     Keys.onPressed: (event) => {
@@ -18,7 +24,7 @@ Item {
                         }
 
                         const key = event.text.toUpperCase()
-                        const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "+", "A", "B", "C", "D", "," ]
+                        const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "A", "B", "C", "D" ]
 
                         if (dtmfKeys.includes(key)) {
                             event.accepted = true
@@ -62,11 +68,11 @@ Item {
         anchors {
             left: parent.left
             top: parent.top
-            bottom: firstAidButton.top
+            bottom: parent.bottom
             right: verticalDragbarDummy.left
 
             leftMargin: 24
-            bottomMargin: 15
+            bottomMargin: 8
         }
 
         CallButtonBar {
@@ -82,8 +88,10 @@ Item {
             onHangupClicked: () => {
                 if (SIPCallManager.isConferenceMode) {
                     SIPCallManager.endConference()
-                } else {
+                } else if (topBar.callItem) {
                     SIPCallManager.endCall(topBar.callItem.accountId, topBar.callItem.callId)
+                } else {
+                    console.error(category, "cannot hang up because missing call item")
                 }
             }
 
@@ -268,28 +276,4 @@ Item {
         }
     }
 
-    TogglerList {
-        id: togglerList
-        visible: togglerList.count > 0
-        clip: true
-        anchors {
-            left: parent.left
-            right: firstAidButton.left
-            bottom: parent.bottom
-
-            leftMargin: 10
-            rightMargin: 10
-            bottomMargin: 10
-        }
-    }
-
-    FirstAidButton {
-        id: firstAidButton
-        z: 100000
-        anchors {
-            verticalCenter: togglerList.verticalCenter
-            right: callListCard.right
-            rightMargin: 10
-        }
-    }
 }

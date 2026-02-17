@@ -95,7 +95,7 @@ void GlobalCallState::updateGlobalCallState()
     setGlobalCallState(globalState);
     updateRemoteContactInfo();
     Q_EMIT activeCallsCountChanged();
-    Q_EMIT nonIdleCallsCount();
+    Q_EMIT nonIdleCallsCountChanged();
 }
 
 void GlobalCallState::setIsPhoneConference(bool flag)
@@ -178,6 +178,15 @@ void GlobalCallState::unholdOtherCall() const
                 callObj->toggleHold();
             }
             break;
+        }
+    }
+}
+
+void GlobalCallState::unholdAllCalls() const
+{
+    for (auto callObj : std::as_const(m_globalCallStateObjects)) {
+        if (callObj->callState() & ICallState::State::OnHold) {
+            callObj->toggleHold();
         }
     }
 }

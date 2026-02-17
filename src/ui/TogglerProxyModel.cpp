@@ -4,8 +4,12 @@
 TogglerProxyModel::TogglerProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
     connect(this, &TogglerProxyModel::displayFilterChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
     });
 }
 

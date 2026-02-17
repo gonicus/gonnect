@@ -33,6 +33,7 @@ SecretPortal::SecretPortal(QObject *parent)
 void SecretPortal::initialize()
 {
     if (!isValid()) {
+        m_hasTriedInitialization = true;
         return;
     }
 
@@ -40,11 +41,14 @@ void SecretPortal::initialize()
     m_supported = QCA::isSupported("aes256-cbc-pkcs7");
 
     if (!m_supported) {
+        m_hasTriedInitialization = true;
         qCFatal(lcSecretPortal) << "QCA does not support aes256-cbc-pkcs7!";
         return;
     }
 
     RetrieveSecret([this](uint code, const QVariantMap &response) {
+        m_hasTriedInitialization = true;
+
         if (code == 0) {
             m_instanceSecret = response.value("secret").toByteArray();
             m_initialized = true;

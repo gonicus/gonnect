@@ -48,9 +48,12 @@ class Theme : public QObject
     Q_PROPERTY(QColor backgroundInitials READ backgroundInitials NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor shadowColor READ shadowColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor redColor READ redColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(
+            QColor activeIndicatorColor READ activeIndicatorColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor greenColor READ greenColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor darkGreenColor READ darkGreenColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor paneColor READ paneColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(QColor highContrastColor READ highContrastColor NOTIFY colorPaletteChanged FINAL)
 
     Q_PROPERTY(QColor buttonBackgroundHover READ buttonBackgroundHover NOTIFY
                        buttonBackgroundHoverChanged FINAL)
@@ -127,9 +130,11 @@ public:
     QColor backgroundInitials() const { return m_backgroundInitials; }
     QColor shadowColor() const { return m_shadowColor; }
     QColor redColor() const { return m_redColor; }
+    QColor activeIndicatorColor() const { return m_activeIndicatorColor; }
     QColor greenColor() const { return m_greenColor; }
     QColor darkGreenColor() const { return m_darkGreenColor; }
     QColor paneColor() const { return m_paneColor; }
+    QColor highContrastColor() const { return m_highContrastColor; }
 
     QColor buttonBackgroundHover() const { return m_buttonBackgroundHover; }
     QColor frame() const { return m_frame; }
@@ -226,6 +231,8 @@ private:
     QColor m_greenColor;
     QColor m_darkGreenColor;
     QColor m_paneColor;
+    QColor m_highContrastColor;
+    QColor m_activeIndicatorColor;
 
     QColor m_buttonBackgroundHover;
     QColor m_frame;
