@@ -39,6 +39,7 @@ public:
         bool isMediaEncrypted = false;
 
         QString codec;
+        quint32 codecClockRate = 0;
 
         double txMos = 0.0;
         double txLossRate = 0.0;
@@ -79,6 +80,7 @@ public:
         IsMediaEncrypted,
 
         Codec,
+        CodecClockRate,
 
         TxMos,
         TxLossRate,

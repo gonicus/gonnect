@@ -79,6 +79,7 @@ public:
     ///@{
 
     QString codec() const { return m_codec; }
+    quint32 codecClockRate() const { return m_clockRate; }
 
     double txMos() const { return m_mosTx; }
     double txLossRate() const { return m_lossRateTx; }

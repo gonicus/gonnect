@@ -30,6 +30,7 @@ Item {
     readonly property bool isMediaEncrypted: control.callItem?.isMediaEncrypted ?? false
 
     readonly property string codec: control.callItem?.codec ?? ""
+    readonly property int codecClockRate: control.callItem?.codecClockRate ?? 0
 
     readonly property real txMos: control.callItem?.txMos ?? 0.0
     readonly property real txLossRate: control.callItem?.txLossRate ?? 0.0
@@ -169,33 +170,65 @@ Item {
             id: callQualityHoverHandler
 
             property Popup qualityLevelPopup: Popup {
+                padding: 20
                 y: callQualityIcon.height
 
                 Column {
                     spacing: 8
 
                     Label {
-                        text: qsTr("Codec: %1").arg(control.codec)
+                        text: qsTr("%1@%2 kHz").arg(control.codec, Math.round(control.codecClockRate / 1000))
                     }
 
                     Row {
-                        spacing: 8
+                        spacing: 22
 
                         Column {
                             id: txCol
                             spacing: 8
 
                             Label {
-                                text: qsTr("TX [mos %1]").arg(control.txMos)
+                                text: qsTr("Transmit")
                             }
-                            Label {
-                                text: qsTr("Packet loss: %1%").arg(control.txLossRate)
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("MOS")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: (control.txMos).toFixed(2)
+                                }
                             }
-                            Label {
-                                text: qsTr("Jitter: %1ms").arg(control.txJitter)
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Packet loss")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.txLossRate) + "%"
+                                }
                             }
-                            Label {
-                                text: qsTr("Delay: %1ms").arg(control.txEffectiveDelay)
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Jitter")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.txJitter) + " ms"
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Effective delay")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.txEffectiveDelay) + "ms"
+                                }
                             }
                         }
 
@@ -209,16 +242,47 @@ Item {
                             spacing: 8
 
                             Label {
-                                text: qsTr("RX [mos %1]").arg(control.rxMos)
+                                text: qsTr("Receive")
                             }
-                            Label {
-                                text: qsTr("Packet loss: %1%").arg(control.rxLossRate)
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("MOS")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: (control.rxMos).toFixed(2)
+                                }
                             }
-                            Label {
-                                text: qsTr("Jitter: %1ms").arg(control.rxJitter)
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Packet loss")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.rxLossRate) + "%"
+                                }
                             }
-                            Label {
-                                text: qsTr("Delay: %1ms").arg(control.rxEffectiveDelay)
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Jitter")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.rxJitter) + " ms"
+                                }
+                            }
+                            Row {
+                                spacing: 8
+                                Label {
+                                    text: qsTr("Effective delay")
+                                }
+                                Label {
+                                    color: Theme.secondaryTextColor
+                                    text: Math.round(control.rxEffectiveDelay) + "ms"
+                                }
                             }
                         }
                     }

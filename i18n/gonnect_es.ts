@@ -138,85 +138,91 @@
 <context>
     <name>CallButtonBar</name>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="114"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="115"/>
         <source>Signaling encrypted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="114"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="115"/>
         <source>Signaling unencrypted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="123"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="124"/>
         <source>Media encrypted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="123"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="124"/>
         <source>Media unencrypted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="189"/>
-        <source>TX [mos %1]</source>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="180"/>
+        <source>%1@%2 kHz</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="178"/>
-        <source>Codec: %1</source>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="191"/>
+        <source>Transmit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="192"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="215"/>
-        <source>Packet loss: %1%</source>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="196"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="250"/>
+        <source>MOS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="195"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="218"/>
-        <source>Jitter: %1ms</source>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="206"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="260"/>
+        <source>Packet loss</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="198"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="221"/>
-        <source>Delay: %1ms</source>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="216"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="270"/>
+        <source>Jitter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="212"/>
-        <source>RX [mos %1]</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="226"/>
         <location filename="../src/ui/components/CallButtonBar.qml" line="280"/>
+        <source>Effective delay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="245"/>
+        <source>Receive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="344"/>
         <source>Screen</source>
         <translation>Pantalla</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="292"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="356"/>
         <source>Camera</source>
         <translation>Cámera</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="304"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="368"/>
         <source>Resume</source>
         <translation>Continuar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="304"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="368"/>
         <source>Hold</source>
         <translation>Mantener</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="322"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="386"/>
         <source>Micro</source>
         <translation>Micrófono</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="341"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="405"/>
         <source>Output</source>
         <translation>Salida</translation>
     </message>
@@ -307,7 +313,7 @@
 <context>
     <name>CallsModel</name>
     <message>
-        <location filename="../src/ui/CallsModel.cpp" line="403"/>
+        <location filename="../src/ui/CallsModel.cpp" line="407"/>
         <source>unknown number</source>
         <translation>número desconocido</translation>
     </message>

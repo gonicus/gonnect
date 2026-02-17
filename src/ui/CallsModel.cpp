@@ -139,6 +139,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
 
         if (callInfo && index >= 0) {
             callInfo->codec = call->codec();
+            callInfo->codecClockRate = call->codecClockRate();
 
             callInfo->txMos = call->txMos();
             callInfo->txLossRate = call->txLossRate();
@@ -154,6 +155,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             Q_EMIT dataChanged(idx, idx,
                                {
                                        static_cast<int>(Roles::Codec),
+                                       static_cast<int>(Roles::CodecClockRate),
 
                                        static_cast<int>(Roles::TxMos),
                                        static_cast<int>(Roles::TxLossRate),
@@ -246,6 +248,7 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::IsMediaEncrypted), "isMediaEncrypted" },
 
         { static_cast<int>(Roles::Codec), "codec" },
+        { static_cast<int>(Roles::CodecClockRate), "codecClockRate" },
 
         { static_cast<int>(Roles::TxMos), "txMos" },
         { static_cast<int>(Roles::TxLossRate), "txLossRate" },
@@ -305,6 +308,7 @@ void CallsModel::updateCalls()
         callInfo->isMediaEncrypted = call->isMediaEncrypted();
 
         callInfo->codec = call->codec();
+        callInfo->codecClockRate = call->codecClockRate();
 
         callInfo->txMos = call->txMos();
         callInfo->txLossRate = call->txLossRate();
@@ -447,6 +451,8 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::Codec):
         return callInfo->codec;
+    case static_cast<int>(Roles::CodecClockRate):
+        return callInfo->codecClockRate;
 
     case static_cast<int>(Roles::TxMos):
         return callInfo->txMos;
