@@ -102,6 +102,10 @@ Item {
             }
         }
 
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("Call security level")
+        Accessible.description: qsTr("Security level of the ongoing call")
+
         HoverHandler {
             id: securityLevelHoverHandler
 
@@ -111,7 +115,14 @@ Item {
                 Column {
                     spacing: 8
 
+                    Accessible.role: Accessible.StaticText
+                    Accessible.name: qsTr("Call security details")
+                    Accessible.description: qsTr("Detailed call security status: ")
+                                            + signalingEncryption.text
+                                            + mediaEncryption.text
+
                     IconLabel {
+                        id: signalingEncryption
                         text: control.isSignalingEncrypted ? qsTr("Signaling encrypted") : qsTr("Signaling unencrypted")
                         spacing: 4
                         icon {
@@ -119,8 +130,12 @@ Item {
                             width: 24
                             height: 24
                         }
+
+                        Accessible.ignored: true
                     }
+
                     IconLabel {
+                        id: mediaEncryption
                         text: control.isMediaEncrypted ? qsTr("Media encrypted") : qsTr("Media unencrypted")
                         spacing: 4
                         icon {
@@ -128,6 +143,8 @@ Item {
                             width: 24
                             height: 24
                         }
+
+                        Accessible.ignored: true
                     }
                 }
             }
@@ -166,6 +183,10 @@ Item {
             }
         }
 
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("Call quality")
+        Accessible.description: qsTr("Quality of the ongoing call")
+
         HoverHandler {
             id: callQualityHoverHandler
 
@@ -189,46 +210,94 @@ Item {
                                     weight: Font.DemiBold
                                     pixelSize: 16
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: qsTr("Transmission statistics")
+                                Accessible.description: qsTr("Call quality metrics")
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: txMosLabel
                                     text: qsTr("MOS")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: txMosValue
                                     color: Theme.secondaryTextColor
                                     text: (control.txMos).toFixed(2)
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: qsTr("Mean opinion score")
+                                Accessible.description: qsTr("Numerical metric assessing transmission-side voice/video call quality: ")
+                                                        + txMosValue.text
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: txLossLabel
                                     text: qsTr("Packet loss")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: txLossValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.txLossRate) + "%"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: txLossLabel.text
+                                Accessible.description: qsTr("Precentage of packets lost in transmission: ")
+                                                        + txLossValue.text
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: txJitterLabel
                                     text: qsTr("Jitter")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: txJitterValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.txJitter) + " ms"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: txJitterLabel.text
+                                Accessible.description: qsTr("Amount of transmission side jitter: ")
+                                                        + txJitterValue.text
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: txDelayLabel
                                     text: qsTr("Effective delay")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: txDelayValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.txEffectiveDelay) + "ms"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: txDelayLabel.text
+                                Accessible.description: qsTr("Effective transmission side call delay: ")
+                                                        + txDelayValue.text
                             }
                         }
 
@@ -240,53 +309,100 @@ Item {
 
                         Column {
                             spacing: 8
-
                             Label {
                                 text: qsTr("Receive")
                                 font {
                                     weight: Font.DemiBold
                                     pixelSize: 16
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: qsTr("Receiver statistics")
+                                Accessible.description: qsTr("Call quality metrics")
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: rxMosLabel
                                     text: qsTr("MOS")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: rxMosValue
                                     color: Theme.secondaryTextColor
                                     text: (control.rxMos).toFixed(2)
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: qsTr("Mean opinion score")
+                                Accessible.description: qsTr("Numerical metric assessing receiver-side voice/video call quality: ")
+                                                        + rxMosValue.text
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: rxLossLabel
                                     text: qsTr("Packet loss")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: rxLossValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.rxLossRate) + "%"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: rxLossLabel.text
+                                Accessible.description: qsTr("Precentage of packets lost in receival: ")
+                                                        + rxLossValue.text
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: rxJitterLabel
                                     text: qsTr("Jitter")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: rxJitterValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.rxJitter) + " ms"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: rxJitterLabel.text
+                                Accessible.description: qsTr("Amount of receiver side jitter: ")
+                                                        + rxJitterValue.text
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: rxDelayLabel
                                     text: qsTr("Effective delay")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: rxDelayValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.rxEffectiveDelay) + "ms"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: rxDelayLabel.text
+                                Accessible.description: qsTr("Effective receiver side call delay: ")
+                                                        + rxDelayValue.text
                             }
                         }
                     }
@@ -305,12 +421,23 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
 
                         Label {
+                            id: codecLabel
                             text: qsTr("Codec")
+
+                            Accessible.ignored: true
                         }
                         Label {
+                            id: codecValue
                             text: qsTr("%1@%2 kHz").arg(control.codec).arg(Math.round(control.codecClockRate / 1000))
                             color: Theme.secondaryTextColor
+
+                            Accessible.ignored: true
                         }
+
+                        Accessible.role: Accessible.StaticText
+                        Accessible.name: qsTr("Audio codec")
+                        Accessible.description: qsTr("The currently used audio codec and frequency: ")
+                                                + codecValue.text
                     }
                 }
             }
