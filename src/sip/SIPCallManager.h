@@ -126,6 +126,9 @@ Q_SIGNALS:
     void audioLevelChanged(SIPCall *call, qreal level);
     void qualityLevelChanged(SIPCall *call, SIPCallManager::QualityLevel qualityLevel);
     void securityLevelChanged(SIPCall *call, SIPCallManager::SecurityLevel securityLevel);
+    void isSignalingEncryptedChanged(SIPCall *call, bool isEncrypted);
+    void isMediaEncryptedChanged(SIPCall *call, bool isEncrypted);
+    void callQualityInfoChanged(SIPCall *call);
     void showCallWindow();
     void blocksChanged();
     void isBlockedChanged(SIPCall *call);
