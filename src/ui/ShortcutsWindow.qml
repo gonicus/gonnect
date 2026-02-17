@@ -43,6 +43,7 @@ BaseWindow {
             Accessible.role: Accessible.StaticText
             Accessible.name: qsTr("Shortcut key")
             Accessible.description: keyLabel.text
+            Accessible.focusable: true
         }
 
         Label {
@@ -60,6 +61,7 @@ BaseWindow {
             Accessible.role: Accessible.StaticText
             Accessible.name: qsTr("Shortcut description")
             Accessible.description: descriptionLabel.text
+            Accessible.focusable: true
         }
     }
 
@@ -99,7 +101,6 @@ BaseWindow {
                 Accessible.name: qsTr("Local shortcuts")
                 Accessible.description: localShortcutsHeading.text
             }
-
 
             KeyDelegate {
                 key: qsTr("Ctrl + F")

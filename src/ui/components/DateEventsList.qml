@@ -24,7 +24,14 @@ ListView {
 
         required property date section
 
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("Date event section")
+        Accessible.description: qsTr("Header for the currently selected day: ")
+                                + sectionHeader.text
+        Accessible.focusable: true
+
         Label {
+            id: sectionHeader
             anchors.centerIn: parent
             text: {
                 if (ViewHelper.isToday(sectionDelg.section)) {
@@ -35,6 +42,8 @@ ListView {
                 }
                 return sectionDelg.section.toLocaleDateString(Qt.locale(), qsTr("dddd - yyyy/MM/dd"))
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -59,7 +68,6 @@ ListView {
             }
         }
     }
-
 
     delegate: Item {
         id: delg
@@ -126,6 +134,14 @@ ListView {
                 bottomPadding: 10
                 Layout.preferredWidth: parent.width * 0.9
 
+                Accessible.role: Accessible.ListItem
+                Accessible.name: qsTr("Date event")
+                Accessible.description: qsTr("Currently selected date event: ")
+                                        + qsTr("Summary: ") + summaryLabel.text
+                                        + qsTr("Starting time: ") + timeLabel.text
+                                        + qsTr("Remaining time: ") + summaryLabel.text
+                Accessible.focusable: true
+
                 Label {
                     id: summaryLabel
                     text: delg.summary
@@ -135,6 +151,8 @@ ListView {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.ignored: true
                 }
 
                 Row {
@@ -145,6 +163,8 @@ ListView {
                         id: timeLabel
                         font.weight: summaryLabel.font.weight
                         text: delg.isAllDayEvent ? qsTr("All day") : delg.dateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm"))
+
+                        Accessible.ignored: true
                     }
 
                     Label {
@@ -157,6 +177,8 @@ ListView {
                         text: "(" + (delg.isCurrentlyTakingPlace
                               ? qsTr("till %1").arg(delg.endDateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm")))
                               : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))) + ")"
+
+                        Accessible.ignored: true
                     }
                 }
             }
@@ -187,8 +209,17 @@ ListView {
 
             Menu {
                 Action {
+                    id: joinAction
                     text: delg.isJitsiMeeting ? qsTr('Join') : qsTr('Open')
-                    onTriggered: () => {
+                    onTriggered: () => joinAction.joinMeeting()
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Join meeting")
+                    Accessible.description: qsTr("Join the meeting associated with the currently selected event")
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => joinAction.joinMeeting()
+
+                    function joinMeeting() {
                         if (delg.isJitsiMeeting) {
                             ViewHelper.requestMeeting(delg.roomName)
                         } else {
@@ -198,8 +229,17 @@ ListView {
                 }
 
                 Action {
-                    text: delg.isJitsiMeeting ? qsTr('Copy room link') :  qsTr('Copy link')
-                    onTriggered: () => {
+                    id: copyAction
+                    text: delg.isJitsiMeeting ? qsTr('Copy room link') : qsTr('Copy link')
+                    onTriggered: () => copyAction.copyLink()
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Copy meeting link")
+                    Accessible.description: qsTr("Copy the meeting link associated with the currently selected event")
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => copyAction.copyLink()
+
+                    function copyLink() {
                         if (delg.isJitsiMeeting) {
                             ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
                         } else {

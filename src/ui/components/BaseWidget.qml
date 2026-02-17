@@ -131,6 +131,11 @@ Item {
                 height: root.height
                 anchors.centerIn: parent
 
+                Accessible.role: Accessible.Dial
+                Accessible.name: qsTr("Drag widget")
+                Accessible.description: qsTr("Change the position of the widget")
+                Accessible.focusable: true
+
                 DragHandler {
                     id: dragControl
                     acceptedButtons: Qt.LeftButton
@@ -171,7 +176,15 @@ Item {
                     width: 32
                     height: 32
                 }
-                onClicked: () => {
+                onClicked: () => removeButton.removeWidget()
+
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("Remove widget")
+                Accessible.description: qsTr("Remove the currently selected widget from the dashboard")
+                Accessible.focusable: true
+                Accessible.onPressAction: () => removeButton.removeWidget()
+
+                function removeWidget() {
                     control.cleanupRequested()
                     control.page.model.remove(control)
                     control.destroy()
@@ -233,6 +246,11 @@ Item {
                     property alias cursorShape: resizeMouseArea.cursorShape
 
                     signal positionChanged(MouseEvent mouse)
+
+                    Accessible.role: Accessible.Dial
+                    Accessible.name: qsTr("Resize widget")
+                    Accessible.description: qsTr("Resize the widget according to the mouse direction")
+                    Accessible.focusable: true
 
                     MouseArea {
                         id: resizeMouseArea

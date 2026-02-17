@@ -59,6 +59,11 @@ BaseWidget {
             anchors {
                 centerIn: dateList
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("Date event widget status")
+            Accessible.description: qsTr("Displays the current status od the widget: ")
+                                    + dateInfo.text
         }
 
         Timer {
