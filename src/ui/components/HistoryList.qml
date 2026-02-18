@@ -22,6 +22,9 @@ Item {
         color: Theme.secondaryTextColor
         font.pixelSize: 18
         text: "🕓  " + qsTr("No past calls")
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("No past calls")
     }
 
     ListView {
@@ -62,9 +65,15 @@ Item {
             required property date section
 
             Label {
+                id: sectionLabel
                 text: sectionDelg.section.toLocaleDateString(Qt.locale(), "dddd, dd. MMMM yyyy")
                 anchors.centerIn: parent
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("history item section")
+            Accessible.description: qsTr("Header for the currently selected day: ")
+                                    + sectionLabel.text
         }
 
         delegate: Item {
@@ -109,6 +118,17 @@ Item {
             }
 
             Component.onCompleted: () => delg.updateBuddyStatus()
+
+            Accessible.role: Accessible.ListItem
+            Accessible.name: qsTr("History item")
+            Accessible.description: qsTr("Currently selected history itemt: ")
+                                    + qsTr("Name: ") + delg.contactName
+                                    + qsTr("Company: ") + delg.company
+                                    + qsTr("Location: ") + delg.location
+                                    + qsTr("Phone: ") + delg.remotePhoneNumber
+                                    + qsTr("Time: ") + timeTextLabel.text
+                                    + qsTr("Duration: ") + durationTextLabel.text
+            Accessible.focusable: true
 
             Connections {
                 target: SIPManager
@@ -180,6 +200,8 @@ Item {
                                 }
                             }
                         ]
+
+                        Accessible.ignored: true
                     }
 
                     Label {
@@ -193,6 +215,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.ignored: true
                     }
                 }
 
@@ -225,6 +249,8 @@ Item {
                                 }
                             }
                         ]
+
+                        Accessible.ignored: true
                     }
 
                     Label {
@@ -238,6 +264,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.ignored: true
                     }
                 }
 
@@ -322,6 +350,8 @@ Item {
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
                     }
 
@@ -354,6 +384,8 @@ Item {
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
                     }
                 }

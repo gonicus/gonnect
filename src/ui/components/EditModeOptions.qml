@@ -18,23 +18,35 @@ Item {
         anchors.centerIn: parent
 
         Button {
+            id: addPageButton
             icon.source: Icons.listAdd
             height: control.buttonHeight
             text: qsTr("Add page")
             enabled: control.tabRoot.dynamicPageCount < control.tabRoot.dynamicPageLimit
+            onPressed: () => control.tabRoot.openPageCreationDialog()
 
-            onPressed: {
-                control.tabRoot.openPageCreationDialog()
-            }
+            Accessible.role: Accessible.Button
+            Accessible.name: addPageButton.text
+            Accessible.description: qsTr("Add a new dashboard page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => control.tabRoot.openPageCreationDialog()
         }
 
         Button {
+            id: addWidgetButton
             icon.source: Icons.viewLeftNew
             height: control.buttonHeight
             text: qsTr("Add widget")
             enabled: control.tabRoot.selectedPageType === GonnectWindow.PageType.Base
+            onPressed: () => addWidgetButton.addWidget()
 
-            onPressed: {
+            Accessible.role: Accessible.Button
+            Accessible.name: addWidgetButton.text
+            Accessible.description: qsTr("Add a new widget to the current dashboard page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => addWidgetButton.addWidget()
+
+            function addWidget() {
                 let page = control.pageRoot.getPage(control.tabRoot.selectedPageId)
                 if (page) {
                     page.widgetCreationDialog()
@@ -43,15 +55,19 @@ Item {
         }
 
         Button {
+            id: finishEditButton
             highlighted: true
             Material.accent: Theme.greenColor
             icon.source: Icons.objectSelectSymbolic
             height: control.buttonHeight
             text: qsTr("Finished")
+            onClicked: () => SM.uiEditMode = false
 
-            onClicked: () => {
-                SM.uiEditMode = false
-            }
+            Accessible.role: Accessible.Button
+            Accessible.name: finishEditButton.text
+            Accessible.description: qsTr("Finish and save all dashboard and widget changes")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => SM.uiEditMode = false
         }
     }
 }

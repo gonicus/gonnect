@@ -20,6 +20,10 @@ Item {
             id: participantsModel
         }
 
+        Accessible.role: Accessible.List
+        Accessible.name: qsTr("Participants list")
+        Accessible.description: qsTr("List of all the participants of the current chat room")
+
         delegate: Item {
             id: delg
             height: 54
@@ -34,6 +38,14 @@ Item {
 
             readonly property bool isModerator: delg.role === ConferenceParticipant.Role.Moderator
             readonly property bool isMe: delg.id === control.conferenceConnector?.ownId ?? false
+
+            Accessible.role: Accessible.ListItem
+            Accessible.name: qsTr("Chat participant")
+            Accessible.description: qsTr("Selected chat participant: ") +
+                                    qsTr("Name: ") + delg.displayName +
+                                    (delg.isModerator ? qsTr("Role: Moderator") : "") +
+                                    (delg.isMe ? qsTr("Hint: This is your account") : "")
+            Accessible.focusable: true
 
             Rectangle {
                 id: selectedBackground
@@ -81,6 +93,8 @@ Item {
                     horizontalCenterOffset: 9
                     verticalCenter: avatarImage.top
                 }
+
+                Accessible.ignored: true
             }
 
             Label {
@@ -97,6 +111,8 @@ Item {
                     leftMargin: 10
                     rightMargin: 20
                 }
+
+                Accessible.ignored: true
             }
 
             HoverHandler {
@@ -133,14 +149,30 @@ Item {
                 Menu {
                     id: participantContextMenu
 
+                    Accessible.role: Accessible.PopupMenu
+                    Accessible.name: qsTr("Participant actions")
+                    Accessible.description: qsTr("Available options for the selected participant")
+
                     MenuItem {
+                        id: participantKick
                         text: qsTr("Kick")
                         onClicked: () => control.conferenceConnector.kickParticipant(delg.id)
+
+                        Accessible.role: Accessible.MenuItem
+                        Accessible.name: participantKick.text
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => participantKick.clicked()
                     }
                     MenuItem {
+                        id: participantMakeMod
                         enabled: !delg.isModerator
                         text: qsTr("Make moderator")
                         onClicked: () => control.conferenceConnector.grantParticipantRole(delg.id, ConferenceParticipant.Role.Moderator)
+
+                        Accessible.role: Accessible.MenuItem
+                        Accessible.name: participantKick.text
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => participantMakeMod.clicked()
                     }
                 }
             }

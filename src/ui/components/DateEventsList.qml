@@ -105,6 +105,14 @@ ListView {
             delg.isAllDayEvent = delg.dateTime.getDate() + 1 === delg.endDateTime.getDate() && delg.dateTime.getHours() === 0
         }
 
+        Accessible.role: Accessible.ListItem
+        Accessible.name: qsTr("Date event")
+        Accessible.description: qsTr("Currently selected date event: ")
+                                + qsTr("Summary: ") + summaryLabel.text
+                                + qsTr("Starting time: ") + timeLabel.text
+                                + qsTr("Remaining time: ") + summaryLabel.text
+        Accessible.focusable: true
+
         Connections {
             target: internal
             function onMinuteTick() {
@@ -133,14 +141,6 @@ ListView {
                 topPadding: 10
                 bottomPadding: 10
                 Layout.preferredWidth: parent.width * 0.9
-
-                Accessible.role: Accessible.ListItem
-                Accessible.name: qsTr("Date event")
-                Accessible.description: qsTr("Currently selected date event: ")
-                                        + qsTr("Summary: ") + summaryLabel.text
-                                        + qsTr("Starting time: ") + timeLabel.text
-                                        + qsTr("Remaining time: ") + summaryLabel.text
-                Accessible.focusable: true
 
                 Label {
                     id: summaryLabel

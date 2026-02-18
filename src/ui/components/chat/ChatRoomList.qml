@@ -28,6 +28,10 @@ ListView {
         }
     }
 
+    Accessible.role: Accessible.List
+    Accessible.name: qsTr("Chat room list")
+    Accessible.description: qsTr("List of all the chat rooms")
+
     delegate: ChatRoomListItem {
         id: delg
         highlighted: control.selectedRoomId === delg.roomId

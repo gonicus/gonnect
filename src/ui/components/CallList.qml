@@ -30,6 +30,7 @@ Item {
     readonly property alias count: callListView.count
 
     Label {
+        id: dragCallLabel
         color: Theme.secondaryTextColor
         visible: control.count > 1
         text: qsTr("Drag callers onto each other to transfer call")
@@ -43,6 +44,9 @@ Item {
             verticalCenter: parent.verticalCenter
             verticalCenterOffset: callListView.contentHeight / 2
         }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: dragCallLabel.text
     }
 
     ListView {
@@ -58,6 +62,9 @@ Item {
             right: parent.right
             bottom: conferenceButton.visible ? conferenceButton.top : parent.bottom
         }
+
+        Accessible.role: Accessible.List
+        Accessible.name: qsTr("List of active calls")
 
         delegate: CallItem {
             id: callDelegate
@@ -86,6 +93,11 @@ Item {
             bottom: parent.bottom
         }
 
+        Accessible.role: Accessible.Button
+        Accessible.name: conferenceButtonLabel.text
+        Accessible.focusable: true
+        Accessible.onPressAction: () => SIPCallManager.startConference()
+
         Rectangle {
             height: 1
             color: Theme.borderColor
@@ -106,6 +118,8 @@ Item {
                 source: Icons.userGroupNew
                 color: conferenceButtonHoverHandler.hovered ? Theme.foregroundHeaderIcons : Theme.secondaryTextColor
             }
+
+            Accessible.ignored: true
         }
 
         HoverHandler {

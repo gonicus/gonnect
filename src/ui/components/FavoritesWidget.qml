@@ -56,6 +56,9 @@ BaseWidget {
             anchors {
                 centerIn: favList
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: favInfo.text
         }
     }
 }

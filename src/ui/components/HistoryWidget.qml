@@ -71,6 +71,23 @@ BaseWidget {
                         label: qsTr('Jitsi Meet')
                     }
                 ]
+
+                Accessible.role: Accessible.ComboBox
+                Accessible.name: qsTr("History call type picker")
+                Accessible.description: qsTr("Select the call type to filter by")
+
+                delegate: ItemDelegate {
+                    id: historyFilterMediumSelectorDelg
+                    width: parent.width
+                    text: historyFilterMediumSelectorDelg.label
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: historyFilterMediumSelectorDelg.label
+                    Accessible.description: qsTr("Currently selected call type")
+                    Accessible.focusable: true
+
+                    required property string label
+                }
             }
 
             ComboBox {
@@ -101,6 +118,23 @@ BaseWidget {
                         label: qsTr('Missed')
                     }
                 ]
+
+                Accessible.role: Accessible.ComboBox
+                Accessible.name: qsTr("History call origin picker")
+                Accessible.description: qsTr("Select the call origin to filter by")
+
+                delegate: ItemDelegate {
+                    id: historyFilterTypeSelectorDelg
+                    width: parent.width
+                    text: historyFilterTypeSelectorDelg.label
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: historyFilterTypeSelectorDelg.label
+                    Accessible.description: qsTr("Currently selected call origin")
+                    Accessible.focusable: true
+
+                    required property string label
+                }
             }
 
             HeaderIconButton {
