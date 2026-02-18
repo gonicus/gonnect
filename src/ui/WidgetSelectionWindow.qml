@@ -116,7 +116,7 @@ BaseWindow {
                 }
 
                 Accessible.role: Accessible.ComboBox
-                Accessible.name: qsTr("Widget selection box")
+                Accessible.name: qsTr("Widget selection")
                 Accessible.description: qsTr("Select the widget that should be added to the current dashboard page")
 
                 delegate: ItemDelegate {
@@ -152,6 +152,8 @@ BaseWindow {
                             textFormat: Text.RichText
                             text: "<b>" + widgetDelg.name + "</b><br>"
                                   + widgetDelg.description
+
+                            Accessible.ignored: true
                         }
                     }
                 }
@@ -176,6 +178,8 @@ BaseWindow {
                         textFormat: Text.RichText
                         text: "<b>" + widgetEntries.get(widgetSelection.currentIndex).name + "</b><br>"
                               + widgetEntries.get(widgetSelection.currentIndex).description
+
+                        Accessible.ignored: true
                     }
                 }
 

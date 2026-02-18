@@ -109,7 +109,7 @@ BaseWindow {
             }
 
             Accessible.role: Accessible.ComboBox
-            Accessible.name: qsTr("Page icon selection box")
+            Accessible.name: qsTr("Page icon selection")
             Accessible.description: qsTr("Select the page icon for the dashboard page")
 
             delegate: ItemDelegate {

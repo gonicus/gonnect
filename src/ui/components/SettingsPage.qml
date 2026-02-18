@@ -332,7 +332,7 @@ Item {
                             Accessible.name: themeLabel.text
                         }
 
-                        ComboBox { // ->
+                        ComboBox {
                             id: darkModeComboBox
                             editable: false
                             textRole: 'displayName'
@@ -341,18 +341,38 @@ Item {
                                 left: parent.left
                                 right: parent.right
                             }
-                            model: [
-                                {
-                                    displayName: qsTr("System default"),
+                            model: ListModel {
+                                id: themeEntries
+                                ListElement {
+                                    displayName: qsTr("System default")
                                     value: Theme.ThemeVariant.System
-                                }, {
-                                    displayName: qsTr("Light"),
+                                }
+                                ListElement {
+                                    displayName: qsTr("Light")
                                     value: Theme.ThemeVariant.Light
-                                }, {
-                                    displayName: qsTr("Dark"),
+                                }
+                                ListElement {
+                                    displayName: qsTr("Dark")
                                     value: Theme.ThemeVariant.Dark
                                 }
-                            ]
+                            }
+
+                            Accessible.role: Accessible.ComboBox
+                            Accessible.name: qsTr("Theme selection box")
+                            Accessible.description: qsTr("Select the UI theme")
+
+                            delegate: ItemDelegate {
+                                id: darkModeDelg
+                                width: parent.width
+                                text: darkModeDelg.displayName
+
+                                Accessible.role: Accessible.ListItem
+                                Accessible.name: darkModeDelg.displayName
+                                Accessible.description: qsTr("Currently selected theme option")
+                                Accessible.focusable: true
+
+                                required property string displayName
+                            }
 
                             onActivated: {
                                 Theme.themeVariant = darkModeComboBox.currentValue
@@ -388,6 +408,10 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.role: Accessible.CheckBox
+                        Accessible.name: busyOnBusyCheckBox.text
+                        Accessible.focusable: true
                     }
 
                     Repeater {
@@ -409,6 +433,11 @@ Item {
                             }
 
                             onToggled: () => TogglerManager.toggleToggler(togglerDelegate.id)
+
+                            Accessible.role: Accessible.CheckBox
+                            Accessible.name: togglerDelegate.text
+                            Accessible.focusable: true
+                            Accessible.onToggleAction: () => TogglerManager.toggleToggler(togglerDelegate.id)
 
                             required property string id
                             required property string name
@@ -443,7 +472,6 @@ Item {
                                     color: togglerDelegate.checked ? togglerDelegate.Material.highlightedRippleColor : togglerDelegate.Material.rippleColor
                                 }
                             }
-
 
                             Item {
                                 id: busyIndicator
@@ -484,11 +512,15 @@ Item {
                         }
 
                         Label {
+                            id: preferredIdentityHeader
                             text: qsTr('Standard preferred identity')
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: preferredIdentityHeader.text
                         }
 
                         ComboBox {
@@ -509,6 +541,23 @@ Item {
                                     id: "auto"
                                 }
                             ].concat(SIPManager.preferredIdentities.filter(pi => pi.enabled))
+
+                            Accessible.role: Accessible.ComboBox
+                            Accessible.name: qsTr("Prefererred identity selection")
+                            Accessible.description: qsTr("Select the preferred identity")
+
+                            delegate: ItemDelegate {
+                                id: standardPreferredIdentityDelg
+                                width: parent.width
+                                text: standardPreferredIdentityDelg.displayName
+
+                                Accessible.role: Accessible.ListItem
+                                Accessible.name: standardPreferredIdentityDelg.displayName
+                                Accessible.description: qsTr("Currently selected identity option")
+                                Accessible.focusable: true
+
+                                required property string displayName
+                            }
 
                             function setDefaultIdentity() {
                                 const selectedId = SIPManager.defaultPreferredIdentity
@@ -557,9 +606,13 @@ Item {
                             }
 
                             Label {
+                                id: prefIdentityEmpty
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 visible: preferredIdentitiesRepeater.count === 0
                                 text: qsTr("No preferred identities yet.")
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: prefIdentityEmpty.text
                             }
 
                             Repeater {
@@ -587,6 +640,10 @@ Item {
                                             topMargin: 5
                                             bottomMargin: 5
                                         }
+
+                                        Accessible.role: Accessible.StaticText
+                                        Accessible.name: preferredIdentityLabel.text
+                                        Accessible.description: qsTr("Currently highlighted preferred identity. Tap to edit.")
                                     }
 
                                     Rectangle {
@@ -602,6 +659,7 @@ Item {
                                     }
 
                                     Label {
+                                        id: preferredIdentityLabel
                                         enabled: preferredIdentityDelegate.modelData?.enabled ?? false
                                         text: preferredIdentityDelegate.modelData?.displayName
                                               + (preferredIdentityDelegate.modelData?.prefix
@@ -624,6 +682,8 @@ Item {
                                             verticalCenter: parent.verticalCenter
                                             left: parent.left
                                         }
+
+                                        Accessible.ignored: true
                                     }
 
                                     Badge {
@@ -673,7 +733,15 @@ Item {
 
                         Material.elevation: 0
 
-                        onClicked: () => {
+                        onClicked: () => addIdentityButton.addIdentity()
+
+                        Accessible.role: Accessible.Button
+                        Accessible.name: addIdentityButton.text
+                        Accessible.description: qsTr("Add a new preferred identity entry")
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => addIdentityButton.addIdentity()
+
+                        function addIdentity() {
                             const identity = SIPManager.addEmptyPreferredIdentity()
                             preferredIdentityEditWindowComponent.createObject(
                                 control, {
@@ -714,6 +782,10 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.role: Accessible.CheckBox
+                        Accessible.name: externalRingerCheckbox.text
+                        Accessible.focusable: true
                     }
 
                     Column {
@@ -723,11 +795,15 @@ Item {
                         }
 
                         Label {
+                            id: inputDeviceHeader
                             text: qsTr('Input device')
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: inputDeviceHeader.text
                         }
 
                         ComboBox {
@@ -740,6 +816,23 @@ Item {
                                 right: parent.right
                             }
                             model: AudioManager.devices.filter(device => device.isInput)
+
+                            Accessible.role: Accessible.ComboBox
+                            Accessible.name: qsTr("Input device selection")
+                            Accessible.description: qsTr("Select the input device to be used")
+
+                            delegate: ItemDelegate {
+                                id: inputAudioSelectorDelg
+                                width: parent.width
+                                text: inputAudioSelectorDelg.name
+
+                                Accessible.role: Accessible.ListItem
+                                Accessible.name: inputAudioSelectorDelg.name
+                                Accessible.description: qsTr("Currently selected input option")
+                                Accessible.focusable: true
+
+                                required property string name
+                            }
 
                             function updateSelectedAudioDeviceFromModel() {
                                 const deviceId = AudioManager.captureDeviceId
@@ -773,11 +866,15 @@ Item {
                         }
 
                         Label {
+                            id: outputDeviceHeader
                             text: qsTr('Output device')
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: outputDeviceHeader.text
                         }
 
                         ComboBox {
@@ -790,6 +887,23 @@ Item {
                                 right: parent.right
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
+
+                            Accessible.role: Accessible.ComboBox
+                            Accessible.name: qsTr("Output device selection")
+                            Accessible.description: qsTr("Select the output device to be used")
+
+                            delegate: ItemDelegate {
+                                id: outputAudioSelectorDelg
+                                width: parent.width
+                                text: outputAudioSelectorDelg.name
+
+                                Accessible.role: Accessible.ListItem
+                                Accessible.name: outputAudioSelectorDelg.name
+                                Accessible.description: qsTr("Currently selected output option")
+                                Accessible.focusable: true
+
+                                required property string name
+                            }
 
                             function updateSelectedAudioDeviceFromModel() {
                                 const deviceId = AudioManager.playbackDeviceId
@@ -823,11 +937,15 @@ Item {
                         }
 
                         Label {
+                            id: outputRingDeviceHeader
                             text: qsTr('Output device for ring tone')
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: outputRingDeviceHeader.text
                         }
 
                         ComboBox {
@@ -841,6 +959,22 @@ Item {
                             }
                             model: AudioManager.devices.filter(device => device.isOutput)
 
+                            Accessible.role: Accessible.ComboBox
+                            Accessible.name: qsTr("Prefererred identity selection")
+                            Accessible.description: qsTr("Select the preferred identity")
+
+                            delegate: ItemDelegate {
+                                id: outputRingAudioSelectorDelg
+                                width: parent.width
+                                text: outputRingAudioSelectorDelg.name
+
+                                Accessible.role: Accessible.ListItem
+                                Accessible.name: outputRingAudioSelectorDelg.name
+                                Accessible.description: qsTr("Currently selected ring output option")
+                                Accessible.focusable: true
+
+                                required property string name
+                            }
 
                             function updateSelectedAudioDeviceFromModel() {
                                 const deviceId = AudioManager.ringDeviceId
@@ -874,11 +1008,15 @@ Item {
                         }
 
                         Label {
+                            id: ringToneHeader
                             text: qsTr('Ring tone')
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: ringToneHeader.text
                         }
 
                         Rectangle {
@@ -892,7 +1030,11 @@ Item {
                                 right: parent.right
                             }
 
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: ringToneName.text
+
                             Label {
+                                id: ringToneName
                                 text: {
                                     const ringToneFilePath = audioSettings.ringtone
                                     if (ringToneFilePath) {
@@ -918,6 +1060,8 @@ Item {
                                     rightMargin: 10
                                     verticalCenter: parent.verticalCenter
                                 }
+
+                                Accessible.ignored: true
                             }
 
                             Button {
@@ -951,6 +1095,12 @@ Item {
                                 }
 
                                 onClicked: () => audioSettings.ringtone = ""
+
+                                Accessible.role: Accessible.Button
+                                Accessible.name: qsTr("Reset ring tone")
+                                Accessible.description: qsTr("Reset the ring tone to its default option")
+                                Accessible.focusable: true
+                                Accessible.onPressAction: () => audioSettings.ringtone = ""
                             }
 
                             Button {
@@ -963,6 +1113,12 @@ Item {
                                     verticalCenter: parent.verticalCenter
                                 }
                                 onClicked: () => ringToneFileDialog.open()
+
+                                Accessible.role: Accessible.Button
+                                Accessible.name: qsTr("Pick ring tone")
+                                Accessible.description: qsTr("Select the ring tone you want to use for incoming calls")
+                                Accessible.focusable: true
+                                Accessible.onPressAction: () => ringToneFileDialog.open()
                             }
                         }
                     }
@@ -974,11 +1130,16 @@ Item {
                         }
 
                         Label {
+                            id: ringToneVolumeHeader
                             text: qsTr('Ring tone volume')
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: ringToneVolumeHeader.text
+                            Accessible.description: qsTr("Currently set to: ") + ringToneVolumeSliderLabel.text
                         }
 
                         Item {
@@ -986,7 +1147,6 @@ Item {
                             anchors {
                                 left: parent.left
                                 right: parent.right
-
                             }
 
                             Slider {
@@ -1004,6 +1164,19 @@ Item {
                                 onMoved: () => {
                                     ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
                                 }
+
+                                Accessible.role: Accessible.Slider
+                                Accessible.name: qsTr("Adjust the ") + ringToneVolumeHeader.text
+                                Accessible.onIncreaseAction: () => {
+                                    if (ringToneVolumeSlider.value < ringToneVolumeSlider.to) {
+                                        ringToneVolumeSlider.value++
+                                    }
+                                }
+                                Accessible.onDecreaseAction: () => {
+                                    if (ringToneVolumeSlider.value > ringToneVolumeSlider.from) {
+                                        ringToneVolumeSlider.value--
+                                    }
+                                }
                             }
 
                             Label {
@@ -1015,6 +1188,8 @@ Item {
                                     right: parent.right
                                     verticalCenter: ringToneVolumeSlider.verticalCenter
                                 }
+
+                                Accessible.ignored: true
                             }
                         }
                     }
@@ -1026,11 +1201,16 @@ Item {
                         }
 
                         Label {
+                            id: ringTonePauseHeader
                             text: qsTr('Pause between ring tones [s]')
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: ringTonePauseHeader.text
+                            Accessible.description: qsTr("Currently set to: ") + ringTonePauseValueLabel.text
                         }
 
                         Item {
@@ -1051,6 +1231,19 @@ Item {
                                     right: ringTonePauseValueLabel.left
                                     rightMargin: 20
                                 }
+
+                                Accessible.role: Accessible.Slider
+                                Accessible.name: qsTr("Adjust the ") + ringTonePauseHeader.text
+                                Accessible.onIncreaseAction: () => {
+                                    if (ringTonePauseSlider.value < ringTonePauseSlider.to) {
+                                        ringTonePauseSlider.value++
+                                    }
+                                }
+                                Accessible.onDecreaseAction: () => {
+                                    if (ringTonePauseSlider.value > ringTonePauseSlider.from) {
+                                        ringTonePauseSlider.value--
+                                    }
+                                }
                             }
 
                             Label {
@@ -1062,6 +1255,8 @@ Item {
                                     right: parent.right
                                     verticalCenter: ringTonePauseSlider.verticalCenter
                                 }
+
+                                Accessible.ignored: true
                             }
                         }
                     }
@@ -1090,6 +1285,7 @@ Item {
                     }
 
                     Label {
+                        id: debugRunLabel
                         text: qsTr('Use this button to start a debug run. The App will restart and then begin to record additional information that can be useful for debugging purposes. During this run, come back here to download the information. A debug run is limited to 5 minutes, after which the App will automatically restart again in normal mode.')
                         visible: !ViewHelper.isDebugRun
                         wrapMode: Label.WordWrap
@@ -1097,32 +1293,57 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.role: Accessible.StaticText
+                        Accessible.name: debugRunLabel.text
                     }
 
                     Button {
+                        id: debugRunbutton
                         visible: !ViewHelper.isDebugRun
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: qsTr('Start debug run (restart app)')
-                        onClicked: () => {
+                        onClicked: () => debugRunbutton.startDebugRun()
+
+                        Accessible.role: Accessible.Button
+                        Accessible.name: debugRunbutton.text
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => debugRunbutton.startDebugRun()
+
+                        function startDebugRun() {
                             genericSettings.setValue("nextDebugRun", true)
                             SM.restart()
                         }
                     }
 
                     Button {
+                        id: debugInfobutton
                         visible: ViewHelper.isDebugRun
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: qsTr('Download debug information')
-                        onClicked: () => {
+                        onClicked: () => debugInfobutton.downloadDebugInfo()
+
+                        Accessible.role: Accessible.Button
+                        Accessible.name: debugInfobutton.text
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => debugInfobutton.downloadDebugInfo()
+
+                        function downloadDebugInfo() {
                             ViewHelper.downloadDebugInformation()
                             SM.restart()
                         }
                     }
 
                     Button {
+                        id: ldapReloadButton
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: qsTr('Reload contacts from LDAP')
                         onClicked: () => ViewHelper.reloadAddressBook()
+
+                        Accessible.role: Accessible.Button
+                        Accessible.name: ldapReloadButton.text
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => ViewHelper.reloadAddressBook()
                     }
                 }
             }
