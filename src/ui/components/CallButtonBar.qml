@@ -113,17 +113,25 @@ Item {
                 y: securityLevelIcon.height
 
                 Column {
+                    id: securityLevelColumn
                     spacing: 8
 
                     Accessible.role: Accessible.Column
                     Accessible.name: qsTr("Call security details")
                     Accessible.description: qsTr("Detailed call security status: ")
-                                            + signalingEncryption.text
-                                            + mediaEncryption.text
+                                            + securityLevelColumn.signalEncryptionValue
+                                            + securityLevelColumn.mediaEncryptedValue
+
+                    property string signalEncryptionValue: control.isSignalingEncrypted
+                                                           ? qsTr("Signaling encrypted")
+                                                           : qsTr("Signaling unencrypted")
+                    property string mediaEncryptedValue: control.isMediaEncrypted
+                                                         ? qsTr("Media encrypted")
+                                                         : qsTr("Media unencrypted")
 
                     IconLabel {
                         id: signalingEncryption
-                        text: control.isSignalingEncrypted ? qsTr("Signaling encrypted") : qsTr("Signaling unencrypted")
+                        text: securityLevelColumn.signalEncryptionValue
                         spacing: 4
                         icon {
                             source: control.isSignalingEncrypted ? Icons.securityHigh : Icons.securityLow
@@ -136,7 +144,7 @@ Item {
 
                     IconLabel {
                         id: mediaEncryption
-                        text: control.isMediaEncrypted ? qsTr("Media encrypted") : qsTr("Media unencrypted")
+                        text: securityLevelColumn.mediaEncryptedValue
                         spacing: 4
                         icon {
                             source: control.isMediaEncrypted ? Icons.securityHigh : Icons.securityLow

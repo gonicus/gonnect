@@ -202,7 +202,15 @@ Item {
             Accessible.name: qsTr("Selected tab")
             Accessible.description: qsTr("The currently selected tab")
             Accessible.focusable: true
-            Accessible.onPressAction: () => delgTabHandler.tapped()
+            Accessible.onPressAction: () => delg.switchTab()
+
+            function switchTab() {
+                if (delg.isEnabled) {
+                    control.selectedPageId = delg.pageId
+                    control.selectedPageType = delg.pageType
+                    control.attachedData = delg.attachedData
+                }
+            }
 
             Rectangle {
                 id: hoverBackground
@@ -336,14 +344,8 @@ Item {
             }
 
             TapHandler {
-                id: delgTabHandler
-                onTapped: () => {
-                    if (delg.isEnabled) {
-                        control.selectedPageId = delg.pageId
-                        control.selectedPageType = delg.pageType
-                        control.attachedData = delg.attachedData
-                    }
-                }
+                id: delgTapHandler
+                onTapped: () => delg.switchTab()
             }
         }
     }
@@ -480,7 +482,7 @@ Item {
             Accessible.name: qsTr("Move tab up")
             Accessible.description: qsTr("Moves the currently selected tab up by one")
             Accessible.focusable: true
-            Accessible.onPressAction: () => moveUpAction.triggered()
+            Accessible.onPressAction: () => moveUpAction.moveTabUp()
 
             function moveTabUp() {
                 if (optionMenu.selectedTabButton !== null) {
@@ -518,7 +520,7 @@ Item {
             Accessible.name: qsTr("Move tab down")
             Accessible.description: qsTr("Moves the currently selected tab down by one")
             Accessible.focusable: true
-            Accessible.onPressAction: () => moveDownAction.triggered()
+            Accessible.onPressAction: () => moveDownAction.moveTabDown()
 
             function moveTabDown() {
                 if (optionMenu.selectedTabButton !== null) {
@@ -556,7 +558,7 @@ Item {
             Accessible.name: qsTr("Edit page")
             Accessible.description: qsTr("Edit the currently selected dashboard page")
             Accessible.focusable: true
-            Accessible.onPressAction: () => editPageAction.triggered()
+            Accessible.onPressAction: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
         }
 
         Action {
@@ -572,7 +574,7 @@ Item {
             Accessible.name: qsTr("Delete page")
             Accessible.description: qsTr("Delete the currently selected dashboard page")
             Accessible.focusable: true
-            Accessible.onPressAction: () => deletePageAction.triggered()
+            Accessible.onPressAction: () => deletePageAction.deletePage()
 
             function deletePage() {
                 if (optionMenu.selectedTabButton !== null) {

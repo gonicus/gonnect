@@ -23,13 +23,13 @@ Item {
             height: control.buttonHeight
             text: qsTr("Add page")
             enabled: control.tabRoot.dynamicPageCount < control.tabRoot.dynamicPageLimit
-            onPressed: () => control.tabRoot.openPageCreationDialog()
+            onClicked: () => control.tabRoot.openPageCreationDialog()
 
             Accessible.role: Accessible.Button
             Accessible.name: addPageButton.text
             Accessible.description: qsTr("Add a new dashboard page")
             Accessible.focusable: true
-            Accessible.onPressAction: () => addPageButton.pressed()
+            Accessible.onPressAction: () => addPageButton.clicked()
         }
 
         Button {
@@ -38,7 +38,7 @@ Item {
             height: control.buttonHeight
             text: qsTr("Add widget")
             enabled: control.tabRoot.selectedPageType === GonnectWindow.PageType.Base
-            onPressed: () => {
+            onClicked: () => {
                 let page = control.pageRoot.getPage(control.tabRoot.selectedPageId)
                 if (page) {
                     page.widgetCreationDialog()
@@ -49,7 +49,7 @@ Item {
             Accessible.name: addWidgetButton.text
             Accessible.description: qsTr("Add a new widget to the current dashboard page")
             Accessible.focusable: true
-            Accessible.onPressAction: () => addWidgetButton.pressed()
+            Accessible.onPressAction: () => addWidgetButton.clicked()
         }
 
         Button {

@@ -126,7 +126,6 @@ Item {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onTapped: (_, mouseButton) => {
                     if (mouseButton === Qt.RightButton) {
-
                         // The functions features in the context menu are not working right now (jitsi meet issues), so hide
                         // the menu completely until fixed.
 

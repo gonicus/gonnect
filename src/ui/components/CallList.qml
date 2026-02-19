@@ -94,9 +94,9 @@ Item {
         }
 
         Accessible.role: Accessible.Button
-        Accessible.name: conferenceButtonLabel.text
+        Accessible.name: qsTr("Create conference")
         Accessible.focusable: true
-        Accessible.onPressAction: () => conferenceButtonTapHandler.tapped()
+        Accessible.onPressAction: () => SIPCallManager.startConference()
 
         Rectangle {
             height: 1

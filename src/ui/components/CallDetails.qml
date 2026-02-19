@@ -259,7 +259,6 @@ Item {
             right: parent.right
             rightMargin: 10
         }
-
         onClicked: () => {
             if (SIPCallManager.isConferenceMode) {
                 SIPCallManager.endConference()
