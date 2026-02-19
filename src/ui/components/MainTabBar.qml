@@ -105,6 +105,7 @@ Item {
                                                      disabledTooltipText: "",
                                                      isEnabled: true,
                                                      showRedDot: false,
+                                                     showActiveBorder: false,
                                                      attachedData: null
                                                  })
         if (tabButton === null) {
