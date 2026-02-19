@@ -186,7 +186,7 @@ Item {
                 Accessible.name: qsTr("Remove widget")
                 Accessible.description: qsTr("Remove the currently selected widget from the dashboard")
                 Accessible.focusable: true
-                Accessible.onPressAction: () => removeButton.clicked()
+                Accessible.onPressAction: () => removeButton.click()
             }
 
             // Resize

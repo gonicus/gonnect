@@ -746,7 +746,7 @@ Item {
                         Accessible.name: addIdentityButton.text
                         Accessible.description: qsTr("Add a new preferred identity entry")
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => addIdentityButton.clicked()
+                        Accessible.onPressAction: () => addIdentityButton.click()
                     }
                 }
             }
@@ -1098,7 +1098,7 @@ Item {
                                 Accessible.name: qsTr("Reset ring tone")
                                 Accessible.description: qsTr("Reset the ring tone to its default option")
                                 Accessible.focusable: true
-                                Accessible.onPressAction: () => resetToDefaultRingToneButton.clicked()
+                                Accessible.onPressAction: () => resetToDefaultRingToneButton.click()
                             }
 
                             Button {
@@ -1116,7 +1116,7 @@ Item {
                                 Accessible.name: qsTr("Pick ring tone")
                                 Accessible.description: qsTr("Select the ring tone you want to use for incoming calls")
                                 Accessible.focusable: true
-                                Accessible.onPressAction: () => pickRingToneButton.clicked()
+                                Accessible.onPressAction: () => pickRingToneButton.click()
                             }
                         }
                     }
@@ -1309,7 +1309,7 @@ Item {
                         Accessible.role: Accessible.Button
                         Accessible.name: debugRunbutton.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => debugRunbutton.clicked()
+                        Accessible.onPressAction: () => debugRunbutton.click()
                     }
 
                     Button {
@@ -1325,7 +1325,7 @@ Item {
                         Accessible.role: Accessible.Button
                         Accessible.name: debugInfobutton.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => debugInfobutton.clicked()
+                        Accessible.onPressAction: () => debugInfobutton.click()
                     }
 
                     Button {
@@ -1337,7 +1337,7 @@ Item {
                         Accessible.role: Accessible.Button
                         Accessible.name: ldapReloadButton.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => ldapReloadButton.clicked()
+                        Accessible.onPressAction: () => ldapReloadButton.click()
                     }
                 }
             }

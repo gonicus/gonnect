@@ -160,7 +160,7 @@ Item {
                         Accessible.role: Accessible.MenuItem
                         Accessible.name: participantKick.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => participantKick.clicked()
+                        Accessible.onPressAction: () => participantKick.click()
                     }
                     MenuItem {
                         id: participantMakeMod
@@ -171,7 +171,7 @@ Item {
                         Accessible.role: Accessible.MenuItem
                         Accessible.name: participantKick.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => participantMakeMod.clicked()
+                        Accessible.onPressAction: () => participantMakeMod.click()
                     }
                 }
             }

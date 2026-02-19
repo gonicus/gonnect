@@ -37,8 +37,8 @@ BaseDialog {
             right: contentLabel.right
         }
 
-        Keys.onEnterPressed: () => okButton.clicked()
-        Keys.onReturnPressed: () => okButton.clicked()
+        Keys.onEnterPressed: () => okButton.click()
+        Keys.onReturnPressed: () => okButton.click()
     }
 
     Button {

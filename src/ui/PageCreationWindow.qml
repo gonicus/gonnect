@@ -176,7 +176,7 @@ BaseWindow {
                 Accessible.name: qsTr("Cancel page modifcation")
                 Accessible.description: qsTr("Cancel button to exit the page creation/update window")
                 Accessible.focusable: true
-                Accessible.onPressAction: () => pageCancel.clicked()
+                Accessible.onPressAction: () => pageCancel.click()
             }
 
             Button {
@@ -197,7 +197,7 @@ BaseWindow {
                                         ? qsTr("Confirmation button to create the new dashboard page")
                                         : qsTr("Confirmation button to apply changes to the dashboard page")
                 Accessible.focusable: true
-                Accessible.onPressAction: () => pageConfirm.clicked()
+                Accessible.onPressAction: () => pageConfirm.click()
             }
         }
     }

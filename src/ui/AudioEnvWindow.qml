@@ -292,7 +292,7 @@ BaseWindow {
             Accessible.name: qsTr("Close audio environment selection")
             Accessible.description: qsTr("Confirmation button to leave the audio environment selection window")
             Accessible.focusable: true
-            Accessible.onPressAction: () => saveButton.clicked()
+            Accessible.onPressAction: () => saveButton.click()
         }
     }
 }

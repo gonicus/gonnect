@@ -47,6 +47,9 @@ Item {
                 }
             }
 
+            Accessible.role: Accessible.List
+            Accessible.name: qsTr("Chat message list")
+            Accessible.description: qsTr("List of all the messages in the current chat")
 
             delegate: Item {
                 id: delg
@@ -70,7 +73,6 @@ Item {
                 readonly property string timeFormatted: Qt.formatTime(delg.timestamp, "hh:mm")
 
                 property color labelColor: Theme.primaryTextColor
-
 
                 states: [
                     State {

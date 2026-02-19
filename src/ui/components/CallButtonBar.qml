@@ -520,7 +520,7 @@ Item {
             Accessible.name: qsTr("Screensharing control")
             Accessible.description: qsTr("Start or stop sharing your screen")
             Accessible.focusable: true
-            Accessible.onPressAction: () => screenShareButton.clicked()
+            Accessible.onPressAction: () => screenShareButton.click()
         }
 
         BarButton {
@@ -538,7 +538,7 @@ Item {
             Accessible.name: qsTr("Camera control")
             Accessible.description: qsTr("Enabled or disable your camera")
             Accessible.focusable: true
-            Accessible.onPressAction: () => videoMuteButton.clicked()
+            Accessible.onPressAction: () => videoMuteButton.click()
         }
 
         BarButton {
@@ -553,7 +553,7 @@ Item {
             Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
             Accessible.description: qsTr("Update the call hold state")
             Accessible.focusable: true
-            Accessible.onPressAction: () => holdButton.clicked()
+            Accessible.onPressAction: () => holdButton.click()
         }
 
         Rectangle {
@@ -586,7 +586,7 @@ Item {
             Accessible.name: qsTr("Input control")
             Accessible.description: qsTr("Set the mute state of the current input device")
             Accessible.focusable: true
-            Accessible.onPressAction: () => audioInputDeviceButton.clicked()
+            Accessible.onPressAction: () => audioInputDeviceButton.click()
         }
 
         BarButton {
@@ -610,7 +610,7 @@ Item {
             Accessible.name: qsTr("Output control")
             Accessible.description: qsTr("Change the current output devices")
             Accessible.focusable: true
-            Accessible.onPressAction: () => audioOutputDeviceButton.clicked()
+            Accessible.onPressAction: () => audioOutputDeviceButton.click()
         }
 
         Button {
@@ -634,7 +634,7 @@ Item {
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Accept call")
             Accessible.focusable: true
-            Accessible.onPressAction: () => acceptCallButton.clicked()
+            Accessible.onPressAction: () => acceptCallButton.click()
         }
 
         Button {
@@ -658,7 +658,7 @@ Item {
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Hangup call")
             Accessible.focusable: true
-            Accessible.onPressAction: () => hangupButton.clicked()
+            Accessible.onPressAction: () => hangupButton.click()
         }
     }
 }

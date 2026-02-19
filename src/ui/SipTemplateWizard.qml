@@ -184,7 +184,7 @@ BaseWindow {
             Accessible.name: qsTr("Continue setup")
             Accessible.description: qsTr("Confirmation button to continue the setup")
             Accessible.focusable: true
-            Accessible.onPressAction: () => templateSetupNext.clicked()
+            Accessible.onPressAction: () => templateSetupNext.click()
         }
     }
 
@@ -337,7 +337,7 @@ BaseWindow {
             Accessible.name: templateBack.text
             Accessible.description: qsTr("Back button to return to the template selection menu")
             Accessible.focusable: true
-            Accessible.onPressAction: () => templateBack.clicked()
+            Accessible.onPressAction: () => templateBack.click()
         }
 
         Button {
@@ -356,7 +356,7 @@ BaseWindow {
             Accessible.name: templateFinish.text
             Accessible.description: qsTr("Confirmation button to apply the changes to the SIP template")
             Accessible.focusable: true
-            Accessible.onPressAction: () => templateFinish.clicked()
+            Accessible.onPressAction: () => templateFinish.click()
         }
     }
 
@@ -458,7 +458,7 @@ BaseWindow {
             Accessible.name: qsTr("Finish wizard")
             Accessible.description: qsTr("Finish the SIP configuration wizard")
             Accessible.focusable: true
-            Accessible.onPressAction: () => wizardFinishButton.clicked()
+            Accessible.onPressAction: () => wizardFinishButton.click()
         }
     }
 }

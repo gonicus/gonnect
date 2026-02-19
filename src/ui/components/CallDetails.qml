@@ -196,7 +196,7 @@ Item {
         Accessible.name: jitsiButton.text
         Accessible.description: qsTr("Switch to a Jitis Meet session")
         Accessible.focusable: true
-        Accessible.onPressAction: () => jitsiButton.clicked()
+        Accessible.onPressAction: () => jitsiButton.click()
     }
 
     Button {
@@ -222,7 +222,7 @@ Item {
         Accessible.name: holdButton.text
         Accessible.description: qsTr("Toggle the hold state to: ") + holdButton.text
         Accessible.focusable: true
-        Accessible.onPressAction: () => holdButton.clicked()
+        Accessible.onPressAction: () => holdButton.click()
     }
 
     Button {
@@ -244,7 +244,7 @@ Item {
         Accessible.role: Accessible.Button
         Accessible.name: qsTr("Accept call")
         Accessible.focusable: true
-        Accessible.onPressAction: () => acceptButton.clicked()
+        Accessible.onPressAction: () => acceptButton.click()
     }
 
     Button {
@@ -270,6 +270,6 @@ Item {
         Accessible.role: Accessible.Button
         Accessible.name: qsTr("Hangup call")
         Accessible.focusable: true
-        Accessible.onPressAction: () => hangupButton.clicked()
+        Accessible.onPressAction: () => hangupButton.click()
     }
 }

@@ -29,7 +29,7 @@ Item {
             Accessible.name: addPageButton.text
             Accessible.description: qsTr("Add a new dashboard page")
             Accessible.focusable: true
-            Accessible.onPressAction: () => addPageButton.clicked()
+            Accessible.onPressAction: () => addPageButton.click()
         }
 
         Button {
@@ -49,7 +49,7 @@ Item {
             Accessible.name: addWidgetButton.text
             Accessible.description: qsTr("Add a new widget to the current dashboard page")
             Accessible.focusable: true
-            Accessible.onPressAction: () => addWidgetButton.clicked()
+            Accessible.onPressAction: () => addWidgetButton.click()
         }
 
         Button {
@@ -65,7 +65,7 @@ Item {
             Accessible.name: finishEditButton.text
             Accessible.description: qsTr("Finish and save all dashboard and widget changes")
             Accessible.focusable: true
-            Accessible.onPressAction: () => finishEditButton.clicked()
+            Accessible.onPressAction: () => finishEditButton.click()
         }
     }
 }

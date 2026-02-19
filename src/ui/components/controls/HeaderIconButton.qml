@@ -39,6 +39,7 @@ Item {
     HoverHandler {
         id: hoverHandler
     }
+
     TapHandler {
         enabled: control.enabled
         onTapped: () => control.clicked()
