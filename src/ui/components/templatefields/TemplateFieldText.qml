@@ -14,6 +14,6 @@ TextField {
 
     Accessible.role: Accessible.EditableText
     Accessible.name: qsTr("Text input")
-    Accessible.name: qsTr("Enter the desired value for the ") + control.templateFieldName
+    Accessible.description: qsTr("Enter the desired value for the ") + control.templateFieldName
     Accessible.focusable: true
 }

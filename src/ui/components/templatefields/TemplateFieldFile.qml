@@ -39,7 +39,7 @@ Item {
 
         Accessible.role: Accessible.Button
         Accessible.name: qsTr("Open file picker")
-        Accessible.name: qsTr("Select the file that should be used for the ") + control.templateFieldName
+        Accessible.description: qsTr("Select the file that should be used for the ") + control.templateFieldName
         Accessible.focusable: true
         Accessible.onPressAction: chooseButton.click()
     }

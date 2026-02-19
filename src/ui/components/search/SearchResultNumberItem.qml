@@ -46,6 +46,14 @@ Rectangle {
 
     Component.onCompleted: () => control.updateBuddyStatus()
 
+    Accessible.role: Accessible.Button
+    Accessible.name: qsTr("Phone number")
+    Accessible.description: qsTr("Selected phone number: ") +
+                            qsTr("Number: ") + delg.displayName +
+                            (control.isFavorite ? qsTr("Hint: This is a favorite") : "")
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.triggerPrimaryAction()
+
     Connections {
         target: SIPManager
         enabled: control.isSipStatusSubscriptable
@@ -87,6 +95,8 @@ Rectangle {
             right: favIcon.left
             rightMargin: 1
         }
+
+        Accessible.ignored: true
     }
 
     FavIcon {
