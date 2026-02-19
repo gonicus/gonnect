@@ -175,7 +175,7 @@ Rectangle {
         Accessible.name:  qsTr("Hangup button")
         Accessible.description: qsTr("Pressing this will end the call")
         Accessible.focusable: true
-        Accessible.onPressAction: SIPCallManager.endCall(control.accountId, control.callId)
+        Accessible.onPressAction: hangupButtonTapHandler.tapped()
 
         IconLabel {
             anchors.centerIn: parent
@@ -188,6 +188,7 @@ Rectangle {
         }
 
         TapHandler {
+            id: hangupButtonTapHandler
             onTapped: SIPCallManager.endCall(control.accountId, control.callId)
         }
     }

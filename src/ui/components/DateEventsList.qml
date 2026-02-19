@@ -211,41 +211,37 @@ ListView {
                 Action {
                     id: joinAction
                     text: delg.isJitsiMeeting ? qsTr('Join') : qsTr('Open')
-                    onTriggered: () => joinAction.joinMeeting()
-
-                    Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Join meeting")
-                    Accessible.description: qsTr("Join the meeting associated with the currently selected event")
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => joinAction.joinMeeting()
-
-                    function joinMeeting() {
+                    onTriggered: () => {
                         if (delg.isJitsiMeeting) {
                             ViewHelper.requestMeeting(delg.roomName)
                         } else {
                             ViewHelper.requestExternalAppointment(delg.link)
                         }
                     }
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Join meeting")
+                    Accessible.description: qsTr("Join the meeting associated with the currently selected event")
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => joinAction.triggered()
                 }
 
                 Action {
                     id: copyAction
                     text: delg.isJitsiMeeting ? qsTr('Copy room link') : qsTr('Copy link')
-                    onTriggered: () => copyAction.copyLink()
-
-                    Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Copy meeting link")
-                    Accessible.description: qsTr("Copy the meeting link associated with the currently selected event")
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => copyAction.copyLink()
-
-                    function copyLink() {
+                    onTriggered: () => {
                         if (delg.isJitsiMeeting) {
                             ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
                         } else {
                             ViewHelper.copyToClipboard(delg.link)
                         }
                     }
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Copy meeting link")
+                    Accessible.description: qsTr("Copy the meeting link associated with the currently selected event")
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => copyAction.triggered()
                 }
             }
         }

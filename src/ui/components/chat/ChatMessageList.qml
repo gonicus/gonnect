@@ -65,7 +65,7 @@ Item {
         Accessible.role: Accessible.Button
         Accessible.name: qsTr("Scroll down")
         Accessible.focusable: true
-        Accessible.onPressAction: () => autoScrollDownButton.tapAction()
+        Accessible.onPressAction: () => autoScrollTapHandler.tapped()
 
         Rectangle {
             id: autoScrollBackground
@@ -88,12 +88,11 @@ Item {
         }
 
         TapHandler {
-            onTapped: () => autoScrollDownButton.tapAction()
-        }
-
-        function tapAction() {
-            internal.autoScrollBottom = true
-            listView.positionViewAtEnd()
+            id: autoScrollTapHandler
+            onTapped: () => {
+                internal.autoScrollBottom = true
+                listView.positionViewAtEnd()
+            }
         }
     }
 }

@@ -176,19 +176,17 @@ Item {
                     width: 32
                     height: 32
                 }
-                onClicked: () => removeButton.removeWidget()
+                onClicked: () => {
+                    control.cleanupRequested()
+                    control.page.model.remove(control)
+                    control.destroy()
+                }
 
                 Accessible.role: Accessible.Button
                 Accessible.name: qsTr("Remove widget")
                 Accessible.description: qsTr("Remove the currently selected widget from the dashboard")
                 Accessible.focusable: true
-                Accessible.onPressAction: () => removeButton.removeWidget()
-
-                function removeWidget() {
-                    control.cleanupRequested()
-                    control.page.model.remove(control)
-                    control.destroy()
-                }
+                Accessible.onPressAction: () => removeButton.clicked()
             }
 
             // Resize

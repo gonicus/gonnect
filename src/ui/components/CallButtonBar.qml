@@ -503,18 +503,16 @@ Item {
             iconPath: Icons.inputTouchscreen
             enabled: control.areInCallButtonsEnabled
             visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
-            onClicked: () => screenShareButton.screenShare()
+            onClicked: () => {
+                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
+                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
+            }
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Screensharing control")
             Accessible.description: qsTr("Start or stop sharing your screen")
             Accessible.focusable: true
-            Accessible.onPressAction: () => screenShareButton.screenShare()
-
-            function screenShare() {
-                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
-                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
-            }
+            Accessible.onPressAction: () => screenShareButton.clicked()
         }
 
         BarButton {
@@ -523,18 +521,16 @@ Item {
             iconPath: Icons.cameraOff
             enabled: control.areInCallButtonsEnabled
             visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
-            onClicked: () => videoMuteButton.videoMute()
+            onClicked: () => {
+                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
+                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
+            }
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Camera control")
             Accessible.description: qsTr("Enabled or disable your camera")
             Accessible.focusable: true
-            Accessible.onPressAction: () => videoMuteButton.videoMute()
-
-            function videoMute() {
-                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
-                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
-            }
+            Accessible.onPressAction: () => videoMuteButton.clicked()
         }
 
         BarButton {
@@ -549,7 +545,7 @@ Item {
             Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
             Accessible.description: qsTr("Update the call hold state")
             Accessible.focusable: true
-            Accessible.onPressAction: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
+            Accessible.onPressAction: () => holdButton.clicked()
         }
 
         Rectangle {
@@ -582,7 +578,7 @@ Item {
             Accessible.name: qsTr("Input control")
             Accessible.description: qsTr("Set the mute state of the current input device")
             Accessible.focusable: true
-            Accessible.onPressAction: () => GlobalMuteState.toggleMute()
+            Accessible.onPressAction: () => audioInputDeviceButton.clicked()
         }
 
         BarButton {
@@ -606,7 +602,7 @@ Item {
             Accessible.name: qsTr("Output control")
             Accessible.description: qsTr("Change the current output devices")
             Accessible.focusable: true
-            Accessible.onPressAction: () => audioOutputDeviceMenu.popup(audioOutputDeviceButton, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
+            Accessible.onPressAction: () => audioOutputDeviceButton.clicked()
         }
 
         Button {
@@ -630,7 +626,7 @@ Item {
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Accept call")
             Accessible.focusable: true
-            Accessible.onPressAction: () => control.acceptCallClicked()
+            Accessible.onPressAction: () => acceptCallButton.clicked()
         }
 
         Button {
@@ -654,7 +650,7 @@ Item {
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Hangup call")
             Accessible.focusable: true
-            Accessible.onPressAction: () => control.hangupClicked()
+            Accessible.onPressAction: () => hangupButton.clicked()
         }
     }
 }

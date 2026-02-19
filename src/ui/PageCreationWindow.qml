@@ -176,7 +176,7 @@ BaseWindow {
                 Accessible.name: qsTr("Cancel page modifcation")
                 Accessible.description: qsTr("Cancel button to exit the page creation/update window")
                 Accessible.focusable: true
-                Accessible.onPressAction: () => control.close()
+                Accessible.onPressAction: () => pageCancel.clicked()
             }
 
             Button {
@@ -185,7 +185,11 @@ BaseWindow {
                 icon.source: Icons.checkbox
                 text: control.newPage ? qsTr("Create") : qsTr("Save")
 
-                onClicked: () => pageConfirm.apply()
+                onClicked: () => {
+                    control.accepted(titleEntry.text.trim(),
+                                     iconEntries.get(iconSelection.currentIndex).iconId)
+                    control.close()
+                }
 
                 Accessible.role: Accessible.Button
                 Accessible.name: pageConfirm.text + qsTr("page")
@@ -193,13 +197,7 @@ BaseWindow {
                                         ? qsTr("Confirmation button to create the new dashboard page")
                                         : qsTr("Confirmation button to apply changes to the dashboard page")
                 Accessible.focusable: true
-                Accessible.onPressAction: () => pageConfirm.apply()
-
-                function apply() {
-                    control.accepted(titleEntry.text.trim(),
-                                     iconEntries.get(iconSelection.currentIndex).iconId)
-                    control.close()
-                }
+                Accessible.onPressAction: () => pageConfirm.clicked()
             }
         }
     }

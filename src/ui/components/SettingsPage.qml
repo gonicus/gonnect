@@ -733,15 +733,7 @@ Item {
 
                         Material.elevation: 0
 
-                        onClicked: () => addIdentityButton.addIdentity()
-
-                        Accessible.role: Accessible.Button
-                        Accessible.name: addIdentityButton.text
-                        Accessible.description: qsTr("Add a new preferred identity entry")
-                        Accessible.focusable: true
-                        Accessible.onPressAction: () => addIdentityButton.addIdentity()
-
-                        function addIdentity() {
+                        onClicked: () => {
                             const identity = SIPManager.addEmptyPreferredIdentity()
                             preferredIdentityEditWindowComponent.createObject(
                                 control, {
@@ -749,6 +741,12 @@ Item {
                                     isNew: true
                                 })
                         }
+
+                        Accessible.role: Accessible.Button
+                        Accessible.name: addIdentityButton.text
+                        Accessible.description: qsTr("Add a new preferred identity entry")
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => addIdentityButton.clicked()
                     }
                 }
             }
@@ -1100,7 +1098,7 @@ Item {
                                 Accessible.name: qsTr("Reset ring tone")
                                 Accessible.description: qsTr("Reset the ring tone to its default option")
                                 Accessible.focusable: true
-                                Accessible.onPressAction: () => audioSettings.ringtone = ""
+                                Accessible.onPressAction: () => resetToDefaultRingToneButton.clicked()
                             }
 
                             Button {
@@ -1118,7 +1116,7 @@ Item {
                                 Accessible.name: qsTr("Pick ring tone")
                                 Accessible.description: qsTr("Select the ring tone you want to use for incoming calls")
                                 Accessible.focusable: true
-                                Accessible.onPressAction: () => ringToneFileDialog.open()
+                                Accessible.onPressAction: () => pickRingToneButton.clicked()
                             }
                         }
                     }
@@ -1303,17 +1301,15 @@ Item {
                         visible: !ViewHelper.isDebugRun
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: qsTr('Start debug run (restart app)')
-                        onClicked: () => debugRunbutton.startDebugRun()
+                        onClicked: () => {
+                            genericSettings.setValue("nextDebugRun", true)
+                            SM.restart()
+                        }
 
                         Accessible.role: Accessible.Button
                         Accessible.name: debugRunbutton.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => debugRunbutton.startDebugRun()
-
-                        function startDebugRun() {
-                            genericSettings.setValue("nextDebugRun", true)
-                            SM.restart()
-                        }
+                        Accessible.onPressAction: () => debugRunbutton.clicked()
                     }
 
                     Button {
@@ -1321,17 +1317,15 @@ Item {
                         visible: ViewHelper.isDebugRun
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: qsTr('Download debug information')
-                        onClicked: () => debugInfobutton.downloadDebugInfo()
+                        onClicked: () => {
+                            ViewHelper.downloadDebugInformation()
+                            SM.restart()
+                        }
 
                         Accessible.role: Accessible.Button
                         Accessible.name: debugInfobutton.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => debugInfobutton.downloadDebugInfo()
-
-                        function downloadDebugInfo() {
-                            ViewHelper.downloadDebugInformation()
-                            SM.restart()
-                        }
+                        Accessible.onPressAction: () => debugInfobutton.clicked()
                     }
 
                     Button {
@@ -1343,7 +1337,7 @@ Item {
                         Accessible.role: Accessible.Button
                         Accessible.name: ldapReloadButton.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => ViewHelper.reloadAddressBook()
+                        Accessible.onPressAction: () => ldapReloadButton.clicked()
                     }
                 }
             }

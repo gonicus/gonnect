@@ -96,7 +96,7 @@ Item {
         Accessible.role: Accessible.Button
         Accessible.name: conferenceButtonLabel.text
         Accessible.focusable: true
-        Accessible.onPressAction: () => SIPCallManager.startConference()
+        Accessible.onPressAction: () => conferenceButtonTapHandler.tapped()
 
         Rectangle {
             height: 1
@@ -127,6 +127,7 @@ Item {
         }
 
         TapHandler {
+            id: conferenceButtonTapHandler
             onTapped: () => SIPCallManager.startConference()
         }
     }

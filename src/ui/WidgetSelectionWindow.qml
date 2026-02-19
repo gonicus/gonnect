@@ -310,13 +310,13 @@ BaseWindow {
                     id: widgetCancel
                     text: qsTr("Cancel")
 
-                    onPressed: control.close()
+                    onPressed: () => control.close()
 
                     Accessible.role: Accessible.Button
                     Accessible.name: qsTr("Cancel widget selection")
                     Accessible.description: qsTr("Cancel button to exit widget selection selection without changes")
                     Accessible.focusable: true
-                    Accessible.onPressAction: () => control.close()
+                    Accessible.onPressAction: () => widgetCancel.pressed()
                 }
 
                 Button {
@@ -330,7 +330,7 @@ BaseWindow {
                     Accessible.name: qsTr("Confirm widget selection")
                     Accessible.description: qsTr("Confirmation button to create and add the selected widget to the current dashboard")
                     Accessible.focusable: true
-                    Accessible.onPressAction: () => widgetConfirm.createWidget()
+                    Accessible.onPressAction: () => widgetConfirm.pressed()
 
                     function createWidget() {
                         const id = `-widget_${UISettings.generateUuid()}`
