@@ -74,6 +74,16 @@ Item {
 
                 property color labelColor: Theme.primaryTextColor
 
+                Accessible.role: Accessible.ListItem
+                Accessible.name: qsTr("Chat message")
+                Accessible.description: qsTr("Selected chat message: ") +
+                                        qsTr("Sender: ") + control.nickName +
+                                        qsTr("Time: ") + control.timestamp +
+                                        qsTr("Message text: ") + control.message
+                                        (delg.isSystemMessage ? qsTr("Hint: This is a system message") : "") +
+                                        (delg.isOwnMessage ? qsTr("Hint: This is a message you sent") : "")
+                Accessible.focusable: true
+
                 states: [
                     State {
                         when: delg.isSystemMessage
@@ -138,6 +148,8 @@ Item {
                         leftMargin: 10
                         rightMargin: 10
                     }
+
+                    Accessible.ignored: true
                 }
 
                 ClipboardButton {
@@ -187,6 +199,8 @@ Item {
                                 Qt.openUrlExternally(link)
                             }
                         }
+
+                        Accessible.ignored: true
                     }
                 }
 
@@ -216,10 +230,17 @@ Item {
                 leftMargin: 10
             }
 
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Select emoji")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => emojiButton.selectEmoji()
+
             Label {
                 anchors.centerIn: parent
                 text: "🙂"
                 font.pixelSize: 20
+
+                Accessible.ignored: true
             }
 
             TapHandler {
@@ -227,11 +248,13 @@ Item {
                 grabPermissions: PointerHandler.CanTakeOverFromAnything
                 exclusiveSignals: TapHandler.SingleTap
 
-                onTapped: () => {
-                    const item = emojiPickerComponent.createObject(emojiButton)
-                    item.emojiPicked.connect(emoji => chatInputField.insert(chatInputField.cursorPosition, emoji))
-                    item.open()
-                }
+                onTapped: () => emojiButton.selectEmoji()
+            }
+
+            function selectEmoji() {
+                const item = emojiPickerComponent.createObject(emojiButton)
+                item.emojiPicked.connect(emoji => chatInputField.insert(chatInputField.cursorPosition, emoji))
+                item.open()
             }
         }
 
@@ -272,6 +295,10 @@ Item {
                     chatInputField.text = ""
                 }
             }
+
+            Accessible.role: Accessible.EditableText
+            Accessible.name: chatInputField.placeholderText
+            Accessible.focusable: true
         }
     }
 }

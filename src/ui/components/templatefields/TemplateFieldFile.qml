@@ -7,6 +7,8 @@ Item {
     implicitWidth: chooseButton.x + chooseButton.implicitWidth
     implicitHeight: textField.implicitHeight
 
+    property string templateFieldName
+
     readonly property alias value: textField.text
 
     property var regex
@@ -19,6 +21,11 @@ Item {
             right: chooseButton.left
             rightMargin: 20
         }
+
+        Accessible.role: Accessible.EditableText
+        Accessible.name: qsTr("File path")
+        Accessible.description: qsTr("Enter the file path for the ") + control.templateFieldName
+        Accessible.focusable: true
     }
 
     Button {
@@ -29,6 +36,12 @@ Item {
             right: parent.right
         }
         onClicked: () => fileDialog.open()
+
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Open file picker")
+        Accessible.name: qsTr("Select the file that should be used for the ") + control.templateFieldName
+        Accessible.focusable: true
+        Accessible.onPressAction: chooseButton.click()
     }
 
     FileDialog {

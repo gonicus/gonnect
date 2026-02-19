@@ -298,6 +298,13 @@ BaseWindow {
                     }
 
                     Binding {
+                        when: !!widgetLoader.item?.hasOwnProperty("templateFieldName")
+                        target: widgetLoader.item
+                        property: "templateFieldName"
+                        value: delg.name
+                    }
+
+                    Binding {
                         when: !!widgetLoader.item?.hasOwnProperty("regex")
                         target: widgetLoader.item
                         property: "regex"
