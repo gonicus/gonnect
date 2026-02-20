@@ -148,10 +148,6 @@ Item {
                 Menu {
                     id: participantContextMenu
 
-                    Accessible.role: Accessible.PopupMenu
-                    Accessible.name: qsTr("Participant actions")
-                    Accessible.description: qsTr("Available options for the selected participant")
-
                     MenuItem {
                         id: participantKick
                         text: qsTr("Kick")

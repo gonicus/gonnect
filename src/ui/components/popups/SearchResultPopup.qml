@@ -90,6 +90,10 @@ Popup {
                 margins: 12
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Search filter and identity selection")
+            Accessible.description: qsTr("Select search filter to be applied as well as the outgoing identity")
+
             SearchCategoryList {
                 id: searchCategories
                 anchors {
@@ -100,6 +104,7 @@ Popup {
             }
 
             Label {
+                id: identityLabel
                 text: qsTr("Outgoing identity")
                 font.weight: Font.Medium
                 anchors {
@@ -108,6 +113,9 @@ Popup {
                     bottom: identitySelector.top
                     bottomMargin: 5
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: identityLabel.text
             }
 
             IdentitySelector {
@@ -142,6 +150,10 @@ Popup {
                 left: verticalSeparatorLine.right
                 margins: 12
             }
+
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Search results")
+            Accessible.description: qsTr("All search results will be listed here in their respective categories")
 
             KeyNavigator {
                 id: keyNavigator

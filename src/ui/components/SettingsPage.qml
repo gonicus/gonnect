@@ -1165,14 +1165,15 @@ Item {
 
                                 Accessible.role: Accessible.Slider
                                 Accessible.name: qsTr("Adjust the ") + ringToneVolumeHeader.text
+                                Accessible.focusable: true
                                 Accessible.onIncreaseAction: () => {
                                     if (ringToneVolumeSlider.value < ringToneVolumeSlider.to) {
-                                        ringToneVolumeSlider.value++
+                                        ringToneVolumeSlider.value += ringToneVolumeSlider.stepSize
                                     }
                                 }
                                 Accessible.onDecreaseAction: () => {
                                     if (ringToneVolumeSlider.value > ringToneVolumeSlider.from) {
-                                        ringToneVolumeSlider.value--
+                                        ringToneVolumeSlider.value -= ringToneVolumeSlider.stepSize
                                     }
                                 }
                             }
@@ -1232,14 +1233,15 @@ Item {
 
                                 Accessible.role: Accessible.Slider
                                 Accessible.name: qsTr("Adjust the ") + ringTonePauseHeader.text
+                                Accessible.focusable: true
                                 Accessible.onIncreaseAction: () => {
                                     if (ringTonePauseSlider.value < ringTonePauseSlider.to) {
-                                        ringTonePauseSlider.value++
+                                        ringTonePauseSlider.value += ringTonePauseSlider.stepSize
                                     }
                                 }
                                 Accessible.onDecreaseAction: () => {
                                     if (ringTonePauseSlider.value > ringTonePauseSlider.from) {
-                                        ringTonePauseSlider.value--
+                                        ringTonePauseSlider.value -= ringTonePauseSlider.stepSize
                                     }
                                 }
                             }

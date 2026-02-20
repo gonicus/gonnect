@@ -38,6 +38,20 @@ Popup {
             Layout.preferredHeight: volumeSlider.implicitHeight
 
             onMoved: () => volumePopup.volumeChanged(volumeSlider.value)
+
+            Accessible.role: Accessible.Slider
+            Accessible.name: qsTr("Adjust the volume")
+            Accessible.focusable: true
+            Accessible.onIncreaseAction: () => {
+                if (volumeSlider.value < volumeSlider.to) {
+                    volumeSlider.value += volumeSlider.stepSize
+                }
+            }
+            Accessible.onDecreaseAction: () => {
+                if (volumeSlider.value > volumeSlider.from) {
+                    volumeSlider.value -= volumeSlider.stepSize
+                }
+            }
         }
 
         Rectangle {
@@ -66,6 +80,11 @@ Popup {
                     height: 16
                 }
             }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Mute")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => volumePopup.muteToggled()
         }
 
         Rectangle {
@@ -93,6 +112,11 @@ Popup {
                     height: 16
                 }
             }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Open audio settings")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => iewHelper.showAudioSettings()
         }
     }
 }

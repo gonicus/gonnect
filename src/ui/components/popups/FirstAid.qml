@@ -32,12 +32,18 @@ Item {
                 text: qsTr("First Aid")
                 font.pixelSize: 32
                 wrapMode: Label.Wrap
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: firstAidHeader.text
+                Accessible.description: firstAidDescription.text
             }
 
             Label {
                 id: firstAidDescription
                 text: qsTr("Clicking one of these buttons will end all current calls and start an emergency call.")
                 wrapMode: Label.Wrap
+
+                Accessible.ignored: true
             }
 
             Repeater {
@@ -74,6 +80,12 @@ Item {
                 onClicked: {
                     control.StackView.view.popCurrentItem(StackView.Immediate)
                 }
+
+                Accessible.role: Accessible.Button
+                Accessible.name: firstAidExit.text
+                Accessible.description: qsTr("Exit the first aid menu without initiating any action")
+                Accessible.focusable: true
+                Accessible.onPressAction: () => firstAidExit.click()
             }
         }
     }
