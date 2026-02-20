@@ -16,6 +16,9 @@ Item {
         searchInputField.forceActiveFocus()
     }
 
+    Accessible.role: Accessible.Form
+    Accessible.name: placeholderLabel.text
+
     states: [
         State {
             when: !control.activeFocus && searchInputField.text.trim() === ""
@@ -66,6 +69,8 @@ Item {
             right: searchInputField.right
             rightMargin: 10
         }
+
+        Accessible.ignored: true
     }
 
     TextInput {
@@ -78,6 +83,10 @@ Item {
             leftMargin: 10
             right: parent.right
         }
+
+        Accessible.role: Accessible.EditableText
+        Accessible.name: qsTr("Enter search term")
+        Accessible.searchEdit: true
     }
 
     Item {
@@ -89,6 +98,11 @@ Item {
             bottom: parent.bottom
             right: parent.right
         }
+
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Clear search term")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => searchInputField.clear()
 
         IconLabel {
             id: clearIcon

@@ -77,9 +77,9 @@ Item {
                 Accessible.role: Accessible.ListItem
                 Accessible.name: qsTr("Chat message")
                 Accessible.description: qsTr("Selected chat message: ") +
-                                        qsTr("Sender: ") + control.nickName +
-                                        qsTr("Time: ") + control.timestamp +
-                                        qsTr("Message text: ") + control.message
+                                        qsTr("Sender: ") + delg.nickName +
+                                        qsTr("Time: ") + delg.timestamp +
+                                        qsTr("Message text: ") + delg.message
                                         (delg.isSystemMessage ? qsTr("Hint: This is a system message") : "") +
                                         (delg.isOwnMessage ? qsTr("Hint: This is a message you sent") : "")
                 Accessible.focusable: true

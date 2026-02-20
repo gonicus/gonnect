@@ -192,6 +192,9 @@ Item {
                 leftMargin: 15
                 bottomMargin: 10
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: nameLabel.text
         }
 
         Rectangle {
@@ -241,6 +244,9 @@ Item {
             bottom: parent.bottom
             right: callListCard.left
         }
+
+        Accessible.role: Accessible.Border
+        Accessible.name: qsTr("Drag bar")
 
         HoverHandler {
             id: verticalDragbarDummyHoverHandler

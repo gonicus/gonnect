@@ -50,6 +50,10 @@ Item {
                 bottom: parent.bottom
             }
 
+            Accessible.role: Accessible.Row
+            Accessible.name: qsTr("Switch emoji category")
+            Accessible.focusable: true
+
             Repeater {
                 id: emojiGroupsRepeater
                 model: EmojiGroupsModel {}
@@ -98,6 +102,10 @@ Item {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Select emoji")
+            Accessible.focusable: true
 
             Repeater {
                 id: emojiList
