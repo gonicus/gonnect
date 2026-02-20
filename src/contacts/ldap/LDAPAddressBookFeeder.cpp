@@ -205,6 +205,8 @@ void LDAPAddressBookFeeder::loadAvatars(const QList<const Contact *> &contacts)
 
 void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapConfig)
 {
+    m_isProcessing = true;
+
     QThread::create([this, ldapConfig]() {
         char *a = nullptr;
         char *dnTemp = nullptr;
@@ -242,6 +244,7 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
             ErrorBus::instance().addError(
                     tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
             clearCStringlist(attrs);
+            m_isProcessing = false;
             return;
         }
 
@@ -255,6 +258,7 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
             qCCritical(lcLDAPAddressBookFeeder)
                     << "Error on search request: " << ldap_err2string(result);
             ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(result)));
+            m_isProcessing = false;
             return;
         }
 
@@ -328,6 +332,7 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
                             << "LDAP parse error:" << ldap_err2string(parseResultCode);
                     ErrorBus::instance().addError(
                             tr("Parse error: %1").arg(ldap_err2string(parseResultCode)));
+                    m_isProcessing = false;
                     return;
                 }
                 break;
@@ -335,6 +340,7 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 
             default:
                 qCCritical(lcLDAPAddressBookFeeder) << "Unknown message type:" << msgType;
+                m_isProcessing = false;
                 return;
             }
         }
@@ -342,6 +348,7 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
         qCInfo(lcLDAPAddressBookFeeder) << "Loaded" << count << "avatars";
 
         LDAPInitializer::freeLDAPHandle(ldap);
+        m_isProcessing = false;
     })->start();
 }
 
