@@ -49,7 +49,7 @@ Rectangle {
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Phone number")
     Accessible.description: qsTr("Selected phone number: ") +
-                            qsTr("Number: ") + delg.displayName +
+                            qsTr("Number: ") + control.number +
                             (control.isFavorite ? qsTr("Hint: This is a favorite") : "")
     Accessible.focusable: true
     Accessible.onPressAction: () => control.triggerPrimaryAction()

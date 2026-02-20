@@ -14,6 +14,11 @@ Item {
 
     property alias headerText: headerLabel.text
 
+    Accessible.role: Accessible.ColumnHeader
+    Accessible.name: qsTr("Search result category: ") + control.headerText
+    Accessible.description: qsTr("Divider for the individual search result items by category")
+    Accessible.focusable: true
+
     Label {
         id: headerLabel
         font.weight: Font.Medium
@@ -21,6 +26,8 @@ Item {
             left: parent.left
             right: parent.right
         }
+
+        Accessible.ignored: true
     }
 
     Rectangle {
