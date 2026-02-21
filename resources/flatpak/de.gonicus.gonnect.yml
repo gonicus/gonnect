@@ -99,8 +99,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
-        tag: 2.15.1
-        commit: 7de6e686fee1642f5443a3f39f0e5ad5e478a117
+        tag: "2.16"
+        commit: 6cab30cec44af36ba7c8a45ff7af2f74a8ed288c
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
