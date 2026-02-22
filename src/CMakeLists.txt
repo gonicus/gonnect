@@ -802,10 +802,15 @@ install(TARGETS gonnect
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(APPLE OR WIN32)
+    set(DEPLOY_OPTIONS "")
+    if(APPLE)
+        set(DEPLOY_OPTIONS "-codesign=-")
+    endif()
+
     qt_generate_deploy_qml_app_script(
         TARGET gonnect
         OUTPUT_SCRIPT deploy_script
-        DEPLOY_TOOL_OPTIONS -codesign=-
+        DEPLOY_TOOL_OPTIONS ${DEPLOY_OPTIONS}
         MACOS_BUNDLE_POST_BUILD
         NO_UNSUPPORTED_PLATFORM_ERROR
         DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM
