@@ -113,7 +113,8 @@ void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
     //pj::CallOpParam tmpPrm = prm;
     //tmpPrm.opt.textCount = 0;
 
-    makeCall(dst_uri.toStdString(), tmpPrm);
+    //makeCall(dst_uri.toStdString(), tmpPrm);
+    makeCall(dst_uri.toStdString(), prm);
 }
 
 void SIPCall::onCallState(pj::OnCallStateParam &prm)
