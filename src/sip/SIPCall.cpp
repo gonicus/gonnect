@@ -109,7 +109,11 @@ void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
     // Extract "," DTMF string and store them for later playback
     m_postTask = dst_uri.section(',', 1, -1, QString::SectionIncludeLeadingSep);
 
-    makeCall(dst_uri.toStdString(), prm);
+    // Disable RTT, as it is not implemented on our side, anyway
+    pj::CallOpParam tmpPrm = prm;
+    tmpPrm.opt.textCount = 0;
+
+    makeCall(dst_uri.toStdString(), tmpPrm);
 }
 
 void SIPCall::onCallState(pj::OnCallStateParam &prm)

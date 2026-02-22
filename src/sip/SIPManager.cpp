@@ -53,6 +53,8 @@ void SIPManager::initialize()
     qCDebug(lcSIPManager) << "initializing";
     pj_log_set_level(0);
 
+    pjsip_cfg()->endpt.use_compact_form = PJ_TRUE;
+
     try {
         m_ep.libCreate();
     } catch (pj::Error &err) {
