@@ -110,11 +110,10 @@ void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
     m_postTask = dst_uri.section(',', 1, -1, QString::SectionIncludeLeadingSep);
 
     // Disable RTT, as it is not implemented on our side, anyway
-    //pj::CallOpParam tmpPrm = prm;
-    //tmpPrm.opt.textCount = 0;
+    pj::CallOpParam tmpPrm = prm;
+    tmpPrm.opt.textCount = 0;
 
-    //makeCall(dst_uri.toStdString(), tmpPrm);
-    makeCall(dst_uri.toStdString(), prm);
+    makeCall(dst_uri.toStdString(), tmpPrm);
 }
 
 void SIPCall::onCallState(pj::OnCallStateParam &prm)
