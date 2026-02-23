@@ -31,6 +31,7 @@ class PjSIPConan(ConanFile):
         "fPIC": [True, False],
         "with_uuid": [True, False],
         "with_opus": [True, False],
+        "with_amr": [True, False],
         "with_samplerate": [True, False],
         "with_ext_sound": [True, False],
         "with_video": [True, False],
@@ -42,6 +43,7 @@ class PjSIPConan(ConanFile):
         "fPIC": True,
         "with_uuid": True,
         "with_opus": True,
+        "with_amr": True,
         "with_samplerate": False,
         "with_ext_sound": True,
         "with_video": False,
@@ -61,6 +63,8 @@ class PjSIPConan(ConanFile):
             self.requires("libsamplerate/0.2.2")
         if self.options.with_opus:
             self.requires("opus/1.5.2")
+        if self.options.with_amr:
+            self.requires("opencore-amr/0.1.6")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,6 +104,10 @@ class PjSIPConan(ConanFile):
 #            tc.configure_args.append("--enable-shared")
         if not self.options.with_uuid:
             tc.configure_args.append("--disable-uuid")
+        if not self.options.with_amr:
+            tc.configure_args.append("--disable-opencore-amr")
+        else:
+            tc.configure_args.append("--with-opencore-amr=%s" % self.dependencies["opencore-amr"].package_folder)
         if not self.options.with_opus:
             tc.configure_args.append("--disable-opus")
         else:

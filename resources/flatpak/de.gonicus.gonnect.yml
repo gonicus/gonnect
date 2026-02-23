@@ -89,13 +89,22 @@ modules:
       - type: file
         path: krb5.conf
 
+  - name: opencore-amr
+    buildsystem: autotools
+    config-opts:
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://sourceforge.net/projects/opencore-amr/files/opencore-amr/opencore-amr-0.1.6.tar.gz
+        sha256: 483eb4061088e2b34b358e47540b5d495a96cd468e361050fae615b1809dc4a1
+
   - name: pjsip
     buildsystem: autotools
     config-opts:
       - --disable-video
       - --enable-ext-sound
       - --with-opus
-      - CFLAGS=-fPIC -DPJ_HAS_IPV6=1 -DPJSIP_MAX_PKT_LEN=8192 -DPJMEDIA_HAS_RTCP_XR=1
+      - CFLAGS=-fPIC
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
@@ -104,6 +113,8 @@ modules:
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
+      - type: patch
+        path: patches/pjproject-site-config.patch
 
   - name: openldap
     config-opts:
