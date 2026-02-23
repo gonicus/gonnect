@@ -1,4 +1,5 @@
 #include "JitsiConnector.h"
+#include "NetworkHelper.h"
 #include "Notification.h"
 #include "ViewHelper.h"
 #include "Contact.h"
@@ -23,8 +24,18 @@
 #include "ChatMessage.h"
 
 #include <QLoggingCategory>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QRegularExpression>
+#include <QtConcurrent>
 
 Q_LOGGING_CATEGORY(lcJitsiConnector, "gonnect.app.JitsiConnector")
+
+#define GONNECT_ASSERT(condition, failMessage)                              \
+    if (!(condition)) {                                                     \
+        qCCritical(lcJitsiConnector) << "Assertion failed:" << failMessage; \
+        return;                                                             \
+    }
 
 JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
 {
@@ -67,6 +78,8 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
                     m_muteTag.clear();
                 }
             });
+
+    checkJitsiBackendFeatures();
 }
 
 JitsiConnector::~JitsiConnector()
@@ -140,7 +153,7 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
                              << "from" << fromId << nickName << "at" << stamp
                              << "as private message:" << isPrivateMessage << ":" << message;
 
-    ChatMessage::Flags flags = static_cast<ChatMessage::Flag>(0);
+    ChatMessage::Flags flags = ChatMessage::Flag::Unknown;
     if (isPrivateMessage) {
         flags |= ChatMessage::Flag::PrivateMessage;
     }
@@ -156,6 +169,8 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     if (settings.value("generic/jitsiChatAsNotifications", true).toBool()) {
         auto notification = new Notification(tr("New chat message"), message,
                                              Notification::Priority::normal, this);
+        notification->setIcon(":/icons/gonnect.svg");
+
         m_chatNotifications.append(notification);
         NotificationManager::instance().add(notification);
 
@@ -308,6 +323,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("toggleSubtitles")
     })
 
+    jitsiConn.executeToggleWhiteboardCommand.connect(() => {
+        api.executeCommand("toggleWhiteboard")
+    })
+
     jitsiConn.executeSetNoiseSupressionCommand.connect((value) => {
         api.executeCommand("setNoiseSuppressionEnabled", { enabled: value })
     })
@@ -446,6 +465,69 @@ void JitsiConnector::toggleMute()
 {
     m_didExecuteAudioMuteToggle = true;
     Q_EMIT executeToggleAudioCommand();
+}
+
+void JitsiConnector::checkJitsiBackendFeatures()
+{
+    auto manager = new QNetworkAccessManager(this);
+
+    QNetworkRequest request;
+    request.setUrl(QUrl(QString("%1/config.js").arg(GlobalInfo::instance().jitsiUrl())));
+
+    auto reply = manager->get(request);
+    connect(reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError err) {
+        qCCritical(lcJitsiConnector) << "Error on fetching config js:" << err;
+    });
+    connect(reply, &QNetworkReply::sslErrors, this, [](const QList<QSslError> &errors) {
+        qCCritical(lcJitsiConnector) << "SSL errors on fetching config js:";
+        for (const auto &err : errors) {
+            qCCritical(lcJitsiConnector) << "  " << err.errorString();
+        }
+    });
+    connect(reply, &QIODevice::readyRead, this, [reply, this]() {
+        static const QRegularExpression whiteboardRegex(
+                R"(whiteboard\s*(?:=|:)\s*{\s*enabled\s*:\s*true)");
+        static const QRegularExpression etherpadRegex(R"(etherpad_base\s*(?:=|:)\s*['"])");
+        static const QRegularExpression dialInConfCodeUrl(
+                R"(dialInConfCodeUrl\s*(?:=|:)\s*['"](?<url>.*)['"])");
+        static const QRegularExpression dialInNumbersUrl(
+                R"(dialInNumbersUrl\s*(?:=|:)\s*['"](?<url>.*)['"])");
+
+        const auto txt = reply->readAll();
+
+        setHasWhiteboard(whiteboardRegex.match(txt).hasMatch());
+        setHasTextpad(etherpadRegex.match(txt).hasMatch());
+
+        const auto dialInConfCodeUrlMatch = dialInConfCodeUrl.match(txt);
+        if (dialInConfCodeUrlMatch.hasMatch()) {
+            m_dialInConfCodeUrl = dialInConfCodeUrlMatch.captured("url");
+        }
+
+        const auto dialInNumbersUrlMatch = dialInNumbersUrl.match(txt);
+        if (dialInNumbersUrlMatch.hasMatch()) {
+            m_dialInNumbersUrl = dialInNumbersUrlMatch.captured("url");
+        }
+
+        if (hasDialIn()) {
+            Q_EMIT hasDialInChanged();
+        }
+    });
+}
+
+void JitsiConnector::setHasWhiteboard(bool value)
+{
+    if (hasCapability(Capability::Whiteboard) && m_hasWhiteboard != value) {
+        m_hasWhiteboard = value;
+        Q_EMIT hasWhiteboardChanged();
+    }
+}
+
+void JitsiConnector::setHasTextpad(bool value)
+{
+    if (hasCapability(Capability::Textpad) && m_hasTextpad != value) {
+        m_hasTextpad = value;
+        Q_EMIT hasTextpadChanged();
+    }
 }
 
 void JitsiConnector::setLargeVideoParticipantById(const QString &id)
@@ -1055,11 +1137,86 @@ bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
         Capability::ParticipantKickable,
         Capability::RoomPassword,
         Capability::ShareUrl,
+        Capability::Textpad,
         Capability::TileView,
+        Capability::Whiteboard,
         Capability::VideoMute,
         Capability::VideoQualityAdjustable,
     };
     return m_capabilites.contains(capabilityToCheck);
+}
+
+void JitsiConnector::toggleWhiteboard()
+{
+    Q_EMIT executeToggleWhiteboardCommand();
+}
+
+bool JitsiConnector::hasDialIn() const
+{
+    return m_dialInConfCodeUrl.isValid() && m_dialInNumbersUrl.isValid();
+}
+
+void JitsiConnector::requestDialInInfo()
+{
+    if (!hasDialIn()) {
+        qCWarning(lcJitsiConnector) << "Dial in feature is not available";
+        return;
+    }
+    if (!isInConference()) {
+        qCWarning(lcJitsiConnector) << "Currently no active conference";
+        return;
+    }
+
+    const QString muc = GlobalInfo::instance().jitsiMuc();
+
+    QString roomName;
+    if (muc.isEmpty()) {
+        roomName = m_roomName;
+    } else {
+        roomName = QString("%1@%2").arg(m_roomName, muc);
+    }
+
+    QUrlQuery numbersQuery(m_dialInNumbersUrl);
+    numbersQuery.addQueryItem("conference", roomName);
+    QUrl numbersUrl = m_dialInNumbersUrl;
+    numbersUrl.setQuery(numbersQuery);
+    auto numberFuture = NetworkHelper::fetchUrlAsJson(numbersUrl);
+
+    QUrlQuery codeQuery(m_dialInConfCodeUrl);
+    codeQuery.addQueryItem("conference", roomName);
+    QUrl codeUrl = m_dialInConfCodeUrl;
+    codeUrl.setQuery(codeQuery);
+    auto pinFuture = NetworkHelper::fetchUrlAsJson(codeUrl);
+
+    QFuture<void> combinedFuture = QtConcurrent::run([this, numberFuture, pinFuture]() {
+        const QJsonDocument numberDoc = numberFuture.result();
+        const QJsonDocument pinDoc = pinFuture.result();
+
+        // Phone numbers
+        GONNECT_ASSERT(!numberDoc.isNull(), "JSON result for phone number is invalid")
+        GONNECT_ASSERT(numberDoc.isObject(), "Received json must be an object")
+        const auto numberObj = numberDoc.object();
+        GONNECT_ASSERT(numberObj.contains("numbers"), "Number JSON must have field 'numbers'")
+        const auto numbersVal = numberObj.value("numbers");
+        GONNECT_ASSERT(numbersVal.isObject(), "'numbers' field must be an object")
+        const auto numbersObj = numbersVal.toObject();
+        GONNECT_ASSERT(!numbersObj.isEmpty(), "'numbers' field must be empty")
+
+        QVariantMap numbersMap;
+        for (auto it = numbersObj.constBegin(); it != numbersObj.constEnd(); ++it) {
+            GONNECT_ASSERT(it.value().isArray(), "Numbers entry must be an array")
+            numbersMap.insert(it.key(), it.value().toArray().toVariantList());
+        }
+
+        // Conference code
+        GONNECT_ASSERT(!pinDoc.isNull(), "JSON result for conference code is invalid")
+        GONNECT_ASSERT(pinDoc.isObject(), "Received json must be an object")
+        const auto pinObj = pinDoc.object();
+        GONNECT_ASSERT(pinObj.contains("id"), "JSON must contain field 'id'")
+        GONNECT_ASSERT(pinObj.contains("conference"), "JSON must contain field 'conference'")
+
+        Q_EMIT dialInfoReceived(numbersMap, QString::number(pinObj.value("id").toInteger()));
+    });
 }
 
 void JitsiConnector::joinConference(const QString &conferenceId, const QString &displayName,
@@ -1075,7 +1232,7 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
         toggleHold();
     }
 
-    DateEventManager::instance().removeNotificationByRoomName(displayName);
+    DateEventManager::instance().removeNotificationByRoomName(conferenceId);
 
     m_startWithVideo = startFlags & IConferenceConnector::StartFlag::VideoActive;
 
@@ -1106,6 +1263,7 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
                                                | Notification::hideContentOnLockScreen);
     m_inConferenceNotification->setCategory("call.ongoing");
     m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
+    m_inConferenceNotification->setIcon(":/icons/gonnect.svg");
 
     QString ref = NotificationManager::instance().add(m_inConferenceNotification);
     connect(m_inConferenceNotification, &Notification::actionInvoked, this,
@@ -1163,6 +1321,8 @@ void JitsiConnector::leaveConference()
         m_inConferenceNotification = nullptr;
     }
 
+    m_chatRoom->clear();
+
     Q_EMIT executeLeaveRoomCommand();
     setConferenceName("");
     setDisplayName("");
@@ -1183,6 +1343,8 @@ void JitsiConnector::terminateConference()
         m_inConferenceNotification->deleteLater();
         m_inConferenceNotification = nullptr;
     }
+
+    m_chatRoom->clear();
 
     Q_EMIT executeEndConferenceCommand();
     setConferenceName("");
@@ -1327,3 +1489,5 @@ QUrl JitsiConnector::conferenceUrl() const
 {
     return QUrl(QString("%1/%2").arg(GlobalInfo::instance().jitsiUrl(), conferenceName()));
 }
+
+#undef GONNECT_ASSERT

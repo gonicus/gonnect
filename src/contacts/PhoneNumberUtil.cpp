@@ -48,26 +48,7 @@ QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
     QString result(number);
 
     static const QRegularExpression stripRegEx("[^0-9#+*]");
-
     result.replace(stripRegEx, "");
-
-    if (!result.size()) {
-        return result;
-    }
-
-    if (result.size() <= 3) {
-        return result;
-    }
-
-    static const QRegularExpression doubleZeroAtBeginning("^00");
-    result.replace(doubleZeroAtBeginning, "+");
-
-    static const QRegularExpression singleZeroAtBeginning("^0");
-    result.replace(singleZeroAtBeginning, "+49");
-
-    if (result.at(0) != '+') {
-        result.prepend('+');
-    }
 
     return result;
 }

@@ -37,8 +37,11 @@ Q_SIGNALS:
 private:
     explicit Credentials(QObject *parent = nullptr);
 
+    void setIsInitialized(bool value);
+
     QList<QKeychain::ReadPasswordJob *> m_readCredentialJobs;
     QList<QKeychain::WritePasswordJob *> m_writeCredentialJobs;
 
     bool m_initialized = false;
+    bool m_isSecretPortalInitialized = false;
 };

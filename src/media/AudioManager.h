@@ -120,6 +120,8 @@ private Q_SLOTS:
 #endif
 
 private:
+    bool noSyncSystemMute() { return m_settings.value("generic/noSyncSystemMute", false).toBool(); }
+
     AudioManager(QObject *parent = nullptr);
     void refreshAudioDevices();
     void doProfileElection();
@@ -142,7 +144,7 @@ private:
 
     QMediaDevices *m_mediaDevices = nullptr;
 
-    std::unique_ptr<AppSettings> m_settings = nullptr;
+    AppSettings m_settings;
 
     bool m_externalRinger = false;
 

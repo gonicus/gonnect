@@ -23,15 +23,18 @@ public:
     }
     ~DateEventManager();
 
-    QString getJitsiRoomFromLocation(QString location);
+    QList<QPair<QDateTime, QDateTime>> createDaysFromRange(const QDateTime start,
+                                                           const QDateTime end);
 
-    /// Add date event; DateEventManager takes ownership of the given object!
-    void addDateEvent(DateEvent *dateEvent);
+    void addDateEvent(const QString &id, const QString &source, const QDateTime &start,
+                      const QDateTime &end, const QString &summary, const QString &location,
+                      const QString &description);
 
     void modifyDateEvent(const QString &id, const QString &source, const QDateTime &start,
-                         const QDateTime &end, const QString &summary, const QString &roomName,
-                         bool isConfirmed);
-    void removeDateEvent(const QString &id);
+                         const QDateTime &end, const QString &summary, const QString &location,
+                         const QString &description);
+
+    void removeDateEvent(const QString &id, const QDateTime &start, const QDateTime &end);
 
     /// Delete all date events
     void resetDateEvents();
@@ -47,6 +50,7 @@ public:
     DateEvent *currentDateEventByRoomName(const QString &roomName) const;
 
     void removeNotificationByRoomName(const QString &roomName);
+    void removeNotificationByLink(const QString &link);
 
 private Q_SLOTS:
     void onTimerTimeout();
@@ -58,7 +62,6 @@ private:
     bool isTooOld(const DateEvent &dateEvent) const;
     bool isOver(const DateEvent &dateEvent) const;
 
-    QString m_jitsiUrl;
     QList<DateEvent *> m_dateEvents;
     QHash<size_t, QString> m_notificationIds;
     QSet<size_t> m_alreadyNotifiedDates;
@@ -70,7 +73,8 @@ private:
 
 Q_SIGNALS:
     void dateEventAdded(qsizetype index, DateEvent *dateEvent);
-    void dateEventModified();
     void dateEventRemoved(qsizetype index);
+
+    void dateEventsModified();
     void dateEventsCleared();
 };

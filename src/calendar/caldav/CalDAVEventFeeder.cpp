@@ -1,9 +1,8 @@
+#include <QMap>
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
 #include "CalDAVEventFeeder.h"
-#include "DateEvent.h"
-#include "DateEventManager.h"
 #include "DateEventFeederManager.h"
 #include "DateEventManager.h"
 
@@ -100,6 +99,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
 {
     DateEventManager &manager = DateEventManager::instance();
 
+    QMap<QString, QList<QDateTime>> exdatesById;
+
     icalcomponent *calendar = icalparser_parse_string(data.toStdString().data());
     if (calendar) {
         // VEVENT's
@@ -107,6 +108,14 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                      icalcomponent_get_first_component(calendar, ICAL_VEVENT_COMPONENT);
              event != nullptr;
              event = icalcomponent_get_next_component(calendar, ICAL_VEVENT_COMPONENT)) {
+            QString id = icalcomponent_get_uid(event);
+
+            icaltimetype dtstart = icalcomponent_get_dtstart(event);
+            QDateTime start = createDateTimeFromTimeType(dtstart);
+
+            icaltimetype dtend = icalcomponent_get_dtend(event);
+            QDateTime end = createDateTimeFromTimeType(dtend);
+
             // RRULE
             bool isRecurrent = false;
             icalproperty *prop = icalcomponent_get_first_property(event, ICAL_RRULE_PROPERTY);
@@ -116,79 +125,106 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                 rrule = icalproperty_get_rrule(prop);
             }
 
-            icaltimetype dtstart = icalcomponent_get_dtstart(event);
-            QDateTime start = createDateTimeFromTimeType(dtstart);
-
-            QString location = manager.getJitsiRoomFromLocation(icalcomponent_get_location(event));
-            bool isRelevantStatus = (icalcomponent_get_status(event) == ICAL_STATUS_CONFIRMED
-                                     || icalcomponent_get_status(event) == ICAL_STATUS_NONE);
-
-            // Skip non-recurrent events that are outside of our date range
-            if (!isRelevantStatus || location.isEmpty()
-                || ((start < m_config.timeRangeStart || start > m_config.timeRangeEnd)
-                    && !isRecurrent)) {
-                continue;
-            }
-
-            icaltimetype dtend = icalcomponent_get_dtend(event);
-            QDateTime end = createDateTimeFromTimeType(dtend);
-
-            QString id = icalcomponent_get_uid(event);
-            QString summary = icalcomponent_get_summary(event);
-
             // RID: The first ever recorded time of a recurrent event instance. We'll use
             // 'UID-UNIX_TIMESTAMP' as ID.
             bool isUpdatedRecurrence = false;
+            bool isCancelledRecurrence = false;
             icaltimetype rid = icalcomponent_get_recurrenceid(event);
             if (!icaltime_is_null_time(rid)) {
-                isUpdatedRecurrence = true;
-                id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+                if (exdatesById.value(id).contains(start)) {
+                    isCancelledRecurrence = true;
+                } else {
+                    isUpdatedRecurrence = true;
+                    id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+                }
             }
 
-            // Get EXDATE's
-            icaltimetype exdate = {};
-            QList<QDateTime> exdates;
-            for (icalproperty *prop = icalcomponent_get_first_property(event, ICAL_EXDATE_PROPERTY);
-                 prop != nullptr;
-                 prop = icalcomponent_get_next_property(event, ICAL_EXDATE_PROPERTY)) {
-                exdate = icalproperty_get_exdate(prop);
-                exdates.append(createDateTimeFromTimeType(exdate));
+            // Multi-day handling
+            bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_config.currentTime;
+            if (isMultiDay && end > m_config.timeRangeEnd) {
+                end = m_config.timeRangeEnd;
             }
 
-            // Recurrent origin event
-            if (isRecurrent && !isUpdatedRecurrence) {
+            // Status filter
+            icalproperty_status status = icalcomponent_get_status(event);
+            bool isCancelled = (status == ICAL_STATUS_CANCELLED || status == ICAL_STATUS_FAILED
+                                || status == ICAL_STATUS_DELETED || isCancelledRecurrence);
+
+            // Skip cancelled or non-recurrent events that are outside of our date range
+            if (isCancelled
+                || (!isRecurrent && !isUpdatedRecurrence
+                    && ((start < m_config.timeRangeStart && !isMultiDay)
+                        || start >= m_config.timeRangeEnd || end < m_config.currentTime))) {
+                continue;
+            }
+
+            QString summary = icalcomponent_get_summary(event);
+            QString location = icalcomponent_get_location(event);
+            QString description = icalcomponent_get_description(event);
+
+            if (isRecurrent) { // Recurrent origin event, parsed first
+                // Get EXDATE's
+                icaltimetype exdate = {};
+                QList<QDateTime> exdates;
+                for (icalproperty *prop =
+                             icalcomponent_get_first_property(event, ICAL_EXDATE_PROPERTY);
+                     prop != nullptr;
+                     prop = icalcomponent_get_next_property(event, ICAL_EXDATE_PROPERTY)) {
+                    exdate = icalproperty_get_exdate(prop);
+                    exdates.append(createDateTimeFromTimeType(exdate));
+                }
+                exdatesById[id] = exdates;
+
                 icalrecur_iterator *recurrenceIter = icalrecur_iterator_new(rrule, dtstart);
-
                 if (recurrenceIter) {
                     qint64 duration = start.secsTo(end);
 
                     for (icaltimetype next = icalrecur_iterator_next(recurrenceIter);
                          !icaltime_is_null_time(next);
                          next = icalrecur_iterator_next(recurrenceIter)) {
-                        QDateTime recur = createDateTimeFromTimeType(next);
-                        if (recur > m_config.timeRangeEnd) {
+                        QDateTime recurStart = createDateTimeFromTimeType(next);
+                        QDateTime recurEnd = recurStart.addSecs(duration);
+                        if (recurStart >= m_config.timeRangeEnd) {
                             break;
+                        } else if (recurEnd < m_config.currentTime) {
+                            continue;
                         }
 
-                        if (!exdates.contains(recur) && recur >= m_config.timeRangeStart) {
-                            QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
-                            manager.addDateEvent(new DateEvent(nid, m_config.source, recur,
-                                                               recur.addMSecs(duration), summary,
-                                                               location, true));
+                        // Recurrent multi-day handling
+                        bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                && recurEnd > m_config.currentTime;
+                        if (recurMultiDay && recurEnd > m_config.timeRangeEnd) {
+                            recurEnd = m_config.timeRangeEnd;
+                        }
+
+                        if (!exdates.contains(recurStart)
+                            && (recurStart >= m_config.timeRangeStart || recurMultiDay)) {
+                            QString recurId =
+                                    QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
+                            manager.addDateEvent(recurId, m_config.source, recurStart, recurEnd,
+                                                 summary, location, description);
                         }
                     }
 
                     icalrecur_iterator_free(recurrenceIter);
                 }
-            } else {
-                // Non-recurrent event or update of a recurrent event instance
-                if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
+            } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
+                if ((start < m_config.timeRangeStart && !isMultiDay)
+                    || start >= m_config.timeRangeEnd || end < m_config.currentTime) {
+                    // Updated recurrence doesn't match our criteria anymore
+                    manager.removeDateEvent(id, start, end);
+                } else if (manager.isAddedDateEvent(id)) {
+                    // Exists but modified
                     manager.modifyDateEvent(id, m_config.source, start, end, summary, location,
-                                            true);
+                                            description);
                 } else {
-                    manager.addDateEvent(new DateEvent(id, m_config.source, start, end, summary,
-                                                       location, true));
+                    // Does not exist, e.g. moved from past to future, different day
+                    manager.addDateEvent(id, m_config.source, start, end, summary, location,
+                                         description);
                 }
+            } else { // Normal event, no recurrence, or update of a recurrent instance
+                manager.addDateEvent(id, m_config.source, start, end, summary, location,
+                                     description);
             }
         }
     } else {
@@ -219,31 +255,28 @@ bool CalDAVEventFeeder::responseDataChanged(const QByteArray &data)
     return true;
 }
 
-QDateTime CalDAVEventFeeder::createDateTimeFromTimeType(const icaltimetype &datetime)
+QDateTime CalDAVEventFeeder::createDateTimeFromTimeType(icaltimetype &datetime)
 {
-    QString zone = icaltimezone_get_tzid(const_cast<icaltimezone *>(datetime.zone));
-    if (zone == "UTC") {
-        /*
-            Qt expects an ISO 8601 format with '-' and '.' delimiters, iCal omits them.
+    /*
+        Datetime values that feature a non-local VTIMEZONE / TZID
+        (e.g. TZID=America/New_York:19980119T020000, or TZID=UTC:) will have to be
+        converted to local time.
 
-            This only needs to be done for UTC datetime (19980119T070000Z) values, as datetime
-            values that include a TZID (TZID=America/New_York:19980119T020000) will already
-            report the correct time.
+        We'll check if we can extract a valid timezone, otherwise we'll
+        treat it as local/floating.
 
-            This doesn't have to be done on "floating" datetimes as well, because "20220816T054500"
-            simply applies to the current timezone. Events with participants that are located in
-            different timezones would hence take place "several times" on a given day.
+        A floating 20220816T054500 simply applies to the current timezone.
+        Events with participants that are located in different timezones would
+        hence take place "several times" on a given day.
 
-            See: https://www.rfc-editor.org/rfc/rfc5545#section-3.3.5
-        */
-        return QDateTime::fromString(QString("%1-%2-%3T%4:%5:%6Z")
-                                             .arg(datetime.year, 4, 10, '0')
-                                             .arg(datetime.month, 2, 10, '0')
-                                             .arg(datetime.day, 2, 10, '0')
-                                             .arg(datetime.hour, 2, 10, '0')
-                                             .arg(datetime.minute, 2, 10, '0')
-                                             .arg(datetime.second, 2, 10, '0'),
-                                     Qt::ISODate)
+        See: https://www.rfc-editor.org/rfc/rfc5545#section-3.3.5
+    */
+    icaltimezone *zone = const_cast<icaltimezone *>(datetime.zone);
+    int offset = icaltimezone_get_utc_offset(zone, &datetime, &datetime.is_daylight);
+    QTimeZone convertZone(offset);
+    if (zone && convertZone.isValid()) {
+        return QDateTime(QDate(datetime.year, datetime.month, datetime.day),
+                         QTime(datetime.hour, datetime.minute, datetime.second), convertZone)
                 .toLocalTime();
     } else {
         return QDateTime(QDate(datetime.year, datetime.month, datetime.day),

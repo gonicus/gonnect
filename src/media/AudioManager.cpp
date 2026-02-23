@@ -16,20 +16,20 @@ using namespace std::chrono_literals;
 
 AudioManager::AudioManager(QObject *parent) : QObject(parent)
 {
-    m_settings = std::make_unique<AppSettings>();
-
 #ifdef Q_OS_LINUX
     // PulseAudio handling
-    m_paMainloop = pa_mainloop_new();
-    m_paContext = pa_context_new(pa_mainloop_get_api(m_paMainloop), "GOnnect");
+    if (!noSyncSystemMute()) {
+        m_paMainloop = pa_mainloop_new();
+        m_paContext = pa_context_new(pa_mainloop_get_api(m_paMainloop), "GOnnect");
 
-    pa_context_set_state_callback(m_paContext, paContextStateCallback, nullptr);
-    pa_context_set_subscribe_callback(m_paContext, paSubscriptionEventCallback, nullptr);
+        pa_context_set_state_callback(m_paContext, paContextStateCallback, nullptr);
+        pa_context_set_subscribe_callback(m_paContext, paSubscriptionEventCallback, nullptr);
 
-    pa_context_connect(m_paContext, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+        pa_context_connect(m_paContext, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
 
-    connect(&m_paMainloopTimer, &QTimer::timeout, this, &AudioManager::paMainloopIterate);
-    m_paMainloopTimer.start(100ms);
+        connect(&m_paMainloopTimer, &QTimer::timeout, this, &AudioManager::paMainloopIterate);
+        m_paMainloopTimer.start(100ms);
+    }
 #endif
 
     // Use Qt mechanism to get notified for updates and re-initialize on changes
@@ -49,13 +49,16 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
             &AudioManager::playbackAudioVolumeChanged);
 
 #ifdef Q_OS_LINUX
-    connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
-        if (m_captureAudioPort) {
-            paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
-        } else {
-            qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
-        }
-    });
+    if (!noSyncSystemMute()) {
+        connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
+            if (m_captureAudioPort) {
+                paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
+                qCInfo(lcAudioManager) << "Sent mute state" << m_isAudioCaptureMuted << "to system";
+            } else {
+                qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
+            }
+        });
+    }
 #endif
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
@@ -183,10 +186,9 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
             if (m_playbackHash != id) {
                 newPlaybackHash = id;
                 if (dev->isDefault()) {
-                    m_settings->remove(QString("audio%1/playback").arg(m_currentAudioProfile));
+                    m_settings.remove(QString("audio%1/playback").arg(m_currentAudioProfile));
                 } else {
-                    m_settings->setValue(QString("audio%1/playback").arg(m_currentAudioProfile),
-                                         id);
+                    m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile), id);
                 }
             }
 
@@ -228,9 +230,9 @@ void AudioManager::setCaptureDeviceId(const QString &id)
             if (m_captureHash != id) {
                 newCaptureHash = id;
                 if (dev->isDefault()) {
-                    m_settings->remove(QString("audio%1/capture").arg(m_currentAudioProfile));
+                    m_settings.remove(QString("audio%1/capture").arg(m_currentAudioProfile));
                 } else {
-                    m_settings->setValue(QString("audio%1/capture").arg(m_currentAudioProfile), id);
+                    m_settings.setValue(QString("audio%1/capture").arg(m_currentAudioProfile), id);
                 }
             }
 
@@ -264,8 +266,10 @@ void AudioManager::setCaptureDeviceId(const QString &id)
     }
 
 #ifdef Q_OS_LINUX
-    // Get the initial mute state of the input device
-    paGetInputMuteState(m_paContext);
+    if (!noSyncSystemMute()) {
+        // Get the initial mute state of the input device
+        paGetInputMuteState(m_paContext);
+    }
 #endif
 
     Q_EMIT captureDeviceIdChanged();
@@ -278,9 +282,9 @@ void AudioManager::setRingDeviceId(const QString &id)
             if (m_ringHash != id) {
                 m_ringHash = id;
                 if (dev->isDefault()) {
-                    m_settings->remove(QString("audio%1/ringing").arg(m_currentAudioProfile));
+                    m_settings.remove(QString("audio%1/ringing").arg(m_currentAudioProfile));
                 } else {
-                    m_settings->setValue(QString("audio%1/ringing").arg(m_currentAudioProfile), id);
+                    m_settings.setValue(QString("audio%1/ringing").arg(m_currentAudioProfile), id);
                 }
                 Q_EMIT ringDeviceIdChanged();
             }
@@ -296,8 +300,8 @@ void AudioManager::setRingDeviceId(const QString &id)
 void AudioManager::setExternalRinger(bool flag)
 {
     if (m_externalRinger != flag) {
-        m_settings->setValue(QString("audio%1/preferExternalRinger").arg(m_currentAudioProfile),
-                             flag);
+        m_settings.setValue(QString("audio%1/preferExternalRinger").arg(m_currentAudioProfile),
+                            flag);
         qCInfo(lcAudioManager) << "set external ringer to" << flag;
         Q_EMIT externalRingerChanged();
     }
@@ -325,19 +329,18 @@ void AudioManager::doProfileElection()
     unsigned pc = 0;
 
     static QRegularExpression isAudioProfile = QRegularExpression("^audio[0-9]+$");
-    QStringList groups = m_settings->childGroups();
+    QStringList groups = m_settings.childGroups();
     QString playbackHash;
     QString captureHash;
     QString ringHash;
 
     for (auto &group : std::as_const(groups)) {
         if (isAudioProfile.match(group).hasMatch()) {
-            playbackHash = m_settings->value(QString("%1/playback").arg(group)).toString();
-            captureHash = m_settings->value(QString("%1/capture").arg(group)).toString();
-            ringHash = m_settings->value(QString("%1/ringing").arg(group)).toString();
+            playbackHash = m_settings.value(QString("%1/playback").arg(group)).toString();
+            captureHash = m_settings.value(QString("%1/capture").arg(group)).toString();
+            ringHash = m_settings.value(QString("%1/ringing").arg(group)).toString();
             m_externalRinger =
-                    m_settings->value(QString("%1/preferExternalRinger").arg(group), false)
-                            .toBool();
+                    m_settings.value(QString("%1/preferExternalRinger").arg(group), false).toBool();
 
             // Check if all audio hashes are available for this profile
             if (isDeviceAvailable(playbackHash) && isDeviceAvailable(captureHash)

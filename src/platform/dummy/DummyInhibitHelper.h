@@ -9,7 +9,6 @@ class DummyInhibitHelper : public InhibitHelper
 public:
     explicit DummyInhibitHelper() : InhibitHelper() { }
 
-    void queryEndResponse() override { }
     void inhibit(unsigned int flags, const QString &reason) override
     {
         Q_UNUSED(flags);
@@ -23,4 +22,6 @@ public:
         Q_UNUSED(reason);
     }
     void releaseScreenSaver() override { }
+
+    bool inhibitActive() const override { return false; }
 };

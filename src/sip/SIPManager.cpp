@@ -53,6 +53,16 @@ void SIPManager::initialize()
     qCDebug(lcSIPManager) << "initializing";
     pj_log_set_level(0);
 
+    ReadOnlyConfdSettings globalSettings;
+    if (globalSettings.value("sip/compactHeader", false).toBool()) {
+        qCDebug(lcSIPManager) << "enabling compact headers";
+        pjsip_cfg()->endpt.use_compact_form = PJ_TRUE;
+    }
+    if (globalSettings.value("sip/noTcpSwitch", false).toBool()) {
+        qCDebug(lcSIPManager) << "disabling TCP switch";
+        pjsip_cfg()->endpt.disable_tcp_switch = PJ_TRUE;
+    }
+
     try {
         m_ep.libCreate();
     } catch (pj::Error &err) {
@@ -66,7 +76,8 @@ void SIPManager::initialize()
     if (app->isDebugRun()) {
         epConfig.logConfig.level = 6;
     } else {
-        epConfig.logConfig.level = m_settings->value("logging/level", 1).toUInt();
+        ReadOnlyConfdSettings settings;
+        epConfig.logConfig.level = settings.value("logging/level", 1).toUInt();
     }
 
     if (epConfig.logConfig.level >= 4) {

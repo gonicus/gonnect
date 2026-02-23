@@ -14,7 +14,7 @@
 
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
 
-long SIPAccount::runningMessageIndex = 0;
+intptr_t SIPAccount::runningMessageIndex = 0;
 
 SIPAccount::SIPAccount(const QString &group, QObject *parent)
     : QObject(parent), Account(), m_account(group)
@@ -154,6 +154,8 @@ void SIPAccount::initialize()
 
     m_accountConfig.mediaConfig.transportConfig.randomizePort =
             m_settings.value("randomizeRtpPorts", false).toBool();
+
+    m_rttEnabled = m_settings.value("realTimeText", true).toBool();
 
     // Tweak IPv6 account settings
     if (m_transportNet == TRANSPORT_NET::IPv4) {
@@ -335,6 +337,9 @@ void SIPAccount::initialize()
 
     m_accountConfig.natConfig.contactRewriteUse = 0;
 
+    m_accountConfig.mediaConfig.rtcpXrEnabled = m_settings.value("rtcpXrEnabled", false).toBool();
+    m_accountConfig.mediaConfig.rtcpMuxEnabled = m_settings.value("rtcpMuxEnabled", false).toBool();
+
     m_settings.endGroup();
 
     // Authentication setup
@@ -463,7 +468,7 @@ QString SIPAccount::call(const QString &number, const QString &contactId,
 long SIPAccount::sendMessage(const QString &recipient, const QString &message,
                              const QString &mimeType)
 {
-    long id = SIPAccount::runningMessageIndex++;
+    const auto id = SIPAccount::runningMessageIndex++;
     QString sipUrl = toSipUri(recipient);
     SIPBuddy *foundBuddy = nullptr;
 
@@ -494,7 +499,7 @@ long SIPAccount::sendMessage(const QString &recipient, const QString &message,
 void SIPAccount::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 {
     qCDebug(lcSIPAccount) << "sent message to " << prm.toUri << ", status: " << prm.code
-                          << prm.reason << (long)prm.userData;
+                          << prm.reason << (intptr_t)prm.userData;
 }
 
 void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
@@ -816,6 +821,11 @@ void SIPAccount::setCredentials(const QString &password)
                     qCCritical(lcSIPAccount) << "failed to set credentials:" << data;
                 }
             });
+}
+
+bool SIPAccount::isSignalingEncrypted()
+{
+    return m_transportType == TRANSPORT_TYPE::TLS;
 }
 
 SIPAccount::~SIPAccount()

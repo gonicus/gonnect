@@ -4,16 +4,20 @@
 #include <QLoggingCategory>
 #include <QCryptographicHash>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_WINDOWS
+static constexpr const char *NULL_DEVICE_NAME = "nul";
+#else
 #  include <unistd.h>
 #  include <grp.h>
+static constexpr const char *NULL_DEVICE_NAME = "/dev/null";
 #endif
+
 #include "ReadOnlyConfdSettings.h"
 
 Q_LOGGING_CATEGORY(lcReadOnlySettings, "gonnect.app.settings")
 
 ReadOnlyConfdSettings::ReadOnlyConfdSettings(QObject *parent)
-    : QSettings("/dev/null", QSettings::IniFormat, parent)
+    : QSettings(NULL_DEVICE_NAME, QSettings::IniFormat, parent)
 {
     setFallbacksEnabled(false);
     readConfd();
@@ -63,8 +67,15 @@ void ReadOnlyConfdSettings::readConfd()
     const QString basePath =
             QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/gonnect";
 
+    QStringList entries;
+
+    if (qEnvironmentVariable("container") == "flatpak") {
+        const auto fpBaseDir = QDir("/app/etc/gonnect");
+        entries += fpBaseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+    }
+
     const auto baseDir = QDir(basePath);
-    const QStringList entries = baseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+    entries += baseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
 
 #ifdef Q_OS_LINUX
     // Filter scope and replace %ENV[variablename]% and %CONF[config/key]% placeholders

@@ -27,7 +27,7 @@ public:
     explicit HistoryProxyModel(QObject *parent = nullptr);
 
 protected:
-    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
 private:
     TypeFilter m_typeFilter = TypeFilter::ALL;

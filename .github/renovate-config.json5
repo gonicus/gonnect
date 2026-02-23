@@ -11,9 +11,11 @@
     repositories: [
         "gonicus/gonnect"
     ],
+    allowedCommands: [".+"],
     prConcurrentLimit: 0,
     prHourlyLimit: 5,
     semanticCommits: "enabled",
+    configMigration: true,
     packageRules: [
         {
             groupName: "github actions",
@@ -22,15 +24,54 @@
                 "github/codeql-action",
                 "renovatebot/github-action"
             ]
+        },
+        {
+            "groupName": "conan dependencies",
+            "matchManagers": ["conan"]
+        },
+        {
+            "matchPackageNames": [
+                "hidapi/**",
+                "libical/**",
+                "libinotify/**",
+                "libpulse/**",
+                "openldap/**",
+                "pjproject/**",
+                "qca/**",
+                "qtkeychain/**",
+                "qtwebdav/**",
+                "vcard/**",
+                "wintoast/**",
+            ],
+            "matchManagers": ["conan"],
+            "overrideDatasource": "custom.conan_local",
+            "postUpgradeTasks": {
+                // /conan/ is the mount point of resources/conan inside the renovate container of the branch this action is running in
+                // /tmp/renovate/repos/github/gonicus/gonnect/ is the branch renovate is using to check for updated (usually "main")
+                "commands": [
+                    "GITHUB_ACTION=1 /conan/updater.py --verbose --dir=/tmp/renovate/repos/github/gonicus/gonnect/ --update-recipes=\"$RENOVATE_POST_UPGRADE_COMMAND_DATA_FILE\""
+                ],
+                "executionMode": "update",
+                "fileFilters": [
+                    "resources/conan/recipes/*/config.yml",
+                    "resources/conan/recipes/*/all/conandata.yml"
+                ],
+                "dataFileTemplate": "{\"depName\": \"{{{depName}}}\", \"currentVersion\": \"{{{currentVersion}}}\", \"newVersion\": \"{{{newVersion}}}\"}"
+            },
+        },
+        {
+            "matchPackageNames": ["openssl/**"],
+            "allowedVersions": "<3.6.0"
         }
+
     ],
     enabledManagers: [
-        "github-actions", "custom.regex"
+        "github-actions", "custom.regex", "conan"
     ],
     customManagers: [
         {
             customType: "regex",
-            fileMatch: [
+            managerFilePatterns: [
                 "^src/CMakeLists.txt$"
             ],
             matchStrings: [
@@ -42,7 +83,7 @@
         },
         {
             customType: "regex",
-            fileMatch: [
+            managerFilePatterns: [
                 "^src/CMakeLists.txt$"
             ],
             matchStrings: [
@@ -50,5 +91,14 @@
             ],
 	        versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}'
         }
-    ]
+    ],
+    "customDatasources": {
+        "conan_local": {
+            "defaultRegistryUrlTemplate": "http://localhost:8080/{{packageName}}/versions.json",
+        }
+    },
+    "logLevelRemap": [{
+        "matchMessage": "/^(Checking for|Executed|Processed|Created) post-upgrade (task|command)/",
+        "newLogLevel": "info"
+    }]
 }

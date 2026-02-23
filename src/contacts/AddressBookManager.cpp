@@ -92,6 +92,12 @@ void AddressBookManager::processAddressBookQueue()
 
         if (auto feeder = m_addressBookFeeders.value(group, nullptr)) {
 
+            if (feeder->isProcessing()) {
+                // A currently active feeder must not be invoked again to prevent double runs and
+                // threading issues.
+                continue;
+            }
+
             // If the plugin requires network access, check the connectivity with
             // the network helper / portal. If we've no connectivity, trigger on
             // connectivityChanged signal to recheck again.

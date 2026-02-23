@@ -1,0 +1,8 @@
+versions:
+  "1.3.2":
+    folder: all
+
+updater:
+  source: anitya
+  id: 386979
+  url-pattern: https://github.com/mohabouje/WinToast/archive/refs/tags/v${version}.zip

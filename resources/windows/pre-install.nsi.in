@@ -1,0 +1,15 @@
+!insertmacro FindProc
+
+; 0 = found, 1 = not found
+StrCmp $processFound "0" 0 install
+    MessageBox MB_OKCANCEL "$(CLOSE_ON_INSTALL)" /SD IDOK IDOK continue IDCANCEL abort
+        continue:
+            ExecDos::exec /TIMEOUT=2000 "taskkill.exe /F /T /IM @CPACK_NSIS_MUI_FINISHPAGE_RUN@"
+            Pop $0 ; The handle for the process
+            ExecDos::wait $0
+            Sleep 2000 ; wait some time, otherwise deleting files used by just killed process does not work
+            Goto install
+        abort:
+    Quit
+
+install:

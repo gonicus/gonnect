@@ -35,6 +35,7 @@ HELP
 # Parsing command line
 VERSION=
 COMMITS=
+IS_BETA=NO
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -63,6 +64,10 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
+if [[ "$VERSION" == *beta* ]]; then
+    IS_BETA=YES
+fi
+
 ###########
 # Functions
 
@@ -77,8 +82,15 @@ function update_cmakelists {
         show_error 1 "CMakeLists.txt not found!"
     fi
 
-    # inline update the version number using sed
-    sed -i -r -e "s/^(project.*VERSION\s)\S*/\1$1/g" "$CMAKELISTS_FILE"
+    if [[ "$IS_BETA" == YES ]]; then
+        # inline update just the 4th version digit by the beta number using sed
+        BETA_VER=$(echo "$VERSION" | rev | cut -d. -f1 | rev)
+        sed -i -r -e "s/^(project.*VERSION\s[0-9]+\.[0-9]+\.[0-9]+)\S*/\1.$BETA_VER/g" "$CMAKELISTS_FILE"    
+    else
+        # inline update the version number using sed
+        sed -i -r -e "s/^(project.*VERSION\s)\S*/\1$VERSION/g" "$CMAKELISTS_FILE"
+    fi
+
 }
 
 # update_antora_module sets the given version in the Antora module description docs/antora.yml
@@ -126,6 +138,11 @@ function update_flatpak {
     MANIFEST="$SCRIPT_DIR/../resources/flatpak/de.gonicus.gonnect.releases.xml"
     local CURRENT_DATE
     CURRENT_DATE=$(date +%Y-%m-%d)
+
+    # Remove all beta entries on release
+    if [[ "$IS_BETA" != YES ]]; then
+        xmlstarlet edit --inplace --delete '/releases/release[@version[contains(.,"beta")]]' "$MANIFEST"
+    fi
 
     # check, if at least one release already exists
     local LAST_VERSION
@@ -176,6 +193,11 @@ echo "Preparing new version \"$VERSION\""
 
 echo "Updating CMakeLists"
 update_cmakelists "$VERSION"
+
+# Don't create release notes, if we are building a beta-version
+if [[ "$IS_BETA" == YES ]]; then
+    COMMITS=
+fi
 
 NOTES=
 if [ -n "$COMMITS" ]; then
