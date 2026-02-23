@@ -53,7 +53,12 @@ void SIPManager::initialize()
     qCDebug(lcSIPManager) << "initializing";
     pj_log_set_level(0);
 
-    pjsip_cfg()->endpt.use_compact_form = PJ_TRUE;
+    if (m_settings->value("sip/compactHeader", false).toBool()) {
+        pjsip_cfg()->endpt.use_compact_form = PJ_TRUE;
+    }
+    if (m_settings->value("sip/noTcpSwitch", false).toBool()) {
+        pjsip_cfg()->endpt.disable_tcp_switch = PJ_TRUE;
+    }
 
     try {
         m_ep.libCreate();
