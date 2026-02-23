@@ -53,10 +53,13 @@ void SIPManager::initialize()
     qCDebug(lcSIPManager) << "initializing";
     pj_log_set_level(0);
 
-    if (m_settings->value("sip/compactHeader", false).toBool()) {
+    ReadOnlyConfdSettings globalSettings;
+    if (globalSettings.value("sip/compactHeader", false).toBool()) {
+        qCDebug(lcSIPManager) << "enabling compact headers";
         pjsip_cfg()->endpt.use_compact_form = PJ_TRUE;
     }
-    if (m_settings->value("sip/noTcpSwitch", false).toBool()) {
+    if (globalSettings.value("sip/noTcpSwitch", false).toBool()) {
+        qCDebug(lcSIPManager) << "disabling TCP switch";
         pjsip_cfg()->endpt.disable_tcp_switch = PJ_TRUE;
     }
 
