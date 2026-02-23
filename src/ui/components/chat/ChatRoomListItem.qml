@@ -15,7 +15,7 @@ Item {
     Accessible.name: qsTr("Chat room")
     Accessible.description: qsTr("Selected chat room: ") +
                             qsTr("Name: ") + control.name +
-                            qsTr("Unread messages: ") + control.unreadCount
+                            qsTr(", unread messages: ") + control.unreadCount
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 
@@ -33,6 +33,8 @@ Item {
             leftMargin: 10
             rightMargin: 10
         }
+
+        Accessible.ignored: true
     }
 
     Rectangle {
@@ -45,6 +47,8 @@ Item {
             leftMargin: 10
             rightMargin: 10
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -66,9 +70,13 @@ Item {
 
     HoverHandler {
         id: hoverHandler
+
+        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => control.clicked()
+
+        Accessible.ignored: true
     }
 }

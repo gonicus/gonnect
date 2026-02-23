@@ -22,8 +22,8 @@ Item {
     Accessible.name: qsTr("Chat message")
     Accessible.description: qsTr("Selected chat message: ") +
                             qsTr("Sender: ") + control.nickName +
-                            qsTr("Time: ") + control.timestamp +
-                            qsTr("Message text: ") + control.message
+                            qsTr(", time: ") + control.timestamp +
+                            qsTr(", message text: ") + control.message
     Accessible.focusable: true
 
     Component.onCompleted: () => {

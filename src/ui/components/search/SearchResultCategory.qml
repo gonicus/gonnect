@@ -39,6 +39,8 @@ Item {
             right: parent.right
             top: headerLabel.bottom
         }
+
+        Accessible.ignored: true
     }
 
     Flow {

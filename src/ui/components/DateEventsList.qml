@@ -109,8 +109,8 @@ ListView {
         Accessible.name: qsTr("Date event")
         Accessible.description: qsTr("Currently selected date event: ")
                                 + qsTr("Summary: ") + summaryLabel.text
-                                + qsTr("Starting time: ") + timeLabel.text
-                                + qsTr("Remaining time: ") + summaryLabel.text
+                                + qsTr(", starting time: ") + timeLabel.text
+                                + qsTr(", remaining time: ") + summaryLabel.text
         Accessible.focusable: true
 
         Connections {
@@ -200,6 +200,8 @@ ListView {
                         width: 20
                         height: 20
                     }
+
+                    Accessible.ignored: true
                 }
             }
         }
@@ -253,6 +255,8 @@ ListView {
         HoverHandler {
             id: rowHoverHandler
             enabled: control.enabled
+
+            Accessible.ignored: true
         }
 
         TapHandler {
@@ -273,6 +277,8 @@ ListView {
                     dateEventContextMenuComponent.createObject(delg).popup()
                 }
             }
+
+            Accessible.ignored: true
         }
     }
 }

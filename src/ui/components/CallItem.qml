@@ -92,6 +92,8 @@ Rectangle {
             left: parent.left
             leftMargin: 15
         }
+
+        Accessible.ignored: true
     }
 
     Column {
@@ -185,22 +187,30 @@ Rectangle {
                 source: Icons.callStop
                 color: Theme.foregroundWhiteColor
             }
+
+            Accessible.ignored: true
         }
 
         TapHandler {
             id: hangupButtonTapHandler
             onTapped: SIPCallManager.endCall(control.accountId, control.callId)
+
+            Accessible.ignored: true
         }
     }
 
     HoverHandler {
         id: hoverHandler
         enabled: control.interactive
+
+        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => control.clicked()
         enabled: control.interactive
+
+        Accessible.ignored: true
     }
 
     DragHandler {
@@ -224,6 +234,8 @@ Rectangle {
                                  }
                              }
                          }
+
+        Accessible.ignored: true
     }
 
     Drag.active: dragHandler.active
@@ -239,5 +251,7 @@ Rectangle {
                        SIPCallManager.transferCall(dragEvent.source.accountId, dragEvent.source.callId,
                                                    control.accountId, control.callId)
                    }
+
+        Accessible.ignored: true
     }
 }

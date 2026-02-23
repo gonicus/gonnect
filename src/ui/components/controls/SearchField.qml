@@ -85,7 +85,7 @@ Item {
         }
 
         Accessible.role: Accessible.EditableText
-        Accessible.name: qsTr("Enter search term")
+        Accessible.name: placeholderLabel.text
         Accessible.searchEdit: true
     }
 
@@ -113,14 +113,20 @@ Item {
                 width: 16
                 height: 16
             }
+
+            Accessible.ignored: true
         }
 
         HoverHandler {
             id: clearButtonHoverHandler
+
+            Accessible.ignored: true
         }
 
         TapHandler {
             onTapped: () => searchInputField.clear()
+
+            Accessible.ignored: true
         }
     }
 }

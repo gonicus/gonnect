@@ -66,10 +66,14 @@ Popup {
 
             HoverHandler {
                 id: muteButtonHandler
+
+                Accessible.ignored: true
             }
 
             TapHandler {
                 onTapped: () => volumePopup.muteToggled()
+
+                Accessible.ignored: true
             }
 
             IconLabel {
@@ -79,6 +83,8 @@ Popup {
                     width: 16
                     height: 16
                 }
+
+                Accessible.ignored: true
             }
 
             Accessible.role: Accessible.Button
@@ -98,10 +104,14 @@ Popup {
 
             HoverHandler {
                 id: audioSettingsButtonHandler
+
+                Accessible.ignored: true
             }
 
             TapHandler {
                 onTapped: () => ViewHelper.showAudioSettings()
+
+                Accessible.ignored: true
             }
 
             IconLabel {
@@ -111,6 +121,8 @@ Popup {
                     width: 16
                     height: 16
                 }
+
+                Accessible.ignored: true
             }
 
             Accessible.role: Accessible.Button

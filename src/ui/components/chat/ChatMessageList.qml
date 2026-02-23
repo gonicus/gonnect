@@ -72,6 +72,8 @@ Item {
             anchors.fill: parent
             radius: parent.width / 2
             color: autoScrollHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : Theme.backgroundOffsetColor
+
+            Accessible.ignored: true
         }
 
         Label {
@@ -85,11 +87,15 @@ Item {
         HoverHandler {
             id: autoScrollHoverHandler
             cursorShape: Qt.PointingHandCursor
+
+            Accessible.ignored: true
         }
 
         TapHandler {
             id: autoScrollTapHandler
             onTapped: () => autoScrollDownButton.scrollAction()
+
+            Accessible.ignored: true
         }
 
         function scrollAction() {

@@ -656,6 +656,8 @@ Item {
                                             left: parent.left
                                             right: parent.right
                                         }
+
+                                        Accessible.ignored: true
                                     }
 
                                     Label {
@@ -711,12 +713,16 @@ Item {
 
                                     HoverHandler {
                                         id: delegateHoverHandler
+
+                                        Accessible.ignored: true
                                     }
 
                                     TapHandler {
                                         onTapped: () => preferredIdentityEditWindowComponent.createObject(
                                                       control,
                                                       { preferredIdentity: preferredIdentityDelegate.modelData })
+
+                                        Accessible.ignored: true
                                     }
                                 }
                             }

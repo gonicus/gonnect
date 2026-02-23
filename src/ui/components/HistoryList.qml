@@ -121,13 +121,13 @@ Item {
 
             Accessible.role: Accessible.ListItem
             Accessible.name: qsTr("History item")
-            Accessible.description: qsTr("Currently selected history itemt: ")
+            Accessible.description: qsTr("Currently selected history item: ")
                                     + qsTr("Name: ") + delg.contactName
-                                    + qsTr("Company: ") + delg.company
-                                    + qsTr("Location: ") + delg.location
-                                    + qsTr("Phone: ") + delg.remotePhoneNumber
-                                    + qsTr("Time: ") + timeTextLabel.text
-                                    + qsTr("Duration: ") + durationTextLabel.text
+                                    + qsTr(", company: ") + delg.company
+                                    + qsTr(", location: ") + delg.location
+                                    + qsTr(", phone: ") + delg.remotePhoneNumber
+                                    + qsTr(", time: ") + timeTextLabel.text
+                                    + qsTr(", duration: ") + durationTextLabel.text
             Accessible.focusable: true
 
             Connections {
@@ -299,6 +299,8 @@ Item {
                             }
                         }
                     }
+
+                    Accessible.ignored: true
                 }
 
                 Item {
@@ -341,6 +343,8 @@ Item {
                                 verticalCenter: parent.verticalCenter
                                 verticalCenterOffset: 2
                             }
+
+                            Accessible.ignored: true
                         }
 
                         Label {
@@ -375,6 +379,8 @@ Item {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
 
                         Label {
@@ -451,12 +457,16 @@ Item {
                         }
                     }
                 }
+
+                Accessible.ignored: true
             }
 
             HoverHandler {
                 id: rowHoverHandler
                 enabled: !delg.isAnonymous
             }
+
+            Accessible.ignored: true
         }
     }
 }

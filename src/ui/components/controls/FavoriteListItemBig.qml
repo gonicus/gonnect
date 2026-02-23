@@ -44,6 +44,15 @@ Item {
         }
     }
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Favorite contact")
+    Accessible.description: qsTr("Selected favorite: ") +
+                            qsTr("Name: ") + delg.name +
+                            (delg.isJitsiUrl ? qsTr(", link: ") : qsTr(", phone: ")) + delg.phoneNumber +
+                            (delg.isJitsiUrl ? qsTr(" (tap to start meeting)") : qsTr(" (tap to call)"))
+    Accessible.focusable: true
+    Accessible.onPressAction: () => delg.startMeetingOrCall()
+
     function updateBuddyStatus() {
         delg.buddyStatus = delg.hasBuddyState
                 ? SIPManager.buddyStatus(delg.phoneNumber)
@@ -72,6 +81,8 @@ Item {
         anchors.fill: parent
         radius: 4
         color: rowHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+
+        Accessible.ignored: true
     }
 
     AvatarImage {
@@ -122,6 +133,8 @@ Item {
                     }
                 }
             ]
+
+            Accessible.ignored: true
         }
 
         Label {
@@ -135,7 +148,11 @@ Item {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
+
+        Accessible.ignored: true
     }
 
     IconLabel {
@@ -147,6 +164,8 @@ Item {
             rightMargin: avatarImage.anchors.leftMargin
             verticalCenter: parent.verticalCenter
         }
+
+        Accessible.ignored: true
     }
 
     Component {
@@ -185,15 +204,7 @@ Item {
         grabPermissions: PointerHandler.ApprovesTakeOverByAnything
         exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onDoubleTapped: () => {
-            if (delg.contactType === NumberStats.ContactType.JitsiMeetUrl) {
-                if (!ViewHelper.isActiveVideoCall) {
-                    ViewHelper.requestMeeting(delg.phoneNumber)
-                }
-            } else {
-                SIPCallManager.call(delg.phoneNumber)
-            }
-        }
+        onDoubleTapped: () => delg.startMeetingOrCall()
         onTapped: (_, mouseButton) => {
             if (mouseButton === Qt.RightButton) {
                 if (delg.isJitsiUrl) {
@@ -203,9 +214,23 @@ Item {
                 }
             }
         }
+
+        Accessible.ignored: true
+    }
+
+    function startMeetingOrCall() {
+        if (delg.contactType === NumberStats.ContactType.JitsiMeetUrl) {
+            if (!ViewHelper.isActiveVideoCall) {
+                ViewHelper.requestMeeting(delg.phoneNumber)
+            }
+        } else {
+            SIPCallManager.call(delg.phoneNumber)
+        }
     }
 
     HoverHandler {
         id: rowHoverHandler
+
+        Accessible.ignored: true
     }
 }

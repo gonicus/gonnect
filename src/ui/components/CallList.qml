@@ -106,6 +106,8 @@ Item {
                 right: parent.right
                 top: parent.top
             }
+
+            Accessible.ignored: true
         }
 
         IconLabel {
@@ -124,11 +126,15 @@ Item {
 
         HoverHandler {
             id: conferenceButtonHoverHandler
+
+            Accessible.ignored: true
         }
 
         TapHandler {
             id: conferenceButtonTapHandler
             onTapped: () => SIPCallManager.startConference()
+
+            Accessible.ignored: true
         }
     }
 }

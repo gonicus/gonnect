@@ -200,6 +200,7 @@ Rectangle {
         HeaderIconButton {
             id: burgerMenuButton
             iconSource: Icons.applicationMenu
+            accessiblePurpose: qsTr("Burger menu")
             active: control.active
             iconSize: 16
             anchors.verticalCenter: parent.verticalCenter
@@ -241,6 +242,7 @@ Rectangle {
 
         HeaderIconButton {
             iconSource: Icons.mobileCloseApp
+            accessiblePurpose: qsTr("Close GOnnect")
             active: control.active
             iconSize: 10
             anchors.verticalCenter: parent.verticalCenter

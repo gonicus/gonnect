@@ -46,11 +46,11 @@ Rectangle {
 
     Component.onCompleted: () => control.updateBuddyStatus()
 
-    Accessible.role: Accessible.Button
+    Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Phone number")
     Accessible.description: qsTr("Selected phone number: ") +
                             qsTr("Number: ") + control.number +
-                            (control.isFavorite ? qsTr("Hint: This is a favorite") : "")
+                            (control.isFavorite ? qsTr(", hint: This is a favorite") : "")
     Accessible.focusable: true
     Accessible.onPressAction: () => control.triggerPrimaryAction()
 
@@ -72,6 +72,8 @@ Rectangle {
             leftMargin: 17
             verticalCenter: parent.verticalCenter
         }
+
+        Accessible.ignored: true
     }
 
     BuddyStatusIndicator {
@@ -126,6 +128,8 @@ Rectangle {
                 control.manuallyHovered()
             }
         }
+
+        Accessible.ignored: true
     }
 
     TapHandler {
@@ -140,5 +144,7 @@ Rectangle {
                 control.triggerPrimaryAction()
             }
         }
+
+        Accessible.ignored: true
     }
 }

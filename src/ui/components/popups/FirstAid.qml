@@ -64,6 +64,13 @@ Item {
 
                     required property string number
                     required property string displayName
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: delg.displayName
+                    Accessible.description: qsTr("Tap to call emergency contact: ") + delg.displayName +
+                                            qsTr(", number: ") + delg.number
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => delg.click()
                 }
             }
 
@@ -93,6 +100,7 @@ Item {
     HeaderIconButton {
         id: closeButton
         iconSource: Icons.mobileCloseApp
+        accessiblePurpose: qsTr("Close first aid menu")
         anchors {
             top: parent.top
             right: parent.right

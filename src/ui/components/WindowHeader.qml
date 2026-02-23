@@ -79,6 +79,7 @@ Rectangle {
         HeaderIconButton {
             id: minimizeButton
             iconSource: Icons.goDown
+            accessiblePurpose: qsTr("Minimize")
             active: control.active
             anchors.verticalCenter: parent.verticalCenter
             onClicked: () => control.window?.showMinimized()
@@ -87,6 +88,7 @@ Rectangle {
         HeaderIconButton {
             id: maximizeButton
             iconSource: Icons.goUp
+            accessiblePurpose: qsTr("Maximize")
             active: control.active
             anchors.verticalCenter: parent.verticalCenter
             onClicked: () => control.toggleMaximized()
@@ -94,6 +96,7 @@ Rectangle {
 
         HeaderIconButton {
             iconSource: Icons.mobileCloseApp
+            accessiblePurpose: qsTr("Close QGonnect")
             active: control.active
             iconSize: 10
             anchors.verticalCenter: parent.verticalCenter

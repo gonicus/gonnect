@@ -30,6 +30,8 @@ Item {
             width: 1
             color: Theme.borderColor
         }
+
+        Accessible.ignored: true
     }
 
     Rectangle {
@@ -42,6 +44,8 @@ Item {
             width: 1
             color: Theme.secondaryTextColor
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -60,10 +64,14 @@ Item {
 
     HoverHandler {
         id: hoverHandler
+
+        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => control.selectCategory()
+
+        Accessible.ignored: true
     }
 
     function selectCategory() {

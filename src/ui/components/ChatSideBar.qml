@@ -206,6 +206,8 @@ Item {
 
                 HoverHandler {
                     id: chatMessageHoverHandler
+
+                    Accessible.ignored: true
                 }
             }
         }
@@ -256,6 +258,8 @@ Item {
                 item.emojiPicked.connect(emoji => chatInputField.insert(chatInputField.cursorPosition, emoji))
                 item.open()
             }
+
+            Accessible.ignored: true
         }
 
         Component {

@@ -140,6 +140,7 @@ BaseWidget {
             HeaderIconButton {
                 id: showHistorySearchButton
                 iconSource: historyHeading.searchVisible ? Icons.mobileCloseApp : Icons.systemSearch
+                accessiblePurpose: historyHeading.searchVisible ? qsTr("Hide history search") : qsTr("Show history search")
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right

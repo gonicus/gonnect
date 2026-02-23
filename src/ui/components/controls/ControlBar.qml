@@ -80,6 +80,7 @@ Item {
         HeaderIconButton {
             id: burgerMenuButton
             iconSource: Icons.applicationMenu
+            accessiblePurpose: qsTr("Burger menu")
             active: control.Window.active
             iconSize: 16
             anchors.verticalCenter: parent.verticalCenter

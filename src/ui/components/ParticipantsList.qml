@@ -43,8 +43,8 @@ Item {
             Accessible.name: qsTr("Chat participant")
             Accessible.description: qsTr("Selected chat participant: ") +
                                     qsTr("Name: ") + delg.displayName +
-                                    (delg.isModerator ? qsTr("Role: Moderator") : "") +
-                                    (delg.isMe ? qsTr("Hint: This is your account") : "")
+                                    (delg.isModerator ? qsTr(", role: Moderator") : "") +
+                                    (delg.isMe ? qsTr(", hint: This is your account") : "")
             Accessible.focusable: true
 
             Rectangle {
@@ -57,6 +57,8 @@ Item {
                     leftMargin: 10
                     rightMargin: 10
                 }
+
+                Accessible.ignored: true
             }
 
             Rectangle {
@@ -69,6 +71,8 @@ Item {
                     leftMargin: 10
                     rightMargin: 10
                 }
+
+                Accessible.ignored: true
             }
 
             AvatarImage {
@@ -117,6 +121,8 @@ Item {
 
             HoverHandler {
                 id: participantHoverHandler
+
+                Accessible.ignored: true
             }
 
             TapHandler {
@@ -140,6 +146,8 @@ Item {
                         }
                     }
                 }
+
+                Accessible.ignored: true
             }
 
             Component {

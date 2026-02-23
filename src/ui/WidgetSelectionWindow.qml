@@ -144,6 +144,8 @@ BaseWindow {
                                 width: widgetSelecionPreview.width
                                 height: widgetSelecionPreview.height
                             }
+
+                            Accessible.ignored: true
                         }
 
                         Label {
@@ -171,6 +173,8 @@ BaseWindow {
                             width: widgetChoicePreview.width
                             height: widgetChoicePreview.height
                         }
+
+                        Accessible.ignored: true
                     }
 
                     Label {

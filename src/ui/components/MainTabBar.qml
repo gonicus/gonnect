@@ -250,6 +250,8 @@ Item {
                             width: parent.width
                             height: parent.height
                         }
+
+                        Accessible.ignored: true
                     }
 
                     MouseArea {
@@ -264,6 +266,8 @@ Item {
                             optionMenu.selectedTabButton = delg
                             optionMenu.open()
                         }
+
+                        Accessible.ignored: true
                     }
                 }
             }
@@ -294,6 +298,8 @@ Item {
                         duration: 2000
                     }
                 }
+
+                Accessible.ignored: true
             }
 
             IconLabel {
@@ -307,6 +313,8 @@ Item {
                     ? Theme.primaryTextColor
                     : Theme.secondaryInactiveTextColor
                 }
+
+                Accessible.ignored: true
             }
 
             Rectangle {
@@ -317,6 +325,8 @@ Item {
                 width: redDot.width + 4
                 height: redDotBackground.width
                 radius: redDotBackground.width / 2
+
+                Accessible.ignored: true
             }
 
             Rectangle {
@@ -332,6 +342,8 @@ Item {
                     verticalCenterOffset: +5
                     horizontalCenterOffset: -5
                 }
+
+                Accessible.ignored: true
             }
 
             ToolTip.text: delg.isEnabled ? delg.labelText : delg.disabledTooltipText
@@ -342,11 +354,15 @@ Item {
 
             HoverHandler {
                 id: delgHoverHandler
+
+                Accessible.ignored: true
             }
 
             TapHandler {
                 id: delgTapHandler
                 onTapped: () => delg.switchTab()
+
+                Accessible.ignored: true
             }
         }
     }

@@ -35,6 +35,8 @@ Item {
                 topMargin: 1/12 * control.iconSize
                 bottomMargin: 1/12 * control.iconSize
             }
+
+            Accessible.ignored: true
         }
 
         Rectangle {
@@ -48,7 +50,11 @@ Item {
                 leftMargin: 1/12 * control.iconSize
                 rightMargin: 1/12 * control.iconSize
             }
+
+            Accessible.ignored: true
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -66,9 +72,13 @@ Item {
 
     HoverHandler {
         id: firstAidHoverHandler
+
+        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => ViewHelper.showFirstAid()
+
+        Accessible.ignored: true
     }
 }
