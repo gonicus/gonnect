@@ -1,3 +1,20 @@
+# [2.1.0-beta.4](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.3...v2.1.0-beta.4) (2026-02-23)
+
+
+### Bug Fixes
+
+* avoid early EDS objects-* signal triggers prior to view completion ([#335](https://github.com/gonicus/gonnect/issues/335)) ([d1c14e4](https://github.com/gonicus/gonnect/commit/d1c14e4b1abc367d9184ecbe413edd8232412c4a))
+* disable Real Time Text (RFC 4103) ([#345](https://github.com/gonicus/gonnect/issues/345)) ([c50890c](https://github.com/gonicus/gonnect/commit/c50890c202491a4ee597a54b900e50e7793cab7d))
+* do not call ldap feeder twice to prevent crash ([#348](https://github.com/gonicus/gonnect/issues/348)) ([0f51ab3](https://github.com/gonicus/gonnect/commit/0f51ab30c89e1d17fe361830cd822febdc51d75f))
+* tab creation failure due to new missing boolean ([#347](https://github.com/gonicus/gonnect/issues/347)) ([518fecb](https://github.com/gonicus/gonnect/commit/518fecbd862fe1ce593b127a8cdef8f505c56007))
+* **ui:** show name/time labels in jitis chat again ([#346](https://github.com/gonicus/gonnect/issues/346)) ([3c20c30](https://github.com/gonicus/gonnect/commit/3c20c3038c0cc5f55914f4886844892cad6f124b))
+* windows block logout / shutdown on ongoing call ([#338](https://github.com/gonicus/gonnect/issues/338)) ([06044c1](https://github.com/gonicus/gonnect/commit/06044c1afb8bc365079edc6af50dab2dd8ecf5ea))
+
+
+### Features
+
+* show connection quality and security details ([#341](https://github.com/gonicus/gonnect/issues/341)) ([8e5623e](https://github.com/gonicus/gonnect/commit/8e5623e7afcf0a14fb07f7f8f09324cce77d2432))
+
 # [2.1.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2026-02-13)
 
 
