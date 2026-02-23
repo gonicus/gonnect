@@ -104,6 +104,10 @@ class PjSIPConan(ConanFile):
 #            tc.configure_args.append("--enable-shared")
         if not self.options.with_uuid:
             tc.configure_args.append("--disable-uuid")
+        if not self.options.with_amr:
+            tc.configure_args.append("--disable-opencore-amr")
+        else:
+            tc.configure_args.append("--with-opencore-amr=%s" % self.dependencies["opencore-amr"].package_folder)
         if not self.options.with_opus:
             tc.configure_args.append("--disable-opus")
         else:
