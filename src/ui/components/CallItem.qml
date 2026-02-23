@@ -59,6 +59,17 @@ Rectangle {
 
     signal clicked
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Call")
+    Accessible.description: qsTr("Selected call: ") +
+                            qsTr("Call index: ") + control.callId +
+                            qsTr(", name: ") + control.contactName +
+                            qsTr(", phone: ") + control.phoneNumber +
+                            qsTr(", company: ") + control.company +
+                            qsTr(", city and country: ") + control.city + ", " + control.country
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.clicked()
+
     states: [
         State {
             when: control.isHolding
@@ -123,9 +134,7 @@ Rectangle {
                 right: parent.right
             }
 
-            Accessible.role: Accessible.StaticText
-            Accessible.name: nameLabel.text
-            Accessible.description: qsTr("The name or phone number of the caller")
+            Accessible.ignored: true
         }
 
         Label {
@@ -139,9 +148,7 @@ Rectangle {
                 right: parent.right
             }
 
-            Accessible.role: Accessible.StaticText
-            Accessible.name: companyLabel.text
-            Accessible.description: qsTr("The company the caller is a part of")
+            Accessible.ignored: true
         }
 
         Label {
@@ -155,9 +162,7 @@ Rectangle {
                 right: parent.right
             }
 
-            Accessible.role: Accessible.StaticText
-            Accessible.name: companyLabel.text
-            Accessible.description: qsTr("The city the caller is in as determined by the phone prefix / area code")
+            Accessible.ignored: true
         }
     }
 
@@ -215,19 +220,19 @@ Rectangle {
         property point originalPosition
 
         onActiveChanged: () => {
-                             if (dragHandler.active) {
-                                 // Save position to snap back on drag cancel
-                                 dragHandler.originalPosition = Qt.point(control.x, control.y)
-                             } else {
-                                 const dropResult = control.Drag.drop()
+            if (dragHandler.active) {
+                // Save position to snap back on drag cancel
+                dragHandler.originalPosition = Qt.point(control.x, control.y)
+            } else {
+                const dropResult = control.Drag.drop()
 
-                                 // Snap back to original position
-                                 if (dropResult !== Qt.MoveAction) {
-                                     control.x = dragHandler.originalPosition.x
-                                     control.y = dragHandler.originalPosition.y
-                                 }
-                             }
-                         }
+                // Snap back to original position
+                if (dropResult !== Qt.MoveAction) {
+                    control.x = dragHandler.originalPosition.x
+                    control.y = dragHandler.originalPosition.y
+                }
+            }
+        }
 
         Accessible.ignored: true
     }
@@ -241,10 +246,10 @@ Rectangle {
         anchors.fill: parent
 
         onDropped: (dragEvent) => {
-                       dragEvent.accept(Qt.MoveAction)
-                       SIPCallManager.transferCall(dragEvent.source.accountId, dragEvent.source.callId,
-                                                   control.accountId, control.callId)
-                   }
+            dragEvent.accept(Qt.MoveAction)
+            SIPCallManager.transferCall(dragEvent.source.accountId, dragEvent.source.callId,
+                                        control.accountId, control.callId)
+        }
 
         Accessible.ignored: true
     }
