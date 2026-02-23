@@ -40,14 +40,10 @@ Item {
         grabPermissions: PointerHandler.TakeOverForbidden
         gesturePolicy: TapHandler.WithinBounds
         onTapped: () => control.toggled()
-
-        Accessible.ignored: true
     }
 
     HoverHandler {
         id: favHoverHandler
         blocking: true
-
-        Accessible.ignored: true
     }
 }

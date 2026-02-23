@@ -194,23 +194,17 @@ Rectangle {
         TapHandler {
             id: hangupButtonTapHandler
             onTapped: SIPCallManager.endCall(control.accountId, control.callId)
-
-            Accessible.ignored: true
         }
     }
 
     HoverHandler {
         id: hoverHandler
         enabled: control.interactive
-
-        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => control.clicked()
         enabled: control.interactive
-
-        Accessible.ignored: true
     }
 
     DragHandler {

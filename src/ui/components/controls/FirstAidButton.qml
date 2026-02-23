@@ -72,13 +72,9 @@ Item {
 
     HoverHandler {
         id: firstAidHoverHandler
-
-        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => ViewHelper.showFirstAid()
-
-        Accessible.ignored: true
     }
 }

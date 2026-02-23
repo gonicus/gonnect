@@ -49,14 +49,10 @@ Item {
 
     HoverHandler {
         id: hoverHandler
-
-        Accessible.ignored: true
     }
 
     TapHandler {
         enabled: control.enabled
         onTapped: () => control.clicked()
-
-        Accessible.ignored: true
     }
 }

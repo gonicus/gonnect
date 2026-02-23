@@ -64,14 +64,10 @@ Item {
 
     HoverHandler {
         id: hoverHandler
-
-        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => control.selectCategory()
-
-        Accessible.ignored: true
     }
 
     function selectCategory() {

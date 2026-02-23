@@ -777,7 +777,7 @@ Item {
         }
 
         Accessible.role: Accessible.Border
-        Accessible.name: cqsTr("Drag bar")
+        Accessible.name: qsTr("Drag bar")
         Accessible.focusable: true
 
         HoverHandler {

@@ -354,15 +354,11 @@ Item {
 
             HoverHandler {
                 id: delgHoverHandler
-
-                Accessible.ignored: true
             }
 
             TapHandler {
                 id: delgTapHandler
                 onTapped: () => delg.switchTab()
-
-                Accessible.ignored: true
             }
         }
     }

@@ -87,15 +87,11 @@ Item {
         HoverHandler {
             id: autoScrollHoverHandler
             cursorShape: Qt.PointingHandCursor
-
-            Accessible.ignored: true
         }
 
         TapHandler {
             id: autoScrollTapHandler
             onTapped: () => autoScrollDownButton.scrollAction()
-
-            Accessible.ignored: true
         }
 
         function scrollAction() {

@@ -44,14 +44,10 @@ Item {
     HoverHandler {
         id: groupButtonHoverHandler
         cursorShape: Qt.PointingHandCursor
-
-        Accessible.ignored: true
     }
 
     TapHandler {
         onSingleTapped: control.clicked()
-
-        Accessible.ignored: true
     }
 
     ToolTip.visible: groupButtonHoverHandler.hovered && !!control.tooltipText

@@ -131,13 +131,9 @@ Item {
         grabPermissions: PointerHandler.ApprovesTakeOverByAnything
         exclusiveSignals: TapHandler.SingleTap
         onSingleTapped: () => SIPCallManager.call(delg.phoneNumber)
-
-        Accessible.ignored: true
     }
 
     HoverHandler {
         id: rowHoverHandler
-
-        Accessible.ignored: true
     }
 }

@@ -119,14 +119,10 @@ Item {
 
         HoverHandler {
             id: clearButtonHoverHandler
-
-            Accessible.ignored: true
         }
 
         TapHandler {
             onTapped: () => searchInputField.clear()
-
-            Accessible.ignored: true
         }
     }
 }

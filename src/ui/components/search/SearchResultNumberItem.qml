@@ -128,8 +128,6 @@ Rectangle {
                 control.manuallyHovered()
             }
         }
-
-        Accessible.ignored: true
     }
 
     TapHandler {
@@ -144,7 +142,5 @@ Rectangle {
                 control.triggerPrimaryAction()
             }
         }
-
-        Accessible.ignored: true
     }
 }

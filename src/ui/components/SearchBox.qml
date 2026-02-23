@@ -31,6 +31,11 @@ Item {
             right: parent.right
         }
 
+        Accessible.role: Accessible.EditableText
+        Accessible.name: qsTr("Search number")
+        Accessible.searchEdit: true
+        Accessible.onPressAction: () => internal.dialHighlightedNumber()
+
         onFocusChanged: (isFocused) => {
             if (isFocused) {
                 searchInputField.selectAll()

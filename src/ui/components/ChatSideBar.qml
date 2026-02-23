@@ -206,8 +206,6 @@ Item {
 
                 HoverHandler {
                     id: chatMessageHoverHandler
-
-                    Accessible.ignored: true
                 }
             }
         }

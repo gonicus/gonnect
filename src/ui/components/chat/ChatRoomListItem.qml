@@ -70,13 +70,9 @@ Item {
 
     HoverHandler {
         id: hoverHandler
-
-        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => control.clicked()
-
-        Accessible.ignored: true
     }
 }

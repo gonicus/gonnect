@@ -121,8 +121,6 @@ Item {
 
             HoverHandler {
                 id: participantHoverHandler
-
-                Accessible.ignored: true
             }
 
             TapHandler {
@@ -146,8 +144,6 @@ Item {
                         }
                     }
                 }
-
-                Accessible.ignored: true
             }
 
             Component {

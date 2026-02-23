@@ -24,6 +24,10 @@ Item {
     signal volumeChanged(real volume)
     signal muteToggled
 
+    Accessible.role: Accessible.Button
+    Accessible.name: qsTr("Change volume")
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.toggleVolumePopup()
 
     Rectangle {
         id: bg
@@ -35,6 +39,8 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: 300 }
         }
+
+        Accessible.ignored: true
     }
 
     Rectangle {
@@ -43,6 +49,8 @@ Item {
         radius: bg.radius
         color: Theme.backgroundOffsetHoveredColor
         anchors.fill: bg
+
+        Accessible.ignored: true
     }
 
     IconLabel {
@@ -52,6 +60,8 @@ Item {
             width: 16
             height: 16
         }
+
+        Accessible.ignored: true
     }
 
     HoverHandler {
@@ -62,13 +72,15 @@ Item {
         gesturePolicy: TapHandler.WithinBounds
         grabPermissions: PointerHandler.ApprovesTakeOverByAnything
         exclusiveSignals: TapHandler.SingleTap
-        onSingleTapped: () => {
-                            if (volumePopup.visible) {
-                                volumePopup.close()
-                            } else {
-                                volumePopup.open()
-                            }
-                        }
+        onSingleTapped: () => control.toggleVolumePopup()
+    }
+
+    function toggleVolumePopup() {
+        if (volumePopup.visible) {
+            volumePopup.close()
+        } else {
+            volumePopup.open()
+        }
     }
 
     VolumePopup {

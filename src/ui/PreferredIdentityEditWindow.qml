@@ -19,10 +19,10 @@ BaseWindow {
     property bool isNew: false
 
     onClosing: () => {
-                   if (control.preferredIdentity && !internal.didUseButton && control.isNew) {
-                       SIPManager.removePreferredIdentity(control.preferredIdentity)
-                   }
-               }
+        if (control.preferredIdentity && !internal.didUseButton && control.isNew) {
+            SIPManager.removePreferredIdentity(control.preferredIdentity)
+        }
+    }
 
     readonly property QtObject privateObject: QtObject {
         id: internal
@@ -107,6 +107,10 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.EditableText
+                Accessible.name: displayNameTextField.text
+                Accessible.searchEdit: true
             }
 
             TextField {
@@ -118,6 +122,10 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.EditableText
+                Accessible.name: prefixTextField.text
+                Accessible.searchEdit: true
             }
 
             TextField {
@@ -129,6 +137,10 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.EditableText
+                Accessible.name: identityTextField.text
+                Accessible.searchEdit: true
             }
 
             Column {
@@ -145,6 +157,10 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.role: Accessible.CheckBox
+                    Accessible.name: enabledCheckBox.text
+                    Accessible.focusable: true
                 }
 
                 CheckBox {
@@ -155,6 +171,10 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.role: Accessible.CheckBox
+                    Accessible.name: autoCheckBox.text
+                    Accessible.focusable: true
                 }
             }
         }
@@ -174,12 +194,17 @@ BaseWindow {
             Material.accent: Theme.redColor
 
             onClicked: () => {
-                           internal.didUseButton = true
-                           if (control.preferredIdentity) {
-                               SIPManager.removePreferredIdentity(control.preferredIdentity)
-                           }
-                           control.close()
-                       }
+                internal.didUseButton = true
+                if (control.preferredIdentity) {
+                    SIPManager.removePreferredIdentity(control.preferredIdentity)
+                }
+                control.close()
+            }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: deleteButton.text
+            Accessible.focusable: true
+            Accessible.onPressAction: () => deleteButton.click()
         }
 
         Button {
@@ -198,10 +223,15 @@ BaseWindow {
                 rightMargin: 10
             }
             onClicked: () => {
-                           internal.didUseButton = true
-                           internal.save()
-                           control.close()
-                       }
+                internal.didUseButton = true
+                internal.save()
+                control.close()
+            }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: saveButton.text
+            Accessible.focusable: true
+            Accessible.onPressAction: () => saveButton.click()
         }
     }
 }

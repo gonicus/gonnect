@@ -126,15 +126,11 @@ Item {
 
         HoverHandler {
             id: conferenceButtonHoverHandler
-
-            Accessible.ignored: true
         }
 
         TapHandler {
             id: conferenceButtonTapHandler
             onTapped: () => SIPCallManager.startConference()
-
-            Accessible.ignored: true
         }
     }
 }

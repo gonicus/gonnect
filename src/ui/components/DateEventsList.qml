@@ -255,8 +255,6 @@ ListView {
         HoverHandler {
             id: rowHoverHandler
             enabled: control.enabled
-
-            Accessible.ignored: true
         }
 
         TapHandler {
@@ -277,8 +275,6 @@ ListView {
                     dateEventContextMenuComponent.createObject(delg).popup()
                 }
             }
-
-            Accessible.ignored: true
         }
     }
 }

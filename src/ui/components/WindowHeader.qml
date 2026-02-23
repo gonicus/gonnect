@@ -23,6 +23,9 @@ Rectangle {
     readonly property var window: control.Window.window
     readonly property bool active: control.Window.window?.active ?? false
 
+    Accessible.role: Accessible.Heading
+    Accessible.name: qsTr("GOnnect window header")
+
     // This rectangle makes the bottom rounded corners of rect straight
     Rectangle {
         height: control.radius
@@ -32,6 +35,8 @@ Rectangle {
             right: control.right
             bottom: control.bottom
         }
+
+        Accessible.ignored: true
     }
 
     DragHandler {
@@ -66,6 +71,8 @@ Rectangle {
         anchors.centerIn: parent
         color: control.active ? Theme.foregroundHeaderIcons : Theme.foregroundHeaderIconsInactive
         text: control.window?.title ?? ""
+
+        Accessible.ignored: true
     }
 
     Row {

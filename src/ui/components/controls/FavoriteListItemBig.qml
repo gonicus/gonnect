@@ -214,8 +214,6 @@ Item {
                 }
             }
         }
-
-        Accessible.ignored: true
     }
 
     function startMeetingOrCall() {
@@ -230,7 +228,5 @@ Item {
 
     HoverHandler {
         id: rowHoverHandler
-
-        Accessible.ignored: true
     }
 }

@@ -126,8 +126,6 @@ Item {
                         control.manuallyHovered()
                     }
                 }
-
-                Accessible.ignored: true
             }
 
             TapHandler {
@@ -143,8 +141,6 @@ Item {
                         control.triggerPrimaryAction()
                     }
                 }
-
-                Accessible.ignored: true
             }
         }
     }

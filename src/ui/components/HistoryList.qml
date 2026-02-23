@@ -457,16 +457,12 @@ Item {
                         }
                     }
                 }
-
-                Accessible.ignored: true
             }
 
             HoverHandler {
                 id: rowHoverHandler
                 enabled: !delg.isAnonymous
             }
-
-            Accessible.ignored: true
         }
     }
 }

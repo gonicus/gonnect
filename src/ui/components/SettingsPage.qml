@@ -713,16 +713,12 @@ Item {
 
                                     HoverHandler {
                                         id: delegateHoverHandler
-
-                                        Accessible.ignored: true
                                     }
 
                                     TapHandler {
                                         onTapped: () => preferredIdentityEditWindowComponent.createObject(
                                                       control,
                                                       { preferredIdentity: preferredIdentityDelegate.modelData })
-
-                                        Accessible.ignored: true
                                     }
                                 }
                             }

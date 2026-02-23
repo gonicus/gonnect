@@ -48,14 +48,10 @@ Item {
 
         HoverHandler {
             id: rightHoverHandler
-
-            Accessible.ignored: true
         }
 
         TapHandler {
             onTapped: () => control.numberSelected(searchBox.text, "", modeSelector.currentValue)
-
-            Accessible.ignored: true
         }
 
         Accessible.role: Accessible.Button
@@ -108,8 +104,6 @@ Item {
 
         TapHandler {
             onTapped: () => searchBox.activate()
-
-            Accessible.ignored: true
         }
 
         Accessible.role: Accessible.Button
@@ -184,14 +178,10 @@ Item {
 
         HoverHandler {
             id: clearButtonHoveredHandler
-
-            Accessible.ignored: true
         }
 
         TapHandler {
             onTapped: () => searchBox.clear()
-
-            Accessible.ignored: true
         }
     }
 

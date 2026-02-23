@@ -27,6 +27,11 @@ BaseWindow {
         id: container
         anchors.fill: parent
 
+        Accessible.role: Accessible.Announcement
+        Accessible.name: qsTr("Incoming emergency call from ") + control.displayName
+        Accessible.description: ongoingCallInfo.text
+        Accessible.searchEdit: true
+
         Item {
             id: cross
             width: 100
@@ -46,6 +51,8 @@ BaseWindow {
                     bottom: parent.bottom
                     horizontalCenter: parent.horizontalCenter
                 }
+
+                Accessible.ignored: true
             }
 
             Rectangle {
@@ -57,7 +64,11 @@ BaseWindow {
                     right: parent.right
                     verticalCenter: parent.verticalCenter
                 }
+
+                Accessible.ignored: true
             }
+
+            Accessible.ignored: true
         }
 
         Item {
@@ -87,9 +98,12 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.ignored: true
                 }
 
                 Label {
+                    id: ongoingCallInfo
                     text: qsTr("Answering the call will automatically terminate all other ongoing calls.")
                     wrapMode: Label.Wrap
                     font.pixelSize: 14
@@ -97,8 +111,14 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.ignored: true
                 }
+
+                Accessible.ignored: true
             }
+
+            Accessible.ignored: true
         }
 
         Button {
@@ -118,6 +138,11 @@ BaseWindow {
                 control.close()
                 control.destroy()
             }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: answerCallButton.text
+            Accessible.focusable: true
+            Accessible.onPressAction: () => answerCallButton.click()
         }
     }
 }
