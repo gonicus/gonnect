@@ -32,6 +32,7 @@ public:
 
     bool isRegistered() const { return m_isRegistered; }
     bool isInstantMessagingAllowed() const;
+    bool isRTTEnabled() const { return m_rttEnabled; }
 
     QString call(const QString &number, const QString &contactId = "",
                  const QString &preferredIdentity = "auto", bool silent = false);
@@ -77,6 +78,8 @@ private:
     bool m_isInstantMessagingAllowed = false;
     bool m_shallNegotiateCapabilities = true;
     bool m_useInstantMessagingWithoutCheck = true;
+
+    bool m_rttEnabled = true;
 
     QString m_account;
     QString m_domain;
