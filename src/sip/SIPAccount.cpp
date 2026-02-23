@@ -155,6 +155,8 @@ void SIPAccount::initialize()
     m_accountConfig.mediaConfig.transportConfig.randomizePort =
             m_settings.value("randomizeRtpPorts", false).toBool();
 
+    m_rttEnabled = m_settings.value("realTimeText", true).toBool();
+
     // Tweak IPv6 account settings
     if (m_transportNet == TRANSPORT_NET::IPv4) {
         m_accountConfig.sipConfig.ipv6Use = PJSUA_IPV6_DISABLED;
