@@ -64,7 +64,7 @@ class PjSIPConan(ConanFile):
         if self.options.with_opus:
             self.requires("opus/1.5.2")
         if self.options.with_amr:
-            self.requires("opencore-amr/"0.1.6")
+            self.requires("opencore-amr/0.1.6")
 
     def config_options(self):
         if self.settings.os == "Windows":
