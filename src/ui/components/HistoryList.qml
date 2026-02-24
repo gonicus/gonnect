@@ -34,6 +34,10 @@ Item {
         visible: control.hasPastCalls
         anchors.fill: parent
 
+        Accessible.role: Accessible.List
+        Accessible.name: qsTr("History")
+        Accessible.description: qsTr("Searchable list of past calls and meetings")
+
         ScrollBar.vertical: ScrollBar {
             id: verticalScrollBar
             width: 10

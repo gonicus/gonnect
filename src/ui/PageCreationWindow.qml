@@ -69,13 +69,17 @@ BaseWindow {
             text: qsTr("Name")
 
             Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("Page name label")
+            Accessible.name: qsTr("Page name")
         }
 
         TextField {
             id: titleEntry
             Layout.fillWidth: true
             onAccepted: () => pageConfirm.click()
+
+            Accessible.role: Accessible.EditableText
+            Accessible.name: qsTr("Enter the page name")
+            Accessible.focusable: true
         }
 
         Label {
@@ -116,7 +120,6 @@ BaseWindow {
                 id: iconDelg
                 width: parent.width
 
-                // TODO: Describe icon?
                 Accessible.role: Accessible.ListItem
                 Accessible.description: qsTr("Currently selected page icon option")
                 Accessible.focusable: true

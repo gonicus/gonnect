@@ -19,6 +19,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: Theme.backgroundSecondaryColor
+
+        Accessible.ignored: true
     }
 
     Timer {
@@ -320,6 +322,9 @@ Item {
                             right: parent.right
                         }
 
+                        Accessible.role: Accessible.Column
+                        Accessible.name: themeLabel.text
+
                         Label {
                             id: themeLabel
                             text: qsTr('Color scheme')
@@ -328,8 +333,7 @@ Item {
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: themeLabel.text
+                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -490,6 +494,8 @@ Item {
                                         source: Icons.viewRefresh
                                     }
                                 }
+
+                                Accessible.ignored: true
                             }
                         }
                     }
@@ -511,6 +517,9 @@ Item {
                             right: parent.right
                         }
 
+                        Accessible.role: Accessible.Column
+                        Accessible.name: preferredIdentityHeader.text
+
                         Label {
                             id: preferredIdentityHeader
                             text: qsTr('Standard preferred identity')
@@ -519,8 +528,7 @@ Item {
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: preferredIdentityHeader.text
+                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -629,6 +637,10 @@ Item {
                                     required property int index
                                     required property PreferredIdentity modelData
 
+                                    Accessible.role: Accessible.StaticText
+                                    Accessible.name: preferredIdentityLabel.text
+                                    Accessible.description: qsTr("Currently highlighted preferred identity. Tap to edit.")
+
                                     Rectangle {
                                         visible: delegateHoverHandler.hovered
                                         color: Theme.backgroundOffsetHoveredColor
@@ -641,9 +653,7 @@ Item {
                                             bottomMargin: 5
                                         }
 
-                                        Accessible.role: Accessible.StaticText
-                                        Accessible.name: preferredIdentityLabel.text
-                                        Accessible.description: qsTr("Currently highlighted preferred identity. Tap to edit.")
+                                        Accessible.ignored: true
                                     }
 
                                     Rectangle {
@@ -794,6 +804,9 @@ Item {
                             right: parent.right
                         }
 
+                        Accessible.role: Accessible.Column
+                        Accessible.name: inputDeviceHeader.text
+
                         Label {
                             id: inputDeviceHeader
                             text: qsTr('Input device')
@@ -802,8 +815,7 @@ Item {
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: inputDeviceHeader.text
+                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -865,6 +877,9 @@ Item {
                             right: parent.right
                         }
 
+                        Accessible.role: Accessible.Column
+                        Accessible.name: outputDeviceHeader.text
+
                         Label {
                             id: outputDeviceHeader
                             text: qsTr('Output device')
@@ -873,8 +888,7 @@ Item {
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: outputDeviceHeader.text
+                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -936,6 +950,9 @@ Item {
                             right: parent.right
                         }
 
+                        Accessible.role: Accessible.Column
+                        Accessible.name: outputRingDeviceHeader.text
+
                         Label {
                             id: outputRingDeviceHeader
                             text: qsTr('Output device for ring tone')
@@ -944,8 +961,7 @@ Item {
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: outputRingDeviceHeader.text
+                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -1007,6 +1023,9 @@ Item {
                             right: parent.right
                         }
 
+                        Accessible.role: Accessible.Column
+                        Accessible.name: ringToneHeader.text
+
                         Label {
                             id: ringToneHeader
                             text: qsTr('Ring tone')
@@ -1015,8 +1034,7 @@ Item {
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: ringToneHeader.text
+                            Accessible.ignored: true
                         }
 
                         Rectangle {
@@ -1129,6 +1147,10 @@ Item {
                             right: parent.right
                         }
 
+                        Accessible.role: Accessible.Column
+                        Accessible.name: ringToneVolumeHeader.text
+                        Accessible.description: qsTr("Currently set to: ") + ringToneVolumeSliderLabel.text
+
                         Label {
                             id: ringToneVolumeHeader
                             text: qsTr('Ring tone volume')
@@ -1137,9 +1159,7 @@ Item {
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: ringToneVolumeHeader.text
-                            Accessible.description: qsTr("Currently set to: ") + ringToneVolumeSliderLabel.text
+                            Accessible.ignored: true
                         }
 
                         Item {
@@ -1201,6 +1221,11 @@ Item {
                             right: parent.right
                         }
 
+
+                        Accessible.role: Accessible.Column
+                        Accessible.name: ringTonePauseHeader.text
+                        Accessible.description: qsTr("Currently set to: ") + ringTonePauseValueLabel.text
+
                         Label {
                             id: ringTonePauseHeader
                             text: qsTr('Pause between ring tones [s]')
@@ -1209,9 +1234,7 @@ Item {
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: ringTonePauseHeader.text
-                            Accessible.description: qsTr("Currently set to: ") + ringTonePauseValueLabel.text
+                            Accessible.ignored: true
                         }
 
                         Item {

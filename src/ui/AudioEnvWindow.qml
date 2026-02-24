@@ -30,6 +30,10 @@ BaseWindow {
                 rightMargin: 20
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Audio environment error")
+            Accessible.description: audioDeviceError.text
+
             Label {
                 id: audioDeviceError
                 text: qsTr("No fitting audio environment could be found. Please select the desired audio devices.")
@@ -40,9 +44,7 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: qsTr("Audio environment error")
-                Accessible.description: audioDeviceError.text
+                Accessible.ignored: true
             }
 
             Column {
@@ -50,6 +52,10 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.Column
+                Accessible.name: qsTr("Input device selection header")
+                Accessible.description: qsTr("Header for the input device selection below")
 
                 Label {
                     id: inputAudioLabel
@@ -59,9 +65,7 @@ BaseWindow {
                         right: parent.right
                     }
 
-                    Accessible.role: Accessible.StaticText
-                    Accessible.name: qsTr("Input device selection header")
-                    Accessible.description: qsTr("Header for the input device selection below")
+                    Accessible.ignored: true
                 }
 
                 ComboBox {
@@ -127,6 +131,10 @@ BaseWindow {
                     right: parent.right
                 }
 
+                Accessible.role: Accessible.Column
+                Accessible.name: qsTr("Output device selection header")
+                Accessible.description: qsTr("Header for the output device selection below")
+
                 Label {
                     text: qsTr('Output device')
                     anchors {
@@ -134,9 +142,7 @@ BaseWindow {
                         right: parent.right
                     }
 
-                    Accessible.role: Accessible.StaticText
-                    Accessible.name: qsTr("Output device selection header")
-                    Accessible.description: qsTr("Header for the output device selection below")
+                    Accessible.ignored: true
                 }
 
                 ComboBox {
@@ -202,6 +208,10 @@ BaseWindow {
                     right: parent.right
                 }
 
+                Accessible.role: Accessible.Column
+                Accessible.name: qsTr("Ring tone output device")
+                Accessible.description: outputRingToneAudioLabel.text
+
                 Label {
                     id: outputRingToneAudioLabel
                     text: qsTr('Output device for ring tone')
@@ -210,9 +220,7 @@ BaseWindow {
                         right: parent.right
                     }
 
-                    Accessible.role: Accessible.StaticText
-                    Accessible.name: qsTr("Ring tone output device")
-                    Accessible.description: outputRingToneAudioLabel.text
+                    Accessible.ignored: true
                 }
 
                 ComboBox {

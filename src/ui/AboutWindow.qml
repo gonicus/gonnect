@@ -31,6 +31,10 @@ BaseWindow {
             margins: 20
         }
 
+        Accessible.role: Accessible.Column
+        Accessible.name: qsTr("Gonnect headline")
+        Accessible.description: appHeader.text
+
         Settings {
             id: genericSettings
             location: ViewHelper.userConfigPath
@@ -55,9 +59,7 @@ BaseWindow {
             font.weight: Font.DemiBold
             anchors.horizontalCenter: parent.horizontalCenter
 
-            Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("Gonnect headline")
-            Accessible.description: appHeader.text
+            Accessible.ignored: true
         }
 
         Item {
@@ -66,13 +68,15 @@ BaseWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             width: appLabel.width + clipboardButton.width
 
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("Gonnect version")
+            Accessible.description: appLabel.text
+
             Label {
                 id: appLabel
                 text: qsTr("Version: v%1").arg(ViewHelper.appVersion())
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: qsTr("Gonnect version")
-                Accessible.description: appLabel.text
+                Accessible.ignored: true
             }
 
             ClipboardButton {
@@ -98,6 +102,8 @@ BaseWindow {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
 
         Row {
@@ -113,6 +119,7 @@ BaseWindow {
                 Accessible.role: Accessible.StaticText
                 Accessible.name: qsTr('Homepage')
                 Accessible.description: qsTr("Visit the project homepage")
+                Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.homePageURL)
 
                 HoverHandler {
                     enabled: parent.hoveredLink
@@ -129,6 +136,7 @@ BaseWindow {
                 Accessible.role: Accessible.StaticText
                 Accessible.name: qsTr('Homepage')
                 Accessible.description: qsTr("Visit the project bug tracker")
+                Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.issueTrackerURL)
 
                 HoverHandler {
                     enabled: parent.hoveredLink
@@ -145,6 +153,7 @@ BaseWindow {
                 Accessible.role: Accessible.StaticText
                 Accessible.name: qsTr('Homepage')
                 Accessible.description: qsTr("Visit the online project documentation")
+                Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.documentationURL)
 
                 HoverHandler {
                     enabled: parent.hoveredLink

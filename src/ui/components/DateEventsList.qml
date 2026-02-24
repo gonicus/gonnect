@@ -10,6 +10,11 @@ ListView {
     id: control
     topMargin: 20
     clip: true
+
+    Accessible.role: Accessible.List
+    Accessible.name: qsTr("Date events")
+    Accessible.description: qsTr("List of all the currently active and upcoming date events")
+
     model: DateEventsModel {}
     section.property: "date"
     section.delegate: Rectangle {
@@ -125,6 +130,8 @@ ListView {
             anchors.fill: parent
             radius: 4
             color: rowHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+
+            Accessible.ignored: true
         }
 
         RowLayout {

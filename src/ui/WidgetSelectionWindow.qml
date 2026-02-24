@@ -264,7 +264,7 @@ BaseWindow {
 
                                 Accessible.role: Accessible.CheckBox
                                 Accessible.name: qsTr("Settings checkbox")
-                                Accessible.description: qsTr("Ceckbox for widget setting ") + delgLabel.text
+                                Accessible.description: qsTr("Checkbox for widget setting ") + delgLabel.text
                                 Accessible.focusable: true
 
                                 Connections {
@@ -283,8 +283,7 @@ BaseWindow {
                                   : ""
 
                             Accessible.role: Accessible.StaticText
-                            Accessible.name: qsTr("Settings label")
-                            Accessible.description: qsTr("Label for widget setting ") + delgLabel.text
+                            Accessible.name: qsTr("Widget setting ") + delgLabel.text
                         }
 
                         Loader {

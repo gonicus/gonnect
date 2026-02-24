@@ -105,6 +105,10 @@ BaseWindow {
                 right: parent.right
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("SIP wizard notification")
+            Accessible.description: templateHeaderLabel.text
+
             Image {
                 source: Icons.preferencesSystemNetwork
                 sourceSize.width: 128
@@ -120,10 +124,6 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
-
-                Accessible.role: Accessible.StaticText
-                Accessible.name: qsTr("SIP wizard notification")
-                Accessible.description: templateHeaderLabel.text
             }
 
             Label {
@@ -134,8 +134,7 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: qsTr("SIP template selection label")
+                Accessible.ignored: true
             }
 
             ComboBox {
@@ -382,6 +381,12 @@ BaseWindow {
                 right: parent.right
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Successful configuration file creation")
+            Accessible.description: wizardInstallationLabel.text + " "
+                                    + wizardInstallationSaveLabel.text + " "
+                                    + configPathLabel.text
+
             Image {
                 id: wizardStatusImage
                 source: Icons.dataSuccess
@@ -399,9 +404,7 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: qsTr("Successful configuration file creation")
-                Accessible.description: wizardInstallationLabel.text
+                Accessible.ignored: true
             }
 
             Label {
@@ -413,9 +416,7 @@ BaseWindow {
                     right: parent.right
                 }
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: qsTr("Configuration file location")
-                Accessible.description: wizardInstallationSaveLabel.text + configPathLabel.text
+                Accessible.ignored: true
             }
 
             Item {
@@ -428,9 +429,7 @@ BaseWindow {
                     id: configPathLabel
                     font.family: "Courier"
 
-                    Accessible.role: Accessible.StaticText
-                    Accessible.name: qsTr("Configuration file location")
-                    Accessible.description: configPathLabel.text
+                    Accessible.ignored: true
                 }
 
                 ClipboardButton {

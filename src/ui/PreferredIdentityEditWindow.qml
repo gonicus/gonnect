@@ -110,7 +110,7 @@ BaseWindow {
 
                 Accessible.role: Accessible.EditableText
                 Accessible.name: displayNameTextField.text
-                Accessible.searchEdit: true
+                Accessible.focusable: true
             }
 
             TextField {
@@ -125,7 +125,7 @@ BaseWindow {
 
                 Accessible.role: Accessible.EditableText
                 Accessible.name: prefixTextField.text
-                Accessible.searchEdit: true
+                Accessible.focusable: true
             }
 
             TextField {
@@ -140,7 +140,7 @@ BaseWindow {
 
                 Accessible.role: Accessible.EditableText
                 Accessible.name: identityTextField.text
-                Accessible.searchEdit: true
+                Accessible.focusable: true
             }
 
             Column {

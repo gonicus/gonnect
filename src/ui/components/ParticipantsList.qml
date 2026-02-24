@@ -169,7 +169,7 @@ Item {
                         onClicked: () => control.conferenceConnector.grantParticipantRole(delg.id, ConferenceParticipant.Role.Moderator)
 
                         Accessible.role: Accessible.MenuItem
-                        Accessible.name: participantKick.text
+                        Accessible.name: participantMakeMod.text
                         Accessible.focusable: true
                         Accessible.onPressAction: () => participantMakeMod.click()
                     }

@@ -30,6 +30,11 @@ BaseWindow {
         required property string key
         required property string description
 
+        Accessible.role: Accessible.HotkeyField
+        Accessible.name: qsTr("Shortcut key: ") + keyLabel.text
+        Accessible.description: descriptionLabel.text
+        Accessible.focusable: true
+
         Label {
             id: keyLabel
             text: delg.key
@@ -40,10 +45,7 @@ BaseWindow {
                 left: parent.left
             }
 
-            Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("Shortcut key")
-            Accessible.description: keyLabel.text
-            Accessible.focusable: true
+            Accessible.ignored: true
         }
 
         Label {
@@ -58,10 +60,7 @@ BaseWindow {
                 rightMargin: 10
             }
 
-            Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("Shortcut description")
-            Accessible.description: descriptionLabel.text
-            Accessible.focusable: true
+            Accessible.ignored: true
         }
     }
 

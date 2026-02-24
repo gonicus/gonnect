@@ -87,6 +87,7 @@ Item {
         Accessible.role: Accessible.EditableText
         Accessible.name: placeholderLabel.text
         Accessible.searchEdit: true
+        Accessible.focusable: true
     }
 
     Item {
