@@ -126,6 +126,9 @@ Item {
                     height: roomTextField.implicitHeight
                     spacing: 20
 
+                    Accessible.role: Accessible.Row
+                    Accessible.name: qsTr("Set room name")
+
                     Label {
                         text: qsTr("Room name:")
                         anchors.verticalCenter: parent.verticalCenter
@@ -190,6 +193,9 @@ Item {
                     height: roomTextField2.implicitHeight
                     spacing: 20
 
+                    Accessible.role: Accessible.Row
+                    Accessible.name: qsTr("Set room name")
+
                     Label {
                         text: qsTr("Room name:")
                         anchors.verticalCenter: parent.verticalCenter
@@ -228,13 +234,15 @@ Item {
         id: waitingForAuthComponent
 
         Item {
+            Accessible.role: Accessible.StaticText
+            Accessible.name: authMessage.text
+
             Label {
                 id: authMessage
                 anchors.centerIn: parent
                 text: qsTr("Please authenticate in the opened browser window...")
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: authMessage.text
+                Accessible.ignored: true
             }
         }
     }
