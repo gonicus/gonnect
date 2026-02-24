@@ -103,6 +103,8 @@ Item {
         text: internal.niceStatusCodes.includes(control.statusCode)
               ? EnumTranslation.sipStatusCode(control.statusCode)
               : ("🕓  " + ViewHelper.secondsToNiceText(internal.elapsedSeconds))
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -174,6 +176,8 @@ Item {
             anchors.centerIn: parent
             font.pixelSize: 50
         }
+
+        Accessible.ignored: true
     }
 
     Button {

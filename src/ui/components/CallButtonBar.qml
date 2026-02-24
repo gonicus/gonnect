@@ -77,6 +77,8 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
+
+        Accessible.ignored: true
     }
 
     IconLabel {
@@ -212,6 +214,10 @@ Item {
                             id: txCol
                             spacing: 8
 
+                            Accessible.role: Accessible.Column
+                            Accessible.name: qsTr("Transmission statistics")
+                            Accessible.description: qsTr("Call quality metrics")
+
                             Label {
                                 text: qsTr("Transmit")
                                 font {
@@ -219,10 +225,9 @@ Item {
                                     pixelSize: 16
                                 }
 
-                                Accessible.role: Accessible.StaticText
-                                Accessible.name: qsTr("Transmission statistics")
-                                Accessible.description: qsTr("Call quality metrics")
+                                Accessible.ignored: true
                             }
+
                             Row {
                                 spacing: 8
                                 Label {
@@ -313,10 +318,17 @@ Item {
                             width: 1
                             height: txCol.height
                             color: Theme.borderColor
+
+                            Accessible.ignored: true
                         }
 
                         Column {
                             spacing: 8
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: qsTr("Receiver statistics")
+                            Accessible.description: qsTr("Call quality metrics")
+
                             Label {
                                 text: qsTr("Receive")
                                 font {
@@ -324,10 +336,9 @@ Item {
                                     pixelSize: 16
                                 }
 
-                                Accessible.role: Accessible.StaticText
-                                Accessible.name: qsTr("Receiver statistics")
-                                Accessible.description: qsTr("Call quality metrics")
+                                Accessible.ignored: true
                             }
+
                             Row {
                                 spacing: 8
                                 Label {
@@ -422,6 +433,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.ignored: true
                     }
 
                     Row {
@@ -471,6 +484,8 @@ Item {
             leftMargin: 20
             verticalCenter: parent.verticalCenter
         }
+
+        Accessible.ignored: true
     }
 
     IconLabel {
@@ -536,7 +551,7 @@ Item {
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Camera control")
-            Accessible.description: qsTr("Enabled or disable your camera")
+            Accessible.description: qsTr("Enable or disable your camera")
             Accessible.focusable: true
             Accessible.onPressAction: () => videoMuteButton.click()
         }
@@ -563,6 +578,8 @@ Item {
             color: Theme.borderColor
             enabled: control.areInCallButtonsEnabled
             anchors.verticalCenter: parent.verticalCenter
+
+            Accessible.ignored: true
         }
 
         BarButton {

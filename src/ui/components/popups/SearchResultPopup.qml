@@ -139,6 +139,8 @@ Popup {
                 left: filterBar.right
                 leftMargin: 12
             }
+
+            Accessible.ignored: true
         }
 
         Item {

@@ -17,6 +17,10 @@ Item {
         contentHeight: options.implicitHeight
         ScrollBar.vertical: ScrollBar { width: 10 }
 
+        Accessible.role: Accessible.ButtonMenu
+        Accessible.name: firstAidHeader.text
+        Accessible.description: firstAidDescription.text
+
         Shortcut {
             sequence: "Esc"
             onActivated: control.StackView.view.popCurrentItem(StackView.Immediate)
@@ -33,9 +37,7 @@ Item {
                 font.pixelSize: 32
                 wrapMode: Label.Wrap
 
-                Accessible.role: Accessible.StaticText
-                Accessible.name: firstAidHeader.text
-                Accessible.description: firstAidDescription.text
+                Accessible.ignored: true
             }
 
             Label {

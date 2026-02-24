@@ -226,13 +226,19 @@ Item {
                 anchors.fill: parent
                 radius: parent.radius
                 color: Theme.backgroundOffsetColor
+
+                Accessible.ignored: true
             }
 
             Label {
                 id: dtmfFeedbackLabel
                 anchors.centerIn: parent
                 font.pixelSize: 50
+
+                Accessible.ignored: true
             }
+
+            Accessible.ignored: true
         }
     }
 

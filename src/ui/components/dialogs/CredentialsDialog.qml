@@ -26,7 +26,7 @@ BaseDialog {
         }
 
         Accessible.role: Accessible.StaticText
-        Accessible.name: control.text + contentLabel.text
+        Accessible.name: control.title + ", " + contentLabel.text
     }
 
     TextField {
