@@ -370,6 +370,10 @@ Item {
                                 width: parent.width
                                 text: darkModeDelg.displayName
 
+                                font.family: darkModeComboBox.font.family
+                                font.weight: darkModeComboBox.font.weight
+                                font.pointSize: darkModeComboBox.font.pointSize
+
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: darkModeDelg.displayName
                                 Accessible.description: qsTr("Currently selected theme option")
@@ -558,6 +562,10 @@ Item {
                                 id: standardPreferredIdentityDelg
                                 width: parent.width
                                 text: standardPreferredIdentityDelg.displayName
+
+                                font.family: standardPreferredIdentitySelector.font.family
+                                font.weight: standardPreferredIdentitySelector.font.weight
+                                font.pointSize: standardPreferredIdentitySelector.font.pointSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: standardPreferredIdentityDelg.displayName
@@ -838,6 +846,10 @@ Item {
                                 width: parent.width
                                 text: inputAudioSelectorDelg.name
 
+                                font.family: inputAudioSelector.font.family
+                                font.weight: inputAudioSelector.font.weight
+                                font.pointSize: inputAudioSelector.font.pointSize
+
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: inputAudioSelectorDelg.name
                                 Accessible.description: qsTr("Currently selected input option")
@@ -911,6 +923,10 @@ Item {
                                 width: parent.width
                                 text: outputAudioSelectorDelg.name
 
+                                font.family: outputAudioSelector.font.family
+                                font.weight: outputAudioSelector.font.weight
+                                font.pointSize: outputAudioSelector.font.pointSize
+
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: outputAudioSelectorDelg.name
                                 Accessible.description: qsTr("Currently selected output option")
@@ -983,6 +999,10 @@ Item {
                                 id: outputRingAudioSelectorDelg
                                 width: parent.width
                                 text: outputRingAudioSelectorDelg.name
+
+                                font.family: outputRingToneAudioSelector.font.family
+                                font.weight: outputRingToneAudioSelector.font.weight
+                                font.pointSize: outputRingToneAudioSelector.font.pointSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: outputRingAudioSelectorDelg.name

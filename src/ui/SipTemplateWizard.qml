@@ -158,6 +158,10 @@ BaseWindow {
                     width: parent.width
                     text: templateSelectBoxDelg.name
 
+                    font.family: templateSelectBox.font.family
+                    font.weight: templateSelectBox.font.weight
+                    font.pointSize: templateSelectBox.font.pointSize
+
                     Accessible.role: Accessible.ListItem
                     Accessible.name: templateSelectBoxDelg.name
                     Accessible.description: qsTr("Currently selected SIP template")

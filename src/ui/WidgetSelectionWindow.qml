@@ -123,6 +123,10 @@ BaseWindow {
                     id: widgetDelg
                     width: parent.width
 
+                    font.family: widgetSelection.font.family
+                    font.weight: widgetSelection.font.weight
+                    font.pointSize: widgetSelection.font.pointSize
+
                     Accessible.role: Accessible.ListItem
                     Accessible.name: widgetDelg.name
                     Accessible.description: qsTr("Currently selected widget option")

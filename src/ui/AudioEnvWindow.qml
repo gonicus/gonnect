@@ -88,6 +88,10 @@ BaseWindow {
                         width: parent.width
                         text: inputAudioSelectorDelg.name
 
+                        font.family: inputAudioSelector.font.family
+                        font.weight: inputAudioSelector.font.weight
+                        font.pointSize: inputAudioSelector.font.pointSize
+
                         Accessible.role: Accessible.ListItem
                         Accessible.name: inputAudioSelectorDelg.name
                         Accessible.description: qsTr("Currently selected input device")
@@ -164,6 +168,10 @@ BaseWindow {
                         id: outputAudioSelectorDelg
                         width: parent.width
                         text: outputAudioSelectorDelg.name
+
+                        font.family: outputAudioSelector.font.family
+                        font.weight: outputAudioSelector.font.weight
+                        font.pointSize: outputAudioSelector.font.pointSize
 
                         Accessible.role: Accessible.ListItem
                         Accessible.name: outputAudioSelectorDelg.name
@@ -242,6 +250,10 @@ BaseWindow {
                         id: outputRingToneAudioSelectorDelg
                         width: parent.width
                         text: outputRingToneAudioSelectorDelg.name
+
+                        font.family: outputRingToneAudioSelector.font.family
+                        font.weight: outputRingToneAudioSelector.font.weight
+                        font.pointSize: outputRingToneAudioSelector.font.pointSize
 
                         Accessible.role: Accessible.ListItem
                         Accessible.name: outputRingToneAudioSelectorDelg.name

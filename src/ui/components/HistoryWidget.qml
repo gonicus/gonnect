@@ -81,6 +81,10 @@ BaseWidget {
                     width: parent.width
                     text: historyFilterMediumSelectorDelg.label
 
+                    font.family: historyFilterMediumSelector.font.family
+                    font.weight: historyFilterMediumSelector.font.weight
+                    font.pointSize: historyFilterMediumSelector.font.pointSize
+
                     Accessible.role: Accessible.ListItem
                     Accessible.name: historyFilterMediumSelectorDelg.label
                     Accessible.description: qsTr("Currently selected call type")
@@ -127,6 +131,10 @@ BaseWidget {
                     id: historyFilterTypeSelectorDelg
                     width: parent.width
                     text: historyFilterTypeSelectorDelg.label
+
+                    font.family: historyFilterTypeSelector.font.family
+                    font.weight: historyFilterTypeSelector.font.weight
+                    font.pointSize: historyFilterTypeSelector.font.pointSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: historyFilterTypeSelectorDelg.label

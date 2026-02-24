@@ -120,6 +120,10 @@ BaseWindow {
                 id: iconDelg
                 width: parent.width
 
+                font.family: iconSelection.font.family
+                font.weight: iconSelection.font.weight
+                font.pointSize: iconSelection.font.pointSize
+
                 Accessible.role: Accessible.ListItem
                 Accessible.description: qsTr("Currently selected page icon option")
                 Accessible.focusable: true
