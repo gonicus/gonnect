@@ -31,6 +31,7 @@ public:
     void onInstantMessage(pj::OnInstantMessageParam &prm) override;
     void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
     void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
+    void onCallRxText(pj::OnCallRxTextParam &prm) override;
 
     SIPAccount *account() const { return m_account; };
     pj::AudioMedia *audioMedia() const;
@@ -91,6 +92,8 @@ public:
     double rxJitter() const { return m_jitterRx; }
     double rxEffectiveDelay() const { return m_effDelayRx; }
 
+    void rttSendText(const QString& text);
+
 Q_SIGNALS:
     void callQualityInfoChanged();
 
@@ -114,6 +117,7 @@ Q_SIGNALS:
     void securityLevelChanged();
     void isSignalingEncryptedChanged();
     void isMediaEncryptedChanged();
+    void hasRttChanged();
 
 private Q_SLOTS:
     void updateIsBlocked();
@@ -155,6 +159,7 @@ private:
     bool m_hasMetadata = false;
     bool m_hasAccepted = false;
     bool m_hasRejected = false;
+    bool m_hasRtt = false;
 
     QString m_sipUrl;
     QString m_contactId;

@@ -104,7 +104,8 @@ modules:
       - --disable-video
       - --enable-ext-sound
       - --with-opus
-      - CFLAGS=-fPIC
+      - --enable-libwebrtc-aec3
+      - CFLAGS=-fPIC -DNDEBUG
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git

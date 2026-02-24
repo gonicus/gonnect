@@ -306,6 +306,15 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
         const auto &mediaInfo = ci.media[i];
 
+        if (mediaInfo.type == PJMEDIA_TYPE_TEXT &&
+            mediaInfo.status == PJSUA_CALL_MEDIA_ACTIVE) {
+
+            m_hasRtt = true;
+            Q_EMIT hasRttChanged();
+
+            continue;
+        }
+
         if (mediaInfo.type == PJMEDIA_TYPE_AUDIO) {
 
             switch (mediaInfo.status) {
@@ -352,6 +361,22 @@ void SIPCall::onInstantMessage(pj::OnInstantMessageParam &prm)
 {
     m_imHandler->process(QString::fromStdString(prm.contentType),
                          QString::fromStdString(prm.msgBody));
+}
+
+void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm) {
+    if (!prm.text.empty()) {
+        // prm.seq  - Sequenznummer
+        // prm.ts   - Timestamp
+        // prm.text - Empfangener UTF-8 Text (T.140)
+        //handleIncomingRttChar(prm.text);
+    }
+}
+
+void SIPCall::rttSendText(const QString& text)
+{
+    pj::CallSendTextParam prm;
+    prm.text = text.toStdString();
+    sendText(prm);
 }
 
 void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
@@ -756,9 +781,9 @@ void SIPCall::updateRtcpStats()
             }
 #endif
 
-            qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << m_lossTx
+            qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << (100 * m_lossTx)
                                << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
-            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosRx << "loss:" << m_lossRx
+            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosRx << "loss:" << (100 * m_lossRx)
                                << "jitter:" << m_jitterRx << "effective delay:" << m_effDelayRx;
 
             double mos = std::min(m_mosTx, m_mosRx);
