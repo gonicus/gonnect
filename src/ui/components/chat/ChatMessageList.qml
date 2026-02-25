@@ -25,7 +25,7 @@ Item {
 
         Accessible.role: Accessible.List
         Accessible.name: qsTr("Chat message list")
-        Accessible.description: qsTr("List of all the chat messages of the current chat room")
+        Accessible.description: qsTr("List of all chat messages of the current chat room")
 
         delegate: ChatMessageListItem {
             anchors {

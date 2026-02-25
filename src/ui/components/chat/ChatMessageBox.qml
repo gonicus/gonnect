@@ -15,6 +15,6 @@ TextField {
 
     Accessible.role: Accessible.EditableText
     Accessible.name: qsTr("Type message")
-    Accessible.description: qsTr("Enter the text message here")
+    Accessible.description: qsTr("Enter the chat text message")
     Accessible.focusable: true
 }

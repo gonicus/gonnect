@@ -20,10 +20,7 @@ Item {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Chat message")
-    Accessible.description: qsTr("Selected chat message: ") +
-                            qsTr("Sender: ") + control.nickName +
-                            qsTr(", time: ") + control.timestamp +
-                            qsTr(", message text: ") + control.message
+    Accessible.description: qsTr("Selected chat message - from %1, at %2: %3").arg(control.nickName).arg(control.timestamp).arg(control.message)
     Accessible.focusable: true
 
     Component.onCompleted: () => {
