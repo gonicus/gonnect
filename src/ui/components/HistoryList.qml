@@ -124,7 +124,7 @@ Item {
 
             Accessible.role: Accessible.ListItem
             Accessible.name: qsTr("History item")
-            Accessible.description: qsTr("Selected history item %1 - company %2, location %3, number %4, time %5, duration %6").arg(delg.contactName).arg(delg.company ?? "-").arg(delg.location ?? "-").arg(phoneNumber).arg(timeTextLabel.text).arg(durationTextLabel.text)
+            Accessible.description: qsTr("Selected history item %1 - company %2, location %3, number %4, time %5, duration %6").arg(delg.contactName).arg(delg.company ?? "-").arg(delg.location ?? "-").arg(delg.remotePhoneNumber).arg(timeTextLabel.text).arg(durationTextLabel.text)
             Accessible.focusable: true
 
             Connections {
