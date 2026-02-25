@@ -13,7 +13,7 @@ Rectangle {
     property string text
 
     Accessible.role: Accessible.Button
-    Accessible.name: qsTr("Copy to clipboard: ") + control.text
+    Accessible.name: qsTr("Copy to clipboard: %1").arg(control.text)
     Accessible.focusable: true
     Accessible.onPressAction: () => ViewHelper.copyToClipboard(control.text)
 

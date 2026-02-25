@@ -92,7 +92,7 @@ Popup {
 
             Accessible.role: Accessible.Column
             Accessible.name: qsTr("Search filter and identity selection")
-            Accessible.description: qsTr("Select search filter to be applied as well as the outgoing identity")
+            Accessible.description: qsTr("Select search filter to be applied, as well as the outgoing identity")
 
             SearchCategoryList {
                 id: searchCategories

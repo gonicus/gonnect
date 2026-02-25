@@ -30,7 +30,7 @@ ListView {
 
     Accessible.role: Accessible.List
     Accessible.name: qsTr("Chat room list")
-    Accessible.description: qsTr("List of all the chat rooms")
+    Accessible.description: qsTr("List of all chat rooms")
 
     delegate: ChatRoomListItem {
         id: delg

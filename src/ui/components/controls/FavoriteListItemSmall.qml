@@ -37,10 +37,8 @@ Item {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Favorite contact")
-    Accessible.description: qsTr("Selected favorite: ") +
-                            qsTr("Name: ") + delg.name +
-                            qsTr(", phone: ") + delg.phoneNumber +
-                            qsTr(" (tap to call)")
+    Accessible.description: qsTr("Selected favorite %1: %2").arg(delg.name).arg(qsTr("tap to call %1").arg(delg.phoneNumber))
+
     Accessible.focusable: true
     Accessible.onPressAction: () => SIPCallManager.call(delg.phoneNumber)
 

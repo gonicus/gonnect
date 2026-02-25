@@ -120,16 +120,14 @@ Item {
 
                     Accessible.role: Accessible.Column
                     Accessible.name: qsTr("Call security details")
-                    Accessible.description: qsTr("Detailed call security status: ")
-                                            + securityLevelColumn.signalEncryptionValue
-                                            + securityLevelColumn.mediaEncryptedValue
+                    Accessible.description: qsTr("Detailed call security status: %1 / %2").arg(securityLevelColumn.signalEncryptionValue).arg(securityLevelColumn.mediaEncryptedValue)
 
                     property string signalEncryptionValue: control.isSignalingEncrypted
-                                                           ? qsTr("Signaling encrypted")
-                                                           : qsTr("Signaling unencrypted")
+                                                           ? qsTr("signaling encrypted")
+                                                           : qsTr("signaling unencrypted")
                     property string mediaEncryptedValue: control.isMediaEncrypted
-                                                         ? qsTr("Media encrypted")
-                                                         : qsTr("Media unencrypted")
+                                                         ? qsTr("media encrypted")
+                                                         : qsTr("media unencrypted")
 
                     IconLabel {
                         id: signalingEncryption
@@ -246,8 +244,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: qsTr("Mean opinion score")
-                                Accessible.description: qsTr("Numerical metric assessing transmission-side voice/video call quality: ")
-                                                        + txMosValue.text
+                                Accessible.description: qsTr("Numerical metric assessing transmission-side voice call quality: %1").arg(txMosValue.text)
                             }
                             Row {
                                 spacing: 8
@@ -267,8 +264,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: txLossLabel.text
-                                Accessible.description: qsTr("Percentage of packets lost in transmission: ")
-                                                        + txLossValue.text
+                                Accessible.description: qsTr("%1% of packets lost in transmission").arg(txLossValue.text)
                             }
                             Row {
                                 spacing: 8
@@ -288,8 +284,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: txJitterLabel.text
-                                Accessible.description: qsTr("Amount of transmission side jitter: ")
-                                                        + txJitterValue.text
+                                Accessible.description: qsTr("Amount of transmission side jitter: %1").arg(txJitterValue.text)
                             }
                             Row {
                                 spacing: 8
@@ -309,8 +304,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: txDelayLabel.text
-                                Accessible.description: qsTr("Effective transmission side call delay: ")
-                                                        + txDelayValue.text
+                                Accessible.description: qsTr("Effective transmission side call delay: %1").arg(txDelayValue.text)
                             }
                         }
 
@@ -357,8 +351,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: qsTr("Mean opinion score")
-                                Accessible.description: qsTr("Numerical metric assessing receiver-side voice/video call quality: ")
-                                                        + rxMosValue.text
+                                Accessible.description: qsTr("Numerical metric assessing receiver-side voice/video call quality: %1").arg(rxMosValue.text)
                             }
                             Row {
                                 spacing: 8
@@ -378,8 +371,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: rxLossLabel.text
-                                Accessible.description: qsTr("Percentage of packets lost in receival: ")
-                                                        + rxLossValue.text
+                                Accessible.description: qsTr("%1% of packets lost in receival").arg(rxLossValue.text)
                             }
                             Row {
                                 spacing: 8
@@ -399,8 +391,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: rxJitterLabel.text
-                                Accessible.description: qsTr("Amount of receiver side jitter: ")
-                                                        + rxJitterValue.text
+                                Accessible.description: qsTr("Amount of receiver side jitter: %1").arg(rxJitterValue.text)
                             }
                             Row {
                                 spacing: 8
@@ -420,8 +411,7 @@ Item {
 
                                 Accessible.role: Accessible.StaticText
                                 Accessible.name: rxDelayLabel.text
-                                Accessible.description: qsTr("Effective receiver side call delay: ")
-                                                        + rxDelayValue.text
+                                Accessible.description: qsTr("Effective receiver side call delay: %1").arg(rxDelayValue.text)
                             }
                         }
                     }
@@ -457,8 +447,7 @@ Item {
 
                         Accessible.role: Accessible.StaticText
                         Accessible.name: qsTr("Audio codec")
-                        Accessible.description: qsTr("The currently used audio codec and frequency: ")
-                                                + codecValue.text
+                        Accessible.description: qsTr("The currently used audio codec and frequency: %1").arg(codecValue.text)
                     }
                 }
             }
@@ -507,8 +496,7 @@ Item {
 
         Accessible.role: Accessible.StaticText
         Accessible.name: qsTr('Elapsed call time')
-        Accessible.description: qsTr("The duration in seconds the call has been active for: ")
-                                + ViewHelper.secondsToNiceText(internal.elapsedSeconds)
+        Accessible.description: qsTr("The duration in seconds the call has been active for: %1").arg(ViewHelper.secondsToNiceText(internal.elapsedSeconds))
     }
 
     Row {
@@ -551,7 +539,7 @@ Item {
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Camera control")
-            Accessible.description: qsTr("Enable or disable your camera")
+            Accessible.description: qsTr("Enable your camera")
             Accessible.focusable: true
             Accessible.onPressAction: () => videoMuteButton.click()
         }

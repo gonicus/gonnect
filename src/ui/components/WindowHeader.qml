@@ -103,7 +103,7 @@ Rectangle {
 
         HeaderIconButton {
             iconSource: Icons.mobileCloseApp
-            accessiblePurpose: qsTr("Close QGonnect")
+            accessiblePurpose: qsTr("Close GOnnect window")
             active: control.active
             iconSize: 10
             anchors.verticalCenter: parent.verticalCenter

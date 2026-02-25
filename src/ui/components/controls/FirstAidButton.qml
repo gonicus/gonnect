@@ -13,7 +13,7 @@ Item {
 
     Accessible.role: Accessible.Button
     Accessible.name: firstAidLabel.text
-    Accessible.description: qsTr("Open the first aid menu")
+    Accessible.description: qsTr("Open first aid menu")
     Accessible.focusable: true
     Accessible.onPressAction: ViewHelper.showFirstAid()
 

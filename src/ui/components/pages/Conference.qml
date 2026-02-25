@@ -641,8 +641,6 @@ Item {
                                 }
 
                                 Accessible.ignored: true
-                                // TODO: Currently ignored as it might not make sense to have a
-                                // password read out loud (?)
                             }
 
                             Row {

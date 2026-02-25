@@ -48,7 +48,7 @@ Item {
 
         Accessible.role: Accessible.StaticText
         Accessible.name: initialsLabel.text
-        Accessible.description: qsTr("Initials of this contact, no avatar image available")
+        Accessible.description: qsTr("Initials of this contact")
     }
 
     Image {

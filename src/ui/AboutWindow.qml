@@ -32,7 +32,7 @@ BaseWindow {
         }
 
         Accessible.role: Accessible.Column
-        Accessible.name: qsTr("Gonnect headline")
+        Accessible.name: qsTr("GOnnect headline")
         Accessible.description: appHeader.text
 
         Settings {
@@ -69,7 +69,7 @@ BaseWindow {
             width: appLabel.width + clipboardButton.width
 
             Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("Gonnect version")
+            Accessible.name: qsTr("GOnnect version")
             Accessible.description: appLabel.text
 
             Label {

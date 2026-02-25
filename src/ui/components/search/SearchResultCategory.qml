@@ -15,7 +15,7 @@ Item {
     property alias headerText: headerLabel.text
 
     Accessible.role: Accessible.ColumnHeader
-    Accessible.name: qsTr("Search result category: ") + control.headerText
+    Accessible.name: qsTr("Search result category %1").arg(control.headerText)
     Accessible.description: qsTr("Divider for the individual search result items by category")
     Accessible.focusable: true
 

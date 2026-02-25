@@ -120,8 +120,7 @@ Item {
 
         Accessible.role: Accessible.StaticText
         Accessible.name: qsTr("SIP call status code")
-        Accessible.description: qsTr("The current status code of the call: ")
-                                + statusCodeLabel.text
+        Accessible.description: qsTr("The current status code of the call: %1").arg(statusCodeLabel.text)
     }
 
     AudioLevelButton {
@@ -198,7 +197,7 @@ Item {
 
         Accessible.role: Accessible.Button
         Accessible.name: jitsiButton.text
-        Accessible.description: qsTr("Switch to a Jitis Meet session")
+        Accessible.description: qsTr("Switch to a Jitsi Meet session")
         Accessible.focusable: true
         Accessible.onPressAction: () => jitsiButton.click()
     }
@@ -224,7 +223,7 @@ Item {
 
         Accessible.role: Accessible.Button
         Accessible.name: holdButton.text
-        Accessible.description: qsTr("Toggle the hold state to: ") + holdButton.text
+        Accessible.description: qsTr("Toggle the hold state to %1").arg(holdButton.text)
         Accessible.focusable: true
         Accessible.onPressAction: () => holdButton.click()
     }

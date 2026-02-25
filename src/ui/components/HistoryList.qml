@@ -75,9 +75,8 @@ Item {
             }
 
             Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("history item section")
-            Accessible.description: qsTr("Header for the currently selected day: ")
-                                    + sectionLabel.text
+            Accessible.name: qsTr("History item section")
+            Accessible.description: qsTr("Header for the currently selected day: %1").arg(sectionLabel.text)
         }
 
         delegate: Item {
@@ -125,13 +124,7 @@ Item {
 
             Accessible.role: Accessible.ListItem
             Accessible.name: qsTr("History item")
-            Accessible.description: qsTr("Currently selected history item: ")
-                                    + qsTr("Name: ") + delg.contactName
-                                    + qsTr(", company: ") + delg.company
-                                    + qsTr(", location: ") + delg.location
-                                    + qsTr(", phone: ") + delg.remotePhoneNumber
-                                    + qsTr(", time: ") + timeTextLabel.text
-                                    + qsTr(", duration: ") + durationTextLabel.text
+            Accessible.description: qsTr("Selected history item %1 - company %2, location %3, number %4, time %5, duration %6").arg(delg.contactName).arg(delg.company ?? "-").arg(delg.location ?? "-").arg(phoneNumber).arg(timeTextLabel.text).arg(durationTextLabel.text)
             Accessible.focusable: true
 
             Connections {

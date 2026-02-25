@@ -48,9 +48,7 @@ Rectangle {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Phone number")
-    Accessible.description: qsTr("Selected phone number: ") +
-                            qsTr("Number: ") + control.number +
-                            (control.isFavorite ? qsTr(", hint: This is a favorite") : "")
+    Accessible.description: control.isFavorite ? qsTr("Selected favorite number %1").arg(control.number) : qsTr("Selected phone number %1").arg(control.number)
     Accessible.focusable: true
     Accessible.onPressAction: () => control.triggerPrimaryAction()
 

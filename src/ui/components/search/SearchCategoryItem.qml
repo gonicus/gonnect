@@ -15,7 +15,7 @@ Item {
     property alias highlighted: highlightedBackground.visible
 
     Accessible.role: Accessible.ColumnHeader
-    Accessible.name: qsTr("Search result category filter: ") + control.name
+    Accessible.name: qsTr("Search result category filter %1").arg(control.name)
     Accessible.description: qsTr("Filter for the individual search result items by category")
     Accessible.focusable: true
     Accessible.onPressAction: () => control.selectCategory()
