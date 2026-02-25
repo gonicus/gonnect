@@ -24,7 +24,6 @@ finish-args:
   - --socket=fallback-x11
   - --socket=pcsc
   - --socket=pulseaudio
-  - --socket=a11y-bus
   - --share=network
   - --share=ipc
   # Screen reader
