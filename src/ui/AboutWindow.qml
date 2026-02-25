@@ -90,7 +90,7 @@ BaseWindow {
 
                 Accessible.role: Accessible.Button
                 Accessible.name: qsTr("Copy to clipboard")
-                Accessible.description: qsTr("Copy the currently used version of Gonnect to the clipboard")
+                Accessible.description: qsTr("Copy the currently used version number of GOnnect to the clipboard")
                 Accessible.focusable: true
             }
         }

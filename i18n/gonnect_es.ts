@@ -593,7 +593,7 @@
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="524"/>
-        <source>Start or stop sharing your screen</source>
+        <source>Start sharing your screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -934,41 +934,26 @@
     </message>
     <message>
         <location filename="../src/ui/components/ChatSideBar.qml" line="79"/>
-        <source>Selected chat message: </source>
+        <source>Selected chat message from %1 at %2: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ChatSideBar.qml" line="80"/>
-        <source>Sender: </source>
+        <location filename="../src/ui/components/ChatSideBar.qml" line="79"/>
+        <source>the server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ChatSideBar.qml" line="81"/>
-        <source>Time: </source>
+        <location filename="../src/ui/components/ChatSideBar.qml" line="79"/>
+        <source>you</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ChatSideBar.qml" line="82"/>
-        <source>Message text: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ChatSideBar.qml" line="83"/>
-        <source>Hint: This is a system message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ChatSideBar.qml" line="84"/>
-        <source>Hint: This is a message you sent</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ChatSideBar.qml" line="234"/>
+        <location filename="../src/ui/components/ChatSideBar.qml" line="229"/>
         <source>Select emoji</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ChatSideBar.qml" line="286"/>
+        <location filename="../src/ui/components/ChatSideBar.qml" line="281"/>
         <source>Enter chat message...</source>
         <translation>Introduce el mensaje del chat...</translation>
     </message>
@@ -4561,7 +4546,7 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1209"/>
         <location filename="../src/ui/components/SettingsPage.qml" line="1280"/>
-        <source>Adjust the </source>
+        <source>Adjust %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
