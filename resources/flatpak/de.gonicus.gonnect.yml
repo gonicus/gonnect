@@ -24,7 +24,6 @@ finish-args:
   - --socket=fallback-x11
   - --socket=pcsc
   - --socket=pulseaudio
-  - --socket=session-bus
   - --share=network
   - --share=ipc
   # Lock screensaver while on the phone/in a conference

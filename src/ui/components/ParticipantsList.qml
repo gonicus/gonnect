@@ -41,10 +41,9 @@ Item {
 
             Accessible.role: Accessible.ListItem
             Accessible.name: qsTr("Chat participant")
-            Accessible.description: qsTr("Selected chat participant: ") +
-                                    qsTr("Name: ") + delg.displayName +
-                                    (delg.isModerator ? qsTr(", role: Moderator") : "") +
-                                    (delg.isMe ? qsTr(", hint: This is your account") : "")
+            Accessible.description: qsTr("Selected chat participant: %1").arg(delg.displayName) +
+                                    (", " + delg.isModerator ? qsTr("moderator") : "") +
+                                    (", " + delg.isMe ? qsTr("it's you") : "")
             Accessible.focusable: true
 
             Rectangle {

@@ -31,7 +31,7 @@ BaseWindow {
         required property string description
 
         Accessible.role: Accessible.HotkeyField
-        Accessible.name: qsTr("Shortcut key: ") + keyLabel.text
+        Accessible.name: qsTr("Shortcut key: %1").arg(keyLabel.text)
         Accessible.description: descriptionLabel.text
         Accessible.focusable: true
 

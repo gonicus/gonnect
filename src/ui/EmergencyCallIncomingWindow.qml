@@ -28,7 +28,7 @@ BaseWindow {
         anchors.fill: parent
 
         Accessible.role: Accessible.Announcement
-        Accessible.name: qsTr("Incoming emergency call from ") + control.displayName
+        Accessible.name: qsTr("Incoming emergency call from %1").arg(control.displayName)
         Accessible.description: ongoingCallInfo.text
         Accessible.searchEdit: true
 

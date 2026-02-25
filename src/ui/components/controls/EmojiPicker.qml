@@ -51,7 +51,7 @@ Item {
             }
 
             Accessible.role: Accessible.Row
-            Accessible.name: qsTr("Switch emoji category")
+            Accessible.name: qsTr("Switch Emoji category")
             Accessible.focusable: true
 
             Repeater {
@@ -104,7 +104,7 @@ Item {
             }
 
             Accessible.role: Accessible.Column
-            Accessible.name: qsTr("Select emoji")
+            Accessible.name: qsTr("Select Emoji")
             Accessible.focusable: true
 
             Repeater {

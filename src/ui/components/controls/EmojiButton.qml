@@ -16,7 +16,7 @@ Item {
 
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Emoji")
-    Accessible.description: qsTr("Selected emoji: ") + control.tooltipText
+    Accessible.description: qsTr("Selected Emoji: %1").arg(control.tooltipText)
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 

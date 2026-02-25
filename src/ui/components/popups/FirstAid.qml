@@ -69,8 +69,7 @@ Item {
 
                     Accessible.role: Accessible.Button
                     Accessible.name: delg.displayName
-                    Accessible.description: qsTr("Tap to call emergency contact: ") + delg.displayName +
-                                            qsTr(", number: ") + delg.number
+                    Accessible.description: qsTr("Tap to call emergency contact: %1 (%2)").arg(delg.displayName).arg(delg.number)
                     Accessible.focusable: true
                     Accessible.onPressAction: () => delg.click()
                 }

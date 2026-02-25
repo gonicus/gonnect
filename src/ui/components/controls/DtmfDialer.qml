@@ -13,7 +13,7 @@ Item {
     signal dialed(string button)
 
     Accessible.role: Accessible.ButtonMenu
-    Accessible.name: qsTr("DTMF dialer")
+    Accessible.name: qsTr("Number pad")
 
     component DialButton : Item {
         id: dialButton
@@ -23,7 +23,7 @@ Item {
         property alias value: buttonLabel.text
 
         Accessible.role: Accessible.Button
-        Accessible.name: qsTr("DTMF character: ") + dialButton.value
+        Accessible.name: qsTr("Character %1").arg(dialButton.value)
         Accessible.focusable: true
         Accessible.onPressAction: () => dialButton.clicked()
 

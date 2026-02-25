@@ -62,8 +62,7 @@ BaseWidget {
 
             Accessible.role: Accessible.StaticText
             Accessible.name: qsTr("Date event widget status")
-            Accessible.description: qsTr("Displays the current status od the widget: ")
-                                    + dateInfo.text
+            Accessible.description: qsTr("Displays the current status of the widget: %1").arg(dateInfo.text)
         }
 
         Timer {

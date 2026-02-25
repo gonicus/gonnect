@@ -152,7 +152,7 @@ Item {
         }
 
         Accessible.role: Accessible.Button
-        Accessible.name: qsTr("Clear search term")
+        Accessible.name: qsTr("Clear search field")
         Accessible.focusable: true
         Accessible.onPressAction: () => searchBox.clear()
 

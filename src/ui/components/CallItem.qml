@@ -61,12 +61,7 @@ Rectangle {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Call")
-    Accessible.description: qsTr("Selected call: ") +
-                            qsTr("Call index: ") + control.callId +
-                            qsTr(", name: ") + control.contactName +
-                            qsTr(", phone: ") + control.phoneNumber +
-                            qsTr(", company: ") + control.company +
-                            qsTr(", city and country: ") + control.city + ", " + control.country
+    Accessible.description: qsTr("Selected call %1 - contact %2, company %3, location %4/%5, number %6").arg(control.callId).arg(control.contactName).arg(control.company ?? "-").arg(control.city ?? "-").arg(control.country ?? "-").arg(control.phoneNumber)
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 

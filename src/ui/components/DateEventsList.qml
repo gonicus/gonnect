@@ -31,8 +31,7 @@ ListView {
 
         Accessible.role: Accessible.StaticText
         Accessible.name: qsTr("Date event section")
-        Accessible.description: qsTr("Header for the currently selected day: ")
-                                + sectionHeader.text
+        Accessible.description: qsTr("Header for %1").arg(sectionHeader.text)
         Accessible.focusable: true
 
         Label {
@@ -112,10 +111,7 @@ ListView {
 
         Accessible.role: Accessible.ListItem
         Accessible.name: qsTr("Date event")
-        Accessible.description: qsTr("Currently selected date event: ")
-                                + qsTr("Summary: ") + summaryLabel.text
-                                + qsTr(", starting time: ") + timeLabel.text
-                                + qsTr(", remaining time: ") + summaryLabel.text
+        Accessible.description: qsTr("Currently selected date event: %1, starting time %2, remaining time %3").arg(summaryLabel.text).arg(timeLabel.text).arg(remainingMinutesLabel.text)
         Accessible.focusable: true
 
         Connections {

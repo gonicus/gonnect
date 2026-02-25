@@ -39,7 +39,7 @@ Item {
             }
 
             Accessible.role: Accessible.Tree
-            Accessible.name: qsTr("Additional caller-related information")
+            Accessible.name: qsTr("Additional caller related information")
             Accessible.description: qsTr("List of informational items regarding the caller, such as open support tickets")
 
             delegate: TreeViewDelegate {

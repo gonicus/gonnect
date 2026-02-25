@@ -84,7 +84,7 @@ Popup {
             }
 
             Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Mute")
+            Accessible.name: volumePopup.isMuted ? qsTr("Unmute") : qsTr("Mute")
             Accessible.focusable: true
             Accessible.onPressAction: () => volumePopup.muteToggled()
         }

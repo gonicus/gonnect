@@ -15,7 +15,7 @@ Item {
     signal toggled
 
     Accessible.role: Accessible.Button
-    Accessible.name: control.isFavorite ? qsTr("Set favorite") : ("Unset favorite")
+    Accessible.name: control.isFavorite ? qsTr("Set favorite") : qsTr("Unset favorite")
     Accessible.focusable: true
     Accessible.onPressAction: () => control.toggled()
 

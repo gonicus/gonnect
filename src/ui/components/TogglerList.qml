@@ -37,7 +37,7 @@ ListView {
         required property bool isBusy
 
         Accessible.role: Accessible.ListItem
-        Accessible.name: qsTr("Toggle for: ") + delg.name
+        Accessible.name: qsTr("Toggle %1").arg(delg.name)
         Accessible.description: delg.description
         Accessible.focusable: true
         Accessible.onPressAction: () => TogglerManager.toggleToggler(delg.id)

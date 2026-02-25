@@ -413,7 +413,7 @@ BaseWindow {
 
             Label {
                 id: wizardInstallationSaveLabel
-                text: qsTr("The configuration has been saved to: ")
+                text: qsTr("The configuration has been saved to:")
                 wrapMode: Label.Wrap
                 anchors {
                     left: parent.left
