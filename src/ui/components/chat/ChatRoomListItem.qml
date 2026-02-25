@@ -13,7 +13,7 @@ Item {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Chat room")
-    Accessible.description: qsTr("Selected chat room %1: unread messages %2").arg(control.name).arg(control.unreadCount)
+    Accessible.description: qsTr("Selected chat room %1: %2 unread messages").arg(control.name).arg(control.unreadCount)
     Accessible.focusable: true
     Accessible.onPressAction: () => control.clicked()
 
