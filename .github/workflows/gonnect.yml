@@ -152,7 +152,7 @@ jobs:
         env:
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
         run: |
-          pip install scan-build
+          pip install scan-build==2.0.20
           export ANALYZE_ARGS="--exclude ${QT_ROOT_DIR} --exclude ${{github.workspace}}/external"
           scripts/static-clang-analyzer.sh
 

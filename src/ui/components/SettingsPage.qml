@@ -1206,7 +1206,7 @@ Item {
                                 }
 
                                 Accessible.role: Accessible.Slider
-                                Accessible.name: qsTr("Adjust the ") + ringToneVolumeHeader.text
+                                Accessible.name: qsTr("Adjust %1").arg(ringToneVolumeHeader.text)
                                 Accessible.focusable: true
                                 Accessible.onIncreaseAction: () => {
                                     if (ringToneVolumeSlider.value < ringToneVolumeSlider.to) {
@@ -1277,7 +1277,7 @@ Item {
                                 }
 
                                 Accessible.role: Accessible.Slider
-                                Accessible.name: qsTr("Adjust the ") + ringTonePauseHeader.text
+                                Accessible.name: qsTr("Adjust %1").arg(ringTonePauseHeader.text)
                                 Accessible.focusable: true
                                 Accessible.onIncreaseAction: () => {
                                     if (ringTonePauseSlider.value < ringTonePauseSlider.to) {

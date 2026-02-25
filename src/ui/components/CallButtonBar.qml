@@ -521,7 +521,7 @@ Item {
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Screensharing control")
-            Accessible.description: qsTr("Start or stop sharing your screen")
+            Accessible.description: qsTr("Start sharing your screen")
             Accessible.focusable: true
             Accessible.onPressAction: () => screenShareButton.click()
         }
