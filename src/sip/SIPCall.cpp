@@ -1,5 +1,6 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QStringBuilder>
 
 #include "SIPCall.h"
 #include "SIPCallManager.h"
@@ -26,6 +27,9 @@
 Q_LOGGING_CATEGORY(lcSIPCall, "gonnect.sip.call")
 
 using namespace std::chrono_literals;
+
+const QChar UnicodeBel(0x0007);
+const QChar UnicodeBackspace(0x0008);
 
 SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool silent)
     : ICallState(account),
@@ -73,6 +77,16 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
             globalCallState.holdAllCalls(this);
         }
     }
+
+    // Setup rtt timeout
+    m_rttTimeoutTimer.setSingleShot(true);
+    m_rttTimeoutTimer.setInterval(6s);
+    connect(&m_rttTimeoutTimer, &QTimer::timeout, this, [this]() {
+        if (!m_currentRttBubble.isEmpty()) {
+            Q_EMIT rttBubbleCommitted(m_currentRttBubble);
+            m_currentRttBubble = "";
+        }
+    });
 
     // Setup stats updater
     m_statsTimer.setInterval(5s);
@@ -306,6 +320,14 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
         const auto &mediaInfo = ci.media[i];
 
+        if (mediaInfo.type == PJMEDIA_TYPE_TEXT && mediaInfo.status == PJSUA_CALL_MEDIA_ACTIVE) {
+
+            m_hasRtt = true;
+            Q_EMIT hasRttChanged();
+
+            continue;
+        }
+
         if (mediaInfo.type == PJMEDIA_TYPE_AUDIO) {
 
             switch (mediaInfo.status) {
@@ -352,6 +374,81 @@ void SIPCall::onInstantMessage(pj::OnInstantMessageParam &prm)
 {
     m_imHandler->process(QString::fromStdString(prm.contentType),
                          QString::fromStdString(prm.msgBody));
+}
+
+void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
+{
+    QString oldRttBubble = m_currentRttBubble;
+
+    if (!prm.text.empty()) {
+        auto text = QString::fromStdString(prm.text);
+
+        for (const auto &ch : std::as_const(text)) {
+
+            // Handle backspace
+            if (ch == UnicodeBackspace) {
+                m_currentRttBubble.removeLast();
+            }
+
+            // Handle BEL
+            else if (ch == UnicodeBel) {
+                Q_EMIT rttAttention();
+            }
+
+            // Handle line feed
+            else if (!m_currentRttBubble.isEmpty()
+                     && (ch == QChar::CarriageReturn || ch == QChar::LineFeed
+                         || ch == QChar::LineSeparator)) {
+                Q_EMIT rttBubbleCommitted(m_currentRttBubble);
+                m_currentRttBubble = "";
+            }
+
+            // Best of the rest
+            else {
+                m_currentRttBubble += ch;
+            }
+        }
+
+        m_rttTimeoutTimer.start();
+    }
+
+    // Detect if we're missing a sequence
+    if (m_lastRttSequence >= 0 && prm.seq > m_lastRttSequence) {
+        quint16 lostSequences = prm.seq - m_lastRttSequence;
+        m_currentRttBubble += QString("�").repeated(lostSequences);
+    }
+    m_lastRttSequence = prm.seq;
+
+    if (oldRttBubble != m_currentRttBubble) {
+        Q_EMIT rttBubbleChanged(m_currentRttBubble);
+    }
+}
+
+void SIPCall::rttSend(const QString &text)
+{
+    pj::CallSendTextParam prm;
+    prm.text = text.toStdString();
+    sendText(prm);
+}
+
+void SIPCall::rttSendLineSeperator()
+{
+    rttSend(QString(QChar::LineFeed));
+}
+
+void SIPCall::rttSendCRLF()
+{
+    rttSend(QChar::CarriageReturn % QChar::LineFeed);
+}
+
+void SIPCall::rttSendBackspace()
+{
+    rttSend(UnicodeBackspace);
+}
+
+void SIPCall::rttSendBell()
+{
+    rttSend(UnicodeBel);
 }
 
 void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
@@ -756,9 +853,9 @@ void SIPCall::updateRtcpStats()
             }
 #endif
 
-            qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << m_lossTx
+            qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << (100 * m_lossTx)
                                << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
-            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosRx << "loss:" << m_lossRx
+            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosRx << "loss:" << (100 * m_lossRx)
                                << "jitter:" << m_jitterRx << "effective delay:" << m_effDelayRx;
 
             double mos = std::min(m_mosTx, m_mosRx);
