@@ -397,7 +397,8 @@ void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
 
             // Handle line feed
             else if (!m_currentRttBubble.isEmpty()
-                     && (ch == QChar::CarriageReturn || ch == QChar::LineFeed || ch == QChar::LineSeparator)) {
+                     && (ch == QChar::CarriageReturn || ch == QChar::LineFeed
+                         || ch == QChar::LineSeparator)) {
                 Q_EMIT rttBubbleCommitted(m_currentRttBubble);
                 m_currentRttBubble = "";
             }
