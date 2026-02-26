@@ -25,5 +25,5 @@ public:
 private:
     QMap<QString, Notification *> m_notifications;
 
-    QMap<QString, WindowsNotification *> m_internalNotifications;
+    QMap<QString, int64_t> m_notificationId2ToastId;
 };
