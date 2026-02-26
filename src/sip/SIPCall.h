@@ -92,7 +92,11 @@ public:
     double rxJitter() const { return m_jitterRx; }
     double rxEffectiveDelay() const { return m_effDelayRx; }
 
-    void rttSendText(const QString& text);
+    void rttSend(const QString &text);
+    void rttSendLineSeperator();
+    void rttSendCRLF();
+    void rttSendBackspace();
+    void rttSendBell();
 
 Q_SIGNALS:
     void callQualityInfoChanged();
@@ -118,6 +122,10 @@ Q_SIGNALS:
     void isSignalingEncryptedChanged();
     void isMediaEncryptedChanged();
     void hasRttChanged();
+
+    void rttAttention();
+    void rttBubbleChanged(QString &text);
+    void rttBubbleCommitted(QString &text);
 
 private Q_SLOTS:
     void updateIsBlocked();
@@ -166,6 +174,8 @@ private:
     QString m_notificationRef;
     QString m_postTask;
 
+    QString m_currentRttBubble;
+
     SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::High;
     SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::High;
 
@@ -175,6 +185,8 @@ private:
     quint32 m_lastPktRx = 0;
     quint32 m_lastLossTx = 0;
     quint32 m_lastPktTx = 0;
+
+    int m_lastRttSequence = -1;
 
     double m_mosRx = 0;
     double m_mosTx = 0;

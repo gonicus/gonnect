@@ -154,7 +154,6 @@ class PjSIPConan(ConanFile):
         with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
             file.write('\n\n#define PJ_HAS_IPV6 1\n')
             file.write('\n\n#define PJMEDIA_HAS_RTCP_XR 1\n')
-            file.write('\n\n#define NDEBUG\n')
 
             if self.settings.os == "Macos":
                 file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')

@@ -306,8 +306,7 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
         const auto &mediaInfo = ci.media[i];
 
-        if (mediaInfo.type == PJMEDIA_TYPE_TEXT &&
-            mediaInfo.status == PJSUA_CALL_MEDIA_ACTIVE) {
+        if (mediaInfo.type == PJMEDIA_TYPE_TEXT && mediaInfo.status == PJSUA_CALL_MEDIA_ACTIVE) {
 
             m_hasRtt = true;
             Q_EMIT hasRttChanged();
@@ -363,20 +362,76 @@ void SIPCall::onInstantMessage(pj::OnInstantMessageParam &prm)
                          QString::fromStdString(prm.msgBody));
 }
 
-void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm) {
+void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
+{
+    QString oldRttBubble = m_currentRttBubble;
+
     if (!prm.text.empty()) {
-        // prm.seq  - Sequenznummer
-        // prm.ts   - Timestamp
-        // prm.text - Empfangener UTF-8 Text (T.140)
-        //handleIncomingRttChar(prm.text);
+        auto text = QString::fromStdString(prm.text);
+
+        for (const auto &ch : std::as_const(text)) {
+
+            // Handle backspace
+            if (ch == QChar(0x0008)) {
+                m_currentRttBubble.removeLast();
+            }
+
+            // Handle BEL
+            else if (ch == QChar(0x0007)) {
+                Q_EMIT rttAttention();
+            }
+
+            // Handle line feed
+            else if (!m_currentRttBubble.isEmpty()
+                     && (ch == QChar(0x000D) || ch == QChar(0x000A) || ch == QChar(0x2028))) {
+                Q_EMIT rttBubbleCommitted(m_currentRttBubble);
+                m_currentRttBubble = "";
+            }
+
+            // Best of the rest
+            else {
+                m_currentRttBubble += ch;
+            }
+        }
+    }
+
+    // Detect if we're missing a sequence
+    if (m_lastRttSequence >= 0 && prm.seq > m_lastRttSequence) {
+        quint16 lostSequences = prm.seq - m_lastRttSequence;
+        m_currentRttBubble += QString("�").repeated(lostSequences);
+    }
+    m_lastRttSequence = prm.seq;
+
+    if (oldRttBubble != m_currentRttBubble) {
+        Q_EMIT rttBubbleChanged(m_currentRttBubble);
     }
 }
 
-void SIPCall::rttSendText(const QString& text)
+void SIPCall::rttSend(const QString &text)
 {
     pj::CallSendTextParam prm;
     prm.text = text.toStdString();
     sendText(prm);
+}
+
+void SIPCall::rttSendLineSeperator()
+{
+    rttSend(QChar(0x2028));
+}
+
+void SIPCall::rttSendCRLF()
+{
+    rttSend(QString::fromUtf8("\u000D\u000A"));
+}
+
+void SIPCall::rttSendBackspace()
+{
+    rttSend(QChar(0x0008));
+}
+
+void SIPCall::rttSendBell()
+{
+    rttSend(QChar(0x0007));
 }
 
 void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
