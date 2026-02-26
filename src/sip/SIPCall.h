@@ -145,6 +145,7 @@ private:
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
 
     QTimer m_statsTimer;
+    QTimer m_rttTimeoutTimer;
     ContactInfo m_contactInfo;
     SIPAccount *m_account = nullptr;
     QPointer<CallHistoryItem> m_historyItem;

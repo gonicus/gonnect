@@ -74,6 +74,16 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         }
     }
 
+    // Setup rtt timeout
+    m_rttTimeoutTimer.setSingleShot(true);
+    m_rttTimeoutTimer.setInterval(6s);
+    connect(&m_rttTimeoutTimer, &QTimer::timeout, this, [this](){
+        if (!m_currentRttBubble.isEmpty()) {
+            Q_EMIT rttBubbleCommitted(m_currentRttBubble);
+            m_currentRttBubble = "";
+        }
+    });
+
     // Setup stats updater
     m_statsTimer.setInterval(5s);
     connect(&m_statsTimer, &QTimer::timeout, this, &SIPCall::updateRtcpStats);
@@ -393,6 +403,8 @@ void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
                 m_currentRttBubble += ch;
             }
         }
+
+        m_rttTimeoutTimer.start();
     }
 
     // Detect if we're missing a sequence
