@@ -77,7 +77,7 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     // Setup rtt timeout
     m_rttTimeoutTimer.setSingleShot(true);
     m_rttTimeoutTimer.setInterval(6s);
-    connect(&m_rttTimeoutTimer, &QTimer::timeout, this, [this](){
+    connect(&m_rttTimeoutTimer, &QTimer::timeout, this, [this]() {
         if (!m_currentRttBubble.isEmpty()) {
             Q_EMIT rttBubbleCommitted(m_currentRttBubble);
             m_currentRttBubble = "";
