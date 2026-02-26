@@ -112,17 +112,19 @@ void SIPManager::initialize()
     }
 
     // Codecs
-    const QList<QString> preferredCodecs = globalSettings.value("sip/preferredCodecs", "").toString().split(",", Qt::SkipEmptyParts);
+    const QList<QString> preferredCodecs = globalSettings.value("sip/preferredCodecs", "")
+                                                   .toString()
+                                                   .split(",", Qt::SkipEmptyParts);
     if (!preferredCodecs.empty()) {
         // Disable all codecs
-        const auto& codecs = m_ep.codecEnum2();
-        for (const auto& c : codecs) {
+        const auto &codecs = m_ep.codecEnum2();
+        for (const auto &c : codecs) {
             m_ep.codecSetPriority(c.codecId, 0);
         }
 
         // Only enable/use config codecs
         int priority = preferredCodecs.count();
-        for (const auto& pC : preferredCodecs) {
+        for (const auto &pC : preferredCodecs) {
             m_ep.codecSetPriority(pC.toStdString(), priority);
             qCCritical(lcSIPManager) << "Using codec=" << pC << ", with priority=" << priority;
             priority--;
