@@ -237,7 +237,7 @@ class PjSIPConan(ConanFile):
             installed_libs = collect_libs(self)
             installed_libs.sort(key=len)
 
-            lib_basenames = ["pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "ilbccodec", "srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "pjnath", "pjlib-util", "pj"]
+            lib_basenames = ["pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "ilbccodec", "srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "webrtc-aec3", "pjnath", "pjlib-util", "pj"]
 
             for basename in lib_basenames:
                 for installed in installed_libs:
