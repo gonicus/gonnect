@@ -1,5 +1,6 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QStringBuilder>
 
 #include "SIPCall.h"
 #include "SIPCallManager.h"
@@ -26,6 +27,9 @@
 Q_LOGGING_CATEGORY(lcSIPCall, "gonnect.sip.call")
 
 using namespace std::chrono_literals;
+
+const QChar UnicodeBel(0x0007);
+const QChar UnicodeBackspace(0x0008);
 
 SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool silent)
     : ICallState(account),
@@ -382,18 +386,18 @@ void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
         for (const auto &ch : std::as_const(text)) {
 
             // Handle backspace
-            if (ch == QChar(0x0008)) {
+            if (ch == UnicodeBackspace) {
                 m_currentRttBubble.removeLast();
             }
 
             // Handle BEL
-            else if (ch == QChar(0x0007)) {
+            else if (ch == UnicodeBel) {
                 Q_EMIT rttAttention();
             }
 
             // Handle line feed
             else if (!m_currentRttBubble.isEmpty()
-                     && (ch == QChar(0x000D) || ch == QChar(0x000A) || ch == QChar(0x2028))) {
+                     && (ch == QChar::CarriageReturn || ch == QChar::LineFeed || ch == QChar::LineSeparator)) {
                 Q_EMIT rttBubbleCommitted(m_currentRttBubble);
                 m_currentRttBubble = "";
             }
@@ -428,22 +432,22 @@ void SIPCall::rttSend(const QString &text)
 
 void SIPCall::rttSendLineSeperator()
 {
-    rttSend(QChar(0x2028));
+    rttSend(QString(QChar::LineFeed));
 }
 
 void SIPCall::rttSendCRLF()
 {
-    rttSend(QString::fromUtf8("\u000D\u000A"));
+    rttSend(QChar::CarriageReturn % QChar::LineFeed);
 }
 
 void SIPCall::rttSendBackspace()
 {
-    rttSend(QChar(0x0008));
+    rttSend(UnicodeBackspace);
 }
 
 void SIPCall::rttSendBell()
 {
-    rttSend(QChar(0x0007));
+    rttSend(UnicodeBel);
 }
 
 void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
