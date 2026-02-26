@@ -228,8 +228,6 @@ Rectangle {
                 }
             }
         }
-
-        Accessible.ignored: true
     }
 
     Drag.active: dragHandler.active
@@ -245,7 +243,5 @@ Rectangle {
             SIPCallManager.transferCall(dragEvent.source.accountId, dragEvent.source.callId,
                                         control.accountId, control.callId)
         }
-
-        Accessible.ignored: true
     }
 }
