@@ -159,7 +159,7 @@ void SIPManager::setPreferredCodecs()
         return;
     }
 
-    // Check if there's valid codecs that should be preferred
+    // Check if there's valid codecs in our preference list
     int invalidCodecs = 0;
     for (const auto &pC : preferredCodecs) {
         try {
@@ -169,7 +169,7 @@ void SIPManager::setPreferredCodecs()
         }
     }
     if (invalidCodecs >= preferredCodecs.count()) {
-        qCCritical(lcSIPManager)
+        qCDebug(lcSIPManager)
                 << "No valid preferred codec found - skipping preferred codec selection";
         return;
     }
@@ -177,8 +177,8 @@ void SIPManager::setPreferredCodecs()
     // Disable all codecs
     const auto &codecs = m_ep.codecEnum2();
     for (const auto &c : codecs) {
-        qCCritical(lcSIPManager) << "Found codec=" << c.codecId
-                                 << ", with priority=" << (int)c.priority;
+        qCDebug(lcSIPManager) << "Found codec" << c.codecId << ", with initial priority"
+                              << (int)c.priority << ", disabling...";
         m_ep.codecSetPriority(c.codecId, PJMEDIA_CODEC_PRIO_DISABLED);
     }
 
@@ -189,8 +189,8 @@ void SIPManager::setPreferredCodecs()
         QString preferredCodec = preferredCodecs.at(i);
 
         m_ep.codecSetPriority(preferredCodec.toStdString(), priorityIndex);
-        qCCritical(lcSIPManager) << "Using codec=" << preferredCodec
-                                 << ", with priority=" << priorityIndex;
+        qCDebug(lcSIPManager) << "Using codec" << preferredCodec << ", with priority"
+                              << priorityIndex;
     }
 }
 
