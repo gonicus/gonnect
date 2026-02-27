@@ -30,11 +30,11 @@ void Credentials::initialize()
 #ifdef Q_OS_FLATPAK
     auto &sp = SecretPortal::instance();
     if (sp.isValid()) {
+        qCDebug(lcCredentials) << "Flatpak secret portal found.";
         if (sp.isInitialized()) {
             m_isSecretPortalInitialized = true;
             setIsInitialized(true);
             return;
-
         } else if (!sp.hasTriedInitialization()) {
             connect(
                     &sp, &SecretPortal::initializedChanged, this,
@@ -47,6 +47,8 @@ void Credentials::initialize()
                     Qt::ConnectionType::SingleShotConnection);
             return;
         }
+    } else {
+        qCDebug(lcCredentials) << "Flatpak secret portal not found.";
     }
 #endif
 
@@ -64,11 +66,11 @@ void Credentials::set(const QString &key, const QString &secret, CredentialsResp
             writeJob, &QKeychain::WritePasswordJob::finished, this,
             [this, writeJob, callback]() {
                 if (writeJob->error()) {
-                    callback(true,
+                    callback(ResponseState_Error,
                              tr("storing credentials failed: %1")
                                      .arg(qPrintable(writeJob->errorString())));
                 } else {
-                    callback(false, "");
+                    callback(ResponseState_Valid, "");
                 }
 
                 m_writeCredentialJobs.removeAll(writeJob);
@@ -97,23 +99,30 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                                        << "error:" << error << "secretEmpty:" << secret.isEmpty();
 
                 // Key is not present in keychain? Try to update it from Flatpak portal
-                if (m_isSecretPortalInitialized
-                    && (error == QKeychain::EntryNotFound || secret.isEmpty())) {
+                if (m_isSecretPortalInitialized && (error == QKeychain::EntryNotFound)) {
                     KeychainSettings keychainSettings;
 
                     qCDebug(lcCredentials) << "no secret from QKeychain; try secret portal";
 
 #ifdef Q_OS_FLATPAK
-                    qCDebug(lcCredentials) << "checking secret portal is valid";
+                    qCDebug(lcCredentials) << "checking if secret portal is valid";
 
                     auto &sp = SecretPortal::instance();
                     if (sp.isValid()) {
                         qCDebug(lcCredentials) << "secret portal is valid";
 
-                        const auto encryptedSecret = keychainSettings.value(key, "").toString();
-                        secret = sp.decrypt(encryptedSecret);
+                        // Create a default value with a low possibility of collision with an actual
+                        // secret.
+                        const QString VALUE_DEFAULT =
+                                "ebeet5iayaefoxee4ies8vueChaegaeH1zai0ANgohSe3iethu";
 
-                        if (!secret.isEmpty()) {
+                        const auto encryptedSecret =
+                                keychainSettings.value(key, VALUE_DEFAULT).toString();
+
+                        if (encryptedSecret != VALUE_DEFAULT) {
+                            // Got a secret from the portal, so migrate it to QKeychain.
+                            secret = sp.decrypt(encryptedSecret);
+
                             qCDebug(lcCredentials) << "migrate secret to QKeychain";
 
                             set(key, secret, [key](bool error, const QString &misc) {
@@ -123,21 +132,23 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                                             << "-" << misc;
                                 }
                             });
+
+                            callback(ResponseState_Valid, secret);
                         }
                     }
 #endif
 
-                    callback(false, secret);
+                    callback(ResponseState_Empty, secret);
                 } else if (error == QKeychain::EntryNotFound) {
                     qCDebug(lcCredentials) << "no secret found by QKeychain";
 
-                    callback(false, "");
+                    callback(ResponseState_Empty, "");
                 } else if (error != QKeychain::NoError) {
-                    callback(true,
+                    callback(ResponseState_Error,
                              tr("reading credentials failed: %1")
                                      .arg(qPrintable(readJob->errorString())));
                 } else {
-                    callback(false, secret);
+                    callback(ResponseState_Valid, secret);
                 }
 
                 m_readCredentialJobs.removeAll(readJob);

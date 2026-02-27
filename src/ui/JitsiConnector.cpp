@@ -587,8 +587,9 @@ void JitsiConnector::setRoomPassword(QString value)
     QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
     Credentials::instance().set(
-            authGroup, value, [this, value, authGroup](bool error, const QString &data) {
-                if (error) {
+            authGroup, value,
+            [this, value, authGroup](CredentialsResponseState state, const QString &data) {
+                if (state == ResponseState_Error) {
                     qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
                 } else {
                     Q_EMIT executePasswordCommand(value);
@@ -683,18 +684,19 @@ void JitsiConnector::onPasswordRequired()
 
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-        Credentials::instance().get(authGroup, [this, authGroup](bool error, const QString &data) {
-            if (error) {
-                qCCritical(lcJitsiConnector) << "failed to get credentials:" << data;
-            } else {
-                if (!data.isEmpty()) {
-                    enterPassword(data, false);
-                    return;
-                }
-            }
+        Credentials::instance().get(
+                authGroup, [this, authGroup](CredentialsResponseState state, const QString &data) {
+                    if (state == ResponseState_Error) {
+                        qCCritical(lcJitsiConnector) << "failed to get credentials:" << data;
+                    } else {
+                        if (state != ResponseState_Empty) {
+                            enterPassword(data, false);
+                            return;
+                        }
+                    }
 
-            setIsPasswordRequired(true);
-        });
+                    setIsPasswordRequired(true);
+                });
     } else {
         setIsPasswordRequired(true);
     }
@@ -1289,8 +1291,9 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
         Credentials::instance().set(
-                authGroup, password, [this, password, authGroup](bool error, const QString &data) {
-                    if (error) {
+                authGroup, password,
+                [this, password, authGroup](CredentialsResponseState state, const QString &data) {
+                    if (state == ResponseState_Error) {
                         qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
                     } else {
                         Q_EMIT executePasswordCommand(password);

@@ -86,9 +86,10 @@ void AuthManager::init()
                      });
 
     Credentials::instance().get(
-            "jitsi/refreshToken", [this, sslConfig](bool error, const QString &data) {
-                if (error) {
-                    qCCritical(lcAuthManager) << "failed to set credentials:" << data;
+            "jitsi/refreshToken",
+            [this, sslConfig](CredentialsResponseState error, const QString &data) {
+                if (error == ResponseState_Error) {
+                    qCCritical(lcAuthManager) << "failed to get credentials:" << data;
                     return;
                 }
 
@@ -117,11 +118,12 @@ void AuthManager::storeRefreshToken(const QString &token) const
         return;
     }
 
-    Credentials::instance().set("jitsi/refreshToken", token, [](bool error, const QString &data) {
-        if (error) {
-            qCCritical(lcAuthManager) << "failed to set credentials:" << data;
-        }
-    });
+    Credentials::instance().set(
+            "jitsi/refreshToken", token, [](CredentialsResponseState state, const QString &data) {
+                if (state == ResponseState_Error) {
+                    qCCritical(lcAuthManager) << "failed to set credentials:" << data;
+                }
+            });
 }
 
 bool AuthManager::isOAuthAuthenticated() const

@@ -3,7 +3,10 @@
 #include <QObject>
 #include <qt6keychain/keychain.h>
 
-typedef std::function<void(bool error, const QString &misc)> CredentialsResponse;
+enum CredentialsResponseState { ResponseState_Valid, ResponseState_Empty, ResponseState_Error };
+
+typedef std::function<void(CredentialsResponseState state, const QString &misc)>
+        CredentialsResponse;
 
 class Credentials : public QObject
 {

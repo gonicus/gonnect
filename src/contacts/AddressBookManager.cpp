@@ -152,13 +152,14 @@ void AddressBookManager::acquireSecret(const QString &group,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, group, secretKey, callback](bool error, const QString &secret) {
-                if (error) {
+            [this, group, secretKey, callback](CredentialsResponseState state,
+                                               const QString &secret) {
+                if (state == ResponseState_Error) {
                     qCWarning(lcAddressBookManager) << "failed to retrieve secret:" << secret;
                     return;
                 }
 
-                if (secret.isEmpty()) {
+                if (state == ResponseState_Empty) {
                     auto &viewHelper = ViewHelper::instance();
 
                     auto conn = connect(
@@ -171,8 +172,9 @@ void AddressBookManager::acquireSecret(const QString &group,
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
-                                            [secretKey](bool error, const QString &data) {
-                                                if (error) {
+                                            [secretKey](CredentialsResponseState state,
+                                                        const QString &data) {
+                                                if (state == ResponseState_Error) {
                                                     qCCritical(lcAddressBookManager)
                                                             << "failed to set credentials:" << data;
                                                 }
