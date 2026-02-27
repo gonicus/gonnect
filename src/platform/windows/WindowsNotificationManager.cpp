@@ -48,11 +48,7 @@ public:
 
     void toastActivated(std::wstring response) const override { }
 
-    void toastDismissed(WinToastDismissalReason state) const override
-    {
-        auto *mutableNotification = const_cast<WindowsNotification *>(this);
-        mutableNotification->deleteLater();
-    }
+    void toastDismissed(WinToastDismissalReason state) const override { }
 
     void toastFailed() const override { qCCritical(winNotificationCat) << "toast failed"; }
 
@@ -112,7 +108,6 @@ QString WindowsNotificationManager::add(::Notification *notification)
     const auto toastId = WinToast::instance()->showToast(templ, windowsNotification);
     if (toastId < 0) {
         qCCritical(winNotificationCat) << "Failed to show notification";
-        delete windowsNotification;
         return notification->id();
     }
 
@@ -121,7 +116,7 @@ QString WindowsNotificationManager::add(::Notification *notification)
     qCDebug(winNotificationCat) << "Showing notification with id" << toastId;
 
     m_notifications[notification->id()] = notification;
-    m_internalNotifications[notification->id()] = windowsNotification;
+    m_notificationId2ToastId[notification->id()] = toastId;
     return notification->id();
 }
 
@@ -130,12 +125,10 @@ bool WindowsNotificationManager::remove(const QString &id)
     if (m_notifications.contains(id)) {
         m_notifications.value(id)->deleteLater();
 
-        auto *windowsNotification = m_internalNotifications.value(id);
-        if (windowsNotification) {
-            WinToast::instance()->hideToast(windowsNotification->m_toastId);
-            m_internalNotifications.remove(id);
+        if (m_notificationId2ToastId.contains(id)) {
+            WinToast::instance()->hideToast(m_notificationId2ToastId.value(id));
+            m_notificationId2ToastId.remove(id);
         }
-        m_internalNotifications.remove(id);
     }
 
     return m_notifications.remove(id);

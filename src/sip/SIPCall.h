@@ -31,6 +31,7 @@ public:
     void onInstantMessage(pj::OnInstantMessageParam &prm) override;
     void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
     void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
+    void onCallRxText(pj::OnCallRxTextParam &prm) override;
 
     SIPAccount *account() const { return m_account; };
     pj::AudioMedia *audioMedia() const;
@@ -91,6 +92,12 @@ public:
     double rxJitter() const { return m_jitterRx; }
     double rxEffectiveDelay() const { return m_effDelayRx; }
 
+    void rttSend(const QString &text);
+    void rttSendLineSeperator();
+    void rttSendCRLF();
+    void rttSendBackspace();
+    void rttSendBell();
+
 Q_SIGNALS:
     void callQualityInfoChanged();
 
@@ -114,6 +121,11 @@ Q_SIGNALS:
     void securityLevelChanged();
     void isSignalingEncryptedChanged();
     void isMediaEncryptedChanged();
+    void hasRttChanged();
+
+    void rttAttention();
+    void rttBubbleChanged(QString &text);
+    void rttBubbleCommitted(QString &text);
 
 private Q_SLOTS:
     void updateIsBlocked();
@@ -133,6 +145,7 @@ private:
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
 
     QTimer m_statsTimer;
+    QTimer m_rttTimeoutTimer;
     ContactInfo m_contactInfo;
     SIPAccount *m_account = nullptr;
     QPointer<CallHistoryItem> m_historyItem;
@@ -155,11 +168,14 @@ private:
     bool m_hasMetadata = false;
     bool m_hasAccepted = false;
     bool m_hasRejected = false;
+    bool m_hasRtt = false;
 
     QString m_sipUrl;
     QString m_contactId;
     QString m_notificationRef;
     QString m_postTask;
+
+    QString m_currentRttBubble;
 
     SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::High;
     SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::High;
@@ -170,6 +186,8 @@ private:
     quint32 m_lastPktRx = 0;
     quint32 m_lastLossTx = 0;
     quint32 m_lastPktTx = 0;
+
+    int m_lastRttSequence = -1;
 
     double m_mosRx = 0;
     double m_mosTx = 0;

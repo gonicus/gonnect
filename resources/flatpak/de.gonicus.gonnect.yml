@@ -104,6 +104,7 @@ modules:
       - --disable-video
       - --enable-ext-sound
       - --with-opus
+      - --enable-libwebrtc-aec3
       - CFLAGS=-fPIC
     sources:
       - type: git
