@@ -61,6 +61,8 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
                 }
 
                 if (secret.isEmpty()) {
+                    qCDebug(lcDateEventFeederManager) << "got empty secret, requesting for password";
+
                     auto &viewHelper = ViewHelper::instance();
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,

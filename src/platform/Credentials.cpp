@@ -93,18 +93,28 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                 auto error = readJob->error();
                 QString secret = readJob->textData();
 
+                qCDebug(lcCredentials) << "handling QKeychain respond: key" << key << "error"
+                                       << error << "secretEmpty" << secret.isEmpty();
+
                 // Key is not present in keychain? Try to update it from Flatpak portal
                 if (m_isSecretPortalInitialized
                     && (error == QKeychain::EntryNotFound || secret.isEmpty())) {
                     KeychainSettings keychainSettings;
 
+                    qCDebug(lcCredentials) << "no secret from QKeychain; try secret portal";
+
 #ifdef Q_OS_FLATPAK
+                    qCDebug(lcCredentials) << "checking secret portal is valid";
+
                     auto &sp = SecretPortal::instance();
                     if (sp.isValid()) {
+                        qCDebug(lcCredentials) << "secret portal is valid";
+
                         const auto encryptedSecret = keychainSettings.value(key, "").toString();
                         secret = sp.decrypt(encryptedSecret);
 
                         if (!secret.isEmpty()) {
+                            qCDebug(lcCredentials) << "migrate secret to QKeychain";
 
                             set(key, secret, [key](bool error, const QString &misc) {
                                 if (error) {
@@ -119,6 +129,8 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
 
                     callback(false, secret);
                 } else if (error == QKeychain::EntryNotFound) {
+                    qCDebug(lcCredentials) << "no secret found by QKeychain";
+
                     callback(false, "inval!d");
                 } else if (error != QKeychain::NoError) {
                     callback(true,
