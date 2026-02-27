@@ -105,7 +105,7 @@ QString WindowsNotificationManager::add(::Notification *notification)
     // templ.setScenario(WinToastLib::WinToastTemplate::Scenario::IncomingCall);
 
     auto windowsNotification = new WindowsNotification(*this, notification->id());
-    const auto toastId = WinToast::instance()->showToast(templ, windowsNotification); // Takes ownership of windowsNotification and will delete it (even on error)
+    const auto toastId = WinToast::instance()->showToast(templ, windowsNotification);
     if (toastId < 0) {
         qCCritical(winNotificationCat) << "Failed to show notification";
         return notification->id();
