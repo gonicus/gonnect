@@ -34,12 +34,8 @@ void ChatConnectorManager::saveRecoveryKey(const QString &settingsGroup, const Q
         return;
     }
 
-    credentials.set(
-            QString("%1/secret").arg(settingsGroup), key, [](bool error, const QString &misc) {
-                if (error) {
-                    qCCritical(lcChatConnectorManager) << "Error on saving recovery key:" << misc;
-                }
-            });
+    credentials.set(QString("%1/secret").arg(settingsGroup), key,
+                    [](QKeychain::Error, const QString &, const QString &) { });
 }
 
 void ChatConnectorManager::saveAccessToken(const QString &settingsGroup, const QString &token) const
@@ -58,12 +54,8 @@ void ChatConnectorManager::saveAccessToken(const QString &settingsGroup, const Q
         return;
     }
 
-    credentials.set(
-            QString("%1/token").arg(settingsGroup), token, [](bool error, const QString &misc) {
-                if (error) {
-                    qCCritical(lcChatConnectorManager) << "Error on saving access token:" << misc;
-                }
-            });
+    credentials.set(QString("%1/token").arg(settingsGroup), token,
+                    [](QKeychain::Error, const QString &, const QString &) { });
 }
 
 void ChatConnectorManager::init()

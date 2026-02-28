@@ -152,13 +152,10 @@ void AddressBookManager::acquireSecret(const QString &group,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, group, secretKey, callback](bool error, const QString &secret) {
-                if (error) {
-                    qCWarning(lcAddressBookManager) << "failed to retrieve secret:" << secret;
-                    return;
-                }
-
-                if (secret.isEmpty()) {
+            [this, group, secretKey, callback](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError) {
+                    callback(secret);
+                } else if (error == QKeychain::EntryNotFound) {
                     auto &viewHelper = ViewHelper::instance();
 
                     auto conn = connect(
@@ -171,12 +168,7 @@ void AddressBookManager::acquireSecret(const QString &group,
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
-                                            [secretKey](bool error, const QString &data) {
-                                                if (error) {
-                                                    qCCritical(lcAddressBookManager)
-                                                            << "failed to set credentials:" << data;
-                                                }
-                                            });
+                                            [secretKey](QKeychain::Error, const QString &, const QString &) { });
 
                                     callback(password);
                                 }
@@ -188,9 +180,6 @@ void AddressBookManager::acquireSecret(const QString &group,
                     settings.beginGroup(group);
                     viewHelper.requestPassword(group, settings.value("host", "").toString());
                     settings.beginGroup(group);
-
-                } else {
-                    callback(secret);
                 }
             });
 }

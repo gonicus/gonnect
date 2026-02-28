@@ -54,33 +54,25 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, configId, secretKey, callback](bool error, const QString &secret) {
-                if (error) {
-                    qCWarning(lcDateEventFeederManager) << "failed to retrieve secret:" << secret;
-                    return;
-                }
-
-                if (secret.isEmpty()) {
+            [this, configId, secretKey, callback](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError) {
+                    callback(secret);
+                } else if (error == QKeychain::Error::EntryNotFound) {
                     auto &viewHelper = ViewHelper::instance();
-                    auto conn = connect(
-                            &viewHelper, &ViewHelper::passwordResponded, this,
-                            [secretKey, configId, callback, this](const QString &id,
-                                                                  const QString &password) {
-                                if (id == configId) {
-                                    QObject::disconnect(m_viewHelperConnections.value(configId));
-                                    m_viewHelperConnections.remove(configId);
+                    auto conn = connect(&viewHelper, &ViewHelper::passwordResponded, this,
+                                        [secretKey, configId, callback,
+                                         this](const QString &id, const QString &password) {
+                                            if (id == configId) {
+                                                QObject::disconnect(
+                                                        m_viewHelperConnections.value(configId));
+                                                m_viewHelperConnections.remove(configId);
 
-                                    Credentials::instance().set(
-                                            secretKey + "/secret", password,
-                                            [](bool error, const QString &data) {
-                                                if (error) {
-                                                    qCCritical(lcDateEventFeederManager)
-                                                            << "failed to set credentials:" << data;
-                                                }
-                                            });
-                                    callback(password);
-                                }
-                            });
+                                                Credentials::instance().set(
+                                                        secretKey + "/secret", password,
+                                                        [](QKeychain::Error, const QString &, const QString &) { });
+                                                callback(password);
+                                            }
+                                        });
 
                     m_viewHelperConnections.insert(configId, conn);
 
@@ -88,8 +80,6 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
                     settings.beginGroup(configId);
                     viewHelper.requestPassword(configId, settings.value("host", "").toString());
                     settings.endGroup();
-                } else {
-                    callback(secret);
                 }
             });
 }
