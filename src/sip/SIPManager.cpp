@@ -149,11 +149,13 @@ void SIPManager::setPreferredCodecs()
     const QList<int> codecPriorities = { PJMEDIA_CODEC_PRIO_HIGHEST, PJMEDIA_CODEC_PRIO_NEXT_HIGHER,
                                          PJMEDIA_CODEC_PRIO_NORMAL, PJMEDIA_CODEC_PRIO_LOWEST };
 
+    static const QRegularExpression filterRegex("\\s+,\\s+");
+
     ReadOnlyConfdSettings globalSettings;
     const QList<QString> preferredCodecs =
             globalSettings.value("sip/preferredCodecs", "")
                     .toString()
-                    .split(QRegularExpression("\\s+,\\s+"), Qt::SkipEmptyParts);
+                    .split(filterRegex, Qt::SkipEmptyParts);
     if (preferredCodecs.empty()) {
         return;
     }
