@@ -111,12 +111,6 @@ void SIPManager::initialize()
         qCFatal(lcSIPManager) << "failed to initialize SIP library: " << err.info();
     }
 
-    const auto &codecs = m_ep.codecEnum2();
-    qCInfo(lcSIPManager) << "available codecs:";
-    for (const auto &c : codecs) {
-        qCInfo(lcSIPManager) << "* " << c.codecId;
-    }
-
     // Set codec preference
     setPreferredCodecs();
 
@@ -155,11 +149,12 @@ void SIPManager::setPreferredCodecs()
     const QList<int> codecPriorities = { PJMEDIA_CODEC_PRIO_HIGHEST, PJMEDIA_CODEC_PRIO_NEXT_HIGHER,
                                          PJMEDIA_CODEC_PRIO_NORMAL, PJMEDIA_CODEC_PRIO_LOWEST };
 
+    static const QRegularExpression filterRegex("\\s+,\\s+");
+
     ReadOnlyConfdSettings globalSettings;
-    const QList<QString> preferredCodecs =
-            globalSettings.value("sip/preferredCodecs", "")
-                    .toString()
-                    .split(QRegularExpression("\\s+,\\s+"), Qt::SkipEmptyParts);
+    const QList<QString> preferredCodecs = globalSettings.value("sip/preferredCodecs", "")
+                                                   .toString()
+                                                   .split(filterRegex, Qt::SkipEmptyParts);
     if (preferredCodecs.empty()) {
         return;
     }
@@ -182,6 +177,8 @@ void SIPManager::setPreferredCodecs()
     // Disable all codecs
     const auto &codecs = m_ep.codecEnum2();
     for (const auto &c : codecs) {
+        qCDebug(lcSIPManager) << "found codec" << c.codecId << ", with initial priority"
+                              << (int)c.priority << ", disabling...";
         m_ep.codecSetPriority(c.codecId, PJMEDIA_CODEC_PRIO_DISABLED);
     }
 
