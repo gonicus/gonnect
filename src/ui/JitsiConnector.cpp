@@ -589,7 +589,8 @@ void JitsiConnector::setRoomPassword(QString value)
 
     Credentials::instance().set(
             authGroup, value,
-            [this, value, authGroup](QKeychain::Error error, const QString &, const QString &message) {
+            [this, value, authGroup](QKeychain::Error error, const QString &,
+                                     const QString &message) {
                 if (error == QKeychain::NoError) {
                     Q_EMIT executePasswordCommand(value);
 
@@ -600,7 +601,8 @@ void JitsiConnector::setRoomPassword(QString value)
 
                     setIsPasswordRequired(!value.isEmpty());
                 } else {
-                    ErrorBus::instance().error(tr("Failed persist room password: %1").arg(message));                                    }
+                    ErrorBus::instance().error(tr("Failed persist room password: %1").arg(message));
+                }
             });
 }
 
@@ -1289,24 +1291,26 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
     if (rememberPassword) {
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-        Credentials::instance().set(authGroup, password,
-                                    [this, password, authGroup](QKeychain::Error error,
-                                                                const QString &, const QString &message) {
-                                        if (error == QKeychain::NoError) {
-                                            Q_EMIT executePasswordCommand(password);
+        Credentials::instance().set(
+                authGroup, password,
+                [this, password, authGroup](QKeychain::Error error, const QString &,
+                                            const QString &message) {
+                    if (error == QKeychain::NoError) {
+                        Q_EMIT executePasswordCommand(password);
 
-                                            if (m_roomPassword != password) {
-                                                m_roomPassword = password;
-                                                Q_EMIT roomPasswordChanged();
-                                            }
+                        if (m_roomPassword != password) {
+                            m_roomPassword = password;
+                            Q_EMIT roomPasswordChanged();
+                        }
 
-                                            setIsPasswordRequired(false);
+                        setIsPasswordRequired(false);
 
-                                            Q_EMIT executePasswordCommand(password);
-                                        } else {
-                                            ErrorBus::instance().error(tr("Failed persist room password: %1").arg(message));
-                                        }
-                                    });
+                        Q_EMIT executePasswordCommand(password);
+                    } else {
+                        ErrorBus::instance().error(
+                                tr("Failed persist room password: %1").arg(message));
+                    }
+                });
     }
 }
 

@@ -38,7 +38,8 @@ void ChatConnectorManager::saveRecoveryKey(const QString &settingsGroup, const Q
     credentials.set(QString("%1/secret").arg(settingsGroup), key,
                     [](QKeychain::Error error, const QString &, const QString &message) {
                         if (error != QKeychain::NoError) {
-                            ErrorBus::instance().error(tr("Failed persist chat recovery code: %1").arg(message));
+                            ErrorBus::instance().error(
+                                    tr("Failed persist chat recovery code: %1").arg(message));
                         }
                     });
 }
@@ -62,7 +63,8 @@ void ChatConnectorManager::saveAccessToken(const QString &settingsGroup, const Q
     credentials.set(QString("%1/token").arg(settingsGroup), token,
                     [](QKeychain::Error error, const QString &, const QString &message) {
                         if (error != QKeychain::NoError) {
-                            ErrorBus::instance().error(tr("Failed persist chat access token: %1").arg(message));
+                            ErrorBus::instance().error(
+                                    tr("Failed persist chat access token: %1").arg(message));
                         }
                     });
 }
