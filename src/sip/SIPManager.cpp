@@ -152,10 +152,9 @@ void SIPManager::setPreferredCodecs()
     static const QRegularExpression filterRegex("\\s+,\\s+");
 
     ReadOnlyConfdSettings globalSettings;
-    const QList<QString> preferredCodecs =
-            globalSettings.value("sip/preferredCodecs", "")
-                    .toString()
-                    .split(filterRegex, Qt::SkipEmptyParts);
+    const QList<QString> preferredCodecs = globalSettings.value("sip/preferredCodecs", "")
+                                                   .toString()
+                                                   .split(filterRegex, Qt::SkipEmptyParts);
     if (preferredCodecs.empty()) {
         return;
     }
