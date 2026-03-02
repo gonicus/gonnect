@@ -67,6 +67,8 @@ class PjSIPConan(ConanFile):
             self.requires("opus/1.5.2")
         if self.options.with_amr:
             self.requires("opencore-amr/0.1.6")
+            if self.settings.os != "Windows":
+                self.requires("vo-amrwbenc/0.1.3")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -110,6 +112,8 @@ class PjSIPConan(ConanFile):
             tc.configure_args.append("--disable-opencore-amr")
         else:
             tc.configure_args.append("--with-opencore-amr=%s" % self.dependencies["opencore-amr"].package_folder)
+            if self.settings.os != "Windows":
+                tc.configure_args.append("--with-opencore-amrwbenc=%s" % self.dependencies["vo-amrwbenc"].package_folder)
         if not self.options.with_opus:
             tc.configure_args.append("--disable-opus")
         else:

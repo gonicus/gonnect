@@ -36,6 +36,8 @@ Item {
         anchors.fill: parent
         color: Theme.backgroundInitials
         radius: initialBackground.width / 2
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -43,6 +45,10 @@ Item {
         anchors.centerIn: parent
         font.pixelSize: 0.4 * control.size
         color: Theme.foregroundInitials
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: initialsLabel.text
+        Accessible.description: qsTr("Initials of this contact")
     }
 
     Image {
@@ -61,6 +67,8 @@ Item {
         color: 'black'
         visible: false
         radius: mask.width / 2
+
+        Accessible.ignored: true
     }
 
     OpacityMask {
@@ -86,5 +94,7 @@ Item {
             width: parent.width - 2
             anchors.centerIn: parent
         }
+
+        Accessible.ignored: true
     }
 }

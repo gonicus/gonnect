@@ -14,10 +14,18 @@ Item {
     property alias emojiChar: emojiIconLabel.text
     property string tooltipText
 
+    Accessible.role: Accessible.Button
+    Accessible.name: qsTr("Emoji")
+    Accessible.description: qsTr("Selected Emoji: %1").arg(control.tooltipText)
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.clicked()
+
     Rectangle {
         anchors.fill: parent
         color: Theme.backgroundOffsetHoveredColor
         visible: groupButtonHoverHandler.hovered
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -29,6 +37,8 @@ Item {
             family: "Noto Color Emoji"
             pixelSize: 20
         }
+
+        Accessible.ignored: true
     }
 
     HoverHandler {

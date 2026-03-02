@@ -192,6 +192,9 @@ Item {
                 leftMargin: 15
                 bottomMargin: 10
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: nameLabel.text
         }
 
         Rectangle {
@@ -223,13 +226,19 @@ Item {
                 anchors.fill: parent
                 radius: parent.radius
                 color: Theme.backgroundOffsetColor
+
+                Accessible.ignored: true
             }
 
             Label {
                 id: dtmfFeedbackLabel
                 anchors.centerIn: parent
                 font.pixelSize: 50
+
+                Accessible.ignored: true
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -241,6 +250,9 @@ Item {
             bottom: parent.bottom
             right: callListCard.left
         }
+
+        Accessible.role: Accessible.Border
+        Accessible.name: qsTr("Drag bar")
 
         HoverHandler {
             id: verticalDragbarDummyHoverHandler

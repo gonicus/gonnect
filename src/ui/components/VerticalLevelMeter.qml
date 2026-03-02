@@ -12,6 +12,9 @@ Item {
 
     property bool hasAudioLevel
 
+    Accessible.role: Accessible.StaticText
+    Accessible.name: qsTr("Level meter")
+
     Rectangle {
         id: bg
         anchors.fill: parent
@@ -22,6 +25,8 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: 300 }
         }
+
+        Accessible.ignored: true
     }
 
     IconLabel {
@@ -32,5 +37,7 @@ Item {
             width: 12
             height: 12
         }
+
+        Accessible.ignored: true
     }
 }

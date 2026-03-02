@@ -11,6 +11,12 @@ Item {
 
     property int iconSize: 24
 
+    Accessible.role: Accessible.Button
+    Accessible.name: firstAidLabel.text
+    Accessible.description: qsTr("Open first aid menu")
+    Accessible.focusable: true
+    Accessible.onPressAction: ViewHelper.showFirstAid()
+
     Rectangle {
         id: firstAidIcon
         width: control.iconSize
@@ -29,6 +35,8 @@ Item {
                 topMargin: 1/12 * control.iconSize
                 bottomMargin: 1/12 * control.iconSize
             }
+
+            Accessible.ignored: true
         }
 
         Rectangle {
@@ -42,7 +50,11 @@ Item {
                 leftMargin: 1/12 * control.iconSize
                 rightMargin: 1/12 * control.iconSize
             }
+
+            Accessible.ignored: true
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -54,11 +66,14 @@ Item {
             left: firstAidIcon.right
             leftMargin: 10
         }
+
+        Accessible.ignored: true
     }
 
     HoverHandler {
         id: firstAidHoverHandler
     }
+
     TapHandler {
         onTapped: () => ViewHelper.showFirstAid()
     }

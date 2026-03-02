@@ -31,6 +31,10 @@ BaseWindow {
             margins: 20
         }
 
+        Accessible.role: Accessible.Column
+        Accessible.name: qsTr("GOnnect headline")
+        Accessible.description: appHeader.text
+
         Settings {
             id: genericSettings
             location: ViewHelper.userConfigPath
@@ -50,9 +54,12 @@ BaseWindow {
         }
 
         Label {
+            id: appHeader
             text: "GOnnect - your friendly VoIP client that connects people"
             font.weight: Font.DemiBold
             anchors.horizontalCenter: parent.horizontalCenter
+
+            Accessible.ignored: true
         }
 
         Item {
@@ -61,9 +68,15 @@ BaseWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             width: appLabel.width + clipboardButton.width
 
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("GOnnect version")
+            Accessible.description: appLabel.text
+
             Label {
                 id: appLabel
                 text: qsTr("Version: v%1").arg(ViewHelper.appVersion())
+
+                Accessible.ignored: true
             }
 
             ClipboardButton {
@@ -74,6 +87,11 @@ BaseWindow {
                     leftMargin: 20
                     verticalCenter: parent.verticalCenter
                 }
+
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("Copy to clipboard")
+                Accessible.description: qsTr("Copy the currently used version number of GOnnect to the clipboard")
+                Accessible.focusable: true
             }
         }
 
@@ -84,8 +102,9 @@ BaseWindow {
                 left: parent.left
                 right: parent.right
             }
-        }
 
+            Accessible.ignored: true
+        }
 
         Row {
             spacing: 20
@@ -97,27 +116,44 @@ BaseWindow {
                     .replace('%2', qsTr('Homepage'))
                 onLinkActivated: link => Qt.openUrlExternally(link)
 
-                HoverHandler {
-                    enabled: parent.hoveredLink
-                    cursorShape: Qt.PointingHandCursor
-                }
-            }
-            Label {
-                text: '<a href="%1">%2</a>'
-                    .replace('%1', genericSettings.issueTrackerURL)
-                    .replace('%2', qsTr('Bug Tracker'))
-                onLinkActivated: link => Qt.openUrlExternally(link)
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr('Homepage')
+                Accessible.description: qsTr("Visit the project homepage")
+                Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.homePageURL)
 
                 HoverHandler {
                     enabled: parent.hoveredLink
                     cursorShape: Qt.PointingHandCursor
                 }
             }
+
+            Label {
+                text: '<a href="%1">%2</a>'
+                    .replace('%1', genericSettings.issueTrackerURL)
+                    .replace('%2', qsTr('Bug Tracker'))
+                onLinkActivated: link => Qt.openUrlExternally(link)
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr('Homepage')
+                Accessible.description: qsTr("Visit the project bug tracker")
+                Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.issueTrackerURL)
+
+                HoverHandler {
+                    enabled: parent.hoveredLink
+                    cursorShape: Qt.PointingHandCursor
+                }
+            }
+
             Label {
                 text: '<a href="%1">%2</a>'
                     .replace('%1', genericSettings.documentationURL)
                     .replace('%2', qsTr('Documentation'))
                 onLinkActivated: link => Qt.openUrlExternally(link)
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr('Homepage')
+                Accessible.description: qsTr("Visit the online project documentation")
+                Accessible.onPressAction: () => Qt.openUrlExternally(genericSettings.documentationURL)
 
                 HoverHandler {
                     enabled: parent.hoveredLink
