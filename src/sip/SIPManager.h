@@ -47,6 +47,8 @@ public:
     void initialize();
     void shutdown();
 
+    void setPreferredCodecs();
+
     void getPlaybackDevices();
 
     void setDefaultPreferredIdentity(const QString &value);

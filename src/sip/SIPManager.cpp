@@ -111,6 +111,9 @@ void SIPManager::initialize()
         qCFatal(lcSIPManager) << "failed to initialize SIP library: " << err.info();
     }
 
+    // Set codec preference
+    setPreferredCodecs();
+
     m_ep.libStart();
 
     // Load Accounts + Transports
@@ -138,6 +141,54 @@ void SIPManager::initialize()
 
     if (!isConfigured()) {
         Q_EMIT notConfigured();
+    }
+}
+
+void SIPManager::setPreferredCodecs()
+{
+    const QList<int> codecPriorities = { PJMEDIA_CODEC_PRIO_HIGHEST, PJMEDIA_CODEC_PRIO_NEXT_HIGHER,
+                                         PJMEDIA_CODEC_PRIO_NORMAL, PJMEDIA_CODEC_PRIO_LOWEST };
+
+    static const QRegularExpression filterRegex("\\s+,\\s+");
+
+    ReadOnlyConfdSettings globalSettings;
+    const QList<QString> preferredCodecs = globalSettings.value("sip/preferredCodecs", "")
+                                                   .toString()
+                                                   .split(filterRegex, Qt::SkipEmptyParts);
+    if (preferredCodecs.empty()) {
+        return;
+    }
+
+    // Check if there's valid codecs in our preference list
+    int invalidCodecs = 0;
+    for (const auto &pC : preferredCodecs) {
+        try {
+            pj::CodecParam param = m_ep.codecGetParam(pC.toStdString());
+        } catch (pj::Error &err) {
+            invalidCodecs++;
+        }
+    }
+    if (invalidCodecs >= preferredCodecs.count()) {
+        qCDebug(lcSIPManager)
+                << "no valid preferred codec found - skipping preferred codec selection";
+        return;
+    }
+
+    // Disable all codecs
+    const auto &codecs = m_ep.codecEnum2();
+    for (const auto &c : codecs) {
+        m_ep.codecSetPriority(c.codecId, PJMEDIA_CODEC_PRIO_DISABLED);
+    }
+
+    // Only enable/use config codecs
+    for (int i = 0; i < preferredCodecs.count(); i++) {
+        int priorityIndex =
+                (i < codecPriorities.count()) ? codecPriorities.at(i) : codecPriorities.count() - 1;
+        QString preferredCodec = preferredCodecs.at(i);
+
+        m_ep.codecSetPriority(preferredCodec.toStdString(), priorityIndex);
+        qCDebug(lcSIPManager) << "using codec" << preferredCodec << ", with priority"
+                              << priorityIndex;
     }
 }
 
