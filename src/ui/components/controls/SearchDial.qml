@@ -53,6 +53,11 @@ Item {
         TapHandler {
             onTapped: () => control.numberSelected(searchBox.text, "", modeSelector.currentValue)
         }
+
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Select number")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => control.numberSelected(searchBox.text, "", modeSelector.currentValue)
     }
 
     Rectangle {
@@ -100,6 +105,11 @@ Item {
         TapHandler {
             onTapped: () => searchBox.activate()
         }
+
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Activate search field")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => searchBox.activate()
     }
 
     Label {
@@ -113,6 +123,9 @@ Item {
             right: searchBox.left
             verticalCenter: searchBox.verticalCenter
         }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: placeholderLabel.displayText
     }
 
     SearchBox {
@@ -138,6 +151,11 @@ Item {
             rightMargin: 20
         }
 
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Clear search field")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => searchBox.clear()
+
         IconLabel {
             id: clearButton
             visible: searchBox.text !== ""
@@ -154,6 +172,8 @@ Item {
             }
 
             Behavior on color { ColorAnimation {} }
+
+            Accessible.ignored: true
         }
 
         HoverHandler {
@@ -184,6 +204,10 @@ Item {
             }
         ].concat(SIPManager.preferredIdentities)
 
+        Accessible.role: Accessible.ComboBox
+        Accessible.name: qsTr("Preferred identity")
+        Accessible.description: qsTr("Select the preferred identity for outgoing calls")
+
         contentItem: Label {
             text: modeSelector.displayText
             wrapMode: Label.WordWrap
@@ -192,6 +216,10 @@ Item {
             elide: Label.ElideRight
             verticalAlignment: Label.AlignVCenter
             leftPadding: 10
+
+            Accessible.role: Accessible.ListItem
+            Accessible.name: modeSelector.displayText
+            Accessible.focusable: true
         }
 
         function setDefaultIdentity() {

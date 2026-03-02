@@ -17,6 +17,10 @@ Item {
     property bool isEstablished
     property bool isIncomingAudioLevel
 
+    Accessible.role: Accessible.Heading
+    Accessible.name: qsTr("Caller name")
+    Accessible.description: control.isIncoming ? (control.name + isCallingLabel.text) : (callingLabel + control.name)
+
     Rectangle {
         id: volumeMeterBg
         anchors.centerIn: avatarImage
@@ -29,6 +33,8 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: 300 }
         }
+
+        Accessible.ignored: true
     }
 
     AvatarImage {
@@ -48,9 +54,12 @@ Item {
             top: avatarImage.bottom
             topMargin: 50
         }
+
+        Accessible.ignored: true
     }
 
     Label {
+        id: isCallingLabel
         font.pixelSize: 22
         text: qsTr("is calling...")
         color: Theme.secondaryTextColor
@@ -60,6 +69,8 @@ Item {
             top: otherName.bottom
             topMargin: 30
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -73,5 +84,7 @@ Item {
             top: otherName.bottom
             topMargin: 30
         }
+
+        Accessible.ignored: true
     }
 }

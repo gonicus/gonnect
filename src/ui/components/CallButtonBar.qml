@@ -77,6 +77,8 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
+
+        Accessible.ignored: true
     }
 
     IconLabel {
@@ -102,6 +104,10 @@ Item {
             }
         }
 
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("Call security level")
+        Accessible.description: qsTr("Security level of the ongoing call")
+
         HoverHandler {
             id: securityLevelHoverHandler
 
@@ -109,25 +115,44 @@ Item {
                 y: securityLevelIcon.height
 
                 Column {
+                    id: securityLevelColumn
                     spacing: 8
 
+                    Accessible.role: Accessible.Column
+                    Accessible.name: qsTr("Call security details")
+                    Accessible.description: qsTr("Detailed call security status: %1 / %2").arg(securityLevelColumn.signalEncryptionValue).arg(securityLevelColumn.mediaEncryptedValue)
+
+                    property string signalEncryptionValue: control.isSignalingEncrypted
+                                                           ? qsTr("signaling encrypted")
+                                                           : qsTr("signaling unencrypted")
+                    property string mediaEncryptedValue: control.isMediaEncrypted
+                                                         ? qsTr("media encrypted")
+                                                         : qsTr("media unencrypted")
+
                     IconLabel {
-                        text: control.isSignalingEncrypted ? qsTr("Signaling encrypted") : qsTr("Signaling unencrypted")
+                        id: signalingEncryption
+                        text: securityLevelColumn.signalEncryptionValue
                         spacing: 4
                         icon {
                             source: control.isSignalingEncrypted ? Icons.securityHigh : Icons.securityLow
                             width: 24
                             height: 24
                         }
+
+                        Accessible.ignored: true
                     }
+
                     IconLabel {
-                        text: control.isMediaEncrypted ? qsTr("Media encrypted") : qsTr("Media unencrypted")
+                        id: mediaEncryption
+                        text: securityLevelColumn.mediaEncryptedValue
                         spacing: 4
                         icon {
                             source: control.isMediaEncrypted ? Icons.securityHigh : Icons.securityLow
                             width: 24
                             height: 24
                         }
+
+                        Accessible.ignored: true
                     }
                 }
             }
@@ -166,6 +191,10 @@ Item {
             }
         }
 
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("Call quality")
+        Accessible.description: qsTr("Quality of the ongoing call")
+
         HoverHandler {
             id: callQualityHoverHandler
 
@@ -183,52 +212,99 @@ Item {
                             id: txCol
                             spacing: 8
 
+                            Accessible.role: Accessible.Column
+                            Accessible.name: qsTr("Transmission statistics")
+                            Accessible.description: qsTr("Call quality metrics")
+
                             Label {
                                 text: qsTr("Transmit")
                                 font {
                                     weight: Font.DemiBold
                                     pixelSize: 16
                                 }
+
+                                Accessible.ignored: true
                             }
+
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: txMosLabel
                                     text: qsTr("MOS")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: txMosValue
                                     color: Theme.secondaryTextColor
                                     text: (control.txMos).toFixed(2)
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: qsTr("Mean opinion score")
+                                Accessible.description: qsTr("Numerical metric assessing transmission-side voice call quality: %1").arg(txMosValue.text)
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: txLossLabel
                                     text: qsTr("Packet loss")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: txLossValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.txLossRate) + "%"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: txLossLabel.text
+                                Accessible.description: qsTr("%1% of packets lost in transmission").arg(txLossValue.text)
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: txJitterLabel
                                     text: qsTr("Jitter")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: txJitterValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.txJitter) + " ms"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: txJitterLabel.text
+                                Accessible.description: qsTr("Amount of transmission side jitter: %1").arg(txJitterValue.text)
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: txDelayLabel
                                     text: qsTr("Effective delay")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: txDelayValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.txEffectiveDelay) + "ms"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: txDelayLabel.text
+                                Accessible.description: qsTr("Effective transmission side call delay: %1").arg(txDelayValue.text)
                             }
                         }
 
@@ -236,10 +312,16 @@ Item {
                             width: 1
                             height: txCol.height
                             color: Theme.borderColor
+
+                            Accessible.ignored: true
                         }
 
                         Column {
                             spacing: 8
+
+                            Accessible.role: Accessible.StaticText
+                            Accessible.name: qsTr("Receiver statistics")
+                            Accessible.description: qsTr("Call quality metrics")
 
                             Label {
                                 text: qsTr("Receive")
@@ -247,46 +329,89 @@ Item {
                                     weight: Font.DemiBold
                                     pixelSize: 16
                                 }
+
+                                Accessible.ignored: true
                             }
+
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: rxMosLabel
                                     text: qsTr("MOS")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: rxMosValue
                                     color: Theme.secondaryTextColor
                                     text: (control.rxMos).toFixed(2)
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: qsTr("Mean opinion score")
+                                Accessible.description: qsTr("Numerical metric assessing receiver-side voice/video call quality: %1").arg(rxMosValue.text)
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: rxLossLabel
                                     text: qsTr("Packet loss")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: rxLossValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.rxLossRate) + "%"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: rxLossLabel.text
+                                Accessible.description: qsTr("%1% of packets lost in receival").arg(rxLossValue.text)
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: rxJitterLabel
                                     text: qsTr("Jitter")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: rxJitterValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.rxJitter) + " ms"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: rxJitterLabel.text
+                                Accessible.description: qsTr("Amount of receiver side jitter: %1").arg(rxJitterValue.text)
                             }
                             Row {
                                 spacing: 8
                                 Label {
+                                    id: rxDelayLabel
                                     text: qsTr("Effective delay")
+
+                                    Accessible.ignored: true
                                 }
                                 Label {
+                                    id: rxDelayValue
                                     color: Theme.secondaryTextColor
                                     text: Math.round(control.rxEffectiveDelay) + "ms"
+
+                                    Accessible.ignored: true
                                 }
+
+                                Accessible.role: Accessible.StaticText
+                                Accessible.name: rxDelayLabel.text
+                                Accessible.description: qsTr("Effective receiver side call delay: %1").arg(rxDelayValue.text)
                             }
                         }
                     }
@@ -298,6 +423,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.ignored: true
                     }
 
                     Row {
@@ -305,12 +432,22 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
 
                         Label {
+                            id: codecLabel
                             text: qsTr("Codec")
+
+                            Accessible.ignored: true
                         }
                         Label {
+                            id: codecValue
                             text: qsTr("%1@%2 kHz").arg(control.codec).arg(Math.round(control.codecClockRate / 1000))
                             color: Theme.secondaryTextColor
+
+                            Accessible.ignored: true
                         }
+
+                        Accessible.role: Accessible.StaticText
+                        Accessible.name: qsTr("Audio codec")
+                        Accessible.description: qsTr("The currently used audio codec and frequency: %1").arg(codecValue.text)
                     }
                 }
             }
@@ -336,6 +473,8 @@ Item {
             leftMargin: 20
             verticalCenter: parent.verticalCenter
         }
+
+        Accessible.ignored: true
     }
 
     IconLabel {
@@ -354,6 +493,10 @@ Item {
             width: 20
             height: 20
         }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr('Elapsed call time')
+        Accessible.description: qsTr("The duration in seconds the call has been active for: %1").arg(ViewHelper.secondsToNiceText(internal.elapsedSeconds))
     }
 
     Row {
@@ -375,6 +518,12 @@ Item {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Screensharing control")
+            Accessible.description: qsTr("Start sharing your screen")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => screenShareButton.click()
         }
 
         BarButton {
@@ -387,6 +536,12 @@ Item {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Camera control")
+            Accessible.description: qsTr("Enable your camera")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => videoMuteButton.click()
         }
 
         BarButton {
@@ -396,6 +551,12 @@ Item {
             enabled: control.isEstablished && !control.isFinished
             visible: control.showHoldButton && control.isEstablished
             onClicked: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
+
+            Accessible.role: Accessible.Button
+            Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
+            Accessible.description: qsTr("Update the call hold state")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => holdButton.click()
         }
 
         Rectangle {
@@ -405,6 +566,8 @@ Item {
             color: Theme.borderColor
             enabled: control.areInCallButtonsEnabled
             anchors.verticalCenter: parent.verticalCenter
+
+            Accessible.ignored: true
         }
 
         BarButton {
@@ -416,7 +579,6 @@ Item {
             onClicked: () => GlobalMuteState.toggleMute()
             onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
 
-
             AudioDeviceMenu {
                 id: audioInputDeviceMenu
                 inputDevices: true
@@ -424,6 +586,12 @@ Item {
 
                 onDeviceSelected: deviceId => AudioManager.captureDeviceId = deviceId
             }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Input control")
+            Accessible.description: qsTr("Set the mute state of the current input device")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => audioInputDeviceButton.click()
         }
 
         BarButton {
@@ -442,6 +610,12 @@ Item {
 
                 onDeviceSelected: deviceId => AudioManager.playbackDeviceId = deviceId
             }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Output control")
+            Accessible.description: qsTr("Change the current output devices")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => audioOutputDeviceButton.click()
         }
 
         Button {
@@ -461,6 +635,11 @@ Item {
             }
 
             onClicked: () => control.acceptCallClicked()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Accept call")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => acceptCallButton.click()
         }
 
         Button {
@@ -480,6 +659,11 @@ Item {
             }
 
             onClicked: () => control.hangupClicked()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Hangup call")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => hangupButton.click()
         }
     }
 }

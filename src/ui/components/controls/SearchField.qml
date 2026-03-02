@@ -16,6 +16,9 @@ Item {
         searchInputField.forceActiveFocus()
     }
 
+    Accessible.role: Accessible.Form
+    Accessible.name: placeholderLabel.text
+
     states: [
         State {
             when: !control.activeFocus && searchInputField.text.trim() === ""
@@ -66,6 +69,8 @@ Item {
             right: searchInputField.right
             rightMargin: 10
         }
+
+        Accessible.ignored: true
     }
 
     TextInput {
@@ -78,6 +83,11 @@ Item {
             leftMargin: 10
             right: parent.right
         }
+
+        Accessible.role: Accessible.EditableText
+        Accessible.name: placeholderLabel.text
+        Accessible.searchEdit: true
+        Accessible.focusable: true
     }
 
     Item {
@@ -90,6 +100,11 @@ Item {
             right: parent.right
         }
 
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Clear search field")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => searchInputField.clear()
+
         IconLabel {
             id: clearIcon
             anchors.centerIn: parent
@@ -99,6 +114,8 @@ Item {
                 width: 16
                 height: 16
             }
+
+            Accessible.ignored: true
         }
 
         HoverHandler {
