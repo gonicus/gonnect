@@ -816,7 +816,11 @@ void SIPAccount::setCredentials(const QString &password)
     // Update storage
     Credentials::instance().set(
             authGroup + "/secret", password,
-            [authGroup](QKeychain::Error, const QString &, const QString &) { });
+            [authGroup](QKeychain::Error error, const QString &, const QString &message) {
+                if (error != QKeychain::NoError) {
+                    ErrorBus::instance().error(tr("Failed persist SIP credentials: %1").arg(message));
+                }
+            });
 }
 
 bool SIPAccount::isSignalingEncrypted()

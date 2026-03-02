@@ -22,6 +22,7 @@
 #include "Credentials.h"
 #include "GlobalCallState.h"
 #include "ChatMessage.h"
+#include "ErrorBus.h"
 
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>
@@ -588,7 +589,7 @@ void JitsiConnector::setRoomPassword(QString value)
 
     Credentials::instance().set(
             authGroup, value,
-            [this, value, authGroup](QKeychain::Error error, const QString &, const QString &) {
+            [this, value, authGroup](QKeychain::Error error, const QString &, const QString &message) {
                 if (error == QKeychain::NoError) {
                     Q_EMIT executePasswordCommand(value);
 
@@ -598,7 +599,8 @@ void JitsiConnector::setRoomPassword(QString value)
                     }
 
                     setIsPasswordRequired(!value.isEmpty());
-                }
+                } else {
+                    ErrorBus::instance().error(tr("Failed persist room password: %1").arg(message));                                    }
             });
 }
 
@@ -1289,7 +1291,7 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
 
         Credentials::instance().set(authGroup, password,
                                     [this, password, authGroup](QKeychain::Error error,
-                                                                const QString &, const QString &) {
+                                                                const QString &, const QString &message) {
                                         if (error == QKeychain::NoError) {
                                             Q_EMIT executePasswordCommand(password);
 
@@ -1301,6 +1303,8 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
                                             setIsPasswordRequired(false);
 
                                             Q_EMIT executePasswordCommand(password);
+                                        } else {
+                                            ErrorBus::instance().error(tr("Failed persist room password: %1").arg(message));
                                         }
                                     });
     }

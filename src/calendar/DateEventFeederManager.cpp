@@ -6,6 +6,7 @@
 #include "DateEventManager.h"
 #include "Credentials.h"
 #include "ViewHelper.h"
+#include "ErrorBus.h"
 
 #include <QTimer>
 #include <QLoggingCategory>
@@ -69,9 +70,13 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
                                     m_viewHelperConnections.remove(configId);
 
                                     Credentials::instance().set(secretKey + "/secret", password,
-                                                                [](QKeychain::Error,
+                                                                [](QKeychain::Error error,
                                                                    const QString &,
-                                                                   const QString &) { });
+                                                                   const QString &message) {
+                                                                    if (error != QKeychain::NoError) {
+                                                                        ErrorBus::instance().error(tr("Failed persist calendar credentials: %1").arg(message));
+                                                                    }
+                                                                });
                                     callback(password);
                                 }
                             });

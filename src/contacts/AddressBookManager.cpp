@@ -6,6 +6,7 @@
 #include "ViewHelper.h"
 #include "NetworkHelper.h"
 #include "Credentials.h"
+#include "ErrorBus.h"
 
 #include <QTimer>
 #include <QUrl>
@@ -168,9 +169,13 @@ void AddressBookManager::acquireSecret(const QString &group,
                                     m_viewHelperConnections.remove(group);
 
                                     Credentials::instance().set(secretKey + "/secret", password,
-                                                                [secretKey](QKeychain::Error,
+                                                                [secretKey](QKeychain::Error error,
                                                                             const QString &,
-                                                                            const QString &) { });
+                                                                            const QString &message) {
+                                                                    if (error != QKeychain::NoError) {
+                                                                        ErrorBus::instance().error(tr("Failed persist address book credentials: %1").arg(message));
+                                                                    }
+                                                                });
 
                                     callback(password);
                                 }

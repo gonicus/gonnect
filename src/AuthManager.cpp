@@ -1,6 +1,7 @@
 #include "AuthManager.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Credentials.h"
+#include "ErrorBus.h"
 
 #include <QtNetworkAuth/QtNetworkAuth>
 #include <QLoggingCategory>
@@ -117,7 +118,11 @@ void AuthManager::storeRefreshToken(const QString &token) const
     }
 
     Credentials::instance().set("jitsi/refreshToken", token,
-                                [](QKeychain::Error, const QString &, const QString &) { });
+                                [](QKeychain::Error error, const QString &, const QString &message) {
+                                    if (error != QKeychain::NoError) {
+                                        ErrorBus::instance().error(tr("Failed persist jitsi refresh token: %1").arg(message));
+                                    }
+                                });
 }
 
 bool AuthManager::isOAuthAuthenticated() const
