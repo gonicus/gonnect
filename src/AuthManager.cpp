@@ -86,7 +86,8 @@ void AuthManager::init()
                      });
 
     Credentials::instance().get(
-            "jitsi/refreshToken", [this, sslConfig](QKeychain::Error error, const QString &secret, const QString &) {
+            "jitsi/refreshToken",
+            [this, sslConfig](QKeychain::Error error, const QString &secret, const QString &) {
                 if (error == QKeychain::NoError) {
                     if (!secret.isEmpty()) {
                         m_authFlow->setRefreshToken(secret);

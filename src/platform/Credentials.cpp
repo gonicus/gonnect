@@ -138,9 +138,10 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                                     << "we have a secret portal, checking if we've a secret there";
 
                             set(key, secret,
-                                [callback, key](QKeychain::Error error, const QString &, const QString &message) {
-                                    // Setting the secret is currently "out of the line". We don't care if
-                                    // it fails, because it doesn't affect the flow.
+                                [callback, key](QKeychain::Error error, const QString &,
+                                                const QString &message) {
+                                    // Setting the secret is currently "out of the line". We don't
+                                    // care if it fails, because it doesn't affect the flow.
                                     if (error != QKeychain::NoError) {
                                         qCCritical(lcCredentials)
                                                 << "failed to update keychain credentials for"
@@ -159,8 +160,8 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
 #endif
                 } else if (error != QKeychain::NoError) {
                     message = tr("reading credentials for %1 failed: %2")
-                                     .arg(key)
-                                     .arg(qPrintable(readJob->errorString()));
+                                      .arg(key)
+                                      .arg(qPrintable(readJob->errorString()));
                     qCDebug(lcCredentials) << "reading credentials for" << key
                                            << "failed:" << readJob->errorString();
                 } else {

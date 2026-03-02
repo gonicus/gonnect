@@ -586,19 +586,20 @@ void JitsiConnector::setRoomPassword(QString value)
 
     QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-    Credentials::instance().set(authGroup, value,
-                                [this, value, authGroup](QKeychain::Error error, const QString &, const QString &) {
-                                    if (error == QKeychain::NoError) {
-                                        Q_EMIT executePasswordCommand(value);
+    Credentials::instance().set(
+            authGroup, value,
+            [this, value, authGroup](QKeychain::Error error, const QString &, const QString &) {
+                if (error == QKeychain::NoError) {
+                    Q_EMIT executePasswordCommand(value);
 
-                                        if (m_roomPassword != value) {
-                                            m_roomPassword = value;
-                                            Q_EMIT roomPasswordChanged();
-                                        }
+                    if (m_roomPassword != value) {
+                        m_roomPassword = value;
+                        Q_EMIT roomPasswordChanged();
+                    }
 
-                                        setIsPasswordRequired(!value.isEmpty());
-                                    }
-                                });
+                    setIsPasswordRequired(!value.isEmpty());
+                }
+            });
 }
 
 void JitsiConnector::updateVideoCallState()
@@ -681,17 +682,18 @@ void JitsiConnector::onPasswordRequired()
 
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-        Credentials::instance().get(authGroup,
-                                    [this, authGroup](QKeychain::Error error, const QString &secret, const QString &) {
-                                        if (error == QKeychain::NoError) {
-                                            if (!secret.isEmpty()) {
-                                                enterPassword(secret, false);
-                                                return;
-                                            }
-                                        }
+        Credentials::instance().get(
+                authGroup,
+                [this, authGroup](QKeychain::Error error, const QString &secret, const QString &) {
+                    if (error == QKeychain::NoError) {
+                        if (!secret.isEmpty()) {
+                            enterPassword(secret, false);
+                            return;
+                        }
+                    }
 
-                                        setIsPasswordRequired(true);
-                                    });
+                    setIsPasswordRequired(true);
+                });
     } else {
         setIsPasswordRequired(true);
     }
@@ -1285,22 +1287,22 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
     if (rememberPassword) {
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-        Credentials::instance().set(
-                authGroup, password,
-                [this, password, authGroup](QKeychain::Error error, const QString &, const QString &) {
-                    if (error == QKeychain::NoError) {
-                        Q_EMIT executePasswordCommand(password);
+        Credentials::instance().set(authGroup, password,
+                                    [this, password, authGroup](QKeychain::Error error,
+                                                                const QString &, const QString &) {
+                                        if (error == QKeychain::NoError) {
+                                            Q_EMIT executePasswordCommand(password);
 
-                        if (m_roomPassword != password) {
-                            m_roomPassword = password;
-                            Q_EMIT roomPasswordChanged();
-                        }
+                                            if (m_roomPassword != password) {
+                                                m_roomPassword = password;
+                                                Q_EMIT roomPasswordChanged();
+                                            }
 
-                        setIsPasswordRequired(false);
+                                            setIsPasswordRequired(false);
 
-                        Q_EMIT executePasswordCommand(password);
-                    }
-                });
+                                            Q_EMIT executePasswordCommand(password);
+                                        }
+                                    });
     }
 }
 

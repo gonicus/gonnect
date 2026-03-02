@@ -54,25 +54,27 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, configId, secretKey, callback](QKeychain::Error error, const QString &secret, const QString &) {
+            [this, configId, secretKey, callback](QKeychain::Error error, const QString &secret,
+                                                  const QString &) {
                 if (error == QKeychain::NoError) {
                     callback(secret);
                 } else if (error == QKeychain::Error::EntryNotFound) {
                     auto &viewHelper = ViewHelper::instance();
-                    auto conn = connect(&viewHelper, &ViewHelper::passwordResponded, this,
-                                        [secretKey, configId, callback,
-                                         this](const QString &id, const QString &password) {
-                                            if (id == configId) {
-                                                QObject::disconnect(
-                                                        m_viewHelperConnections.value(configId));
-                                                m_viewHelperConnections.remove(configId);
+                    auto conn = connect(
+                            &viewHelper, &ViewHelper::passwordResponded, this,
+                            [secretKey, configId, callback, this](const QString &id,
+                                                                  const QString &password) {
+                                if (id == configId) {
+                                    QObject::disconnect(m_viewHelperConnections.value(configId));
+                                    m_viewHelperConnections.remove(configId);
 
-                                                Credentials::instance().set(
-                                                        secretKey + "/secret", password,
-                                                        [](QKeychain::Error, const QString &, const QString &) { });
-                                                callback(password);
-                                            }
-                                        });
+                                    Credentials::instance().set(secretKey + "/secret", password,
+                                                                [](QKeychain::Error,
+                                                                   const QString &,
+                                                                   const QString &) { });
+                                    callback(password);
+                                }
+                            });
 
                     m_viewHelperConnections.insert(configId, conn);
 

@@ -3,7 +3,8 @@
 #include <QObject>
 #include <qt6keychain/keychain.h>
 
-typedef std::function<void(QKeychain::Error error, const QString &secret, const QString &message)> CredentialsResponse;
+typedef std::function<void(QKeychain::Error error, const QString &secret, const QString &message)>
+        CredentialsResponse;
 
 class Credentials : public QObject
 {

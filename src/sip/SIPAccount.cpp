@@ -375,8 +375,8 @@ void SIPAccount::initialize()
         if (data.isEmpty()) {
             auto &cds = Credentials::instance();
             cds.get(auth + "/secret",
-                    [this, auth, scheme, realm, username, dataTypeValue](QKeychain::Error error,
-                                                                         const QString &secret, const QString &) {
+                    [this, auth, scheme, realm, username, dataTypeValue](
+                            QKeychain::Error error, const QString &secret, const QString &) {
                         if (error != QKeychain::NoError) {
                             Q_EMIT initialized(false);
                             return;
@@ -814,8 +814,9 @@ void SIPAccount::setCredentials(const QString &password)
     }
 
     // Update storage
-    Credentials::instance().set(authGroup + "/secret", password,
-                                [authGroup](QKeychain::Error, const QString &, const QString &) { });
+    Credentials::instance().set(
+            authGroup + "/secret", password,
+            [authGroup](QKeychain::Error, const QString &, const QString &) { });
 }
 
 bool SIPAccount::isSignalingEncrypted()

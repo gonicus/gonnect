@@ -152,7 +152,8 @@ void AddressBookManager::acquireSecret(const QString &group,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, group, secretKey, callback](QKeychain::Error error, const QString &secret, const QString &) {
+            [this, group, secretKey, callback](QKeychain::Error error, const QString &secret,
+                                               const QString &) {
                 if (error == QKeychain::NoError) {
                     callback(secret);
                 } else if (error == QKeychain::EntryNotFound) {
@@ -166,9 +167,10 @@ void AddressBookManager::acquireSecret(const QString &group,
                                     QObject::disconnect(m_viewHelperConnections.value(group));
                                     m_viewHelperConnections.remove(group);
 
-                                    Credentials::instance().set(
-                                            secretKey + "/secret", password,
-                                            [secretKey](QKeychain::Error, const QString &, const QString &) { });
+                                    Credentials::instance().set(secretKey + "/secret", password,
+                                                                [secretKey](QKeychain::Error,
+                                                                            const QString &,
+                                                                            const QString &) { });
 
                                     callback(password);
                                 }
