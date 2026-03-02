@@ -103,6 +103,8 @@ Item {
         text: internal.niceStatusCodes.includes(control.statusCode)
               ? EnumTranslation.sipStatusCode(control.statusCode)
               : ("🕓  " + ViewHelper.secondsToNiceText(internal.elapsedSeconds))
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -115,6 +117,10 @@ Item {
             topMargin: 15
             horizontalCenter: elapsedTimeLabel.horizontalCenter
         }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("SIP call status code")
+        Accessible.description: qsTr("The current status code of the call: %1").arg(statusCodeLabel.text)
     }
 
     AudioLevelButton {
@@ -169,6 +175,8 @@ Item {
             anchors.centerIn: parent
             font.pixelSize: 50
         }
+
+        Accessible.ignored: true
     }
 
     Button {
@@ -186,6 +194,12 @@ Item {
             leftMargin: 10
         }
         onClicked: () => SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi")
+
+        Accessible.role: Accessible.Button
+        Accessible.name: jitsiButton.text
+        Accessible.description: qsTr("Switch to a Jitsi Meet session")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => jitsiButton.click()
     }
 
     Button {
@@ -200,12 +214,18 @@ Item {
             rightMargin: 10
         }
         onClicked: () => {
-                       if (control.isHolding) {
-                           SIPCallManager.unholdCall(control.accountId, control.callId)
-                       } else {
-                           SIPCallManager.holdCall(control.accountId, control.callId)
-                       }
-                   }
+            if (control.isHolding) {
+                SIPCallManager.unholdCall(control.accountId, control.callId)
+            } else {
+                SIPCallManager.holdCall(control.accountId, control.callId)
+            }
+        }
+
+        Accessible.role: Accessible.Button
+        Accessible.name: holdButton.text
+        Accessible.description: qsTr("Toggle the hold state to %1").arg(holdButton.text)
+        Accessible.focusable: true
+        Accessible.onPressAction: () => holdButton.click()
     }
 
     Button {
@@ -223,6 +243,11 @@ Item {
         }
 
         onClicked: () => SIPCallManager.acceptCall(control.accountId, control.callId)
+
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Accept call")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => acceptButton.click()
     }
 
     Button {
@@ -237,13 +262,17 @@ Item {
             right: parent.right
             rightMargin: 10
         }
-
         onClicked: () => {
-                       if (SIPCallManager.isConferenceMode) {
-                           SIPCallManager.endConference()
-                       } else {
-                           SIPCallManager.endCall(control.accountId, control.callId)
-                       }
-                   }
+            if (SIPCallManager.isConferenceMode) {
+                SIPCallManager.endConference()
+            } else {
+                SIPCallManager.endCall(control.accountId, control.callId)
+            }
+        }
+
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Hangup call")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => hangupButton.click()
     }
 }

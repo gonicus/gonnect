@@ -90,6 +90,10 @@ Window {
                         left: parent.left
                     }
 
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Top left drag border for window resize operations")
+
                     HoverHandler {
                         cursorShape: Qt.SizeFDiagCursor
                     }
@@ -115,6 +119,10 @@ Window {
                         rightMargin: dragHandlerContainer.borderWidth
                     }
 
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Top drag border for window resize operations")
+
                     HoverHandler {
                         cursorShape: Qt.SizeVerCursor
                     }
@@ -137,6 +145,10 @@ Window {
                         top: parent.top
                         right: parent.right
                     }
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Top right border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeBDiagCursor
@@ -163,6 +175,10 @@ Window {
                         bottomMargin: dragHandlerContainer.borderWidth
                     }
 
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Right drag border for window resize operations")
+
                     HoverHandler {
                         cursorShape: Qt.SizeHorCursor
                     }
@@ -185,6 +201,10 @@ Window {
                         bottom: parent.bottom
                         right: parent.right
                     }
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Bottom right drag border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeFDiagCursor
@@ -211,6 +231,10 @@ Window {
                         rightMargin: dragHandlerContainer.borderWidth
                     }
 
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Bottom drag border for window resize operations")
+
                     HoverHandler {
                         cursorShape: Qt.SizeVerCursor
                     }
@@ -233,6 +257,10 @@ Window {
                         bottom: parent.bottom
                         left: parent.left
                     }
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Bottom left drag border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeBDiagCursor
@@ -258,6 +286,10 @@ Window {
                         topMargin: dragHandlerContainer.borderWidth
                         bottomMargin: dragHandlerContainer.borderWidth
                     }
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Left drag border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeHorCursor

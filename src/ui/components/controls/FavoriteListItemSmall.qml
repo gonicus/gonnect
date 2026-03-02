@@ -35,6 +35,13 @@ Item {
 
     property int buddyStatus: SIPBuddyState.UNKNOWN
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Favorite contact")
+    Accessible.description: qsTr("Selected favorite %1: %2").arg(delg.name).arg(qsTr("tap to call %1").arg(delg.phoneNumber))
+
+    Accessible.focusable: true
+    Accessible.onPressAction: () => SIPCallManager.call(delg.phoneNumber)
+
     function updateBuddyStatus() {
         delg.buddyStatus = delg.hasBuddyState
                 ? SIPManager.buddyStatus(delg.phoneNumber)
@@ -56,6 +63,8 @@ Item {
         anchors.fill: parent
         radius: 4
         color: rowHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+
+        Accessible.ignored: true
     }
 
     AvatarImage {
@@ -79,6 +88,8 @@ Item {
             leftMargin: 7
             verticalCenter: parent.verticalCenter
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -92,6 +103,8 @@ Item {
             rightMargin: 10
             verticalCenter: parent.verticalCenter
         }
+
+        Accessible.ignored: true
     }
 
     FavIcon {

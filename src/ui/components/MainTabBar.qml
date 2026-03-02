@@ -199,6 +199,20 @@ Item {
 
             readonly property bool isSelected: control.selectedPageId === delg.pageId
 
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Selected tab")
+            Accessible.description: qsTr("The currently selected tab")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => delg.switchTab()
+
+            function switchTab() {
+                if (delg.isEnabled) {
+                    control.selectedPageId = delg.pageId
+                    control.selectedPageType = delg.pageType
+                    control.attachedData = delg.attachedData
+                }
+            }
+
             Rectangle {
                 id: hoverBackground
                 visible: delg.isSelected
@@ -223,14 +237,21 @@ Item {
                     anchors.margins: 2
                     z: 1
 
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Selected tab options")
+                    Accessible.description: qsTr("The settings of the currently selected tab")
+                    Accessible.focusable: true
+
                     IconLabel {
-                        id: removeIcon
+                        id: optionIcon
                         anchors.centerIn: parent
                         icon {
                             source: Icons.goDown
                             width: parent.width
                             height: parent.height
                         }
+
+                        Accessible.ignored: true
                     }
 
                     MouseArea {
@@ -245,6 +266,8 @@ Item {
                             optionMenu.selectedTabButton = delg
                             optionMenu.open()
                         }
+
+                        Accessible.ignored: true
                     }
                 }
             }
@@ -275,6 +298,8 @@ Item {
                         duration: 2000
                     }
                 }
+
+                Accessible.ignored: true
             }
 
             IconLabel {
@@ -288,6 +313,8 @@ Item {
                     ? Theme.primaryTextColor
                     : Theme.secondaryInactiveTextColor
                 }
+
+                Accessible.ignored: true
             }
 
             Rectangle {
@@ -298,6 +325,8 @@ Item {
                 width: redDot.width + 4
                 height: redDotBackground.width
                 radius: redDotBackground.width / 2
+
+                Accessible.ignored: true
             }
 
             Rectangle {
@@ -313,6 +342,8 @@ Item {
                     verticalCenterOffset: +5
                     horizontalCenterOffset: -5
                 }
+
+                Accessible.ignored: true
             }
 
             ToolTip.text: delg.isEnabled ? delg.labelText : delg.disabledTooltipText
@@ -326,13 +357,8 @@ Item {
             }
 
             TapHandler {
-                onTapped: () => {
-                    if (delg.isEnabled) {
-                        control.selectedPageId = delg.pageId
-                        control.selectedPageType = delg.pageType
-                        control.attachedData = delg.attachedData
-                    }
-                }
+                id: delgTapHandler
+                onTapped: () => delg.switchTab()
             }
         }
     }
@@ -458,11 +484,20 @@ Item {
         }
 
         Action {
+            id: moveUpAction
             text: qsTr("Move up")
             icon.source: Icons.arrowUp
             enabled: !menuInternal.isFirst
 
-            onTriggered: {
+            onTriggered: () => moveUpAction.moveTabUp()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Move tab up")
+            Accessible.description: qsTr("Moves the currently selected tab up by one")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => moveUpAction.moveTabUp()
+
+            function moveTabUp() {
                 if (optionMenu.selectedTabButton !== null) {
                     const newOrder = control.getTabList()
                     const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
@@ -487,11 +522,20 @@ Item {
         }
 
         Action {
+            id: moveDownAction
             text: qsTr("Move down")
             icon.source: Icons.arrowDown
             enabled: !menuInternal.isLast
 
-            onTriggered: {
+            onTriggered: () => moveDownAction.moveTabDown()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Move tab down")
+            Accessible.description: qsTr("Moves the currently selected tab down by one")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => moveDownAction.moveTabDown()
+
+            function moveTabDown() {
                 if (optionMenu.selectedTabButton !== null) {
                     const newOrder = control.getTabList()
                     const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
@@ -516,20 +560,36 @@ Item {
         }
 
         Action {
+            id: editPageAction
             text: qsTr("Edit")
             icon.source: Icons.editor
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
             onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Edit page")
+            Accessible.description: qsTr("Edit the currently selected dashboard page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
         }
 
         Action {
+            id: deletePageAction
             text: qsTr("Delete")
             icon.source: Icons.editDelete
             enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
                      && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
 
-            onTriggered: {
+            onTriggered: () => deletePageAction.deletePage()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Delete page")
+            Accessible.description: qsTr("Delete the currently selected dashboard page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => deletePageAction.deletePage()
+
+            function deletePage() {
                 if (optionMenu.selectedTabButton !== null) {
                     let curIndex
                     let newIndex

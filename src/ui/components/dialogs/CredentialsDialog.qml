@@ -24,6 +24,9 @@ BaseDialog {
             right: parent.right
             margins: 20
         }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: control.title + ", " + contentLabel.text
     }
 
     TextField {
@@ -37,8 +40,12 @@ BaseDialog {
             right: contentLabel.right
         }
 
-        Keys.onEnterPressed: () => okButton.clicked()
-        Keys.onReturnPressed: () => okButton.clicked()
+        Keys.onEnterPressed: () => okButton.click()
+        Keys.onReturnPressed: () => okButton.click()
+
+        Accessible.role: Accessible.EditableText
+        Accessible.name: qsTr("Enter the password")
+        Accessible.focusable: true
     }
 
     Button {
@@ -57,5 +64,10 @@ BaseDialog {
             control.passwordAccepted(passwordField.text)
             control.close()
         }
+
+        Accessible.role: Accessible.Button
+        Accessible.name: okButton.text
+        Accessible.focusable: true
+        Accessible.onPressAction: () => okButton.click()
     }
 }

@@ -126,15 +126,24 @@ Item {
                     height: roomTextField.implicitHeight
                     spacing: 20
 
+                    Accessible.role: Accessible.Row
+                    Accessible.name: qsTr("Set room name")
+
                     Label {
                         text: qsTr("Room name:")
                         anchors.verticalCenter: parent.verticalCenter
+
+                        Accessible.ignored: true
                     }
 
                     TextField {
                         id: roomTextField
                         width: 300
                         text: RandomRoomNameGenerator.randomJitsiRoomName()
+
+                        Accessible.role: Accessible.EditableText
+                        Accessible.name: qsTr("Enter the room name")
+                        Accessible.focusable: true
                     }
                 }
 
@@ -150,6 +159,11 @@ Item {
                     Component.onCompleted: () => {
                         internal.authButton = authButton
                     }
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: authButton.text
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => authButton.click()
                 }
             }
         }
@@ -179,15 +193,24 @@ Item {
                     height: roomTextField2.implicitHeight
                     spacing: 20
 
+                    Accessible.role: Accessible.Row
+                    Accessible.name: qsTr("Set room name")
+
                     Label {
                         text: qsTr("Room name:")
                         anchors.verticalCenter: parent.verticalCenter
+
+                        Accessible.ignored: true
                     }
 
                     TextField {
                         id: roomTextField2
                         width: 300
                         // text: AuthManager.authenticatedJitsiRoom
+
+                        Accessible.role: Accessible.EditableText
+                        Accessible.name: qsTr("Enter the room name")
+                        Accessible.focusable: true
                     }
                 }
 
@@ -197,6 +220,11 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     onClicked: () => control.startConference(roomTextField2.text.trim())
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: joinRoomButton.text
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => joinRoomButton.click()
                 }
             }
         }
@@ -206,9 +234,15 @@ Item {
         id: waitingForAuthComponent
 
         Item {
+            Accessible.role: Accessible.StaticText
+            Accessible.name: authMessage.text
+
             Label {
+                id: authMessage
                 anchors.centerIn: parent
                 text: qsTr("Please authenticate in the opened browser window...")
+
+                Accessible.ignored: true
             }
         }
     }
@@ -358,13 +392,19 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
+                            Accessible.role: Accessible.Column
+                            Accessible.name: passwordRequired.text
+
                             Label {
+                                id: passwordRequired
                                 text: qsTr("This conference is protected by a password. Please enter it to join the room.")
                                 wrapMode: Text.Wrap
                                 anchors {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.ignored: true
                             }
 
                             TextField {
@@ -380,6 +420,10 @@ Item {
                                 Keys.onReturnPressed: () => passwordItem.respondPassword()
                                 Keys.onEscapePressed: () => passwordItem.cancel()
                                 Component.onCompleted: () => passwordField.forceActiveFocus()
+
+                                Accessible.role: Accessible.EditableText
+                                Accessible.name: qsTr("Enter the password")
+                                Accessible.focusable: true
                             }
 
                             CheckBox {
@@ -389,6 +433,10 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.role: Accessible.CheckBox
+                                Accessible.name: rememberCheckBox.text
+                                Accessible.focusable: true
                             }
 
                             Row {
@@ -396,9 +444,15 @@ Item {
                                 spacing: 20
 
                                 Button {
+                                    id: cancelButton
                                     text: qsTr("Cancel")
 
                                     onClicked: () => passwordItem.cancel()
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: cancelButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => cancelButton.click()
                                 }
 
                                 Button {
@@ -408,6 +462,11 @@ Item {
                                     highlighted: true
 
                                     onClicked: () => passwordItem.respondPassword()
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: joinRoomButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => joinRoomButton.click()
                                 }
                             }
                         }
@@ -447,6 +506,9 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
+                            Accessible.role: Accessible.Column
+                            Accessible.name: qsTr("Password required")
+
                             states: [
                                 State {
                                     name: "PASSWORD_SET_BY_ME"
@@ -485,6 +547,9 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.role: Accessible.Column
+                                Accessible.name: newPasswordLabel.text
                             }
 
                             Label {
@@ -496,6 +561,9 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.role: Accessible.Column
+                                Accessible.name: existingPasswordLabel.text
                             }
 
                             Label {
@@ -507,6 +575,9 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.role: Accessible.Column
+                                Accessible.name: otherSetPasswordLabel.text
                             }
 
                             Item {
@@ -527,6 +598,10 @@ Item {
                                     }
 
                                     Component.onCompleted: () => passwordField.forceActiveFocus()
+
+                                    Accessible.role: Accessible.EditableText
+                                    Accessible.name: qsTr("Enter the password")
+                                    Accessible.focusable: true
                                 }
 
                                 Label {
@@ -543,6 +618,8 @@ Item {
                                         rightMargin: 10
                                         verticalCenter: parent.verticalCenter
                                     }
+
+                                    Accessible.ignored: true
                                 }
 
                                 ClipboardButton {
@@ -562,6 +639,8 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.ignored: true
                             }
 
                             Row {
@@ -569,9 +648,15 @@ Item {
                                 spacing: 20
 
                                 Button {
+                                    id: cancelButton
                                     text: qsTr("Cancel")
 
                                     onClicked: () => setPasswordItem.cancel()
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: cancelButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => cancelButton.click()
                                 }
 
                                 Button {
@@ -579,6 +664,11 @@ Item {
                                     visible: false
                                     text: qsTr("Remove")
                                     onClicked: () => setPasswordItem.setPassword("")
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: removePasswordButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => removePasswordButton.click()
                                 }
 
                                 Button {
@@ -588,6 +678,11 @@ Item {
                                     highlighted: true
 
                                     onClicked: () => setPasswordItem.setPassword(passwordField.text)
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: savePasswordButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => savePasswordButton.click()
                                 }
                             }
                         }
@@ -611,6 +706,9 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
+                            Accessible.role: Accessible.Column
+                            Accessible.name: qsTr("Video quality")
+
                             component QualityButton : RadioButton {
                                 id: qButton
                                 checked: confConn.videoQuality === qButton.qualityValue
@@ -622,6 +720,12 @@ Item {
                                 required property int qualityValue
 
                                 onToggled: () => confConn.setVideoQuality(qButton.qualityValue)
+
+                                Accessible.role: Accessible.RadioButton
+                                Accessible.name: qButton.text
+                                Accessible.description: qsTr("Change the video quality of this meeting")
+                                Accessible.focusable: true
+                                Accessible.onPressAction: () => onfConn.setVideoQuality(qButton.qualityValue)
                             }
 
                             QualityButton {
@@ -645,11 +749,17 @@ Item {
                             }
 
                             Button {
+                                id: closeButton
                                 text: qsTr("Close")
                                 highlighted: true
                                 anchors.right: parent.right
 
                                 onClicked: () => ViewHelper.topDrawer.loader.sourceComponent = undefined
+
+                                Accessible.role: Accessible.Button
+                                Accessible.name: closeButton.text
+                                Accessible.focusable: true
+                                Accessible.onPressAction: () => closeButton.click()
                             }
                         }
                     }
@@ -671,6 +781,10 @@ Item {
             bottom: parent.bottom
             right: callListCard.left
         }
+
+        Accessible.role: Accessible.Border
+        Accessible.name: qsTr("Drag bar")
+        Accessible.focusable: true
 
         HoverHandler {
             id: verticalDragbarDummyHoverHandler

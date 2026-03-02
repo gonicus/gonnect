@@ -18,6 +18,11 @@ Item {
     required property string message
     required property string imageUrl
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Chat message")
+    Accessible.description: qsTr("Selected chat message - from %1, at %2: %3").arg(control.nickName).arg(control.timestamp).arg(control.message)
+    Accessible.focusable: true
+
     Component.onCompleted: () => {
         if (!control.message) {
             console.debug(category, "image URL", control.imageUrl)
@@ -32,6 +37,8 @@ Item {
             top: parent.top
             left: parent.left
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -48,6 +55,8 @@ Item {
         }
 
         onLinkActivated: link => Qt.openUrlExternally(link)
+
+        Accessible.ignored: true
     }
 
     Image {
