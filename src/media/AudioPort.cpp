@@ -156,7 +156,7 @@ void AudioPort::stopSinkIO()
 
     if (m_sink) {
         m_sink->stop();
-        delete m_sink;
+        m_sink->deleteLater();
         m_sink = nullptr;
         m_io = nullptr;
     }
@@ -193,7 +193,7 @@ void AudioPort::stopSourceIO()
     m_idleTimer.stop();
     if (m_source) {
         m_source->stop();
-        delete m_source;
+        m_source->deleteLater();
         m_source = nullptr;
         m_io = nullptr;
     }

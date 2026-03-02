@@ -124,7 +124,7 @@ modules:
       - --enable-ext-sound
       - --with-opus
       - --enable-libwebrtc-aec3
-      - CFLAGS=-fPIC -DNDEBUG
+      - CFLAGS=-fPIC
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
