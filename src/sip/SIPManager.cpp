@@ -177,8 +177,6 @@ void SIPManager::setPreferredCodecs()
     // Disable all codecs
     const auto &codecs = m_ep.codecEnum2();
     for (const auto &c : codecs) {
-        qCDebug(lcSIPManager) << "found codec" << c.codecId << ", with initial priority"
-                              << (int)c.priority << ", disabling...";
         m_ep.codecSetPriority(c.codecId, PJMEDIA_CODEC_PRIO_DISABLED);
     }
 
