@@ -192,13 +192,13 @@ Item {
         function onError(msg : string) {
             DialogFactory.createInfoDialog({
                 title: qsTr("Error"),
-                                           text: msg
+                text: msg
             })
         }
         function onFatalError(msg : string) {
             const item = DialogFactory.createInfoDialog({
                 title: qsTr("Fatal Error"),
-                                                        text: msg
+                text: msg
             })
             item.accepted.connect(() => Qt.quit())
         }

@@ -11,6 +11,9 @@ Item {
 
     property alias text: lbl.text
 
+    Accessible.role: Accessible.Heading
+    Accessible.name: control.text
+
     Label {
         id: lbl
         font.pixelSize: 16
@@ -24,6 +27,8 @@ Item {
             leftMargin: 20
             rightMargin: 20
         }
+
+        Accessible.ignored: true
     }
 
     Rectangle {
@@ -34,5 +39,7 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
+
+        Accessible.ignored: true
     }
 }

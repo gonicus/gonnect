@@ -22,6 +22,9 @@ Item {
         color: Theme.secondaryTextColor
         font.pixelSize: 18
         text: "🕓  " + qsTr("No past calls")
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("No past calls")
     }
 
     ListView {
@@ -30,6 +33,10 @@ Item {
         topMargin: 20
         visible: control.hasPastCalls
         anchors.fill: parent
+
+        Accessible.role: Accessible.List
+        Accessible.name: qsTr("History")
+        Accessible.description: qsTr("Searchable list of past calls and meetings")
 
         ScrollBar.vertical: ScrollBar {
             id: verticalScrollBar
@@ -62,9 +69,14 @@ Item {
             required property date section
 
             Label {
+                id: sectionLabel
                 text: sectionDelg.section.toLocaleDateString(Qt.locale(), "dddd, dd. MMMM yyyy")
                 anchors.centerIn: parent
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("History item section")
+            Accessible.description: qsTr("Header for the currently selected day: %1").arg(sectionLabel.text)
         }
 
         delegate: Item {
@@ -109,6 +121,11 @@ Item {
             }
 
             Component.onCompleted: () => delg.updateBuddyStatus()
+
+            Accessible.role: Accessible.ListItem
+            Accessible.name: qsTr("History item")
+            Accessible.description: qsTr("Selected history item %1 - company %2, location %3, number %4, time %5, duration %6").arg(delg.contactName).arg(delg.company ?? "-").arg(delg.location ?? "-").arg(delg.remotePhoneNumber).arg(timeTextLabel.text).arg(durationTextLabel.text)
+            Accessible.focusable: true
 
             Connections {
                 target: SIPManager
@@ -180,6 +197,8 @@ Item {
                                 }
                             }
                         ]
+
+                        Accessible.ignored: true
                     }
 
                     Label {
@@ -193,6 +212,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.ignored: true
                     }
                 }
 
@@ -225,6 +246,8 @@ Item {
                                 }
                             }
                         ]
+
+                        Accessible.ignored: true
                     }
 
                     Label {
@@ -238,6 +261,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.ignored: true
                     }
                 }
 
@@ -271,6 +296,8 @@ Item {
                             }
                         }
                     }
+
+                    Accessible.ignored: true
                 }
 
                 Item {
@@ -313,6 +340,8 @@ Item {
                                 verticalCenter: parent.verticalCenter
                                 verticalCenterOffset: 2
                             }
+
+                            Accessible.ignored: true
                         }
 
                         Label {
@@ -322,6 +351,8 @@ Item {
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
                     }
 
@@ -345,6 +376,8 @@ Item {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
 
                         Label {
@@ -354,6 +387,8 @@ Item {
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
                     }
                 }

@@ -20,6 +20,8 @@ Rectangle {
 
     property bool isBlocked: false
 
+    Accessible.ignored: true
+
     SequentialAnimation {
         id: ringingAnimation
         running: false
@@ -52,6 +54,8 @@ Rectangle {
             height: 10
             source: Icons.dialogCancel
         }
+
+        Accessible.ignored: true
     }
 
     states: [

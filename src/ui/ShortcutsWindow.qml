@@ -30,6 +30,11 @@ BaseWindow {
         required property string key
         required property string description
 
+        Accessible.role: Accessible.HotkeyField
+        Accessible.name: qsTr("Shortcut key: %1").arg(keyLabel.text)
+        Accessible.description: descriptionLabel.text
+        Accessible.focusable: true
+
         Label {
             id: keyLabel
             text: delg.key
@@ -39,6 +44,8 @@ BaseWindow {
                 top: parent.top
                 left: parent.left
             }
+
+            Accessible.ignored: true
         }
 
         Label {
@@ -52,6 +59,8 @@ BaseWindow {
                 leftMargin: 20
                 rightMargin: 10
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -75,6 +84,7 @@ BaseWindow {
             }
 
             Label {
+                id: localShortcutsHeading
                 text: qsTr("Local shortcuts (work only when app is focused)")
                 font.pixelSize: 16
                 font.weight: Font.Medium
@@ -85,8 +95,11 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
-            }
 
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Local shortcuts")
+                Accessible.description: localShortcutsHeading.text
+            }
 
             KeyDelegate {
                 key: qsTr("Ctrl + F")
@@ -119,6 +132,10 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: qsTr("Global shortcuts")
+                Accessible.description: globalShortcutsHeading.text
             }
 
             Repeater {

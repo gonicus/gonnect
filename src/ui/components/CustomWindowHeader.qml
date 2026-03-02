@@ -28,6 +28,9 @@ Rectangle {
     required property var tabRoot
     required property var pageRoot
 
+    Accessible.role: Accessible.Heading
+    Accessible.name: qsTr("GOnnect window header")
+
     function focusSearchBox() {
         searchField.giveFocus()
     }
@@ -44,6 +47,8 @@ Rectangle {
             bottom: parent.bottom
         }
 
+        Accessible.ignored: true
+
         Rectangle {
             color: mimicRect.color
             width: mimicRect.radius
@@ -52,6 +57,8 @@ Rectangle {
                 bottom: parent.bottom
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
 
         Rectangle {
@@ -62,6 +69,8 @@ Rectangle {
                 bottom: parent.bottom
                 left: parent.left
             }
+
+            Accessible.ignored: true
         }
 
         Rectangle {
@@ -72,6 +81,8 @@ Rectangle {
                 bottom: parent.bottom
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -84,6 +95,8 @@ Rectangle {
             right: control.right
             bottom: control.bottom
         }
+
+        Accessible.ignored: true
     }
 
     DragHandler {
@@ -108,6 +121,8 @@ Rectangle {
 
         color: control.mainBarColor
 
+        Accessible.ignored: true
+
         Rectangle {
             id: border
             color: Theme.borderColor
@@ -117,6 +132,8 @@ Rectangle {
                 top: parent.top
                 bottom: parent.bottom
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -200,6 +217,7 @@ Rectangle {
         HeaderIconButton {
             id: burgerMenuButton
             iconSource: Icons.applicationMenu
+            accessiblePurpose: qsTr("App menu")
             active: control.active
             iconSize: 16
             anchors.verticalCenter: parent.verticalCenter
@@ -241,6 +259,7 @@ Rectangle {
 
         HeaderIconButton {
             iconSource: Icons.mobileCloseApp
+            accessiblePurpose: qsTr("Close GOnnect window")
             active: control.active
             iconSize: 10
             anchors.verticalCenter: parent.verticalCenter

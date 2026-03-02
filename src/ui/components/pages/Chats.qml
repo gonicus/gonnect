@@ -60,9 +60,15 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: recoveryKeyHint.text
+
             Label {
+                id: recoveryKeyHint
                 text: qsTr("Please enter your recovery key to decrypt messages:")
                 anchors.horizontalCenter: parent.horizontalCenter
+
+                Accessible.ignored: true
             }
 
             TextField {
@@ -77,6 +83,10 @@ Item {
 
                 Keys.onReturnPressed: () => acceptRecoveryKeyButton.click()
                 Keys.onEnterPressed: () => acceptRecoveryKeyButton.click()
+
+                Accessible.role: Accessible.Column
+                Accessible.name: qsTr("Enter recovery key")
+                Accessible.focusable: true
             }
 
             Button {
@@ -87,6 +97,11 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 onClicked: () => control.attachedData.handleRecoveryKey(recoveryKeyTextField.text)
+
+                Accessible.role: Accessible.Column
+                Accessible.name: qsTr("Use recovery key")
+                Accessible.focusable: true
+                Accessible.onPressAction: () => acceptRecoveryKeyButton.click()
             }
         }
     }

@@ -71,6 +71,27 @@ BaseWidget {
                         label: qsTr('Jitsi Meet')
                     }
                 ]
+
+                Accessible.role: Accessible.ComboBox
+                Accessible.name: qsTr("History call type picker")
+                Accessible.description: qsTr("Select the call type to filter by")
+
+                delegate: ItemDelegate {
+                    id: historyFilterMediumSelectorDelg
+                    width: parent.width
+                    text: historyFilterMediumSelectorDelg.label
+
+                    font.family: historyFilterMediumSelector.font.family
+                    font.weight: historyFilterMediumSelector.font.weight
+                    font.pointSize: historyFilterMediumSelector.font.pointSize
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: historyFilterMediumSelectorDelg.label
+                    Accessible.description: qsTr("Currently selected call type")
+                    Accessible.focusable: true
+
+                    required property string label
+                }
             }
 
             ComboBox {
@@ -101,11 +122,33 @@ BaseWidget {
                         label: qsTr('Missed')
                     }
                 ]
+
+                Accessible.role: Accessible.ComboBox
+                Accessible.name: qsTr("History call origin picker")
+                Accessible.description: qsTr("Select the call origin to filter by")
+
+                delegate: ItemDelegate {
+                    id: historyFilterTypeSelectorDelg
+                    width: parent.width
+                    text: historyFilterTypeSelectorDelg.label
+
+                    font.family: historyFilterTypeSelector.font.family
+                    font.weight: historyFilterTypeSelector.font.weight
+                    font.pointSize: historyFilterTypeSelector.font.pointSize
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: historyFilterTypeSelectorDelg.label
+                    Accessible.description: qsTr("Currently selected call origin")
+                    Accessible.focusable: true
+
+                    required property string label
+                }
             }
 
             HeaderIconButton {
                 id: showHistorySearchButton
                 iconSource: historyHeading.searchVisible ? Icons.mobileCloseApp : Icons.systemSearch
+                accessiblePurpose: historyHeading.searchVisible ? qsTr("Hide history search") : qsTr("Show history search")
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right

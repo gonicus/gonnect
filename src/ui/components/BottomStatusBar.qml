@@ -11,6 +11,9 @@ Rectangle {
 
     readonly property alias count: togglerList.count
 
+    Accessible.role: Accessible.StatusBar
+    Accessible.name: qsTr("Status bar")
+
     Rectangle {
         height: control.radius
         color: Theme.paneColor
@@ -19,6 +22,8 @@ Rectangle {
             left: parent.left
             right: parent.right
         }
+
+        Accessible.ignored: true
     }
 
     Rectangle {
@@ -29,6 +34,8 @@ Rectangle {
             left: parent.left
             right: parent.right
         }
+
+        Accessible.ignored: true
     }
 
     TogglerList {
