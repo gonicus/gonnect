@@ -99,7 +99,7 @@ QString LinuxNotificationManager::add(Notification *notification)
     // Default action
     if (!notification->defaultAction().isEmpty()) {
         notify_notification_add_action(
-                internalNotification, "default", "Show message",
+                internalNotification, "default", "default",
                 [](NotifyNotification *notification, char *, gpointer user_data) {
                     Notification *en = (Notification *)user_data;
                     Q_EMIT en->actionInvoked(en->defaultAction(), en->defaultActionParameters());
