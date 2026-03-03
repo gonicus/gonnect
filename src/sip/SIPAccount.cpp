@@ -377,7 +377,7 @@ void SIPAccount::initialize()
             cds.get(auth + "/secret",
                     [this, auth, scheme, realm, username, dataTypeValue](
                             QKeychain::Error error, const QString &secret, const QString &) {
-                        if (error != QKeychain::NoError) {
+                        if (error != QKeychain::NoError && error != QKeychain::EntryNotFound) {
                             Q_EMIT initialized(false);
                             return;
                         }
