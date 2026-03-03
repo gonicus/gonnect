@@ -96,6 +96,18 @@ QString LinuxNotificationManager::add(Notification *notification)
     notify_notification_set_category(internalNotification,
                                      notification->category().toStdString().c_str());
 
+    // Default action
+    if (!notification->defaultAction().isEmpty()) {
+        notify_notification_add_action(
+                internalNotification, "default", "default",
+                [](NotifyNotification *notification, char *, gpointer user_data) {
+                    Notification *en = (Notification *)user_data;
+                    Q_EMIT en->actionInvoked(en->defaultAction(), en->defaultActionParameters());
+                    notify_notification_close(notification, NULL);
+                },
+                (gpointer)notification, NULL);
+    }
+
     // Assemble actions
     QList<QVariantMap> buttonDescriptions = notification->buttonDescriptions();
     for (auto &bd : std::as_const(buttonDescriptions)) {
