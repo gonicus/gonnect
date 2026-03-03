@@ -92,7 +92,7 @@ void EDSAddressBookFeeder::init()
 
         qCDebug(lcEDSAddressBookFeeder) << "Connecting to source" << sourceInfo;
 
-        e_book_client_connect(source, 5, nullptr, onEbookClientConnected, this);
+        e_book_client_connect(source, -1, nullptr, onEbookClientConnected, this);
     }
 
     m_sourcePromise->start();
