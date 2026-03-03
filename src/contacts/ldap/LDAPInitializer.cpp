@@ -61,10 +61,9 @@ static int interact(LDAP *ld, unsigned flags, void *defaults, void *sasl_interac
 }
 #endif
 
-LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config)
+LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config, int &result)
 {
     LDAP *ldap = nullptr;
-    int result = 0;
 
     qCInfo(lcLDAPInitializer) << "Connecting to LDAP service";
 
@@ -121,9 +120,6 @@ LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config)
 
             result = ldap_sasl_bind_s(ldap, config.bindDn.toStdString().c_str(), LDAP_SASL_SIMPLE,
                                       &cred, NULL, NULL, NULL);
-            if (result == LDAP_INVALID_CREDENTIALS) {
-                // TODO: trigger signal the LDAP feeder can then respond to
-            }
 
 #ifdef HAVE_SASL
         } else if (config.bindMethod == LDAPInitializer::BindMethod::GSSAPI) {

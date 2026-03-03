@@ -55,7 +55,7 @@ void CalDAVEventFeeder::init()
     process(false);
 }
 
-void CalDAVEventFeeder::onError(QString error)
+void CalDAVEventFeeder::onError(QString error) const
 {
     qCCritical(lcCalDAVEventFeeder) << error;
 }

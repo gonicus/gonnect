@@ -29,7 +29,7 @@ public:
     void process(bool authFailed);
 
 private Q_SLOTS:
-    void onError(QString error);
+    void onError(QString error) const;
     void onParserFinished();
 
 private:

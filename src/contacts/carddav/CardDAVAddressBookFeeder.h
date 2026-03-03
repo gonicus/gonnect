@@ -49,6 +49,5 @@ private:
     QString m_group;
     BlockInfo m_blockInfo;
 
-    bool m_authFailed = false;
     CardDAVAddressBookFeederConfig m_config;
 };
