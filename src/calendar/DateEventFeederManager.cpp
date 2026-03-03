@@ -45,7 +45,7 @@ void DateEventFeederManager::reload()
     processQueue();
 }
 
-void DateEventFeederManager::acquireSecret(const QString &configId,
+void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &configId,
                                            std::function<void(const QString &)> callback)
 {
     ReadOnlyConfdSettings settings;
@@ -55,11 +55,11 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, configId, secretKey, callback](QKeychain::Error error, const QString &secret,
-                                                  const QString &) {
-                if (error == QKeychain::NoError) {
+            [this, forcePrompt, configId, secretKey,
+             callback](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError && !forcePrompt) {
                     callback(secret);
-                } else if (error == QKeychain::Error::EntryNotFound) {
+                } else if (error == QKeychain::Error::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,

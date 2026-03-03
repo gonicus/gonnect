@@ -67,9 +67,8 @@ void LDAPAddressBookFeeder::process()
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
 
     if (bindMethodStr == "simple" || bindMethodStr == "gssapi") {
-        m_manager->acquireSecret(m_group,
+        m_manager->acquireSecret(false, m_group,
                                  [this](const QString &password) { processImpl(password); });
-
     } else { // "none"
         processImpl("");
     }

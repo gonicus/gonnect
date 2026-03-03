@@ -121,6 +121,9 @@ LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config)
 
             result = ldap_sasl_bind_s(ldap, config.bindDn.toStdString().c_str(), LDAP_SASL_SIMPLE,
                                       &cred, NULL, NULL, NULL);
+            if (result == LDAP_INVALID_CREDENTIALS) {
+                // TODO: trigger signal the LDAP feeder can then respond to
+            }
 
 #ifdef HAVE_SASL
         } else if (config.bindMethod == LDAPInitializer::BindMethod::GSSAPI) {

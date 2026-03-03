@@ -6,6 +6,7 @@
 #include <QTimer>
 
 #include "IDateEventFeeder.h"
+#include "DateEventFeederManager.h"
 #include "CalDAVEventFeederConfig.h"
 #include <libical/ical.h>
 #include <libical/icalerror.h>
@@ -25,10 +26,10 @@ public:
     void init() override;
     QUrl networkCheckURL() const override;
 
-    void process();
+    void process(bool authFailed);
 
 private Q_SLOTS:
-    void onError(QString error) const;
+    void onError(QString error);
     void onParserFinished();
 
 private:

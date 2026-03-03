@@ -143,7 +143,7 @@ void AddressBookManager::processAddressBookQueue()
     m_queueMutex.unlock();
 }
 
-void AddressBookManager::acquireSecret(const QString &group,
+void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                                        std::function<void(const QString &secret)> callback)
 {
     ReadOnlyConfdSettings settings;
@@ -153,11 +153,11 @@ void AddressBookManager::acquireSecret(const QString &group,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, group, secretKey, callback](QKeychain::Error error, const QString &secret,
-                                               const QString &) {
-                if (error == QKeychain::NoError) {
+            [this, forcePrompt, group, secretKey,
+             callback](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError && !forcePrompt) {
                     callback(secret);
-                } else if (error == QKeychain::EntryNotFound) {
+                } else if (error == QKeychain::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
 
                     auto conn = connect(
