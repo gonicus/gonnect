@@ -7,8 +7,10 @@ if(ENABLE_DAV)
     
       CardDAVAddressBookFactory.cpp
       CardDAVAddressBookFactory.h
+
       CardDAVAddressBookFeeder.cpp
       CardDAVAddressBookFeeder.h
+      CardDAVAddressBookFeederConfig.h
     )
     
     target_include_directories(CardDAVAddressBookFactory

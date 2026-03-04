@@ -6,6 +6,7 @@
 #include "DateEventManager.h"
 #include "Credentials.h"
 #include "ViewHelper.h"
+#include "ErrorBus.h"
 
 #include <QTimer>
 #include <QLoggingCategory>
@@ -44,7 +45,7 @@ void DateEventFeederManager::reload()
     processQueue();
 }
 
-void DateEventFeederManager::acquireSecret(const QString &configId,
+void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &configId,
                                            std::function<void(const QString &)> callback)
 {
     ReadOnlyConfdSettings settings;
@@ -54,13 +55,11 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, configId, secretKey, callback](bool error, const QString &secret) {
-                if (error) {
-                    qCWarning(lcDateEventFeederManager) << "failed to retrieve secret:" << secret;
-                    return;
-                }
-
-                if (secret.isEmpty()) {
+            [this, forcePrompt, configId, secretKey,
+             callback](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError && !forcePrompt) {
+                    callback(secret);
+                } else if (error == QKeychain::Error::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,
@@ -72,10 +71,13 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
-                                            [](bool error, const QString &data) {
-                                                if (error) {
-                                                    qCCritical(lcDateEventFeederManager)
-                                                            << "failed to set credentials:" << data;
+                                            [](QKeychain::Error error, const QString &,
+                                               const QString &message) {
+                                                if (error != QKeychain::NoError) {
+                                                    ErrorBus::instance().error(
+                                                            tr("Failed persist calendar "
+                                                               "credentials: %1")
+                                                                    .arg(message));
                                                 }
                                             });
                                     callback(password);
@@ -88,8 +90,6 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
                     settings.beginGroup(configId);
                     viewHelper.requestPassword(configId, settings.value("host", "").toString());
                     settings.endGroup();
-                } else {
-                    callback(secret);
                 }
             });
 }

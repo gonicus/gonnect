@@ -61,10 +61,9 @@ static int interact(LDAP *ld, unsigned flags, void *defaults, void *sasl_interac
 }
 #endif
 
-LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config)
+LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config, int &result)
 {
     LDAP *ldap = nullptr;
-    int result = 0;
 
     qCInfo(lcLDAPInitializer) << "Connecting to LDAP service";
 

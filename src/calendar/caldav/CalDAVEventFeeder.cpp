@@ -3,7 +3,6 @@
 #include <QRegularExpression>
 
 #include "CalDAVEventFeeder.h"
-#include "DateEventFeederManager.h"
 #include "DateEventManager.h"
 
 Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
@@ -32,8 +31,14 @@ void CalDAVEventFeeder::init()
 {
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CalDAVEventFeeder::onParserFinished);
+
     connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this, &CalDAVEventFeeder::onError);
     connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onError);
+
+    connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
+        // Previous run failed due to auth, we'll prompt the user again
+        process(true);
+    });
 
     /*
         As the Kopano CalDAV server doesn't provide 'getetag' and 'getlastmodified' values,
@@ -44,10 +49,10 @@ void CalDAVEventFeeder::init()
         '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
     */
     m_calendarRefreshTimer.setInterval(m_config.interval);
-    connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
+    connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(false); });
     m_calendarRefreshTimer.start();
 
-    process();
+    process(false);
 }
 
 void CalDAVEventFeeder::onError(QString error) const
@@ -83,10 +88,10 @@ void CalDAVEventFeeder::onParserFinished()
     }
 }
 
-void CalDAVEventFeeder::process()
+void CalDAVEventFeeder::process(bool authFailed)
 {
     auto manager = q_check_ptr(qobject_cast<DateEventFeederManager *>(parent()));
-    manager->acquireSecret(m_config.settingsGroupId, [this](const QString &password) {
+    manager->acquireSecret(authFailed, m_config.settingsGroupId, [this](const QString &password) {
         m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
                                        m_config.host, m_config.path, m_config.user, password,
                                        m_config.port);

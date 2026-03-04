@@ -375,22 +375,21 @@ void SIPAccount::initialize()
         if (data.isEmpty()) {
             auto &cds = Credentials::instance();
             cds.get(auth + "/secret",
-                    [this, auth, scheme, realm, username, dataTypeValue](bool error,
-                                                                         const QString &data) {
-                        if (error) {
-                            qCCritical(lcSIPAccount) << "authentification failed:" << data;
+                    [this, auth, scheme, realm, username, dataTypeValue](
+                            QKeychain::Error error, const QString &secret, const QString &) {
+                        if (error != QKeychain::NoError && error != QKeychain::EntryNotFound) {
                             Q_EMIT initialized(false);
                             return;
                         }
 
-                        if (data.isEmpty()) {
+                        if (secret.isEmpty()) {
                             qCWarning(lcSIPAccount)
                                     << "no password available for auth group" << auth;
                         }
 
                         pj::AuthCredInfo cred(scheme.toStdString(), realm.toStdString(),
                                               username.toStdString(), dataTypeValue,
-                                              data.toStdString());
+                                              secret.toStdString());
 
                         m_accountConfig.sipConfig.authCreds.push_back(cred);
 
@@ -816,9 +815,11 @@ void SIPAccount::setCredentials(const QString &password)
 
     // Update storage
     Credentials::instance().set(
-            authGroup + "/secret", password, [authGroup](bool error, const QString &data) {
-                if (error) {
-                    qCCritical(lcSIPAccount) << "failed to set credentials:" << data;
+            authGroup + "/secret", password,
+            [authGroup](QKeychain::Error error, const QString &, const QString &message) {
+                if (error != QKeychain::NoError) {
+                    ErrorBus::instance().error(
+                            tr("Failed persist SIP credentials: %1").arg(message));
                 }
             });
 }

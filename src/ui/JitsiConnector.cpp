@@ -22,6 +22,7 @@
 #include "Credentials.h"
 #include "GlobalCallState.h"
 #include "ChatMessage.h"
+#include "ErrorBus.h"
 
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>
@@ -587,10 +588,10 @@ void JitsiConnector::setRoomPassword(QString value)
     QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
     Credentials::instance().set(
-            authGroup, value, [this, value, authGroup](bool error, const QString &data) {
-                if (error) {
-                    qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
-                } else {
+            authGroup, value,
+            [this, value, authGroup](QKeychain::Error error, const QString &,
+                                     const QString &message) {
+                if (error == QKeychain::NoError) {
                     Q_EMIT executePasswordCommand(value);
 
                     if (m_roomPassword != value) {
@@ -599,6 +600,8 @@ void JitsiConnector::setRoomPassword(QString value)
                     }
 
                     setIsPasswordRequired(!value.isEmpty());
+                } else {
+                    ErrorBus::instance().error(tr("Failed persist room password: %1").arg(message));
                 }
             });
 }
@@ -683,18 +686,18 @@ void JitsiConnector::onPasswordRequired()
 
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
-        Credentials::instance().get(authGroup, [this, authGroup](bool error, const QString &data) {
-            if (error) {
-                qCCritical(lcJitsiConnector) << "failed to get credentials:" << data;
-            } else {
-                if (!data.isEmpty()) {
-                    enterPassword(data, false);
-                    return;
-                }
-            }
+        Credentials::instance().get(
+                authGroup,
+                [this, authGroup](QKeychain::Error error, const QString &secret, const QString &) {
+                    if (error == QKeychain::NoError) {
+                        if (!secret.isEmpty()) {
+                            enterPassword(secret, false);
+                            return;
+                        }
+                    }
 
-            setIsPasswordRequired(true);
-        });
+                    setIsPasswordRequired(true);
+                });
     } else {
         setIsPasswordRequired(true);
     }
@@ -1289,10 +1292,10 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
         QString authGroup = "jitsiRoomPasswords/" + m_roomName;
 
         Credentials::instance().set(
-                authGroup, password, [this, password, authGroup](bool error, const QString &data) {
-                    if (error) {
-                        qCCritical(lcJitsiConnector) << "failed to set credentials:" << data;
-                    } else {
+                authGroup, password,
+                [this, password, authGroup](QKeychain::Error error, const QString &,
+                                            const QString &message) {
+                    if (error == QKeychain::NoError) {
                         Q_EMIT executePasswordCommand(password);
 
                         if (m_roomPassword != password) {
@@ -1303,6 +1306,9 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
                         setIsPasswordRequired(false);
 
                         Q_EMIT executePasswordCommand(password);
+                    } else {
+                        ErrorBus::instance().error(
+                                tr("Failed persist room password: %1").arg(message));
                     }
                 });
     }

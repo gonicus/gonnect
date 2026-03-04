@@ -30,6 +30,8 @@ Q_SIGNALS:
     void newExternalImageAdded(const QString &id, const QByteArray &data, const QDateTime &modified,
                                QPrivateSignal);
 
+    void invalidCredentials();
+
 private:
     void clearCStringlist(char **attrs) const;
     void init(const LDAPInitializer::Config &ldapConfig,

@@ -1,5 +1,6 @@
 #include "ChatConnectorManager.h"
 #include "Credentials.h"
+#include "ErrorBus.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -34,12 +35,13 @@ void ChatConnectorManager::saveRecoveryKey(const QString &settingsGroup, const Q
         return;
     }
 
-    credentials.set(
-            QString("%1/secret").arg(settingsGroup), key, [](bool error, const QString &misc) {
-                if (error) {
-                    qCCritical(lcChatConnectorManager) << "Error on saving recovery key:" << misc;
-                }
-            });
+    credentials.set(QString("%1/secret").arg(settingsGroup), key,
+                    [](QKeychain::Error error, const QString &, const QString &message) {
+                        if (error != QKeychain::NoError) {
+                            ErrorBus::instance().error(
+                                    tr("Failed persist chat recovery code: %1").arg(message));
+                        }
+                    });
 }
 
 void ChatConnectorManager::saveAccessToken(const QString &settingsGroup, const QString &token) const
@@ -58,12 +60,13 @@ void ChatConnectorManager::saveAccessToken(const QString &settingsGroup, const Q
         return;
     }
 
-    credentials.set(
-            QString("%1/token").arg(settingsGroup), token, [](bool error, const QString &misc) {
-                if (error) {
-                    qCCritical(lcChatConnectorManager) << "Error on saving access token:" << misc;
-                }
-            });
+    credentials.set(QString("%1/token").arg(settingsGroup), token,
+                    [](QKeychain::Error error, const QString &, const QString &message) {
+                        if (error != QKeychain::NoError) {
+                            ErrorBus::instance().error(
+                                    tr("Failed persist chat access token: %1").arg(message));
+                        }
+                    });
 }
 
 void ChatConnectorManager::init()
