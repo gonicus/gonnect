@@ -1,3 +1,10 @@
+# [2.1.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.4...v2.1.0-beta.5) (2026-03-05)
+
+
+### Bug Fixes
+
+* force change for new beta release after rebase ([60ee872](https://github.com/gonicus/gonnect/commit/60ee872d0204c8d2b16d1ab7b29f82b511f6e5e2))
+
 # [2.1.0-beta.4](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.3...v2.1.0-beta.4) (2026-02-23)
 
 
