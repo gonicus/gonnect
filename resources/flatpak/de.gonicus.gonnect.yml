@@ -63,6 +63,20 @@ cleanup-commands:
   - mkdir -p ${FLATPAK_DEST}/etc/gonnect
 
 modules:
+  - name: libnotify
+    buildsystem: meson
+    config-opts:
+      - -Dtests=false
+      - -Dintrospection=disabled
+      - -Dman=false
+      - -Ddocbook_docs=disabled
+    sources:
+      - type: archive
+        url: https://gitlab.gnome.org/GNOME/libnotify/-/archive/0.8.8/libnotify-0.8.8.tar.bz2
+        sha256: fc7e901f6a5eec29a604d33c88a0f26caed405bbe7dd24d098fbb15d3c049419
+      - type: patch
+        path: patches/libnotify-default-action.patch
+
   - name: kerberos
     subdir: src
     config-opts:

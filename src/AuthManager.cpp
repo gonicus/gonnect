@@ -1,6 +1,7 @@
 #include "AuthManager.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Credentials.h"
+#include "ErrorBus.h"
 
 #include <QtNetworkAuth/QtNetworkAuth>
 #include <QLoggingCategory>
@@ -86,28 +87,27 @@ void AuthManager::init()
                      });
 
     Credentials::instance().get(
-            "jitsi/refreshToken", [this, sslConfig](bool error, const QString &data) {
-                if (error) {
-                    qCCritical(lcAuthManager) << "failed to set credentials:" << data;
-                    return;
+            "jitsi/refreshToken",
+            [this, sslConfig](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError) {
+                    if (!secret.isEmpty()) {
+                        m_authFlow->setRefreshToken(secret);
+                    }
+
+                    ReadOnlyConfdSettings settings;
+                    settings.beginGroup("jitsi");
+
+                    m_authFlow->setAutoRefresh(true);
+                    m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
+                    m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
+                    m_authFlow->setClientIdentifier(
+                            settings.value("clientIdentifier", "").toString());
+                    m_authFlow->setSslConfiguration(sslConfig);
+
+                    settings.endGroup();
+
+                    Q_EMIT isAuthManagerInitializedChanged();
                 }
-
-                if (!data.isEmpty()) {
-                    m_authFlow->setRefreshToken(data);
-                }
-
-                ReadOnlyConfdSettings settings;
-                settings.beginGroup("jitsi");
-
-                m_authFlow->setAutoRefresh(true);
-                m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
-                m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
-                m_authFlow->setClientIdentifier(settings.value("clientIdentifier", "").toString());
-                m_authFlow->setSslConfiguration(sslConfig);
-
-                settings.endGroup();
-
-                Q_EMIT isAuthManagerInitializedChanged();
             });
 }
 
@@ -117,11 +117,14 @@ void AuthManager::storeRefreshToken(const QString &token) const
         return;
     }
 
-    Credentials::instance().set("jitsi/refreshToken", token, [](bool error, const QString &data) {
-        if (error) {
-            qCCritical(lcAuthManager) << "failed to set credentials:" << data;
-        }
-    });
+    Credentials::instance().set(
+            "jitsi/refreshToken", token,
+            [](QKeychain::Error error, const QString &, const QString &message) {
+                if (error != QKeychain::NoError) {
+                    ErrorBus::instance().error(
+                            tr("Failed persist jitsi refresh token: %1").arg(message));
+                }
+            });
 }
 
 bool AuthManager::isOAuthAuthenticated() const

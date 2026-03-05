@@ -34,13 +34,28 @@ LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookMa
     connect(this, &LDAPAddressBookFeeder::newExternalImageAdded, this,
             [](const QString &id, const QByteArray &data, const QDateTime &modified,
                QPrivateSignal) { AvatarManager::instance().addExternalImage(id, data, modified); });
+
+    connect(this, &LDAPAddressBookFeeder::invalidCredentials, this, [this]() {
+        // TODO: Check for bind method again?
+        m_manager->acquireSecret(true, m_group, [this](const QString &password) {
+            m_ldapConfig.bindPassword = password;
+
+            feedAddressBook();
+
+            const auto dirtyContacts = AvatarManager::instance().initialLoad();
+            if (dirtyContacts.isEmpty()) {
+                loadAllAvatars(m_ldapConfig);
+            } else {
+                loadAvatars(dirtyContacts);
+            }
+        });
+    });
 }
 
 void LDAPAddressBookFeeder::init(const LDAPInitializer::Config &ldapConfig,
                                  QStringList sipStatusSubscriptableAttributes,
                                  const QString &baseNumber)
 {
-
     m_ldapConfig = ldapConfig;
     m_baseNumber = baseNumber;
     m_sipStatusSubscriptableAttributes = sipStatusSubscriptableAttributes;
@@ -49,7 +64,6 @@ void LDAPAddressBookFeeder::init(const LDAPInitializer::Config &ldapConfig,
 void LDAPAddressBookFeeder::process()
 {
     ReadOnlyConfdSettings settings;
-
     settings.beginGroup(m_group);
 
     m_displayName = settings.value("displayName", "").toString();
@@ -67,9 +81,8 @@ void LDAPAddressBookFeeder::process()
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
 
     if (bindMethodStr == "simple" || bindMethodStr == "gssapi") {
-        m_manager->acquireSecret(m_group,
+        m_manager->acquireSecret(false, m_group,
                                  [this](const QString &password) { processImpl(password); });
-
     } else { // "none"
         processImpl("");
     }
@@ -158,11 +171,17 @@ void LDAPAddressBookFeeder::feedAddressBook()
     }
     attrs[i] = NULL;
 
-    m_ldap = LDAPInitializer::initialize(m_ldapConfig);
+    m_ldap = LDAPInitializer::initialize(m_ldapConfig, result);
     if (!m_ldap) {
-        qCCritical(lcLDAPAddressBookFeeder) << "Could not get LDAP connection - aborting";
-        ErrorBus::instance().addError(tr("Failed to initialize LDAP connection"));
+        qCCritical(lcLDAPAddressBookFeeder)
+                << "Could not get LDAP connection:" << ldap_err2string(result);
+        ErrorBus::instance().addError(
+                tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
         clearCStringlist(attrs);
+
+        if (result == LDAP_INVALID_CREDENTIALS) {
+            Q_EMIT invalidCredentials();
+        }
         return;
     }
 
@@ -178,7 +197,6 @@ void LDAPAddressBookFeeder::feedAddressBook()
 
     if (result == LDAP_SUCCESS) {
         startContactQuery();
-
     } else {
         qCCritical(lcLDAPAddressBookFeeder)
                 << "Error on search request: " << ldap_err2string(result);
@@ -237,7 +255,7 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 
         qCInfo(lcLDAPAddressBookFeeder) << "Connecting to LDAP service" << ldapConfig.ldapUrl;
 
-        ldap = LDAPInitializer::initialize(ldapConfig);
+        ldap = LDAPInitializer::initialize(ldapConfig, result);
         if (!ldap) {
             qCCritical(lcLDAPAddressBookFeeder)
                     << "Could not initialize LDAP handle from uri:" << ldap_err2string(result);
@@ -245,6 +263,10 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
                     tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
             clearCStringlist(attrs);
             m_isProcessing = false;
+
+            if (result == LDAP_INVALID_CREDENTIALS) {
+                Q_EMIT invalidCredentials();
+            }
             return;
         }
 
@@ -429,7 +451,6 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
 
                 // Iterate over values
                 if ((vals = ldap_get_values_len(m_ldap, msg, a)) != NULL) {
-
                     const auto val = (**vals).bv_val;
 
                     if (strcmp(a, "cn") == 0) {

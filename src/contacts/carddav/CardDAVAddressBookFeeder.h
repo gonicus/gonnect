@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <IAddressBookFeeder.h>
+#include "CardDAVAddressBookFeederConfig.h"
 #include <QtWebDAV/qwebdav.h>
 #include <QtWebDAV/qwebdavdirparser.h>
 
@@ -24,20 +25,17 @@ public:
 private Q_SLOTS:
     void onError(QString error) const;
     void onParserFinished();
-    void flushCachImpl();
+    void flushCacheImpl();
 
 private:
-    void init(const size_t settingsHash, const QString &host, const QString &path,
-              const QString &user, const QString &password, int port, bool useSSL);
-    void processImpl(const QString &password);
+    void init();
+    void feedAddressBook(bool authFailed);
 
     void processVcard(QByteArray data, const QString &uuid, const QDateTime &modifiedDate);
     void loadCachedData(const size_t hash);
     QString cacheFilePath(const size_t hash, bool createPath = false);
     void processPhotoProperty(const QString &id, const QByteArray &data,
                               const QDateTime &modifiedDate) const;
-
-    virtual void feedAddressBook();
 
     AddressBookManager *m_manager = nullptr;
 
@@ -50,4 +48,6 @@ private:
 
     QString m_group;
     BlockInfo m_blockInfo;
+
+    CardDAVAddressBookFeederConfig m_config;
 };
