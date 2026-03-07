@@ -44,7 +44,8 @@ else()
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
-        wintoast::wintoast)
+        wintoast::wintoast
+        runtimeobject)
 endif()
 
 add_definitions(-DPJMEDIA_HAS_RTCP_XR=1 -DPJMEDIA_STREAM_ENABLE_XR=1)
@@ -266,8 +267,6 @@ elseif(WIN32)
     set(PLATFORM_SOURCES
         platform/windows/WindowsUserInfo.cpp
         platform/windows/WindowsUserInfo.h
-        platform/dummy/DummyExternalMediaManager.cpp
-        platform/dummy/DummyExternalMediaManager.h
         platform/dummy/DummyBackgroundManager.cpp
         platform/dummy/DummyBackgroundManager.h
         platform/windows/WindowsThemeManager.cpp
@@ -279,6 +278,8 @@ elseif(WIN32)
         platform/windows/WindowsNotificationManager.h
         platform/windows/WindowsNotificationManager.cpp
         platform/windows/WindowsInhibitHelper.h
+        platform/windows/SmtcExternalMediaManager.h
+        platform/windows/SmtcExternalMediaManager.cpp
         platform/windows/WindowsInhibitHelper.cpp
         platform/dummy/DummyGlobalShortcuts.h
         platform/dummy/DummyGlobalShortcuts.cpp
