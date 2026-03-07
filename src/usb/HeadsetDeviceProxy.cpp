@@ -156,6 +156,8 @@ bool HeadsetDeviceProxy::refreshDevice()
     if (devs.count()) {
         m_device = devs.first();
 
+        connect(m_device, &HeadsetDevice::destroyed, this, [this]() { m_device = nullptr; });
+
         connect(m_device, &HeadsetDevice::hookSwitch, this, [this]() {
             if (isEnabled()) {
                 Q_EMIT hookSwitch();
