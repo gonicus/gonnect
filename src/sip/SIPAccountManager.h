@@ -41,7 +41,7 @@ public:
 
 Q_SIGNALS:
     void accountsChanged();
-    void sipRegisteredChanged();
+    void sipRegisteredChanged(bool status);
     void authorizationFailed(QString accountId);
 
 private:
