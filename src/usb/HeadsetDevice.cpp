@@ -359,6 +359,11 @@ void HeadsetDevice::setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMappi
 
 void HeadsetDevice::processEvents()
 {
+    if (m_ignoreNextMuteUpdate) {
+        m_ignoreNextMuteUpdate = false;
+        return;
+    }
+
     unsigned char data[64];
     memset(data, 0, sizeof(data));
 
@@ -403,6 +408,7 @@ void HeadsetDevice::processEvents()
 
                         qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
                         setMute(m_muted);
+                        m_ignoreNextMuteUpdate = true;
                     }
                 }
 
