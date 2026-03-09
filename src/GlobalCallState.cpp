@@ -213,6 +213,7 @@ void GlobalCallState::onCallInForegroundChanged()
     }
 
     if (m_callInForeground) {
+        m_foregroundCallContext = new QObject(this);
         connect(m_callInForeground, &QObject::destroyed, m_foregroundCallContext,
                 [this]() { setProperty("callInForeground", QVariant::fromValue(nullptr)); });
     }

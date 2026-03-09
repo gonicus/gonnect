@@ -221,12 +221,6 @@ void HeadsetDevice::setMute(bool flag)
         return;
     }
 
-    if (m_ignoreNextMuteUpdate) {
-        m_ignoreNextMuteUpdate = false;
-        qCDebug(lcHeadset).noquote().nospace() << "Ignoring setMute(" << flag << ") call";
-        return;
-    }
-
     m_muted = flag;
 
     if (m_displaySupported && m_teamsUsageMapping.contains(UsageId::Teams_IconsControl)) {
