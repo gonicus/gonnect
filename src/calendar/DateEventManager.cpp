@@ -195,7 +195,6 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
         qsizetype index = 0;
         QMutableListIterator it(m_dateEvents);
         while (it.hasNext()) {
-            index++;
             const auto item = it.next();
             if (item && item->id() == dateEventId) {
                 const auto eventHash = item->getHash();
@@ -210,6 +209,7 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
 
                 Q_EMIT dateEventRemoved(index);
             }
+            index++;
         }
     }
 }
@@ -237,19 +237,17 @@ void DateEventManager::resetDateEvents()
 
 void DateEventManager::removeDateEventsBySource(const QString &source)
 {
-    qsizetype i = 0;
     QMutexLocker lock(&m_feederMutex);
     QMutableListIterator it(m_dateEvents);
     while (it.hasNext()) {
-        i++;
         const auto item = it.next();
         if (item && item->source() == source) {
             item->deleteLater();
             it.remove();
-
-            Q_EMIT dateEventRemoved(i);
         }
     }
+
+    Q_EMIT dateEventsCleared();
 }
 
 bool DateEventManager::isAddedDateEvent(const QString &id)
