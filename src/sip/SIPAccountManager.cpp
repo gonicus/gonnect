@@ -37,9 +37,6 @@ void SIPAccountManager::updateSipRegistered()
 
 void SIPAccountManager::initialize()
 {
-    // Signalize lack of initial registration status
-    Q_EMIT sipRegisteredChanged(false);
-
     static QRegularExpression isAccountGroup = QRegularExpression("^account[0-9]+$");
 
     // Look for accountN groups

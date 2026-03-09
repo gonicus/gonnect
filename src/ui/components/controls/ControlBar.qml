@@ -100,6 +100,7 @@ Item {
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
             showBuddyStatus: ViewHelper.currentUser?.hasBuddyState || avatarImage.isUnregistered
             buddyStatus: SIPBuddyState.UNKNOWN
+            isUnregistered: true
 
             Component.onCompleted: () => {
                 avatarImage.updateBuddyStatus()
