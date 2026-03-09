@@ -11,10 +11,11 @@ DateEventsModel::DateEventsModel(QObject *parent) : QAbstractListModel{ parent }
         endResetModel();
     });
 
-    connect(&manager, &DateEventManager::dateEventAdded, this, [this](qsizetype index, DateEvent *) {
-        beginInsertRows(QModelIndex(), index, index);
-        endInsertRows();
-    });
+    connect(&manager, &DateEventManager::dateEventAdded, this,
+            [this](qsizetype index, DateEvent *) {
+                beginInsertRows(QModelIndex(), index, index);
+                endInsertRows();
+            });
 
     connect(&manager, &DateEventManager::dateEventsModified, this, [this]() {
         beginResetModel();
