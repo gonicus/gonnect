@@ -98,9 +98,11 @@ Item {
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
-            showBuddyStatus: ViewHelper.currentUser?.hasBuddyState || avatarImage.isUnregistered
+            showBuddyStatus: avatarImage.hasBuddyState || avatarImage.isUnregistered
             buddyStatus: SIPBuddyState.UNKNOWN
             isUnregistered: true
+
+            property bool hasBuddyState: ViewHelper.currentUser?.hasBuddyState ?? false
 
             Component.onCompleted: () => {
                 avatarImage.updateBuddyStatus()
