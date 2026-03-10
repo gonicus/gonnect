@@ -381,9 +381,10 @@ void SIPAccount::initialize()
                             return;
                         }
 
-                        if (secret.isEmpty()) {
+                        if (error == QKeychain::EntryNotFound) {
                             qCWarning(lcSIPAccount)
-                                    << "no password available for auth group" << auth;
+                                    << "no password available for auth group" << auth
+                                    << "- using empty one to trigger authorization";
                         }
 
                         pj::AuthCredInfo cred(scheme.toStdString(), realm.toStdString(),
