@@ -17,6 +17,8 @@ Item {
     }
 
     Component.onCompleted: () => {
+        qsTr("QT_LAYOUT_DIRECTION", "QGuiApplication");
+
         DialogFactory.rootItem = baseItem
 
         if (settings.showMainWindowOnStart) {
@@ -130,6 +132,12 @@ Item {
         function onAuthorizationFailed(accountId : string) {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for the SIP account:") })
             dialog.onPasswordAccepted.connect(pw => SIPAccountManager.setAccountCredentials(accountId, pw))
+        }
+        function onConnectionError(code : int, message : string) {
+            DialogFactory.createInfoDialog({
+                title: qsTr("Registration failed"),
+                text: qsTr("Registration failed with with status %1: %2").arg(code).arg(message)
+            })
         }
     }
 

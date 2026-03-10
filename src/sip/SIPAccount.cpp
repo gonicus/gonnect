@@ -9,6 +9,7 @@
 #include "ErrorBus.h"
 #include "NetworkHelper.h"
 #include "Credentials.h"
+#include "EnumTranslation.h"
 
 #include <QUuid>
 
@@ -380,9 +381,10 @@ void SIPAccount::initialize()
                             return;
                         }
 
-                        if (secret.isEmpty()) {
+                        if (error == QKeychain::EntryNotFound) {
                             qCWarning(lcSIPAccount)
-                                    << "no password available for auth group" << auth;
+                                    << "no password available for auth group" << auth
+                                    << "- using empty one to trigger authorization";
                         }
 
                         pj::AuthCredInfo cred(scheme.toStdString(), realm.toStdString(),
@@ -738,8 +740,15 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         Q_EMIT isRegisteredChanged();
     }
 
-    if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED) {
+    if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED
+        || prm.code == PJSIP_SC_FORBIDDEN) {
         Q_EMIT authorizationFailed();
+        return;
+    }
+
+    if (prm.code >= 400) {
+        Q_EMIT connectionError(prm.code, EnumTranslation::instance().sipStatusCode(prm.code));
+        return;
     }
 
     if (!m_useInstantMessagingWithoutCheck && m_isRegistered && m_shallNegotiateCapabilities) {
@@ -818,7 +827,7 @@ void SIPAccount::setCredentials(const QString &password)
             [authGroup](QKeychain::Error error, const QString &, const QString &message) {
                 if (error != QKeychain::NoError) {
                     ErrorBus::instance().error(
-                            tr("Failed persist SIP credentials: %1").arg(message));
+                            tr("Failed to persist SIP credentials: %1").arg(message));
                 }
             });
 }
