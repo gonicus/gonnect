@@ -34,7 +34,6 @@ void GlobalShortcutPortal::initialize()
                     SLOT(shortcutsChangedReceived(QDBusObjectPath, Shortcuts)));
 
             m_supported = true;
-            Q_EMIT initialized();
             break;
         case 1:
             qCWarning(lcShortcuts) << "session create request was rejected by portal"
@@ -45,6 +44,8 @@ void GlobalShortcutPortal::initialize()
                                    << response.value("error").toString();
             break;
         }
+
+        Q_EMIT initialized();
     });
 }
 
