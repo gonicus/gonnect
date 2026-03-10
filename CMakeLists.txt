@@ -77,7 +77,7 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Gui ${PLATFORM_QT_MODULES} Qml Quick QuickControls2 LinguistTools)
 qt_standard_project_setup(REQUIRES 6.9
     I18N_SOURCE_LANGUAGE en
-    I18N_TRANSLATED_LANGUAGES de es it
+    I18N_TRANSLATED_LANGUAGES de es it fa fr ru uk
 )
 
 # Adjust target path for qm files
