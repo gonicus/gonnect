@@ -37,4 +37,5 @@ private:
     QTimer m_blinkTimer;
     QString m_path;
     bool m_isOn = false;
+    bool m_isRunning = false;
 };
