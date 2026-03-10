@@ -413,8 +413,8 @@ void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
     }
 
     // Detect if we're missing a sequence
-    if (m_lastRttSequence >= 0 && prm.seq > m_lastRttSequence) {
-        quint16 lostSequences = prm.seq - m_lastRttSequence;
+    if (m_lastRttSequence >= 0 && prm.seq > m_lastRttSequence + 1) {
+        quint16 lostSequences = prm.seq - m_lastRttSequence - 1;
         m_currentRttBubble += QString("�").repeated(lostSequences);
     }
     m_lastRttSequence = prm.seq;
@@ -787,6 +787,10 @@ void SIPCall::createOngoingCallNotification()
 void SIPCall::addMetadata(const QString &data)
 {
     ResponseLoader loader(data);
+
+    qDeleteAll(m_metadata);
+    m_metadata.clear();
+
     m_metadata = loader.loadResponse();
     if (!m_metadata.empty()) {
         m_hasMetadata = true;

@@ -154,7 +154,7 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
             if (!str.isEmpty()) {
                 str += ", ";
             }
-            str = contactInfo.countries.join(", ");
+            str += contactInfo.countries.join(", ");
         }
         return str;
     }

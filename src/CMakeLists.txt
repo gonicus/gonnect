@@ -702,8 +702,8 @@ qt_add_qml_module(gonnect
         usb/busylight/KuandoOmega.cpp
         usb/busylight/LuxaforFlag.h
         usb/busylight/LuxaforFlag.cpp
-#        usb/busylight/LitraBeamLX.h
-#        usb/busylight/LitraBeamLX.cpp
+        usb/busylight/LitraBeamLX.h
+        usb/busylight/LitraBeamLX.cpp
         usb/busylight/LitraGlow.h
         usb/busylight/LitraGlow.cpp
 )
