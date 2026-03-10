@@ -174,7 +174,7 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                                                         const QString &message) {
                                                 if (error != QKeychain::NoError) {
                                                     ErrorBus::instance().error(
-                                                            tr("Failed persist address book "
+                                                            tr("Failed to persist address book "
                                                                "credentials: %1")
                                                                     .arg(message));
                                                 }

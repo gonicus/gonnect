@@ -30,8 +30,8 @@
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="93"/>
-        <source>Copy the currently used version of Gonnect to the clipboard</source>
-        <translation>Copia la versione attualmente utilizzata di GOnnect negli appunti</translation>
+        <source>Copy the currently used version number of GOnnect to the clipboard</source>
+        <translation>Copia il numero di versione attualmente in uso di GOnnect negli appunti</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="116"/>
@@ -83,6 +83,14 @@
         <location filename="../src/ui/components/AdditionalInfo.qml" line="54"/>
         <source>Expandable response section</source>
         <translation>Sezione di risposta espandibile</translation>
+    </message>
+</context>
+<context>
+    <name>AddressBookManager</name>
+    <message>
+        <location filename="../src/contacts/AddressBookManager.cpp" line="177"/>
+        <source>Failed to persist address book credentials: %1</source>
+        <translation>Impossibile salvare le credenziali della rubrica: %1</translation>
     </message>
 </context>
 <context>
@@ -222,14 +230,22 @@
 <context>
     <name>AudioManager</name>
     <message>
-        <location filename="../src/media/AudioManager.cpp" line="156"/>
+        <location filename="../src/media/AudioManager.cpp" line="162"/>
         <source>Default input</source>
         <translation>Ingresso predefinito</translation>
     </message>
     <message>
-        <location filename="../src/media/AudioManager.cpp" line="157"/>
+        <location filename="../src/media/AudioManager.cpp" line="163"/>
         <source>Default output</source>
         <translation>Uscita predefinita</translation>
+    </message>
+</context>
+<context>
+    <name>AuthManager</name>
+    <message>
+        <location filename="../src/AuthManager.cpp" line="125"/>
+        <source>Failed to persist jitsi refresh token: %1</source>
+        <translation>Impossibile mantenere il token di aggiornamento Jitsi: %1</translation>
     </message>
 </context>
 <context>
@@ -841,6 +857,19 @@
     </message>
 </context>
 <context>
+    <name>ChatConnectorManager</name>
+    <message>
+        <location filename="../src/chat/ChatConnectorManager.cpp" line="42"/>
+        <source>Failed to persist chat recovery code: %1</source>
+        <translation>Impossibile salvare il codice di recupero della chat: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/chat/ChatConnectorManager.cpp" line="67"/>
+        <source>Failed to persist chat access token: %1</source>
+        <translation>Impossibile mantenere il token di accesso alla chat: %1</translation>
+    </message>
+</context>
+<context>
     <name>ChatMessageBox</name>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="9"/>
@@ -953,7 +982,7 @@
         <translation>Seleziona emoji</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ChatSideBar.qml" line="281"/>
+        <location filename="../src/ui/components/ChatSideBar.qml" line="279"/>
         <source>Enter chat message...</source>
         <translation>Scrivi un messaggio...</translation>
     </message>
@@ -1288,14 +1317,14 @@
 <context>
     <name>Credentials</name>
     <message>
-        <location filename="../src/platform/Credentials.cpp" line="68"/>
-        <source>storing credentials failed: %1</source>
-        <translation>Salvataggio delle credenziali non riuscito: %1</translation>
+        <location filename="../src/platform/Credentials.cpp" line="92"/>
+        <source>Storing credentials for %1 failed: %2</source>
+        <translation>Impossibile salvare i dati di accesso per %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/platform/Credentials.cpp" line="125"/>
-        <source>reading credentials failed: %1</source>
-        <translation>Lettura delle credenziali non riuscita: %1</translation>
+        <location filename="../src/platform/Credentials.cpp" line="162"/>
+        <source>reading credentials for %1 failed: %2</source>
+        <translation>Impossibile leggere i dati di accesso per %1: %2</translation>
     </message>
 </context>
 <context>
@@ -1342,6 +1371,14 @@
         <location filename="../src/ui/components/CustomWindowHeader.qml" line="262"/>
         <source>Close GOnnect window</source>
         <translation>Chiudi la finestra GOnnect</translation>
+    </message>
+</context>
+<context>
+    <name>DateEventFeederManager</name>
+    <message>
+        <location filename="../src/calendar/DateEventFeederManager.cpp" line="78"/>
+        <source>Failed to persist calendar credentials: %1</source>
+        <translation>Impossibile salvare le credenziali del calendario: %1</translation>
     </message>
 </context>
 <context>
@@ -1935,7 +1972,7 @@
 <context>
     <name>GonnectWindow</name>
     <message>
-        <location filename="../src/ui/GonnectWindow.qml" line="355"/>
+        <location filename="../src/ui/GonnectWindow.qml" line="358"/>
         <source>Home</source>
         <translation>Home</translation>
     </message>
@@ -2201,32 +2238,38 @@
 <context>
     <name>JitsiConnector</name>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="170"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="171"/>
         <source>New chat message</source>
         <translation>Nuovo messaggio chat</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="214"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="215"/>
         <source>Unnamed participant</source>
         <translation>Partecipante senza nome</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1260"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1263"/>
         <source>Active conference</source>
         <translation>Conferenza attiva</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1265"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1268"/>
         <source>Hang up</source>
         <translation>Riaggancia</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="788"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="791"/>
         <source>%1 has joined the conference</source>
         <translation>%1 ha partecipato alla conferenza</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="802"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="604"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1311"/>
+        <source>Failed to persist room password: %1</source>
+        <translation>Impossibile memorizzare la password della stanza: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/JitsiConnector.cpp" line="805"/>
         <source>%1 has left the conference</source>
         <translation>%1 ha abbandonato la conferenza</translation>
     </message>
@@ -2257,30 +2300,26 @@
 <context>
     <name>LDAPAddressBookFeeder</name>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="164"/>
-        <source>Failed to initialize LDAP connection</source>
-        <translation>Inizializzazione della connessione LDAP non riuscita</translation>
-    </message>
-    <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="185"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="260"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="383"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="203"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="282"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="405"/>
         <source>LDAP error: %1</source>
         <translation>Errore LDAP: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="334"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="494"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="356"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="515"/>
         <source>Parse error: %1</source>
         <translation>Errore di analisi: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="379"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="401"/>
         <source>LDAP timeout: %1</source>
         <translation>Timeout LDAP: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="245"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="179"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="263"/>
         <source>Failed to initialize LDAP connection: %1</source>
         <translation>Inizializzazione della connessione LDAP non riuscita: %1</translation>
     </message>
@@ -2296,62 +2335,68 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../src/Main.qml" line="28"/>
+        <location filename="../src/Main.qml" line="20"/>
+        <source>QT_LAYOUT_DIRECTION</source>
+        <comment>QGuiApplication</comment>
+        <translation>LTR</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="30"/>
         <source>No system tray available</source>
         <translation>Nessuna area di notifica disponibile</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="29"/>
+        <location filename="../src/Main.qml" line="31"/>
         <source>GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.</source>
         <translation>GOnnect consente un accesso rapido alle funzionalità tramite l&apos;area di notifica. Il tuo ambiente desktop non ne dispone.</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="36"/>
+        <location filename="../src/Main.qml" line="38"/>
         <source>Information</source>
         <translation>Informazioni</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="37"/>
+        <location filename="../src/Main.qml" line="39"/>
         <source>GOnnect is under testing for your operating system and is not yet officially released. There is no feature parity with the Linux version yet, and there may be bugs that we didn&apos;t find yet. You&apos;re welcome with reporting these issues on github. Happy testing!</source>
         <translation>GOnnect è in fase di test per il tuo sistema operativo e non è ancora stato rilasciato ufficialmente. Al momento non c&apos;è parità di funzionalità con la versione Linux, e potrebbero esserci bug non ancora trovati. Sei invitato a segnalare questi problemi su GitHub. Buon test!</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="61"/>
+        <location filename="../src/Main.qml" line="63"/>
         <source>There are still phone calls going on, do you really want to quit?</source>
         <translation>Ci sono ancora chiamate telefoniche in corso. Vuoi davvero uscire?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="89"/>
+        <location filename="../src/Main.qml" line="91"/>
         <source>Please enter the password for %1:</source>
         <translation>Inserisci la password per %1:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="100"/>
+        <location filename="../src/Main.qml" line="102"/>
         <source>Please enter the recovery key for %1:</source>
         <translation>Inserisci la chiave di ripristino per %1:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="115"/>
+        <location filename="../src/Main.qml" line="117"/>
         <source>End all calls</source>
         <translation>Termina tutte le chiamate</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="116"/>
+        <location filename="../src/Main.qml" line="118"/>
         <source>Do you really want to close this window and terminate all ongoing calls?</source>
         <translation>Vuoi davvero chiudere questa finestra e terminare tutte le chiamate in corso?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="131"/>
+        <location filename="../src/Main.qml" line="133"/>
         <source>Please enter the password for the SIP account:</source>
         <translation>Inserisci la password per l&apos;account SIP:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="194"/>
+        <location filename="../src/Main.qml" line="196"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="200"/>
+        <location filename="../src/Main.qml" line="202"/>
         <source>Fatal Error</source>
         <translation>Errore fatale</translation>
     </message>
@@ -3980,9 +4025,14 @@
         <translation>&apos;proxies&apos; contiene una voce URI SIP non valida: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="419"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="416"/>
         <source>Failed to create %1: %2</source>
         <translation>Impossibile creare %1: %2</translation>
+    </message>
+    <message>
+        <location filename="../src/sip/SIPAccount.cpp" line="821"/>
+        <source>Failed to persist SIP credentials: %1</source>
+        <translation>Impossibile mantenere le credenziali SIP: %1</translation>
     </message>
 </context>
 <context>
@@ -3996,12 +4046,12 @@
 <context>
     <name>SIPCall</name>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="647"/>
+        <location filename="../src/sip/SIPCall.cpp" line="744"/>
         <source>Active call with %1</source>
         <translation>Chiamata attiva con %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="676"/>
+        <location filename="../src/sip/SIPCall.cpp" line="773"/>
         <source>Hang up</source>
         <translation>Riaggancia</translation>
     </message>
@@ -4044,7 +4094,7 @@
 <context>
     <name>SIPManager</name>
     <message>
-        <location filename="../src/sip/SIPManager.cpp" line="190"/>
+        <location filename="../src/sip/SIPManager.cpp" line="241"/>
         <source>New Identity</source>
         <translation>Nuova identità</translation>
     </message>

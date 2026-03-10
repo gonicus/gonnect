@@ -818,7 +818,7 @@ void SIPAccount::setCredentials(const QString &password)
             [authGroup](QKeychain::Error error, const QString &, const QString &message) {
                 if (error != QKeychain::NoError) {
                     ErrorBus::instance().error(
-                            tr("Failed persist SIP credentials: %1").arg(message));
+                            tr("Failed to persist SIP credentials: %1").arg(message));
                 }
             });
 }

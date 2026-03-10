@@ -17,6 +17,8 @@ Item {
     }
 
     Component.onCompleted: () => {
+        qsTr("QT_LAYOUT_DIRECTION", "QGuiApplication");
+
         DialogFactory.rootItem = baseItem
 
         if (settings.showMainWindowOnStart) {
