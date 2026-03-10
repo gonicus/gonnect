@@ -150,6 +150,7 @@ bool HeadsetDeviceProxy::refreshDevice()
 {
     auto devs = USBDevices::instance().headsetDevices();
     if (m_device) {
+        disconnect(m_device, nullptr, this, nullptr);
         m_device = nullptr;
     }
 

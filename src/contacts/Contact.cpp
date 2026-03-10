@@ -56,6 +56,7 @@ Contact::Contact(const Contact &other) : QObject{ other.parent() }
     m_mail = other.m_mail;
     m_lastModified = other.m_lastModified;
     m_sipStatusSubscriptable = other.m_sipStatusSubscriptable;
+    m_hasAvatar = other.m_hasAvatar;
     init();
 }
 
@@ -72,6 +73,7 @@ Contact &Contact::operator=(const Contact &other)
     m_mail = other.m_mail;
     m_lastModified = other.m_lastModified;
     m_sipStatusSubscriptable = other.m_sipStatusSubscriptable;
+    m_hasAvatar = other.m_hasAvatar;
     init();
     return *this;
 }

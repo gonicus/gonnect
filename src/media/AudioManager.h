@@ -152,6 +152,7 @@ private:
     pa_mainloop *m_paMainloop = nullptr;
     QTimer m_paMainloopTimer;
     pa_context *m_paContext = nullptr;
+    int m_paCallbackSuppress = 0;
 #endif
 };
 

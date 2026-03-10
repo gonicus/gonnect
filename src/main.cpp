@@ -114,6 +114,10 @@ int main(int argc, char *argv[])
     engine.loadFromModule("base", "Main");
 
     const auto &objs = engine.rootObjects();
+    if (objs.isEmpty()) {
+        qFatal() << "no QML windows registered";
+    }
+
     const auto &itemObjs = objs.first();
 
     QQuickWindow *mainWindow = itemObjs->findChild<QQuickWindow *>("gonnectWindow");
