@@ -739,7 +739,8 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         Q_EMIT isRegisteredChanged();
     }
 
-    if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED || prm.code == PJSIP_SC_FORBIDDEN) {
+    if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED
+        || prm.code == PJSIP_SC_FORBIDDEN) {
         Q_EMIT authorizationFailed();
         return;
     }
