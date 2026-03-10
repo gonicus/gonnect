@@ -45,6 +45,11 @@ bool BusylightDeviceManager::createBusylightDevice(const hid_device_info &device
     return device;
 }
 
+void BusylightDeviceManager::removeDevice(IBusylightDevice *dev) {
+    m_devices.removeAll(dev);
+    delete dev;
+}
+
 void BusylightDeviceManager::clearDevices()
 {
     qDeleteAll(m_devices);

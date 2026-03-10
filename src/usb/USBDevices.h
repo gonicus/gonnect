@@ -28,6 +28,12 @@ public:
         return *_instance;
     }
 
+    enum USBDeviceType {
+        Headset,
+        Busylight
+    };
+    Q_ENUM(USBDeviceType)
+
     void initialize();
     void shutdown();
 
