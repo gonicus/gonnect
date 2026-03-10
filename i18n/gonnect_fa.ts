@@ -2246,28 +2246,28 @@
         <translation type="unfinished">شرکت‌کننده بی‌نام</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1263"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1264"/>
         <source>Active conference</source>
         <translation type="unfinished">کنفرانس فعال</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1268"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1269"/>
         <source>Hang up</source>
         <translation type="unfinished">قطع تماس</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="791"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="792"/>
         <source>%1 has joined the conference</source>
         <translation type="unfinished">%1 به کنفرانس پیوست</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="604"/>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1311"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="605"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1312"/>
         <source>Failed to persist room password: %1</source>
         <translation type="unfinished">ذخیرهٔ رمز عبور اتاق ناموفق بود: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="805"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="806"/>
         <source>%1 has left the conference</source>
         <translation type="unfinished">%1 کنفرانس را ترک کرد</translation>
     </message>
@@ -2389,12 +2389,22 @@
         <translation type="unfinished">آیا می‌خواهید این پنجره بسته و همه تماس‌ها پایان یابد؟</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="196"/>
+        <location filename="../src/Main.qml" line="138"/>
+        <source>Registration failed</source>
+        <translation type="unfinished">ثبت‌نام ناموفق بود</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="139"/>
+        <source>Registration failed with with status %1: %2</source>
+        <translation type="unfinished">ثبت‌نام با وضعیت %1: %2 ناموفق بود</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="202"/>
         <source>Error</source>
         <translation type="unfinished">خطا</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="202"/>
+        <location filename="../src/Main.qml" line="208"/>
         <source>Fatal Error</source>
         <translation type="unfinished">خطای مهلک</translation>
     </message>
@@ -3997,37 +4007,37 @@
 <context>
     <name>SIPAccount</name>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="66"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="67"/>
         <source>&apos;userUri&apos; is no valid SIP URI: %1</source>
         <translation type="unfinished">&apos;userUri&apos; یک SIP URI معتبر نیست: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="74"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="75"/>
         <source>&apos;userUri&apos; is required</source>
         <translation type="unfinished">&apos;userUri&apos; الزامی است</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="86"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="87"/>
         <source>&apos;registrarUri&apos; is no valid SIP URI: %1</source>
         <translation type="unfinished">&apos;registrarUri&apos; یک SIP URI معتبر نیست: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="97"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="98"/>
         <source>&apos;registrarUri&apos; is required</source>
         <translation type="unfinished">&apos;registrarUri&apos; الزامی است</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="108"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="109"/>
         <source>&apos;proxies&apos; contains invalid SIP URI entry: %1</source>
         <translation type="unfinished">&apos;proxies&apos; یک SIP URI نامعتبر دارد: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="416"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="417"/>
         <source>Failed to create %1: %2</source>
         <translation type="unfinished">ایجاد %1 ناموفق بود: %2</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="821"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="828"/>
         <source>Failed to persist SIP credentials: %1</source>
         <translation type="unfinished">ثبت نام کاربری SIP ناموفق بود: %1</translation>
     </message>

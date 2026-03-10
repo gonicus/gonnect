@@ -2248,28 +2248,28 @@
         <translation>Unbekannter Teilnehmer</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1263"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1264"/>
         <source>Active conference</source>
         <translation>Aktive Konferenz</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1268"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1269"/>
         <source>Hang up</source>
         <translation>Auflegen</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="791"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="792"/>
         <source>%1 has joined the conference</source>
         <translation>%1 hat die Konferenz betreten</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="604"/>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1311"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="605"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1312"/>
         <source>Failed to persist room password: %1</source>
         <translation>Speichern des Raumkennworts fehlgeschlagen: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="805"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="806"/>
         <source>%1 has left the conference</source>
         <translation>%1 hat die Konferenz verlassen</translation>
     </message>
@@ -2391,12 +2391,22 @@
         <translation>Möchtest Du das Fenster schliessen und alle aktiven Anrufe beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="196"/>
+        <location filename="../src/Main.qml" line="138"/>
+        <source>Registration failed</source>
+        <translation>Registrierung fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="139"/>
+        <source>Registration failed with with status %1: %2</source>
+        <translation>Die Registrierung ist mit dem Status %1 fehlgeschlagen: %2</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="202"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="202"/>
+        <location filename="../src/Main.qml" line="208"/>
         <source>Fatal Error</source>
         <translation>Fataler Fehler</translation>
     </message>
@@ -4000,37 +4010,37 @@
 <context>
     <name>SIPAccount</name>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="66"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="67"/>
         <source>&apos;userUri&apos; is no valid SIP URI: %1</source>
         <translation>&apos;userUri&apos; ist keine gültige SIP URI: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="74"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="75"/>
         <source>&apos;userUri&apos; is required</source>
         <translation>&apos;userUri&apos; ist erforderlich</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="86"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="87"/>
         <source>&apos;registrarUri&apos; is no valid SIP URI: %1</source>
         <translation>&apos;registrarUri&apos; ist keine gültige SIP URI: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="97"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="98"/>
         <source>&apos;registrarUri&apos; is required</source>
         <translation>&apos;registrarUri&apos; ist erforderlich</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="108"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="109"/>
         <source>&apos;proxies&apos; contains invalid SIP URI entry: %1</source>
         <translation>&apos;proxies&apos; enthält eine ungültige SIP URI: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="416"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="417"/>
         <source>Failed to create %1: %2</source>
         <translation>Fehler beim Erzeugen von %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="821"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="828"/>
         <source>Failed to persist SIP credentials: %1</source>
         <translation>SIP-Anmeldedaten konnten nicht gespeichert werden: %1</translation>
     </message>

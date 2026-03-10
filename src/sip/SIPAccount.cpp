@@ -9,6 +9,7 @@
 #include "ErrorBus.h"
 #include "NetworkHelper.h"
 #include "Credentials.h"
+#include "EnumTranslation.h"
 
 #include <QUuid>
 
@@ -738,8 +739,14 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         Q_EMIT isRegisteredChanged();
     }
 
-    if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED) {
+    if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED || prm.code == PJSIP_SC_FORBIDDEN) {
         Q_EMIT authorizationFailed();
+        return;
+    }
+
+    if (prm.code >= 400) {
+        Q_EMIT connectionError(prm.code, EnumTranslation::instance().sipStatusCode(prm.code));
+        return;
     }
 
     if (!m_useInstantMessagingWithoutCheck && m_isRegistered && m_shallNegotiateCapabilities) {
