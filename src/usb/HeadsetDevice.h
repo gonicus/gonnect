@@ -43,6 +43,8 @@ public:
     void setMute(bool flag);
     bool getMute() const { return m_muted; }
 
+    QString path() const { return m_path; }
+
     void setIdle();
 
     void syncDateAndTime();

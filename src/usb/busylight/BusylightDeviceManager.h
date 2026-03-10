@@ -21,6 +21,8 @@ public:
     }
 
     bool createBusylightDevice(const struct hid_device_info &deviceInfo);
+    void removeDevice(IBusylightDevice *dev);
+
     void clearDevices();
 
     void switchOn(QColor color) const;
@@ -31,6 +33,8 @@ public:
 
     void switchStreamlightOn() const;
     void switchStreamlightOff() const;
+
+    QList<IBusylightDevice *> devices() const { return m_devices; }
 
 private Q_SLOTS:
     void updateBusylightState();

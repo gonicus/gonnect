@@ -164,7 +164,7 @@ void SIPAccount::initialize()
     } else if (m_transportNet == TRANSPORT_NET::IPv6) {
         m_accountConfig.sipConfig.ipv6Use = PJSUA_IPV6_ENABLED_USE_IPV6_ONLY;
         m_accountConfig.mediaConfig.ipv6Use = PJSUA_IPV6_ENABLED_USE_IPV6_ONLY;
-    } else if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv6) {
+    } else if (m_transportNet == TRANSPORT_NET::AUTO) {
         m_accountConfig.sipConfig.ipv6Use = PJSUA_IPV6_ENABLED_PREFER_IPV6;
         m_accountConfig.mediaConfig.ipv6Use = PJSUA_IPV6_ENABLED_PREFER_IPV6;
     }
@@ -334,8 +334,6 @@ void SIPAccount::initialize()
         m_accountConfig.natConfig.sipOutboundRegId =
                 m_settings.value("sipOutboundRegId").toString().toStdString();
     }
-
-    m_accountConfig.natConfig.contactRewriteUse = 0;
 
     m_accountConfig.mediaConfig.rtcpXrEnabled = m_settings.value("rtcpXrEnabled", false).toBool();
     m_accountConfig.mediaConfig.rtcpMuxEnabled = m_settings.value("rtcpMuxEnabled", false).toBool();
@@ -524,12 +522,13 @@ SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
 
     // We don't have a buddy yet - try to subscribe
     auto buddy = new SIPBuddy(this, sipUrl);
-    qCInfo(lcSIPAccount) << "subscribing to buddy" << buddy->uri();
+    QString uri = buddy->uri();
+    qCInfo(lcSIPAccount) << "subscribing to buddy" << uri;
 
     if (buddy->initialize()) {
         m_buddies.push_back(buddy);
-        connect(buddy, &SIPBuddy::destroyed, this, [buddy, this]() {
-            qCCritical(lcSIPAccount) << "removing buddy" << buddy->uri();
+        connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
+            qCCritical(lcSIPAccount) << "removing buddy" << uri;
             m_buddies.removeAll(buddy);
         });
     } else {
@@ -739,7 +738,7 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         Q_EMIT isRegisteredChanged();
     }
 
-    if (prm.code == PJSIP_SC_UNAUTHORIZED) {
+    if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED) {
         Q_EMIT authorizationFailed();
     }
 
