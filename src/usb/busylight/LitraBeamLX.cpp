@@ -24,6 +24,30 @@ QSet<IBusylightDevice::SupportedCommands> LitraBeamLX::supportedCommands()
     return _commands;
 }
 
+bool LitraBeamLX::hidppTransaction(unsigned char *buf, size_t len)
+{
+    // TODO: Make a hid++ support library and do this in a non hardcoded way
+    //       because index and feature versions are not guaranteed to stay this
+    //       way.
+
+    if (hid_write(m_device, buf, len) < 0) {
+        return false;
+    }
+
+    unsigned char resp[20];
+    int n = hid_read_timeout(m_device, resp, sizeof(resp), 200);
+    if (n <= 0) {
+        return false;
+    }
+
+    // Check for device error report
+    if (n >= 4 && resp[0] == 0x11 && resp[2] == 0xFF) {
+        return false;
+    }
+
+    return true;
+}
+
 void LitraBeamLX::switchStreamlight(bool on)
 {
     if (!m_device) {
@@ -31,11 +55,13 @@ void LitraBeamLX::switchStreamlight(bool on)
         return;
     }
 
-    unsigned char buf[20];
+    // Don't send the same state again
+    if (m_state == on) {
+        return;
+    }
+    m_state = on;
 
-    // TODO: Make a hid++ support library and do this in a non hardcoded way
-    //       because index and feature versions are not guaranteed to stay this
-    //       way.
+    unsigned char buf[20];
 
     // Switch on or off
     memset(buf, 0, sizeof(buf));
@@ -45,7 +71,7 @@ void LitraBeamLX::switchStreamlight(bool on)
     buf[3] = LX_SET_ILLUMINATION | LX_SOFTWARE_ID;
     buf[4] = on ? 1 : 0;
 
-    hid_write(m_device, buf, sizeof(buf));
+    hidppTransaction(buf, sizeof(buf));
 }
 
 void LitraBeamLX::send(bool on)
@@ -54,6 +80,12 @@ void LitraBeamLX::send(bool on)
         qCCritical(lcLitraBeamLX) << "Error: trying to send data while the USB device is not open";
         return;
     }
+
+    // Don't send the same state again
+    if (m_blinkState == on) {
+        return;
+    }
+    m_blinkState = on;
 
     unsigned char buf[20];
 
@@ -69,9 +101,9 @@ void LitraBeamLX::send(bool on)
     buf[3] = LX_SET_ILLUMINATION_RGB | LX_SOFTWARE_ID;
     buf[4] = on ? 1 : 0;
 
-    hid_write(m_device, buf, sizeof(buf));
-
-    hid_read_timeout(m_device, buf, 20, 1000);
+    if (!hidppTransaction(buf, sizeof(buf))) {
+        return;
+    }
 
     if (on) {
         // rgb values
@@ -87,8 +119,9 @@ void LitraBeamLX::send(bool on)
             buf[7 + i * 4] = m_color.blue();
         }
 
-        hid_write(m_device, buf, sizeof(buf));
-        hid_read_timeout(m_device, buf, 20, 1000);
+        if (!hidppTransaction(buf, sizeof(buf))) {
+            return;
+        }
 
         memset(buf, 0, sizeof(buf));
         buf[0] = LX_REPORT_ID;
@@ -102,8 +135,9 @@ void LitraBeamLX::send(bool on)
             buf[7 + i * 4] = m_color.blue();
         }
 
-        hid_write(m_device, buf, sizeof(buf));
-        hid_read_timeout(m_device, buf, 20, 1000);
+        if (!hidppTransaction(buf, sizeof(buf))) {
+            return;
+        }
 
         // Flush
         memset(buf, 0, sizeof(buf));
@@ -113,7 +147,8 @@ void LitraBeamLX::send(bool on)
         buf[3] = LX_FRAME_END | LX_SOFTWARE_ID;
         buf[4] = 1; // Persist
 
-        hid_write(m_device, buf, sizeof(buf));
-        hid_read_timeout(m_device, buf, 20, 1000);
+        if (!hidppTransaction(buf, sizeof(buf))) {
+            return;
+        }
     }
 }

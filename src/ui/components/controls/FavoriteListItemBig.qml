@@ -46,7 +46,7 @@ Item {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Favorite contact")
-    Accessible.description: qsTr("Selected favorite %1: %2").arg(delg.name).arg(delg.isJitsiUrl ? qsTr("tap to start meeting %1").arg(dlg.phoneNumber) : qsTr("tap to call %1").arg(delg.phoneNumber))
+    Accessible.description: qsTr("Selected favorite %1: %2").arg(delg.name).arg(delg.isJitsiUrl ? qsTr("tap to start meeting %1").arg(delg.phoneNumber) : qsTr("tap to call %1").arg(delg.phoneNumber))
     Accessible.focusable: true
     Accessible.onPressAction: () => delg.startMeetingOrCall()
 
