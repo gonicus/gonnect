@@ -75,7 +75,7 @@ void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &conf
                                                const QString &message) {
                                                 if (error != QKeychain::NoError) {
                                                     ErrorBus::instance().error(
-                                                            tr("Failed persist calendar "
+                                                            tr("Failed to persist calendar "
                                                                "credentials: %1")
                                                                     .arg(message));
                                                 }
