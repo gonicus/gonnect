@@ -60,11 +60,13 @@ private:
     QString m_group;
     BlockInfo m_blockInfo;
 
-    ESourceRegistry *m_registry = nullptr;
-    GList *m_sources = nullptr;
-    gchar *m_searchExpr = nullptr;
+    ESourceRegistry *m_registry = NULL;
+    GList *m_sources = NULL;
+    gchar *m_searchExpr = NULL;
     QList<EBookClient *> m_clients;
     QList<EBookClientView *> m_clientViews;
+
+    GCancellable *m_cancellable = NULL;
 
     int m_sourceCount = 0;
     std::atomic<int> m_clientCount = 0;
