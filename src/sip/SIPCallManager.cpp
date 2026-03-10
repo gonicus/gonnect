@@ -540,7 +540,7 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
     auto toCall = findCall(toAccountId, toCallId);
     if (!toCall) {
         qCCritical(lcSIPCallManager)
-                << "Cannot find call" << toAccountId << "in account" << toCallId;
+                << "Cannot find call" << toCallId << "in account" << toAccountId;
         return;
     }
 

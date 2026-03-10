@@ -52,6 +52,7 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
     if (!noSyncSystemMute()) {
         connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
             if (m_captureAudioPort) {
+                m_paCallbackSuppress++;
                 paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
                 qCInfo(lcAudioManager) << "Sent mute state" << m_isAudioCaptureMuted << "to system";
             } else {
@@ -140,6 +141,11 @@ void AudioManager::paInputMuteStateCallback(pa_context *, const pa_source_info *
 {
     AudioManager &instance = AudioManager::instance();
     if (!end && instance.m_captureAudioPort->getSystemDeviceID() == QString(source->name)) {
+        if (instance.m_paCallbackSuppress > 0) {
+            instance.m_paCallbackSuppress--;
+            return;
+        }
+
         auto &gms = GlobalMuteState::instance();
         if (source->mute != gms.isMuted()) {
             gms.toggleMute();

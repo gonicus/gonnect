@@ -106,6 +106,15 @@ udevadm trigger
 | ------------ | ------------------ |
 | kuando       | Busylight UC Omega |
 | Luxafor      | Flag               |
+| Logitech     | Litra Beam LX      |
+
+
+# Automatic video light switching
+
+| Manufacturer | Model              |
+| ------------ | ------------------ |
+| Logitech     | Litra Beam LX      |
+| Logitech     | Litra Glow         |
 
 # Installing _GOnnect_
 

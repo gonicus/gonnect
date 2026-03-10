@@ -3,6 +3,7 @@
 #include <QMutexLocker>
 #include <QLoggingCategory>
 #include <cmath>
+#include "IBusylightDevice.h"
 #include "ReportDescriptorParser.h"
 #include "ReportDescriptorEnums.h"
 #include "ReportDescriptorStructs.h"
@@ -147,16 +148,48 @@ void USBDevices::refresh()
     QString lastPath;
     auto &busylightDeviceManager = BusylightDeviceManager::instance();
 
-    clearDevices();
+    // Collect devices previously in use
+    QHash<QString, USBDeviceType> previousPaths;
+    for (auto hd : std::as_const(m_headsetDevices)) {
+        previousPaths.insert(hd->path(), USBDeviceType::Headset);
+    }
+
+    auto bdevs = busylightDeviceManager.devices();
+    for (auto bd : std::as_const(bdevs)) {
+        previousPaths.insert(bd->path(), USBDeviceType::Busylight);
+    }
 
     struct hid_device_info *devs, *deviceInfo;
-
     deviceInfo = devs = hid_enumerate(0, 0);
 
+    // Collect current paths
+    QSet<QString> currentPaths;
+    for (auto di = devs; di; di = di->next) {
+        currentPaths.insert(di->path);
+    }
+
+    // Remove headset devices that are gone
+    QMutableListIterator it(m_headsetDevices);
+    while (it.hasNext()) {
+        auto hd = it.next();
+        if (!currentPaths.contains(hd->path())) {
+            delete hd;
+            it.remove();
+        }
+    }
+
+    // Remove busylights that are gone
+    for (auto bd : std::as_const(bdevs)) {
+        if (!currentPaths.contains(bd->path())) {
+            busylightDeviceManager.removeDevice(bd);
+        }
+    }
+
+    // Initialize new devices
     for (; deviceInfo; deviceInfo = deviceInfo->next) {
 
         QString path = deviceInfo->path;
-        if (path == lastPath) {
+        if (previousPaths.contains(path) || path == lastPath) {
             continue;
         }
 
@@ -185,6 +218,11 @@ void USBDevices::clearDevices()
 
 HeadsetDevice *USBDevices::parseReportDescriptor(const hid_device_info *deviceInfo)
 {
+    // Only look for telephony devices
+    if (deviceInfo->usage_page != 0x0B) {
+        return nullptr;
+    }
+
     unsigned char descriptor[HID_API_MAX_REPORT_DESCRIPTOR_SIZE];
     hid_device *device = hid_open_path(deviceInfo->path);
 

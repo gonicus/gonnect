@@ -237,7 +237,7 @@ void ViewHelper::toggleFavorite(const QString &phoneNumber,
 
 QString ViewHelper::initials(const QString &name) const
 {
-    const auto splitted = name.split(QChar(' '));
+    const auto splitted = name.simplified().split(QChar(' '));
     if (name.length() == 0 || splitted.length() == 0) {
         return "";
     } else if (splitted.length() == 1) {

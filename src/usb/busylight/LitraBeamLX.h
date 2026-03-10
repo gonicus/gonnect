@@ -16,6 +16,12 @@ public:
     QSet<SupportedCommands> supportedCommands() override;
     void switchStreamlight(bool on) override;
 
+private:
+    bool hidppTransaction(unsigned char *buf, size_t len);
+
 protected:
     void send(bool on) override;
+
+    bool m_state = false;
+    bool m_blinkState = false;
 };

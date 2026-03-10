@@ -24,11 +24,13 @@ void LitraGlow::switchStreamlight(bool on)
         return;
     }
 
-    unsigned char buf[20];
+    // Don't send the same state again
+    if (m_state == on) {
+        return;
+    }
+    m_state = on;
 
-    // TODO: Make a hid++ support library and do this in a non hardcoded way
-    //       because index and feature versions are not guaranteed to stay this
-    //       way.
+    unsigned char buf[20];
 
     // Switch on or off
     memset(buf, 0, sizeof(buf));
@@ -39,6 +41,7 @@ void LitraGlow::switchStreamlight(bool on)
     buf[4] = on ? 1 : 0;
 
     hid_write(m_device, buf, sizeof(buf));
+    hid_read_timeout(m_device, buf, sizeof(buf), 200);
 }
 
 void LitraGlow::send(bool on)
