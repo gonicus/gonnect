@@ -73,7 +73,7 @@ void EDSAddressBookFeeder::init()
     // Prepare the search query
     EBookQuery *query = e_book_query_any_field_contains("");
     m_searchExpr = e_book_query_to_string(query);
-    g_clear_pointer (&query, e_book_query_unref);
+    g_clear_pointer(&query, e_book_query_unref);
 
     // Clients and signals
     m_sourcePromise = new QPromise<void>();
