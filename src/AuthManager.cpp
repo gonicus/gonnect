@@ -122,7 +122,7 @@ void AuthManager::storeRefreshToken(const QString &token) const
             [](QKeychain::Error error, const QString &, const QString &message) {
                 if (error != QKeychain::NoError) {
                     ErrorBus::instance().error(
-                            tr("Failed persist jitsi refresh token: %1").arg(message));
+                            tr("Failed to persist jitsi refresh token: %1").arg(message));
                 }
             });
 }
