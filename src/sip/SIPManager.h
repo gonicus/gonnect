@@ -47,6 +47,9 @@ public:
     void initialize();
     void shutdown();
 
+    void suspend();
+    void resume();
+
     void setPreferredCodecs();
 
     void getPlaybackDevices();

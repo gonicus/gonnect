@@ -14,6 +14,7 @@
 #include "CallHistory.h"
 #include "GlobalCallState.h"
 #include "ExternalMediaManager.h"
+#include "NetworkHelper.h"
 
 Q_LOGGING_CATEGORY(lcStateHandling, "gonnect.state")
 
@@ -100,6 +101,11 @@ void StateManager::initialize()
             cm.toggleHold();
         }
     });
+    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
+        if (NetworkHelper::instance().hasConnectivity()) {
+            SIPManager::instance().resume();
+        }
+    });
 }
 
 void StateManager::restart()
@@ -152,6 +158,8 @@ void StateManager::sessionStateChanged(bool, InhibitHelper::InhibitState state)
                             | InhibitHelper::InhibitFlag::SUSPEND
                             | InhibitHelper::InhibitFlag::USER_SWITCH,
                     QObject::tr("There are %n active call(s).", "calls", activeCalls));
+        } else if (state == InhibitHelper::InhibitState::ENDING) {
+            SIPManager::instance().suspend();
         }
     }
 }
