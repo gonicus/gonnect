@@ -67,7 +67,7 @@ void CalDAVEventFeeder::onParserFinished()
         QNetworkReply *reply = m_webdav.get(item.path());
         connect(
                 reply, &QNetworkReply::finished, this,
-                [reply, this]() {
+                [item, reply, this]() {
                     if (!reply) {
                         return;
                     }
@@ -78,10 +78,12 @@ void CalDAVEventFeeder::onParserFinished()
                     QMimeType type = db.mimeTypeForData(data);
                     if (type.name() == "text/calendar" && !data.isEmpty()
                         && responseDataChanged(data)) {
-                        DateEventManager &manager = DateEventManager::instance();
-                        manager.removeDateEventsBySource(m_config.source);
+                        QString concreteSource = QString("%1-%2").arg(m_config.source, item.name());
 
-                        processResponse(data);
+                        DateEventManager &manager = DateEventManager::instance();
+                        manager.removeDateEventsBySource(concreteSource);
+
+                        processResponse(data, concreteSource);
                     }
                 },
                 Qt::ConnectionType::SingleShotConnection);
@@ -100,7 +102,7 @@ void CalDAVEventFeeder::process(bool authFailed)
     });
 }
 
-void CalDAVEventFeeder::processResponse(const QByteArray &data)
+void CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &source)
 {
     DateEventManager &manager = DateEventManager::instance();
 
@@ -206,8 +208,8 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                             && (recurStart >= m_config.timeRangeStart || recurMultiDay)) {
                             QString recurId =
                                     QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
-                            manager.addDateEvent(recurId, m_config.source, recurStart, recurEnd,
-                                                 summary, location, description);
+                            manager.addDateEvent(recurId, source, recurStart, recurEnd, summary,
+                                                 location, description);
                         }
                     }
 
@@ -220,16 +222,13 @@ void CalDAVEventFeeder::processResponse(const QByteArray &data)
                     manager.removeDateEvent(id, start, end);
                 } else if (manager.isAddedDateEvent(id)) {
                     // Exists but modified
-                    manager.modifyDateEvent(id, m_config.source, start, end, summary, location,
-                                            description);
+                    manager.modifyDateEvent(id, source, start, end, summary, location, description);
                 } else {
                     // Does not exist, e.g. moved from past to future, different day
-                    manager.addDateEvent(id, m_config.source, start, end, summary, location,
-                                         description);
+                    manager.addDateEvent(id, source, start, end, summary, location, description);
                 }
             } else { // Normal event, no recurrence, or update of a recurrent instance
-                manager.addDateEvent(id, m_config.source, start, end, summary, location,
-                                     description);
+                manager.addDateEvent(id, source, start, end, summary, location, description);
             }
         }
     } else {

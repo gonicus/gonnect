@@ -33,7 +33,7 @@ private Q_SLOTS:
     void onParserFinished();
 
 private:
-    void processResponse(const QByteArray &data);
+    void processResponse(const QByteArray &data, const QString &source);
 
     bool responseDataChanged(const QByteArray &data);
     QDateTime createDateTimeFromTimeType(icaltimetype &datetime);

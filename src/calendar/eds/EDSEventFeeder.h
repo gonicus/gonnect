@@ -60,11 +60,13 @@ private:
     QDateTime m_timeRangeStart;
     QDateTime m_timeRangeEnd;
 
-    ESourceRegistry *m_registry = nullptr;
-    GList *m_sources = nullptr;
-    gchar *m_searchExpr = nullptr;
+    ESourceRegistry *m_registry = NULL;
+    GList *m_sources = NULL;
+    gchar *m_searchExpr = NULL;
     QList<ECalClient *> m_clients;
     QList<ECalClientView *> m_clientViews;
+
+    GCancellable *m_cancellable = NULL;
 
     int m_sourceCount = 0;
     std::atomic<int> m_clientCount = 0;
