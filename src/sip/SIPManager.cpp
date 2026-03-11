@@ -341,7 +341,8 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
     return nullptr;
 }
 
-void SIPManager::suspend() {
+void SIPManager::suspend()
+{
     qCDebug(lcSIPManager) << "suspending SIP";
 
     pj::CallOpParam prm;
@@ -366,7 +367,8 @@ void SIPManager::suspend() {
     pj::Endpoint::instance().handleIpChange(param);
 }
 
-void SIPManager::resume() {
+void SIPManager::resume()
+{
     // Since resume may be called in more network changed cases, only
     // do this when we have no active calls going.
     if (!!SIPCallManager::instance().hasActiveCalls()) {
@@ -374,8 +376,8 @@ void SIPManager::resume() {
         try {
             pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
         } catch (pj::Error &err) {
-            qCCritical(lcSIPManager) << "error handling IP change:"
-                                     << QString::fromLocal8Bit(err.info(false));
+            qCCritical(lcSIPManager)
+                    << "error handling IP change:" << QString::fromLocal8Bit(err.info(false));
         }
 
         // Re-activate account registration
