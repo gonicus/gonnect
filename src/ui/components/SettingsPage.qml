@@ -1376,15 +1376,15 @@ Item {
                     }
 
                     Button {
-                        id: ldapReloadButton
+                        id: contactReloadButton
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: qsTr('Reload contacts from LDAP')
+                        text: qsTr('Reload contacts')
                         onClicked: () => ViewHelper.reloadAddressBook()
 
                         Accessible.role: Accessible.Button
-                        Accessible.name: ldapReloadButton.text
+                        Accessible.name: contactReloadButton.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => ldapReloadButton.click()
+                        Accessible.onPressAction: () => contactReloadButton.click()
                     }
                 }
             }

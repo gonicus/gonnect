@@ -33,6 +33,7 @@ EDSEventFeeder::~EDSEventFeeder()
         g_clear_object(&client);
     }
 
+    disconnectCalendarSignals();
     for (auto clientView : std::as_const(m_clientViews)) {
         g_clear_object(&clientView);
     }
@@ -103,7 +104,11 @@ void EDSEventFeeder::init()
         if (!m_futureWatcher->isFinished()) {
             qCDebug(lcEDSEventFeeder) << "Failed to process EDS sources";
 
+            // Cancel all potentially active EDS async methods
             g_cancellable_cancel(m_cancellable);
+
+            // Disconnect all EDS signal handlers
+            disconnectCalendarSignals();
 
             m_sourceFuture.cancel();
             m_futureWatcher->cancel();
@@ -202,6 +207,17 @@ void EDSEventFeeder::connectCalendarSignals(ECalClientView *view)
     g_signal_connect(view, "objects-added", G_CALLBACK(onEventsAdded), this);
     g_signal_connect(view, "objects-modified", G_CALLBACK(onEventsModified), this);
     g_signal_connect(view, "objects-removed", G_CALLBACK(onEventsRemoved), this);
+}
+
+void EDSEventFeeder::disconnectCalendarSignals()
+{
+    for (auto view : std::as_const(m_clientViews)) {
+        // Match all signals with the same gpointer user_data
+        g_signal_handlers_disconnect_matched(view,
+                                             G_SIGNAL_MATCH_DATA,
+                                             0, 0, NULL, NULL,
+                                             this);
+    }
 }
 
 void EDSEventFeeder::onEventsAdded(ECalClientView *view, GSList *components, gpointer user_data)

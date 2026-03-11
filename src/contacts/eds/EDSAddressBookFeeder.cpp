@@ -31,6 +31,7 @@ EDSAddressBookFeeder::~EDSAddressBookFeeder()
         g_clear_object(&client);
     }
 
+    disconnectContactSignals();
     for (auto clientView : std::as_const(m_clientViews)) {
         g_clear_object(&clientView);
     }
@@ -103,7 +104,11 @@ void EDSAddressBookFeeder::init()
         if (!m_futureWatcher->isFinished()) {
             qCDebug(lcEDSAddressBookFeeder) << "Failed to process EDS sources";
 
+            // Cancel all potentially active EDS async methods
             g_cancellable_cancel(m_cancellable);
+
+            // Disconnect all EDS signal handlers
+            disconnectContactSignals();
 
             m_sourceFuture.cancel();
             m_futureWatcher->cancel();
@@ -215,6 +220,17 @@ void EDSAddressBookFeeder::connectContactSignals(EBookClientView *view)
     g_signal_connect(view, "objects-added", G_CALLBACK(onContactsAdded), this);
     g_signal_connect(view, "objects-modified", G_CALLBACK(onContactsModified), this);
     g_signal_connect(view, "objects-removed", G_CALLBACK(onContactsRemoved), this);
+}
+
+void EDSAddressBookFeeder::disconnectContactSignals()
+{
+    for (auto view : std::as_const(m_clientViews)) {
+        // Match all signals with the same gpointer user_data
+        g_signal_handlers_disconnect_matched(view,
+                                             G_SIGNAL_MATCH_DATA,
+                                             0, 0, NULL, NULL,
+                                             this);
+    }
 }
 
 void EDSAddressBookFeeder::onContactsAdded(EBookClientView *view, GSList *contacts,

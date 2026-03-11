@@ -85,7 +85,7 @@ void AddressBookManager::reloadAddressBook()
 {
     // TODO: if *QStringList of custom Ids is passed, clearById() instead of clear()
     // then do m_addressBookQueue = m_retryFeederIds -> processAddressBookQueue();
-    AddressBook::instance().clear();
+    AddressBook::instance().resetContacts();
     m_addressBookQueue = m_addressBookConfigs;
     processAddressBookQueue();
 }

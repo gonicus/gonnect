@@ -34,6 +34,8 @@ private:
     static void onEcalClientConnected(GObject *source_object, GAsyncResult *result,
                                       gpointer user_data);
 
+    void disconnectCalendarSignals();
+
     void connectViewCompleteSignal(ECalClientView *view);
 
     static void onViewComplete(ECalClientView *view, GError *error, gpointer user_data);
