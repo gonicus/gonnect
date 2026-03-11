@@ -15,6 +15,9 @@ BaseWindow {
     title: "GOnnect"
     resizable: true
 
+    LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
+    LayoutMirroring.childrenInherit: true
+
     readonly property LoggingCategory lc: LoggingCategory {
         id: category
         name: "gonnect.qml.GonnectWindow"

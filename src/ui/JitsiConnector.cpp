@@ -601,7 +601,8 @@ void JitsiConnector::setRoomPassword(QString value)
 
                     setIsPasswordRequired(!value.isEmpty());
                 } else {
-                    ErrorBus::instance().error(tr("Failed persist room password: %1").arg(message));
+                    ErrorBus::instance().error(
+                            tr("Failed to persist room password: %1").arg(message));
                 }
             });
 }
@@ -1308,7 +1309,7 @@ void JitsiConnector::enterPassword(const QString &password, bool rememberPasswor
                         Q_EMIT executePasswordCommand(password);
                     } else {
                         ErrorBus::instance().error(
-                                tr("Failed persist room password: %1").arg(message));
+                                tr("Failed to persist room password: %1").arg(message));
                     }
                 });
     }
