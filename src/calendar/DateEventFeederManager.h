@@ -28,6 +28,9 @@ public:
     void acquireSecret(bool override, const QString &configId,
                        std::function<void(const QString &secret)> callback);
 
+    void addToRetryList(const QString &configId) { m_retryFeederIds.append(configId); };
+    void retryFailedPlugins();
+
 private:
     explicit DateEventFeederManager(QObject *parent = nullptr);
 

@@ -148,6 +148,7 @@ void AddressBook::resetContacts()
 
     qDeleteAll(m_contacts);
     m_contacts.clear();
+    m_contactsBySourceId.clear();
     Q_EMIT contactsCleared();
 }
 

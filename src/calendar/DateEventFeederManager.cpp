@@ -29,11 +29,9 @@ DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ paren
 
     m_retryTimer.setInterval(10s);
     connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
+        // TODO: Don't run forever. try again n times...
         if (!m_retryFeederIds.isEmpty()) {
-            // TODO: Casually reloads everything
-            // We could also verify if entry in m_retryFeederIds is in m_dateEventFeeders
-            reloadCalendar();
-            m_retryFeederIds.clear();
+            retryFailedPlugins();
         }
     });
     m_retryTimer.start();
@@ -53,11 +51,19 @@ void DateEventFeederManager::setTimeData()
 
 void DateEventFeederManager::reloadCalendar()
 {
-    // TODO: if *QStringList of custom Ids is passed
-    // removeDateEventsById() instead of resetDateEvents()
-    // then do m_feederConfigIds = m_retryFeederIds -> processAddressBookQueue();
     DateEventManager::instance().resetDateEvents();
     m_feederConfigIds = m_dateEventFeeders.keys();
+    processQueue();
+}
+
+void DateEventFeederManager::retryFailedPlugins()
+{
+    // Reload feeder plugins that have failed
+    for (const auto &feederId : std::as_const(m_retryFeederIds)) {
+        DateEventManager::instance().removeDateEventsBySource(feederId);
+    }
+    m_feederConfigIds = m_retryFeederIds;
+    m_retryFeederIds.clear();
     processQueue();
 }
 

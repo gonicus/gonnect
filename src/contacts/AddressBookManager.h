@@ -29,6 +29,8 @@ public:
     void acquireSecret(bool forcePrompt, const QString &group,
                        std::function<void(const QString &secret)> callback);
 
+    void addToRetryList(const QString &configId) { m_retryFeederIds.append(configId); };
+
 private:
     explicit AddressBookManager(QObject *parent = nullptr);
 
