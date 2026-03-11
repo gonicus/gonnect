@@ -50,6 +50,8 @@ void SIPAccountManager::initialize()
                     &SIPAccountManager::updateSipRegistered);
             connect(sipAccount, &SIPAccount::authorizationFailed, this,
                     [this, sipAccount]() { Q_EMIT authorizationFailed(sipAccount->id()); });
+            connect(sipAccount, &SIPAccount::connectionError, this,
+                    [this](int code, QString message) { Q_EMIT connectionError(code, message); });
             updateSipRegistered();
 
             connect(sipAccount, &SIPAccount::initialized, this,
