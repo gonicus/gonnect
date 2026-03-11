@@ -157,9 +157,7 @@ void AddressBook::removeContactsBySource(const QString &source)
 
     QMutexLocker lock(&m_feederMutex);
 
-    for (auto i = m_contacts.cbegin(), end = m_contacts.cend(); i != end; ++i) {
-
-    }
+    for (auto i = m_contacts.cbegin(), end = m_contacts.cend(); i != end; ++i) { }
 
     Q_EMIT contactsCleared();
 }
