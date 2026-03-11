@@ -24,7 +24,7 @@ public:
     }
 
     void initFeederConfigs();
-    void reload();
+    void reloadCalendar();
     void acquireSecret(bool override, const QString &configId,
                        std::function<void(const QString &secret)> callback);
 
@@ -49,4 +49,7 @@ private:
     QHash<QString, IDateEventFeeder *> m_dateEventFeeders;
     QStringList m_feederConfigIds;
     bool m_isReconnectSignalSetup = false;
+
+    QTimer m_retryTimer;
+    QStringList m_retryFeederIds;
 };

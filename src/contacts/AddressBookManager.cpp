@@ -20,7 +20,19 @@ using namespace Qt::Literals::StringLiterals;
 
 Q_LOGGING_CATEGORY(lcAddressBookManager, "gonnect.app.addressbook")
 
-AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent } { }
+AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
+{
+    m_retryTimer.setInterval(10s);
+    connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
+        if (!m_retryFeederIds.isEmpty()) {
+            // TODO: Casually reloads everything, the LDAP reload button does that too...
+            // We could also verify if entry in m_retryFeederIds is in m_addressBookFeeders
+            reloadAddressBook();
+            m_retryFeederIds.clear();
+        }
+    });
+    m_retryTimer.start();
+}
 
 QString AddressBookManager::secret(const QString &group) const
 {
@@ -71,6 +83,8 @@ void AddressBookManager::initAddressBookConfigs()
 
 void AddressBookManager::reloadAddressBook()
 {
+    // TODO: if *QStringList of custom Ids is passed, clearById() instead of clear()
+    // then do m_addressBookQueue = m_retryFeederIds -> processAddressBookQueue();
     AddressBook::instance().clear();
     m_addressBookQueue = m_addressBookConfigs;
     processAddressBookQueue();

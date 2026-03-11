@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QHash>
 #include <QMutex>
+#include <QTimer>
 
 class IAddressBookFeeder;
 
@@ -41,4 +42,7 @@ private:
     QStringList m_addressBookConfigs;
     QStringList m_addressBookQueue;
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
+
+    QTimer m_retryTimer;
+    QStringList m_retryFeederIds;
 };

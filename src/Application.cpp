@@ -133,7 +133,7 @@ void Application::initialize()
     StateManager::instance().initialize();
 
     AddressBookManager::instance().reloadAddressBook();
-    DateEventFeederManager::instance().reload();
+    DateEventFeederManager::instance().reloadCalendar();
     SystemTrayMenu::instance(); // Ensure singleton is created
 
     AppSettings settings;

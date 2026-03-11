@@ -12,6 +12,8 @@
 #include <QLoggingCategory>
 #include <QPluginLoader>
 
+using namespace std::chrono_literals;
+
 Q_LOGGING_CATEGORY(lcDateEventFeederManager, "gonnect.app.dateevents.feeder.manager")
 
 DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ parent }
@@ -21,9 +23,20 @@ DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ paren
     connect(&m_nextDayRefreshTimer, &QTimer::timeout, this, [this]() {
         setTimeData();
         initFeederConfigs();
-        reload();
+        reloadCalendar();
     });
     m_nextDayRefreshTimer.start();
+
+    m_retryTimer.setInterval(10s);
+    connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
+        if (!m_retryFeederIds.isEmpty()) {
+            // TODO: Casually reloads everything
+            // We could also verify if entry in m_retryFeederIds is in m_dateEventFeeders
+            reloadCalendar();
+            m_retryFeederIds.clear();
+        }
+    });
+    m_retryTimer.start();
 }
 
 void DateEventFeederManager::setTimeData()
@@ -38,8 +51,11 @@ void DateEventFeederManager::setTimeData()
     m_nextDayRefreshTimer.setInterval(m_nextDayDuration);
 }
 
-void DateEventFeederManager::reload()
+void DateEventFeederManager::reloadCalendar()
 {
+    // TODO: if *QStringList of custom Ids is passed
+    // removeDateEventsById() instead of resetDateEvents()
+    // then do m_feederConfigIds = m_retryFeederIds -> processAddressBookQueue();
     DateEventManager::instance().resetDateEvents();
     m_feederConfigIds = m_dateEventFeeders.keys();
     processQueue();
