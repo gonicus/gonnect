@@ -1,3 +1,18 @@
+# [2.1.0-beta.6](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.5...v2.1.0-beta.6) (2026-03-11)
+
+
+### Bug Fixes
+
+* code review loop ([#374](https://github.com/gonicus/gonnect/issues/374)) ([60bbbc0](https://github.com/gonicus/gonnect/commit/60bbbc0f0e70fa163aae1fadf88cf72f23ef174e))
+* more sip codes lead to auth request ([#379](https://github.com/gonicus/gonnect/issues/379)) ([4d53b22](https://github.com/gonicus/gonnect/commit/4d53b221e161f52ed946beed0683ce59aec22cfa))
+* potential crash on HeadsetDevice destroyed ([#371](https://github.com/gonicus/gonnect/issues/371)) ([ce9045b](https://github.com/gonicus/gonnect/commit/ce9045be09af4b20545f8edd921d7af0eb8690a5))
+
+
+### Features
+
+* pause/resume media on windows ([#370](https://github.com/gonicus/gonnect/issues/370)) ([cf7dd0f](https://github.com/gonicus/gonnect/commit/cf7dd0f1355f537ae878efe8927cfd1c5fcc93b2))
+* pre-fill missing it/es translations ([#377](https://github.com/gonicus/gonnect/issues/377)) ([6c78b55](https://github.com/gonicus/gonnect/commit/6c78b55fa6612d630b201382a2d88b122fe2cf36))
+
 # [2.1.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.4...v2.1.0-beta.5) (2026-03-05)
 
 
