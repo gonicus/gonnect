@@ -43,6 +43,7 @@ Q_SIGNALS:
     void accountsChanged();
     void sipRegisteredChanged(bool status);
     void authorizationFailed(QString accountId);
+    void connectionError(int code, QString message);
 
 private:
     SIPAccountManager(QObject *parent = nullptr);
