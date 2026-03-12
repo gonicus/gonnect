@@ -79,8 +79,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     connect(m_termNotifier, SIGNAL(activated(QSocketDescriptor)), this, SLOT(handleSigTerm()));
 #endif
 
-
-
 #ifdef Q_OS_WINDOWS
     QObject::connect(this, &QGuiApplication::commitDataRequest,
                      [](QSessionManager &manager) { manager.cancel(); });
