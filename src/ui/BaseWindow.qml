@@ -95,18 +95,14 @@ Window {
                     Accessible.description: qsTr("Top left drag border for window resize operations")
 
                     HoverHandler {
-                        cursorShape: control.LayoutMirroring.enabled ? Qt.SizeBDiagCursor : Qt.SizeFDiagCursor
+                        cursorShape: Qt.SizeFDiagCursor
                     }
                     DragHandler {
                         target: null
                         dragThreshold: 0
                         onActiveChanged: () => {
                             if (active) {
-                                if (control.LayoutMirroring.enabled) {
-                                    control.startSystemResize(Qt.RightEdge | Qt.TopEdge)
-                                } else {
-                                    control.startSystemResize(Qt.LeftEdge | Qt.TopEdge)
-                                }
+                                control.startSystemResize(Qt.LeftEdge | Qt.TopEdge)
                             }
                         }
                     }
@@ -155,18 +151,14 @@ Window {
                     Accessible.description: qsTr("Top right border for window resize operations")
 
                     HoverHandler {
-                        cursorShape: control.LayoutMirroring.enabled ? Qt.SizeFDiagCursor : Qt.SizeBDiagCursor
+                        cursorShape: Qt.SizeBDiagCursor
                     }
                     DragHandler {
                         target: null
                         dragThreshold: 0
                         onActiveChanged: () => {
                             if (active) {
-                                if (control.LayoutMirroring.enabled) {
-                                    control.startSystemResize(Qt.TopEdge | Qt.LeftEdge)
-                                } else {
-                                    control.startSystemResize(Qt.TopEdge | Qt.RightEdge)
-                                }
+                                control.startSystemResize(Qt.TopEdge | Qt.RightEdge)
                             }
                         }
                     }
@@ -195,7 +187,7 @@ Window {
                         dragThreshold: 0
                         onActiveChanged: () => {
                             if (active) {
-                                control.startSystemResize(control.LayoutMirroring.enabled ? Qt.LeftEdge : Qt.RightEdge)
+                                control.startSystemResize(Qt.RightEdge)
                             }
                         }
                     }
@@ -215,18 +207,14 @@ Window {
                     Accessible.description: qsTr("Bottom right drag border for window resize operations")
 
                     HoverHandler {
-                        cursorShape: control.LayoutMirroring.enabled ? Qt.SizeBDiagCursor : Qt.SizeFDiagCursor
+                        cursorShape: Qt.SizeFDiagCursor
                     }
                     DragHandler {
                         target: null
                         dragThreshold: 0
                         onActiveChanged: () => {
                             if (active) {
-                                if (control.LayoutMirroring.enabled) {
-                                    control.startSystemResize(Qt.BottomEdge | Qt.LeftEdge)
-                                } else {
-                                    control.startSystemResize(Qt.BottomEdge | Qt.RightEdge)
-                                }
+                                control.startSystemResize(Qt.BottomEdge | Qt.RightEdge)
                             }
                         }
                     }
@@ -275,18 +263,14 @@ Window {
                     Accessible.description: qsTr("Bottom left drag border for window resize operations")
 
                     HoverHandler {
-                        cursorShape: control.LayoutMirroring.enabled ? Qt.SizeFDiagCursor : Qt.SizeBDiagCursor
+                        cursorShape: Qt.SizeBDiagCursor
                     }
                     DragHandler {
                         target: null
                         dragThreshold: 0
                         onActiveChanged: () => {
                             if (active) {
-                                if (control.LayoutMirroring.enabled) {
-                                    control.startSystemResize(Qt.RightEdge | Qt.BottomEdge)
-                                } else {
-                                    control.startSystemResize(Qt.LeftEdge | Qt.BottomEdge)
-                                }
+                                control.startSystemResize(Qt.LeftEdge | Qt.BottomEdge)
                             }
                         }
                     }
@@ -315,7 +299,7 @@ Window {
                         dragThreshold: 0
                         onActiveChanged: () => {
                             if (active) {
-                                control.startSystemResize(control.LayoutMirroring.enabled ? Qt.RightEdge : Qt.LeftEdge)
+                                control.startSystemResize(Qt.LeftEdge)
                             }
                         }
                     }
