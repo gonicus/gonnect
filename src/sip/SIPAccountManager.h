@@ -51,6 +51,7 @@ private:
     void updateSipRegistered();
 
     unsigned m_numberOfAccounts = 0;
+    int m_lastErrorCode = 0;
 
     QList<SIPAccount *> m_accounts;
     bool m_sipRegistered = false;

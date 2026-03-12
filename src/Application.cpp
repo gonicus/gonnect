@@ -20,7 +20,6 @@
 #include <QQmlContext>
 #include <QDesktopServices>
 #include <QtWebEngineQuick>
-#include <iostream>
 
 #ifdef Q_OS_MACOS
 #  define LOGFAULT_WITH_OS_LOG
@@ -62,19 +61,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setApplicationVersion(QString::fromStdString(getVersion()));
 
     installTranslations();
-
     initLogging();
-
-    AddressBookManager::instance().initAddressBookConfigs();
-    DateEventFeederManager::instance().initFeederConfigs();
-
     setQuitOnLastWindowClosed(false);
-
-    USBDevices::instance().initialize();
-
-    StateManager::instance().setParent(this);
-    SearchProvider::instance().setParent(this);
-    UISettings::instance().setParent(this);
 
 #ifdef Q_OS_LINUX
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, s_sighupFd)) {
@@ -90,9 +78,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_termNotifier = new QSocketNotifier(s_sigtermFd[1], QSocketNotifier::Read, this);
     connect(m_termNotifier, SIGNAL(activated(QSocketDescriptor)), this, SLOT(handleSigTerm()));
 #endif
-
-    // Take care for running "initialize" after exec() is called
-    QTimer::singleShot(0, this, &Application::initialize);
 
 #ifdef Q_OS_WINDOWS
     QObject::connect(this, &QGuiApplication::commitDataRequest,
@@ -131,6 +116,13 @@ void Application::setRootWindow(QQuickWindow *win)
 void Application::initialize()
 {
     StateManager::instance().initialize();
+
+    AddressBookManager::instance().initAddressBookConfigs();
+    DateEventFeederManager::instance().initFeederConfigs();
+    USBDevices::instance().initialize();
+    StateManager::instance().setParent(this);
+    SearchProvider::instance().setParent(this);
+    UISettings::instance().setParent(this);
 
     AddressBookManager::instance().reloadAddressBook();
     DateEventFeederManager::instance().reload();
