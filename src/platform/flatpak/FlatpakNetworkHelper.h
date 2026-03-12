@@ -13,7 +13,7 @@ public:
     explicit FlatpakNetworkHelper();
     ~FlatpakNetworkHelper() = default;
 
-    bool isReachable(const QUrl &url) override;
+    QFuture<bool> isReachable(const QUrl &url) override;
 
     QStringList nameservers() const override;
 

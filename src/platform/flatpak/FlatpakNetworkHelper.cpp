@@ -2,6 +2,7 @@
 #include "NetworkMonitor.h"
 #include <netdb.h>
 #include <qhostaddress.h>
+#include <QtConcurrent>
 
 #define NH_CALL_TIMEOUT 500
 
@@ -62,34 +63,36 @@ void FlatpakNetworkHelper::updateNetworkState()
     }
 }
 
-bool FlatpakNetworkHelper::isReachable(const QUrl &url)
+QFuture<bool> FlatpakNetworkHelper::isReachable(const QUrl &url)
 {
-    int port = url.port();
-    if (port < 0) {
+    return QtConcurrent::run([url, this]() -> bool {
+        int port = url.port();
+        if (port < 0) {
 
-        QString scheme = url.scheme();
-        struct servent *sptr = getservbyname(scheme.toStdString().c_str(), "tcp");
-        if (!sptr) {
-            qCCritical(lcNetwork) << "cannot map scheme" << scheme << "to port";
+            QString scheme = url.scheme();
+            struct servent *sptr = getservbyname(scheme.toStdString().c_str(), "tcp");
+            if (!sptr) {
+                qCCritical(lcNetwork) << "cannot map scheme" << scheme << "to port";
+                return false;
+            }
+
+            port = ntohs(sptr->s_port);
+        }
+
+        auto reply = m_portal->CanReach(url.host(), port);
+        reply.waitForFinished();
+
+        if (reply.isError()) {
+            qCWarning(lcNetwork) << "failed to call CanReach:", qPrintable(reply.error().message());
             return false;
         }
 
-        port = ntohs(sptr->s_port);
-    }
+        if (!reply.value()) {
+            qCWarning(lcNetwork) << "unable to reach" << url.toString();
+        }
 
-    auto reply = m_portal->CanReach(url.host(), port);
-    reply.waitForFinished();
-
-    if (reply.isError()) {
-        qCWarning(lcNetwork) << "failed to call CanReach:", qPrintable(reply.error().message());
-        return false;
-    }
-
-    if (!reply.value()) {
-        qCWarning(lcNetwork) << "unable to reach" << url.toString();
-    }
-
-    return reply.value();
+        return reply.value();
+    });
 }
 
 QStringList FlatpakNetworkHelper::nameservers() const

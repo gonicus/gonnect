@@ -1,4 +1,5 @@
 #include "LDAPInitializer.h"
+#include "ReadOnlyConfdSettings.h"
 
 #include <QLoggingCategory>
 #include <QCoreApplication>
@@ -90,6 +91,21 @@ LDAP *LDAPInitializer::initialize(const LDAPInitializer::Config &config, int &re
     // Use LDAP version 3
     int version = 3;
     ldap_set_option(ldap, LDAP_OPT_PROTOCOL_VERSION, &version);
+
+    // Adjust timeouts
+    ReadOnlyConfdSettings settings;
+
+    struct timeval  tv;
+    bool ok = true;
+    auto networkTimeout = settings.value("generic/networkTimeout", 5).toUInt(&ok);
+    if (!ok) {
+        qCWarning(lcLDAPInitializer) << "non numeric value for generic/networkTimeout - falling back to default";
+        networkTimeout = 5;
+    }
+    tv.tv_sec = networkTimeout;
+    tv.tv_usec = 0;
+    ldap_set_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, &tv);
+    qCDebug(lcLDAPInitializer) << "setting LDAP connection timeout to" << networkTimeout << "seconds";
 
     // Use TLS
     if (config.useSSL) {

@@ -30,20 +30,6 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
                 con.registerObject(FLATPAK_APP_PATH, this) && con.registerService(FLATPAK_APP_ID);
     }
 #endif
-
-    m_inhibitHelper = &InhibitHelper::instance();
-    connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
-            &StateManager::sessionStateChanged);
-
-    auto &cm = SIPCallManager::instance();
-    connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
-        if (SIPCallManager::instance().activeCalls() == 0) {
-            m_inhibitHelper->release();
-        }
-    });
-
-    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
-            &StateManager::updateInhibitState);
 }
 
 bool StateManager::globalShortcutsSupported() const
@@ -67,6 +53,19 @@ QVariantMap StateManager::globalShortcuts() const
 
 void StateManager::initialize()
 {
+    m_inhibitHelper = &InhibitHelper::instance();
+    connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
+            &StateManager::sessionStateChanged);
+
+    auto &cm = SIPCallManager::instance();
+    connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
+        if (SIPCallManager::instance().activeCalls() == 0) {
+            m_inhibitHelper->release();
+        }
+    });
+
+    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
+            &StateManager::updateInhibitState);
     auto &globalShortcuts = GlobalShortcuts::instance();
 
     QList<Shortcut> shortcuts = {

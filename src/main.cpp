@@ -3,6 +3,7 @@
 #include <QtWebEngineQuick>
 #include "Application.h"
 #include "GlobalInfo.h"
+#include "StateManager.h"
 
 #ifdef Q_OS_LINUX
 #  include <QDBusConnection>
@@ -82,6 +83,9 @@ int main(int argc, char *argv[])
         app.sendArguments();
         return 2;
     }
+
+    // Take care for running "initialize" after exec() is called
+    QTimer::singleShot(0, &app, &Application::initialize);
 
     app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
 
