@@ -100,7 +100,8 @@ void StateManager::initialize()
     });
 }
 
-void StateManager::initializeSip() {
+void StateManager::initializeSip()
+{
     auto &cm = SIPCallManager::instance();
     connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
         if (SIPCallManager::instance().activeCalls() == 0) {
