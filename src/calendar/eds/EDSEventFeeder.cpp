@@ -22,31 +22,7 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDa
 
 EDSEventFeeder::~EDSEventFeeder()
 {
-    g_clear_object(&m_registry);
-    if (m_sources) {
-        g_list_free_full(m_sources, g_object_unref);
-    }
-    g_clear_pointer(&m_searchExpr, g_free);
-    g_clear_object(&m_cancellable);
-
-    for (auto client : std::as_const(m_clients)) {
-        g_clear_object(&client);
-    }
-
-    disconnectCalendarSignals();
-    for (auto clientView : std::as_const(m_clientViews)) {
-        g_clear_object(&clientView);
-    }
-
-    if (m_sourcePromise) {
-        delete m_sourcePromise;
-        m_sourcePromise = nullptr;
-    }
-
-    if (m_futureWatcher) {
-        m_futureWatcher->deleteLater();
-        m_futureWatcher = nullptr;
-    }
+    resetFeeder();
 }
 
 void EDSEventFeeder::init()
@@ -110,12 +86,56 @@ void EDSEventFeeder::init()
             // Disconnect all EDS signal handlers
             disconnectCalendarSignals();
 
+            // Prepare feeder for re-init
+            resetFeeder();
+            resetContacts();
+
             m_sourceFuture.cancel();
             m_futureWatcher->cancel();
         }
     });
 
     m_futureWatcher->setFuture(m_sourceFuture);
+}
+
+void EDSEventFeeder::resetFeeder()
+{
+    g_clear_object(&m_registry);
+    if (m_sources) {
+        g_list_free_full(m_sources, g_object_unref);
+    }
+    g_clear_pointer(&m_searchExpr, g_free);
+    g_clear_object(&m_cancellable);
+
+    for (auto client : std::as_const(m_clients)) {
+        g_clear_object(&client);
+    }
+
+    disconnectCalendarSignals();
+    for (auto clientView : std::as_const(m_clientViews)) {
+        g_clear_object(&clientView);
+    }
+
+    if (m_sourcePromise) {
+        delete m_sourcePromise;
+        m_sourcePromise = nullptr;
+    }
+
+    if (m_futureWatcher) {
+        m_futureWatcher->deleteLater();
+        m_futureWatcher = nullptr;
+    }
+}
+
+void EDSEventFeeder::resetContacts()
+{
+    DateEventManager &manager = DateEventManager::instance();
+
+    for (auto client : std::as_const(m_clients)) {
+        QString concreteSource = QString("%1-%2").arg(
+                m_source, e_source_get_uid(e_client_get_source(E_CLIENT(client))));
+        manager.removeDateEventsBySource(concreteSource);
+    }
 }
 
 void EDSEventFeeder::process()
