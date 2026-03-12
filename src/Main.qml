@@ -128,16 +128,28 @@ Item {
     }
 
     Connections {
+        id: sipAccountManagerConnections
         target: SIPAccountManager
+
+        readonly property var existingErrorDialogs: ({})
+
         function onAuthorizationFailed(accountId : string) {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for the SIP account:") })
             dialog.onPasswordAccepted.connect(pw => SIPAccountManager.setAccountCredentials(accountId, pw))
         }
         function onConnectionError(code : int, message : string) {
-            DialogFactory.createInfoDialog({
-                title: qsTr("Registration failed"),
-                text: qsTr("Registration failed with with status %1: %2").arg(code).arg(message)
-            })
+            const existing = sipAccountManagerConnections.existingErrorDialogs
+
+            if (!existing.hasOwnProperty(code)) {
+                const item = DialogFactory.createInfoDialog({
+                    title: qsTr("Registration failed"),
+                    text: qsTr("Registration failed with with status %1: %2").arg(code).arg(message)
+                })
+
+                item.Component.destruction.connect(() => delete sipAccountManagerConnections.existingErrorDialogs[code])
+
+                existing[code] = item
+            }
         }
     }
 
