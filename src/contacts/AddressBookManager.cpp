@@ -14,6 +14,7 @@
 #include <QLoggingCategory>
 #include <QCryptographicHash>
 #include <QPluginLoader>
+#include <QMutexLocker>
 
 using namespace std::chrono_literals;
 using namespace Qt::Literals::StringLiterals;
@@ -78,7 +79,6 @@ void AddressBookManager::reloadAddressBook()
 
 void AddressBookManager::processAddressBookQueue()
 {
-    bool changed = false;
     bool networkAvailable = true;
     auto &nh = NetworkHelper::instance();
 
@@ -120,24 +120,24 @@ void AddressBookManager::processAddressBookQueue()
                     continue;
                 }
 
-                if (!nh.isReachable(checkURL)) {
-                    qCWarning(lcAddressBookManager) << checkURL << "is not reachable";
-                    connect(
-                            &nh, &NetworkHelper::connectivityChanged, this,
-                            [this]() { processAddressBookQueue(); },
-                            Qt::ConnectionType::SingleShotConnection);
-                    continue;
-                }
+                nh.isReachable(checkURL).then([feeder, checkURL, this](bool isReachable) {
+                    if (isReachable) {
+                        QMutexLocker mutex(&m_queueMutex);
+
+                        feeder->process();
+                        Q_EMIT AddressBook::instance().contactsReady();
+                    } else {
+                        qCWarning(lcAddressBookManager) << checkURL << "is not reachable";
+                        connect(
+                                &NetworkHelper::instance(), &NetworkHelper::connectivityChanged,
+                                this, [this]() { processAddressBookQueue(); },
+                                Qt::ConnectionType::SingleShotConnection);
+                    }
+                });
             }
 
-            feeder->process();
             it.remove();
-            changed = true;
         }
-    }
-
-    if (changed) {
-        Q_EMIT AddressBook::instance().contactsReady();
     }
 
     m_queueMutex.unlock();

@@ -149,15 +149,20 @@ void DateEventFeederManager::processQueue()
                     continue;
                 }
 
-                if (!networkHelper.isReachable(urlToCheck)) {
-                    qCWarning(lcDateEventFeederManager)
-                            << "Feeder url" << urlToCheck << "is not reachable";
-                    setupReconnectSignal();
-                    continue;
-                }
+                networkHelper.isReachable(urlToCheck)
+                        .then([feeder, urlToCheck, this](bool isReachable) {
+                            if (isReachable) {
+                                QMutexLocker mutex(&m_queueMutex);
+                                feeder->init();
+
+                            } else {
+                                qCWarning(lcDateEventFeederManager)
+                                        << "Feeder url" << urlToCheck << "is not reachable";
+                                setupReconnectSignal();
+                            }
+                        });
             }
 
-            feeder->init();
             it.remove();
         }
     }
