@@ -51,6 +51,7 @@ BaseWidget {
                 height: 30
                 font.pixelSize: 13
                 padding: 0
+                rightPadding: 10
                 valueRole: "value"
                 textRole: "label"
                 anchors {
@@ -78,7 +79,7 @@ BaseWidget {
 
                 delegate: ItemDelegate {
                     id: historyFilterMediumSelectorDelg
-                    width: parent.width
+                    width: historyFilterMediumSelector.width
                     text: historyFilterMediumSelectorDelg.label
 
                     font.family: historyFilterMediumSelector.font.family
@@ -99,6 +100,7 @@ BaseWidget {
                 height: 30
                 font.pixelSize: 13
                 padding: 0
+                rightPadding: 10
                 valueRole: "value"
                 textRole: "label"
                 anchors {
@@ -129,7 +131,7 @@ BaseWidget {
 
                 delegate: ItemDelegate {
                     id: historyFilterTypeSelectorDelg
-                    width: parent.width
+                    width: historyFilterTypeSelector.width
                     text: historyFilterTypeSelectorDelg.label
 
                     font.family: historyFilterTypeSelector.font.family

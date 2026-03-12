@@ -35,7 +35,7 @@ Item {
         return Object.keys(control.parameters)
     }
 
-    function data() {
+    function items() {
         return control.parameters
     }
 }
