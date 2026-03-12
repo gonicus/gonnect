@@ -3,7 +3,6 @@
 #include <QtWebEngineQuick>
 #include "Application.h"
 #include "GlobalInfo.h"
-#include "StateManager.h"
 
 #ifdef Q_OS_LINUX
 #  include <QDBusConnection>
@@ -84,9 +83,6 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    // Take care for running "initialize" after exec() is called
-    QTimer::singleShot(0, &app, &Application::initialize);
-
     app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
 
     // Fonts
@@ -128,6 +124,9 @@ int main(int argc, char *argv[])
     if (mainWindow) {
         app.setRootWindow(mainWindow);
     }
+
+    // Take care for running "initialize" after exec() is called
+    QTimer::singleShot(100, &app, &Application::initialize);
 
     exitCode = app.exec();
     if (exitCode == RESTART_CODE) {

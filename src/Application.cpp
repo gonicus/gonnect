@@ -83,6 +83,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     QObject::connect(this, &QGuiApplication::commitDataRequest,
                      [](QSessionManager &manager) { manager.cancel(); });
 #endif
+
+    StateManager::instance().initialize();
 }
 
 void Application::installTranslations()
@@ -115,7 +117,7 @@ void Application::setRootWindow(QQuickWindow *win)
 
 void Application::initialize()
 {
-    StateManager::instance().initialize();
+    StateManager::instance().initializeSip();
 
     AddressBookManager::instance().initAddressBookConfigs();
     DateEventFeederManager::instance().initFeederConfigs();

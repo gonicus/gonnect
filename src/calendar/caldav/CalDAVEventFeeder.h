@@ -32,6 +32,9 @@ private Q_SLOTS:
     void onError(QString error) const;
     void onParserFinished();
 
+Q_SIGNALS:
+    void triggerRefresh();
+
 private:
     void processResponse(const QByteArray &data, const QString &source);
 
