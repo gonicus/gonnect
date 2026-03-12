@@ -40,10 +40,6 @@ void CalDAVEventFeeder::init()
         process(true);
     });
 
-    connect(this, &CalDAVEventFeeder::triggerRefresh, this, [this](){
-           m_calendarRefreshTimer.start();
-    });
-
     /*
         As the Kopano CalDAV server doesn't provide 'getetag' and 'getlastmodified' values,
         it's impossible to actively poll for changes. Thus, we're simply re-launching the
@@ -55,7 +51,7 @@ void CalDAVEventFeeder::init()
     m_calendarRefreshTimer.setInterval(m_config.interval);
     connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(false); });
 
-    Q_EMIT triggerRefresh();
+    m_calendarRefreshTimer.start();
 
     process(false);
 }

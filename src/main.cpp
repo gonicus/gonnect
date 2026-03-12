@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     }
 
     // Take care for running "initialize" after exec() is called
-    QTimer::singleShot(100, &app, &Application::initialize);
+    QTimer::singleShot(0, &app, &Application::initialize);
 
     exitCode = app.exec();
     if (exitCode == RESTART_CODE) {
