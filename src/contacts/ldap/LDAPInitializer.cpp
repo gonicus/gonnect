@@ -4,6 +4,10 @@
 #include <QLoggingCategory>
 #include <QCoreApplication>
 
+#ifdef WIN32
+#  include <winsock2.h>
+#endif
+
 #ifdef HAVE_SASL
 #  include <sasl/sasl.h>
 #endif
