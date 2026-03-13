@@ -18,6 +18,19 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDa
       m_timeRangeStart(timeRangeStart),
       m_timeRangeEnd(timeRangeEnd)
 {
+    connect(this, &EDSEventFeeder::feederFailed, this, [this](){
+        qCDebug(lcEDSEventFeeder) << "Failed to process EDS sources";
+
+        // Cancel all potentially active EDS async methods
+        g_cancellable_cancel(m_cancellable);
+
+        // Disconnect all EDS signal handlers
+        disconnectCalendarSignals();
+
+        // Prepare feeder for re-init
+        resetFeeder();
+        resetContacts();
+    });
 }
 
 EDSEventFeeder::~EDSEventFeeder()
@@ -78,17 +91,7 @@ void EDSEventFeeder::init()
 
     QTimer::singleShot(5s, this, [this]() {
         if (!m_futureWatcher->isFinished()) {
-            qCDebug(lcEDSEventFeeder) << "Failed to process EDS sources";
-
-            // Cancel all potentially active EDS async methods
-            g_cancellable_cancel(m_cancellable);
-
-            // Disconnect all EDS signal handlers
-            disconnectCalendarSignals();
-
-            // Prepare feeder for re-init
-            resetFeeder();
-            resetContacts();
+            Q_EMIT feederFailed(); // TODO: Find other points to emit this on failure as well
 
             m_sourceFuture.cancel();
             m_futureWatcher->cancel();

@@ -28,6 +28,9 @@ public:
 
     void process();
 
+Q_SIGNALS:
+    void feederFailed();
+
 private:
     QDateTime createDateTimeFromTimeType(ICalTime *datetime);
 
