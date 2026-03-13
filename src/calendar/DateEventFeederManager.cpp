@@ -152,6 +152,7 @@ void DateEventFeederManager::processQueue()
 
         if (auto feeder = m_dateEventFeeders.value(configId, nullptr)) {
 
+            qCCritical(lcDateEventFeederManager) << "???" << configId;
             QUrl urlToCheck = feeder->networkCheckURL();
 
             if (!urlToCheck.isEmpty()) {

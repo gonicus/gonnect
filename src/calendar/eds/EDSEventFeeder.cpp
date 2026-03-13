@@ -1,5 +1,6 @@
 #include "EDSEventFeeder.h"
 #include "DateEventManager.h"
+#include "DateEventFeederManager.h"
 
 #include <QMap>
 #include <QTimeZone>
@@ -30,6 +31,9 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDa
         // Prepare feeder for re-init
         resetFeeder();
         resetContacts();
+
+        // Add to retry queue
+        DateEventFeederManager::instance().addToRetryList("eds-calendar"); // Settings group ID would be cooler
     });
 }
 
@@ -91,10 +95,10 @@ void EDSEventFeeder::init()
 
     QTimer::singleShot(5s, this, [this]() {
         if (!m_futureWatcher->isFinished()) {
-            Q_EMIT feederFailed(); // TODO: Find other points to emit this on failure as well
-
             m_sourceFuture.cancel();
             m_futureWatcher->cancel();
+
+            Q_EMIT feederFailed(); // TODO: Find other points to emit this on failure as well
         }
     });
 
