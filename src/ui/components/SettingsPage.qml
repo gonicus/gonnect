@@ -1225,7 +1225,8 @@ Item {
 
                             Label {
                                 id: ringToneVolumeSliderLabel
-                                text: qsTr('%1 %').arg(ringToneVolumeSlider.value)
+                                //: Label for showing percentage
+                                text: qsTr('%1 %').arg(ringToneVolumeSlider.value.toLocaleString(Qt.locale(), "f", 0))
                                 horizontalAlignment: Label.AlignRight
                                 width: 40
                                 anchors {
@@ -1296,7 +1297,8 @@ Item {
 
                             Label {
                                 id: ringTonePauseValueLabel
-                                text: (ringTonePauseSlider.value / 1000).toLocaleString(Qt.locale(), "f", 2) + " s"
+                                //: Label for showing seconds
+                                text: qsTr("%1 s").arg((ringTonePauseSlider.value / 1000).toLocaleString(Qt.locale(), "f", 2))
                                 horizontalAlignment: Label.AlignRight
                                 width: 40
                                 anchors {
