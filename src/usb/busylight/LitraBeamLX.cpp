@@ -41,7 +41,7 @@ bool LitraBeamLX::hidppTransaction(unsigned char *buf, size_t len)
     }
 
     // Check for device error report
-    if (n >= 4 && resp[0] == 0x11 && resp[2] == 0xFF) {
+    if (n >= 4 && resp[0] == 0xFF) {
         return false;
     }
 

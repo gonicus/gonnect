@@ -129,7 +129,6 @@ void DateEventFeederManager::processQueue()
         const auto &configId = it.next();
 
         if (auto feeder = m_dateEventFeeders.value(configId, nullptr)) {
-
             QUrl urlToCheck = feeder->networkCheckURL();
 
             if (!urlToCheck.isEmpty()) {
@@ -150,7 +149,7 @@ void DateEventFeederManager::processQueue()
                 }
 
                 networkHelper.isReachable(urlToCheck)
-                        .then([feeder, urlToCheck, this](bool isReachable) {
+                        .then(this, [feeder, urlToCheck, this](bool isReachable) {
                             if (isReachable) {
                                 QMutexLocker mutex(&m_queueMutex);
                                 feeder->init();

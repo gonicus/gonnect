@@ -57,13 +57,6 @@ void StateManager::initialize()
     connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
             &StateManager::sessionStateChanged);
 
-    auto &cm = SIPCallManager::instance();
-    connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
-        if (SIPCallManager::instance().activeCalls() == 0) {
-            m_inhibitHelper->release();
-        }
-    });
-
     connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
             &StateManager::updateInhibitState);
     auto &globalShortcuts = GlobalShortcuts::instance();
@@ -103,6 +96,16 @@ void StateManager::initialize()
     connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
         if (NetworkHelper::instance().hasConnectivity()) {
             SIPManager::instance().resume();
+        }
+    });
+}
+
+void StateManager::initializeSip()
+{
+    auto &cm = SIPCallManager::instance();
+    connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
+        if (SIPCallManager::instance().activeCalls() == 0) {
+            m_inhibitHelper->release();
         }
     });
 }

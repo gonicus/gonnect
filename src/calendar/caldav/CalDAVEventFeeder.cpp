@@ -50,6 +50,7 @@ void CalDAVEventFeeder::init()
     */
     m_calendarRefreshTimer.setInterval(m_config.interval);
     connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(false); });
+
     m_calendarRefreshTimer.start();
 
     process(false);

@@ -120,7 +120,7 @@ void AddressBookManager::processAddressBookQueue()
                     continue;
                 }
 
-                nh.isReachable(checkURL).then([feeder, checkURL, this](bool isReachable) {
+                nh.isReachable(checkURL).then(this, [feeder, checkURL, this](bool isReachable) {
                     if (isReachable) {
                         QMutexLocker mutex(&m_queueMutex);
 

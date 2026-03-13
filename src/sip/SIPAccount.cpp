@@ -734,7 +734,11 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         return;
     }
 
-    if (prm.code >= 400) {
+    if (prm.code == PJSIP_SC_SERVICE_UNAVAILABLE || prm.code == PJSIP_SC_SERVER_TIMEOUT) {
+        return;
+    }
+
+    if (prm.code >= 400 && prm.code < 600) {
         Q_EMIT connectionError(prm.code, EnumTranslation::instance().sipStatusCode(prm.code));
         return;
     }
