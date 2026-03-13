@@ -152,9 +152,20 @@ Item {
         }
     }
 
+    Item {
+        id: dummyFlickableWidthCalculator
+        height: 1
+        anchors {
+            top: parent.top
+            right: rightStickyButtonRow.left
+            left: timeLabelContainer.right
+            leftMargin: 20
+        }
+    }
+
     Flickable {
         id: rowFlickable
-        width: Math.min(buttonRow.implicitWidth, control.width - (timeLabelContainer.x + timeLabelContainer.width) - rightStickyButtonRow.implicitWidth)
+        implicitWidth: Math.min(dummyFlickableWidthCalculator.width, buttonRow.implicitWidth)
         contentWidth: buttonRow.implicitWidth
         clip: true
         anchors {
@@ -396,6 +407,7 @@ Item {
     Row {
         id: rightStickyButtonRow
         spacing: 5
+        leftPadding: 20
         rightPadding: 20
         anchors {
             top: parent.top

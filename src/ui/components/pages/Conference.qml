@@ -29,7 +29,7 @@ Item {
             PropertyChanges {
                 verticalDragbarDummyDragHandler.enabled: true
                 verticalDragbarDummyHoverHandler.enabled: true
-                verticalDragbarDummy.x: 3/4 * control.width
+                verticalDragbarDummy.x: control.LayoutMirroring.enabled ? (1/4 * control.width) : (3/4 * control.width)
             }
 
             AnchorChanges {
@@ -797,8 +797,8 @@ Item {
             enabled: false
             yAxis.enabled: false
             xAxis {
-                minimum: 1/2 * control.width
-                maximum: control.width - callSideBar.optimalExtendedWidth - verticalDragbarDummy.width - callListCard.anchors.rightMargin
+                minimum: control.LayoutMirroring.enabled ? (1/5 * control.width) : (1/2 * control.width)
+                maximum: control.LayoutMirroring.enabled ? (1/2 * control.width) : (control.width - callSideBar.optimalExtendedWidth - verticalDragbarDummy.width - callListCard.anchors.rightMargin)
             }
 
             onActiveChanged: () => {
