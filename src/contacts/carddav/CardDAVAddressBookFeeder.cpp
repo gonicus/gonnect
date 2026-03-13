@@ -319,7 +319,7 @@ void CardDAVAddressBookFeeder::process()
                  settings.value("port", useSSL ? 443 : 80).toInt(), useSSL };
 
     init();
-    feedAddressBook(false);
+    feedAddressBook();
 
     settings.endGroup();
 };
