@@ -341,6 +341,53 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
     return nullptr;
 }
 
+void SIPManager::suspend()
+{
+    qCDebug(lcSIPManager) << "suspending SIP";
+
+    pj::CallOpParam prm;
+    prm.statusCode = PJSIP_SC_SERVICE_UNAVAILABLE;
+
+    // Hang up all calls
+    auto calls = SIPCallManager::instance().calls();
+    for (auto call : std::as_const(calls)) {
+        call->hangup(prm);
+    }
+
+    // Unregister account(s)
+    auto accounts = SIPAccountManager::instance().accounts();
+    for (auto account : std::as_const(accounts)) {
+        account->setRegistration(false);
+    }
+
+    // Shutdown transports
+    pj::IpChangeParam param;
+    param.shutdownTransport = true;
+    param.restartListener = false;
+    pj::Endpoint::instance().handleIpChange(param);
+}
+
+void SIPManager::resume()
+{
+    // Since resume may be called in more network changed cases, only
+    // do this when we have no active calls going.
+    if (!!SIPCallManager::instance().hasActiveCalls()) {
+        // Restore transports
+        try {
+            pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
+        } catch (pj::Error &err) {
+            qCCritical(lcSIPManager)
+                    << "error handling IP change:" << QString::fromLocal8Bit(err.info(false));
+        }
+
+        // Re-activate account registration
+        auto accounts = SIPAccountManager::instance().accounts();
+        for (auto account : std::as_const(accounts)) {
+            account->setRegistration(false);
+        }
+    }
+}
+
 void SIPManager::shutdown()
 {
     qCDebug(lcSIPManager) << "shutting down";

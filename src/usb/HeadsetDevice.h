@@ -107,6 +107,5 @@ private:
     bool m_ringing = false;
     bool m_isOpen = false;
 
-    bool m_ignoreNextMuteUpdate = false;
     bool m_displaySupported = false;
 };

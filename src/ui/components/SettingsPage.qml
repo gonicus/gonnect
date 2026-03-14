@@ -341,6 +341,7 @@ Item {
                             editable: false
                             textRole: 'displayName'
                             valueRole: 'value'
+                            rightPadding: 10
                             anchors {
                                 left: parent.left
                                 right: parent.right
@@ -367,7 +368,6 @@ Item {
 
                             delegate: ItemDelegate {
                                 id: darkModeDelg
-                                width: parent.width
                                 text: darkModeDelg.displayName
 
                                 font.family: darkModeComboBox.font.family
@@ -540,6 +540,7 @@ Item {
                             editable: false
                             textRole: 'displayName'
                             valueRole: 'id'
+                            rightPadding: 10
                             anchors {
                                 left: parent.left
                                 right: parent.right
@@ -560,7 +561,6 @@ Item {
 
                             delegate: ItemDelegate {
                                 id: standardPreferredIdentityDelg
-                                width: parent.width
                                 text: standardPreferredIdentityDelg.displayName
 
                                 font.family: standardPreferredIdentitySelector.font.family
@@ -831,6 +831,7 @@ Item {
                             editable: false
                             textRole: 'name'
                             valueRole: 'id'
+                            rightPadding: 10
                             anchors {
                                 left: parent.left
                                 right: parent.right
@@ -843,8 +844,8 @@ Item {
 
                             delegate: ItemDelegate {
                                 id: inputAudioSelectorDelg
-                                width: parent.width
                                 text: inputAudioSelectorDelg.name
+                                width: inputAudioSelectorDelg.implicitWidth
 
                                 font.family: inputAudioSelector.font.family
                                 font.weight: inputAudioSelector.font.weight
@@ -908,6 +909,7 @@ Item {
                             editable: false
                             textRole: 'name'
                             valueRole: 'id'
+                            rightPadding: 10
                             anchors {
                                 left: parent.left
                                 right: parent.right
@@ -920,8 +922,8 @@ Item {
 
                             delegate: ItemDelegate {
                                 id: outputAudioSelectorDelg
-                                width: parent.width
                                 text: outputAudioSelectorDelg.name
+                                width: outputAudioSelectorDelg.implicitWidth
 
                                 font.family: outputAudioSelector.font.family
                                 font.weight: outputAudioSelector.font.weight
@@ -985,6 +987,7 @@ Item {
                             editable: false
                             textRole: 'name'
                             valueRole: 'id'
+                            rightPadding: 10
                             anchors {
                                 left: parent.left
                                 right: parent.right
@@ -997,8 +1000,8 @@ Item {
 
                             delegate: ItemDelegate {
                                 id: outputRingAudioSelectorDelg
-                                width: parent.width
                                 text: outputRingAudioSelectorDelg.name
+                                width: outputRingAudioSelectorDelg.implicitWidth
 
                                 font.family: outputRingToneAudioSelector.font.family
                                 font.weight: outputRingToneAudioSelector.font.weight
@@ -1222,7 +1225,8 @@ Item {
 
                             Label {
                                 id: ringToneVolumeSliderLabel
-                                text: qsTr('%1 %').arg(ringToneVolumeSlider.value)
+                                //: Label for showing percentage
+                                text: qsTr('%1 %').arg(ringToneVolumeSlider.value.toLocaleString(Qt.locale(), "f", 0))
                                 horizontalAlignment: Label.AlignRight
                                 width: 40
                                 anchors {
@@ -1293,7 +1297,8 @@ Item {
 
                             Label {
                                 id: ringTonePauseValueLabel
-                                text: (ringTonePauseSlider.value / 1000).toLocaleString(Qt.locale(), "f", 2) + " s"
+                                //: Label for showing seconds
+                                text: qsTr("%1 s").arg((ringTonePauseSlider.value / 1000).toLocaleString(Qt.locale(), "f", 2))
                                 horizontalAlignment: Label.AlignRight
                                 width: 40
                                 anchors {

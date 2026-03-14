@@ -14,6 +14,7 @@
 #include "CallHistory.h"
 #include "GlobalCallState.h"
 #include "ExternalMediaManager.h"
+#include "NetworkHelper.h"
 
 Q_LOGGING_CATEGORY(lcStateHandling, "gonnect.state")
 
@@ -29,20 +30,6 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
                 con.registerObject(FLATPAK_APP_PATH, this) && con.registerService(FLATPAK_APP_ID);
     }
 #endif
-
-    m_inhibitHelper = &InhibitHelper::instance();
-    connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
-            &StateManager::sessionStateChanged);
-
-    auto &cm = SIPCallManager::instance();
-    connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
-        if (SIPCallManager::instance().activeCalls() == 0) {
-            m_inhibitHelper->release();
-        }
-    });
-
-    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
-            &StateManager::updateInhibitState);
 }
 
 bool StateManager::globalShortcutsSupported() const
@@ -66,6 +53,12 @@ QVariantMap StateManager::globalShortcuts() const
 
 void StateManager::initialize()
 {
+    m_inhibitHelper = &InhibitHelper::instance();
+    connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
+            &StateManager::sessionStateChanged);
+
+    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
+            &StateManager::updateInhibitState);
     auto &globalShortcuts = GlobalShortcuts::instance();
 
     QList<Shortcut> shortcuts = {
@@ -98,6 +91,21 @@ void StateManager::initialize()
             SIPCallManager::instance().call(ci.sipUrl);
         } else if (action == "toggle-hold") {
             cm.toggleHold();
+        }
+    });
+    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
+        if (NetworkHelper::instance().hasConnectivity()) {
+            SIPManager::instance().resume();
+        }
+    });
+}
+
+void StateManager::initializeSip()
+{
+    auto &cm = SIPCallManager::instance();
+    connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
+        if (SIPCallManager::instance().activeCalls() == 0) {
+            m_inhibitHelper->release();
         }
     });
 }
@@ -152,6 +160,8 @@ void StateManager::sessionStateChanged(bool, InhibitHelper::InhibitState state)
                             | InhibitHelper::InhibitFlag::SUSPEND
                             | InhibitHelper::InhibitFlag::USER_SWITCH,
                     QObject::tr("There are %n active call(s).", "calls", activeCalls));
+        } else if (state == InhibitHelper::InhibitState::ENDING) {
+            SIPManager::instance().suspend();
         }
     }
 }

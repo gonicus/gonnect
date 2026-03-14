@@ -43,6 +43,7 @@ public Q_SLOTS:
     void handleSigTerm();
 #endif
 
+    void initialize();
     void shutdown();
 
 private:
@@ -50,7 +51,6 @@ private:
                               const QString &rawMsg);
 
     void initLogging();
-    void initialize();
     void initializeSIP();
     void installTranslations();
 

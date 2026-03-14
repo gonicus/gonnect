@@ -56,6 +56,8 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateBuddyState);
     connect(&SIPAccountManager::instance(), &SIPAccountManager::sipRegisteredChanged, this,
             &SystemTrayMenu::updateMenu);
+    connect(&SIPAccountManager::instance(), &SIPAccountManager::sipRegisteredChanged, this,
+            &SystemTrayMenu::resetTrayIcon);
     connect(&SIPCallManager::instance(), &SIPCallManager::activeCallsChanged, this,
             &SystemTrayMenu::updateCalls);
     connect(&SIPCallManager::instance(), &SIPCallManager::establishedCallsCountChanged, this,
@@ -453,13 +455,22 @@ void SystemTrayMenu::resetTrayIcon()
             ThemeManager::instance().trayColorScheme() == ThemeManager::ColorScheme::DARK;
     QString noteDot = m_missedCallsCount ? "_note" : "";
 
-    if (m_hasEstablishedCalls) {
-        m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
+    const auto sipReg = SIPAccountManager::instance().sipRegistered();
+    if (sipReg) {
+        if (m_hasEstablishedCalls) {
+            m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
+        } else {
+            if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
+                m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
+            } else {
+                m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
+            }
+        }
     } else {
         if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
+            m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_dark.svg"));
         } else {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
+            m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_light.svg"));
         }
     }
 }

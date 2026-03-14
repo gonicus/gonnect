@@ -128,7 +128,9 @@ Item {
     }
 
     Connections {
+        id: sipAccountManagerConnections
         target: SIPAccountManager
+
         function onAuthorizationFailed(accountId : string) {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for the SIP account:") })
             dialog.onPasswordAccepted.connect(pw => SIPAccountManager.setAccountCredentials(accountId, pw))

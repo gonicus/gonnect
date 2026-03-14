@@ -125,6 +125,9 @@ int main(int argc, char *argv[])
         app.setRootWindow(mainWindow);
     }
 
+    // Take care for running "initialize" after exec() is called
+    QTimer::singleShot(0, &app, &Application::initialize);
+
     exitCode = app.exec();
     if (exitCode == RESTART_CODE) {
         QProcess::startDetached(argv[0]);

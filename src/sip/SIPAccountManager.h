@@ -41,8 +41,9 @@ public:
 
 Q_SIGNALS:
     void accountsChanged();
-    void sipRegisteredChanged();
+    void sipRegisteredChanged(bool status);
     void authorizationFailed(QString accountId);
+    void connectionError(int code, QString message);
 
 private:
     SIPAccountManager(QObject *parent = nullptr);
@@ -50,6 +51,7 @@ private:
     void updateSipRegistered();
 
     unsigned m_numberOfAccounts = 0;
+    int m_lastErrorCode = 0;
 
     QList<SIPAccount *> m_accounts;
     bool m_sipRegistered = false;

@@ -1,5 +1,4 @@
 #include "GlobalMuteState.h"
-#include "GlobalCallState.h"
 
 GlobalMuteState::GlobalMuteState(QObject *parent) : QObject{ parent } { }
 

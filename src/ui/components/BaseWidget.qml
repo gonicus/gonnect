@@ -20,6 +20,9 @@ Item {
 
     signal cleanupRequested()
 
+    LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
+    LayoutMirroring.childrenInherit: true
+
     Connections {
         target: control.config
         function onParametersUpdated() {
@@ -272,6 +275,7 @@ Item {
                     anchors.left: parent.left
                     anchors.top: parent.top
                     cursorShape: Qt.SizeFDiagCursor
+                    LayoutMirroring.enabled: false
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewX(mouse.x)
@@ -299,6 +303,7 @@ Item {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     cursorShape: Qt.SizeBDiagCursor
+                    LayoutMirroring.enabled: false
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewY(mouse.y)
@@ -315,6 +320,7 @@ Item {
                         right: resizeTopRight.right
                         bottom: resizeBottomRight.bottom
                     }
+                    LayoutMirroring.enabled: false
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewWidth(mouse.x)
@@ -326,6 +332,7 @@ Item {
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     cursorShape: Qt.SizeFDiagCursor
+                    LayoutMirroring.enabled: false
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewWidth(mouse.x)
@@ -353,6 +360,7 @@ Item {
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom
                     cursorShape: Qt.SizeBDiagCursor
+                    LayoutMirroring.enabled: false
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewX(mouse.x)
@@ -369,6 +377,7 @@ Item {
                         right: resizeTopLeft.right
                         bottom: resizeBottomLeft.top
                     }
+                    LayoutMirroring.enabled: false
 
                     onPositionChanged: mouse => {
                         resizeHandleOverlay.setNewX(mouse.x)

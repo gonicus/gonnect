@@ -502,6 +502,7 @@ Item {
     Row {
         spacing: 5
         rightPadding: 20
+        leftPadding: 20
         anchors {
             top: parent.top
             bottom: parent.bottom
