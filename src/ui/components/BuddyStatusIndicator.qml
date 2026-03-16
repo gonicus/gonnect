@@ -19,6 +19,7 @@ Rectangle {
     property int status: SIPBuddyState.UNKNOWN
 
     property bool isBlocked: false
+    property bool isUnregistered: false
 
     Accessible.ignored: true
 
@@ -59,6 +60,13 @@ Rectangle {
     }
 
     states: [
+        State {
+            when: control.isUnregistered
+
+            PropertyChanges {
+                control.color: Theme.borderColor
+            }
+        },
         State {
             when: control.isBlocked
 

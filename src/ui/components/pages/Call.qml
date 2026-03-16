@@ -48,7 +48,7 @@ Item {
             PropertyChanges {
                 verticalDragbarDummyDragHandler.enabled: true
                 verticalDragbarDummyHoverHandler.enabled: true
-                verticalDragbarDummy.x: 3/4 * control.width
+                verticalDragbarDummy.x: (control.LayoutMirroring.enabled ? 1/4 : 3/4) * control.width
             }
 
             AnchorChanges {
@@ -265,8 +265,8 @@ Item {
             enabled: false
             yAxis.enabled: false
             xAxis {
-                minimum: 1/2 * control.width
-                maximum: control.width - 300
+                minimum: control.LayoutMirroring.enabled ? 300 : (1/2 * control.width)
+                maximum: control.LayoutMirroring.enabled ? (1/2 * control.width) : (control.width - 300)
             }
         }
     }

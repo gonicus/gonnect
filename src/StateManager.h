@@ -32,6 +32,7 @@ public:
     }
 
     void initialize();
+    void initializeSip();
     bool globalShortcutsSupported() const;
     QVariantMap globalShortcuts() const;
 
