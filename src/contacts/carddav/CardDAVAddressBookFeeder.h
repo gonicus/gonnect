@@ -29,7 +29,7 @@ private Q_SLOTS:
 
 private:
     void init();
-    void feedAddressBook(bool authFailed);
+    void feedAddressBook(bool authFailed = false);
 
     void processVcard(QByteArray data, const QString &uuid, const QDateTime &modifiedDate);
     void loadCachedData(const size_t hash);

@@ -19,6 +19,7 @@ Item {
     property alias showBuddyStatus: buddyStatusIndicatorContainer.visible
     property alias buddyStatus: buddyStatusIndicator.status
     property alias isBlocked: buddyStatusIndicator.isBlocked
+    property alias isUnregistered: buddyStatusIndicator.isUnregistered
 
     states: [
         State {

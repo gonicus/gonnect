@@ -235,8 +235,11 @@ Rectangle {
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
-            showBuddyStatus: ViewHelper.currentUser?.hasBuddyState ?? false
+            showBuddyStatus: avatarImage.hasBuddyState || avatarImage.isUnregistered
             buddyStatus: SIPBuddyState.UNKNOWN
+            isUnregistered: true
+
+            property bool hasBuddyState: ViewHelper.currentUser?.hasBuddyState ?? false
 
             Component.onCompleted: () => {
                 avatarImage.updateBuddyStatus()
@@ -253,6 +256,17 @@ Rectangle {
                 enabled: ViewHelper.currentUser?.hasBuddyState ?? false
                 function onBuddyStateChanged(url : string, status : int) {
                     avatarImage.updateBuddyStatus()
+                }
+            }
+
+            Connections {
+                target: SIPAccountManager
+                function onSipRegisteredChanged(status : bool) {
+                    if (status) {
+                        avatarImage.isUnregistered = false
+                    } else {
+                        avatarImage.isUnregistered = true
+                    }
                 }
             }
         }

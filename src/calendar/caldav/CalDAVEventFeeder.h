@@ -26,7 +26,7 @@ public:
     void init() override;
     QUrl networkCheckURL() const override;
 
-    void process(bool authFailed);
+    void process(bool authFailed = false);
 
 private Q_SLOTS:
     void onError(QString error) const;

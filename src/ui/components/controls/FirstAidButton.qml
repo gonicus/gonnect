@@ -6,7 +6,7 @@ import base
 Item {
     id: control
     implicitHeight: control.iconSize
-    implicitWidth: firstAidLabel.x + firstAidLabel.implicitWidth
+    implicitWidth: control.iconSize + 10 + firstAidLabel.implicitWidth
     visible: GlobalInfo.hasEmergencyNumbers
 
     property int iconSize: 24
@@ -23,6 +23,7 @@ Item {
         height: control.iconSize
         radius: control.iconSize / 2
         color: Qt.rgba(1, 1, 1)
+        anchors.left: parent.left
 
         Rectangle {
             id: verticalBar

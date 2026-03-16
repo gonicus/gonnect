@@ -72,8 +72,20 @@ Popup {
         id: popupContainer
         focus: true
 
-        Keys.onLeftPressed: () => keyNavigator.keyLeft()
-        Keys.onRightPressed: () => keyNavigator.keyRight()
+        Keys.onLeftPressed: () => {
+            if (LayoutMirroring.enabled) {
+                keyNavigator.keyRight()
+            } else {
+                keyNavigator.keyLeft()
+            }
+        }
+        Keys.onRightPressed: () => {
+            if (LayoutMirroring.enabled) {
+                keyNavigator.keyLeft()
+            } else {
+                keyNavigator.keyRight()
+            }
+        }
         Keys.onDownPressed: () => keyNavigator.keyDown()
         Keys.onUpPressed: () => keyNavigator.keyUp()
         Keys.onEnterPressed: () => control.triggerPrimaryAction()

@@ -129,35 +129,42 @@ void DateEventFeederManager::processQueue()
         const auto &configId = it.next();
 
         if (auto feeder = m_dateEventFeeders.value(configId, nullptr)) {
-
             QUrl urlToCheck = feeder->networkCheckURL();
 
-            if (!urlToCheck.isEmpty()) {
+            if (urlToCheck.isEmpty()) {
+                feeder->init();
+            } else {
                 if (!networkAvailable) {
                     continue;
                 }
 
                 if (!urlToCheck.isValid()) {
-                    qCCritical(lcDateEventFeederManager) << "Url is invalid:" << urlToCheck;
+                    qCCritical(lcDateEventFeederManager) << "URL is invalid:" << urlToCheck;
                     continue;
                 }
 
                 if (!networkHelper.hasConnectivity()) {
-                    qCWarning(lcDateEventFeederManager) << "No network connectivity";
+                    qCWarning(lcDateEventFeederManager)
+                            << "No connectivity state yet - trying later";
                     networkAvailable = false;
                     setupReconnectSignal();
                     continue;
                 }
 
-                if (!networkHelper.isReachable(urlToCheck)) {
-                    qCWarning(lcDateEventFeederManager)
-                            << "Feeder url" << urlToCheck << "is not reachable";
-                    setupReconnectSignal();
-                    continue;
-                }
+                networkHelper.isReachable(urlToCheck)
+                        .then(this, [feeder, urlToCheck, this](bool isReachable) {
+                            if (isReachable) {
+                                QMutexLocker mutex(&m_queueMutex);
+
+                                feeder->init();
+                            } else {
+                                qCWarning(lcDateEventFeederManager)
+                                        << "Feeder URL" << urlToCheck << "is not reachable";
+                                setupReconnectSignal();
+                            }
+                        });
             }
 
-            feeder->init();
             it.remove();
         }
     }

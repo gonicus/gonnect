@@ -338,7 +338,6 @@ qt_add_qml_module(gonnect
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/Label.qml
         ui/components/controls/MenuContactInfo.qml
-        ui/components/controls/SearchDial.qml
         ui/components/controls/SearchField.qml
         ui/components/controls/Switch.qml
         ui/components/controls/TabBar.qml
@@ -407,7 +406,6 @@ qt_add_qml_module(gonnect
         ui/components/HistoryList.qml
         ui/components/MainTabBar.qml
         ui/components/ParticipantsList.qml
-        ui/components/SearchBox.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
