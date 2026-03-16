@@ -131,7 +131,9 @@ void DateEventFeederManager::processQueue()
         if (auto feeder = m_dateEventFeeders.value(configId, nullptr)) {
             QUrl urlToCheck = feeder->networkCheckURL();
 
-            if (!urlToCheck.isEmpty()) {
+            if (urlToCheck.isEmpty()) {
+                feeder->init();
+            } else {
                 if (!networkAvailable) {
                     continue;
                 }
@@ -152,8 +154,8 @@ void DateEventFeederManager::processQueue()
                         .then(this, [feeder, urlToCheck, this](bool isReachable) {
                             if (isReachable) {
                                 QMutexLocker mutex(&m_queueMutex);
-                                feeder->init();
 
+                                feeder->init();
                             } else {
                                 qCWarning(lcDateEventFeederManager)
                                         << "Feeder url" << urlToCheck << "is not reachable";

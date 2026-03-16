@@ -103,7 +103,10 @@ void AddressBookManager::processAddressBookQueue()
             // the network helper / portal. If we've no connectivity, trigger on
             // connectivityChanged signal to recheck again.
             QUrl checkURL = feeder->networkCheckURL();
-            if (!checkURL.isEmpty()) {
+
+            if (checkURL.isEmpty()) {
+                feeder->process();
+            } else {
                 if (!networkAvailable) {
                     continue;
                 }
