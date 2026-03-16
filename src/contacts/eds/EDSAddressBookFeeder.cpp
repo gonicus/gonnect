@@ -93,7 +93,7 @@ void EDSAddressBookFeeder::init()
 
     m_sourcePromise->start();
 
-    QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished).then([this]() {
+    QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished).then(this, [this]() {
         if (m_sourceFuture.isFinished()) {
             feedAddressBook();
         }

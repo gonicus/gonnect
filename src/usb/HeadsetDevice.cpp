@@ -359,11 +359,6 @@ void HeadsetDevice::setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMappi
 
 void HeadsetDevice::processEvents()
 {
-    if (m_ignoreNextMuteUpdate) {
-        m_ignoreNextMuteUpdate = false;
-        return;
-    }
-
     unsigned char data[64];
     memset(data, 0, sizeof(data));
 
@@ -404,11 +399,11 @@ void HeadsetDevice::processEvents()
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_PhoneMute);
                     if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
                         m_muted = !m_muted;
-                        Q_EMIT mute();
 
                         qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
                         setMute(m_muted);
-                        m_ignoreNextMuteUpdate = true;
+
+                        Q_EMIT mute();
                     }
                 }
 
