@@ -139,7 +139,7 @@ void DateEventFeederManager::processQueue()
                 }
 
                 if (!urlToCheck.isValid()) {
-                    qCCritical(lcDateEventFeederManager) << "Url is invalid:" << urlToCheck;
+                    qCCritical(lcDateEventFeederManager) << "URL is invalid:" << urlToCheck;
                     continue;
                 }
 

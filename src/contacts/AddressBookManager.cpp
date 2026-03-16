@@ -112,7 +112,7 @@ void AddressBookManager::processAddressBookQueue()
                 }
 
                 if (!checkURL.isValid()) {
-                    qCCritical(lcAddressBookManager) << "Url is invalid:" << checkURL;
+                    qCCritical(lcAddressBookManager) << "URL is invalid:" << checkURL;
                     continue;
                 }
 
