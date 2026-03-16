@@ -144,7 +144,8 @@ void DateEventFeederManager::processQueue()
                 }
 
                 if (!networkHelper.hasConnectivity()) {
-                    qCWarning(lcDateEventFeederManager) << "No network connectivity";
+                    qCWarning(lcDateEventFeederManager)
+                            << "No connectivity state yet - trying later";
                     networkAvailable = false;
                     setupReconnectSignal();
                     continue;

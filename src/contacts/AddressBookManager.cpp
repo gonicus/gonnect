@@ -111,8 +111,13 @@ void AddressBookManager::processAddressBookQueue()
                     continue;
                 }
 
+                if (!checkURL.isValid()) {
+                    qCCritical(lcAddressBookManager) << "Url is invalid:" << checkURL;
+                    continue;
+                }
+
                 if (!nh.hasConnectivity()) {
-                    qCWarning(lcAddressBookManager) << "no connectivity state yet - trying later";
+                    qCWarning(lcAddressBookManager) << "No connectivity state yet - trying later";
 
                     networkAvailable = false;
                     connect(
@@ -130,7 +135,8 @@ void AddressBookManager::processAddressBookQueue()
                         feeder->process();
                         Q_EMIT AddressBook::instance().contactsReady();
                     } else {
-                        qCWarning(lcAddressBookManager) << checkURL << "is not reachable";
+                        qCWarning(lcAddressBookManager)
+                                << "Feeder url" << checkURL << "is not reachable";
                         connect(
                                 &NetworkHelper::instance(), &NetworkHelper::connectivityChanged,
                                 this, [this]() { processAddressBookQueue(); },
