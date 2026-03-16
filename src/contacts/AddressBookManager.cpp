@@ -25,11 +25,9 @@ AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
 {
     m_retryTimer.setInterval(10s);
     connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
+        // TODO: Don't run forever. try again n times...
         if (!m_retryFeederIds.isEmpty()) {
-            // TODO: Casually reloads everything, the LDAP reload button does that too...
-            // We could also verify if entry in m_retryFeederIds is in m_addressBookFeeders
-            reloadAddressBook();
-            m_retryFeederIds.clear();
+            retryFailedPlugins();
         }
     });
     m_retryTimer.start();
@@ -84,10 +82,25 @@ void AddressBookManager::initAddressBookConfigs()
 
 void AddressBookManager::reloadAddressBook()
 {
-    // TODO: if *QStringList of custom Ids is passed, clearById() instead of clear()
-    // then do m_addressBookQueue = m_retryFeederIds -> processAddressBookQueue();
     AddressBook::instance().resetContacts();
     m_addressBookQueue = m_addressBookConfigs;
+    processAddressBookQueue();
+}
+
+void AddressBookManager::addToRetryList(const QString &configId)
+{
+    QMutexLocker mutex(&m_retryQueueMutex);
+
+    m_retryFeederIds.append(configId);
+}
+
+void AddressBookManager::retryFailedPlugins()
+{
+    // Reload feeder plugins that have failed
+    QMutexLocker mutex(&m_retryQueueMutex);
+
+    m_addressBookQueue = m_retryFeederIds;
+    m_retryFeederIds.clear();
     processAddressBookQueue();
 }
 

@@ -28,7 +28,7 @@ public:
     void acquireSecret(bool override, const QString &configId,
                        std::function<void(const QString &secret)> callback);
 
-    void addToRetryList(const QString &configId) { m_retryFeederIds.append(configId); };
+    void addToRetryList(const QString &configId);
     void retryFailedPlugins();
 
 private:
@@ -55,4 +55,5 @@ private:
 
     QTimer m_retryTimer;
     QStringList m_retryFeederIds;
+    QMutex m_retryQueueMutex;
 };

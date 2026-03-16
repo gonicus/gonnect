@@ -56,9 +56,18 @@ void DateEventFeederManager::reloadCalendar()
     processQueue();
 }
 
+void DateEventFeederManager::addToRetryList(const QString &configId)
+{
+    QMutexLocker mutex(&m_retryQueueMutex);
+
+    m_retryFeederIds.append(configId);
+}
+
 void DateEventFeederManager::retryFailedPlugins()
 {
     // Reload feeder plugins that have failed
+    QMutexLocker mutex(&m_retryQueueMutex);
+
     m_feederConfigIds = m_retryFeederIds;
     m_retryFeederIds.clear();
     processQueue();
