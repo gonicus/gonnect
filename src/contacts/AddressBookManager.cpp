@@ -103,13 +103,21 @@ void AddressBookManager::processAddressBookQueue()
             // the network helper / portal. If we've no connectivity, trigger on
             // connectivityChanged signal to recheck again.
             QUrl checkURL = feeder->networkCheckURL();
-            if (!checkURL.isEmpty()) {
+
+            if (checkURL.isEmpty()) {
+                feeder->process();
+            } else {
                 if (!networkAvailable) {
                     continue;
                 }
 
+                if (!checkURL.isValid()) {
+                    qCCritical(lcAddressBookManager) << "URL is invalid:" << checkURL;
+                    continue;
+                }
+
                 if (!nh.hasConnectivity()) {
-                    qCWarning(lcAddressBookManager) << "no connectivity state yet - trying later";
+                    qCWarning(lcAddressBookManager) << "No connectivity state yet - trying later";
 
                     networkAvailable = false;
                     connect(
@@ -127,7 +135,8 @@ void AddressBookManager::processAddressBookQueue()
                         feeder->process();
                         Q_EMIT AddressBook::instance().contactsReady();
                     } else {
-                        qCWarning(lcAddressBookManager) << checkURL << "is not reachable";
+                        qCWarning(lcAddressBookManager)
+                                << "Feeder URL" << checkURL << "is not reachable";
                         connect(
                                 &NetworkHelper::instance(), &NetworkHelper::connectivityChanged,
                                 this, [this]() { processAddressBookQueue(); },
