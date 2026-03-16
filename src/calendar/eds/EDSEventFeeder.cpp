@@ -20,7 +20,7 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDa
       m_timeRangeEnd(timeRangeEnd)
 {
     connect(this, &EDSEventFeeder::feederFailed, this, [this](){
-        qCDebug(lcEDSEventFeeder) << "Failed to process EDS sources";
+        qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources";
 
         // Cancel all potentially active EDS async methods
         g_cancellable_cancel(m_cancellable);
@@ -30,7 +30,7 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDa
 
         // Prepare feeder for re-init
         resetFeeder();
-        resetContacts();
+        resetCalendar();
 
         // Add to retry queue
         DateEventFeederManager::instance().addToRetryList(m_source);
@@ -134,7 +134,7 @@ void EDSEventFeeder::resetFeeder()
     }
 }
 
-void EDSEventFeeder::resetContacts()
+void EDSEventFeeder::resetCalendar()
 {
     DateEventManager &manager = DateEventManager::instance();
 

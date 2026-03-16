@@ -92,7 +92,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
     const auto &collections = fetchJob->collections();
     for (const auto &collection : collections) {
         if (collection.isValid()) {
-            qDebug(lcAkonadiEventFeeder) << collection.name();
+            qDebug(lcAkonadiEventFeeder) << collection.name(); // TODO: No concrete source / calendar separation here?
 
             Akonadi::ItemFetchJob *job = new Akonadi::ItemFetchJob(collection);
             job->fetchScope().fetchFullPayload();

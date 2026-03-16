@@ -59,9 +59,6 @@ void DateEventFeederManager::reloadCalendar()
 void DateEventFeederManager::retryFailedPlugins()
 {
     // Reload feeder plugins that have failed
-    for (const auto &feederId : std::as_const(m_retryFeederIds)) {
-        DateEventManager::instance().removeDateEventsBySource(feederId);
-    }
     m_feederConfigIds = m_retryFeederIds;
     m_retryFeederIds.clear();
     processQueue();
