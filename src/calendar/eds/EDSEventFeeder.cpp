@@ -33,7 +33,7 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDa
         resetContacts();
 
         // Add to retry queue
-        DateEventFeederManager::instance().addToRetryList("eds-calendar"); // Settings group ID would be cooler
+        DateEventFeederManager::instance().addToRetryList(m_source);
     });
 }
 
@@ -139,7 +139,7 @@ void EDSEventFeeder::resetContacts()
     DateEventManager &manager = DateEventManager::instance();
 
     for (auto client : std::as_const(m_clients)) {
-        QString concreteSource = QString("%1-%2").arg(
+        QString concreteSource = QString("%1_%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(client))));
         manager.removeDateEventsBySource(concreteSource);
     }
@@ -293,7 +293,7 @@ void EDSEventFeeder::processEventsAdded(ECalClientView *view)
         const auto idx = m_clients.indexOf(client);
         g_clear_object(&client);
 
-        QString concreteSource = QString("%1-%2").arg(
+        QString concreteSource = QString("%1_%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
@@ -316,7 +316,7 @@ void EDSEventFeeder::processEventsModified(ECalClientView *view)
         const auto idx = m_clients.indexOf(client);
         g_clear_object(&client);
 
-        QString concreteSource = QString("%1-%2").arg(
+        QString concreteSource = QString("%1_%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
@@ -339,7 +339,7 @@ void EDSEventFeeder::processEventsRemoved(ECalClientView *view)
         const auto idx = m_clients.indexOf(client);
         g_clear_object(&client);
 
-        QString concreteSource = QString("%1-%2").arg(
+        QString concreteSource = QString("%1_%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
@@ -410,7 +410,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 {
     DateEventManager &manager = DateEventManager::instance();
 
-    QString concreteSource = QString("%1-%2").arg(m_source, clientUid);
+    QString concreteSource = QString("%1_%2").arg(m_source, clientUid);
 
     QMap<QString, QList<QDateTime>> exdatesById;
 

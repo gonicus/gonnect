@@ -6,7 +6,6 @@
 
 struct CalDAVEventFeederConfig
 {
-    QString settingsGroupId;
     QString source;
     QString host;
     QString path;

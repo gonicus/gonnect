@@ -31,8 +31,5 @@ IDateEventFeeder *EDSEventFeederFactory::createFeeder(const QString &settingsGro
                                                       const QDateTime &timeRangeEnd,
                                                       DateEventFeederManager *feederManager) const
 {
-    ReadOnlyConfdSettings settings;
-    settings.beginGroup(settingsGroup);
-
-    return new EDSEventFeeder(feederManager, name(), currentTime, timeRangeStart, timeRangeEnd);
+    return new EDSEventFeeder(feederManager, settingsGroup, currentTime, timeRangeStart, timeRangeEnd);
 }

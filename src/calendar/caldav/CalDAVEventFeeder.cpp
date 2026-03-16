@@ -78,7 +78,7 @@ void CalDAVEventFeeder::onParserFinished()
                     QMimeType type = db.mimeTypeForData(data);
                     if (type.name() == "text/calendar" && !data.isEmpty()
                         && responseDataChanged(data)) {
-                        QString concreteSource = QString("%1-%2").arg(m_config.source, item.name());
+                        QString concreteSource = QString("%1_%2").arg(m_config.source, item.name());
 
                         DateEventManager &manager = DateEventManager::instance();
                         manager.removeDateEventsBySource(concreteSource);
@@ -93,7 +93,7 @@ void CalDAVEventFeeder::onParserFinished()
 void CalDAVEventFeeder::process(bool authFailed)
 {
     auto manager = q_check_ptr(qobject_cast<DateEventFeederManager *>(parent()));
-    manager->acquireSecret(authFailed, m_config.settingsGroupId, [this](const QString &password) {
+    manager->acquireSecret(authFailed, m_config.source, [this](const QString &password) {
         m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
                                        m_config.host, m_config.path, m_config.user, password,
                                        m_config.port);
