@@ -159,7 +159,7 @@ void DateEventFeederManager::processQueue()
                                 feeder->init();
                             } else {
                                 qCWarning(lcDateEventFeederManager)
-                                        << "Feeder url" << urlToCheck << "is not reachable";
+                                        << "Feeder URL" << urlToCheck << "is not reachable";
                                 setupReconnectSignal();
                             }
                         });

@@ -136,7 +136,7 @@ void AddressBookManager::processAddressBookQueue()
                         Q_EMIT AddressBook::instance().contactsReady();
                     } else {
                         qCWarning(lcAddressBookManager)
-                                << "Feeder url" << checkURL << "is not reachable";
+                                << "Feeder URL" << checkURL << "is not reachable";
                         connect(
                                 &NetworkHelper::instance(), &NetworkHelper::connectivityChanged,
                                 this, [this]() { processAddressBookQueue(); },
