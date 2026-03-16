@@ -90,6 +90,8 @@ Window {
                         left: parent.left
                     }
 
+                    LayoutMirroring.enabled: false
+
                     Accessible.role: Accessible.Border
                     Accessible.name: qsTr("Drag border")
                     Accessible.description: qsTr("Top left drag border for window resize operations")
@@ -119,6 +121,8 @@ Window {
                         rightMargin: dragHandlerContainer.borderWidth
                     }
 
+                    LayoutMirroring.enabled: false
+
                     Accessible.role: Accessible.Border
                     Accessible.name: qsTr("Drag border")
                     Accessible.description: qsTr("Top drag border for window resize operations")
@@ -145,6 +149,7 @@ Window {
                         top: parent.top
                         right: parent.right
                     }
+                    LayoutMirroring.enabled: false
 
                     Accessible.role: Accessible.Border
                     Accessible.name: qsTr("Drag border")
@@ -174,6 +179,7 @@ Window {
                         topMargin: dragHandlerContainer.borderWidth
                         bottomMargin: dragHandlerContainer.borderWidth
                     }
+                    LayoutMirroring.enabled: false
 
                     Accessible.role: Accessible.Border
                     Accessible.name: qsTr("Drag border")
@@ -201,6 +207,7 @@ Window {
                         bottom: parent.bottom
                         right: parent.right
                     }
+                    LayoutMirroring.enabled: false
 
                     Accessible.role: Accessible.Border
                     Accessible.name: qsTr("Drag border")
@@ -230,6 +237,7 @@ Window {
                         leftMargin: dragHandlerContainer.borderWidth
                         rightMargin: dragHandlerContainer.borderWidth
                     }
+                    LayoutMirroring.enabled: false
 
                     Accessible.role: Accessible.Border
                     Accessible.name: qsTr("Drag border")
@@ -257,6 +265,7 @@ Window {
                         bottom: parent.bottom
                         left: parent.left
                     }
+                    LayoutMirroring.enabled: false
 
                     Accessible.role: Accessible.Border
                     Accessible.name: qsTr("Drag border")
@@ -286,6 +295,7 @@ Window {
                         topMargin: dragHandlerContainer.borderWidth
                         bottomMargin: dragHandlerContainer.borderWidth
                     }
+                    LayoutMirroring.enabled: false
 
                     Accessible.role: Accessible.Border
                     Accessible.name: qsTr("Drag border")

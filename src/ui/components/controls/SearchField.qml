@@ -80,8 +80,9 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             left: searchIcon.right
+            right: clearButton.visible ? clearButton.left : parent.right
             leftMargin: 10
-            right: parent.right
+            rightMargin: 10
         }
 
         Accessible.role: Accessible.EditableText
@@ -108,6 +109,7 @@ Item {
         IconLabel {
             id: clearIcon
             anchors.centerIn: parent
+            rotation: LayoutMirroring.enabled ? 180 : 0
             icon {
                 source: Icons.editClear
                 color: clearButtonHoverHandler.hovered ? Theme.primaryTextColor : Theme.secondaryInactiveTextColor

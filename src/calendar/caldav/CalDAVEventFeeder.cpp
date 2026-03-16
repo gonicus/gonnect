@@ -49,10 +49,11 @@ void CalDAVEventFeeder::init()
         '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
     */
     m_calendarRefreshTimer.setInterval(m_config.interval);
-    connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(false); });
+    connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
+
     m_calendarRefreshTimer.start();
 
-    process(false);
+    process();
 }
 
 void CalDAVEventFeeder::onError(QString error) const

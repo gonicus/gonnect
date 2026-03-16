@@ -176,8 +176,8 @@ void GlobalCallState::unholdOtherCall() const
         for (auto callObj : std::as_const(m_globalCallStateObjects)) {
             if (callObj->callState() & ICallState::State::OnHold) {
                 callObj->toggleHold();
+                break;
             }
-            break;
         }
     }
 }
