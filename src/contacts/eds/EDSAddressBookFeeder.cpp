@@ -16,35 +16,27 @@ Q_LOGGING_CATEGORY(lcEDSAddressBookFeeder, "gonnect.app.feeder.EDSAddressBookFee
 EDSAddressBookFeeder::EDSAddressBookFeeder(const QString &group, AddressBookManager *parent)
     : QObject(parent), m_group(group)
 {
+    connect(this, &EDSAddressBookFeeder::feederFailed, this, [this](){
+        qCWarning(lcEDSAddressBookFeeder) << "Failed to process EDS sources - trying later";
+
+        // Cancel all potentially active EDS async methods
+        g_cancellable_cancel(m_cancellable);
+
+        // Disconnect all EDS signal handlers
+        disconnectContactSignals();
+
+        // Prepare feeder for re-init
+        resetFeeder();
+        resetContacts();
+
+        // Add to retry queue
+        AddressBookManager::instance().addToRetryList(m_group);
+    });
 }
 
 EDSAddressBookFeeder::~EDSAddressBookFeeder()
 {
-    g_clear_object(&m_registry);
-    if (m_sources) {
-        g_list_free_full(m_sources, g_object_unref);
-    }
-    g_clear_pointer(&m_searchExpr, g_free);
-    g_clear_object(&m_cancellable);
-
-    for (auto client : std::as_const(m_clients)) {
-        g_clear_object(&client);
-    }
-
-    disconnectContactSignals();
-    for (auto clientView : std::as_const(m_clientViews)) {
-        g_clear_object(&clientView);
-    }
-
-    if (m_sourcePromise) {
-        delete m_sourcePromise;
-        m_sourcePromise = nullptr;
-    }
-
-    if (m_futureWatcher) {
-        m_futureWatcher->deleteLater();
-        m_futureWatcher = nullptr;
-    }
+    resetFeeder();
 }
 
 void EDSAddressBookFeeder::init()
@@ -102,20 +94,48 @@ void EDSAddressBookFeeder::init()
 
     QTimer::singleShot(5s, this, [this]() {
         if (!m_futureWatcher->isFinished()) {
-            qCDebug(lcEDSAddressBookFeeder) << "Failed to process EDS sources";
-
-            // Cancel all potentially active EDS async methods
-            g_cancellable_cancel(m_cancellable);
-
-            // Disconnect all EDS signal handlers
-            disconnectContactSignals();
-
             m_sourceFuture.cancel();
             m_futureWatcher->cancel();
+
+            Q_EMIT feederFailed();
         }
     });
 
     m_futureWatcher->setFuture(m_sourceFuture);
+}
+
+void EDSAddressBookFeeder::resetFeeder()
+{
+    g_clear_object(&m_registry);
+    if (m_sources) {
+        g_list_free_full(m_sources, g_object_unref);
+    }
+    g_clear_pointer(&m_searchExpr, g_free);
+    g_clear_object(&m_cancellable);
+
+    for (auto client : std::as_const(m_clients)) {
+        g_clear_object(&client);
+    }
+
+    disconnectContactSignals();
+    for (auto clientView : std::as_const(m_clientViews)) {
+        g_clear_object(&clientView);
+    }
+
+    if (m_sourcePromise) {
+        delete m_sourcePromise;
+        m_sourcePromise = nullptr;
+    }
+
+    if (m_futureWatcher) {
+        m_futureWatcher->deleteLater();
+        m_futureWatcher = nullptr;
+    }
+}
+
+void EDSAddressBookFeeder::resetContacts()
+{
+    AddressBook::instance().removeContactsBySource(m_group);
 }
 
 void EDSAddressBookFeeder::process()

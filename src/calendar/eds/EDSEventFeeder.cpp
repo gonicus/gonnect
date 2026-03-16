@@ -20,7 +20,7 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDa
       m_timeRangeEnd(timeRangeEnd)
 {
     connect(this, &EDSEventFeeder::feederFailed, this, [this](){
-        qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources";
+        qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources - trying later";
 
         // Cancel all potentially active EDS async methods
         g_cancellable_cancel(m_cancellable);

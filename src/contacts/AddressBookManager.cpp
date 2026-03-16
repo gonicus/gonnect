@@ -25,10 +25,16 @@ AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
 {
     m_retryTimer.setInterval(10s);
     connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
-        // TODO: Don't run forever. try again n times...
+        if (m_retryCounter <= 0 ) {
+            m_retryTimer.stop();
+            return;
+        }
+
         if (!m_retryFeederIds.isEmpty()) {
             retryFailedPlugins();
         }
+
+        m_retryCounter--;
     });
     m_retryTimer.start();
 }

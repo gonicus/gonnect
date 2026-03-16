@@ -24,6 +24,9 @@ public:
 
     void process() override;
 
+Q_SIGNALS:
+    void feederFailed();
+
 private:
     QString getField(EContact *contact, EContactField id);
     QString getFieldMerge(EContact *contact, EContactField pId, EContactField sId);
@@ -58,6 +61,9 @@ private:
                                           gpointer user_data);
 
     void processContacts(QString clientInfo, GSList *contacts);
+
+    void resetFeeder();
+    void resetContacts();
 
     QString m_group;
     BlockInfo m_blockInfo;

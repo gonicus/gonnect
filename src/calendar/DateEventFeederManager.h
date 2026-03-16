@@ -54,6 +54,7 @@ private:
     bool m_isReconnectSignalSetup = false;
 
     QTimer m_retryTimer;
+    int m_retryCounter = 5;
     QStringList m_retryFeederIds;
     QMutex m_retryQueueMutex;
 };
