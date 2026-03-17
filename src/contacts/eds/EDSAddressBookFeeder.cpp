@@ -143,8 +143,7 @@ void EDSAddressBookFeeder::resetFeeder()
     m_chainFuture = QFuture<void>();
 
     if (m_futureWatcher) {
-        m_futureWatcher->disconnect(this);
-        m_futureWatcher->waitForFinished();
+        m_futureWatcher->cancel();
 
         delete m_futureWatcher;
         m_futureWatcher = nullptr;
