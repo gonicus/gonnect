@@ -93,7 +93,7 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
 
                     Contact *contact = addressbook.addContact(
                             addressee.assembledName() + addressee.organization(), addressee.uid(),
-                            { m_priority, m_displayName }, addressee.assembledName(),
+                            { m_priority, m_displayName, m_group }, addressee.assembledName(),
                             addressee.organization(), email, changed, phoneNumbers);
 
                     if (!addressee.photo().isEmpty()) {
@@ -239,7 +239,7 @@ void AkonadiAddressBookFeeder::processSearchResult(KJob *job)
 
         Contact *contact = addressbook.addContact(
                 addressee.assembledName() + addressee.organization(), addressee.uid(),
-                { m_priority, m_displayName }, addressee.assembledName(), addressee.organization(),
+                { m_priority, m_displayName, m_group }, addressee.assembledName(), addressee.organization(),
                 email, changed, phoneNumbers);
 
         if (!addressee.photo().isEmpty()) {

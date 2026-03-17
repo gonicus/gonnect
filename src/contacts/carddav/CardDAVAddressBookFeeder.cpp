@@ -231,9 +231,9 @@ void CardDAVAddressBookFeeder::onParserFinished()
 
         if (m_ignoredIds.contains(cacheId) && m_ignoredIds.value(cacheId) >= modifiedDate) {
             continue;
-        } else if (Contact *cashedContact = m_cachedContacts.value(cacheId, nullptr)) {
-            if (cashedContact->lastModified() >= modifiedDate) {
-                AddressBook::instance().addContact(cashedContact);
+        } else if (Contact *cachedContact = m_cachedContacts.value(cacheId, nullptr)) {
+            if (cachedContact->lastModified() >= modifiedDate) {
+                AddressBook::instance().addContact(cachedContact);
                 continue;
             }
         }

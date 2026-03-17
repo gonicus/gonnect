@@ -105,7 +105,7 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
             }
         }
 
-        addressBook.addContact(contactId, "", { 1, "Outlook" }, name, company, email, QDateTime(),
+        addressBook.addContact(contactId, "", { 1, "Outlook", m_group }, name, company, email, QDateTime(),
                                phoneNumbers, BlockInfo());
     }
 
