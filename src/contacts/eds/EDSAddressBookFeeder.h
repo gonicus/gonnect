@@ -8,6 +8,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QPromise>
+#include <QTimer>
 
 #include "IAddressBookFeeder.h"
 #include "BlockInfo.h"
@@ -78,6 +79,8 @@ private:
 
     int m_sourceCount = 0;
     std::atomic<int> m_clientCount = 0;
+    QFuture<void> m_chainFuture;
+    QTimer m_sourceTimeout;
     QPromise<void> *m_sourcePromise = nullptr;
     QFuture<void> m_sourceFuture;
     QFutureWatcher<void> *m_futureWatcher = nullptr;
