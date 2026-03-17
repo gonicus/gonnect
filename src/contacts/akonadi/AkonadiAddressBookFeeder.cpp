@@ -239,8 +239,8 @@ void AkonadiAddressBookFeeder::processSearchResult(KJob *job)
 
         Contact *contact = addressbook.addContact(
                 addressee.assembledName() + addressee.organization(), addressee.uid(),
-                { m_priority, m_displayName, m_group }, addressee.assembledName(), addressee.organization(),
-                email, changed, phoneNumbers);
+                { m_priority, m_displayName, m_group }, addressee.assembledName(),
+                addressee.organization(), email, changed, phoneNumbers);
 
         if (!addressee.photo().isEmpty()) {
             AvatarManager::instance().addExternalImage(contact->id(), addressee.photo().rawData(),

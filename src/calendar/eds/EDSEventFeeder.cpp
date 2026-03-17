@@ -19,7 +19,7 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDa
       m_timeRangeStart(timeRangeStart),
       m_timeRangeEnd(timeRangeEnd)
 {
-    connect(this, &EDSEventFeeder::feederFailed, this, [this](){
+    connect(this, &EDSEventFeeder::feederFailed, this, [this]() {
         qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources - trying later";
 
         // Cancel all potentially active EDS async methods
@@ -240,10 +240,7 @@ void EDSEventFeeder::disconnectCalendarSignals()
 {
     for (auto view : std::as_const(m_clientViews)) {
         // Match all signals with the same gpointer user_data
-        g_signal_handlers_disconnect_matched(view,
-                                             G_SIGNAL_MATCH_DATA,
-                                             0, 0, NULL, NULL,
-                                             this);
+        g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, this);
     }
 }
 

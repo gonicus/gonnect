@@ -29,7 +29,7 @@ DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ paren
 
     m_retryTimer.setInterval(10s);
     connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
-        if (m_retryCounter <= 0 ) {
+        if (m_retryCounter <= 0) {
             m_retryTimer.stop();
             return;
         }

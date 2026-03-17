@@ -29,5 +29,6 @@ IDateEventFeeder *AkonadiEventFeederFactory::createFeeder(
         const QString &settingsGroup, const QDateTime &currentTime, const QDateTime &timeRangeStart,
         const QDateTime &timeRangeEnd, DateEventFeederManager *feederManager) const
 {
-    return new AkonadiEventFeeder(feederManager, settingsGroup, currentTime, timeRangeStart, timeRangeEnd);
+    return new AkonadiEventFeeder(feederManager, settingsGroup, currentTime, timeRangeStart,
+                                  timeRangeEnd);
 }
