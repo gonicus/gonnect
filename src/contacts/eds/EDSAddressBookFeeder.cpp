@@ -25,16 +25,19 @@ EDSAddressBookFeeder::~EDSAddressBookFeeder()
 
 void EDSAddressBookFeeder::init()
 {
-    connect(this, &EDSAddressBookFeeder::feederFailed, this, [this]() {
-        qCWarning(lcEDSAddressBookFeeder) << "Failed to process EDS sources - trying later";
+    connect(
+            this, &EDSAddressBookFeeder::feederFailed, this,
+            [this]() {
+                qCWarning(lcEDSAddressBookFeeder) << "Failed to process EDS sources - trying later";
 
-        // Prepare feeder for re-init
-        resetContacts();
-        resetFeeder();
+                // Prepare feeder for re-init
+                resetContacts();
+                resetFeeder();
 
-        // Add to retry queue
-        AddressBookManager::instance().addToRetryList(m_group);
-    }, Qt::SingleShotConnection);
+                // Add to retry queue
+                AddressBookManager::instance().addToRetryList(m_group);
+            },
+            Qt::SingleShotConnection);
 
     m_cancellable = g_cancellable_new();
 
