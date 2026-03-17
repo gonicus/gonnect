@@ -154,19 +154,13 @@ void AddressBook::resetContacts()
 
 void AddressBook::removeContactsBySource(const QString &source)
 {
-    Q_UNUSED(source)
-
     QMutexLocker lock(&m_feederMutex);
 
     for (auto contact : std::as_const(m_contacts)) {
-        Q_UNUSED(contact)
-        // TODO Contact class needs a source parameter, for stuff like "eds-contacts"
-        /*
-        if (contact->source() == source) {
+        if (contact->contactSourceInfo().configId == source) {
             m_contacts.remove(contact->id());
             m_contactsBySourceId.remove(contact->sourceUid());
         }
-        */
     }
 
     Q_EMIT contactsCleared();

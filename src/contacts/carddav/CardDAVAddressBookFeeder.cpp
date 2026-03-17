@@ -127,8 +127,8 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
 
         if (!uuid.isEmpty() && !name.isEmpty() && !phoneNumbers.isEmpty()) {
             Contact *contact = AddressBook::instance().addContact(
-                    uuid, remoteUid, { m_priority, m_displayName }, name, org, email, modifiedDate,
-                    phoneNumbers, m_blockInfo);
+                    uuid, remoteUid, { m_priority, m_displayName, m_group }, name, org, email,
+                    modifiedDate, phoneNumbers, m_blockInfo);
             m_cachedContacts.insert(uuid, contact);
 
             processPhotoProperty(contact->id(), photoData, modifiedDate);

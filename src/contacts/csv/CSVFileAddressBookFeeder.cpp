@@ -88,9 +88,9 @@ void CsvFileAddressBookFeeder::feedAddressBook()
                     { Contact::NumberType::Home, splitted.at(6), splitted.at(7) == "true" });
         }
 
-        addressbook.addContact(splitted.at(0) + splitted.at(1), "", { m_priority, m_displayName },
-                               splitted.at(0), splitted.at(1), "", QDateTime(), phoneNumbers,
-                               m_blockInfo);
+        addressbook.addContact(splitted.at(0) + splitted.at(1), "",
+                               { m_priority, m_displayName, m_group }, splitted.at(0),
+                               splitted.at(1), "", QDateTime(), phoneNumbers, m_blockInfo);
         ++contactCount;
     }
 

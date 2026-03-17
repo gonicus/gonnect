@@ -16,7 +16,7 @@ Q_LOGGING_CATEGORY(lcEDSAddressBookFeeder, "gonnect.app.feeder.EDSAddressBookFee
 EDSAddressBookFeeder::EDSAddressBookFeeder(const QString &group, AddressBookManager *parent)
     : QObject(parent), m_group(group)
 {
-    connect(this, &EDSAddressBookFeeder::feederFailed, this, [this](){
+    connect(this, &EDSAddressBookFeeder::feederFailed, this, [this]() {
         qCWarning(lcEDSAddressBookFeeder) << "Failed to process EDS sources - trying later";
 
         // Cancel all potentially active EDS async methods
@@ -246,10 +246,7 @@ void EDSAddressBookFeeder::disconnectContactSignals()
 {
     for (auto view : std::as_const(m_clientViews)) {
         // Match all signals with the same gpointer user_data
-        g_signal_handlers_disconnect_matched(view,
-                                             G_SIGNAL_MATCH_DATA,
-                                             0, 0, NULL, NULL,
-                                             this);
+        g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, this);
     }
 }
 
@@ -312,7 +309,7 @@ void EDSAddressBookFeeder::processContactsAdded(GSList *contacts)
 
             Contact *contact = addressbook.addContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
-                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
+                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName, m_group },
                     getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers, m_blockInfo);
 
@@ -486,7 +483,7 @@ void EDSAddressBookFeeder::processContacts(QString clientInfo, GSList *contacts)
 
             Contact *contact = addressbook.addContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
-                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
+                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName, m_group },
                     getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers, m_blockInfo);
 

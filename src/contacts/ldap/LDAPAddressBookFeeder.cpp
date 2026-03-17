@@ -493,7 +493,8 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
                 }
             }
 
-            Q_EMIT newContactReady(dn, sourceUid, { m_priority, m_displayName }, cn, company, mail,
+            Q_EMIT newContactReady(dn, sourceUid, { m_priority, m_displayName, m_group }, cn,
+                                   company, mail,
                                    QDateTime::fromString(modifyTimestamp, "yyyyMMddhhmmsst"),
                                    phoneNumbers, QPrivateSignal());
 
