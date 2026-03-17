@@ -16,16 +16,6 @@ Q_LOGGING_CATEGORY(lcEDSAddressBookFeeder, "gonnect.app.feeder.EDSAddressBookFee
 EDSAddressBookFeeder::EDSAddressBookFeeder(const QString &group, AddressBookManager *parent)
     : QObject(parent), m_group(group)
 {
-    connect(this, &EDSAddressBookFeeder::feederFailed, this, [this]() {
-        qCWarning(lcEDSAddressBookFeeder) << "Failed to process EDS sources - trying later";
-
-        // Prepare feeder for re-init
-        resetContacts();
-        resetFeeder();
-
-        // Add to retry queue
-        AddressBookManager::instance().addToRetryList(m_group);
-    });
 }
 
 EDSAddressBookFeeder::~EDSAddressBookFeeder()
@@ -35,6 +25,17 @@ EDSAddressBookFeeder::~EDSAddressBookFeeder()
 
 void EDSAddressBookFeeder::init()
 {
+    connect(this, &EDSAddressBookFeeder::feederFailed, this, [this]() {
+        qCWarning(lcEDSAddressBookFeeder) << "Failed to process EDS sources - trying later";
+
+        // Prepare feeder for re-init
+        resetContacts();
+        resetFeeder();
+
+        // Add to retry queue
+        AddressBookManager::instance().addToRetryList(m_group);
+    }, Qt::SingleShotConnection);
+
     m_cancellable = g_cancellable_new();
 
     GError *error = NULL;
@@ -103,6 +104,9 @@ void EDSAddressBookFeeder::init()
 
 void EDSAddressBookFeeder::resetFeeder()
 {
+    m_sourceCount = 0;
+    m_clientCount = 0;
+
     if (m_sourceTimeout.isActive()) {
         m_sourceTimeout.stop();
     }

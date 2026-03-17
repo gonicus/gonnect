@@ -30,7 +30,7 @@ void EDSEventFeeder::init()
 {
     connect(
             this, &EDSEventFeeder::feederFailed, this,
-            [this]() { // TEST ONLY
+            [this]() {
                 qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources - trying later";
 
                 // Prepare feeder for re-init
@@ -108,6 +108,9 @@ void EDSEventFeeder::init()
 
 void EDSEventFeeder::resetFeeder()
 {
+    m_sourceCount = 0;
+    m_clientCount = 0;
+
     if (m_sourceTimeout.isActive()) {
         m_sourceTimeout.stop();
     }
