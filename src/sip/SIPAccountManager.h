@@ -32,6 +32,7 @@ public:
     QList<SIPAccount *> accounts() const { return m_accounts; }
 
     Q_INVOKABLE void setAccountCredentials(const QString &accountId, const QString &password);
+    Q_INVOKABLE void callVoiceBox(const QString &accountId);
 
     ~SIPAccountManager() = default;
 
@@ -42,6 +43,7 @@ public:
 Q_SIGNALS:
     void accountsChanged();
     void sipRegisteredChanged(bool status);
+    void voiceMessagesWaitingChanged(QString accountId, int voiceNew, int voiceOld);
     void authorizationFailed(QString accountId);
     void connectionError(int code, QString message);
 

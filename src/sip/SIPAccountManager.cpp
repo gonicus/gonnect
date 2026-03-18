@@ -57,6 +57,11 @@ void SIPAccountManager::initialize()
                             Q_EMIT connectionError(code, message);
                         }
                     });
+            connect(sipAccount, &SIPAccount::voiceMessagesWaitingChanged, this,
+                    [this, sipAccount](int voiceNew, int voiceOld) {
+                        Q_EMIT voiceMessagesWaitingChanged(sipAccount->id(), voiceNew, voiceOld);
+                    });
+
             updateSipRegistered();
 
             connect(sipAccount, &SIPAccount::initialized, this,
@@ -82,6 +87,15 @@ void SIPAccountManager::setAccountCredentials(const QString &accountId, const QS
 {
     if (auto account = getAccount(accountId)) {
         account->setCredentials(password);
+    } else {
+        qCCritical(lcSIPAccountManager) << "account" << accountId << "not found";
+    }
+}
+
+void SIPAccountManager::callVoiceBox(const QString &accountId)
+{
+    if (auto account = getAccount(accountId)) {
+        account->callVoiceBox();
     } else {
         qCCritical(lcSIPAccountManager) << "account" << accountId << "not found";
     }

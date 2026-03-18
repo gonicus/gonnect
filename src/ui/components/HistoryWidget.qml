@@ -26,6 +26,19 @@ BaseWidget {
 
             property alias searchVisible: historySearchField.visible
 
+            // TODO: What to do on small window sizes?
+
+            VoiceMailField {
+                id: voiceMailField
+                visible: !historyHeading.searchVisible && voiceMailField.hasVoicemail
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: historyFilterMediumSelector.left
+                    leftMargin: 20
+                    rightMargin: 20
+                }
+            }
+
             SearchField {
                 id: historySearchField
                 visible: false
