@@ -159,6 +159,10 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                                 << statusCode << ") "
                                 << " last reason " << ci.lastReason << " contactId " << m_contactId;
 
+    if (statusCode == PJSIP_SC_RINGING) {
+        ringToneFactory.ringingTone()->start();
+    }
+
     switch (ci.state) {
     case PJSIP_INV_STATE_NULL:
         if (!m_isSilent) {
@@ -171,7 +175,6 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     case PJSIP_INV_STATE_CONNECTING:
     case PJSIP_INV_STATE_CALLING:
         if (!m_isSilent && !m_incoming) {
-            ringToneFactory.ringingTone()->start();
             addCallState(ICallState::State::RingingOutgoing);
         }
         break;
