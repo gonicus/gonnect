@@ -60,9 +60,9 @@ int main(int argc, char *argv[])
 
     // Assemble the Qt web engine flags
     QStringList chromiumFlags;
-    //chromiumFlags.push_back("--enable-features=WebRtcPipeWireCamera");
-    //chromiumFlags.push_back("--enable-logging=stderr");
-    //chromiumFlags.push_back("--v=3");
+    // chromiumFlags.push_back("--enable-features=WebRtcPipeWireCamera");
+    // chromiumFlags.push_back("--enable-logging=stderr");
+    // chromiumFlags.push_back("--v=3");
 #if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
     chromiumFlags.push_back("--use-fake-ui-for-media-stream");
 #endif

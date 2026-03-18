@@ -8,8 +8,8 @@
 #include "SIPBuddy.h"
 #include "ReadOnlyConfdSettings.h"
 
-
-struct MwiInfo {
+struct MwiInfo
+{
     bool messagesWaiting = false;
     QString messageAccount;
 
@@ -17,7 +17,6 @@ struct MwiInfo {
     quint16 voiceNew = 0;
     quint16 voiceOld = 0;
 };
-
 
 class SIPAccount : public QObject, public pj::Account
 {
@@ -90,7 +89,7 @@ private:
 
     QString addTransport(const QString &uri);
 
-    MwiInfo parseMwiBody(const QString& body);
+    MwiInfo parseMwiBody(const QString &body);
     void parseMessageCount(const QString &value, quint16 &newMessages, quint16 &oldMessages);
 
     QList<SIPCall *> m_calls;
@@ -126,6 +125,4 @@ Q_SIGNALS:
     void authorizationFailed();
     void connectionError(int code, QString message);
     void messageReceived(const QString &sender, const QString &message, const QString &mimeType);
-
-
 };

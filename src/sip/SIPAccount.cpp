@@ -519,7 +519,8 @@ void SIPAccount::parseMessageCount(const QString &value, quint16 &newMessages, q
     }
 }
 
-MwiInfo SIPAccount::parseMwiBody(const QString &body) {
+MwiInfo SIPAccount::parseMwiBody(const QString &body)
+{
     MwiInfo info;
 
     QStringList lines = body.split("\r\n");
@@ -548,7 +549,8 @@ MwiInfo SIPAccount::parseMwiBody(const QString &body) {
     return info;
 }
 
-void SIPAccount::onMwiInfo(pj::OnMwiInfoParam &prm) {
+void SIPAccount::onMwiInfo(pj::OnMwiInfoParam &prm)
+{
     qCDebug(lcSIPAccount) << "received MWI info message - subscription status:" << prm.state;
 
     QString fullMsg = QString::fromStdString(prm.rdata.wholeMsg);
@@ -588,26 +590,29 @@ void SIPAccount::onMwiInfo(pj::OnMwiInfoParam &prm) {
     }
 }
 
-bool SIPAccount::callVoiceBox() {
+bool SIPAccount::callVoiceBox()
+{
     if (!m_voiceMailUri.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via" << m_voiceMailUri;
         call(m_account, m_voiceMailUri, "", false);
         return true;
 
     } else if (!m_messageAccount.isEmpty()) {
-        qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account" << m_messageAccount;
+        qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account"
+                              << m_messageAccount;
         call(m_account, m_messageAccount, "", false);
         return true;
     }
 
-    qCCritical(lcSIPAccount) << "no voice mail account specified - use voiceMailUri or configure MWI/Message-Account to contain one";
+    qCCritical(lcSIPAccount) << "no voice mail account specified - use voiceMailUri or configure "
+                                "MWI/Message-Account to contain one";
     return false;
 }
 
 void SIPAccount::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 {
-    qCDebug(lcSIPAccount) << "sent message to" << prm.toUri << ", status:" << prm.code
-                          << prm.reason << (intptr_t)prm.userData;
+    qCDebug(lcSIPAccount) << "sent message to" << prm.toUri << ", status:" << prm.code << prm.reason
+                          << (intptr_t)prm.userData;
 }
 
 void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
