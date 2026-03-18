@@ -60,21 +60,23 @@ int main(int argc, char *argv[])
 
     // Assemble the Qt web engine flags
     QStringList chromiumFlags;
-    // chromiumFlags.push_back("--enable-features=WebRtcPipeWireCamera");
-    // chromiumFlags.push_back("--enable-logging=stderr");
-    // chromiumFlags.push_back("--v=3");
+    auto webenginePresetEnv = qgetenv("GONNECT_QTWEBENGINE_CHROMIUM_FLAGS");
+    if (webenginePresetEnv.isEmpty()) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
-    chromiumFlags.push_back("--use-fake-ui-for-media-stream");
+        chromiumFlags.push_back("--use-fake-ui-for-media-stream");
 #endif
-    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
-        chromiumFlags.push_back("--disable-gpu");
-    }
-    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
-        chromiumFlags.push_back("--disable-renderer-accessibility");
-    }
+        if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
+            chromiumFlags.push_back("--disable-gpu");
+        }
+        if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
+            chromiumFlags.push_back("--disable-renderer-accessibility");
+        }
 
-    if (chromiumFlags.size() > 0) {
-        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
+        if (chromiumFlags.size() > 0) {
+            qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
+        }
+    } else {
+        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", webenginePresetEnv);
     }
 
     int exitCode = 0;
