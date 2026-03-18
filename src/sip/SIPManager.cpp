@@ -90,6 +90,8 @@ void SIPManager::initialize()
                                                         "*.critical=true"));
     }
 
+    epConfig.uaConfig.mwiUnsolicitedEnabled = true;
+
     m_mediaConfig = new SIPMediaConfig(this);
     m_mediaConfig->applyConfig(epConfig);
 

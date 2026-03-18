@@ -77,6 +77,19 @@ void SIPAccount::initialize()
         return;
     }
 
+    QString voiceMailUri = m_settings.value("voiceMailUri", "").toString();
+    if (!voiceMailUri.isEmpty()) {
+        if (!sipURI.match(voiceMailUri).hasMatch()) {
+            qCCritical(lcSIPAccount) << "'voiceMailUri' is no valid SIP URI:" << voiceMailUri;
+            ErrorBus::instance().addFatalError(
+                    tr("'voiceMailUri' is no valid SIP URI: %1").arg(userUri));
+            Q_EMIT initialized(false);
+            return;
+        }
+
+        m_voiceMailUri = voiceMailUri;
+    }
+
     QString registrarUri = m_settings.value("registrarUri", "").toString();
     if (!registrarUri.isEmpty()) {
         m_domain = sipURI.match(registrarUri).captured(2);
@@ -132,6 +145,9 @@ void SIPAccount::initialize()
         }
     }
     m_accountConfig.mediaConfig.srtpUse = srtpUseValue;
+
+    m_accountConfig.mwiConfig.enabled = true;
+    m_accountConfig.mwiConfig.expirationSec = 3600;
 
     int rtpPort = m_settings.value("rtpPort", 0).toInt(&ok);
     if (!ok) {
@@ -483,15 +499,120 @@ long SIPAccount::sendMessage(const QString &recipient, const QString &message,
     return id;
 }
 
+void SIPAccount::parseMessageCount(const QString &value, quint16 &newMessages, quint16 &oldMessages)
+{
+    static QRegularExpression messageMatcher("^(\\d+)/(\\d+)\\s+\\((\\d+)/(\\d+)\\)$");
+
+    auto match = messageMatcher.match(value);
+    if (match.hasMatch()) {
+        bool ok = false;
+
+        newMessages = match.captured(1).toUInt(&ok);
+        if (!ok) {
+            qCWarning(lcSIPAccount) << "failed to parse 'new message count' from" << value;
+        }
+
+        oldMessages = match.captured(2).toUInt(&ok);
+        if (!ok) {
+            qCWarning(lcSIPAccount) << "failed to parse 'old message count' from" << value;
+        }
+    }
+}
+
+MwiInfo SIPAccount::parseMwiBody(const QString &body) {
+    MwiInfo info;
+
+    QStringList lines = body.split("\r\n");
+    for (auto line : std::as_const(lines)) {
+        line = line.trimmed().toLower();
+
+        auto colonPos = line.indexOf(":");
+        if (colonPos < 0) {
+            continue;
+        }
+
+        QString key = line.sliced(0, colonPos);
+        QString value = line.sliced(colonPos + 1).trimmed();
+
+        if (key == "messages-waiting") {
+            info.messagesWaiting = value == "yes";
+
+        } else if (key == "message-account") {
+            info.messageAccount = value;
+
+        } else if (key == "voice-message") {
+            parseMessageCount(value, info.voiceNew, info.voiceOld);
+        }
+    }
+
+    return info;
+}
+
+void SIPAccount::onMwiInfo(pj::OnMwiInfoParam &prm) {
+    qCDebug(lcSIPAccount) << "received MWI info message - subscription status:" << prm.state;
+
+    QString fullMsg = QString::fromStdString(prm.rdata.wholeMsg);
+    QStringList parts = fullMsg.split("\r\n\r\n");
+
+    if (parts.length() < 2 || parts[1].isEmpty()) {
+        qCDebug(lcSIPAccount) << "MWI message body has no payload";
+        return;
+    }
+
+    bool changed = false;
+
+    auto mwiInfo = parseMwiBody(parts[1]);
+
+    if (mwiInfo.messagesWaiting != m_messagesWaiting) {
+        qCInfo(lcSIPAccount) << "Messages waiting:" << mwiInfo.messagesWaiting;
+        m_messagesWaiting = mwiInfo.messagesWaiting;
+        changed = true;
+    }
+
+    if (mwiInfo.voiceNew != m_newVoiceMessages) {
+        qCInfo(lcSIPAccount) << "New voice messages:" << mwiInfo.voiceNew;
+        m_newVoiceMessages = mwiInfo.voiceNew;
+        changed = true;
+    }
+
+    if (mwiInfo.voiceOld != m_readVoiceMessages) {
+        qCInfo(lcSIPAccount) << "Read voice messages:" << mwiInfo.voiceOld;
+        m_readVoiceMessages = mwiInfo.voiceOld;
+        changed = true;
+    }
+
+    m_messageAccount = mwiInfo.messageAccount;
+
+    if (changed) {
+        Q_EMIT voiceMessagesWaitingChanged();
+    }
+}
+
+bool SIPAccount::callVoiceBox() {
+    if (!m_voiceMailUri.isEmpty()) {
+        qCDebug(lcSIPAccount) << "calling voice mail via" << m_voiceMailUri;
+        call(m_account, m_voiceMailUri, "", false);
+        return true;
+
+    } else if (!m_messageAccount.isEmpty()) {
+        qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account" << m_messageAccount;
+        call(m_account, m_messageAccount, "", false);
+        return true;
+    }
+
+    qCCritical(lcSIPAccount) << "no voice mail account specified - use voiceMailUri or configure MWI/Message-Account to contain one";
+    return false;
+}
+
 void SIPAccount::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 {
-    qCDebug(lcSIPAccount) << "sent message to " << prm.toUri << ", status: " << prm.code
+    qCDebug(lcSIPAccount) << "sent message to" << prm.toUri << ", status:" << prm.code
                           << prm.reason << (intptr_t)prm.userData;
 }
 
 void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
 {
-    qCDebug(lcSIPAccount) << "received message from " << prm.fromUri << ":" << prm.msgBody;
+    qCDebug(lcSIPAccount) << "received message from" << prm.fromUri << ":" << prm.msgBody;
     Q_EMIT messageReceived(prm.fromUri.c_str(), prm.msgBody.c_str(), prm.contentType.c_str());
 }
 
