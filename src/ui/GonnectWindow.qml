@@ -414,15 +414,14 @@ BaseWindow {
                 anchors {
                     right: parent.right
                     bottom: parent.bottom
-
-                    topMargin: 2
-                    bottomMargin: 2
-                    rightMargin: 12
+                    //topMargin: 2
+                    //bottomMargin: 2
+                    rightMargin: 24
                 }
 
                 FirstAidButton {
                     id: firstAidButton
-                    height: bottomBar.height - 4
+                    height: 42
                     z: 100000
                 }
             }
