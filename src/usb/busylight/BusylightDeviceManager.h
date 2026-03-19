@@ -20,6 +20,8 @@ public:
         return *_instance;
     }
 
+    ~BusylightDeviceManager();
+
     bool createBusylightDevice(const struct hid_device_info &deviceInfo);
     void removeDevice(IBusylightDevice *dev);
 
