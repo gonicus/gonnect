@@ -87,6 +87,8 @@ void USBDevices::initialize()
 
 void USBDevices::shutdown()
 {
+    BusylightDeviceManager::instance().shutdown();
+
     if (!m_ctx) {
         return;
     }
