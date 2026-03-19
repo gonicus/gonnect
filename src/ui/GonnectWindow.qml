@@ -415,13 +415,14 @@ BaseWindow {
                     right: parent.right
                     bottom: parent.bottom
 
-                    topMargin: 6
-                    bottomMargin: 6
+                    topMargin: 2
+                    bottomMargin: 2
                     rightMargin: 12
                 }
 
                 FirstAidButton {
                     id: firstAidButton
+                    height: bottomBar.height - 4
                     z: 100000
                 }
             }

@@ -3,13 +3,12 @@ import QtQuick.Controls.Material
 import QtQuick.Controls.impl
 import base
 
-Item {
+Button {
     id: control
-    implicitHeight: control.iconSize
-    implicitWidth: control.iconSize + 10 + firstAidLabel.implicitWidth
     visible: GlobalInfo.hasEmergencyNumbers
-
-    property int iconSize: 24
+    text: qsTr("First Aid")
+    icon.source: "qrc:/icons/ISO_7010_E004" + qsTr("QT_CULTURAL_SPHERE", "QGuiApplication") + ".svg"
+    highlighted: true
 
     Accessible.role: Accessible.Button
     Accessible.name: firstAidLabel.text
@@ -17,65 +16,12 @@ Item {
     Accessible.focusable: true
     Accessible.onPressAction: ViewHelper.showFirstAid()
 
-    Rectangle {
-        id: firstAidIcon
-        width: control.iconSize
-        height: control.iconSize
-        radius: control.iconSize / 2
-        color: Qt.rgba(1, 1, 1)
-        anchors.left: parent.left
+    Material.accent: Theme.emergencyColor
 
-        Rectangle {
-            id: verticalBar
-            color: Qt.rgba(1, 0, 0)
-            width: 1/4 * control.iconSize
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: parent.top
-                bottom: parent.bottom
-                topMargin: 1/12 * control.iconSize
-                bottomMargin: 1/12 * control.iconSize
-            }
-
-            Accessible.ignored: true
-        }
-
-        Rectangle {
-            id: horizontalBar
-            color: Qt.rgba(1, 0, 0)
-            height: 1/4 * control.iconSize
-            anchors {
-                verticalCenter: parent.verticalCenter
-                left: parent.left
-                right: parent.right
-                leftMargin: 1/12 * control.iconSize
-                rightMargin: 1/12 * control.iconSize
-            }
-
-            Accessible.ignored: true
-        }
-
-        Accessible.ignored: true
+    Component.onCompleted: () => {
+        control.icon.width = 24
+        control.icon.height = 24
     }
 
-    Label {
-        id: firstAidLabel
-        text: qsTr("First Aid")
-        color: firstAidHoverHandler.hovered ? Theme.primaryTextColor : Theme.inactiveTextColor
-        anchors {
-            verticalCenter: control.verticalCenter
-            left: firstAidIcon.right
-            leftMargin: 10
-        }
-
-        Accessible.ignored: true
-    }
-
-    HoverHandler {
-        id: firstAidHoverHandler
-    }
-
-    TapHandler {
-        onTapped: () => ViewHelper.showFirstAid()
-    }
+    onClicked: () => ViewHelper.showFirstAid()
 }
