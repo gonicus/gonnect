@@ -19,8 +19,6 @@ Item {
     property bool hasNewVoicemail: control.newVoicemailCount > 0
     property bool hasVoicemail: control.hasNewVoicemail || control.oldVoicemailCount > 0
 
-    // TODO: If hasNewVoicemail find parent page of widget & tab linked to page -> set redDot
-
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Listen to voicemail")
     Accessible.onPressAction: () => SIPAccountManager.callVoiceBox(control.accountId)
@@ -59,7 +57,9 @@ Item {
             text: control.hasNewVoicemail
                   ? (control.newVoicemailCount + qsTr(" new voice mails"))
                   : (control.oldVoicemailCount + qsTr(" old voice mails"))
+            font.weight: Font.Medium
             color: Theme.secondaryTextColor
+            elide: Text.ElideRight
 
             Accessible.ignored: true
         }

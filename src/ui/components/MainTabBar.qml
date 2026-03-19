@@ -53,8 +53,8 @@ Item {
             SM.uiHasActiveEditDialog = true
 
             item.accepted.connect((name, iconId) => {
-                                      control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
-                                      control.mainWindow.createPage(id, iconId, name)
+                                      const tab = control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
+                                      control.mainWindow.createPage(id, name, iconId, tab)
                                   })
             item.show()
         }
@@ -80,13 +80,9 @@ Item {
                                       page.name = name
 
                                       // Update tab button
-                                      const tabList = control.getTabList()
-                                      for (const tab of tabList) {
-                                          if (tab.pageId === id) {
-                                              tab.iconSource = Icons[iconId]
-                                              tab.labelText = name
-                                              break
-                                          }
+                                      if (page.tabButton) {
+                                          page.tabButton.iconSource = Icons[iconId]
+                                          page.tabButton.labelText = name
                                       }
                                   })
             item.prefill(page.iconId, page.name)
@@ -94,7 +90,7 @@ Item {
         }
     }
 
-    function createTab(id : string, type : int, iconId : string, name : string) {
+    function createTab(id : string, type : int, iconId : string, name : string) : variant {
         const iconPath = Icons[iconId]
         const tabButton = tabDelegate.createObject(topMenuCol,
                                                  {
@@ -110,10 +106,15 @@ Item {
                                                  })
         if (tabButton === null) {
             console.error(category, "could not create tab button component")
-            return
+            return tabButton
         }
 
         control.dynamicPageCount += 1
+        return tabButton
+    }
+
+    function getTabById(id : string) : variant {
+        return [...topMenuCol.children].find((button) => button.pageId === id);
     }
 
     function getTabList() {
@@ -204,6 +205,12 @@ Item {
             Accessible.description: qsTr("The currently selected tab")
             Accessible.focusable: true
             Accessible.onPressAction: () => delg.switchTab()
+
+            function updateRedDot(state : bool) {
+                if (delg.showRedDot !== state) {
+                    delg.showRedDot = state
+                }
+            }
 
             function switchTab() {
                 if (delg.isEnabled) {

@@ -19,22 +19,27 @@ BaseWidget {
         CardHeading {
             id: historyHeading
             text: qsTr("History")
+            showDivider: historyHeading.voicemailVisible
+            showHeading: true // TODO: Don't show on certain widget size...
             anchors {
                 left: parent.left
                 right: parent.right
             }
 
             property alias searchVisible: historySearchField.visible
+            property alias voicemailVisible: voiceMailField.hasVoicemail
 
-            // TODO: What to do on small window sizes?
+            onVoicemailVisibleChanged: () => {
+                control.page?.tabButton?.updateRedDot(historyHeading.voicemailVisible)
+            }
 
             VoiceMailField {
                 id: voiceMailField
-                visible: !historyHeading.searchVisible && voiceMailField.hasVoicemail
+                visible: !historyHeading.searchVisible && historyHeading.voicemailVisible
                 anchors {
                     verticalCenter: parent.verticalCenter
-                    right: historyFilterMediumSelector.left
-                    leftMargin: 20
+                    left: parent.left
+                    leftMargin: 20 + historyHeading.headingMargin
                     rightMargin: 20
                 }
             }

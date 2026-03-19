@@ -464,7 +464,7 @@ Item {
     }
 
     Rectangle {
-        id: elabsedTimeSeparator
+        id: elapsedTimeSeparator
         height: 32
         width: 1
         color: Theme.borderColor
@@ -483,7 +483,7 @@ Item {
         text: ViewHelper.secondsToNiceText(internal.elapsedSeconds)
         spacing: 4
         anchors {
-            left: elabsedTimeSeparator.right
+            left: elapsedTimeSeparator.right
             leftMargin: 20
             verticalCenter: parent.verticalCenter
         }

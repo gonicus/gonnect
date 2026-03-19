@@ -11,6 +11,7 @@ Item {
     required property string pageId
     required property string name
     required property string iconId
+    required property var tabButton
 
     readonly property alias grid: snapGrid
     readonly property alias gridWidth: snapGrid.width
