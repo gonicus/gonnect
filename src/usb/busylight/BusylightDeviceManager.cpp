@@ -158,7 +158,8 @@ void BusylightDeviceManager::updateBusylightState()
     }
 }
 
-void BusylightDeviceManager::shutdown() {
+void BusylightDeviceManager::shutdown()
+{
     stopBlinking();
     switchOff();
     switchStreamlightOff();

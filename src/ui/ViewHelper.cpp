@@ -289,7 +289,8 @@ void ViewHelper::updateIsActiveVideoCall()
     }
 }
 
-QString ViewHelper::culturalSphereExtension() const {
+QString ViewHelper::culturalSphereExtension() const
+{
     auto sphere = tr("QT_CULTURAL_SPHERE", "QGuiApplication");
     return sphere == "QT_CULTURAL_SPHERE" ? "" : sphere;
 }
