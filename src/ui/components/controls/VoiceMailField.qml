@@ -57,9 +57,10 @@ Item {
             text: control.hasNewVoicemail
                   ? (control.newVoicemailCount + qsTr(" new voice mails"))
                   : (control.oldVoicemailCount + qsTr(" old voice mails"))
+            font.pixelSize: 16
             font.weight: Font.Medium
-            color: Theme.secondaryTextColor
             elide: Text.ElideRight
+            color: Theme.secondaryTextColor
 
             Accessible.ignored: true
         }
