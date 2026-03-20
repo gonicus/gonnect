@@ -84,6 +84,7 @@ void StateManager::initialize()
         auto &cm = SIPCallManager::instance();
         if (action == "dial") {
             qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+            qobject_cast<Application *>(Application::instance())->rootWindow()->raise();
         } else if (action == "hangup") {
             cm.endAllCalls();
         } else if (action == "redial") {
