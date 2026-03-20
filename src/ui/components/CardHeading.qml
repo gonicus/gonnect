@@ -34,6 +34,8 @@ Item {
             active: control.showHeading
             sourceComponent: headingComponent
         }
+
+        Accessible.ignored: true
     }
 
     Component {

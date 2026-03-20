@@ -10,6 +10,10 @@ BaseWidget {
     minCellWidth: 20
     minCellHeight: 15
 
+    onCleanupRequested: {
+        control.page?.tabButton?.updateRedDot(false)
+    }
+
     Rectangle {
         id: historyWidget
         parent: control.root
@@ -20,7 +24,7 @@ BaseWidget {
             id: historyHeading
             text: qsTr("History")
             showDivider: historyHeading.voicemailVisible
-            showHeading: historyWidget.width > 650
+            showHeading: historyWidget.width > 650 || historyHeading.showDivider === false
             anchors {
                 left: parent.left
                 right: parent.right
