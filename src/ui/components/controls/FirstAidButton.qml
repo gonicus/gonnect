@@ -11,7 +11,9 @@ Button {
     highlighted: true
 
     padding: 0
-    spacing: 0
+    spacing: 6
+    leftPadding: 10
+    rightPadding: 10
 
     Accessible.role: Accessible.Button
     Accessible.name: control.text
@@ -22,8 +24,8 @@ Button {
     Material.accent: Theme.emergencyColor
 
     Component.onCompleted: () => {
-        control.icon.width = 32
-        control.icon.height = 32
+        control.icon.width = 16
+        control.icon.height = 16
     }
 
     onClicked: () => ViewHelper.showFirstAid()
