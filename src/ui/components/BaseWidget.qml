@@ -30,6 +30,8 @@ Item {
         }
     }
 
+    property int notifications: 0
+
     property real gridWidth
     property real gridHeight
     property real gridCellWidth

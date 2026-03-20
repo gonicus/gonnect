@@ -100,7 +100,6 @@ Item {
                                                      labelText: name,
                                                      disabledTooltipText: "",
                                                      isEnabled: true,
-                                                     showRedDot: false,
                                                      showActiveBorder: false,
                                                      attachedData: null
                                                  })
@@ -191,7 +190,6 @@ Item {
             required property string pageId
             required property int pageType
             required property bool isEnabled
-            required property bool showRedDot
             required property bool showActiveBorder
             required property string labelText
             required property string disabledTooltipText
@@ -200,17 +198,14 @@ Item {
 
             readonly property bool isSelected: control.selectedPageId === delg.pageId
 
+            property int notifications: 0
+            property bool showNotificationBubble: delg.notifications > 0
+
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Selected tab")
             Accessible.description: qsTr("The currently selected tab")
             Accessible.focusable: true
             Accessible.onPressAction: () => delg.switchTab()
-
-            function updateRedDot(state : bool) {
-                if (delg.showRedDot !== state) {
-                    delg.showRedDot = state
-                }
-            }
 
             function switchTab() {
                 if (delg.isEnabled) {
@@ -325,29 +320,37 @@ Item {
             }
 
             Rectangle {
-                id: redDotBackground
-                visible: redDot.visible
+                id: notificationBubbleBackground
+                visible: notificationBubble.visible
                 color: hoverBackground.visible ? hoverBackground.color : filler.color
-                anchors.centerIn: redDot
-                width: redDot.width + 4
-                height: redDotBackground.width
-                radius: redDotBackground.width / 2
+                anchors.centerIn: notificationBubble
+                width: notificationBubble.width + 4
+                height: notificationBubbleBackground.width
+                radius: notificationBubbleBackground.width / 2
 
                 Accessible.ignored: true
             }
 
             Rectangle {
-                id: redDot
-                visible: delg.showRedDot
+                id: notificationBubble
+                visible: delg.showNotificationBubble
                 color: Theme.redColor
-                width: 6
-                height: redDot.width
-                radius: redDot.width / 2
+                width: 12
+                height: notificationBubble.width
+                radius: notificationBubble.width / 2
                 anchors {
                     verticalCenter: delgIcon.top
                     horizontalCenter: delgIcon.right
                     verticalCenterOffset: +5
                     horizontalCenterOffset: -5
+                }
+
+                // TODO: Limit counter to avoid too many digits? "n+"
+                Label {
+                    id: notificationBubbleCount
+                    font.pixelSize: 8
+                    text: delg.notifications
+                    anchors.centerIn: parent
                 }
 
                 Accessible.ignored: true
@@ -391,7 +394,6 @@ Item {
                         labelText: qsTr("Home"),
                         disabledTooltipText: qsTr("Home"),
                         isEnabled: true,
-                        showRedDot: false,
                         showActiveBorder: false,
                         attachedData: null
                     }, {
@@ -401,7 +403,6 @@ Item {
                         labelText: qsTr("Conference"),
                         disabledTooltipText: qsTr("No active conference"),
                         isEnabled: control.hasActiveConference,
-                        showRedDot: false,
                         showActiveBorder: control.hasActiveConference && control.selectedPageId !== control.mainWindow.conferencePageId,
                         attachedData: null
                     }, {
@@ -411,7 +412,6 @@ Item {
                         labelText: qsTr("Call"),
                         disabledTooltipText: qsTr("No active call"),
                         isEnabled: control.hasActiveCall,
-                        showRedDot: false,
                         showActiveBorder: control.hasActiveUnfinishedCall && control.selectedPageId !== control.mainWindow.callPageId,
                         attachedData: null
                     }
@@ -445,7 +445,6 @@ Item {
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
                     isEnabled: true,
-                    showRedDot: false,
                     showActiveBorder: false,
                     attachedData: null
                 }

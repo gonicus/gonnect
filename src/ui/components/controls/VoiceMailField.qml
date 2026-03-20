@@ -13,11 +13,12 @@ Item {
 
     property string accountId: ""
 
+    property int totalVoicemailCount: control.newVoicemailCount + control.oldVoicemailCount
     property int newVoicemailCount: 0
     property int oldVoicemailCount: 0
 
+    property bool hasVoicemail: control.totalVoicemailCount > 0
     property bool hasNewVoicemail: control.newVoicemailCount > 0
-    property bool hasVoicemail: control.hasNewVoicemail || control.oldVoicemailCount > 0
 
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Listen to voicemail")

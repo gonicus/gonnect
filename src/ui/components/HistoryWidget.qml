@@ -10,8 +10,14 @@ BaseWidget {
     minCellWidth: 20
     minCellHeight: 15
 
+    notifications: voiceMailField.totalVoicemailCount
+
+    Component.onCompleted: () => {
+        control.page?.notificationManager.registerElement(control)
+    }
+
     onCleanupRequested: {
-        control.page?.tabButton?.updateRedDot(false)
+        control.page?.notificationManager.unregisterElement(control)
     }
 
     Rectangle {
@@ -32,10 +38,6 @@ BaseWidget {
 
             property alias searchVisible: historySearchField.visible
             property alias voicemailVisible: voiceMailField.hasVoicemail
-
-            onVoicemailVisibleChanged: () => {
-                control.page?.tabButton?.updateRedDot(historyHeading.voicemailVisible)
-            }
 
             VoiceMailField {
                 id: voiceMailField

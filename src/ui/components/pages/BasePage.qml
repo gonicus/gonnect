@@ -64,6 +64,18 @@ Item {
     onNameChanged: () => pageWriter.save()
     onIconIdChanged: () => pageWriter.save()
 
+    property NotificationStateManager notificationManager: NotificationStateManager { }
+
+    Connections {
+        target: notificationManager
+
+        function onNotificationsChanged() {
+            if (control.tabButton) {
+                control.tabButton.notifications = notificationManager.notifications
+            }
+        }
+    }
+
     Component {
         id: widgetSelectionWindowComponent
         WidgetSelectionWindow {
