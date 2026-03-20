@@ -48,19 +48,20 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
     connect(this, &AudioManager::playbackDeviceIdChanged, this,
             &AudioManager::playbackAudioVolumeChanged);
 
+    connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
+        if (m_captureAudioPort) {
 #ifdef Q_OS_LINUX
-    if (!noSyncSystemMute()) {
-        connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
-            if (m_captureAudioPort) {
+            if (!noSyncSystemMute()) {
                 m_paCallbackSuppress++;
                 paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
                 qCInfo(lcAudioManager) << "Sent mute state" << m_isAudioCaptureMuted << "to system";
-            } else {
-                qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
             }
-        });
-    }
 #endif
+            m_captureAudioPort->adjustTxLevel(m_isAudioCaptureMuted ? 0.0f : 1.0f);
+        } else {
+            qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
+        }
+    });
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
             [this](bool value, const QString) { setProperty("isAudioCaptureMuted", value); });
