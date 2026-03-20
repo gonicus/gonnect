@@ -55,8 +55,8 @@ Item {
         Label {
             id: voicemailCount
             text: control.hasNewVoicemail
-                  ? (control.newVoicemailCount + qsTr(" new voice mails"))
-                  : (control.oldVoicemailCount + qsTr(" old voice mails"))
+                  ? qsTr("%n new voice mail(s)", "", control.newVoicemailCount)
+                  : qsTr("%n old voice mail(s)", "", control.oldVoicemailCount)
             font.pixelSize: 16
             font.weight: Font.Medium
             elide: Text.ElideRight

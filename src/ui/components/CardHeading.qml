@@ -12,21 +12,27 @@ Item {
     property string text: ""
     property bool showHeading: true
     property bool showDivider: false
-    property alias headingMargin: headingLoader.implicitWidth
+    property alias headingMargin: headingLoaderWrapper.implicitWidth
 
     Accessible.role: Accessible.Heading
     Accessible.name: control.text
 
-    Loader {
-        id: headingLoader
-        active: control.showHeading
-        sourceComponent: headingComponent
-
+    Item {
+        id: headingLoaderWrapper
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: 20
             rightMargin: 20
+        }
+
+        implicitWidth: headingLoader.item ? headingLoader.item.implicitWidth : 0
+        implicitHeight: headingLoader.item ? headingLoader.item.implicitHeight : 0
+
+        Loader {
+            id: headingLoader
+            active: control.showHeading
+            sourceComponent: headingComponent
         }
     }
 

@@ -20,7 +20,7 @@ BaseWidget {
             id: historyHeading
             text: qsTr("History")
             showDivider: historyHeading.voicemailVisible
-            showHeading: true // TODO: Don't show on certain widget size...
+            showHeading: historyWidget.width > 650
             anchors {
                 left: parent.left
                 right: parent.right
