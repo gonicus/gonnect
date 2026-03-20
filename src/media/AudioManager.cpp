@@ -59,14 +59,14 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
                 qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
             }
         });
-    }
-    else
+    } else
 #else
     {
         connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
             if (m_captureAudioPort) {
                 m_captureAudioPort->setMuted(m_isAudioCaptureMuted);
-                qCInfo(lcAudioManager) << "Sent mute state" << m_isAudioCaptureMuted << "to audio port";
+                qCInfo(lcAudioManager)
+                        << "Sent mute state" << m_isAudioCaptureMuted << "to audio port";
             } else {
                 qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
             }
@@ -74,8 +74,8 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
     }
 #endif
 
-    connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
-            [this](bool value, const QString) { setProperty("isAudioCaptureMuted", value); });
+        connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
+                [this](bool value, const QString) { setProperty("isAudioCaptureMuted", value); });
 }
 
 AudioManager::~AudioManager()
