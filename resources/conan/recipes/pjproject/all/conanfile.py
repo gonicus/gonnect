@@ -165,6 +165,7 @@ class PjSIPConan(ConanFile):
 
             if self.settings.os == "Windows":
                 file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
+                file.write('\n\n#define PJMEDIA_AUDIO_DEV_HAS_WMME 0\n')
 
     def buildWindows(self):
         if self.options.shared:
