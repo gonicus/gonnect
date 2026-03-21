@@ -348,7 +348,8 @@ Item {
                 // TODO: Limit counter to avoid too many digits? "n+"
                 Label {
                     id: notificationBubbleCount
-                    font.pixelSize: 8
+                    color: Theme.foregroundWhiteColor
+                    font.pixelSize: 10
                     text: delg.notifications
                     anchors.centerIn: parent
                 }

@@ -192,7 +192,7 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
             if (m_playbackHash != id) {
                 newPlaybackHash = id;
                 if (dev->isDefault()) {
-                    m_settings.remove(QString("audio%1/playback").arg(m_currentAudioProfile));
+                    m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile), "default");
                 } else {
                     m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile), id);
                 }
@@ -316,7 +316,7 @@ void AudioManager::setExternalRinger(bool flag)
 bool AudioManager::isDeviceAvailable(const QString &hash)
 {
     // Default hash is empty
-    if (hash.isEmpty()) {
+    if (hash.isEmpty() || hash == "default") {
         return true;
     }
 
