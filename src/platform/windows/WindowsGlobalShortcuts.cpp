@@ -13,7 +13,7 @@ GlobalShortcuts &GlobalShortcuts::instance()
     return *_instance;
 }
 
-WindowsGlobalShortcuts::WindowsGlobalShortcuts() : GlobalShortcuts{ }
+WindowsGlobalShortcuts::WindowsGlobalShortcuts() : GlobalShortcuts{}
 {
     ReadOnlyConfdSettings settings;
     m_enabled = !settings.value("generic/disableGlobalShortcuts", false).toBool();
