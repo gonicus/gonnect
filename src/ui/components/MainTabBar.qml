@@ -335,13 +335,13 @@ Item {
                 id: notificationBubble
                 visible: delg.showNotificationBubble
                 color: Theme.redColor
-                width: 12
+                width: 14
                 height: notificationBubble.width
                 radius: notificationBubble.width / 2
                 anchors {
-                    verticalCenter: delgIcon.top
+                    verticalCenter: delgIcon.bottom
                     horizontalCenter: delgIcon.right
-                    verticalCenterOffset: +5
+                    verticalCenterOffset: -5
                     horizontalCenterOffset: -5
                 }
 
@@ -349,7 +349,7 @@ Item {
                 Label {
                     id: notificationBubbleCount
                     color: Theme.foregroundWhiteColor
-                    font.pixelSize: 10
+                    font.pixelSize: 12
                     text: delg.notifications
                     anchors.centerIn: parent
                 }
