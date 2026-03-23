@@ -57,7 +57,7 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
                 qCInfo(lcAudioManager) << "Sent mute state" << m_isAudioCaptureMuted << "to system";
             }
 #endif
-            m_captureAudioPort->adjustTxLevel(m_isAudioCaptureMuted ? 0.0f : 1.0f);
+            m_captureAudioPort->setMuted(m_isAudioCaptureMuted);
         } else {
             qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
         }

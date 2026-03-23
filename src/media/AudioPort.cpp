@@ -6,6 +6,8 @@
 #include "AudioPort.h"
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
+#define NORMAL_AUDIO_LEVEL 1.2f
+
 using namespace std::chrono_literals;
 
 AudioPort::AudioPort(QAudioDevice device) : m_device(device)
@@ -31,12 +33,22 @@ bool AudioPort::initialize()
 
     createPort(m_device.id().toStdString(), m_pj_fmt);
 
+    if (m_device.mode() == QAudioDevice::Mode::Input) {
+        adjustTxLevel(NORMAL_AUDIO_LEVEL);
+    }
+
     return true;
 }
 
 void AudioPort::setMuted(bool value)
 {
-    m_isMuted = value;
+    if (m_isMuted != value) {
+        if (m_device.mode() == QAudioDevice::Mode::Input) {
+            adjustTxLevel(value ? 0.0f : NORMAL_AUDIO_LEVEL);
+        }
+
+        m_isMuted = value;
+    }
 }
 
 bool AudioPort::initFmt()
