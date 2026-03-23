@@ -418,7 +418,7 @@ BaseWindow {
                     bottom: parent.bottom
                     //topMargin: 2
                     //bottomMargin: 2
-                    rightMargin: 24
+                    rightMargin: 4
                 }
 
                 FirstAidButton {

@@ -12,8 +12,10 @@ Button {
 
     padding: 0
     spacing: 6
+    topPadding: 0
     leftPadding: 10
     rightPadding: 10
+    bottomPadding: 0
 
     Accessible.role: Accessible.Button
     Accessible.name: control.text
