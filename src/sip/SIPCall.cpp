@@ -220,6 +220,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             removeCallState(ICallState::State::RingingIncoming
                             | ICallState::State::KnockingIncoming);
             removeCallState(ICallState::State::RingingOutgoing);
+            removeCallState(ICallState::State::InProgress);
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
 
             ringToneFactory.ringingTone()->stop();
