@@ -192,7 +192,8 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
             if (m_playbackHash != id) {
                 newPlaybackHash = id;
                 if (dev->isDefault()) {
-                    m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile), "default");
+                    m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile),
+                                        "default");
                 } else {
                     m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile), id);
                 }

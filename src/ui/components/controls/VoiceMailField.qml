@@ -67,7 +67,7 @@ Item {
         }
     }
 
-    Connections {
+    Connections { // TODO: Use property, but SIPAccountManager *technically* manages several accounts?
         target: SIPAccountManager
         function onVoiceMessagesWaitingChanged(accountId : string, voiceNew : int, voiceOld : int) {
             if (control.accountId !== accountId) {

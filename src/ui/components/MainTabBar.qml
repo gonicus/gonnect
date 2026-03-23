@@ -335,9 +335,10 @@ Item {
                 id: notificationBubble
                 visible: delg.showNotificationBubble
                 color: Theme.redColor
-                width: 14
-                height: notificationBubble.width
-                radius: notificationBubble.width / 2
+                width: delg.notifications > notificationBubble.maxNotifications
+                       ? 24 : 16
+                height: 16
+                radius: notificationBubble.height / 2
                 anchors {
                     verticalCenter: delgIcon.bottom
                     horizontalCenter: delgIcon.right
@@ -345,12 +346,14 @@ Item {
                     horizontalCenterOffset: -5
                 }
 
-                // TODO: Limit counter to avoid too many digits? "n+"
+                property int maxNotifications: 99
+
                 Label {
                     id: notificationBubbleCount
                     color: Theme.foregroundWhiteColor
                     font.pixelSize: 12
-                    text: delg.notifications
+                    text: delg.notifications > notificationBubble.maxNotifications
+                          ? "99+" : delg.notifications.toString()
                     anchors.centerIn: parent
                 }
 
