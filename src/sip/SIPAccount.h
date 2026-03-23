@@ -33,6 +33,8 @@ public:
     Q_ENUM(TRANSPORT_NET)
 
     void initialize();
+    bool activateTransports();
+    void deactivateTransports();
 
     void onIncomingCall(pj::OnIncomingCallParam &prm) override;
     void onRegState(pj::OnRegStateParam &prm) override;
@@ -94,6 +96,7 @@ private:
 
     QList<SIPCall *> m_calls;
     QList<SIPBuddy *> m_buddies;
+    QList<pjsua_transport_id> m_transportIds;
 
     bool m_messagesWaiting = false;
     quint16 m_newVoiceMessages = 0;

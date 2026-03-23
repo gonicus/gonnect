@@ -235,33 +235,7 @@ void SIPAccount::initialize()
 
     m_transportConfig.tlsConfig.verifyServer = m_settings.value("verifyServer", false).toBool();
 
-    try {
-        if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv4) {
-            if (m_transportType == TRANSPORT_TYPE::TLS) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TLS,
-                                                                  m_transportConfig);
-            } else if (m_transportType == TRANSPORT_TYPE::TCP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TCP,
-                                                                  m_transportConfig);
-            } else if (m_transportType == TRANSPORT_TYPE::UDP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_UDP,
-                                                                  m_transportConfig);
-            }
-        }
-        if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv6) {
-            if (m_transportType == TRANSPORT_TYPE::TLS) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TLS6,
-                                                                  m_transportConfig);
-            } else if (m_transportType == TRANSPORT_TYPE::TCP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TCP6,
-                                                                  m_transportConfig);
-            } else if (m_transportType == TRANSPORT_TYPE::UDP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_UDP6,
-                                                                  m_transportConfig);
-            }
-        }
-    } catch (pj::Error &err) {
-        qCCritical(lcSIPAccount) << "failed to create transport:" << err.info(false);
+    if (!activateTransports()) {
         Q_EMIT initialized(false);
         return;
     }
@@ -422,6 +396,59 @@ void SIPAccount::initialize()
     }
 
     finalizeInitialization();
+}
+
+bool SIPAccount::activateTransports() {
+    if (m_transportIds.length() != 0) {
+        qCCritical(lcSIPAccount) << "transports are already created - skipping";
+        return false;
+    }
+
+    try {
+        if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv4) {
+            if (m_transportType == TRANSPORT_TYPE::TLS) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TLS,
+                                                                  m_transportConfig));
+            } else if (m_transportType == TRANSPORT_TYPE::TCP) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TCP,
+                                                                  m_transportConfig));
+            } else if (m_transportType == TRANSPORT_TYPE::UDP) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_UDP,
+                                                                  m_transportConfig));
+            }
+        }
+        if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv6) {
+            if (m_transportType == TRANSPORT_TYPE::TLS) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TLS6,
+                                                                  m_transportConfig));
+            } else if (m_transportType == TRANSPORT_TYPE::TCP) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TCP6,
+                                                                  m_transportConfig));
+            } else if (m_transportType == TRANSPORT_TYPE::UDP) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_UDP6,
+                                                                  m_transportConfig));
+            }
+        }
+    } catch (pj::Error &err) {
+        qCCritical(lcSIPAccount) << "failed to create transport:" << err.info(false);
+        return false;
+    }
+
+    return true;
+}
+
+void SIPAccount::deactivateTransports() {
+    try {
+        setRegistration(false);
+    } catch (...) {}
+
+    for (auto tid : std::as_const(m_transportIds)) {
+        try {
+            SIPManager::instance().endpoint().transportClose(tid);
+        } catch (...) {}
+    }
+
+    m_transportIds.clear();
 }
 
 void SIPAccount::finalizeInitialization()
