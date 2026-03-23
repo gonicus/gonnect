@@ -416,9 +416,7 @@ BaseWindow {
                 anchors {
                     right: parent.right
                     bottom: parent.bottom
-                    //topMargin: 2
-                    //bottomMargin: 2
-                    rightMargin: 4
+                    rightMargin: 6
                 }
 
                 FirstAidButton {
