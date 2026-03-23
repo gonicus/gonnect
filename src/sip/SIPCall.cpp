@@ -161,6 +161,11 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
     if (statusCode == PJSIP_SC_RINGING) {
         ringToneFactory.ringingTone()->start();
+        if (!m_isSilent && !m_incoming) {
+            removeCallState(ICallState::State::InProgress);
+            addCallState(ICallState::State::RingingOutgoing);
+            m_isInProgress = false;
+        }
     }
 
     switch (ci.state) {
@@ -175,7 +180,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     case PJSIP_INV_STATE_CONNECTING:
     case PJSIP_INV_STATE_CALLING:
         if (!m_isSilent && !m_incoming) {
-            addCallState(ICallState::State::RingingOutgoing);
+            m_isInProgress = true;
+            addCallState(ICallState::State::InProgress);
         }
         break;
 

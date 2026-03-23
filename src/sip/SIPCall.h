@@ -63,6 +63,7 @@ public:
     void accept();
     void reject();
 
+    bool isInProgress() const { return m_isInProgress; }
     bool isEstablished() const { return m_isEstablished; }
     /// The time when the call was established (i.e. answered); invalid QDateTime if not established
     QDateTime establishedTime() const { return m_establishedTime; }
@@ -169,6 +170,7 @@ private:
     bool m_hasAccepted = false;
     bool m_hasRejected = false;
     bool m_hasRtt = false;
+    bool m_isInProgress = false;
 
     QString m_sipUrl;
     QString m_contactId;

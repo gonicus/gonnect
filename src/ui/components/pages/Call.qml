@@ -122,6 +122,7 @@ Item {
                 avatarUrl: callSideBar.selectedCallItem?.hasAvatar ? ("file://" + callSideBar.selectedCallItem.avatarPath) : ""
                 isIncoming: topBar.isIncoming
                 isEstablished: topBar.isEstablished
+                isInProgress: topBar.isInProgress
                 isIncomingAudioLevel: callSideBar.selectedCallItem?.hasIncomingAudioLevel ?? false
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -152,6 +153,7 @@ Item {
                             required property string avatarPath
                             required property bool hasIncomingAudioLevel
                             required property bool isEstablished
+                            required property bool isInProgress
                             required property bool isIncoming
 
                             CallerBigAvatar {
@@ -161,6 +163,7 @@ Item {
                                 avatarUrl: callerDelg.avatarPath
                                 isIncoming: callerDelg.isIncoming
                                 isEstablished: callerDelg.isEstablished
+                                isInProgress: callerDelg.isInProgress
                                 isIncomingAudioLevel: callerDelg.hasIncomingAudioLevel
                                 anchors.horizontalCenter: parent.horizontalCenter
                             }
