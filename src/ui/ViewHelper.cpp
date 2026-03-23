@@ -307,7 +307,7 @@ void ViewHelper::resetTrayIcon() const
 
 bool ViewHelper::isUnsupportedPlatform() const
 {
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_WINDOWS)
     return false;
 #endif
     return true;

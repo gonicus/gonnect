@@ -18,8 +18,8 @@ Item {
     readonly property int callId: control.callItem?.callId ?? -1
     readonly property string accountId: control.callItem?.accountId ?? ""
     readonly property bool showHoldButton: control.callItem?.showHoldButton ?? true
-    readonly property bool isEstablished: control.callItem?.isInProgress ?? false
-    readonly property bool isInProgress: control.callItem?.isEstablished ?? false
+    readonly property bool isEstablished: control.callItem?.isEstablished ?? false
+    readonly property bool isInProgress: control.callItem?.isInProgress ?? false
     readonly property bool isHolding: control.callItem?.isHolding ?? false
     readonly property bool isFinished: control.callItem?.isFinished ?? false
     readonly property bool isIncoming: control.callItem?.isIncoming ?? false
