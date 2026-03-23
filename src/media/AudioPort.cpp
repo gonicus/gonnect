@@ -6,7 +6,7 @@
 #include "AudioPort.h"
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
-#define NORMAL_AUDIO_LEVEL 1.2f
+#define NORMAL_AUDIO_LEVEL 2.0f
 
 using namespace std::chrono_literals;
 
