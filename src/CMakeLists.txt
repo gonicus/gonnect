@@ -372,7 +372,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/Menu.qml
         ui/components/popups/SearchResultPopup.qml
         ui/components/popups/VideoDeviceMenu.qml
-        ui/components/popups/VolumePopup.qml
+        ui/components/popups/StreamingLightPopup.qml
 
         ui/components/search/IdentitySelector.qml
         ui/components/search/KeyNavigator.qml
