@@ -10,16 +10,9 @@ BaseWidget {
     minCellWidth: 20
     minCellHeight: 15
 
-    notifications: voiceMailField.totalVoicemailCount
+    notifications: voiceMailField.totalVoicemailCount + control.missedCallsCount
 
-    Component.onCompleted: () => {
-        control.page?.notificationManager.registerElement(control)
-    }
-
-    onCleanupRequested: {
-        control.page?.notificationManager.unregisterElement(control)
-    }
-
+    // TODO: Display this somewhere in the UI as well?
     property int missedCallsCount: SIPCallManager.missedCalls
 
     Rectangle {
