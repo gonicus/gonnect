@@ -223,9 +223,6 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             removeCallState(ICallState::State::InProgress);
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
 
-            ringToneFactory.ringingTone()->stop();
-            ringToneFactory.zipTone()->stop();
-
             m_isEstablished = true;
             m_wasEstablished = true;
             m_establishedTime = QDateTime::currentDateTime();
@@ -362,13 +359,15 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     mic_media.startTransmit(aud_med);
                     aud_med.startTransmit(speaker_media);
 
-                    auto sniffer = new Sniffer(this);
-                    sniffer->initialize();
-                    aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*sniffer));
-                    connect(sniffer, &Sniffer::audioLevelChanged, this, [this, sniffer]() {
-                        Q_EMIT SIPCallManager::instance().audioLevelChanged(this,
-                                                                            sniffer->audioLevel());
-                    });
+                    if (!m_sniffer) {
+                        m_sniffer = new Sniffer(this);
+                        m_sniffer->initialize();
+                        aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*m_sniffer));
+                        connect(m_sniffer, &Sniffer::audioLevelChanged, this, [this]() {
+                            Q_EMIT SIPCallManager::instance().audioLevelChanged(this,
+                                                                                m_sniffer->audioLevel());
+                        });
+                    }
                 }
 
                 break;

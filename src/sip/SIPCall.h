@@ -13,6 +13,7 @@ class SIPAccount;
 class CallHistoryItem;
 class IMHandler;
 class HeadsetDeviceProxy;
+class Sniffer;
 
 class SIPCall : public ICallState, public pj::Call
 {
@@ -156,6 +157,7 @@ private:
 
     pj::AudioMedia *m_aud_med = NULL;
     IMHandler *m_imHandler = nullptr;
+    Sniffer *m_sniffer = nullptr;
 
     bool m_incoming = false;
     bool m_isEstablished = false;
