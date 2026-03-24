@@ -20,6 +20,8 @@ BaseWidget {
         control.page?.notificationManager.unregisterElement(control)
     }
 
+    property int missedCallsCount: SIPCallManager.missedCalls
+
     Rectangle {
         id: historyWidget
         parent: control.root

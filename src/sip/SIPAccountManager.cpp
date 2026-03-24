@@ -58,9 +58,7 @@ void SIPAccountManager::initialize()
                         }
                     });
             connect(sipAccount, &SIPAccount::voiceMessagesWaitingChanged, this,
-                    [this, sipAccount](int voiceNew, int voiceOld) {
-                        Q_EMIT voiceMessagesWaitingChanged(sipAccount->id(), voiceNew, voiceOld);
-                    });
+                    &SIPAccountManager::voiceMessagesWaitingChanged);
 
             updateSipRegistered();
 
@@ -107,6 +105,22 @@ uint SIPAccountManager::sipRegisterRetryInterval() const
         return account->retryInterval();
     }
     return 30;
+}
+
+qint16 SIPAccountManager::newVoiceMessageCount() const
+{
+    for (const auto account : std::as_const(m_accounts)) {
+        return account->newVoiceMessages();
+    }
+    return 0;
+}
+
+qint16 SIPAccountManager::oldVoiceMessageCount() const
+{
+    for (const auto account : std::as_const(m_accounts)) {
+        return account->oldVoiceMessages();
+    }
+    return 0;
 }
 
 SIPAccount *SIPAccountManager::getAccount(const QString &accountId)

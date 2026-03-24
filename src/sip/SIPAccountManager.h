@@ -12,6 +12,8 @@ class SIPAccountManager : public QObject
 
     Q_PROPERTY(bool sipRegistered READ sipRegistered NOTIFY sipRegisteredChanged FINAL)
     Q_PROPERTY(uint sipRegisterRetryInterval READ sipRegisterRetryInterval CONSTANT FINAL)
+    Q_PROPERTY(qint16 newVoiceMessageCount READ newVoiceMessageCount NOTIFY voiceMessagesWaitingChanged FINAL)
+    Q_PROPERTY(qint16 oldVoiceMessageCount READ oldVoiceMessageCount NOTIFY voiceMessagesWaitingChanged FINAL)
 
 public:
     Q_REQUIRED_RESULT static SIPAccountManager &instance()
@@ -27,6 +29,8 @@ public:
 
     bool sipRegistered() const { return m_sipRegistered; }
     uint sipRegisterRetryInterval() const;
+    qint16 newVoiceMessageCount() const;
+    qint16 oldVoiceMessageCount() const;
 
     SIPAccount *getAccount(const QString &accountId);
     QList<SIPAccount *> accounts() const { return m_accounts; }
@@ -43,7 +47,7 @@ public:
 Q_SIGNALS:
     void accountsChanged();
     void sipRegisteredChanged(bool status);
-    void voiceMessagesWaitingChanged(QString accountId, int voiceNew, int voiceOld);
+    void voiceMessagesWaitingChanged();
     void authorizationFailed(QString accountId);
     void connectionError(int code, QString message);
 

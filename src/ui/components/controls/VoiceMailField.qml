@@ -11,18 +11,16 @@ Item {
     implicitWidth: voicemailRow.width
     implicitHeight: 30
 
-    property string accountId: ""
-
     property int totalVoicemailCount: control.newVoicemailCount + control.oldVoicemailCount
-    property int newVoicemailCount: 0
-    property int oldVoicemailCount: 0
+    property int newVoicemailCount: SIPAccountManager.newVoiceMessageCount
+    property int oldVoicemailCount: SIPAccountManager.oldVoiceMessageCount
 
     property bool hasVoicemail: control.totalVoicemailCount > 0
     property bool hasNewVoicemail: control.newVoicemailCount > 0
 
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Listen to voicemail")
-    Accessible.onPressAction: () => SIPAccountManager.callVoiceBox(control.accountId)
+    Accessible.onPressAction: () => SIPAccountManager.callVoiceBox("account0")
 
     RowLayout {
         id: voicemailRow
@@ -67,29 +65,12 @@ Item {
         }
     }
 
-    Connections { // TODO: Use property, but SIPAccountManager *technically* manages several accounts?
-        target: SIPAccountManager
-        function onVoiceMessagesWaitingChanged(accountId : string, voiceNew : int, voiceOld : int) {
-            if (control.accountId !== accountId) {
-                control.accountId = accountId
-            }
-
-            if (control.newVoicemailCount !== voiceNew) {
-                control.newVoicemailCount = voiceNew
-            }
-
-            if (control.oldVoicemailCount !== voiceOld) {
-                control.oldVoicemailCount = voiceOld
-            }
-        }
-    }
-
     HoverHandler {
         id: clearButtonHoverHandler
         cursorShape: Qt.PointingHandCursor
     }
 
     TapHandler {
-        onTapped: () => SIPAccountManager.callVoiceBox(control.accountId)
+        onTapped: () => SIPAccountManager.callVoiceBox("account0")
     }
 }
