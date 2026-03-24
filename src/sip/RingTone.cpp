@@ -1,5 +1,6 @@
 #include "RingTone.h"
 #include "AudioManager.h"
+#include "ReadOnlyConfdSettings.h"
 
 RingTone::RingTone(quint16 frequency1, quint16 frequency2, QList<QPair<quint16, quint16>> intervals,
                    qint8 loopIndex, QObject *parent)
@@ -43,6 +44,7 @@ void RingTone::start()
         m_stopTimer.stop();
     }
 
+    m_toneGen.startTransmit(m_mediaSink);
     playNextTone();
 }
 
@@ -81,7 +83,6 @@ void RingTone::playNextTone()
     tones.push_back(tone);
 
     m_toneGen.play(tones, m_loopIndex >= 0);
-    m_toneGen.startTransmit(m_mediaSink);
 
     // Restart timer
     ++m_currentIndex;

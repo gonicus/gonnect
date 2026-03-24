@@ -144,8 +144,6 @@ void AudioPort::startSinkIO()
 
     if (!m_sink.isNull()) {
         stopSinkIO();
-        delete m_sink;
-        m_sink = nullptr;
     }
 
     qCInfo(lcAudioPort).noquote().nospace()
@@ -158,6 +156,11 @@ void AudioPort::startSinkIO()
 
     m_sink = new QAudioSink(m_device, m_audioFormat);
     m_io = m_sink->start();
+
+    // Write silence to allow USB headsets to switch audio mode without
+    // ugly crackling noise.
+    QByteArray silence(8192, 0);
+    m_io->write(silence);
 
     Q_EMIT audioSinkChanged();
 }
