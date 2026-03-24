@@ -124,7 +124,7 @@ private:
 Q_SIGNALS:
     void initialized(bool success);
     void isRegisteredChanged();
-    void voiceMessagesWaitingChanged(int voiceNew, int voiceOld);
+    void voiceMessagesWaitingChanged();
     void authorizationFailed();
     void connectionError(int code, QString message);
     void messageReceived(const QString &sender, const QString &message, const QString &mimeType);

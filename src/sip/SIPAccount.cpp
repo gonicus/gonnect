@@ -7,7 +7,6 @@
 #include "PreferredIdentity.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
-#include "NetworkHelper.h"
 #include "Credentials.h"
 #include "EnumTranslation.h"
 
@@ -617,7 +616,7 @@ void SIPAccount::onMwiInfo(pj::OnMwiInfoParam &prm)
     m_messageAccount = mwiInfo.messageAccount;
 
     if (changed) {
-        Q_EMIT voiceMessagesWaitingChanged(m_newVoiceMessages, m_readVoiceMessages);
+        Q_EMIT voiceMessagesWaitingChanged();
     }
 }
 
