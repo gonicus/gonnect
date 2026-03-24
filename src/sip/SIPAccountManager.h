@@ -12,8 +12,10 @@ class SIPAccountManager : public QObject
 
     Q_PROPERTY(bool sipRegistered READ sipRegistered NOTIFY sipRegisteredChanged FINAL)
     Q_PROPERTY(uint sipRegisterRetryInterval READ sipRegisterRetryInterval CONSTANT FINAL)
-    Q_PROPERTY(qint16 newVoiceMessageCount READ newVoiceMessageCount NOTIFY voiceMessagesWaitingChanged FINAL)
-    Q_PROPERTY(qint16 oldVoiceMessageCount READ oldVoiceMessageCount NOTIFY voiceMessagesWaitingChanged FINAL)
+    Q_PROPERTY(qint16 newVoiceMessageCount READ newVoiceMessageCount NOTIFY
+                       voiceMessagesWaitingChanged FINAL)
+    Q_PROPERTY(qint16 oldVoiceMessageCount READ oldVoiceMessageCount NOTIFY
+                       voiceMessagesWaitingChanged FINAL)
 
 public:
     Q_REQUIRED_RESULT static SIPAccountManager &instance()
