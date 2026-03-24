@@ -41,6 +41,14 @@ Item {
         }
     }
 
+    property int notifications: widgetModel.notifications
+
+    onNotificationsChanged: () => {
+        if (control.tabButton) {
+            control.tabButton.notifications = control.notifications
+        }
+    }
+
     readonly property WidgetModel model: WidgetModel {
         id: widgetModel
     }
@@ -63,18 +71,6 @@ Item {
     Component.onCompleted: () => pageWriter.save()
     onNameChanged: () => pageWriter.save()
     onIconIdChanged: () => pageWriter.save()
-
-    property NotificationStateManager notificationManager: NotificationStateManager { }
-
-    Connections {
-        target: notificationManager
-
-        function onNotificationsChanged() {
-            if (control.tabButton) {
-                control.tabButton.notifications = notificationManager.notifications
-            }
-        }
-    }
 
     Component {
         id: widgetSelectionWindowComponent

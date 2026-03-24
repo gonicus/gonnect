@@ -36,6 +36,7 @@ BaseWindow {
         }
     }
 
+    // TODO: Not very consistent with focus updates?
     onActiveChanged: () => {
         if (control.active) {
             SIPCallManager.resetMissedCalls()
@@ -189,6 +190,14 @@ BaseWindow {
 
     CommonPages {
         id: pages
+    }
+
+    // INFO: The home page (homePage) is not part of the PageModel as
+    // it is not created dynamically by the PageReader
+    property int notifications: pageModel.notifications + homePage.notifications
+
+    onNotificationsChanged: () => {
+        SystemTrayMenu.setBadgeNumber(control.notifications)
     }
 
     PageModel {
