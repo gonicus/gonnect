@@ -19,6 +19,7 @@ Item {
     readonly property string accountId: control.callItem?.accountId ?? ""
     readonly property bool showHoldButton: control.callItem?.showHoldButton ?? true
     readonly property bool isEstablished: control.callItem?.isEstablished ?? false
+    readonly property bool isInProgress: control.callItem?.isInProgress ?? false
     readonly property bool isHolding: control.callItem?.isHolding ?? false
     readonly property bool isFinished: control.callItem?.isFinished ?? false
     readonly property bool isIncoming: control.callItem?.isIncoming ?? false
@@ -464,7 +465,7 @@ Item {
     }
 
     Rectangle {
-        id: elabsedTimeSeparator
+        id: elapsedTimeSeparator
         height: 32
         width: 1
         color: Theme.borderColor
@@ -483,7 +484,7 @@ Item {
         text: ViewHelper.secondsToNiceText(internal.elapsedSeconds)
         spacing: 4
         anchors {
-            left: elabsedTimeSeparator.right
+            left: elapsedTimeSeparator.right
             leftMargin: 20
             verticalCenter: parent.verticalCenter
         }

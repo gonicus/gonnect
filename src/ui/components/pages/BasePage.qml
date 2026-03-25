@@ -11,6 +11,7 @@ Item {
     required property string pageId
     required property string name
     required property string iconId
+    required property var tabButton
 
     readonly property alias grid: snapGrid
     readonly property alias gridWidth: snapGrid.width
@@ -37,6 +38,14 @@ Item {
             if (!control.isBeingDeleted) {
                 pageWriter.save()
             }
+        }
+    }
+
+    property int notifications: widgetModel.notifications
+
+    onNotificationsChanged: () => {
+        if (control.tabButton) {
+            control.tabButton.notifications = control.notifications
         }
     }
 

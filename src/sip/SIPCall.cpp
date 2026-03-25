@@ -159,6 +159,15 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                                 << statusCode << ") "
                                 << " last reason " << ci.lastReason << " contactId " << m_contactId;
 
+    if (statusCode == PJSIP_SC_RINGING) {
+        ringToneFactory.ringingTone()->start();
+        if (!m_isSilent && !m_incoming) {
+            removeCallState(ICallState::State::InProgress);
+            addCallState(ICallState::State::RingingOutgoing);
+            m_isInProgress = false;
+        }
+    }
+
     switch (ci.state) {
     case PJSIP_INV_STATE_NULL:
         if (!m_isSilent) {
@@ -171,8 +180,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     case PJSIP_INV_STATE_CONNECTING:
     case PJSIP_INV_STATE_CALLING:
         if (!m_isSilent && !m_incoming) {
-            ringToneFactory.ringingTone()->start();
-            addCallState(ICallState::State::RingingOutgoing);
+            m_isInProgress = true;
+            addCallState(ICallState::State::InProgress);
         }
         break;
 
@@ -211,10 +220,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             removeCallState(ICallState::State::RingingIncoming
                             | ICallState::State::KnockingIncoming);
             removeCallState(ICallState::State::RingingOutgoing);
+            removeCallState(ICallState::State::InProgress);
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
-
-            ringToneFactory.ringingTone()->stop();
-            ringToneFactory.zipTone()->stop();
 
             m_isEstablished = true;
             m_wasEstablished = true;
@@ -352,13 +359,15 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     mic_media.startTransmit(aud_med);
                     aud_med.startTransmit(speaker_media);
 
-                    auto sniffer = new Sniffer(this);
-                    sniffer->initialize();
-                    aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*sniffer));
-                    connect(sniffer, &Sniffer::audioLevelChanged, this, [this, sniffer]() {
-                        Q_EMIT SIPCallManager::instance().audioLevelChanged(this,
-                                                                            sniffer->audioLevel());
-                    });
+                    if (!m_sniffer) {
+                        m_sniffer = new Sniffer(this);
+                        m_sniffer->initialize();
+                        aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*m_sniffer));
+                        connect(m_sniffer, &Sniffer::audioLevelChanged, this, [this]() {
+                            Q_EMIT SIPCallManager::instance().audioLevelChanged(
+                                    this, m_sniffer->audioLevel());
+                        });
+                    }
                 }
 
                 break;

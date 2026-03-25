@@ -8,6 +8,16 @@
 #include "SIPBuddy.h"
 #include "ReadOnlyConfdSettings.h"
 
+struct MwiInfo
+{
+    bool messagesWaiting = false;
+    QString messageAccount;
+
+    // We're only interested in ordinary voice info w/o urgency
+    quint16 voiceNew = 0;
+    quint16 voiceOld = 0;
+};
+
 class SIPAccount : public QObject, public pj::Account
 {
     Q_OBJECT
@@ -23,12 +33,15 @@ public:
     Q_ENUM(TRANSPORT_NET)
 
     void initialize();
+    bool activateTransports();
+    void deactivateTransports();
 
     void onIncomingCall(pj::OnIncomingCallParam &prm) override;
     void onRegState(pj::OnRegStateParam &prm) override;
     void onSendRequest(pj::OnSendRequestParam &prm) override;
     void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
     void onInstantMessage(pj::OnInstantMessageParam &prm) override;
+    void onMwiInfo(pj::OnMwiInfoParam &prm) override;
 
     bool isRegistered() const { return m_isRegistered; }
     bool isInstantMessagingAllowed() const;
@@ -49,6 +62,12 @@ public:
     QString id() const { return m_account; }
     QString domain() const { return m_domain; }
     uint retryInterval() const;
+
+    QString voiceMessageAccount() const { return m_messageAccount; }
+    bool messagesWaiting() const { return m_messagesWaiting; }
+    quint16 newVoiceMessages() const { return m_newVoiceMessages; }
+    quint16 oldVoiceMessages() const { return m_readVoiceMessages; }
+    bool callVoiceBox();
 
     long sendMessage(const QString &recipient, const QString &message,
                      const QString &mimeType = "text/plain");
@@ -72,13 +91,23 @@ private:
 
     QString addTransport(const QString &uri);
 
+    MwiInfo parseMwiBody(const QString &body);
+    void parseMessageCount(const QString &value, quint16 &newMessages, quint16 &oldMessages);
+
     QList<SIPCall *> m_calls;
     QList<SIPBuddy *> m_buddies;
+    QList<pjsua_transport_id> m_transportIds;
+
+    bool m_messagesWaiting = false;
+    quint16 m_newVoiceMessages = 0;
+    quint16 m_readVoiceMessages = 0;
+    QString m_messageAccount;
+    QString m_voiceMailUri;
+
     bool m_isRegistered = false;
     bool m_isInstantMessagingAllowed = false;
     bool m_shallNegotiateCapabilities = true;
     bool m_useInstantMessagingWithoutCheck = true;
-
     bool m_rttEnabled = true;
 
     QString m_account;
@@ -95,6 +124,7 @@ private:
 Q_SIGNALS:
     void initialized(bool success);
     void isRegisteredChanged();
+    void voiceMessagesWaitingChanged();
     void authorizationFailed();
     void connectionError(int code, QString message);
     void messageReceived(const QString &sender, const QString &message, const QString &mimeType);

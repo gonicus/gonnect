@@ -26,7 +26,7 @@
 <context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../../../src/StateManager.cpp" line="154"/>
+        <location filename="../../../src/StateManager.cpp" line="163"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>
@@ -59,6 +59,25 @@
         <translation>
             <numerusform>eine Stunde</numerusform>
             <numerusform>%n Stunden</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>VoiceMailField</name>
+    <message numerus="yes">
+        <location filename="../../../src/ui/components/controls/VoiceMailField.qml" line="59"/>
+        <source>%n new voice mail(s)</source>
+        <translation>
+            <numerusform>%n new voice mail</numerusform>
+            <numerusform>%n new voice mails</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../../src/ui/components/controls/VoiceMailField.qml" line="60"/>
+        <source>%n old voice mail(s)</source>
+        <translation>
+            <numerusform>%n old voice mail</numerusform>
+            <numerusform>%n old voice mails</numerusform>
         </translation>
     </message>
 </context>

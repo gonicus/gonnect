@@ -53,8 +53,8 @@ Item {
             SM.uiHasActiveEditDialog = true
 
             item.accepted.connect((name, iconId) => {
-                                      control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
-                                      control.mainWindow.createPage(id, iconId, name)
+                                      const tab = control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
+                                      control.mainWindow.createPage(id, name, iconId, tab)
                                   })
             item.show()
         }
@@ -80,13 +80,9 @@ Item {
                                       page.name = name
 
                                       // Update tab button
-                                      const tabList = control.getTabList()
-                                      for (const tab of tabList) {
-                                          if (tab.pageId === id) {
-                                              tab.iconSource = Icons[iconId]
-                                              tab.labelText = name
-                                              break
-                                          }
+                                      if (page.tabButton) {
+                                          page.tabButton.iconSource = Icons[iconId]
+                                          page.tabButton.labelText = name
                                       }
                                   })
             item.prefill(page.iconId, page.name)
@@ -94,7 +90,7 @@ Item {
         }
     }
 
-    function createTab(id : string, type : int, iconId : string, name : string) {
+    function createTab(id : string, type : int, iconId : string, name : string) : variant {
         const iconPath = Icons[iconId]
         const tabButton = tabDelegate.createObject(topMenuCol,
                                                  {
@@ -104,16 +100,20 @@ Item {
                                                      labelText: name,
                                                      disabledTooltipText: "",
                                                      isEnabled: true,
-                                                     showRedDot: false,
                                                      showActiveBorder: false,
                                                      attachedData: null
                                                  })
         if (tabButton === null) {
             console.error(category, "could not create tab button component")
-            return
+            return tabButton
         }
 
         control.dynamicPageCount += 1
+        return tabButton
+    }
+
+    function getTabById(id : string) : variant {
+        return [...topMenuCol.children].find((button) => button.pageId === id);
     }
 
     function getTabList() {
@@ -190,7 +190,6 @@ Item {
             required property string pageId
             required property int pageType
             required property bool isEnabled
-            required property bool showRedDot
             required property bool showActiveBorder
             required property string labelText
             required property string disabledTooltipText
@@ -198,6 +197,9 @@ Item {
             required property var attachedData
 
             readonly property bool isSelected: control.selectedPageId === delg.pageId
+
+            property int notifications: 0
+            property bool showNotificationBubble: delg.notifications > 0
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Selected tab")
@@ -318,29 +320,41 @@ Item {
             }
 
             Rectangle {
-                id: redDotBackground
-                visible: redDot.visible
+                id: notificationBubbleBackground
+                visible: notificationBubble.visible
                 color: hoverBackground.visible ? hoverBackground.color : filler.color
-                anchors.centerIn: redDot
-                width: redDot.width + 4
-                height: redDotBackground.width
-                radius: redDotBackground.width / 2
+                anchors.centerIn: notificationBubble
+                width: notificationBubble.width + 4
+                height: notificationBubbleBackground.width
+                radius: notificationBubbleBackground.width / 2
 
                 Accessible.ignored: true
             }
 
             Rectangle {
-                id: redDot
-                visible: delg.showRedDot
+                id: notificationBubble
+                visible: delg.showNotificationBubble
                 color: Theme.redColor
-                width: 6
-                height: redDot.width
-                radius: redDot.width / 2
+                width: delg.notifications > notificationBubble.maxNotifications
+                       ? 24 : 16
+                height: 16
+                radius: notificationBubble.height / 2
                 anchors {
-                    verticalCenter: delgIcon.top
+                    verticalCenter: delgIcon.bottom
                     horizontalCenter: delgIcon.right
-                    verticalCenterOffset: +5
+                    verticalCenterOffset: -5
                     horizontalCenterOffset: -5
+                }
+
+                property int maxNotifications: 99
+
+                Label {
+                    id: notificationBubbleCount
+                    color: Theme.foregroundWhiteColor
+                    font.pixelSize: 12
+                    text: delg.notifications > notificationBubble.maxNotifications
+                          ? "99+" : delg.notifications.toString()
+                    anchors.centerIn: parent
                 }
 
                 Accessible.ignored: true
@@ -384,7 +398,6 @@ Item {
                         labelText: qsTr("Home"),
                         disabledTooltipText: qsTr("Home"),
                         isEnabled: true,
-                        showRedDot: false,
                         showActiveBorder: false,
                         attachedData: null
                     }, {
@@ -394,7 +407,6 @@ Item {
                         labelText: qsTr("Conference"),
                         disabledTooltipText: qsTr("No active conference"),
                         isEnabled: control.hasActiveConference,
-                        showRedDot: false,
                         showActiveBorder: control.hasActiveConference && control.selectedPageId !== control.mainWindow.conferencePageId,
                         attachedData: null
                     }, {
@@ -404,7 +416,6 @@ Item {
                         labelText: qsTr("Call"),
                         disabledTooltipText: qsTr("No active call"),
                         isEnabled: control.hasActiveCall,
-                        showRedDot: false,
                         showActiveBorder: control.hasActiveUnfinishedCall && control.selectedPageId !== control.mainWindow.callPageId,
                         attachedData: null
                     }
@@ -438,7 +449,6 @@ Item {
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
                     isEnabled: true,
-                    showRedDot: false,
                     showActiveBorder: false,
                     attachedData: null
                 }
