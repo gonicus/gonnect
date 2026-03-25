@@ -12,7 +12,6 @@ BaseWidget {
 
     notifications: voiceMailField.totalVoicemailCount + control.missedCallsCount
 
-    // TODO: Display this somewhere in the UI as well?
     property int missedCallsCount: SIPCallManager.missedCalls
 
     Rectangle {

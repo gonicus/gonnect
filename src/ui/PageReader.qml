@@ -62,6 +62,7 @@ Item {
 
     function loadHomePage(pageId : string) {
         const page = pageRoot.getPage(pageId)
+        model.add(page)
 
         const widgetIds = UISettings.getWidgetIds(pageId)
         if (widgetIds.length) {
