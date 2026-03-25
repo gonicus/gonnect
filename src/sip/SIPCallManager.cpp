@@ -4,7 +4,6 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPAccountManager.h"
-#include "ExternalMediaManager.h"
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "RingToneFactory.h"
@@ -12,7 +11,6 @@
 #include "PhoneNumberUtil.h"
 #include "DtmfGenerator.h"
 #include "EnumTranslation.h"
-#include "StateManager.h"
 #include "ViewHelper.h"
 #include "AvatarManager.h"
 #include "USBDevices.h"
@@ -134,14 +132,6 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
     m_blockCleanTimer.callOnTimeout(this, &SIPCallManager::cleanupBlocks);
 
     connect(this, &SIPCallManager::blocksChanged, this, &SIPCallManager::updateBlockTimerRunning);
-
-    QTimer *timer = new QTimer(this);
-    timer->setInterval(2000);
-    connect(timer, &QTimer::timeout, this, [this](){
-        m_missedCalls += 5;
-        Q_EMIT missedCallsChanged();
-    });
-    timer->start();
 }
 
 void SIPCallManager::onIncomingCall(SIPCall *call)
