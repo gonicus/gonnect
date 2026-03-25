@@ -15,112 +15,82 @@ Popup {
 
     Material.theme: Theme.isDarkMode ? Material.Dark : Material.Light
 
-    /// The volume of the device, between 0.0 and 1.0
-    property real incomingVolume
-    property bool isMuted
-    property alias showMuteButton: muteButton.visible
-
-    signal volumeChanged(real volume)
-    signal muteToggled
-
-    onIncomingVolumeChanged: () => volumeSlider.value = volumePopup.incomingVolume
-
-    RowLayout {
-        spacing: 10
+    ColumnLayout {
         anchors {
             left: parent.left
             right: parent.right
         }
 
-        Slider {
-            id: volumeSlider
-            Layout.preferredWidth: volumeSlider.implicitWidth
-            Layout.preferredHeight: volumeSlider.implicitHeight
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
 
-            onMoved: () => volumePopup.volumeChanged(volumeSlider.value)
-
-            Accessible.role: Accessible.Slider
-            Accessible.name: qsTr("Adjust the volume")
-            Accessible.focusable: true
-            Accessible.onIncreaseAction: () => {
-                if (volumeSlider.value < volumeSlider.to) {
-                    volumeSlider.value += volumeSlider.stepSize
-                }
+            Image {
+                source: Icons.brightnessHigh
+                sourceSize.width: 22
+                sourceSize.height: 22
             }
-            Accessible.onDecreaseAction: () => {
-                if (volumeSlider.value > volumeSlider.from) {
-                    volumeSlider.value -= volumeSlider.stepSize
+
+            Slider {
+                id: brightnessSlider
+
+                from: 0
+                to: 100
+                stepSize: 1
+                value: BusylightDeviceManager.streamingLightBrightness
+
+                Layout.preferredWidth: brightnessSlider.implicitWidth
+                Layout.preferredHeight: brightnessSlider.implicitHeight
+
+                onMoved: () => BusylightDeviceManager.setStreamingLightBrightness(brightnessSlider.value)
+
+                Accessible.role: Accessible.Slider
+                Accessible.name: qsTr("Adjust the brightness")
+                Accessible.focusable: true
+                Accessible.onIncreaseAction: () => {
+                    if (brightnessSlider.value < brightnessSlider.to) {
+                        brightnessSlider.value += brightnessSlider.stepSize
+                    }
+                }
+                Accessible.onDecreaseAction: () => {
+                    if (brightnessSlider.value > brightnessSlider.from) {
+                        brightnessSlider.value -= brightnessSlider.stepSize
+                    }
                 }
             }
         }
 
-        Rectangle {
-            id: muteButton
-            visible: false
-            Layout.preferredWidth: 32
-            Layout.preferredHeight: 32
-            radius: 6
-            color: muteButtonHandler.hovered ? Theme.backgroundOffsetHoveredColor : Theme.backgroundOffsetColor
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
 
-            Behavior on color { ColorAnimation {} }
-
-            HoverHandler {
-                id: muteButtonHandler
+            Image {
+                source: Icons.colorManagement
+                sourceSize.width: 22
+                sourceSize.height: 22
             }
 
-            TapHandler {
-                onTapped: () => volumePopup.muteToggled()
-            }
+            Slider {
+                id: colorTemperatureSlider
+                Layout.preferredWidth: colorTemperatureSlider.implicitWidth
+                Layout.preferredHeight: colorTemperatureSlider.implicitHeight
 
-            IconLabel {
-                anchors.centerIn: parent
-                icon {
-                    source: volumePopup.isMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
-                    width: 16
-                    height: 16
+                onMoved: () => console.log(colorTemperatureSlider.value)
+
+                Accessible.role: Accessible.Slider
+                Accessible.name: qsTr("Adjust the color temperature")
+                Accessible.focusable: true
+                Accessible.onIncreaseAction: () => {
+                    if (colorTemperatureSlider.value < colorTemperatureSlider.to) {
+                        colorTemperatureSlider.value += colorTemperatureSlider.stepSize
+                    }
                 }
-
-                Accessible.ignored: true
-            }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: volumePopup.isMuted ? qsTr("Unmute") : qsTr("Mute")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => volumePopup.muteToggled()
-        }
-
-        Rectangle {
-            id: audioSettingsButton
-            Layout.preferredWidth: 32
-            Layout.preferredHeight: 32
-            radius: 6
-            color: audioSettingsButtonHandler.hovered ? Theme.backgroundOffsetHoveredColor : Theme.backgroundOffsetColor
-
-            Behavior on color { ColorAnimation {} }
-
-            HoverHandler {
-                id: audioSettingsButtonHandler
-            }
-
-            TapHandler {
-                onTapped: () => ViewHelper.showAudioSettings()
-            }
-
-            IconLabel {
-                anchors.centerIn: parent
-                icon {
-                    source: Icons.settingsConfigure
-                    width: 16
-                    height: 16
+                Accessible.onDecreaseAction: () => {
+                    if (colorTemperatureSlider.value > colorTemperatureSlider.from) {
+                        colorTemperatureSlider.value -= colorTemperatureSlider.stepSize
+                    }
                 }
-
-                Accessible.ignored: true
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Open audio settings")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => iewHelper.showAudioSettings()
         }
     }
 }

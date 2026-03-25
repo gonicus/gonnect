@@ -11,7 +11,7 @@ class IBusylightDevice : public QObject
     Q_OBJECT
 
 public:
-    enum class SupportedCommands { BusylightOnOff, BusylightColor, StreamlightOnOff };
+    enum class SupportedCommands { BusylightOnOff, BusylightColor, StreamlightOnOff, StreamlightBrightness };
     Q_ENUM(SupportedCommands)
 
     virtual QSet<SupportedCommands> supportedCommands() = 0;
@@ -20,6 +20,10 @@ public:
     virtual ~IBusylightDevice();
 
     virtual void switchStreamlight(bool on) { Q_UNUSED(on); };
+    virtual bool streamlightActive() { return false; };
+
+    virtual void setStreaminglightBrightness(unsigned value) { Q_UNUSED(value); };
+    virtual unsigned streaminglightBrightness() { return 0; };
 
     bool open();
     void close();
@@ -39,6 +43,7 @@ protected:
 private:
     QTimer m_blinkTimer;
     QString m_path;
+
     bool m_isOn = false;
     bool m_isRunning = false;
 };

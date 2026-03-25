@@ -15,12 +15,17 @@ public:
 
     QSet<SupportedCommands> supportedCommands() override;
     void switchStreamlight(bool on) override;
+    void setStreaminglightBrightness(unsigned value) override;
 
 private:
     bool hidppTransaction(unsigned char *buf, size_t len);
 
 protected:
     void send(bool on) override;
+
+    QColor m_previousColor;
+
+    unsigned m_brightness = 0;
 
     bool m_state = false;
     bool m_blinkState = false;

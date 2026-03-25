@@ -291,6 +291,22 @@ Item {
             }
 
             BarButton {
+                id: videoLightButton
+                visible: BusylightDeviceManager.hasStreamingLight
+                text: qsTr("Video light")
+                iconPath: BusylightDeviceManager.streamingLightActive ? Icons.videolightOn : Icons.videolightOff
+                showDropdownButton: true
+                onClicked: () => BusylightDeviceManager.toggleStreamingLight()
+                onDropDownClicked: () => streamingLightPopup.open()
+
+                StreamingLightPopup {
+                    id: streamingLightPopup
+                    x: -streamingLightPopup.width + videoLightButton.width
+                    y: videoLightButton.height
+                }
+            }
+
+            BarButton {
                 id: videoDeviceButton
                 visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
                 enabled: !control.isOnHold

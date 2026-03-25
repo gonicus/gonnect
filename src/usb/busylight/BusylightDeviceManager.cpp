@@ -9,8 +9,14 @@
 
 #include <QSet>
 
+using namespace std::chrono_literals;
+
 BusylightDeviceManager::BusylightDeviceManager(QObject *parent) : QObject{ parent }
 {
+    m_brightnessUpdateDebouncer.setSingleShot(true);
+    m_brightnessUpdateDebouncer.setInterval(800ms);
+    connect(&m_brightnessUpdateDebouncer, &QTimer::timeout, this,
+            &BusylightDeviceManager::applyStreamingLightBrightness);
 
     connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
             &BusylightDeviceManager::updateBusylightState);
@@ -41,7 +47,9 @@ bool BusylightDeviceManager::createBusylightDevice(const hid_device_info &device
     if (device) {
         device->open();
         m_devices.append(device);
+        refreshOwnCapabilities();
     }
+
     return device;
 }
 
@@ -49,12 +57,14 @@ void BusylightDeviceManager::removeDevice(IBusylightDevice *dev)
 {
     m_devices.removeAll(dev);
     delete dev;
+    refreshOwnCapabilities();
 }
 
 void BusylightDeviceManager::clearDevices()
 {
     qDeleteAll(m_devices);
     m_devices.clear();
+    refreshOwnCapabilities();
 }
 
 void BusylightDeviceManager::switchOn(QColor color) const
@@ -77,6 +87,18 @@ void BusylightDeviceManager::switchOff() const
     }
 }
 
+void BusylightDeviceManager::applyStreamingLightBrightness()
+{
+    for (auto device : std::as_const(m_devices)) {
+        if (device->supportedCommands().contains(
+                    IBusylightDevice::SupportedCommands::StreamlightBrightness)) {
+            device->setStreaminglightBrightness(m_brightness);
+        }
+    }
+
+    Q_EMIT streamingLightBrightnessChanged(m_brightness);
+}
+
 void BusylightDeviceManager::startBlinking(QColor color) const
 {
     for (auto device : std::as_const(m_devices)) {
@@ -97,25 +119,72 @@ void BusylightDeviceManager::stopBlinking() const
     }
 }
 
-void BusylightDeviceManager::switchStreamlightOn() const
+void BusylightDeviceManager::switchStreamlightOn()
 {
-    for (auto device : std::as_const(m_devices)) {
-        if (device->supportedCommands().contains(
-                    IBusylightDevice::SupportedCommands::StreamlightOnOff)) {
-            device->switchStreamlight(true);
+    if (!m_streamingLightActive) {
+        m_streamingLightActive = true;
+
+        for (auto device : std::as_const(m_devices)) {
+            if (device->supportedCommands().contains(
+                        IBusylightDevice::SupportedCommands::StreamlightOnOff)) {
+                device->switchStreamlight(true);
+            }
         }
+
+        Q_EMIT streamingLightActiveChanged();
     }
 }
 
-void BusylightDeviceManager::switchStreamlightOff() const
+void BusylightDeviceManager::switchStreamlightOff()
 {
+    if (m_streamingLightActive) {
+        m_streamingLightActive = false;
+
+        for (auto device : std::as_const(m_devices)) {
+            if (device->supportedCommands().contains(
+                        IBusylightDevice::SupportedCommands::StreamlightOnOff)) {
+                device->switchStreamlight(false);
+            }
+        }
+
+        Q_EMIT streamingLightActiveChanged();
+    }
+}
+
+void BusylightDeviceManager::toggleStreamingLight()
+{
+    if (m_streamingLightActive) {
+        switchStreamlightOff();
+    } else {
+        switchStreamlightOn();
+    }
+}
+
+void BusylightDeviceManager::refreshOwnCapabilities()
+{
+    bool hasStreamingLight = false;
+
     for (auto device : std::as_const(m_devices)) {
         if (device->supportedCommands().contains(
                     IBusylightDevice::SupportedCommands::StreamlightOnOff)) {
-            device->switchStreamlight(false);
+            hasStreamingLight = true;
+            break;
         }
     }
+
+    if (hasStreamingLight != m_hasStreamingLight) {
+        m_hasStreamingLight = hasStreamingLight;
+        Q_EMIT streamingLightsUpdated();
+    }
 }
+
+void BusylightDeviceManager::setStreamingLightBrightness(unsigned value) {
+    if (value <= 100 && m_brightness != value) {
+        m_brightness = value;
+        m_brightnessUpdateDebouncer.start();
+    }
+}
+
 
 void BusylightDeviceManager::updateBusylightState()
 {
@@ -141,7 +210,7 @@ void BusylightDeviceManager::updateBusylightState()
     }
 
     QColor color(Qt::GlobalColor::red);
-    if (!isMuted) {
+    if (isMuted) {
         color.setRgb(255, 165, 0);
     }
 

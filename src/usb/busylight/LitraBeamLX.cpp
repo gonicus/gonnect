@@ -5,6 +5,7 @@
 #define LX_DEVICE_ID 0xFF
 #define LX_SOFTWARE_ID 0x0A
 #define LX_SET_ILLUMINATION 0x10
+#define LX_SET_BRIGTHNESS 0x40
 #define LX_SET_ILLUMINATION_RGB 0x40
 #define LX_SET_INDIVITUAL_RGB_ZONES 0x10
 #define LX_FRAME_END 0x70
@@ -20,6 +21,7 @@ QSet<IBusylightDevice::SupportedCommands> LitraBeamLX::supportedCommands()
         IBusylightDevice::SupportedCommands::BusylightOnOff,
         IBusylightDevice::SupportedCommands::BusylightColor,
         IBusylightDevice::SupportedCommands::StreamlightOnOff,
+        IBusylightDevice::SupportedCommands::StreamlightBrightness,
     };
     return _commands;
 }
@@ -70,6 +72,38 @@ void LitraBeamLX::switchStreamlight(bool on)
     buf[2] = LX_FEATURE_ILLUMINATION;
     buf[3] = LX_SET_ILLUMINATION | LX_SOFTWARE_ID;
     buf[4] = on ? 1 : 0;
+
+    hidppTransaction(buf, sizeof(buf));
+}
+
+void LitraBeamLX::setStreaminglightBrightness(unsigned value) {
+    if (!m_device) {
+        qCCritical(lcLitraBeamLX) << "Error: trying to send data while the USB device is not open";
+        return;
+    }
+
+    // Don't send the same state again
+    if (m_brightness == value) {
+        return;
+    }
+    m_brightness = value;
+
+    quint16 lumen = 30 + (value * 370 / 100);
+
+    qCritical() << "### lumen" << lumen << "/ value" << value;
+
+    unsigned char buf[20];
+
+    // Send brightness
+    memset(buf, 0, sizeof(buf));
+    buf[0] = LX_REPORT_ID;
+    buf[1] = LX_DEVICE_ID;
+    buf[2] = LX_FEATURE_ILLUMINATION;
+    buf[3] = LX_SET_BRIGTHNESS | LX_SOFTWARE_ID;
+    buf[4] = (lumen >> 8) & 0xFF;
+    buf[5] = lumen & 0xFF;
+
+    qCritical() << "# b" << buf[4] << buf[5];
 
     hidppTransaction(buf, sizeof(buf));
 }
