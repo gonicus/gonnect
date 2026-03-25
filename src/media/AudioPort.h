@@ -39,6 +39,8 @@ Q_SIGNALS:
     void sourceLevelChanged(qreal level);
 
 private:
+    void writeSilenceMS(unsigned milliseconds);
+
     void startIO();
     void stopIO();
 
