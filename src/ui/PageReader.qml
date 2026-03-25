@@ -31,11 +31,18 @@ Item {
         for (const pageId of pageIds) {
             const pageName = UISettings.getUISetting(pageId, "name", "")
             const pageIconId = UISettings.getUISetting(pageId, "iconId", "")
+
+            const tab = tabRoot.createTab(pageId,
+                                          GonnectWindow.PageType.Base,
+                                          pageIconId,
+                                          pageName)
+
             const page = pages.base.createObject(control.pageRoot,
                                                  {
                                                      pageId: pageId,
                                                      name: pageName,
-                                                     iconId: pageIconId
+                                                     iconId: pageIconId,
+                                                     tabButton: tab
                                                  })
             if (!page) {
                 console.error(category, "could not create page component", pageId)
@@ -43,12 +50,6 @@ Item {
             }
 
             model.add(page)
-
-            tabRoot.createTab(pageId,
-                              GonnectWindow.PageType.Base,
-                              pageIconId,
-                              pageName)
-
             pageRoot.pages[pageId] = page
 
             // Widgets
@@ -61,6 +62,7 @@ Item {
 
     function loadHomePage(pageId : string) {
         const page = pageRoot.getPage(pageId)
+        model.add(page)
 
         const widgetIds = UISettings.getWidgetIds(pageId)
         if (widgetIds.length) {

@@ -6,7 +6,8 @@
 #include "AudioPort.h"
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
-#define NORMAL_AUDIO_LEVEL 2.0f
+#define NORMAL_AUDIO_LEVEL 1.6f
+#define SILENCE_BUFFER_MS 1000
 
 using namespace std::chrono_literals;
 
@@ -138,14 +139,29 @@ void AudioPort::stopIO()
     }
 }
 
+void AudioPort::writeSilenceMS(unsigned milliseconds)
+{
+    if (m_sink) {
+        if (!m_io.isNull()) {
+            pj::MediaFormatAudio fmt = getPortInfo().format;
+            unsigned byteCount =
+                    (fmt.clockRate * fmt.channelCount * (fmt.bitsPerSample / 8) * milliseconds)
+                    / 1000;
+
+            // Write silence to allow USB headsets to switch audio mode without
+            // ugly crackling noise.
+            QByteArray silence(byteCount, 0);
+            m_io->write(silence);
+        }
+    }
+}
+
 void AudioPort::startSinkIO()
 {
     m_idleTimer.stop();
 
     if (!m_sink.isNull()) {
         stopSinkIO();
-        delete m_sink;
-        m_sink = nullptr;
     }
 
     qCInfo(lcAudioPort).noquote().nospace()
@@ -159,6 +175,8 @@ void AudioPort::startSinkIO()
     m_sink = new QAudioSink(m_device, m_audioFormat);
     m_io = m_sink->start();
 
+    writeSilenceMS(SILENCE_BUFFER_MS);
+
     Q_EMIT audioSinkChanged();
 }
 
@@ -167,6 +185,8 @@ void AudioPort::stopSinkIO()
     m_idleTimer.stop();
 
     if (m_sink) {
+        writeSilenceMS(SILENCE_BUFFER_MS);
+
         m_sink->stop();
         m_sink->deleteLater();
         m_sink = nullptr;

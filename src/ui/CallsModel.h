@@ -5,7 +5,7 @@
 #include <QQmlEngine>
 #include <pjsip/sip_msg.h>
 #include "PhoneNumberUtil.h"
-#include "SIPCall.h"
+#include "SIPCallManager.h"
 
 class CallsModel : public QAbstractListModel
 {
@@ -22,6 +22,7 @@ public:
         QString accountId;
         QString remoteUri;
         bool isIncoming = false;
+        bool isInProgress = false;
         bool isHolding = false;
         bool isBlocked = false;
         bool isEstablished = false;
@@ -63,6 +64,7 @@ public:
         Country,
         Company,
         IsEstablished,
+        IsInProgress,
         EstablishedTime,
         IsHolding,
         IsBlocked,

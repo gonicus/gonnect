@@ -14,6 +14,10 @@ NotificationManager &NotificationManager::instance()
 LinuxNotificationManager::LinuxNotificationManager() : NotificationManager()
 {
     notify_init(qAppName().toStdString().c_str());
+
+    if (GList *caps = notify_get_server_caps()) {
+        g_list_free_full(caps, g_free);
+    }
 }
 
 void LinuxNotificationManager::handleAction(QString id, QString action, QVariantList parameters)

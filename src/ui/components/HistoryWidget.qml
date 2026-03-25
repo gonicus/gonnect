@@ -10,6 +10,10 @@ BaseWidget {
     minCellWidth: 20
     minCellHeight: 15
 
+    notifications: voiceMailField.totalVoicemailCount + control.missedCallsCount
+
+    property int missedCallsCount: SIPCallManager.missedCalls
+
     Rectangle {
         id: historyWidget
         parent: control.root
@@ -19,12 +23,26 @@ BaseWidget {
         CardHeading {
             id: historyHeading
             text: qsTr("History")
+            showDivider: historyHeading.voicemailVisible
+            showHeading: historyWidget.width > 650 || historyHeading.showDivider === false
             anchors {
                 left: parent.left
                 right: parent.right
             }
 
             property alias searchVisible: historySearchField.visible
+            property alias voicemailVisible: voiceMailField.hasVoicemail
+
+            VoiceMailField {
+                id: voiceMailField
+                visible: !historyHeading.searchVisible && historyHeading.voicemailVisible
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: 20 + historyHeading.headingMargin
+                    rightMargin: 20
+                }
+            }
 
             SearchField {
                 id: historySearchField

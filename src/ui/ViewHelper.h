@@ -30,6 +30,7 @@ class ViewHelper : public QObject
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
     Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
     Q_PROPERTY(bool canSyncSystemMute READ canSyncSystemMute CONSTANT FINAL)
+    Q_PROPERTY(QString culturalSphereExtension READ culturalSphereExtension CONSTANT FINAL)
 
 public:
     static ViewHelper &instance()
@@ -132,6 +133,8 @@ public:
     Q_INVOKABLE void toggleFullscreen();
 
     Q_INVOKABLE uint numberOfGridCells() const;
+
+    QString culturalSphereExtension() const;
 
 public Q_SLOTS:
     Q_INVOKABLE void quitApplicationNoConfirm() const;

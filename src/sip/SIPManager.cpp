@@ -90,6 +90,8 @@ void SIPManager::initialize()
                                                         "*.critical=true"));
     }
 
+    epConfig.uaConfig.mwiUnsolicitedEnabled = true;
+
     m_mediaConfig = new SIPMediaConfig(this);
     m_mediaConfig->applyConfig(epConfig);
 
@@ -357,7 +359,7 @@ void SIPManager::suspend()
     // Unregister account(s)
     auto accounts = SIPAccountManager::instance().accounts();
     for (auto account : std::as_const(accounts)) {
-        account->setRegistration(false);
+        account->deactivateTransports();
     }
 
     // Shutdown transports
@@ -372,7 +374,15 @@ void SIPManager::resume()
     // Since resume may be called in more network changed cases, only
     // do this when we have no active calls going.
     if (!!SIPCallManager::instance().hasActiveCalls()) {
-        // Restore transports
+        qCDebug(lcSIPManager) << "resuming SIP";
+
+        // Activate transports again
+        auto accounts = SIPAccountManager::instance().accounts();
+        for (auto account : std::as_const(accounts)) {
+            account->setRegistration(false);
+            account->activateTransports();
+        }
+
         try {
             pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
         } catch (pj::Error &err) {
@@ -381,9 +391,8 @@ void SIPManager::resume()
         }
 
         // Re-activate account registration
-        auto accounts = SIPAccountManager::instance().accounts();
         for (auto account : std::as_const(accounts)) {
-            account->setRegistration(false);
+            account->setRegistration(true);
         }
     }
 }

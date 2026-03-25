@@ -82,10 +82,11 @@ void LitraBeamLX::send(bool on)
     }
 
     // Don't send the same state again
-    if (m_blinkState == on) {
+    if (m_blinkState == on && m_color == m_previousColor) {
         return;
     }
     m_blinkState = on;
+    m_previousColor = m_color;
 
     unsigned char buf[20];
 

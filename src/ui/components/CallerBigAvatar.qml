@@ -15,6 +15,7 @@ Item {
 
     property bool isIncoming
     property bool isEstablished
+    property bool isInProgress
     property bool isIncomingAudioLevel
 
     Accessible.role: Accessible.Heading
@@ -76,7 +77,7 @@ Item {
     Label {
         id: callingLabel
         font.pixelSize: 22
-        text: qsTr("Calling...")
+        text: control.isInProgress ? qsTr("In progress...") :  qsTr("Calling...")
         color: Theme.secondaryTextColor
         visible: !control.isIncoming && !control.isEstablished
         anchors {

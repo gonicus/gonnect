@@ -1,6 +1,5 @@
 #include <QBuffer>
 #include <QImage>
-#include <QPixmap>
 #include <QPainter>
 #include <QPainterPath>
 #include <QLoggingCategory>
@@ -50,8 +49,7 @@ NotificationIcon::NotificationIcon(const QString &fileUri, const QString &emblem
         }
     }
 
-    QPixmap pixmap = QPixmap::fromImage(tmpImage);
     QBuffer buffer(&m_data);
     buffer.open(QIODevice::WriteOnly);
-    pixmap.save(&buffer, "PNG");
+    tmpImage.save(&buffer, "PNG");
 }

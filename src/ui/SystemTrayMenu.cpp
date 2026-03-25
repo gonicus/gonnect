@@ -473,6 +473,8 @@ void SystemTrayMenu::resetTrayIcon()
             m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_light.svg"));
         }
     }
+
+    m_trayIcon->setVisible(true);
 }
 
 void SystemTrayMenu::setBadgeNumber(unsigned number)
