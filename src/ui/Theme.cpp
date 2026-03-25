@@ -4,7 +4,6 @@
 
 #include <QLoggingCategory>
 #include <QRegularExpression>
-#include <private/qzipreader_p.h>
 
 Q_LOGGING_CATEGORY(lcTheme, "gonnect.app.theme")
 
