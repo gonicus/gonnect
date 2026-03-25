@@ -75,7 +75,7 @@ private:
 
     AppSettings m_settings;
 
-    unsigned m_missedCallsCount = 0;
+    unsigned m_notificationCount = 0;
 
     bool m_ringingState = false;
     bool m_hasEstablishedCalls = false;

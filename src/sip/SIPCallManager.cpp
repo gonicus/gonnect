@@ -134,6 +134,14 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
     m_blockCleanTimer.callOnTimeout(this, &SIPCallManager::cleanupBlocks);
 
     connect(this, &SIPCallManager::blocksChanged, this, &SIPCallManager::updateBlockTimerRunning);
+
+    QTimer *timer = new QTimer(this);
+    timer->setInterval(2000);
+    connect(timer, &QTimer::timeout, this, [this](){
+        m_missedCalls += 5;
+        Q_EMIT missedCallsChanged();
+    });
+    timer->start();
 }
 
 void SIPCallManager::onIncomingCall(SIPCall *call)
