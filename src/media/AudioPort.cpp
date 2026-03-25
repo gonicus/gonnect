@@ -6,7 +6,7 @@
 #include "AudioPort.h"
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
-#define NORMAL_AUDIO_LEVEL 2.0f
+#define NORMAL_AUDIO_LEVEL 1.6f
 
 using namespace std::chrono_literals;
 
@@ -159,8 +159,10 @@ void AudioPort::startSinkIO()
 
     // Write silence to allow USB headsets to switch audio mode without
     // ugly crackling noise.
-    QByteArray silence(8192, 0);
-    m_io->write(silence);
+    if (!m_io.isNull()) {
+        QByteArray silence(16384, 0);
+        m_io->write(silence);
+    }
 
     Q_EMIT audioSinkChanged();
 }
@@ -170,6 +172,11 @@ void AudioPort::stopSinkIO()
     m_idleTimer.stop();
 
     if (m_sink) {
+        if (!m_io.isNull()) {
+            QByteArray silence(16384, 0);
+            m_io->write(silence);
+        }
+
         m_sink->stop();
         m_sink->deleteLater();
         m_sink = nullptr;
