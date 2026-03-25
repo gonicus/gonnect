@@ -22,6 +22,8 @@ private:
 protected:
     void send(bool on) override;
 
+    QColor m_previousColor;
+
     bool m_state = false;
     bool m_blinkState = false;
 };
