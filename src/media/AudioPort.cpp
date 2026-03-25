@@ -144,7 +144,9 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
     if (m_sink) {
         if (!m_io.isNull()) {
             pj::MediaFormatAudio fmt = getPortInfo().format;
-            unsigned byteCount = (fmt.clockRate * fmt.channelCount * (fmt.bitsPerSample / 8) * milliseconds) / 1000;
+            unsigned byteCount =
+                    (fmt.clockRate * fmt.channelCount * (fmt.bitsPerSample / 8) * milliseconds)
+                    / 1000;
 
             // Write silence to allow USB headsets to switch audio mode without
             // ugly crackling noise.
@@ -153,7 +155,6 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
         }
     }
 }
-
 
 void AudioPort::startSinkIO()
 {
