@@ -158,6 +158,7 @@ class PjSIPConan(ConanFile):
         with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
             file.write('\n\n#define PJ_HAS_IPV6 1\n')
             file.write('\n\n#define PJMEDIA_HAS_RTCP_XR 1\n')
+            file.write('\n\n#define PJSIP_MAX_PKT_LEN 8192\n')
 
             if self.settings.os == "Macos":
                 file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
@@ -165,6 +166,7 @@ class PjSIPConan(ConanFile):
 
             if self.settings.os == "Windows":
                 file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
+                file.write('\n\n#define PJMEDIA_AUDIO_DEV_HAS_WMME 0\n')
 
     def buildWindows(self):
         if self.options.shared:

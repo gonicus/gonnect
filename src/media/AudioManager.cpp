@@ -48,19 +48,20 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
     connect(this, &AudioManager::playbackDeviceIdChanged, this,
             &AudioManager::playbackAudioVolumeChanged);
 
+    connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
+        if (m_captureAudioPort) {
 #ifdef Q_OS_LINUX
-    if (!noSyncSystemMute()) {
-        connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
-            if (m_captureAudioPort) {
+            if (!noSyncSystemMute()) {
                 m_paCallbackSuppress++;
                 paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
                 qCInfo(lcAudioManager) << "Sent mute state" << m_isAudioCaptureMuted << "to system";
-            } else {
-                qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
             }
-        });
-    }
 #endif
+            m_captureAudioPort->setMuted(m_isAudioCaptureMuted);
+        } else {
+            qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
+        }
+    });
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
             [this](bool value, const QString) { setProperty("isAudioCaptureMuted", value); });
@@ -192,7 +193,8 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
             if (m_playbackHash != id) {
                 newPlaybackHash = id;
                 if (dev->isDefault()) {
-                    m_settings.remove(QString("audio%1/playback").arg(m_currentAudioProfile));
+                    m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile),
+                                        "default");
                 } else {
                     m_settings.setValue(QString("audio%1/playback").arg(m_currentAudioProfile), id);
                 }
@@ -316,7 +318,7 @@ void AudioManager::setExternalRinger(bool flag)
 bool AudioManager::isDeviceAvailable(const QString &hash)
 {
     // Default hash is empty
-    if (hash.isEmpty()) {
+    if (hash.isEmpty() || hash == "default") {
         return true;
     }
 

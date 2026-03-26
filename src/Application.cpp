@@ -145,13 +145,6 @@ void Application::initializeSIP()
     auto &sm = SIPManager::instance();
     sm.initialize();
 
-    auto &cm = SIPCallManager::instance();
-    connect(&cm, &SIPCallManager::missedCallsChanged, this, [this]() {
-        auto count = SIPCallManager::instance().missedCalls();
-        setBadgeNumber(count);
-        SystemTrayMenu::instance().setBadgeNumber(count);
-    });
-
     m_initialized = true;
 }
 

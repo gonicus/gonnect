@@ -161,12 +161,13 @@ BaseWindow {
         mainTabBar.saveTabList()
     }
 
-    function createPage(pageId : string, iconId : string, name : string) {
+    function createPage(pageId : string, name : string, iconId : string, tab : variant) {
         const page = pages.base.createObject(pageStack,
                                            {
                                                pageId: pageId,
                                                name: name,
                                                iconId: iconId,
+                                               tabButton: tab,
                                                editMode: true
                                            })
         if (page === null) {
@@ -188,6 +189,12 @@ BaseWindow {
 
     CommonPages {
         id: pages
+    }
+
+    property int notifications: pageModel.notifications
+
+    onNotificationsChanged: () => {
+        SystemTrayMenu.setBadgeNumber(control.notifications)
     }
 
     PageModel {
@@ -357,6 +364,7 @@ BaseWindow {
                 pageId: control.homePageId
                 name: qsTr("Home")
                 iconId: "userHome"
+                tabButton: mainTabBar.getTabById(control.homePageId)
             }
 
             Call {
@@ -388,7 +396,7 @@ BaseWindow {
 
         Item {
             id: bottomBar
-            visible: true //  mainTabBar.selectedPageType === GonnectWindow.PageType.Base
+            visible: true
             height: 35
             anchors {
                 right: parent.right
@@ -414,14 +422,12 @@ BaseWindow {
                 anchors {
                     right: parent.right
                     bottom: parent.bottom
-
-                    topMargin: 6
-                    bottomMargin: 6
-                    rightMargin: 12
+                    rightMargin: 6
                 }
 
                 FirstAidButton {
                     id: firstAidButton
+                    height: 42
                     z: 100000
                 }
             }

@@ -48,7 +48,7 @@ public:
 
     bool isEarlyCallState() const { return m_earlyCallState; }
 
-    unsigned missedCalls() const { return m_missedCalls; }
+    Q_INVOKABLE unsigned missedCalls() const { return m_missedCalls; }
 
     QStringList callIds() const;
     Q_INVOKABLE QString call(const QString &number, bool silent = false);

@@ -172,7 +172,11 @@ Popup {
             KeyNavigator {
                 id: keyNavigator
 
-                onVerticallyOutOfBounds: () => control.returnFocus()
+                onVerticallyOutOfBounds: () => {
+                    if (control.visible) {
+                        control.returnFocus()
+                    }
+                }
 
                 readonly property Connections resetConnection: Connections {
                     target: control

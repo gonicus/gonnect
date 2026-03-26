@@ -28,6 +28,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             auto idx = createIndex(index, 0);
             Q_EMIT dataChanged(idx, idx,
                                {
+                                       static_cast<int>(Roles::IsInProgress),
                                        static_cast<int>(Roles::IsEstablished),
                                        static_cast<int>(Roles::EstablishedTime),
                                        static_cast<int>(Roles::HasCapabilityJitsi),
@@ -231,6 +232,7 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::Country), "country" },
         { static_cast<int>(Roles::Company), "company" },
         { static_cast<int>(Roles::IsEstablished), "isEstablished" },
+        { static_cast<int>(Roles::IsInProgress), "isInProgress" },
         { static_cast<int>(Roles::EstablishedTime), "establishedTime" },
         { static_cast<int>(Roles::IsHolding), "isHolding" },
         { static_cast<int>(Roles::IsBlocked), "isBlocked" },
@@ -294,6 +296,7 @@ void CallsModel::updateCalls()
         callInfo->remoteUri = call->sipUrl();
         callInfo->established = call->establishedTime();
         callInfo->isEstablished = call->isEstablished();
+        callInfo->isInProgress = call->isInProgress();
         callInfo->isIncoming = call->isIncoming();
         callInfo->isBlocked = call->isBlocked();
         callInfo->isHolding = call->isHolding();
@@ -381,6 +384,9 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::IsEstablished):
         return callInfo->isEstablished;
+
+    case static_cast<int>(Roles::IsInProgress):
+        return callInfo->isInProgress;
 
     case static_cast<int>(Roles::IsFinished):
         return callInfo->isFinished;
