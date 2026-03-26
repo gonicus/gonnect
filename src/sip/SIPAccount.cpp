@@ -624,13 +624,13 @@ bool SIPAccount::callVoiceBox()
 {
     if (!m_voiceMailUri.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via" << m_voiceMailUri;
-        call(m_account, m_voiceMailUri, "", false);
+        call(m_voiceMailUri);
         return true;
 
     } else if (!m_messageAccount.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account"
                               << m_messageAccount;
-        call(m_account, m_messageAccount, "", false);
+        call(m_messageAccount);
         return true;
     }
 
