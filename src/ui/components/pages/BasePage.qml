@@ -43,10 +43,12 @@ Item {
 
     property int notifications: widgetModel.notifications
 
-    onNotificationsChanged: () => {
-        if (control.tabButton) {
-            control.tabButton.notifications = control.notifications
-        }
+    Binding {
+        target: control.tabButton
+        property: "notifications"
+        value: control.notifications
+        when: !!control.tabButton
+        restoreMode: Binding.RestoreBindingOrValue
     }
 
     readonly property WidgetModel model: WidgetModel {

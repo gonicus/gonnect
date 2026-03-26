@@ -438,7 +438,7 @@ void SystemTrayMenu::setRinging(bool flag)
 
 void SystemTrayMenu::ringTimerCallback()
 {
-    QString noteDot = m_missedCallsCount ? "_note" : "";
+    QString noteDot = m_notificationCount ? "_note" : "";
 
     if (m_ringingState) {
         m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring" + noteDot + ".svg"));
@@ -453,7 +453,7 @@ void SystemTrayMenu::resetTrayIcon()
 {
     const bool darkIconDefault =
             ThemeManager::instance().trayColorScheme() == ThemeManager::ColorScheme::DARK;
-    QString noteDot = m_missedCallsCount ? "_note" : "";
+    QString noteDot = m_notificationCount ? "_note" : "";
 
     const auto sipReg = SIPAccountManager::instance().sipRegistered();
     if (sipReg) {
@@ -479,6 +479,6 @@ void SystemTrayMenu::resetTrayIcon()
 
 void SystemTrayMenu::setBadgeNumber(unsigned number)
 {
-    m_missedCallsCount = number;
+    m_notificationCount = number;
     resetTrayIcon();
 }
