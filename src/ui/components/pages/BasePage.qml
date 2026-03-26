@@ -47,7 +47,7 @@ Item {
         target: control.tabButton
         property: "notifications"
         value: control.notifications
-        when: control.tabButton !== null
+        when: !!control.tabButton
         restoreMode: Binding.RestoreBindingOrValue
     }
 
