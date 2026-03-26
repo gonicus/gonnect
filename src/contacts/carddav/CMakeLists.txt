@@ -32,5 +32,5 @@ if(ENABLE_DAV)
       Qt6::Xml
       vCard)
 
-    set(CARDDAV_ADDRESSBOOK_FACTORY CardDAVAddressBookFactory PARENT_SCOPE)
+    set(CARDDAV_CONTACT_FACTORY CardDAVAddressBookFactory PARENT_SCOPE)
 endif()
