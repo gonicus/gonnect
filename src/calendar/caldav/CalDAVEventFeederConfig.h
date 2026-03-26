@@ -16,4 +16,6 @@ struct CalDAVEventFeederConfig
     QDateTime currentTime;
     QDateTime timeRangeStart;
     QDateTime timeRangeEnd;
+    int retryCount;
+    int retryInterval;
 };

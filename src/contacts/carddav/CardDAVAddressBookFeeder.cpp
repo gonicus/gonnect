@@ -18,38 +18,22 @@ Q_LOGGING_CATEGORY(lcCardDAVAddressBookFeeder, "gonnect.app.feeder.CardDAVAddres
 
 using namespace std::chrono_literals;
 
-CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, AddressBookManager *parent)
-    : QObject(parent), m_group(group)
+CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, const int retryCount,
+                                                   const int retryInterval,
+                                                   AddressBookManager *parent)
+    : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
 {
     m_manager = qobject_cast<AddressBookManager *>(parent);
 }
 
-CardDAVAddressBookFeeder::~CardDAVAddressBookFeeder() { }
-
 void CardDAVAddressBookFeeder::init()
 {
-    connect(
-            this, &CardDAVAddressBookFeeder::feederFailed, this,
-            [this]() {
-                qCWarning(lcCardDAVAddressBookFeeder)
-                        << "Failed to process CardDAV sources - trying later";
-
-                // Prepare feeder for re-init
-                resetContacts();
-                resetFeeder();
-
-                // Add to retry queue
-                AddressBookManager::instance().addToRetryList(m_group);
-            },
-            Qt::SingleShotConnection);
-
     m_cacheWriteTimer.setSingleShot(true);
     m_cacheWriteTimer.setInterval(3s);
     m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
 
     loadCachedData(m_settingsHash);
 
-    // TODO: These have to be disconnected/stopped
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CardDAVAddressBookFeeder::onParserFinished);
 
@@ -58,9 +42,41 @@ void CardDAVAddressBookFeeder::init()
     connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
 
     connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
-        // Previous run failed due to auth, we'll prompt the user again
-        feedAddressBook(true);
+        m_pendingAuth = true;
+        checkErrorStatus();
     });
+}
+
+void CardDAVAddressBookFeeder::checkErrorStatus()
+{
+    QMetaObject::invokeMethod(
+            this,
+            [this]() {
+                qCWarning(lcCardDAVAddressBookFeeder)
+                        << "Failed to process CardDAV sources - trying later";
+
+                // Prepare feeder for re-run
+                resetContacts();
+
+                if (m_pendingAuth && m_pendingError) {
+                    // Previous run failed due to auth, we'll prompt the user again immediately
+                    feedAddressBook(true);
+                } else if (m_pendingError) {
+                    // Some other error has occurred, wait and try again
+                    if (m_retryCount > 0) {
+                        m_retryCount--;
+
+                        QTimer::singleShot(m_retryInterval, this, [this]() { feedAddressBook(); });
+                    }
+                }
+
+                // Reset timer (TODO: Verifiy if needed!)
+                m_cacheWriteTimer.start();
+
+                m_pendingAuth = false;
+                m_pendingError = false;
+            },
+            Qt::QueuedConnection);
 }
 
 void CardDAVAddressBookFeeder::resetContacts()
@@ -68,7 +84,13 @@ void CardDAVAddressBookFeeder::resetContacts()
     AddressBook::instance().removeContactsBySource(m_group);
 }
 
-void CardDAVAddressBookFeeder::resetFeeder() { }
+void CardDAVAddressBookFeeder::onError(QString error)
+{
+    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
+
+    m_pendingError = true;
+    checkErrorStatus();
+}
 
 void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
 {
@@ -241,11 +263,6 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
         const QByteArray decoded = QByteArray::fromBase64(data);
         AvatarManager::instance().addExternalImage(id, decoded, modifiedDate);
     }
-}
-
-void CardDAVAddressBookFeeder::onError(QString error) const
-{
-    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
 }
 
 void CardDAVAddressBookFeeder::onParserFinished()

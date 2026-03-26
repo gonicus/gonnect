@@ -16,7 +16,9 @@ CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederCon
 
 CalDAVEventFeeder::~CalDAVEventFeeder()
 {
-    resetFeeder();
+    if (m_calendarRefreshTimer.isActive()) {
+        m_calendarRefreshTimer.stop();
+    }
 }
 
 QUrl CalDAVEventFeeder::networkCheckURL() const
@@ -27,21 +29,6 @@ QUrl CalDAVEventFeeder::networkCheckURL() const
 
 void CalDAVEventFeeder::init()
 {
-    connect(
-            this, &CalDAVEventFeeder::feederFailed, this,
-            [this]() {
-                qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV sources - trying later";
-
-                // Prepare feeder for re-init
-                resetCalendar();
-                resetFeeder();
-
-                // Add to retry queue
-                DateEventFeederManager::instance().addToRetryList(m_config.source);
-            },
-            Qt::SingleShotConnection);
-
-    // TODO: These have to be disconnected/stopped
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CalDAVEventFeeder::onParserFinished);
 
@@ -49,8 +36,8 @@ void CalDAVEventFeeder::init()
     connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onError);
 
     connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
-        // Previous run failed due to auth, we'll prompt the user again
-        process(true);
+        m_pendingAuth = true;
+        checkErrorStatus();
     });
 
     /*
@@ -69,6 +56,37 @@ void CalDAVEventFeeder::init()
     process();
 }
 
+void CalDAVEventFeeder::checkErrorStatus()
+{
+    QMetaObject::invokeMethod(
+            this,
+            [this]() {
+                qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV sources - trying later";
+
+                // Prepare feeder for re-run
+                resetCalendar();
+
+                if (m_pendingAuth && m_pendingError) {
+                    // Previous run failed due to auth, we'll prompt the user again immediately
+                    process(true);
+                } else if (m_pendingError) {
+                    // Some other error has occurred, wait and try again
+                    if (m_config.retryCount > 0) {
+                        m_config.retryCount--;
+
+                        QTimer::singleShot(m_config.retryInterval, this, [this]() { process(); });
+                    }
+                }
+
+                // Reset timer
+                m_calendarRefreshTimer.start();
+
+                m_pendingAuth = false;
+                m_pendingError = false;
+            },
+            Qt::QueuedConnection);
+}
+
 void CalDAVEventFeeder::resetCalendar()
 {
     DateEventManager &manager = DateEventManager::instance();
@@ -78,16 +96,12 @@ void CalDAVEventFeeder::resetCalendar()
     }
 }
 
-void CalDAVEventFeeder::resetFeeder()
-{
-    if (m_calendarRefreshTimer.isActive()) {
-        m_calendarRefreshTimer.stop();
-    }
-}
-
-void CalDAVEventFeeder::onError(QString error) const
+void CalDAVEventFeeder::onError(QString error)
 {
     qCCritical(lcCalDAVEventFeeder) << error;
+
+    m_pendingError = true;
+    checkErrorStatus();
 }
 
 void CalDAVEventFeeder::onParserFinished()

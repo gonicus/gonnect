@@ -11,7 +11,9 @@ class CsvFileAddressBookFeeder : public QObject, public IAddressBookFeeder
     Q_OBJECT
 
 public:
-    explicit CsvFileAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
+    explicit CsvFileAddressBookFeeder(const QString &group, const int retryCount,
+                                      const int retryInterval,
+                                      AddressBookManager *parent = nullptr);
 
     void process() override;
 

@@ -1,6 +1,5 @@
 #include "EDSEventFeeder.h"
 #include "DateEventManager.h"
-#include "DateEventFeederManager.h"
 
 #include <QMap>
 #include <QTimeZone>
@@ -12,12 +11,15 @@ using namespace std::chrono_literals;
 Q_LOGGING_CATEGORY(lcEDSEventFeeder, "gonnect.app.dateevents.feeder.eds")
 
 EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDateTime &currentTime,
-                               const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd)
+                               const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd,
+                               const int retryCount, const int retryInterval)
     : QObject(parent),
       m_source(source),
       m_currentTime(currentTime),
       m_timeRangeStart(timeRangeStart),
-      m_timeRangeEnd(timeRangeEnd)
+      m_timeRangeEnd(timeRangeEnd),
+      m_retryCount(retryCount),
+      m_retryInterval(retryInterval)
 {
 }
 
@@ -31,14 +33,18 @@ void EDSEventFeeder::init()
     connect(
             this, &EDSEventFeeder::feederFailed, this,
             [this]() {
-                qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources - trying later";
+                if (m_retryCount > 0) {
+                    m_retryCount--;
 
-                // Prepare feeder for re-init
-                resetCalendar();
-                resetFeeder();
+                    qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources - trying later";
 
-                // Add to retry queue
-                DateEventFeederManager::instance().addToRetryList(m_source);
+                    // Prepare feeder for re-init
+                    resetCalendar();
+                    resetFeeder();
+
+                    // Retry
+                    QTimer::singleShot(m_retryInterval, this, [this]() { init(); });
+                }
             },
             Qt::SingleShotConnection);
 

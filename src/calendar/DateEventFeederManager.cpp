@@ -26,21 +26,6 @@ DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ paren
         reloadCalendar();
     });
     m_nextDayRefreshTimer.start();
-
-    m_retryTimer.setInterval(10s);
-    connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
-        if (m_retryCounter <= 0) {
-            m_retryTimer.stop();
-            return;
-        }
-
-        if (!m_retryFeederIds.isEmpty()) {
-            retryFailedPlugins();
-        }
-
-        m_retryCounter--;
-    });
-    m_retryTimer.start();
 }
 
 void DateEventFeederManager::setTimeData()
@@ -59,23 +44,6 @@ void DateEventFeederManager::reloadCalendar()
 {
     DateEventManager::instance().resetDateEvents();
     m_feederConfigIds = m_dateEventFeeders.keys();
-    processQueue();
-}
-
-void DateEventFeederManager::addToRetryList(const QString &configId)
-{
-    QMutexLocker mutex(&m_retryQueueMutex);
-
-    m_retryFeederIds.append(configId);
-}
-
-void DateEventFeederManager::retryFailedPlugins()
-{
-    // Reload feeder plugins that have failed
-    QMutexLocker mutex(&m_retryQueueMutex);
-
-    m_feederConfigIds = m_retryFeederIds;
-    m_retryFeederIds.clear();
     processQueue();
 }
 
@@ -142,7 +110,8 @@ void DateEventFeederManager::initFeederConfigs()
             for (auto &cfg : std::as_const(configs)) {
                 m_dateEventFeeders.insert(cfg,
                                           plugin->createFeeder(cfg, m_currentTime, m_timeRangeStart,
-                                                               m_timeRangeEnd, this));
+                                                               m_timeRangeEnd, m_retryCount,
+                                                               m_retryInterval, this));
             }
         }
     }

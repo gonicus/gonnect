@@ -10,9 +10,13 @@
 
 Q_LOGGING_CATEGORY(lcCsvAddressBookFeeder, "gonnect.app.feeder.CsvAddressBookFeeder")
 
-CsvFileAddressBookFeeder::CsvFileAddressBookFeeder(const QString &group, AddressBookManager *parent)
+CsvFileAddressBookFeeder::CsvFileAddressBookFeeder(const QString &group, const int retryCount,
+                                                   const int retryInterval,
+                                                   AddressBookManager *parent)
     : QObject(parent), m_group(group)
 {
+    Q_UNUSED(retryCount)
+    Q_UNUSED(retryInterval)
 }
 
 void CsvFileAddressBookFeeder::process()

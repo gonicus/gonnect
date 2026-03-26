@@ -13,8 +13,9 @@ using namespace std::chrono_literals;
 
 Q_LOGGING_CATEGORY(lcEDSAddressBookFeeder, "gonnect.app.feeder.EDSAddressBookFeeder")
 
-EDSAddressBookFeeder::EDSAddressBookFeeder(const QString &group, AddressBookManager *parent)
-    : QObject(parent), m_group(group)
+EDSAddressBookFeeder::EDSAddressBookFeeder(const QString &group, const int retryCount,
+                                           const int retryInterval, AddressBookManager *parent)
+    : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
 {
 }
 
@@ -28,14 +29,19 @@ void EDSAddressBookFeeder::init()
     connect(
             this, &EDSAddressBookFeeder::feederFailed, this,
             [this]() {
-                qCWarning(lcEDSAddressBookFeeder) << "Failed to process EDS sources - trying later";
+                if (m_retryCount > 0) {
+                    m_retryCount--;
 
-                // Prepare feeder for re-init
-                resetContacts();
-                resetFeeder();
+                    qCWarning(lcEDSAddressBookFeeder)
+                            << "Failed to process EDS sources - trying later";
 
-                // Add to retry queue
-                AddressBookManager::instance().addToRetryList(m_group);
+                    // Prepare feeder for re-init
+                    resetContacts();
+                    resetFeeder();
+
+                    // Retry
+                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
+                }
             },
             Qt::SingleShotConnection);
 

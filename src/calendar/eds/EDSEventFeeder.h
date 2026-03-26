@@ -21,7 +21,8 @@ public:
     explicit EDSEventFeeder(QObject *parent = nullptr, const QString &source = "",
                             const QDateTime &currentTime = QDateTime(),
                             const QDateTime &timeRangeStart = QDateTime(),
-                            const QDateTime &timeRangeEnd = QDateTime());
+                            const QDateTime &timeRangeEnd = QDateTime(), const int retryCount = 0,
+                            const int retryInterval = 0);
     ~EDSEventFeeder();
 
     void init() override;
@@ -84,4 +85,7 @@ private:
     QPromise<void> *m_sourcePromise = nullptr;
     QFuture<void> m_sourceFuture;
     QFutureWatcher<void> *m_futureWatcher = nullptr;
+
+    int m_retryCount = 0;
+    int m_retryInterval = 0;
 };

@@ -21,23 +21,7 @@ using namespace Qt::Literals::StringLiterals;
 
 Q_LOGGING_CATEGORY(lcAddressBookManager, "gonnect.app.addressbook")
 
-AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
-{
-    m_retryTimer.setInterval(10s);
-    connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
-        if (m_retryCounter <= 0) {
-            m_retryTimer.stop();
-            return;
-        }
-
-        if (!m_retryFeederIds.isEmpty()) {
-            retryFailedPlugins();
-        }
-
-        m_retryCounter--;
-    });
-    m_retryTimer.start();
-}
+AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent } { }
 
 QString AddressBookManager::secret(const QString &group) const
 {
@@ -79,7 +63,8 @@ void AddressBookManager::initAddressBookConfigs()
                     << "active configurations for address book plugin" << addrPlugin->name();
 
             for (auto &cfg : std::as_const(configs)) {
-                m_addressBookFeeders.insert(cfg, addrPlugin->createFeeder(cfg, this));
+                m_addressBookFeeders.insert(
+                        cfg, addrPlugin->createFeeder(cfg, m_retryCount, m_retryInterval, this));
                 m_addressBookConfigs.push_back(cfg);
             }
         }
@@ -90,23 +75,6 @@ void AddressBookManager::reloadAddressBook()
 {
     AddressBook::instance().resetContacts();
     m_addressBookQueue = m_addressBookConfigs;
-    processAddressBookQueue();
-}
-
-void AddressBookManager::addToRetryList(const QString &configId)
-{
-    QMutexLocker mutex(&m_retryQueueMutex);
-
-    m_retryFeederIds.append(configId);
-}
-
-void AddressBookManager::retryFailedPlugins()
-{
-    // Reload feeder plugins that have failed
-    QMutexLocker mutex(&m_retryQueueMutex);
-
-    m_addressBookQueue = m_retryFeederIds;
-    m_retryFeederIds.clear();
     processAddressBookQueue();
 }
 

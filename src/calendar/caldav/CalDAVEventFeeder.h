@@ -28,11 +28,8 @@ public:
 
     void process(bool authFailed = false);
 
-Q_SIGNALS:
-    void feederFailed();
-
 private Q_SLOTS:
-    void onError(QString error) const;
+    void onError(QString error);
     void onParserFinished();
 
 private:
@@ -41,8 +38,8 @@ private:
     bool responseDataChanged(const QByteArray &data);
     QDateTime createDateTimeFromTimeType(icaltimetype &datetime);
 
+    void checkErrorStatus();
     void resetCalendar();
-    void resetFeeder();
 
     QList<size_t> m_checksums;
 
@@ -54,4 +51,7 @@ private:
     QWebdavDirParser m_webdavParser;
 
     QStringList m_concreteSources;
+
+    bool m_pendingError = false;
+    bool m_pendingAuth = false;
 };

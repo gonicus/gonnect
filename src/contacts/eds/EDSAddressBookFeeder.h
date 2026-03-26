@@ -20,7 +20,8 @@ class EDSAddressBookFeeder : public QObject, public IAddressBookFeeder
     Q_OBJECT
 
 public:
-    explicit EDSAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
+    explicit EDSAddressBookFeeder(const QString &group, const int retryCount,
+                                  const int retryInterval, AddressBookManager *parent = nullptr);
     ~EDSAddressBookFeeder();
 
     void process() override;
@@ -84,4 +85,7 @@ private:
     QPromise<void> *m_sourcePromise = nullptr;
     QFuture<void> m_sourceFuture;
     QFutureWatcher<void> *m_futureWatcher = nullptr;
+
+    int m_retryCount = 0;
+    int m_retryInterval = 0;
 };

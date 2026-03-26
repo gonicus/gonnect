@@ -17,18 +17,17 @@ class CardDAVAddressBookFeeder : public QObject, public IAddressBookFeeder
     Q_OBJECT
 
 public:
-    explicit CardDAVAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
+    explicit CardDAVAddressBookFeeder(const QString &group, const int retryCount,
+                                      const int retryInterval,
+                                      AddressBookManager *parent = nullptr);
 
-    ~CardDAVAddressBookFeeder();
+    ~CardDAVAddressBookFeeder() = default;
 
     void process() override;
     QUrl networkCheckURL() const override;
 
-Q_SIGNALS:
-    void feederFailed();
-
 private Q_SLOTS:
-    void onError(QString error) const;
+    void onError(QString error);
     void onParserFinished();
     void flushCacheImpl();
 
@@ -42,8 +41,8 @@ private:
     void processPhotoProperty(const QString &id, const QByteArray &data,
                               const QDateTime &modifiedDate) const;
 
+    void checkErrorStatus();
     void resetContacts();
-    void resetFeeder();
 
     AddressBookManager *m_manager = nullptr;
 
@@ -58,4 +57,10 @@ private:
     BlockInfo m_blockInfo;
 
     CardDAVAddressBookFeederConfig m_config;
+
+    int m_retryCount = 0;
+    int m_retryInterval = 0;
+
+    bool m_pendingError = false;
+    bool m_pendingAuth = false;
 };

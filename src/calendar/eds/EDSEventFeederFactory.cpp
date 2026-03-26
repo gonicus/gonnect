@@ -29,8 +29,9 @@ IDateEventFeeder *EDSEventFeederFactory::createFeeder(const QString &settingsGro
                                                       const QDateTime &currentTime,
                                                       const QDateTime &timeRangeStart,
                                                       const QDateTime &timeRangeEnd,
+                                                      const int retryCount, const int retryInterval,
                                                       DateEventFeederManager *feederManager) const
 {
     return new EDSEventFeeder(feederManager, settingsGroup, currentTime, timeRangeStart,
-                              timeRangeEnd);
+                              timeRangeEnd, retryCount, retryInterval);
 }

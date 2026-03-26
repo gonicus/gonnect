@@ -29,9 +29,6 @@ public:
     void acquireSecret(bool forcePrompt, const QString &group,
                        std::function<void(const QString &secret)> callback);
 
-    void addToRetryList(const QString &configId);
-    void retryFailedPlugins();
-
 private:
     explicit AddressBookManager(QObject *parent = nullptr);
 
@@ -46,8 +43,6 @@ private:
     QStringList m_addressBookQueue;
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
 
-    QTimer m_retryTimer;
-    int m_retryCounter = 5;
-    QStringList m_retryFeederIds;
-    QMutex m_retryQueueMutex;
+    int m_retryCount = 5;
+    int m_retryInterval = 10000; // TODO: chrono...
 };

@@ -17,9 +17,13 @@
 
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
-LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookManager *parent)
+LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, const int retryCount,
+                                             const int retryInterval, AddressBookManager *parent)
     : QObject(parent), m_group(group)
 {
+    Q_UNUSED(retryCount)
+    Q_UNUSED(retryInterval)
+
     m_manager = qobject_cast<AddressBookManager *>(parent);
 
     connect(this, &LDAPAddressBookFeeder::newContactReady, this,
@@ -36,7 +40,6 @@ LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookMa
                QPrivateSignal) { AvatarManager::instance().addExternalImage(id, data, modified); });
 
     connect(this, &LDAPAddressBookFeeder::invalidCredentials, this, [this]() {
-        // TODO: Check for bind method again?
         m_manager->acquireSecret(true, m_group, [this](const QString &password) {
             m_ldapConfig.bindPassword = password;
 

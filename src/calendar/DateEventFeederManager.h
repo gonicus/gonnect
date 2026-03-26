@@ -28,9 +28,6 @@ public:
     void acquireSecret(bool override, const QString &configId,
                        std::function<void(const QString &secret)> callback);
 
-    void addToRetryList(const QString &configId);
-    void retryFailedPlugins();
-
 private:
     explicit DateEventFeederManager(QObject *parent = nullptr);
 
@@ -53,8 +50,6 @@ private:
     QStringList m_feederConfigIds;
     bool m_isReconnectSignalSetup = false;
 
-    QTimer m_retryTimer;
-    int m_retryCounter = 5;
-    QStringList m_retryFeederIds;
-    QMutex m_retryQueueMutex;
+    int m_retryCount = 5;
+    int m_retryInterval = 10000; // TODO: chrono...
 };
