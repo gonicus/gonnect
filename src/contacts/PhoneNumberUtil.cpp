@@ -162,6 +162,23 @@ QString PhoneNumberUtil::numberFromSipUrl(const QString &sipUrl)
     return "";
 }
 
+QString PhoneNumberUtil::nameFromSipUrl(const QString &sipUrl)
+{
+    static const QRegularExpression sipNameRegex(
+            R"(^["]?(?<pre>[^"<]*)["]?.*sips?:(?<post>.*)@.*$)",
+            QRegularExpression::CaseInsensitiveOption);
+
+    const auto matchResult = sipNameRegex.match(sipUrl);
+    if (matchResult.hasMatch()) {
+        const auto pre = matchResult.captured("pre");
+        if (!pre.isEmpty()) {
+            return pre;
+        }
+        return matchResult.captured("post");
+    }
+    return numberFromSipUrl(sipUrl);
+}
+
 bool PhoneNumberUtil::isEmergencyCallUrl(const QString &sipUrl)
 {
     static bool isEmergencyRegexInitalized = false;
