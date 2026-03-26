@@ -15,7 +15,9 @@ class MSGraphAddressBookFeeder : public QObject, public IAddressBookFeeder
     Q_OBJECT
 
 public:
-    explicit MSGraphAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
+    explicit MSGraphAddressBookFeeder(const QString &group, const int retryCount,
+                                      const int retryInterval,
+                                      AddressBookManager *parent = nullptr);
 
     void process() override;
     QUrl networkCheckURL() const override;

@@ -14,12 +14,17 @@
 
 Q_LOGGING_CATEGORY(lcAkonadiAddressBookFeeder, "gonnect.app.feeder.AkonadiAddressBookFeeder")
 
-AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, AddressBookManager *parent)
+AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, const int retryCount,
+                                                   const int retryInterval,
+                                                   AddressBookManager *parent)
     : QObject(parent),
       m_group(group),
       m_session(new Akonadi::Session("GOnnect::ContactsSession")),
       m_monitor(new Akonadi::Monitor(parent))
 {
+    Q_UNUSED(retryCount)
+    Q_UNUSED(retryInterval)
+
     ReadOnlyConfdSettings settings;
 
     settings.beginGroup(m_group);

@@ -16,9 +16,14 @@
 
 Q_LOGGING_CATEGORY(msGraphAddressBookFeeder, "gonnect.app.feeder.MSGraphAddressBookFeeder")
 
-MSGraphAddressBookFeeder::MSGraphAddressBookFeeder(const QString &group, AddressBookManager *parent)
+MSGraphAddressBookFeeder::MSGraphAddressBookFeeder(const QString &group, const int retryCount,
+                                                   const int retryInterval,
+                                                   AddressBookManager *parent)
     : QObject(parent), m_manager(parent), m_group(group)
 {
+    Q_UNUSED(retryCount)
+    Q_UNUSED(retryInterval)
+
     m_networkAccessManager = new QNetworkAccessManager(this);
 }
 

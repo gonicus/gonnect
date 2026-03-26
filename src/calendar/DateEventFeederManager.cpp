@@ -12,8 +12,6 @@
 #include <QLoggingCategory>
 #include <QPluginLoader>
 
-using namespace std::chrono_literals;
-
 Q_LOGGING_CATEGORY(lcDateEventFeederManager, "gonnect.app.dateevents.feeder.manager")
 
 DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ parent }
