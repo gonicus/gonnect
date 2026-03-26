@@ -702,9 +702,10 @@ void SIPCallManager::addCall(SIPCall *call)
         const Contact *c = contactInfo.contact;
         QStringList bodyParts;
 
+        const QString name =
+                PhoneNumberUtil::instance().nameFromSipUrl(QString::fromStdString(ci.remoteUri));
         const QString title =
-                tr("Missed call from %1")
-                        .arg((c && !c->name().isEmpty()) ? c->name() : contactInfo.phoneNumber);
+                tr("Missed call from %1").arg((c && !c->name().isEmpty()) ? c->name() : name);
         const QString number = contactInfo.phoneNumber;
 
         if (c && !c->company().isEmpty()) {
