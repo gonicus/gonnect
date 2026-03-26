@@ -24,16 +24,35 @@ CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, Address
     m_manager = qobject_cast<AddressBookManager *>(parent);
 }
 
+CardDAVAddressBookFeeder::~CardDAVAddressBookFeeder() { }
+
 void CardDAVAddressBookFeeder::init()
 {
+    connect(
+            this, &CardDAVAddressBookFeeder::feederFailed, this,
+            [this]() {
+                qCWarning(lcCardDAVAddressBookFeeder)
+                        << "Failed to process CardDAV sources - trying later";
+
+                // Prepare feeder for re-init
+                resetContacts();
+                resetFeeder();
+
+                // Add to retry queue
+                AddressBookManager::instance().addToRetryList(m_group);
+            },
+            Qt::SingleShotConnection);
+
     m_cacheWriteTimer.setSingleShot(true);
     m_cacheWriteTimer.setInterval(3s);
     m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
 
     loadCachedData(m_settingsHash);
 
+    // TODO: These have to be disconnected/stopped
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CardDAVAddressBookFeeder::onParserFinished);
+
     connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
             &CardDAVAddressBookFeeder::onError);
     connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
@@ -43,6 +62,13 @@ void CardDAVAddressBookFeeder::init()
         feedAddressBook(true);
     });
 }
+
+void CardDAVAddressBookFeeder::resetContacts()
+{
+    AddressBook::instance().removeContactsBySource(m_group);
+}
+
+void CardDAVAddressBookFeeder::resetFeeder() { }
 
 void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
 {

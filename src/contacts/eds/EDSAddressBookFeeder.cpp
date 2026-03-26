@@ -105,6 +105,11 @@ void EDSAddressBookFeeder::init()
     m_futureWatcher->setFuture(m_sourceFuture);
 }
 
+void EDSAddressBookFeeder::resetContacts()
+{
+    AddressBook::instance().removeContactsBySource(m_group);
+}
+
 void EDSAddressBookFeeder::resetFeeder()
 {
     m_sourceCount = 0;
@@ -160,11 +165,6 @@ void EDSAddressBookFeeder::resetFeeder()
         delete m_sourcePromise;
         m_sourcePromise = nullptr;
     }
-}
-
-void EDSAddressBookFeeder::resetContacts()
-{
-    AddressBook::instance().removeContactsBySource(m_group);
 }
 
 void EDSAddressBookFeeder::process()

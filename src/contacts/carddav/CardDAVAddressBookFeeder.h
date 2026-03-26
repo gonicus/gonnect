@@ -19,8 +19,13 @@ class CardDAVAddressBookFeeder : public QObject, public IAddressBookFeeder
 public:
     explicit CardDAVAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
 
+    ~CardDAVAddressBookFeeder();
+
     void process() override;
     QUrl networkCheckURL() const override;
+
+Q_SIGNALS:
+    void feederFailed();
 
 private Q_SLOTS:
     void onError(QString error) const;
@@ -36,6 +41,9 @@ private:
     QString cacheFilePath(const size_t hash, bool createPath = false);
     void processPhotoProperty(const QString &id, const QByteArray &data,
                               const QDateTime &modifiedDate) const;
+
+    void resetContacts();
+    void resetFeeder();
 
     AddressBookManager *m_manager = nullptr;
 

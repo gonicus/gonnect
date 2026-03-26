@@ -63,8 +63,8 @@ private:
 
     void processContacts(QString clientInfo, GSList *contacts);
 
-    void resetFeeder();
     void resetContacts();
+    void resetFeeder();
 
     QString m_group;
     BlockInfo m_blockInfo;

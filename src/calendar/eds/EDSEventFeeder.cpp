@@ -106,6 +106,19 @@ void EDSEventFeeder::init()
     m_futureWatcher->setFuture(m_sourceFuture);
 }
 
+void EDSEventFeeder::resetCalendar()
+{
+    DateEventManager &manager = DateEventManager::instance();
+
+    for (auto client : std::as_const(m_clients)) {
+        if (client) {
+            QString concreteSource = QString("%1_%2").arg(
+                    m_source, e_source_get_uid(e_client_get_source(E_CLIENT(client))));
+            manager.removeDateEventsBySource(concreteSource);
+        }
+    }
+}
+
 void EDSEventFeeder::resetFeeder()
 {
     m_sourceCount = 0;
@@ -160,19 +173,6 @@ void EDSEventFeeder::resetFeeder()
 
         delete m_sourcePromise;
         m_sourcePromise = nullptr;
-    }
-}
-
-void EDSEventFeeder::resetCalendar()
-{
-    DateEventManager &manager = DateEventManager::instance();
-
-    for (auto client : std::as_const(m_clients)) {
-        if (client) {
-            QString concreteSource = QString("%1_%2").arg(
-                    m_source, e_source_get_uid(e_client_get_source(E_CLIENT(client))));
-            manager.removeDateEventsBySource(concreteSource);
-        }
     }
 }
 

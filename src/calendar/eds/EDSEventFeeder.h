@@ -61,8 +61,8 @@ private:
 
     void processEvents(QString clientName, QString clientUid, GSList *components);
 
-    void resetFeeder();
     void resetCalendar();
+    void resetFeeder();
 
     QString m_source;
     QDateTime m_currentTime;

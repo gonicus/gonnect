@@ -16,9 +16,7 @@ CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederCon
 
 CalDAVEventFeeder::~CalDAVEventFeeder()
 {
-    if (m_calendarRefreshTimer.isActive()) {
-        m_calendarRefreshTimer.stop();
-    }
+    resetFeeder();
 }
 
 QUrl CalDAVEventFeeder::networkCheckURL() const
@@ -29,6 +27,21 @@ QUrl CalDAVEventFeeder::networkCheckURL() const
 
 void CalDAVEventFeeder::init()
 {
+    connect(
+            this, &CalDAVEventFeeder::feederFailed, this,
+            [this]() {
+                qCWarning(lcCalDAVEventFeeder) << "Failed to process CalDAV sources - trying later";
+
+                // Prepare feeder for re-init
+                resetCalendar();
+                resetFeeder();
+
+                // Add to retry queue
+                DateEventFeederManager::instance().addToRetryList(m_config.source);
+            },
+            Qt::SingleShotConnection);
+
+    // TODO: These have to be disconnected/stopped
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CalDAVEventFeeder::onParserFinished);
 
@@ -56,6 +69,22 @@ void CalDAVEventFeeder::init()
     process();
 }
 
+void CalDAVEventFeeder::resetCalendar()
+{
+    DateEventManager &manager = DateEventManager::instance();
+
+    for (auto &concreteSource : std::as_const(m_concreteSources)) {
+        manager.removeDateEventsBySource(concreteSource);
+    }
+}
+
+void CalDAVEventFeeder::resetFeeder()
+{
+    if (m_calendarRefreshTimer.isActive()) {
+        m_calendarRefreshTimer.stop();
+    }
+}
+
 void CalDAVEventFeeder::onError(QString error) const
 {
     qCCritical(lcCalDAVEventFeeder) << error;
@@ -63,6 +92,8 @@ void CalDAVEventFeeder::onError(QString error) const
 
 void CalDAVEventFeeder::onParserFinished()
 {
+    m_concreteSources.clear();
+
     const auto list = m_webdavParser.getList();
     for (const auto &item : list) {
         QNetworkReply *reply = m_webdav.get(item.path());
@@ -80,6 +111,7 @@ void CalDAVEventFeeder::onParserFinished()
                     if (type.name() == "text/calendar" && !data.isEmpty()
                         && responseDataChanged(data)) {
                         QString concreteSource = QString("%1_%2").arg(m_config.source, item.name());
+                        m_concreteSources.append(concreteSource);
 
                         DateEventManager &manager = DateEventManager::instance();
                         manager.removeDateEventsBySource(concreteSource);
