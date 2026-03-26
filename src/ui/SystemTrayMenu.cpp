@@ -440,13 +440,13 @@ void SystemTrayMenu::ringTimerCallback()
 {
     QString noteDot = m_missedCallsCount ? "_note" : "";
 
-    m_ringingState = !m_ringingState;
-
     if (m_ringingState) {
         m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring" + noteDot + ".svg"));
     } else {
         resetTrayIcon();
     }
+
+    m_ringingState = !m_ringingState;
 }
 
 void SystemTrayMenu::resetTrayIcon()
