@@ -33,7 +33,7 @@ Item {
 
             Label {
                 id: firstAidHeader
-                text: qsTr("First Aid")
+                text: qsTr("Emergency Call")
                 font.pixelSize: 32
                 wrapMode: Label.Wrap
 
@@ -91,7 +91,7 @@ Item {
 
                 Accessible.role: Accessible.Button
                 Accessible.name: firstAidExit.text
-                Accessible.description: qsTr("Exit the first aid menu without initiating any action")
+                Accessible.description: qsTr("Exit the emergency call menu without initiating any action")
                 Accessible.focusable: true
                 Accessible.onPressAction: () => firstAidExit.click()
             }
@@ -101,7 +101,7 @@ Item {
     HeaderIconButton {
         id: closeButton
         iconSource: Icons.mobileCloseApp
-        accessiblePurpose: qsTr("Close first aid menu")
+        accessiblePurpose: qsTr("Close emergency call menu")
         anchors {
             top: parent.top
             right: parent.right

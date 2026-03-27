@@ -6,7 +6,7 @@ import base
 Button {
     id: control
     visible: GlobalInfo.hasEmergencyNumbers
-    text: qsTr("First Aid")
+    text: qsTr("Emegency call")
     icon.source: "qrc:/icons/ISO_7010_E004" + ViewHelper.culturalSphereExtension + ".svg"
     highlighted: true
 
@@ -19,7 +19,7 @@ Button {
 
     Accessible.role: Accessible.Button
     Accessible.name: control.text
-    Accessible.description: qsTr("Open first aid menu")
+    Accessible.description: qsTr("Open emergency call menu")
     Accessible.focusable: true
     Accessible.onPressAction: ViewHelper.showFirstAid()
 
