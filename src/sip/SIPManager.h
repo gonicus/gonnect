@@ -96,6 +96,8 @@ private:
 
     pj::Endpoint m_ep;
 
+    bool m_suspended = false;
+
     QSet<QString> m_buddyStateQueue;
 };
 

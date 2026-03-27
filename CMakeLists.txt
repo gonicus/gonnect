@@ -75,7 +75,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Gui ${PLATFORM_QT_MODULES} Qml Quick QuickControls2 LinguistTools)
-qt_standard_project_setup(REQUIRES 6.9
+qt_standard_project_setup(REQUIRES 6.10
     I18N_SOURCE_LANGUAGE en
     I18N_TRANSLATED_LANGUAGES de es it fa fr ru uk
 )

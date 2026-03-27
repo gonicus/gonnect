@@ -44,7 +44,7 @@ Item {
     property int notifications: widgetModel.notifications
 
     Binding {
-        target: control.tabButton
+        target: control.tabButton ?? null
         property: "notifications"
         value: control.notifications
         when: !!control.tabButton
