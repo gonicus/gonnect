@@ -83,7 +83,7 @@ void ContactsTest::testNameFromSipUrl()
 
     // Quoted display name before the URI
     QCOMPARE(PhoneNumberUtil::nameFromSipUrl("\"Alice\"<sip:alice@example.com>"), QString("Alice"));
-    QCOMPARE(PhoneNumberUtil::nameFromSipUrl("\"John Doe\" <sip:john@example.com>"), QString("John Doe "));
+    QCOMPARE(PhoneNumberUtil::nameFromSipUrl("\"John Doe\" <sip:john@example.com>"), QString("John Doe"));
 
     // No SIP URL — returns empty string
     QCOMPARE(PhoneNumberUtil::nameFromSipUrl(""), QString(""));
