@@ -416,13 +416,30 @@ void SystemTrayMenu::updateTogglers()
 
 void SystemTrayMenu::updateBuddyState(const QString uri, SIPBuddyState::STATUS)
 {
-    const auto number = PhoneNumberUtil::numberFromSipUrl(uri);
+    // Empty URI leads to a complete update
+    if (uri.isEmpty()) {
+        QHashIterator favoriteIterator(m_favoriteActions);
+        while (favoriteIterator.hasNext()) {
+            favoriteIterator.next();
+            favoriteIterator.value()->setText(
+                    contactText(*(NumberStats::instance().numberStat(favoriteIterator.key()))));
+        }
 
-    if (auto action = m_favoriteActions.value(number, nullptr)) {
-        action->setText(contactText(*(NumberStats::instance().numberStat(number))));
-    }
-    if (auto action = m_mostCalledActions.value(number, nullptr)) {
-        action->setText(contactText(*(NumberStats::instance().numberStat(number))));
+        QHashIterator mostCalledIterator(m_mostCalledActions);
+        while (mostCalledIterator.hasNext()) {
+            mostCalledIterator.next();
+            mostCalledIterator.value()->setText(
+                    contactText(*(NumberStats::instance().numberStat(mostCalledIterator.key()))));
+        }
+    } else {
+        const auto number = PhoneNumberUtil::numberFromSipUrl(uri);
+
+        if (auto action = m_favoriteActions.value(number, nullptr)) {
+            action->setText(contactText(*(NumberStats::instance().numberStat(number))));
+        }
+        if (auto action = m_mostCalledActions.value(number, nullptr)) {
+            action->setText(contactText(*(NumberStats::instance().numberStat(number))));
+        }
     }
 }
 
@@ -440,13 +457,13 @@ void SystemTrayMenu::ringTimerCallback()
 {
     QString noteDot = m_notificationCount ? "_note" : "";
 
-    m_ringingState = !m_ringingState;
-
     if (m_ringingState) {
         m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring" + noteDot + ".svg"));
     } else {
         resetTrayIcon();
     }
+
+    m_ringingState = !m_ringingState;
 }
 
 void SystemTrayMenu::resetTrayIcon()

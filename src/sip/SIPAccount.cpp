@@ -624,13 +624,13 @@ bool SIPAccount::callVoiceBox()
 {
     if (!m_voiceMailUri.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via" << m_voiceMailUri;
-        call(m_account, m_voiceMailUri, "", false);
+        call(m_voiceMailUri);
         return true;
 
     } else if (!m_messageAccount.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account"
                               << m_messageAccount;
-        call(m_account, m_messageAccount, "", false);
+        call(m_messageAccount);
         return true;
     }
 
@@ -881,7 +881,15 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
 
     if (m_isRegistered != ai.regIsActive) {
         m_isRegistered = ai.regIsActive;
+
         Q_EMIT isRegisteredChanged();
+    }
+
+    // Clear out buddies as a re-registration due to network timeouts
+    // leaves broken buddies around which do not update their state anymore.
+    if (prm.code == PJSIP_SC_OK && prm.expiration > 0 && m_afterResume) {
+        m_afterResume = false;
+        reinitBuddies();
     }
 
     if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED
@@ -983,6 +991,38 @@ void SIPAccount::setCredentials(const QString &password)
 bool SIPAccount::isSignalingEncrypted()
 {
     return m_transportType == TRANSPORT_TYPE::TLS;
+}
+
+void SIPAccount::reinitBuddies()
+{
+    if (m_buddies.isEmpty()) {
+        return;
+    }
+
+    QStringList uris;
+    for (auto buddy : std::as_const(m_buddies)) {
+        uris.push_back(buddy->uri());
+    }
+
+    qCInfo(lcSIPAccount) << "re-subscribing to" << uris.size() << "buddies after re-registration";
+
+    qDeleteAll(m_buddies);
+    m_buddies.clear();
+
+    for (const auto &uri : std::as_const(uris)) {
+        auto buddy = new SIPBuddy(this, uri);
+        if (buddy->initialize()) {
+            m_buddies.push_back(buddy);
+            connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
+                qCCritical(lcSIPAccount) << "removing buddy" << uri;
+                m_buddies.removeAll(buddy);
+            });
+        } else {
+            buddy->deleteLater();
+        }
+    }
+
+    Q_EMIT SIPManager::instance().buddyStateChanged("", SIPBuddyState::UNKNOWN);
 }
 
 SIPAccount::~SIPAccount()

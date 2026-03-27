@@ -69,6 +69,8 @@ public:
     quint16 oldVoiceMessages() const { return m_readVoiceMessages; }
     bool callVoiceBox();
 
+    void setAfterResume() { m_afterResume = true; }
+
     long sendMessage(const QString &recipient, const QString &message,
                      const QString &mimeType = "text/plain");
 
@@ -94,6 +96,8 @@ private:
     MwiInfo parseMwiBody(const QString &body);
     void parseMessageCount(const QString &value, quint16 &newMessages, quint16 &oldMessages);
 
+    void reinitBuddies();
+
     QList<SIPCall *> m_calls;
     QList<SIPBuddy *> m_buddies;
     QList<pjsua_transport_id> m_transportIds;
@@ -109,6 +113,7 @@ private:
     bool m_shallNegotiateCapabilities = true;
     bool m_useInstantMessagingWithoutCheck = true;
     bool m_rttEnabled = true;
+    bool m_afterResume = false;
 
     QString m_account;
     QString m_domain;

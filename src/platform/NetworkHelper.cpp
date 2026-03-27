@@ -123,6 +123,7 @@ void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reac
 
     if (m_connectivity != connected) {
         m_connectivity = connected;
+
         Q_EMIT connectivityChanged();
     }
 }
