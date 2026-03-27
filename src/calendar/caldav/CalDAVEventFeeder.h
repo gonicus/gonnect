@@ -33,7 +33,9 @@ private Q_SLOTS:
     void onParserFinished();
 
 private:
-    void processResponse(const QByteArray &data, const QString &source);
+    void getNextItem();
+
+    bool processResponse(const QByteArray &data, const QString &source);
 
     bool responseDataChanged(const QByteArray &data);
     QDateTime createDateTimeFromTimeType(icaltimetype &datetime);
@@ -49,6 +51,7 @@ private:
 
     QWebdav m_webdav;
     QWebdavDirParser m_webdavParser;
+    QList<QWebdavItem> m_items;
 
     QStringList m_concreteSources;
 

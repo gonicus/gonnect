@@ -52,26 +52,29 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
     QMetaObject::invokeMethod(
             this,
             [this]() {
-                qCWarning(lcCardDAVAddressBookFeeder)
-                        << "Failed to process CardDAV sources - trying later";
-
                 // Prepare feeder for re-run
                 resetContacts();
+                if (m_cacheWriteTimer.isActive()) {
+                    m_cacheWriteTimer.stop();
+                }
 
                 if (m_pendingAuth && m_pendingError) {
                     // Previous run failed due to auth, we'll prompt the user again immediately
+                    qCWarning(lcCardDAVAddressBookFeeder)
+                            << "Failed to process CardDAV sources - invalid password";
+
                     feedAddressBook(true);
                 } else if (m_pendingError) {
                     // Some other error has occurred, wait and try again
                     if (m_retryCount > 0) {
                         m_retryCount--;
 
+                        qCWarning(lcCardDAVAddressBookFeeder)
+                                << "Failed to process CardDAV sources - trying later";
+
                         QTimer::singleShot(m_retryInterval, this, [this]() { feedAddressBook(); });
                     }
                 }
-
-                // Reset timer (TODO: Verifiy if needed!)
-                m_cacheWriteTimer.start();
 
                 m_pendingAuth = false;
                 m_pendingError = false;
@@ -222,7 +225,7 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
 
     if (magic != CARDDAV_MAGIC || version != CARDDAV_VERSION) {
         qCInfo(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
-                                           << "in invalid and will therefore be removed.";
+                                           << "is invalid and will therefore be removed.";
         cacheFile.remove();
         return;
     }
