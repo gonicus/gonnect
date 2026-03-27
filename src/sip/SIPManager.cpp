@@ -346,6 +346,7 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
 void SIPManager::suspend()
 {
     qCDebug(lcSIPManager) << "suspending SIP";
+    m_suspended = true;
 
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_SERVICE_UNAVAILABLE;
@@ -371,14 +372,21 @@ void SIPManager::suspend()
 
 void SIPManager::resume()
 {
+    if (!m_suspended) {
+        return;
+    }
+
+    m_suspended = false;
+
     // Since resume may be called in more network changed cases, only
     // do this when we have no active calls going.
-    if (!!SIPCallManager::instance().hasActiveCalls()) {
+    if (!SIPCallManager::instance().hasActiveCalls()) {
         qCDebug(lcSIPManager) << "resuming SIP";
 
         // Activate transports again
         auto accounts = SIPAccountManager::instance().accounts();
         for (auto account : std::as_const(accounts)) {
+            account->setAfterResume();
             account->setRegistration(false);
             account->activateTransports();
         }
