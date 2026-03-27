@@ -97,11 +97,21 @@ void AuthManager::init()
                     ReadOnlyConfdSettings settings;
                     settings.beginGroup("jitsi");
 
+                    const auto authUrl = settings.value("authorizationUrl", "").toUrl();
+                    const auto tokenUrl = settings.value("tokenUrl", "").toUrl();
+                    const auto clientId = settings.value("clientIdentifier", "").toString();
+
+                    qCDebug(lcAuthManager) << "Reading jtsi authorization info:";
+                    qCDebug(lcAuthManager).noquote().nospace()
+                            << "  authUrl: " << authUrl << ", valid: " << authUrl.isValid();
+                    qCDebug(lcAuthManager).noquote().nospace()
+                            << "  tokenUrl: " << tokenUrl << ", valid: " << tokenUrl.isValid();
+                    qCDebug(lcAuthManager).noquote().nospace() << "  clientId: " << clientId;
+
                     m_authFlow->setAutoRefresh(true);
-                    m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
-                    m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
-                    m_authFlow->setClientIdentifier(
-                            settings.value("clientIdentifier", "").toString());
+                    m_authFlow->setAuthorizationUrl(authUrl);
+                    m_authFlow->setTokenUrl(tokenUrl);
+                    m_authFlow->setClientIdentifier(clientId);
                     m_authFlow->setSslConfiguration(sslConfig);
 
                     settings.endGroup();
@@ -279,12 +289,18 @@ const QList<QSslCertificate> &AuthManager::sslCAs()
         ReadOnlyConfdSettings settings;
         const auto pathList = settings.value("generic/caFiles").toStringList();
 
+        qCDebug(lcAuthManager) << "Reading jtsi CA files:" << pathList;
+
         for (const auto &path : pathList) {
+            qCDebug(lcAuthManager) << "  reading:" << path;
+
             QFile file(path);
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 qCCritical(lcAuthManager) << "Unable to read CA file" << path;
                 continue;
             }
+
+            qCDebug(lcAuthManager) << "    reading successful";
 
             QSslCertificate cert(file.readAll());
             file.close();
