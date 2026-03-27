@@ -75,7 +75,7 @@ NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
     connect(netInfo, &QNetworkInformation::reachabilityChanged, this,
             &NetworkHelper::onReachabilityChanged);
 
-    netInfo->reachability();
+    onReachabilityChanged(netInfo->reachability());
 }
 
 QFuture<bool> NetworkHelper::isReachable(const QUrl &url)
