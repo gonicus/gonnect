@@ -31,7 +31,7 @@ Q_SIGNALS:
     void newExternalImageAdded(const QString &id, const QByteArray &data, const QDateTime &modified,
                                QPrivateSignal);
 
-    void invalidCredentials();
+    void feederFailed();
 
 private:
     void clearCStringlist(char **attrs) const;
@@ -44,6 +44,8 @@ private:
     void processResult(LDAPMessage *ldapMessage);
     void startContactQuery();
 
+    void resetFeeder();
+
     LDAPInitializer::Config m_ldapConfig;
 
     AddressBookManager *m_manager = nullptr;
@@ -54,4 +56,8 @@ private:
     QString m_baseNumber;
     QStringList m_sipStatusSubscriptableAttributes;
     BlockInfo m_blockInfo;
+
+    bool m_authFailed = false;
+    int m_retryCount = 0;
+    int m_retryInterval = 0;
 };
