@@ -1933,7 +1933,7 @@
     <message>
         <location filename="../src/ui/components/popups/FirstAid.qml" line="36"/>
         <source>Emergency Call</source>
-        <translation type="unfinished">Chiamata di emergenza</translation>
+        <translation>Chiamata di emergenza</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/FirstAid.qml" line="45"/>
@@ -1953,12 +1953,12 @@
     <message>
         <location filename="../src/ui/components/popups/FirstAid.qml" line="94"/>
         <source>Exit the emergency call menu without initiating any action</source>
-        <translation type="unfinished"></translation>
+        <translation>Esci dal menu delle chiamate di emergenza senza eseguire alcuna operazione</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/FirstAid.qml" line="104"/>
         <source>Close emergency call menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Chiudi il menu delle chiamate di emergenza</translation>
     </message>
 </context>
 <context>
@@ -1966,12 +1966,12 @@
     <message>
         <location filename="../src/ui/components/controls/FirstAidButton.qml" line="9"/>
         <source>Emegency call</source>
-        <translation type="unfinished"></translation>
+        <translation>Chiamata di emergenza</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FirstAidButton.qml" line="22"/>
         <source>Open emergency call menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Apri il menu delle chiamate di emergenza</translation>
     </message>
 </context>
 <context>
@@ -4846,22 +4846,22 @@
     <message>
         <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="43"/>
         <source>Adjust the volume</source>
-        <translation type="unfinished">Regola il volume</translation>
+        <translation>Regola il volume</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="87"/>
         <source>Unmute</source>
-        <translation type="unfinished">Riattiva audio</translation>
+        <translation>Riattiva audio</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="87"/>
         <source>Mute</source>
-        <translation type="unfinished">Silenzia</translation>
+        <translation>Disattiva l&apos;audio</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="121"/>
         <source>Open audio settings</source>
-        <translation type="unfinished">Apri impostazioni audio</translation>
+        <translation>Apri impostazioni audio</translation>
     </message>
 </context>
 <context>
