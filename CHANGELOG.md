@@ -1,3 +1,23 @@
+# [2.1.0-beta.7](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.6...v2.1.0-beta.7) (2026-03-30)
+
+
+### Bug Fixes
+
+* disable WMME in pjsip ([#397](https://github.com/gonicus/gonnect/issues/397)) ([b08c87e](https://github.com/gonicus/gonnect/commit/b08c87ea32926e5f0c4185b7ef43f66a1f47a7df))
+* handle direct pjsip mute again ([#402](https://github.com/gonicus/gonnect/issues/402)) ([cc9373f](https://github.com/gonicus/gonnect/commit/cc9373fce3d29a9939b5605e9a5d7af197aea5da))
+* mwi recursions ([#405](https://github.com/gonicus/gonnect/issues/405)) ([a7b6e8a](https://github.com/gonicus/gonnect/commit/a7b6e8a303e03208d07b2f7aebb2437147ed6d5e))
+* raise window after showing it ([#398](https://github.com/gonicus/gonnect/issues/398)) ([6da44fa](https://github.com/gonicus/gonnect/commit/6da44fa478a0bdd8871708fd0d4071f309b4c4eb))
+* reenable CardDAV plugin ([#406](https://github.com/gonicus/gonnect/issues/406)) ([6829e25](https://github.com/gonicus/gonnect/commit/6829e2578310e529413415cf306c4fe2cf5cdcee))
+* restore functionality for feeders without network requirements ([#387](https://github.com/gonicus/gonnect/issues/387)) ([ce6639c](https://github.com/gonicus/gonnect/commit/ce6639cb364873a5ea0484b0c7c7409ea24465bf))
+* tab switch/reset notifications ([5cdaf86](https://github.com/gonicus/gonnect/commit/5cdaf868ed4f8c3041a44f7f5134c9ce0133e6a1))
+* **ui:** give focus to call screen when startet via enter ([#395](https://github.com/gonicus/gonnect/issues/395)) ([494402b](https://github.com/gonicus/gonnect/commit/494402b3315c0974beb8bb529bde332884a5ddfb))
+
+
+### Features
+
+* basic MWI support ([#392](https://github.com/gonicus/gonnect/issues/392)) ([dcb7fbc](https://github.com/gonicus/gonnect/commit/dcb7fbcc9100e113f219afaf038318283bf5393a))
+* display sip registration status ([#375](https://github.com/gonicus/gonnect/issues/375)) ([4bf60d0](https://github.com/gonicus/gonnect/commit/4bf60d0af998ce1d773bc60f892b31252b30f871))
+
 # [2.1.0-beta.6](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.5...v2.1.0-beta.6) (2026-03-11)
 
 
