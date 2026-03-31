@@ -1,0 +1,157 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectnums:
+
+= GOnnect Architecture Documentation
+
+== 2. Requirements and Constraints
+
+=== 2.1. Functional Requirements
+
+==== 2.1.1. SIP Communication
+
+|===
+| ID | Requirement | Priority
+
+| FR-SIP-001 | Support SIP accounts with TLS/UDP/TCP transport | High
+| FR-SIP-002 | Support SRTP media encryption | High
+| FR-SIP-003 | Support multiple SIP accounts simultaneously | High
+| FR-SIP-004 | Support preferred identity selection | Medium
+| FR-SIP-005 | Support call forwarding and transfer | Medium
+| FR-SIP-006 | Support RTT (Real-time text) | Medium
+| FR-SIP-007 | Support DTMF tones in call | Medium
+|===
+
+==== 2.1.2. Call Management
+
+|===
+| ID | Requirement | Priority
+
+| FR-CALL-001 | Support incoming call handling | High
+| FR-CALL-002 | Support outgoing call initiation | High
+| FR-CALL-003 | Support call hold/unhold | High
+| FR-CALL-004 | Support call mute/unmute | High
+| FR-CALL-005 | Support call history tracking | High
+| FR-CALL-006 | Support emergency call priority | High
+| FR-CALL-007 | Support call quality metrics display | Medium
+|===
+
+==== 2.1.3. Contact Management
+
+|===
+| ID | Requirement | Priority
+
+| FR-CONTACT-001 | Support LDAP contact sources | High
+| FR-CONTACT-002 | Support CardDAV contact sources | High
+| FR-CONTACT-003 | Support Akonadi contact sources | Medium
+| FR-CONTACT-004 | Support EDS contact sources | Medium
+| FR-CONTACT-005 | Support CSV contact import | Medium
+| FR-CONTACT-006 | Support fuzzy contact search | High
+| FR-CONTACT-007 | Support contact avatar display | Medium
+| FR-CONTACT-008 | Support buddy state subscription | Medium
+|===
+
+==== 2.1.4. Calendar Integration
+
+|===
+| ID | Requirement | Priority
+
+| FR-CAL-001 | Support CalDAV calendar sources | High
+| FR-CAL-002 | Support Akonadi calendar sources | Medium
+| FR-CAL-003 | Support EDS calendar sources | Medium
+| FR-CAL-004 | Support event-based call initiation | Medium
+| FR-CAL-005 | Support room booking integration | Low
+|===
+
+==== 2.1.5. User Interface
+
+|===
+| ID | Requirement | Priority
+
+| FR-UI-001 | Support QML-based user interface | High
+| FR-UI-002 | Support custom window decoration | High
+| FR-UI-003 | Support system tray integration | High
+| FR-UI-004 | Support internationalization (i18n) | High
+| FR-UI-005 | Support accessibility features | Medium
+| FR-UI-006 | Support keyboard shortcuts | Medium
+|===
+
+=== 2.2. Non-Functional Requirements
+
+==== 2.2.1. Performance
+
+|===
+| ID | Requirement | Target
+
+| NFR-PERF-001 | Application startup time | < 3 seconds
+| NFR-PERF-002 | Call establishment time | < 2 seconds
+| NFR-PERF-003 | Contact search response time | < 500ms
+| NFR-PERF-004 | Memory usage (idle) | < 200MB
+| NFR-PERF-005 | CPU usage (idle) | < 5%
+|===
+
+==== 2.2.2. Quality
+
+|===
+| ID | Requirement | Target
+
+| NFR-QUAL-001 | Call quality MOS score | > 3.5
+| NFR-QUAL-002 | Audio latency | < 150ms
+| NFR-QUAL-003 | Video frame rate | >= 25 fps
+| NFR-QUAL-004 | Jitter buffer adaptation | < 100ms
+|===
+
+==== 2.2.3. Reliability
+
+|===
+| ID | Requirement | Target
+
+| NFR-REL-001 | Call drop rate | < 1%
+| NFR-REL-002 | Uptime (background) | 24/7
+| NFR-REL-003 | Auto-reconnect on network failure | Yes
+| NFR-REL-004 | Config persistence | 100%
+|===
+
+==== 2.2.4. Security
+
+|===
+| ID | Requirement | Target
+
+| NFR-SEC-001 | SIP signaling encryption | TLS 1.2+
+| NFR-SEC-002 | Media encryption | SRTP
+| NFR-SEC-003 | Credential storage | Encrypted keychain
+| NFR-SEC-004 | Certificate validation | Strict
+|===
+
+=== 2.3. Architectural Constraints
+
+==== 2.3.1. Technology Constraints
+
+* Qt6 framework (minimum version 6.5)
+* C++17 standard
+* PJSIP library (v2.14+)
+* CMake build system (v3.20+)
+* Conan dependency manager
+* Qt Quick Controls 2
+* Qt WebEngine (for Jitsi integration)
+
+==== 2.3.2. Platform Constraints
+
+|===
+| Platform | Minimum Version | Notes
+
+| Linux | Ubuntu 20.04+ | Flatpak and native builds
+| macOS | macOS 12.0+ | Apple Silicon and Intel
+| Windows | Windows 10 21H2+ | MSVC 2022
+|===
+
+==== 2.3.3. Dependency Constraints
+
+* Must use Qt's parent-child memory management
+* Must avoid raw new/delete in favor of Qt containers
+* Must use QML for UI, C++ for business logic
+* Must follow Qt coding style guidelines
+|===

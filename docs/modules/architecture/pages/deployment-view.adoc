@@ -1,0 +1,331 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectnums:
+
+= GOnnect Architecture Documentation
+
+== 7. Deployment View
+
+=== 7.1. Deployment Architecture
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Deployment Architecture
+
+rectangle "User Desktop" as UserDesktop {
+  rectangle "GOnnect Application" as App {
+    component "Main Process" as MainProc
+    component "QML Engine" as QMLE
+    component "C++ Backend" as CPP
+  }
+  component "System Tray" as Tray
+  component "Notification Daemon" as ND
+}
+
+rectangle "Network" as Network {
+  rectangle "SIP Server / PBX" as SIPServer
+  rectangle "LDAP Server" as LDAPServer
+  rectangle "CardDAV Server" as CardDAVServer
+  rectangle "CalDAV Server" as CalDAVServer
+  rectangle "Jitsi Meet Server" as JitsiServer
+}
+
+rectangle "Local Services" as Local {
+  component "Akonadi Server" as Akonadi
+  component "EDS Server" as EDS
+  component "Keychain Service" as KC
+}
+
+MainProc --> SIPServer : SIP/TLS (5061)
+MainProc --> LDAPServer : LDAP/LDAPS
+MainProc --> CardDAVServer : CardDAV/HTTPS
+MainProc --> CalDAVServer : CalDAV/HTTPS
+MainProc --> JitsiServer : WebRTC/HTTPS
+
+MainProc --> Akonadi : D-Bus
+MainProc --> EDS : D-Bus
+MainProc --> KC : Secret Service API
+
+MainProc --> Tray : System tray
+Tray --> ND : Notifications
+@enduml
+```
+
+=== 7.2. Linux Deployment
+
+==== 7.2.1. Native Linux Build
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title Linux Native Deployment
+
+rectangle "Build System" as Build {
+  component "CMake" as CMake
+  component "Conan" as Conan
+  component "clang-format" as CF
+}
+
+rectangle "Build Dependencies" as BuildDeps {
+  component "Qt6" as Qt6
+  component "PJSIP" as PJSIP
+  component "libsecret" as LS
+  component "logfault" as LF
+}
+
+rectangle "Target System" as Target {
+  component "GOnnect Binary" as Bin
+  component "QML Files" as QML
+  component "Translations" as Trans
+  component "Config Files" as CFG
+}
+
+rectangle "Runtime Dependencies" as Runtime {
+  component "Qt6 Runtime" as Qt6R
+  component "D-Bus" as DBus
+  component "Keychain Service" as KCS
+  component "Akonadi" as Akonadi
+  component "EDS" as EDS
+}
+
+CMake --> Conan : Dependency resolution
+Conan --> BuildDeps : Fetch packages
+CMake --> Target : Build application
+
+Target --> Runtime : Link libraries
+Target --> BuildDeps : Runtime libs
+@enduml
+```
+
+==== 7.2.2. Flatpak Deployment
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title Flatpak Deployment
+
+rectangle "Flatpak Build" as FPBuild {
+  component "Flatpak Builder" as FPB
+  component "Manifest" as Manifest
+}
+
+rectangle "Flatpak Runtime" as FPR {
+  component "org.freedesktop.Platform" as FLP
+  component "org.kde.Platform" as KDP
+  component "Qt6 Runtime" as Qt6R
+}
+
+rectangle "Flatpak App" as FPA {
+  component "GOnnect App" as GP
+  component "Extensions" as Ext
+}
+
+rectangle "Host System" as Host {
+  component "D-Bus" as DBus
+  component "Keyring" as Keyring
+  component "File System" as FS
+}
+
+FPB --> FPR : Base runtime
+FPB --> FPA : Build app
+FPA --> FPR : Runtime dependencies
+FPA --> Host : D-Bus access
+FPA --> Host : Keyring access
+FPA --> Host : File system access
+@enduml
+```
+
+=== 7.3. macOS Deployment
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title macOS Deployment
+
+rectangle "Build System" as Build {
+  component "CMake" as CMake
+  component "Conan" as Conan
+}
+
+rectangle "Build Dependencies" as BuildDeps {
+  component "Qt6" as Qt6
+  component "PJSIP" as PJSIP
+  component "Keychain" as KC
+  component "OSLog" as OSLog
+}
+
+rectangle "App Bundle" as AppBundle {
+  component "GOnnect.app" as App
+  component "Contents/MacOS" as MacOS
+  component "Contents/Resources" as Res
+  component "Info.plist" as Info
+}
+
+rectangle "System Integration" as Sys {
+  component "LaunchAgents" as LA
+  component "MenuBar" as MB
+  component "Notifications" as N
+}
+
+CMake --> Conan : Dependency resolution
+Conan --> BuildDeps : Fetch packages
+CMake --> AppBundle : Build application
+
+AppBundle --> Sys : Register services
+AppBundle --> Sys : Launch agent
+@enduml
+```
+
+=== 7.4. Windows Deployment
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title Windows Deployment
+
+rectangle "Build System" as Build {
+  component "CMake" as CMake
+  component "Conan" as Conan
+  component "Visual Studio" as VS
+}
+
+rectangle "Build Dependencies" as BuildDeps {
+  component "Qt6" as Qt6
+  component "PJSIP" as PJSIP
+  component "Windows SDK" as WinSDK
+  component "WinCrypt" as WinCrypt
+}
+
+rectangle "Installer" as Inst {
+  component "NSIS Installer" as NSIS
+  component "GOnnect Setup.exe" as Setup
+}
+
+rectangle "System Integration" as Sys {
+  component "Start Menu" as SM
+  component "Taskbar" as TB
+  component "Event Viewer" as EV
+  component "Windows Keychain" as WK
+}
+
+CMake --> VS : Build configuration
+VS --> BuildDeps : Link libraries
+CMake --> Inst : Generate installer
+
+Inst --> Sys : Create shortcuts
+Inst --> Sys : Register file types
+Inst --> Sys : Event log source
+@enduml
+```
+
+=== 7.5. Configuration File Structure
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Configuration Structure
+
+package "User Configuration" as UserConf {
+  file "gonnect.conf" as CONF
+  file "keychain" as KC
+}
+
+package "System Configuration" as SysConf {
+  file "/etc/gonnect/gonnect.conf" as SYS_CONF
+  file "/etc/gonnect/keychain.d/" as SYS_KC
+}
+
+package "Application Resources" as Resources {
+  file ":/i18n/gonnect_de.qm" as QM1
+  file ":/i18n/gonnect_en.qm" as QM2
+  file ":/qml/GonnectWindow.qml" as QML1
+  file ":/qml/CallWindow.qml" as QML2
+}
+
+package "Runtime Data" as Runtime {
+  file "~/.local/share/gonnect/log/" as LOG
+  file "~/.local/share/gonnect/cache/" as CACHE
+  file "~/.local/share/gonnect/history/" as HIST
+}
+
+UserConf --> Resources : Load resources
+SysConf --> UserConf : Override settings
+Resources --> Runtime : Write logs
+Runtime --> UserConf : Persist data
+@enduml
+```
+
+=== 7.6. Network Ports and Protocols
+
+|===
+| Protocol | Port | Direction | Purpose
+
+| SIP/TLS | 5061 | Outbound | SIP signaling (encrypted)
+| SIP/UDP | 5060 | Outbound | SIP signaling (unencrypted)
+| SIP/TCP | 5060 | Outbound | SIP signaling (TCP)
+| RTP | 10000-20000 | Bidirectional | Media streams
+| STUN | 3478 | Outbound | NAT traversal
+| TURN | 3478 | Outbound | NAT relay
+| CardDAV | 443 | Outbound | Contact synchronization
+| CalDAV | 443 | Outbound | Calendar synchronization
+| Jitsi | 443 | Outbound | Video conference
+| D-Bus | N/A | Local | IPC
+|===
+
+=== 7.7. Resource Requirements
+
+==== 7.7.1. Minimum Requirements
+
+|===
+| Resource | Minimum | Recommended
+
+| CPU | 1 Core @ 1GHz | 2 Cores @ 2GHz
+| RAM | 1GB | 4GB
+| Disk | 500MB | 1GB
+| Network | 128kbps | 1Mbps+
+|===
+
+==== 7.7.2. Recommended Requirements
+
+|===
+| Resource | Minimum | Recommended
+
+| CPU | 2 Cores @ 2GHz | 4 Cores @ 3GHz
+| RAM | 2GB | 8GB
+| Disk | 1GB SSD | 2GB SSD
+| Network | 512kbps | 10Mbps+
+|===
+
+=== 7.8. Environment Variables
+
+|===
+| Variable | Purpose | Default
+
+| GONNECT_DEBUG | Enable debug logging | false
+| QT_LOGGING_RULES | Qt logging configuration | 
+| PJSIP_LOG_LEVEL | PJSIP logging level | 0
+| KEYCHAIN_SERVICE | Keychain service name | gonnect
+|===
+|===

@@ -1,0 +1,238 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectnums:
+
+= GOnnect Architecture Documentation
+
+== 4. Architectural Scenarios
+
+=== 4.1. Call Flow Scenario
+
+==== 4.1.1. Outgoing Call Sequence
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor User
+participant "UI" as UI
+participant "StateManager" as SM
+participant "SIPManager" as SIPM
+participant "SIPCallManager" as CM
+participant "SIPCall" as Call
+participant "PJSIP" as PJSIP
+
+User -> UI : Dial number
+UI -> SM : Get preferred identity
+SM --> UI : Return identity
+UI -> SIPM : Create call request
+SIPM -> CM : Create call
+CM -> Call : Initialize call
+Call -> PJSIP : Send INVITE
+PJSIP --> Call : 100 Trying
+Call --> CM : State changed
+CM --> UI : Update UI
+PJSIP --> Call : 180 Ringing
+Call --> CM : State changed
+CM --> UI : Update UI
+PJSIP --> Call : 200 OK
+Call --> CM : State changed
+CM --> UI : Update UI
+User -> UI : Answer call
+UI -> Call : Accept
+Call -> PJSIP : ACK
+PJSIP --> Call : Media established
+Call --> CM : Call active
+CM --> UI : Update UI
+@enduml
+```
+
+==== 4.1.2. Incoming Call Sequence
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor RemoteUser
+participant "PJSIP" as PJSIP
+participant "SIPCall" as Call
+participant "SIPCallManager" as CM
+participant "UI" as UI
+participant "User" as User
+
+RemoteUser -> PJSIP : INVITE
+PJSIP -> Call : Create call
+Call -> CM : Notify incoming
+CM -> UI : Show incoming call
+UI --> User : Display call
+User -> UI : Answer
+UI -> Call : Accept
+Call -> PJSIP : 200 OK
+PJSIP --> Call : ACK
+Call --> CM : Call established
+CM --> UI : Update UI
+@enduml
+```
+
+==== 4.1.3. Call Termination
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "User" as User
+participant "UI" as UI
+participant "SIPCall" as Call
+participant "SIPCallManager" as CM
+participant "PJSIP" as PJSIP
+
+User -> UI : End call
+UI -> Call : Hangup
+Call -> PJSIP : Send BYE
+PJSIP --> Call : 200 OK
+Call --> CM : State changed
+CM --> UI : Update UI
+Call -> CM : Remove from active calls
+CM -> CM : Update call history
+@enduml
+```
+
+=== 4.2. Contact Synchronization Scenario
+
+==== 4.2.1. Contact Source Loading
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "Application" as App
+participant "AddressBookManager" as ABM
+participant "LDAP Feeder" as LDAP
+participant "CardDAV Feeder" as CD
+participant "Akonadi Feeder" as AK
+participant "ContactModel" as CM
+
+App -> ABM : Initialize
+ABM -> LDAP : Load contacts
+ABM -> CD : Load contacts
+ABM -> AK : Load contacts
+LDAP --> ABM : Contacts list
+CD --> ABM : Contacts list
+AK --> ABM : Contacts list
+ABM -> CM : Update model
+CM --> ABM : Acknowledged
+ABM --> App : Ready
+@enduml
+```
+
+==== 4.2.2. Contact Search
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "UI" as UI
+participant "ContactModel" as CM
+participant "Contact" as Contact
+
+User -> UI : Enter search term
+UI -> CM : Search query
+CM -> Contact : Filter contacts
+Contact --> CM : Matching contacts
+CM --> UI : Search results
+UI --> User : Display results
+@enduml
+```
+
+=== 4.3. Configuration Loading Scenario
+
+==== 4.3.1. Application Startup
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "Application" as App
+participant "UISettings" as UIS
+participant "AppSettings" as AS
+participant "Keychain" as KC
+participant "StateManager" as SM
+
+User -> App : Start application
+App -> AS : Load settings
+AS --> App : Configuration
+App -> KC : Load credentials
+KC --> App : Decrypted secrets
+App -> UIS : Apply UI settings
+UIS --> App : UI configured
+App -> SM : Initialize state
+SM --> App : State ready
+@enduml
+```
+
+=== 4.4. Buddy State Subscription Scenario
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "SIPManager" as SIPM
+participant "SIPBuddy" as Buddy
+participant "PJSIP" as PJSIP
+participant "UI" as UI
+
+SIPM -> Buddy : Subscribe to state
+Buddy -> PJSIP : SUBSCRIBE request
+PJSIP --> Buddy : 200 OK
+PJSIP --> Buddy : NOTIFY with state
+Buddy --> SIPM : State changed
+SIPM --> UI : Emit buddyStateChanged
+UI --> Buddy : Update display
+@enduml
+```
+
+=== 4.5. Emergency Call Scenario
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "UI" as UI
+participant "StateManager" as SM
+participant "SIPCallManager" as CM
+participant "SIPCall" as Call
+
+User -> UI : Click emergency number
+UI -> SM : Request emergency call
+SM --> UI : Authorization
+UI -> CM : Create emergency call
+CM -> Call : Initialize call
+Call -> Call : Mark as emergency
+Call -> CM : Send INVITE
+CM --> UI : Call in progress
+@enduml
+```
+|===
