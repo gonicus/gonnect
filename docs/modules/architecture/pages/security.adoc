@@ -402,4 +402,3 @@ CH --> KC : Credential access
 | NIST | Compliant | Meets NIST recommendations
 | GDPR | Compliant | Privacy by design
 |===
-|===

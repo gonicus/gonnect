@@ -117,4 +117,3 @@ Client --> LocalServices : Local contacts/calendar
 * Must be buildable with CMake and Conan dependency management
 * Must support Flatpak packaging for Linux distribution
 * Must comply with DCO (Developer Certificate of Origin) for contributions
-|===

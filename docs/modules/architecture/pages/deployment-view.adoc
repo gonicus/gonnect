@@ -328,4 +328,3 @@ Runtime --> UserConf : Persist data
 | PJSIP_LOG_LEVEL | PJSIP logging level | 0
 | KEYCHAIN_SERVICE | Keychain service name | gonnect
 |===
-|===

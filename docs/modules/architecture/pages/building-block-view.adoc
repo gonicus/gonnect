@@ -362,4 +362,3 @@ HDP --> Audio : Headset proxy
 RTF --> RT : Ring tone creation
 @enduml
 ```
-|===

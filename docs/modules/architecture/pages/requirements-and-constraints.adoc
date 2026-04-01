@@ -154,4 +154,3 @@
 * Must avoid raw new/delete in favor of Qt containers
 * Must use QML for UI, C++ for business logic
 * Must follow Qt coding style guidelines
-|===

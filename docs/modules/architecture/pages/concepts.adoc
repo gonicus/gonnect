@@ -369,4 +369,3 @@ SM --> OC : uiEditModeChanged signal
 OC -> UI : Update UI based on state
 @enduml
 ```
-|===

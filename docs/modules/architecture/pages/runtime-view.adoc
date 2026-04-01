@@ -303,4 +303,3 @@ App --> SM : Window shown
 SM --> Ext : Activation complete
 @enduml
 ```
-|===

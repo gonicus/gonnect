@@ -235,4 +235,3 @@ Call -> CM : Send INVITE
 CM --> UI : Call in progress
 @enduml
 ```
-|===

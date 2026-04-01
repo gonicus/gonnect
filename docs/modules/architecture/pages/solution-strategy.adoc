@@ -209,4 +209,3 @@ SIPM --> KC : Credentials
 ABM --> PJS : Buddy State
 @enduml
 ```
-|===
