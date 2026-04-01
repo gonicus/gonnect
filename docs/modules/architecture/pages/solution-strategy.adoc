@@ -4,7 +4,8 @@
 
 GOnnect follows a layered architecture pattern with clear separation of concerns:
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -44,7 +45,7 @@ Presentation --> Application : QML Context
 Application --> Business : C++ Backend
 Business --> Infrastructure : External Libraries
 @enduml
-```
+....
 
 == Design Patterns
 
@@ -152,7 +153,8 @@ For QML data models:
 
 == Component Interaction
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -199,4 +201,4 @@ SIPM --> PJS : SIP Stack
 SIPM --> KC : Credentials
 ABM --> PJS : Buddy State
 @enduml
-```
+....

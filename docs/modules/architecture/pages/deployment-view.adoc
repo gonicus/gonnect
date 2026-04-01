@@ -2,7 +2,8 @@
 
 == Deployment Architecture
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -47,13 +48,14 @@ MainProc --> KC : Secret Service API
 MainProc --> Tray : System tray
 Tray --> ND : Notifications
 @enduml
-```
+....
 
 == Linux Deployment
 
 === Native Linux Build
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -96,11 +98,12 @@ CMake --> Target : Build application
 Target --> Runtime : Link libraries
 Target --> BuildDeps : Runtime libs
 @enduml
-```
+....
 
 === Flatpak Deployment
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -137,11 +140,12 @@ FPA --> Host : D-Bus access
 FPA --> Host : Keyring access
 FPA --> Host : File system access
 @enduml
-```
+....
 
 == macOS Deployment
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -181,11 +185,12 @@ CMake --> AppBundle : Build application
 AppBundle --> Sys : Register services
 AppBundle --> Sys : Launch agent
 @enduml
-```
+....
 
 == Windows Deployment
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -226,11 +231,12 @@ Inst --> Sys : Create shortcuts
 Inst --> Sys : Register file types
 Inst --> Sys : Event log source
 @enduml
-```
+....
 
 == Configuration File Structure
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -266,7 +272,7 @@ SysConf --> UserConf : Override settings
 Resources --> Runtime : Write logs
 Runtime --> UserConf : Persist data
 @enduml
-```
+....
 
 == Network Ports and Protocols
 

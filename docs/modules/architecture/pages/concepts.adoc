@@ -6,7 +6,8 @@ GOnnect supports multiple preferred identities that allow callers to present dif
 
 === Identity Selection Algorithm
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -24,7 +25,7 @@ PI --> SIPM : Return matching identity
 SIPM --> UI : Identity selected
 UI -> SIPM : Use identity for call
 @enduml
-```
+....
 
 === Identity Configuration
 
@@ -44,7 +45,8 @@ GOnnect tracks the availability state of contacts through SIP SUBSCRIBE/NOTIFY m
 
 === Buddy State Flow
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -63,7 +65,7 @@ SB --> Contact : State: Available
 PJSIP --> SB : NOTIFY: busy
 SB --> Contact : State: Busy
 @enduml
-```
+....
 
 === Buddy States
 
@@ -83,7 +85,8 @@ GOnnect aggregates contacts from multiple sources into a unified view. Each sour
 
 === Contact Merging
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -108,7 +111,7 @@ ABM -> ABM : Merge and deduplicate
 ABM --> Search : 6 unique results
 Search --> User : Display results
 @enduml
-```
+....
 
 === Source Priority
 
@@ -143,7 +146,8 @@ GOnnect provides detailed call quality information using RTCP XR (Extended Repor
 
 === Quality Level Classification
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam stateStyle mode
@@ -167,13 +171,14 @@ Good --> Fair : MOS decreases
 Fair --> Poor : MOS decreases
 Poor --> Bad : MOS decreases
 @enduml
-```
+....
 
 == Security Architecture
 
 === Credential Storage
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -189,7 +194,7 @@ KC --> Creds : Encrypted data
 Creds --> SA : Decrypted password
 SA -> SA : Use for authentication
 @enduml
-```
+....
 
 === Encryption Layers
 
@@ -208,7 +213,8 @@ Emergency calls have special handling to ensure they are always prioritized and 
 
 === Emergency Call Flow
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -228,7 +234,7 @@ SCM -> EC : Create emergency call
 EC --> SCM : Call established
 SCM --> EB : Emergency call in progress
 @enduml
-```
+....
 
 === Emergency Number Configuration
 
@@ -246,7 +252,8 @@ GOnnect can upgrade SIP calls to Jitsi Meet video conferences when both parties 
 
 === Jitsi Integration Flow
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -264,7 +271,7 @@ Jitsi --> JC : Conference URL
 JC --> SC : Upgrade to Jitsi
 SC --> JC : Send invite
 @enduml
-```
+....
 
 === Jitsi Configuration
 
@@ -284,7 +291,8 @@ GOnnect uses a plugin-based architecture for contact sources and chat plugins.
 
 === Contact Source Plugins
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -313,7 +321,7 @@ AK --> Feeder : Implements
 EDS --> Feeder : Implements
 CSV --> Feeder : Implements
 @enduml
-```
+....
 
 === Plugin Lifecycle
 
@@ -344,7 +352,8 @@ StateManager provides a centralized way to manage application state and coordina
 
 === State Change Flow
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -359,4 +368,4 @@ SM --> UI : uiEditModeChanged signal
 SM --> OC : uiEditModeChanged signal
 OC -> UI : Update UI based on state
 @enduml
-```
+....

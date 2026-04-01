@@ -4,7 +4,8 @@
 
 === Outgoing Call Sequence
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -41,11 +42,12 @@ PJSIP --> Call : Media established
 Call --> CM : Call active
 CM --> UI : Update UI
 @enduml
-```
+....
 
 === Incoming Call Sequence
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -70,11 +72,12 @@ PJSIP --> Call : ACK
 Call --> CM : Call established
 CM --> UI : Update UI
 @enduml
-```
+....
 
 === Call Termination
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -95,13 +98,14 @@ CM --> UI : Update UI
 Call -> CM : Remove from active calls
 CM -> CM : Update call history
 @enduml
-```
+....
 
 == Contact Synchronization Scenario
 
 === Contact Source Loading
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -126,11 +130,12 @@ ABM -> CM : Update model
 CM --> ABM : Acknowledged
 ABM --> App : Ready
 @enduml
-```
+....
 
 === Contact Search
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -148,13 +153,14 @@ Contact --> CM : Matching contacts
 CM --> UI : Search results
 UI --> User : Display results
 @enduml
-```
+....
 
 == Configuration Loading Scenario
 
 === Application Startup
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -177,11 +183,12 @@ UIS --> App : UI configured
 App -> SM : Initialize state
 SM --> App : State ready
 @enduml
-```
+....
 
 == Buddy State Subscription Scenario
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -200,11 +207,12 @@ Buddy --> SIPM : State changed
 SIPM --> UI : Emit buddyStateChanged
 UI --> Buddy : Update display
 @enduml
-```
+....
 
 == Emergency Call Scenario
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -225,4 +233,4 @@ Call -> Call : Mark as emergency
 Call -> CM : Send INVITE
 CM --> UI : Call in progress
 @enduml
-```
+....

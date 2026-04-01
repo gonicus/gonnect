@@ -17,7 +17,8 @@ The application targets enterprise and professional users requiring reliable com
 
 == System Context
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -44,7 +45,7 @@ Client --> JitsiServer : Jitsi Meet sessions
 Client --> LocalServices : Local contacts/calendar
 
 @enduml
-```
+....
 
 == Stakeholders and Interests
 

@@ -2,7 +2,8 @@
 
 == Security Architecture Overview
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -47,7 +48,7 @@ AC --> CB : Contact filtering
 AC --> EO : Emergency priority
 AC --> PC : Permission validation
 @enduml
-```
+....
 
 == Authentication Mechanisms
 
@@ -55,7 +56,8 @@ AC --> PC : Permission validation
 
 GOnnect supports SIP digest authentication as defined in RFC 2617.
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -78,7 +80,7 @@ SIPServer --> SA : 401 Unauthorized
 SA -> SIPServer : REGISTER with digest
 SIPServer --> SA : 200 OK
 @enduml
-```
+....
 
 === Authentication Methods
 
@@ -97,7 +99,8 @@ SIPServer --> SA : 200 OK
 
 === Transport Security
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -125,7 +128,7 @@ Transport --> Network : Encrypted packets
 Net --> TLS : SIP over TLS
 Net --> DTLS : Media over DTLS
 @enduml
-```
+....
 
 === Encryption Configuration
 
@@ -140,7 +143,8 @@ Net --> DTLS : Media over DTLS
 
 === Certificate Handling
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -159,13 +163,14 @@ SIPM -> CABundle : Validate certificate
 CABundle --> SIPM : Validation result
 SIPM --> SIPServer : Handshake complete
 @enduml
-```
+....
 
 == Credential Storage
 
 === Keychain Integration
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -188,7 +193,7 @@ User -> KC : Enter password
 KC --> Creds : Decrypted password
 Creds --> SA : Password for auth
 @enduml
-```
+....
 
 === Keychain Service Configuration
 
@@ -215,7 +220,8 @@ Creds --> SA : Password for auth
 
 === Contact Blocking
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -232,7 +238,7 @@ BI --> SIPM : Contact blocked
 SIPM -> SC : Reject call
 SC --> Caller : 603 Declined
 @enduml
-```
+....
 
 === Blocking Configuration
 
@@ -248,7 +254,8 @@ SC --> Caller : 603 Declined
 
 === Firewall Configuration
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -279,7 +286,7 @@ Out --> SIPServer : SIP/TLS (5061)
 Out --> ExtServers : CardDAV/CalDAV
 In --> Media : RTP/RTCP (10000-20000)
 @enduml
-```
+....
 
 === Required Ports
 
@@ -334,7 +341,8 @@ In --> Media : RTP/RTCP (10000-20000)
 
 === Attack Surface
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -367,7 +375,7 @@ Net --> Net : Network services
 FS --> Cache : File operations
 CH --> KC : Credential access
 @enduml
-```
+....
 
 == Security Compliance
 

@@ -2,7 +2,8 @@
 
 == Application Startup Flow
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -38,11 +39,12 @@ SIPM --> App : SIP ready
 App --> Main : Application ready
 Main --> User : UI displayed
 @enduml
-```
+....
 
 == SIP Initialization Sequence
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -65,11 +67,12 @@ SAM --> SIPM : Accounts ready
 SIPM -> SEL : Start event loop
 SEL --> SIPM : Event loop running
 @enduml
-```
+....
 
 == Call State Machine
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam stateStyle mode
@@ -98,11 +101,12 @@ Hold --> Established : Unhold requested
 Hold --> Terminating : BYE sent
 Terminating --> Terminated : 200 OK
 @enduml
-```
+....
 
 == Contact Synchronization Flow
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -137,11 +141,12 @@ CS1 --> AM : Avatar data
 CS2 --> AM : Avatar data
 AM --> CM : Update avatars
 @enduml
-```
+....
 
 == Buddy State Update Flow
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -159,11 +164,12 @@ SIPM --> CM : Emit buddyStateChanged
 CM --> UI : Update buddy icon
 UI --> SB : Acknowledged
 @enduml
-```
+....
 
 == Call Quality Monitoring
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -184,11 +190,12 @@ PJSIP --> SC : Jitter buffer info
 SC -> SC : Update metrics
 SC --> SCM : Quality info changed
 @enduml
-```
+....
 
 == Emergency Call Flow
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -218,11 +225,12 @@ PJSIP --> SC : 200 OK
 SC --> SCM : Call established
 SCM --> UI : Update UI
 @enduml
-```
+....
 
 == Configuration Save/Load Cycle
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -245,11 +253,12 @@ SIPM --> SW : Settings applied
 SW -> UIS : Apply UI settings
 UIS --> SW : UI updated
 @enduml
-```
+....
 
 == System Tray Menu Activation
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -272,11 +281,12 @@ User -> STM : Select action
 STM --> App : Execute action
 App --> STM : Action completed
 @enduml
-```
+....
 
 == D-Bus Activation
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam sequenceMessageAlign center
@@ -293,4 +303,4 @@ SM -> App : Bring to front
 App --> SM : Window shown
 SM --> Ext : Activation complete
 @enduml
-```
+....

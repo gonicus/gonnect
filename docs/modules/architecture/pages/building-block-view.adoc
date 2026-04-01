@@ -2,7 +2,8 @@
 
 == High-Level Architecture
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -100,11 +101,12 @@ STM --> Platform : System tray
 NM --> Platform : Notifications
 Creds --> Platform : Keychain
 @enduml
-```
+....
 
 == SIP Module Architecture
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -163,11 +165,12 @@ R --> RT : Ring playback
 TM --> T : Toggler instances
 DTGF --> SC : DTMF generation
 @enduml
-```
+....
 
 == Contacts Module Architecture
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -247,11 +250,12 @@ PCL --> C : Phone codes
 EC --> C : Emergency contacts
 BI --> C : Block info
 @enduml
-```
+....
 
 == Calendar Module Architecture
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -310,11 +314,12 @@ RNG --> DE : Room name generation
 ER --> DE : Emoji resolution
 EM --> DE : Emoji model
 @enduml
-```
+....
 
 == Media Module Architecture
 
-```plantuml
+[plantuml]
+....
 @startuml
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle uml2
@@ -352,4 +357,4 @@ HDP --> Audio : Headset proxy
 
 RTF --> RT : Ring tone creation
 @enduml
-```
+....
