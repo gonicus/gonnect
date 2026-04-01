@@ -1,15 +1,6 @@
-:doctype: book
-:icons: font
-:source-highlighter: highlightjs
-:toc: left
-:toclevels: 3
-:sectnums:
+= 7. Deployment View
 
-= GOnnect Architecture Documentation
-
-== 7. Deployment View
-
-=== 7.1. Deployment Architecture
+== 7.1. Deployment Architecture
 
 ```plantuml
 @startuml
@@ -58,9 +49,9 @@ Tray --> ND : Notifications
 @enduml
 ```
 
-=== 7.2. Linux Deployment
+== 7.2. Linux Deployment
 
-==== 7.2.1. Native Linux Build
+=== 7.2.1. Native Linux Build
 
 ```plantuml
 @startuml
@@ -107,7 +98,7 @@ Target --> BuildDeps : Runtime libs
 @enduml
 ```
 
-==== 7.2.2. Flatpak Deployment
+=== 7.2.2. Flatpak Deployment
 
 ```plantuml
 @startuml
@@ -148,7 +139,7 @@ FPA --> Host : File system access
 @enduml
 ```
 
-=== 7.3. macOS Deployment
+== 7.3. macOS Deployment
 
 ```plantuml
 @startuml
@@ -192,7 +183,7 @@ AppBundle --> Sys : Launch agent
 @enduml
 ```
 
-=== 7.4. Windows Deployment
+== 7.4. Windows Deployment
 
 ```plantuml
 @startuml
@@ -237,7 +228,7 @@ Inst --> Sys : Event log source
 @enduml
 ```
 
-=== 7.5. Configuration File Structure
+== 7.5. Configuration File Structure
 
 ```plantuml
 @startuml
@@ -277,7 +268,7 @@ Runtime --> UserConf : Persist data
 @enduml
 ```
 
-=== 7.6. Network Ports and Protocols
+== 7.6. Network Ports and Protocols
 
 |===
 | Protocol | Port | Direction | Purpose
@@ -294,9 +285,9 @@ Runtime --> UserConf : Persist data
 | D-Bus | N/A | Local | IPC
 |===
 
-=== 7.7. Resource Requirements
+== 7.7. Resource Requirements
 
-==== 7.7.1. Minimum Requirements
+=== 7.7.1. Minimum Requirements
 
 |===
 | Resource | Minimum | Recommended
@@ -307,7 +298,7 @@ Runtime --> UserConf : Persist data
 | Network | 128kbps | 1Mbps+
 |===
 
-==== 7.7.2. Recommended Requirements
+=== 7.7.2. Recommended Requirements
 
 |===
 | Resource | Minimum | Recommended
@@ -318,7 +309,7 @@ Runtime --> UserConf : Persist data
 | Network | 512kbps | 10Mbps+
 |===
 
-=== 7.8. Environment Variables
+== 7.8. Environment Variables
 
 |===
 | Variable | Purpose | Default

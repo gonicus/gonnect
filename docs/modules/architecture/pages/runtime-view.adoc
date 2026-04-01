@@ -1,15 +1,6 @@
-:doctype: book
-:icons: font
-:source-highlighter: highlightjs
-:toc: left
-:toclevels: 3
-:sectnums:
+= 6. Runtime View
 
-= GOnnect Architecture Documentation
-
-== 6. Runtime View
-
-=== 6.1. Application Startup Flow
+== 6.1. Application Startup Flow
 
 ```plantuml
 @startuml
@@ -49,7 +40,7 @@ Main --> User : UI displayed
 @enduml
 ```
 
-=== 6.2. SIP Initialization Sequence
+== 6.2. SIP Initialization Sequence
 
 ```plantuml
 @startuml
@@ -76,7 +67,7 @@ SEL --> SIPM : Event loop running
 @enduml
 ```
 
-=== 6.3. Call State Machine
+== 6.3. Call State Machine
 
 ```plantuml
 @startuml
@@ -109,7 +100,7 @@ Terminating --> Terminated : 200 OK
 @enduml
 ```
 
-=== 6.4. Contact Synchronization Flow
+== 6.4. Contact Synchronization Flow
 
 ```plantuml
 @startuml
@@ -148,7 +139,7 @@ AM --> CM : Update avatars
 @enduml
 ```
 
-=== 6.5. Buddy State Update Flow
+== 6.5. Buddy State Update Flow
 
 ```plantuml
 @startuml
@@ -170,7 +161,7 @@ UI --> SB : Acknowledged
 @enduml
 ```
 
-=== 6.6. Call Quality Monitoring
+== 6.6. Call Quality Monitoring
 
 ```plantuml
 @startuml
@@ -195,7 +186,7 @@ SC --> SCM : Quality info changed
 @enduml
 ```
 
-=== 6.7. Emergency Call Flow
+== 6.7. Emergency Call Flow
 
 ```plantuml
 @startuml
@@ -229,7 +220,7 @@ SCM --> UI : Update UI
 @enduml
 ```
 
-=== 6.8. Configuration Save/Load Cycle
+== 6.8. Configuration Save/Load Cycle
 
 ```plantuml
 @startuml
@@ -256,7 +247,7 @@ UIS --> SW : UI updated
 @enduml
 ```
 
-=== 6.9. System Tray Menu Activation
+== 6.9. System Tray Menu Activation
 
 ```plantuml
 @startuml
@@ -283,7 +274,7 @@ App --> STM : Action completed
 @enduml
 ```
 
-=== 6.10. D-Bus Activation
+== 6.10. D-Bus Activation
 
 ```plantuml
 @startuml

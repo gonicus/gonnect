@@ -1,17 +1,8 @@
-:doctype: book
-:icons: font
-:source-highlighter: highlightjs
-:toc: left
-:toclevels: 3
-:sectnums:
+= 2. Requirements and Constraints
 
-= GOnnect Architecture Documentation
+== 2.1. Functional Requirements
 
-== 2. Requirements and Constraints
-
-=== 2.1. Functional Requirements
-
-==== 2.1.1. SIP Communication
+=== 2.1.1. SIP Communication
 
 |===
 | ID | Requirement | Priority
@@ -25,7 +16,7 @@
 | FR-SIP-007 | Support DTMF tones in call | Medium
 |===
 
-==== 2.1.2. Call Management
+=== 2.1.2. Call Management
 
 |===
 | ID | Requirement | Priority
@@ -39,7 +30,7 @@
 | FR-CALL-007 | Support call quality metrics display | Medium
 |===
 
-==== 2.1.3. Contact Management
+=== 2.1.3. Contact Management
 
 |===
 | ID | Requirement | Priority
@@ -54,7 +45,7 @@
 | FR-CONTACT-008 | Support buddy state subscription | Medium
 |===
 
-==== 2.1.4. Calendar Integration
+=== 2.1.4. Calendar Integration
 
 |===
 | ID | Requirement | Priority
@@ -66,7 +57,7 @@
 | FR-CAL-005 | Support room booking integration | Low
 |===
 
-==== 2.1.5. User Interface
+=== 2.1.5. User Interface
 
 |===
 | ID | Requirement | Priority
@@ -79,9 +70,9 @@
 | FR-UI-006 | Support keyboard shortcuts | Medium
 |===
 
-=== 2.2. Non-Functional Requirements
+== 2.2. Non-Functional Requirements
 
-==== 2.2.1. Performance
+=== 2.2.1. Performance
 
 |===
 | ID | Requirement | Target
@@ -93,7 +84,7 @@
 | NFR-PERF-005 | CPU usage (idle) | < 5%
 |===
 
-==== 2.2.2. Quality
+=== 2.2.2. Quality
 
 |===
 | ID | Requirement | Target
@@ -104,7 +95,7 @@
 | NFR-QUAL-004 | Jitter buffer adaptation | < 100ms
 |===
 
-==== 2.2.3. Reliability
+=== 2.2.3. Reliability
 
 |===
 | ID | Requirement | Target
@@ -115,7 +106,7 @@
 | NFR-REL-004 | Config persistence | 100%
 |===
 
-==== 2.2.4. Security
+=== 2.2.4. Security
 
 |===
 | ID | Requirement | Target
@@ -126,9 +117,9 @@
 | NFR-SEC-004 | Certificate validation | Strict
 |===
 
-=== 2.3. Architectural Constraints
+== 2.3. Architectural Constraints
 
-==== 2.3.1. Technology Constraints
+=== 2.3.1. Technology Constraints
 
 * Qt6 framework (minimum version 6.5)
 * C++17 standard
@@ -138,7 +129,7 @@
 * Qt Quick Controls 2
 * Qt WebEngine (for Jitsi integration)
 
-==== 2.3.2. Platform Constraints
+=== 2.3.2. Platform Constraints
 
 |===
 | Platform | Minimum Version | Notes
@@ -148,7 +139,7 @@
 | Windows | Windows 10 21H2+ | MSVC 2022
 |===
 
-==== 2.3.3. Dependency Constraints
+=== 2.3.3. Dependency Constraints
 
 * Must use Qt's parent-child memory management
 * Must avoid raw new/delete in favor of Qt containers

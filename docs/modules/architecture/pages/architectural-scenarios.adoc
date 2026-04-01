@@ -1,17 +1,8 @@
-:doctype: book
-:icons: font
-:source-highlighter: highlightjs
-:toc: left
-:toclevels: 3
-:sectnums:
+= 4. Architectural Scenarios
 
-= GOnnect Architecture Documentation
+== 4.1. Call Flow Scenario
 
-== 4. Architectural Scenarios
-
-=== 4.1. Call Flow Scenario
-
-==== 4.1.1. Outgoing Call Sequence
+=== 4.1.1. Outgoing Call Sequence
 
 ```plantuml
 @startuml
@@ -52,7 +43,7 @@ CM --> UI : Update UI
 @enduml
 ```
 
-==== 4.1.2. Incoming Call Sequence
+=== 4.1.2. Incoming Call Sequence
 
 ```plantuml
 @startuml
@@ -81,7 +72,7 @@ CM --> UI : Update UI
 @enduml
 ```
 
-==== 4.1.3. Call Termination
+=== 4.1.3. Call Termination
 
 ```plantuml
 @startuml
@@ -106,9 +97,9 @@ CM -> CM : Update call history
 @enduml
 ```
 
-=== 4.2. Contact Synchronization Scenario
+== 4.2. Contact Synchronization Scenario
 
-==== 4.2.1. Contact Source Loading
+=== 4.2.1. Contact Source Loading
 
 ```plantuml
 @startuml
@@ -137,7 +128,7 @@ ABM --> App : Ready
 @enduml
 ```
 
-==== 4.2.2. Contact Search
+=== 4.2.2. Contact Search
 
 ```plantuml
 @startuml
@@ -159,9 +150,9 @@ UI --> User : Display results
 @enduml
 ```
 
-=== 4.3. Configuration Loading Scenario
+== 4.3. Configuration Loading Scenario
 
-==== 4.3.1. Application Startup
+=== 4.3.1. Application Startup
 
 ```plantuml
 @startuml
@@ -188,7 +179,7 @@ SM --> App : State ready
 @enduml
 ```
 
-=== 4.4. Buddy State Subscription Scenario
+== 4.4. Buddy State Subscription Scenario
 
 ```plantuml
 @startuml
@@ -211,7 +202,7 @@ UI --> Buddy : Update display
 @enduml
 ```
 
-=== 4.5. Emergency Call Scenario
+== 4.5. Emergency Call Scenario
 
 ```plantuml
 @startuml

@@ -1,15 +1,6 @@
-:doctype: book
-:icons: font
-:source-highlighter: highlightjs
-:toc: left
-:toclevels: 3
-:sectnums:
+= 3. Solution Strategy
 
-= GOnnect Architecture Documentation
-
-== 3. Solution Strategy
-
-=== 3.1. Overall Architecture
+== 3.1. Overall Architecture
 
 GOnnect follows a layered architecture pattern with clear separation of concerns:
 
@@ -55,9 +46,9 @@ Business --> Infrastructure : External Libraries
 @enduml
 ```
 
-=== 3.2. Design Patterns
+== 3.2. Design Patterns
 
-==== 3.2.1. Singleton Pattern
+=== 3.2.1. Singleton Pattern
 
 Used for global managers that should have exactly one instance:
 
@@ -66,14 +57,14 @@ Used for global managers that should have exactly one instance:
 * `AddressBookManager` - Contact source management
 * `UISettings` - UI configuration
 
-==== 3.2.2. Factory Pattern
+=== 3.2.2. Factory Pattern
 
 Used for creating contact and calendar sources:
 
 * `IAddressBookFactory` - Contact source factory
 * `IDateEventFeederFactory` - Calendar source factory
 
-==== 3.2.3. Observer Pattern
+=== 3.2.3. Observer Pattern
 
 Qt's signal/slot mechanism for event notification:
 
@@ -81,7 +72,7 @@ Qt's signal/slot mechanism for event notification:
 * `StateManager` - State change notifications
 * `SIPManager` - Buddy state changes
 
-==== 3.2.4. MVC Pattern
+=== 3.2.4. MVC Pattern
 
 For QML data models:
 
@@ -89,9 +80,9 @@ For QML data models:
 * `HistoryModel` - Call history model
 * `ContactModel` - Contact list model
 
-=== 3.3. Technology Decisions
+== 3.3. Technology Decisions
 
-==== 3.3.1. Why Qt/QML?
+=== 3.3.1. Why Qt/QML?
 
 * Cross-platform GUI framework
 * Declarative UI with QML
@@ -99,7 +90,7 @@ For QML data models:
 * Rich ecosystem of Qt modules
 * Active community and long-term support
 
-==== 3.3.2. Why PJSIP?
+=== 3.3.2. Why PJSIP?
 
 * Mature SIP stack (15+ years)
 * Feature-complete implementation
@@ -107,16 +98,16 @@ For QML data models:
 * Active development and maintenance
 * Industry-standard compliance
 
-==== 3.3.3. Why CMake + Conan?
+=== 3.3.3. Why CMake + Conan?
 
 * Modern build system with presets
 * Cross-platform compatibility
 * Conan for dependency management
 * Better dependency versioning than Qt's qmake
 
-=== 3.4. Module Responsibilities
+== 3.4. Module Responsibilities
 
-==== 3.4.1. SIP Module
+=== 3.4.1. SIP Module
 
 |===
 | Component | Responsibility
@@ -128,7 +119,7 @@ For QML data models:
 | SIPAccount | Account configuration and credentials
 |===
 
-==== 3.4.2. Contacts Module
+=== 3.4.2. Contacts Module
 
 |===
 | Component | Responsibility
@@ -139,7 +130,7 @@ For QML data models:
 | AvatarManager | Contact avatar handling
 |===
 
-==== 3.4.3. Calendar Module
+=== 3.4.3. Calendar Module
 
 |===
 | Component | Responsibility
@@ -149,7 +140,7 @@ For QML data models:
 | DateEventsModel | QML calendar events model
 |===
 
-==== 3.4.4. Media Module
+=== 3.4.4. Media Module
 
 |===
 | Component | Responsibility
@@ -159,7 +150,7 @@ For QML data models:
 | AudioPort | Audio port routing
 |===
 
-=== 3.5. Component Interaction
+== 3.5. Component Interaction
 
 ```plantuml
 @startuml

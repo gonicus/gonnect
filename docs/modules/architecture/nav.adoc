@@ -1,9 +1,0 @@
-* xref:introduction-and-goals.adoc
-* xref:requirements-and-constraints.adoc
-* xref:solution-strategy.adoc
-* xref:architectural-scenarios.adoc
-* xref:building-block-view.adoc
-* xref:runtime-view.adoc
-* xref:deployment-view.adoc
-* xref:concepts.adoc
-* xref:security.adoc

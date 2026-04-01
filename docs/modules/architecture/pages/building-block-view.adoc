@@ -1,15 +1,6 @@
-:doctype: book
-:icons: font
-:source-highlighter: highlightjs
-:toc: left
-:toclevels: 3
-:sectnums:
+= 5. Building Block View
 
-= GOnnect Architecture Documentation
-
-== 5. Building Block View
-
-=== 5.1. High-Level Architecture
+== 5.1. High-Level Architecture
 
 ```plantuml
 @startuml
@@ -111,7 +102,7 @@ Creds --> Platform : Keychain
 @enduml
 ```
 
-=== 5.2. SIP Module Architecture
+== 5.2. SIP Module Architecture
 
 ```plantuml
 @startuml
@@ -174,7 +165,7 @@ DTGF --> SC : DTMF generation
 @enduml
 ```
 
-=== 5.3. Contacts Module Architecture
+== 5.3. Contacts Module Architecture
 
 ```plantuml
 @startuml
@@ -258,7 +249,7 @@ BI --> C : Block info
 @enduml
 ```
 
-=== 5.4. Calendar Module Architecture
+== 5.4. Calendar Module Architecture
 
 ```plantuml
 @startuml
@@ -321,7 +312,7 @@ EM --> DE : Emoji model
 @enduml
 ```
 
-=== 5.5. Media Module Architecture
+== 5.5. Media Module Architecture
 
 ```plantuml
 @startuml

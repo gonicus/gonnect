@@ -1,15 +1,6 @@
-:doctype: book
-:icons: font
-:source-highlighter: highlightjs
-:toc: left
-:toclevels: 3
-:sectnums:
+= 9. Security Considerations
 
-= GOnnect Architecture Documentation
-
-== 9. Security Considerations
-
-=== 9.1. Security Architecture Overview
+== 9.1. Security Architecture Overview
 
 ```plantuml
 @startuml
@@ -58,9 +49,9 @@ AC --> PC : Permission validation
 @enduml
 ```
 
-=== 9.2. Authentication Mechanisms
+== 9.2. Authentication Mechanisms
 
-==== 9.2.1. SIP Authentication
+=== 9.2.1. SIP Authentication
 
 GOnnect supports SIP digest authentication as defined in RFC 2617.
 
@@ -89,7 +80,7 @@ SIPServer --> SA : 200 OK
 @enduml
 ```
 
-==== 9.2.2. Authentication Methods
+=== 9.2.2. Authentication Methods
 
 |===
 | Method | Protocol | Security Level | Description
@@ -102,9 +93,9 @@ SIPServer --> SA : 200 OK
 | Basic | CardDAV/CalDAV | Medium | HTTP Basic auth
 |===
 
-=== 9.3. Encryption Implementation
+== 9.3. Encryption Implementation
 
-==== 9.3.1. Transport Security
+=== 9.3.1. Transport Security
 
 ```plantuml
 @startuml
@@ -136,7 +127,7 @@ Net --> DTLS : Media over DTLS
 @enduml
 ```
 
-==== 9.3.2. Encryption Configuration
+=== 9.3.2. Encryption Configuration
 
 |===
 | Parameter | Value | Description
@@ -147,7 +138,7 @@ Net --> DTLS : Media over DTLS
 | SRTP Profile | AES_CM_128_HMAC_SHA1_80 | Default SRTP profile
 |===
 
-==== 9.3.3. Certificate Handling
+=== 9.3.3. Certificate Handling
 
 ```plantuml
 @startuml
@@ -170,9 +161,9 @@ SIPM --> SIPServer : Handshake complete
 @enduml
 ```
 
-=== 9.4. Credential Storage
+== 9.4. Credential Storage
 
-==== 9.4.1. Keychain Integration
+=== 9.4.1. Keychain Integration
 
 ```plantuml
 @startuml
@@ -199,7 +190,7 @@ Creds --> SA : Password for auth
 @enduml
 ```
 
-==== 9.4.2. Keychain Service Configuration
+=== 9.4.2. Keychain Service Configuration
 
 |===
 | Platform | Keychain Service | Service Name | Label
@@ -209,7 +200,7 @@ Creds --> SA : Password for auth
 | Windows | Windows Credential Manager | gonnect | GOnnect credentials
 |===
 
-==== 9.4.3. Credential Security
+=== 9.4.3. Credential Security
 
 |===
 | Aspect | Implementation | Notes
@@ -220,9 +211,9 @@ Creds --> SA : Password for auth
 | Logging | Never logged | Credentials excluded from logs
 |===
 
-=== 9.5. Contact Privacy
+== 9.5. Contact Privacy
 
-==== 9.5.1. Contact Blocking
+=== 9.5.1. Contact Blocking
 
 ```plantuml
 @startuml
@@ -243,7 +234,7 @@ SC --> Caller : 603 Declined
 @enduml
 ```
 
-==== 9.5.2. Blocking Configuration
+=== 9.5.2. Blocking Configuration
 
 |===
 | Field | Description | Default
@@ -253,9 +244,9 @@ SC --> Caller : 603 Declined
 | blockReason | Reason for blocking | Configurable
 |===
 
-=== 9.6. Network Security
+== 9.6. Network Security
 
-==== 9.6.1. Firewall Configuration
+=== 9.6.1. Firewall Configuration
 
 ```plantuml
 @startuml
@@ -290,7 +281,7 @@ In --> Media : RTP/RTCP (10000-20000)
 @enduml
 ```
 
-==== 9.6.2. Required Ports
+=== 9.6.2. Required Ports
 
 |===
 | Port | Protocol | Direction | Purpose
@@ -302,9 +293,9 @@ In --> Media : RTP/RTCP (10000-20000)
 | 443 | TCP/TLS | Outbound | CardDAV/CalDAV/Jitsi
 |===
 
-=== 9.7. Security Best Practices
+== 9.7. Security Best Practices
 
-==== 9.7.1. Configuration Security
+=== 9.7.1. Configuration Security
 
 |===
 | Practice | Description | Priority
@@ -316,7 +307,7 @@ In --> Media : RTP/RTCP (10000-20000)
 | Secure keychain | Protect system keychain access | High
 |===
 
-==== 9.7.2. Operational Security
+=== 9.7.2. Operational Security
 
 |===
 | Practice | Description | Frequency
@@ -327,9 +318,9 @@ In --> Media : RTP/RTCP (10000-20000)
 | Review access | Audit who has access | Monthly
 |===
 
-=== 9.8. Threat Model
+== 9.8. Threat Model
 
-==== 9.8.1. Identified Threats
+=== 9.8.1. Identified Threats
 
 |===
 | Threat | Impact | Mitigation
@@ -341,7 +332,7 @@ In --> Media : RTP/RTCP (10000-20000)
 | Denial of Service | Availability | Rate limiting
 |===
 
-==== 9.8.2. Attack Surface
+=== 9.8.2. Attack Surface
 
 ```plantuml
 @startuml
@@ -378,9 +369,9 @@ CH --> KC : Credential access
 @enduml
 ```
 
-=== 9.9. Security Compliance
+== 9.9. Security Compliance
 
-==== 9.9.1. Protocol Compliance
+=== 9.9.1. Protocol Compliance
 
 |===
 | Standard | Compliance | Notes
@@ -393,7 +384,7 @@ CH --> KC : Credential access
 | RFC 5626 (SIP Outbound) | Full | Connection reuse
 |===
 
-==== 9.9.2. Security Standards
+=== 9.9.2. Security Standards
 
 |===
 | Standard | Status | Notes
