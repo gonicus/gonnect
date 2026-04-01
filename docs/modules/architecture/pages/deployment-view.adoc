@@ -304,17 +304,6 @@ Runtime --> UserConf : Persist data
 | Network | 128kbps | 1Mbps+
 |===
 
-=== Recommended Requirements
-
-|===
-| Resource | Minimum | Recommended
-
-| CPU | 2 Cores @ 2GHz | 4 Cores @ 3GHz
-| RAM | 2GB | 8GB
-| Disk | 1GB SSD | 2GB SSD
-| Network | 512kbps | 10Mbps+
-|===
-
 == Environment Variables
 
 |===

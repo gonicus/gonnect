@@ -2,16 +2,15 @@
 
 == Scope
 
-GOnnect is a cross-platform SIP/VoIP client application built with Qt/QML that provides:
+GOnnect is a cross-platform Unified Communications client built with Qt/QML that provides:
 
-* SIP voice and video calling capabilities
-* Contact management from multiple sources (LDAP, CardDAV, Akonadi, EDS)
+* SIP voice calling capabilities
+* Contact aggregation from multiple sources (LDAP, CardDAV, Akonadi, EDS)
 * Calendar integration (CalDAV, Akonadi, EDS)
 * Instant messaging support
-* Conference call management
 * Jitsi Meet integration for video conferences
 * System tray integration with custom window decoration
-* Multi-platform support (Linux, macOS, Windows)
+* Multi-platform support (Linux, Windows, macOS (experimental))
 
 The application targets enterprise and professional users requiring reliable communication tools with integration into corporate infrastructure.
 
@@ -82,7 +81,6 @@ Client --> LocalServices : Local contacts/calendar
 * PSTN gateway functionality
 * PBX server functionality
 * Mobile platform support (iOS, Android)
-* Legacy telephony protocol support (H.323, MGCP)
 
 == Definition of Terms
 
