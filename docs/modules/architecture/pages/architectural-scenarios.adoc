@@ -1,8 +1,8 @@
-= 4. Architectural Scenarios
+= Architectural Scenarios
 
-== 4.1. Call Flow Scenario
+== Call Flow Scenario
 
-=== 4.1.1. Outgoing Call Sequence
+=== Outgoing Call Sequence
 
 ```plantuml
 @startuml
@@ -43,7 +43,7 @@ CM --> UI : Update UI
 @enduml
 ```
 
-=== 4.1.2. Incoming Call Sequence
+=== Incoming Call Sequence
 
 ```plantuml
 @startuml
@@ -72,7 +72,7 @@ CM --> UI : Update UI
 @enduml
 ```
 
-=== 4.1.3. Call Termination
+=== Call Termination
 
 ```plantuml
 @startuml
@@ -97,9 +97,9 @@ CM -> CM : Update call history
 @enduml
 ```
 
-== 4.2. Contact Synchronization Scenario
+== Contact Synchronization Scenario
 
-=== 4.2.1. Contact Source Loading
+=== Contact Source Loading
 
 ```plantuml
 @startuml
@@ -128,7 +128,7 @@ ABM --> App : Ready
 @enduml
 ```
 
-=== 4.2.2. Contact Search
+=== Contact Search
 
 ```plantuml
 @startuml
@@ -150,9 +150,9 @@ UI --> User : Display results
 @enduml
 ```
 
-== 4.3. Configuration Loading Scenario
+== Configuration Loading Scenario
 
-=== 4.3.1. Application Startup
+=== Application Startup
 
 ```plantuml
 @startuml
@@ -179,7 +179,7 @@ SM --> App : State ready
 @enduml
 ```
 
-== 4.4. Buddy State Subscription Scenario
+== Buddy State Subscription Scenario
 
 ```plantuml
 @startuml
@@ -202,7 +202,7 @@ UI --> Buddy : Update display
 @enduml
 ```
 
-== 4.5. Emergency Call Scenario
+== Emergency Call Scenario
 
 ```plantuml
 @startuml

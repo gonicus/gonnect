@@ -1,6 +1,6 @@
-= 5. Building Block View
+= Building Block View
 
-== 5.1. High-Level Architecture
+== High-Level Architecture
 
 ```plantuml
 @startuml
@@ -102,7 +102,7 @@ Creds --> Platform : Keychain
 @enduml
 ```
 
-== 5.2. SIP Module Architecture
+== SIP Module Architecture
 
 ```plantuml
 @startuml
@@ -165,7 +165,7 @@ DTGF --> SC : DTMF generation
 @enduml
 ```
 
-== 5.3. Contacts Module Architecture
+== Contacts Module Architecture
 
 ```plantuml
 @startuml
@@ -249,7 +249,7 @@ BI --> C : Block info
 @enduml
 ```
 
-== 5.4. Calendar Module Architecture
+== Calendar Module Architecture
 
 ```plantuml
 @startuml
@@ -312,7 +312,7 @@ EM --> DE : Emoji model
 @enduml
 ```
 
-== 5.5. Media Module Architecture
+== Media Module Architecture
 
 ```plantuml
 @startuml

@@ -1,10 +1,10 @@
-= 8. Important Concepts
+= Important Concepts
 
-== 8.1. Preferred Identities
+== Preferred Identities
 
 GOnnect supports multiple preferred identities that allow callers to present different identities to callees based on the dialed number. This is useful for enterprises that want to route calls through different outbound numbers based on the destination.
 
-=== 8.1.1. Identity Selection Algorithm
+=== Identity Selection Algorithm
 
 ```plantuml
 @startuml
@@ -26,7 +26,7 @@ UI -> SIPM : Use identity for call
 @enduml
 ```
 
-=== 8.1.2. Identity Configuration
+=== Identity Configuration
 
 |===
 | Field | Description | Example
@@ -38,11 +38,11 @@ UI -> SIPM : Use identity for call
 | prefix | Number prefix for auto-selection | +492913641
 |===
 
-== 8.2. Buddy State Management
+== Buddy State Management
 
 GOnnect tracks the availability state of contacts through SIP SUBSCRIBE/NOTIFY mechanism. This enables presence awareness in the contact list.
 
-=== 8.2.1. Buddy State Flow
+=== Buddy State Flow
 
 ```plantuml
 @startuml
@@ -65,7 +65,7 @@ SB --> Contact : State: Busy
 @enduml
 ```
 
-=== 8.2.2. Buddy States
+=== Buddy States
 
 |===
 | State | Description | Icon
@@ -77,11 +77,11 @@ SB --> Contact : State: Busy
 | Unknown | State not known | Question mark
 |===
 
-== 8.3. Contact Source Federation
+== Contact Source Federation
 
 GOnnect aggregates contacts from multiple sources into a unified view. Each source can have different priorities and display names.
 
-=== 8.3.1. Contact Merging
+=== Contact Merging
 
 ```plantuml
 @startuml
@@ -110,7 +110,7 @@ Search --> User : Display results
 @enduml
 ```
 
-=== 8.3.2. Source Priority
+=== Source Priority
 
 |===
 | Source | Default Priority | Configurable
@@ -122,11 +122,11 @@ Search --> User : Display results
 | CSV | 10 | Yes
 |===
 
-== 8.4. Call Quality Metrics
+== Call Quality Metrics
 
 GOnnect provides detailed call quality information using RTCP XR (Extended Reports) and PJSIP's built-in quality metrics.
 
-=== 8.4.1. Quality Metrics
+=== Quality Metrics
 
 |===
 | Metric | Description | Scale
@@ -141,7 +141,7 @@ GOnnect provides detailed call quality information using RTCP XR (Extended Repor
 | Delay-RX | One-way delay - Reception | 0 - 500ms
 |===
 
-=== 8.4.2. Quality Level Classification
+=== Quality Level Classification
 
 ```plantuml
 @startuml
@@ -169,9 +169,9 @@ Poor --> Bad : MOS decreases
 @enduml
 ```
 
-== 8.5. Security Architecture
+== Security Architecture
 
-=== 8.5.1. Credential Storage
+=== Credential Storage
 
 ```plantuml
 @startuml
@@ -191,7 +191,7 @@ SA -> SA : Use for authentication
 @enduml
 ```
 
-=== 8.5.2. Encryption Layers
+=== Encryption Layers
 
 |===
 | Layer | Protocol | Purpose
@@ -202,11 +202,11 @@ SA -> SA : Use for authentication
 | Config | File permissions | Config file protection
 |===
 
-== 8.6. Emergency Call Handling
+== Emergency Call Handling
 
 Emergency calls have special handling to ensure they are always prioritized and can override ongoing calls.
 
-=== 8.6.1. Emergency Call Flow
+=== Emergency Call Flow
 
 ```plantuml
 @startuml
@@ -230,7 +230,7 @@ SCM --> EB : Emergency call in progress
 @enduml
 ```
 
-=== 8.6.2. Emergency Number Configuration
+=== Emergency Number Configuration
 
 |===
 | Field | Description | Example
@@ -240,11 +240,11 @@ SCM --> EB : Emergency call in progress
 | priority | Call priority | High
 |===
 
-== 8.7. Jitsi Meet Integration
+== Jitsi Meet Integration
 
 GOnnect can upgrade SIP calls to Jitsi Meet video conferences when both parties support it.
 
-=== 8.7.1. Jitsi Integration Flow
+=== Jitsi Integration Flow
 
 ```plantuml
 @startuml
@@ -266,7 +266,7 @@ SC --> JC : Send invite
 @enduml
 ```
 
-=== 8.7.2. Jitsi Configuration
+=== Jitsi Configuration
 
 |===
 | Field | Description | Example
@@ -278,11 +278,11 @@ SC --> JC : Send invite
 | muc | Jitsi MUC for dial-in | conference.meet.jit.si
 |===
 
-== 8.8. Plugin Architecture
+== Plugin Architecture
 
 GOnnect uses a plugin-based architecture for contact sources and chat plugins.
 
-=== 8.8.1. Contact Source Plugins
+=== Contact Source Plugins
 
 ```plantuml
 @startuml
@@ -315,7 +315,7 @@ CSV --> Feeder : Implements
 @enduml
 ```
 
-=== 8.8.2. Plugin Lifecycle
+=== Plugin Lifecycle
 
 |===
 | Phase | Action | Description
@@ -327,11 +327,11 @@ CSV --> Feeder : Implements
 | Unload | Destroy | Unload library
 |===
 
-== 8.9. State Management
+== State Management
 
 StateManager provides a centralized way to manage application state and coordinate between different components.
 
-=== 8.9.1. State Properties
+=== State Properties
 
 |===
 | Property | Type | Description
@@ -342,7 +342,7 @@ StateManager provides a centralized way to manage application state and coordina
 | globalShortcuts | QVariantMap | Custom shortcut mappings
 |===
 
-=== 8.9.2. State Change Flow
+=== State Change Flow
 
 ```plantuml
 @startuml

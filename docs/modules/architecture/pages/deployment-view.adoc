@@ -1,6 +1,6 @@
-= 7. Deployment View
+= Deployment View
 
-== 7.1. Deployment Architecture
+== Deployment Architecture
 
 ```plantuml
 @startuml
@@ -49,9 +49,9 @@ Tray --> ND : Notifications
 @enduml
 ```
 
-== 7.2. Linux Deployment
+== Linux Deployment
 
-=== 7.2.1. Native Linux Build
+=== Native Linux Build
 
 ```plantuml
 @startuml
@@ -98,7 +98,7 @@ Target --> BuildDeps : Runtime libs
 @enduml
 ```
 
-=== 7.2.2. Flatpak Deployment
+=== Flatpak Deployment
 
 ```plantuml
 @startuml
@@ -139,7 +139,7 @@ FPA --> Host : File system access
 @enduml
 ```
 
-== 7.3. macOS Deployment
+== macOS Deployment
 
 ```plantuml
 @startuml
@@ -183,7 +183,7 @@ AppBundle --> Sys : Launch agent
 @enduml
 ```
 
-== 7.4. Windows Deployment
+== Windows Deployment
 
 ```plantuml
 @startuml
@@ -228,7 +228,7 @@ Inst --> Sys : Event log source
 @enduml
 ```
 
-== 7.5. Configuration File Structure
+== Configuration File Structure
 
 ```plantuml
 @startuml
@@ -268,7 +268,7 @@ Runtime --> UserConf : Persist data
 @enduml
 ```
 
-== 7.6. Network Ports and Protocols
+== Network Ports and Protocols
 
 |===
 | Protocol | Port | Direction | Purpose
@@ -285,9 +285,9 @@ Runtime --> UserConf : Persist data
 | D-Bus | N/A | Local | IPC
 |===
 
-== 7.7. Resource Requirements
+== Resource Requirements
 
-=== 7.7.1. Minimum Requirements
+=== Minimum Requirements
 
 |===
 | Resource | Minimum | Recommended
@@ -298,7 +298,7 @@ Runtime --> UserConf : Persist data
 | Network | 128kbps | 1Mbps+
 |===
 
-=== 7.7.2. Recommended Requirements
+=== Recommended Requirements
 
 |===
 | Resource | Minimum | Recommended
@@ -309,7 +309,7 @@ Runtime --> UserConf : Persist data
 | Network | 512kbps | 10Mbps+
 |===
 
-== 7.8. Environment Variables
+== Environment Variables
 
 |===
 | Variable | Purpose | Default
