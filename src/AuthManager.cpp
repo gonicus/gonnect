@@ -101,7 +101,7 @@ void AuthManager::init()
                     const auto tokenUrl = settings.value("tokenUrl", "").toUrl();
                     const auto clientId = settings.value("clientIdentifier", "").toString();
 
-                    qCDebug(lcAuthManager) << "Reading jtsi authorization info:";
+                    qCDebug(lcAuthManager) << "Reading Jitsi authorization info:";
                     qCDebug(lcAuthManager).noquote().nospace()
                             << "  authUrl: " << authUrl << ", valid: " << authUrl.isValid();
                     qCDebug(lcAuthManager).noquote().nospace()
@@ -287,9 +287,9 @@ const QList<QSslCertificate> &AuthManager::sslCAs()
         m_isCAsInitialized = true;
 
         ReadOnlyConfdSettings settings;
-        const auto pathList = settings.value("generic/caFiles").toStringList();
+        const auto pathList = settings.value("generic/caFiles").toString().split(',', Qt::SkipEmptyParts, Qt::CaseSensitive);
 
-        qCDebug(lcAuthManager) << "Reading jtsi CA files:" << pathList;
+        qCDebug(lcAuthManager) << "Reading Jitsi CA files:" << pathList;
 
         for (const auto &path : pathList) {
             qCDebug(lcAuthManager) << "  reading:" << path;
