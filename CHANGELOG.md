@@ -1,3 +1,10 @@
+# [2.1.0-beta.8](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.7...v2.1.0-beta.8) (2026-04-01)
+
+
+### Bug Fixes
+
+* make MWI subscription configurable ([#414](https://github.com/gonicus/gonnect/issues/414)) ([afc06fc](https://github.com/gonicus/gonnect/commit/afc06fcc75a60ce706e81d66dbd525b072d78fa0))
+
 # [2.1.0-beta.7](https://github.com/gonicus/gonnect/compare/v2.1.0-beta.6...v2.1.0-beta.7) (2026-03-30)
 
 
