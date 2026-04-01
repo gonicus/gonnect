@@ -145,8 +145,11 @@ void SIPAccount::initialize()
     }
     m_accountConfig.mediaConfig.srtpUse = srtpUseValue;
 
-    m_accountConfig.mwiConfig.enabled = true;
-    m_accountConfig.mwiConfig.expirationSec = 3600;
+    bool enableMwiConfig = m_settings.value("enableMwiConfig", true).toBool();
+    if (enableMwiConfig) {
+        m_accountConfig.mwiConfig.enabled = true;
+        m_accountConfig.mwiConfig.expirationSec = 3600;
+    }
 
     int rtpPort = m_settings.value("rtpPort", 0).toInt(&ok);
     if (!ok) {
@@ -582,6 +585,10 @@ MwiInfo SIPAccount::parseMwiBody(const QString &body)
 void SIPAccount::onMwiInfo(pj::OnMwiInfoParam &prm)
 {
     qCDebug(lcSIPAccount) << "received MWI info message - subscription status:" << prm.state;
+
+    if (prm.state == PJSIP_EVSUB_STATE_TERMINATED) {
+        return;
+    }
 
     QString fullMsg = QString::fromStdString(prm.rdata.wholeMsg);
     QStringList parts = fullMsg.split("\r\n\r\n");
