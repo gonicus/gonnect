@@ -1,0 +1,403 @@
+= Security Considerations
+
+== Security Architecture Overview
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Security Architecture
+
+package "Security Boundaries" as Sec {
+  component "Application Sandbox" as Sandbox
+  component "Credential Store" as Creds
+  component "Network Layer" as Net
+}
+
+package "Authentication" as Auth {
+  component "SIP Digest Auth" as SIPAuth
+  component "LDAP Bind" as LDAPBind
+  component "CardDAV Auth" as CDAuth
+  component "CalDAV Auth" as CDVAuth
+}
+
+package "Encryption" as Enc {
+  component "TLS/SSL" as TLS
+  component "SRTP" as SRTP
+  component "Keychain" as KC
+}
+
+package "Access Control" as AC {
+  component "Contact Blocking" as CB
+  component "Emergency Override" as EO
+  component "Permission Checks" as PC
+}
+
+Sandbox --> Creds : Secure access
+Sandbox --> Net : Encrypted comms
+Net --> TLS : Transport security
+Net --> SRTP : Media security
+Auth --> SIPAuth : SIP authentication
+Auth --> LDAPBind : LDAP authentication
+Auth --> CDAuth : CardDAV authentication
+Auth --> CDVAuth : CalDAV authentication
+AC --> CB : Contact filtering
+AC --> EO : Emergency priority
+AC --> PC : Permission validation
+@enduml
+....
+
+== Authentication Mechanisms
+
+=== SIP Authentication
+
+GOnnect supports SIP digest authentication as defined in RFC 2617.
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "SIPAccount" as SA
+participant "Credentials" as Creds
+participant "SIP Server" as SIPServer
+
+User -> SA : Configure account
+SA -> Creds : Store credentials
+Creds --> SA : Encrypted storage
+
+User -> SA : Initiate call
+SA -> Creds : Retrieve credentials
+Creds --> SA : Decrypted credentials
+SA -> SIPServer : REGISTER with auth
+SIPServer --> SA : 401 Unauthorized
+SA -> SIPServer : REGISTER with digest
+SIPServer --> SA : 200 OK
+@enduml
+....
+
+=== Authentication Methods
+
+|===
+| Method | Protocol | Security Level | Description
+
+| Digest | SIP | High | RFC 2617 digest authentication
+| Basic | SIP | Low | Base64 encoded credentials (not recommended)
+| GSSAPI | LDAP | High | Kerberos-based authentication
+| Plain | LDAP | Medium | Simple bind with password
+| OAuth 2.0 | CardDAV/CalDAV | High | Token-based authentication
+| Basic | CardDAV/CalDAV | Medium | HTTP Basic auth
+|===
+
+== Encryption Implementation
+
+=== Transport Security
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title Transport Security Layers
+
+rectangle "Application" as App {
+  component "SIP Manager" as SIPM
+  component "Network Layer" as Net
+}
+
+rectangle "Transport Layer" as Transport {
+  component "TLS 1.2+" as TLS
+  component "DTLS-SRTP" as DTLS
+}
+
+rectangle "Network" as Network {
+  component "Firewall" as FW
+  component "Internet" as Internet
+}
+
+App --> Transport : Secure channel
+Transport --> Network : Encrypted packets
+Net --> TLS : SIP over TLS
+Net --> DTLS : Media over DTLS
+@enduml
+....
+
+=== Encryption Configuration
+
+|===
+| Parameter | Value | Description
+
+| TLS Version | 1.2+ | Minimum TLS version
+| Cipher Suites | AES-256-GCM | Preferred cipher suites
+| Certificate Validation | Strict | Enforce certificate validation
+| SRTP Profile | AES_CM_128_HMAC_SHA1_80 | Default SRTP profile
+|===
+
+=== Certificate Handling
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "SIPManager" as SIPM
+participant "Certificate Store" as CertStore
+participant "CA Bundle" as CABundle
+participant "SIP Server" as SIPServer
+
+SIPM -> CertStore : Load CA certificates
+CertStore --> SIPM : CA bundle
+SIPM -> SIPServer : TLS handshake
+SIPServer --> SIPM : Server certificate
+SIPM -> CABundle : Validate certificate
+CABundle --> SIPM : Validation result
+SIPM --> SIPServer : Handshake complete
+@enduml
+....
+
+== Credential Storage
+
+=== Keychain Integration
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "Credentials" as Creds
+participant "Keychain Service" as KC
+participant "SIPAccount" as SA
+
+User -> SA : Enter password
+SA -> Creds : Store credential
+Creds -> KC : Save to keychain
+KC --> Creds : Encrypted storage
+
+SA -> Creds : Request password
+Creds -> KC : Get credential
+KC --> Creds : Prompt user
+User -> KC : Enter password
+KC --> Creds : Decrypted password
+Creds --> SA : Password for auth
+@enduml
+....
+
+=== Keychain Service Configuration
+
+|===
+| Platform | Keychain Service | Service Name | Label
+
+| Linux | Secret Service API | gonnect | GOnnect credentials
+| macOS | Keychain | gonnect | GOnnect credentials
+| Windows | Windows Credential Manager | gonnect | GOnnect credentials
+|===
+
+=== Credential Security
+
+|===
+| Aspect | Implementation | Notes
+
+| Storage | Platform keychain | Encrypted at rest
+| Access | Runtime only | Never written to disk
+| Transmission | In-memory only | No network transmission
+| Logging | Never logged | Credentials excluded from logs
+|===
+
+== Contact Privacy
+
+=== Contact Blocking
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "Caller" as Caller
+participant "SIPCall" as SC
+participant "BlockInfo" as BI
+participant "SIPManager" as SIPM
+
+Caller -> SIPM : INVITE
+SIPM -> BI : Check block list
+BI --> SIPM : Contact blocked
+SIPM -> SC : Reject call
+SC --> Caller : 603 Declined
+@enduml
+....
+
+=== Blocking Configuration
+
+|===
+| Field | Description | Default
+
+| blocked | Contact is blocked | false
+| blockSipCode | SIP response code | 603 (Declined)
+| blockReason | Reason for blocking | Configurable
+|===
+
+== Network Security
+
+=== Firewall Configuration
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Firewall Requirements
+
+rectangle "GOnnect" as App {
+  component "SIP Signaling" as SIP
+  component "Media Streams" as Media
+  component "External Services" as Ext
+}
+
+rectangle "Firewall" as FW {
+  component "Outbound Rules" as Out
+  component "Inbound Rules" as In
+}
+
+rectangle "Network" as Network {
+  component "SIP Server" as SIPServer
+  component "External Servers" as ExtServers
+}
+
+App --> FW : Request access
+FW --> Out : Allow outbound
+FW --> In : Allow inbound (RTP)
+Out --> SIPServer : SIP/TLS (5061)
+Out --> ExtServers : CardDAV/CalDAV
+In --> Media : RTP/RTCP (10000-20000)
+@enduml
+....
+
+=== Required Ports
+
+|===
+| Port | Protocol | Direction | Purpose
+
+| 5061 | TCP/TLS | Outbound | SIP signaling
+| 5060 | TCP/UDP | Outbound | SIP signaling
+| 10000-20000 | UDP | Bidirectional | RTP media
+| 3478 | UDP/TCP | Outbound | STUN/TURN
+| 443 | TCP/TLS | Outbound | CardDAV/CalDAV/Jitsi
+|===
+
+== Security Best Practices
+
+=== Configuration Security
+
+|===
+| Practice | Description | Priority
+
+| Use strong passwords | Minimum 12 characters with complexity | High
+| Enable TLS | Always use TLS for SIP signaling | High
+| Validate certificates | Enable strict certificate validation | High
+| Regular updates | Keep application updated | High
+| Secure keychain | Protect system keychain access | High
+|===
+
+=== Operational Security
+
+|===
+| Practice | Description | Frequency
+
+| Audit logs | Review application logs | Weekly
+| Check certificates | Verify certificate validity | Monthly
+| Update credentials | Rotate passwords periodically | Quarterly
+| Review access | Audit who has access | Monthly
+|===
+
+== Threat Model
+
+=== Identified Threats
+
+|===
+| Threat | Impact | Mitigation
+
+| Eavesdropping | Confidentiality | TLS/SRTP encryption
+| Man-in-the-Middle | Integrity | Certificate validation
+| Credential Theft | Confidentiality | Keychain storage
+| Unauthorized Access | Availability | Authentication
+| Denial of Service | Availability | Rate limiting
+|===
+
+=== Attack Surface
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Attack Surface
+
+rectangle "External Interfaces" as Ext {
+  component "SIP Interface" as SIP
+  component "Network Services" as Net
+  component "File System" as FS
+}
+
+rectangle "Internal Components" as Int {
+  component "SIP Stack" as SIPStack
+  component "Contact Manager" as CM
+  component "Credential Handler" as CH
+}
+
+rectangle "Data Stores" as Data {
+  component "Keychain" as KC
+  component "Config Files" as CFG
+  component "Cache" as Cache
+}
+
+Ext --> Int : Interface exposure
+Int --> Data : Data access
+SIP --> SIPStack : SIP processing
+Net --> Net : Network services
+FS --> Cache : File operations
+CH --> KC : Credential access
+@enduml
+....
+
+== Security Compliance
+
+=== Protocol Compliance
+
+|===
+| Standard | Compliance | Notes
+
+| RFC 3261 (SIP) | Full | Complete SIP implementation
+| RFC 3264 (SDP) | Full | Offer/answer model
+| RFC 3711 (SRTP) | Full | Media encryption
+| RFC 5245 (ICE) | Full | NAT traversal
+| RFC 5389 (STUN) | Full | NAT discovery
+| RFC 5626 (SIP Outbound) | Full | Connection reuse
+|===
+
+=== Security Standards
+
+|===
+| Standard | Status | Notes
+
+| OWASP | Compliant | Follows OWASP guidelines
+| NIST | Compliant | Meets NIST recommendations
+| GDPR | Compliant | Privacy by design
+|===
