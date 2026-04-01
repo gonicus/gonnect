@@ -168,7 +168,7 @@ package "UI Layer" as UI {
   component "SettingsWindow" as SW
 }
 
-package "Application Layer" as App {
+package "Application Layer" as Applayer {
   component "Application" as App
   component "StateManager" as SM
   component "UISettings" as UIS
