@@ -1,14 +1,12 @@
 #pragma once
 
 #include <QObject>
+#include <QNetworkReply>
 #include <IAddressBookFeeder.h>
-#include <QOAuth2AuthorizationCodeFlow>
-#include <QNetworkAccessManager>
 #include "Contact.h"
 
 class AddressBook;
 class AddressBookManager;
-class QOAuthHttpServerReplyHandler;
 
 class MSGraphAddressBookFeeder : public QObject, public IAddressBookFeeder
 {
@@ -21,21 +19,12 @@ public:
     QUrl networkCheckURL() const override;
 
 private:
-    void authStatusChanged(QAbstractOAuth::Status status);
-
+    void refreshOrRequestLogin();
     void contactsReceived(QNetworkReply *reply);
-
+    void errorOccurred(QNetworkReply *reply, QNetworkReply::NetworkError code);
     void requestContacts();
 
-    void authorize();
-
+    const QString m_group;
     AddressBookManager *m_manager = nullptr;
-
-    QOAuthHttpServerReplyHandler *m_replyHandler = nullptr;
-
-    QString m_group;
-
-    QOAuth2AuthorizationCodeFlow *m_authCodeFlow = nullptr;
-
     QNetworkAccessManager *m_networkAccessManager = nullptr;
 };
