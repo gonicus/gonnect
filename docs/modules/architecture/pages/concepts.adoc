@@ -1,0 +1,371 @@
+= Important Concepts
+
+== Preferred Identities
+
+GOnnect supports multiple preferred identities that allow callers to present different identities to callees based on the dialed number. This is useful for enterprises that want to route calls through different outbound numbers based on the destination.
+
+=== Identity Selection Algorithm
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "UI" as UI
+participant "SIPManager" as SIPM
+participant "PreferredIdentity" as PI
+
+User -> UI : Initiate call
+UI -> SIPM : Get preferred identity
+SIPM -> PI : Check identity list
+PI --> SIPM : Return matching identity
+SIPM --> UI : Identity selected
+UI -> SIPM : Use identity for call
+@enduml
+....
+
+=== Identity Configuration
+
+|===
+| Field | Description | Example
+
+| enabled | Whether the identity is active | true
+| automatic | Whether identity is auto-selected | true
+| name | Display name in UI | "Support Line"
+| identity | SIP URI for this identity | sip:support@example.org
+| prefix | Number prefix for auto-selection | +492913641
+|===
+
+== Buddy State Management
+
+GOnnect tracks the availability state of contacts through SIP SUBSCRIBE/NOTIFY mechanism. This enables presence awareness in the contact list.
+
+=== Buddy State Flow
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "Contact" as Contact
+participant "SIPBuddy" as SB
+participant "SIPManager" as SIPM
+participant "PJSIP" as PJSIP
+
+Contact -> SB : Subscribe
+SB -> PJSIP : SUBSCRIBE request
+PJSIP --> SB : 200 OK
+PJSIP --> SB : NOTIFY: available
+SB --> Contact : State: Available
+PJSIP --> SB : NOTIFY: busy
+SB --> Contact : State: Busy
+@enduml
+....
+
+=== Buddy States
+
+|===
+| State | Description | Icon
+
+| Available | Contact is online and available | Green dot
+| Busy | Contact is on a call | Red dot
+| Away | Contact is away | Yellow dot
+| Offline | Contact is offline | Gray dot
+| Unknown | State not known | Question mark
+|===
+
+== Contact Source Federation
+
+GOnnect aggregates contacts from multiple sources into a unified view. Each source can have different priorities and display names.
+
+=== Contact Merging
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "User" as User
+participant "Search UI" as Search
+participant "AddressBookManager" as ABM
+participant "LDAP" as LDAP
+participant "CardDAV" as CD
+participant "Akonadi" as AK
+
+User -> Search : Search "John"
+Search -> ABM : Search query
+ABM -> LDAP : Search "John"
+ABM -> CD : Search "John"
+ABM -> AK : Search "John"
+LDAP --> ABM : 5 results
+CD --> ABM : 3 results
+AK --> ABM : 2 results
+ABM -> ABM : Merge and deduplicate
+ABM --> Search : 6 unique results
+Search --> User : Display results
+@enduml
+....
+
+=== Source Priority
+
+|===
+| Source | Default Priority | Configurable
+
+| LDAP | 50 | Yes
+| CardDAV | 50 | Yes
+| Akonadi | 25 | Yes
+| EDS | 25 | Yes
+| CSV | 10 | Yes
+|===
+
+== Call Quality Metrics
+
+GOnnect provides detailed call quality information using RTCP XR (Extended Reports) and PJSIP's built-in quality metrics.
+
+=== Quality Metrics
+
+|===
+| Metric | Description | Scale
+
+| MOS-TX | Mean Opinion Score - Transmission | 1.0 - 5.0
+| MOS-RX | Mean Opinion Score - Reception | 1.0 - 5.0
+| Loss-TX | Packet loss rate - Transmission | 0% - 100%
+| Loss-RX | Packet loss rate - Reception | 0% - 100%
+| Jitter-TX | Jitter - Transmission | 0 - 500ms
+| Jitter-RX | Jitter - Reception | 0 - 500ms
+| Delay-TX | One-way delay - Transmission | 0 - 500ms
+| Delay-RX | One-way delay - Reception | 0 - 500ms
+|===
+
+=== Quality Level Classification
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam stateStyle mode
+
+title Call Quality Levels
+
+state "Excellent" as Excellent
+state "Good" as Good
+state "Fair" as Fair
+state "Poor" as Poor
+state "Bad" as Bad
+
+Excellent : 4.5 - 5.0 MOS
+Good : 4.0 - 4.5 MOS
+Fair : 3.5 - 4.0 MOS
+Poor : 3.0 - 3.5 MOS
+Bad : < 3.0 MOS
+
+Excellent --> Good : MOS decreases
+Good --> Fair : MOS decreases
+Fair --> Poor : MOS decreases
+Poor --> Bad : MOS decreases
+@enduml
+....
+
+== Security Architecture
+
+=== Credential Storage
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "SIPAccount" as SA
+participant "Credentials" as Creds
+participant "Keychain" as KC
+
+SA -> Creds : Request password
+Creds -> KC : Get credential
+KC --> Creds : Encrypted data
+Creds --> SA : Decrypted password
+SA -> SA : Use for authentication
+@enduml
+....
+
+=== Encryption Layers
+
+|===
+| Layer | Protocol | Purpose
+
+| Signaling | TLS 1.2+ | SIP message encryption
+| Media | SRTP | RTP/RTCP encryption
+| Credentials | Keychain | Password storage
+| Config | File permissions | Config file protection
+|===
+
+== Emergency Call Handling
+
+Emergency calls have special handling to ensure they are always prioritized and can override ongoing calls.
+
+=== Emergency Call Flow
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "Emergency Button" as EB
+participant "SIPCallManager" as SCM
+participant "Active Call" as AC
+participant "Emergency Call" as EC
+
+User -> EB : Click emergency
+EB -> SCM : Request emergency call
+SCM -> AC : Terminate active calls
+AC --> SCM : Calls terminated
+SCM -> EC : Create emergency call
+EC --> SCM : Call established
+SCM --> EB : Emergency call in progress
+@enduml
+....
+
+=== Emergency Number Configuration
+
+|===
+| Field | Description | Example
+
+| number | Emergency number | 112
+| displayName | Display name | "Firefighters / Medical"
+| priority | Call priority | High
+|===
+
+== Jitsi Meet Integration
+
+GOnnect can upgrade SIP calls to Jitsi Meet video conferences when both parties support it.
+
+=== Jitsi Integration Flow
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "SIPCall" as SC
+participant "JitsiConnector" as JC
+participant "Jitsi Meet" as Jitsi
+
+SC -> JC : Check capabilities
+JC --> SC : Jitsi supported
+SC -> JC : Create conference
+JC -> Jitsi : Create room
+Jitsi --> JC : Conference URL
+JC --> SC : Upgrade to Jitsi
+SC --> JC : Send invite
+@enduml
+....
+
+=== Jitsi Configuration
+
+|===
+| Field | Description | Example
+
+| url | Jitsi server URL | https://meet.example.com
+| displayName | Display name in Jitsi | "GOnnect User"
+| preconfig | Show pre-join screen | false
+| authorizationMode | Authorization method | none
+| muc | Jitsi MUC for dial-in | conference.meet.jit.si
+|===
+
+== Plugin Architecture
+
+GOnnect uses a plugin-based architecture for contact sources and chat plugins.
+
+=== Contact Source Plugins
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title Contact Source Plugin Architecture
+
+interface "IAddressBookFeeder" as Feeder
+
+package "Core" as Core {
+  component "AddressBookManager" as ABM
+}
+
+package "Plugins" as Plugins {
+  component "LDAP Feeder" as LDAP
+  component "CardDAV Feeder" as CD
+  component "Akonadi Feeder" as AK
+  component "EDS Feeder" as EDS
+  component "CSV Feeder" as CSV
+}
+
+ABM --> Feeder : Factory creates
+LDAP --> Feeder : Implements
+CD --> Feeder : Implements
+AK --> Feeder : Implements
+EDS --> Feeder : Implements
+CSV --> Feeder : Implements
+@enduml
+....
+
+=== Plugin Lifecycle
+
+|===
+| Phase | Action | Description
+
+| Load | Initialize | Load plugin library
+| Configure | Apply settings | Read configuration
+| Start | Begin fetch | Start data synchronization
+| Stop | Cleanup | Release resources
+| Unload | Destroy | Unload library
+|===
+
+== State Management
+
+StateManager provides a centralized way to manage application state and coordinate between different components.
+
+=== State Properties
+
+|===
+| Property | Type | Description
+
+| globalShortcutsSupported | bool | System supports global shortcuts
+| uiEditMode | bool | UI is in edit mode
+| uiHasActiveEditDialog | bool | Edit dialog is open
+| globalShortcuts | QVariantMap | Custom shortcut mappings
+|===
+
+=== State Change Flow
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "UI" as UI
+participant "StateManager" as SM
+participant "Other Component" as OC
+
+UI -> SM : Set uiEditMode=true
+SM --> UI : uiEditModeChanged signal
+SM --> OC : uiEditModeChanged signal
+OC -> UI : Update UI based on state
+@enduml
+....
