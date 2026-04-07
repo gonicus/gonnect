@@ -43,10 +43,15 @@ void MSGraphAddressBookFeeder::authStatusChanged(QAbstractOAuth::Status status)
 void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
 {
     if (reply->error() != QNetworkReply::NoError) {
+        qCWarning(msGraphAddressBookFeeder) << "Error:" << reply->errorString();
+        reply->deleteLater();
+
+        Q_EMIT feederFailed();
         return;
     }
 
     auto jsonText = reply->readAll();
+    reply->deleteLater();
     auto doc = QJsonDocument::fromJson(jsonText);
     if (doc.isNull()) {
         return;
@@ -124,6 +129,10 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
                        u"Bearer "_s + m_authCodeFlow->token());
         request.setHeaders(headers);
         auto *reply = m_networkAccessManager->get(request);
+        if (!reply) {
+            Q_EMIT feederFailed();
+            return;
+        }
 
         connect(reply, &QNetworkReply::finished, reply,
                 [this, reply]() { contactsReceived(reply); });
@@ -134,6 +143,8 @@ void MSGraphAddressBookFeeder::requestContacts()
 {
     if (!m_authCodeFlow || m_authCodeFlow->status() != QAbstractOAuth::Status::Granted) {
         qCWarning(msGraphAddressBookFeeder) << "Cannot request contacts - not logged in";
+
+        Q_EMIT feederFailed();
         return;
     }
 
@@ -206,6 +217,7 @@ void MSGraphAddressBookFeeder::authorize()
 void MSGraphAddressBookFeeder::resetFeeder()
 {
     if (m_replyHandler) {
+        m_replyHandler->close();
         m_replyHandler->deleteLater();
         m_replyHandler = nullptr;
     }

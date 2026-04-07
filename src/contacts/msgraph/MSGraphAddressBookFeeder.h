@@ -46,6 +46,6 @@ private:
 
     QNetworkAccessManager *m_networkAccessManager = nullptr;
 
-    m_retryCount = 0;
-    m_retryInterval = 0;
+    int m_retryCount = 0;
+    int m_retryInterval = 0;
 };
