@@ -58,7 +58,7 @@ jobs:
             }
 
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@3633cede7d4d4598438e654eac4a695e46004420 # v46.1.7
+        uses: renovatebot/github-action@b67590ea780158ccd13192c22a3655a5231f869d # v46.1.8
         with:
           docker-cmd-file: .github/renovate-entrypoint.sh
           docker-user: root
