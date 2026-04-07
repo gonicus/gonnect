@@ -287,7 +287,9 @@ const QList<QSslCertificate> &AuthManager::sslCAs()
         m_isCAsInitialized = true;
 
         ReadOnlyConfdSettings settings;
-        const auto pathList = settings.value("generic/caFiles").toString().split(',', Qt::SkipEmptyParts, Qt::CaseSensitive);
+        const auto pathList = settings.value("generic/caFiles")
+                                      .toString()
+                                      .split(',', Qt::SkipEmptyParts, Qt::CaseSensitive);
 
         qCDebug(lcAuthManager) << "Reading Jitsi CA files:" << pathList;
 
