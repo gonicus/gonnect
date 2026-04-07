@@ -22,6 +22,9 @@ public:
     void process() override;
     QUrl networkCheckURL() const override;
 
+Q_SIGNALS:
+    void feederFailed();
+
 private:
     void authStatusChanged(QAbstractOAuth::Status status);
 
@@ -30,6 +33,8 @@ private:
     void requestContacts();
 
     void authorize();
+
+    void resetFeeder();
 
     AddressBookManager *m_manager = nullptr;
 
@@ -40,4 +45,7 @@ private:
     QOAuth2AuthorizationCodeFlow *m_authCodeFlow = nullptr;
 
     QNetworkAccessManager *m_networkAccessManager = nullptr;
+
+    m_retryCount = 0;
+    m_retryInterval = 0;
 };

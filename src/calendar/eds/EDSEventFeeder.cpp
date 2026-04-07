@@ -165,7 +165,7 @@ void EDSEventFeeder::resetFeeder()
     if (m_futureWatcher) {
         m_futureWatcher->cancel();
 
-        delete m_futureWatcher;
+        m_futureWatcher->deleteLater();
         m_futureWatcher = nullptr;
     }
 

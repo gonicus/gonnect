@@ -1,8 +1,6 @@
 #include "MSGraphAddressBookFeeder.h"
 #include "AddressBook.h"
 #include "AddressBookManager.h"
-#include "AvatarManager.h"
-#include "ReadOnlyConfdSettings.h"
 #include <QOAuthHttpServerReplyHandler>
 #include <QRegularExpression>
 #include <QDesktopServices>
@@ -19,11 +17,13 @@ Q_LOGGING_CATEGORY(msGraphAddressBookFeeder, "gonnect.app.feeder.MSGraphAddressB
 MSGraphAddressBookFeeder::MSGraphAddressBookFeeder(const QString &group, const int retryCount,
                                                    const int retryInterval,
                                                    AddressBookManager *parent)
-    : QObject(parent), m_manager(parent), m_group(group)
-{
-    Q_UNUSED(retryCount)
-    Q_UNUSED(retryInterval)
+    : QObject(parent),
+      m_manager(parent),
+      m_group(group),
+      m_retryCount(retryCount),
+      m_retryInterval(retryInterval)
 
+{
     m_networkAccessManager = new QNetworkAccessManager(this);
 }
 
@@ -115,7 +115,6 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
     }
 
     if (doc.object().contains("@odata.nextLink")) {
-
         QString nextLink = doc.object()["@odata.nextLink"].toString();
 
         using namespace Qt::StringLiterals;
@@ -125,6 +124,7 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
                        u"Bearer "_s + m_authCodeFlow->token());
         request.setHeaders(headers);
         auto *reply = m_networkAccessManager->get(request);
+
         connect(reply, &QNetworkReply::finished, reply,
                 [this, reply]() { contactsReceived(reply); });
     }
@@ -146,6 +146,8 @@ void MSGraphAddressBookFeeder::requestContacts()
     auto *reply = m_networkAccessManager->get(request);
     if (!reply) {
         qCCritical(msGraphAddressBookFeeder) << "Failed to create contacts request";
+
+        Q_EMIT feederFailed();
         return;
     }
 
@@ -174,6 +176,8 @@ void MSGraphAddressBookFeeder::authorize()
         if (!m_replyHandler->isListening()) {
             qCCritical(msGraphAddressBookFeeder)
                     << "Failed to start QOAuthHttpServerReplyHandler. No port available?";
+
+            Q_EMIT feederFailed();
             return;
         }
     }
@@ -199,8 +203,40 @@ void MSGraphAddressBookFeeder::authorize()
     m_authCodeFlow->grant();
 }
 
+void MSGraphAddressBookFeeder::resetFeeder()
+{
+    if (m_replyHandler) {
+        m_replyHandler->deleteLater();
+        m_replyHandler = nullptr;
+    }
+
+    if (m_authCodeFlow) {
+        m_authCodeFlow->deleteLater();
+        m_authCodeFlow = nullptr;
+    }
+}
+
 void MSGraphAddressBookFeeder::process()
 {
+    connect(
+            this, &MSGraphAddressBookFeeder::feederFailed, this,
+            [this]() {
+                // Prepare feeder for re-run
+                resetFeeder();
+                AddressBook::instance().removeContactsBySource(m_group);
+
+                // Some other error has occurred, wait and try again
+                if (m_retryCount > 0) {
+                    m_retryCount--;
+
+                    qCCritical(msGraphAddressBookFeeder)
+                            << "Failed to process MSGraph sources - trying later";
+
+                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
+                }
+            },
+            Qt::SingleShotConnection);
+
     if (m_authCodeFlow && m_authCodeFlow->status() == QAbstractOAuth::Status::Granted) {
         requestContacts();
     } else {
