@@ -1,0 +1,69 @@
+#include "RTTModel.h"
+
+RTTModel::RTTModel(QObject *parent) : QAbstractListModel(parent) { }
+
+int RTTModel::rowCount(const QModelIndex &parent) const
+{
+    if (parent.isValid()) {
+        return 0;
+    }
+    return m_messages.size();
+}
+
+QVariant RTTModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.row() >= m_messages.size()) {
+        return QVariant();
+    }
+
+    const RTTMessage &msg = m_messages.at(index.row());
+
+    switch (role) {
+    case static_cast<int>(Roles::Timestamp):
+        return msg.timestamp();
+    case static_cast<int>(Roles::Sender):
+        return msg.sender();
+    case static_cast<int>(Roles::Message):
+        return msg.message();
+    case static_cast<int>(Roles::IsMe):
+        return msg.isMe();
+    case static_cast<int>(Roles::IsFinished):
+        return msg.isFinished();
+    default:
+        return QVariant();
+    }
+}
+
+QHash<int, QByteArray> RTTModel::roleNames() const
+{
+    return {
+        { static_cast<int>(Roles::Timestamp), "timestamp" },
+        { static_cast<int>(Roles::Sender), "sender" },
+        { static_cast<int>(Roles::Message), "message" },
+        { static_cast<int>(Roles::IsMe), "isMe" },
+        { static_cast<int>(Roles::IsFinished), "isFinished" },
+    };
+}
+
+void RTTModel::addMessage(const QDateTime &timestamp, const QString &sender, const QString &message,
+                          bool isMe)
+{
+    beginInsertRows(QModelIndex(), m_messages.size(), m_messages.size());
+    m_messages.append(RTTMessage{ timestamp, sender, message, isMe, false });
+    endInsertRows();
+}
+
+void RTTModel::updateLastMessage(const QString &newMessage, bool finished)
+{
+    if (m_messages.isEmpty()) {
+        return;
+    }
+
+    int lastRow = m_messages.size() - 1;
+    m_messages[lastRow].setMessage(newMessage);
+    m_messages[lastRow].setIsFinished(finished);
+
+    QModelIndex idx = index(lastRow);
+    Q_EMIT dataChanged(idx, idx,
+                       { static_cast<int>(Roles::Message), static_cast<int>(Roles::IsFinished) });
+}

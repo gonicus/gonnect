@@ -610,6 +610,13 @@ qt_add_qml_module(gonnect
         platform/SearchProvider.h
         ${PLATFORM_SOURCES}
 
+        rtt/RTTMessage.h
+        rtt/RTTMessage.cpp
+        rtt/RTTModel.h
+        rtt/RTTModel.cpp
+        rtt/RTTProxyModel.h
+        rtt/RTTProxyModel.cpp
+
         ui/CallsModel.h
         ui/CallsModel.cpp
         ui/DateEventsModel.h
@@ -781,6 +788,7 @@ target_include_directories(gonnect
     usb/busylight
     media
     platform
+    rtt # could also be moved to chat/ but practically unrelated
     ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
