@@ -610,6 +610,8 @@ qt_add_qml_module(gonnect
         platform/SearchProvider.h
         ${PLATFORM_SOURCES}
 
+        rtt/RTTProvider.h
+        rtt/RTTProvider.cpp
         rtt/RTTMessage.h
         rtt/RTTMessage.cpp
         rtt/RTTModel.h
