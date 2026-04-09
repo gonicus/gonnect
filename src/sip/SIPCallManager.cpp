@@ -361,6 +361,22 @@ QStringList SIPCallManager::callIds() const
     return res;
 }
 
+SIPCall *SIPCallManager::getCurrentCall() const
+{
+    pj::CallInfo info;
+    for (auto call : std::as_const(m_calls)) {
+        info = call->getInfo();
+        for (unsigned i = 0; i < info.media.size(); ++i) {
+            // Check if call is actively transmitting media (aka not on hold?)
+            if (info.media[i].type == PJMEDIA_TYPE_AUDIO && info.media[i].status == PJSUA_CALL_MEDIA_ACTIVE) {
+                return call;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 void SIPCallManager::endAllCalls()
 {
     for (auto call : std::as_const(m_calls)) {

@@ -51,6 +51,7 @@ public:
     Q_INVOKABLE unsigned missedCalls() const { return m_missedCalls; }
 
     QStringList callIds() const;
+    SIPCall *getCurrentCall() const;
     Q_INVOKABLE QString call(const QString &number, bool silent = false);
     Q_INVOKABLE QString call(const QString &accountId, const QString &number,
                              const QString &contactId = "",

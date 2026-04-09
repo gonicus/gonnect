@@ -407,6 +407,7 @@ qt_add_qml_module(gonnect
         ui/components/HistoryList.qml
         ui/components/MainTabBar.qml
         ui/components/ParticipantsList.qml
+        ui/components/RTTSideBar.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml

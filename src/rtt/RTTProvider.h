@@ -5,6 +5,7 @@
 #include <QtQml/qqmlregistration.h>
 
 #include "RTTModel.h"
+#include "SIPCall.h"
 #include "SIPCallManager.h"
 
 class RTTProvider : public QObject
@@ -36,7 +37,11 @@ private:
     RTTProvider(QObject *parent = nullptr);
 
     RTTModel *m_model = nullptr;
-    SIPCallManager *m_callManager = nullptr;
+
+    SIPCallManager *m_manager = nullptr;
+    SIPCall *m_call = nullptr;
+
+    bool m_newMessage = false;
 };
 
 class RTTProviderWrapper
