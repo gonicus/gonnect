@@ -42,6 +42,13 @@ QHash<int, QByteArray> RTTModel::roleNames() const
     };
 }
 
+void RTTModel::reset()
+{
+    beginResetModel();
+    m_messages.clear();
+    endResetModel();
+}
+
 void RTTModel::addMessage(qint64 timestamp, const QString &message, bool isMe)
 {
     beginInsertRows(QModelIndex(), m_messages.size(), m_messages.size());

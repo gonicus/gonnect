@@ -41,6 +41,9 @@ private:
     SIPCallManager *m_manager = nullptr;
     SIPCall *m_call = nullptr;
 
+    QMetaObject::Connection m_changed;
+    QMetaObject::Connection m_committed;
+
     bool m_newMessage = false;
 };
 

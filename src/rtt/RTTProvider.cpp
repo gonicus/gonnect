@@ -6,11 +6,19 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
 
     m_manager = &SIPCallManager::instance();
     connect(m_manager, &SIPCallManager::establishedCallsCountChanged, this, [this]() {
-        m_call = m_manager->getCurrentCall();
-
+        // Disconnect from RTT signals of the old call
         if (m_call) {
-            // TODO: Disconnect on update!
-            connect(m_call, &SIPCall::rttBubbleChanged, this, [this](QString message) {
+            disconnect(m_changed);
+            disconnect(m_committed);
+        }
+
+        // Clear model containing the RTT messages
+        m_model->reset();
+
+        // Connect to RTT signals of the new call
+        m_call = m_manager->getCurrentCall();
+        if (m_call) {
+            m_changed = connect(m_call, &SIPCall::rttBubbleChanged, this, [this](QString message) {
                 if (m_newMessage) { // TODO: Safe, cause of ST-event loop?
                     m_model->addMessage(QDateTime::currentMSecsSinceEpoch(), message, false);
                     m_newMessage = false;
@@ -18,10 +26,11 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
                     m_model->updateMessage(message, false);
                 }
             });
-            connect(m_call, &SIPCall::rttBubbleCommitted, this, [this](QString message) {
-                m_model->updateMessage(message, true);
-                m_newMessage = true;
-            });
+            m_committed =
+                    connect(m_call, &SIPCall::rttBubbleCommitted, this, [this](QString message) {
+                        m_model->updateMessage(message, true);
+                        m_newMessage = true;
+                    });
         }
     });
 }
