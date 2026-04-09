@@ -8,11 +8,9 @@ class RTTMessage
     Q_GADGET
 
 public:
-    explicit RTTMessage(qint64 timestamp, const QString &sender, const QString &message,
-                        bool isMe, bool isFinished);
+    explicit RTTMessage(qint64 timestamp, const QString &message, bool isMe, bool isFinished);
 
     qint64 timestamp() const { return m_timestamp; };
-    QString sender() const { return m_sender; };
     QString message() const { return m_message; };
     bool isMe() const { return m_isMe; };
     bool isFinished() const { return m_isFinished; };
@@ -22,7 +20,6 @@ public:
 
 private:
     qint64 m_timestamp;
-    QString m_sender;
     QString m_message;
     bool m_isMe;
     bool m_isFinished = false;

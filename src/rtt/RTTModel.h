@@ -12,7 +12,7 @@ class RTTModel : public QAbstractListModel
     QML_ELEMENT
 
 public:
-    enum class Roles { Timestamp = Qt::UserRole + 1, Sender, Message, IsMe, IsFinished };
+    enum class Roles { Timestamp = Qt::UserRole + 1, Message, IsMe, IsFinished };
 
     explicit RTTModel(QObject *parent = nullptr);
 
@@ -20,8 +20,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE void addMessage(qint64 timestamp, const QString &sender, const QString &text,
-                                bool isMe);
+    Q_INVOKABLE void addMessage(qint64 timestamp, const QString &text, bool isMe);
     Q_INVOKABLE void updateMessage(const QString &message, bool isMe, bool isFinished = false);
 
 private:

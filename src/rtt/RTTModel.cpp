@@ -21,8 +21,6 @@ QVariant RTTModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case static_cast<int>(Roles::Timestamp):
         return msg.timestamp();
-    case static_cast<int>(Roles::Sender):
-        return msg.sender();
     case static_cast<int>(Roles::Message):
         return msg.message();
     case static_cast<int>(Roles::IsMe):
@@ -38,18 +36,16 @@ QHash<int, QByteArray> RTTModel::roleNames() const
 {
     return {
         { static_cast<int>(Roles::Timestamp), "timestamp" },
-        { static_cast<int>(Roles::Sender), "sender" },
         { static_cast<int>(Roles::Message), "message" },
         { static_cast<int>(Roles::IsMe), "isMe" },
         { static_cast<int>(Roles::IsFinished), "isFinished" },
     };
 }
 
-void RTTModel::addMessage(qint64 timestamp, const QString &sender, const QString &message,
-                          bool isMe)
+void RTTModel::addMessage(qint64 timestamp, const QString &message, bool isMe)
 {
     beginInsertRows(QModelIndex(), m_messages.size(), m_messages.size());
-    m_messages.append(RTTMessage{ timestamp, sender, message, isMe, false });
+    m_messages.append(RTTMessage{ timestamp, message, isMe, false });
     endInsertRows();
 }
 
