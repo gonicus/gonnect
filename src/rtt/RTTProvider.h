@@ -12,7 +12,7 @@ class RTTProvider : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(RTTProvider)
 
-    Q_PROPERTY(RTTModel* model READ model CONSTANT)
+    Q_PROPERTY(RTTModel *model READ model CONSTANT)
 
 public:
     Q_REQUIRED_RESULT static RTTProvider &instance()
@@ -28,7 +28,7 @@ public:
 
     ~RTTProvider() = default;
 
-    RTTModel* model() const { return m_model; }
+    RTTModel *model() const { return m_model; }
 
 Q_SIGNALS:
 
@@ -47,10 +47,7 @@ class RTTProviderWrapper
     QML_SINGLETON
 
 public:
-    static RTTProvider *create(QQmlEngine *, QJSEngine *)
-    {
-        return &RTTProvider::instance();
-    }
+    static RTTProvider *create(QQmlEngine *, QJSEngine *) { return &RTTProvider::instance(); }
 
 private:
     RTTProviderWrapper() = default;

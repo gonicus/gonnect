@@ -22,7 +22,7 @@ public:
 
     Q_INVOKABLE void addMessage(const QDateTime &timestamp, const QString &sender,
                                 const QString &text, bool isMe);
-    Q_INVOKABLE void updateLastMessage(const QString &newMessage, bool finished = false);
+    Q_INVOKABLE void updateLastMessage(const QString &message, bool isMe, bool isFinished = false);
 
 private:
     QList<RTTMessage> m_messages;

@@ -53,17 +53,29 @@ void RTTModel::addMessage(const QDateTime &timestamp, const QString &sender, con
     endInsertRows();
 }
 
-void RTTModel::updateLastMessage(const QString &newMessage, bool finished)
+void RTTModel::updateLastMessage(const QString &message, bool isMe, bool isFinished)
 {
     if (m_messages.isEmpty()) {
         return;
     }
 
-    int lastRow = m_messages.size() - 1;
-    m_messages[lastRow].setMessage(newMessage);
-    m_messages[lastRow].setIsFinished(finished);
+    // Retrieve the last message of the participant
+    int targetRow = -1;
+    for (int i = m_messages.size() - 1; i >= 0; --i) {
+        if (m_messages[i].isMe() == isMe) {
+            targetRow = i;
+            break;
+        }
+    }
 
-    QModelIndex idx = index(lastRow);
+    if (targetRow == -1) {
+        return;
+    }
+
+    m_messages[targetRow].setMessage(message);
+    m_messages[targetRow].setIsFinished(isFinished);
+
+    QModelIndex idx = index(targetRow);
     Q_EMIT dataChanged(idx, idx,
                        { static_cast<int>(Roles::Message), static_cast<int>(Roles::IsFinished) });
 }
