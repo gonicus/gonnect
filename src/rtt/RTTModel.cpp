@@ -62,7 +62,8 @@ void RTTModel::updateLastMessage(const QString &message, bool isMe, bool isFinis
     // Retrieve the last message of the participant
     int targetRow = -1;
     for (int i = m_messages.size() - 1; i >= 0; --i) {
-        if (m_messages[i].isMe() == isMe) {
+        auto &message = m_messages[i];
+        if (message.isMe() == isMe && !message.isFinished()) {
             targetRow = i;
             break;
         }
