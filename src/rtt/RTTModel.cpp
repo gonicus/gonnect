@@ -53,13 +53,13 @@ void RTTModel::addMessage(const QDateTime &timestamp, const QString &sender, con
     endInsertRows();
 }
 
-void RTTModel::updateLastMessage(const QString &message, bool isMe, bool isFinished)
+void RTTModel::updateMessage(const QString &message, bool isMe, bool isFinished)
 {
     if (m_messages.isEmpty()) {
         return;
     }
 
-    // Retrieve the last message of the participant
+    // Retrieve the last unfinished message of the participant
     int targetRow = -1;
     for (int i = m_messages.size() - 1; i >= 0; --i) {
         auto &message = m_messages[i];
