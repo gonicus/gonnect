@@ -6,6 +6,9 @@ on:
       dryRun:
         description: 'Dry run'
         type: 'boolean'
+      skipFlatpak:
+        description: 'Skip Flatpak manifest'
+        type: 'boolean'
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
@@ -45,4 +48,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.get_token.outputs.token }}
           DRY_RUN_OPTION: ${{ inputs.dryRun == true && '--dry-run' || '' }}
+          UPDATE_FLATPAK: ${{ inputs.skipFlatpak == true && 'NO' || 'YES' }}
         run: npx --package=semantic-release --package=@semantic-release/changelog --package=@semantic-release/git --package=@semantic-release/exec -- semantic-release $DRY_RUN_OPTION

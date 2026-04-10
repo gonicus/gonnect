@@ -28,7 +28,8 @@ Usage: prepare_new_version.sh <new version> [<commits as Base64 encoded JSON>] [
 <commits as Base64 encoded JSON> contains the commits as Base64 encoded JSON object.
 
 Options:
-    -h  --help  Show this help
+    -F  --no-flatpak  Do not update the flatpak version manifest
+    -h  --help        Show this help
 HELP
 }
 
@@ -36,12 +37,17 @@ HELP
 VERSION=
 COMMITS=
 IS_BETA=NO
+UPDATE_FLATPAK=${UPDATE_FLATPAK:-YES}
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -h|--help)
             help
             return 0
+            ;;
+        -F|--no-flatpak)
+            UPDATE_FLATPAK=NO
+            shift
             ;;
         *)
             if [ -z "$VERSION" ]; then
@@ -199,13 +205,17 @@ if [[ "$IS_BETA" == YES ]]; then
     COMMITS=
 fi
 
-NOTES=
-if [ -n "$COMMITS" ]; then
-    echo "Creating release notes for Flatpak metainfo"
-    create_release_notes "$COMMITS"
+if [[ "$UPDATE_FLATPAK" == "YES" ]]; then
+    NOTES=
+    if [ -n "$COMMITS" ]; then
+        echo "Creating release notes for Flatpak metainfo"
+        create_release_notes "$COMMITS"
+    fi
+    echo "Updating Flatpak metainfo"
+    update_flatpak "$VERSION" "$NOTES"
+else
+    echo "Skipping Flatpak metainfo"
 fi
-echo "Updating Flatpak metainfo"
-update_flatpak "$VERSION" "$NOTES"
 
 echo "Updating Antora module"
 update_antora_module "$VERSION"
