@@ -22,10 +22,10 @@ command -v npx >/dev/null 2>&1 || show_error 2 "npx command is missing!"
 # help shows the usage information.
 function help {
     cat <<HELP
-Usage: prepare_new_version.sh <new version> [<commits as Base64 encoded JSON>] [options]
+Usage: prepare_new_version.sh <new version> [<filename with commits as Base64 encoded JSON>] [options]
 
 <new version> is a string that conforms to the rules of semantic versioning. E.g.: 1.2.3
-<commits as Base64 encoded JSON> contains the commits as Base64 encoded JSON object.
+<filename with commits as Base64 encoded JSON> contains the filename with commits as Base64 encoded JSON object.
 
 Options:
     -F  --no-flatpak  Do not update the flatpak version manifest
@@ -209,7 +209,8 @@ if [[ "$UPDATE_FLATPAK" == "YES" ]]; then
     NOTES=
     if [ -n "$COMMITS" ]; then
         echo "Creating release notes for Flatpak metainfo"
-        create_release_notes "$COMMITS"
+        COMMIT_MSGS=$(cat "$COMMITS")
+        create_release_notes "$COMMIT_MSGS"
     fi
     echo "Updating Flatpak metainfo"
     update_flatpak "$VERSION" "$NOTES"
