@@ -95,7 +95,7 @@ void GlobalCallState::updateGlobalCallState()
     setGlobalCallState(globalState);
     updateRemoteContactInfo();
     Q_EMIT activeCallsCountChanged();
-    Q_EMIT nonIdleCallsCount();
+    Q_EMIT nonIdleCallsCountChanged();
 }
 
 void GlobalCallState::setIsPhoneConference(bool flag)
@@ -176,8 +176,17 @@ void GlobalCallState::unholdOtherCall() const
         for (auto callObj : std::as_const(m_globalCallStateObjects)) {
             if (callObj->callState() & ICallState::State::OnHold) {
                 callObj->toggleHold();
+                break;
             }
-            break;
+        }
+    }
+}
+
+void GlobalCallState::unholdAllCalls() const
+{
+    for (auto callObj : std::as_const(m_globalCallStateObjects)) {
+        if (callObj->callState() & ICallState::State::OnHold) {
+            callObj->toggleHold();
         }
     }
 }
@@ -204,6 +213,7 @@ void GlobalCallState::onCallInForegroundChanged()
     }
 
     if (m_callInForeground) {
+        m_foregroundCallContext = new QObject(this);
         connect(m_callInForeground, &QObject::destroyed, m_foregroundCallContext,
                 [this]() { setProperty("callInForeground", QVariant::fromValue(nullptr)); });
     }

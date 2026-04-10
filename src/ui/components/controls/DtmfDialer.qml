@@ -12,12 +12,20 @@ Item {
     signal buttonPressed(string button)
     signal dialed(string button)
 
+    Accessible.role: Accessible.ButtonMenu
+    Accessible.name: qsTr("Number pad")
+
     component DialButton : Item {
         id: dialButton
         width: 100
         height: 100
 
         property alias value: buttonLabel.text
+
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Character %1").arg(dialButton.value)
+        Accessible.focusable: true
+        Accessible.onPressAction: () => dialButton.clicked()
 
         function clicked() {
             control.dialed(dialButton.value)
@@ -30,11 +38,15 @@ Item {
             width: dialButton.width - 20
             height: dialButton.height - 20
             anchors.centerIn: parent
+
+            Accessible.ignored: true
         }
 
         Label {
             id: buttonLabel
             anchors.centerIn: parent
+
+            Accessible.ignored: true
         }
 
         Connections {

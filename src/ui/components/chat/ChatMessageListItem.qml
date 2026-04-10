@@ -7,14 +7,25 @@ Item {
     id: control
     implicitHeight: messageLabel.visible ? messageLabel.height : messageImage.height
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.ChatMessageListItem"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     required property date timestamp
     required property string nickName
     required property string message
     required property string imageUrl
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Chat message")
+    Accessible.description: qsTr("Selected chat message - from %1, at %2: %3").arg(control.nickName).arg(control.timestamp).arg(control.message)
+    Accessible.focusable: true
+
     Component.onCompleted: () => {
         if (!control.message) {
-            console.error("===>", control.imageUrl)
+            console.debug(category, "image URL", control.imageUrl)
         }
     }
 
@@ -26,6 +37,8 @@ Item {
             top: parent.top
             left: parent.left
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -42,6 +55,8 @@ Item {
         }
 
         onLinkActivated: link => Qt.openUrlExternally(link)
+
+        Accessible.ignored: true
     }
 
     Image {
@@ -57,20 +72,18 @@ Item {
         }
         onStatusChanged: () => {
             if (messageImage.visible) {
-                console.error('===>', messageImage.source)
-
                 switch (messageImage.status) {
                     case Image.Null:
-                        console.error('   ===> NULL')
+                        console.warn(category, 'image', messageImage.source, 'NULL')
                         break
                     case Image.Ready:
-                        console.error('   ===> READY')
+                        console.info(category, 'image', messageImage.source, 'READY')
                         break
                     case Image.Loading:
-                        console.error('   ===> LOADING')
+                        console.info(category, 'image', messageImage.source, 'LOADING')
                         break
                     case Image.Error:
-                        console.error('   ===> ERROR')
+                        console.error(category, 'image', messageImage.source, 'ERROR')
                         break
                 }
             }

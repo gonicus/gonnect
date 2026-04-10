@@ -10,6 +10,7 @@
 #include "TogglerManager.h"
 #include "Toggler.h"
 #include "Application.h"
+#include "ThemeManager.h"
 
 using namespace std::chrono_literals;
 
@@ -24,7 +25,6 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
     m_trayIcon = new QSystemTrayIcon(this);
     m_trayIcon->setContextMenu(m_trayIconMenu);
     m_trayIcon->show();
-    resetTrayIcon();
 
     connect(m_trayIcon, &QSystemTrayIcon::activated, this,
             [](QSystemTrayIcon::ActivationReason reason) {
@@ -33,6 +33,10 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
                     Q_EMIT ViewHelper::instance().activateSearch();
                 }
             });
+
+    auto themeManager = &ThemeManager::instance();
+    connect(themeManager, &ThemeManager::trayColorSchemeChanged, this,
+            &SystemTrayMenu::resetTrayIcon);
 
     updateMenu();
 
@@ -52,6 +56,8 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateBuddyState);
     connect(&SIPAccountManager::instance(), &SIPAccountManager::sipRegisteredChanged, this,
             &SystemTrayMenu::updateMenu);
+    connect(&SIPAccountManager::instance(), &SIPAccountManager::sipRegisteredChanged, this,
+            &SystemTrayMenu::resetTrayIcon);
     connect(&SIPCallManager::instance(), &SIPCallManager::activeCallsChanged, this,
             &SystemTrayMenu::updateCalls);
     connect(&SIPCallManager::instance(), &SIPCallManager::establishedCallsCountChanged, this,
@@ -68,6 +74,8 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateTogglers);
     connect(&TogglerManager::instance(), &TogglerManager::togglerBusyChanged, this,
             &SystemTrayMenu::updateTogglers);
+
+    resetTrayIcon();
 }
 
 SystemTrayMenu::~SystemTrayMenu()
@@ -408,13 +416,30 @@ void SystemTrayMenu::updateTogglers()
 
 void SystemTrayMenu::updateBuddyState(const QString uri, SIPBuddyState::STATUS)
 {
-    const auto number = PhoneNumberUtil::numberFromSipUrl(uri);
+    // Empty URI leads to a complete update
+    if (uri.isEmpty()) {
+        QHashIterator favoriteIterator(m_favoriteActions);
+        while (favoriteIterator.hasNext()) {
+            favoriteIterator.next();
+            favoriteIterator.value()->setText(
+                    contactText(*(NumberStats::instance().numberStat(favoriteIterator.key()))));
+        }
 
-    if (auto action = m_favoriteActions.value(number, nullptr)) {
-        action->setText(contactText(*(NumberStats::instance().numberStat(number))));
-    }
-    if (auto action = m_mostCalledActions.value(number, nullptr)) {
-        action->setText(contactText(*(NumberStats::instance().numberStat(number))));
+        QHashIterator mostCalledIterator(m_mostCalledActions);
+        while (mostCalledIterator.hasNext()) {
+            mostCalledIterator.next();
+            mostCalledIterator.value()->setText(
+                    contactText(*(NumberStats::instance().numberStat(mostCalledIterator.key()))));
+        }
+    } else {
+        const auto number = PhoneNumberUtil::numberFromSipUrl(uri);
+
+        if (auto action = m_favoriteActions.value(number, nullptr)) {
+            action->setText(contactText(*(NumberStats::instance().numberStat(number))));
+        }
+        if (auto action = m_mostCalledActions.value(number, nullptr)) {
+            action->setText(contactText(*(NumberStats::instance().numberStat(number))));
+        }
     }
 }
 
@@ -430,34 +455,47 @@ void SystemTrayMenu::setRinging(bool flag)
 
 void SystemTrayMenu::ringTimerCallback()
 {
-    QString noteDot = m_missedCallsCount ? "_note" : "";
-
-    m_ringingState = !m_ringingState;
+    QString noteDot = m_notificationCount ? "_note" : "";
 
     if (m_ringingState) {
         m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring" + noteDot + ".svg"));
     } else {
         resetTrayIcon();
     }
+
+    m_ringingState = !m_ringingState;
 }
 
 void SystemTrayMenu::resetTrayIcon()
 {
-    QString noteDot = m_missedCallsCount ? "_note" : "";
+    const bool darkIconDefault =
+            ThemeManager::instance().trayColorScheme() == ThemeManager::ColorScheme::DARK;
+    QString noteDot = m_notificationCount ? "_note" : "";
 
-    if (m_hasEstablishedCalls) {
-        m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
-    } else {
-        if (m_settings.value("generic/trayIconDark", false).toBool()) {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
+    const auto sipReg = SIPAccountManager::instance().sipRegistered();
+    if (sipReg) {
+        if (m_hasEstablishedCalls) {
+            m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
         } else {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
+            if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
+                m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
+            } else {
+                m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
+            }
+        }
+    } else {
+        if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
+            m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_dark.svg"));
+        } else {
+            m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_light.svg"));
         }
     }
+
+    m_trayIcon->setVisible(true);
 }
 
 void SystemTrayMenu::setBadgeNumber(unsigned number)
 {
-    m_missedCallsCount = number;
+    m_notificationCount = number;
     resetTrayIcon();
 }

@@ -6,6 +6,7 @@
 #include "ViewHelper.h"
 #include "NetworkHelper.h"
 #include "Credentials.h"
+#include "ErrorBus.h"
 
 #include <QTimer>
 #include <QUrl>
@@ -13,6 +14,7 @@
 #include <QLoggingCategory>
 #include <QCryptographicHash>
 #include <QPluginLoader>
+#include <QMutexLocker>
 
 using namespace std::chrono_literals;
 using namespace Qt::Literals::StringLiterals;
@@ -77,7 +79,6 @@ void AddressBookManager::reloadAddressBook()
 
 void AddressBookManager::processAddressBookQueue()
 {
-    bool changed = false;
     bool networkAvailable = true;
     auto &nh = NetworkHelper::instance();
 
@@ -92,17 +93,31 @@ void AddressBookManager::processAddressBookQueue()
 
         if (auto feeder = m_addressBookFeeders.value(group, nullptr)) {
 
+            if (feeder->isProcessing()) {
+                // A currently active feeder must not be invoked again to prevent double runs and
+                // threading issues.
+                continue;
+            }
+
             // If the plugin requires network access, check the connectivity with
             // the network helper / portal. If we've no connectivity, trigger on
             // connectivityChanged signal to recheck again.
             QUrl checkURL = feeder->networkCheckURL();
-            if (!checkURL.isEmpty()) {
+
+            if (checkURL.isEmpty()) {
+                feeder->process();
+            } else {
                 if (!networkAvailable) {
                     continue;
                 }
 
+                if (!checkURL.isValid()) {
+                    qCCritical(lcAddressBookManager) << "URL is invalid:" << checkURL;
+                    continue;
+                }
+
                 if (!nh.hasConnectivity()) {
-                    qCWarning(lcAddressBookManager) << "no connectivity state yet - trying later";
+                    qCWarning(lcAddressBookManager) << "No connectivity state yet - trying later";
 
                     networkAvailable = false;
                     connect(
@@ -113,30 +128,31 @@ void AddressBookManager::processAddressBookQueue()
                     continue;
                 }
 
-                if (!nh.isReachable(checkURL)) {
-                    qCWarning(lcAddressBookManager) << checkURL << "is not reachable";
-                    connect(
-                            &nh, &NetworkHelper::connectivityChanged, this,
-                            [this]() { processAddressBookQueue(); },
-                            Qt::ConnectionType::SingleShotConnection);
-                    continue;
-                }
+                nh.isReachable(checkURL).then(this, [feeder, checkURL, this](bool isReachable) {
+                    if (isReachable) {
+                        QMutexLocker mutex(&m_queueMutex);
+
+                        feeder->process();
+                        Q_EMIT AddressBook::instance().contactsReady();
+                    } else {
+                        qCWarning(lcAddressBookManager)
+                                << "Feeder URL" << checkURL << "is not reachable";
+                        connect(
+                                &NetworkHelper::instance(), &NetworkHelper::connectivityChanged,
+                                this, [this]() { processAddressBookQueue(); },
+                                Qt::ConnectionType::SingleShotConnection);
+                    }
+                });
             }
 
-            feeder->process();
             it.remove();
-            changed = true;
         }
-    }
-
-    if (changed) {
-        Q_EMIT AddressBook::instance().contactsReady();
     }
 
     m_queueMutex.unlock();
 }
 
-void AddressBookManager::acquireSecret(const QString &group,
+void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                                        std::function<void(const QString &secret)> callback)
 {
     ReadOnlyConfdSettings settings;
@@ -146,13 +162,11 @@ void AddressBookManager::acquireSecret(const QString &group,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, group, secretKey, callback](bool error, const QString &secret) {
-                if (error) {
-                    qCWarning(lcAddressBookManager) << "failed to retrieve secret:" << secret;
-                    return;
-                }
-
-                if (secret.isEmpty()) {
+            [this, forcePrompt, group, secretKey,
+             callback](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError && !forcePrompt) {
+                    callback(secret);
+                } else if (error == QKeychain::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
 
                     auto conn = connect(
@@ -165,10 +179,13 @@ void AddressBookManager::acquireSecret(const QString &group,
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
-                                            [secretKey](bool error, const QString &data) {
-                                                if (error) {
-                                                    qCCritical(lcAddressBookManager)
-                                                            << "failed to set credentials:" << data;
+                                            [secretKey](QKeychain::Error error, const QString &,
+                                                        const QString &message) {
+                                                if (error != QKeychain::NoError) {
+                                                    ErrorBus::instance().error(
+                                                            tr("Failed to persist address book "
+                                                               "credentials: %1")
+                                                                    .arg(message));
                                                 }
                                             });
 
@@ -181,10 +198,7 @@ void AddressBookManager::acquireSecret(const QString &group,
                     ReadOnlyConfdSettings settings;
                     settings.beginGroup(group);
                     viewHelper.requestPassword(group, settings.value("host", "").toString());
-                    settings.beginGroup(group);
-
-                } else {
-                    callback(secret);
+                    settings.endGroup();
                 }
             });
 }

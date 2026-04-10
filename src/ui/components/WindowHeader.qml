@@ -23,6 +23,9 @@ Rectangle {
     readonly property var window: control.Window.window
     readonly property bool active: control.Window.window?.active ?? false
 
+    Accessible.role: Accessible.Heading
+    Accessible.name: qsTr("GOnnect window header")
+
     // This rectangle makes the bottom rounded corners of rect straight
     Rectangle {
         height: control.radius
@@ -32,6 +35,8 @@ Rectangle {
             right: control.right
             bottom: control.bottom
         }
+
+        Accessible.ignored: true
     }
 
     DragHandler {
@@ -66,6 +71,8 @@ Rectangle {
         anchors.centerIn: parent
         color: control.active ? Theme.foregroundHeaderIcons : Theme.foregroundHeaderIconsInactive
         text: control.window?.title ?? ""
+
+        Accessible.ignored: true
     }
 
     Row {
@@ -79,6 +86,7 @@ Rectangle {
         HeaderIconButton {
             id: minimizeButton
             iconSource: Icons.goDown
+            accessiblePurpose: qsTr("Minimize")
             active: control.active
             anchors.verticalCenter: parent.verticalCenter
             onClicked: () => control.window?.showMinimized()
@@ -87,6 +95,7 @@ Rectangle {
         HeaderIconButton {
             id: maximizeButton
             iconSource: Icons.goUp
+            accessiblePurpose: qsTr("Maximize")
             active: control.active
             anchors.verticalCenter: parent.verticalCenter
             onClicked: () => control.toggleMaximized()
@@ -94,6 +103,7 @@ Rectangle {
 
         HeaderIconButton {
             iconSource: Icons.mobileCloseApp
+            accessiblePurpose: qsTr("Close GOnnect window")
             active: control.active
             iconSize: 10
             anchors.verticalCenter: parent.verticalCenter

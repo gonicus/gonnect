@@ -13,9 +13,17 @@ public:
     LitraBeamLX(const hid_device_info &deviceInfo, QObject *parent = nullptr)
         : IBusylightDevice{ deviceInfo, parent } { };
 
-    virtual QSet<SupportedCommands> supportedCommands() override;
-    virtual void switchStreamlight(bool on) override;
+    QSet<SupportedCommands> supportedCommands() override;
+    void switchStreamlight(bool on) override;
+
+private:
+    bool hidppTransaction(unsigned char *buf, size_t len);
 
 protected:
-    virtual void send(bool on) override;
+    void send(bool on) override;
+
+    QColor m_previousColor;
+
+    bool m_state = false;
+    bool m_blinkState = false;
 };

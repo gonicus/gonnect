@@ -17,6 +17,8 @@ Item {
     }
 
     Component.onCompleted: () => {
+        qsTr("QT_LAYOUT_DIRECTION", "QGuiApplication");
+
         DialogFactory.rootItem = baseItem
 
         if (settings.showMainWindowOnStart) {
@@ -25,10 +27,17 @@ Item {
 
         if (!ViewHelper.isSystrayAvailable() && settings.showTrayDialog) {
             const item = DialogFactory.createInfoDialog({
-                                               title: qsTr("No system tray available"),
-                                               text: qsTr("GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.")
-                                           })
+                title: qsTr("No system tray available"),
+                                                        text: qsTr("GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.")
+            })
             item.accepted.connect(() => settings.showTrayDialog = false)
+        }
+
+        if (ViewHelper.unsupportedPlatform) {
+            DialogFactory.createInfoDialog({
+                        title: qsTr("Information"),
+                        text: qsTr("GOnnect is under testing for your operating system and is not yet officially released. There is no feature parity with the Linux version yet, and there may be bugs that we didn't find yet. You're welcome with reporting these issues on github. Happy testing!")
+                    })
         }
     }
 
@@ -44,7 +53,8 @@ Item {
             gonnectWindow.focusSearchBox()
         }
         function onShowSettings() {
-            gonnectWindow.showPage(GonnectWindow.PageId.Settings)
+            gonnectWindow.updateTabSelection(gonnectWindow.settingsPageId,
+                                             GonnectWindow.PageType.Settings)
             gonnectWindow.ensureVisible()
         }
         function onShowShortcuts() { shortcutsWindowComponent.createObject(baseItem).show() }
@@ -101,27 +111,35 @@ Item {
             closeEvent.accepted = false
 
             if (GlobalCallState.globalCallState & (ICallState.State.CallActive
-                                                   | ICallState.State.RingingIncoming
-                                                   | ICallState.State.RingingOutgoing)) {
+                | ICallState.State.RingingIncoming
+                | ICallState.State.RingingOutgoing)) {
                 const item = DialogFactory.createConfirmDialog({
-                                                                   title: qsTr("End all calls"),
-                                                                   text: qsTr("Do you really want to close this window and terminate all ongoing calls?")
-                                                               })
+                    title: qsTr("End all calls"),
+                                                               text: qsTr("Do you really want to close this window and terminate all ongoing calls?")
+                })
                 item.accepted.connect(() => {
-                                          SIPCallManager.endAllCalls()
-                                          gonnectWindow.hide()
-                                      })
-            } else {
-                gonnectWindow.hide()
-            }
+                    SIPCallManager.endAllCalls()
+                    gonnectWindow.hide()
+                })
+                } else {
+                    gonnectWindow.hide()
+                }
         }
     }
 
     Connections {
+        id: sipAccountManagerConnections
         target: SIPAccountManager
+
         function onAuthorizationFailed(accountId : string) {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for the SIP account:") })
             dialog.onPasswordAccepted.connect(pw => SIPAccountManager.setAccountCredentials(accountId, pw))
+        }
+        function onConnectionError(code : int, message : string) {
+            DialogFactory.createInfoDialog({
+                title: qsTr("Registration failed"),
+                text: qsTr("Registration failed with with status %1: %2").arg(code).arg(message)
+            })
         }
     }
 
@@ -183,15 +201,15 @@ Item {
         target: ErrorBus
         function onError(msg : string) {
             DialogFactory.createInfoDialog({
-                                               title: qsTr("Error"),
-                                               text: msg
-                                           })
+                title: qsTr("Error"),
+                text: msg
+            })
         }
         function onFatalError(msg : string) {
             const item = DialogFactory.createInfoDialog({
-                                               title: qsTr("Fatal Error"),
-                                               text: msg
-                                           })
+                title: qsTr("Fatal Error"),
+                text: msg
+            })
             item.accepted.connect(() => Qt.quit())
         }
     }

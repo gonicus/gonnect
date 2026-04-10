@@ -22,6 +22,11 @@ Item {
                 id: chatModel
             }
         }
+
+        Accessible.role: Accessible.List
+        Accessible.name: qsTr("Chat message list")
+        Accessible.description: qsTr("List of all chat messages of the current chat room")
+
         delegate: ChatMessageListItem {
             anchors {
                 left: parent?.left
@@ -57,17 +62,26 @@ Item {
             right: parent.right
         }
 
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Auto scroll down")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => autoScrollDownButton.scrollAction()
+
         Rectangle {
             id: autoScrollBackground
             anchors.fill: parent
             radius: parent.width / 2
             color: autoScrollHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : Theme.backgroundOffsetColor
+
+            Accessible.ignored: true
         }
 
         Label {
             text: "↓"
             anchors.centerIn: parent
             font.pixelSize: 20
+
+            Accessible.ignored: true
         }
 
         HoverHandler {
@@ -76,10 +90,13 @@ Item {
         }
 
         TapHandler {
-            onTapped: () => {
-                internal.autoScrollBottom = true
-                listView.positionViewAtEnd()
-            }
+            id: autoScrollTapHandler
+            onTapped: () => autoScrollDownButton.scrollAction()
+        }
+
+        function scrollAction() {
+            internal.autoScrollBottom = true
+            listView.positionViewAtEnd()
         }
     }
 }

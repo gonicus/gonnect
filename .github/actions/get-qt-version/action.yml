@@ -1,0 +1,10 @@
+name: 'GOnnect read QT version from sources'
+description: 'Recurring tasks for CI jobs'
+outputs:
+  qt-version:
+    description: 'QT version'
+
+runs:
+  using: "node24"
+  main: "index.js"
+

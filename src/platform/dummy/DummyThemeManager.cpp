@@ -8,3 +8,8 @@ ThemeManager &ThemeManager::instance()
     }
     return *_instance;
 }
+
+DummyThemeManager::DummyThemeManager() : ThemeManager()
+{
+    initColorThemeDetection();
+}

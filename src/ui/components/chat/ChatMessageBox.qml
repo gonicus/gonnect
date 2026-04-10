@@ -12,4 +12,9 @@ TextField {
 
     Keys.onEnterPressed: () => control.sendMessage()
     Keys.onReturnPressed: () => control.sendMessage()
+
+    Accessible.role: Accessible.EditableText
+    Accessible.name: qsTr("Type message")
+    Accessible.description: qsTr("Enter the chat text message")
+    Accessible.focusable: true
 }

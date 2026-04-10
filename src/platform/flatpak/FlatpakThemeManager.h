@@ -15,10 +15,14 @@ public:
     {
         return m_settingsPortal->colorScheme();
     }
+
     QColor accentColor() const override { return m_settingsPortal->accentColor(); }
     bool highContrast() const override { return m_settingsPortal->highContrast(); }
 
     void shutdown() override { };
+
+protected:
+    void initColorThemeDetection() override;
 
 private:
     SettingsPortal *m_settingsPortal = nullptr;

@@ -6,6 +6,7 @@
 #include "DateEventManager.h"
 #include "Credentials.h"
 #include "ViewHelper.h"
+#include "ErrorBus.h"
 
 #include <QTimer>
 #include <QLoggingCategory>
@@ -13,7 +14,29 @@
 
 Q_LOGGING_CATEGORY(lcDateEventFeederManager, "gonnect.app.dateevents.feeder.manager")
 
-DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ parent } { }
+DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ parent }
+{
+    setTimeData();
+
+    connect(&m_nextDayRefreshTimer, &QTimer::timeout, this, [this]() {
+        setTimeData();
+        initFeederConfigs();
+        reload();
+    });
+    m_nextDayRefreshTimer.start();
+}
+
+void DateEventFeederManager::setTimeData()
+{
+    // Event filter options
+    m_currentTime = QDateTime::currentDateTime();
+    m_timeRangeStart = QDateTime(m_currentTime.date(), QTime(0, 0, 0, 0));
+    m_timeRangeEnd = m_timeRangeStart.addDays(3);
+
+    m_nextDayTime = m_timeRangeStart.addDays(1);
+    m_nextDayDuration = m_currentTime.msecsTo(m_nextDayTime);
+    m_nextDayRefreshTimer.setInterval(m_nextDayDuration);
+}
 
 void DateEventFeederManager::reload()
 {
@@ -22,7 +45,7 @@ void DateEventFeederManager::reload()
     processQueue();
 }
 
-void DateEventFeederManager::acquireSecret(const QString &configId,
+void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &configId,
                                            std::function<void(const QString &)> callback)
 {
     ReadOnlyConfdSettings settings;
@@ -32,13 +55,11 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, configId, secretKey, callback](bool error, const QString &secret) {
-                if (error) {
-                    qCWarning(lcDateEventFeederManager) << "failed to retrieve secret:" << secret;
-                    return;
-                }
-
-                if (secret.isEmpty()) {
+            [this, forcePrompt, configId, secretKey,
+             callback](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError && !forcePrompt) {
+                    callback(secret);
+                } else if (error == QKeychain::Error::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,
@@ -50,10 +71,13 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
-                                            [](bool error, const QString &data) {
-                                                if (error) {
-                                                    qCCritical(lcDateEventFeederManager)
-                                                            << "failed to set credentials:" << data;
+                                            [](QKeychain::Error error, const QString &,
+                                               const QString &message) {
+                                                if (error != QKeychain::NoError) {
+                                                    ErrorBus::instance().error(
+                                                            tr("Failed to persist calendar "
+                                                               "credentials: %1")
+                                                                    .arg(message));
                                                 }
                                             });
                                     callback(password);
@@ -66,18 +90,12 @@ void DateEventFeederManager::acquireSecret(const QString &configId,
                     settings.beginGroup(configId);
                     viewHelper.requestPassword(configId, settings.value("host", "").toString());
                     settings.endGroup();
-                } else {
-                    callback(secret);
                 }
             });
 }
 
 void DateEventFeederManager::initFeederConfigs()
 {
-    // Event filter options
-    QDateTime timeRangeStart = QDateTime::currentDateTime();
-    QDateTime timeRangeEnd = timeRangeStart.addDays(3);
-
     const QObjectList &staticPlugins = QPluginLoader::staticInstances();
 
     for (QObject *obj : std::as_const(staticPlugins)) {
@@ -88,8 +106,9 @@ void DateEventFeederManager::initFeederConfigs()
                     << plugin->name();
 
             for (auto &cfg : std::as_const(configs)) {
-                m_dateEventFeeders.insert(
-                        cfg, plugin->createFeeder(cfg, timeRangeStart, timeRangeEnd, this));
+                m_dateEventFeeders.insert(cfg,
+                                          plugin->createFeeder(cfg, m_currentTime, m_timeRangeStart,
+                                                               m_timeRangeEnd, this));
             }
         }
     }
@@ -110,35 +129,42 @@ void DateEventFeederManager::processQueue()
         const auto &configId = it.next();
 
         if (auto feeder = m_dateEventFeeders.value(configId, nullptr)) {
-
             QUrl urlToCheck = feeder->networkCheckURL();
 
-            if (!urlToCheck.isEmpty()) {
+            if (urlToCheck.isEmpty()) {
+                feeder->init();
+            } else {
                 if (!networkAvailable) {
                     continue;
                 }
 
                 if (!urlToCheck.isValid()) {
-                    qCCritical(lcDateEventFeederManager) << "Url is invalid:" << urlToCheck;
+                    qCCritical(lcDateEventFeederManager) << "URL is invalid:" << urlToCheck;
                     continue;
                 }
 
                 if (!networkHelper.hasConnectivity()) {
-                    qCWarning(lcDateEventFeederManager) << "No network connectivity";
+                    qCWarning(lcDateEventFeederManager)
+                            << "No connectivity state yet - trying later";
                     networkAvailable = false;
                     setupReconnectSignal();
                     continue;
                 }
 
-                if (!networkHelper.isReachable(urlToCheck)) {
-                    qCWarning(lcDateEventFeederManager)
-                            << "Feeder url" << urlToCheck << "is not reachable";
-                    setupReconnectSignal();
-                    continue;
-                }
+                networkHelper.isReachable(urlToCheck)
+                        .then(this, [feeder, urlToCheck, this](bool isReachable) {
+                            if (isReachable) {
+                                QMutexLocker mutex(&m_queueMutex);
+
+                                feeder->init();
+                            } else {
+                                qCWarning(lcDateEventFeederManager)
+                                        << "Feeder URL" << urlToCheck << "is not reachable";
+                                setupReconnectSignal();
+                            }
+                        });
             }
 
-            feeder->init();
             it.remove();
         }
     }

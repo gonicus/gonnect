@@ -138,7 +138,7 @@ bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistor
 
 bool IMHandler::sendCapabilities()
 {
-    if (--m_capabilitySendingTries == 0) {
+    if (m_capabilitySendingTries-- == 0) {
         return false;
     }
 

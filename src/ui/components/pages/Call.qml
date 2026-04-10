@@ -8,6 +8,12 @@ Item {
     id: control
     focus: true
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Call"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     readonly property alias selectedCallItem: callSideBar.selectedCallItem
 
     Keys.onPressed: (event) => {
@@ -18,7 +24,7 @@ Item {
                         }
 
                         const key = event.text.toUpperCase()
-                        const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "+", "A", "B", "C", "D", "," ]
+                        const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "A", "B", "C", "D" ]
 
                         if (dtmfKeys.includes(key)) {
                             event.accepted = true
@@ -42,7 +48,7 @@ Item {
             PropertyChanges {
                 verticalDragbarDummyDragHandler.enabled: true
                 verticalDragbarDummyHoverHandler.enabled: true
-                verticalDragbarDummy.x: 3/4 * control.width
+                verticalDragbarDummy.x: (control.LayoutMirroring.enabled ? 1/4 : 3/4) * control.width
             }
 
             AnchorChanges {
@@ -62,11 +68,11 @@ Item {
         anchors {
             left: parent.left
             top: parent.top
-            bottom: firstAidButton.top
+            bottom: parent.bottom
             right: verticalDragbarDummy.left
 
             leftMargin: 24
-            bottomMargin: 15
+            bottomMargin: 8
         }
 
         CallButtonBar {
@@ -82,8 +88,10 @@ Item {
             onHangupClicked: () => {
                 if (SIPCallManager.isConferenceMode) {
                     SIPCallManager.endConference()
-                } else {
+                } else if (topBar.callItem) {
                     SIPCallManager.endCall(topBar.callItem.accountId, topBar.callItem.callId)
+                } else {
+                    console.error(category, "cannot hang up because missing call item")
                 }
             }
 
@@ -114,6 +122,7 @@ Item {
                 avatarUrl: callSideBar.selectedCallItem?.hasAvatar ? ("file://" + callSideBar.selectedCallItem.avatarPath) : ""
                 isIncoming: topBar.isIncoming
                 isEstablished: topBar.isEstablished
+                isInProgress: topBar.isInProgress
                 isIncomingAudioLevel: callSideBar.selectedCallItem?.hasIncomingAudioLevel ?? false
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -144,6 +153,7 @@ Item {
                             required property string avatarPath
                             required property bool hasIncomingAudioLevel
                             required property bool isEstablished
+                            required property bool isInProgress
                             required property bool isIncoming
 
                             CallerBigAvatar {
@@ -153,6 +163,7 @@ Item {
                                 avatarUrl: callerDelg.avatarPath
                                 isIncoming: callerDelg.isIncoming
                                 isEstablished: callerDelg.isEstablished
+                                isInProgress: callerDelg.isInProgress
                                 isIncomingAudioLevel: callerDelg.hasIncomingAudioLevel
                                 anchors.horizontalCenter: parent.horizontalCenter
                             }
@@ -184,6 +195,9 @@ Item {
                 leftMargin: 15
                 bottomMargin: 10
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: nameLabel.text
         }
 
         Rectangle {
@@ -215,13 +229,19 @@ Item {
                 anchors.fill: parent
                 radius: parent.radius
                 color: Theme.backgroundOffsetColor
+
+                Accessible.ignored: true
             }
 
             Label {
                 id: dtmfFeedbackLabel
                 anchors.centerIn: parent
                 font.pixelSize: 50
+
+                Accessible.ignored: true
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -234,6 +254,9 @@ Item {
             right: callListCard.left
         }
 
+        Accessible.role: Accessible.Border
+        Accessible.name: qsTr("Drag bar")
+
         HoverHandler {
             id: verticalDragbarDummyHoverHandler
             enabled: false
@@ -245,8 +268,8 @@ Item {
             enabled: false
             yAxis.enabled: false
             xAxis {
-                minimum: 1/2 * control.width
-                maximum: control.width - 300
+                minimum: control.LayoutMirroring.enabled ? 300 : (1/2 * control.width)
+                maximum: control.LayoutMirroring.enabled ? (1/2 * control.width) : (control.width - 300)
             }
         }
     }
@@ -268,28 +291,4 @@ Item {
         }
     }
 
-    TogglerList {
-        id: togglerList
-        visible: togglerList.count > 0
-        clip: true
-        anchors {
-            left: parent.left
-            right: firstAidButton.left
-            bottom: parent.bottom
-
-            leftMargin: 10
-            rightMargin: 10
-            bottomMargin: 10
-        }
-    }
-
-    FirstAidButton {
-        id: firstAidButton
-        z: 100000
-        anchors {
-            verticalCenter: togglerList.verticalCenter
-            right: callListCard.right
-            rightMargin: 10
-        }
-    }
 }

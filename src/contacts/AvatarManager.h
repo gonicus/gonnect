@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QTimer>
 #include "Contact.h"
-#include "LDAPInitializer.h"
 
 class AvatarManager : public QObject
 {
@@ -19,7 +18,7 @@ public:
         return *_instance;
     }
 
-    void initialLoad(const LDAPInitializer::Config &ldapConfig);
+    QList<const Contact *> initialLoad();
 
     QString avatarPathFor(const QString &id);
 
@@ -27,7 +26,6 @@ public:
     void removeExternalImage(const QString &id);
 
 private:
-    void clearCStringlist(char **attrs) const;
     void createFile(const QString &id, const QByteArray &data) const;
     void removeFile(const QString &id) const;
     void addIdsToDb(QHash<QString, QDateTime> &idTimeMap) const;
@@ -35,11 +33,8 @@ private:
     void updateAvatarModifiedTime(const QString &id, const QDateTime &modified) const;
     QDateTime modifiedTimeInDb(const QString &id) const;
     QHash<QString, QDateTime> readIdsFromDb() const;
-    void loadAvatars(const QList<const Contact *> &contacts,
-                     const LDAPInitializer::Config &ldapConfig);
 
     QStringList readContactIdsFromDir() const;
-    void loadAll(const LDAPInitializer::Config &ldapConfig);
     explicit AvatarManager(QObject *parent = nullptr);
 
     QString m_avatarImageDirPath;

@@ -1,12 +1,12 @@
 #include "FlatpakNetworkHelper.h"
 #include "NetworkMonitor.h"
-#include <QLoggingCategory>
 #include <netdb.h>
 #include <qhostaddress.h>
-
-Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
+#include <QtConcurrent>
 
 #define NH_CALL_TIMEOUT 500
+
+Q_DECLARE_LOGGING_CATEGORY(lcNetwork)
 
 NetworkHelper &NetworkHelper::instance()
 {
@@ -35,10 +35,7 @@ void FlatpakNetworkHelper::updateNetworkState()
     QDBusPendingReply<QVariantMap> reply = m_portal->GetStatus();
     reply.waitForFinished();
 
-    bool localNetwork = false;
-    bool limitedNetwork = false;
-    bool captiveNetwork = false;
-    bool fullNetwork = true;
+    bool connected = true;
 
     if (reply.isError()) {
         qCCritical(lcNetwork) << "failed to query network status:" << reply.error().message();
@@ -49,71 +46,53 @@ void FlatpakNetworkHelper::updateNetworkState()
             bool ok;
             unsigned connectivity = res.value("connectivity").toUInt(&ok);
             if (ok) {
-                localNetwork = connectivity == 1;
-                limitedNetwork = connectivity == 2;
-                captiveNetwork = connectivity == 3;
-                fullNetwork = connectivity == 4;
+                connected = !!connectivity;
             }
         } else if (res.contains("available")) {
-            fullNetwork = true;
+            connected = true;
         } else {
             qCWarning(lcNetwork) << "status request does not contain usable fields - falling back "
                                     "to 'full network reachable'";
         }
     }
 
-    if (localNetwork != m_localNetwork) {
-        m_localNetwork = localNetwork;
-        Q_EMIT localNetworkAvailableChanged();
-        qCDebug(lcNetwork) << "local network available changed to" << localNetwork;
+    if (connected != m_connectivity) {
+        m_connectivity = connected;
+        Q_EMIT connectivityChanged();
+        qCDebug(lcNetwork) << "network available changed to" << connected;
     }
-    if (limitedNetwork != m_limitedNetwork) {
-        m_limitedNetwork = limitedNetwork;
-        Q_EMIT limitedNetworkAvailableChanged();
-        qCDebug(lcNetwork) << "limited network available changed to" << limitedNetwork;
-    }
-    if (captiveNetwork != m_captiveNetwork) {
-        m_captiveNetwork = captiveNetwork;
-        Q_EMIT captiveNetworkAvailableChanged();
-        qCDebug(lcNetwork) << "captive network available changed to" << captiveNetwork;
-    }
-    if (fullNetwork != m_fullNetwork) {
-        m_fullNetwork = fullNetwork;
-        Q_EMIT fullNetworkAvailableChanged();
-        qCDebug(lcNetwork) << "full network available changed to" << fullNetwork;
-    }
-
-    Q_EMIT connectivityChanged();
 }
 
-bool FlatpakNetworkHelper::isReachable(const QUrl &url)
+QFuture<bool> FlatpakNetworkHelper::isReachable(const QUrl &url)
 {
-    int port = url.port();
-    if (port < 0) {
+    return QtConcurrent::run([url, this]() -> bool {
+        int port = url.port();
+        if (port < 0) {
 
-        QString scheme = url.scheme();
-        struct servent *sptr = getservbyname(scheme.toStdString().c_str(), "tcp");
-        if (!sptr) {
-            qCCritical(lcNetwork) << "cannot map scheme" << scheme << "to port";
+            QString scheme = url.scheme();
+            struct servent *sptr = getservbyname(scheme.toStdString().c_str(), "tcp");
+            if (!sptr) {
+                qCCritical(lcNetwork) << "cannot map scheme" << scheme << "to port";
+                return false;
+            }
+
+            port = ntohs(sptr->s_port);
+        }
+
+        auto reply = m_portal->CanReach(url.host(), port);
+        reply.waitForFinished();
+
+        if (reply.isError()) {
+            qCWarning(lcNetwork) << "failed to call CanReach:", qPrintable(reply.error().message());
             return false;
         }
 
-        port = ntohs(sptr->s_port);
-    }
+        if (!reply.value()) {
+            qCWarning(lcNetwork) << "unable to reach" << url.toString();
+        }
 
-    auto reply = m_portal->CanReach(url.host(), port);
-    reply.waitForFinished();
-
-    if (reply.isError()) {
-        qCWarning(lcNetwork) << "failed to call CanReach:", qPrintable(reply.error().message());
-        return false;
-    }
-
-    if (!reply.value()) {
-        qCWarning(lcNetwork) << "unable to reach" << url.toString();
-    }
-
-    return reply.value();
+        return reply.value();
+    });
 }
 
 QStringList FlatpakNetworkHelper::nameservers() const

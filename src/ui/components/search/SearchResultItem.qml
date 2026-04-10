@@ -30,6 +30,12 @@ Item {
             right: parent.right
         }
 
+        Accessible.role: Accessible.Column
+        Accessible.name: qsTr("Search result")
+        Accessible.description: qsTr("Currently selected search result")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => control.triggerPrimaryAction()
+
         Rectangle {
             id: mainRow
             height: 50
@@ -80,6 +86,9 @@ Item {
                     rightMargin: 10
                     verticalCenter: parent.verticalCenter
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: mainLabel.text
             }
 
             Loader {
@@ -104,6 +113,9 @@ Item {
                     left: mainLabel.left
                     right: mainLabel.right
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: secondaryLabel.text
             }
 
             HoverHandler {

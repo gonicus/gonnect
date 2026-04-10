@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
     QtWebEngineQuick::initialize();
 
-#ifdef WITH_DBUS
+#ifdef Q_OS_LINUX
     qDBusRegisterMetaType<QList<QVariantMap>>();
     qDBusRegisterMetaType<QPair<QString, QVariantMap>>();
     qDBusRegisterMetaType<QList<QPair<QString, QVariantMap>>>();
@@ -60,17 +60,23 @@ int main(int argc, char *argv[])
 
     // Assemble the Qt web engine flags
     QStringList chromiumFlags;
+    auto webenginePresetEnv = qgetenv("GONNECT_QTWEBENGINE_CHROMIUM_FLAGS");
+    if (webenginePresetEnv.isEmpty()) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
-    chromiumFlags.push_back("--use-fake-ui-for-media-stream");
+        chromiumFlags.push_back("--use-fake-ui-for-media-stream");
 #endif
-    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
-        chromiumFlags.push_back("--disable-gpu");
-    }
-    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
-        chromiumFlags.push_back("--disable-renderer-accessibility");
-    }
-    if (chromiumFlags.size() > 0) {
-        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
+        if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
+            chromiumFlags.push_back("--disable-gpu");
+        }
+        if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
+            chromiumFlags.push_back("--disable-renderer-accessibility");
+        }
+
+        if (chromiumFlags.size() > 0) {
+            qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
+        }
+    } else {
+        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", webenginePresetEnv);
     }
 
     int exitCode = 0;
@@ -81,6 +87,8 @@ int main(int argc, char *argv[])
         app.sendArguments();
         return 2;
     }
+
+    app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
 
     // Fonts
     const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
@@ -111,12 +119,19 @@ int main(int argc, char *argv[])
     engine.loadFromModule("base", "Main");
 
     const auto &objs = engine.rootObjects();
+    if (objs.isEmpty()) {
+        qFatal() << "no QML windows registered";
+    }
+
     const auto &itemObjs = objs.first();
 
     QQuickWindow *mainWindow = itemObjs->findChild<QQuickWindow *>("gonnectWindow");
     if (mainWindow) {
         app.setRootWindow(mainWindow);
     }
+
+    // Take care for running "initialize" after exec() is called
+    QTimer::singleShot(0, &app, &Application::initialize);
 
     exitCode = app.exec();
     if (exitCode == RESTART_CODE) {

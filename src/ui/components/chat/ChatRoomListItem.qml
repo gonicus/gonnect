@@ -11,6 +11,12 @@ Item {
     required property string name
     required property int unreadCount
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Chat room")
+    Accessible.description: qsTr("Selected chat room %1: %2 unread messages").arg(control.name).arg(control.unreadCount)
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.clicked()
+
     property alias highlighted: selectedBackground.visible
 
     signal clicked
@@ -25,6 +31,8 @@ Item {
             leftMargin: 10
             rightMargin: 10
         }
+
+        Accessible.ignored: true
     }
 
     Rectangle {
@@ -37,6 +45,8 @@ Item {
             leftMargin: 10
             rightMargin: 10
         }
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -52,6 +62,8 @@ Item {
             leftMargin: 20
             rightMargin: 20
         }
+
+        Accessible.ignored: true
     }
 
     HoverHandler {

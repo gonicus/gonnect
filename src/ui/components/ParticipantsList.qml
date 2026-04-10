@@ -20,6 +20,10 @@ Item {
             id: participantsModel
         }
 
+        Accessible.role: Accessible.List
+        Accessible.name: qsTr("Participants list")
+        Accessible.description: qsTr("List of all the participants of the current chat room")
+
         delegate: Item {
             id: delg
             height: 54
@@ -35,6 +39,13 @@ Item {
             readonly property bool isModerator: delg.role === ConferenceParticipant.Role.Moderator
             readonly property bool isMe: delg.id === control.conferenceConnector?.ownId ?? false
 
+            Accessible.role: Accessible.ListItem
+            Accessible.name: qsTr("Chat participant")
+            Accessible.description: qsTr("Selected chat participant: %1").arg(delg.displayName) +
+                                    (", " + delg.isModerator ? qsTr("moderator") : "") +
+                                    (", " + delg.isMe ? qsTr("it's you") : "")
+            Accessible.focusable: true
+
             Rectangle {
                 id: selectedBackground
                 visible: control.conferenceConnector.largeVideoParticipant?.id === delg.id
@@ -45,6 +56,8 @@ Item {
                     leftMargin: 10
                     rightMargin: 10
                 }
+
+                Accessible.ignored: true
             }
 
             Rectangle {
@@ -57,6 +70,8 @@ Item {
                     leftMargin: 10
                     rightMargin: 10
                 }
+
+                Accessible.ignored: true
             }
 
             AvatarImage {
@@ -81,6 +96,8 @@ Item {
                     horizontalCenterOffset: 9
                     verticalCenter: avatarImage.top
                 }
+
+                Accessible.ignored: true
             }
 
             Label {
@@ -97,6 +114,8 @@ Item {
                     leftMargin: 10
                     rightMargin: 20
                 }
+
+                Accessible.ignored: true
             }
 
             HoverHandler {
@@ -110,7 +129,6 @@ Item {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onTapped: (_, mouseButton) => {
                     if (mouseButton === Qt.RightButton) {
-
                         // The functions features in the context menu are not working right now (jitsi meet issues), so hide
                         // the menu completely until fixed.
 
@@ -134,13 +152,25 @@ Item {
                     id: participantContextMenu
 
                     MenuItem {
+                        id: participantKick
                         text: qsTr("Kick")
                         onClicked: () => control.conferenceConnector.kickParticipant(delg.id)
+
+                        Accessible.role: Accessible.MenuItem
+                        Accessible.name: participantKick.text
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => participantKick.click()
                     }
                     MenuItem {
+                        id: participantMakeMod
                         enabled: !delg.isModerator
                         text: qsTr("Make moderator")
                         onClicked: () => control.conferenceConnector.grantParticipantRole(delg.id, ConferenceParticipant.Role.Moderator)
+
+                        Accessible.role: Accessible.MenuItem
+                        Accessible.name: participantMakeMod.text
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => participantMakeMod.click()
                     }
                 }
             }

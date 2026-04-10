@@ -7,14 +7,14 @@
 #include "PreferredIdentity.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
-#include "NetworkHelper.h"
 #include "Credentials.h"
+#include "EnumTranslation.h"
 
 #include <QUuid>
 
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
 
-long SIPAccount::runningMessageIndex = 0;
+intptr_t SIPAccount::runningMessageIndex = 0;
 
 SIPAccount::SIPAccount(const QString &group, QObject *parent)
     : QObject(parent), Account(), m_account(group)
@@ -76,6 +76,19 @@ void SIPAccount::initialize()
         return;
     }
 
+    QString voiceMailUri = m_settings.value("voiceMailUri", "").toString();
+    if (!voiceMailUri.isEmpty()) {
+        if (!sipURI.match(voiceMailUri).hasMatch()) {
+            qCCritical(lcSIPAccount) << "'voiceMailUri' is no valid SIP URI:" << voiceMailUri;
+            ErrorBus::instance().addFatalError(
+                    tr("'voiceMailUri' is no valid SIP URI: %1").arg(userUri));
+            Q_EMIT initialized(false);
+            return;
+        }
+
+        m_voiceMailUri = voiceMailUri;
+    }
+
     QString registrarUri = m_settings.value("registrarUri", "").toString();
     if (!registrarUri.isEmpty()) {
         m_domain = sipURI.match(registrarUri).captured(2);
@@ -132,6 +145,12 @@ void SIPAccount::initialize()
     }
     m_accountConfig.mediaConfig.srtpUse = srtpUseValue;
 
+    bool enableMwiConfig = m_settings.value("enableMwiConfig", true).toBool();
+    if (enableMwiConfig) {
+        m_accountConfig.mwiConfig.enabled = true;
+        m_accountConfig.mwiConfig.expirationSec = 3600;
+    }
+
     int rtpPort = m_settings.value("rtpPort", 0).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'rtpPort':" << rtpPort;
@@ -155,6 +174,8 @@ void SIPAccount::initialize()
     m_accountConfig.mediaConfig.transportConfig.randomizePort =
             m_settings.value("randomizeRtpPorts", false).toBool();
 
+    m_rttEnabled = m_settings.value("realTimeText", true).toBool();
+
     // Tweak IPv6 account settings
     if (m_transportNet == TRANSPORT_NET::IPv4) {
         m_accountConfig.sipConfig.ipv6Use = PJSUA_IPV6_DISABLED;
@@ -162,7 +183,7 @@ void SIPAccount::initialize()
     } else if (m_transportNet == TRANSPORT_NET::IPv6) {
         m_accountConfig.sipConfig.ipv6Use = PJSUA_IPV6_ENABLED_USE_IPV6_ONLY;
         m_accountConfig.mediaConfig.ipv6Use = PJSUA_IPV6_ENABLED_USE_IPV6_ONLY;
-    } else if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv6) {
+    } else if (m_transportNet == TRANSPORT_NET::AUTO) {
         m_accountConfig.sipConfig.ipv6Use = PJSUA_IPV6_ENABLED_PREFER_IPV6;
         m_accountConfig.mediaConfig.ipv6Use = PJSUA_IPV6_ENABLED_PREFER_IPV6;
     }
@@ -216,33 +237,7 @@ void SIPAccount::initialize()
 
     m_transportConfig.tlsConfig.verifyServer = m_settings.value("verifyServer", false).toBool();
 
-    try {
-        if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv4) {
-            if (m_transportType == TRANSPORT_TYPE::TLS) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TLS,
-                                                                  m_transportConfig);
-            } else if (m_transportType == TRANSPORT_TYPE::TCP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TCP,
-                                                                  m_transportConfig);
-            } else if (m_transportType == TRANSPORT_TYPE::UDP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_UDP,
-                                                                  m_transportConfig);
-            }
-        }
-        if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv6) {
-            if (m_transportType == TRANSPORT_TYPE::TLS) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TLS6,
-                                                                  m_transportConfig);
-            } else if (m_transportType == TRANSPORT_TYPE::TCP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_TCP6,
-                                                                  m_transportConfig);
-            } else if (m_transportType == TRANSPORT_TYPE::UDP) {
-                SIPManager::instance().endpoint().transportCreate(PJSIP_TRANSPORT_UDP6,
-                                                                  m_transportConfig);
-            }
-        }
-    } catch (pj::Error &err) {
-        qCCritical(lcSIPAccount) << "failed to create transport:" << err.info(false);
+    if (!activateTransports()) {
         Q_EMIT initialized(false);
         return;
     }
@@ -333,7 +328,8 @@ void SIPAccount::initialize()
                 m_settings.value("sipOutboundRegId").toString().toStdString();
     }
 
-    m_accountConfig.natConfig.contactRewriteUse = 0;
+    m_accountConfig.mediaConfig.rtcpXrEnabled = m_settings.value("rtcpXrEnabled", false).toBool();
+    m_accountConfig.mediaConfig.rtcpMuxEnabled = m_settings.value("rtcpMuxEnabled", false).toBool();
 
     m_settings.endGroup();
 
@@ -370,22 +366,22 @@ void SIPAccount::initialize()
         if (data.isEmpty()) {
             auto &cds = Credentials::instance();
             cds.get(auth + "/secret",
-                    [this, auth, scheme, realm, username, dataTypeValue](bool error,
-                                                                         const QString &data) {
-                        if (error) {
-                            qCCritical(lcSIPAccount) << "authentification failed:" << data;
+                    [this, auth, scheme, realm, username, dataTypeValue](
+                            QKeychain::Error error, const QString &secret, const QString &) {
+                        if (error != QKeychain::NoError && error != QKeychain::EntryNotFound) {
                             Q_EMIT initialized(false);
                             return;
                         }
 
-                        if (data.isEmpty()) {
+                        if (error == QKeychain::EntryNotFound) {
                             qCWarning(lcSIPAccount)
-                                    << "no password available for auth group" << auth;
+                                    << "no password available for auth group" << auth
+                                    << "- using empty one to trigger authorization";
                         }
 
                         pj::AuthCredInfo cred(scheme.toStdString(), realm.toStdString(),
                                               username.toStdString(), dataTypeValue,
-                                              data.toStdString());
+                                              secret.toStdString());
 
                         m_accountConfig.sipConfig.authCreds.push_back(cred);
 
@@ -404,6 +400,63 @@ void SIPAccount::initialize()
     finalizeInitialization();
 }
 
+bool SIPAccount::activateTransports()
+{
+    if (m_transportIds.length() != 0) {
+        qCCritical(lcSIPAccount) << "transports are already created - skipping";
+        return false;
+    }
+
+    try {
+        if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv4) {
+            if (m_transportType == TRANSPORT_TYPE::TLS) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(
+                        PJSIP_TRANSPORT_TLS, m_transportConfig));
+            } else if (m_transportType == TRANSPORT_TYPE::TCP) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(
+                        PJSIP_TRANSPORT_TCP, m_transportConfig));
+            } else if (m_transportType == TRANSPORT_TYPE::UDP) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(
+                        PJSIP_TRANSPORT_UDP, m_transportConfig));
+            }
+        }
+        if (m_transportNet == TRANSPORT_NET::AUTO || m_transportNet == TRANSPORT_NET::IPv6) {
+            if (m_transportType == TRANSPORT_TYPE::TLS) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(
+                        PJSIP_TRANSPORT_TLS6, m_transportConfig));
+            } else if (m_transportType == TRANSPORT_TYPE::TCP) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(
+                        PJSIP_TRANSPORT_TCP6, m_transportConfig));
+            } else if (m_transportType == TRANSPORT_TYPE::UDP) {
+                m_transportIds.push_back(SIPManager::instance().endpoint().transportCreate(
+                        PJSIP_TRANSPORT_UDP6, m_transportConfig));
+            }
+        }
+    } catch (pj::Error &err) {
+        qCCritical(lcSIPAccount) << "failed to create transport:" << err.info(false);
+        return false;
+    }
+
+    return true;
+}
+
+void SIPAccount::deactivateTransports()
+{
+    try {
+        setRegistration(false);
+    } catch (...) {
+    }
+
+    for (auto tid : std::as_const(m_transportIds)) {
+        try {
+            SIPManager::instance().endpoint().transportClose(tid);
+        } catch (...) {
+        }
+    }
+
+    m_transportIds.clear();
+}
+
 void SIPAccount::finalizeInitialization()
 {
     try {
@@ -416,18 +469,6 @@ void SIPAccount::finalizeInitialization()
         Q_EMIT initialized(false);
         return;
     }
-
-    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
-        if (NetworkHelper::instance().hasConnectivity()
-            && !SIPCallManager::instance().hasActiveCalls()) {
-            try {
-                pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
-            } catch (pj::Error &err) {
-                qCCritical(lcSIPAccount) << "Ignoring pjsip error on handle ip change:"
-                                         << QString::fromLocal8Bit(err.info(false));
-            }
-        }
-    });
 
     Q_EMIT initialized(true);
 }
@@ -463,7 +504,7 @@ QString SIPAccount::call(const QString &number, const QString &contactId,
 long SIPAccount::sendMessage(const QString &recipient, const QString &message,
                              const QString &mimeType)
 {
-    long id = SIPAccount::runningMessageIndex++;
+    const auto id = SIPAccount::runningMessageIndex++;
     QString sipUrl = toSipUri(recipient);
     SIPBuddy *foundBuddy = nullptr;
 
@@ -491,15 +532,129 @@ long SIPAccount::sendMessage(const QString &recipient, const QString &message,
     return id;
 }
 
+void SIPAccount::parseMessageCount(const QString &value, quint16 &newMessages, quint16 &oldMessages)
+{
+    static QRegularExpression messageMatcher("^(\\d+)/(\\d+)\\s+\\((\\d+)/(\\d+)\\)$");
+
+    auto match = messageMatcher.match(value);
+    if (match.hasMatch()) {
+        bool ok = false;
+
+        newMessages = match.captured(1).toUInt(&ok);
+        if (!ok) {
+            qCWarning(lcSIPAccount) << "failed to parse 'new message count' from" << value;
+        }
+
+        oldMessages = match.captured(2).toUInt(&ok);
+        if (!ok) {
+            qCWarning(lcSIPAccount) << "failed to parse 'old message count' from" << value;
+        }
+    }
+}
+
+MwiInfo SIPAccount::parseMwiBody(const QString &body)
+{
+    MwiInfo info;
+
+    QStringList lines = body.split("\r\n");
+    for (auto line : std::as_const(lines)) {
+        line = line.trimmed().toLower();
+
+        auto colonPos = line.indexOf(":");
+        if (colonPos < 0) {
+            continue;
+        }
+
+        QString key = line.sliced(0, colonPos);
+        QString value = line.sliced(colonPos + 1).trimmed();
+
+        if (key == "messages-waiting") {
+            info.messagesWaiting = value == "yes";
+
+        } else if (key == "message-account") {
+            info.messageAccount = value;
+
+        } else if (key == "voice-message") {
+            parseMessageCount(value, info.voiceNew, info.voiceOld);
+        }
+    }
+
+    return info;
+}
+
+void SIPAccount::onMwiInfo(pj::OnMwiInfoParam &prm)
+{
+    qCDebug(lcSIPAccount) << "received MWI info message - subscription status:" << prm.state;
+
+    if (prm.state == PJSIP_EVSUB_STATE_TERMINATED) {
+        return;
+    }
+
+    QString fullMsg = QString::fromStdString(prm.rdata.wholeMsg);
+    QStringList parts = fullMsg.split("\r\n\r\n");
+
+    if (parts.length() < 2 || parts[1].isEmpty()) {
+        qCDebug(lcSIPAccount) << "MWI message body has no payload";
+        return;
+    }
+
+    bool changed = false;
+
+    auto mwiInfo = parseMwiBody(parts[1]);
+
+    if (mwiInfo.messagesWaiting != m_messagesWaiting) {
+        qCInfo(lcSIPAccount) << "Messages waiting:" << mwiInfo.messagesWaiting;
+        m_messagesWaiting = mwiInfo.messagesWaiting;
+        changed = true;
+    }
+
+    if (mwiInfo.voiceNew != m_newVoiceMessages) {
+        qCInfo(lcSIPAccount) << "New voice messages:" << mwiInfo.voiceNew;
+        m_newVoiceMessages = mwiInfo.voiceNew;
+        changed = true;
+    }
+
+    if (mwiInfo.voiceOld != m_readVoiceMessages) {
+        qCInfo(lcSIPAccount) << "Read voice messages:" << mwiInfo.voiceOld;
+        m_readVoiceMessages = mwiInfo.voiceOld;
+        changed = true;
+    }
+
+    m_messageAccount = mwiInfo.messageAccount;
+
+    if (changed) {
+        Q_EMIT voiceMessagesWaitingChanged();
+    }
+}
+
+bool SIPAccount::callVoiceBox()
+{
+    if (!m_voiceMailUri.isEmpty()) {
+        qCDebug(lcSIPAccount) << "calling voice mail via" << m_voiceMailUri;
+        call(m_voiceMailUri);
+        return true;
+
+    } else if (!m_messageAccount.isEmpty()) {
+        qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account"
+                              << m_messageAccount;
+        call(m_messageAccount);
+        return true;
+    }
+
+    qCCritical(lcSIPAccount) << "no voice mail account specified - use voiceMailUri or configure "
+                                "MWI/Message-Account to contain one";
+    return false;
+}
+
 void SIPAccount::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 {
-    qCDebug(lcSIPAccount) << "sent message to " << prm.toUri << ", status: " << prm.code
-                          << prm.reason << (long)prm.userData;
+    qCDebug(lcSIPAccount) << "sent message to" << prm.toUri << ", status:" << prm.code << prm.reason
+                          << (intptr_t)prm.userData;
 }
 
 void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
 {
-    qCDebug(lcSIPAccount) << "received message from " << prm.fromUri << ":" << prm.msgBody;
+    qCDebug(lcSIPAccount) << "received message from" << prm.fromUri << ":" << prm.msgBody;
     Q_EMIT messageReceived(prm.fromUri.c_str(), prm.msgBody.c_str(), prm.contentType.c_str());
 }
 
@@ -520,12 +675,13 @@ SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
 
     // We don't have a buddy yet - try to subscribe
     auto buddy = new SIPBuddy(this, sipUrl);
-    qCInfo(lcSIPAccount) << "subscribing to buddy" << buddy->uri();
+    QString uri = buddy->uri();
+    qCInfo(lcSIPAccount) << "subscribing to buddy" << uri;
 
     if (buddy->initialize()) {
         m_buddies.push_back(buddy);
-        connect(buddy, &SIPBuddy::destroyed, this, [buddy, this]() {
-            qCCritical(lcSIPAccount) << "removing buddy" << buddy->uri();
+        connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
+            qCCritical(lcSIPAccount) << "removing buddy" << uri;
             m_buddies.removeAll(buddy);
         });
     } else {
@@ -732,11 +888,30 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
 
     if (m_isRegistered != ai.regIsActive) {
         m_isRegistered = ai.regIsActive;
+
         Q_EMIT isRegisteredChanged();
     }
 
-    if (prm.code == PJSIP_SC_UNAUTHORIZED) {
+    // Clear out buddies as a re-registration due to network timeouts
+    // leaves broken buddies around which do not update their state anymore.
+    if (prm.code == PJSIP_SC_OK && prm.expiration > 0 && m_afterResume) {
+        m_afterResume = false;
+        reinitBuddies();
+    }
+
+    if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED
+        || prm.code == PJSIP_SC_FORBIDDEN) {
         Q_EMIT authorizationFailed();
+        return;
+    }
+
+    if (prm.code == PJSIP_SC_SERVICE_UNAVAILABLE || prm.code == PJSIP_SC_SERVER_TIMEOUT) {
+        return;
+    }
+
+    if (prm.code >= 400 && prm.code < 600) {
+        Q_EMIT connectionError(prm.code, EnumTranslation::instance().sipStatusCode(prm.code));
+        return;
     }
 
     if (!m_useInstantMessagingWithoutCheck && m_isRegistered && m_shallNegotiateCapabilities) {
@@ -811,11 +986,50 @@ void SIPAccount::setCredentials(const QString &password)
 
     // Update storage
     Credentials::instance().set(
-            authGroup + "/secret", password, [authGroup](bool error, const QString &data) {
-                if (error) {
-                    qCCritical(lcSIPAccount) << "failed to set credentials:" << data;
+            authGroup + "/secret", password,
+            [authGroup](QKeychain::Error error, const QString &, const QString &message) {
+                if (error != QKeychain::NoError) {
+                    ErrorBus::instance().error(
+                            tr("Failed to persist SIP credentials: %1").arg(message));
                 }
             });
+}
+
+bool SIPAccount::isSignalingEncrypted()
+{
+    return m_transportType == TRANSPORT_TYPE::TLS;
+}
+
+void SIPAccount::reinitBuddies()
+{
+    if (m_buddies.isEmpty()) {
+        return;
+    }
+
+    QStringList uris;
+    for (auto buddy : std::as_const(m_buddies)) {
+        uris.push_back(buddy->uri());
+    }
+
+    qCInfo(lcSIPAccount) << "re-subscribing to" << uris.size() << "buddies after re-registration";
+
+    qDeleteAll(m_buddies);
+    m_buddies.clear();
+
+    for (const auto &uri : std::as_const(uris)) {
+        auto buddy = new SIPBuddy(this, uri);
+        if (buddy->initialize()) {
+            m_buddies.push_back(buddy);
+            connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
+                qCCritical(lcSIPAccount) << "removing buddy" << uri;
+                m_buddies.removeAll(buddy);
+            });
+        } else {
+            buddy->deleteLater();
+        }
+    }
+
+    Q_EMIT SIPManager::instance().buddyStateChanged("", SIPBuddyState::UNKNOWN);
 }
 
 SIPAccount::~SIPAccount()

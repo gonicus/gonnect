@@ -3,6 +3,7 @@
 #include "GOnnectDBusAPI.h"
 #include "SIPCallManager.h"
 #include "PhoneNumberUtil.h"
+#include "SIPCall.h"
 
 GOnnectDBusAPI::GOnnectDBusAPI(QObject *parent) : QObject(parent)
 {

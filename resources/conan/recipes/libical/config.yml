@@ -1,0 +1,8 @@
+versions:
+  "3.0.20":
+    folder: all
+
+updater:
+  source: anitya
+  id: 1637
+  url-pattern: https://github.com/libical/libical/releases/download/v${version}/libical-${version}.tar.gz

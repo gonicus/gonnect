@@ -13,6 +13,13 @@ Item {
         id: internal
 
         property Button authButton
+        property bool shareFullScreen
+    }
+
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.Conference"
+        defaultLogLevel: LoggingCategory.Warning
     }
 
     states: [
@@ -22,7 +29,7 @@ Item {
             PropertyChanges {
                 verticalDragbarDummyDragHandler.enabled: true
                 verticalDragbarDummyHoverHandler.enabled: true
-                verticalDragbarDummy.x: 3/4 * control.width
+                verticalDragbarDummy.x: control.LayoutMirroring.enabled ? (1/4 * control.width) : (3/4 * control.width)
             }
 
             AnchorChanges {
@@ -119,15 +126,24 @@ Item {
                     height: roomTextField.implicitHeight
                     spacing: 20
 
+                    Accessible.role: Accessible.Row
+                    Accessible.name: qsTr("Set room name")
+
                     Label {
                         text: qsTr("Room name:")
                         anchors.verticalCenter: parent.verticalCenter
+
+                        Accessible.ignored: true
                     }
 
                     TextField {
                         id: roomTextField
                         width: 300
                         text: RandomRoomNameGenerator.randomJitsiRoomName()
+
+                        Accessible.role: Accessible.EditableText
+                        Accessible.name: qsTr("Enter the room name")
+                        Accessible.focusable: true
                     }
                 }
 
@@ -143,6 +159,11 @@ Item {
                     Component.onCompleted: () => {
                         internal.authButton = authButton
                     }
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: authButton.text
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => authButton.click()
                 }
             }
         }
@@ -172,15 +193,24 @@ Item {
                     height: roomTextField2.implicitHeight
                     spacing: 20
 
+                    Accessible.role: Accessible.Row
+                    Accessible.name: qsTr("Set room name")
+
                     Label {
                         text: qsTr("Room name:")
                         anchors.verticalCenter: parent.verticalCenter
+
+                        Accessible.ignored: true
                     }
 
                     TextField {
                         id: roomTextField2
                         width: 300
                         // text: AuthManager.authenticatedJitsiRoom
+
+                        Accessible.role: Accessible.EditableText
+                        Accessible.name: qsTr("Enter the room name")
+                        Accessible.focusable: true
                     }
                 }
 
@@ -190,6 +220,11 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     onClicked: () => control.startConference(roomTextField2.text.trim())
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: joinRoomButton.text
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => joinRoomButton.click()
                 }
             }
         }
@@ -199,9 +234,15 @@ Item {
         id: waitingForAuthComponent
 
         Item {
+            Accessible.role: Accessible.StaticText
+            Accessible.name: authMessage.text
+
             Label {
+                id: authMessage
                 anchors.centerIn: parent
                 text: qsTr("Please authenticate in the opened browser window...")
+
+                Accessible.ignored: true
             }
         }
     }
@@ -240,13 +281,21 @@ Item {
                     onSetOnHold: () => confConn.toggleHold()
                     onSetAudioMuted: (value) => GlobalMuteState.toggleMute()
                     onSetVideoMuted: (value) => confConn.setVideoMuted(value)
-                    onSetScreenShare: (value) => confConn.setSharingScreen(value)
+                    onSetScreenShare: (value, screen) => {
+                        internal.shareFullScreen = screen
+                        confConn.setSharingScreen(value)
+                    }
                     onSetTileView: (value) => confConn.setTileView(value)
                     onSetRaiseHand: (value) => confConn.setHandRaised(value)
 
                     onShowVirtualBackgroundDialog: () => confConn.showVirtualBackgroundDialog()
                     onOpenSetPasswordDialog: () => ViewHelper.topDrawer.loader.sourceComponent = setPasswordItemComponent
                     onOpenVideoQualityDialog: () => ViewHelper.topDrawer.loader.sourceComponent = videoQualityComponent
+                    onOpenDialInInfoDialog: (numbers, code) => {
+                        ViewHelper.topDrawer.loader.sourceComponent = dialInInfoComponent
+                        ViewHelper.topDrawer.loader.item.numbers = numbers
+                        ViewHelper.topDrawer.loader.item.code = code
+                    }
                     onHangup: () => confConn.leaveConference()
                     onFinishForAll: () => confConn.terminateConference()
                 }
@@ -274,24 +323,33 @@ Item {
 
                     onJavaScriptConsoleMessage: (level, message, line, source) => {
                         if (level >= 2) {
-                            console.error("# " + message + ": " + source + " +" + line)
+                            console.error(category, message + ": " + source + " +" + line)
                         } else if (level === 1) {
-                            console.warn("# " + message + ": " + source + " +" + line)
+                            console.warn(category, message + ": " + source + " +" + line)
                         } else {
-                            console.log("# " + message + ": " + source + " +" + line)
+                            console.log(category, message + ": " + source + " +" + line)
                         }
                     }
 
                     onPermissionRequested: (permission) => {
-                        console.log("#### permission requested", permission.isValid, permission.origin, permission.permissionType, permission.state)
                         permission.grant()
                     }
+
+                    //TODO: this can be re-enabled after QTBUG-142040 / QTBUG-142040 are fixed
+                    //      see ConferenceButtonBar.qml +228
+                    //onDesktopMediaRequested: (request) => {
+                    //    if (internal.shareFullScreen) {
+                    //        request.selectScreen(request.screensModel.index(0, 0))
+                    //    } else {
+                    //        request.selectWindow(request.windowsModel.index(0, 0))
+                    //    }
+                    //}
 
                     onLoadingChanged: (info) => {
                         if (info.status === WebEngineView.LoadSucceededStatus) {
                             jitsiView.runJavaScript(confConn.jitsiJavascriptInternal())
                         } else {
-                            console.error(`Failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
+                            console.error(category, `failed to load HTML: ${info.errorString} (domain: ${info.errorDomain}, code: ${info.errorCode}, status: ${info.status}, url: ${info.url})`)
                         }
                     }
 
@@ -334,13 +392,19 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
+                            Accessible.role: Accessible.Column
+                            Accessible.name: passwordRequired.text
+
                             Label {
+                                id: passwordRequired
                                 text: qsTr("This conference is protected by a password. Please enter it to join the room.")
                                 wrapMode: Text.Wrap
                                 anchors {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.ignored: true
                             }
 
                             TextField {
@@ -356,6 +420,10 @@ Item {
                                 Keys.onReturnPressed: () => passwordItem.respondPassword()
                                 Keys.onEscapePressed: () => passwordItem.cancel()
                                 Component.onCompleted: () => passwordField.forceActiveFocus()
+
+                                Accessible.role: Accessible.EditableText
+                                Accessible.name: qsTr("Enter the password")
+                                Accessible.focusable: true
                             }
 
                             CheckBox {
@@ -365,6 +433,10 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.role: Accessible.CheckBox
+                                Accessible.name: rememberCheckBox.text
+                                Accessible.focusable: true
                             }
 
                             Row {
@@ -372,9 +444,15 @@ Item {
                                 spacing: 20
 
                                 Button {
+                                    id: cancelButton
                                     text: qsTr("Cancel")
 
                                     onClicked: () => passwordItem.cancel()
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: cancelButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => cancelButton.click()
                                 }
 
                                 Button {
@@ -384,10 +462,21 @@ Item {
                                     highlighted: true
 
                                     onClicked: () => passwordItem.respondPassword()
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: joinRoomButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => joinRoomButton.click()
                                 }
                             }
                         }
                     }
+                }
+
+                Component {
+                    id: dialInInfoComponent
+
+                    DialInInfo {}
                 }
 
                 Component {
@@ -416,6 +505,9 @@ Item {
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.role: Accessible.Column
+                            Accessible.name: qsTr("Password required")
 
                             states: [
                                 State {
@@ -455,6 +547,9 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.role: Accessible.Column
+                                Accessible.name: newPasswordLabel.text
                             }
 
                             Label {
@@ -466,6 +561,9 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.role: Accessible.Column
+                                Accessible.name: existingPasswordLabel.text
                             }
 
                             Label {
@@ -477,6 +575,9 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.role: Accessible.Column
+                                Accessible.name: otherSetPasswordLabel.text
                             }
 
                             Item {
@@ -497,6 +598,10 @@ Item {
                                     }
 
                                     Component.onCompleted: () => passwordField.forceActiveFocus()
+
+                                    Accessible.role: Accessible.EditableText
+                                    Accessible.name: qsTr("Enter the password")
+                                    Accessible.focusable: true
                                 }
 
                                 Label {
@@ -513,6 +618,8 @@ Item {
                                         rightMargin: 10
                                         verticalCenter: parent.verticalCenter
                                     }
+
+                                    Accessible.ignored: true
                                 }
 
                                 ClipboardButton {
@@ -532,6 +639,8 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                 }
+
+                                Accessible.ignored: true
                             }
 
                             Row {
@@ -539,9 +648,15 @@ Item {
                                 spacing: 20
 
                                 Button {
+                                    id: cancelButton
                                     text: qsTr("Cancel")
 
                                     onClicked: () => setPasswordItem.cancel()
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: cancelButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => cancelButton.click()
                                 }
 
                                 Button {
@@ -549,6 +664,11 @@ Item {
                                     visible: false
                                     text: qsTr("Remove")
                                     onClicked: () => setPasswordItem.setPassword("")
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: removePasswordButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => removePasswordButton.click()
                                 }
 
                                 Button {
@@ -558,6 +678,11 @@ Item {
                                     highlighted: true
 
                                     onClicked: () => setPasswordItem.setPassword(passwordField.text)
+
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: savePasswordButton.text
+                                    Accessible.focusable: true
+                                    Accessible.onPressAction: () => savePasswordButton.click()
                                 }
                             }
                         }
@@ -581,6 +706,9 @@ Item {
                                 verticalCenter: parent.verticalCenter
                             }
 
+                            Accessible.role: Accessible.Column
+                            Accessible.name: qsTr("Video quality")
+
                             component QualityButton : RadioButton {
                                 id: qButton
                                 checked: confConn.videoQuality === qButton.qualityValue
@@ -592,6 +720,12 @@ Item {
                                 required property int qualityValue
 
                                 onToggled: () => confConn.setVideoQuality(qButton.qualityValue)
+
+                                Accessible.role: Accessible.RadioButton
+                                Accessible.name: qButton.text
+                                Accessible.description: qsTr("Change the video quality of this meeting")
+                                Accessible.focusable: true
+                                Accessible.onPressAction: () => onfConn.setVideoQuality(qButton.qualityValue)
                             }
 
                             QualityButton {
@@ -615,11 +749,17 @@ Item {
                             }
 
                             Button {
+                                id: closeButton
                                 text: qsTr("Close")
                                 highlighted: true
                                 anchors.right: parent.right
 
                                 onClicked: () => ViewHelper.topDrawer.loader.sourceComponent = undefined
+
+                                Accessible.role: Accessible.Button
+                                Accessible.name: closeButton.text
+                                Accessible.focusable: true
+                                Accessible.onPressAction: () => closeButton.click()
                             }
                         }
                     }
@@ -642,6 +782,10 @@ Item {
             right: callListCard.left
         }
 
+        Accessible.role: Accessible.Border
+        Accessible.name: qsTr("Drag bar")
+        Accessible.focusable: true
+
         HoverHandler {
             id: verticalDragbarDummyHoverHandler
             enabled: false
@@ -653,8 +797,8 @@ Item {
             enabled: false
             yAxis.enabled: false
             xAxis {
-                minimum: 1/2 * control.width
-                maximum: control.width - callSideBar.optimalExtendedWidth - verticalDragbarDummy.width - callListCard.anchors.rightMargin
+                minimum: control.LayoutMirroring.enabled ? (1/5 * control.width) : (1/2 * control.width)
+                maximum: control.LayoutMirroring.enabled ? (1/2 * control.width) : (control.width - callSideBar.optimalExtendedWidth - verticalDragbarDummy.width - callListCard.anchors.rightMargin)
             }
 
             onActiveChanged: () => {

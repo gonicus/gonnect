@@ -3,12 +3,18 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Controls.impl
+import QtQuick.Layouts
 import base
 
 ListView {
     id: control
     topMargin: 20
     clip: true
+
+    Accessible.role: Accessible.List
+    Accessible.name: qsTr("Date events")
+    Accessible.description: qsTr("List of all the currently active and upcoming date events")
+
     model: DateEventsModel {}
     section.property: "date"
     section.delegate: Rectangle {
@@ -23,7 +29,13 @@ ListView {
 
         required property date section
 
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("Date event section")
+        Accessible.description: qsTr("Header for %1").arg(sectionHeader.text)
+        Accessible.focusable: true
+
         Label {
+            id: sectionHeader
             anchors.centerIn: parent
             text: {
                 if (ViewHelper.isToday(sectionDelg.section)) {
@@ -34,6 +46,8 @@ ListView {
                 }
                 return sectionDelg.section.toLocaleDateString(Qt.locale(), qsTr("dddd - yyyy/MM/dd"))
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -59,10 +73,9 @@ ListView {
         }
     }
 
-
     delegate: Item {
         id: delg
-        implicitHeight: innerCol.implicitHeight
+        implicitHeight: mainRow.implicitHeight
         anchors {
             left: parent?.left
             right: parent?.right
@@ -72,11 +85,14 @@ ListView {
         required property date endDateTime
         required property string summary
         required property string roomName
-        required property bool isConfirmed
+        required property string link
+        required property bool isJitsiMeeting
+        required property bool isOtherLink
 
         property bool isToday
         property bool isInPast
         property bool isCurrentlyTakingPlace
+        property bool isAllDayEvent
         property int minutesRemainingToStart
         property int minutesRemainingToEnd
 
@@ -90,7 +106,13 @@ ListView {
             delg.isToday = ViewHelper.isToday(delg.dateTime)
             delg.isInPast = delg.endDateTime.getTime() < now.getTime()
             delg.isCurrentlyTakingPlace = delg.dateTime.getTime() < now.getTime() && now.getTime() < delg.endDateTime.getTime()
+            delg.isAllDayEvent = delg.dateTime.getDate() + 1 === delg.endDateTime.getDate() && delg.dateTime.getHours() === 0
         }
+
+        Accessible.role: Accessible.ListItem
+        Accessible.name: qsTr("Date event")
+        Accessible.description: qsTr("Currently selected date event: %1, starting time %2, remaining time %3").arg(summaryLabel.text).arg(timeLabel.text).arg(remainingMinutesLabel.text)
+        Accessible.focusable: true
 
         Connections {
             target: internal
@@ -104,51 +126,85 @@ ListView {
             anchors.fill: parent
             radius: 4
             color: rowHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+
+            Accessible.ignored: true
         }
 
-        Column {
-            id: innerCol
+        RowLayout {
+            id: mainRow
             enabled: !delg.isInPast
-            topPadding: 10
-            bottomPadding: 10
             anchors {
-                left: parent.left
-                right: parent.right
+                fill: parent
                 leftMargin: 10
                 rightMargin: 10
             }
 
-            Label {
-                id: summaryLabel
-                text: delg.summary
-                elide: Label.ElideRight
-                font.weight: delg.isCurrentlyTakingPlace ? Font.Medium : Font.Normal
-                anchors {
-                    left: parent.left
-                    right: parent.right
+            Column {
+                id: leftCol
+                topPadding: 10
+                bottomPadding: 10
+                Layout.preferredWidth: parent.width * 0.9
+
+                Label {
+                    id: summaryLabel
+                    text: delg.summary
+                    elide: Label.ElideRight
+                    font.weight: delg.isCurrentlyTakingPlace ? Font.Medium : Font.Normal
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+
+                    Accessible.ignored: true
+                }
+
+                Row {
+                    spacing: 5
+                    height: summaryLabel.implicitHeight
+
+                    Label {
+                        id: timeLabel
+                        font.weight: summaryLabel.font.weight
+                        text: delg.isAllDayEvent ? qsTr("All day") : delg.dateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm"))
+
+                        Accessible.ignored: true
+                    }
+
+                    Label {
+                        id: remainingMinutesLabel
+                        visible: delg.isToday && !delg.isInPast && !delg.isAllDayEvent
+                                 && ((delg.minutesRemainingToStart >= 0 && delg.minutesRemainingToStart < 120)
+                                     || delg.isCurrentlyTakingPlace)
+                        font.weight: summaryLabel.font.weight
+                        color: Theme.secondaryTextColor
+                        text: "(" + (delg.isCurrentlyTakingPlace
+                              ? qsTr("till %1").arg(delg.endDateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm")))
+                              : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))) + ")"
+
+                        Accessible.ignored: true
+                    }
                 }
             }
 
-            Row {
-                spacing: 5
-                height: timeLabel.implicitHeight
+            Column {
+                id: rightCol
+                topPadding: 10
+                bottomPadding: 10
+                leftPadding: 7
+                Layout.preferredWidth: parent.width * 0.1
 
-                Label {
-                    id: timeLabel
-                    font.weight: summaryLabel.font.weight
-                    text: delg.dateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm"))
-                }
+                IconLabel {
+                    id: meetingIndicator
 
-                Label {
-                    id: remainingMinutesLabel
-                    visible: delg.isToday && !delg.isInPast
-                             && ((delg.minutesRemainingToStart >= 0 && delg.minutesRemainingToStart < 120)
-                                 || delg.isCurrentlyTakingPlace)
-                    font.weight: summaryLabel.font.weight
-                    color: Theme.secondaryTextColor
-                    text: "(" + (delg.isCurrentlyTakingPlace
-                          ? qsTr("till %1").arg(delg.endDateTime.toLocaleTimeString(Qt.locale(), qsTr("hh:mm")))
-                          : qsTr("in %1").arg(ViewHelper.minutesToNiceText(delg.minutesRemainingToStart))) + ")"
+                    alignment: Qt.AlignCenter
+                    visible: delg.isJitsiMeeting || delg.isOtherLink
+                    icon {
+                        source: delg.isJitsiMeeting ? Icons.videoCall : Icons.openLink
+                        width: 20
+                        height: 20
+                    }
+
+                    Accessible.ignored: true
                 }
             }
         }
@@ -158,13 +214,43 @@ ListView {
 
             Menu {
                 Action {
-                    text: qsTr('Join')
-                    onTriggered: () => ViewHelper.requestMeeting(delg.roomName)
+                    id: joinAction
+                    text: delg.isJitsiMeeting ? qsTr('Join') : qsTr('Open')
+                    onTriggered: () => joinAction.joinMeeting()
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Join meeting")
+                    Accessible.description: qsTr("Join the meeting associated with the currently selected event")
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => joinAction.joinMeeting()
+
+                    function joinMeeting() {
+                        if (delg.isJitsiMeeting) {
+                            ViewHelper.requestMeeting(delg.roomName)
+                        } else {
+                            ViewHelper.requestExternalAppointment(delg.link)
+                        }
+                    }
                 }
 
                 Action {
-                    text: qsTr('Copy room link')
-                    onTriggered: () => ViewHelper.copyToClipboard(delg.roomName)
+                    id: copyAction
+                    text: delg.isJitsiMeeting ? qsTr('Copy room link') : qsTr('Copy link')
+                    onTriggered: () => copyAction.copyLink()
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Copy meeting link")
+                    Accessible.description: qsTr("Copy the meeting link associated with the currently selected event")
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => copyAction.copyLink()
+
+                    function copyLink() {
+                        if (delg.isJitsiMeeting) {
+                            ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
+                        } else {
+                            ViewHelper.copyToClipboard(delg.link)
+                        }
+                    }
                 }
             }
         }
@@ -181,10 +267,14 @@ ListView {
             exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onDoubleTapped: () => {
-                ViewHelper.requestMeeting(delg.roomName)
+                if (delg.isJitsiMeeting) {
+                    ViewHelper.requestMeeting(delg.roomName)
+                } else if (delg.isOtherLink) {
+                    ViewHelper.requestExternalAppointment(delg.link)
+                }
             }
             onTapped: (_, mouseButton) => {
-                if (mouseButton === Qt.RightButton) {
+                if (mouseButton === Qt.RightButton && (delg.isJitsiMeeting || delg.isOtherLink)) {
                     dateEventContextMenuComponent.createObject(delg).popup()
                 }
             }

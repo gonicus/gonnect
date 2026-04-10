@@ -28,6 +28,9 @@ public:
     /// Send a message in this room
     Q_INVOKABLE virtual void sendMessage(const QString &message) = 0;
 
+    /// Remove all messages. Must invoke chatMessagesReset() afterwards.
+    virtual void clear() = 0;
+
 Q_SIGNALS:
     void nameChanged(QString name);
     void notificationCountChanged(qsizetype count);

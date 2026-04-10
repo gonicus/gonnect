@@ -19,12 +19,18 @@ BaseWindow {
     maximumWidth: control.width
     maximumHeight: control.height
 
+    readonly property LoggingCategory lc: LoggingCategory {
+        id: category
+        name: "gonnect.qml.SipTemplateWizard"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     function finishWizard() {
         const result = sipTemplateController.createConfig(templateModel.templateId, control.values)
 
         if (result.error) {
             wizardInstallationLabel.text = qsTr("Error: %1").arg(result.error)
-            wizardStatusImage.source = "qrc:/icons/data-error.svg"
+            wizardStatusImage.source = Icons.dataError
             wizardInstallationSaveLabel.visible = false
             wizardInstallItem.visible = false
             wizardFinishButton.enabled = false
@@ -99,14 +105,19 @@ BaseWindow {
                 right: parent.right
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("SIP wizard notification")
+            Accessible.description: templateHeaderLabel.text
+
             Image {
-                source: "qrc:/icons/preferences-system-network.svg"
+                source: Icons.preferencesSystemNetwork
                 sourceSize.width: 128
                 sourceSize.height: 128
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
             Label {
+                id: templateHeaderLabel
                 text: qsTr("GOnnect cannot find a SIP configuration. To get started, pick one of the templates below and modify the resulting configuration file if required.")
                 wrapMode: Label.Wrap
                 anchors {
@@ -122,6 +133,8 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.ignored: true
             }
 
             ComboBox {
@@ -135,10 +148,32 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.role: Accessible.ComboBox
+                Accessible.name: qsTr("Select SIP template")
+                Accessible.description: qsTr("Select the SIP template to be used")
+
+                delegate: ItemDelegate {
+                    id: templateSelectBoxDelg
+                    width: parent.width
+                    text: templateSelectBoxDelg.name
+
+                    font.family: templateSelectBox.font.family
+                    font.weight: templateSelectBox.font.weight
+                    font.pointSize: templateSelectBox.font.pointSize
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: templateSelectBoxDelg.name
+                    Accessible.description: qsTr("Currently selected SIP template")
+                    Accessible.focusable: true
+
+                    required property string name
+                }
             }
         }
 
         Button {
+            id: templateSetupNext
             text: qsTr("Next")
             highlighted: true
             anchors {
@@ -147,6 +182,12 @@ BaseWindow {
             }
 
             onClicked: () => templateModel.templateId = templateSelectBox.currentValue
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Continue setup")
+            Accessible.description: qsTr("Confirmation button to continue the setup")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => templateSetupNext.click()
         }
     }
 
@@ -165,6 +206,11 @@ BaseWindow {
             model: SIPTemplateModel {
                 id: templateModel
             }
+
+            Accessible.role: Accessible.List
+            Accessible.name: qsTr("Template field list")
+            Accessible.description: qsTr("List of all the available SIP template options")
+
             delegate: Column {
                 id: delg
                 anchors {
@@ -187,6 +233,11 @@ BaseWindow {
                     }
                 }
 
+                Accessible.role: Accessible.ListItem
+                Accessible.name: qsTr("SIP template option")
+                Accessible.description: qsTr("Currently selected SIP template option")
+                Accessible.focusable: true
+
                 Label {
                     id: nameLabel
                     text: delg.name
@@ -196,6 +247,10 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.role: Accessible.StaticText
+                    Accessible.name: delg.name
+                    Accessible.description: qsTr("Display name of the SIP template option")
                 }
 
                 Label {
@@ -206,6 +261,10 @@ BaseWindow {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.role: Accessible.StaticText
+                    Accessible.name: delg.description
+                    Accessible.description: qsTr("Description of the SIP template option")
                 }
 
                 Loader {
@@ -226,7 +285,7 @@ BaseWindow {
                                 return base + "TemplateFieldFile.qml"
                         }
 
-                        console.error("Error: Unknown template field type:", delg.type)
+                        console.error(category, "unknown template field type:", delg.type)
                         return ""
                     }
 
@@ -239,6 +298,13 @@ BaseWindow {
                             val[delg.target] = item.value
                             control.values = Object.assign({}, control.values, val)
                         }
+                    }
+
+                    Binding {
+                        when: !!widgetLoader.item?.hasOwnProperty("templateFieldName")
+                        target: widgetLoader.item
+                        property: "templateFieldName"
+                        value: delg.name
                     }
 
                     Binding {
@@ -268,6 +334,7 @@ BaseWindow {
         }
 
         Button {
+            id: templateBack
             text: qsTr("Back")
             anchors {
                 left: parent.left
@@ -275,9 +342,16 @@ BaseWindow {
             }
 
             onClicked: () => templateModel.templateId = ""
+
+            Accessible.role: Accessible.Button
+            Accessible.name: templateBack.text
+            Accessible.description: qsTr("Back button to return to the template selection menu")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => templateBack.click()
         }
 
         Button {
+            id: templateFinish
             text: qsTr("Finish")
             highlighted: true
             enabled: control.isValid
@@ -287,6 +361,12 @@ BaseWindow {
             }
 
             onClicked: () => control.finishWizard()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: templateFinish.text
+            Accessible.description: qsTr("Confirmation button to apply the changes to the SIP template")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => templateFinish.click()
         }
     }
 
@@ -305,9 +385,15 @@ BaseWindow {
                 right: parent.right
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Successful configuration file creation")
+            Accessible.description: wizardInstallationLabel.text + " "
+                                    + wizardInstallationSaveLabel.text + " "
+                                    + configPathLabel.text
+
             Image {
                 id: wizardStatusImage
-                source: "qrc:/icons/data-success.svg"
+                source: Icons.dataSuccess
                 sourceSize.width: 128
                 sourceSize.height: 128
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -321,6 +407,8 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.ignored: true
             }
 
             Label {
@@ -331,6 +419,8 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.ignored: true
             }
 
             Item {
@@ -342,6 +432,8 @@ BaseWindow {
                 Label {
                     id: configPathLabel
                     font.family: "Courier"
+
+                    Accessible.ignored: true
                 }
 
                 ClipboardButton {
@@ -352,6 +444,11 @@ BaseWindow {
                         leftMargin: 20
                         verticalCenter: parent.verticalCenter
                     }
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Copy to clipboard")
+                    Accessible.description: qsTr("Copy the full path of the configuration file to the clipboard")
+                    Accessible.focusable: true
                 }
             }
         }
@@ -366,6 +463,12 @@ BaseWindow {
             }
 
             onClicked: () => SM.restart()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Finish wizard")
+            Accessible.description: qsTr("Finish the SIP configuration wizard")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => wizardFinishButton.click()
         }
     }
 }

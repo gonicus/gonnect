@@ -1,0 +1,7 @@
+sources:
+  "2.3.10":
+    url: "https://github.com/KDE/qca/archive/refs/tags/v2.3.10.zip"
+    sha256: "2d95f384255ad96832f93c14ae51d24828d6fea373a9045dada40007a7319659"
+patches:
+  "2.3.10":
+    - patch_file: "patches/fix-windows-static-build.patch"

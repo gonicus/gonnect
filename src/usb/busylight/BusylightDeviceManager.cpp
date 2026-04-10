@@ -1,6 +1,6 @@
 #include "BusylightDeviceManager.h"
 
-// #include "LitraBeamLX.h"
+#include "LitraBeamLX.h"
 #include "LitraGlow.h"
 #include "LuxaforFlag.h"
 #include "KuandoOmega.h"
@@ -34,8 +34,8 @@ bool BusylightDeviceManager::createBusylightDevice(const hid_device_info &device
     } else if (vendor == 0x046D && product == 0xC900) {
         device = new LitraGlow(deviceInfo, this);
 
-        //    } else if (vendor == 0x046D && product == 0xC903) {
-        //        device = new LitraBeamLX(deviceInfo, this);
+    } else if (vendor == 0x046D && product == 0xC903) {
+        device = new LitraBeamLX(deviceInfo, this);
     }
 
     if (device) {
@@ -43,6 +43,12 @@ bool BusylightDeviceManager::createBusylightDevice(const hid_device_info &device
         m_devices.append(device);
     }
     return device;
+}
+
+void BusylightDeviceManager::removeDevice(IBusylightDevice *dev)
+{
+    m_devices.removeAll(dev);
+    delete dev;
 }
 
 void BusylightDeviceManager::clearDevices()
@@ -135,7 +141,7 @@ void BusylightDeviceManager::updateBusylightState()
     }
 
     QColor color(Qt::GlobalColor::red);
-    if (!isMuted) {
+    if (isMuted) {
         color.setRgb(255, 165, 0);
     }
 
@@ -150,4 +156,12 @@ void BusylightDeviceManager::updateBusylightState()
     } else {
         switchStreamlightOff();
     }
+}
+
+void BusylightDeviceManager::shutdown()
+{
+    stopBlinking();
+    switchOff();
+    switchStreamlightOff();
+    clearDevices();
 }

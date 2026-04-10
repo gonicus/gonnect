@@ -44,9 +44,9 @@ void GlobalShortcutPortal::initialize()
                                    << response.value("error").toString();
             break;
         }
-    });
 
-    Q_EMIT initialized();
+        Q_EMIT initialized();
+    });
 }
 
 void GlobalShortcutPortal::registerShortcuts()

@@ -38,6 +38,10 @@ Item {
                 policy: ScrollBar.AsNeeded
             }
 
+            Accessible.role: Accessible.Tree
+            Accessible.name: qsTr("Additional caller related information")
+            Accessible.description: qsTr("List of informational items regarding the caller, such as open support tickets")
+
             delegate: TreeViewDelegate {
                 id: treeViewDelegate
                 implicitWidth: control.width - control.scrollBarWidth
@@ -46,17 +50,24 @@ Item {
 
                 required property variant output
 
+                Accessible.role: Accessible.Section
+                Accessible.name: qsTr("Expandable response section")
+                Accessible.focusable: true
+                Accessible.onPressAction: () => treeViewDelegate.toggleSection()
+
+                function toggleSection() {
+                    const row = treeViewDelegate.row
+
+                    if (treeView.isExpanded(row)) {
+                        treeView.collapse(row)
+                    } else {
+                        treeView.expand(row)
+                    }
+                }
+
                 TapHandler {
                     id: tapArea
-                    onTapped: {
-                        const row = treeViewDelegate.row
-
-                        if (treeView.isExpanded(row)) {
-                            treeView.collapse(row)
-                        } else {
-                            treeView.expand(row)
-                        }
-                    }
+                    onTapped: () => treeViewDelegate.toggleSection()
                 }
 
                 HoverHandler {
@@ -67,6 +78,8 @@ Item {
                     anchors.fill: parent
                     color: hoverArea.hovered ? Theme.highlightColor : Theme.backgroundColor
                     z: 0
+
+                    Accessible.ignored: true
                 }
 
                 contentItem: TextEdit {
@@ -80,6 +93,10 @@ Item {
                     selectByMouse: true
                     onLinkActivated: (link) => Qt.openUrlExternally(link)
                     z: 1
+
+                    Accessible.role: Accessible.TreeItem
+                    Accessible.name: treeItem.text
+                    Accessible.focusable: true
                 }
 
                 indentation: 10
@@ -99,6 +116,8 @@ Item {
                         }
                         rotation: treeViewDelegate.expanded ? 270 : 0
                     }
+
+                    Accessible.ignored: true
                 }
             }
         }

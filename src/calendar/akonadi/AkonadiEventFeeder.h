@@ -25,13 +25,14 @@ class AkonadiEventFeeder : public QObject, public IDateEventFeeder
 
 public:
     explicit AkonadiEventFeeder(QObject *parent = nullptr, const QString &source = "",
+                                const QDateTime &currentTime = QDateTime(),
                                 const QDateTime &timeRangeStart = QDateTime(),
                                 const QDateTime &timeRangeEnd = QDateTime());
 
     ~AkonadiEventFeeder();
 
-    virtual void init() override;
-    virtual QUrl networkCheckURL() const override { return QUrl(); };
+    void init() override;
+    QUrl networkCheckURL() const override { return QUrl(); };
 
     void process();
 
@@ -40,6 +41,7 @@ private Q_SLOTS:
 
 private:
     QString m_source;
+    QDateTime m_currentTime;
     QDateTime m_timeRangeStart;
     QDateTime m_timeRangeEnd;
 

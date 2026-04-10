@@ -1,5 +1,6 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QStringBuilder>
 
 #include "SIPCall.h"
 #include "SIPCallManager.h"
@@ -20,11 +21,15 @@
 #include "AvatarManager.h"
 #include "GlobalCallState.h"
 
-#include "pjsua-lib/pjsua.h"
+#include <pjsua-lib/pjsua.h>
+#include <pjsua-lib/pjsua_internal.h>
 
 Q_LOGGING_CATEGORY(lcSIPCall, "gonnect.sip.call")
 
 using namespace std::chrono_literals;
+
+const QChar UnicodeBel(0x0007);
+const QChar UnicodeBackspace(0x0008);
 
 SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool silent)
     : ICallState(account),
@@ -68,10 +73,24 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         auto &globalCallState = GlobalCallState::instance();
         Q_EMIT globalCallState.callStarted(false);
 
-        if (callId <= 0) { // Call is outgoing
+        if (callId < 0) { // Call is outgoing
             globalCallState.holdAllCalls(this);
         }
     }
+
+    // Setup rtt timeout
+    m_rttTimeoutTimer.setSingleShot(true);
+    m_rttTimeoutTimer.setInterval(6s);
+    connect(&m_rttTimeoutTimer, &QTimer::timeout, this, [this]() {
+        if (!m_currentRttBubble.isEmpty()) {
+            Q_EMIT rttBubbleCommitted(m_currentRttBubble);
+            m_currentRttBubble = "";
+        }
+    });
+
+    // Setup stats updater
+    m_statsTimer.setInterval(5s);
+    connect(&m_statsTimer, &QTimer::timeout, this, &SIPCall::updateRtcpStats);
 }
 
 SIPCall::~SIPCall()
@@ -104,7 +123,14 @@ void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
     // Extract "," DTMF string and store them for later playback
     m_postTask = dst_uri.section(',', 1, -1, QString::SectionIncludeLeadingSep);
 
-    makeCall(dst_uri.toStdString(), prm);
+    if (m_account && m_account->isRTTEnabled()) {
+        makeCall(dst_uri.toStdString(), prm);
+    } else {
+        pj::CallOpParam tmpPrm = prm;
+        tmpPrm.opt.textCount = 0;
+
+        makeCall(dst_uri.toStdString(), tmpPrm);
+    }
 }
 
 void SIPCall::onCallState(pj::OnCallStateParam &prm)
@@ -133,6 +159,15 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                                 << statusCode << ") "
                                 << " last reason " << ci.lastReason << " contactId " << m_contactId;
 
+    if (statusCode == PJSIP_SC_RINGING) {
+        ringToneFactory.ringingTone()->start();
+        if (!m_isSilent && !m_incoming) {
+            removeCallState(ICallState::State::InProgress);
+            addCallState(ICallState::State::RingingOutgoing);
+            m_isInProgress = false;
+        }
+    }
+
     switch (ci.state) {
     case PJSIP_INV_STATE_NULL:
         if (!m_isSilent) {
@@ -145,8 +180,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     case PJSIP_INV_STATE_CONNECTING:
     case PJSIP_INV_STATE_CALLING:
         if (!m_isSilent && !m_incoming) {
-            ringToneFactory.ringingTone()->start();
-            addCallState(ICallState::State::RingingOutgoing);
+            m_isInProgress = true;
+            addCallState(ICallState::State::InProgress);
         }
         break;
 
@@ -185,10 +220,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             removeCallState(ICallState::State::RingingIncoming
                             | ICallState::State::KnockingIncoming);
             removeCallState(ICallState::State::RingingOutgoing);
+            removeCallState(ICallState::State::InProgress);
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
-
-            ringToneFactory.ringingTone()->stop();
-            ringToneFactory.zipTone()->stop();
 
             m_isEstablished = true;
             m_wasEstablished = true;
@@ -217,6 +250,9 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                     hold();
                 }
             });
+
+            m_statsTimer.start();
+            updateRtcpStats();
         }
 
         // Send DTMF post tasks if present
@@ -291,6 +327,14 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
         const auto &mediaInfo = ci.media[i];
 
+        if (mediaInfo.type == PJMEDIA_TYPE_TEXT && mediaInfo.status == PJSUA_CALL_MEDIA_ACTIVE) {
+
+            m_hasRtt = true;
+            Q_EMIT hasRttChanged();
+
+            continue;
+        }
+
         if (mediaInfo.type == PJMEDIA_TYPE_AUDIO) {
 
             switch (mediaInfo.status) {
@@ -315,13 +359,15 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     mic_media.startTransmit(aud_med);
                     aud_med.startTransmit(speaker_media);
 
-                    auto sniffer = new Sniffer(this);
-                    sniffer->initialize();
-                    aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*sniffer));
-                    connect(sniffer, &Sniffer::audioLevelChanged, this, [this, sniffer]() {
-                        Q_EMIT SIPCallManager::instance().audioLevelChanged(this,
-                                                                            sniffer->audioLevel());
-                    });
+                    if (!m_sniffer) {
+                        m_sniffer = new Sniffer(this);
+                        m_sniffer->initialize();
+                        aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*m_sniffer));
+                        connect(m_sniffer, &Sniffer::audioLevelChanged, this, [this]() {
+                            Q_EMIT SIPCallManager::instance().audioLevelChanged(
+                                    this, m_sniffer->audioLevel());
+                        });
+                    }
                 }
 
                 break;
@@ -337,6 +383,81 @@ void SIPCall::onInstantMessage(pj::OnInstantMessageParam &prm)
 {
     m_imHandler->process(QString::fromStdString(prm.contentType),
                          QString::fromStdString(prm.msgBody));
+}
+
+void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
+{
+    QString oldRttBubble = m_currentRttBubble;
+
+    if (!prm.text.empty()) {
+        auto text = QString::fromStdString(prm.text);
+
+        for (const auto &ch : std::as_const(text)) {
+
+            // Handle backspace
+            if (ch == UnicodeBackspace) {
+                m_currentRttBubble.removeLast();
+            }
+
+            // Handle BEL
+            else if (ch == UnicodeBel) {
+                Q_EMIT rttAttention();
+            }
+
+            // Handle line feed
+            else if (!m_currentRttBubble.isEmpty()
+                     && (ch == QChar::CarriageReturn || ch == QChar::LineFeed
+                         || ch == QChar::LineSeparator)) {
+                Q_EMIT rttBubbleCommitted(m_currentRttBubble);
+                m_currentRttBubble = "";
+            }
+
+            // Best of the rest
+            else {
+                m_currentRttBubble += ch;
+            }
+        }
+
+        m_rttTimeoutTimer.start();
+    }
+
+    // Detect if we're missing a sequence
+    if (m_lastRttSequence >= 0 && prm.seq > m_lastRttSequence + 1) {
+        quint16 lostSequences = prm.seq - m_lastRttSequence - 1;
+        m_currentRttBubble += QString("�").repeated(lostSequences);
+    }
+    m_lastRttSequence = prm.seq;
+
+    if (oldRttBubble != m_currentRttBubble) {
+        Q_EMIT rttBubbleChanged(m_currentRttBubble);
+    }
+}
+
+void SIPCall::rttSend(const QString &text)
+{
+    pj::CallSendTextParam prm;
+    prm.text = text.toStdString();
+    sendText(prm);
+}
+
+void SIPCall::rttSendLineSeperator()
+{
+    rttSend(QString(QChar::LineFeed));
+}
+
+void SIPCall::rttSendCRLF()
+{
+    rttSend(QChar::CarriageReturn % QChar::LineFeed);
+}
+
+void SIPCall::rttSendBackspace()
+{
+    rttSend(UnicodeBackspace);
+}
+
+void SIPCall::rttSendBell()
+{
+    rttSend(UnicodeBel);
 }
 
 void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
@@ -468,7 +589,7 @@ void SIPCall::toggleHoldImpl()
 void SIPCall::setIsHolding(bool value)
 {
     if (m_isHolding != value) {
-        if (!value) {
+        if (!value && !SIPCallManager::instance().isConferenceMode()) {
             GlobalCallState::instance().holdAllCalls(this);
         }
 
@@ -518,6 +639,42 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
                                                                m_contactInfo.isSipSubscriptable);
 
         Q_EMIT contactChanged();
+    }
+}
+
+void SIPCall::setQualityLevel(SIPCallManager::QualityLevel qualityLevel)
+{
+    if (m_qualityLevel != qualityLevel) {
+        m_qualityLevel = qualityLevel;
+        Q_EMIT qualityLevelChanged();
+        Q_EMIT SIPCallManager::instance().qualityLevelChanged(this, qualityLevel);
+    }
+}
+
+void SIPCall::setSecurityLevel(SIPCallManager::SecurityLevel securityLevel)
+{
+    if (m_securityLevel != securityLevel) {
+        m_securityLevel = securityLevel;
+        Q_EMIT securityLevelChanged();
+        Q_EMIT SIPCallManager::instance().securityLevelChanged(this, securityLevel);
+    }
+}
+
+void SIPCall::setIsSignalingEncrypted(bool value)
+{
+    if (m_signalingEncrypted != value) {
+        m_signalingEncrypted = value;
+        Q_EMIT isSignalingEncryptedChanged();
+        Q_EMIT SIPCallManager::instance().isSignalingEncryptedChanged(this, value);
+    }
+}
+
+void SIPCall::setIsMediaEncrypted(bool value)
+{
+    if (m_mediaEncrypted != value) {
+        m_mediaEncrypted = value;
+        Q_EMIT isMediaEncryptedChanged();
+        Q_EMIT SIPCallManager::instance().isMediaEncryptedChanged(this, value);
     }
 }
 
@@ -639,10 +796,145 @@ void SIPCall::createOngoingCallNotification()
 void SIPCall::addMetadata(const QString &data)
 {
     ResponseLoader loader(data);
+
+    qDeleteAll(m_metadata);
+    m_metadata.clear();
+
     m_metadata = loader.loadResponse();
     if (!m_metadata.empty()) {
         m_hasMetadata = true;
     }
 
     Q_EMIT metadataChanged();
+}
+
+void SIPCall::updateRtcpStats()
+{
+    pj::CallInfo ci = getInfo();
+
+    for (unsigned i = 0; i < ci.media.size(); ++i) {
+        if (ci.media[i].type == PJMEDIA_TYPE_AUDIO) {
+
+            pj::StreamStat st = getStreamStat(i);
+            pj::StreamInfo si = getStreamInfo(i);
+
+            // Update basic information
+            if (m_codec != si.codecName) {
+                m_codec = QString::fromStdString(si.codecName);
+                m_clockRate = si.codecClockRate;
+                setIsMediaEncrypted(si.proto & PJMEDIA_TP_PROFILE_SRTP);
+                setIsSignalingEncrypted(m_account->isSignalingEncrypted());
+            }
+
+            m_mosTx = calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.last, m_jitterTx, m_effDelayTx,
+                                   m_lastLossTx, m_lastPktTx);
+            m_mosRx = calculateMos(st.rtcp.rxStat, st.rtcp.rttUsec.last, m_jitterRx, m_effDelayRx,
+                                   m_lastLossRx, m_lastPktRx);
+
+            // Go for RTCP XR information - if available
+            pjsua_call_info pj_ci;
+            pjsua_call_get_info(getId(), &pj_ci);
+
+            pjsua_call *call = &pjsua_var.calls[getId()];
+            pjsua_call_media *call_med = &call->media[i];
+
+            qCDebug(lcSIPCall) << "---- Call quality info for media #" << i << "----";
+
+#if defined(PJMEDIA_HAS_RTCP_XR) && (PJMEDIA_HAS_RTCP_XR != 0)
+            pjmedia_rtcp_xr_stat xr_stat;
+            if (pjmedia_stream_get_stat_xr(call_med->strm.a.stream, &xr_stat) == PJ_SUCCESS
+                && xr_stat.tx.voip_mtc.mos_lq != 127) {
+
+                m_mosTxLq = xr_stat.tx.voip_mtc.mos_lq;
+                m_mosRxLq = xr_stat.rx.voip_mtc.mos_lq;
+                m_mosTxCq = xr_stat.tx.voip_mtc.mos_cq;
+                m_mosRxCq = xr_stat.rx.voip_mtc.mos_cq;
+                m_jitterBufferTxDelay = double(xr_stat.tx.voip_mtc.jb_nom) / 1000.0;
+                m_jitterBufferRxDelay = double(xr_stat.rx.voip_mtc.jb_nom) / 1000.0;
+
+                m_rtt = double(xr_stat.rtt.last) / 1000.0;
+                m_lossRateTx = xr_stat.tx.voip_mtc.loss_rate;
+                m_lossRateRx = xr_stat.rx.voip_mtc.loss_rate;
+
+                qCDebug(lcSIPCall)
+                        << "- RTCP-XR TX -> mosLQ:" << m_mosTxLq << "mosCQ:" << m_mosTxCq
+                        << "jitter:" << m_jitterBufferTxDelay << "loss rate:" << m_lossRateTx;
+                qCDebug(lcSIPCall)
+                        << "- RTCP-XR RX -> mosLQ:" << m_mosRxLq << "mosCQ:" << m_mosRxCq
+                        << "jitter:" << m_jitterBufferRxDelay << "loss rate:" << m_lossRateRx;
+                qCDebug(lcSIPCall) << "- RTCP-XR RTT" << m_rtt;
+            }
+#endif
+
+            qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << (100 * m_lossTx)
+                               << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
+            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosRx << "loss:" << (100 * m_lossRx)
+                               << "jitter:" << m_jitterRx << "effective delay:" << m_effDelayRx;
+
+            double mos = std::min(m_mosTx, m_mosRx);
+            if (mos >= 4.0) {
+                setQualityLevel(SIPCallManager::QualityLevel::High);
+            } else if (mos < 4.0 && mos >= 3.5) {
+                setQualityLevel(SIPCallManager::QualityLevel::Medium);
+            } else {
+                setQualityLevel(SIPCallManager::QualityLevel::Low);
+            }
+
+            if (m_mediaEncrypted && m_signalingEncrypted) {
+                setSecurityLevel(SIPCallManager::SecurityLevel::High);
+            } else if (m_mediaEncrypted || m_signalingEncrypted) {
+                setSecurityLevel(SIPCallManager::SecurityLevel::Medium);
+            } else {
+                setSecurityLevel(SIPCallManager::SecurityLevel::Low);
+            }
+
+            Q_EMIT callQualityInfoChanged();
+            Q_EMIT SIPCallManager::instance().callQualityInfoChanged(this);
+            Q_EMIT rtcpStatsChanged();
+
+            // Look at first audio stream, only
+            break;
+        }
+    }
+}
+
+float SIPCall::calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
+                            double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss)
+{
+    double loss = 0.0;
+
+    if (stat.pkt != lastPkt) {
+        loss = 100.0 * (double)(stat.loss - lastLoss) / (double)(stat.pkt - lastPkt);
+    }
+
+    jitter = stat.jitterUsec.mean / 1000.0;
+    double rtt = rttLast / 1000.0;
+
+    lastLoss = stat.loss;
+    lastPkt = stat.pkt;
+
+    effectiveDelay = rtt / 2.0 + (jitter * 2.0) + 10.0;
+
+    // R-factor base value
+    double R = 93.2;
+
+    // Remove delay
+    if (effectiveDelay > 160.0) {
+        R -= (effectiveDelay - 120.0) / 10.0;
+    } else {
+        R -= effectiveDelay / 40.0;
+    }
+
+    // Remove loss
+    R -= loss;
+
+    // Adjust to mos scale
+    if (R < 0) {
+        return 1.0f;
+    }
+    if (R > 100) {
+        return 4.5f;
+    }
+
+    return 1.0f + (0.035f * R) + (0.000007f * R * (R - 60.0f) * (100.0f - R));
 }

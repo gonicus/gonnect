@@ -19,6 +19,10 @@ Window {
     property bool showMinimizeButton: true
     property bool showMaximizeButton: true
 
+    property int windowHeaderPadding: control.useOwnDecoration
+                                      ? windowHeaderLoader.height + 2 * control.shadowMargin
+                                      : 0
+
     default property alias content: innerContainer.children
 
     readonly property bool isMaximized: [ Window.Maximized, Window.FullScreen ].includes(control.visibility)
@@ -86,6 +90,12 @@ Window {
                         left: parent.left
                     }
 
+                    LayoutMirroring.enabled: false
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Top left drag border for window resize operations")
+
                     HoverHandler {
                         cursorShape: Qt.SizeFDiagCursor
                     }
@@ -111,6 +121,12 @@ Window {
                         rightMargin: dragHandlerContainer.borderWidth
                     }
 
+                    LayoutMirroring.enabled: false
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Top drag border for window resize operations")
+
                     HoverHandler {
                         cursorShape: Qt.SizeVerCursor
                     }
@@ -133,6 +149,11 @@ Window {
                         top: parent.top
                         right: parent.right
                     }
+                    LayoutMirroring.enabled: false
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Top right border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeBDiagCursor
@@ -158,6 +179,11 @@ Window {
                         topMargin: dragHandlerContainer.borderWidth
                         bottomMargin: dragHandlerContainer.borderWidth
                     }
+                    LayoutMirroring.enabled: false
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Right drag border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeHorCursor
@@ -181,6 +207,11 @@ Window {
                         bottom: parent.bottom
                         right: parent.right
                     }
+                    LayoutMirroring.enabled: false
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Bottom right drag border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeFDiagCursor
@@ -206,6 +237,11 @@ Window {
                         leftMargin: dragHandlerContainer.borderWidth
                         rightMargin: dragHandlerContainer.borderWidth
                     }
+                    LayoutMirroring.enabled: false
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Bottom drag border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeVerCursor
@@ -229,6 +265,11 @@ Window {
                         bottom: parent.bottom
                         left: parent.left
                     }
+                    LayoutMirroring.enabled: false
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Bottom left drag border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeBDiagCursor
@@ -254,6 +295,11 @@ Window {
                         topMargin: dragHandlerContainer.borderWidth
                         bottomMargin: dragHandlerContainer.borderWidth
                     }
+                    LayoutMirroring.enabled: false
+
+                    Accessible.role: Accessible.Border
+                    Accessible.name: qsTr("Drag border")
+                    Accessible.description: qsTr("Left drag border for window resize operations")
 
                     HoverHandler {
                         cursorShape: Qt.SizeHorCursor

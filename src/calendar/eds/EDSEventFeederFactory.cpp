@@ -26,6 +26,7 @@ QStringList EDSEventFeederFactory::configurations() const
 }
 
 IDateEventFeeder *EDSEventFeederFactory::createFeeder(const QString &settingsGroup,
+                                                      const QDateTime &currentTime,
                                                       const QDateTime &timeRangeStart,
                                                       const QDateTime &timeRangeEnd,
                                                       DateEventFeederManager *feederManager) const
@@ -33,5 +34,5 @@ IDateEventFeeder *EDSEventFeederFactory::createFeeder(const QString &settingsGro
     ReadOnlyConfdSettings settings;
     settings.beginGroup(settingsGroup);
 
-    return new EDSEventFeeder(feederManager, name(), timeRangeStart, timeRangeEnd);
+    return new EDSEventFeeder(feederManager, name(), currentTime, timeRangeStart, timeRangeEnd);
 }

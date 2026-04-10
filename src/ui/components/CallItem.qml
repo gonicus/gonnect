@@ -33,6 +33,24 @@ Rectangle {
     required property bool hasMetadata
     required property string avatarPath
 
+    required property int qualityLevel
+    required property int securityLevel
+    required property bool isSignalingEncrypted
+    required property bool isMediaEncrypted
+
+    required property string codec
+    required property int codecClockRate
+
+    required property real txMos
+    required property real txLossRate
+    required property real txJitter
+    required property real txEffectiveDelay
+
+    required property real rxMos
+    required property real rxLossRate
+    required property real rxJitter
+    required property real rxEffectiveDelay
+
     property bool selected: false
     property bool interactive: true
     property bool showHoldButton: true
@@ -41,6 +59,11 @@ Rectangle {
 
     signal clicked
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Call")
+    Accessible.description: qsTr("Selected call %1 - contact %2, company %3, location %4/%5, number %6").arg(control.callId).arg(control.contactName).arg(control.company ?? "-").arg(control.city ?? "-").arg(control.country ?? "-").arg(control.phoneNumber)
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.clicked()
 
     states: [
         State {
@@ -51,7 +74,6 @@ Rectangle {
             }
         }
     ]
-
 
     VerticalLevelMeter {
         id: levelMeter
@@ -76,6 +98,8 @@ Rectangle {
             left: parent.left
             leftMargin: 15
         }
+
+        Accessible.ignored: true
     }
 
     Column {
@@ -104,6 +128,8 @@ Rectangle {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
 
         Label {
@@ -116,6 +142,8 @@ Rectangle {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
 
         Label {
@@ -128,6 +156,8 @@ Rectangle {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -143,6 +173,12 @@ Rectangle {
             rightMargin: control.padding
         }
 
+        Accessible.role: Accessible.StaticText
+        Accessible.name:  qsTr("Hangup button")
+        Accessible.description: qsTr("Pressing this will end the call")
+        Accessible.focusable: true
+        Accessible.onPressAction: SIPCallManager.endCall(control.accountId, control.callId)
+
         IconLabel {
             anchors.centerIn: parent
             icon {
@@ -151,9 +187,12 @@ Rectangle {
                 source: Icons.callStop
                 color: Theme.foregroundWhiteColor
             }
+
+            Accessible.ignored: true
         }
 
         TapHandler {
+            id: hangupButtonTapHandler
             onTapped: SIPCallManager.endCall(control.accountId, control.callId)
         }
     }
@@ -176,19 +215,19 @@ Rectangle {
         property point originalPosition
 
         onActiveChanged: () => {
-                             if (dragHandler.active) {
-                                 // Save position to snap back on drag cancel
-                                 dragHandler.originalPosition = Qt.point(control.x, control.y)
-                             } else {
-                                 const dropResult = control.Drag.drop()
+            if (dragHandler.active) {
+                // Save position to snap back on drag cancel
+                dragHandler.originalPosition = Qt.point(control.x, control.y)
+            } else {
+                const dropResult = control.Drag.drop()
 
-                                 // Snap back to original position
-                                 if (dropResult !== Qt.MoveAction) {
-                                     control.x = dragHandler.originalPosition.x
-                                     control.y = dragHandler.originalPosition.y
-                                 }
-                             }
-                         }
+                // Snap back to original position
+                if (dropResult !== Qt.MoveAction) {
+                    control.x = dragHandler.originalPosition.x
+                    control.y = dragHandler.originalPosition.y
+                }
+            }
+        }
     }
 
     Drag.active: dragHandler.active
@@ -200,9 +239,9 @@ Rectangle {
         anchors.fill: parent
 
         onDropped: (dragEvent) => {
-                       dragEvent.accept(Qt.MoveAction)
-                       SIPCallManager.transferCall(dragEvent.source.accountId, dragEvent.source.callId,
-                                                   control.accountId, control.callId)
-                   }
+            dragEvent.accept(Qt.MoveAction)
+            SIPCallManager.transferCall(dragEvent.source.accountId, dragEvent.source.callId,
+                                        control.accountId, control.callId)
+        }
     }
 }

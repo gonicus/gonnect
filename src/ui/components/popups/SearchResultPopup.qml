@@ -20,6 +20,12 @@ Popup {
     exit: null
     visible: !!control.searchText.length
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.SearchResultPopup"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     Material.accent: Theme.accentColor
     Material.theme: Theme.isDarkMode ? Material.Dark : Material.Light
 
@@ -29,6 +35,8 @@ Popup {
     signal returnFocus
 
     readonly property int colWidth: flickableContainer.width / 3
+
+    onSearchTextChanged: () => Qt.callLater(keyNavigator.keyDown)
 
     function initialKeyDown() { keyNavigator.keyDown() }
     function initialKeyUp() { keyNavigator.keyUp() }
@@ -41,7 +49,7 @@ Popup {
             keyNavigator.selectedItem.triggerPrimaryAction()
             control.primaryActionTriggered()
         } else {
-            console.error('Cannot find selected item to trigger primary action on')
+            console.error(category, 'cannot find selected item to trigger primary action on')
         }
     }
 
@@ -51,21 +59,33 @@ Popup {
         } else if (keyNavigator.selectedItem) {
             keyNavigator.selectedItem.triggerSecondaryAction()
         } else {
-            console.error('Cannot find selected item to trigger secondary action on')
+            console.error(category, 'cannot find selected item to trigger secondary action on')
         }
     }
 
     SearchListModel {
         id: searchListModel
-        searchPhrase: control.searchText
+        searchPhrase: ViewHelper.preprocessSearchText(control.searchText)
     }
 
     contentItem: Item {
         id: popupContainer
         focus: true
 
-        Keys.onLeftPressed: () => keyNavigator.keyLeft()
-        Keys.onRightPressed: () => keyNavigator.keyRight()
+        Keys.onLeftPressed: () => {
+            if (LayoutMirroring.enabled) {
+                keyNavigator.keyRight()
+            } else {
+                keyNavigator.keyLeft()
+            }
+        }
+        Keys.onRightPressed: () => {
+            if (LayoutMirroring.enabled) {
+                keyNavigator.keyLeft()
+            } else {
+                keyNavigator.keyRight()
+            }
+        }
         Keys.onDownPressed: () => keyNavigator.keyDown()
         Keys.onUpPressed: () => keyNavigator.keyUp()
         Keys.onEnterPressed: () => control.triggerPrimaryAction()
@@ -82,6 +102,10 @@ Popup {
                 margins: 12
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Search filter and identity selection")
+            Accessible.description: qsTr("Select search filter to be applied, as well as the outgoing identity")
+
             SearchCategoryList {
                 id: searchCategories
                 anchors {
@@ -92,6 +116,7 @@ Popup {
             }
 
             Label {
+                id: identityLabel
                 text: qsTr("Outgoing identity")
                 font.weight: Font.Medium
                 anchors {
@@ -100,6 +125,9 @@ Popup {
                     bottom: identitySelector.top
                     bottomMargin: 5
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: identityLabel.text
             }
 
             IdentitySelector {
@@ -123,6 +151,8 @@ Popup {
                 left: filterBar.right
                 leftMargin: 12
             }
+
+            Accessible.ignored: true
         }
 
         Item {
@@ -135,10 +165,18 @@ Popup {
                 margins: 12
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Search results")
+            Accessible.description: qsTr("All search results will be listed here in their respective categories")
+
             KeyNavigator {
                 id: keyNavigator
 
-                onVerticallyOutOfBounds: () => control.returnFocus()
+                onVerticallyOutOfBounds: () => {
+                    if (control.visible) {
+                        control.returnFocus()
+                    }
+                }
 
                 readonly property Connections resetConnection: Connections {
                     target: control
@@ -199,7 +237,7 @@ Popup {
 
                         SearchResultItem {
                             id: callDirectItem
-                            mainText: qsTr('Call "%1"').arg(control.searchText)
+                            mainText: qsTr('Call "%1"').arg(searchListModel.searchPhrase)
                             width: control.colWidth
                             visible: callDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === callDirectItem
@@ -211,20 +249,20 @@ Popup {
                                 }
                             }
 
-                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(control.searchText)
+                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(searchListModel.searchPhrase)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(callDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                SIPCallManager.call("account0", control.searchText, "", identitySelector.currentValue)
+                                SIPCallManager.call("account0", searchListModel.searchPhrase, "", identitySelector.currentValue)
                                 control.primaryActionTriggered()
                             }
                         }
 
                         SearchResultItem {
                             id: roomDirectItem
-                            mainText: qsTr('Open room "%1"').arg(control.searchText)
+                            mainText: qsTr('Open room "%1"').arg(searchListModel.searchPhrase)
                             width: control.colWidth
                             visible: roomDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === roomDirectItem
@@ -238,13 +276,13 @@ Popup {
 
                             readonly property bool shallBeVisible: ViewHelper.isJitsiAvailable
                                                                    && !ViewHelper.isActiveVideoCall
-                                                                   && ViewHelper.isValidJitsiRoomName(control.searchText)
+                                                                   && ViewHelper.isValidJitsiRoomName(searchListModel.searchPhrase)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(roomDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                ViewHelper.requestMeeting(control.searchText)
+                                ViewHelper.requestMeeting(searchListModel.searchPhrase)
                                 control.primaryActionTriggered()
                             }
                         }
@@ -267,7 +305,7 @@ Popup {
                                 showJitsi: ViewHelper.isJitsiAvailable
 
                                 HistoryContactSearchModel {
-                                    searchText: control.searchText
+                                    searchText: searchListModel.searchPhrase
                                 }
                             }
                             delegate: SearchResultItem {
@@ -276,7 +314,7 @@ Popup {
                                 mainText: historyDelg.displayName || historyDelg.url
                                 secondaryText: historyDelg.displayName ? historyDelg.url : ""
                                 highlighted: keyNavigator.selectedItem === historyDelg
-                                enabled: ViewHelper.isJitsiAvailable || !historyDelg.isPhoneNumber
+                                enabled: historyDelg.isPhoneNumber || ViewHelper.isJitsiAvailable
                                 mainRowLeftInsetLoader.sourceComponent: IconLabel {
                                     color: Theme.primaryTextColor
                                     icon {
@@ -527,7 +565,7 @@ Popup {
             //     }
 
             //     TapHandler {
-            //         onTapped: () => console.log('TODO')
+            //         onTapped: () => console.log(category, 'TODO')
             //     }
             // }
         }

@@ -1,18 +1,34 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.Material
 import base
 
 Item {
     id: control
     implicitHeight: 44
 
+    required property bool showSearch
+
+    required property var tabRoot
+    required property var pageRoot
+
     function focusSearchBox() {
         searchField.giveFocus()
     }
 
+    EditModeOptions {
+        id: editControls
+        visible: !control.showSearch
+        anchors.centerIn: parent
+
+        tabRoot: control.tabRoot
+        pageRoot: control.pageRoot
+    }
+
     SearchField {
         id: searchField
+        visible: control.showSearch
         anchors.centerIn: parent
 
         Keys.onDownPressed: () => {
@@ -23,6 +39,8 @@ Item {
             resultPopup.initialKeyUp()
             resultPopup.forceActiveFocus()
         }
+        Keys.onEnterPressed: () => resultPopup.triggerPrimaryAction()
+        Keys.onReturnPressed: () => resultPopup.triggerPrimaryAction()
         Keys.onEscapePressed: () => {
             if (searchField.text.trim() === "") {
                 const nextItem = searchField.nextItemInFocusChain(true)
@@ -62,6 +80,7 @@ Item {
         HeaderIconButton {
             id: burgerMenuButton
             iconSource: Icons.applicationMenu
+            accessiblePurpose: qsTr("App menu")
             active: control.Window.active
             iconSize: 16
             anchors.verticalCenter: parent.verticalCenter
@@ -79,8 +98,11 @@ Item {
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
-            showBuddyStatus: ViewHelper.currentUser?.hasBuddyState ?? false
+            showBuddyStatus: avatarImage.hasBuddyState || avatarImage.isUnregistered
             buddyStatus: SIPBuddyState.UNKNOWN
+            isUnregistered: true
+
+            property bool hasBuddyState: ViewHelper.currentUser?.hasBuddyState ?? false
 
             Component.onCompleted: () => {
                 avatarImage.updateBuddyStatus()
@@ -97,6 +119,17 @@ Item {
                 enabled: ViewHelper.currentUser?.hasBuddyState ?? false
                 function onBuddyStateChanged(url : string, status : int) {
                     avatarImage.updateBuddyStatus()
+                }
+            }
+
+            Connections {
+                target: SIPAccountManager
+                function onSipRegisteredChanged(status : bool) {
+                    if (status) {
+                        avatarImage.isUnregistered = false
+                    } else {
+                        avatarImage.isUnregistered = true
+                    }
                 }
             }
         }

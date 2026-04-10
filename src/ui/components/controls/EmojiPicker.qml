@@ -9,6 +9,12 @@ Item {
     width: 400
     height: 400
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.EmojiPicker"
+        defaultLogLevel: LoggingCategory.Warning
+    }
+
     EmojiModel { id: emojiModel }
 
     signal emojiPicked(string emoji)
@@ -22,7 +28,7 @@ Item {
             }
         }
 
-        console.warn("Unable to find rendered group item for group", groupIndex)
+        console.warn(category, "unable to find rendered group item for group", groupIndex)
     }
 
     Flickable {
@@ -43,6 +49,10 @@ Item {
                 top: parent.top
                 bottom: parent.bottom
             }
+
+            Accessible.role: Accessible.Row
+            Accessible.name: qsTr("Switch Emoji category")
+            Accessible.focusable: true
 
             Repeater {
                 id: emojiGroupsRepeater
@@ -92,6 +102,10 @@ Item {
                 left: parent.left
                 right: parent.right
             }
+
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Select Emoji")
+            Accessible.focusable: true
 
             Repeater {
                 id: emojiList

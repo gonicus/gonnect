@@ -13,6 +13,8 @@ qt_add_executable(contactsTest
     Contacts.test.h
     ${PROJECT_SOURCE_DIR}/src/contacts/AddressBook.cpp
     ${PROJECT_SOURCE_DIR}/src/contacts/AddressBook.h
+    ${PROJECT_SOURCE_DIR}/src/contacts/BlockInfo.cpp
+    ${PROJECT_SOURCE_DIR}/src/contacts/BlockInfo.h
     ${PROJECT_SOURCE_DIR}/src/contacts/Contact.cpp
     ${PROJECT_SOURCE_DIR}/src/contacts/Contact.h
     ${PROJECT_SOURCE_DIR}/src/contacts/PhoneCodeLookup.cpp

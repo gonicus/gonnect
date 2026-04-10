@@ -53,6 +53,16 @@ void SIPManager::initialize()
     qCDebug(lcSIPManager) << "initializing";
     pj_log_set_level(0);
 
+    ReadOnlyConfdSettings globalSettings;
+    if (globalSettings.value("sip/compactHeader", false).toBool()) {
+        qCDebug(lcSIPManager) << "enabling compact headers";
+        pjsip_cfg()->endpt.use_compact_form = PJ_TRUE;
+    }
+    if (globalSettings.value("sip/noTcpSwitch", false).toBool()) {
+        qCDebug(lcSIPManager) << "disabling TCP switch";
+        pjsip_cfg()->endpt.disable_tcp_switch = PJ_TRUE;
+    }
+
     try {
         m_ep.libCreate();
     } catch (pj::Error &err) {
@@ -66,7 +76,8 @@ void SIPManager::initialize()
     if (app->isDebugRun()) {
         epConfig.logConfig.level = 6;
     } else {
-        epConfig.logConfig.level = m_settings->value("logging/level", 1).toUInt();
+        ReadOnlyConfdSettings settings;
+        epConfig.logConfig.level = settings.value("logging/level", 1).toUInt();
     }
 
     if (epConfig.logConfig.level >= 4) {
@@ -78,6 +89,8 @@ void SIPManager::initialize()
                                                         "*.warning=true\n"
                                                         "*.critical=true"));
     }
+
+    epConfig.uaConfig.mwiUnsolicitedEnabled = true;
 
     m_mediaConfig = new SIPMediaConfig(this);
     m_mediaConfig->applyConfig(epConfig);
@@ -99,6 +112,9 @@ void SIPManager::initialize()
     } catch (pj::Error &err) {
         qCFatal(lcSIPManager) << "failed to initialize SIP library: " << err.info();
     }
+
+    // Set codec preference
+    setPreferredCodecs();
 
     m_ep.libStart();
 
@@ -127,6 +143,54 @@ void SIPManager::initialize()
 
     if (!isConfigured()) {
         Q_EMIT notConfigured();
+    }
+}
+
+void SIPManager::setPreferredCodecs()
+{
+    const QList<int> codecPriorities = { PJMEDIA_CODEC_PRIO_HIGHEST, PJMEDIA_CODEC_PRIO_NEXT_HIGHER,
+                                         PJMEDIA_CODEC_PRIO_NORMAL, PJMEDIA_CODEC_PRIO_LOWEST };
+
+    static const QRegularExpression filterRegex("\\s*,\\s*");
+
+    ReadOnlyConfdSettings globalSettings;
+    const QList<QString> preferredCodecs = globalSettings.value("sip/preferredCodecs", "")
+                                                   .toString()
+                                                   .split(filterRegex, Qt::SkipEmptyParts);
+    if (preferredCodecs.empty()) {
+        return;
+    }
+
+    // Check if there's valid codecs in our preference list
+    int invalidCodecs = 0;
+    for (const auto &pC : preferredCodecs) {
+        try {
+            pj::CodecParam param = m_ep.codecGetParam(pC.toStdString());
+        } catch (pj::Error &err) {
+            invalidCodecs++;
+        }
+    }
+    if (invalidCodecs >= preferredCodecs.count()) {
+        qCDebug(lcSIPManager)
+                << "no valid preferred codec found - skipping preferred codec selection";
+        return;
+    }
+
+    // Disable all codecs
+    const auto &codecs = m_ep.codecEnum2();
+    for (const auto &c : codecs) {
+        m_ep.codecSetPriority(c.codecId, PJMEDIA_CODEC_PRIO_DISABLED);
+    }
+
+    // Only enable/use config codecs
+    for (int i = 0; i < preferredCodecs.count(); i++) {
+        int priorityIndex =
+                (i < codecPriorities.count()) ? codecPriorities.at(i) : codecPriorities.count() - 1;
+        QString preferredCodec = preferredCodecs.at(i);
+
+        m_ep.codecSetPriority(preferredCodec.toStdString(), priorityIndex);
+        qCDebug(lcSIPManager) << "using codec" << preferredCodec << ", with priority"
+                              << priorityIndex;
     }
 }
 
@@ -277,6 +341,68 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
 
     qCDebug(lcSIPManager) << "could not find the corresponding buddy";
     return nullptr;
+}
+
+void SIPManager::suspend()
+{
+    qCDebug(lcSIPManager) << "suspending SIP";
+    m_suspended = true;
+
+    pj::CallOpParam prm;
+    prm.statusCode = PJSIP_SC_SERVICE_UNAVAILABLE;
+
+    // Hang up all calls
+    auto calls = SIPCallManager::instance().calls();
+    for (auto call : std::as_const(calls)) {
+        call->hangup(prm);
+    }
+
+    // Unregister account(s)
+    auto accounts = SIPAccountManager::instance().accounts();
+    for (auto account : std::as_const(accounts)) {
+        account->deactivateTransports();
+    }
+
+    // Shutdown transports
+    pj::IpChangeParam param;
+    param.shutdownTransport = true;
+    param.restartListener = false;
+    pj::Endpoint::instance().handleIpChange(param);
+}
+
+void SIPManager::resume()
+{
+    if (!m_suspended) {
+        return;
+    }
+
+    m_suspended = false;
+
+    // Since resume may be called in more network changed cases, only
+    // do this when we have no active calls going.
+    if (!SIPCallManager::instance().hasActiveCalls()) {
+        qCDebug(lcSIPManager) << "resuming SIP";
+
+        // Activate transports again
+        auto accounts = SIPAccountManager::instance().accounts();
+        for (auto account : std::as_const(accounts)) {
+            account->setAfterResume();
+            account->setRegistration(false);
+            account->activateTransports();
+        }
+
+        try {
+            pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
+        } catch (pj::Error &err) {
+            qCCritical(lcSIPManager)
+                    << "error handling IP change:" << QString::fromLocal8Bit(err.info(false));
+        }
+
+        // Re-activate account registration
+        for (auto account : std::as_const(accounts)) {
+            account->setRegistration(true);
+        }
+    }
 }
 
 void SIPManager::shutdown()

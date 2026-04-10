@@ -16,6 +16,9 @@ Item {
         searchInputField.forceActiveFocus()
     }
 
+    Accessible.role: Accessible.Form
+    Accessible.name: placeholderLabel.text
+
     states: [
         State {
             when: !control.activeFocus && searchInputField.text.trim() === ""
@@ -66,6 +69,8 @@ Item {
             right: searchInputField.right
             rightMargin: 10
         }
+
+        Accessible.ignored: true
     }
 
     TextInput {
@@ -75,9 +80,15 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             left: searchIcon.right
+            right: clearButton.visible ? clearButton.left : parent.right
             leftMargin: 10
-            right: parent.right
+            rightMargin: 10
         }
+
+        Accessible.role: Accessible.EditableText
+        Accessible.name: placeholderLabel.text
+        Accessible.searchEdit: true
+        Accessible.focusable: true
     }
 
     Item {
@@ -90,15 +101,23 @@ Item {
             right: parent.right
         }
 
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Clear search field")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => searchInputField.clear()
+
         IconLabel {
             id: clearIcon
             anchors.centerIn: parent
+            rotation: LayoutMirroring.enabled ? 180 : 0
             icon {
                 source: Icons.editClear
                 color: clearButtonHoverHandler.hovered ? Theme.primaryTextColor : Theme.secondaryInactiveTextColor
                 width: 16
                 height: 16
             }
+
+            Accessible.ignored: true
         }
 
         HoverHandler {

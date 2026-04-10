@@ -25,7 +25,8 @@ public:
 
     static QString hashForSettingsGroup(const QString &group);
 
-    void acquireSecret(const QString &group, std::function<void(const QString &secret)> callback);
+    void acquireSecret(bool forcePrompt, const QString &group,
+                       std::function<void(const QString &secret)> callback);
 
 private:
     explicit AddressBookManager(QObject *parent = nullptr);

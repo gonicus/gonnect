@@ -4,7 +4,6 @@
 
 #include <QLoggingCategory>
 #include <QRegularExpression>
-#include <private/qzipreader_p.h>
 
 Q_LOGGING_CATEGORY(lcTheme, "gonnect.app.theme")
 
@@ -38,9 +37,13 @@ bool Theme::useOwnDecoration()
                 settings.value("generic/useOwnWindowDecoration", "auto").toString();
 
         if (settingsVal == "auto") {
+#ifdef Q_OS_LINUX
             const auto desktop =
                     QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")).toLower(); // gnome|kde
             m_useOwnDecoration = desktop.contains("gnome");
+#else
+            m_useOwnDecoration = true;
+#endif
         } else {
             m_useOwnDecoration = settingsVal == "true";
         }
@@ -108,6 +111,7 @@ void Theme::updateColorPalette()
     m_borderHeaderIconHovered = QColor(206, 201, 196);
     m_highlightColor = QColor(30, 57, 143, 76);
     m_paneColor = QColor(246, 245, 244);
+    m_highContrastColor = QColor(0, 0, 0);
     m_backgroundColor = QColor(255, 255, 255);
     m_backgroundSecondaryColor = QColor(250, 250, 250);
     m_backgroundOffsetColor = QColor(0, 0, 0, 20);
@@ -119,8 +123,10 @@ void Theme::updateColorPalette()
     m_backgroundInitials = QColor(214, 212, 233);
     m_shadowColor = QColor(0, 0, 0, 32);
     m_redColor = QColor(224, 27, 36);
+    m_emergencyColor = QColor(0, 136, 85);
     m_greenColor = QColor(36, 181, 27);
     m_darkGreenColor = QColor(128, 128, 0);
+    m_activeIndicatorColor = QColor(255, 102, 0);
 
     // Dark mode overrides
     if (m_isDarkMode) {

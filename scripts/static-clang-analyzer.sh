@@ -1,24 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
-API_TOKEN="${API_TOKEN:-null}"
 TMP_OUT=$(mktemp -d)
 
 pushd . &> /dev/null
 
-rm -rf build; mkdir build; cd build
-
-export CC=/usr/bin/clang
-export CXX=/usr/bin/clang++
-
-cmake -DBUILD_TESTING=OFF -DBUILD_DEPENDENCIES=ON -DENABLE_QASSERT=ON -DCMAKE_PREFIX_PATH="$EXT_BASE/pjproject;$EXT_BASE/qca/lib/cmake" ..
+cmake --preset conan-release -GNinja -DBUILD_TESTING=OFF -DENABLE_QASSERT=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 set -eo pipefail
-intercept-build make -j$(nproc --all) 2>&1 | tee /tmp/build.log
+cd build/Release
+ninja -j$(nproc --all) 2>&1 | tee /tmp/build.log
 set -e
 
 analyze-build -v --output "$TMP_OUT" $ANALYZE_ARGS --plist-html --enable-checker optin.cplusplus.VirtualCall || true
 
 popd &> /dev/null
 
-scripts/process-clang-output.py --exclude '.*/(Qt|qt6|qca|qtkeychain)/.*' --token $API_TOKEN "$TMP_OUT/$(ls -1 $TMP_OUT)"
+scripts/process-clang-output.py --exclude '.*/(Qt|qt6|qca|qtkeychain)/.*' "$TMP_OUT/$(ls -1 $TMP_OUT)"

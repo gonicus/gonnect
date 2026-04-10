@@ -14,14 +14,23 @@ Item {
     property bool showHoldButton: true
 
     onCountChanged: () => {
-                        if (control.count === 1) {
-                            control.selectedItem = callListView.itemAtIndex(0)
-                        }
+        if (control.count) {
+            if (control.selectedItem) {
+                for (let i = 0; i < callListView.count; ++i) {
+                    if (callListView.itemAtIndex(i) === control.selectedItem) {
+                        return
                     }
+                }
+            }
+
+            control.selectedItem = callListView.itemAtIndex(0)
+        }
+    }
 
     readonly property alias count: callListView.count
 
     Label {
+        id: dragCallLabel
         color: Theme.secondaryTextColor
         visible: control.count > 1
         text: qsTr("Drag callers onto each other to transfer call")
@@ -35,6 +44,9 @@ Item {
             verticalCenter: parent.verticalCenter
             verticalCenterOffset: callListView.contentHeight / 2
         }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: dragCallLabel.text
     }
 
     ListView {
@@ -50,6 +62,9 @@ Item {
             right: parent.right
             bottom: conferenceButton.visible ? conferenceButton.top : parent.bottom
         }
+
+        Accessible.role: Accessible.List
+        Accessible.name: qsTr("List of active calls")
 
         delegate: CallItem {
             id: callDelegate
@@ -78,6 +93,11 @@ Item {
             bottom: parent.bottom
         }
 
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Create conference")
+        Accessible.focusable: true
+        Accessible.onPressAction: () => SIPCallManager.startConference()
+
         Rectangle {
             height: 1
             color: Theme.borderColor
@@ -86,6 +106,8 @@ Item {
                 right: parent.right
                 top: parent.top
             }
+
+            Accessible.ignored: true
         }
 
         IconLabel {
@@ -98,6 +120,8 @@ Item {
                 source: Icons.userGroupNew
                 color: conferenceButtonHoverHandler.hovered ? Theme.foregroundHeaderIcons : Theme.secondaryTextColor
             }
+
+            Accessible.ignored: true
         }
 
         HoverHandler {
@@ -105,6 +129,7 @@ Item {
         }
 
         TapHandler {
+            id: conferenceButtonTapHandler
             onTapped: () => SIPCallManager.startConference()
         }
     }

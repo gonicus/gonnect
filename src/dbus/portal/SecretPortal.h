@@ -24,6 +24,7 @@ public:
 
     void initialize();
 
+    bool hasTriedInitialization() { return m_hasTriedInitialization; }
     bool isInitialized() { return m_initialized; }
     bool hasInstanceSecret() { return !m_instanceSecret.isEmpty(); }
 
@@ -44,6 +45,7 @@ private:
 
     int m_fds[2];
 
+    bool m_hasTriedInitialization = false;
     bool m_initialized = false;
     bool m_supported = false;
 };

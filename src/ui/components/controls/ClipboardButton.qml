@@ -12,6 +12,11 @@ Rectangle {
 
     property string text
 
+    Accessible.role: Accessible.Button
+    Accessible.name: qsTr("Copy to clipboard: %1").arg(control.text)
+    Accessible.focusable: true
+    Accessible.onPressAction: () => ViewHelper.copyToClipboard(control.text)
+
     IconLabel {
         anchors.centerIn: parent
         icon {
@@ -19,11 +24,14 @@ Rectangle {
             height: 16
             source: Icons.editCopy
         }
+
+        Accessible.ignored: true
     }
 
     TapHandler {
         onTapped: () => ViewHelper.copyToClipboard(control.text)
     }
+
     HoverHandler {
         id: clipboardButtonHoverHandler
     }

@@ -255,7 +255,6 @@ Item {
         }
     }
 
-
     ParticipantsList {
         id: participantList
         conferenceConnector: control.conferenceConnector

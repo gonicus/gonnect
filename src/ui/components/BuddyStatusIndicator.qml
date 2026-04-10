@@ -19,6 +19,9 @@ Rectangle {
     property int status: SIPBuddyState.UNKNOWN
 
     property bool isBlocked: false
+    property bool isUnregistered: false
+
+    Accessible.ignored: true
 
     SequentialAnimation {
         id: ringingAnimation
@@ -52,9 +55,18 @@ Rectangle {
             height: 10
             source: Icons.dialogCancel
         }
+
+        Accessible.ignored: true
     }
 
     states: [
+        State {
+            when: control.isUnregistered
+
+            PropertyChanges {
+                control.color: Theme.borderColor
+            }
+        },
         State {
             when: control.isBlocked
 

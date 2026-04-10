@@ -1,0 +1,8 @@
+sources:
+  0.8.1-1:
+    url:
+      - https://github.com/jgaa/logfault/archive/e63fed95cac7be512c2cb815b602039bc64c13e9.tar.gz
+    sha256: 43d16ac14d60eba1861484accb135c1aa55a9cedf6c9b1132a0c866b349e46cf
+patches:
+  0.8.1-1:
+    - patch_file: "patches/001-fix-warnings.patch"

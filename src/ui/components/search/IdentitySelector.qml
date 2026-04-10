@@ -30,6 +30,10 @@ ComboBox {
         }
     }
 
+    Accessible.role: Accessible.ComboBox
+    Accessible.name: qsTr("Identity selection")
+    Accessible.description: qsTr("Select the preferred identity to be used in calls")
+
     contentItem: Label {
         text: control.displayText
         wrapMode: Label.WordWrap
@@ -38,6 +42,11 @@ ComboBox {
         elide: Label.ElideRight
         verticalAlignment: Label.AlignVCenter
         leftPadding: 10
+
+        Accessible.role: Accessible.ListItem
+        Accessible.name: control.displayText
+        Accessible.description: qsTr("Currently selected identity")
+        Accessible.focusable: true
     }
 
     function setDefaultIdentity() {

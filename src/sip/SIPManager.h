@@ -47,6 +47,11 @@ public:
     void initialize();
     void shutdown();
 
+    void suspend();
+    void resume();
+
+    void setPreferredCodecs();
+
     void getPlaybackDevices();
 
     void setDefaultPreferredIdentity(const QString &value);
@@ -90,6 +95,8 @@ private:
     SIPEventLoop *m_ev = nullptr;
 
     pj::Endpoint m_ep;
+
+    bool m_suspended = false;
 
     QSet<QString> m_buddyStateQueue;
 };

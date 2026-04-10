@@ -19,7 +19,7 @@ void SIPAccountManager::setSipRegistered(bool value)
                 value ? ReportDescriptorEnums::TeamsPresenceIcon::Online
                       : ReportDescriptorEnums::TeamsPresenceIcon::Offline);
 
-        Q_EMIT sipRegisteredChanged();
+        Q_EMIT sipRegisteredChanged(value);
     }
 }
 
@@ -50,6 +50,16 @@ void SIPAccountManager::initialize()
                     &SIPAccountManager::updateSipRegistered);
             connect(sipAccount, &SIPAccount::authorizationFailed, this,
                     [this, sipAccount]() { Q_EMIT authorizationFailed(sipAccount->id()); });
+            connect(sipAccount, &SIPAccount::connectionError, this,
+                    [this](int code, QString message) {
+                        if (code != m_lastErrorCode) {
+                            m_lastErrorCode = code;
+                            Q_EMIT connectionError(code, message);
+                        }
+                    });
+            connect(sipAccount, &SIPAccount::voiceMessagesWaitingChanged, this,
+                    &SIPAccountManager::voiceMessagesWaitingChanged);
+
             updateSipRegistered();
 
             connect(sipAccount, &SIPAccount::initialized, this,
@@ -80,12 +90,37 @@ void SIPAccountManager::setAccountCredentials(const QString &accountId, const QS
     }
 }
 
+void SIPAccountManager::callVoiceBox(const QString &accountId)
+{
+    if (auto account = getAccount(accountId)) {
+        account->callVoiceBox();
+    } else {
+        qCCritical(lcSIPAccountManager) << "account" << accountId << "not found";
+    }
+}
+
 uint SIPAccountManager::sipRegisterRetryInterval() const
 {
     for (const auto account : std::as_const(m_accounts)) {
         return account->retryInterval();
     }
     return 30;
+}
+
+qint16 SIPAccountManager::newVoiceMessageCount() const
+{
+    for (const auto account : std::as_const(m_accounts)) {
+        return account->newVoiceMessages();
+    }
+    return 0;
+}
+
+qint16 SIPAccountManager::oldVoiceMessageCount() const
+{
+    for (const auto account : std::as_const(m_accounts)) {
+        return account->oldVoiceMessages();
+    }
+    return 0;
 }
 
 SIPAccount *SIPAccountManager::getAccount(const QString &accountId)

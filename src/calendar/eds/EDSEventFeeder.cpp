@@ -1,7 +1,8 @@
 #include "EDSEventFeeder.h"
-#include "DateEvent.h"
 #include "DateEventManager.h"
 
+#include <QMap>
+#include <QTimeZone>
 #include <QLoggingCategory>
 #include <QRegularExpression>
 
@@ -9,10 +10,11 @@ using namespace std::chrono_literals;
 
 Q_LOGGING_CATEGORY(lcEDSEventFeeder, "gonnect.app.dateevents.feeder.eds")
 
-EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source,
+EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDateTime &currentTime,
                                const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd)
     : QObject(parent),
       m_source(source),
+      m_currentTime(currentTime),
       m_timeRangeStart(timeRangeStart),
       m_timeRangeEnd(timeRangeEnd)
 {
@@ -20,24 +22,19 @@ EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source,
 
 EDSEventFeeder::~EDSEventFeeder()
 {
-    if (m_registry) {
-        g_object_unref(m_registry);
-    }
+    g_clear_object(&m_registry);
     if (m_sources) {
         g_list_free_full(m_sources, g_object_unref);
     }
-    if (m_searchExpr) {
-        g_free(m_searchExpr);
-    }
+    g_clear_pointer(&m_searchExpr, g_free);
+    g_clear_object(&m_cancellable);
 
     for (auto client : std::as_const(m_clients)) {
-        g_object_unref(client);
-        client = nullptr;
+        g_clear_object(&client);
     }
 
     for (auto clientView : std::as_const(m_clientViews)) {
-        g_object_unref(clientView);
-        clientView = nullptr;
+        g_clear_object(&clientView);
     }
 
     if (m_sourcePromise) {
@@ -53,15 +50,16 @@ EDSEventFeeder::~EDSEventFeeder()
 
 void EDSEventFeeder::init()
 {
-    GError *error = nullptr;
+    m_cancellable = g_cancellable_new();
+
+    GError *error = NULL;
 
     // Create a source registry
-    m_registry = e_source_registry_new_sync(nullptr, &error);
+    m_registry = e_source_registry_new_sync(m_cancellable, &error);
     if (!m_registry) {
         if (error) {
             qCDebug(lcEDSEventFeeder) << "Can't create registry:" << error->message;
-            g_error_free(error);
-            error = nullptr;
+            g_clear_error(&error);
         }
         return;
     }
@@ -74,29 +72,28 @@ void EDSEventFeeder::init()
         return;
     }
 
-    // Calendar event search filter, covers STATUS component
-    // Info: "NOT STARTED" == I_CAL_STATUS_NONE
-    m_searchExpr = g_strdup(
-            "(or (contains? \"status\" \"CONFIRMED\") (contains? \"status\" \"NOT STARTED\"))");
+    // Calendar event search filter, covers DTSTART component
+    // INFO: This is done because the @sexp literally cannot be empty or NULL...
+    m_searchExpr = g_strdup("(has-start?)");
 
     // Clients and signals
     m_sourcePromise = new QPromise<void>();
     m_sourceFuture = m_sourcePromise->future();
     m_futureWatcher = new QFutureWatcher<void>();
 
-    for (GList *iter = m_sources; iter != nullptr; iter = g_list_next(iter)) {
+    for (GList *iter = m_sources; iter != NULL; iter = g_list_next(iter)) {
         ESource *source = E_SOURCE(iter->data);
 
         qCDebug(lcEDSEventFeeder) << "Connecting to source" << e_source_get_display_name(source)
                                   << "(" << e_source_get_uid(source) << ")";
 
-        e_cal_client_connect(source, E_CAL_CLIENT_SOURCE_TYPE_EVENTS, -1, nullptr,
+        e_cal_client_connect(source, E_CAL_CLIENT_SOURCE_TYPE_EVENTS, -1, m_cancellable,
                              onEcalClientConnected, this);
     }
 
     m_sourcePromise->start();
 
-    QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished).then([this]() {
+    QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished).then(this, [this]() {
         if (m_sourceFuture.isFinished()) {
             process();
         }
@@ -105,6 +102,8 @@ void EDSEventFeeder::init()
     QTimer::singleShot(5s, this, [this]() {
         if (!m_futureWatcher->isFinished()) {
             qCDebug(lcEDSEventFeeder) << "Failed to process EDS sources";
+
+            g_cancellable_cancel(m_cancellable);
 
             m_sourceFuture.cancel();
             m_futureWatcher->cancel();
@@ -117,26 +116,27 @@ void EDSEventFeeder::init()
 void EDSEventFeeder::process()
 {
     for (auto client : std::as_const(m_clients)) {
-        e_cal_client_get_object_list(client, m_searchExpr, nullptr, onClientEventsRequested, this);
+        e_cal_client_get_object_list(client, m_searchExpr, m_cancellable, onClientEventsRequested,
+                                     this);
     }
 }
 
-QDateTime EDSEventFeeder::createDateTimeFromTimeType(const ICalTime *datetime)
+QDateTime EDSEventFeeder::createDateTimeFromTimeType(ICalTime *datetime)
 {
     if (!datetime) {
         return QDateTime();
     }
 
-    QString zone = i_cal_time_get_tzid(datetime);
-    if (zone == "UTC") {
-        return QDateTime::fromString(QString("%1-%2-%3T%4:%5:%6Z")
-                                             .arg(i_cal_time_get_year(datetime), 4, 10, '0')
-                                             .arg(i_cal_time_get_month(datetime), 2, 10, '0')
-                                             .arg(i_cal_time_get_day(datetime), 2, 10, '0')
-                                             .arg(i_cal_time_get_hour(datetime), 2, 10, '0')
-                                             .arg(i_cal_time_get_minute(datetime), 2, 10, '0')
-                                             .arg(i_cal_time_get_second(datetime), 2, 10, '0'),
-                                     Qt::ISODate)
+    ICalTimezone *zone = i_cal_time_get_timezone(datetime);
+    int daylight = i_cal_time_is_daylight(datetime);
+    int offset = i_cal_timezone_get_utc_offset(zone, datetime, &daylight);
+    QTimeZone convertZone(offset);
+    if (zone && convertZone.isValid()) {
+        return QDateTime(QDate(i_cal_time_get_year(datetime), i_cal_time_get_month(datetime),
+                               i_cal_time_get_day(datetime)),
+                         QTime(i_cal_time_get_hour(datetime), i_cal_time_get_minute(datetime),
+                               i_cal_time_get_second(datetime)),
+                         convertZone)
                 .toLocalTime();
     } else {
         return QDateTime(QDate(i_cal_time_get_year(datetime), i_cal_time_get_month(datetime),
@@ -151,8 +151,8 @@ void EDSEventFeeder::onEcalClientConnected(GObject *source_object, GAsyncResult 
 {
     Q_UNUSED(source_object)
 
-    GError *error = nullptr;
-    ECalClient *client = nullptr;
+    GError *error = NULL;
+    ECalClient *client = NULL;
 
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
@@ -160,12 +160,40 @@ void EDSEventFeeder::onEcalClientConnected(GObject *source_object, GAsyncResult 
         if (error) {
             qCDebug(lcEDSEventFeeder)
                     << "Can't retrieve finished client connection:" << error->message;
-            g_error_free(error);
-            error = nullptr;
+            g_clear_error(&error);
             return;
         }
 
-        e_cal_client_get_view(client, feeder->m_searchExpr, nullptr, onViewCreated, feeder);
+        e_cal_client_get_view(client, feeder->m_searchExpr, feeder->m_cancellable, onViewCreated,
+                              feeder);
+    }
+}
+
+void EDSEventFeeder::connectViewCompleteSignal(ECalClientView *view)
+{
+    g_signal_connect(view, "complete", G_CALLBACK(onViewComplete), this);
+}
+
+void EDSEventFeeder::onViewComplete(ECalClientView *view, GError *error, gpointer user_data)
+{
+    /*
+        INFO: The "complete" signal is only needed on first startup to wait for the initial
+        stream of all objects to the view, we'll disconnect it here.
+        Otherwise, future view updates would cause duplicate signal connections.
+    */
+    guint signalId = g_signal_lookup("complete", G_OBJECT_TYPE(view));
+    g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_ID, signalId, 0, NULL, NULL, NULL);
+
+    if (error) {
+        qCCritical(lcEDSEventFeeder) << "Failed to wait for view completion, unable to subscribe "
+                                        "to live calendar updates:"
+                                     << error->message;
+        return;
+    }
+
+    EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
+    if (feeder) {
+        feeder->connectCalendarSignals(view);
     }
 }
 
@@ -214,19 +242,19 @@ void EDSEventFeeder::processEventsAdded(ECalClientView *view)
 
     if (client) {
         if (!m_clients.contains(client)) {
-            g_object_unref(client);
+            g_clear_object(&client);
             return;
         }
 
         // Use a class-managed reference instead
         const auto idx = m_clients.indexOf(client);
-        g_object_unref(client);
+        g_clear_object(&client);
 
         QString concreteSource = QString("%1-%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
-        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr,
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, m_cancellable,
                                      onClientEventsRequested, this);
     }
 }
@@ -238,18 +266,18 @@ void EDSEventFeeder::processEventsModified(ECalClientView *view)
 
     if (client) {
         if (!m_clients.contains(client)) {
-            g_object_unref(client);
+            g_clear_object(&client);
             return;
         }
 
         const auto idx = m_clients.indexOf(client);
-        g_object_unref(client);
+        g_clear_object(&client);
 
         QString concreteSource = QString("%1-%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
-        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr,
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, m_cancellable,
                                      onClientEventsRequested, this);
     }
 }
@@ -261,45 +289,43 @@ void EDSEventFeeder::processEventsRemoved(ECalClientView *view)
 
     if (client) {
         if (!m_clients.contains(client)) {
-            g_object_unref(client);
+            g_clear_object(&client);
             return;
         }
 
         const auto idx = m_clients.indexOf(client);
-        g_object_unref(client);
+        g_clear_object(&client);
 
         QString concreteSource = QString("%1-%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
-        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, nullptr,
+        e_cal_client_get_object_list(m_clients.at(idx), m_searchExpr, m_cancellable,
                                      onClientEventsRequested, this);
     }
 }
 
 void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result, gpointer user_data)
 {
-    GError *error = nullptr;
+    GError *error = NULL;
     ECalClient *client = E_CAL_CLIENT(source_object);
-    ECalClientView *view = nullptr;
+    ECalClientView *view = NULL;
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
 
     if (feeder && client) {
         if (!e_cal_client_get_view_finish(client, result, &view, &error)) {
             if (error) {
                 qCCritical(lcEDSEventFeeder) << "Can't retrieve finished view:" << error->message;
-                g_error_free(error);
-                error = nullptr;
+                g_clear_error(&error);
             }
             return;
         }
 
-        feeder->connectCalendarSignals(view);
+        feeder->connectViewCompleteSignal(view);
         e_cal_client_view_start(view, &error);
         if (error) {
             qCCritical(lcEDSEventFeeder) << "Can't start view:" << error->message;
-            g_error_free(error);
-            error = nullptr;
+            g_clear_error(&error);
             return;
         }
         feeder->m_clientViews.append(view);
@@ -314,8 +340,8 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
 void EDSEventFeeder::onClientEventsRequested(GObject *source_object, GAsyncResult *result,
                                              gpointer user_data)
 {
-    GError *error = nullptr;
-    GSList *components = nullptr;
+    GError *error = NULL;
+    GSList *components = NULL;
 
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
@@ -323,8 +349,7 @@ void EDSEventFeeder::onClientEventsRequested(GObject *source_object, GAsyncResul
                                                  &error)) {
             if (error) {
                 qCCritical(lcEDSEventFeeder) << "Can't retrieve events:" << error->message;
-                g_error_free(error);
-                error = nullptr;
+                g_clear_error(&error);
             }
             return;
         }
@@ -344,98 +369,138 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
     QString concreteSource = QString("%1-%2").arg(m_source, clientUid);
 
-    for (GSList *item = components; item != nullptr; item = g_slist_next(item)) {
+    QMap<QString, QList<QDateTime>> exdatesById;
+
+    for (GSList *item = components; item != NULL; item = g_slist_next(item)) {
         ICalComponent *component = I_CAL_COMPONENT(item->data);
         if (component && i_cal_component_isa(component) == I_CAL_VEVENT_COMPONENT) {
+            QString id = i_cal_component_get_uid(component);
+
+            ICalTime *dtstart = i_cal_component_get_dtstart(component);
+            QDateTime start = createDateTimeFromTimeType(dtstart);
+
+            ICalTime *dtend = i_cal_component_get_dtend(component);
+            QDateTime end = createDateTimeFromTimeType(dtend);
+
             // RRULE
             bool isRecurrent = false;
             ICalProperty *prop =
                     i_cal_component_get_first_property(component, I_CAL_RRULE_PROPERTY);
-            ICalRecurrence *rrule = nullptr;
+            ICalRecurrence *rrule = NULL;
             if (prop) {
                 isRecurrent = true;
                 rrule = i_cal_property_get_rrule(prop);
                 g_clear_object(&prop);
             }
 
-            ICalTime *dtstart = i_cal_component_get_dtstart(component);
-            QDateTime start = createDateTimeFromTimeType(dtstart);
-
-            QString location =
-                    manager.getJitsiRoomFromLocation(i_cal_component_get_location(component));
-
-            // Skip non-recurrent events that are outside of our date range
-            if (location.isEmpty()
-                || ((start < m_timeRangeStart || start > m_timeRangeEnd) && !isRecurrent)) {
-                continue;
-            }
-
-            ICalTime *dtend = i_cal_component_get_dtend(component);
-            QDateTime end = createDateTimeFromTimeType(dtend);
-
-            QString id = i_cal_component_get_uid(component);
-            QString summary = i_cal_component_get_summary(component);
-
             // RID: The first ever recorded time of a recurrent event instance. We'll use
             // 'UID-UNIX_TIMESTAMP' as ID.
             bool isUpdatedRecurrence = false;
+            bool isCancelledRecurrence = false;
             ICalTime *rid = i_cal_component_get_recurrenceid(component);
             if (rid && !i_cal_time_is_null_time(rid)) {
-                isUpdatedRecurrence = true;
-                id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+                if (exdatesById.value(id).contains(start)) {
+                    isCancelledRecurrence = true;
+                } else {
+                    isUpdatedRecurrence = true;
+                    id += QString("-%1").arg(createDateTimeFromTimeType(rid).toMSecsSinceEpoch());
+                }
             }
 
-            // Get EXDATE's
-            ICalTime *exdate = nullptr;
-            QList<QDateTime> exdates;
-            for (ICalProperty *prop =
-                         i_cal_component_get_first_property(component, I_CAL_EXDATE_PROPERTY);
-                 prop != nullptr;
-                 prop = i_cal_component_get_next_property(component, I_CAL_EXDATE_PROPERTY)) {
-                exdate = i_cal_property_get_exdate(prop);
-                exdates.append(createDateTimeFromTimeType(exdate));
+            // Multi-day handling
+            bool isMultiDay = start.daysTo(end.addSecs(-1)) > 0 && end > m_currentTime;
+            if (isMultiDay && end > m_timeRangeEnd) {
+                end = m_timeRangeEnd;
             }
 
-            // Recurrent origin event
-            if (isRecurrent && !isUpdatedRecurrence) {
+            // Status filter
+            ICalPropertyStatus status = i_cal_component_get_status(component);
+            bool isCancelled = (status == I_CAL_STATUS_CANCELLED || status == I_CAL_STATUS_FAILED
+                                || status == I_CAL_STATUS_DELETED || isCancelledRecurrence);
+
+            // Skip cancelled or non-recurrent events that are outside of our date range
+            if (isCancelled
+                || (!isRecurrent && !isUpdatedRecurrence
+                    && ((start < m_timeRangeStart && !isMultiDay) || start >= m_timeRangeEnd
+                        || end < m_currentTime))) {
+                continue;
+            }
+
+            QString summary = i_cal_component_get_summary(component);
+            QString location = i_cal_component_get_location(component);
+            QString description = i_cal_component_get_description(component);
+
+            if (isRecurrent) { // Recurrent origin event, parsed first
+                // Get EXDATE's
+                ICalTime *exdate = NULL;
+                QList<QDateTime> exdates;
+                for (ICalProperty *prop =
+                             i_cal_component_get_first_property(component, I_CAL_EXDATE_PROPERTY);
+                     prop != NULL;
+                     prop = i_cal_component_get_next_property(component, I_CAL_EXDATE_PROPERTY)) {
+                    exdate = i_cal_property_get_exdate(prop);
+                    exdates.append(createDateTimeFromTimeType(exdate));
+                }
+                exdatesById[id] = exdates;
+
                 ICalRecurIterator *recurrenceIter = i_cal_recur_iterator_new(rrule, dtstart);
-
                 if (recurrenceIter) {
                     qint64 duration = start.secsTo(end);
 
                     for (ICalTime *next = i_cal_recur_iterator_next(recurrenceIter);
                          !i_cal_time_is_null_time(next);
                          next = i_cal_recur_iterator_next(recurrenceIter)) {
-                        QDateTime recur = createDateTimeFromTimeType(next);
-                        if (recur > m_timeRangeEnd) {
+                        QDateTime recurStart = createDateTimeFromTimeType(next);
+                        QDateTime recurEnd = recurStart.addSecs(duration);
+                        if (recurStart >= m_timeRangeEnd) {
+                            // Recurrence instances outside of date range
                             break;
+                        } else if (recurEnd < m_currentTime) {
+                            // Recurrence instance ended earlier today
+                            continue;
                         }
 
-                        if (!exdates.contains(recur) && recur >= m_timeRangeStart) {
-                            QString nid = QString("%1-%2").arg(id).arg(recur.toMSecsSinceEpoch());
-                            manager.addDateEvent(new DateEvent(nid, concreteSource, recur,
-                                                               recur.addMSecs(duration), summary,
-                                                               location, true));
+                        // Recurrent multi-day handling
+                        bool recurMultiDay = recurStart.daysTo(recurEnd.addSecs(-1)) > 0
+                                && recurEnd > m_currentTime;
+                        if (recurMultiDay && recurEnd > m_timeRangeEnd) {
+                            recurEnd = m_timeRangeEnd;
+                        }
+
+                        if (!exdates.contains(recurStart)
+                            && (recurStart >= m_timeRangeStart || recurMultiDay)) {
+                            QString recurId =
+                                    QString("%1-%2").arg(id).arg(recurStart.toMSecsSinceEpoch());
+                            manager.addDateEvent(recurId, concreteSource, recurStart, recurEnd,
+                                                 summary, location, description);
                         }
                     }
 
                     i_cal_recur_iterator_free(recurrenceIter);
                 }
-            } else {
-                // Non-recurrent event or update of a recurrent event instance
-                if (isUpdatedRecurrence && manager.isAddedDateEvent(id)) {
+            } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
+                if ((start < m_timeRangeStart && !isMultiDay) || start >= m_timeRangeEnd
+                    || end < m_currentTime) {
+                    // Updated recurrence doesn't match our criteria anymore
+                    manager.removeDateEvent(id, start, end);
+                } else if (manager.isAddedDateEvent(id)) {
+                    // Exists but modified
                     manager.modifyDateEvent(id, concreteSource, start, end, summary, location,
-                                            true);
+                                            description);
                 } else {
-                    manager.addDateEvent(
-                            new DateEvent(id, concreteSource, start, end, summary, location, true));
+                    // Does not exist, e.g. moved from past to future, different day
+                    manager.addDateEvent(id, concreteSource, start, end, summary, location,
+                                         description);
                 }
+            } else { // Normal event, no recurrence, or update of a recurrent instance
+                manager.addDateEvent(id, concreteSource, start, end, summary, location,
+                                     description);
             }
         }
     }
 
     g_slist_free_full(components, g_object_unref);
-    components = nullptr;
+    components = NULL;
 
     qCInfo(lcEDSEventFeeder) << "Loaded events of source" << clientName << "(" << clientUid << ")";
 }

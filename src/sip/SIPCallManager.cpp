@@ -4,7 +4,6 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPAccountManager.h"
-#include "ExternalMediaManager.h"
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "RingToneFactory.h"
@@ -12,7 +11,6 @@
 #include "PhoneNumberUtil.h"
 #include "DtmfGenerator.h"
 #include "EnumTranslation.h"
-#include "StateManager.h"
 #include "ViewHelper.h"
 #include "AvatarManager.h"
 #include "USBDevices.h"
@@ -156,6 +154,15 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
     const auto contactInfo =
             PhoneNumberUtil::instance().contactInfoBySipUrl(QString::fromStdString(ci.remoteUri));
     const auto c = contactInfo.contact;
+
+    // Check if number is blocked (i.e. a blacklisted contact)
+    if (c && c->blockInfo().isBlocking) {
+        pj::CallOpParam prm;
+        prm.statusCode = static_cast<pjsip_status_code>(c->blockInfo().responseCode);
+        call->answer(prm);
+        return;
+    }
+
     QStringList bodyParts;
     QString displayName = contactInfo.phoneNumber;
     auto numberType = contactInfo.numberType;
@@ -391,7 +398,7 @@ void SIPCallManager::holdAllCalls() const
 
 void SIPCallManager::unholdAllCalls() const
 {
-    GlobalCallState::instance().unholdOtherCall();
+    GlobalCallState::instance().unholdAllCalls();
 }
 
 void SIPCallManager::toggleHoldCall(const QString &accountId, const int callId)
@@ -531,7 +538,7 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
     auto toCall = findCall(toAccountId, toCallId);
     if (!toCall) {
         qCCritical(lcSIPCallManager)
-                << "Cannot find call" << toAccountId << "in account" << toCallId;
+                << "Cannot find call" << toCallId << "in account" << toAccountId;
         return;
     }
 
@@ -596,6 +603,7 @@ void SIPCallManager::startConference()
     if (!m_isConferenceMode) {
         Q_ASSERT(m_calls.size() == 2);
 
+        m_isConferenceMode = true;
         unholdAllCalls();
 
         QTimer::singleShot(100, this, [this]() {
@@ -620,7 +628,6 @@ void SIPCallManager::startConference()
                         << "  file and line:" << err.srcFile << err.srcLine << "\n";
             }
 
-            m_isConferenceMode = true;
             GlobalCallState::instance().setIsPhoneConference(true);
             Q_EMIT isConferenceModeChanged();
         });
@@ -695,9 +702,10 @@ void SIPCallManager::addCall(SIPCall *call)
         const Contact *c = contactInfo.contact;
         QStringList bodyParts;
 
+        const QString name =
+                PhoneNumberUtil::instance().nameFromSipUrl(QString::fromStdString(ci.remoteUri));
         const QString title =
-                tr("Missed call from %1")
-                        .arg((c && !c->name().isEmpty()) ? c->name() : contactInfo.phoneNumber);
+                tr("Missed call from %1").arg((c && !c->name().isEmpty()) ? c->name() : name);
         const QString number = contactInfo.phoneNumber;
 
         if (c && !c->company().isEmpty()) {
@@ -832,6 +840,12 @@ bool SIPCallManager::isContactBlocked(const QString &contactId) const
             return true;
         }
     }
+
+    const auto *contact = AddressBook::instance().lookupByContactId(contactId);
+    if (contact && contact->blockInfo().isBlocking) {
+        return true;
+    }
+
     return false;
 }
 

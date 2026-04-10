@@ -28,6 +28,9 @@ class ViewHelper : public QObject
                        NOTIFY nextMeetingStartFlagsChanged FINAL)
     Q_PROPERTY(QObject *topDrawer MEMBER m_topDrawer NOTIFY topDrawerChanged FINAL)
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
+    Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
+    Q_PROPERTY(bool canSyncSystemMute READ canSyncSystemMute CONSTANT FINAL)
+    Q_PROPERTY(QString culturalSphereExtension READ culturalSphereExtension CONSTANT FINAL)
 
 public:
     static ViewHelper &instance()
@@ -64,6 +67,8 @@ public:
     Q_INVOKABLE int secondsDelta(const QDateTime &start, const QDateTime &end) const;
     Q_INVOKABLE void copyToClipboard(const QString &str) const;
     Q_INVOKABLE void reloadAddressBook() const;
+
+    Q_INVOKABLE QString preprocessSearchText(const QString &in) const;
 
     /// Returns the contact id for the phone number if such contact exists or empty string
     Q_INVOKABLE QString contactIdByNumber(const QString &phoneNumber) const;
@@ -105,10 +110,15 @@ public:
     Q_INVOKABLE bool isPhoneNumber(const QString &number) const;
     Q_INVOKABLE bool isValidJitsiRoomName(const QString &name) const;
 
+    bool isUnsupportedPlatform() const;
+    bool canSyncSystemMute() const;
+
     Q_INVOKABLE void
     requestMeeting(const QString &roomName,
                    QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
                    const QString &displayName = "");
+
+    Q_INVOKABLE void requestExternalAppointment(const QString &link);
 
     Q_INVOKABLE void setCallInForegroundByIds(const QString &accountId, int callId);
 
@@ -122,6 +132,10 @@ public:
 
     Q_INVOKABLE void toggleFullscreen();
 
+    Q_INVOKABLE uint numberOfGridCells() const;
+
+    QString culturalSphereExtension() const;
+
 public Q_SLOTS:
     Q_INVOKABLE void quitApplicationNoConfirm() const;
     Q_INVOKABLE void quitApplication();
@@ -132,6 +146,9 @@ private Q_SLOTS:
 
 private:
     explicit ViewHelper(QObject *parent = nullptr);
+    void initializeReplacers();
+
+    QHash<QRegularExpression, QString> m_preprocessRegexs;
 
     bool m_isPlayingRingTone = false;
     Ringer *m_ringer = nullptr;

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Controls.Material
 import base
 
@@ -13,35 +14,38 @@ Item {
         anchors.fill: parent
         clip: true
         flickableDirection: Flickable.AutoFlickIfNeeded
-        contentHeight: container.implicitHeight
-
+        contentHeight: options.implicitHeight
         ScrollBar.vertical: ScrollBar { width: 10 }
 
-        Column {
-            id: container
+        Accessible.role: Accessible.ButtonMenu
+        Accessible.name: firstAidHeader.text
+        Accessible.description: firstAidDescription.text
+
+        Shortcut {
+            sequence: "Esc"
+            onActivated: control.StackView.view.popCurrentItem(StackView.Immediate)
+        }
+
+        ColumnLayout {
+            id: options
             spacing: 20
-            anchors {
-                left: parent.left
-                right: parent.right
-            }
+            anchors.fill: parent
 
             Label {
-                text: qsTr("First Aid")
+                id: firstAidHeader
+                text: qsTr("Emergency Call")
                 font.pixelSize: 32
                 wrapMode: Label.Wrap
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                }
+
+                Accessible.ignored: true
             }
 
             Label {
+                id: firstAidDescription
                 text: qsTr("Clicking one of these buttons will end all current calls and start an emergency call.")
                 wrapMode: Label.Wrap
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                }
+
+                Accessible.ignored: true
             }
 
             Repeater {
@@ -49,9 +53,10 @@ Item {
                 delegate: Button {
                     id: delg
                     text: delg.displayName
-                    anchors.horizontalCenter: parent.horizontalCenter
                     highlighted: true
                     Material.accent: Theme.redColor
+                    Layout.preferredWidth: control.implicitWidth / 2
+                    Layout.alignment: Qt.AlignHCenter
 
                     onClicked: () => {
                         SIPCallManager.endAllCalls()
@@ -61,7 +66,34 @@ Item {
 
                     required property string number
                     required property string displayName
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: delg.displayName
+                    Accessible.description: qsTr("Tap to call emergency contact: %1 (%2)").arg(delg.displayName).arg(delg.number)
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => delg.click()
                 }
+            }
+
+            Item {
+                Layout.preferredHeight: 20
+            }
+
+            Button {
+                id: firstAidExit
+                text: qsTr("Close")
+                Layout.preferredWidth: control.implicitWidth / 2
+                Layout.alignment: Qt.AlignHCenter
+
+                onClicked: {
+                    control.StackView.view.popCurrentItem(StackView.Immediate)
+                }
+
+                Accessible.role: Accessible.Button
+                Accessible.name: firstAidExit.text
+                Accessible.description: qsTr("Exit the emergency call menu without initiating any action")
+                Accessible.focusable: true
+                Accessible.onPressAction: () => firstAidExit.click()
             }
         }
     }
@@ -69,6 +101,7 @@ Item {
     HeaderIconButton {
         id: closeButton
         iconSource: Icons.mobileCloseApp
+        accessiblePurpose: qsTr("Close emergency call menu")
         anchors {
             top: parent.top
             right: parent.right

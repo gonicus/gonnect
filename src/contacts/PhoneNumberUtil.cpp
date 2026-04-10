@@ -48,26 +48,7 @@ QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
     QString result(number);
 
     static const QRegularExpression stripRegEx("[^0-9#+*]");
-
     result.replace(stripRegEx, "");
-
-    if (!result.size()) {
-        return result;
-    }
-
-    if (result.size() <= 3) {
-        return result;
-    }
-
-    static const QRegularExpression doubleZeroAtBeginning("^00");
-    result.replace(doubleZeroAtBeginning, "+");
-
-    static const QRegularExpression singleZeroAtBeginning("^0");
-    result.replace(singleZeroAtBeginning, "+49");
-
-    if (result.at(0) != '+') {
-        result.prepend('+');
-    }
 
     return result;
 }
@@ -179,6 +160,23 @@ QString PhoneNumberUtil::numberFromSipUrl(const QString &sipUrl)
         return matchResult.captured(1);
     }
     return "";
+}
+
+QString PhoneNumberUtil::nameFromSipUrl(const QString &sipUrl)
+{
+    static const QRegularExpression sipNameRegex(
+            R"(^["]?(?<pre>[^"<]*)["]?.*sips?:(?<post>.*)@.*$)",
+            QRegularExpression::CaseInsensitiveOption);
+
+    const auto matchResult = sipNameRegex.match(sipUrl);
+    if (matchResult.hasMatch()) {
+        const auto pre = matchResult.captured("pre");
+        if (!pre.isEmpty()) {
+            return pre;
+        }
+        return matchResult.captured("post");
+    }
+    return numberFromSipUrl(sipUrl);
 }
 
 bool PhoneNumberUtil::isEmergencyCallUrl(const QString &sipUrl)

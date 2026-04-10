@@ -1,25 +1,49 @@
-qt_add_plugin(LDAPAddressBookFactory STATIC
-  CLASS_NAME LDAPAddressBookFactory
+if(ENABLE_LDAP)
+    if(UNIX)
+        include(FindPkgConfig)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(OPENLDAP REQUIRED IMPORTED_TARGET lber ldap)
+        pkg_check_modules(SASL2 IMPORTED_TARGET libsasl2)
 
-  LDAPAddressBookFactory.cpp
-  LDAPAddressBookFactory.h
-  LDAPAddressBookFeeder.cpp
-  LDAPAddressBookFeeder.h
-)
+        set(LDAP_PLATFORM_LIBS PkgConfig::OPENLDAP)
+    else()
+        find_package(OpenLDAP REQUIRED)
+        set(LDAP_PLATFORM_LIBS OpenLDAP::LDAP)
+    endif()
 
-target_include_directories(LDAPAddressBookFactory
-  PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/contacts
-    ${PROJECT_SOURCE_DIR}/src/dbus/portal
-    ${PROJECT_SOURCE_DIR}/src/ui
-    ${PROJECT_SOURCE_DIR}/src/sip
-    ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}
-    ${PROJECT_BINARY_DIR}/src
-)
+    qt_add_plugin(LDAPAddressBookFactory STATIC
+      CLASS_NAME LDAPAddressBookFactory
+    
+      LDAPAddressBookFactory.cpp
+      LDAPAddressBookFactory.h
+      LDAPAddressBookFeeder.cpp
+      LDAPAddressBookFeeder.h
+      LDAPInitializer.cpp
+      LDAPInitializer.h
+    )
 
-target_link_libraries(LDAPAddressBookFactory PRIVATE
-  Qt6::Core
-  Qt6::Gui
-  Qt6::Quick
-  Qt6::Widgets)
+    if(HAVE_SASL)
+        target_compile_definitions(LDAPAddressBookFactory PRIVATE HAVE_SASL=1)
+    endif()
+
+    target_include_directories(LDAPAddressBookFactory
+      PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/dbus/portal
+        ${PROJECT_SOURCE_DIR}/src/ui
+        ${PROJECT_SOURCE_DIR}/src/sip
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_BINARY_DIR}/src
+    )
+    
+    target_link_libraries(LDAPAddressBookFactory
+    PRIVATE
+      Qt6::Core
+      Qt6::Gui
+      Qt6::Quick
+      ${LDAP_PLATFORM_LIBS}
+    )
+    
+    set(LDAP_ADDRESSBOOK_FACTORY LDAPAddressBookFactory PARENT_SCOPE)
+endif()

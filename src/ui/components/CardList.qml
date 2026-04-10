@@ -13,6 +13,10 @@ Item {
 
     default property alias content: col.children
 
+    Accessible.role: Accessible.List
+    Accessible.name: control.title
+    Accessible.description: qsTr("List of configurable options")
+
     Card {
         id: background
         anchors {
@@ -32,6 +36,8 @@ Item {
             left: parent.left
             right: parent.right
         }
+
+        Accessible.ignored: true
     }
 
     Column {

@@ -221,12 +221,6 @@ void HeadsetDevice::setMute(bool flag)
         return;
     }
 
-    if (m_ignoreNextMuteUpdate) {
-        m_ignoreNextMuteUpdate = false;
-        qCDebug(lcHeadset).noquote().nospace() << "Ignoring setMute(" << flag << ") call";
-        return;
-    }
-
     m_muted = flag;
 
     if (m_displaySupported && m_teamsUsageMapping.contains(UsageId::Teams_IconsControl)) {
@@ -405,10 +399,11 @@ void HeadsetDevice::processEvents()
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_PhoneMute);
                     if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
                         m_muted = !m_muted;
-                        Q_EMIT mute();
 
                         qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
                         setMute(m_muted);
+
+                        Q_EMIT mute();
                     }
                 }
 

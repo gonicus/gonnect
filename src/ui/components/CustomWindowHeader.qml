@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.Material
 import base
 
 Rectangle {
@@ -19,8 +20,16 @@ Rectangle {
     readonly property var window: control.Window.window
     readonly property bool active: control.Window.window?.active ?? false
 
-    property int mainBarWidth: 0
-    property color mainBarColor
+    required property int mainBarWidth
+    required property color mainBarColor
+
+    required property bool showSearch
+
+    required property var tabRoot
+    required property var pageRoot
+
+    Accessible.role: Accessible.Heading
+    Accessible.name: qsTr("GOnnect window header")
 
     function focusSearchBox() {
         searchField.giveFocus()
@@ -38,6 +47,8 @@ Rectangle {
             bottom: parent.bottom
         }
 
+        Accessible.ignored: true
+
         Rectangle {
             color: mimicRect.color
             width: mimicRect.radius
@@ -46,6 +57,8 @@ Rectangle {
                 bottom: parent.bottom
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
 
         Rectangle {
@@ -56,6 +69,8 @@ Rectangle {
                 bottom: parent.bottom
                 left: parent.left
             }
+
+            Accessible.ignored: true
         }
 
         Rectangle {
@@ -66,6 +81,8 @@ Rectangle {
                 bottom: parent.bottom
                 right: parent.right
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -78,6 +95,8 @@ Rectangle {
             right: control.right
             bottom: control.bottom
         }
+
+        Accessible.ignored: true
     }
 
     DragHandler {
@@ -102,6 +121,8 @@ Rectangle {
 
         color: control.mainBarColor
 
+        Accessible.ignored: true
+
         Rectangle {
             id: border
             color: Theme.borderColor
@@ -111,6 +132,8 @@ Rectangle {
                 top: parent.top
                 bottom: parent.bottom
             }
+
+            Accessible.ignored: true
         }
     }
 
@@ -131,8 +154,18 @@ Rectangle {
         }
     }
 
+    EditModeOptions {
+        id: editControls
+        visible: !control.showSearch
+        anchors.centerIn: parent
+
+        tabRoot: control.tabRoot
+        pageRoot: control.pageRoot
+    }
+
     SearchField {
         id: searchField
+        visible: control.showSearch
         anchors.centerIn: parent
 
         Keys.onDownPressed: () => {
@@ -143,6 +176,8 @@ Rectangle {
             resultPopup.initialKeyUp()
             resultPopup.forceActiveFocus()
         }
+        Keys.onEnterPressed: () => resultPopup.triggerPrimaryAction()
+        Keys.onReturnPressed: () => resultPopup.triggerPrimaryAction()
         Keys.onEscapePressed: () => {
             if (searchField.text.trim() === "") {
                 const nextItem = searchField.nextItemInFocusChain(true)
@@ -182,6 +217,7 @@ Rectangle {
         HeaderIconButton {
             id: burgerMenuButton
             iconSource: Icons.applicationMenu
+            accessiblePurpose: qsTr("App menu")
             active: control.active
             iconSize: 16
             anchors.verticalCenter: parent.verticalCenter
@@ -199,8 +235,11 @@ Rectangle {
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
-            showBuddyStatus: ViewHelper.currentUser?.hasBuddyState ?? false
+            showBuddyStatus: avatarImage.hasBuddyState || avatarImage.isUnregistered
             buddyStatus: SIPBuddyState.UNKNOWN
+            isUnregistered: true
+
+            property bool hasBuddyState: ViewHelper.currentUser?.hasBuddyState ?? false
 
             Component.onCompleted: () => {
                 avatarImage.updateBuddyStatus()
@@ -219,10 +258,22 @@ Rectangle {
                     avatarImage.updateBuddyStatus()
                 }
             }
+
+            Connections {
+                target: SIPAccountManager
+                function onSipRegisteredChanged(status : bool) {
+                    if (status) {
+                        avatarImage.isUnregistered = false
+                    } else {
+                        avatarImage.isUnregistered = true
+                    }
+                }
+            }
         }
 
         HeaderIconButton {
             iconSource: Icons.mobileCloseApp
+            accessiblePurpose: qsTr("Close GOnnect window")
             active: control.active
             iconSize: 10
             anchors.verticalCenter: parent.verticalCenter

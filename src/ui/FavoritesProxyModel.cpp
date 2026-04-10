@@ -6,8 +6,12 @@ FavoritesProxyModel::FavoritesProxyModel(QObject *parent) : QSortFilterProxyMode
 {
 
     connect(this, &FavoritesProxyModel::showJitsiChanged, this, [this]() {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
         endFilterChange();
+#else
+        invalidateRowsFilter();
+#endif
     });
 }
 

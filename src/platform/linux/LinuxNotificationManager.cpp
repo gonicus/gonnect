@@ -14,6 +14,10 @@ NotificationManager &NotificationManager::instance()
 LinuxNotificationManager::LinuxNotificationManager() : NotificationManager()
 {
     notify_init(qAppName().toStdString().c_str());
+
+    if (GList *caps = notify_get_server_caps()) {
+        g_list_free_full(caps, g_free);
+    }
 }
 
 void LinuxNotificationManager::handleAction(QString id, QString action, QVariantList parameters)
@@ -95,6 +99,18 @@ QString LinuxNotificationManager::add(Notification *notification)
 
     notify_notification_set_category(internalNotification,
                                      notification->category().toStdString().c_str());
+
+    // Default action
+    if (!notification->defaultAction().isEmpty()) {
+        notify_notification_add_action(
+                internalNotification, "default", "default",
+                [](NotifyNotification *notification, char *, gpointer user_data) {
+                    Notification *en = (Notification *)user_data;
+                    Q_EMIT en->actionInvoked(en->defaultAction(), en->defaultActionParameters());
+                    notify_notification_close(notification, NULL);
+                },
+                (gpointer)notification, NULL);
+    }
 
     // Assemble actions
     QList<QVariantMap> buttonDescriptions = notification->buttonDescriptions();

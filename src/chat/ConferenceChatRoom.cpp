@@ -42,3 +42,10 @@ void ConferenceChatRoom::resetUnreadCount()
 {
     // Unsupported
 }
+
+void ConferenceChatRoom::clear()
+{
+    qDeleteAll(m_messages);
+    m_messages.clear();
+    Q_EMIT chatMessagesReset();
+}
