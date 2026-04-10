@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://docs.gonicus.de/gonnect/"">Documentation</a> |
+  <a href="https://docs.gonicus.de/gonnect"">Documentation</a> |
   <a href="https://github.com/gonicus/gonnect/issues">Issues</a> |
   <a href="https://flathub.org/apps/de.gonicus.gonnect">Install</a>
 </p>
