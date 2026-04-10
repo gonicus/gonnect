@@ -120,8 +120,6 @@ jobs:
           path: build/Release/GOnnect*.dmg
 
   format:
-    # disable temporarily due to defect action: https://github.com/jidicula/clang-format-action/issues/267
-    if: false
     runs-on: ubuntu-24.04
     name: "Code Formatting"
     steps:
