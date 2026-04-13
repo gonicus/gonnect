@@ -571,11 +571,12 @@ void EDSAddressBookFeeder::addAvatar(QString id, EContact *contact, QDateTime ch
                 if (!image.isNull()) {
                     QByteArray avatar;
                     QBuffer buffer(&avatar);
-                    buffer.open(QIODevice::WriteOnly);
-                    // INFO: EDS stores contact photos as PNG ("*.image-2Fpng")
-                    image.save(&buffer, "PNG");
-                    if (avatar.size()) {
-                        AvatarManager::instance().addExternalImage(id, avatar, changed);
+                    if (buffer.open(QIODevice::WriteOnly)) {
+                        // INFO: EDS stores contact photos as PNG ("*.image-2Fpng")
+                        image.save(&buffer, "PNG");
+                        if (avatar.size()) {
+                            AvatarManager::instance().addExternalImage(id, avatar, changed);
+                        }
                     }
                 }
             }

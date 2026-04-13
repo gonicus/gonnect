@@ -2,6 +2,8 @@
 
 #include <QString>
 #include <QList>
+#include <algorithm>
+#include <numeric>
 
 class FuzzyCompare
 {
@@ -19,11 +21,11 @@ public:
         QList<qreal> idx(list.size());
         std::iota(idx.begin(), idx.end(), 0);
 
-        std::sort(idx.begin(), idx.end(), [&weights](const qsizetype left, const qsizetype right) {
+        std::ranges::sort(idx, [&weights](const qsizetype left, const qsizetype right) {
             return weights.at(left) < weights.at(right);
         });
 
-        std::transform(idx.begin(), idx.end(), list.begin(),
-                       [&listCopy](const qsizetype i) { return listCopy[i]; });
+        std::ranges::transform(idx, list.begin(),
+                               [&listCopy](const qsizetype i) { return listCopy[i]; });
     }
 };
