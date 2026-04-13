@@ -81,7 +81,7 @@ void SIPAccount::initialize()
         if (!sipURI.match(voiceMailUri).hasMatch()) {
             qCCritical(lcSIPAccount) << "'voiceMailUri' is no valid SIP URI:" << voiceMailUri;
             ErrorBus::instance().addFatalError(
-                    tr("'voiceMailUri' is no valid SIP URI: %1").arg(userUri));
+                    tr("'voiceMailUri' is no valid SIP URI: %1").arg(voiceMailUri));
             Q_EMIT initialized(false);
             return;
         }

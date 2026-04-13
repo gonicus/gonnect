@@ -155,7 +155,7 @@ private:
 
     QList<ResponseItem *> m_metadata;
 
-    pj::AudioMedia *m_aud_med = NULL;
+    pj::AudioMedia *m_aud_med = nullptr;
     IMHandler *m_imHandler = nullptr;
     Sniffer *m_sniffer = nullptr;
 

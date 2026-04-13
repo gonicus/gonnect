@@ -60,7 +60,9 @@ void KuandoOmega::send(bool on)
     buf[62] = checksum >> 8;
     buf[63] = checksum & 0xFF;
 
-    hid_write(m_device, buf, sizeof(buf));
+    if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+        qCWarning(lcKuandoOmega) << "failed to write to Kuando Omega device";
+    }
 }
 
 void KuandoOmega::sendKeepAlive() const
@@ -89,5 +91,7 @@ void KuandoOmega::sendKeepAlive() const
     buf[62] = checksum >> 8;
     buf[63] = checksum & 0xFF;
 
-    hid_write(m_device, buf, sizeof(buf));
+    if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+        qCWarning(lcKuandoOmega) << "failed to write keepalive to Kuando Omega device";
+    }
 }

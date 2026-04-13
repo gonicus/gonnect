@@ -16,7 +16,7 @@ AkonadiEventFeeder::AkonadiEventFeeder(QObject *parent, const QString &source,
       m_timeRangeStart(timeRangeStart),
       m_timeRangeEnd(timeRangeEnd),
       m_session(new Akonadi::Session("GOnnect::CalendarSession")),
-      m_monitor(new Akonadi::Monitor(parent))
+      m_monitor(new Akonadi::Monitor())
 {
 }
 
@@ -122,7 +122,8 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         // RRULE
                         bool isRecurrent = event->recurs();
                         KCalendarCore::Recurrence *recurrence = event->recurrence();
-                        KCalendarCore::RecurrenceRule *rrule = recurrence->defaultRRule();
+                        KCalendarCore::RecurrenceRule *rrule =
+                                isRecurrent ? recurrence->defaultRRule() : nullptr;
 
                         // RID: The first ever recorded time of a recurrent event instance. We'll
                         // use 'UID-UNIX_TIMESTAMP' as ID.
@@ -161,7 +162,7 @@ void AkonadiEventFeeder::processCollections(KJob *job)
                         QString location = event->location();
                         QString description = event->description();
 
-                        if (isRecurrent) { // Recurrent origin event, parsed first
+                        if (isRecurrent && rrule) { // Recurrent origin event, parsed first
                             // Get EXDATE's
                             QList<QDateTime> exdates;
                             for (auto &exdate : recurrence->exDateTimes()) {
