@@ -52,6 +52,8 @@ QString AddressBookManager::hashForSettingsGroup(const QString &group)
 void AddressBookManager::initAddressBookConfigs()
 {
     ReadOnlyConfdSettings settings;
+    int retryCount = settings.value("generic/feederPluginRetryCount", 5).toInt();
+    int retryInterval = settings.value("generic/feederPluginRetryInterval", 10000).toInt();
 
     const QObjectList &staticPlugins = QPluginLoader::staticInstances();
 
@@ -64,7 +66,7 @@ void AddressBookManager::initAddressBookConfigs()
 
             for (auto &cfg : std::as_const(configs)) {
                 m_addressBookFeeders.insert(
-                        cfg, addrPlugin->createFeeder(cfg, m_retryCount, m_retryInterval, this));
+                        cfg, addrPlugin->createFeeder(cfg, retryCount, retryInterval, this));
                 m_addressBookConfigs.push_back(cfg);
             }
         }

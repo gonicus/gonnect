@@ -140,7 +140,7 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     if (s_bindMethods.contains(bindMethodStr)) {
         bindMethod = s_bindMethods.value(bindMethodStr);
     } else {
-        // TODO: Seems like an error where a simple retry seems pointless?
+        // INFO: This would point towards a config issue - not going to retry automatically
         qCCritical(lcLDAPAddressBookFeeder).nospace()
                 << "Unknown LDAP bind method '" << bindMethodStr
                 << "' - initialization of LDAP account will be aborted.";

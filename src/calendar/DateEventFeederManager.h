@@ -49,7 +49,4 @@ private:
     QHash<QString, IDateEventFeeder *> m_dateEventFeeders;
     QStringList m_feederConfigIds;
     bool m_isReconnectSignalSetup = false;
-
-    int m_retryCount = 5;
-    int m_retryInterval = 10000; // TODO: chrono...
 };

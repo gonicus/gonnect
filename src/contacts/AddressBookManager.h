@@ -42,7 +42,4 @@ private:
     QStringList m_addressBookConfigs;
     QStringList m_addressBookQueue;
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
-
-    int m_retryCount = 5;
-    int m_retryInterval = 10000; // TODO: chrono...
 };
