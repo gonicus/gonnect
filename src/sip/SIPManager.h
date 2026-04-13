@@ -91,7 +91,7 @@ private:
 
     SIPMediaConfig *m_mediaConfig = nullptr;
     SIPUserAgentConfig *m_uaConfig = nullptr;
-    SIPLogWriter *m_logWriter = nullptr;
+    std::unique_ptr<SIPLogWriter> m_logWriter;
     SIPEventLoop *m_ev = nullptr;
 
     pj::Endpoint m_ep;

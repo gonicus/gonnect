@@ -6,7 +6,7 @@ import base
 Button {
     id: control
     visible: GlobalInfo.hasEmergencyNumbers
-    text: qsTr("Emegency call")
+    text: qsTr("Emergency call")
     icon.source: "qrc:/icons/ISO_7010_E004" + ViewHelper.culturalSphereExtension + ".svg"
     highlighted: true
 

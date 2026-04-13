@@ -52,7 +52,7 @@ void WindowsInhibitHelper::inhibit(unsigned int flags, const QString &reason)
     Q_UNUSED(reason)
 
     if (!m_inhibit) {
-        auto app = qobject_cast<Application *>(Application::instance());
+        auto app = static_cast<Application *>(Application::instance());
         auto hwnd = app->rootWindow()->winId();
         QString msg = QObject::tr("There are still phone calls going on");
         ShutdownBlockReasonCreate(reinterpret_cast<HWND>(hwnd),
@@ -66,7 +66,7 @@ void WindowsInhibitHelper::inhibit(unsigned int flags, const QString &reason)
 void WindowsInhibitHelper::release()
 {
     if (m_inhibit) {
-        auto app = qobject_cast<Application *>(Application::instance());
+        auto app = static_cast<Application *>(Application::instance());
         auto hwnd = app->rootWindow()->winId();
         ShutdownBlockReasonDestroy(reinterpret_cast<HWND>(hwnd));
 

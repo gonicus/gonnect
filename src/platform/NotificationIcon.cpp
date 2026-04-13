@@ -50,6 +50,9 @@ NotificationIcon::NotificationIcon(const QString &fileUri, const QString &emblem
     }
 
     QBuffer buffer(&m_data);
-    buffer.open(QIODevice::WriteOnly);
+    if (!buffer.open(QIODevice::WriteOnly)) {
+        qCWarning(lcNotifications) << "unable to open buffer for PNG encoding";
+        return;
+    }
     tmpImage.save(&buffer, "PNG");
 }
