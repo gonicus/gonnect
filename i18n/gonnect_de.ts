@@ -1965,7 +1965,7 @@
     <name>FirstAidButton</name>
     <message>
         <location filename="../src/ui/components/controls/FirstAidButton.qml" line="9"/>
-        <source>Emegency call</source>
+        <source>Emergency call</source>
         <translation>Notruf</translation>
     </message>
     <message>

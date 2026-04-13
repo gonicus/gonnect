@@ -99,10 +99,10 @@ void SIPManager::initialize()
     m_uaConfig->applyConfig(epConfig);
 
     // Setup log writer
-    m_logWriter = new SIPLogWriter();
+    m_logWriter = std::make_unique<SIPLogWriter>();
 
     pj::LogConfig *log_cfg = &epConfig.logConfig;
-    log_cfg->writer = m_logWriter;
+    log_cfg->writer = m_logWriter.get();
     log_cfg->decor = log_cfg->decor
             & ~(::pj_log_decoration::PJ_LOG_HAS_CR | ::pj_log_decoration::PJ_LOG_HAS_NEWLINE
                 | ::pj_log_decoration::PJ_LOG_HAS_TIME | ::pj_log_decoration::PJ_LOG_HAS_MICRO_SEC);
@@ -165,7 +165,7 @@ void SIPManager::setPreferredCodecs()
     int invalidCodecs = 0;
     for (const auto &pC : preferredCodecs) {
         try {
-            pj::CodecParam param = m_ep.codecGetParam(pC.toStdString());
+            m_ep.codecGetParam(pC.toStdString()); // throws if codec is unknown
         } catch (pj::Error &err) {
             invalidCodecs++;
         }
