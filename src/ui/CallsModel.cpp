@@ -292,8 +292,9 @@ void CallsModel::updateCalls()
         }
 
         callInfo->callId = callId;
-        if (auto *account = qobject_cast<SIPAccount *>(call->parent()))
+        if (auto *account = qobject_cast<SIPAccount *>(call->parent())) {
             callInfo->accountId = account->id();
+        }
         callInfo->remoteUri = call->sipUrl();
         callInfo->established = call->establishedTime();
         callInfo->isEstablished = call->isEstablished();
