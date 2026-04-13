@@ -433,7 +433,7 @@ void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
     }
 }
 
-void SIPCall::rttSend(const QString &text)
+void SIPCall::rttSend(const QString &text) // TODO: Is this actually char by char
 {
     pj::CallSendTextParam prm;
     prm.text = text.toStdString();

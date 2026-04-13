@@ -14,6 +14,7 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
 
         // Clear model containing the RTT messages
         m_model->reset();
+        m_newMessage = true;
 
         // Connect to RTT signals of the new call
         m_call = m_manager->getCurrentCall();
@@ -23,12 +24,12 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
                     m_model->addMessage(QDateTime::currentMSecsSinceEpoch(), message, false);
                     m_newMessage = false;
                 } else {
-                    m_model->updateMessage(message, false);
+                    m_model->updateMessage(message, false, false);
                 }
             });
             m_committed =
                     connect(m_call, &SIPCall::rttBubbleCommitted, this, [this](QString message) {
-                        m_model->updateMessage(message, true);
+                        m_model->updateMessage(message, false, true);
                         m_newMessage = true;
                     });
         }

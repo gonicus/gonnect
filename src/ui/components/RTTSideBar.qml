@@ -57,33 +57,66 @@ Item {
             bottom: parent.bottom
         }
 
+        property bool newMessage: true
+
+        Timer {
+            id: rttTimeoutTimer
+            interval: 6000
+            repeat: true
+
+            onTriggered: () => {
+                rttListView.model.updateMessage(rttInputField.text, true, true)
+                rttInputContainer.newMessage = true
+                rttInputField.text = ""
+            }
+        }
+
         TextField {
             id: rttInputField
             placeholderText: "Message..."
-            onAccepted: focus = false // needed?
+            //onAccepted: focus = false
 
             Keys.onPressed: (event) => {
                 if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-                    RTTProvider.call.rttSendLineSeperator();
+                    RTTProvider.call.rttSendLineSeperator()
+
                     event.accepted = true
+
+                    rttListView.model.updateMessage(rttInputField.text, true, true)
+                    rttInputContainer.newMessage = true
+                    rttTimeoutTimer.restart()
+                    rttInputField.text = ""
                 } else if (event.key === Qt.Key_Backspace) {
                     RTTProvider.call.rttSendBackspace()
+
+                    event.accepted = true
+
+                    rttInputField.text = rttInputField.text.slice(0, -1)
+                    rttListView.model.updateMessage(rttInputField.text, true, false)
                 } else if (event.key === Qt.Key_G && (event.modifiers & Qt.ControlModifier)) {
                     // Which key should trigger this?
                     RTTProvider.call.rttSendBell()
+
                     event.accepted = true
                 }
             }
 
             onTextEdited: {
-                let lastChar = text.charAt(cursorPosition - 1);
+                let lastChar = rttInputField.text.charAt(rttInputField.length - 1);
                 if (lastChar !== "") {
                     RTTProvider.call.rttSend(lastChar);
+
+                    if (rttInputContainer.newMessage) {
+                        rttListView.model.addMessage(Date.now(), rttInputField.text, true)
+                        rttInputContainer.newMessage = false
+                    } else {
+                        rttListView.model.updateMessage(rttInputField.text, true, false)
+                    }
                 }
             }
 
             Accessible.role: Accessible.EditableText
-            Accessible.name: chatInputField.placeholderText
+            Accessible.name: rttInputField.placeholderText
             Accessible.focusable: true
         }
     }
