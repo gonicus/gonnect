@@ -90,6 +90,8 @@ void SIPManager::initialize()
                                                         "*.critical=true"));
     }
 
+    epConfig.uaConfig.mwiUnsolicitedEnabled = true;
+
     m_mediaConfig = new SIPMediaConfig(this);
     m_mediaConfig->applyConfig(epConfig);
 
@@ -97,10 +99,10 @@ void SIPManager::initialize()
     m_uaConfig->applyConfig(epConfig);
 
     // Setup log writer
-    m_logWriter = new SIPLogWriter();
+    m_logWriter = std::make_unique<SIPLogWriter>();
 
     pj::LogConfig *log_cfg = &epConfig.logConfig;
-    log_cfg->writer = m_logWriter;
+    log_cfg->writer = m_logWriter.get();
     log_cfg->decor = log_cfg->decor
             & ~(::pj_log_decoration::PJ_LOG_HAS_CR | ::pj_log_decoration::PJ_LOG_HAS_NEWLINE
                 | ::pj_log_decoration::PJ_LOG_HAS_TIME | ::pj_log_decoration::PJ_LOG_HAS_MICRO_SEC);
@@ -163,7 +165,7 @@ void SIPManager::setPreferredCodecs()
     int invalidCodecs = 0;
     for (const auto &pC : preferredCodecs) {
         try {
-            pj::CodecParam param = m_ep.codecGetParam(pC.toStdString());
+            m_ep.codecGetParam(pC.toStdString()); // throws if codec is unknown
         } catch (pj::Error &err) {
             invalidCodecs++;
         }
@@ -344,6 +346,7 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
 void SIPManager::suspend()
 {
     qCDebug(lcSIPManager) << "suspending SIP";
+    m_suspended = true;
 
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_SERVICE_UNAVAILABLE;
@@ -357,7 +360,7 @@ void SIPManager::suspend()
     // Unregister account(s)
     auto accounts = SIPAccountManager::instance().accounts();
     for (auto account : std::as_const(accounts)) {
-        account->setRegistration(false);
+        account->deactivateTransports();
     }
 
     // Shutdown transports
@@ -369,10 +372,25 @@ void SIPManager::suspend()
 
 void SIPManager::resume()
 {
+    if (!m_suspended) {
+        return;
+    }
+
+    m_suspended = false;
+
     // Since resume may be called in more network changed cases, only
     // do this when we have no active calls going.
-    if (!!SIPCallManager::instance().hasActiveCalls()) {
-        // Restore transports
+    if (!SIPCallManager::instance().hasActiveCalls()) {
+        qCDebug(lcSIPManager) << "resuming SIP";
+
+        // Activate transports again
+        auto accounts = SIPAccountManager::instance().accounts();
+        for (auto account : std::as_const(accounts)) {
+            account->setAfterResume();
+            account->setRegistration(false);
+            account->activateTransports();
+        }
+
         try {
             pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
         } catch (pj::Error &err) {
@@ -381,9 +399,8 @@ void SIPManager::resume()
         }
 
         // Re-activate account registration
-        auto accounts = SIPAccountManager::instance().accounts();
         for (auto account : std::as_const(accounts)) {
-            account->setRegistration(false);
+            account->setRegistration(true);
         }
     }
 }

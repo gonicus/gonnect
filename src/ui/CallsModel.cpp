@@ -20,7 +20,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&callManager, &SIPCallManager::establishedChanged, this, [this](SIPCall *call) {
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->isEstablished = call->isEstablished();
             callInfo->established = call->establishedTime();
             callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && callInfo->isEstablished;
@@ -28,6 +28,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
             auto idx = createIndex(index, 0);
             Q_EMIT dataChanged(idx, idx,
                                {
+                                       static_cast<int>(Roles::IsInProgress),
                                        static_cast<int>(Roles::IsEstablished),
                                        static_cast<int>(Roles::EstablishedTime),
                                        static_cast<int>(Roles::HasCapabilityJitsi),
@@ -38,7 +39,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&callManager, &SIPCallManager::metadataChanged, this, [this](SIPCall *call) {
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->hasMetadata = call->hasMetadata();
 
             auto idx = createIndex(index, 0);
@@ -50,7 +51,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
 
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->isHolding = call->isHolding();
 
             auto idx = createIndex(index, 0);
@@ -62,7 +63,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
 
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->isBlocked = call->isBlocked();
 
             auto idx = createIndex(index, 0);
@@ -75,7 +76,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                 auto callInfo = m_callsHash.value(call->getId());
                 const auto index = m_calls.indexOf(callInfo);
 
-                if (index >= 0) {
+                if (callInfo && index >= 0) {
                     callInfo->incomingAudioLevel = QtAudio::convertVolume(
                             level, QtAudio::LinearVolumeScale, QtAudio::LogarithmicVolumeScale);
 
@@ -174,7 +175,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         auto callInfo = m_callsHash.value(callId);
         const auto index = m_calls.indexOf(callInfo);
 
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->statusCode = static_cast<pjsip_status_code>(statusCode);
 
             auto idx = createIndex(index, 0);
@@ -186,7 +187,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
 
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && callInfo->isEstablished;
 
             auto idx = createIndex(index, 0);
@@ -231,6 +232,7 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::Country), "country" },
         { static_cast<int>(Roles::Company), "company" },
         { static_cast<int>(Roles::IsEstablished), "isEstablished" },
+        { static_cast<int>(Roles::IsInProgress), "isInProgress" },
         { static_cast<int>(Roles::EstablishedTime), "establishedTime" },
         { static_cast<int>(Roles::IsHolding), "isHolding" },
         { static_cast<int>(Roles::IsBlocked), "isBlocked" },
@@ -290,10 +292,13 @@ void CallsModel::updateCalls()
         }
 
         callInfo->callId = callId;
-        callInfo->accountId = qobject_cast<SIPAccount *>(call->parent())->id();
+        if (auto *account = qobject_cast<SIPAccount *>(call->parent())) {
+            callInfo->accountId = account->id();
+        }
         callInfo->remoteUri = call->sipUrl();
         callInfo->established = call->establishedTime();
         callInfo->isEstablished = call->isEstablished();
+        callInfo->isInProgress = call->isInProgress();
         callInfo->isIncoming = call->isIncoming();
         callInfo->isBlocked = call->isBlocked();
         callInfo->isHolding = call->isHolding();
@@ -381,6 +386,9 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::IsEstablished):
         return callInfo->isEstablished;
+
+    case static_cast<int>(Roles::IsInProgress):
+        return callInfo->isInProgress;
 
     case static_cast<int>(Roles::IsFinished):
         return callInfo->isFinished;

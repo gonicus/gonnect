@@ -14,4 +14,8 @@ private slots:
     void testLevenshteinDistance();
     void testJaroWinklerDistance();
     void testSortListByWeight();
+
+    void testIsSipUri();
+    void testNumberFromSipUrl();
+    void testNameFromSipUrl();
 };

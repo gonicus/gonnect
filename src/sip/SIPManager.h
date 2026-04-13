@@ -91,10 +91,12 @@ private:
 
     SIPMediaConfig *m_mediaConfig = nullptr;
     SIPUserAgentConfig *m_uaConfig = nullptr;
-    SIPLogWriter *m_logWriter = nullptr;
+    std::unique_ptr<SIPLogWriter> m_logWriter;
     SIPEventLoop *m_ev = nullptr;
 
     pj::Endpoint m_ep;
+
+    bool m_suspended = false;
 
     QSet<QString> m_buddyStateQueue;
 };

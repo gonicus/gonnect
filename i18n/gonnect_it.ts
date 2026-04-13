@@ -88,7 +88,7 @@
 <context>
     <name>AddressBookManager</name>
     <message>
-        <location filename="../src/contacts/AddressBookManager.cpp" line="177"/>
+        <location filename="../src/contacts/AddressBookManager.cpp" line="186"/>
         <source>Failed to persist address book credentials: %1</source>
         <translation>Impossibile salvare le credenziali della rubrica: %1</translation>
     </message>
@@ -230,12 +230,12 @@
 <context>
     <name>AudioManager</name>
     <message>
-        <location filename="../src/media/AudioManager.cpp" line="162"/>
+        <location filename="../src/media/AudioManager.cpp" line="163"/>
         <source>Default input</source>
         <translation>Ingresso predefinito</translation>
     </message>
     <message>
-        <location filename="../src/media/AudioManager.cpp" line="163"/>
+        <location filename="../src/media/AudioManager.cpp" line="164"/>
         <source>Default output</source>
         <translation>Uscita predefinita</translation>
     </message>
@@ -251,7 +251,7 @@
 <context>
     <name>AvatarImage</name>
     <message>
-        <location filename="../src/ui/components/AvatarImage.qml" line="51"/>
+        <location filename="../src/ui/components/AvatarImage.qml" line="52"/>
         <source>Initials of this contact</source>
         <translation>Iniziali di questo contatto</translation>
     </message>
@@ -267,17 +267,17 @@
 <context>
     <name>BasePage</name>
     <message>
-        <location filename="../src/ui/components/pages/BasePage.qml" line="96"/>
+        <location filename="../src/ui/components/pages/BasePage.qml" line="107"/>
         <source>Base dashboard page grid</source>
         <translation>Griglia di base della pagina del pannello</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/BasePage.qml" line="97"/>
+        <location filename="../src/ui/components/pages/BasePage.qml" line="108"/>
         <source>Canvas for editable dashboard pages</source>
         <translation>Area di disegno per le pagine del pannello modificabili</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/BasePage.qml" line="102"/>
+        <location filename="../src/ui/components/pages/BasePage.qml" line="113"/>
         <source>Add widgets</source>
         <translation>Aggiungi widget</translation>
     </message>
@@ -285,32 +285,32 @@
 <context>
     <name>BaseWidget</name>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="135"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="140"/>
         <source>Drag widget</source>
         <translation>Trascina widget</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="136"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="141"/>
         <source>Change the position of the widget</source>
         <translation>Cambia la posizione del widget</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="186"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="191"/>
         <source>Remove widget</source>
         <translation>Rimuovi widget</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="187"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="192"/>
         <source>Remove the currently selected widget from the dashboard</source>
         <translation>Rimuovi il widget attualmente selezionato dal pannello</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="249"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="254"/>
         <source>Resize widget</source>
         <translation>Ridimensiona widget</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="250"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="255"/>
         <source>Resize the widget according to the mouse direction</source>
         <translation>Ridimensiona il widget in base alla direzione del mouse</translation>
     </message>
@@ -318,54 +318,54 @@
 <context>
     <name>BaseWindow</name>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="94"/>
-        <location filename="../src/ui/BaseWindow.qml" line="123"/>
-        <location filename="../src/ui/BaseWindow.qml" line="150"/>
-        <location filename="../src/ui/BaseWindow.qml" line="179"/>
-        <location filename="../src/ui/BaseWindow.qml" line="206"/>
-        <location filename="../src/ui/BaseWindow.qml" line="235"/>
-        <location filename="../src/ui/BaseWindow.qml" line="262"/>
-        <location filename="../src/ui/BaseWindow.qml" line="291"/>
+        <location filename="../src/ui/BaseWindow.qml" line="96"/>
+        <location filename="../src/ui/BaseWindow.qml" line="127"/>
+        <location filename="../src/ui/BaseWindow.qml" line="155"/>
+        <location filename="../src/ui/BaseWindow.qml" line="185"/>
+        <location filename="../src/ui/BaseWindow.qml" line="213"/>
+        <location filename="../src/ui/BaseWindow.qml" line="243"/>
+        <location filename="../src/ui/BaseWindow.qml" line="271"/>
+        <location filename="../src/ui/BaseWindow.qml" line="301"/>
         <source>Drag border</source>
         <translation>Bordo di trascinamento</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="95"/>
+        <location filename="../src/ui/BaseWindow.qml" line="97"/>
         <source>Top left drag border for window resize operations</source>
         <translation>Bordo di trascinamento in alto a sinistra per ridimensionare la finestra</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="124"/>
+        <location filename="../src/ui/BaseWindow.qml" line="128"/>
         <source>Top drag border for window resize operations</source>
         <translation>Bordo di trascinamento in alto per ridimensionare la finestra</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="151"/>
+        <location filename="../src/ui/BaseWindow.qml" line="156"/>
         <source>Top right border for window resize operations</source>
         <translation>Bordo in alto a destra per ridimensionare la finestra</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="180"/>
+        <location filename="../src/ui/BaseWindow.qml" line="186"/>
         <source>Right drag border for window resize operations</source>
         <translation>Bordo di trascinamento a destra per ridimensionare la finestra</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="207"/>
+        <location filename="../src/ui/BaseWindow.qml" line="214"/>
         <source>Bottom right drag border for window resize operations</source>
         <translation>Bordo di trascinamento in basso a destra per ridimensionare la finestra</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="236"/>
+        <location filename="../src/ui/BaseWindow.qml" line="244"/>
         <source>Bottom drag border for window resize operations</source>
         <translation>Bordo di trascinamento in basso per ridimensionare la finestra</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="263"/>
+        <location filename="../src/ui/BaseWindow.qml" line="272"/>
         <source>Bottom left drag border for window resize operations</source>
         <translation>Bordo di trascinamento in basso a sinistra per ridimensionare la finestra</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="292"/>
+        <location filename="../src/ui/BaseWindow.qml" line="302"/>
         <source>Left drag border for window resize operations</source>
         <translation>Bordo di trascinamento a sinistra per ridimensionare la finestra</translation>
     </message>
@@ -409,12 +409,12 @@
 <context>
     <name>Call</name>
     <message>
-        <location filename="../src/ui/components/pages/Call.qml" line="178"/>
+        <location filename="../src/ui/components/pages/Call.qml" line="181"/>
         <source>Conference</source>
         <translation>Conferenza</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Call.qml" line="255"/>
+        <location filename="../src/ui/components/pages/Call.qml" line="258"/>
         <source>Drag bar</source>
         <translation>Barra di trascinamento</translation>
     </message>
@@ -422,273 +422,273 @@
 <context>
     <name>CallButtonBar</name>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="442"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="443"/>
         <source>%1@%2 kHz</source>
         <translation>%1@%2 kHz</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="220"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="221"/>
         <source>Transmit</source>
         <translation>Trasmetti</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="108"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="109"/>
         <source>Call security level</source>
         <translation>Livello di sicurezza della chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="109"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="110"/>
         <source>Security level of the ongoing call</source>
         <translation>Livello di sicurezza della chiamata in corso</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="122"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="123"/>
         <source>Call security details</source>
         <translation>Dettagli di sicurezza della chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="123"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="124"/>
         <source>Detailed call security status: %1 / %2</source>
         <translation>Stato dettagliato della sicurezza della chiamata: %1 / %2</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="126"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="127"/>
         <source>signaling encrypted</source>
         <translation>segnalazione cifrata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="127"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="128"/>
         <source>signaling unencrypted</source>
         <translation>segnalazione non cifrata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="129"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="130"/>
         <source>media encrypted</source>
         <translation>media cifrati</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="130"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="131"/>
         <source>media unencrypted</source>
         <translation>media non cifrati</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="195"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="196"/>
         <source>Call quality</source>
         <translation>Qualità della chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="196"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="197"/>
         <source>Quality of the ongoing call</source>
         <translation>Qualità della chiamata in corso</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="216"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="217"/>
         <source>Transmission statistics</source>
         <translation>Statistiche di trasmissione</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="217"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="324"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="218"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="325"/>
         <source>Call quality metrics</source>
         <translation>Metriche di qualità della chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="233"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="340"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="234"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="341"/>
         <source>MOS</source>
         <translation>MOS</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="246"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="353"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="247"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="354"/>
         <source>Mean opinion score</source>
         <translation>Punteggio di opinione medio (MOS)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="247"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="248"/>
         <source>Numerical metric assessing transmission-side voice call quality: %1</source>
         <translation>Metrica numerica che valuta la qualità vocale dal lato trasmissione: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="253"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="360"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="254"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="361"/>
         <source>Packet loss</source>
         <translation>Perdita di pacchetti</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="267"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="268"/>
         <source>%1% of packets lost in transmission</source>
         <translation>%1% dei pacchetti persi in trasmissione</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="273"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="380"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="274"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="381"/>
         <source>Jitter</source>
         <translation>Jitter</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="287"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="288"/>
         <source>Amount of transmission side jitter: %1</source>
         <translation>Jitter dal lato trasmissione: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="293"/>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="400"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="294"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="401"/>
         <source>Effective delay</source>
         <translation>Ritardo effettivo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="307"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="308"/>
         <source>Effective transmission side call delay: %1</source>
         <translation>Ritardo effettivo della chiamata dal lato trasmissione: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="323"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="324"/>
         <source>Receiver statistics</source>
         <translation>Statistiche di ricezione</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="327"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="328"/>
         <source>Receive</source>
         <translation>Ricevi</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="354"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="355"/>
         <source>Numerical metric assessing receiver-side voice/video call quality: %1</source>
         <translation>Metrica numerica che valuta la qualità voce/video dal lato ricevitore: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="374"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="375"/>
         <source>%1% of packets lost in receival</source>
         <translation>%1% dei pacchetti persi in ricezione</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="394"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="395"/>
         <source>Amount of receiver side jitter: %1</source>
         <translation>Jitter dal lato ricevitore: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="414"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="415"/>
         <source>Effective receiver side call delay: %1</source>
         <translation>Ritardo effettivo della chiamata dal lato ricevitore: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="436"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="437"/>
         <source>Codec</source>
         <translation>Codec</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="449"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="450"/>
         <source>Audio codec</source>
         <translation>Codec audio</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="450"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="451"/>
         <source>The currently used audio codec and frequency: %1</source>
         <translation>Il codec audio e la frequenza attualmente in uso: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="498"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="499"/>
         <source>Elapsed call time</source>
         <translation>Durata trascorsa della chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="499"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="500"/>
         <source>The duration in seconds the call has been active for: %1</source>
         <translation>La durata in secondi in cui la chiamata è stata attiva: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="513"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="515"/>
         <source>Screen</source>
         <translation>Schermo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="523"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="525"/>
         <source>Screensharing control</source>
         <translation>Controllo condivisione schermo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="524"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="526"/>
         <source>Start sharing your screen</source>
         <translation>Avvia la condivisione dello schermo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="531"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="533"/>
         <source>Camera</source>
         <translation>Fotocamera</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="541"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="543"/>
         <source>Camera control</source>
         <translation>Controllo fotocamera</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="542"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="544"/>
         <source>Enable your camera</source>
         <translation>Attiva la fotocamera</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="549"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="551"/>
         <source>Resume</source>
         <translation>Riprendi</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="549"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="551"/>
         <source>Hold</source>
         <translation>In attesa</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="556"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="558"/>
         <source>Resume call</source>
         <translation>Riprendi la chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="556"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="558"/>
         <source>Hold call</source>
         <translation>Metti in attesa la chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="557"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="559"/>
         <source>Update the call hold state</source>
         <translation>Aggiorna lo stato di attesa della chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="575"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="577"/>
         <source>Micro</source>
         <translation>Microfono</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="591"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="593"/>
         <source>Input control</source>
         <translation>Controllo ingresso</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="592"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="594"/>
         <source>Set the mute state of the current input device</source>
         <translation>Imposta lo stato di silenziamento del dispositivo di ingresso corrente</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="599"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="601"/>
         <source>Output</source>
         <translation>Uscita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="615"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="617"/>
         <source>Output control</source>
         <translation>Controllo uscita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="616"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="618"/>
         <source>Change the current output devices</source>
         <translation>Cambia i dispositivi di uscita correnti</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="640"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="642"/>
         <source>Accept call</source>
         <translation>Accetta chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="664"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="666"/>
         <source>Hangup call</source>
         <translation>Termina chiamata</translation>
     </message>
@@ -825,25 +825,30 @@
 <context>
     <name>CallerBigAvatar</name>
     <message>
-        <location filename="../src/ui/components/CallerBigAvatar.qml" line="21"/>
+        <location filename="../src/ui/components/CallerBigAvatar.qml" line="22"/>
         <source>Caller name</source>
         <translation>Nome del chiamante</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallerBigAvatar.qml" line="64"/>
+        <location filename="../src/ui/components/CallerBigAvatar.qml" line="65"/>
         <source>is calling...</source>
         <translation>sta chiamando...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallerBigAvatar.qml" line="79"/>
+        <location filename="../src/ui/components/CallerBigAvatar.qml" line="80"/>
         <source>Calling...</source>
         <translation>Chiamata in corso...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallerBigAvatar.qml" line="80"/>
+        <source>In progress...</source>
+        <translation>Connessione in corso...</translation>
     </message>
 </context>
 <context>
     <name>CallsModel</name>
     <message>
-        <location filename="../src/ui/CallsModel.cpp" line="407"/>
+        <location filename="../src/ui/CallsModel.cpp" line="413"/>
         <source>unknown number</source>
         <translation>numero sconosciuto</translation>
     </message>
@@ -1178,122 +1183,122 @@
         <translation>Stanza conferenza</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="184"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="195"/>
         <source>Share</source>
         <translation>Condividi</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="198"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="209"/>
         <source>Copy room name</source>
         <translation>Copia nome stanza</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="202"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="213"/>
         <source>Copy room link</source>
         <translation>Copia link stanza</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="206"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="217"/>
         <source>Open in browser</source>
         <translation>Apri nel browser</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="210"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="221"/>
         <source>Show phone number</source>
         <translation>Mostra numero di telefono</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="226"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="237"/>
         <source>Raise</source>
         <translation>Alza la mano</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="235"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="246"/>
         <source>Resume</source>
         <translation>Riprendi</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="235"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="246"/>
         <source>Hold</source>
         <translation>In attesa</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="244"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="255"/>
         <source>View</source>
         <translation>Vista</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="253"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="264"/>
         <source>Screen</source>
         <translation>Schermo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="271"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="282"/>
         <source>Share window</source>
         <translation>Condividi finestra</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="276"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="287"/>
         <source>Share screen</source>
         <translation>Condividi schermo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="286"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="297"/>
         <source>Camera</source>
         <translation>Fotocamera</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="304"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="315"/>
         <source>Micro</source>
         <translation>Microfono</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="323"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="334"/>
         <source>Output</source>
         <translation>Uscita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="341"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="352"/>
         <source>More</source>
         <translation>Altro</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="353"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="364"/>
         <source>Noise supression</source>
         <translation>Soppressione del rumore</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="359"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="370"/>
         <source>Toggle subtitles</source>
         <translation>Attiva/disattiva sottotitoli</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="366"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="377"/>
         <source>Toggle whiteboard</source>
         <translation>Attiva/disattiva lavagna</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="372"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="383"/>
         <source>Video quality...</source>
         <translation>Qualità video...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="381"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="392"/>
         <source>Set room password...</source>
         <translation>Imposta password stanza...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="388"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="399"/>
         <source>Mute everyone</source>
         <translation>Silenzia tutti</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="443"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="455"/>
         <source>Leave conference</source>
         <translation>Abbandona la conferenza</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="451"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="463"/>
         <source>End conference for all</source>
         <translation>Termina la conferenza per tutti</translation>
     </message>
@@ -1368,7 +1373,7 @@
         <translation>Menu applicazione</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CustomWindowHeader.qml" line="262"/>
+        <location filename="../src/ui/components/CustomWindowHeader.qml" line="276"/>
         <source>Close GOnnect window</source>
         <translation>Chiudi la finestra GOnnect</translation>
     </message>
@@ -1384,22 +1389,22 @@
 <context>
     <name>DateEventManager</name>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="372"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="370"/>
         <source>Conference starting soon</source>
         <translation>La conferenza inizia a breve</translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="373"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="371"/>
         <source>Appointment starting soon</source>
         <translation>L&apos;appuntamento inizia a breve</translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="379"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="377"/>
         <source>Join</source>
         <translation>Partecipa</translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="381"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="379"/>
         <source>Open</source>
         <translation>Apri</translation>
     </message>
@@ -1927,8 +1932,8 @@
     <name>FirstAid</name>
     <message>
         <location filename="../src/ui/components/popups/FirstAid.qml" line="36"/>
-        <source>First Aid</source>
-        <translation>Pronto soccorso</translation>
+        <source>Emergency Call</source>
+        <translation>Chiamata di emergenza</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/FirstAid.qml" line="45"/>
@@ -1947,32 +1952,32 @@
     </message>
     <message>
         <location filename="../src/ui/components/popups/FirstAid.qml" line="94"/>
-        <source>Exit the first aid menu without initiating any action</source>
-        <translation>Esci dal menu pronto soccorso senza avviare alcuna azione</translation>
+        <source>Exit the emergency call menu without initiating any action</source>
+        <translation>Esci dal menu delle chiamate di emergenza senza eseguire alcuna operazione</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/FirstAid.qml" line="104"/>
-        <source>Close first aid menu</source>
-        <translation>Chiudi il menu pronto soccorso</translation>
+        <source>Close emergency call menu</source>
+        <translation>Chiudi il menu delle chiamate di emergenza</translation>
     </message>
 </context>
 <context>
     <name>FirstAidButton</name>
     <message>
-        <location filename="../src/ui/components/controls/FirstAidButton.qml" line="16"/>
-        <source>Open first aid menu</source>
-        <translation>Apri il menu pronto soccorso</translation>
+        <location filename="../src/ui/components/controls/FirstAidButton.qml" line="9"/>
+        <source>Emergency call</source>
+        <translation>Chiamata di emergenza</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/FirstAidButton.qml" line="62"/>
-        <source>First Aid</source>
-        <translation>Pronto soccorso</translation>
+        <location filename="../src/ui/components/controls/FirstAidButton.qml" line="22"/>
+        <source>Open emergency call menu</source>
+        <translation>Apri il menu delle chiamate di emergenza</translation>
     </message>
 </context>
 <context>
     <name>GonnectWindow</name>
     <message>
-        <location filename="../src/ui/GonnectWindow.qml" line="358"/>
+        <location filename="../src/ui/GonnectWindow.qml" line="365"/>
         <source>Home</source>
         <translation>Home</translation>
     </message>
@@ -1980,7 +1985,7 @@
 <context>
     <name>HeadsetDevice</name>
     <message>
-        <location filename="../src/usb/HeadsetDevice.cpp" line="565"/>
+        <location filename="../src/usb/HeadsetDevice.cpp" line="560"/>
         <source>MMM dd</source>
         <translation>dd MMM</translation>
     </message>
@@ -2112,78 +2117,78 @@
 <context>
     <name>HistoryWidget</name>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="21"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="25"/>
         <source>History</source>
         <translation>Cronologia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="65"/>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="113"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
         <source>All</source>
         <translation>Tutti</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="68"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
         <source>SIP</source>
         <translation>SIP</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="71"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="90"/>
         <source>Jitsi Meet</source>
         <translation>Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="76"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="95"/>
         <source>History call type picker</source>
         <translation>Selettore tipo di chiamata cronologia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="77"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="96"/>
         <source>Select the call type to filter by</source>
         <translation>Seleziona il tipo di chiamata per filtrare</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="90"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="109"/>
         <source>Currently selected call type</source>
         <translation>Tipo di chiamata attualmente selezionato</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="116"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
         <source>Incoming</source>
         <translation>In entrata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="119"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="139"/>
         <source>Outgoing</source>
         <translation>In uscita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="122"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="142"/>
         <source>Missed</source>
         <translation>Perse</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="127"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="147"/>
         <source>History call origin picker</source>
         <translation>Selettore origine chiamata cronologia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="128"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="148"/>
         <source>Select the call origin to filter by</source>
         <translation>Seleziona l&apos;origine della chiamata per filtrare</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="141"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="161"/>
         <source>Currently selected call origin</source>
         <translation>Origine della chiamata attualmente selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="151"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="171"/>
         <source>Hide history search</source>
         <translation>Nascondi ricerca cronologia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="151"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="171"/>
         <source>Show history search</source>
         <translation>Mostra ricerca cronologia</translation>
     </message>
@@ -2386,27 +2391,27 @@
         <translation>Vuoi davvero chiudere questa finestra e terminare tutte le chiamate in corso?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="133"/>
+        <location filename="../src/Main.qml" line="135"/>
         <source>Please enter the password for the SIP account:</source>
         <translation>Inserisci la password per l&apos;account SIP:</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="138"/>
+        <location filename="../src/Main.qml" line="140"/>
         <source>Registration failed</source>
         <translation>Registrazione non riuscita</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="139"/>
+        <location filename="../src/Main.qml" line="141"/>
         <source>Registration failed with with status %1: %2</source>
         <translation>Registrazione non riuscita con stato %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="202"/>
+        <location filename="../src/Main.qml" line="204"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="208"/>
+        <location filename="../src/Main.qml" line="210"/>
         <source>Fatal Error</source>
         <translation>Errore fatale</translation>
     </message>
@@ -2414,114 +2419,114 @@
 <context>
     <name>MainTabBar</name>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="203"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="205"/>
         <source>Selected tab</source>
         <translation>Scheda selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="204"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="206"/>
         <source>The currently selected tab</source>
         <translation>La scheda attualmente selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="241"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="243"/>
         <source>Selected tab options</source>
         <translation>Opzioni scheda selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="242"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="244"/>
         <source>The settings of the currently selected tab</source>
         <translation>Le impostazioni della scheda attualmente selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="384"/>
-        <location filename="../src/ui/components/MainTabBar.qml" line="385"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="398"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="399"/>
         <source>Home</source>
         <translation>Casa</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="394"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="407"/>
         <source>Conference</source>
         <translation>Conferenza</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="395"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="408"/>
         <source>No active conference</source>
         <translation>Nessuna conferenza attiva</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="404"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="416"/>
         <source>Call</source>
         <translation>Chiamata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="405"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="417"/>
         <source>No active call</source>
         <translation>Nessuna chiamata attiva</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="438"/>
-        <location filename="../src/ui/components/MainTabBar.qml" line="439"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="449"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="450"/>
         <source>Settings</source>
         <translation>Impostazioni</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="488"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="498"/>
         <source>Move up</source>
         <translation>Sposta su</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="495"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="505"/>
         <source>Move tab up</source>
         <translation>Sposta scheda su</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="496"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="506"/>
         <source>Moves the currently selected tab up by one</source>
         <translation>Sposta la scheda attualmente selezionata di una posizione verso l&apos;alto</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="526"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="536"/>
         <source>Move down</source>
         <translation>Sposta giù</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="533"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="543"/>
         <source>Move tab down</source>
         <translation>Sposta scheda giù</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="534"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="544"/>
         <source>Moves the currently selected tab down by one</source>
         <translation>Sposta la scheda attualmente selezionata di una posizione verso il basso</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="564"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="574"/>
         <source>Edit</source>
         <translation>Modifica</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="571"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="581"/>
         <source>Edit page</source>
         <translation>Modifica pagina</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="572"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="582"/>
         <source>Edit the currently selected dashboard page</source>
         <translation>Modifica la pagina del pannello attualmente selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="579"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="589"/>
         <source>Delete</source>
         <translation>Elimina</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="587"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="597"/>
         <source>Delete page</source>
         <translation>Elimina pagina</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="588"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="598"/>
         <source>Delete the currently selected dashboard page</source>
         <translation>Elimina la pagina del pannello attualmente selezionata</translation>
     </message>
@@ -2734,7 +2739,7 @@
 <context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../src/StateManager.cpp" line="154"/>
+        <location filename="../src/StateManager.cpp" line="163"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>
@@ -4010,37 +4015,42 @@
 <context>
     <name>SIPAccount</name>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="67"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="66"/>
         <source>&apos;userUri&apos; is no valid SIP URI: %1</source>
         <translation>&apos;userUri&apos; non è un URI SIP valido: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="75"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="74"/>
         <source>&apos;userUri&apos; is required</source>
         <translation>&apos;userUri&apos; è obbligatorio</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="87"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="84"/>
+        <source>&apos;voiceMailUri&apos; is no valid SIP URI: %1</source>
+        <translation>&apos;voiceMailUri&apos; non è un URI SIP valido: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/sip/SIPAccount.cpp" line="99"/>
         <source>&apos;registrarUri&apos; is no valid SIP URI: %1</source>
         <translation>&apos;registrarUri&apos; non è un URI SIP valido: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="98"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="110"/>
         <source>&apos;registrarUri&apos; is required</source>
         <translation>&apos;registrarUri&apos; è obbligatorio</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="109"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="121"/>
         <source>&apos;proxies&apos; contains invalid SIP URI entry: %1</source>
         <translation>&apos;proxies&apos; contiene una voce URI SIP non valida: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="417"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="464"/>
         <source>Failed to create %1: %2</source>
         <translation>Impossibile creare %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="828"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="986"/>
         <source>Failed to persist SIP credentials: %1</source>
         <translation>Impossibile mantenere le credenziali SIP: %1</translation>
     </message>
@@ -4056,12 +4066,12 @@
 <context>
     <name>SIPCall</name>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="744"/>
+        <location filename="../src/sip/SIPCall.cpp" line="753"/>
         <source>Active call with %1</source>
         <translation>Chiamata attiva con %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="773"/>
+        <location filename="../src/sip/SIPCall.cpp" line="782"/>
         <source>Hang up</source>
         <translation>Riaggancia</translation>
     </message>
@@ -4069,24 +4079,24 @@
 <context>
     <name>SIPCallManager</name>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="183"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="181"/>
         <source>%1 is calling</source>
         <translation>%1 sta chiamando</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="185"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="183"/>
         <source>%1 (%2) is calling</source>
         <translation>%1 (%2) sta chiamando</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="211"/>
-        <location filename="../src/sip/SIPCallManager.cpp" line="215"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="209"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="213"/>
         <source>Reject</source>
         <translation>Rifiuta</translation>
     </message>
     <message>
+        <location filename="../src/sip/SIPCallManager.cpp" line="210"/>
         <location filename="../src/sip/SIPCallManager.cpp" line="212"/>
-        <location filename="../src/sip/SIPCallManager.cpp" line="214"/>
         <source>Accept</source>
         <translation>Accetta</translation>
     </message>
@@ -4096,7 +4106,7 @@
         <translation>Chiamata persa da %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="742"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="741"/>
         <source>Call back</source>
         <translation>Richiama</translation>
     </message>
@@ -4104,7 +4114,7 @@
 <context>
     <name>SIPManager</name>
     <message>
-        <location filename="../src/sip/SIPManager.cpp" line="241"/>
+        <location filename="../src/sip/SIPManager.cpp" line="243"/>
         <source>New Identity</source>
         <translation>Nuova identità</translation>
     </message>
@@ -4126,14 +4136,6 @@
         <location filename="../src/sip/SIPTemplate.cpp" line="96"/>
         <source>Source file %1 does not exist</source>
         <translation>Il file sorgente %1 non esiste</translation>
-    </message>
-</context>
-<context>
-    <name>SearchBox</name>
-    <message>
-        <location filename="../src/ui/components/SearchBox.qml" line="35"/>
-        <source>Search number</source>
-        <translation>Cerca numero</translation>
     </message>
 </context>
 <context>
@@ -4173,49 +4175,6 @@
     </message>
 </context>
 <context>
-    <name>SearchDial</name>
-    <message>
-        <location filename="../src/ui/components/controls/SearchDial.qml" line="58"/>
-        <source>Select number</source>
-        <translation>Seleziona numero</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/SearchDial.qml" line="110"/>
-        <source>Activate search field</source>
-        <translation>Attiva campo di ricerca</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/SearchDial.qml" line="117"/>
-        <source>Number or contact</source>
-        <translation>Numero o contatto</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/SearchDial.qml" line="155"/>
-        <source>Clear search field</source>
-        <translation>Cancella campo di ricerca</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/SearchDial.qml" line="199"/>
-        <source>Default</source>
-        <translation>Predefinito</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/SearchDial.qml" line="202"/>
-        <source>Auto</source>
-        <translation>Auto</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/SearchDial.qml" line="208"/>
-        <source>Preferred identity</source>
-        <translation>Identità preferita</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/SearchDial.qml" line="209"/>
-        <source>Select the preferred identity for outgoing calls</source>
-        <translation>Seleziona l&apos;identità preferita per le chiamate in uscita</translation>
-    </message>
-</context>
-<context>
     <name>SearchField</name>
     <message>
         <location filename="../src/ui/components/controls/SearchField.qml" line="62"/>
@@ -4223,7 +4182,7 @@
         <translation>Cerca contatti o nomi stanza...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/SearchField.qml" line="104"/>
+        <location filename="../src/ui/components/controls/SearchField.qml" line="105"/>
         <source>Clear search field</source>
         <translation>Cancella campo di ricerca</translation>
     </message>
@@ -4275,52 +4234,52 @@
 <context>
     <name>SearchResultPopup</name>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="94"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="106"/>
         <source>Search filter and identity selection</source>
         <translation>Filtro di ricerca e selezione identità</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="95"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="107"/>
         <source>Select search filter to be applied, as well as the outgoing identity</source>
         <translation>Seleziona il filtro di ricerca da applicare e l&apos;identità in uscita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="108"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="120"/>
         <source>Outgoing identity</source>
         <translation>Identità in uscita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="157"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="169"/>
         <source>Search results</source>
         <translation>Risultati di ricerca</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="158"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="170"/>
         <source>All search results will be listed here in their respective categories</source>
         <translation>Tutti i risultati di ricerca saranno elencati qui nelle rispettive categorie</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="213"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="229"/>
         <source>Direct dial</source>
         <translation>Composizione diretta</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="224"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="240"/>
         <source>Call &quot;%1&quot;</source>
         <translation>Chiama &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="249"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="265"/>
         <source>Open room &quot;%1&quot;</source>
         <translation>Apri stanza &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="277"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="293"/>
         <source>History</source>
         <translation>Cronologia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="400"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="416"/>
         <source>Contacts</source>
         <translation>Contatti</translation>
     </message>
@@ -4383,27 +4342,27 @@
         <translation>Schema colori</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="351"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="352"/>
         <source>System default</source>
         <translation>Predefinito di sistema</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="355"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="356"/>
         <source>Light</source>
         <translation>Chiaro</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="359"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="360"/>
         <source>Dark</source>
         <translation>Scuro</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="365"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="366"/>
         <source>Theme selection box</source>
         <translation>Casella di selezione tema</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="366"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="367"/>
         <source>Select the UI theme</source>
         <translation>Seleziona il tema dell&apos;interfaccia</translation>
     </message>
@@ -4433,26 +4392,26 @@
         <translation>Identità preferita standard</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="549"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1084"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="550"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1087"/>
         <source>Default</source>
         <translation>Predefinito</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="552"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="553"/>
         <location filename="../src/ui/components/SettingsPage.qml" line="723"/>
         <source>Auto</source>
         <translation>Auto</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="558"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="995"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="559"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="998"/>
         <source>Prefererred identity selection</source>
         <translation>Selezione identità preferita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="559"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="996"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="560"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="999"/>
         <source>Select the preferred identity</source>
         <translation>Seleziona l&apos;identità preferita</translation>
     </message>
@@ -4518,124 +4477,131 @@
         <translation>Dispositivo di ingresso</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="841"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="842"/>
         <source>Input device selection</source>
         <translation>Selezione dispositivo di ingresso</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="842"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="843"/>
         <source>Select the input device to be used</source>
         <translation>Seleziona il dispositivo di ingresso da utilizzare</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="855"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="856"/>
         <source>Currently selected input option</source>
         <translation>Opzione di ingresso attualmente selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="897"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="898"/>
         <source>Output device</source>
         <translation>Dispositivo di uscita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="918"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="920"/>
         <source>Output device selection</source>
         <translation>Selezione dispositivo di uscita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="919"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="921"/>
         <source>Select the output device to be used</source>
         <translation>Seleziona il dispositivo di uscita da utilizzare</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="932"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="934"/>
         <source>Currently selected output option</source>
         <translation>Opzione di uscita attualmente selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="974"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="976"/>
         <source>Output device for ring tone</source>
         <translation>Dispositivo di uscita per la suoneria</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1009"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1012"/>
         <source>Currently selected ring output option</source>
         <translation>Opzione di uscita suoneria attualmente selezionata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1051"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1054"/>
         <source>Ring tone</source>
         <translation>Suoneria</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1138"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1141"/>
         <source>Reset ring tone</source>
         <translation>Reimposta suoneria</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1139"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1142"/>
         <source>Reset the ring tone to its default option</source>
         <translation>Reimposta la suoneria alla sua opzione predefinita</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1156"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1159"/>
         <source>Pick ring tone</source>
         <translation>Scegli suoneria</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1157"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1160"/>
         <source>Select the ring tone you want to use for incoming calls</source>
         <translation>Seleziona la suoneria da utilizzare per le chiamate in entrata</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1172"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1247"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1175"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1251"/>
         <source>Currently set to: </source>
         <translation>Attualmente impostata su: </translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1176"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1179"/>
         <source>Ring tone volume</source>
         <translation>Volume suoneria</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1209"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1280"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1212"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1284"/>
         <source>Adjust %1</source>
         <translation>Regola %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1225"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1229"/>
         <source>%1 %</source>
+        <extracomment>Label for showing percentage</extracomment>
         <translation>%1 %</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1251"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1255"/>
         <source>Pause between ring tones [s]</source>
         <translation>Pausa tra le suonerie [s]</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1324"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1301"/>
+        <source>%1 s</source>
+        <extracomment>Label for showing seconds</extracomment>
+        <translation>%1 s</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1329"/>
         <source>Debugging</source>
         <translation>Debug</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1334"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1339"/>
         <source>Use this button to start a debug run. The App will restart and then begin to record additional information that can be useful for debugging purposes. During this run, come back here to download the information. A debug run is limited to 5 minutes, after which the App will automatically restart again in normal mode.</source>
         <translation>Usa questo pulsante per avviare una sessione di debug. L&apos;app si riavvierà e inizierà a registrare informazioni aggiuntive utili per il debug. Durante questa sessione, torna qui per scaricare le informazioni. Una sessione di debug è limitata a 5 minuti, dopodiché l&apos;app si riavvierà automaticamente in modalità normale.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1350"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1355"/>
         <source>Start debug run (restart app)</source>
         <translation>Avvia sessione di debug (riavvia app)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1366"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1371"/>
         <source>Download debug information</source>
         <translation>Scarica informazioni di debug</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1381"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1386"/>
         <source>Reload contacts from LDAP</source>
         <translation>Ricarica contatti da LDAP</translation>
     </message>
@@ -4850,76 +4816,99 @@
 <context>
     <name>StateManager</name>
     <message>
-        <location filename="../src/StateManager.cpp" line="73"/>
+        <location filename="../src/StateManager.cpp" line="66"/>
         <source>Show dial window and focus search field</source>
         <translation>Mostra la finestra di composizione e metti a fuoco il campo di ricerca</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="76"/>
+        <location filename="../src/StateManager.cpp" line="69"/>
         <source>End all calls</source>
         <translation>Termina tutte le chiamate</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="78"/>
+        <location filename="../src/StateManager.cpp" line="71"/>
         <source>Redial last outgoing call</source>
         <translation>Ripeti l&apos;ultima chiamata effettuata</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="81"/>
+        <location filename="../src/StateManager.cpp" line="74"/>
         <source>Toggle hold</source>
         <translation>Commuta attesa</translation>
     </message>
     <message>
-        <location filename="../src/StateManager.cpp" line="129"/>
+        <location filename="../src/StateManager.cpp" line="138"/>
         <source>Phone calls are active</source>
         <translation>Ci sono chiamate telefoniche attive</translation>
     </message>
 </context>
 <context>
+    <name>StreamingLightPopup</name>
+    <message>
+        <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="43"/>
+        <source>Adjust the volume</source>
+        <translation>Regola il volume</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="87"/>
+        <source>Unmute</source>
+        <translation>Riattiva audio</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="87"/>
+        <source>Mute</source>
+        <translation>Disattiva l&apos;audio</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/StreamingLightPopup.qml" line="121"/>
+        <source>Open audio settings</source>
+        <translation>Apri impostazioni audio</translation>
+    </message>
+</context>
+<context>
     <name>SystemTrayMenu</name>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="89"/>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="104"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="91"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="106"/>
         <source>Dial...</source>
         <translation>Componi...</translation>
     </message>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="89"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="91"/>
         <source>Not registered...</source>
         <translation>Non registrato...</translation>
     </message>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="114"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="116"/>
         <source>Settings</source>
         <translation>Impostazioni</translation>
     </message>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="117"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="119"/>
         <source>About</source>
         <translation>Informazioni</translation>
     </message>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="120"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="122"/>
         <source>Quit</source>
         <translation>Esci</translation>
     </message>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="256"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="258"/>
         <source>End conference</source>
         <translation>Termina conferenza</translation>
     </message>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="286"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="288"/>
         <source>Call with %1 has ended</source>
         <translation>La chiamata con %1 è terminata</translation>
     </message>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="294"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="296"/>
         <source>Accept call with %1</source>
         <translation>Accetta chiamata da %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/SystemTrayMenu.cpp" line="304"/>
+        <location filename="../src/ui/SystemTrayMenu.cpp" line="306"/>
         <source>Hang up call with %1</source>
         <translation>Riaggancia chiamata con %1</translation>
     </message>
@@ -5048,28 +5037,35 @@
         <source>Audio Files (%1)</source>
         <translation>File audio (%1)</translation>
     </message>
+    <message>
+        <location filename="../src/ui/ViewHelper.cpp" line="294"/>
+        <source>QT_CULTURAL_SPHERE</source>
+        <comment>QGuiApplication</comment>
+        <translation></translation>
+    </message>
 </context>
 <context>
-    <name>VolumePopup</name>
+    <name>VoiceMailField</name>
     <message>
-        <location filename="../src/ui/components/popups/VolumePopup.qml" line="43"/>
-        <source>Adjust the volume</source>
-        <translation>Regola il volume</translation>
+        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="22"/>
+        <source>Listen to voicemail</source>
+        <translation>Ascoltare la segreteria telefonica</translation>
     </message>
-    <message>
-        <location filename="../src/ui/components/popups/VolumePopup.qml" line="87"/>
-        <source>Unmute</source>
-        <translation>Riattiva audio</translation>
+    <message numerus="yes">
+        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="57"/>
+        <source>%n new voice mail(s)</source>
+        <translation>
+            <numerusform>%n nuovo messaggio</numerusform>
+            <numerusform>%n nuovi messaggi</numerusform>
+        </translation>
     </message>
-    <message>
-        <location filename="../src/ui/components/popups/VolumePopup.qml" line="87"/>
-        <source>Mute</source>
-        <translation>Silenzia</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/VolumePopup.qml" line="121"/>
-        <source>Open audio settings</source>
-        <translation>Apri impostazioni audio</translation>
+    <message numerus="yes">
+        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="58"/>
+        <source>%n old voice mail(s)</source>
+        <translation>
+            <numerusform>%n messaggio vecchio</numerusform>
+            <numerusform>%n notizie arretrate</numerusform>
+        </translation>
     </message>
 </context>
 <context>

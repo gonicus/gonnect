@@ -141,7 +141,7 @@ void BusylightDeviceManager::updateBusylightState()
     }
 
     QColor color(Qt::GlobalColor::red);
-    if (!isMuted) {
+    if (isMuted) {
         color.setRgb(255, 165, 0);
     }
 
@@ -156,4 +156,12 @@ void BusylightDeviceManager::updateBusylightState()
     } else {
         switchStreamlightOff();
     }
+}
+
+void BusylightDeviceManager::shutdown()
+{
+    stopBlinking();
+    switchOff();
+    switchStreamlightOff();
+    clearDevices();
 }

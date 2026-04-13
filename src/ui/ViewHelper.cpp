@@ -289,6 +289,12 @@ void ViewHelper::updateIsActiveVideoCall()
     }
 }
 
+QString ViewHelper::culturalSphereExtension() const
+{
+    auto sphere = tr("QT_CULTURAL_SPHERE", "QGuiApplication");
+    return sphere == "QT_CULTURAL_SPHERE" ? "" : sphere;
+}
+
 void ViewHelper::quitApplicationNoConfirm() const
 {
     Application::instance()->quit();
@@ -301,7 +307,7 @@ void ViewHelper::resetTrayIcon() const
 
 bool ViewHelper::isUnsupportedPlatform() const
 {
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_WINDOWS)
     return false;
 #endif
     return true;

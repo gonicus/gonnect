@@ -4,7 +4,6 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPAccountManager.h"
-#include "ExternalMediaManager.h"
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "RingToneFactory.h"
@@ -12,7 +11,6 @@
 #include "PhoneNumberUtil.h"
 #include "DtmfGenerator.h"
 #include "EnumTranslation.h"
-#include "StateManager.h"
 #include "ViewHelper.h"
 #include "AvatarManager.h"
 #include "USBDevices.h"
@@ -125,7 +123,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
 
     connect(dev, &HeadsetDeviceProxy::dial, this, [this](const QString &number) {
         if (m_calls.count() == 0) {
-            qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+            static_cast<Application *>(Application::instance())->rootWindow()->show();
             call(number);
         }
     });
@@ -704,9 +702,10 @@ void SIPCallManager::addCall(SIPCall *call)
         const Contact *c = contactInfo.contact;
         QStringList bodyParts;
 
+        const QString name =
+                PhoneNumberUtil::instance().nameFromSipUrl(QString::fromStdString(ci.remoteUri));
         const QString title =
-                tr("Missed call from %1")
-                        .arg((c && !c->name().isEmpty()) ? c->name() : contactInfo.phoneNumber);
+                tr("Missed call from %1").arg((c && !c->name().isEmpty()) ? c->name() : name);
         const QString number = contactInfo.phoneNumber;
 
         if (c && !c->company().isEmpty()) {

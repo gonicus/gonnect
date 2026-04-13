@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.1.0" date="2026-04-10">
+    <description>
+      <p>Changes:</p>
+      <ul>
+        <li>dynamic widget pages/dashboards</li>
+        <li>introduce custom widget settings and a new web display widget</li>
+        <li>display SIP registration status</li>
+        <li>many bug fixes and improvements</li>
+      </ul>
+    </description>
+  </release>
   <release version="2.0.9" date="2026-01-21">
     <description>
       <p>Bug Fixes:</p>

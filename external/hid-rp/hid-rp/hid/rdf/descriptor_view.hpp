@@ -254,8 +254,8 @@ class descriptor_view_base : public items_view_base<TIterator>
     {}
     template <typename TIter>
     constexpr descriptor_view_base(const TIter begin, const TIter end)
-        : descriptor_view_base(std::addressof(*begin),
-                               std::addressof(*begin) + std::distance(begin, end))
+        : descriptor_view_base(begin == end ? nullptr : std::addressof(*begin),
+                               begin == end ? nullptr : std::addressof(*begin) + std::distance(begin, end))
     {}
 
   private:

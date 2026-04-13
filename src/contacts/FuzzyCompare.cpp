@@ -1,4 +1,5 @@
 #include <QRegularExpression>
+#include <numeric>
 #include "FuzzyCompare.h"
 
 quint8 FuzzyCompare::levenshteinDistance(const QString &a, const QString &b)
@@ -7,9 +8,7 @@ quint8 FuzzyCompare::levenshteinDistance(const QString &a, const QString &b)
     QList<quint8> v0(n + 1);
     QList<quint8> v1(n + 1);
 
-    for (int i = 0; i <= n; ++i) {
-        v0[i] = i;
-    }
+    std::iota(v0.begin(), v0.end(), 0);
 
     for (int i = 0; i < a.size(); ++i) {
         v1[0] = i + 1;

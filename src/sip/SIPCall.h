@@ -13,6 +13,7 @@ class SIPAccount;
 class CallHistoryItem;
 class IMHandler;
 class HeadsetDeviceProxy;
+class Sniffer;
 
 class SIPCall : public ICallState, public pj::Call
 {
@@ -63,6 +64,7 @@ public:
     void accept();
     void reject();
 
+    bool isInProgress() const { return m_isInProgress; }
     bool isEstablished() const { return m_isEstablished; }
     /// The time when the call was established (i.e. answered); invalid QDateTime if not established
     QDateTime establishedTime() const { return m_establishedTime; }
@@ -153,8 +155,9 @@ private:
 
     QList<ResponseItem *> m_metadata;
 
-    pj::AudioMedia *m_aud_med = NULL;
+    pj::AudioMedia *m_aud_med = nullptr;
     IMHandler *m_imHandler = nullptr;
+    Sniffer *m_sniffer = nullptr;
 
     bool m_incoming = false;
     bool m_isEstablished = false;
@@ -169,6 +172,7 @@ private:
     bool m_hasAccepted = false;
     bool m_hasRejected = false;
     bool m_hasRtt = false;
+    bool m_isInProgress = false;
 
     QString m_sipUrl;
     QString m_contactId;

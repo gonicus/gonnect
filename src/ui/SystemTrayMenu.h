@@ -25,7 +25,7 @@ public:
         return *_instance;
     }
 
-    void setBadgeNumber(unsigned number);
+    Q_INVOKABLE void setBadgeNumber(unsigned number);
     void resetTrayIcon();
     void setRinging(bool flag);
 
@@ -75,8 +75,22 @@ private:
 
     AppSettings m_settings;
 
-    unsigned m_missedCallsCount = 0;
+    unsigned m_notificationCount = 0;
 
     bool m_ringingState = false;
     bool m_hasEstablishedCalls = false;
+};
+
+class SystemTrayMenuWrapper
+{
+    Q_GADGET
+    QML_FOREIGN(SystemTrayMenu)
+    QML_NAMED_ELEMENT(SystemTrayMenu)
+    QML_SINGLETON
+
+public:
+    static SystemTrayMenu *create(QQmlEngine *, QJSEngine *) { return &SystemTrayMenu::instance(); }
+
+private:
+    SystemTrayMenuWrapper() = default;
 };

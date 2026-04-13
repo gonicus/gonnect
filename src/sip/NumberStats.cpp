@@ -7,6 +7,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QLoggingCategory>
+#include <utility>
 
 Q_LOGGING_CATEGORY(lcNumberStats, "gonnect.app.NumberStats")
 
@@ -233,7 +234,7 @@ bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,
                 "INSERT INTO contactflags (phonenumber, callcount, isFavorite, isBlocked, type) "
                 "VALUES (:phoneNumber, 0, 0, 0, :type);");
         query.bindValue(":phoneNumber", phoneNumber);
-        query.bindValue(":type", static_cast<int>(contactType));
+        query.bindValue(":type", std::to_underlying(contactType));
 
         if (!query.exec()) {
             qCCritical(lcNumberStats)
