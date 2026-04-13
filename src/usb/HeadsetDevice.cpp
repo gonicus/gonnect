@@ -3,6 +3,7 @@
 #include <QLoggingCategory>
 #include <QDateTime>
 #include <libusb.h>
+#include <algorithm>
 #include "HeadsetDevice.h"
 #include "GlobalInfo.h"
 
@@ -62,7 +63,7 @@ bool HeadsetDevice::open()
         // Read Teams info if available
         if (m_teamsUsageMapping.contains(UsageId::Teams_VendorExtension)) {
             unsigned char buf[256];
-            memset(buf, 0, sizeof(buf));
+            std::ranges::fill(buf, 0);
 
             // Read vendor extension from device
             buf[0] = m_teamsUsageMapping[UsageId::Teams_VendorExtension];
@@ -76,7 +77,7 @@ bool HeadsetDevice::open()
             // If we've display support, read the display configuration from device
             if (m_displaySupported
                 && m_teamsUsageMapping.contains(UsageId::Teams_DisplayAttributes)) {
-                memset(buf, 0, sizeof(buf));
+                std::ranges::fill(buf, 0);
                 buf[0] = m_teamsUsageMapping[UsageId::Teams_DisplayAttributes];
                 auto res = hid_get_feature_report(device, buf, sizeof(buf));
                 if (res >= 5) {
@@ -360,7 +361,7 @@ void HeadsetDevice::setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMappi
 void HeadsetDevice::processEvents()
 {
     unsigned char data[64];
-    memset(data, 0, sizeof(data));
+    std::ranges::fill(data, 0);
 
     if (auto len = hid_read_timeout(m_device, data, sizeof(data), 10)) {
         quint8 reportId = data[0];
@@ -512,7 +513,7 @@ void HeadsetDevice::setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupp
 
         auto chunks = makeChunks(text, 8);
         for (auto i = 0; i < chunks.length(); i++) {
-            memset(buf, 0, sizeof(buf));
+            std::ranges::fill(buf, 0);
             buf[0] = m_teamsUsageMapping[UsageId::Teams_CharacterReport];
             buf[1] = i == chunks.length() - 1 ? 0x80 : 0;
 
@@ -641,7 +642,7 @@ void HeadsetDevice::sendASP(quint8 cmd)
 
     if (m_teamsUsageMapping.contains(UsageId::Teams_ASPNotification)) {
         unsigned char buf[64];
-        memset(buf, 0, sizeof(buf));
+        std::ranges::fill(buf, 0);
         buf[0] = m_teamsUsageMapping[UsageId::Teams_ASPNotification];
         buf[1] = cmd; // 0x00, 0x10 and 0x40 have been captured
         hid_write(m_device, buf, sizeof(buf));

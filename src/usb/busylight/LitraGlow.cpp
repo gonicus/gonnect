@@ -1,5 +1,6 @@
 #include "LitraGlow.h"
 #include <QLoggingCategory>
+#include <algorithm>
 
 #define REPORT_ID 0x11
 #define DEVICE_ID 0xFF
@@ -33,7 +34,7 @@ void LitraGlow::switchStreamlight(bool on)
     unsigned char buf[20];
 
     // Switch on or off
-    memset(buf, 0, sizeof(buf));
+    std::ranges::fill(buf, 0);
     buf[0] = REPORT_ID;
     buf[1] = DEVICE_ID;
     buf[2] = FEATURE_ILLUMINATION;
