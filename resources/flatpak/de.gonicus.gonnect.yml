@@ -174,7 +174,7 @@ modules:
   - name: qtwebdav
     buildsystem: cmake-ninja
     config-opts:
-    - -DBUILD_WITH_QT6=ON
+      - -DBUILD_WITH_QT6=ON
     sources:
       - type: git
         url: https://github.com/PikachuHy/QtWebDAV.git
@@ -186,7 +186,7 @@ modules:
     buildsystem: cmake-ninja
     builddir: true
     config-opts:
-    - -DBUILD_WITH_QT6=ON
+      - -DBUILD_WITH_QT6=ON
     sources:
       - type: git
         url: https://github.com/frankosterfeld/qtkeychain.git
@@ -291,17 +291,17 @@ modules:
   - name: gonnect
     buildsystem: cmake-ninja
     config-opts:
-    - -DCMAKE_MODULE_PATH=/app/lib/${FLATPAK_ARCH}-linux-gnu/cmake/Qt6
-    - -DCMAKE_LIBRARY_PATH=/usr/lib
-    - -DCMAKE_INSTALL_RPATH=/usr/lib
-    - -DCMAKE_UNITY_BUILD=ON
-    - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
-    - -DENABLE_GOW_001=ON
-    - -DENABLE_GOW_002=ON
-    - -DENABLE_GOW_003=ON
-    - -DENABLE_PCH=ON
+      - -DCMAKE_MODULE_PATH=/app/lib/${FLATPAK_ARCH}-linux-gnu/cmake/Qt6
+      - -DCMAKE_LIBRARY_PATH=/usr/lib
+      - -DCMAKE_INSTALL_RPATH=/usr/lib
+      - -DCMAKE_UNITY_BUILD=ON
+      - -DCMAKE_OPTIMIZE_DEPENDENCIES=ON
+      - -DENABLE_GOW_001=ON
+      - -DENABLE_GOW_002=ON
+      - -DENABLE_GOW_003=ON
+      - -DENABLE_PCH=ON
     sources:
-    - type: dir
-      path: ../..
+      - type: dir
+        path: ../..
     cleanup:
-    - /bin/update-emojis
+      - /bin/update-emojis
