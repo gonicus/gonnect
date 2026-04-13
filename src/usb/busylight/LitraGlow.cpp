@@ -41,8 +41,12 @@ void LitraGlow::switchStreamlight(bool on)
     buf[3] = SET_ILLUMINATION | SOFTWARE_ID;
     buf[4] = on ? 1 : 0;
 
-    hid_write(m_device, buf, sizeof(buf));
-    hid_read_timeout(m_device, buf, sizeof(buf), 200);
+    if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+        qCWarning(lcLitraGlow) << "failed to write to Litra Glow device";
+    }
+    if (hid_read_timeout(m_device, buf, sizeof(buf), 200) < 0) {
+        qCWarning(lcLitraGlow) << "failed to read from Litra Glow device";
+    }
 }
 
 void LitraGlow::send(bool on)

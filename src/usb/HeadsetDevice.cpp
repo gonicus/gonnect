@@ -128,7 +128,9 @@ void HeadsetDevice::send(quint8 reportId, unsigned data)
     qCDebug(lcHeadset) << "Sending report" << QString::asprintf("0x%02X", reportId) << "with data"
                        << QString::asprintf("0x%08X", data);
 
-    hid_write(m_device, buf, sizeof(buf));
+    if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+        qCWarning(lcHeadset) << "failed to write to headset device";
+    }
 }
 
 void HeadsetDevice::setIdle()
@@ -233,7 +235,9 @@ void HeadsetDevice::setMute(bool flag)
         qCInfo(lcHeadset) << "Sending 'mute' state with value" << flag
                           << "to headset with display specification usage"
                           << UsageId::Teams_IconsControl;
-        hid_write(m_device, buf, sizeof(buf));
+        if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+            qCWarning(lcHeadset) << "failed to write mute state to headset device";
+        }
     } else {
         const auto &usage = m_hidUsages.value(UsageId::LED_Mute);
         const unsigned bitValue = 1 << usage.bitPosition;
@@ -509,7 +513,9 @@ void HeadsetDevice::setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupp
         buf[0] = m_teamsUsageMapping[UsageId::Teams_CharacterAttributes];
         buf[1] = (quint8)field;
         buf[2] = text.length() ? 0x80 : 0;
-        hid_write(m_device, buf, 3);
+        if (hid_write(m_device, buf, 3) < 0) {
+            qCWarning(lcHeadset) << "failed to write display field header to headset device";
+        }
 
         auto chunks = makeChunks(text, 8);
         for (auto i = 0; i < chunks.length(); i++) {
@@ -527,7 +533,9 @@ void HeadsetDevice::setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupp
                 buf[dataIndex++] = ch >> 8;
             }
 
-            hid_write(m_device, buf, sizeof(buf));
+            if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+                qCWarning(lcHeadset) << "failed to write display field chunk to headset device";
+            }
         }
     }
 }
@@ -611,7 +619,9 @@ void HeadsetDevice::selectScreen(ReportDescriptorEnums::TeamsScreenSelect screen
         buf[0] = m_teamsUsageMapping[UsageId::Teams_DisplayControl];
         buf[1] = (((quint8)screen & 0b1111) << 3) + (backlight ? 4 : 0) + (clear ? 2 : 0)
                 + 1; // 1 for enable
-        hid_write(m_device, buf, sizeof(buf));
+        if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+            qCWarning(lcHeadset) << "failed to write screen selection to headset device";
+        }
     }
 }
 
@@ -629,7 +639,9 @@ void HeadsetDevice::setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon ico
         buf[0] = m_teamsUsageMapping[UsageId::Teams_IconsControl];
         buf[1] = (quint8)m_presenceIcon & 0b1111;
         buf[2] = 0;
-        hid_write(m_device, buf, sizeof(buf));
+        if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+            qCWarning(lcHeadset) << "failed to write presence icon to headset device";
+        }
     }
 }
 
@@ -645,7 +657,9 @@ void HeadsetDevice::sendASP(quint8 cmd)
         std::ranges::fill(buf, 0);
         buf[0] = m_teamsUsageMapping[UsageId::Teams_ASPNotification];
         buf[1] = cmd; // 0x00, 0x10 and 0x40 have been captured
-        hid_write(m_device, buf, sizeof(buf));
+        if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+            qCWarning(lcHeadset) << "failed to write ASP notification to headset device";
+        }
     }
 }
 
