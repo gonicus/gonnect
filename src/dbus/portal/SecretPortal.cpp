@@ -12,7 +12,7 @@
 
 Q_LOGGING_CATEGORY(lcSecretPortal, "gonnect.secrets")
 
-static constexpr int AES_IV_LEN = 16;
+static constexpr int AES_BLOCK_SIZE = 16;
 static constexpr int AES_256_KEY_LEN = 32;
 
 struct EvpCtxDeleter
@@ -213,21 +213,21 @@ QString SecretPortal::encrypt(const QString &plainText)
     // Also note that the secret portal is a fallback for old 1.x versions
     // anyway.
     if (!settings.contains("keychain/iv")) {
-        unsigned char ivBuf[AES_IV_LEN];
-        if (RAND_bytes(ivBuf, AES_IV_LEN) != 1) {
+        unsigned char ivBuf[AES_BLOCK_SIZE];
+        if (RAND_bytes(ivBuf, AES_BLOCK_SIZE) != 1) {
             qCFatal(lcSecretPortal) << "RAND_bytes failed while generating IV";
         }
 
         settings.setValue(
                 "keychain/iv",
                 QString::fromLatin1(
-                        QByteArray(reinterpret_cast<const char *>(ivBuf), AES_IV_LEN).toHex()));
+                        QByteArray(reinterpret_cast<const char *>(ivBuf), AES_BLOCK_SIZE).toHex()));
 
         m_iv = QByteArray::fromHex(settings.value("keychain/iv").toByteArray());
     }
 
-    QByteArray key = m_instanceSecret.leftJustified(32, '\0').left(32);
-    QByteArray iv = m_iv.leftJustified(16, '\0').left(16);
+    QByteArray key = m_instanceSecret.leftJustified(AES_256_KEY_LEN, '\0').left(AES_256_KEY_LEN);
+    QByteArray iv = m_iv.leftJustified(AES_BLOCK_SIZE, '\0').left(AES_BLOCK_SIZE);
 
     const QByteArray cipherBytes = opensslEncrypt(plainText.toUtf8(), key, iv);
     if (cipherBytes.isEmpty()) {
@@ -245,8 +245,8 @@ QString SecretPortal::decrypt(const QString &cipherText)
         return "";
     }
 
-    QByteArray key = m_instanceSecret.leftJustified(32, '\0').left(32);
-    QByteArray iv = m_iv.leftJustified(16, '\0').left(16);
+    QByteArray key = m_instanceSecret.leftJustified(AES_256_KEY_LEN, '\0').left(AES_256_KEY_LEN);
+    QByteArray iv = m_iv.leftJustified(AES_BLOCK_SIZE, '\0').left(AES_BLOCK_SIZE);
     QByteArray cipherBytes = QByteArray::fromHex(cipherText.toLatin1());
 
     const QByteArray plainBytes = opensslDecrypt(cipherBytes, key, iv);
