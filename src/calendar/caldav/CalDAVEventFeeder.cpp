@@ -64,14 +64,32 @@ void CalDAVEventFeeder::onError(QString error) const
 void CalDAVEventFeeder::onParserFinished()
 {
     const auto list = m_webdavParser.getList();
+    qCWarning(lcCalDAVEventFeeder) << "WEBDAV directory entries:" << list.size();
+
     for (const auto &item : list) {
         QNetworkReply *reply = m_webdav.get(item.path());
+        if (!reply) {
+            qCWarning(lcCalDAVEventFeeder) << "WEBDAV reply is nullptr";
+            continue;
+        }
+
         connect(
                 reply, &QNetworkReply::finished, this,
                 [item, reply, this]() {
                     if (!reply) {
+                        qCWarning(lcCalDAVEventFeeder) << "WEBDAV reply is nullptr";
                         return;
                     }
+
+                    if (reply->error() != QNetworkReply::NoError) {
+                        qCWarning(lcCalDAVEventFeeder)
+                                << "WEBDAV reply error:" << reply->error() << item.name();
+                        reply->deleteLater();
+                        return;
+                    }
+
+                    qCWarning(lcCalDAVEventFeeder) << "WEBDAV reply is OK";
+
                     QByteArray data = reply->readAll();
                     reply->deleteLater();
 
