@@ -13,43 +13,50 @@
 Q_LOGGING_CATEGORY(lcSecretPortal, "gonnect.secrets")
 
 static constexpr int AES_IV_LEN = 16;
+static constexpr int AES_256_KEY_LEN = 32;
+
+struct EvpCtxDeleter
+{
+    void operator()(EVP_CIPHER_CTX *ctx) const { EVP_CIPHER_CTX_free(ctx); }
+};
+using EvpCtxPtr = std::unique_ptr<EVP_CIPHER_CTX, EvpCtxDeleter>;
 
 static QByteArray opensslEncrypt(const QByteArray &plainText, const QByteArray &key,
                                  const QByteArray &iv)
 {
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (key.size() != AES_256_KEY_LEN || iv.size() != AES_BLOCK_SIZE) {
+        return {};
+    }
+
+    EvpCtxPtr ctx(EVP_CIPHER_CTX_new());
     if (!ctx) {
         return {};
     }
 
-    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr,
+    if (EVP_EncryptInit_ex(ctx.get(), EVP_aes_256_cbc(), nullptr,
                            reinterpret_cast<const unsigned char *>(key.constData()),
                            reinterpret_cast<const unsigned char *>(iv.constData()))
         != 1) {
-        EVP_CIPHER_CTX_free(ctx);
         return {};
     }
 
-    QByteArray cipherText(plainText.size() + EVP_MAX_BLOCK_LENGTH, '\0');
+    QByteArray cipherText(plainText.size() + AES_BLOCK_SIZE, '\0');
     int outLen1 = 0;
+    int outLen2 = 0;
 
-    if (EVP_EncryptUpdate(ctx, reinterpret_cast<unsigned char *>(cipherText.data()), &outLen1,
+    if (EVP_EncryptUpdate(ctx.get(), reinterpret_cast<unsigned char *>(cipherText.data()), &outLen1,
                           reinterpret_cast<const unsigned char *>(plainText.constData()),
                           plainText.size())
         != 1) {
-        EVP_CIPHER_CTX_free(ctx);
         return {};
     }
 
-    int outLen2 = 0;
-    if (EVP_EncryptFinal_ex(ctx, reinterpret_cast<unsigned char *>(cipherText.data()) + outLen1,
-                            &outLen2)
+    if (EVP_EncryptFinal_ex(
+                ctx.get(), reinterpret_cast<unsigned char *>(cipherText.data()) + outLen1, &outLen2)
         != 1) {
-        EVP_CIPHER_CTX_free(ctx);
         return {};
     }
 
-    EVP_CIPHER_CTX_free(ctx);
     cipherText.resize(outLen1 + outLen2);
     return cipherText;
 }
@@ -57,39 +64,39 @@ static QByteArray opensslEncrypt(const QByteArray &plainText, const QByteArray &
 static QByteArray opensslDecrypt(const QByteArray &cipherText, const QByteArray &key,
                                  const QByteArray &iv)
 {
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (key.size() != AES_256_KEY_LEN || iv.size() != AES_BLOCK_SIZE || cipherText.isEmpty()) {
+        return {};
+    }
+
+    EvpCtxPtr ctx(EVP_CIPHER_CTX_new());
     if (!ctx) {
         return {};
     }
 
-    if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr,
+    if (EVP_DecryptInit_ex(ctx.get(), EVP_aes_256_cbc(), nullptr,
                            reinterpret_cast<const unsigned char *>(key.constData()),
                            reinterpret_cast<const unsigned char *>(iv.constData()))
         != 1) {
-        EVP_CIPHER_CTX_free(ctx);
         return {};
     }
 
-    QByteArray plainText(cipherText.size(), '\0');
+    QByteArray plainText(cipherText.size() + AES_BLOCK_SIZE, '\0');
     int outLen1 = 0;
+    int outLen2 = 0;
 
-    if (EVP_DecryptUpdate(ctx, reinterpret_cast<unsigned char *>(plainText.data()), &outLen1,
+    if (EVP_DecryptUpdate(ctx.get(), reinterpret_cast<unsigned char *>(plainText.data()), &outLen1,
                           reinterpret_cast<const unsigned char *>(cipherText.constData()),
                           cipherText.size())
         != 1) {
-        EVP_CIPHER_CTX_free(ctx);
         return {};
     }
 
-    int outLen2 = 0;
-    if (EVP_DecryptFinal_ex(ctx, reinterpret_cast<unsigned char *>(plainText.data()) + outLen1,
-                            &outLen2)
+    if (EVP_DecryptFinal_ex(ctx.get(),
+                            reinterpret_cast<unsigned char *>(plainText.data()) + outLen1, &outLen2)
         != 1) {
-        EVP_CIPHER_CTX_free(ctx);
         return {};
     }
 
-    EVP_CIPHER_CTX_free(ctx);
     plainText.resize(outLen1 + outLen2);
     return plainText;
 }
