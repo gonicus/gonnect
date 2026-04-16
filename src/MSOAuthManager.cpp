@@ -186,8 +186,7 @@ void MSOAuthManager::initAuthCodeFlow()
                                        << "description:" << errorDescription << "uri:" << uri;
                 showOauthLoginStatus(tr("Login failed, the server reported an error:\n%1\nWith "
                                         "error description: %2")
-                                             .arg(error)
-                                             .arg(errorDescription),
+                                             .arg(error, errorDescription),
                                      true);
             });
     connect(m_authCodeFlow, &QOAuth2AuthorizationCodeFlow::requestFailed, this,
