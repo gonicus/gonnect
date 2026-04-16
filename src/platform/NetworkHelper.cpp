@@ -78,22 +78,20 @@ NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
     onReachabilityChanged(netInfo->reachability());
 }
 
-QFuture<bool> NetworkHelper::isReachable(const QUrl &url)
+bool NetworkHelper::isReachable(const QUrl &url)
 {
-    return QtConcurrent::run([url]() -> bool {
-        QTcpSocket testSocket;
-        testSocket.connectToHost(url.host(), url.port());
-        testSocket.waitForConnected(1000);
+    QTcpSocket testSocket;
+    testSocket.connectToHost(url.host(), url.port());
+    testSocket.waitForConnected(1000);
 
-        bool state = testSocket.state() == QTcpSocket::UnconnectedState;
-        testSocket.close();
+    bool state = testSocket.state() == QTcpSocket::UnconnectedState;
+    testSocket.close();
 
-        if (!state) {
-            qCWarning(lcNetwork) << url << "is not reachable";
-        }
+    if (!state) {
+        qCWarning(lcNetwork) << url << "is not reachable";
+    }
 
-        return state;
-    });
+    return state;
 }
 
 void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reachability)
@@ -123,7 +121,6 @@ void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reac
 
     if (m_connectivity != connected) {
         m_connectivity = connected;
-
         Q_EMIT connectivityChanged();
     }
 }

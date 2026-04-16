@@ -18,7 +18,7 @@ public:
     static NetworkHelper &instance();
 
     virtual bool hasConnectivity() const { return m_connectivity; }
-    virtual QFuture<bool> isReachable(const QUrl &url);
+    virtual bool isReachable(const QUrl &url);
 
     virtual QStringList nameservers() const;
 

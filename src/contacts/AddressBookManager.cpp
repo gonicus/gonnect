@@ -14,7 +14,6 @@
 #include <QLoggingCategory>
 #include <QCryptographicHash>
 #include <QPluginLoader>
-#include <QMutexLocker>
 
 using namespace std::chrono_literals;
 using namespace Qt::Literals::StringLiterals;
@@ -79,6 +78,7 @@ void AddressBookManager::reloadAddressBook()
 
 void AddressBookManager::processAddressBookQueue()
 {
+    bool changed = false;
     bool networkAvailable = true;
     auto &nh = NetworkHelper::instance();
 
@@ -103,21 +103,13 @@ void AddressBookManager::processAddressBookQueue()
             // the network helper / portal. If we've no connectivity, trigger on
             // connectivityChanged signal to recheck again.
             QUrl checkURL = feeder->networkCheckURL();
-
-            if (checkURL.isEmpty()) {
-                feeder->process();
-            } else {
+            if (!checkURL.isEmpty()) {
                 if (!networkAvailable) {
                     continue;
                 }
 
-                if (!checkURL.isValid()) {
-                    qCCritical(lcAddressBookManager) << "URL is invalid:" << checkURL;
-                    continue;
-                }
-
                 if (!nh.hasConnectivity()) {
-                    qCWarning(lcAddressBookManager) << "No connectivity state yet - trying later";
+                    qCWarning(lcAddressBookManager) << "no connectivity state yet - trying later";
 
                     networkAvailable = false;
                     connect(
@@ -128,25 +120,24 @@ void AddressBookManager::processAddressBookQueue()
                     continue;
                 }
 
-                nh.isReachable(checkURL).then(this, [feeder, checkURL, this](bool isReachable) {
-                    if (isReachable) {
-                        QMutexLocker mutex(&m_queueMutex);
-
-                        feeder->process();
-                        Q_EMIT AddressBook::instance().contactsReady();
-                    } else {
-                        qCWarning(lcAddressBookManager)
-                                << "Feeder URL" << checkURL << "is not reachable";
-                        connect(
-                                &NetworkHelper::instance(), &NetworkHelper::connectivityChanged,
-                                this, [this]() { processAddressBookQueue(); },
-                                Qt::ConnectionType::SingleShotConnection);
-                    }
-                });
+                if (!nh.isReachable(checkURL)) {
+                    qCWarning(lcAddressBookManager) << checkURL << "is not reachable";
+                    connect(
+                            &nh, &NetworkHelper::connectivityChanged, this,
+                            [this]() { processAddressBookQueue(); },
+                            Qt::ConnectionType::SingleShotConnection);
+                    continue;
+                }
             }
 
+            feeder->process();
             it.remove();
+            changed = true;
         }
+    }
+
+    if (changed) {
+        Q_EMIT AddressBook::instance().contactsReady();
     }
 
     m_queueMutex.unlock();
@@ -183,7 +174,7 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                                                         const QString &message) {
                                                 if (error != QKeychain::NoError) {
                                                     ErrorBus::instance().error(
-                                                            tr("Failed to persist address book "
+                                                            tr("Failed persist address book "
                                                                "credentials: %1")
                                                                     .arg(message));
                                                 }

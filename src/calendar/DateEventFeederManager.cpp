@@ -75,7 +75,7 @@ void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &conf
                                                const QString &message) {
                                                 if (error != QKeychain::NoError) {
                                                     ErrorBus::instance().error(
-                                                            tr("Failed to persist calendar "
+                                                            tr("Failed persist calendar "
                                                                "credentials: %1")
                                                                     .arg(message));
                                                 }
@@ -129,42 +129,35 @@ void DateEventFeederManager::processQueue()
         const auto &configId = it.next();
 
         if (auto feeder = m_dateEventFeeders.value(configId, nullptr)) {
+
             QUrl urlToCheck = feeder->networkCheckURL();
 
-            if (urlToCheck.isEmpty()) {
-                feeder->init();
-            } else {
+            if (!urlToCheck.isEmpty()) {
                 if (!networkAvailable) {
                     continue;
                 }
 
                 if (!urlToCheck.isValid()) {
-                    qCCritical(lcDateEventFeederManager) << "URL is invalid:" << urlToCheck;
+                    qCCritical(lcDateEventFeederManager) << "Url is invalid:" << urlToCheck;
                     continue;
                 }
 
                 if (!networkHelper.hasConnectivity()) {
-                    qCWarning(lcDateEventFeederManager)
-                            << "No connectivity state yet - trying later";
+                    qCWarning(lcDateEventFeederManager) << "No network connectivity";
                     networkAvailable = false;
                     setupReconnectSignal();
                     continue;
                 }
 
-                networkHelper.isReachable(urlToCheck)
-                        .then(this, [feeder, urlToCheck, this](bool isReachable) {
-                            if (isReachable) {
-                                QMutexLocker mutex(&m_queueMutex);
-
-                                feeder->init();
-                            } else {
-                                qCWarning(lcDateEventFeederManager)
-                                        << "Feeder URL" << urlToCheck << "is not reachable";
-                                setupReconnectSignal();
-                            }
-                        });
+                if (!networkHelper.isReachable(urlToCheck)) {
+                    qCWarning(lcDateEventFeederManager)
+                            << "Feeder url" << urlToCheck << "is not reachable";
+                    setupReconnectSignal();
+                    continue;
+                }
             }
 
+            feeder->init();
             it.remove();
         }
     }
