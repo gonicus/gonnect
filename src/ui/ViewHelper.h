@@ -8,10 +8,10 @@
 #include "Application.h"
 #include "NumberStats.h"
 #include "JitsiConnector.h"
+#include "HeadsetDeviceProxy.h"
 
 class Ringer;
 class Contact;
-class HeadsetDeviceProxy;
 class CallHistoryItem;
 
 class ViewHelper : public QObject
