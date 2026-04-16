@@ -25,6 +25,14 @@ QList<QPair<QDateTime, QDateTime>> DateEventManager::createDaysFromRange(const Q
 {
     QList<QPair<QDateTime, QDateTime>> days;
 
+    // INFO: Events can have a duration of 0 (start == end)
+    // And since one could manually edit an ICS/iCal file and, for some reason,
+    // set an end time < start time, we'll check for that as well
+    if (end <= start) {
+        days.append(qMakePair(start, start));
+        return days;
+    }
+
     QDateTime currentStart = start;
     while (currentStart < end) {
         QDateTime endOfDay = currentStart.addDays(1);
