@@ -89,8 +89,13 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
             // Multi-day events will share the same base ID with a counter added to it
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid date range";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);
@@ -149,8 +154,13 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
         for (int i = 0; i < days.count(); i++) {
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid date range";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);
@@ -193,8 +203,13 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
         for (int i = 0; i < days.count(); i++) {
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid date range";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);
