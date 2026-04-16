@@ -248,7 +248,7 @@ void MSOAuthManager::authorize(const QSet<QByteArray> &scopes)
         return;
     }
     QString scopesString;
-    for (auto s : scopes) {
+    for (const auto &s : scopes) {
         if (!scopesString.isEmpty()) {
             scopesString += ",";
         }
