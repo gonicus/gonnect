@@ -10,11 +10,15 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
     connect(&GlobalCallState::instance(), &GlobalCallState::callInForegroundChanged, this,
             [this]() {
                 // Disconnect from RTT signals of the old call
-                if (m_call) {
+                if (m_changed) {
                     disconnect(m_changed);
-                    disconnect(m_committed);
-                    m_call = nullptr;
+                    m_changed = QMetaObject::Connection();
                 }
+                if (m_committed) {
+                    disconnect(m_committed);
+                    m_committed = QMetaObject::Connection();
+                }
+                m_call = nullptr;
 
                 // Clear model containing the RTT messages
                 m_model->reset();
@@ -44,6 +48,24 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
                                           });
                 }
             });
+}
+
+RTTProvider::~RTTProvider()
+{
+    if (m_changed) {
+        disconnect(m_changed);
+        m_changed = QMetaObject::Connection();
+    }
+    if (m_committed) {
+        disconnect(m_committed);
+        m_committed = QMetaObject::Connection();
+    }
+    m_call = nullptr;
+
+    if (m_model) {
+        delete m_model;
+        m_model = nullptr;
+    }
 }
 
 /*

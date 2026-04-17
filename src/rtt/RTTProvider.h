@@ -27,7 +27,7 @@ public:
         return *_instance;
     }
 
-    ~RTTProvider() = default;
+    ~RTTProvider();
 
     RTTModel *model() const { return m_model; }
 
