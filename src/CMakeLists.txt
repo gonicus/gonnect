@@ -15,7 +15,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineQuick
     Xml)
 
-find_package(Qca-qt6 REQUIRED)
 find_package(logfault CONFIG REQUIRED)
 
 if(UNIX)
@@ -751,7 +750,6 @@ target_link_libraries(gonnect
         Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
-        qca-qt6
         qt6keychain
         hid-rp
         ${AKONADI_CONTACT_FACTORY}

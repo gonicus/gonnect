@@ -8,7 +8,7 @@ command: gonnect
 
 add-extensions:
   de.gonicus.gonnect.plugin:
-    version: "2"
+    version: '2'
     directory: plugins
     subdirectories: true
     no-autodownload: true
@@ -142,11 +142,11 @@ modules:
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
-        tag: "2.16"
+        tag: 2.16
         commit: 6cab30cec44af36ba7c8a45ff7af2f74a8ed288c
         x-checker-data:
           type: git
-          tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
+          tag-pattern: ^([0-9]+\.[0-9]+(\.[0-9]+)?)$
       - type: patch
         path: patches/pjproject-site-config.patch
 
@@ -169,7 +169,7 @@ modules:
           type: anitya
           stable-only: true
           project-id: 2551
-          url-template: "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${major}.${minor}.${patch}.tgz"
+          url-template: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${major}.${minor}.${patch}.tgz
 
   - name: qtwebdav
     buildsystem: cmake-ninja
@@ -249,8 +249,8 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        url: https://download.gnome.org/sources/evolution-data-server/3.59/evolution-data-server-3.59.2.tar.xz
-        sha256: 15bd798c85dee923462bebe880761b4668b6c5065584e840900988389add83bf
+        url: https://download.gnome.org/sources/evolution-data-server/3.60/evolution-data-server-3.60.1.tar.xz
+        sha256: 33f92d3b8822eba04c313796c0778cbb65a1a38472e857edc5f98854cca9b34c
         x-checker-data:
           type: gnome
           name: evolution-data-server
@@ -282,8 +282,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/jgaa/logfault.git
-        tag: v0.8.1
-        commit: 9851bceb50e53de21cbbf27fef0b79c19667d3ec
+        tag: v0.8.5
+        commit: 846e8a11abd88a6780591864fb37d182e33793b7
         x-checker-data:
           type: git
           tag-pattern: ^(v[0-9.]+)$

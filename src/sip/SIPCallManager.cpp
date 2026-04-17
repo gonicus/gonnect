@@ -123,7 +123,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
 
     connect(dev, &HeadsetDeviceProxy::dial, this, [this](const QString &number) {
         if (m_calls.count() == 0) {
-            qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+            static_cast<Application *>(Application::instance())->rootWindow()->show();
             call(number);
         }
     });

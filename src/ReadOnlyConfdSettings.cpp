@@ -61,8 +61,6 @@ QStringList ReadOnlyConfdSettings::getUserGroups()
 void ReadOnlyConfdSettings::readConfd()
 {
     static const QRegularExpression configFileName("^\\d+-[a-zA-Z0-9_-]+.conf$");
-    static const QRegularExpression envPlaceholder("%ENV\\[([a-zA-Z0-9][A-Za-z0-9_]*)\\]%");
-    static const QRegularExpression cfgPlaceholder("%CFG\\[([A_Za-z_/]+)\\]%");
 
     const QString basePath =
             QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/gonnect";
@@ -102,22 +100,46 @@ void ReadOnlyConfdSettings::readConfd()
                     continue;
                 }
 
-                QString settingsValue = tmpSettings.value(key).toString();
-                auto envMatch = envPlaceholder.match(settingsValue);
-                if (envMatch.hasMatch()) {
-                    settingsValue.replace(
-                            envPlaceholder,
-                            qEnvironmentVariable(envMatch.captured(1).toStdString().c_str()));
-                }
-                auto cfgMatch = cfgPlaceholder.match(settingsValue);
-                if (cfgMatch.hasMatch()) {
-                    settingsValue.replace(cfgPlaceholder, value(cfgMatch.captured(1)).toString());
-                }
+                QVariant settingsValue = tmpSettings.value(key);
 
-                setValue(key, settingsValue);
+                if (settingsValue.userType() == QMetaType::QStringList) {
+                    QStringList newList;
+                    const QStringList strings = settingsValue.toStringList();
+                    newList.reserve(strings.length());
+                    std::ranges::transform(
+                            strings, std::back_inserter(newList),
+                            [this](const QString &s) { return replacePlaceholders(s); });
+
+                    setValue(key, newList);
+
+                } else if (settingsValue.userType() == QMetaType::QString) {
+                    setValue(key, replacePlaceholders(settingsValue.toString()));
+                } else {
+                    setValue(key, settingsValue);
+                }
             }
         }
     }
+}
+
+QString ReadOnlyConfdSettings::replacePlaceholders(const QString &settingsStringValue) const
+{
+    static const QRegularExpression envPlaceholder("%ENV\\[([a-zA-Z0-9][A-Za-z0-9_]*)\\]%");
+    static const QRegularExpression cfgPlaceholder("%CFG\\[([A_Za-z_/]+)\\]%");
+
+    QString str = settingsStringValue;
+
+    auto envMatch = envPlaceholder.match(str);
+    if (envMatch.hasMatch()) {
+        str.replace(envPlaceholder,
+                    qEnvironmentVariable(envMatch.captured(1).toStdString().c_str()));
+    }
+    auto cfgMatch = cfgPlaceholder.match(str);
+    if (cfgMatch.hasMatch()) {
+        str.replace(cfgPlaceholder, value(cfgMatch.captured(1)).toString());
+    }
+
+    return str;
 }
 
 QString ReadOnlyConfdSettings::hashForSettingsGroup(const QString &group)
