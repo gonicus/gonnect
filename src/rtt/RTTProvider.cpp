@@ -1,39 +1,49 @@
+#include "GlobalCallState.h"
+#include "SIPCallManager.h"
+
 #include "RTTProvider.h"
 
 RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
 {
     m_model = new RTTModel(this);
 
-    m_manager = &SIPCallManager::instance();
-    connect(m_manager, &SIPCallManager::establishedCallsCountChanged, this, [this]() {
-        // Disconnect from RTT signals of the old call
-        if (m_call) {
-            disconnect(m_changed);
-            disconnect(m_committed);
-        }
+    connect(&GlobalCallState::instance(), &GlobalCallState::callInForegroundChanged, this,
+            [this]() {
+                // Disconnect from RTT signals of the old call
+                if (m_call) {
+                    disconnect(m_changed);
+                    disconnect(m_committed);
+                    m_call = nullptr;
+                }
 
-        // Clear model containing the RTT messages
-        m_model->reset();
-        m_newMessage = true;
+                // Clear model containing the RTT messages
+                m_model->reset();
+                m_newMessage = true;
 
-        // Connect to RTT signals of the new call
-        m_call = m_manager->getCurrentCall();
-        if (m_call) {
-            m_changed = connect(m_call, &SIPCall::rttBubbleChanged, this, [this](QString message) {
-                if (m_newMessage) { // TODO: Safe, cause of ST-event loop?
-                    m_model->addMessage(QDateTime::currentMSecsSinceEpoch(), message, false);
-                    m_newMessage = false;
-                } else {
-                    m_model->updateMessage(message, false, false);
+                // Connect to RTT signals of the new call
+                m_state = GlobalCallState::instance().callInForeground();
+                if (m_state) {
+                    m_call = SIPCallManager::instance().findCallById(m_state->uuid());
+                }
+
+                if (m_call) {
+                    m_changed = connect(
+                            m_call, &SIPCall::rttBubbleChanged, this, [this](QString message) {
+                                if (m_newMessage) { // TODO: Safe, cause of ST-event loop?
+                                    m_model->addMessage(QDateTime::currentMSecsSinceEpoch(),
+                                                        message, false);
+                                    m_newMessage = false;
+                                } else {
+                                    m_model->updateMessage(message, false, false);
+                                }
+                            });
+                    m_committed = connect(m_call, &SIPCall::rttBubbleCommitted, this,
+                                          [this](QString message) {
+                                              m_model->updateMessage(message, false, true);
+                                              m_newMessage = true;
+                                          });
                 }
             });
-            m_committed =
-                    connect(m_call, &SIPCall::rttBubbleCommitted, this, [this](QString message) {
-                        m_model->updateMessage(message, false, true);
-                        m_newMessage = true;
-                    });
-        }
-    });
 }
 
 /*

@@ -5,8 +5,8 @@
 #include <QtQml/qqmlregistration.h>
 
 #include "RTTModel.h"
+#include "ICallState.h"
 #include "SIPCall.h"
-#include "SIPCallManager.h"
 
 class RTTProvider : public QObject
 {
@@ -38,7 +38,7 @@ private:
 
     RTTModel *m_model = nullptr;
 
-    SIPCallManager *m_manager = nullptr;
+    ICallState *m_state = nullptr;
     SIPCall *m_call = nullptr;
 
     QMetaObject::Connection m_changed;
