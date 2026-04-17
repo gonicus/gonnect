@@ -27,9 +27,8 @@ MSGraphEventFeeder::MSGraphEventFeeder(const QString &group, const QDateTime &ti
     m_networkAccessManager = new QNetworkAccessManager(this);
     m_calendarRefreshTimer.setSingleShot(true);
 
-    connect(&MSOAuthManager::instance(), &MSOAuthManager::loginSuccessful, this, [this]() {
-        QTimer::singleShot(std::chrono::seconds(0), this, &MSGraphEventFeeder::requestEvents);
-    });
+    connect(&MSOAuthManager::instance(), &MSOAuthManager::loginSuccessful, this,
+            &MSGraphEventFeeder::requestEvents);
     connect(&m_calendarRefreshTimer, &QTimer::timeout, this, &MSGraphEventFeeder::requestEvents);
 }
 

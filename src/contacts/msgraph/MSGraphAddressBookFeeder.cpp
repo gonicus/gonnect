@@ -11,7 +11,6 @@
 #include <QNetworkReply>
 #include <QNetworkRequestFactory>
 #include <QHttpHeaders>
-#include <QTimer>
 
 Q_LOGGING_CATEGORY(msGraphAddressBookFeeder, "gonnect.app.feeder.MSGraphAddressBookFeeder")
 
@@ -20,9 +19,8 @@ MSGraphAddressBookFeeder::MSGraphAddressBookFeeder(const QString &group, Address
 {
     m_networkAccessManager = new QNetworkAccessManager(this);
 
-    connect(&MSOAuthManager::instance(), &MSOAuthManager::loginSuccessful, this, [this]() {
-        QTimer::singleShot(std::chrono::seconds(0), this, [this]() { requestContacts(); });
-    });
+    connect(&MSOAuthManager::instance(), &MSOAuthManager::loginSuccessful, this,
+            &MSGraphAddressBookFeeder::requestContacts);
 }
 
 QUrl MSGraphAddressBookFeeder::networkCheckURL() const
