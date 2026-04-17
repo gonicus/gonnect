@@ -96,9 +96,6 @@ void MSGraphEventFeeder::eventsReceived(QNetworkReply *reply)
 
     DateEventManager &manager = DateEventManager::instance();
     if (m_isFirstPage) {
-        // TODO: In a more advanced variant, we could remove only the events that are no longer in
-        //       the response(s) and merely update the rest.
-        //       But for now this is good enough. We simply add all events again.
         manager.removeDateEventsBySource(eventSource);
     }
 
