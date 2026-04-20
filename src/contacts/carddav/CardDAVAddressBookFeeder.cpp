@@ -245,6 +245,14 @@ void CardDAVAddressBookFeeder::onParserFinished()
                     if (!reply) {
                         return;
                     }
+
+                    if (reply->error() != QNetworkReply::NoError) {
+                        qCDebug(lcCardDAVAddressBookFeeder)
+                                << "WebDAV reply error:" << reply->error();
+                        reply->deleteLater();
+                        return;
+                    }
+
                     QByteArray data = reply->readAll();
                     reply->deleteLater();
 

@@ -66,7 +66,6 @@ void CalDAVEventFeeder::onParserFinished()
     const auto list = m_webdavParser.getList();
     for (const auto &item : list) {
         QNetworkReply *reply = m_webdav.get(item.path());
-
         connect(
                 reply, &QNetworkReply::finished, this,
                 [item, reply, this]() {
@@ -75,8 +74,7 @@ void CalDAVEventFeeder::onParserFinished()
                     }
 
                     if (reply->error() != QNetworkReply::NoError) {
-                        qCWarning(lcCalDAVEventFeeder)
-                                << "WebDAV reply error:" << reply->error();
+                        qCDebug(lcCalDAVEventFeeder) << "WebDAV reply error:" << reply->error();
                         reply->deleteLater();
                         return;
                     }
