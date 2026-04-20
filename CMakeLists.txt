@@ -41,7 +41,7 @@ option(ENABLE_EDS "Enable EDS plugins" ON)
 option(ENABLE_LDAP "Enable LDAP plugin" ON)
 option(ENABLE_DAV "Enable DAV plugin" ON)
 option(ENABLE_CSV "Enable CSV plugin" ON)
-option(ENABLE_MSGRAPH "Enable MS Graph plugin" OFF)
+option(ENABLE_MSGRAPH "Enable MS Graph plugins" OFF)
 
 set(APP_ID "de.gonicus.gonnect")
 add_definitions(-DAPP_ID="${APP_ID}")
