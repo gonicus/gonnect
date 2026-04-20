@@ -143,7 +143,7 @@ void MSOAuthManager::initAuthCodeFlow()
                 new QOAuthHttpServerReplyHandler(QHostAddress::Any, availablePorts[0], this);
         //: This is text is displayed in the web browser after the user successfully logged in to the microsoft account.
         m_replyHandler->setCallbackText(
-                tr("Login to the Microsoft account has been received by GOnnect. Gonnect will "
+                tr("Login to the Microsoft account has been received by GOnnect. GOnnect will "
                    "continue the authorization process now. You can close this page now."));
         m_replyHandler->setCallbackPath(QStringLiteral("/Gonnect"));
     }
