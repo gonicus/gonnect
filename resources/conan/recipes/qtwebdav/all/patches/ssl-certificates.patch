@@ -1,0 +1,56 @@
+diff --git a/qwebdav.cpp b/qwebdav.cpp
+index 091500d..6619a48 100644
+--- a/qwebdav.cpp
++++ b/qwebdav.cpp
+@@ -160,6 +160,16 @@ void QWebdav::acceptSslCertificate(const QString &sslCertDigestMd5,
+     m_sslCertDigestSha1 = hexToDigest(sslCertDigestSha1);
+ }
+ 
++void QWebdav::addSslCa(QSslCertificate certificate)
++{
++    m_sslCa += certificate;
++}
++
++void QWebdav::addSslCa(const QList<QSslCertificate> &certificates)
++{
++    m_sslCa += certificates;
++}
++
+ void QWebdav::replyReadyRead()
+ {
+     auto reply = qobject_cast<QNetworkReply*>(QObject::sender());
+@@ -695,6 +705,12 @@ QNetworkReply* QWebdav::remove(const QString& path)
+ QNetworkRequest QWebdav::buildRequest() {
+     QNetworkRequest req;
+     if (isSSL()) {
++        if (!m_sslCa.isEmpty()) {
++            QSslConfiguration sslConfig;
++            sslConfig.addCaCertificates(m_sslCa);
++            req.setSslConfiguration(sslConfig);
++        }
++
+         QString concatenated = m_username + ":" + m_password;
+         QByteArray data = concatenated.toLocal8Bit().toBase64();
+         QString headerData = "Basic " + data;
+diff --git a/qwebdav.h b/qwebdav.h
+index 7111f05..bc3b5f5 100644
+--- a/qwebdav.h
++++ b/qwebdav.h
+@@ -97,6 +97,9 @@ public:
+     void acceptSslCertificate(const QString &sslCertDigestMd5 = "",
+                               const QString &sslCertDigestSha1 = "");
+ 
++    void addSslCa(QSslCertificate certificate);
++    void addSslCa(const QList<QSslCertificate>& certificates);
++
+     QNetworkReply* list(const QString& path);
+     QNetworkReply* list(const QString& path, int depth);
+ 
+@@ -156,6 +159,7 @@ private:
+ private:
+     QMap<QNetworkReply*, QIODevice*> m_outDataDevices;
+     QMap<QNetworkReply*, QIODevice*> m_inDataDevices;
++    QList<QSslCertificate> m_sslCa;
+ 
+     QString m_rootPath;
+     QString m_username;
