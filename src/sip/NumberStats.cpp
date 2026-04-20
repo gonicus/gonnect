@@ -142,8 +142,6 @@ void NumberStats::incrementCallCount(const QString &phoneNumber)
     } else {
         qCInfo(lcNumberStats) << "Successfully opened history database";
 
-        QSqlQuery query(db);
-
         if (ensureFlaggedNumberExists(phoneNumber)) {
             auto *countObj = m_callCountLookup.value(phoneNumber, nullptr);
             if (countObj) {
