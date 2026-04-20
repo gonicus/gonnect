@@ -46,6 +46,14 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
                                               m_model->updateMessage(message, false, true);
                                               m_newMessage = true;
                                           });
+
+                    /*
+                    TODO: Give this signal the boolean, in SIPCall
+                    And/or any other way to check if someone RTT'd you first?
+                    connect(m_call, &SIPCall::hasRttChanged, this, []() {
+
+                    });
+                    */
                 }
             });
 }
