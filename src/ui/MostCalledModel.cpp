@@ -8,6 +8,8 @@ MostCalledModel::MostCalledModel(QObject *parent) : QAbstractListModel{ parent }
 
     connect(&numStats, &NumberStats::numberStatAdded, this, &MostCalledModel::updateModel);
     connect(&numStats, &NumberStats::countChanged, this, &MostCalledModel::updateModel);
+    connect(&numStats, &NumberStats::favoriteAdded, this, &MostCalledModel::updateModel);
+    connect(&numStats, &NumberStats::favoriteRemoved, this, &MostCalledModel::updateModel);
 
     updateModel();
 }

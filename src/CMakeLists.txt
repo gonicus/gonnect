@@ -473,6 +473,7 @@ qt_add_qml_module(gonnect
         sip/NumberStat.h
         sip/NumberStats.h
         sip/NumberStats.cpp
+        sip/PhoneNumberCallCount.h
         sip/SIPAccount.h
         sip/SIPAccount.cpp
         sip/SIPAccountManager.h
