@@ -359,6 +359,26 @@ void ViewHelper::respondPassword(const QString &id, const QString password)
     Q_EMIT passwordResponded(id, password);
 }
 
+void ViewHelper::requestOauthLogin(const QString &id, const QString &reason)
+{
+    Q_EMIT oauthLoginRequested(id, reason);
+}
+
+void ViewHelper::respondStartOauthLogin(const QString &id)
+{
+    Q_EMIT oauthLoginStartResponded(id);
+}
+
+void ViewHelper::showOauthLoginStatus(const QString &id, const QString &status, bool canRetry)
+{
+    Q_EMIT oauthLoginStatus(id, status, canRetry);
+}
+
+void ViewHelper::respondOauthLoginClosed(const QString &id)
+{
+    Q_EMIT oauthLoginCloseResponded(id);
+}
+
 void ViewHelper::respondRecoveryKey(const QString &id, const QString &key)
 {
     Q_EMIT recoveryKeyResponded(id, key);
