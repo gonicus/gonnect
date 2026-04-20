@@ -14,7 +14,7 @@ class MSGraphAddressBookFactory : public QObject, IAddressBookFactory
 public:
     MSGraphAddressBookFactory() { };
 
-    QString name() const override { return "MSGraph"; }
+    QString name() const override { return "MSGraphContacts"; }
 
     QStringList configurations() const override;
 
