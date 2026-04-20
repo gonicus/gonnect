@@ -38,6 +38,7 @@ private:
     explicit CallHistory(QObject *parent = nullptr);
     qsizetype insertItemAtCorrectPosition(CallHistoryItem *item);
     void ensureDatabaseVersion();
+    void removeOldHistory();
 
     QList<CallHistoryItem *> m_historyItems;
     QString m_databasePath;

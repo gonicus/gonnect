@@ -459,6 +459,8 @@ qt_add_qml_module(gonnect
         KeychainSettings.h
         StateManager.cpp
         StateManager.h
+        Ticker.h
+        Ticker.cpp
         UISettings.cpp
         UISettings.h
 
