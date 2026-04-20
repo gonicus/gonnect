@@ -207,6 +207,6 @@ void MSGraphAddressBookFeeder::refreshOrRequestLogin()
     MSOAuthManager::instance().refreshOrRequestOauthLogin(
             m_group,
             tr("Login to your Microsoft account is required to access your contacts or calendars "
-               "from the GOnnect application."),
+               "from GOnnect."),
             scopes);
 }
