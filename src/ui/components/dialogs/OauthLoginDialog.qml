@@ -34,7 +34,7 @@ BaseDialog {
 
     Label {
         id: flowLabel
-        text: qsTr("To begin the login, press start. A browser window will open asking you to login to your account and share the required data with Gonnect.")
+        text: qsTr("To begin the login, press 'Authenticate'. A browser window will open asking you to login to your account and share the required data with GOnnect.")
         elide: Label.ElideRight
         wrapMode: Label.WordWrap
         anchors {
@@ -50,7 +50,7 @@ BaseDialog {
 
     Button {
         id: startButton
-        text: qsTr("Start")
+        text: qsTr("Authenticate")
         highlighted: true
         anchors {
             top: flowLabel.bottom
