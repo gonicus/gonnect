@@ -218,7 +218,7 @@ void MSOAuthManager::initAuthCodeFlow()
                     break;
                 case QAbstractOAuth::Error::ClientError:
                     showOauthLoginStatus(tr("Login failed, possibly due to a GOnnect configuration "
-                                            "error. Please contact the GOnnect support."),
+                                            "error."),
                                          true);
                     break;
                 case QAbstractOAuth::Error::ExpiredError:
