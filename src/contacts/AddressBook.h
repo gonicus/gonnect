@@ -34,7 +34,14 @@ public:
 
     void removeContact(const QString &sourceUid);
 
+    /// Delete all date events
+    void resetContacts();
+
+    /// Delete contacts of a specifc source
+    void removeContactsBySource(const QString &source);
+
     QHash<QString, Contact *> contacts() const;
+
     void reserve(qsizetype size);
 
     QList<Contact *> search(const QString &searchString, bool includeBlocked = false) const;
@@ -43,7 +50,6 @@ public:
     Contact *lookupByContactId(const QString &contactId) const;
     Contact *lookupBySourceUid(const QString &sourceUid) const;
 
-    void clear();
     QString hashifyCn(const QString &cn) const;
 
     const QList<Contact::ContactSourceInfo> &sortedSourceInfos() const
