@@ -4,6 +4,7 @@
 
 #include "CalDAVEventFeeder.h"
 #include "DateEventManager.h"
+#include "AuthManager.h"
 
 Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
 
@@ -12,6 +13,7 @@ using namespace std::chrono_literals;
 CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederConfig &config)
     : QObject(parent), m_config(config)
 {
+    m_webdav.addSslCa(AuthManager::instance().sslCAs());
 }
 
 CalDAVEventFeeder::~CalDAVEventFeeder()
