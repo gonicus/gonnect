@@ -10,7 +10,7 @@ class NumberStatsModel : public QAbstractListModel
     QML_ELEMENT
 
 public:
-    enum class Roles { PhoneNumber = Qt::UserRole + 1, Count };
+    enum class Roles { PhoneNumber = Qt::UserRole + 1 };
 
     explicit NumberStatsModel(QObject *parent = nullptr);
 
