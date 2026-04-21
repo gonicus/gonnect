@@ -153,12 +153,15 @@ void DateEventFeederManager::processQueue()
 
                 networkHelper.isReachable(urlToCheck)
                         .then(this, [feeder, urlToCheck, this](bool isReachable) {
-                            if (isReachable) {
-                                feeder->init();
-                            } else {
+                            if (!isReachable) {
                                 qCWarning(lcDateEventFeederManager)
-                                        << "Feeder URL" << urlToCheck << "is not reachable";
+                                << "Feeder URL" << urlToCheck << "is not reachable";
                                 setupReconnectSignal();
+                                return;
+                            }
+
+                            if (!feeder->isInitialized()) {
+                                feeder->init();
                             }
                         });
             }
