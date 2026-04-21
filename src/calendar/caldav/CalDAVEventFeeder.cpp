@@ -31,6 +31,8 @@ QUrl CalDAVEventFeeder::networkCheckURL() const
 
 void CalDAVEventFeeder::init()
 {
+    m_isInitialized = true;
+
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CalDAVEventFeeder::onParserFinished);
 

@@ -26,25 +26,6 @@ EDSAddressBookFeeder::~EDSAddressBookFeeder()
 
 void EDSAddressBookFeeder::init()
 {
-    connect(
-            this, &EDSAddressBookFeeder::feederFailed, this,
-            [this]() {
-                // Prepare feeder for re-run
-                resetContacts();
-                resetFeeder();
-
-                if (m_retryCount > 0) {
-                    m_retryCount--;
-
-                    qCWarning(lcEDSAddressBookFeeder)
-                            << "Failed to process EDS sources - trying later";
-
-                    // Retry
-                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
-                }
-            },
-            Qt::SingleShotConnection);
-
     m_cancellable = g_cancellable_new();
 
     GError *error = NULL;
@@ -58,6 +39,8 @@ void EDSAddressBookFeeder::init()
 
             Q_EMIT feederFailed();
         }
+
+        m_isProcessing = false;
         return;
     }
 
@@ -66,6 +49,8 @@ void EDSAddressBookFeeder::init()
     m_sourceCount = g_list_length(m_sources);
     if (m_sourceCount == 0) {
         qCDebug(lcEDSAddressBookFeeder) << "No sources found in registry";
+
+        m_isProcessing = false;
         return;
     }
 
@@ -118,6 +103,8 @@ void EDSAddressBookFeeder::resetContacts()
 
 void EDSAddressBookFeeder::resetFeeder()
 {
+    m_isProcessing = false;
+
     m_sourceCount = 0;
     m_clientCount = 0;
 
@@ -175,6 +162,27 @@ void EDSAddressBookFeeder::resetFeeder()
 
 void EDSAddressBookFeeder::process()
 {
+    m_isProcessing = true;
+
+    connect(
+            this, &EDSAddressBookFeeder::feederFailed, this,
+            [this]() {
+                // Prepare feeder for re-run
+                resetContacts();
+                resetFeeder();
+
+                if (m_retryCount > 0) {
+                    m_retryCount--;
+
+                    qCWarning(lcEDSAddressBookFeeder)
+                            << "Failed to process EDS sources - trying later";
+
+                    // Retry
+                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
+                }
+            },
+            Qt::SingleShotConnection);
+
     ReadOnlyConfdSettings settings;
 
     settings.beginGroup(m_group);

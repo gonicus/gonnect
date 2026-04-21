@@ -96,8 +96,6 @@ void AddressBookManager::processAddressBookQueue()
 
         if (auto feeder = m_addressBookFeeders.value(group, nullptr)) {
 
-            // TODO: isInitialized() exists now too, this might be superfluous as no
-            // double init and thus processing is possible
             if (feeder->isProcessing()) {
                 // A currently active feeder must not be invoked again to prevent double runs and
                 // threading issues.
@@ -145,8 +143,8 @@ void AddressBookManager::processAddressBookQueue()
                         return;
                     }
 
-                    // INFO: Only initialize the plugin once
-                    if (!feeder->isInitialized()) {
+                    // INFO: Do not allow plugins to process more than once at a time
+                    if (!feeder->isProcessing()) {
                         feeder->process();
                         Q_EMIT AddressBook::instance().contactsReady();
                     }

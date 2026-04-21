@@ -30,6 +30,8 @@ EDSEventFeeder::~EDSEventFeeder()
 
 void EDSEventFeeder::init()
 {
+    m_isInitialized = true;
+
     connect(
             this, &EDSEventFeeder::feederFailed, this,
             [this]() {
@@ -127,6 +129,8 @@ void EDSEventFeeder::resetCalendar()
 
 void EDSEventFeeder::resetFeeder()
 {
+    m_isInitialized = false;
+
     m_sourceCount = 0;
     m_clientCount = 0;
 

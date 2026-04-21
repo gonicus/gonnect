@@ -94,7 +94,7 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
     }
 
     if (days.count() != dateEventIds.count()) {
-        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid date range";
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
         return;
     }
 
@@ -159,7 +159,7 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
     }
 
     if (days.count() != dateEventIds.count()) {
-        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid date range";
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
         return;
     }
 
@@ -208,7 +208,7 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
     }
 
     if (days.count() != dateEventIds.count()) {
-        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid date range";
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
         return;
     }
 

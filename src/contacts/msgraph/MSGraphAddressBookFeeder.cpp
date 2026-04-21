@@ -143,6 +143,7 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
 void MSGraphAddressBookFeeder::errorOccurred(QNetworkReply *reply, QNetworkReply::NetworkError code)
 {
     if (!reply) {
+        m_isProcessing = false;
         return;
     }
 
@@ -199,11 +200,14 @@ void MSGraphAddressBookFeeder::requestContacts()
 
 void MSGraphAddressBookFeeder::process()
 {
+    m_isProcessing = true;
+
     connect(
             this, &MSGraphAddressBookFeeder::feederFailed, this,
             [this]() {
                 // Prepare feeder for re-run
                 AddressBook::instance().removeContactsBySource(m_group);
+                m_isProcessing = false;
 
                 // Some other error has occurred, wait and try again
                 if (m_retryCount > 0) {
