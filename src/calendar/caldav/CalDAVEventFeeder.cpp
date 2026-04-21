@@ -141,12 +141,11 @@ void CalDAVEventFeeder::getNextItem()
                     return;
                 }
 
-                    if (reply->error() != QNetworkReply::NoError) {
-                        qCDebug(lcCalDAVEventFeeder) << "WebDAV reply error:" << reply->error();
-                        reply->deleteLater();
-                        return;
-                    }
-
+                if (reply->error() != QNetworkReply::NoError) {
+                    qCDebug(lcCalDAVEventFeeder) << "WebDAV reply error:" << reply->error();
+                    reply->deleteLater();
+                    return;
+                }
 
                 QByteArray data = reply->readAll();
                 reply->deleteLater();

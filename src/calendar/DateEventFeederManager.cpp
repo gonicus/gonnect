@@ -160,11 +160,13 @@ void DateEventFeederManager::processQueue()
                         .then(this, [feeder, urlToCheck, this](bool isReachable) {
                             if (!isReachable) {
                                 qCWarning(lcDateEventFeederManager)
-                                << "Feeder URL" << urlToCheck << "is not reachable";
+                                        << "Feeder URL" << urlToCheck << "is not reachable";
+
                                 setupReconnectSignal();
                                 return;
                             }
 
+                            // INFO: Only initialize the plugin once
                             if (!feeder->isInitialized()) {
                                 feeder->init();
                             }
