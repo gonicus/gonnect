@@ -71,8 +71,9 @@ Item {
         id: avatarImage
         initials: ViewHelper.initials(delg.name || delg.phoneNumber)
         source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
-        showBuddyStatus: delg.hasBuddyState
-        buddyStatus: delg.buddyStatus
+        showPresenceStatus: delg.hasBuddyState
+        presenceStatus: delg.buddyStatus
+        indicatorComponent: Component { BuddyStatusIndicator {} }
         anchors {
             left: parent.left
             verticalCenter: parent.verticalCenter

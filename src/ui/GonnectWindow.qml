@@ -447,6 +447,9 @@ BaseWindow {
             control.ensureVisible()
             control.updateTabSelection(control.conferencePageId, GonnectWindow.PageType.Conference)
         }
+        function onShowStatusTextEditDialog() {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditStatusText.qml")
+        }
         function onFullscreenToggle() {
             if (control.visibility === Window.FullScreen) {
                 control.showNormal()

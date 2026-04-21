@@ -11,6 +11,7 @@ if(ENABLE_MSGRAPH)
     target_include_directories(MSGraphAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/presence
         ${PROJECT_SOURCE_DIR}/src/ui
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}
