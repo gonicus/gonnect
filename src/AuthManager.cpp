@@ -25,6 +25,11 @@ void AuthManager::init()
     m_isAuthManagerInitialized = true;
 
     ReadOnlyConfdSettings settings;
+
+    if (!settings.childGroups().contains("jitsi")) {
+        return;
+    }
+
     settings.beginGroup("jitsi");
 
     // Use this when other auth types for Jitsi Meet are implemented

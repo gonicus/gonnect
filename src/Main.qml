@@ -47,6 +47,7 @@ Item {
 
         property EmergencyCallIncomingWindow emergencyWindow: null
         property var passwordDialogs: ({})
+        property var oauthLoginDialogs: ({})
 
         function onActivateSearch() {
             gonnectWindow.ensureVisible()
@@ -95,6 +96,32 @@ Item {
                 dialog.Component.destruction.connect(() => delete viewHelperConnections.passwordDialogs[id])
             } else {
                 existingDialogs[id].show()
+                existingDialogs[id].raise()
+            }
+        }
+
+        function onOauthLoginRequested(id : string, reason : string) {
+            const existingDialogs = viewHelperConnections.oauthLoginDialogs
+
+            if (!existingDialogs[id]) {
+                const dialog = DialogFactory.createDialog("OauthLoginDialog.qml", { text: reason })
+                dialog.onStartOauthLogin.connect(() => ViewHelper.respondStartOauthLogin(id))
+                dialog.onCloseDialog.connect(() => ViewHelper.respondOauthLoginClosed(id))
+
+                viewHelperConnections.oauthLoginDialogs[id] = dialog
+                dialog.Component.destruction.connect(() => delete viewHelperConnections.oauthLoginDialogs[id])
+            } else {
+                existingDialogs[id].show()
+                existingDialogs[id].raise()
+            }
+        }
+
+        function onOauthLoginStatus(id : string, status : string, canRetry : bool) {
+            const dialog = viewHelperConnections.oauthLoginDialogs[id]
+            if (dialog) {
+                dialog.setStatus(status, canRetry)
+                dialog.show()
+                dialog.raise()
             }
         }
 

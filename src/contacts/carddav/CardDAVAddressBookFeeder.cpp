@@ -3,6 +3,7 @@
 #include "AddressBookManager.h"
 #include "AvatarManager.h"
 #include "ReadOnlyConfdSettings.h"
+#include "AuthManager.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -29,6 +30,8 @@ void CardDAVAddressBookFeeder::init()
     m_cacheWriteTimer.setSingleShot(true);
     m_cacheWriteTimer.setInterval(3s);
     m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
+
+    m_webdav.addSslCa(AuthManager::instance().sslCAs());
 
     loadCachedData(m_settingsHash);
 

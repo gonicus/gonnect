@@ -99,6 +99,11 @@ public:
     void requestPassword(const QString &id, const QString &host);
     Q_INVOKABLE void respondPassword(const QString &id, const QString password);
 
+    void requestOauthLogin(const QString &id, const QString &reason);
+    Q_INVOKABLE void respondStartOauthLogin(const QString &id);
+    void showOauthLoginStatus(const QString &id, const QString &status, bool canRetry);
+    Q_INVOKABLE void respondOauthLoginClosed(const QString &id);
+
     void requestRecoveryKey(const QString &id, const QString &displayName);
     Q_INVOKABLE void respondRecoveryKey(const QString &id, const QString &key);
 
@@ -186,6 +191,11 @@ Q_SIGNALS:
 
     void passwordRequested(QString id, QString host);
     void passwordResponded(QString id, QString password);
+
+    void oauthLoginRequested(QString id, QString reason);
+    void oauthLoginStartResponded(QString id);
+    void oauthLoginStatus(QString id, QString status, bool canRetry);
+    void oauthLoginCloseResponded(QString id);
 
     void recoveryKeyRequested(QString id, QString displayName);
     void recoveryKeyResponded(QString id, QString key);

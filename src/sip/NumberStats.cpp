@@ -2,6 +2,7 @@
 #include "CallHistory.h"
 #include "AddressBook.h"
 #include "NumberStat.h"
+#include "PhoneNumberCallCount.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -19,7 +20,10 @@ NumberStats::NumberStats(QObject *parent) : QObject{ parent }
 
     m_debounceAddressBookUpdateTimer.setSingleShot(true);
     m_debounceAddressBookUpdateTimer.setInterval(5ms);
-    m_debounceAddressBookUpdateTimer.callOnTimeout(this, &NumberStats::initialRead);
+    m_debounceAddressBookUpdateTimer.callOnTimeout(this, [this]() {
+        initialRead();
+        readNumberOfCalls();
+    });
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
             [this]() { m_debounceAddressBookUpdateTimer.start(); });
@@ -29,6 +33,7 @@ NumberStats::NumberStats(QObject *parent) : QObject{ parent }
             [this]() { m_debounceAddressBookUpdateTimer.start(); });
 
     initialRead();
+    readNumberOfCalls();
 }
 
 void NumberStats::initialRead()
@@ -58,7 +63,6 @@ void NumberStats::initialRead()
                 auto item = new NumberStat;
 
                 item->phoneNumber = query.value("phoneNumber").toString();
-                item->callCount = query.value("callcount").toUInt();
                 item->isBlocked = query.value("isBlocked").toBool();
                 item->isFavorite = query.value("isFavorite").toBool();
                 item->contactType =
@@ -81,6 +85,45 @@ void NumberStats::initialRead()
     Q_EMIT modelReset();
 }
 
+void NumberStats::readNumberOfCalls()
+{
+    auto db = QSqlDatabase::database();
+
+    if (!db.open()) {
+        qCCritical(lcNumberStats) << "Unable to open call history database:"
+                                  << db.lastError().text();
+    } else {
+        qCInfo(lcNumberStats) << "Successfully opened history database";
+
+        const auto sipCallValue = std::to_underlying(CallHistoryItem::Type::SIPCall);
+        QSqlQuery query(db);
+        query.prepare("SELECT remoteUrl, COUNT(*) as numberOfCalls FROM HISTORY WHERE (type & "
+                      ":typeValue) != 0 GROUP BY remoteUrl, account ORDER BY numberOfCalls DESC;");
+        query.bindValue(":typeValue", sipCallValue);
+
+        if (!query.exec()) {
+            qCCritical(lcNumberStats)
+                    << "Error on executing SQL query:" << query.lastError().text();
+        } else {
+            while (query.next()) {
+                const auto phoneNumber = PhoneNumberUtil::cleanPhoneNumber(
+                        PhoneNumberUtil::numberFromSipUrl(query.value("remoteUrl").toString()));
+
+                if (!phoneNumber.isEmpty()) {
+                    const auto count = query.value("numberOfCalls").toUInt();
+
+                    // Because remoteUrls are not
+                    if (auto *item = m_callCountLookup.value(phoneNumber, nullptr)) {
+                        item->count += count;
+                    } else {
+                        createAndAddCountObject(phoneNumber, count);
+                    }
+                }
+            }
+        }
+    }
+}
+
 NumberStats::~NumberStats()
 {
     m_statItemsLookup.clear();
@@ -99,24 +142,21 @@ void NumberStats::incrementCallCount(const QString &phoneNumber)
     } else {
         qCInfo(lcNumberStats) << "Successfully opened history database";
 
-        QSqlQuery query(db);
-
         if (ensureFlaggedNumberExists(phoneNumber)) {
-            auto statItem = m_statItemsLookup.value(phoneNumber);
-            statItem->callCount++;
-            Q_EMIT countChanged(m_statItems.indexOf(statItem));
+            auto *countObj = m_callCountLookup.value(phoneNumber, nullptr);
+            if (countObj) {
+                countObj->count++;
 
-            // Update DB entry
-            qCInfo(lcNumberStats) << "Updating call count for number" << phoneNumber
-                                  << "in database";
-            query.prepare("UPDATE contactflags SET callcount = callcount + 1 WHERE phoneNumber = "
-                          ":phoneNumber;");
-            query.bindValue(":phoneNumber", phoneNumber);
-
-            if (!query.exec()) {
-                qCCritical(lcNumberStats)
-                        << "Error on executing SQL query:" << query.lastError().text();
+                std::ranges::sort(m_callCounts,
+                                  [](const PhoneNumberCallCount *left,
+                                     const PhoneNumberCallCount *right) -> bool {
+                                      return left->count > right->count;
+                                  });
+            } else {
+                countObj = createAndAddCountObject(phoneNumber, 1);
             }
+
+            Q_EMIT countChanged(m_callCounts.indexOf(countObj));
         }
     }
 }
@@ -150,25 +190,32 @@ QList<NumberStat *> NumberStats::favorites() const
 
 QStringList NumberStats::mostCalled(quint8 limit, bool includeFavorites) const
 {
-    auto copy = m_statItems;
-
-    std::sort(copy.begin(), copy.end(),
-              [](const NumberStat *left, const NumberStat *right) -> bool {
-                  return left->callCount > right->callCount;
-              });
-
     QStringList result;
     result.reserve(limit);
-    quint8 count = 0;
 
-    for (qsizetype i = 0, s = copy.size(); count < limit && i < s; ++i) {
-        const auto item = copy.at(i);
-        if (includeFavorites || !item->isFavorite) {
-            result.append(item->phoneNumber);
-            ++count;
+    if (includeFavorites) {
+        const auto l = std::min(static_cast<qsizetype>(limit), m_callCounts.size());
+        for (qsizetype i = 0; i < l; ++i) {
+            result.append(m_callCounts.at(i)->phoneNumber);
+        }
+    } else {
+        for (const auto *countObj : std::as_const(m_callCounts)) {
+            if (m_favoriteLookup.contains(countObj->phoneNumber)) {
+                result.append(countObj->phoneNumber);
+            }
+
+            if (result.size() == limit) {
+                break;
+            }
         }
     }
+
     return result;
+}
+
+bool NumberStats::isFavorite(const QString &phoneNumber) const
+{
+    return m_favoriteLookup.contains(phoneNumber);
 }
 
 void NumberStats::toggleFavorite(const QString &phoneNumber,
@@ -212,6 +259,11 @@ void NumberStats::toggleFavorite(const QString &phoneNumber,
     }
 }
 
+const NumberStat *NumberStats::numberStat(const QString &phoneNumber) const
+{
+    return m_statItemsLookup.value(phoneNumber, nullptr);
+}
+
 bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,
                                             const NumberStats::ContactType contactType)
 {
@@ -230,9 +282,8 @@ bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,
         qCInfo(lcNumberStats) << "Successfully opened history database";
 
         QSqlQuery query(db);
-        query.prepare(
-                "INSERT INTO contactflags (phonenumber, callcount, isFavorite, isBlocked, type) "
-                "VALUES (:phoneNumber, 0, 0, 0, :type);");
+        query.prepare("INSERT INTO contactflags (phonenumber, isFavorite, isBlocked, type) "
+                      "VALUES (:phoneNumber, 0, 0, :type);");
         query.bindValue(":phoneNumber", phoneNumber);
         query.bindValue(":type", std::to_underlying(contactType));
 
@@ -255,6 +306,19 @@ bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,
     return false;
 }
 
+PhoneNumberCallCount *NumberStats::createAndAddCountObject(const QString &phoneNumber,
+                                                           quint32 count)
+{
+    auto *countObj = new PhoneNumberCallCount(this);
+    countObj->phoneNumber = phoneNumber;
+    countObj->count = count;
+
+    m_callCounts.append(countObj);
+    m_callCountLookup.insert(phoneNumber, countObj);
+
+    return countObj;
+}
+
 QDebug operator<<(QDebug debug, const NumberStats &stats)
 {
     QDebugStateSaver saver(debug);
@@ -265,7 +329,7 @@ QDebug operator<<(QDebug debug, const NumberStats &stats)
 QDebug operator<<(QDebug debug, const NumberStat &statItem)
 {
     QDebugStateSaver saver(debug);
-    debug.nospace() << "NumberStat(" << statItem.phoneNumber << ", count: " << statItem.callCount
+    debug.nospace() << "NumberStat(" << statItem.phoneNumber
                     << ", is favorite: " << statItem.isFavorite
                     << ", is blocked: " << statItem.isBlocked << ")";
     return debug;

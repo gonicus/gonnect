@@ -25,7 +25,7 @@ public:
 
     void initFeederConfigs();
     void reload();
-    void acquireSecret(bool override, const QString &configId,
+    void acquireSecret(bool forcePrompt, const QString &configId,
                        std::function<void(const QString &secret)> callback);
 
 private:

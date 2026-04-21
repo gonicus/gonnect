@@ -167,6 +167,7 @@ add_subdirectory(calendar/eds)
 add_subdirectory(contacts/akonadi)
 add_subdirectory(calendar/akonadi)
 add_subdirectory(contacts/msgraph)
+add_subdirectory(calendar/msgraph)
 
 find_package(Qt6Keychain REQUIRED)
 
@@ -348,6 +349,7 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
         ui/components/dialogs/InfoDialog.qml
+        ui/components/dialogs/OauthLoginDialog.qml
         # Dynamic UI
         ui/components/BaseWidget.qml
         ui/components/DateEventsWidget.qml
@@ -459,8 +461,12 @@ qt_add_qml_module(gonnect
         KeychainSettings.h
         StateManager.cpp
         StateManager.h
+        Ticker.h
+        Ticker.cpp
         UISettings.cpp
         UISettings.h
+        MSOAuthManager.cpp
+        MSOAuthManager.h
 
         sip/CallHistory.h
         sip/CallHistory.cpp
@@ -473,6 +479,7 @@ qt_add_qml_module(gonnect
         sip/NumberStat.h
         sip/NumberStats.h
         sip/NumberStats.cpp
+        sip/PhoneNumberCallCount.h
         sip/SIPAccount.h
         sip/SIPAccount.cpp
         sip/SIPAccountManager.h
@@ -751,6 +758,7 @@ target_link_libraries(gonnect
         ${EDS_CALENDAR_LIBRARIES}
         ${LDAP_ADDRESSBOOK_FACTORY}
         ${MSGRAPH_ADDRESSBOOK_FACTORY}
+        ${MSGRAPH_CALENDAR_FACTORY}
 )
 
 qt_import_plugins(gonnect INCLUDE
@@ -760,6 +768,7 @@ qt_import_plugins(gonnect INCLUDE
      ${CSV_ADDRESSBOOK_FACTORY}
      ${CALDAV_CALENDAR_FACTORY}
      ${MSGRAPH_ADDRESSBOOK_FACTORY}
+     ${MSGRAPH_CALENDAR_FACTORY}
      ${EDS_ADDRESSBOOK_FACTORY}
      ${EDS_CALENDAR_FACTORY}
      ${LDAP_ADDRESSBOOK_FACTORY})
