@@ -46,7 +46,7 @@ jobs:
           resources/conan/updater.py --renovate=tmp/renovate/ -v
 
       - name: Serve Files
-        uses: Eun/http-server-action@f71cec1321f665652a46c40b6852f8e5a68bfcd4 # v1
+        uses: Eun/http-server-action@dadebd209d4a902eeefceb524c24c38b364c46a7 # v1
         with:
           directory: ${{ github.workspace }}/tmp/renovate/
           port: 8080
@@ -58,7 +58,7 @@ jobs:
             }
 
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@eb932558ad942cccfd8211cf535f17ff183a9f74 # v46.1.9
+        uses: renovatebot/github-action@83ec54fee49ab67d9cd201084c1ff325b4b462e4 # v46.1.10
         with:
           docker-cmd-file: .github/renovate-entrypoint.sh
           docker-user: root

@@ -1,13 +1,13 @@
 #include "MSGraphAddressBookFeeder.h"
 #include "AddressBook.h"
 #include "AddressBookManager.h"
-#include <QOAuthHttpServerReplyHandler>
-#include <QRegularExpression>
-#include <QDesktopServices>
+#include "ReadOnlyConfdSettings.h"
+#include "MSOAuthManager.h"
 #include <QLoggingCategory>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequestFactory>
 #include <QHttpHeaders>
@@ -25,6 +25,9 @@ MSGraphAddressBookFeeder::MSGraphAddressBookFeeder(const QString &group, const i
 
 {
     m_networkAccessManager = new QNetworkAccessManager(this);
+
+    connect(&MSOAuthManager::instance(), &MSOAuthManager::loginSuccessful, this,
+            &MSGraphAddressBookFeeder::requestContacts);
 }
 
 QUrl MSGraphAddressBookFeeder::networkCheckURL() const
@@ -32,16 +35,12 @@ QUrl MSGraphAddressBookFeeder::networkCheckURL() const
     return {};
 }
 
-void MSGraphAddressBookFeeder::authStatusChanged(QAbstractOAuth::Status status)
-{
-    if (status == QAbstractOAuth::Status::Granted) {
-        m_replyHandler->close();
-        QTimer::singleShot(std::chrono::seconds(0), this, [this]() { requestContacts(); });
-    }
-}
-
 void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
 {
+    if (!reply) {
+        return;
+    }
+    reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
         qCWarning(msGraphAddressBookFeeder) << "Error:" << reply->errorString();
         reply->deleteLater();
@@ -60,7 +59,7 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
     auto value = doc.object()["value"];
     auto contacts = value.toArray();
     auto &addressBook = AddressBook::instance();
-    for (auto contact : contacts) {
+    for (const auto &contact : contacts) {
         const auto obj = contact.toObject();
 
         const auto contactId = obj["id"].toString();
@@ -126,7 +125,7 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
         QNetworkRequest request(nextLink);
         QHttpHeaders headers;
         headers.append(QHttpHeaders::WellKnownHeader::Authorization,
-                       u"Bearer "_s + m_authCodeFlow->token());
+                       u"Bearer "_s + MSOAuthManager::instance().token());
         request.setHeaders(headers);
         auto *reply = m_networkAccessManager->get(request);
         if (!reply) {
@@ -136,12 +135,40 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
 
         connect(reply, &QNetworkReply::finished, reply,
                 [this, reply]() { contactsReceived(reply); });
+        connect(reply, &QNetworkReply::errorOccurred, this,
+                [this, reply](QNetworkReply::NetworkError code) { errorOccurred(reply, code); });
     }
+}
+
+void MSGraphAddressBookFeeder::errorOccurred(QNetworkReply *reply, QNetworkReply::NetworkError code)
+{
+    if (!reply) {
+        return;
+    }
+    switch (code) {
+    case QNetworkReply::NoError:
+        // Should never happen here
+        break;
+    // See msgraph API documentation: HTTP status code 401 (Unauthorized) and 403 (Forbidden)
+    // may indicate issues with the login.
+    case QNetworkReply::AuthenticationRequiredError: // Corresponds to HTTP 401
+    case QNetworkReply::ContentAccessDenied: // Corresponds to HTTP 403
+        qCCritical(msGraphAddressBookFeeder)
+                << "Network error for msgraph request:" << code << "require new login to account.";
+        MSOAuthManager::instance()
+                .clearRefreshToken(); // Make sure we don't try to refresh the token again
+        refreshOrRequestLogin();
+        break;
+    default:
+        qCCritical(msGraphAddressBookFeeder) << "Network error for msgraph request:" << code;
+        break;
+    }
+    reply->deleteLater();
 }
 
 void MSGraphAddressBookFeeder::requestContacts()
 {
-    if (!m_authCodeFlow || m_authCodeFlow->status() != QAbstractOAuth::Status::Granted) {
+    if (!MSOAuthManager::instance().isGranted()) {
         qCWarning(msGraphAddressBookFeeder) << "Cannot request contacts - not logged in";
 
         Q_EMIT feederFailed();
@@ -151,7 +178,7 @@ void MSGraphAddressBookFeeder::requestContacts()
     qCDebug(msGraphAddressBookFeeder) << "Requesting contacts with microsoft graph api";
 
     QNetworkRequestFactory requestFactory({ "https://graph.microsoft.com/v1.0" });
-    requestFactory.setBearerToken(m_authCodeFlow->token().toLatin1());
+    requestFactory.setBearerToken(MSOAuthManager::instance().token().toLatin1());
 
     auto request = requestFactory.createRequest("me/contacts");
     auto *reply = m_networkAccessManager->get(request);
@@ -163,55 +190,17 @@ void MSGraphAddressBookFeeder::requestContacts()
     }
 
     connect(reply, &QNetworkReply::finished, reply, [this, reply]() { contactsReceived(reply); });
+    connect(reply, &QNetworkReply::errorOccurred, this,
+            [this, reply](QNetworkReply::NetworkError code) { errorOccurred(reply, code); });
 }
 
-void MSGraphAddressBookFeeder::authorize()
+void MSGraphAddressBookFeeder::process()
 {
-    qCDebug(msGraphAddressBookFeeder) << "Starting microsoft authorization";
-    if (!m_replyHandler) {
-        m_replyHandler = new QOAuthHttpServerReplyHandler(this);
+    if (MSOAuthManager::instance().isGranted()) {
+        requestContacts();
+    } else {
+        refreshOrRequestLogin();
     }
-
-    if (!m_replyHandler->isListening()) {
-        // For each port a redirect url must be registered in the azure portal for this app.
-        // http://127.0.0.1:33221 ...
-        std::array<uint16_t, 3> availablePorts = { 33221, 34221, 33521 };
-
-        // try and hope that one of the available ports is available for listening
-        for (auto port : availablePorts) {
-            if (m_replyHandler->listen(QHostAddress::Any, port)) {
-                break;
-            }
-        }
-
-        if (!m_replyHandler->isListening()) {
-            qCCritical(msGraphAddressBookFeeder)
-                    << "Failed to start QOAuthHttpServerReplyHandler. No port available?";
-
-            Q_EMIT feederFailed();
-            return;
-        }
-    }
-
-    if (!m_authCodeFlow) {
-        const QSet<QByteArray> tokens = { { "Contacts.Read" } };
-        m_authCodeFlow = new QOAuth2AuthorizationCodeFlow(this);
-        m_authCodeFlow->setReplyHandler(m_replyHandler);
-        m_authCodeFlow->setAuthorizationUrl(
-                QStringLiteral("https://login.microsoftonline.com/common/oauth2/v2.0/authorize"));
-        m_authCodeFlow->setTokenUrl(
-                { "https://login.microsoftonline.com/common/oauth2/v2.0/token" });
-        m_authCodeFlow->setRequestedScopeTokens(tokens);
-        m_authCodeFlow->setClientIdentifier(QStringLiteral("040bd189-3f48-414d-acf8-076bf1983326"));
-
-        connect(m_authCodeFlow, &QOAuth2AuthorizationCodeFlow::statusChanged, this,
-                &MSGraphAddressBookFeeder::authStatusChanged);
-
-        connect(m_authCodeFlow, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser,
-                &QDesktopServices::openUrl);
-    }
-
-    m_authCodeFlow->grant();
 }
 
 void MSGraphAddressBookFeeder::resetFeeder()
@@ -228,30 +217,30 @@ void MSGraphAddressBookFeeder::resetFeeder()
     }
 }
 
-void MSGraphAddressBookFeeder::process()
+void MSGraphAddressBookFeeder::refreshOrRequestLogin()
 {
-    connect(
-            this, &MSGraphAddressBookFeeder::feederFailed, this,
-            [this]() {
-                // Prepare feeder for re-run
-                resetFeeder();
-                AddressBook::instance().removeContactsBySource(m_group);
+    ReadOnlyConfdSettings settings;
+    QSet<QByteArray> scopes = {
+        { "offline_access" },
+#if QT_VERSION < QT_VERSION_CHECK(6, 11, 1)
+        { "openid" }, // See QTBUG-145561. Required for Qt <= 6.11 only
+#endif
+        { "Contacts.Read" },
+        { "Contacts.Read.Shared" },
+    };
 
-                // Some other error has occurred, wait and try again
-                if (m_retryCount > 0) {
-                    m_retryCount--;
-
-                    qCCritical(msGraphAddressBookFeeder)
-                            << "Failed to process MSGraph sources - trying later";
-
-                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
-                }
-            },
-            Qt::SingleShotConnection);
-
-    if (m_authCodeFlow && m_authCodeFlow->status() == QAbstractOAuth::Status::Granted) {
-        requestContacts();
-    } else {
-        authorize();
+    // If calendar plugin is enabled as well, request calendar permissions as well at
+    // the same time
+    const auto calendarGroup = QStringLiteral("msgraphcalendar");
+    if (settings.childGroups().contains(calendarGroup)
+        && settings.value(calendarGroup + QStringLiteral("/enabled"), true).toBool()) {
+        scopes.insert({ "Calendars.Read" });
+        scopes.insert({ "Calendars.Read.Shared" });
     }
+
+    MSOAuthManager::instance().refreshOrRequestOauthLogin(
+            m_group,
+            tr("Login to your Microsoft account is required to access your contacts or calendars "
+               "from GOnnect."),
+            scopes);
 }
