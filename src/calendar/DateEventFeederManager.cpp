@@ -154,8 +154,6 @@ void DateEventFeederManager::processQueue()
                 networkHelper.isReachable(urlToCheck)
                         .then(this, [feeder, urlToCheck, this](bool isReachable) {
                             if (isReachable) {
-                                QMutexLocker mutex(&m_queueMutex);
-
                                 feeder->init();
                             } else {
                                 qCWarning(lcDateEventFeederManager)

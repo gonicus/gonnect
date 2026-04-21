@@ -31,7 +31,7 @@ public:
 private:
     explicit DateEventFeederManager(QObject *parent = nullptr);
 
-    QMutex m_queueMutex;
+    QRecursiveMutex m_queueMutex;
 
     QDateTime m_currentTime;
     QDateTime m_timeRangeStart;
