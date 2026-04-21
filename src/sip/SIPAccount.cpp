@@ -1088,7 +1088,6 @@ pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const
         pjStatus.status = PJSUA_BUDDY_STATUS_OFFLINE;
         pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
         break;
-
     case PresenceState::State::Away:
         pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
         pjStatus.activity = PJRPID_ACTIVITY_AWAY;
@@ -1112,4 +1111,3 @@ pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const
 
     return pjStatus;
 }
-
