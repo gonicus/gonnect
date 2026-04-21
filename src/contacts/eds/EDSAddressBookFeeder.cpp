@@ -29,15 +29,15 @@ void EDSAddressBookFeeder::init()
     connect(
             this, &EDSAddressBookFeeder::feederFailed, this,
             [this]() {
+                // Prepare feeder for re-run
+                resetContacts();
+                resetFeeder();
+
                 if (m_retryCount > 0) {
                     m_retryCount--;
 
                     qCWarning(lcEDSAddressBookFeeder)
                             << "Failed to process EDS sources - trying later";
-
-                    // Prepare feeder for re-init
-                    resetContacts();
-                    resetFeeder();
 
                     // Retry
                     QTimer::singleShot(m_retryInterval, this, [this]() { process(); });

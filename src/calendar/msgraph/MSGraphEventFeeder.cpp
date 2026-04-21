@@ -46,16 +46,16 @@ void MSGraphEventFeeder::init()
     connect(
             this, &MSGraphEventFeeder::feederFailed, this,
             [this]() {
+                // Prepare feeder for re-run
+                m_calendarRefreshTimer.stop();
+                m_isFirstPage = false;
+                DateEventManager::instance().removeDateEventsBySource(m_source);
+
                 if (m_retryCount > 0) {
                     m_retryCount--;
 
                     qCWarning(lcMSGraphEventFeeder)
                             << "Failed to process MSGraph sources - trying later";
-
-                    // Prepare feeder for re-init
-                    m_calendarRefreshTimer.stop();
-                    m_isFirstPage = false;
-                    DateEventManager::instance().removeDateEventsBySource(m_source);
 
                     // Retry
                     QTimer::singleShot(m_retryInterval, this, [this]() { init(); });
@@ -154,7 +154,7 @@ void MSGraphEventFeeder::eventsReceived(QNetworkReply *reply)
         // is likely in HTML (see obj["body"].toObject()["contentType"].toString())
         const auto bodyPreview = obj["bodyPreview"].toString();
 
-        manager.addDateEvent(eventId, eventSource, start, end, subject, location, bodyPreview);
+        manager.addDateEvent(eventId, m_source, start, end, subject, location, bodyPreview);
     }
 
     m_isFirstPage = false;

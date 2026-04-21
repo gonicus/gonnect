@@ -33,14 +33,14 @@ void EDSEventFeeder::init()
     connect(
             this, &EDSEventFeeder::feederFailed, this,
             [this]() {
+                // Prepare feeder for re-run
+                resetCalendar();
+                resetFeeder();
+
                 if (m_retryCount > 0) {
                     m_retryCount--;
 
                     qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources - trying later";
-
-                    // Prepare feeder for re-init
-                    resetCalendar();
-                    resetFeeder();
 
                     // Retry
                     QTimer::singleShot(m_retryInterval, this, [this]() { init(); });
