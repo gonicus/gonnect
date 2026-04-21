@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QNetworkReply>
 #include <IAddressBookFeeder.h>
-#include "Contact.h"
 
 class AddressBook;
 class AddressBookManager;
@@ -28,10 +27,6 @@ private:
     void contactsReceived(QNetworkReply *reply);
     void errorOccurred(QNetworkReply *reply, QNetworkReply::NetworkError code);
     void requestContacts();
-
-    void authorize();
-
-    void resetFeeder();
 
     AddressBookManager *m_manager = nullptr;
     QNetworkAccessManager *m_networkAccessManager = nullptr;

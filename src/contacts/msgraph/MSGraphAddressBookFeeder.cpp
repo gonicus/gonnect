@@ -40,7 +40,7 @@ void MSGraphAddressBookFeeder::contactsReceived(QNetworkReply *reply)
     if (!reply) {
         return;
     }
-    reply->deleteLater();
+
     if (reply->error() != QNetworkReply::NoError) {
         qCWarning(msGraphAddressBookFeeder) << "Error:" << reply->errorString();
         reply->deleteLater();
@@ -145,6 +145,7 @@ void MSGraphAddressBookFeeder::errorOccurred(QNetworkReply *reply, QNetworkReply
     if (!reply) {
         return;
     }
+
     switch (code) {
     case QNetworkReply::NoError:
         // Should never happen here
@@ -153,17 +154,18 @@ void MSGraphAddressBookFeeder::errorOccurred(QNetworkReply *reply, QNetworkReply
     // may indicate issues with the login.
     case QNetworkReply::AuthenticationRequiredError: // Corresponds to HTTP 401
     case QNetworkReply::ContentAccessDenied: // Corresponds to HTTP 403
-        qCCritical(msGraphAddressBookFeeder)
-                << "Network error for msgraph request:" << code << "require new login to account.";
+        qCCritical(msGraphAddressBookFeeder) << "Network error for msgraph request:" << code
+                                             << "requires a new login to account.";
         MSOAuthManager::instance()
                 .clearRefreshToken(); // Make sure we don't try to refresh the token again
-        refreshOrRequestLogin();
         break;
     default:
         qCCritical(msGraphAddressBookFeeder) << "Network error for msgraph request:" << code;
         break;
     }
     reply->deleteLater();
+
+    Q_EMIT feederFailed();
 }
 
 void MSGraphAddressBookFeeder::requestContacts()
@@ -196,24 +198,28 @@ void MSGraphAddressBookFeeder::requestContacts()
 
 void MSGraphAddressBookFeeder::process()
 {
+    connect(
+            this, &MSGraphAddressBookFeeder::feederFailed, this,
+            [this]() {
+                // Prepare feeder for re-run
+                AddressBook::instance().removeContactsBySource(m_group);
+
+                // Some other error has occurred, wait and try again
+                if (m_retryCount > 0) {
+                    m_retryCount--;
+
+                    qCCritical(msGraphAddressBookFeeder)
+                            << "Failed to process MSGraph sources - trying later";
+
+                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
+                }
+            },
+            Qt::SingleShotConnection);
+
     if (MSOAuthManager::instance().isGranted()) {
         requestContacts();
     } else {
         refreshOrRequestLogin();
-    }
-}
-
-void MSGraphAddressBookFeeder::resetFeeder()
-{
-    if (m_replyHandler) {
-        m_replyHandler->close();
-        m_replyHandler->deleteLater();
-        m_replyHandler = nullptr;
-    }
-
-    if (m_authCodeFlow) {
-        m_authCodeFlow->deleteLater();
-        m_authCodeFlow = nullptr;
     }
 }
 
