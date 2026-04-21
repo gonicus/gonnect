@@ -1,5 +1,7 @@
 #include "CallHistory.h"
 #include "ErrorBus.h"
+#include "ReadOnlyConfdSettings.h"
+#include "Ticker.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -37,7 +39,10 @@ CallHistory::CallHistory(QObject *parent) : QObject{ parent }
     auto db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(m_databasePath);
 
+    connect(&Ticker::instance(), &Ticker::newDay, this, &CallHistory::removeOldHistory);
+
     ensureDatabaseVersion();
+    removeOldHistory();
     readFromDatabase();
 }
 
@@ -172,6 +177,40 @@ void CallHistory::ensureDatabaseVersion()
         }
     } else {
         qCInfo(lcCallHistory) << "Database scheme is up to date at" << currentVersionNumber;
+    }
+}
+
+void CallHistory::removeOldHistory()
+{
+    ReadOnlyConfdSettings settings;
+    bool ok = false;
+    const auto days = settings.value("generic/keepHistoryDays", 90).toUInt(&ok);
+
+    if (!ok) {
+        qCCritical(lcCallHistory)
+                << "Unable to parse settings value generic/keepHistoryDays as number";
+        return;
+    }
+
+    auto db = QSqlDatabase::database();
+
+    if (!db.open()) {
+        qCCritical(lcCallHistory) << "Unable to open call history database:"
+                                  << db.lastError().text();
+    } else {
+        qCInfo(lcCallHistory)
+                << "Successfully opened history database to remove old history entries";
+
+        QSqlQuery query(db);
+        query.prepare(QString("DELETE FROM history WHERE time <= unixepoch('now', '-%1 days');")
+                              .arg(days));
+
+        if (query.exec()) {
+            qInfo() << query.numRowsAffected() << "old history entries deleted";
+        } else {
+            qCCritical(lcCallHistory)
+                    << "Error on executing SQL query:" << query.lastError().text();
+        }
     }
 }
 
