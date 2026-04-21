@@ -15,14 +15,16 @@
 
 Q_LOGGING_CATEGORY(lcMSGraphEventFeeder, "gonnect.app.dateevents.feeder.MSGraphEventFeeder")
 
-MSGraphEventFeeder::MSGraphEventFeeder(const QString &group, const QDateTime &timeRangeStart,
-                                       const QDateTime &timeRangeEnd,
-                                       DateEventFeederManager *parent)
+MSGraphEventFeeder::MSGraphEventFeeder(const QString &source, const QDateTime &timeRangeStart,
+                                       const QDateTime &timeRangeEnd, const int retryCount,
+                                       const int retryInterval, DateEventFeederManager *parent)
     : QObject(parent),
-      m_group(group),
-      m_manager(parent),
+      m_source(source),
       m_timeRangeStart(timeRangeStart),
-      m_timeRangeEnd(timeRangeEnd)
+      m_timeRangeEnd(timeRangeEnd),
+      m_manager(parent),
+      m_retryCount(retryCount),
+      m_retryInterval(retryInterval)
 {
     m_networkAccessManager = new QNetworkAccessManager(this);
     m_calendarRefreshTimer.setSingleShot(true);
@@ -41,6 +43,26 @@ QUrl MSGraphEventFeeder::networkCheckURL() const
 
 void MSGraphEventFeeder::init()
 {
+    connect(
+            this, &MSGraphEventFeeder::feederFailed, this,
+            [this]() {
+                if (m_retryCount > 0) {
+                    m_retryCount--;
+
+                    qCWarning(lcMSGraphEventFeeder)
+                            << "Failed to process MSGraph sources - trying later";
+
+                    // Prepare feeder for re-init
+                    m_calendarRefreshTimer.stop();
+                    m_isFirstPage = false;
+                    DateEventManager::instance().removeDateEventsBySource(m_source);
+
+                    // Retry
+                    QTimer::singleShot(m_retryInterval, this, [this]() { init(); });
+                }
+            },
+            Qt::SingleShotConnection);
+
     if (MSOAuthManager::instance().isGranted()) {
         requestEvents();
     } else {
@@ -70,7 +92,7 @@ void MSGraphEventFeeder::refreshOrRequestLogin()
     }
 
     MSOAuthManager::instance().refreshOrRequestOauthLogin(
-            m_group,
+            m_source,
             tr("Login to your Microsoft account is required to access your contacts or calendars "
                "from GOnnect."),
             scopes);
@@ -81,22 +103,25 @@ void MSGraphEventFeeder::eventsReceived(QNetworkReply *reply)
     if (!reply) {
         return;
     }
-    reply->deleteLater();
+
     if (reply->error() != QNetworkReply::NoError) {
+        qCWarning(lcMSGraphEventFeeder) << "Error:" << reply->errorString();
+        reply->deleteLater();
+
+        Q_EMIT feederFailed();
         return;
     }
 
     auto jsonText = reply->readAll();
+    reply->deleteLater();
     auto doc = QJsonDocument::fromJson(jsonText);
     if (doc.isNull()) {
         return;
     }
 
-    const QString eventSource = m_group;
-
     DateEventManager &manager = DateEventManager::instance();
     if (m_isFirstPage) {
-        manager.removeDateEventsBySource(eventSource);
+        manager.removeDateEventsBySource(m_source);
     }
 
     auto value = doc.object()["value"];
@@ -158,8 +183,11 @@ void MSGraphEventFeeder::requestEvents()
     m_calendarRefreshTimer.stop();
     if (!MSOAuthManager::instance().isGranted()) {
         qCWarning(lcMSGraphEventFeeder) << "Cannot request events - not logged in";
+
+        Q_EMIT feederFailed();
         return;
     }
+
     if (!m_timeRangeStart.isValid() || !m_timeRangeEnd.isValid()) {
         qCWarning(lcMSGraphEventFeeder) << "Cannot request events - timerange not valid";
         return;
@@ -179,6 +207,8 @@ void MSGraphEventFeeder::requestEvents()
     auto *reply = m_networkAccessManager->get(request);
     if (!reply) {
         qCCritical(lcMSGraphEventFeeder) << "Failed to create contacts request";
+
+        Q_EMIT feederFailed();
         return;
     }
 
@@ -193,7 +223,7 @@ void MSGraphEventFeeder::errorOccurred(QNetworkReply *reply, QNetworkReply::Netw
     if (!reply) {
         return;
     }
-    m_calendarRefreshTimer.stop();
+
     switch (code) {
     case QNetworkReply::NoError:
         // Should never happen here
@@ -202,17 +232,19 @@ void MSGraphEventFeeder::errorOccurred(QNetworkReply *reply, QNetworkReply::Netw
     // may indicate issues with the login.
     case QNetworkReply::AuthenticationRequiredError: // Corresponds to HTTP 401
     case QNetworkReply::ContentAccessDenied: // Corresponds to HTTP 403
-        qCCritical(lcMSGraphEventFeeder)
-                << "Network error for msgraph request:" << code << "require new login to account.";
+        qCCritical(lcMSGraphEventFeeder) << "Network error for msgraph request:" << code
+                                         << "requires a new login to account.";
         MSOAuthManager::instance()
                 .clearRefreshToken(); // Make sure we don't try to refresh the token again
-        refreshOrRequestLogin();
         break;
     default:
         qCCritical(lcMSGraphEventFeeder) << "Network error for msgraph request:" << code;
         break;
     }
+
     reply->deleteLater();
+
+    Q_EMIT feederFailed();
 }
 
 QDateTime MSGraphEventFeeder::parseDateTime(const QJsonValue &dateTimeContainer)

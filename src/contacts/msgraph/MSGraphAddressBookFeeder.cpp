@@ -163,6 +163,7 @@ void MSGraphAddressBookFeeder::errorOccurred(QNetworkReply *reply, QNetworkReply
         qCCritical(msGraphAddressBookFeeder) << "Network error for msgraph request:" << code;
         break;
     }
+
     reply->deleteLater();
 
     Q_EMIT feederFailed();

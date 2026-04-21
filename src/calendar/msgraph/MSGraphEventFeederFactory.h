@@ -18,5 +18,6 @@ public:
     QStringList configurations() const override;
     IDateEventFeeder *createFeeder(const QString &settingsGroup, const QDateTime &currentTime,
                                    const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd,
+                                   const int retryCount, const int retryInterval,
                                    DateEventFeederManager *feederManager) const override;
 };
