@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QHash>
 #include <QMutex>
+#include <QTimer>
 
 class IAddressBookFeeder;
 

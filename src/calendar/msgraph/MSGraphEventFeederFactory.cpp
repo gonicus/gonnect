@@ -27,8 +27,10 @@ QStringList MSGraphEventFeederFactory::configurations() const
 
 IDateEventFeeder *MSGraphEventFeederFactory::createFeeder(
         const QString &settingsGroup, const QDateTime &currentTime, const QDateTime &timeRangeStart,
-        const QDateTime &timeRangeEnd, DateEventFeederManager *feederManager) const
+        const QDateTime &timeRangeEnd, const int retryCount, const int retryInterval,
+        DateEventFeederManager *feederManager) const
 {
     Q_UNUSED(currentTime);
-    return new MSGraphEventFeeder(settingsGroup, timeRangeStart, timeRangeEnd, feederManager);
+    return new MSGraphEventFeeder(settingsGroup, timeRangeStart, timeRangeEnd, retryCount,
+                                  retryInterval, feederManager);
 }
