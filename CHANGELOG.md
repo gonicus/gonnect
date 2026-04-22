@@ -1,3 +1,39 @@
+# [2.2.0-beta.1](https://github.com/gonicus/gonnect/compare/v2.1.0...v2.2.0-beta.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* build with certificate patch ([#433](https://github.com/gonicus/gonnect/issues/433)) ([8e8ba1f](https://github.com/gonicus/gonnect/commit/8e8ba1f9897457a4582ffdb059985569ac957984))
+* c++ standard and guarding updates ([#422](https://github.com/gonicus/gonnect/issues/422)) ([9e8171b](https://github.com/gonicus/gonnect/commit/9e8171ba4ef5336e988d6938fa62793432d89ae5))
+* code review loop ([#374](https://github.com/gonicus/gonnect/issues/374)) ([f1c609d](https://github.com/gonicus/gonnect/commit/f1c609da8dc0214e2f0c4909ef7b645b08352c11))
+* disable WMME in pjsip ([#397](https://github.com/gonicus/gonnect/issues/397)) ([a90a80c](https://github.com/gonicus/gonnect/commit/a90a80cb4796c96f1626f82d3e59d49312c23585))
+* handle direct pjsip mute again ([#402](https://github.com/gonicus/gonnect/issues/402)) ([0c4609c](https://github.com/gonicus/gonnect/commit/0c4609ca355f760478a19bda2c618aa299ff86eb))
+* home/call switch tab notification reset ([#404](https://github.com/gonicus/gonnect/issues/404)) ([95e0a3f](https://github.com/gonicus/gonnect/commit/95e0a3ff849fda5a6fbb7e2294a99349edef77f8))
+* make MWI subscription configurable ([#414](https://github.com/gonicus/gonnect/issues/414)) ([d74c530](https://github.com/gonicus/gonnect/commit/d74c53040e10f354cfbf86ef62662570af4bd3fc))
+* make ReadOnlyConfdSettings treate string lists correctly ([#423](https://github.com/gonicus/gonnect/issues/423)) ([48328e2](https://github.com/gonicus/gonnect/commit/48328e235cf888f00b95b4b6792b727138aaf35c))
+* more sip codes lead to auth request ([#379](https://github.com/gonicus/gonnect/issues/379)) ([31ee0cd](https://github.com/gonicus/gonnect/commit/31ee0cd138b21d34c3945274a4f6f08e344eae96))
+* mwi recursions ([#405](https://github.com/gonicus/gonnect/issues/405)) ([2a42344](https://github.com/gonicus/gonnect/commit/2a423440dbafddb79db9a988e0bb27716e47ed1f))
+* potential crash on HeadsetDevice destroyed ([#371](https://github.com/gonicus/gonnect/issues/371)) ([65900ab](https://github.com/gonicus/gonnect/commit/65900abcc5030f33687ebfab95e03f05c1591c51))
+* raise window after showing it ([#398](https://github.com/gonicus/gonnect/issues/398)) ([4f72dc6](https://github.com/gonicus/gonnect/commit/4f72dc6ad54731be70190d1495c00b15b301c14e))
+* reenable CardDAV plugin ([#406](https://github.com/gonicus/gonnect/issues/406)) ([9b9b136](https://github.com/gonicus/gonnect/commit/9b9b136f27fc945f2e6f6763401de76ead6a9a7b))
+* resolve feeder manager deadlock ([#427](https://github.com/gonicus/gonnect/issues/427)) ([9a8d604](https://github.com/gonicus/gonnect/commit/9a8d6048e871262fda444a24a5091096940274f2))
+* restore functionality for feeders without network requirements ([#387](https://github.com/gonicus/gonnect/issues/387)) ([01c6494](https://github.com/gonicus/gonnect/commit/01c64946a77c9cee40f566c9af2fecd51bfa7bcc))
+* tab switch/reset notifications ([9338ed0](https://github.com/gonicus/gonnect/commit/9338ed0c6a82c35d44e36a40d90a66781c0c0441))
+* **ui:** give focus to call screen when startet via enter ([#395](https://github.com/gonicus/gonnect/issues/395)) ([5e5d78e](https://github.com/gonicus/gonnect/commit/5e5d78e0a6364d511a43558e59be5ab020bf2795))
+
+
+### Features
+
+* adding global shortcuts support for windows ([#399](https://github.com/gonicus/gonnect/issues/399)) ([eb5237e](https://github.com/gonicus/gonnect/commit/eb5237ed507135d99f5d27b304eec25e0352df2a))
+* basic MWI support ([#392](https://github.com/gonicus/gonnect/issues/392)) ([8c3c914](https://github.com/gonicus/gonnect/commit/8c3c91455b04a800a5c3e09c76b1f3e3b92ce023))
+* delete old history entries ([#432](https://github.com/gonicus/gonnect/issues/432)) ([0ee826d](https://github.com/gonicus/gonnect/commit/0ee826d3384151954c559e3c417967f8b3fc872f))
+* display sip registration status ([#375](https://github.com/gonicus/gonnect/issues/375)) ([f9e6567](https://github.com/gonicus/gonnect/commit/f9e6567a1bc89b5c688d7edb53fd4cc54899dcba))
+* feeder plugin retry mechanism ([#391](https://github.com/gonicus/gonnect/issues/391)) ([e262f3f](https://github.com/gonicus/gonnect/commit/e262f3f75ef70ed54b1aca17c7169e06c7ebd94a))
+* pause/resume media on windows ([#370](https://github.com/gonicus/gonnect/issues/370)) ([61f3407](https://github.com/gonicus/gonnect/commit/61f34075a0f8dae316bd2a7ed6f6cf171917ad2b))
+* plugins for microsoft calendars and contacts ([#428](https://github.com/gonicus/gonnect/issues/428)) ([e7e8cd9](https://github.com/gonicus/gonnect/commit/e7e8cd96bffc42e63dfb488894adb836c5ad4ff5))
+* pre-fill missing it/es translations ([#377](https://github.com/gonicus/gonnect/issues/377)) ([4428e4e](https://github.com/gonicus/gonnect/commit/4428e4e659af0c708fa3738dc521977b7b11d1c2))
+* update pjproject to 2.17 ([#435](https://github.com/gonicus/gonnect/issues/435)) ([98c7199](https://github.com/gonicus/gonnect/commit/98c719971d48f696f312a21dde469c745c4ba220))
+
 # [2.1.0](https://github.com/gonicus/gonnect/compare/v2.0.9...v2.1.0) (2026-04-10)
 
 
