@@ -17,8 +17,9 @@
 
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
-LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookManager *parent)
-    : QObject(parent), m_group(group)
+LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, const int retryCount,
+                                             const int retryInterval, AddressBookManager *parent)
+    : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
 {
     m_manager = qobject_cast<AddressBookManager *>(parent);
 
@@ -34,22 +35,6 @@ LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookMa
     connect(this, &LDAPAddressBookFeeder::newExternalImageAdded, this,
             [](const QString &id, const QByteArray &data, const QDateTime &modified,
                QPrivateSignal) { AvatarManager::instance().addExternalImage(id, data, modified); });
-
-    connect(this, &LDAPAddressBookFeeder::invalidCredentials, this, [this]() {
-        // TODO: Check for bind method again?
-        m_manager->acquireSecret(true, m_group, [this](const QString &password) {
-            m_ldapConfig.bindPassword = password;
-
-            feedAddressBook();
-
-            const auto dirtyContacts = AvatarManager::instance().initialLoad();
-            if (dirtyContacts.isEmpty()) {
-                loadAllAvatars(m_ldapConfig);
-            } else {
-                loadAvatars(dirtyContacts);
-            }
-        });
-    });
 }
 
 void LDAPAddressBookFeeder::init(const LDAPInitializer::Config &ldapConfig,
@@ -61,8 +46,50 @@ void LDAPAddressBookFeeder::init(const LDAPInitializer::Config &ldapConfig,
     m_sipStatusSubscriptableAttributes = sipStatusSubscriptableAttributes;
 }
 
+void LDAPAddressBookFeeder::resetFeeder()
+{
+    m_ldapConfig = {};
+
+    if (m_ldap) {
+        LDAPInitializer::freeLDAPHandle(m_ldap);
+        m_ldap = nullptr;
+    }
+
+    m_ldapSearchMessageId = -1;
+    m_baseNumber = "";
+    m_sipStatusSubscriptableAttributes.clear();
+    m_blockInfo = {};
+}
+
 void LDAPAddressBookFeeder::process()
 {
+    connect(
+            this, &LDAPAddressBookFeeder::feederFailed, this,
+            [this]() {
+                // Prepare feeder for re-run
+                resetFeeder();
+                AddressBook::instance().removeContactsBySource(m_group);
+
+                if (m_authFailed) {
+                    // Previous run failed due to auth, we'll prompt the user again immediately
+                    qCCritical(lcLDAPAddressBookFeeder)
+                            << "Failed to process LDAP sources - invalid password";
+
+                    process();
+                } else {
+                    // Some other error has occurred, wait and try again
+                    if (m_retryCount > 0) {
+                        m_retryCount--;
+
+                        qCCritical(lcLDAPAddressBookFeeder)
+                                << "Failed to process LDAP sources - trying later";
+
+                        QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
+                    }
+                }
+            },
+            Qt::SingleShotConnection);
+
     ReadOnlyConfdSettings settings;
     settings.beginGroup(m_group);
 
@@ -81,8 +108,11 @@ void LDAPAddressBookFeeder::process()
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
 
     if (bindMethodStr == "simple" || bindMethodStr == "gssapi") {
-        m_manager->acquireSecret(false, m_group,
-                                 [this](const QString &password) { processImpl(password); });
+        m_manager->acquireSecret(m_authFailed, m_group, [this](const QString &password) {
+            m_authFailed = false;
+
+            processImpl(password);
+        });
     } else { // "none"
         processImpl("");
     }
@@ -110,6 +140,7 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     if (s_bindMethods.contains(bindMethodStr)) {
         bindMethod = s_bindMethods.value(bindMethodStr);
     } else {
+        // INFO: This would point towards a config issue - not going to retry automatically
         qCCritical(lcLDAPAddressBookFeeder).nospace()
                 << "Unknown LDAP bind method '" << bindMethodStr
                 << "' - initialization of LDAP account will be aborted.";
@@ -180,8 +211,9 @@ void LDAPAddressBookFeeder::feedAddressBook()
         clearCStringlist(attrs);
 
         if (result == LDAP_INVALID_CREDENTIALS) {
-            Q_EMIT invalidCredentials();
+            m_authFailed = true;
         }
+        Q_EMIT feederFailed();
         return;
     }
 
@@ -201,6 +233,8 @@ void LDAPAddressBookFeeder::feedAddressBook()
         qCCritical(lcLDAPAddressBookFeeder)
                 << "Error on search request: " << ldap_err2string(result);
         ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(result)));
+
+        Q_EMIT feederFailed();
         return;
     }
 }
@@ -265,8 +299,9 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
             m_isProcessing = false;
 
             if (result == LDAP_INVALID_CREDENTIALS) {
-                Q_EMIT invalidCredentials();
+                m_authFailed = true;
             }
+            Q_EMIT feederFailed();
             return;
         }
 
@@ -280,7 +315,9 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
             qCCritical(lcLDAPAddressBookFeeder)
                     << "Error on search request: " << ldap_err2string(result);
             ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(result)));
+
             m_isProcessing = false;
+            Q_EMIT feederFailed();
             return;
         }
 
@@ -354,7 +391,9 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
                             << "LDAP parse error:" << ldap_err2string(parseResultCode);
                     ErrorBus::instance().addError(
                             tr("Parse error: %1").arg(ldap_err2string(parseResultCode)));
+
                     m_isProcessing = false;
+                    Q_EMIT feederFailed();
                     return;
                 }
                 break;
@@ -362,7 +401,9 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 
             default:
                 qCCritical(lcLDAPAddressBookFeeder) << "Unknown message type:" << msgType;
+
                 m_isProcessing = false;
+                Q_EMIT feederFailed();
                 return;
             }
         }
@@ -493,7 +534,8 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
                 }
             }
 
-            Q_EMIT newContactReady(dn, sourceUid, { m_priority, m_displayName }, cn, company, mail,
+            Q_EMIT newContactReady(dn, sourceUid, { m_priority, m_displayName, m_group }, cn,
+                                   company, mail,
                                    QDateTime::fromString(modifyTimestamp, "yyyyMMddhhmmsst"),
                                    phoneNumbers, QPrivateSignal());
 
@@ -513,6 +555,8 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
                         << "LDAP parse error:" << ldap_err2string(parseResultCode);
                 ErrorBus::instance().addError(
                         tr("Parse error: %1").arg(ldap_err2string(parseResultCode)));
+
+                Q_EMIT feederFailed();
                 return;
             }
             break;
@@ -520,6 +564,8 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
 
         default:
             qCCritical(lcLDAPAddressBookFeeder) << "Unknown message type:" << msgType;
+
+            Q_EMIT feederFailed();
             return;
         }
     }
