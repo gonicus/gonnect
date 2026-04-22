@@ -86,16 +86,17 @@ void AddressBookManager::processAddressBookQueue()
     auto &nh = NetworkHelper::instance();
 
     if (!m_queueMutex.tryLock()) {
-        QTimer::singleShot(100, this, &AddressBookManager::processAddressBookQueue);
+        qCFatal(lcAddressBookManager) << "Failed to acquire lock for the feeder queue";
         return;
     }
+
+    bool reconnectRequired = false;
 
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {
         QString group = it.next();
 
         if (auto feeder = m_addressBookFeeders.value(group, nullptr)) {
-
             if (feeder->isProcessing()) {
                 // A currently active feeder must not be invoked again to prevent double runs and
                 // threading issues.
@@ -116,6 +117,7 @@ void AddressBookManager::processAddressBookQueue()
 
                 if (!checkURL.isValid()) {
                     qCCritical(lcAddressBookManager) << "URL is invalid:" << checkURL;
+
                     continue;
                 }
 
@@ -123,30 +125,19 @@ void AddressBookManager::processAddressBookQueue()
                     qCWarning(lcAddressBookManager) << "No connectivity state yet - trying later";
 
                     networkAvailable = false;
-                    connect(
-                            &nh, &NetworkHelper::connectivityChanged, this,
-                            [this]() { processAddressBookQueue(); },
-                            Qt::ConnectionType::SingleShotConnection);
-
+                    reconnectRequired = true;
                     continue;
                 }
 
-                nh.isReachable(checkURL).then(this, [feeder, checkURL, this](bool isReachable) {
-                    if (!isReachable) {
+                nh.isReachable(checkURL).then(this, [feeder, checkURL, &reconnectRequired](bool isReachable) {
+                    if (isReachable) {
+                        feeder->process();
+                        Q_EMIT AddressBook::instance().contactsReady();
+                    } else {
                         qCWarning(lcAddressBookManager)
                                 << "Feeder URL" << checkURL << "is not reachable";
 
-                        connect(
-                                &NetworkHelper::instance(), &NetworkHelper::connectivityChanged,
-                                this, [this]() { processAddressBookQueue(); },
-                                Qt::ConnectionType::SingleShotConnection);
-                        return;
-                    }
-
-                    // INFO: Do not allow plugins to process more than once at a time
-                    if (!feeder->isProcessing()) {
-                        feeder->process();
-                        Q_EMIT AddressBook::instance().contactsReady();
+                        reconnectRequired = true;
                     }
                 });
             }
@@ -156,6 +147,13 @@ void AddressBookManager::processAddressBookQueue()
     }
 
     m_queueMutex.unlock();
+
+    if (reconnectRequired) {
+        connect(
+                &nh, &NetworkHelper::connectivityChanged, this,
+                [this]() { processAddressBookQueue(); },
+                Qt::ConnectionType::SingleShotConnection);
+    }
 }
 
 void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,

@@ -31,8 +31,6 @@ AkonadiEventFeeder::~AkonadiEventFeeder()
 
 void AkonadiEventFeeder::init()
 {
-    m_isInitialized = true;
-
     Akonadi::ItemFetchScope scope;
     scope.fetchFullPayload(true);
 

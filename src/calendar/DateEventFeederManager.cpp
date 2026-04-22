@@ -125,9 +125,11 @@ void DateEventFeederManager::processQueue()
     auto &networkHelper = NetworkHelper::instance();
 
     if (!m_queueMutex.tryLock()) {
-        QTimer::singleShot(100, this, &DateEventFeederManager::processQueue);
+        qCFatal(lcDateEventFeederManager) << "Failed to acquire lock for the feeder queue";
         return;
     }
+
+    bool reconnectRequired = false;
 
     QMutableStringListIterator it(m_feederConfigIds);
     while (it.hasNext()) {
@@ -145,30 +147,28 @@ void DateEventFeederManager::processQueue()
 
                 if (!urlToCheck.isValid()) {
                     qCCritical(lcDateEventFeederManager) << "URL is invalid:" << urlToCheck;
+
                     continue;
                 }
 
                 if (!networkHelper.hasConnectivity()) {
                     qCWarning(lcDateEventFeederManager)
                             << "No connectivity state yet - trying later";
+
                     networkAvailable = false;
-                    setupReconnectSignal();
+                    reconnectRequired = true;
                     continue;
                 }
 
                 networkHelper.isReachable(urlToCheck)
-                        .then(this, [feeder, urlToCheck, this](bool isReachable) {
-                            if (!isReachable) {
+                        .then(this, [feeder, urlToCheck, &reconnectRequired](bool isReachable) {
+                            if (isReachable) {
+                                feeder->init();
+                            } else {
                                 qCWarning(lcDateEventFeederManager)
                                         << "Feeder URL" << urlToCheck << "is not reachable";
 
-                                setupReconnectSignal();
-                                return;
-                            }
-
-                            // INFO: Only initialize the plugin once
-                            if (!feeder->isInitialized()) {
-                                feeder->init();
+                                reconnectRequired = true;
                             }
                         });
             }
@@ -178,6 +178,10 @@ void DateEventFeederManager::processQueue()
     }
 
     m_queueMutex.unlock();
+
+    if (reconnectRequired) {
+        setupReconnectSignal();
+    }
 }
 
 void DateEventFeederManager::setupReconnectSignal()

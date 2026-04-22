@@ -43,14 +43,11 @@ QUrl MSGraphEventFeeder::networkCheckURL() const
 
 void MSGraphEventFeeder::init()
 {
-    m_isInitialized = true;
-
     connect(
             this, &MSGraphEventFeeder::feederFailed, this,
             [this]() {
                 // Prepare feeder for re-run
                 DateEventManager::instance().removeDateEventsBySource(m_source);
-                m_isInitialized = false;
                 m_calendarRefreshTimer.stop();
                 m_isFirstPage = false;
 
