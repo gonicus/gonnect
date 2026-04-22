@@ -129,17 +129,18 @@ void AddressBookManager::processAddressBookQueue()
                     continue;
                 }
 
-                nh.isReachable(checkURL).then(this, [feeder, checkURL, &reconnectRequired](bool isReachable) {
-                    if (isReachable) {
-                        feeder->process();
-                        Q_EMIT AddressBook::instance().contactsReady();
-                    } else {
-                        qCWarning(lcAddressBookManager)
-                                << "Feeder URL" << checkURL << "is not reachable";
+                nh.isReachable(checkURL).then(
+                        this, [feeder, checkURL, &reconnectRequired](bool isReachable) {
+                            if (isReachable) {
+                                feeder->process();
+                                Q_EMIT AddressBook::instance().contactsReady();
+                            } else {
+                                qCWarning(lcAddressBookManager)
+                                        << "Feeder URL" << checkURL << "is not reachable";
 
-                        reconnectRequired = true;
-                    }
-                });
+                                reconnectRequired = true;
+                            }
+                        });
             }
 
             it.remove();
@@ -151,8 +152,7 @@ void AddressBookManager::processAddressBookQueue()
     if (reconnectRequired) {
         connect(
                 &nh, &NetworkHelper::connectivityChanged, this,
-                [this]() { processAddressBookQueue(); },
-                Qt::ConnectionType::SingleShotConnection);
+                [this]() { processAddressBookQueue(); }, Qt::ConnectionType::SingleShotConnection);
     }
 }
 
