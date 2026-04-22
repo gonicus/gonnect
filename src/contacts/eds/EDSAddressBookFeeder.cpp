@@ -40,7 +40,6 @@ void EDSAddressBookFeeder::init()
             Q_EMIT feederFailed();
         }
 
-        m_isProcessing = false;
         return;
     }
 
@@ -50,7 +49,6 @@ void EDSAddressBookFeeder::init()
     if (m_sourceCount == 0) {
         qCDebug(lcEDSAddressBookFeeder) << "No sources found in registry";
 
-        m_isProcessing = false;
         return;
     }
 
@@ -103,8 +101,6 @@ void EDSAddressBookFeeder::resetContacts()
 
 void EDSAddressBookFeeder::resetFeeder()
 {
-    m_isProcessing = false;
-
     m_sourceCount = 0;
     m_clientCount = 0;
 

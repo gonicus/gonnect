@@ -53,7 +53,6 @@ void CsvFileAddressBookFeeder::feedAddressBook()
         qCCritical(lcCsvAddressBookFeeder)
                 << "File path" << m_filePath << "does not exist - aborting";
 
-        m_isProcessing = false;
         return;
     }
 
@@ -62,7 +61,6 @@ void CsvFileAddressBookFeeder::feedAddressBook()
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qCCritical(lcCsvAddressBookFeeder) << "Unable to open file" << m_filePath << "- aborting";
 
-        m_isProcessing = false;
         return;
     }
 
@@ -81,7 +79,6 @@ void CsvFileAddressBookFeeder::feedAddressBook()
                     << "Expected 8 elements in line, but found" << splitted.length() << "at line"
                     << line << "- aborting";
 
-            m_isProcessing = false;
             return;
         }
 
@@ -108,6 +105,4 @@ void CsvFileAddressBookFeeder::feedAddressBook()
 
     qCInfo(lcCsvAddressBookFeeder) << "Finished processing csv file" << m_filePath << "loaded"
                                    << contactCount << "contacts";
-
-    m_isProcessing = false;
 }

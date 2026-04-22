@@ -57,7 +57,6 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
             [this]() {
                 // Prepare feeder for re-run
                 resetContacts();
-                m_isProcessing = false;
                 if (m_cacheWriteTimer.isActive()) {
                     m_cacheWriteTimer.stop();
                 }
