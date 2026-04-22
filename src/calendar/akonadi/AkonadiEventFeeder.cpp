@@ -9,7 +9,8 @@ Q_LOGGING_CATEGORY(lcAkonadiEventFeeder, "gonnect.app.dateevents.feeder.akonadi"
 AkonadiEventFeeder::AkonadiEventFeeder(QObject *parent, const QString &source,
                                        const QDateTime &currentTime,
                                        const QDateTime &timeRangeStart,
-                                       const QDateTime &timeRangeEnd)
+                                       const QDateTime &timeRangeEnd, const int retryCount,
+                                       const int retryInterval)
     : QObject(parent),
       m_source(source),
       m_currentTime(currentTime),
@@ -18,6 +19,8 @@ AkonadiEventFeeder::AkonadiEventFeeder(QObject *parent, const QString &source,
       m_session(new Akonadi::Session("GOnnect::CalendarSession")),
       m_monitor(new Akonadi::Monitor())
 {
+    Q_UNUSED(retryCount)
+    Q_UNUSED(retryInterval)
 }
 
 AkonadiEventFeeder::~AkonadiEventFeeder()
