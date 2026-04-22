@@ -29,14 +29,19 @@ public:
     void process(bool authFailed = false);
 
 private Q_SLOTS:
-    void onError(QString error) const;
+    void onError(QString error);
     void onParserFinished();
 
 private:
-    void processResponse(const QByteArray &data, const QString &source);
+    void getNextItem();
+
+    bool processResponse(const QByteArray &data, const QString &source);
 
     bool responseDataChanged(const QByteArray &data);
     QDateTime createDateTimeFromTimeType(icaltimetype &datetime);
+
+    void checkErrorStatus();
+    void resetCalendar();
 
     QList<size_t> m_checksums;
 
@@ -46,4 +51,10 @@ private:
 
     QWebdav m_webdav;
     QWebdavDirParser m_webdavParser;
+    QList<QWebdavItem> m_items;
+
+    QStringList m_concreteSources;
+
+    bool m_pendingError = false;
+    bool m_pendingAuth = false;
 };

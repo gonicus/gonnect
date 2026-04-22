@@ -22,8 +22,9 @@ QStringList MSGraphAddressBookFactory::configurations() const
     return res;
 }
 
-IAddressBookFeeder *MSGraphAddressBookFactory::createFeeder(const QString &id,
+IAddressBookFeeder *MSGraphAddressBookFactory::createFeeder(const QString &id, const int retryCount,
+                                                            const int retryInterval,
                                                             AddressBookManager *parent) const
 {
-    return new MSGraphAddressBookFeeder(id, parent);
+    return new MSGraphAddressBookFeeder(id, retryCount, retryInterval, parent);
 }

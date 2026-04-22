@@ -11,45 +11,43 @@ using namespace std::chrono_literals;
 Q_LOGGING_CATEGORY(lcEDSEventFeeder, "gonnect.app.dateevents.feeder.eds")
 
 EDSEventFeeder::EDSEventFeeder(QObject *parent, const QString &source, const QDateTime &currentTime,
-                               const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd)
+                               const QDateTime &timeRangeStart, const QDateTime &timeRangeEnd,
+                               const int retryCount, const int retryInterval)
     : QObject(parent),
       m_source(source),
       m_currentTime(currentTime),
       m_timeRangeStart(timeRangeStart),
-      m_timeRangeEnd(timeRangeEnd)
+      m_timeRangeEnd(timeRangeEnd),
+      m_retryCount(retryCount),
+      m_retryInterval(retryInterval)
 {
 }
 
 EDSEventFeeder::~EDSEventFeeder()
 {
-    g_clear_object(&m_registry);
-    if (m_sources) {
-        g_list_free_full(m_sources, g_object_unref);
-    }
-    g_clear_pointer(&m_searchExpr, g_free);
-    g_clear_object(&m_cancellable);
-
-    for (auto client : std::as_const(m_clients)) {
-        g_clear_object(&client);
-    }
-
-    for (auto clientView : std::as_const(m_clientViews)) {
-        g_clear_object(&clientView);
-    }
-
-    if (m_sourcePromise) {
-        delete m_sourcePromise;
-        m_sourcePromise = nullptr;
-    }
-
-    if (m_futureWatcher) {
-        m_futureWatcher->deleteLater();
-        m_futureWatcher = nullptr;
-    }
+    resetFeeder();
 }
 
 void EDSEventFeeder::init()
 {
+    connect(
+            this, &EDSEventFeeder::feederFailed, this,
+            [this]() {
+                // Prepare feeder for re-run
+                resetCalendar();
+                resetFeeder();
+
+                if (m_retryCount > 0) {
+                    m_retryCount--;
+
+                    qCWarning(lcEDSEventFeeder) << "Failed to process EDS sources - trying later";
+
+                    // Retry
+                    QTimer::singleShot(m_retryInterval, this, [this]() { init(); });
+                }
+            },
+            Qt::SingleShotConnection);
+
     m_cancellable = g_cancellable_new();
 
     GError *error = NULL;
@@ -60,6 +58,8 @@ void EDSEventFeeder::init()
         if (error) {
             qCDebug(lcEDSEventFeeder) << "Can't create registry:" << error->message;
             g_clear_error(&error);
+
+            Q_EMIT feederFailed();
         }
         return;
     }
@@ -93,24 +93,93 @@ void EDSEventFeeder::init()
 
     m_sourcePromise->start();
 
-    QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished).then(this, [this]() {
-        if (m_sourceFuture.isFinished()) {
-            process();
+    m_chainFuture = QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished)
+                            .then(this, [this]() {
+                                if (!m_chainFuture.isCanceled() && m_sourceFuture.isFinished()) {
+                                    process();
+                                }
+                            });
+
+    m_sourceTimeout.setSingleShot(true);
+    m_sourceTimeout.setInterval(5s);
+    connect(&m_sourceTimeout, &QTimer::timeout, this, [this]() {
+        if (m_futureWatcher && !m_futureWatcher->isFinished()) {
+            Q_EMIT feederFailed();
         }
     });
-
-    QTimer::singleShot(5s, this, [this]() {
-        if (!m_futureWatcher->isFinished()) {
-            qCDebug(lcEDSEventFeeder) << "Failed to process EDS sources";
-
-            g_cancellable_cancel(m_cancellable);
-
-            m_sourceFuture.cancel();
-            m_futureWatcher->cancel();
-        }
-    });
+    m_sourceTimeout.start();
 
     m_futureWatcher->setFuture(m_sourceFuture);
+}
+
+void EDSEventFeeder::resetCalendar()
+{
+    DateEventManager &manager = DateEventManager::instance();
+
+    for (auto client : std::as_const(m_clients)) {
+        if (client) {
+            QString concreteSource = QString("%1_%2").arg(
+                    m_source, e_source_get_uid(e_client_get_source(E_CLIENT(client))));
+            manager.removeDateEventsBySource(concreteSource);
+        }
+    }
+}
+
+void EDSEventFeeder::resetFeeder()
+{
+    m_sourceCount = 0;
+    m_clientCount = 0;
+
+    if (m_sourceTimeout.isActive()) {
+        m_sourceTimeout.stop();
+    }
+
+    g_clear_object(&m_registry);
+    if (m_sources) {
+        g_clear_list(&m_sources, g_object_unref);
+    }
+    g_clear_pointer(&m_searchExpr, g_free);
+
+    // Cancel all active EDS async methods
+    g_cancellable_cancel(m_cancellable);
+    g_clear_object(&m_cancellable);
+
+    for (auto client : std::as_const(m_clients)) {
+        g_clear_object(&client);
+    }
+    m_clients.clear();
+
+    // Disconnect all EDS signal handlers
+    disconnectCalendarSignals();
+    for (auto clientView : std::as_const(m_clientViews)) {
+        g_clear_object(&clientView);
+    }
+    m_clientViews.clear();
+
+    // Future/Promise
+    if (m_chainFuture.isRunning()) {
+        m_chainFuture.cancel();
+    }
+    m_chainFuture = QFuture<void>();
+
+    if (m_futureWatcher) {
+        m_futureWatcher->cancel();
+
+        m_futureWatcher->deleteLater();
+        m_futureWatcher = nullptr;
+    }
+
+    if (m_sourceFuture.isRunning()) {
+        m_sourceFuture.cancel();
+    }
+    m_sourceFuture = QFuture<void>();
+
+    if (m_sourcePromise) {
+        m_sourcePromise->finish();
+
+        delete m_sourcePromise;
+        m_sourcePromise = nullptr;
+    }
 }
 
 void EDSEventFeeder::process()
@@ -161,6 +230,8 @@ void EDSEventFeeder::onEcalClientConnected(GObject *source_object, GAsyncResult 
             qCDebug(lcEDSEventFeeder)
                     << "Can't retrieve finished client connection:" << error->message;
             g_clear_error(&error);
+
+            Q_EMIT feeder->feederFailed();
             return;
         }
 
@@ -184,14 +255,18 @@ void EDSEventFeeder::onViewComplete(ECalClientView *view, GError *error, gpointe
     guint signalId = g_signal_lookup("complete", G_OBJECT_TYPE(view));
     g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_ID, signalId, 0, NULL, NULL, NULL);
 
+    EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
+
     if (error) {
         qCCritical(lcEDSEventFeeder) << "Failed to wait for view completion, unable to subscribe "
                                         "to live calendar updates:"
                                      << error->message;
+        if (feeder) {
+            Q_EMIT feeder->feederFailed();
+        }
         return;
     }
 
-    EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
         feeder->connectCalendarSignals(view);
     }
@@ -202,6 +277,14 @@ void EDSEventFeeder::connectCalendarSignals(ECalClientView *view)
     g_signal_connect(view, "objects-added", G_CALLBACK(onEventsAdded), this);
     g_signal_connect(view, "objects-modified", G_CALLBACK(onEventsModified), this);
     g_signal_connect(view, "objects-removed", G_CALLBACK(onEventsRemoved), this);
+}
+
+void EDSEventFeeder::disconnectCalendarSignals()
+{
+    for (auto view : std::as_const(m_clientViews)) {
+        // Match all signals with the same gpointer user_data
+        g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, this);
+    }
 }
 
 void EDSEventFeeder::onEventsAdded(ECalClientView *view, GSList *components, gpointer user_data)
@@ -250,7 +333,7 @@ void EDSEventFeeder::processEventsAdded(ECalClientView *view)
         const auto idx = m_clients.indexOf(client);
         g_clear_object(&client);
 
-        QString concreteSource = QString("%1-%2").arg(
+        QString concreteSource = QString("%1_%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
@@ -273,7 +356,7 @@ void EDSEventFeeder::processEventsModified(ECalClientView *view)
         const auto idx = m_clients.indexOf(client);
         g_clear_object(&client);
 
-        QString concreteSource = QString("%1-%2").arg(
+        QString concreteSource = QString("%1_%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
@@ -296,7 +379,7 @@ void EDSEventFeeder::processEventsRemoved(ECalClientView *view)
         const auto idx = m_clients.indexOf(client);
         g_clear_object(&client);
 
-        QString concreteSource = QString("%1-%2").arg(
+        QString concreteSource = QString("%1_%2").arg(
                 m_source, e_source_get_uid(e_client_get_source(E_CLIENT(m_clients.at(idx)))));
         manager.removeDateEventsBySource(concreteSource);
 
@@ -317,6 +400,8 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
             if (error) {
                 qCCritical(lcEDSEventFeeder) << "Can't retrieve finished view:" << error->message;
                 g_clear_error(&error);
+
+                Q_EMIT feeder->feederFailed();
             }
             return;
         }
@@ -326,6 +411,8 @@ void EDSEventFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
         if (error) {
             qCCritical(lcEDSEventFeeder) << "Can't start view:" << error->message;
             g_clear_error(&error);
+
+            Q_EMIT feeder->feederFailed();
             return;
         }
         feeder->m_clientViews.append(view);
@@ -345,11 +432,17 @@ void EDSEventFeeder::onClientEventsRequested(GObject *source_object, GAsyncResul
 
     EDSEventFeeder *feeder = static_cast<EDSEventFeeder *>(user_data);
     if (feeder) {
+        /*
+            INFO: The function below may return false, but no error - it seems that this
+            happens if the components GSList is empty or NULL (?), this shouldn't happen
+        */
         if (!e_cal_client_get_object_list_finish(E_CAL_CLIENT(source_object), result, &components,
                                                  &error)) {
             if (error) {
                 qCCritical(lcEDSEventFeeder) << "Can't retrieve events:" << error->message;
                 g_clear_error(&error);
+
+                Q_EMIT feeder->feederFailed();
             }
             return;
         }
@@ -367,7 +460,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 {
     DateEventManager &manager = DateEventManager::instance();
 
-    QString concreteSource = QString("%1-%2").arg(m_source, clientUid);
+    QString concreteSource = QString("%1_%2").arg(m_source, clientUid);
 
     QMap<QString, QList<QDateTime>> exdatesById;
 
@@ -499,8 +592,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
         }
     }
 
-    g_slist_free_full(components, g_object_unref);
-    components = NULL;
+    g_clear_slist(&components, g_object_unref);
 
     qCInfo(lcEDSEventFeeder) << "Loaded events of source" << clientName << "(" << clientUid << ")";
 }

@@ -26,8 +26,9 @@ QStringList CardDAVAddressBookFactory::configurations() const
     return res;
 }
 
-IAddressBookFeeder *CardDAVAddressBookFactory::createFeeder(const QString &id,
+IAddressBookFeeder *CardDAVAddressBookFactory::createFeeder(const QString &id, const int retryCount,
+                                                            const int retryInterval,
                                                             AddressBookManager *parent) const
 {
-    return new CardDAVAddressBookFeeder(id, parent);
+    return new CardDAVAddressBookFeeder(id, retryCount, retryInterval, parent);
 }
