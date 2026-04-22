@@ -1077,7 +1077,7 @@ pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const
     auto &glob = GlobalStateAggregator::instance();
 
     pj::PresenceStatus pjStatus;
-    pjStatus.statusText = glob.statusText().toStdString();
+    pjStatus.note = glob.statusText().toStdString();
 
     switch (glob.presenceState()) {
 
