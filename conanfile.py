@@ -61,7 +61,7 @@ class GOnnectRecipe(ConanFile):
 
     def requirements(self):
         self.requires("hidapi/0.15.0")
-        self.requires("pjproject/2.16")
+        self.requires("pjproject/2.17")
         self.requires("openldap/2.6.13")
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
@@ -72,6 +72,7 @@ class GOnnectRecipe(ConanFile):
 
         if self.settings.os == "Windows":
             self.requires("wintoast/1.3.2")
+            self.requires("qhotkey/2026-03-19")
 
         if self.settings.os == "Linux":
             self.requires("libnotify/system")
