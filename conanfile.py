@@ -72,6 +72,7 @@ class GOnnectRecipe(ConanFile):
 
         if self.settings.os == "Windows":
             self.requires("wintoast/1.3.2")
+            self.requires("qhotkey/2026-03-19")
 
         if self.settings.os == "Linux":
             self.requires("libnotify/system")
