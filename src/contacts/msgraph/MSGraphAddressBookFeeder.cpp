@@ -199,8 +199,6 @@ void MSGraphAddressBookFeeder::requestContacts()
 
 void MSGraphAddressBookFeeder::process()
 {
-    m_isProcessing = true;
-
     connect(
             this, &MSGraphAddressBookFeeder::feederFailed, this,
             [this]() {

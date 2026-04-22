@@ -21,8 +21,6 @@ CsvFileAddressBookFeeder::CsvFileAddressBookFeeder(const QString &group, const i
 
 void CsvFileAddressBookFeeder::process()
 {
-    m_isProcessing = true;
-
     ReadOnlyConfdSettings settings;
 
     settings.beginGroup(m_group);

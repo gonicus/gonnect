@@ -66,7 +66,6 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
                     qCWarning(lcCardDAVAddressBookFeeder)
                             << "Failed to process CardDAV sources - invalid password";
 
-                    m_isProcessing = true;
                     feedAddressBook(true);
                 } else if (m_pendingError) {
                     // Some other error has occurred, wait and try again
@@ -76,11 +75,7 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
                         qCWarning(lcCardDAVAddressBookFeeder)
                                 << "Failed to process CardDAV sources - trying later";
 
-                        QTimer::singleShot(m_retryInterval, this, [this]() {
-                            m_isProcessing = true;
-
-                            feedAddressBook();
-                        });
+                        QTimer::singleShot(m_retryInterval, this, [this]() { feedAddressBook(); });
                     }
                 }
 
@@ -352,8 +347,6 @@ void CardDAVAddressBookFeeder::flushCacheImpl()
 
 void CardDAVAddressBookFeeder::process()
 {
-    m_isProcessing = true;
-
     ReadOnlyConfdSettings settings;
     settings.beginGroup(m_group);
 

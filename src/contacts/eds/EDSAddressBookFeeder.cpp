@@ -158,8 +158,6 @@ void EDSAddressBookFeeder::resetFeeder()
 
 void EDSAddressBookFeeder::process()
 {
-    m_isProcessing = true;
-
     connect(
             this, &EDSAddressBookFeeder::feederFailed, this,
             [this]() {
