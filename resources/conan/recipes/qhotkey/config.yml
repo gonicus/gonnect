@@ -1,0 +1,8 @@
+versions:
+  '2026-03-19':
+    folder: all
+updater:
+  source: github
+  id: Skycoder42/QHotkey
+  branch: master
+  url-pattern: https://github.com/Skycoder42/QHotkey/archive/${sha}.zip

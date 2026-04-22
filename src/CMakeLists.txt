@@ -38,12 +38,14 @@ else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
     find_package(wintoast REQUIRED)
+    find_package(QHotkey REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
         wintoast::wintoast
+        QHotkey
         runtimeobject)
 endif()
 
@@ -281,8 +283,8 @@ elseif(WIN32)
         platform/windows/SmtcExternalMediaManager.h
         platform/windows/SmtcExternalMediaManager.cpp
         platform/windows/WindowsInhibitHelper.cpp
-        platform/dummy/DummyGlobalShortcuts.h
-        platform/dummy/DummyGlobalShortcuts.cpp
+        platform/windows/WindowsGlobalShortcuts.h
+        platform/windows/WindowsGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
         platform/dummy/DummySearchProvider.cpp
     )
