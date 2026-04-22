@@ -235,7 +235,7 @@ Rectangle {
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
-            showPresenceStatus: !avatarImage.isUnregistered
+            showPresenceStatus: true
             presenceStatus: GlobalStateAggregator.presenceState
             isUnregistered: true
 
