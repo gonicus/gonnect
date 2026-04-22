@@ -133,6 +133,7 @@ modules:
 
   - name: pjsip
     buildsystem: autotools
+    no-parallel-make: true
     config-opts:
       - --disable-video
       - --enable-ext-sound
@@ -142,8 +143,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
-        tag: 2.16
-        commit: 6cab30cec44af36ba7c8a45ff7af2f74a8ed288c
+        tag: 2.17
+        commit: 5a457451fa2712ba18e12b01738e8ff3af2b26fd
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+(\.[0-9]+)?)$

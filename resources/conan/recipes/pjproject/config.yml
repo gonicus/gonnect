@@ -1,5 +1,5 @@
 versions:
-  '2.16':
+  '2.17':
     folder: all
 updater:
   source: anitya
