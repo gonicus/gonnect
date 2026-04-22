@@ -2,6 +2,3 @@ sources:
   '2.17':
     url: https://github.com/pjsip/pjproject/archive/refs/tags/2.17.tar.gz
     sha256: 065fe06c06788d97c35f563796d59f00ce52fe9558a52d7b490a042a966facce
-patches:
-  '2.17':
-    - patch_file: patches/01-cmake-archive-location.patch
