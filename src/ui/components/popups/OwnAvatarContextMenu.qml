@@ -23,18 +23,18 @@ Menu {
     }
 
     MenuItem {
-        id: dndAction
-        text: qsTr("Do not disturb")
+        id: availableAction
+        text: qsTr("Available")
         icon {
-            source: Icons.imUserBusy
+            source: Icons.imUserOnline
             color: "transparent"
         }
-        onTriggered: () => control.setPresenceState(PresenceState.Busy)
+        onTriggered: () => control.setPresenceState(PresenceState.Available)
 
         Accessible.role: Accessible.Button
-        Accessible.name: dndAction.text
+        Accessible.name: availableAction.text
         Accessible.focusable: true
-        Accessible.onPressAction: () => control.setPresenceState(PresenceState.Busy)
+        Accessible.onPressAction: () => control.setPresenceState(PresenceState.Available)
     }
 
     MenuItem {
@@ -53,18 +53,18 @@ Menu {
     }
 
     MenuItem {
-        id: availableAction
-        text: qsTr("Available")
+        id: dndAction
+        text: qsTr("Do not disturb")
         icon {
-            source: Icons.imUserOnline
+            source: Icons.imUserBusy
             color: "transparent"
         }
-        onTriggered: () => control.setPresenceState(PresenceState.Available)
+        onTriggered: () => control.setPresenceState(PresenceState.Busy)
 
         Accessible.role: Accessible.Button
-        Accessible.name: availableAction.text
+        Accessible.name: dndAction.text
         Accessible.focusable: true
-        Accessible.onPressAction: () => control.setPresenceState(PresenceState.Available)
+        Accessible.onPressAction: () => control.setPresenceState(PresenceState.Busy)
     }
 
     MenuSeparator { }
