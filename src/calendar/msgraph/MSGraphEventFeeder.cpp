@@ -47,9 +47,9 @@ void MSGraphEventFeeder::init()
             this, &MSGraphEventFeeder::feederFailed, this,
             [this]() {
                 // Prepare feeder for re-run
+                DateEventManager::instance().removeDateEventsBySource(m_source);
                 m_calendarRefreshTimer.stop();
                 m_isFirstPage = false;
-                DateEventManager::instance().removeDateEventsBySource(m_source);
 
                 if (m_retryCount > 0) {
                     m_retryCount--;

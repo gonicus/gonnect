@@ -48,6 +48,8 @@ void LDAPAddressBookFeeder::init(const LDAPInitializer::Config &ldapConfig,
 
 void LDAPAddressBookFeeder::resetFeeder()
 {
+    m_isProcessing = false;
+
     m_ldapConfig = {};
 
     if (m_ldap) {
