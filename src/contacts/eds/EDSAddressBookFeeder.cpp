@@ -26,25 +26,6 @@ EDSAddressBookFeeder::~EDSAddressBookFeeder()
 
 void EDSAddressBookFeeder::init()
 {
-    connect(
-            this, &EDSAddressBookFeeder::feederFailed, this,
-            [this]() {
-                // Prepare feeder for re-run
-                resetContacts();
-                resetFeeder();
-
-                if (m_retryCount > 0) {
-                    m_retryCount--;
-
-                    qCWarning(lcEDSAddressBookFeeder)
-                            << "Failed to process EDS sources - trying later";
-
-                    // Retry
-                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
-                }
-            },
-            Qt::SingleShotConnection);
-
     m_cancellable = g_cancellable_new();
 
     GError *error = NULL;
@@ -175,6 +156,25 @@ void EDSAddressBookFeeder::resetFeeder()
 
 void EDSAddressBookFeeder::process()
 {
+    connect(
+            this, &EDSAddressBookFeeder::feederFailed, this,
+            [this]() {
+                // Prepare feeder for re-run
+                resetContacts();
+                resetFeeder();
+
+                if (m_retryCount > 0) {
+                    m_retryCount--;
+
+                    qCWarning(lcEDSAddressBookFeeder)
+                            << "Failed to process EDS sources - trying later";
+
+                    // Retry
+                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
+                }
+            },
+            Qt::SingleShotConnection);
+
     ReadOnlyConfdSettings settings;
 
     settings.beginGroup(m_group);

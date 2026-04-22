@@ -12,7 +12,6 @@
 class SIPAccount;
 class CallHistoryItem;
 class IMHandler;
-class HeadsetDeviceProxy;
 class Sniffer;
 
 class SIPCall : public ICallState, public pj::Call
