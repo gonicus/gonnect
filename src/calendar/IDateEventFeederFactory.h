@@ -16,7 +16,8 @@ public:
     virtual IDateEventFeeder *createFeeder(const QString &settingsGroup,
                                            const QDateTime &currentTime,
                                            const QDateTime &timeRangeStart,
-                                           const QDateTime &timeRangeEnd,
+                                           const QDateTime &timeRangeEnd, const int retryCount,
+                                           const int retryInterval,
                                            DateEventFeederManager *feederManager) const = 0;
 };
 

@@ -25,6 +25,14 @@ QList<QPair<QDateTime, QDateTime>> DateEventManager::createDaysFromRange(const Q
 {
     QList<QPair<QDateTime, QDateTime>> days;
 
+    // INFO: Events can have a duration of 0 (start == end)
+    // And since one could manually edit an ICS/iCal file and, for some reason,
+    // set an end time < start time, we'll check for that as well
+    if (end <= start) {
+        days.append(qMakePair(start, start));
+        return days;
+    }
+
     QDateTime currentStart = start;
     while (currentStart < end) {
         QDateTime endOfDay = currentStart.addDays(1);
@@ -81,8 +89,13 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
             // Multi-day events will share the same base ID with a counter added to it
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);
@@ -141,8 +154,13 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
         for (int i = 0; i < days.count(); i++) {
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);
@@ -185,8 +203,13 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
         for (int i = 0; i < days.count(); i++) {
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);

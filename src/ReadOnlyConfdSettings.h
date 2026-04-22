@@ -18,4 +18,6 @@ private:
 #endif
 
     void readConfd();
+
+    QString replacePlaceholders(const QString &value) const;
 };

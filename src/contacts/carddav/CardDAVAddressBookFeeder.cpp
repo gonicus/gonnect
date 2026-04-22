@@ -3,6 +3,7 @@
 #include "AddressBookManager.h"
 #include "AvatarManager.h"
 #include "ReadOnlyConfdSettings.h"
+#include "AuthManager.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -18,8 +19,10 @@ Q_LOGGING_CATEGORY(lcCardDAVAddressBookFeeder, "gonnect.app.feeder.CardDAVAddres
 
 using namespace std::chrono_literals;
 
-CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, AddressBookManager *parent)
-    : QObject(parent), m_group(group)
+CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, const int retryCount,
+                                                   const int retryInterval,
+                                                   AddressBookManager *parent)
+    : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
 {
     m_manager = qobject_cast<AddressBookManager *>(parent);
 }
@@ -30,18 +33,69 @@ void CardDAVAddressBookFeeder::init()
     m_cacheWriteTimer.setInterval(3s);
     m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
 
+    m_webdav.addSslCa(AuthManager::instance().sslCAs());
+
     loadCachedData(m_settingsHash);
 
     connect(&m_webdavParser, &QWebdavDirParser::finished, this,
             &CardDAVAddressBookFeeder::onParserFinished);
+
     connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
             &CardDAVAddressBookFeeder::onError);
     connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
 
     connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
-        // Previous run failed due to auth, we'll prompt the user again
-        feedAddressBook(true);
+        m_pendingAuth = true;
+        checkErrorStatus();
     });
+}
+
+void CardDAVAddressBookFeeder::checkErrorStatus()
+{
+    QMetaObject::invokeMethod(
+            this,
+            [this]() {
+                // Prepare feeder for re-run
+                resetContacts();
+                if (m_cacheWriteTimer.isActive()) {
+                    m_cacheWriteTimer.stop();
+                }
+
+                if (m_pendingAuth && m_pendingError) {
+                    // Previous run failed due to auth, we'll prompt the user again immediately
+                    qCWarning(lcCardDAVAddressBookFeeder)
+                            << "Failed to process CardDAV sources - invalid password";
+
+                    feedAddressBook(true);
+                } else if (m_pendingError) {
+                    // Some other error has occurred, wait and try again
+                    if (m_retryCount > 0) {
+                        m_retryCount--;
+
+                        qCWarning(lcCardDAVAddressBookFeeder)
+                                << "Failed to process CardDAV sources - trying later";
+
+                        QTimer::singleShot(m_retryInterval, this, [this]() { feedAddressBook(); });
+                    }
+                }
+
+                m_pendingAuth = false;
+                m_pendingError = false;
+            },
+            Qt::QueuedConnection);
+}
+
+void CardDAVAddressBookFeeder::resetContacts()
+{
+    AddressBook::instance().removeContactsBySource(m_group);
+}
+
+void CardDAVAddressBookFeeder::onError(QString error)
+{
+    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
+
+    m_pendingError = true;
+    checkErrorStatus();
 }
 
 void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
@@ -127,8 +181,8 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
 
         if (!uuid.isEmpty() && !name.isEmpty() && !phoneNumbers.isEmpty()) {
             Contact *contact = AddressBook::instance().addContact(
-                    uuid, remoteUid, { m_priority, m_displayName }, name, org, email, modifiedDate,
-                    phoneNumbers, m_blockInfo);
+                    uuid, remoteUid, { m_priority, m_displayName, m_group }, name, org, email,
+                    modifiedDate, phoneNumbers, m_blockInfo);
             m_cachedContacts.insert(uuid, contact);
 
             processPhotoProperty(contact->id(), photoData, modifiedDate);
@@ -174,7 +228,7 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
 
     if (magic != CARDDAV_MAGIC || version != CARDDAV_VERSION) {
         qCInfo(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
-                                           << "in invalid and will therefore be removed.";
+                                           << "is invalid and will therefore be removed.";
         cacheFile.remove();
         return;
     }
@@ -217,11 +271,6 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
     }
 }
 
-void CardDAVAddressBookFeeder::onError(QString error) const
-{
-    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
-}
-
 void CardDAVAddressBookFeeder::onParserFinished()
 {
     const auto list = m_webdavParser.getList();
@@ -231,9 +280,9 @@ void CardDAVAddressBookFeeder::onParserFinished()
 
         if (m_ignoredIds.contains(cacheId) && m_ignoredIds.value(cacheId) >= modifiedDate) {
             continue;
-        } else if (Contact *cashedContact = m_cachedContacts.value(cacheId, nullptr)) {
-            if (cashedContact->lastModified() >= modifiedDate) {
-                AddressBook::instance().addContact(cashedContact);
+        } else if (Contact *cachedContact = m_cachedContacts.value(cacheId, nullptr)) {
+            if (cachedContact->lastModified() >= modifiedDate) {
+                AddressBook::instance().addContact(cachedContact);
                 continue;
             }
         }
@@ -245,6 +294,14 @@ void CardDAVAddressBookFeeder::onParserFinished()
                     if (!reply) {
                         return;
                     }
+
+                    if (reply->error() != QNetworkReply::NoError) {
+                        qCDebug(lcCardDAVAddressBookFeeder)
+                                << "WebDAV reply error:" << reply->error();
+                        reply->deleteLater();
+                        return;
+                    }
+
                     QByteArray data = reply->readAll();
                     reply->deleteLater();
 

@@ -15,7 +15,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineQuick
     Xml)
 
-find_package(Qca-qt6 REQUIRED)
 find_package(logfault CONFIG REQUIRED)
 
 if(UNIX)
@@ -39,12 +38,14 @@ else()
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
     find_package(wintoast REQUIRED)
+    find_package(QHotkey REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
         wintoast::wintoast
+        QHotkey
         runtimeobject)
 endif()
 
@@ -168,6 +169,7 @@ add_subdirectory(calendar/eds)
 add_subdirectory(contacts/akonadi)
 add_subdirectory(calendar/akonadi)
 add_subdirectory(contacts/msgraph)
+add_subdirectory(calendar/msgraph)
 
 find_package(Qt6Keychain REQUIRED)
 
@@ -281,8 +283,8 @@ elseif(WIN32)
         platform/windows/SmtcExternalMediaManager.h
         platform/windows/SmtcExternalMediaManager.cpp
         platform/windows/WindowsInhibitHelper.cpp
-        platform/dummy/DummyGlobalShortcuts.h
-        platform/dummy/DummyGlobalShortcuts.cpp
+        platform/windows/WindowsGlobalShortcuts.h
+        platform/windows/WindowsGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
         platform/dummy/DummySearchProvider.cpp
     )
@@ -349,6 +351,7 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
         ui/components/dialogs/InfoDialog.qml
+        ui/components/dialogs/OauthLoginDialog.qml
         # Dynamic UI
         ui/components/BaseWidget.qml
         ui/components/DateEventsWidget.qml
@@ -460,8 +463,12 @@ qt_add_qml_module(gonnect
         KeychainSettings.h
         StateManager.cpp
         StateManager.h
+        Ticker.h
+        Ticker.cpp
         UISettings.cpp
         UISettings.h
+        MSOAuthManager.cpp
+        MSOAuthManager.h
 
         sip/CallHistory.h
         sip/CallHistory.cpp
@@ -474,6 +481,7 @@ qt_add_qml_module(gonnect
         sip/NumberStat.h
         sip/NumberStats.h
         sip/NumberStats.cpp
+        sip/PhoneNumberCallCount.h
         sip/SIPAccount.h
         sip/SIPAccount.cpp
         sip/SIPAccountManager.h
@@ -741,7 +749,6 @@ target_link_libraries(gonnect
         Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
-        qca-qt6
         qt6keychain
         hid-rp
         ${AKONADI_CONTACT_FACTORY}
@@ -753,6 +760,7 @@ target_link_libraries(gonnect
         ${EDS_CALENDAR_LIBRARIES}
         ${LDAP_ADDRESSBOOK_FACTORY}
         ${MSGRAPH_ADDRESSBOOK_FACTORY}
+        ${MSGRAPH_CALENDAR_FACTORY}
 )
 
 qt_import_plugins(gonnect INCLUDE
@@ -762,6 +770,7 @@ qt_import_plugins(gonnect INCLUDE
      ${CSV_ADDRESSBOOK_FACTORY}
      ${CALDAV_CALENDAR_FACTORY}
      ${MSGRAPH_ADDRESSBOOK_FACTORY}
+     ${MSGRAPH_CALENDAR_FACTORY}
      ${EDS_ADDRESSBOOK_FACTORY}
      ${EDS_CALENDAR_FACTORY}
      ${LDAP_ADDRESSBOOK_FACTORY})

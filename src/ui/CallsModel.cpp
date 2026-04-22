@@ -20,7 +20,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&callManager, &SIPCallManager::establishedChanged, this, [this](SIPCall *call) {
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->isEstablished = call->isEstablished();
             callInfo->established = call->establishedTime();
             callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && callInfo->isEstablished;
@@ -39,7 +39,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&callManager, &SIPCallManager::metadataChanged, this, [this](SIPCall *call) {
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->hasMetadata = call->hasMetadata();
 
             auto idx = createIndex(index, 0);
@@ -51,7 +51,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
 
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->isHolding = call->isHolding();
 
             auto idx = createIndex(index, 0);
@@ -63,7 +63,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
 
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->isBlocked = call->isBlocked();
 
             auto idx = createIndex(index, 0);
@@ -76,7 +76,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
                 auto callInfo = m_callsHash.value(call->getId());
                 const auto index = m_calls.indexOf(callInfo);
 
-                if (index >= 0) {
+                if (callInfo && index >= 0) {
                     callInfo->incomingAudioLevel = QtAudio::convertVolume(
                             level, QtAudio::LinearVolumeScale, QtAudio::LogarithmicVolumeScale);
 
@@ -175,7 +175,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         auto callInfo = m_callsHash.value(callId);
         const auto index = m_calls.indexOf(callInfo);
 
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->statusCode = static_cast<pjsip_status_code>(statusCode);
 
             auto idx = createIndex(index, 0);
@@ -187,7 +187,7 @@ CallsModel::CallsModel(QObject *parent) : QAbstractListModel{ parent }
         auto callInfo = m_callsHash.value(call->getId());
         const auto index = m_calls.indexOf(callInfo);
 
-        if (index >= 0) {
+        if (callInfo && index >= 0) {
             callInfo->hasCapabilityJitsi = call->hasCapability("jitsi") && callInfo->isEstablished;
 
             auto idx = createIndex(index, 0);
@@ -292,7 +292,9 @@ void CallsModel::updateCalls()
         }
 
         callInfo->callId = callId;
-        callInfo->accountId = qobject_cast<SIPAccount *>(call->parent())->id();
+        if (auto *account = qobject_cast<SIPAccount *>(call->parent())) {
+            callInfo->accountId = account->id();
+        }
         callInfo->remoteUri = call->sipUrl();
         callInfo->established = call->establishedTime();
         callInfo->isEstablished = call->isEstablished();

@@ -38,6 +38,7 @@ public:
     {
         unsigned prio = 0;
         QString displayName;
+        QString configId;
 
         bool operator==(const ContactSourceInfo &other) const;
         bool operator!=(const ContactSourceInfo &other) const;

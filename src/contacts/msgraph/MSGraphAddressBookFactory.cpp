@@ -6,28 +6,25 @@ QStringList MSGraphAddressBookFactory::configurations() const
 {
     QStringList res;
 
-    static QRegularExpression groupRegex = QRegularExpression("^msgraph[0-9]+$");
-
     ReadOnlyConfdSettings settings;
-    const QStringList groups = settings.childGroups();
+    const auto msOAuthGroup = QStringLiteral("msoauth");
+    const auto group = QStringLiteral("msgraphcontacts");
+    if (settings.childGroups().contains(msOAuthGroup) && settings.childGroups().contains(group)) {
+        const auto &clientIdentifier =
+                settings.value(msOAuthGroup + QStringLiteral("/clientIdentifier")).toString();
+        const bool enabled = settings.value(group + QStringLiteral("enabled"), true).toBool();
 
-    for (const auto &group : groups) {
-        if (groupRegex.match(group).hasMatch()) {
-            settings.beginGroup(group);
-            const bool enabled = settings.value("enabled", true).toBool();
-            settings.endGroup();
-
-            if (enabled) {
-                res.push_back(group);
-            }
+        if (enabled && !clientIdentifier.isEmpty()) {
+            res.push_back(group);
         }
     }
 
     return res;
 }
 
-IAddressBookFeeder *MSGraphAddressBookFactory::createFeeder(const QString &id,
+IAddressBookFeeder *MSGraphAddressBookFactory::createFeeder(const QString &id, const int retryCount,
+                                                            const int retryInterval,
                                                             AddressBookManager *parent) const
 {
-    return new MSGraphAddressBookFeeder(id, parent);
+    return new MSGraphAddressBookFeeder(id, retryCount, retryInterval, parent);
 }
