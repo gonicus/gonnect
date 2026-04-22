@@ -50,7 +50,6 @@ void CsvFileAddressBookFeeder::feedAddressBook()
     if (!file.exists()) {
         qCCritical(lcCsvAddressBookFeeder)
                 << "File path" << m_filePath << "does not exist - aborting";
-
         return;
     }
 
@@ -58,7 +57,6 @@ void CsvFileAddressBookFeeder::feedAddressBook()
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qCCritical(lcCsvAddressBookFeeder) << "Unable to open file" << m_filePath << "- aborting";
-
         return;
     }
 
@@ -76,7 +74,6 @@ void CsvFileAddressBookFeeder::feedAddressBook()
             qCCritical(lcCsvAddressBookFeeder)
                     << "Expected 8 elements in line, but found" << splitted.length() << "at line"
                     << line << "- aborting";
-
             return;
         }
 
