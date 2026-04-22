@@ -26,6 +26,8 @@ SIPAccount::SIPAccount(const QString &group, QObject *parent)
 
 void SIPAccount::initialize()
 {
+    m_accountConfig.presConfig.publishEnabled = true;
+
     bool ok = false;
     static QRegularExpression sipURI = QRegularExpression("^(sips?):([^@]+)(?:@(.+))?$");
 
