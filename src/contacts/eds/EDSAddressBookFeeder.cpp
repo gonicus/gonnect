@@ -39,7 +39,6 @@ void EDSAddressBookFeeder::init()
 
             Q_EMIT feederFailed();
         }
-
         return;
     }
 
@@ -48,7 +47,6 @@ void EDSAddressBookFeeder::init()
     m_sourceCount = g_list_length(m_sources);
     if (m_sourceCount == 0) {
         qCDebug(lcEDSAddressBookFeeder) << "No sources found in registry";
-
         return;
     }
 
