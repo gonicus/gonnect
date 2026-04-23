@@ -1,3 +1,10 @@
+# [2.2.0-beta.2](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.1...v2.2.0-beta.2) (2026-04-23)
+
+
+### Bug Fixes
+
+* use verifyServer flag for CA verification with webdav ([#437](https://github.com/gonicus/gonnect/issues/437)) ([c1ab98f](https://github.com/gonicus/gonnect/commit/c1ab98fe1294fc6fa62c204007f714f55d6eafe2))
+
 # [2.2.0-beta.1](https://github.com/gonicus/gonnect/compare/v2.1.0...v2.2.0-beta.1) (2026-04-22)
 
 
