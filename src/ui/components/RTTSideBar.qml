@@ -8,7 +8,7 @@ Item {
     id: control
 
     Item {
-        id: rttContainer
+        id: rttChatContainer
         anchors {
             top: parent.top
             left: parent.left
@@ -22,27 +22,52 @@ Item {
             anchors.fill: parent
             clip: true
             bottomMargin: 20
-            model: RTTProvider.model // ProxyModel?
+            model: RTTProvider.model // TODO: Remove ProxyModel?
 
             Accessible.role: Accessible.List
             Accessible.name: qsTr("RTT message list")
             Accessible.description: qsTr("List of all the RTT messages of the current call")
 
-            delegate: ItemDelegate {
+            // TODO: More height/width/anchor tuning
+            delegate: Item {
+                id: rttDelg
                 width: parent.width
-                text: rttListView.model.message
+                height: 35
+
+                required property int timestamp
+                required property string message
+                required property bool isMe
+                required property bool isFinished
 
                 Accessible.role: Accessible.ListItem
-                Accessible.name: qsTr("Chat message")
-                Accessible.description: qsTr("Selected chat message from %1 at %2: %3").arg(delg.isSystemMessage ? qsTr("the server") : delg.isOwnMessage ? qsTr("you") : delg.nickName).arg(delg.timestamp).arg(delg.message)
+                Accessible.name: qsTr("RTT message")
+                Accessible.description: qsTr("Selected RTT message from %1: %2").arg(rttDelg.isMe ? qsTr("you") : qsTr("call participant")).arg(rttDelg.message)
                 Accessible.focusable: true
 
-                contentItem: Text {
-                    text: model.message
-                    color: model.isMe ? "blue" : "gray"
-                    font.italic: model.isFinished
+                Rectangle {
+                    id: rttBubble
+                    width: rttMessage.implicitWidth + 10
+                    height: parent.height - 10
+                    radius: 6
 
-                    // TODO: required property ... bindings here
+                    anchors.right: rttDelg.isMe ? parent.right : undefined
+                    anchors.left: !rttDelg.isMe ? parent.left : undefined
+                    anchors.margins: 10
+
+                    color: rttDelg.isMe ? "blue" : "gray"
+
+                    Label {
+                        id: rttMessage
+                        text: rttDelg.message
+                        color: rttDelg.isMe ? "white" : "black"
+                        font.italic: !rttDelg.isFinished
+                        wrapMode: Label.Wrap
+                        anchors {
+                            centerIn: parent
+                            leftMargin: 5
+                            rightMargin: 5
+                        }
+                    }
                 }
             }
         }
@@ -52,8 +77,8 @@ Item {
         id: rttInputContainer
         height: rttInputField.y + rttInputField.height + rttInputField.anchors.margins
         anchors {
-            left: rttContainer.left
-            right: rttContainer.right
+            left: rttChatContainer.left
+            right: rttChatContainer.right
             bottom: parent.bottom
         }
 
@@ -75,43 +100,49 @@ Item {
             id: rttInputField
             placeholderText: "Message..."
             //onAccepted: focus = false
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
 
             Keys.onPressed: (event) => {
                 if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-                    RTTProvider.rttSendLineSeperator()
-
                     event.accepted = true
 
                     rttListView.model.updateMessage(rttInputField.text, true, true)
                     rttInputContainer.newMessage = true
-                    rttTimeoutTimer.restart()
                     rttInputField.text = ""
-                } else if (event.key === Qt.Key_Backspace) {
-                    RTTProvider.rttSendBackspace()
+                    rttTimeoutTimer.restart()
 
+                    RTTProvider.rttSendLineSeperator()
+                } else if (event.key === Qt.Key_Backspace) {
                     event.accepted = true
 
                     rttInputField.text = rttInputField.text.slice(0, -1)
                     rttListView.model.updateMessage(rttInputField.text, true, false)
-                } else if (event.key === Qt.Key_G && (event.modifiers & Qt.ControlModifier)) {
-                    // Which key should trigger this?
-                    RTTProvider.rttSendBell()
 
+                    RTTProvider.rttSendBackspace()
+                } else if (event.key === Qt.Key_G && (event.modifiers & Qt.ControlModifier)) {
+                    // TODO: Which key should trigger this?
                     event.accepted = true
+
+                    RTTProvider.rttSendBell()
                 }
             }
 
             onTextEdited: {
                 let lastChar = rttInputField.text.charAt(rttInputField.length - 1);
                 if (lastChar !== "") {
-                    RTTProvider.rttSend(lastChar);
-
                     if (rttInputContainer.newMessage) {
                         rttListView.model.addMessage(Date.now(), rttInputField.text, true)
                         rttInputContainer.newMessage = false
                     } else {
                         rttListView.model.updateMessage(rttInputField.text, true, false)
                     }
+
+                    rttTimeoutTimer.restart()
+
+                    RTTProvider.rttSend(lastChar)
                 }
             }
 

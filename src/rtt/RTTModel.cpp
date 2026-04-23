@@ -4,9 +4,8 @@ RTTModel::RTTModel(QObject *parent) : QAbstractListModel(parent) { }
 
 int RTTModel::rowCount(const QModelIndex &parent) const
 {
-    if (parent.isValid()) {
-        return 0;
-    }
+    Q_UNUSED(parent)
+
     return m_messages.size();
 }
 
