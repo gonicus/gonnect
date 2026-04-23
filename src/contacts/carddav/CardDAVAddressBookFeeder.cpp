@@ -33,6 +33,8 @@ void CardDAVAddressBookFeeder::init()
     m_cacheWriteTimer.setInterval(3s);
     m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
 
+    ReadOnlyConfdSettings settings;
+    m_webdav.setVerifyCa(settings.value("verifyServer", true).toBool());
     m_webdav.addSslCa(AuthManager::instance().sslCAs());
 
     loadCachedData(m_settingsHash);
