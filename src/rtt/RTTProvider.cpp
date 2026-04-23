@@ -49,14 +49,6 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
                                               m_model->updateMessage(message, false, true);
                                               m_newMessage = true;
                                           });
-
-                    /*
-                    TODO: Give this signal the boolean, in SIPCall
-                    And/or any other way to check if someone RTT'd you first?
-                    connect(m_call, &SIPCall::hasRttChanged, this, []() {
-
-                    });
-                    */
                 }
             });
 }
@@ -113,26 +105,3 @@ void RTTProvider::rttSendBell()
         m_call->rttSendBell();
     }
 }
-
-/*
-This singleton provider class serves as the easily accessible interface to the model
-
-We'd have to fetch the active call from the call manager and connect to SIPCall
-rttBubbleChanged / rttBubbleCommitted and hook them up to RTTModel
-updateLastMessage / addMessage
-
-QML text field in Call.qml needs linking to SIPCall rtt bubble?
-
-Should be Q_INVOKABLE and triggerable by QML UI TextInput?
-    void rttSend(const QString &text);
-    void rttSendLineSeperator();
-    void rttSendCRLF();
-    void rttSendBackspace();
-    void rttSendBell();
-
-    -> QML UI part also needs to do addMessage() / updateMessage()
-
-Provider should listen for these SIPCall signals:
-    void rttBubbleChanged(QString &text);
-    void rttBubbleCommitted(QString &text);
-*/
