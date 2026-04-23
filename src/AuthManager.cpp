@@ -40,7 +40,9 @@ void AuthManager::init()
     }
 
     QSslConfiguration sslConfig;
-    sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    if (!settings.value("verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
     sslConfig.addCaCertificates(sslCAs());
     m_reqFactory.setSslConfiguration(sslConfig);
 
@@ -369,7 +371,11 @@ void AuthManager::authenticateJitsiImpl(const QString &roomName)
     auto request = m_reqFactory.createRequest(QUrlQuery(QString("room=%1").arg(roomName)));
 
     QSslConfiguration sslConfig;
-    sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+
+    ReadOnlyConfdSettings settings;
+    if (!settings.value("verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
     sslConfig.addCaCertificates(sslCAs());
     request.setSslConfiguration(sslConfig);
 
