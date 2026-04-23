@@ -235,7 +235,7 @@ void SIPAccount::initialize()
         m_transportConfig.tlsConfig.privKeyFile = privKeyFile.toStdString();
     }
 
-    m_transportConfig.tlsConfig.verifyServer = m_settings.value("verifyServer", false).toBool();
+    m_transportConfig.tlsConfig.verifyServer = m_settings.value("verifyServer", true).toBool();
 
     if (!activateTransports()) {
         Q_EMIT initialized(false);
