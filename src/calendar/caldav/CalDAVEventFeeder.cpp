@@ -15,7 +15,7 @@ CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederCon
     : QObject(parent), m_config(config)
 {
     ReadOnlyConfdSettings settings;
-    m_webdav.setVerifyCa(settings.value("verifyServer", true).toBool());
+    m_webdav.setVerifyCa(settings.value("generic/verifyServer", true).toBool());
     m_webdav.addSslCa(AuthManager::instance().sslCAs());
 }
 
