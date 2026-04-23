@@ -5,6 +5,7 @@
 #include "CalDAVEventFeeder.h"
 #include "DateEventManager.h"
 #include "AuthManager.h"
+#include "ReadOnlyConfdSettings.h"
 
 Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
 
@@ -13,6 +14,8 @@ using namespace std::chrono_literals;
 CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederConfig &config)
     : QObject(parent), m_config(config)
 {
+    ReadOnlyConfdSettings settings;
+    m_webdav.setVerifyCa(settings.value("verifyServer", true).toBool());
     m_webdav.addSslCa(AuthManager::instance().sslCAs());
 }
 
@@ -138,6 +141,12 @@ void CalDAVEventFeeder::getNextItem()
             reply, &QNetworkReply::finished, this,
             [item, reply, this]() {
                 if (!reply) {
+                    return;
+                }
+
+                if (reply->error() != QNetworkReply::NoError) {
+                    qCDebug(lcCalDAVEventFeeder) << "WebDAV reply error:" << reply->error();
+                    reply->deleteLater();
                     return;
                 }
 
