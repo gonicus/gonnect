@@ -33,7 +33,7 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
                 if (m_call) {
                     m_changed = connect(
                             m_call, &SIPCall::rttBubbleChanged, this, [this](QString message) {
-                                if (m_newMessage) { // TODO: Safe, cause of ST-event loop?
+                                if (m_newMessage) {
                                     m_model->addMessage(QDateTime::currentMSecsSinceEpoch(),
                                                         message, false);
                                     m_newMessage = false;
@@ -73,6 +73,41 @@ RTTProvider::~RTTProvider()
     if (m_model) {
         delete m_model;
         m_model = nullptr;
+    }
+}
+
+void RTTProvider::rttSend(const QString &text)
+{
+    if (m_call) {
+        m_call->rttSend(text);
+    }
+}
+
+void RTTProvider::rttSendLineSeperator()
+{
+    if (m_call) {
+        m_call->rttSendLineSeperator();
+    }
+}
+
+void RTTProvider::rttSendCRLF()
+{
+    if (m_call) {
+        m_call->rttSendCRLF();
+    }
+}
+
+void RTTProvider::rttSendBackspace()
+{
+    if (m_call) {
+        m_call->rttSendBackspace();
+    }
+}
+
+void RTTProvider::rttSendBell()
+{
+    if (m_call) {
+        m_call->rttSendBell();
     }
 }
 

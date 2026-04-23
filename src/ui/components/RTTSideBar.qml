@@ -78,7 +78,7 @@ Item {
 
             Keys.onPressed: (event) => {
                 if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-                    RTTProvider.call.rttSendLineSeperator()
+                    RTTProvider.rttSendLineSeperator()
 
                     event.accepted = true
 
@@ -87,7 +87,7 @@ Item {
                     rttTimeoutTimer.restart()
                     rttInputField.text = ""
                 } else if (event.key === Qt.Key_Backspace) {
-                    RTTProvider.call.rttSendBackspace()
+                    RTTProvider.rttSendBackspace()
 
                     event.accepted = true
 
@@ -95,7 +95,7 @@ Item {
                     rttListView.model.updateMessage(rttInputField.text, true, false)
                 } else if (event.key === Qt.Key_G && (event.modifiers & Qt.ControlModifier)) {
                     // Which key should trigger this?
-                    RTTProvider.call.rttSendBell()
+                    RTTProvider.rttSendBell()
 
                     event.accepted = true
                 }
@@ -104,7 +104,7 @@ Item {
             onTextEdited: {
                 let lastChar = rttInputField.text.charAt(rttInputField.length - 1);
                 if (lastChar !== "") {
-                    RTTProvider.call.rttSend(lastChar);
+                    RTTProvider.rttSend(lastChar);
 
                     if (rttInputContainer.newMessage) {
                         rttListView.model.addMessage(Date.now(), rttInputField.text, true)

@@ -31,6 +31,13 @@ public:
 
     RTTModel *model() const { return m_model; }
 
+    /// These methods wrap the SIPCall RTT functionality
+    Q_INVOKABLE void rttSend(const QString &text);
+    Q_INVOKABLE void rttSendLineSeperator();
+    Q_INVOKABLE void rttSendCRLF();
+    Q_INVOKABLE void rttSendBackspace();
+    Q_INVOKABLE void rttSendBell();
+
 Q_SIGNALS:
 
 private:
