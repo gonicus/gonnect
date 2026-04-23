@@ -39,13 +39,15 @@ void AuthManager::init()
         return;
     }
 
+    settings.endGroup();
     QSslConfiguration sslConfig;
-    if (!settings.value("verifyServer", true).toBool()) {
+    if (!settings.value("generic/verifyServer", true).toBool()) {
         sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
     }
     sslConfig.addCaCertificates(sslCAs());
     m_reqFactory.setSslConfiguration(sslConfig);
 
+    settings.beginGroup("jitsi");
     m_reqFactory.setBaseUrl(settings.value("baseUrl", "").toUrl());
 
     m_authFlow = new QOAuth2AuthorizationCodeFlow(this);
@@ -373,7 +375,7 @@ void AuthManager::authenticateJitsiImpl(const QString &roomName)
     QSslConfiguration sslConfig;
 
     ReadOnlyConfdSettings settings;
-    if (!settings.value("verifyServer", true).toBool()) {
+    if (!settings.value("generic/verifyServer", true).toBool()) {
         sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
     }
     sslConfig.addCaCertificates(sslCAs());
