@@ -1,4 +1,6 @@
 #include "SystemTrayMenu.h"
+#include "GlobalCallState.h"
+#include "IConferenceConnector.h"
 #include "NumberStat.h"
 #include "ViewHelper.h"
 #include "NumberStats.h"
@@ -17,6 +19,7 @@ using namespace std::chrono_literals;
 SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
 {
     initMenu();
+    updateConferences();
     updateCalls();
     updateFavorites();
     updateMostCalled();
@@ -74,6 +77,8 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateTogglers);
     connect(&TogglerManager::instance(), &TogglerManager::togglerBusyChanged, this,
             &SystemTrayMenu::updateTogglers);
+    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
+            &SystemTrayMenu::updateConferences);
 
     resetTrayIcon();
 }
@@ -92,9 +97,38 @@ void SystemTrayMenu::updateMenu()
     m_mainWindowAction->setIcon(sipReg ? QIcon::fromTheme("call-start-symbolic")
                                        : QIcon::fromTheme("view-refresh-symbolic"));
 
+    updateConferences();
     updateCalls();
     updateFavorites();
     updateMostCalled();
+}
+
+void SystemTrayMenu::updateConferences()
+{
+    for (QAction *action : std::as_const(m_activeConferencesActions)) {
+        m_trayIconMenu->removeAction(action);
+    }
+    m_activeConferencesActions.clear();
+
+    const auto globalCallStateObject = GlobalCallState::instance().globalCallStateObjects();
+
+    for (const auto globalCallObj : globalCallStateObject) {
+        auto conferenceObj = qobject_cast<IConferenceConnector *>(globalCallObj);
+        if (conferenceObj && (conferenceObj->callState() & ICallState::State::CallActive)) {
+
+            auto action =
+                    new QAction(QIcon::fromTheme("call-stop-symbolic"),
+                                tr("Leave conference '%1'").arg(conferenceObj->conferenceName()),
+                                m_trayIconMenu);
+            m_trayIconMenu->insertAction(m_activeConferencesSeparator, action);
+            m_activeConferencesActions.append(action);
+
+            connect(action, &QAction::triggered, this,
+                    [conferenceObj]() { conferenceObj->leaveConference(); });
+        }
+    }
+
+    m_activeConferencesSeparator->setVisible(m_activeConferencesActions.size());
 }
 
 void SystemTrayMenu::initMenu()
@@ -107,6 +141,7 @@ void SystemTrayMenu::initMenu()
     connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::activateSearch);
 
     m_trayIconMenu->addSeparator();
+    m_activeConferencesSeparator = m_trayIconMenu->addSeparator();
     m_activeCallsSeparator = m_trayIconMenu->addSeparator();
     m_favoritesSeparator = m_trayIconMenu->addSeparator();
     m_mostCalledSeparator = m_trayIconMenu->addSeparator();
