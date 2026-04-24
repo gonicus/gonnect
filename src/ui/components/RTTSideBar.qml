@@ -1,11 +1,24 @@
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
 import QtQuick.Controls.Material
 import base
 
 Item {
     id: control
+
+    // TODO: Use these visiblity props for display in Call.qml?
+    property alias hasMessages: RTTProvider.hasMessages
+    property alias hasRttConsole: rttSettings.showRealTimeTextConsole
+
+    Settings {
+        id: rttSettings
+        location: ViewHelper.userConfigPath
+        category: "account0"
+
+        property bool showRealTimeTextConsole: false
+    }
 
     Item {
         id: rttChatContainer
