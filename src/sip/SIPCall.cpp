@@ -115,7 +115,10 @@ SIPCall::~SIPCall()
 
     SIPCallManager::instance().removeCall(this);
     Q_EMIT GlobalCallState::instance().callEnded(false);
-    GlobalCallState::instance().unholdOtherCall();
+
+    // Prevent unhold in the same event loop tick to prevent confused pjsip segfault
+    QTimer::singleShot(0, &GlobalCallState::instance(),
+                       []() { GlobalCallState::instance().unholdOtherCall(); });
 }
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
