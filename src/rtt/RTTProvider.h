@@ -14,6 +14,7 @@ class RTTProvider : public QObject
     Q_DISABLE_COPY(RTTProvider)
 
     Q_PROPERTY(RTTModel *model READ model CONSTANT)
+    Q_PROPERTY(bool hasMessages READ hasMessages NOTIFY hasMessagesChanged)
 
 public:
     Q_REQUIRED_RESULT static RTTProvider &instance()
@@ -31,6 +32,9 @@ public:
 
     RTTModel *model() const { return m_model; }
 
+    /// Determine QML visibility based on messages being present
+    bool hasMessages();
+
     /// These methods wrap the SIPCall RTT functionality
     Q_INVOKABLE void rttSend(const QString &text);
     Q_INVOKABLE void rttSendLineSeperator();
@@ -39,6 +43,7 @@ public:
     Q_INVOKABLE void rttSendBell();
 
 Q_SIGNALS:
+    void hasMessagesChanged();
 
 private:
     RTTProvider(QObject *parent = nullptr);

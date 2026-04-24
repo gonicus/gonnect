@@ -7,7 +7,12 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
 {
     m_model = new RTTModel(this);
 
-    // TODO: Only active if showRealTimeTextConsole == true oder RTT message received
+    connect(m_model, &RTTModel::rowsInserted, this, &RTTProvider::hasMessagesChanged);
+    connect(m_model, &RTTModel::rowsRemoved, this, &RTTProvider::hasMessagesChanged);
+    connect(m_model, &RTTModel::modelReset, this, &RTTProvider::hasMessagesChanged);
+
+    // TODO: Only active if showRealTimeTextConsole == true
+    // or RTT message received (RTTProvider::hasMessages)
     // And limit to one-to-one calls?
 
     connect(&GlobalCallState::instance(), &GlobalCallState::callInForegroundChanged, this,
@@ -69,6 +74,15 @@ RTTProvider::~RTTProvider()
         delete m_model;
         m_model = nullptr;
     }
+}
+
+bool RTTProvider::hasMessages()
+{
+    if (m_model) {
+        return m_model->rowCount() > 0;
+    }
+
+    return false;
 }
 
 void RTTProvider::rttSend(const QString &text)
