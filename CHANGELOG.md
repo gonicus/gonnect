@@ -1,3 +1,10 @@
+# [2.2.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.2...v2.2.0-beta.3) (2026-04-27)
+
+
+### Bug Fixes
+
+* prevent unhold on currently changing call ([#439](https://github.com/gonicus/gonnect/issues/439)) ([f1a05f5](https://github.com/gonicus/gonnect/commit/f1a05f59746755ebfb4d89def1b1bd1c8ff7a73a))
+
 # [2.2.0-beta.2](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.1...v2.2.0-beta.2) (2026-04-23)
 
 
