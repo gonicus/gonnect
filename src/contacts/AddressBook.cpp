@@ -156,6 +156,8 @@ void AddressBook::removeContactsBySource(const QString &source)
 {
     QMutexLocker lock(&m_feederMutex);
 
+    const int before = m_contacts.size();
+
     for (auto contact : std::as_const(m_contacts)) {
         if (contact->contactSourceInfo().configId == source) {
             m_contacts.remove(contact->id());
@@ -163,7 +165,14 @@ void AddressBook::removeContactsBySource(const QString &source)
         }
     }
 
-    Q_EMIT contactsCleared();
+    // Only signal contactsCleared when this call actually removed entries.
+    // The handler clears m_contactSourceInfos for *every* source, so a periodic
+    // feeder retry that touches no rows (e.g. EDS retrying without an
+    // evolution-data-server present) used to wipe other sources' search-result
+    // categories, leaving every subsequent address-book search visually empty.
+    if (m_contacts.size() != before) {
+        Q_EMIT contactsCleared();
+    }
 }
 
 QHash<QString, Contact *> AddressBook::contacts() const
