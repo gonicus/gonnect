@@ -59,6 +59,7 @@ private:
         QByteArray commercial;
         QByteArray mobile;
         QByteArray home;
+        QByteArray avatar;
     };
 
     LDAPInitializer::Config m_ldapConfig;

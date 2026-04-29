@@ -171,6 +171,7 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     m_attrs.commercial = settings.value("attrCommercial", "telephoneNumber").toByteArray();
     m_attrs.mobile = settings.value("attrMobile", "mobile").toByteArray();
     m_attrs.home = settings.value("attrHome", "homePhone").toByteArray();
+    m_attrs.avatar = settings.value("attrAvatar", "jpegPhoto").toByteArray();
 
     init(ldapConfig,
          scriptableAttributes.isEmpty() ? QStringList() : scriptableAttributes.split(QChar(',')),
@@ -264,11 +265,16 @@ void LDAPAddressBookFeeder::feedAddressBook()
 
 void LDAPAddressBookFeeder::loadAvatars(const QList<const Contact *> &contacts)
 {
+    if (m_attrs.name.isEmpty() || m_attrs.avatar.isEmpty()) {
+        return;
+    }
+
+    const auto nameAttr = QString::fromLatin1(m_attrs.name);
     QStringList filterList;
     filterList.reserve(contacts.size());
 
     for (const Contact *contact : contacts) {
-        filterList.append(QString("(cn=%1)").arg(contact->name()));
+        filterList.append(QString("(%1=%2)").arg(nameAttr, contact->name()));
     }
 
     LDAPInitializer::Config newConfig(m_ldapConfig);
@@ -282,7 +288,11 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 {
     m_isProcessing = true;
 
-    QThread::create([this, ldapConfig]() {
+    // Snapshot the configured avatar attribute so the worker thread does not
+    // race with the main thread's reset/replay of m_attrs.
+    const QByteArray avatarAttr = m_attrs.avatar;
+
+    QThread::create([this, ldapConfig, avatarAttr]() {
         char *a = nullptr;
         char *dnTemp = nullptr;
         BerElement *ber = nullptr;
@@ -293,14 +303,19 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
         LDAP *ldap = nullptr;
         LDAPMessage *msg = nullptr;
 
-        QStringList attributes = { "cn", "jpegPhoto", "modifyTimestamp" };
+        // Honour the configurable avatar attribute. modifyTimestamp stays
+        // hardcoded as an operational LDAP attribute.
+        QList<QByteArray> attributes = { QByteArrayLiteral("modifyTimestamp") };
+        if (!avatarAttr.isEmpty()) {
+            attributes.append(avatarAttr);
+        }
 
         size_t i = 0;
         char **attrs = (char **)malloc((attributes.count() + 1) * sizeof(char *));
-        for (auto &attr : std::as_const(attributes)) {
+        for (const QByteArray &attr : std::as_const(attributes)) {
             size_t sz = attr.size() + 1;
             char *p = (char *)malloc(sz);
-            strncpy(p, attr.toLocal8Bit().toStdString().c_str(), sz);
+            strncpy(p, attr.constData(), sz);
             attrs[i++] = p;
         }
         attrs[i] = NULL;
@@ -375,12 +390,13 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 
                         char *val = (**vals).bv_val;
 
-                        if (strcmp(a, "jpegPhoto") == 0) {
+                        if (!avatarAttr.isEmpty()
+                            && qstricmp(a, avatarAttr.constData()) == 0) {
                             for (uint i = 0; i < (**vals).bv_len; ++i) {
                                 jpegPhoto.append(*val);
                                 val += sizeof(char);
                             }
-                        } else if (strcmp(a, "modifyTimestamp") == 0) {
+                        } else if (qstricmp(a, "modifyTimestamp") == 0) {
                             modifyTimestamp = QDateTime::fromString(val, "yyyyMMddhhmmsst");
                         }
 
