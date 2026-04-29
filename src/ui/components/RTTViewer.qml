@@ -1,24 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import QtCore
 import QtQuick
 import QtQuick.Controls.Material
 import base
 
 Item {
     id: control
-
-    // TODO: Use these visiblity props for display in Call.qml?
-    property alias hasMessages: RTTProvider.hasMessages
-    property alias hasRttConsole: rttSettings.showRealTimeTextConsole
-
-    Settings {
-        id: rttSettings
-        location: ViewHelper.userConfigPath
-        category: "account0"
-
-        property bool showRealTimeTextConsole: false
-    }
 
     Item {
         id: rttChatContainer
@@ -36,16 +23,18 @@ Item {
             clip: true
             bottomMargin: 20
             model: RTTProvider.model // TODO: Remove ProxyModel?
+            spacing: 12
 
             Accessible.role: Accessible.List
             Accessible.name: qsTr("RTT message list")
             Accessible.description: qsTr("List of all the RTT messages of the current call")
 
-            // TODO: More height/width/anchor tuning
             delegate: Item {
                 id: rttDelg
                 width: parent.width
-                height: 35
+                height: rttBubble.height
+
+                property int maxBubbleSize: rttDelg.width * 0.8
 
                 required property int timestamp
                 required property string message
@@ -59,13 +48,12 @@ Item {
 
                 Rectangle {
                     id: rttBubble
-                    width: rttMessage.implicitWidth + 10
-                    height: parent.height - 10
-                    radius: 6
+                    width: Math.min(rttMessage.implicitWidth, rttDelg.maxBubbleSize)
+                    height: rttMessage.height
+                    radius: 8
 
                     anchors.right: rttDelg.isMe ? parent.right : undefined
                     anchors.left: !rttDelg.isMe ? parent.left : undefined
-                    anchors.margins: 10
 
                     color: rttDelg.isMe ? "blue" : "gray"
 
@@ -73,14 +61,16 @@ Item {
                         id: rttMessage
                         text: rttDelg.message
                         color: rttDelg.isMe ? "white" : "black"
-                        font.italic: !rttDelg.isFinished
+                        //font.italic: !rttDelg.isFinished
+                        width: parent.width
                         wrapMode: Label.Wrap
+                        padding: 10
                         anchors {
                             centerIn: parent
-                            leftMargin: 5
-                            rightMargin: 5
                         }
                     }
+
+                    Accessible.ignored: true
                 }
             }
         }
@@ -112,7 +102,6 @@ Item {
         TextField {
             id: rttInputField
             placeholderText: "Message..."
-            //onAccepted: focus = false
             anchors {
                 left: parent.left
                 right: parent.right
@@ -155,7 +144,7 @@ Item {
 
                     rttTimeoutTimer.restart()
 
-                    RTTProvider.rttSend(lastChar)
+                    //RTTProvider.rttSend(lastChar)
                 }
             }
 

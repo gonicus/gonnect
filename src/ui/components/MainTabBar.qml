@@ -415,7 +415,7 @@ Item {
                         iconSource: Icons.callStart,
                         labelText: qsTr("Call"),
                         disabledTooltipText: qsTr("No active call"),
-                        isEnabled: control.hasActiveCall,
+                        isEnabled: true, // control.hasActiveCall,
                         showActiveBorder: control.hasActiveUnfinishedCall && control.selectedPageId !== control.mainWindow.callPageId,
                         attachedData: null
                     }

@@ -53,7 +53,7 @@ Item {
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: avatarImage.bottom
-            topMargin: 50
+            topMargin: 25
         }
 
         Accessible.ignored: true
@@ -68,7 +68,7 @@ Item {
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: otherName.bottom
-            topMargin: 30
+            topMargin: 15
         }
 
         Accessible.ignored: true
@@ -83,7 +83,7 @@ Item {
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: otherName.bottom
-            topMargin: 30
+            topMargin: 15
         }
 
         Accessible.ignored: true

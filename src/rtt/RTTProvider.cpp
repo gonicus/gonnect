@@ -11,10 +11,6 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
     connect(m_model, &RTTModel::rowsRemoved, this, &RTTProvider::hasMessagesChanged);
     connect(m_model, &RTTModel::modelReset, this, &RTTProvider::hasMessagesChanged);
 
-    // TODO: Only active if showRealTimeTextConsole == true
-    // or RTT message received (RTTProvider::hasMessages)
-    // And limit to one-to-one calls?
-
     connect(&GlobalCallState::instance(), &GlobalCallState::callInForegroundChanged, this,
             [this]() {
                 // Disconnect from RTT signals of the old call
