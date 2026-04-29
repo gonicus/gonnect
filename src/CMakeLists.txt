@@ -410,7 +410,7 @@ qt_add_qml_module(gonnect
         ui/components/HistoryList.qml
         ui/components/MainTabBar.qml
         ui/components/ParticipantsList.qml
-        ui/components/RTTViewer.qml
+        ui/components/RTTDisplay.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
@@ -625,8 +625,6 @@ qt_add_qml_module(gonnect
         rtt/RTTMessage.cpp
         rtt/RTTModel.h
         rtt/RTTModel.cpp
-        rtt/RTTProxyModel.h
-        rtt/RTTProxyModel.cpp
 
         ui/CallsModel.h
         ui/CallsModel.cpp
@@ -800,7 +798,7 @@ target_include_directories(gonnect
     usb/busylight
     media
     platform
-    rtt # could also be moved to chat/ but practically unrelated
+    rtt
     ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )

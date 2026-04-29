@@ -22,7 +22,7 @@ Item {
             anchors.fill: parent
             clip: true
             bottomMargin: 20
-            model: RTTProvider.model // TODO: Remove ProxyModel?
+            model: RTTProvider.model
             spacing: 12
 
             Accessible.role: Accessible.List
@@ -144,7 +144,7 @@ Item {
 
                     rttTimeoutTimer.restart()
 
-                    //RTTProvider.rttSend(lastChar)
+                    RTTProvider.rttSend(lastChar)
                 }
             }
 

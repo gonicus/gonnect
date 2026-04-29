@@ -207,8 +207,8 @@ Item {
             Component {
                 id: rttComponent
 
-                RTTViewer {
-                    id: rttView
+                RTTDisplay {
+                    id: rttDisplay
                 }
             }
         }
