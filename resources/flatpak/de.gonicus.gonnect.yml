@@ -193,8 +193,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/frankosterfeld/qtkeychain.git
-        tag: 0.15.0
-        commit: ad7344c45a86a4f66cbafc4b081b5f7b876cb0b7
+        tag: 0.16.0
+        commit: aa6da344e1a20b9194e12bace3665caeea6b6304
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
