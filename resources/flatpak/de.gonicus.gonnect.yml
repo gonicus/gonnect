@@ -207,11 +207,16 @@ modules:
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DCMAKE_INSTALL_LIBDIR=lib
-      - -DBUILD_SHARED_LIBS:BOOL=ON
-      - -DICAL_GLIB=true
-      - -DGOBJECT_INTROSPECTION=true
-      - -DICAL_GLIB_VAPI=false
-      - -DICAL_BUILD_DOCS=false
+      - -DLIBICAL_STATIC:BOOL=OFF
+      - -DLIBICAL_GLIB=ON
+      - -DLIBICAL_GLIB_VAPI=OFF
+      - -DLIBICAL_GOBJECT_INTROSPECTION=ON
+      - -DLIBICAL_JAVA_BINDINGS=OFF
+      - -DLIBICAL_GLIB_BUILD_DOCS=OFF
+      - -DLIBICAL_BUILD_DOCS=OFF
+      - -DLIBICAL_BUILD_TESTING=OFF
+      - -DLIBICAL_BUILD_EXAMPLES=OFF
+
     sources:
       - type: archive
         url: https://github.com/libical/libical/releases/download/v4.0.0/libical-4.0.0.tar.gz
