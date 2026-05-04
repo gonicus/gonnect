@@ -207,9 +207,8 @@ void LDAPAddressBookFeeder::feedAddressBook()
     // single attribute may serve multiple roles (e.g. AccountNumber as both
     // uid and primary number on a Grandstream UCM), hence the QSet dedup.
     QSet<QByteArray> requested = { QByteArrayLiteral("modifyTimestamp") };
-    for (const QByteArray *role : { &m_attrs.name, &m_attrs.uid, &m_attrs.company,
-                                    &m_attrs.email, &m_attrs.commercial, &m_attrs.mobile,
-                                    &m_attrs.home }) {
+    for (const QByteArray *role : { &m_attrs.name, &m_attrs.uid, &m_attrs.company, &m_attrs.email,
+                                    &m_attrs.commercial, &m_attrs.mobile, &m_attrs.home }) {
         if (!role->isEmpty()) {
             requested.insert(*role);
         }
@@ -390,8 +389,7 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 
                         char *val = (**vals).bv_val;
 
-                        if (!avatarAttr.isEmpty()
-                            && qstricmp(a, avatarAttr.constData()) == 0) {
+                        if (!avatarAttr.isEmpty() && qstricmp(a, avatarAttr.constData()) == 0) {
                             for (uint i = 0; i < (**vals).bv_len; ++i) {
                                 jpegPhoto.append(*val);
                                 val += sizeof(char);
@@ -564,8 +562,7 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
                         modifyTimestamp = val;
                     }
                     if (matches(m_attrs.commercial)) {
-                        phoneNumbers.append({ Contact::NumberType::Commercial,
-                                              stripBaseNumber(val),
+                        phoneNumbers.append({ Contact::NumberType::Commercial, stripBaseNumber(val),
                                               m_sipStatusSubscriptableAttributes.contains(
                                                       QString::fromLatin1(m_attrs.commercial)) });
                     }
