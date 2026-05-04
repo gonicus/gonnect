@@ -40,7 +40,7 @@ index 091500d..98d7b59 100644
 +        };
 +
 +        for (const auto& error : errors) {
-+            if (!verifyErrors.contains(error)) {
++            if (!verifyErrors.contains(error.error())) {
 +                emit checkSslCertifcate(errors);
 +                reply->abort();
 +                return;
