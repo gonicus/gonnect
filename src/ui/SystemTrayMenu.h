@@ -31,6 +31,7 @@ public:
 
 private Q_SLOTS:
     void updateMenu();
+    void updateConferences();
     void updateCalls();
     void updateFavorites();
     void updateMostCalled();
@@ -62,6 +63,7 @@ private:
 
     QAction *m_mainWindowAction = nullptr;
     QAction *m_settingsWindowAction = nullptr;
+    QAction *m_activeConferencesSeparator = nullptr;
     QAction *m_activeCallsSeparator = nullptr;
     QAction *m_mostCalledSeparator = nullptr;
     QAction *m_favoritesSeparator = nullptr;
@@ -69,6 +71,7 @@ private:
 
     QList<CallEntry> m_callEntries;
     QList<QAction *> m_activeCallsActions;
+    QList<QAction *> m_activeConferencesActions;
     QList<QAction *> m_togglerActions;
     QHash<QString, QAction *> m_favoriteActions;
     QHash<QString, QAction *> m_mostCalledActions;

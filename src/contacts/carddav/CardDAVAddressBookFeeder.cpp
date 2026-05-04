@@ -34,7 +34,7 @@ void CardDAVAddressBookFeeder::init()
     m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
 
     ReadOnlyConfdSettings settings;
-    m_webdav.setVerifyCa(settings.value("verifyServer", true).toBool());
+    m_webdav.setVerifyCa(settings.value("generic/verifyServer", true).toBool());
     m_webdav.addSslCa(AuthManager::instance().sslCAs());
 
     loadCachedData(m_settingsHash);
@@ -365,7 +365,7 @@ void CardDAVAddressBookFeeder::process()
     m_blockInfo.responseCode =
             settings.value("blockSipCode", GONNECT_DEFAULT_BLOCK_SIP_CODE).toUInt();
 
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {

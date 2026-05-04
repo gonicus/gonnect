@@ -28,7 +28,7 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, const i
     ReadOnlyConfdSettings settings;
 
     settings.beginGroup(m_group);
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {

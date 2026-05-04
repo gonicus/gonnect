@@ -156,14 +156,26 @@ void AddressBook::removeContactsBySource(const QString &source)
 {
     QMutexLocker lock(&m_feederMutex);
 
+    QString sourceUid;
+    bool sourceInfoCleared = false;
     for (auto contact : std::as_const(m_contacts)) {
         if (contact->contactSourceInfo().configId == source) {
+            sourceUid = contact->sourceUid();
+
+            // Remove the ContactSourceInfo of the contact source
+            if (!sourceInfoCleared) {
+                m_contactSourceInfos.removeAll(contact->contactSourceInfo());
+                sourceInfoCleared = true;
+
+                Q_EMIT contactSourceInfosChanged();
+            }
+
             m_contacts.remove(contact->id());
-            m_contactsBySourceId.remove(contact->sourceUid());
+            m_contactsBySourceId.remove(sourceUid);
+
+            Q_EMIT contactRemoved(sourceUid);
         }
     }
-
-    Q_EMIT contactsCleared();
 }
 
 QHash<QString, Contact *> AddressBook::contacts() const
