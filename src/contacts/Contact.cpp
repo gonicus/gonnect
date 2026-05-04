@@ -406,5 +406,6 @@ bool Contact::ContactSourceInfo::operator==(const ContactSourceInfo &other) cons
 
 bool Contact::ContactSourceInfo::operator!=(const ContactSourceInfo &other) const
 {
-    return this->prio != other.prio || this->displayName != other.displayName;
+    return this->prio != other.prio || this->displayName != other.displayName
+            || this->configId != other.configId;
 }

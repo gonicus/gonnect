@@ -25,7 +25,7 @@ void CsvFileAddressBookFeeder::process()
 
     settings.beginGroup(m_group);
     m_filePath = settings.value("path", "").toString();
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
 
     m_blockInfo.isBlocking = settings.value("block", false).toBool();
     m_blockInfo.responseCode =
