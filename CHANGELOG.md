@@ -1,3 +1,16 @@
+# [2.2.0-beta.4](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.3...v2.2.0-beta.4) (2026-05-04)
+
+
+### Bug Fixes
+
+* do not wipe all contact sources on by-source removals ([#450](https://github.com/gonicus/gonnect/issues/450)) ([f89882f](https://github.com/gonicus/gonnect/commit/f89882f9be298c1f90de881239b44a50b749492b))
+* ignore certain ssl errors when verifyServer is false (webdav) ([#451](https://github.com/gonicus/gonnect/issues/451)) ([428860a](https://github.com/gonicus/gonnect/commit/428860a320785b9a52888a824d28990f59a6beb6))
+
+
+### Features
+
+* **ldap:** configurable contact attribute mapping ([#445](https://github.com/gonicus/gonnect/issues/445)) ([4113384](https://github.com/gonicus/gonnect/commit/41133841f2c00c72229658a159abfae59330d7c9))
+
 # [2.2.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.2...v2.2.0-beta.3) (2026-04-27)
 
 
