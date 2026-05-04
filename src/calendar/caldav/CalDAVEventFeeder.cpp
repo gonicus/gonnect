@@ -218,7 +218,7 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
             icalrecurrencetype rrule = {};
             if (prop) {
                 isRecurrent = true;
-                rrule = icalproperty_get_rrule(prop);
+                rrule = *icalproperty_get_rrule(prop);
             }
 
             // RID: The first ever recorded time of a recurrent event instance. We'll use
