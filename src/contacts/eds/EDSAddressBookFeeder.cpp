@@ -178,7 +178,7 @@ void EDSAddressBookFeeder::process()
     ReadOnlyConfdSettings settings;
 
     settings.beginGroup(m_group);
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
 
     m_blockInfo.isBlocking = settings.value("block", false).toBool();
     m_blockInfo.responseCode =
