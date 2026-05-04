@@ -273,6 +273,24 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
 
                 icalrecur_iterator *recurrenceIter = icalrecur_iterator_new(rrule, dtstart);
                 if (recurrenceIter) {
+                    // INFO: Since v3.0, a start time can be specified for libical recurrence iterators
+                    // in order to reduce parsing overhead, i.e. events that are irrelevant to us.
+                    // This only works for RRULE's that do not contain COUNT
+                    // TODO: Check if we can also omit some m_config.timeRangeStart checks below
+                    if (rrule.count == 0) {
+                        struct icaltimetype ict = icaltime_null_time();
+
+                        QDateTime timeRangeStart = m_config.timeRangeStart.toUTC();
+                        ict.year   = timeRangeStart.date().year();
+                        ict.month  = timeRangeStart.date().month();
+                        ict.day    = timeRangeStart.date().day();
+                        ict.hour   = timeRangeStart.time().hour();
+                        ict.minute = timeRangeStart.time().minute();
+                        ict.second = timeRangeStart.time().second();
+
+                        icalrecur_iterator_set_start(recurrenceIter, ict);
+                    }
+
                     qint64 duration = start.secsTo(end);
 
                     for (icaltimetype next = icalrecur_iterator_next(recurrenceIter);
