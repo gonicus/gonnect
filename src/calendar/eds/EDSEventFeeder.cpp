@@ -538,6 +538,24 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
 
                 ICalRecurIterator *recurrenceIter = i_cal_recur_iterator_new(rrule, dtstart);
                 if (recurrenceIter) {
+                    // INFO: Since libical-glib v3.0, a start time can be specified for recurrence
+                    // iterators in order to reduce parsing overhead, i.e. old events that are
+                    // irrelevant to us. This only works for RRULE's that do not contain COUNT
+                    if (i_cal_recurrence_get_count(rrule) == 0) {
+                        QDateTime timeRangeStart = m_timeRangeStart.toUTC();
+
+                        ICalTime *recurStartCap = i_cal_time_new();
+                        i_cal_time_set_date(recurStartCap, timeRangeStart.date().year(),
+                                            timeRangeStart.date().month(),
+                                            timeRangeStart.date().day());
+                        i_cal_time_set_time(recurStartCap, timeRangeStart.time().hour(),
+                                            timeRangeStart.time().minute(),
+                                            timeRangeStart.time().second());
+                        i_cal_time_set_is_date(recurStartCap, FALSE);
+
+                        i_cal_recur_iterator_set_start(recurrenceIter, recurStartCap);
+                    }
+
                     qint64 duration = start.secsTo(end);
 
                     for (ICalTime *next = i_cal_recur_iterator_next(recurrenceIter);
