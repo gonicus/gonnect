@@ -5,6 +5,7 @@
 #include <ldap.h>
 #include <QDebug>
 #include <QLoggingCategory>
+#include <QSet>
 #include <QThread>
 
 #include "LDAPAddressBookFeeder.h"
@@ -61,6 +62,7 @@ void LDAPAddressBookFeeder::resetFeeder()
     m_baseNumber = "";
     m_sipStatusSubscriptableAttributes.clear();
     m_blockInfo = {};
+    m_attrs = {};
 }
 
 void LDAPAddressBookFeeder::process()
@@ -95,7 +97,7 @@ void LDAPAddressBookFeeder::process()
     ReadOnlyConfdSettings settings;
     settings.beginGroup(m_group);
 
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {
@@ -162,6 +164,15 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     ldapConfig.saslAuthcid = settings.value("authcid", "").toString();
     ldapConfig.saslAuthzid = settings.value("authzid", "").toString();
 
+    m_attrs.name = settings.value("attrName", "cn").toByteArray();
+    m_attrs.uid = settings.value("attrUid", "uid").toByteArray();
+    m_attrs.company = settings.value("attrCompany", "o").toByteArray();
+    m_attrs.email = settings.value("attrEmail", "mail").toByteArray();
+    m_attrs.commercial = settings.value("attrCommercial", "telephoneNumber").toByteArray();
+    m_attrs.mobile = settings.value("attrMobile", "mobile").toByteArray();
+    m_attrs.home = settings.value("attrHome", "homePhone").toByteArray();
+    m_attrs.avatar = settings.value("attrAvatar", "jpegPhoto").toByteArray();
+
     init(ldapConfig,
          scriptableAttributes.isEmpty() ? QStringList() : scriptableAttributes.split(QChar(',')),
          settings.value("baseNumber", "").toString());
@@ -191,15 +202,25 @@ void LDAPAddressBookFeeder::clearCStringlist(char **attrs) const
 
 void LDAPAddressBookFeeder::feedAddressBook()
 {
-    QStringList attributes = { "uid",    "cn",        "o",    "telephoneNumber",
-                               "mobile", "homePhone", "mail", "modifyTimestamp" };
+    // modifyTimestamp is an operational attribute we always need for change
+    // detection. The remaining names come from the user-configurable map; a
+    // single attribute may serve multiple roles (e.g. AccountNumber as both
+    // uid and primary number on a Grandstream UCM), hence the QSet dedup.
+    QSet<QByteArray> requested = { QByteArrayLiteral("modifyTimestamp") };
+    for (const QByteArray *role : { &m_attrs.name, &m_attrs.uid, &m_attrs.company, &m_attrs.email,
+                                    &m_attrs.commercial, &m_attrs.mobile, &m_attrs.home }) {
+        if (!role->isEmpty()) {
+            requested.insert(*role);
+        }
+    }
+
     int result = 0;
     size_t i = 0;
-    char **attrs = (char **)malloc((attributes.count() + 1) * sizeof(char *));
-    for (auto &attr : std::as_const(attributes)) {
+    char **attrs = (char **)malloc((requested.size() + 1) * sizeof(char *));
+    for (const QByteArray &attr : std::as_const(requested)) {
         size_t sz = attr.size() + 1;
         char *p = (char *)malloc(sz);
-        strncpy(p, attr.toLocal8Bit().toStdString().c_str(), sz);
+        strncpy(p, attr.constData(), sz);
         attrs[i++] = p;
     }
     attrs[i] = NULL;
@@ -243,11 +264,16 @@ void LDAPAddressBookFeeder::feedAddressBook()
 
 void LDAPAddressBookFeeder::loadAvatars(const QList<const Contact *> &contacts)
 {
+    if (m_attrs.name.isEmpty() || m_attrs.avatar.isEmpty()) {
+        return;
+    }
+
+    const auto nameAttr = QString::fromLatin1(m_attrs.name);
     QStringList filterList;
     filterList.reserve(contacts.size());
 
     for (const Contact *contact : contacts) {
-        filterList.append(QString("(cn=%1)").arg(contact->name()));
+        filterList.append(QString("(%1=%2)").arg(nameAttr, contact->name()));
     }
 
     LDAPInitializer::Config newConfig(m_ldapConfig);
@@ -261,7 +287,11 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 {
     m_isProcessing = true;
 
-    QThread::create([this, ldapConfig]() {
+    // Snapshot the configured avatar attribute so the worker thread does not
+    // race with the main thread's reset/replay of m_attrs.
+    const QByteArray avatarAttr = m_attrs.avatar;
+
+    QThread::create([this, ldapConfig, avatarAttr]() {
         char *a = nullptr;
         char *dnTemp = nullptr;
         BerElement *ber = nullptr;
@@ -272,14 +302,19 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
         LDAP *ldap = nullptr;
         LDAPMessage *msg = nullptr;
 
-        QStringList attributes = { "cn", "jpegPhoto", "modifyTimestamp" };
+        // Honour the configurable avatar attribute. modifyTimestamp stays
+        // hardcoded as an operational LDAP attribute.
+        QList<QByteArray> attributes = { QByteArrayLiteral("modifyTimestamp") };
+        if (!avatarAttr.isEmpty()) {
+            attributes.append(avatarAttr);
+        }
 
         size_t i = 0;
         char **attrs = (char **)malloc((attributes.count() + 1) * sizeof(char *));
-        for (auto &attr : std::as_const(attributes)) {
+        for (const QByteArray &attr : std::as_const(attributes)) {
             size_t sz = attr.size() + 1;
             char *p = (char *)malloc(sz);
-            strncpy(p, attr.toLocal8Bit().toStdString().c_str(), sz);
+            strncpy(p, attr.constData(), sz);
             attrs[i++] = p;
         }
         attrs[i] = NULL;
@@ -354,12 +389,12 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 
                         char *val = (**vals).bv_val;
 
-                        if (strcmp(a, "jpegPhoto") == 0) {
+                        if (!avatarAttr.isEmpty() && qstricmp(a, avatarAttr.constData()) == 0) {
                             for (uint i = 0; i < (**vals).bv_len; ++i) {
                                 jpegPhoto.append(*val);
                                 val += sizeof(char);
                             }
-                        } else if (strcmp(a, "modifyTimestamp") == 0) {
+                        } else if (qstricmp(a, "modifyTimestamp") == 0) {
                             modifyTimestamp = QDateTime::fromString(val, "yyyyMMddhhmmsst");
                         }
 
@@ -460,8 +495,15 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
     char *errorMsg = nullptr;
     int numEntries = 0, numRefs = 0, result = 0, msgType = 0, parseResultCode = 0;
     LDAPMessage *msg = ldapMessage;
-    QString dn, cn, sourceUid, company, number, mail, modifyTimestamp;
+    QString dn, cn, sourceUid, company, mail, modifyTimestamp;
     QList<Contact::PhoneNumber> phoneNumbers;
+
+    auto stripBaseNumber = [this](QString num) {
+        if (num.startsWith(m_baseNumber)) {
+            num = num.sliced(m_baseNumber.size());
+        }
+        return num;
+    };
 
     numEntries = ldap_count_entries(m_ldap, msg);
     numRefs = ldap_count_references(m_ldap, msg);
@@ -477,7 +519,6 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
             dn = "";
             cn = "";
             company = "";
-            number = "";
             mail = "";
             modifyTimestamp = "";
             phoneNumbers.clear();
@@ -496,40 +537,44 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
                 if ((vals = ldap_get_values_len(m_ldap, msg, a)) != NULL) {
                     const auto val = (**vals).bv_val;
 
-                    if (strcmp(a, "cn") == 0) {
+                    // Independent matches: a single LDAP attribute may serve
+                    // more than one role at once when the user maps several
+                    // roles to the same source attribute. ASCII-case-insensitive
+                    // per RFC 4512, which treats attribute descriptions as
+                    // case-insensitive.
+                    auto matches = [a](const QByteArray &name) {
+                        return !name.isEmpty() && qstricmp(a, name.constData()) == 0;
+                    };
+
+                    if (matches(m_attrs.name)) {
                         cn = val;
-                    } else if (strcmp(a, "o") == 0) {
+                    }
+                    if (matches(m_attrs.company)) {
                         company = val;
-                    } else if (strcmp(a, "uid") == 0) {
+                    }
+                    if (matches(m_attrs.uid)) {
                         sourceUid = val;
-                    } else if (strcmp(a, "mail") == 0) {
+                    }
+                    if (matches(m_attrs.email)) {
                         mail = val;
-                    } else if (strcmp(a, "modifyTimestamp") == 0) {
+                    }
+                    if (qstricmp(a, "modifyTimestamp") == 0) {
                         modifyTimestamp = val;
-                    } else if (strcmp(a, "telephoneNumber") == 0) {
-                        number = val;
-                        if (number.startsWith(m_baseNumber)) {
-                            number = number.sliced(QString(m_baseNumber).size());
-                        }
-                        phoneNumbers.append(
-                                { Contact::NumberType::Commercial, number,
-                                  m_sipStatusSubscriptableAttributes.contains("telephoneNumber") });
-                    } else if (strcmp(a, "mobile") == 0) {
-                        number = val;
-                        if (number.startsWith(m_baseNumber)) {
-                            number = number.sliced(QString(m_baseNumber).size());
-                        }
-                        phoneNumbers.append(
-                                { Contact::NumberType::Mobile, number,
-                                  m_sipStatusSubscriptableAttributes.contains("mobile") });
-                    } else if (strcmp(a, "homePhone") == 0) {
-                        number = val;
-                        if (number.startsWith(m_baseNumber)) {
-                            number = number.sliced(QString(m_baseNumber).size());
-                        }
-                        phoneNumbers.append(
-                                { Contact::NumberType::Home, number,
-                                  m_sipStatusSubscriptableAttributes.contains("homePhone") });
+                    }
+                    if (matches(m_attrs.commercial)) {
+                        phoneNumbers.append({ Contact::NumberType::Commercial, stripBaseNumber(val),
+                                              m_sipStatusSubscriptableAttributes.contains(
+                                                      QString::fromLatin1(m_attrs.commercial)) });
+                    }
+                    if (matches(m_attrs.mobile)) {
+                        phoneNumbers.append({ Contact::NumberType::Mobile, stripBaseNumber(val),
+                                              m_sipStatusSubscriptableAttributes.contains(
+                                                      QString::fromLatin1(m_attrs.mobile)) });
+                    }
+                    if (matches(m_attrs.home)) {
+                        phoneNumbers.append({ Contact::NumberType::Home, stripBaseNumber(val),
+                                              m_sipStatusSubscriptableAttributes.contains(
+                                                      QString::fromLatin1(m_attrs.home)) });
                     }
 
                     ldap_value_free_len(vals);
