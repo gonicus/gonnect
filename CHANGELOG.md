@@ -1,3 +1,10 @@
+# [2.2.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.4...v2.2.0-beta.5) (2026-05-05)
+
+
+### Bug Fixes
+
+* ignore verification ssl errors if verifyServer=false ([#453](https://github.com/gonicus/gonnect/issues/453)) ([be3d71c](https://github.com/gonicus/gonnect/commit/be3d71c419b252e4a103d5107ab9a9598b474742))
+
 # [2.2.0-beta.4](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.3...v2.2.0-beta.4) (2026-05-04)
 
 
