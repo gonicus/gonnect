@@ -14,7 +14,9 @@ class RTTProvider : public QObject
     Q_DISABLE_COPY(RTTProvider)
 
     Q_PROPERTY(RTTModel *model READ model CONSTANT)
-    Q_PROPERTY(bool hasMessages READ hasMessages NOTIFY hasMessagesChanged)
+    Q_PROPERTY(bool hasMessages READ hasMessages NOTIFY hasMessagesChanged FINAL)
+    Q_PROPERTY(bool isEstablishedCall READ isEstablishedCall NOTIFY isEstablishedCallChanged FINAL)
+    Q_PROPERTY(bool isRttCall READ isRttCall NOTIFY isRttCallChanged FINAL)
 
 public:
     Q_REQUIRED_RESULT static RTTProvider &instance()
@@ -35,6 +37,12 @@ public:
     /// Determine QML visibility based on messages being present
     bool hasMessages();
 
+    /// Determine QML visibility based on call state
+    bool isEstablishedCall();
+
+    /// Determine QML visibility based on RTT enablement
+    bool isRttCall();
+
     /// These methods wrap the SIPCall RTT functionality
     Q_INVOKABLE void rttSend(const QString &text);
     Q_INVOKABLE void rttSendLineSeperator();
@@ -44,6 +52,8 @@ public:
 
 Q_SIGNALS:
     void hasMessagesChanged();
+    void isEstablishedCallChanged();
+    void isRttCallChanged();
 
 private:
     RTTProvider(QObject *parent = nullptr);
@@ -53,8 +63,10 @@ private:
     ICallState *m_state = nullptr;
     SIPCall *m_call = nullptr;
 
-    QMetaObject::Connection m_changed;
-    QMetaObject::Connection m_committed;
+    QMetaObject::Connection m_establishedCall;
+    QMetaObject::Connection m_rttCall;
+    QMetaObject::Connection m_rttBubbleChanged;
+    QMetaObject::Connection m_rttBubbleCommitted;
 
     bool m_newMessage = false;
 };

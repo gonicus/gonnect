@@ -18,6 +18,15 @@ Item {
 
     readonly property alias selectedCallItem: callSideBar.selectedCallItem
 
+    // INFO: RTT is currently limited to 1:1 calls, see GONGONNECT-396
+    property bool isRttEnabled: !SIPCallManager.isConferenceMode
+                                && RTTProvider.isEstablishedCall
+                                && RTTProvider.isRttCall
+                                && (RTTProvider.hasMessages || rttSettings.showRealTimeTextConsole)
+
+    // The avatar should grow in relation to card height, but only to maximum of 202-254 px
+    property int maxAvatarSize: control.isRttEnabled ? 202 : 254
+
     Keys.onPressed: (event) => {
                         const callItem = callSideBar.selectedCallItem
 
@@ -109,7 +118,7 @@ Item {
                 right: parent.right
                 bottom: nameLabel.top
 
-                topMargin: rttLoader.isRttEnabled ? 30
+                topMargin: control.isRttEnabled ? 30
                            : Math.max(24, 24 + callMainCard.height / 2 - 254)
                 bottomMargin: 15
             }
@@ -117,18 +126,15 @@ Item {
             Loader {
                 id: avatarLoader
                 width: parent.width
-                height: rttLoader.isRttEnabled ? parent.height / 2 : parent.height
+                height: control.isRttEnabled ? parent.height / 2 : parent.height
                 sourceComponent: SIPCallManager.isConferenceMode ? multiAvatarComponent : singleAvatarComponent
-
-                // The avatar should grow in relation to card height, but only to maximum of 202-254 px
-                property int maxAvatarSize: rttLoader.isRttEnabled ? 202 : 254
             }
 
             Component {
                 id: singleAvatarComponent
 
                 CallerBigAvatar {
-                    bubbleSize: Math.min(avatarLoader.maxAvatarSize / 850 * callMainCard.height, avatarLoader.maxAvatarSize)
+                    bubbleSize: Math.min(control.maxAvatarSize / 850 * callMainCard.height, control.maxAvatarSize)
                     name: callSideBar.selectedCallItem?.contactName ?? ""
                     avatarUrl: callSideBar.selectedCallItem?.hasAvatar ? ("file://" + callSideBar.selectedCallItem.avatarPath) : ""
                     isIncoming: topBar.isIncoming
@@ -169,7 +175,7 @@ Item {
 
                                 CallerBigAvatar {
                                     id: bigAvatar
-                                    bubbleSize: Math.min(avatarLoader.maxAvatarSize / 850 * callMainCard.height, avatarLoader.maxAvatarSize)
+                                    bubbleSize: Math.min(avatarLoader.control / 850 * callMainCard.height, control.maxAvatarSize)
                                     name: callerDelg.contactName
                                     avatarUrl: callerDelg.avatarPath
                                     isIncoming: callerDelg.isIncoming
@@ -186,7 +192,7 @@ Item {
 
             Settings {
                 id: rttSettings
-                location: ViewHelper.userConfigPath
+                location: ViewHelper.userConfigPath // TODO: Uses 99-user.conf
                 category: "account0"
 
                 property bool showRealTimeTextConsole: false
@@ -195,13 +201,9 @@ Item {
             Loader {
                 id: rttLoader
                 width: parent.width / 2
-                height: rttLoader.isRttEnabled ? parent.height / 2 : 0
+                height: control.isRttEnabled ? parent.height / 2 : 0
                 anchors.horizontalCenter: parent.horizontalCenter
-                sourceComponent: rttLoader.isRttEnabled ? rttComponent : undefined
-
-                // INFO: RTT is currently limited to 1:1 calls, see GONGONNECT-396
-                property bool isRttEnabled: !SIPCallManager.isConferenceMode &&
-                                            (RTTProvider.hasMessages || rttSettings.showRealTimeTextConsole)
+                sourceComponent: control.isRttEnabled ? rttComponent : undefined
             }
 
             Component {

@@ -13,14 +13,22 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
 
     connect(&GlobalCallState::instance(), &GlobalCallState::callInForegroundChanged, this,
             [this]() {
-                // Disconnect from RTT signals of the old call
-                if (m_changed) {
-                    disconnect(m_changed);
-                    m_changed = QMetaObject::Connection();
+                // Disconnect from signals of the old call
+                if (m_establishedCall) {
+                    disconnect(m_establishedCall);
+                    m_establishedCall = QMetaObject::Connection();
                 }
-                if (m_committed) {
-                    disconnect(m_committed);
-                    m_committed = QMetaObject::Connection();
+                if (m_rttCall) {
+                    disconnect(m_rttCall);
+                    m_rttCall = QMetaObject::Connection();
+                }
+                if (m_rttBubbleChanged) {
+                    disconnect(m_rttBubbleChanged);
+                    m_rttBubbleChanged = QMetaObject::Connection();
+                }
+                if (m_rttBubbleCommitted) {
+                    disconnect(m_rttBubbleCommitted);
+                    m_rttBubbleCommitted = QMetaObject::Connection();
                 }
                 m_call = nullptr;
 
@@ -28,14 +36,20 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
                 m_model->reset();
                 m_newMessage = true;
 
-                // Connect to RTT signals of the new call
+                // Connect to signals of the new call
                 m_state = GlobalCallState::instance().callInForeground();
                 if (m_state) {
                     m_call = SIPCallManager::instance().findCallById(m_state->uuid());
                 }
 
                 if (m_call) {
-                    m_changed = connect(
+                    m_establishedCall = connect(m_call, &SIPCall::establishedChanged, this,
+                                                &RTTProvider::isEstablishedCallChanged);
+
+                    m_rttCall = connect(m_call, &SIPCall::hasRttChanged, this,
+                                        &RTTProvider::isRttCallChanged);
+
+                    m_rttBubbleChanged = connect(
                             m_call, &SIPCall::rttBubbleChanged, this, [this](QString message) {
                                 if (m_newMessage) {
                                     m_model->addMessage(QDateTime::currentMSecsSinceEpoch(),
@@ -45,24 +59,33 @@ RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
                                     m_model->updateMessage(message, false, false);
                                 }
                             });
-                    m_committed = connect(m_call, &SIPCall::rttBubbleCommitted, this,
-                                          [this](QString message) {
-                                              m_model->updateMessage(message, false, true);
-                                              m_newMessage = true;
-                                          });
+
+                    m_rttBubbleCommitted = connect(m_call, &SIPCall::rttBubbleCommitted, this,
+                                                   [this](QString message) {
+                                                       m_model->updateMessage(message, false, true);
+                                                       m_newMessage = true;
+                                                   });
                 }
             });
 }
 
 RTTProvider::~RTTProvider()
 {
-    if (m_changed) {
-        disconnect(m_changed);
-        m_changed = QMetaObject::Connection();
+    if (m_establishedCall) {
+        disconnect(m_establishedCall);
+        m_establishedCall = QMetaObject::Connection();
     }
-    if (m_committed) {
-        disconnect(m_committed);
-        m_committed = QMetaObject::Connection();
+    if (m_rttCall) {
+        disconnect(m_rttCall);
+        m_rttCall = QMetaObject::Connection();
+    }
+    if (m_rttBubbleChanged) {
+        disconnect(m_rttBubbleChanged);
+        m_rttBubbleChanged = QMetaObject::Connection();
+    }
+    if (m_rttBubbleCommitted) {
+        disconnect(m_rttBubbleCommitted);
+        m_rttBubbleCommitted = QMetaObject::Connection();
     }
     m_call = nullptr;
 
@@ -76,6 +99,24 @@ bool RTTProvider::hasMessages()
 {
     if (m_model) {
         return m_model->rowCount() > 0;
+    }
+
+    return false;
+}
+
+bool RTTProvider::isEstablishedCall()
+{
+    if (m_call) {
+        return m_call->isEstablished();
+    }
+
+    return false;
+}
+
+bool RTTProvider::isRttCall()
+{
+    if (m_call) {
+        return m_call->hasRtt();
     }
 
     return false;
