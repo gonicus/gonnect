@@ -411,6 +411,11 @@ void SIPManager::shutdown()
 
     m_ep.hangupAllCalls();
 
+    // Release ownership of the log writer to pjsua2, which will delete it
+    // during libDestroy(). Without this, libDestroy() logs internally and
+    // calls into the already-deleted writer, or double-deletes it.
+    m_logWriter.release();
+
     try {
         delete m_ev;
         m_ep.libDestroy();
