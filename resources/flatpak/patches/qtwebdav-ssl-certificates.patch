@@ -1,5 +1,5 @@
 diff --git a/qwebdav.cpp b/qwebdav.cpp
-index 091500d..98d7b59 100644
+index 091500d..558c475 100644
 --- a/qwebdav.cpp
 +++ b/qwebdav.cpp
 @@ -160,6 +160,16 @@ void QWebdav::acceptSslCertificate(const QString &sslCertDigestMd5,
@@ -19,7 +19,7 @@ index 091500d..98d7b59 100644
  void QWebdav::replyReadyRead()
  {
      auto reply = qobject_cast<QNetworkReply*>(QObject::sender());
-@@ -263,6 +273,30 @@ void QWebdav::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
+@@ -263,6 +273,32 @@ void QWebdav::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
      {
          // user accepted this SSL certifcate already ==> ignore SSL errors
          reply->ignoreSslErrors();
@@ -47,10 +47,12 @@ index 091500d..98d7b59 100644
 +            }
 +        }
 +
++        reply->ignoreSslErrors();
++
      } else {
          // user has to check the SSL certificate and has to accept manually
          emit checkSslCertifcate(errors);
-@@ -692,9 +726,22 @@ QNetworkReply* QWebdav::remove(const QString& path)
+@@ -692,9 +728,22 @@ QNetworkReply* QWebdav::remove(const QString& path)
      return createRequest("DELETE", req);
  }
  
