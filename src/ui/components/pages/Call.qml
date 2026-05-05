@@ -22,7 +22,7 @@ Item {
     property bool isRttEnabled: !SIPCallManager.isConferenceMode
                                 && RTTProvider.isEstablishedCall
                                 && RTTProvider.isRttCall
-                                && (RTTProvider.hasMessages || rttSettings.showRealTimeTextConsole)
+                                && (RTTProvider.hasMessages || RTTProvider.showRealTimeTextConsole)
 
     // The avatar should grow in relation to card height, but only to maximum of 202-254 px
     property int maxAvatarSize: control.isRttEnabled ? 202 : 254
@@ -188,14 +188,6 @@ Item {
                         }
                     }
                 }
-            }
-
-            Settings {
-                id: rttSettings
-                location: ViewHelper.userConfigPath // TODO: Uses 99-user.conf
-                category: "account0"
-
-                property bool showRealTimeTextConsole: false
             }
 
             Loader {

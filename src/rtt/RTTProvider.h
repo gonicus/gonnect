@@ -4,6 +4,7 @@
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
 
+#include "ReadOnlyConfdSettings.h"
 #include "RTTModel.h"
 #include "ICallState.h"
 #include "SIPCall.h"
@@ -14,6 +15,7 @@ class RTTProvider : public QObject
     Q_DISABLE_COPY(RTTProvider)
 
     Q_PROPERTY(RTTModel *model READ model CONSTANT)
+    Q_PROPERTY(bool showRealTimeTextConsole READ showRealTimeTextConsole CONSTANT FINAL)
     Q_PROPERTY(bool hasMessages READ hasMessages NOTIFY hasMessagesChanged FINAL)
     Q_PROPERTY(bool isEstablishedCall READ isEstablishedCall NOTIFY isEstablishedCallChanged FINAL)
     Q_PROPERTY(bool isRttCall READ isRttCall NOTIFY isRttCallChanged FINAL)
@@ -34,13 +36,10 @@ public:
 
     RTTModel *model() const { return m_model; }
 
-    /// Determine QML visibility based on messages being present
+    /// Flags to determine QML visibility
+    bool showRealTimeTextConsole() const { return m_showRealTimeTextConsole; }
     bool hasMessages();
-
-    /// Determine QML visibility based on call state
     bool isEstablishedCall();
-
-    /// Determine QML visibility based on RTT enablement
     bool isRttCall();
 
     /// These methods wrap the SIPCall RTT functionality
@@ -57,6 +56,9 @@ Q_SIGNALS:
 
 private:
     RTTProvider(QObject *parent = nullptr);
+
+    ReadOnlyConfdSettings m_settings;
+    bool m_showRealTimeTextConsole = false;
 
     RTTModel *m_model = nullptr;
 

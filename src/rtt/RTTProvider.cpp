@@ -5,6 +5,9 @@
 
 RTTProvider::RTTProvider(QObject *parent) : QObject(parent)
 {
+    m_showRealTimeTextConsole =
+            m_settings.value("account0/showRealTimeTextConsole", false).toBool();
+
     m_model = new RTTModel(this);
 
     connect(m_model, &RTTModel::rowsInserted, this, &RTTProvider::hasMessagesChanged);
