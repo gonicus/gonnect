@@ -202,10 +202,6 @@ void LDAPAddressBookFeeder::clearCStringlist(char **attrs) const
 
 void LDAPAddressBookFeeder::feedAddressBook()
 {
-    // modifyTimestamp is an operational attribute we always need for change
-    // detection. The remaining names come from the user-configurable map; a
-    // single attribute may serve multiple roles (e.g. AccountNumber as both
-    // uid and primary number on a Grandstream UCM), hence the QSet dedup.
     QSet<QByteArray> requested = { QByteArrayLiteral("modifyTimestamp") };
     for (const QByteArray *role : { &m_attrs.name, &m_attrs.uid, &m_attrs.company, &m_attrs.email,
                                     &m_attrs.commercial, &m_attrs.mobile, &m_attrs.home }) {
@@ -285,11 +281,8 @@ void LDAPAddressBookFeeder::loadAvatars(const QList<const Contact *> &contacts)
 
 void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapConfig)
 {
-    m_isProcessing = true;
-
-    // Snapshot the configured avatar attribute so the worker thread does not
-    // race with the main thread's reset/replay of m_attrs.
     const QByteArray avatarAttr = m_attrs.avatar;
+    m_isProcessing = true;
 
     QThread::create([this, ldapConfig, avatarAttr]() {
         char *a = nullptr;
@@ -302,8 +295,6 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
         LDAP *ldap = nullptr;
         LDAPMessage *msg = nullptr;
 
-        // Honour the configurable avatar attribute. modifyTimestamp stays
-        // hardcoded as an operational LDAP attribute.
         QList<QByteArray> attributes = { QByteArrayLiteral("modifyTimestamp") };
         if (!avatarAttr.isEmpty()) {
             attributes.append(avatarAttr);
@@ -537,11 +528,6 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
                 if ((vals = ldap_get_values_len(m_ldap, msg, a)) != NULL) {
                     const auto val = (**vals).bv_val;
 
-                    // Independent matches: a single LDAP attribute may serve
-                    // more than one role at once when the user maps several
-                    // roles to the same source attribute. ASCII-case-insensitive
-                    // per RFC 4512, which treats attribute descriptions as
-                    // case-insensitive.
                     auto matches = [a](const QByteArray &name) {
                         return !name.isEmpty() && qstricmp(a, name.constData()) == 0;
                     };
