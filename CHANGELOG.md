@@ -1,3 +1,11 @@
+# [2.2.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.4...v2.2.0-beta.5) (2026-05-06)
+
+
+### Bug Fixes
+
+* if so configured, do not verify CA even if they are state ([#455](https://github.com/gonicus/gonnect/issues/455)) ([f45a1d8](https://github.com/gonicus/gonnect/commit/f45a1d81f152bb8d2024dad675206302255e2126))
+* ignore verification ssl errors if verifyServer=false ([#453](https://github.com/gonicus/gonnect/issues/453)) ([be3d71c](https://github.com/gonicus/gonnect/commit/be3d71c419b252e4a103d5107ab9a9598b474742))
+
 # [2.2.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.4...v2.2.0-beta.5) (2026-05-05)
 
 
