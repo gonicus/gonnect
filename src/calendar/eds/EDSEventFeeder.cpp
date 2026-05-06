@@ -555,7 +555,19 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                                             timeRangeStart.time().second());
                         i_cal_time_set_is_date(recurStartCap, FALSE);
 
-                        i_cal_recur_iterator_set_start(recurrenceIter, recurStartCap);
+                        if (i_cal_time_is_valid_time(recurStartCap)) {
+                            if (i_cal_recur_iterator_set_start(recurrenceIter, recurStartCap)
+                                == 0) {
+                                qCCritical(lcEDSEventFeeder)
+                                        << "Failed to set RRULE iterator starting date";
+
+                                Q_EMIT feederFailed();
+                                return;
+                            }
+                        } else {
+                            qCDebug(lcEDSEventFeeder)
+                                    << "Invalid RRULE iterator starting date - skipping";
+                        }
                     }
 
                     qint64 duration = start.secsTo(end);
