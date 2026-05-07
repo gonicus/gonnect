@@ -290,13 +290,15 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
                         recurStartCap.is_date = false;
 
                         if (icaltime_is_valid_time(recurStartCap)) {
-                            if (icalrecur_iterator_set_start(recurrenceIter, recurStartCap) == 0) {
-                                onError("Failed to set RRULE iterator starting date");
+                            if (!icalrecur_iterator_set_start(recurrenceIter, recurStartCap)) {
+                                onError(QString("Failed to set RRULE iterator starting date: %1")
+                                                .arg(icalerror_strerror(icalerrno)));
                                 return false;
                             }
                         } else {
                             qCDebug(lcCalDAVEventFeeder)
-                                    << "Invalid RRULE iterator starting date - skipping";
+                                    << "Invalid RRULE iterator starting date - skipping:"
+                                    << icalerror_strerror(icalerrno);
                         }
                     }
 

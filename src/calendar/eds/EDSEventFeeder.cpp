@@ -553,20 +553,21 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                         i_cal_time_set_time(recurStartCap, timeRangeStart.time().hour(),
                                             timeRangeStart.time().minute(),
                                             timeRangeStart.time().second());
-                        i_cal_time_set_is_date(recurStartCap, FALSE);
+                        i_cal_time_set_is_date(recurStartCap, 0);
 
                         if (i_cal_time_is_valid_time(recurStartCap)) {
-                            if (i_cal_recur_iterator_set_start(recurrenceIter, recurStartCap)
-                                == 0) {
+                            if (!i_cal_recur_iterator_set_start(recurrenceIter, recurStartCap)) {
                                 qCCritical(lcEDSEventFeeder)
-                                        << "Failed to set RRULE iterator starting date";
+                                        << "Failed to set RRULE iterator starting date:"
+                                        << i_cal_error_strerror(i_cal_errno_return());
 
                                 Q_EMIT feederFailed();
                                 return;
                             }
                         } else {
                             qCDebug(lcEDSEventFeeder)
-                                    << "Invalid RRULE iterator starting date - skipping";
+                                    << "Invalid RRULE iterator starting date - skipping:"
+                                    << i_cal_error_strerror(i_cal_errno_return());
                         }
                     }
 
