@@ -536,6 +536,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 }
                 exdatesById[id] = exdates;
 
+                ICalTime *recurStartCap = NULL;
                 ICalRecurIterator *recurrenceIter = i_cal_recur_iterator_new(rrule, dtstart);
                 if (recurrenceIter) {
                     // INFO: Since libical-glib v3.0, a start time limit can be specified for
@@ -546,16 +547,18 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                     if (i_cal_recurrence_get_count(rrule) == 0) {
                         QDateTime timeRangeStart = m_timeRangeStart.toUTC();
 
-                        ICalTime *recurStartCap = i_cal_time_new();
-                        i_cal_time_set_date(recurStartCap, timeRangeStart.date().year(),
-                                            timeRangeStart.date().month(),
-                                            timeRangeStart.date().day());
-                        i_cal_time_set_time(recurStartCap, timeRangeStart.time().hour(),
-                                            timeRangeStart.time().minute(),
-                                            timeRangeStart.time().second());
-                        i_cal_time_set_is_date(recurStartCap, 0);
+                        recurStartCap = i_cal_time_new();
+                        if (recurStartCap) {
+                            i_cal_time_set_date(recurStartCap, timeRangeStart.date().year(),
+                                                timeRangeStart.date().month(),
+                                                timeRangeStart.date().day());
+                            i_cal_time_set_time(recurStartCap, timeRangeStart.time().hour(),
+                                                timeRangeStart.time().minute(),
+                                                timeRangeStart.time().second());
+                            i_cal_time_set_is_date(recurStartCap, 0);
+                        }
 
-                        if (i_cal_time_is_valid_time(recurStartCap)) {
+                        if (recurStartCap && i_cal_time_is_valid_time(recurStartCap)) {
                             if (!i_cal_recur_iterator_set_start(recurrenceIter, recurStartCap)) {
                                 qCCritical(lcEDSEventFeeder)
                                         << "Failed to set RRULE iterator starting date:"
@@ -602,6 +605,9 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                         }
                     }
 
+                    if (recurStartCap) {
+                        g_clear_object(&recurStartCap);
+                    }
                     i_cal_recur_iterator_free(recurrenceIter);
                 }
             } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
