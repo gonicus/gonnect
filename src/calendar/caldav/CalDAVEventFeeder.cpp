@@ -293,6 +293,9 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
                             if (!icalrecur_iterator_set_start(recurrenceIter, recurStartCap)) {
                                 onError(QString("Failed to set RRULE iterator starting date: %1")
                                                 .arg(icalerror_strerror(icalerrno)));
+
+                                icalrecur_iterator_free(recurrenceIter);
+
                                 return false;
                             }
                         } else {

@@ -564,6 +564,9 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                                         << "Failed to set RRULE iterator starting date:"
                                         << i_cal_error_strerror(i_cal_errno_return());
 
+                                g_clear_object(&recurStartCap);
+                                i_cal_recur_iterator_free(recurrenceIter);
+
                                 Q_EMIT feederFailed();
                                 return;
                             }
