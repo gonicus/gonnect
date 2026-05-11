@@ -1,5 +1,5 @@
 diff --git a/qwebdav.cpp b/qwebdav.cpp
-index 091500d..5483888 100644
+index 091500d..f3fa4b8 100644
 --- a/qwebdav.cpp
 +++ b/qwebdav.cpp
 @@ -160,6 +160,16 @@ void QWebdav::acceptSslCertificate(const QString &sslCertDigestMd5,
@@ -19,7 +19,7 @@ index 091500d..5483888 100644
  void QWebdav::replyReadyRead()
  {
      auto reply = qobject_cast<QNetworkReply*>(QObject::sender());
-@@ -692,9 +702,24 @@ QNetworkReply* QWebdav::remove(const QString& path)
+@@ -692,9 +702,23 @@ QNetworkReply* QWebdav::remove(const QString& path)
      return createRequest("DELETE", req);
  }
  
@@ -31,15 +31,14 @@ index 091500d..5483888 100644
      QNetworkRequest req;
      if (isSSL()) {
 +
++        QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
 +        if (!m_verifyCa) {
-+            QSslConfiguration sslConfig;
 +            sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
-+            req.setSslConfiguration(sslConfig);
-+        } else if (!m_sslCa.isEmpty()) {
-+            QSslConfiguration sslConfig;
-+            sslConfig.addCaCertificates(m_sslCa);
-+            req.setSslConfiguration(sslConfig);
 +        }
++        if (!m_sslCa.isEmpty()) {
++            sslConfig.addCaCertificates(m_sslCa);
++        }
++        req.setSslConfiguration(sslConfig);
 +
          QString concatenated = m_username + ":" + m_password;
          QByteArray data = concatenated.toLocal8Bit().toBase64();
