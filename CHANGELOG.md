@@ -1,3 +1,10 @@
+# [2.2.0-beta.6](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.5...v2.2.0-beta.6) (2026-05-11)
+
+
+### Bug Fixes
+
+* base edits on SSL default configuration ([#459](https://github.com/gonicus/gonnect/issues/459)) ([6dcbf78](https://github.com/gonicus/gonnect/commit/6dcbf78a5b1b470ec966d8704b68e7d3e21da490))
+
 # [2.2.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.4...v2.2.0-beta.5) (2026-05-06)
 
 
