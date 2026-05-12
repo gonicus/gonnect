@@ -7,6 +7,8 @@ on:
     branches:
       - release
       - main
+    tags:
+      - 'v*'
   # Use the release/main branch workflow/actions definitions rather the definitions in the pull_request
   pull_request:
     branches:
@@ -25,6 +27,8 @@ env:
 permissions:
   contents: read
   pull-requests: read
+  id-token: write
+  contents: read
 
 jobs:
   build:
@@ -73,15 +77,24 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ vars.MS_APPLICATION_IDENTIFIER }}
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ vars.AZURE_CLIENT_ID }}
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
       - name: Build application
         run: cmake --build --preset conan-release
 
+      - name: Azure Login via OIDC
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Sign application
-        uses: azure/artifact-signing-action@v0
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: azure/artifact-signing-action@v1
         with:
           endpoint: https://weu.codesigning.azure.net/
           signing-account-name: GONICUS-signing
@@ -96,6 +109,7 @@ jobs:
         run: cd build && cpack ${{github.workspace}}
 
       - name: Sign installer
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: azure/artifact-signing-action@v0
         with:
           endpoint: https://weu.codesigning.azure.net/
