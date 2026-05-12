@@ -14,9 +14,9 @@
 # Overview
 
 _GOnnect_ is a simple, easy to use UC client, designed for
-Linux / _Flatpak_ based installations. It makes use of various Flatpak
-portals and is meant to integrate well into modern Desktop Environments
-like _KDE_ or _GNOME_.
+Linux / _Flatpak_ based installations and Microsoft Windows.
+It is designed to integrate seamlessly into modern desktop
+environments.
 
 ![Overview](media/main-screen.png)
 
@@ -35,12 +35,14 @@ Here's a short feature list:
    * CardDAV
    * CSV
    * GNOME Contacts / Evolution Data Service
+   * Microsoft 365 Contacts (on Windows)
  * Configurable identities for outgoing calls
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
  * **Jitsi Meet Integration: Upgrade call to Videoconference**
  * Calendar sources for upcoming conferences
    * CalDAV
    * GNOME Calendar / Evolution Data Service
+   * Microsoft 365 Calendar (on Windows)
  * **Support for various hardware headsets (i.e. Yealink, Jabra)**
  * Support for various busylights
  * Custom audio device profiles or managed by your system
