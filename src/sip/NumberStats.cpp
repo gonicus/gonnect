@@ -200,7 +200,7 @@ QStringList NumberStats::mostCalled(quint8 limit, bool includeFavorites) const
         }
     } else {
         for (const auto *countObj : std::as_const(m_callCounts)) {
-            if (m_favoriteLookup.contains(countObj->phoneNumber)) {
+            if (!m_favoriteLookup.contains(countObj->phoneNumber)) {
                 result.append(countObj->phoneNumber);
             }
 
