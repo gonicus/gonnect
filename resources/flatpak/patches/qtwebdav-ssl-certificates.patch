@@ -1,5 +1,5 @@
 diff --git a/qwebdav.cpp b/qwebdav.cpp
-index 091500d..558c475 100644
+index 091500d..f3fa4b8 100644
 --- a/qwebdav.cpp
 +++ b/qwebdav.cpp
 @@ -160,6 +160,16 @@ void QWebdav::acceptSslCertificate(const QString &sslCertDigestMd5,
@@ -19,40 +19,7 @@ index 091500d..558c475 100644
  void QWebdav::replyReadyRead()
  {
      auto reply = qobject_cast<QNetworkReply*>(QObject::sender());
-@@ -263,6 +273,32 @@ void QWebdav::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
-     {
-         // user accepted this SSL certifcate already ==> ignore SSL errors
-         reply->ignoreSslErrors();
-+
-+    } else if (!m_verifyCa) {
-+
-+        // Ignore these errors
-+        static const QList<QSslError::SslError> verifyErrors = {
-+            QSslError::SelfSignedCertificate,
-+            QSslError::SelfSignedCertificateInChain,
-+            QSslError::UnableToGetIssuerCertificate,
-+            QSslError::UnableToGetLocalIssuerCertificate,
-+            QSslError::UnableToVerifyFirstCertificate,
-+            QSslError::CertificateUntrusted,
-+            QSslError::CertificateExpired,
-+            QSslError::CertificateNotYetValid,
-+            QSslError::HostNameMismatch,
-+        };
-+
-+        for (const auto& error : errors) {
-+            if (!verifyErrors.contains(error.error())) {
-+                emit checkSslCertifcate(errors);
-+                reply->abort();
-+                return;
-+            }
-+        }
-+
-+        reply->ignoreSslErrors();
-+
-     } else {
-         // user has to check the SSL certificate and has to accept manually
-         emit checkSslCertifcate(errors);
-@@ -692,9 +728,22 @@ QNetworkReply* QWebdav::remove(const QString& path)
+@@ -692,9 +702,23 @@ QNetworkReply* QWebdav::remove(const QString& path)
      return createRequest("DELETE", req);
  }
  
@@ -63,14 +30,15 @@ index 091500d..558c475 100644
  QNetworkRequest QWebdav::buildRequest() {
      QNetworkRequest req;
      if (isSSL()) {
-+        if (!m_sslCa.isEmpty()) {
-+            QSslConfiguration sslConfig;
-+            if (!m_verifyCa) {
-+                sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
-+            }
-+            sslConfig.addCaCertificates(m_sslCa);
-+            req.setSslConfiguration(sslConfig);
++
++        QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
++        if (!m_verifyCa) {
++            sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
 +        }
++        if (!m_sslCa.isEmpty()) {
++            sslConfig.addCaCertificates(m_sslCa);
++        }
++        req.setSslConfiguration(sslConfig);
 +
          QString concatenated = m_username + ":" + m_password;
          QByteArray data = concatenated.toLocal8Bit().toBase64();
