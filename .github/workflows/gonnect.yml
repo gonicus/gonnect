@@ -77,11 +77,35 @@ jobs:
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
-      - name: Build
+      - name: Build application
         run: cmake --build --preset conan-release
 
-      - name: Package
+      - name: Sign application
+        uses: azure/artifact-signing-action@v0
+        with:
+          endpoint: https://weu.codesigning.azure.net/
+          signing-account-name: GONICUS-signing
+          certificate-profile-name: gonicus-profile
+          files-folder: build/src
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Build installer
         run: cd build && cpack ${{github.workspace}}
+
+      - name: Sign installer
+        uses: azure/artifact-signing-action@v0
+        with:
+          endpoint: https://weu.codesigning.azure.net/
+          signing-account-name: GONICUS-signing
+          certificate-profile-name: gonicus-profile
+          files-folder: build/
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
 
       - name: Save installer
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
