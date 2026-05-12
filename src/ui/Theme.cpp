@@ -113,8 +113,8 @@ void Theme::updateColorPalette()
     m_paneColor = QColor(246, 245, 244);
     m_rttBubbleSelf = QColor(45, 92, 229);
     m_rttTextSelf = QColor(233, 233, 233);
-    m_rttBubbleOther = QColor(44, 44, 46);
-    m_rttTextOther = QColor(255, 255, 255);
+    m_rttBubbleOther = QColor(233, 233, 233);
+    m_rttTextOther = QColor(0, 0, 0);
     m_highContrastColor = QColor(0, 0, 0);
     m_backgroundColor = QColor(255, 255, 255);
     m_backgroundSecondaryColor = QColor(250, 250, 250);
@@ -153,8 +153,8 @@ void Theme::updateColorPalette()
         m_paneColor = QColor(45, 45, 45);
         m_rttBubbleSelf = QColor(50, 96, 230);
         m_rttTextSelf = QColor(255, 255, 255);
-        m_rttBubbleOther = QColor(233, 233, 233);
-        m_rttTextOther = QColor(0, 0, 0);
+        m_rttBubbleOther = QColor(44, 44, 46);
+        m_rttTextOther = QColor(255, 255, 255);
     }
 
     Q_EMIT colorPaletteChanged();
