@@ -273,6 +273,38 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
 
                 icalrecur_iterator *recurrenceIter = icalrecur_iterator_new(rrule, dtstart);
                 if (recurrenceIter) {
+                    // INFO: Since libical v3.0, a start time limit can be specified for recurrence
+                    // iterators in order to reduce parsing overhead, i.e. for old events that are
+                    // irrelevant to us. This only works for RRULE's that do not contain COUNT.
+                    // https://github.com/libical/libical/blob/3.0/src/libical/icalrecur.h#L291
+                    if (rrule.count == 0) {
+                        QDateTime timeRangeStart = m_config.timeRangeStart.toUTC();
+
+                        struct icaltimetype recurStartCap = icaltime_null_time();
+                        recurStartCap.year = timeRangeStart.date().year();
+                        recurStartCap.month = timeRangeStart.date().month();
+                        recurStartCap.day = timeRangeStart.date().day();
+                        recurStartCap.hour = timeRangeStart.time().hour();
+                        recurStartCap.minute = timeRangeStart.time().minute();
+                        recurStartCap.second = timeRangeStart.time().second();
+                        recurStartCap.is_date = false;
+
+                        if (icaltime_is_valid_time(recurStartCap)) {
+                            if (!icalrecur_iterator_set_start(recurrenceIter, recurStartCap)) {
+                                onError(QString("Failed to set RRULE iterator starting date: %1")
+                                                .arg(icalerror_strerror(icalerrno)));
+
+                                icalrecur_iterator_free(recurrenceIter);
+
+                                return false;
+                            }
+                        } else {
+                            qCDebug(lcCalDAVEventFeeder)
+                                    << "Invalid RRULE iterator starting date - skipping:"
+                                    << icalerror_strerror(icalerrno);
+                        }
+                    }
+
                     qint64 duration = start.secsTo(end);
 
                     for (icaltimetype next = icalrecur_iterator_next(recurrenceIter);
