@@ -82,23 +82,26 @@ ContactInfo PhoneNumberUtil::contactInfoBySipUrl(const QString &sipUrl)
 
     // Extract phone number from sip url
     auto phoneNumber = sipUrl;
-    static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
-                                                   QRegularExpression::CaseInsensitiveOption);
-    phoneNumber.replace(sipNumberRegex, "\\1");
 
-    static const QRegularExpression international("^000(.*)$");
-    phoneNumber.replace(international, "+\\1");
+    if (isSipUri(sipUrl)) {
+        static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
+                                                       QRegularExpression::CaseInsensitiveOption);
+        phoneNumber.replace(sipNumberRegex, "\\1");
 
-    static const QRegularExpression national("^00(.*)$");
-    QString nationalPrefix = settings.value("generic/nationalPrefix").toString();
-    if (!nationalPrefix.isEmpty()) {
-        phoneNumber.replace(national, nationalPrefix + "\\1");
-    }
+        static const QRegularExpression international("^000(.*)$");
+        phoneNumber.replace(international, "+\\1");
 
-    static const QRegularExpression regional("^0(.*)$");
-    QString regionalPrefix = settings.value("generic/regionalPrefix").toString();
-    if (!regionalPrefix.isEmpty()) {
-        phoneNumber.replace(regional, regionalPrefix + "\\1");
+        static const QRegularExpression national("^00(.*)$");
+        QString nationalPrefix = settings.value("generic/nationalPrefix").toString();
+        if (!nationalPrefix.isEmpty()) {
+            phoneNumber.replace(national, nationalPrefix + "\\1");
+        }
+
+        static const QRegularExpression regional("^0(.*)$");
+        QString regionalPrefix = settings.value("generic/regionalPrefix").toString();
+        if (!regionalPrefix.isEmpty()) {
+            phoneNumber.replace(regional, regionalPrefix + "\\1");
+        }
     }
 
     ContactInfo info;
