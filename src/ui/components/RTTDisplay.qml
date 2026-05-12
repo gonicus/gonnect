@@ -59,12 +59,12 @@ Item {
                     anchors.right: rttDelg.isMe ? parent.right : undefined
                     anchors.left: !rttDelg.isMe ? parent.left : undefined
 
-                    color: rttDelg.isMe ? "blue" : "gray"
+                    color: rttDelg.isMe ? Theme.rttBubbleSelf : Theme.rttBubbleOther
 
                     Label {
                         id: rttMessage
                         text: rttDelg.message
-                        color: rttDelg.isMe ? "white" : "black"
+                        color: rttDelg.isMe ? Theme.rttTextSelf : Theme.rttTextOther
                         width: parent.width
                         wrapMode: Label.Wrap
                         padding: 10
