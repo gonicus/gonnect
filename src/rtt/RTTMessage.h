@@ -19,8 +19,8 @@ public:
     void setIsFinished(bool finished) { m_isFinished = finished; };
 
 private:
-    qint64 m_timestamp;
+    qint64 m_timestamp = 0;
     QString m_message;
-    bool m_isMe;
+    bool m_isMe = false;
     bool m_isFinished = false;
 };
