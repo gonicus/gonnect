@@ -73,7 +73,7 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ vars.MS_APPLICATION_IDENTIFIER }}
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
