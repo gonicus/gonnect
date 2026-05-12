@@ -406,9 +406,14 @@ void SystemTrayMenu::updateMostCalled()
         m_mostCalledActions.reserve(mostCalled.size());
 
         for (const auto &number : mostCalled) {
-            const auto &numStat = *(NumberStats::instance().numberStat(number));
-            auto action = new QAction(QIcon::fromTheme(contactIcon(numStat)), contactText(numStat),
-                                      m_trayIconMenu);
+            const auto numStat = NumberStats::instance().numberStat(number);
+            QAction *action = nullptr;
+            if (numStat) {
+                action = new QAction(QIcon::fromTheme(contactIcon(*numStat)), contactText(*numStat),
+                                     m_trayIconMenu);
+            } else {
+                action = new QAction(QString("⚫  %2").arg(number), m_trayIconMenu);
+            }
             m_trayIconMenu->insertAction(m_mostCalledSeparator, action);
             m_mostCalledActions.insert(number, action);
             connect(action, &QAction::triggered, this,

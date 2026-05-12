@@ -523,7 +523,7 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
             QString location = i_cal_component_get_location(component);
             QString description = i_cal_component_get_description(component);
 
-            if (isRecurrent) { // Recurrent origin event, parsed first
+            if (isRecurrent && rrule) { // Recurrent origin event, parsed first
                 // Get EXDATE's
                 ICalTime *exdate = NULL;
                 QList<QDateTime> exdates;
@@ -536,8 +536,47 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                 }
                 exdatesById[id] = exdates;
 
+                ICalTime *recurStartCap = NULL;
                 ICalRecurIterator *recurrenceIter = i_cal_recur_iterator_new(rrule, dtstart);
                 if (recurrenceIter) {
+                    // INFO: Since libical-glib v3.0, a start time limit can be specified for
+                    // recurrence iterators in order to reduce parsing overhead, i.e. for old
+                    // events that are irrelevant to us. This only works for RRULE's that
+                    // do not contain COUNT.
+                    // https://github.com/libical/libical/blob/3.0/src/libical/icalrecur.h#L291
+                    if (i_cal_recurrence_get_count(rrule) == 0) {
+                        QDateTime timeRangeStart = m_timeRangeStart.toUTC();
+
+                        recurStartCap = i_cal_time_new();
+                        if (recurStartCap) {
+                            i_cal_time_set_date(recurStartCap, timeRangeStart.date().year(),
+                                                timeRangeStart.date().month(),
+                                                timeRangeStart.date().day());
+                            i_cal_time_set_time(recurStartCap, timeRangeStart.time().hour(),
+                                                timeRangeStart.time().minute(),
+                                                timeRangeStart.time().second());
+                            i_cal_time_set_is_date(recurStartCap, 0);
+                        }
+
+                        if (recurStartCap && i_cal_time_is_valid_time(recurStartCap)) {
+                            if (!i_cal_recur_iterator_set_start(recurrenceIter, recurStartCap)) {
+                                qCCritical(lcEDSEventFeeder)
+                                        << "Failed to set RRULE iterator starting date:"
+                                        << i_cal_error_strerror(i_cal_errno_return());
+
+                                g_clear_object(&recurStartCap);
+                                i_cal_recur_iterator_free(recurrenceIter);
+
+                                Q_EMIT feederFailed();
+                                return;
+                            }
+                        } else {
+                            qCDebug(lcEDSEventFeeder)
+                                    << "Invalid RRULE iterator starting date - skipping:"
+                                    << i_cal_error_strerror(i_cal_errno_return());
+                        }
+                    }
+
                     qint64 duration = start.secsTo(end);
 
                     for (ICalTime *next = i_cal_recur_iterator_next(recurrenceIter);
@@ -569,6 +608,9 @@ void EDSEventFeeder::processEvents(QString clientName, QString clientUid, GSList
                         }
                     }
 
+                    if (recurStartCap) {
+                        g_clear_object(&recurStartCap);
+                    }
                     i_cal_recur_iterator_free(recurrenceIter);
                 }
             } else if (isUpdatedRecurrence) { // Updates of a recurrent event instance
