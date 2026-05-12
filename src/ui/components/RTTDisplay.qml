@@ -29,9 +29,11 @@ Item {
             Accessible.name: qsTr("RTT message list")
             Accessible.description: qsTr("List of all the RTT messages of the current call")
 
+            onCountChanged: () => Qt.callLater(rttListView.positionViewAtEnd)
+
             delegate: Item {
                 id: rttDelg
-                width: parent.width
+                width: rttListView.width
                 height: rttBubble.height
 
                 property int maxBubbleSize: rttDelg.width * 0.8
@@ -52,6 +54,8 @@ Item {
                     height: rttMessage.height
                     radius: 8
 
+                    onHeightChanged: () => Qt.callLater(rttListView.positionViewAtEnd)
+
                     anchors.right: rttDelg.isMe ? parent.right : undefined
                     anchors.left: !rttDelg.isMe ? parent.left : undefined
 
@@ -61,7 +65,6 @@ Item {
                         id: rttMessage
                         text: rttDelg.message
                         color: rttDelg.isMe ? "white" : "black"
-                        //font.italic: !rttDelg.isFinished
                         width: parent.width
                         wrapMode: Label.Wrap
                         padding: 10
