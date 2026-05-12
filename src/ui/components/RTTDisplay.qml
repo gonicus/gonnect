@@ -128,7 +128,6 @@ Item {
 
                     RTTProvider.rttSendBackspace()
                 } else if (event.key === Qt.Key_G && (event.modifiers & Qt.ControlModifier)) {
-                    // TODO: Which key should trigger this?
                     event.accepted = true
 
                     RTTProvider.rttSendBell()

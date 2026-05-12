@@ -64,8 +64,8 @@ void RTTModel::updateMessage(const QString &message, bool isMe, bool isFinished)
     // Retrieve the last unfinished message of the participant
     int targetRow = -1;
     for (int i = m_messages.size() - 1; i >= 0; --i) {
-        auto &message = m_messages[i];
-        if (message.isMe() == isMe && !message.isFinished()) {
+        auto &msg = m_messages[i];
+        if (msg.isMe() == isMe && !msg.isFinished()) {
             targetRow = i;
             break;
         }

@@ -5,8 +5,6 @@
 
 class RTTMessage
 {
-    Q_GADGET
-
 public:
     explicit RTTMessage(qint64 timestamp, const QString &message, bool isMe, bool isFinished);
 
