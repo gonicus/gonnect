@@ -135,7 +135,7 @@ Item {
             }
 
             onTextEdited: {
-                let lastChar = rttInputField.text.charAt(rttInputField.length - 1);
+                const lastChar = rttInputField.text.charAt(rttInputField.length - 1);
                 if (lastChar !== "") {
                     if (rttInputContainer.newMessage) {
                         rttListView.model.addMessage(Date.now(), rttInputField.text, true)
