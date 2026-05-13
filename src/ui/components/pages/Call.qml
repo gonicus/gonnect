@@ -1,6 +1,8 @@
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Controls.Material
 import base
 
@@ -15,6 +17,15 @@ Item {
     }
 
     readonly property alias selectedCallItem: callSideBar.selectedCallItem
+
+    // INFO: RTT is currently limited to 1:1 calls, see GONGONNECT-396
+    property bool isRttEnabled: !SIPCallManager.isConferenceMode
+                                && RTTProvider.isEstablishedCall
+                                && RTTProvider.isRttCall
+                                && (RTTProvider.hasMessages || RTTProvider.showRealTimeTextConsole)
+
+    // The avatar should grow in relation to card height, but only to maximum of 202-254 px
+    property int maxAvatarSize: control.isRttEnabled ? 202 : 254
 
     Keys.onPressed: (event) => {
                         const callItem = callSideBar.selectedCallItem
@@ -100,75 +111,98 @@ Item {
             }
         }
 
-        Loader {
-            id: avatarLoader
-            sourceComponent: SIPCallManager.isConferenceMode ? multiAvatarComponent : singleAvatarComponent
+        Column {
             anchors {
                 top: topBar.bottom
                 left: parent.left
                 right: parent.right
-                bottom: parent.bottom
+                bottom: nameLabel.top
 
-                topMargin: Math.max(24, 24 + callMainCard.height / 2 - 254)
+                topMargin: control.isRttEnabled ? 30
+                           : Math.max(24, 24 + callMainCard.height / 2 - 254)
+                bottomMargin: 15
             }
-        }
 
-        Component {
-            id: singleAvatarComponent
-
-            CallerBigAvatar {
-                bubbleSize: Math.min(254 / 700 * callMainCard.height, 254)  // Grow in relation to card height, but only to maximum of 254 px
-                name: callSideBar.selectedCallItem?.contactName ?? ""
-                avatarUrl: callSideBar.selectedCallItem?.hasAvatar ? ("file://" + callSideBar.selectedCallItem.avatarPath) : ""
-                isIncoming: topBar.isIncoming
-                isEstablished: topBar.isEstablished
-                isInProgress: topBar.isInProgress
-                isIncomingAudioLevel: callSideBar.selectedCallItem?.hasIncomingAudioLevel ?? false
-                anchors.horizontalCenter: parent.horizontalCenter
+            Loader {
+                id: avatarLoader
+                width: parent.width
+                height: control.isRttEnabled ? parent.height / 2 : parent.height
+                sourceComponent: SIPCallManager.isConferenceMode ? multiAvatarComponent : singleAvatarComponent
             }
-        }
 
-        Component {
-            id: multiAvatarComponent
+            Component {
+                id: singleAvatarComponent
 
-            Item {
-                id: multiAvatarContainer
+                CallerBigAvatar {
+                    bubbleSize: Math.min(control.maxAvatarSize / 850 * callMainCard.height, control.maxAvatarSize)
+                    name: callSideBar.selectedCallItem?.contactName ?? ""
+                    avatarUrl: callSideBar.selectedCallItem?.hasAvatar ? ("file://" + callSideBar.selectedCallItem.avatarPath) : ""
+                    isIncoming: topBar.isIncoming
+                    isEstablished: topBar.isEstablished
+                    isInProgress: topBar.isInProgress
+                    isIncomingAudioLevel: callSideBar.selectedCallItem?.hasIncomingAudioLevel ?? false
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+            }
+
+            Component {
+                id: multiAvatarComponent
+
                 // Additional item is necessary to center the row as the Loader uses the maximum available space
+                Item {
+                    id: multiAvatarContainer
 
-                Row {
-                    anchors.horizontalCenter: parent?.horizontalCenter
+                    Row {
+                        anchors.horizontalCenter: parent?.horizontalCenter
 
-                    Repeater {
-                        id: callsRepeater
-                        model: CallsProxyModel {
-                            onlyEstablishedCalls: true
-                            CallsModel {}
-                        }
-                        delegate: Item {
-                            id: callerDelg
-                            implicitWidth: Math.max(0.75 * multiAvatarContainer.width / callsRepeater.count, bigAvatar.implicitWidth)
-                            implicitHeight: bigAvatar.implicitHeight
+                        Repeater {
+                            id: callsRepeater
+                            model: CallsProxyModel {
+                                onlyEstablishedCalls: true
+                                CallsModel {}
+                            }
+                            delegate: Item {
+                                id: callerDelg
+                                implicitWidth: Math.max(0.75 * multiAvatarContainer.width / callsRepeater.count, bigAvatar.implicitWidth)
+                                implicitHeight: bigAvatar.implicitHeight
 
-                            required property string contactName
-                            required property string avatarPath
-                            required property bool hasIncomingAudioLevel
-                            required property bool isEstablished
-                            required property bool isInProgress
-                            required property bool isIncoming
+                                required property string contactName
+                                required property string avatarPath
+                                required property bool hasIncomingAudioLevel
+                                required property bool isEstablished
+                                required property bool isInProgress
+                                required property bool isIncoming
 
-                            CallerBigAvatar {
-                                id: bigAvatar
-                                bubbleSize: Math.min(254 / 700 * callMainCard.height, 254)  // Grow in relation to card height, but only to maximum of 254 px
-                                name: callerDelg.contactName
-                                avatarUrl: callerDelg.avatarPath
-                                isIncoming: callerDelg.isIncoming
-                                isEstablished: callerDelg.isEstablished
-                                isInProgress: callerDelg.isInProgress
-                                isIncomingAudioLevel: callerDelg.hasIncomingAudioLevel
-                                anchors.horizontalCenter: parent.horizontalCenter
+                                CallerBigAvatar {
+                                    id: bigAvatar
+                                    bubbleSize: Math.min(avatarLoader.control / 850 * callMainCard.height, control.maxAvatarSize)
+                                    name: callerDelg.contactName
+                                    avatarUrl: callerDelg.avatarPath
+                                    isIncoming: callerDelg.isIncoming
+                                    isEstablished: callerDelg.isEstablished
+                                    isInProgress: callerDelg.isInProgress
+                                    isIncomingAudioLevel: callerDelg.hasIncomingAudioLevel
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                }
                             }
                         }
                     }
+                }
+            }
+
+            Loader {
+                id: rttLoader
+                width: parent.width / 2
+                height: control.isRttEnabled ? parent.height / 2 : 0
+                anchors.horizontalCenter: parent.horizontalCenter
+                sourceComponent: control.isRttEnabled ? rttComponent : undefined
+            }
+
+            Component {
+                id: rttComponent
+
+                RTTDisplay {
+                    id: rttDisplay
                 }
             }
         }
