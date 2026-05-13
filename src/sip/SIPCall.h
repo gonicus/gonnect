@@ -93,6 +93,8 @@ public:
     double rxJitter() const { return m_jitterRx; }
     double rxEffectiveDelay() const { return m_effDelayRx; }
 
+    bool hasRtt() const { return m_hasRtt; }
+
     void rttSend(const QString &text);
     void rttSendLineSeperator();
     void rttSendCRLF();
