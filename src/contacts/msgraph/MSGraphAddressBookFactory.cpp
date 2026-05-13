@@ -12,7 +12,9 @@ QStringList MSGraphAddressBookFactory::configurations() const
     const auto group = QStringLiteral("msgraphcontacts");
     if (settings.childGroups().contains(msOAuthGroup) && settings.childGroups().contains(group)) {
         const auto &clientIdentifier =
-                settings.value(msOAuthGroup + QStringLiteral("/clientIdentifier"), MS_APPLICATION_IDENTIFIER).toString();
+                settings.value(msOAuthGroup + QStringLiteral("/clientIdentifier"),
+                               MS_APPLICATION_IDENTIFIER)
+                        .toString();
         const bool enabled = settings.value(group + QStringLiteral("enabled"), true).toBool();
 
         if (enabled && !clientIdentifier.isEmpty()) {
