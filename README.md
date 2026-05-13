@@ -28,6 +28,7 @@ Here's a short feature list:
 
  * Call forwarding
  * Conference calls with three parties
+ * Real-Time Text (RTT) over SIP
  * Busy state for supported sources
  * Configurable busy on active call
  * Address sources
