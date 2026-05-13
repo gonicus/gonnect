@@ -413,6 +413,7 @@ qt_add_qml_module(gonnect
         ui/components/MainTabBar.qml
         ui/components/ParticipantsList.qml
         ui/components/PresenceStatusIndicator.qml
+        ui/components/RTTDisplay.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
         ui/components/VerticalLevelMeter.qml
@@ -625,6 +626,13 @@ qt_add_qml_module(gonnect
         presence/GlobalStateAggregator.cpp
         presence/PresenceState.h
 
+        rtt/RTTProvider.h
+        rtt/RTTProvider.cpp
+        rtt/RTTMessage.h
+        rtt/RTTMessage.cpp
+        rtt/RTTModel.h
+        rtt/RTTModel.cpp
+
         ui/CallsModel.h
         ui/CallsModel.cpp
         ui/DateEventsModel.h
@@ -800,6 +808,7 @@ target_include_directories(gonnect
     usb/busylight
     media
     platform
+    rtt
     ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
