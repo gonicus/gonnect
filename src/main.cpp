@@ -8,6 +8,7 @@
 #  include <QDBusConnection>
 #  include <QDBusMetaType>
 #  include <signal.h>
+#  include "platform/linux/TrustAnchors.h"
 #endif
 
 using namespace Qt::Literals::StringLiterals;
@@ -38,6 +39,35 @@ static int setup_unix_signal_handlers()
 
     return 0;
 }
+
+#ifdef Q_OS_LINUX
+void installQtTrustAnchors()
+{
+    const auto &anchors = TrustAnchors::instance().qtCerts();
+    if (anchors.isEmpty())
+        return;
+
+    auto cfg = QSslConfiguration::defaultConfiguration();
+    auto cas = cfg.caCertificates();
+
+    QSet<QByteArray> seen;
+    seen.reserve(cas.size() + anchors.size());
+    for (const auto &c : std::as_const(cas))
+        seen.insert(c.digest(QCryptographicHash::Sha256));
+
+    for (const auto &c : anchors) {
+        const auto key = c.digest(QCryptographicHash::Sha256);
+        if (!seen.contains(key)) {
+            cas.append(c);
+            seen.insert(key);
+        }
+    }
+
+    cfg.setCaCertificates(cas);
+    QSslConfiguration::setDefaultConfiguration(cfg);
+}
+#endif
+
 
 int main(int argc, char *argv[])
 {
@@ -87,6 +117,10 @@ int main(int argc, char *argv[])
         app.sendArguments();
         return 2;
     }
+
+#ifdef Q_OS_LINUX
+    installQtTrustAnchors();
+#endif
 
     app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
 

@@ -10,6 +10,10 @@
 #include "Credentials.h"
 #include "EnumTranslation.h"
 
+#ifdef Q_OS_LINUX
+#include "platform/linux/TrustAnchors.h"
+#endif
+
 #include <QUuid>
 
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
@@ -35,6 +39,10 @@ void SIPAccount::initialize()
     QString transport = m_settings.value("transport", "tls").toString();
     if (transport == "tls") {
         m_transportType = TRANSPORT_TYPE::TLS;
+#ifdef Q_OS_LINUX
+        m_transportConfig.tlsConfig.method = PJSIP_SSLV23_METHOD;
+        m_transportConfig.tlsConfig.CaBuf = TrustAnchors::instance().pemBundle();
+#endif
     } else if (transport == "udp") {
         m_transportType = TRANSPORT_TYPE::UDP;
     } else if (transport == "tcp") {
