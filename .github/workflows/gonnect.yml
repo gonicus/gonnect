@@ -49,6 +49,7 @@ jobs:
       build: ${{ steps.filter.outputs.build }}
       flatpak: ${{ steps.filter.outputs.flatpak }}
       tests: ${{ steps.filter.outputs.tests }}
+      workflow: ${{ steps.filter.outputs.workflow }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -70,12 +71,14 @@ jobs:
               - 'CMakeLists.txt'
             tests:
               - 'tests/**'
+            workflow:
+              - '.github/workflows/gonnect.yml'
 
   build:
     runs-on: ubuntu-24.04
     name: "Build GOnnect (Linux)"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
+    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.workflow == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -108,7 +111,7 @@ jobs:
     runs-on: windows-2025
     name: "Build GOnnect (Windows)"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
+    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.workflow == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -185,7 +188,7 @@ jobs:
     runs-on: macos-26
     name: "Build GOnnect (MacOS)"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
+    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.workflow == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -341,7 +344,7 @@ jobs:
     name: "Flatpak"
     runs-on: ubuntu-24.04
     needs: changes
-    if: ${{ needs.changes.outputs.flatpak == 'true' || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
+    if: ${{ needs.changes.outputs.flatpak == 'true' || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.workflow == 'true' }}
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
       options: --privileged
