@@ -16,10 +16,24 @@ on:
     branches:
       - release
       - main
+    paths:
+      - 'src/**'
+      - 'external/**'
+      - '**/CMakeLists.txt'
+      - '**/conanfile.py'
+      - '**/conanfile.txt'
+      - '.github/workflows/codeql.yml'
   pull_request:
     branches:
       - release
       - main
+    paths:
+      - 'src/**'
+      - 'external/**'
+      - '**/CMakeLists.txt'
+      - '**/conanfile.py'
+      - '**/conanfile.txt'
+      - '.github/workflows/codeql.yml'
   schedule:
     - cron: '18 19 * * 5'
 

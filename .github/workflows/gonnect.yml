@@ -9,11 +9,23 @@ on:
       - main
     tags:
       - 'v*'
+    paths:
+      - 'src/**'
+      - 'CMakeLists.txt'
+      - 'conanfile.py'
+      - 'resources/conan/**'
+      - '.github/workflows/gonnect.yml'
   # Use the release/main branch workflow/actions definitions rather the definitions in the pull_request
   pull_request:
     branches:
       - release
       - main
+    paths-ignore:
+      - 'src/**'
+      - 'CMakeLists.txt'
+      - 'conanfile.py'
+      - 'resources/conan/**'
+      - '.github/workflows/gonnect.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,9 +42,40 @@ permissions:
   id-token: write
 
 jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      src: ${{ steps.filter.outputs.src }}
+      build: ${{ steps.filter.outputs.build }}
+      flatpak: ${{ steps.filter.outputs.flatpak }}
+      tests: ${{ steps.filter.outputs.tests }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Get changes
+        uses: dorny/paths-filter@34a36178c3e9b7aabf2e30ee0e7b38c44716d90b # v3
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**'
+              - 'external/**'
+            build:
+              - '**/CMakeLists.txt'
+              - '**/conanfile.py'
+              - '**/conanfile.txt'
+              - '**/CMakePresets.json'
+            flatpak:
+              - 'resources/flatpak/**'
+              - 'CMakeLists.txt'
+            tests:
+              - 'tests/**'
+
   build:
     runs-on: ubuntu-24.04
     name: "Build GOnnect (Linux)"
+    needs: changes
+    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -64,6 +107,8 @@ jobs:
   build-windows:
     runs-on: windows-2025
     name: "Build GOnnect (Windows)"
+    needs: changes
+    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -139,6 +184,8 @@ jobs:
   build-macos:
     runs-on: macos-26
     name: "Build GOnnect (MacOS)"
+    needs: changes
+    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -168,6 +215,8 @@ jobs:
   format:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
+    needs: changes
+    if: ${{ needs.changes.outputs.src == 'true' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Run clang-format style check for C/C++/Protobuf programs.
@@ -180,6 +229,8 @@ jobs:
   clang:
     runs-on: ubuntu-24.04
     name: "Static Code Analyzer"
+    needs: changes
+    if: ${{ needs.changes.outputs.src == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -212,6 +263,8 @@ jobs:
     runs-on: ubuntu-24.04
     container: fedora:43
     name: "Qt Semantics"
+    needs: changes
+    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
 
     steps:
       - name: Install dependencies
@@ -241,7 +294,7 @@ jobs:
       - name: Install qt
         run: |
           pip install aqtinstall
-          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ steps.get-qt.outputs.qt-version }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
+          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ steps.get-qt.outputs.qt-version }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebengine qtpositioning
           echo "PATH=$PATH:${{ github.workspace }}/Qt/${{ steps.get-qt.outputs.qt-version }}/gcc_64/bin" >> $GITHUB_ENV
 
       - name: Prepare conan
@@ -287,6 +340,8 @@ jobs:
   flatpak:
     name: "Flatpak"
     runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ needs.changes.outputs.flatpak == 'true' || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
       options: --privileged
@@ -313,7 +368,8 @@ jobs:
   tests:
     runs-on: ubuntu-24.04
     name: "Unit Tests"
-    needs: build
+    needs: [changes, build]
+    if: ${{ always() && (needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -339,3 +395,17 @@ jobs:
         uses: geekyeggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
         with:
           name: gonnect-tests
+
+  ci-status:
+    needs: [changes, build, build-windows, build-macos, format, clang, clazy, flatpak, tests]
+    if: always() # Ensure this runs even if upstream jobs were skipped
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify pipeline status
+        run: |
+          # Contains evaluates to true if any job failed or was cancelled
+          if ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}; then
+            echo "Pipeline failed."
+            exit 1
+          fi
+          echo "Pipeline passed!"
