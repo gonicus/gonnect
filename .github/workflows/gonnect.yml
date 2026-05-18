@@ -2,6 +2,31 @@ name: GOnnect Build
 
 on:
   workflow_dispatch:  # can be manually dispatched under GitHub's "Actions" tab
+    inputs:
+      run_build:
+        description: Run build job
+        type: boolean
+      run_build_windows:
+        description: Run build-windows job
+        type: boolean
+      run_build_macos:
+        description: Run build-macos job
+        type: boolean
+      run_format:
+        description: Run format job
+        type: boolean
+      run_clang:
+        description: Run clang job
+        type: boolean
+      run_clazy:
+        description: Run clazy job
+        type: boolean
+      run_flatpak:
+        description: Run flatpak job
+        type: boolean
+      run_tests:
+        description: Run tests job
+        type: boolean
   # Run the build only, if the branch is release or main or a PR with release or main as target is used
   push:
     branches:
@@ -49,7 +74,7 @@ jobs:
       build: ${{ steps.filter.outputs.build }}
       flatpak: ${{ steps.filter.outputs.flatpak }}
       tests: ${{ steps.filter.outputs.tests }}
-      workflow: ${{ steps.filter.outputs.workflow }}
+      resources: ${{ steps.filter.outputs.resources }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -71,14 +96,18 @@ jobs:
               - 'CMakeLists.txt'
             tests:
               - 'tests/**'
-            workflow:
-              - '.github/workflows/gonnect.yml'
+            resources:
+              - 'resources/artwork/**'
+              - 'resources/emojis/**'
+              - 'resources/font/**'
+              - 'resources/sounds/**'
+              - 'resources/templates/**'
 
   build:
     runs-on: ubuntu-24.04
     name: "Build GOnnect (Linux)"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.workflow == 'true' }}
+    if: ${{ inputs.run_build || needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -111,7 +140,7 @@ jobs:
     runs-on: windows-2025
     name: "Build GOnnect (Windows)"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.workflow == 'true' }}
+    if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -188,7 +217,7 @@ jobs:
     runs-on: macos-26
     name: "Build GOnnect (MacOS)"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.workflow == 'true' }}
+    if: ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -219,7 +248,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' }}
+    if: ${{ inputs.run_format || needs.changes.outputs.src == 'true' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Run clang-format style check for C/C++/Protobuf programs.
@@ -233,7 +262,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Static Code Analyzer"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' }}
+    if: ${{ inputs.run_clang || needs.changes.outputs.src == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -267,7 +296,7 @@ jobs:
     container: fedora:43
     name: "Qt Semantics"
     needs: changes
-    if: ${{ needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
+    if: ${{ inputs.run_clazy || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
 
     steps:
       - name: Install dependencies
@@ -344,7 +373,7 @@ jobs:
     name: "Flatpak"
     runs-on: ubuntu-24.04
     needs: changes
-    if: ${{ needs.changes.outputs.flatpak == 'true' || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.workflow == 'true' }}
+    if: ${{ inputs.run_flatpak || needs.changes.outputs.flatpak == 'true' || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' }}
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
       options: --privileged
@@ -372,7 +401,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Unit Tests"
     needs: [changes, build]
-    if: ${{ always() && (needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    if: ${{ (inputs.run_tests || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && needs.build.result == 'success' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
