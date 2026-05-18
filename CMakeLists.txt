@@ -13,7 +13,7 @@ set(APPLICATION_VENDOR "GONICUS GmbH")
 set(APPLICATION_ICON_NAME  "${APPLICATION_SHORTNAME}" )
 set(APPLICATION_URL "https://www.gonnect-project.org")
 
-#GOnnect_VERSION -> override from git tag
+set(MS_APPLICATION_IDENTIFIER "" CACHE STRING "Application ID used for OAUTH / Microsoft 365")
 
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_STANDARD 23)
