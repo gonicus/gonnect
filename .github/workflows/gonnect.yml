@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Get changes
-        uses: dorny/paths-filter@34a36178c3e9b7aabf2e30ee0e7b38c44716d90b # v3
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
         id: filter
         with:
           filters: |
