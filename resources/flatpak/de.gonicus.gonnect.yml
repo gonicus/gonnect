@@ -143,7 +143,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/pjsip/pjproject.git
-        tag: 2.17
+        tag: '2.17'
         commit: 5a457451fa2712ba18e12b01738e8ff3af2b26fd
         x-checker-data:
           type: git
