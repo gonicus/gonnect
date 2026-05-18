@@ -1,5 +1,5 @@
 versions:
-  "3.0.20":
+  "4.0.0":
     folder: all
 
 updater:

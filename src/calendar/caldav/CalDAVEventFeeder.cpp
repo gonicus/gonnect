@@ -215,7 +215,7 @@ bool CalDAVEventFeeder::processResponse(const QByteArray &data, const QString &s
             // RRULE
             bool isRecurrent = false;
             icalproperty *prop = icalcomponent_get_first_property(event, ICAL_RRULE_PROPERTY);
-            icalrecurrencetype rrule = {};
+            icalrecurrencetype *rrule = nullptr;
             if (prop) {
                 isRecurrent = true;
                 rrule = icalproperty_get_rrule(prop);
