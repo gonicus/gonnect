@@ -3,6 +3,7 @@
 #include "Credentials.h"
 #include "ViewHelper.h"
 #include "ErrorBus.h"
+#include "MSOAuthManagerConfig.h"
 #include <QOAuth2AuthorizationCodeFlow>
 #include <QOAuthHttpServerReplyHandler>
 #include <QDesktopServices>
@@ -118,7 +119,8 @@ void MSOAuthManager::initAuthCodeFlow()
     // This should be a Gonicus registered app (see the Microsoft Entra admin center), with the
     // redirect urls (see below) and the supported scopes configured.
     // (A different identifier, registered by someone else, could also be used, if desired)
-    const QString clientIdentifier = settings.value("clientIdentifier").toString();
+    const QString clientIdentifier =
+            settings.value("clientIdentifier", MS_APPLICATION_IDENTIFIER).toString();
     const QString authorizationUrl =
             settings.value("authorizationUrl",
                            QStringLiteral("https://login.microsoftonline.com/common/oauth2/v2.0/"

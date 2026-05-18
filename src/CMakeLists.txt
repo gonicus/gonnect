@@ -175,6 +175,8 @@ find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
 
+configure_file(MSOAuthManagerConfig.h.in MSOAuthManagerConfig.h)
+
 if(FLATPAK)
     set(PLATFORM_SOURCES
         dbus/portal/AbstractPortal.h
