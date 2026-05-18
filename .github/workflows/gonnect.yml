@@ -152,7 +152,7 @@ jobs:
           endpoint: https://weu.codesigning.azure.net/
           signing-account-name: GONICUS-signing
           certificate-profile-name: gonicus-profile
-          files-folder: build/src
+          files-folder: build/Release/src
           files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -171,7 +171,7 @@ jobs:
           endpoint: https://weu.codesigning.azure.net/
           signing-account-name: GONICUS-signing
           certificate-profile-name: gonicus-profile
-          files-folder: build/
+          files-folder: build
           files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
