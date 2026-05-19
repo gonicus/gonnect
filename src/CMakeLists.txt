@@ -201,8 +201,8 @@ if(FLATPAK)
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
 
-        platform/linux/TrustAnchors.h
-        platform/linux/TrustAnchors.cpp
+        platform/flatpak/TrustAnchors.h
+        platform/flatpak/TrustAnchors.cpp
 
         platform/flatpak/FlatpakUserInfo.h
         platform/flatpak/FlatpakUserInfo.cpp
