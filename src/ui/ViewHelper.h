@@ -180,6 +180,7 @@ Q_SIGNALS:
     void showDialPad();
     void showFirstAid();
     void showQuitConfirm();
+    void showStatusTextEditDialog();
     void showEmergency(QString accountId, int callId, QString displayName);
     void hideEmergency();
     void showConferenceChat();

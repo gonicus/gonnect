@@ -371,10 +371,12 @@ qt_add_qml_module(gonnect
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
         ui/components/popups/DialInInfo.qml
+        ui/components/popups/EditStatusText.qml
         ui/components/popups/FirstAid.qml
         ui/components/popups/HistoryListContextMenu.qml
         ui/components/popups/JitsiHistoryListContextMenu.qml
         ui/components/popups/Menu.qml
+        ui/components/popups/OwnAvatarContextMenu.qml
         ui/components/popups/SearchResultPopup.qml
         ui/components/popups/VideoDeviceMenu.qml
         ui/components/popups/StreamingLightPopup.qml
@@ -412,6 +414,7 @@ qt_add_qml_module(gonnect
         ui/components/HistoryList.qml
         ui/components/MainTabBar.qml
         ui/components/ParticipantsList.qml
+        ui/components/PresenceStatusIndicator.qml
         ui/components/RTTDisplay.qml
         ui/components/SettingsPage.qml
         ui/components/TogglerList.qml
@@ -621,6 +624,10 @@ qt_add_qml_module(gonnect
         platform/SearchProvider.h
         ${PLATFORM_SOURCES}
 
+        presence/GlobalStateAggregator.h
+        presence/GlobalStateAggregator.cpp
+        presence/PresenceState.h
+
         rtt/RTTProvider.h
         rtt/RTTProvider.cpp
         rtt/RTTMessage.h
@@ -676,6 +683,8 @@ qt_add_qml_module(gonnect
         ui/RandomRoomNameGenerator.cpp
         ui/ParticipantsModel.h
         ui/ParticipantsModel.cpp
+        ui/PersonCoinProvider.h
+        ui/PersonCoinProvider.cpp
         ui/SearchListModel.h
         ui/SearchListModel.cpp
         ui/SearchListProxyModel.h
@@ -794,6 +803,7 @@ target_include_directories(gonnect
     calendar
     contacts
     conference
+    presence
     ui
     ui/chat
     usb

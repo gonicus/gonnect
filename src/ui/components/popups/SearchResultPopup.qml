@@ -480,8 +480,9 @@ Popup {
                                             id: avatarImage
                                             initials: ViewHelper.initials(contactDelg.name)
                                             source: contactDelg.hasAvatar ? ("file://" + contactDelg.avatarPath) : ""
-                                            showBuddyStatus: contactDelg.subscriptableNumber !== ""
-                                            buddyStatus: contactDelg.buddyStatus
+                                            showPresenceStatus: contactDelg.subscriptableNumber !== ""
+                                            presenceStatus: contactDelg.buddyStatus
+                                            indicatorComponent: Component { BuddyStatusIndicator {} }
                                         }
                                     }
 
