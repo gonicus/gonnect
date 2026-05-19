@@ -69,6 +69,8 @@ permissions:
 jobs:
   changes:
     runs-on: ubuntu-24.04
+    # Job selection comes from inputs, if started manually. No need to detect the changes.
+    if: ${{ github.event_name != 'workflow_dispatch' }}
     outputs:
       src: ${{ steps.filter.outputs.src }}
       build: ${{ steps.filter.outputs.build }}
@@ -83,7 +85,6 @@ jobs:
         id: filter
         with:
           # Set the base branch, if not a pull request
-          base: ${{ !contains(github.event_name, 'pull_reguest') && github.ref_name || null }}
           filters: |
             src:
               - 'src/**'
