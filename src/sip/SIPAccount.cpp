@@ -10,7 +10,7 @@
 #include "Credentials.h"
 #include "EnumTranslation.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
 #  include "platform/linux/TrustAnchors.h"
 #endif
 
@@ -39,7 +39,7 @@ void SIPAccount::initialize()
     QString transport = m_settings.value("transport", "tls").toString();
     if (transport == "tls") {
         m_transportType = TRANSPORT_TYPE::TLS;
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
         m_transportConfig.tlsConfig.method = PJSIP_SSLV23_METHOD;
         m_transportConfig.tlsConfig.CaBuf = TrustAnchors::instance().pemBundle();
 #endif

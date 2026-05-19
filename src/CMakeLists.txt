@@ -201,6 +201,9 @@ if(FLATPAK)
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
 
+        platform/linux/TrustAnchors.h
+        platform/linux/TrustAnchors.cpp
+
         platform/flatpak/FlatpakUserInfo.h
         platform/flatpak/FlatpakUserInfo.cpp
         platform/linux/LinuxNotificationManager.h
@@ -226,9 +229,6 @@ elseif(LINUX)
         dbus/GOnnectDBusAPI.cpp
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
-
-        platform/linux/TrustAnchors.h
-        platform/linux/TrustAnchors.cpp
 
         platform/linux/LinuxUserInfo.h
         platform/linux/LinuxUserInfo.cpp

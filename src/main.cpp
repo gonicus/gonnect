@@ -8,6 +8,9 @@
 #  include <QDBusConnection>
 #  include <QDBusMetaType>
 #  include <signal.h>
+#endif
+
+#ifdef Q_OS_FLATPAK
 #  include "platform/linux/TrustAnchors.h"
 #endif
 
@@ -40,7 +43,7 @@ static int setup_unix_signal_handlers()
     return 0;
 }
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
 void installQtTrustAnchors()
 {
     const auto &anchors = TrustAnchors::instance().qtCerts();
@@ -119,7 +122,7 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_FLATPAK
     installQtTrustAnchors();
 #endif
 

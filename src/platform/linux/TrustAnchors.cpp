@@ -101,7 +101,7 @@ QList<QSslCertificate> loadAnchorsFromP11Kit()
     return anchors;
 }
 
-} // namespace
+}
 
 
 TrustAnchors::TrustAnchors()
