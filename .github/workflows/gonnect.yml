@@ -82,6 +82,8 @@ jobs:
         uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
         id: filter
         with:
+          # Set the base branch, if not a pull request
+          base: ${{ !contains(github.event_name, 'pull_reguest') && github.ref_name || null }}
           filters: |
             src:
               - 'src/**'
@@ -326,7 +328,7 @@ jobs:
       - name: Install qt
         run: |
           pip install aqtinstall
-          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ steps.get-qt.outputs.qt-version }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebengine qtwebchannel qtpositioning
+          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ steps.get-qt.outputs.qt-version }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
           echo "PATH=$PATH:${{ github.workspace }}/Qt/${{ steps.get-qt.outputs.qt-version }}/gcc_64/bin" >> $GITHUB_ENV
 
       - name: Prepare conan
