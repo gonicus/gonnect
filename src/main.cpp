@@ -44,16 +44,18 @@ static int setup_unix_signal_handlers()
 void installQtTrustAnchors()
 {
     const auto &anchors = TrustAnchors::instance().qtCerts();
-    if (anchors.isEmpty())
+    if (anchors.isEmpty()) {
         return;
+    }
 
     auto cfg = QSslConfiguration::defaultConfiguration();
     auto cas = cfg.caCertificates();
 
     QSet<QByteArray> seen;
     seen.reserve(cas.size() + anchors.size());
-    for (const auto &c : std::as_const(cas))
+    for (const auto &c : std::as_const(cas)) {
         seen.insert(c.digest(QCryptographicHash::Sha256));
+    }
 
     for (const auto &c : anchors) {
         const auto key = c.digest(QCryptographicHash::Sha256);
@@ -67,7 +69,6 @@ void installQtTrustAnchors()
     QSslConfiguration::setDefaultConfiguration(cfg);
 }
 #endif
-
 
 int main(int argc, char *argv[])
 {
