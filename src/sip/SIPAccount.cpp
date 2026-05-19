@@ -11,7 +11,7 @@
 #include "EnumTranslation.h"
 
 #ifdef Q_OS_LINUX
-#include "platform/linux/TrustAnchors.h"
+#  include "platform/linux/TrustAnchors.h"
 #endif
 
 #include <QUuid>
