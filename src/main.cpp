@@ -11,7 +11,7 @@
 #endif
 
 #ifdef Q_OS_FLATPAK
-#  include "platform/linux/TrustAnchors.h"
+#  include "platform/flatpak/TrustAnchors.h"
 #endif
 
 using namespace Qt::Literals::StringLiterals;

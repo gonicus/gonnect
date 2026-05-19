@@ -11,7 +11,7 @@
 #include "EnumTranslation.h"
 
 #ifdef Q_OS_FLATPAK
-#  include "platform/linux/TrustAnchors.h"
+#  include "platform/flatpak/TrustAnchors.h"
 #endif
 
 #include <QUuid>
