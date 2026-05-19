@@ -34,23 +34,11 @@ on:
       - main
     tags:
       - 'v*'
-    paths:
-      - 'src/**'
-      - 'CMakeLists.txt'
-      - 'conanfile.py'
-      - 'resources/conan/**'
-      - '.github/workflows/gonnect.yml'
   # Use the release/main branch workflow/actions definitions rather the definitions in the pull_request
   pull_request:
     branches:
       - release
       - main
-    paths-ignore:
-      - 'src/**'
-      - 'CMakeLists.txt'
-      - 'conanfile.py'
-      - 'resources/conan/**'
-      - '.github/workflows/gonnect.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -67,16 +55,19 @@ permissions:
   id-token: write
 
 jobs:
+  # Detect changes to allow selecting the jobs to run.
+  # If the workflow is triggered manually, the selection comes from the inputs there.
   changes:
     runs-on: ubuntu-24.04
-    # Job selection comes from inputs, if started manually. No need to detect the changes.
-    if: ${{ github.event_name != 'workflow_dispatch' }}
     outputs:
-      src: ${{ steps.filter.outputs.src }}
-      build: ${{ steps.filter.outputs.build }}
-      flatpak: ${{ steps.filter.outputs.flatpak }}
-      tests: ${{ steps.filter.outputs.tests }}
-      resources: ${{ steps.filter.outputs.resources }}
+      # Job selection comes from inputs, if started manually. No need to use detected changes.
+      src: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.src }}
+      build: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.build }}
+      flatpak: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.flatpak }}
+      tests: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.tests }}
+      resources: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources }}
+      resources-windows: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-windows }}
+      resources-macos: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-macos }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -84,7 +75,6 @@ jobs:
         uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
         id: filter
         with:
-          # Set the base branch, if not a pull request
           filters: |
             src:
               - 'src/**'
@@ -105,6 +95,12 @@ jobs:
               - 'resources/font/**'
               - 'resources/sounds/**'
               - 'resources/templates/**'
+              - 'migrate/**'
+              - 'i18n/**/*.ts'
+            resources-windows:
+              - 'resources/windows/**'
+            resources-macos:
+              - 'resources/macos/**'
 
   build:
     runs-on: ubuntu-24.04
@@ -143,7 +139,7 @@ jobs:
     runs-on: windows-2025
     name: "Build GOnnect (Windows)"
     needs: changes
-    if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' }}
+    if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-windows == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -220,7 +216,7 @@ jobs:
     runs-on: macos-26
     name: "Build GOnnect (MacOS)"
     needs: changes
-    if: ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' }}
+    if: ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-macos == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
