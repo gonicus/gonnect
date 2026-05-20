@@ -67,9 +67,11 @@ if(APPLE)
 elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
+    pkg_check_modules(P11KIT  REQUIRED IMPORTED_TARGET p11-kit-1)
 
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
+        PkgConfig::P11KIT
         PkgConfig::LIBNOTIFY
         Qt6::DBus)
 
@@ -198,6 +200,9 @@ if(FLATPAK)
         dbus/GOnnectDBusAPI.cpp
         dbus/KRunnerAdapter.h
         dbus/KRunnerAdapter.cpp
+
+        platform/flatpak/TrustAnchors.h
+        platform/flatpak/TrustAnchors.cpp
 
         platform/flatpak/FlatpakUserInfo.h
         platform/flatpak/FlatpakUserInfo.cpp
