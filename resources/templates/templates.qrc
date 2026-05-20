@@ -8,5 +8,6 @@
         <file>telekom.conf</file>
         <file>easybell_phoneline.conf</file>
         <file>easybell_pbx.conf</file>
+        <file>1und1.conf</file>
     </qresource>
 </RCC>
