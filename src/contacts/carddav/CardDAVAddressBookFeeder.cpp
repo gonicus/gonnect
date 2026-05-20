@@ -219,18 +219,29 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
 
     QDataStream in(&cacheFile);
 
-    quint16 magic;
-    quint8 version;
-    qsizetype numberOfContacts;
+    quint16 magic = 0;
+    quint8 version = 0;
 
     in >> magic;
     in >> version;
+
+    if (in.status() != QDataStream::Ok || magic != CARDDAV_MAGIC || version != CARDDAV_VERSION) {
+        qCInfo(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
+                                           << "is invalid and will therefore be removed.";
+        cacheFile.close();
+        cacheFile.remove();
+        return;
+    }
+
+    qsizetype numberOfContacts = 0;
     in >> m_ignoredIds;
     in >> numberOfContacts;
 
-    if (magic != CARDDAV_MAGIC || version != CARDDAV_VERSION) {
-        qCInfo(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
-                                           << "is invalid and will therefore be removed.";
+    if (in.status() != QDataStream::Ok || numberOfContacts < 0 || numberOfContacts > 1000000) {
+        qCWarning(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
+                                              << "is corrupted and will therefore be removed.";
+        m_ignoredIds.clear();
+        cacheFile.close();
         cacheFile.remove();
         return;
     }
@@ -240,6 +251,19 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
         Contact *contact = new Contact(this);
         in >> key;
         in >> *contact;
+
+        if (in.status() != QDataStream::Ok) {
+            delete contact;
+            qCWarning(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
+                                                  << "is truncated or corrupted - aborting cache load.";
+            qDeleteAll(m_cachedContacts);
+            m_cachedContacts.clear();
+            m_ignoredIds.clear();
+            cacheFile.close();
+            cacheFile.remove();
+            return;
+        }
+
         m_cachedContacts.insert(key, contact);
     }
 
