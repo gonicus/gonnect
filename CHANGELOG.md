@@ -1,3 +1,20 @@
+# [2.2.0-beta.7](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.6...v2.2.0-beta.7) (2026-05-20)
+
+
+### Bug Fixes
+
+* do not show favorites in "most called" list ([#456](https://github.com/gonicus/gonnect/issues/456)) ([8ee676d](https://github.com/gonicus/gonnect/commit/8ee676d08a6e79eba5c31749fb62531dfa6c7069))
+* Ensure correct `tag` value type in flatpak manifest ([#466](https://github.com/gonicus/gonnect/issues/466)) ([3c5412a](https://github.com/gonicus/gonnect/commit/3c5412a250d5a7e3c3404432ae57d28465bac48c))
+* **ui:** do not treat room names beginning with digits as phone numbers ([#461](https://github.com/gonicus/gonnect/issues/461)) ([75ed3f2](https://github.com/gonicus/gonnect/commit/75ed3f23ebe0730f10c43f6867d91cd1d54acf3f))
+
+
+### Features
+
+* add template for 1&1 ([#465](https://github.com/gonicus/gonnect/issues/465)) ([865fcd9](https://github.com/gonicus/gonnect/commit/865fcd975f5d030674ff2d916c0eea5e1fa29456))
+* ical rrule parsing optimization ([#457](https://github.com/gonicus/gonnect/issues/457)) ([c46f066](https://github.com/gonicus/gonnect/commit/c46f066fd5f4f1aee410676f6e502ac682f4b265))
+* rtt ui integration ([#443](https://github.com/gonicus/gonnect/issues/443)) ([62d48f3](https://github.com/gonicus/gonnect/commit/62d48f313a4aed5c971dc52d8e33a13e8396a58d))
+* windows signing ([#462](https://github.com/gonicus/gonnect/issues/462)) ([f7dd63a](https://github.com/gonicus/gonnect/commit/f7dd63a69d2231c92c768154eae99326a7ba1c29))
+
 # [2.2.0-beta.6](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.5...v2.2.0-beta.6) (2026-05-11)
 
 
