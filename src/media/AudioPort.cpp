@@ -37,7 +37,7 @@ bool AudioPort::initialize()
     if (m_device.mode() == QAudioDevice::Mode::Input) {
         try {
             adjustTxLevel(NORMAL_AUDIO_LEVEL);
-        } catch(pj::Error &err) {
+        } catch (pj::Error &err) {
             qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
         }
     }
@@ -51,7 +51,7 @@ void AudioPort::setMuted(bool value)
         if (m_device.mode() == QAudioDevice::Mode::Input) {
             try {
                 adjustTxLevel(value ? 0.0f : NORMAL_AUDIO_LEVEL);
-            } catch(pj::Error &err) {
+            } catch (pj::Error &err) {
                 qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
             }
         }
@@ -174,8 +174,8 @@ void AudioPort::startSinkIO()
 
     qCInfo(lcAudioPort).noquote().nospace()
             << "Initialize sink of device_descr=\"" << m_device.description() << "\", device_id=\""
-            << m_device.id() << "\", with settings:"
-            << "\nsampleRate=" << m_audioFormat.sampleRate()
+            << m_device.id()
+            << "\", with settings:" << "\nsampleRate=" << m_audioFormat.sampleRate()
             << "\nchannelCount=" << m_audioFormat.channelCount()
             << "\nbytesPerSample=" << m_audioFormat.bytesPerSample()
             << "\nsampleFormat=" << m_audioFormat.sampleFormat();
@@ -216,8 +216,8 @@ void AudioPort::startSourceIO()
 
     qCInfo(lcAudioPort).noquote().nospace()
             << "Initialize source of device_descr=\"" << m_device.description()
-            << "\", device_id=\"" << m_device.id() << "\", with settings:"
-            << "\nsampleRate=" << m_audioFormat.sampleRate()
+            << "\", device_id=\"" << m_device.id()
+            << "\", with settings:" << "\nsampleRate=" << m_audioFormat.sampleRate()
             << "\nchannelCount=" << m_audioFormat.channelCount()
             << "\nbytesPerSample=" << m_audioFormat.bytesPerSample()
             << "\nsampleFormat=" << m_audioFormat.sampleFormat();

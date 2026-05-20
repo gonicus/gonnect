@@ -254,8 +254,9 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
 
         if (in.status() != QDataStream::Ok) {
             delete contact;
-            qCWarning(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
-                                                  << "is truncated or corrupted - aborting cache load.";
+            qCWarning(lcCardDAVAddressBookFeeder)
+                    << "CardDAV cache file at" << filePath
+                    << "is truncated or corrupted - aborting cache load.";
             qDeleteAll(m_cachedContacts);
             m_cachedContacts.clear();
             m_ignoredIds.clear();

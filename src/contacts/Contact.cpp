@@ -338,8 +338,8 @@ QDataStream &operator>>(QDataStream &in, Contact &contact)
     BlockInfo blockInfo;
     QList<Contact::PhoneNumber> phoneNumbers;
 
-    in >> id >> dn >> sourceUid >> name >> prio >> displayName >> configId >> company >> mail >> lastModified
-            >> sipStatusSubscriptable >> phoneNumbers >> blockInfo;
+    in >> id >> dn >> sourceUid >> name >> prio >> displayName >> configId >> company >> mail
+            >> lastModified >> sipStatusSubscriptable >> phoneNumbers >> blockInfo;
     contact = Contact(id, dn, sourceUid, { prio, displayName, configId }, name, company, mail,
                       lastModified, phoneNumbers, blockInfo);
 

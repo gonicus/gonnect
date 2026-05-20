@@ -160,8 +160,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     qCInfo(lcSIPCall).nospace() << "Call State: " << ci.stateText << " (" << remoteUri << ")"
                                 << " last status code: "
                                 << EnumTranslation::instance().sipStatusCode(statusCode) << " ("
-                                << statusCode << ") "
-                                << " last reason " << ci.lastReason << " contactId " << m_contactId;
+                                << statusCode << ") " << " last reason " << ci.lastReason
+                                << " contactId " << m_contactId;
 
     if (statusCode == PJSIP_SC_RINGING) {
         ringToneFactory.ringingTone()->start();
@@ -363,15 +363,18 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
                     try {
                         mic_media.startTransmit(aud_med);
-                    } catch(pj::Error &err) {
-                        qCCritical(lcSIPCall) << "failed to start mic media transmission: " << err.info();
-                        ErrorBus::instance().addFatalError(tr("Failed to initialize microphone audio"));
+                    } catch (pj::Error &err) {
+                        qCCritical(lcSIPCall)
+                                << "failed to start mic media transmission: " << err.info();
+                        ErrorBus::instance().addFatalError(
+                                tr("Failed to initialize microphone audio"));
                     }
 
                     try {
                         aud_med.startTransmit(speaker_media);
-                    } catch(pj::Error &err) {
-                        qCCritical(lcSIPCall) << "failed to start aud media transmission: " << err.info();
+                    } catch (pj::Error &err) {
+                        qCCritical(lcSIPCall)
+                                << "failed to start aud media transmission: " << err.info();
                         ErrorBus::instance().addFatalError(tr("Failed to initialize call audio"));
                     }
 
@@ -381,13 +384,14 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
                         try {
                             aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*m_sniffer));
-                        } catch(pj::Error &err) {
-                            qCCritical(lcSIPCall) << "failed to start audio level transmission: " << err.info();
+                        } catch (pj::Error &err) {
+                            qCCritical(lcSIPCall)
+                                    << "failed to start audio level transmission: " << err.info();
                         }
 
                         connect(m_sniffer, &Sniffer::audioLevelChanged, this, [this]() {
                             Q_EMIT SIPCallManager::instance().audioLevelChanged(
-                                    this, m_sniffer->audioLevel());
+                                    this, m_sniffer -> audioLevel());
                         });
                     }
                 }
