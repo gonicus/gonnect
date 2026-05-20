@@ -35,7 +35,11 @@ bool AudioPort::initialize()
     createPort(m_device.id().toStdString(), m_pj_fmt);
 
     if (m_device.mode() == QAudioDevice::Mode::Input) {
-        adjustTxLevel(NORMAL_AUDIO_LEVEL);
+        try {
+            adjustTxLevel(NORMAL_AUDIO_LEVEL);
+        } catch(pj::Error &err) {
+            qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
+        }
     }
 
     return true;
@@ -45,7 +49,11 @@ void AudioPort::setMuted(bool value)
 {
     if (m_isMuted != value) {
         if (m_device.mode() == QAudioDevice::Mode::Input) {
-            adjustTxLevel(value ? 0.0f : NORMAL_AUDIO_LEVEL);
+            try {
+                adjustTxLevel(value ? 0.0f : NORMAL_AUDIO_LEVEL);
+            } catch(pj::Error &err) {
+                qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
+            }
         }
 
         m_isMuted = value;
