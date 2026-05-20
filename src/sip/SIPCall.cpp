@@ -391,7 +391,7 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
                         connect(m_sniffer, &Sniffer::audioLevelChanged, this, [this]() {
                             Q_EMIT SIPCallManager::instance().audioLevelChanged(
-                                    this, m_sniffer -> audioLevel());
+                                    this, m_sniffer->audioLevel());
                         });
                     }
                 }
