@@ -88,6 +88,11 @@ class Theme : public QObject
     Q_PROPERTY(QColor toolbarTopSeparator READ toolbarTopSeparator NOTIFY toolbarTopSeparatorChanged
                        FINAL)
 
+    Q_PROPERTY(QColor rttBubbleSelf READ rttBubbleSelf NOTIFY rttBubbleSelfChanged FINAL)
+    Q_PROPERTY(QColor rttTextSelf READ rttTextSelf NOTIFY rttTextSelfChanged FINAL)
+    Q_PROPERTY(QColor rttBubbleOther READ rttBubbleOther NOTIFY rttBubbleOtherChanged FINAL)
+    Q_PROPERTY(QColor rttTextOther READ rttTextOther NOTIFY rttTextOtherChanged FINAL)
+
 public:
     static Theme &instance()
     {
@@ -163,6 +168,11 @@ public:
     QColor toolbarText() const { return m_toolbarText; }
     QColor toolbarTopSeparator() const { return m_toolbarTopSeparator; }
 
+    QColor rttBubbleSelf() const { return m_rttBubbleSelf; }
+    QColor rttTextSelf() const { return m_rttTextSelf; }
+    QColor rttBubbleOther() const { return m_rttBubbleOther; }
+    QColor rttTextOther() const { return m_rttTextOther; }
+
 private Q_SLOTS:
     void updateColorPalette();
     void onThemeVariantChanged();
@@ -197,6 +207,11 @@ Q_SIGNALS:
     void toolbarFieldTextFocusChanged();
     void toolbarTextChanged();
     void toolbarTopSeparatorChanged();
+
+    void rttBubbleSelfChanged();
+    void rttTextSelfChanged();
+    void rttBubbleOtherChanged();
+    void rttTextOtherChanged();
 
 private:
     void setDarkMode(bool value);
@@ -261,6 +276,11 @@ private:
     QColor m_toolbarFieldTextFocus;
     QColor m_toolbarText;
     QColor m_toolbarTopSeparator;
+
+    QColor m_rttBubbleSelf;
+    QColor m_rttTextSelf;
+    QColor m_rttBubbleOther;
+    QColor m_rttTextOther;
 };
 
 class ThemeWrapper

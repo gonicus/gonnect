@@ -17,16 +17,9 @@ bool NumberStatsProxyModel::lessThan(const QModelIndex &sourceLeft,
 
     typedef NumberStatsModel::Roles Roles;
 
-    const auto leftCount = model->data(sourceLeft, static_cast<int>(Roles::Count)).toUInt();
-    const auto rightCount = model->data(sourceRight, static_cast<int>(Roles::Count)).toUInt();
-
-    if (leftCount == rightCount) {
-        const auto leftNumber =
-                model->data(sourceLeft, static_cast<int>(Roles::PhoneNumber)).toString();
-        const auto rightNumber =
-                model->data(sourceRight, static_cast<int>(Roles::PhoneNumber)).toString();
-        return leftNumber < rightNumber;
-    }
-
-    return leftCount > rightCount;
+    const auto leftNumber =
+            model->data(sourceLeft, static_cast<int>(Roles::PhoneNumber)).toString();
+    const auto rightNumber =
+            model->data(sourceRight, static_cast<int>(Roles::PhoneNumber)).toString();
+    return leftNumber < rightNumber;
 }

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.2.0-beta.8" date="2026-05-21"/>
+  <release version="2.2.0-beta.7" date="2026-05-20"/>
+  <release version="2.2.0-beta.6" date="2026-05-11"/>
+  <release version="2.2.0-beta.5" date="2026-05-06"/>
+  <release version="2.2.0-beta.5" date="2026-05-05"/>
+  <release version="2.2.0-beta.4" date="2026-05-04"/>
+  <release version="2.2.0-beta.3" date="2026-04-27"/>
+  <release version="2.2.0-beta.2" date="2026-04-23"/>
+  <release version="2.2.0-beta.2" date="2026-04-23"/>
+  <release version="2.2.0-beta.1" date="2026-04-22"/>
   <release version="2.1.0" date="2026-04-10">
     <description>
       <p>Changes:</p>

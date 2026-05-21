@@ -20,6 +20,7 @@
 #include "NotificationManager.h"
 #include "AvatarManager.h"
 #include "GlobalCallState.h"
+#include "ErrorBus.h"
 
 #include <pjsua-lib/pjsua.h>
 #include <pjsua-lib/pjsua_internal.h>
@@ -115,7 +116,10 @@ SIPCall::~SIPCall()
 
     SIPCallManager::instance().removeCall(this);
     Q_EMIT GlobalCallState::instance().callEnded(false);
-    GlobalCallState::instance().unholdOtherCall();
+
+    // Prevent unhold in the same event loop tick to prevent confused pjsip segfault
+    QTimer::singleShot(0, &GlobalCallState::instance(),
+                       []() { GlobalCallState::instance().unholdOtherCall(); });
 }
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
@@ -156,8 +160,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     qCInfo(lcSIPCall).nospace() << "Call State: " << ci.stateText << " (" << remoteUri << ")"
                                 << " last status code: "
                                 << EnumTranslation::instance().sipStatusCode(statusCode) << " ("
-                                << statusCode << ") "
-                                << " last reason " << ci.lastReason << " contactId " << m_contactId;
+                                << statusCode << ") " << " last reason " << ci.lastReason
+                                << " contactId " << m_contactId;
 
     if (statusCode == PJSIP_SC_RINGING) {
         ringToneFactory.ringingTone()->start();
@@ -356,13 +360,35 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
                     qCInfo(lcSIPCall) << "Found media, index" << i << "of" << ci.media.size();
                     aud_med = getAudioMedia(i);
-                    mic_media.startTransmit(aud_med);
-                    aud_med.startTransmit(speaker_media);
+
+                    try {
+                        mic_media.startTransmit(aud_med);
+                    } catch (pj::Error &err) {
+                        qCCritical(lcSIPCall)
+                                << "failed to start mic media transmission: " << err.info();
+                        ErrorBus::instance().addFatalError(
+                                tr("Failed to initialize microphone audio"));
+                    }
+
+                    try {
+                        aud_med.startTransmit(speaker_media);
+                    } catch (pj::Error &err) {
+                        qCCritical(lcSIPCall)
+                                << "failed to start aud media transmission: " << err.info();
+                        ErrorBus::instance().addFatalError(tr("Failed to initialize call audio"));
+                    }
 
                     if (!m_sniffer) {
                         m_sniffer = new Sniffer(this);
                         m_sniffer->initialize();
-                        aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*m_sniffer));
+
+                        try {
+                            aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*m_sniffer));
+                        } catch (pj::Error &err) {
+                            qCCritical(lcSIPCall)
+                                    << "failed to start audio level transmission: " << err.info();
+                        }
+
                         connect(m_sniffer, &Sniffer::audioLevelChanged, this, [this]() {
                             Q_EMIT SIPCallManager::instance().audioLevelChanged(
                                     this, m_sniffer->audioLevel());

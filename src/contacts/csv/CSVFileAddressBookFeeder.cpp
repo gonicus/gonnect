@@ -10,9 +10,13 @@
 
 Q_LOGGING_CATEGORY(lcCsvAddressBookFeeder, "gonnect.app.feeder.CsvAddressBookFeeder")
 
-CsvFileAddressBookFeeder::CsvFileAddressBookFeeder(const QString &group, AddressBookManager *parent)
+CsvFileAddressBookFeeder::CsvFileAddressBookFeeder(const QString &group, const int retryCount,
+                                                   const int retryInterval,
+                                                   AddressBookManager *parent)
     : QObject(parent), m_group(group)
 {
+    Q_UNUSED(retryCount)
+    Q_UNUSED(retryInterval)
 }
 
 void CsvFileAddressBookFeeder::process()
@@ -21,7 +25,7 @@ void CsvFileAddressBookFeeder::process()
 
     settings.beginGroup(m_group);
     m_filePath = settings.value("path", "").toString();
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
 
     m_blockInfo.isBlocking = settings.value("block", false).toBool();
     m_blockInfo.responseCode =
@@ -88,9 +92,9 @@ void CsvFileAddressBookFeeder::feedAddressBook()
                     { Contact::NumberType::Home, splitted.at(6), splitted.at(7) == "true" });
         }
 
-        addressbook.addContact(splitted.at(0) + splitted.at(1), "", { m_priority, m_displayName },
-                               splitted.at(0), splitted.at(1), "", QDateTime(), phoneNumbers,
-                               m_blockInfo);
+        addressbook.addContact(splitted.at(0) + splitted.at(1), "",
+                               { m_priority, m_displayName, m_group }, splitted.at(0),
+                               splitted.at(1), "", QDateTime(), phoneNumbers, m_blockInfo);
         ++contactCount;
     }
 

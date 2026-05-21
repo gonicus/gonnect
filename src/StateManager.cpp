@@ -83,8 +83,8 @@ void StateManager::initialize()
     connect(&globalShortcuts, &GlobalShortcuts::activated, this, [](const QString &action) {
         auto &cm = SIPCallManager::instance();
         if (action == "dial") {
-            qobject_cast<Application *>(Application::instance())->rootWindow()->show();
-            qobject_cast<Application *>(Application::instance())->rootWindow()->raise();
+            static_cast<Application *>(Application::instance())->rootWindow()->show();
+            static_cast<Application *>(Application::instance())->rootWindow()->raise();
         } else if (action == "hangup") {
             cm.endAllCalls();
         } else if (action == "redial") {
@@ -189,7 +189,7 @@ void StateManager::sendArguments(const QStringList &args)
 
 void StateManager::Activate(const QVariantMap &)
 {
-    qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+    static_cast<Application *>(Application::instance())->rootWindow()->show();
 }
 
 void StateManager::ActivateAction(const QString &action_name, const QVariantList &parameter,
@@ -203,7 +203,7 @@ void StateManager::ActivateAction(const QString &action_name, const QVariantList
             QString value = v.toString();
 
             if (value == "--show") {
-                qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+                static_cast<Application *>(Application::instance())->rootWindow()->show();
             } else if (value == "--hangup") {
                 SIPCallManager::instance().endAllCalls();
             } else {
@@ -212,7 +212,7 @@ void StateManager::ActivateAction(const QString &action_name, const QVariantList
             }
         }
     } else if (action_name == "Show") {
-        qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+        static_cast<Application *>(Application::instance())->rootWindow()->show();
     } else if (action_name == "Hangup") {
         SIPCallManager::instance().endAllCalls();
     } else if (action_name == "refreshIdentities") {
@@ -266,6 +266,6 @@ void StateManager::Open(const QStringList &args, const QVariantMap &)
         }
         ActivateAction("invoke", vArgs, {});
     } else {
-        qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+        static_cast<Application *>(Application::instance())->rootWindow()->show();
     }
 }

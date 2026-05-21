@@ -2,32 +2,109 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <QtCrypto>
+
+#include <openssl/evp.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
 
 #include "SecretPortal.h"
 #include "AppSettings.h"
 
 Q_LOGGING_CATEGORY(lcSecretPortal, "gonnect.secrets")
 
+static constexpr int AES_BLOCK_SIZE = 16;
+static constexpr int AES_256_KEY_LEN = 32;
+
+struct EvpCtxDeleter
+{
+    void operator()(EVP_CIPHER_CTX *ctx) const { EVP_CIPHER_CTX_free(ctx); }
+};
+using EvpCtxPtr = std::unique_ptr<EVP_CIPHER_CTX, EvpCtxDeleter>;
+
+static QByteArray opensslEncrypt(const QByteArray &plainText, const QByteArray &key,
+                                 const QByteArray &iv)
+{
+    if (key.size() != AES_256_KEY_LEN || iv.size() != AES_BLOCK_SIZE) {
+        return {};
+    }
+
+    EvpCtxPtr ctx(EVP_CIPHER_CTX_new());
+    if (!ctx) {
+        return {};
+    }
+
+    if (EVP_EncryptInit_ex(ctx.get(), EVP_aes_256_cbc(), nullptr,
+                           reinterpret_cast<const unsigned char *>(key.constData()),
+                           reinterpret_cast<const unsigned char *>(iv.constData()))
+        != 1) {
+        return {};
+    }
+
+    QByteArray cipherText(plainText.size() + AES_BLOCK_SIZE, '\0');
+    int outLen1 = 0;
+    int outLen2 = 0;
+
+    if (EVP_EncryptUpdate(ctx.get(), reinterpret_cast<unsigned char *>(cipherText.data()), &outLen1,
+                          reinterpret_cast<const unsigned char *>(plainText.constData()),
+                          plainText.size())
+        != 1) {
+        return {};
+    }
+
+    if (EVP_EncryptFinal_ex(
+                ctx.get(), reinterpret_cast<unsigned char *>(cipherText.data()) + outLen1, &outLen2)
+        != 1) {
+        return {};
+    }
+
+    cipherText.resize(outLen1 + outLen2);
+    return cipherText;
+}
+
+static QByteArray opensslDecrypt(const QByteArray &cipherText, const QByteArray &key,
+                                 const QByteArray &iv)
+{
+    if (key.size() != AES_256_KEY_LEN || iv.size() != AES_BLOCK_SIZE || cipherText.isEmpty()) {
+        return {};
+    }
+
+    EvpCtxPtr ctx(EVP_CIPHER_CTX_new());
+    if (!ctx) {
+        return {};
+    }
+
+    if (EVP_DecryptInit_ex(ctx.get(), EVP_aes_256_cbc(), nullptr,
+                           reinterpret_cast<const unsigned char *>(key.constData()),
+                           reinterpret_cast<const unsigned char *>(iv.constData()))
+        != 1) {
+        return {};
+    }
+
+    QByteArray plainText(cipherText.size() + AES_BLOCK_SIZE, '\0');
+    int outLen1 = 0;
+    int outLen2 = 0;
+
+    if (EVP_DecryptUpdate(ctx.get(), reinterpret_cast<unsigned char *>(plainText.data()), &outLen1,
+                          reinterpret_cast<const unsigned char *>(cipherText.constData()),
+                          cipherText.size())
+        != 1) {
+        return {};
+    }
+
+    if (EVP_DecryptFinal_ex(ctx.get(),
+                            reinterpret_cast<unsigned char *>(plainText.data()) + outLen1, &outLen2)
+        != 1) {
+        return {};
+    }
+
+    plainText.resize(outLen1 + outLen2);
+    return plainText;
+}
+
 SecretPortal::SecretPortal(QObject *parent)
     : AbstractPortal{ FREEDESKTOP_DBUS_PORTAL_SERVICE, FREEDESKTOP_DBUS_PORTAL_PATH,
                       SECRET_PORTAL_INTERFACE, parent }
 {
-    const QString chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    const auto charsSize = chars.length();
-
-    AppSettings settings;
-    if (!settings.contains("keychain/iv")) {
-        QString randomString;
-        for (int i = 0; i < 16; i++) {
-            auto r = QRandomGenerator::global()->generate();
-            randomString.append(chars.at(r % charsSize));
-        }
-
-        settings.setValue("keychain/iv", randomString);
-    }
-
-    m_iva = settings.value("keychain/iv").toByteArray();
 }
 
 void SecretPortal::initialize()
@@ -37,12 +114,13 @@ void SecretPortal::initialize()
         return;
     }
 
-    QCA::Initializer init;
-    m_supported = QCA::isSupported("aes256-cbc-pkcs7");
+    // Verify that AES-256-CBC is available in the linked OpenSSL build.
+    // EVP_aes_256_cbc() returns a non-null pointer when supported.
+    m_supported = (EVP_aes_256_cbc() != nullptr);
 
     if (!m_supported) {
         m_hasTriedInitialization = true;
-        qCFatal(lcSecretPortal) << "QCA does not support aes256-cbc-pkcs7!";
+        qCFatal(lcSecretPortal) << "OpenSSL does not support AES-256-CBC!";
         return;
     }
 
@@ -71,8 +149,6 @@ void SecretPortal::initialize()
 
 void SecretPortal::RetrieveSecret(PortalResponse callback)
 {
-    QCA::Initializer init;
-
     QDBusMessage message = QDBusMessage::createMethodCall(
             FREEDESKTOP_DBUS_PORTAL_SERVICE, FREEDESKTOP_DBUS_PORTAL_PATH, SECRET_PORTAL_INTERFACE,
             "RetrieveSecret");
@@ -83,7 +159,6 @@ void SecretPortal::RetrieveSecret(PortalResponse callback)
 
     if (pipe(m_fds) < 0) {
         callback(1, { { "error", "failed to open secret pipe" } });
-
         return;
     }
 
@@ -112,7 +187,6 @@ void SecretPortal::RetrieveSecret(PortalResponse callback)
             if (count < SECRET_MAX_LEN) {
                 QVariantMap reply = response;
                 reply.insert("secret", QByteArray(secret, count));
-
                 callback(code, reply);
             } else {
                 callback(2, { { "error", "secret size too large" } });
@@ -131,42 +205,55 @@ QString SecretPortal::encrypt(const QString &plainText)
         return "";
     }
 
-    QCA::Initializer init;
-    QCA::SecureArray arg = plainText.toUtf8();
-    QCA::InitializationVector iv(m_iva);
+    AppSettings settings;
 
-    QCA::Cipher cipher(QStringLiteral("aes256"), QCA::Cipher::CBC, QCA::Cipher::DefaultPadding,
-                       QCA::Encode, m_instanceSecret, iv);
+    // For backwards compatibility, fall back to the stored iv value that is
+    // stored in the configuration. This is not ideal, as iv should be stored
+    // with the secret instead, but changing it would break with old versions.
+    // Also note that the secret portal is a fallback for old 1.x versions
+    // anyway.
+    if (!settings.contains("keychain/iv")) {
+        unsigned char ivBuf[AES_BLOCK_SIZE];
+        if (RAND_bytes(ivBuf, AES_BLOCK_SIZE) != 1) {
+            qCFatal(lcSecretPortal) << "RAND_bytes failed while generating IV";
+        }
 
-    QCA::SecureArray u = cipher.update(arg);
-    if (!cipher.ok()) {
-        qCCritical(lcSecretPortal) << "cipher update failed";
+        settings.setValue(
+                "keychain/iv",
+                QString::fromLatin1(
+                        QByteArray(reinterpret_cast<const char *>(ivBuf), AES_BLOCK_SIZE).toHex()));
+
+        m_iv = QByteArray::fromHex(settings.value("keychain/iv").toByteArray());
+    }
+
+    QByteArray key = m_instanceSecret.leftJustified(AES_256_KEY_LEN, '\0').left(AES_256_KEY_LEN);
+    QByteArray iv = m_iv.leftJustified(AES_BLOCK_SIZE, '\0').left(AES_BLOCK_SIZE);
+
+    const QByteArray cipherBytes = opensslEncrypt(plainText.toUtf8(), key, iv);
+    if (cipherBytes.isEmpty()) {
+        qCCritical(lcSecretPortal) << "encryption failed";
         return "";
     }
 
-    QCA::SecureArray f = cipher.final();
-    if (!cipher.ok()) {
-        qCCritical(lcSecretPortal) << "cipher finalization failed";
-        return "";
-    }
-
-    QCA::SecureArray cipherText = u.append(f);
-    return QCA::arrayToHex(cipherText.toByteArray());
+    return QString::fromLatin1(cipherBytes.toHex());
 }
 
 QString SecretPortal::decrypt(const QString &cipherText)
 {
-    if (!m_supported || !m_initialized) {
+    if (!m_supported || !m_initialized || m_iv.isEmpty()) {
         qCCritical(lcSecretPortal) << "secret portal is not available";
         return "";
     }
 
-    QCA::Initializer init;
-    QCA::SecureArray arg = QCA::hexToArray(cipherText);
-    QCA::InitializationVector iv(m_iva);
+    QByteArray key = m_instanceSecret.leftJustified(AES_256_KEY_LEN, '\0').left(AES_256_KEY_LEN);
+    QByteArray iv = m_iv.leftJustified(AES_BLOCK_SIZE, '\0').left(AES_BLOCK_SIZE);
+    QByteArray cipherBytes = QByteArray::fromHex(cipherText.toLatin1());
 
-    QCA::Cipher cipher(QStringLiteral("aes256"), QCA::Cipher::CBC, QCA::Cipher::DefaultPadding,
-                       QCA::Decode, m_instanceSecret, iv);
+    const QByteArray plainBytes = opensslDecrypt(cipherBytes, key, iv);
+    if (plainBytes.isEmpty()) {
+        qCCritical(lcSecretPortal) << "decryption failed";
+        return "";
+    }
 
-    return QCA::SecureArray(cipher.process(arg)).data();
+    return QString::fromUtf8(plainBytes);
 }

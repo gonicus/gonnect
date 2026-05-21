@@ -1,5 +1,6 @@
 #include "LitraGlow.h"
 #include <QLoggingCategory>
+#include <algorithm>
 
 #define REPORT_ID 0x11
 #define DEVICE_ID 0xFF
@@ -33,15 +34,19 @@ void LitraGlow::switchStreamlight(bool on)
     unsigned char buf[20];
 
     // Switch on or off
-    memset(buf, 0, sizeof(buf));
+    std::ranges::fill(buf, 0);
     buf[0] = REPORT_ID;
     buf[1] = DEVICE_ID;
     buf[2] = FEATURE_ILLUMINATION;
     buf[3] = SET_ILLUMINATION | SOFTWARE_ID;
     buf[4] = on ? 1 : 0;
 
-    hid_write(m_device, buf, sizeof(buf));
-    hid_read_timeout(m_device, buf, sizeof(buf), 200);
+    if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+        qCWarning(lcLitraGlow) << "failed to write to Litra Glow device";
+    }
+    if (hid_read_timeout(m_device, buf, sizeof(buf), 200) < 0) {
+        qCWarning(lcLitraGlow) << "failed to read from Litra Glow device";
+    }
 }
 
 void LitraGlow::send(bool on)

@@ -316,9 +316,9 @@ QDataStream &operator<<(QDataStream &out, const Contact &contact)
     const auto &contactSourceInfo = contact.contactSourceInfo();
 
     out << contact.id() << contact.dn() << contact.sourceUid() << contact.name()
-        << contactSourceInfo.prio << contactSourceInfo.displayName << contact.company()
-        << contact.mail() << contact.lastModified() << contact.sipStatusSubscriptable()
-        << contact.phoneNumbers() << contact.blockInfo();
+        << contactSourceInfo.prio << contactSourceInfo.displayName << contactSourceInfo.configId
+        << contact.company() << contact.mail() << contact.lastModified()
+        << contact.sipStatusSubscriptable() << contact.phoneNumbers() << contact.blockInfo();
     return out;
 }
 
@@ -330,6 +330,7 @@ QDataStream &operator>>(QDataStream &in, Contact &contact)
     QString name;
     unsigned prio;
     QString displayName;
+    QString configId;
     QString company;
     QString mail;
     QDateTime lastModified;
@@ -337,10 +338,10 @@ QDataStream &operator>>(QDataStream &in, Contact &contact)
     BlockInfo blockInfo;
     QList<Contact::PhoneNumber> phoneNumbers;
 
-    in >> id >> dn >> sourceUid >> name >> prio >> displayName >> company >> mail >> lastModified
-            >> sipStatusSubscriptable >> phoneNumbers >> blockInfo;
-    contact = Contact(id, dn, sourceUid, { prio, displayName }, name, company, mail, lastModified,
-                      phoneNumbers, blockInfo);
+    in >> id >> dn >> sourceUid >> name >> prio >> displayName >> configId >> company >> mail
+            >> lastModified >> sipStatusSubscriptable >> phoneNumbers >> blockInfo;
+    contact = Contact(id, dn, sourceUid, { prio, displayName, configId }, name, company, mail,
+                      lastModified, phoneNumbers, blockInfo);
 
     return in;
 }
@@ -405,5 +406,6 @@ bool Contact::ContactSourceInfo::operator==(const ContactSourceInfo &other) cons
 
 bool Contact::ContactSourceInfo::operator!=(const ContactSourceInfo &other) const
 {
-    return this->prio != other.prio || this->displayName != other.displayName;
+    return this->prio != other.prio || this->displayName != other.displayName
+            || this->configId != other.configId;
 }

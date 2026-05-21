@@ -81,7 +81,7 @@ void SIPAccount::initialize()
         if (!sipURI.match(voiceMailUri).hasMatch()) {
             qCCritical(lcSIPAccount) << "'voiceMailUri' is no valid SIP URI:" << voiceMailUri;
             ErrorBus::instance().addFatalError(
-                    tr("'voiceMailUri' is no valid SIP URI: %1").arg(userUri));
+                    tr("'voiceMailUri' is no valid SIP URI: %1").arg(voiceMailUri));
             Q_EMIT initialized(false);
             return;
         }
@@ -235,7 +235,7 @@ void SIPAccount::initialize()
         m_transportConfig.tlsConfig.privKeyFile = privKeyFile.toStdString();
     }
 
-    m_transportConfig.tlsConfig.verifyServer = m_settings.value("verifyServer", false).toBool();
+    m_transportConfig.tlsConfig.verifyServer = m_settings.value("verifyServer", true).toBool();
 
     if (!activateTransports()) {
         Q_EMIT initialized(false);

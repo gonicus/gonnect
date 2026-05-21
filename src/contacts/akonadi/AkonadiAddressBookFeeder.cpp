@@ -14,16 +14,21 @@
 
 Q_LOGGING_CATEGORY(lcAkonadiAddressBookFeeder, "gonnect.app.feeder.AkonadiAddressBookFeeder")
 
-AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, AddressBookManager *parent)
+AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, const int retryCount,
+                                                   const int retryInterval,
+                                                   AddressBookManager *parent)
     : QObject(parent),
       m_group(group),
       m_session(new Akonadi::Session("GOnnect::ContactsSession")),
       m_monitor(new Akonadi::Monitor(parent))
 {
+    Q_UNUSED(retryCount)
+    Q_UNUSED(retryInterval)
+
     ReadOnlyConfdSettings settings;
 
     settings.beginGroup(m_group);
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {
@@ -93,7 +98,7 @@ AkonadiAddressBookFeeder::AkonadiAddressBookFeeder(const QString &group, Address
 
                     Contact *contact = addressbook.addContact(
                             addressee.assembledName() + addressee.organization(), addressee.uid(),
-                            { m_priority, m_displayName }, addressee.assembledName(),
+                            { m_priority, m_displayName, m_group }, addressee.assembledName(),
                             addressee.organization(), email, changed, phoneNumbers);
 
                     if (!addressee.photo().isEmpty()) {
@@ -239,8 +244,8 @@ void AkonadiAddressBookFeeder::processSearchResult(KJob *job)
 
         Contact *contact = addressbook.addContact(
                 addressee.assembledName() + addressee.organization(), addressee.uid(),
-                { m_priority, m_displayName }, addressee.assembledName(), addressee.organization(),
-                email, changed, phoneNumbers);
+                { m_priority, m_displayName, m_group }, addressee.assembledName(),
+                addressee.organization(), email, changed, phoneNumbers);
 
         if (!addressee.photo().isEmpty()) {
             AvatarManager::instance().addExternalImage(contact->id(), addressee.photo().rawData(),

@@ -2,11 +2,38 @@ name: GOnnect Build
 
 on:
   workflow_dispatch:  # can be manually dispatched under GitHub's "Actions" tab
+    inputs:
+      run_build:
+        description: Run build job
+        type: boolean
+      run_build_windows:
+        description: Run build-windows job
+        type: boolean
+      run_build_macos:
+        description: Run build-macos job
+        type: boolean
+      run_format:
+        description: Run format job
+        type: boolean
+      run_clang:
+        description: Run clang job
+        type: boolean
+      run_clazy:
+        description: Run clazy job
+        type: boolean
+      run_flatpak:
+        description: Run flatpak job
+        type: boolean
+      run_tests:
+        description: Run tests job
+        type: boolean
   # Run the build only, if the branch is release or main or a PR with release or main as target is used
   push:
     branches:
       - release
       - main
+    tags:
+      - 'v*'
   # Use the release/main branch workflow/actions definitions rather the definitions in the pull_request
   pull_request:
     branches:
@@ -25,11 +52,61 @@ env:
 permissions:
   contents: read
   pull-requests: read
+  id-token: write
 
 jobs:
+  # Detect changes to allow selecting the jobs to run.
+  # If the workflow is triggered manually, the selection comes from the inputs there.
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      # Job selection comes from inputs, if started manually. No need to use detected changes.
+      src: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.src }}
+      build: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.build }}
+      flatpak: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.flatpak }}
+      tests: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.tests }}
+      resources: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources }}
+      resources-windows: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-windows }}
+      resources-macos: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-macos }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Get changes
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**'
+              - 'external/**'
+            build:
+              - '**/CMakeLists.txt'
+              - '**/conanfile.py'
+              - '**/conanfile.txt'
+              - '**/CMakePresets.json'
+            flatpak:
+              - 'resources/flatpak/**'
+              - 'CMakeLists.txt'
+            tests:
+              - 'tests/**'
+            resources:
+              - 'resources/artwork/**'
+              - 'resources/emojis/**'
+              - 'resources/font/**'
+              - 'resources/sounds/**'
+              - 'resources/templates/**'
+              - 'migrate/**'
+              - 'i18n/**/*.ts'
+            resources-windows:
+              - 'resources/windows/**'
+            resources-macos:
+              - 'resources/macos/**'
+
   build:
     runs-on: ubuntu-24.04
     name: "Build GOnnect (Linux)"
+    needs: changes
+    if: ${{ inputs.run_build || needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -52,7 +129,7 @@ jobs:
         run: cmake --build --preset conan-release --parallel $(nproc --all)
 
       - name: Upload Test artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: gonnect-tests
           path: build/Release/tests/contactsTest
@@ -61,6 +138,8 @@ jobs:
   build-windows:
     runs-on: windows-2025
     name: "Build GOnnect (Windows)"
+    needs: changes
+    if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-windows == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -73,18 +152,61 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }}
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
-      - name: Build
+      - name: Build application
         run: cmake --build --preset conan-release
 
-      - name: Package
+      - name: Azure Login via OIDC
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign application
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+        with:
+          endpoint: https://weu.codesigning.azure.net/
+          signing-account-name: GONICUS-signing
+          certificate-profile-name: gonicus-profile
+          files-folder: build/Release
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Build installer
         run: cd build && cpack ${{github.workspace}}
 
+      - name: Sign installer
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+        with:
+          endpoint: https://weu.codesigning.azure.net/
+          signing-account-name: GONICUS-signing
+          certificate-profile-name: gonicus-profile
+          files-folder: build
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
       - name: Save installer
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: windows-installer.zip
           compression-level: 0
@@ -93,6 +215,8 @@ jobs:
   build-macos:
     runs-on: macos-26
     name: "Build GOnnect (MacOS)"
+    needs: changes
+    if: ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-macos == 'true' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -113,17 +237,17 @@ jobs:
         run: cd build/Release && cpack ${{github.workspace}}
 
       - name: Save installer
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: mac-installer.dmg
           compression-level: 0
           path: build/Release/GOnnect*.dmg
 
   format:
-    # disable temporarily due to defect action: https://github.com/jidicula/clang-format-action/issues/267
-    if: false
     runs-on: ubuntu-24.04
     name: "Code Formatting"
+    needs: changes
+    if: ${{ inputs.run_format || needs.changes.outputs.src == 'true' }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Run clang-format style check for C/C++/Protobuf programs.
@@ -136,6 +260,8 @@ jobs:
   clang:
     runs-on: ubuntu-24.04
     name: "Static Code Analyzer"
+    needs: changes
+    if: ${{ inputs.run_clang || needs.changes.outputs.src == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -159,7 +285,7 @@ jobs:
           scripts/static-clang-analyzer.sh
 
       - name: Save Report
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: clang-report
           path: /tmp/build.log
@@ -168,6 +294,8 @@ jobs:
     runs-on: ubuntu-24.04
     container: fedora:43
     name: "Qt Semantics"
+    needs: changes
+    if: ${{ inputs.run_clazy || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
 
     steps:
       - name: Install dependencies
@@ -209,7 +337,7 @@ jobs:
           conan profile detect || true
 
       - name: Restore cached Conan packages
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-conan-packages
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
@@ -224,7 +352,7 @@ jobs:
           conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
 
       - name: Cached Conan packages
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         if: always() && steps.cache-conan-packages.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
@@ -243,6 +371,8 @@ jobs:
   flatpak:
     name: "Flatpak"
     runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ inputs.run_flatpak || needs.changes.outputs.flatpak == 'true' || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' }}
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
       options: --privileged
@@ -258,7 +388,7 @@ jobs:
         run: |
           echo "gonnect_version=$(grep -oP 'GOnnect VERSION ([0-9.]+)' CMakeLists.txt | awk '{ print $3 }')" >> $GITHUB_OUTPUT
 
-      - uses: flatpak/flatpak-github-actions/flatpak-builder@92ae9851ad316786193b1fd3f40c4b51eb5cb101 # v6.6
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@401fe28a8384095fc1531b9d320b292f0ee45adb # v6.7
         with:
           bundle: gonnect
           build-bundle: 'true'
@@ -269,7 +399,8 @@ jobs:
   tests:
     runs-on: ubuntu-24.04
     name: "Unit Tests"
-    needs: build
+    needs: [changes, build]
+    if: ${{ (inputs.run_tests || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && needs.build.result == 'success' }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -295,3 +426,17 @@ jobs:
         uses: geekyeggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
         with:
           name: gonnect-tests
+
+  ci-status:
+    needs: [changes, build, build-windows, build-macos, format, clang, clazy, flatpak, tests]
+    if: always() # Ensure this runs even if upstream jobs were skipped
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify pipeline status
+        run: |
+          # Contains evaluates to true if any job failed or was cancelled
+          if ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}; then
+            echo "Pipeline failed."
+            exit 1
+          fi
+          echo "Pipeline passed!"
