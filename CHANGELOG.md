@@ -1,3 +1,10 @@
+# [2.2.0-beta.8](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.7...v2.2.0-beta.8) (2026-05-21)
+
+
+### Bug Fixes
+
+* robustness for media and contacts cache ([#471](https://github.com/gonicus/gonnect/issues/471)) ([d879e1b](https://github.com/gonicus/gonnect/commit/d879e1b6a16ddca85658b20b8fb0fca63e51f05c))
+
 # [2.2.0-beta.7](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.6...v2.2.0-beta.7) (2026-05-20)
 
 
