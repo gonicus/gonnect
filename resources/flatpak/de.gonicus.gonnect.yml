@@ -207,15 +207,20 @@ modules:
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DCMAKE_INSTALL_LIBDIR=lib
-      - -DBUILD_SHARED_LIBS:BOOL=ON
-      - -DICAL_GLIB=true
-      - -DGOBJECT_INTROSPECTION=true
-      - -DICAL_GLIB_VAPI=false
-      - -DICAL_BUILD_DOCS=false
+      - -DLIBICAL_STATIC:BOOL=OFF
+      - -DLIBICAL_GLIB=ON
+      - -DLIBICAL_GLIB_VAPI=OFF
+      - -DLIBICAL_GOBJECT_INTROSPECTION=ON
+      - -DLIBICAL_JAVA_BINDINGS=OFF
+      - -DLIBICAL_GLIB_BUILD_DOCS=OFF
+      - -DLIBICAL_BUILD_DOCS=OFF
+      - -DLIBICAL_BUILD_TESTING=OFF
+      - -DLIBICAL_BUILD_EXAMPLES=OFF
+
     sources:
       - type: archive
-        url: https://github.com/libical/libical/releases/download/v3.0.20/libical-3.0.20.tar.gz
-        sha256: e73de92f5a6ce84c1b00306446b290a2b08cdf0a80988eca0a2c9d5c3510b4c2
+        url: https://github.com/libical/libical/releases/download/v4.0.0/libical-4.0.0.tar.gz
+        sha256: caa74119c5a83d19e7466f20344ea6ffe4b779198ee33f46d5fab9d574dac207
         x-checker-data:
           type: anitya
           project-id: 1637

@@ -63,7 +63,7 @@ class GOnnectRecipe(ConanFile):
         self.requires("hidapi/0.15.0")
         self.requires("pjproject/2.17")
         self.requires("openldap/2.6.13")
-        self.requires("libical/3.0.20")
+        self.requires("libical/4.0.0")
         self.requires("vcard/cci.20250408")
         self.requires("logfault/0.8.1-1")
 

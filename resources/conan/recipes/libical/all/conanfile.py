@@ -41,12 +41,15 @@ class LibICALConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
 
-        tc.variables["STATIC_ONLY"] = not self.options.shared
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["GOBJECT_INTROSPECTION"] = False
-        tc.variables["ICAL_GLIB"] = False
-        tc.variables["ICAL_GLIB_VAPI"] = False
-        tc.variables["ICAL_BUILD_DOCS"] = False
+        tc.variables["LIBICAL_STATIC"] = not self.options.shared
+        tc.variables["LIBICAL_JAVA_BINDINGS"] = False
+        tc.variables["LIBICAL_GLIB"] = False
+        tc.variables["LIBICAL_GLIB_VAPI"] = False
+        tc.variables["LIBICAL_BUILD_DOCS"] = False
+        tc.variables["LIBICAL_GLIB_BUILD_DOCS"] = False
+        tc.variables["LIBICAL_GOBJECT_INTROSPECTION"] = False
+        tc.variables["LIBICAL_BUILD_TESTING"] = False
+        tc.variables["LIBICAL_BUILD_EXAMPLES"] = False
 
         rm(self, "FindGLib.cmake", os.path.join(self.source_folder, "cmake"))
         rm(self, "FindGObjectIntrospection.cmake", os.path.join(self.source_folder, "cmake", "modules"))
