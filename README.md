@@ -110,6 +110,7 @@ udevadm trigger
 | kuando       | Busylight UC Omega |
 | Luxafor      | Flag               |
 | Logitech     | Litra Beam LX      |
+| Blinkstick   | All models         |
 
 
 # Automatic video light switching
