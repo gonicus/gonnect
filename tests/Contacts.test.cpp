@@ -13,6 +13,9 @@ void ContactsTest::testCleanPhoneNumber()
     // Strip whitespace and -
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  +49 2931 9160   "), QString("+4929319160"));
     QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("  +49-2931-9160   "), QString("+4929319160"));
+    // Handle URL encoded numbers
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("callto:+49%202932%209160"), QString("+4929329160"));
+    QCOMPARE(PhoneNumberUtil::cleanPhoneNumber("%2B49%202932%209160"), QString("+4929329160"));
 }
 
 void ContactsTest::testLevenshteinDistance()
