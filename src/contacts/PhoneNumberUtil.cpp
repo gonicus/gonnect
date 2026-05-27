@@ -45,7 +45,7 @@ bool ContactInfo::operator!=(const ContactInfo &other)
 
 QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
 {
-    QString result(number);
+    QString result(QUrl::fromPercentEncoding(number.toLocal8Bit()));
 
     static const QRegularExpression stripRegEx("[^0-9#+*]");
     result.replace(stripRegEx, "");
