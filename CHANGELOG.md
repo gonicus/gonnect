@@ -1,3 +1,15 @@
+# [2.2.0-beta.9](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.8...v2.2.0-beta.9) (2026-05-28)
+
+
+### Bug Fixes
+
+* clear out URI encoded number input ([#475](https://github.com/gonicus/gonnect/issues/475)) ([cd1c126](https://github.com/gonicus/gonnect/commit/cd1c126b55aef57532db88ae432705d8421f7fe7))
+
+
+### Features
+
+* add Blinkstick busylight support ([#474](https://github.com/gonicus/gonnect/issues/474)) ([af400bd](https://github.com/gonicus/gonnect/commit/af400bd2b32bb19ff1e62c8ff9fc20531056d997))
+
 # [2.2.0-beta.8](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.7...v2.2.0-beta.8) (2026-05-21)
 
 
