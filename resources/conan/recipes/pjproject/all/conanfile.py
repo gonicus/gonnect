@@ -158,6 +158,7 @@ class PjSIPConan(ConanFile):
         with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
             file.write('\n\n#define PJ_HAS_IPV6 1\n')
             file.write('\n\n#define PJMEDIA_HAS_RTCP_XR 1\n')
+            file.write('\n\n#define PJMEDIA_HAS_DTMF_FLASH 0\n')
             file.write('\n\n#define PJSIP_MAX_PKT_LEN 8192\n')
 
             if self.settings.os == "Macos":
