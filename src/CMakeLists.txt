@@ -723,6 +723,8 @@ qt_add_qml_module(gonnect
         usb/busylight/LitraBeamLX.cpp
         usb/busylight/LitraGlow.h
         usb/busylight/LitraGlow.cpp
+        usb/busylight/BlinkStick.h
+        usb/busylight/BlinkStick.cpp
 )
 
 if(LINUX)
