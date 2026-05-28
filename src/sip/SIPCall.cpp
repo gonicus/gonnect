@@ -79,6 +79,8 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         }
     }
 
+    AudioManager::instance().acquireDevice();
+
     // Setup rtt timeout
     m_rttTimeoutTimer.setSingleShot(true);
     m_rttTimeoutTimer.setInterval(6s);
@@ -96,6 +98,8 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
 
 SIPCall::~SIPCall()
 {
+    AudioManager::instance().releaseDevice();
+
     if (m_isEmergencyCall) {
         Q_EMIT ViewHelper::instance().hideEmergency();
     }
@@ -286,13 +290,14 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
             if (m_isEstablished) {
                 ringToneFactory.endTone()->start();
-            }
-            if (!m_incoming) {
-                if (statusCode == PJSIP_SC_BUSY_HERE) {
-                    ringToneFactory.busyTone()->start(5);
-                } else if (static_cast<int>(statusCode) >= 400
-                           && static_cast<int>(statusCode) < 700) {
-                    ringToneFactory.congestionTone()->start(5);
+            } else {
+                if (!m_incoming) {
+                    if (statusCode == PJSIP_SC_BUSY_HERE) {
+                        ringToneFactory.busyTone()->start(5);
+                    } else if (static_cast<int>(statusCode) >= 400
+                               && static_cast<int>(statusCode) < 700) {
+                        ringToneFactory.congestionTone()->start(5);
+                    }
                 }
             }
         }

@@ -66,6 +66,8 @@ private:
     HeadsetDevice *m_device = nullptr;
     ICallState::States m_oldCallState = ICallState::State::Idle;
 
+    QTimer m_callEndTimer;
+
     bool m_inRemoteCallScreen = false;
     QString m_muteTag;
 };

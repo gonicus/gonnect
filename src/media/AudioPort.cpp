@@ -13,7 +13,7 @@ using namespace std::chrono_literals;
 
 AudioPort::AudioPort(QAudioDevice device) : m_device(device)
 {
-    m_idleTimer.setInterval(1s);
+    m_idleTimer.setInterval(10s);
     connect(&m_idleTimer, &QTimer::timeout, this, &AudioPort::stopIO);
 
     connect(this, &AudioPort::startIdleTimer, this,
@@ -168,6 +168,11 @@ void AudioPort::startSinkIO()
 {
     m_idleTimer.stop();
 
+    if (m_isDraining && !m_sink.isNull()) {
+        m_isDraining = false;
+        return;
+    }
+
     if (!m_sink.isNull()) {
         stopSinkIO();
     }
@@ -191,17 +196,25 @@ void AudioPort::startSinkIO()
 void AudioPort::stopSinkIO()
 {
     m_idleTimer.stop();
-
-    if (m_sink) {
-        writeSilenceMS(SILENCE_BUFFER_MS);
-
-        m_sink->stop();
-        m_sink->deleteLater();
-        m_sink = nullptr;
-        m_io = nullptr;
+    if (m_sink.isNull() || m_isDraining) {
+        return;
     }
 
-    Q_EMIT audioSinkChanged();
+    writeSilenceMS(SILENCE_BUFFER_MS);
+
+    m_isDraining = true;
+    QTimer::singleShot(SILENCE_BUFFER_MS + 200, this, [this]() {
+        m_isDraining = false;
+
+        if (m_sink) {
+            m_sink->stop();
+            m_sink->deleteLater();
+            m_sink = nullptr;
+            m_io = nullptr;
+        }
+
+        Q_EMIT audioSinkChanged();
+    });
 }
 
 void AudioPort::startSourceIO()
@@ -267,6 +280,11 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
         return;
     }
 
+    if (m_isWarmingUp) {
+        m_isWarmingUp = false;
+        QObject::disconnect(m_warmUpDrain);
+    }
+
     auto bytes = m_io->read(frame.size);
 
     if (!m_isMuted) {
@@ -297,8 +315,50 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
         return;
     }
 
+    m_isWarmingUp = false;
+
     m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);
 
     // Auto destroy sink after timeout
     Q_EMIT startIdleTimer();
+}
+
+void AudioPort::acquire()
+{
+    if (m_device.mode() == QAudioDevice::Mode::Input) {
+        if (m_source.isNull()) {
+            startSourceIO();
+        }
+    } else {
+        if (m_sink.isNull()) {
+            startSinkIO();
+        }
+    }
+
+    m_isWarmingUp = true;
+
+    if (m_device.mode() == QAudioDevice::Mode::Input && !m_io.isNull()) {
+        QObject::disconnect(m_warmUpDrain);
+
+         m_warmUpDrain = connect(m_io.data(), &QIODevice::readyRead, this, [this]() {
+            if (m_isWarmingUp && !m_io.isNull()) {
+                m_io->readAll();
+            }
+        });
+    }
+}
+
+void AudioPort::release()
+{
+    if (!m_isWarmingUp) {
+        return;
+    }
+
+    m_isWarmingUp = false;
+
+    QObject::disconnect(m_warmUpDrain);
+
+    if (!m_idleTimer.isActive()) {
+        stopIO();
+    }
 }

@@ -36,6 +36,19 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
             &HeadsetDeviceProxy::updateRemoteContactInfo);
     connect(&GlobalCallState::instance(), &GlobalCallState::isPhoneConferenceChanged, this,
             &HeadsetDeviceProxy::updateRemoteContactInfo);
+
+    m_callEndTimer.setInterval(2s);
+    m_callEndTimer.setSingleShot(true);
+    connect(&m_callEndTimer, &QTimer::timeout, this, [this]() {
+        if (!m_device) {
+            return;
+        }
+
+        if (GlobalCallState::instance().globalCallState() == ICallState::State::Idle) {
+            m_device->setCallStatus(tr("Call ended"));
+            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
+        }
+    });
 }
 
 HeadsetDeviceProxy::~HeadsetDeviceProxy()
@@ -56,6 +69,11 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
             refreshAll ? ICallState::States::fromInt((1 << 9) - 1) : (m_oldCallState ^ state);
 
     m_oldCallState = state;
+
+    if (state && m_callEndTimer.isActive()) {
+        m_callEndTimer.stop();
+    }
+
     if (changeMask & State::RingingIncoming) {
         setRing(state & State::RingingIncoming);
         if (state & State::RingingIncoming) {
@@ -107,13 +125,16 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
     if (changeMask && !state) {
         setIdle();
         m_inRemoteCallScreen = false;
-        m_device->setCallStatus(tr("Call ended"));
-        m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
+        m_callEndTimer.start();
     }
 
     if (changeMask & State::AudioActive && !(state & State::Migrating)) {
         GlobalMuteState::instance().reset();
-        setBusyLine(state & State::AudioActive);
+        if (state & State::AudioActive) {
+            setBusyLine(true);
+        } else {
+            setBusyLine(false);
+        }
     }
 
     if (changeMask & State::CallActive) {
@@ -121,10 +142,6 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("Call active"));
             m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
-        } else {
-            m_inRemoteCallScreen = false;
-            m_device->setCallStatus(tr("Call ended"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::EndCall);
         }
     }
 
