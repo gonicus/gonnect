@@ -25,6 +25,11 @@ void AuthManager::init()
     m_isAuthManagerInitialized = true;
 
     ReadOnlyConfdSettings settings;
+
+    if (!settings.childGroups().contains("jitsi")) {
+        return;
+    }
+
     settings.beginGroup("jitsi");
 
     // Use this when other auth types for Jitsi Meet are implemented
@@ -34,11 +39,15 @@ void AuthManager::init()
         return;
     }
 
-    QSslConfiguration sslConfig;
-    sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    settings.endGroup();
+    QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+    if (!settings.value("generic/verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
     sslConfig.addCaCertificates(sslCAs());
     m_reqFactory.setSslConfiguration(sslConfig);
 
+    settings.beginGroup("jitsi");
     m_reqFactory.setBaseUrl(settings.value("baseUrl", "").toUrl());
 
     m_authFlow = new QOAuth2AuthorizationCodeFlow(this);
@@ -363,8 +372,12 @@ void AuthManager::authenticateJitsiImpl(const QString &roomName)
 
     auto request = m_reqFactory.createRequest(QUrlQuery(QString("room=%1").arg(roomName)));
 
-    QSslConfiguration sslConfig;
-    sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+
+    ReadOnlyConfdSettings settings;
+    if (!settings.value("generic/verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
     sslConfig.addCaCertificates(sslCAs());
     request.setSslConfiguration(sslConfig);
 

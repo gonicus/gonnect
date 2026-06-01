@@ -1,0 +1,77 @@
+diff --git a/qwebdav.cpp b/qwebdav.cpp
+index 091500d..f3fa4b8 100644
+--- a/qwebdav.cpp
++++ b/qwebdav.cpp
+@@ -160,6 +160,16 @@ void QWebdav::acceptSslCertificate(const QString &sslCertDigestMd5,
+     m_sslCertDigestSha1 = hexToDigest(sslCertDigestSha1);
+ }
+ 
++void QWebdav::addSslCa(QSslCertificate certificate)
++{
++    m_sslCa += certificate;
++}
++
++void QWebdav::addSslCa(const QList<QSslCertificate> &certificates)
++{
++    m_sslCa += certificates;
++}
++
+ void QWebdav::replyReadyRead()
+ {
+     auto reply = qobject_cast<QNetworkReply*>(QObject::sender());
+@@ -692,9 +702,23 @@ QNetworkReply* QWebdav::remove(const QString& path)
+     return createRequest("DELETE", req);
+ }
+ 
++void QWebdav::setVerifyCa(const bool value) {
++    m_verifyCa = value;
++}
++
+ QNetworkRequest QWebdav::buildRequest() {
+     QNetworkRequest req;
+     if (isSSL()) {
++
++        QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
++        if (!m_verifyCa) {
++            sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
++        }
++        if (!m_sslCa.isEmpty()) {
++            sslConfig.addCaCertificates(m_sslCa);
++        }
++        req.setSslConfiguration(sslConfig);
++
+         QString concatenated = m_username + ":" + m_password;
+         QByteArray data = concatenated.toLocal8Bit().toBase64();
+         QString headerData = "Basic " + data;
+diff --git a/qwebdav.h b/qwebdav.h
+index 7111f05..3e8cbcb 100644
+--- a/qwebdav.h
++++ b/qwebdav.h
+@@ -97,6 +97,9 @@ public:
+     void acceptSslCertificate(const QString &sslCertDigestMd5 = "",
+                               const QString &sslCertDigestSha1 = "");
+ 
++    void addSslCa(QSslCertificate certificate);
++    void addSslCa(const QList<QSslCertificate>& certificates);
++
+     QNetworkReply* list(const QString& path);
+     QNetworkReply* list(const QString& path, int depth);
+ 
+@@ -125,6 +128,8 @@ public:
+     QNetworkReply* lock(const QString& path, qint64 secs, const QString& token = QString(), QWebdavLockScope scope = LOCK_SCOPE_EXCLUSIVE, QWebdavLockDepth depth = LOCK_DEPTH_ZERO, const QString& owner = QString());
+     QNetworkReply* unlock(const QString& path, const QString& token);
+ 
++    void setVerifyCa(const bool value);
++
+     //! converts a digest from QByteArray to hexadecimal format ( XX:XX:XX:... with X in [0-9,A-F] )
+     static QString digestToHex(const QByteArray &input);
+     //! converts a digest from hexadecimal format ( XX:XX:XX:... with X in [0-9,A-F] ) to QByteArray
+@@ -156,6 +161,8 @@ private:
+ private:
+     QMap<QNetworkReply*, QIODevice*> m_outDataDevices;
+     QMap<QNetworkReply*, QIODevice*> m_inDataDevices;
++    QList<QSslCertificate> m_sslCa;
++    bool m_verifyCa = true;
+ 
+     QString m_rootPath;
+     QString m_username;

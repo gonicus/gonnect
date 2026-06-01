@@ -1,3 +1,136 @@
+# [2.2.0-beta.9](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.8...v2.2.0-beta.9) (2026-05-28)
+
+
+### Bug Fixes
+
+* clear out URI encoded number input ([#475](https://github.com/gonicus/gonnect/issues/475)) ([cd1c126](https://github.com/gonicus/gonnect/commit/cd1c126b55aef57532db88ae432705d8421f7fe7))
+
+
+### Features
+
+* add Blinkstick busylight support ([#474](https://github.com/gonicus/gonnect/issues/474)) ([af400bd](https://github.com/gonicus/gonnect/commit/af400bd2b32bb19ff1e62c8ff9fc20531056d997))
+
+# [2.2.0-beta.8](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.7...v2.2.0-beta.8) (2026-05-21)
+
+
+### Bug Fixes
+
+* robustness for media and contacts cache ([#471](https://github.com/gonicus/gonnect/issues/471)) ([d879e1b](https://github.com/gonicus/gonnect/commit/d879e1b6a16ddca85658b20b8fb0fca63e51f05c))
+
+# [2.2.0-beta.7](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.6...v2.2.0-beta.7) (2026-05-20)
+
+
+### Bug Fixes
+
+* do not show favorites in "most called" list ([#456](https://github.com/gonicus/gonnect/issues/456)) ([8ee676d](https://github.com/gonicus/gonnect/commit/8ee676d08a6e79eba5c31749fb62531dfa6c7069))
+* Ensure correct `tag` value type in flatpak manifest ([#466](https://github.com/gonicus/gonnect/issues/466)) ([3c5412a](https://github.com/gonicus/gonnect/commit/3c5412a250d5a7e3c3404432ae57d28465bac48c))
+* **ui:** do not treat room names beginning with digits as phone numbers ([#461](https://github.com/gonicus/gonnect/issues/461)) ([75ed3f2](https://github.com/gonicus/gonnect/commit/75ed3f23ebe0730f10c43f6867d91cd1d54acf3f))
+
+
+### Features
+
+* add template for 1&1 ([#465](https://github.com/gonicus/gonnect/issues/465)) ([865fcd9](https://github.com/gonicus/gonnect/commit/865fcd975f5d030674ff2d916c0eea5e1fa29456))
+* ical rrule parsing optimization ([#457](https://github.com/gonicus/gonnect/issues/457)) ([c46f066](https://github.com/gonicus/gonnect/commit/c46f066fd5f4f1aee410676f6e502ac682f4b265))
+* rtt ui integration ([#443](https://github.com/gonicus/gonnect/issues/443)) ([62d48f3](https://github.com/gonicus/gonnect/commit/62d48f313a4aed5c971dc52d8e33a13e8396a58d))
+* windows signing ([#462](https://github.com/gonicus/gonnect/issues/462)) ([f7dd63a](https://github.com/gonicus/gonnect/commit/f7dd63a69d2231c92c768154eae99326a7ba1c29))
+
+# [2.2.0-beta.6](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.5...v2.2.0-beta.6) (2026-05-11)
+
+
+### Bug Fixes
+
+* base edits on SSL default configuration ([#459](https://github.com/gonicus/gonnect/issues/459)) ([6dcbf78](https://github.com/gonicus/gonnect/commit/6dcbf78a5b1b470ec966d8704b68e7d3e21da490))
+
+# [2.2.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.4...v2.2.0-beta.5) (2026-05-06)
+
+
+### Bug Fixes
+
+* if so configured, do not verify CA even if they are state ([#455](https://github.com/gonicus/gonnect/issues/455)) ([f45a1d8](https://github.com/gonicus/gonnect/commit/f45a1d81f152bb8d2024dad675206302255e2126))
+* ignore verification ssl errors if verifyServer=false ([#453](https://github.com/gonicus/gonnect/issues/453)) ([be3d71c](https://github.com/gonicus/gonnect/commit/be3d71c419b252e4a103d5107ab9a9598b474742))
+
+# [2.2.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.4...v2.2.0-beta.5) (2026-05-05)
+
+
+### Bug Fixes
+
+* ignore verification ssl errors if verifyServer=false ([#453](https://github.com/gonicus/gonnect/issues/453)) ([be3d71c](https://github.com/gonicus/gonnect/commit/be3d71c419b252e4a103d5107ab9a9598b474742))
+
+# [2.2.0-beta.4](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.3...v2.2.0-beta.4) (2026-05-04)
+
+
+### Bug Fixes
+
+* do not wipe all contact sources on by-source removals ([#450](https://github.com/gonicus/gonnect/issues/450)) ([f89882f](https://github.com/gonicus/gonnect/commit/f89882f9be298c1f90de881239b44a50b749492b))
+* ignore certain ssl errors when verifyServer is false (webdav) ([#451](https://github.com/gonicus/gonnect/issues/451)) ([428860a](https://github.com/gonicus/gonnect/commit/428860a320785b9a52888a824d28990f59a6beb6))
+
+
+### Features
+
+* **ldap:** configurable contact attribute mapping ([#445](https://github.com/gonicus/gonnect/issues/445)) ([4113384](https://github.com/gonicus/gonnect/commit/41133841f2c00c72229658a159abfae59330d7c9))
+
+# [2.2.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.2...v2.2.0-beta.3) (2026-04-27)
+
+
+### Bug Fixes
+
+* prevent unhold on currently changing call ([#439](https://github.com/gonicus/gonnect/issues/439)) ([f1a05f5](https://github.com/gonicus/gonnect/commit/f1a05f59746755ebfb4d89def1b1bd1c8ff7a73a))
+
+# [2.2.0-beta.2](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.1...v2.2.0-beta.2) (2026-04-23)
+
+
+### Bug Fixes
+
+* use verifyServer flag for CA verification with webdav ([#437](https://github.com/gonicus/gonnect/issues/437)) ([c1ab98f](https://github.com/gonicus/gonnect/commit/c1ab98fe1294fc6fa62c204007f714f55d6eafe2))
+
+
+### Features
+
+* **ui:** leave conference via systray menu ([#438](https://github.com/gonicus/gonnect/issues/438)) ([b973bb6](https://github.com/gonicus/gonnect/commit/b973bb63c7798bea7fc6bf0c249e053c5d331fef))
+
+# [2.2.0-beta.2](https://github.com/gonicus/gonnect/compare/v2.2.0-beta.1...v2.2.0-beta.2) (2026-04-23)
+
+
+### Bug Fixes
+
+* use verifyServer flag for CA verification with webdav ([#437](https://github.com/gonicus/gonnect/issues/437)) ([c1ab98f](https://github.com/gonicus/gonnect/commit/c1ab98fe1294fc6fa62c204007f714f55d6eafe2))
+
+# [2.2.0-beta.1](https://github.com/gonicus/gonnect/compare/v2.1.0...v2.2.0-beta.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* build with certificate patch ([#433](https://github.com/gonicus/gonnect/issues/433)) ([8e8ba1f](https://github.com/gonicus/gonnect/commit/8e8ba1f9897457a4582ffdb059985569ac957984))
+* c++ standard and guarding updates ([#422](https://github.com/gonicus/gonnect/issues/422)) ([9e8171b](https://github.com/gonicus/gonnect/commit/9e8171ba4ef5336e988d6938fa62793432d89ae5))
+* code review loop ([#374](https://github.com/gonicus/gonnect/issues/374)) ([f1c609d](https://github.com/gonicus/gonnect/commit/f1c609da8dc0214e2f0c4909ef7b645b08352c11))
+* disable WMME in pjsip ([#397](https://github.com/gonicus/gonnect/issues/397)) ([a90a80c](https://github.com/gonicus/gonnect/commit/a90a80cb4796c96f1626f82d3e59d49312c23585))
+* handle direct pjsip mute again ([#402](https://github.com/gonicus/gonnect/issues/402)) ([0c4609c](https://github.com/gonicus/gonnect/commit/0c4609ca355f760478a19bda2c618aa299ff86eb))
+* home/call switch tab notification reset ([#404](https://github.com/gonicus/gonnect/issues/404)) ([95e0a3f](https://github.com/gonicus/gonnect/commit/95e0a3ff849fda5a6fbb7e2294a99349edef77f8))
+* make MWI subscription configurable ([#414](https://github.com/gonicus/gonnect/issues/414)) ([d74c530](https://github.com/gonicus/gonnect/commit/d74c53040e10f354cfbf86ef62662570af4bd3fc))
+* make ReadOnlyConfdSettings treate string lists correctly ([#423](https://github.com/gonicus/gonnect/issues/423)) ([48328e2](https://github.com/gonicus/gonnect/commit/48328e235cf888f00b95b4b6792b727138aaf35c))
+* more sip codes lead to auth request ([#379](https://github.com/gonicus/gonnect/issues/379)) ([31ee0cd](https://github.com/gonicus/gonnect/commit/31ee0cd138b21d34c3945274a4f6f08e344eae96))
+* mwi recursions ([#405](https://github.com/gonicus/gonnect/issues/405)) ([2a42344](https://github.com/gonicus/gonnect/commit/2a423440dbafddb79db9a988e0bb27716e47ed1f))
+* potential crash on HeadsetDevice destroyed ([#371](https://github.com/gonicus/gonnect/issues/371)) ([65900ab](https://github.com/gonicus/gonnect/commit/65900abcc5030f33687ebfab95e03f05c1591c51))
+* raise window after showing it ([#398](https://github.com/gonicus/gonnect/issues/398)) ([4f72dc6](https://github.com/gonicus/gonnect/commit/4f72dc6ad54731be70190d1495c00b15b301c14e))
+* reenable CardDAV plugin ([#406](https://github.com/gonicus/gonnect/issues/406)) ([9b9b136](https://github.com/gonicus/gonnect/commit/9b9b136f27fc945f2e6f6763401de76ead6a9a7b))
+* resolve feeder manager deadlock ([#427](https://github.com/gonicus/gonnect/issues/427)) ([9a8d604](https://github.com/gonicus/gonnect/commit/9a8d6048e871262fda444a24a5091096940274f2))
+* restore functionality for feeders without network requirements ([#387](https://github.com/gonicus/gonnect/issues/387)) ([01c6494](https://github.com/gonicus/gonnect/commit/01c64946a77c9cee40f566c9af2fecd51bfa7bcc))
+* tab switch/reset notifications ([9338ed0](https://github.com/gonicus/gonnect/commit/9338ed0c6a82c35d44e36a40d90a66781c0c0441))
+* **ui:** give focus to call screen when startet via enter ([#395](https://github.com/gonicus/gonnect/issues/395)) ([5e5d78e](https://github.com/gonicus/gonnect/commit/5e5d78e0a6364d511a43558e59be5ab020bf2795))
+
+
+### Features
+
+* adding global shortcuts support for windows ([#399](https://github.com/gonicus/gonnect/issues/399)) ([eb5237e](https://github.com/gonicus/gonnect/commit/eb5237ed507135d99f5d27b304eec25e0352df2a))
+* basic MWI support ([#392](https://github.com/gonicus/gonnect/issues/392)) ([8c3c914](https://github.com/gonicus/gonnect/commit/8c3c91455b04a800a5c3e09c76b1f3e3b92ce023))
+* delete old history entries ([#432](https://github.com/gonicus/gonnect/issues/432)) ([0ee826d](https://github.com/gonicus/gonnect/commit/0ee826d3384151954c559e3c417967f8b3fc872f))
+* display sip registration status ([#375](https://github.com/gonicus/gonnect/issues/375)) ([f9e6567](https://github.com/gonicus/gonnect/commit/f9e6567a1bc89b5c688d7edb53fd4cc54899dcba))
+* feeder plugin retry mechanism ([#391](https://github.com/gonicus/gonnect/issues/391)) ([e262f3f](https://github.com/gonicus/gonnect/commit/e262f3f75ef70ed54b1aca17c7169e06c7ebd94a))
+* pause/resume media on windows ([#370](https://github.com/gonicus/gonnect/issues/370)) ([61f3407](https://github.com/gonicus/gonnect/commit/61f34075a0f8dae316bd2a7ed6f6cf171917ad2b))
+* plugins for microsoft calendars and contacts ([#428](https://github.com/gonicus/gonnect/issues/428)) ([e7e8cd9](https://github.com/gonicus/gonnect/commit/e7e8cd96bffc42e63dfb488894adb836c5ad4ff5))
+* pre-fill missing it/es translations ([#377](https://github.com/gonicus/gonnect/issues/377)) ([4428e4e](https://github.com/gonicus/gonnect/commit/4428e4e659af0c708fa3738dc521977b7b11d1c2))
+* update pjproject to 2.17 ([#435](https://github.com/gonicus/gonnect/issues/435)) ([98c7199](https://github.com/gonicus/gonnect/commit/98c719971d48f696f312a21dde469c745c4ba220))
+
 # [2.1.0](https://github.com/gonicus/gonnect/compare/v2.0.9...v2.1.0) (2026-04-10)
 
 

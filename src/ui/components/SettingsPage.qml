@@ -43,6 +43,7 @@ Item {
         property alias useHeadset: headsetCheckBox.checked
         property alias noSyncSystemMute: disableSystemMutePropagationCheckBox.checked
         property alias jitsiChatAsNotifications: jitsiChatAsNotificationsCheckBox.checked
+        property alias keepHistoryDays: historyDaysToKeepInputField.text
     }
 
     Settings {
@@ -245,6 +246,58 @@ Item {
                             Accessible.name: headsetHookOffCheckBox.text
                             Accessible.focusable: true
                         }
+                    }
+                }
+
+                CardList {
+                    title: qsTr('History')
+                    spacing: 20
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        margins: 20
+                    }
+
+                    Item {
+                        implicitHeight: historyDaysToKeepInputField.implicitHeight
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        TextField {
+                            id: historyDaysToKeepInputField
+                            text: "90"
+                            anchors.left: parent.left
+                            topPadding: 0
+                            bottomPadding: 0
+                            inputMethodHints: Qt.ImhDigitsOnly
+                            validator: IntValidator {
+                                bottom: 1
+                                top: 999
+                            }
+                        }
+
+                        Label {
+                            text: qsTr("day(s) of history", "", parseInt(historyDaysToKeepInputField.text, 10))
+                            anchors {
+                                left: historyDaysToKeepInputField.right
+                                right: parent.right
+                                verticalCenter: historyDaysToKeepInputField.verticalCenter
+                                leftMargin: 12
+                            }
+                        }
+                    }
+
+                    Label {
+                        id: historyExplanationLabel
+                        color: Theme.secondaryTextColor
+                        wrapMode: Label.Wrap
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        text: qsTr("Keep a call history for this number of days (from 1 to 999). Any row before this time span is automatically deleted. Changing this setting has an effect on the next day or a reboot of GOnnect.")
                     }
                 }
 
@@ -1381,15 +1434,15 @@ Item {
                     }
 
                     Button {
-                        id: ldapReloadButton
+                        id: contactReloadButton
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: qsTr('Reload contacts from LDAP')
+                        text: qsTr('Reload contacts')
                         onClicked: () => ViewHelper.reloadAddressBook()
 
                         Accessible.role: Accessible.Button
-                        Accessible.name: ldapReloadButton.text
+                        Accessible.name: contactReloadButton.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => ldapReloadButton.click()
+                        Accessible.onPressAction: () => contactReloadButton.click()
                     }
                 }
             }

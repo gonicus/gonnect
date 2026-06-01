@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QByteArray>
 #include "IAddressBookFeeder.h"
 #include "LDAPInitializer.h"
 #include "Contact.h"
@@ -14,7 +15,8 @@ class LDAPAddressBookFeeder : public QObject, public IAddressBookFeeder
     Q_OBJECT
 
 public:
-    explicit LDAPAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
+    explicit LDAPAddressBookFeeder(const QString &group, const int retryCount,
+                                   const int retryInterval, AddressBookManager *parent = nullptr);
 
     void process() override;
     QUrl networkCheckURL() const override;
@@ -30,7 +32,7 @@ Q_SIGNALS:
     void newExternalImageAdded(const QString &id, const QByteArray &data, const QDateTime &modified,
                                QPrivateSignal);
 
-    void invalidCredentials();
+    void feederFailed();
 
 private:
     void clearCStringlist(char **attrs) const;
@@ -43,6 +45,23 @@ private:
     void processResult(LDAPMessage *ldapMessage);
     void startContactQuery();
 
+    void resetFeeder();
+
+    // Per-account mapping from semantic contact roles to the LDAP attribute
+    // names actually published by the directory. Empty entries disable that
+    // role for the current source. Defaults match standard inetOrgPerson.
+    struct AttributeMap
+    {
+        QByteArray name;
+        QByteArray uid;
+        QByteArray company;
+        QByteArray email;
+        QByteArray commercial;
+        QByteArray mobile;
+        QByteArray home;
+        QByteArray avatar;
+    };
+
     LDAPInitializer::Config m_ldapConfig;
 
     AddressBookManager *m_manager = nullptr;
@@ -53,4 +72,9 @@ private:
     QString m_baseNumber;
     QStringList m_sipStatusSubscriptableAttributes;
     BlockInfo m_blockInfo;
+    AttributeMap m_attrs;
+
+    bool m_authFailed = false;
+    int m_retryCount = 0;
+    int m_retryInterval = 0;
 };

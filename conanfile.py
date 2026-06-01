@@ -61,7 +61,7 @@ class GOnnectRecipe(ConanFile):
 
     def requirements(self):
         self.requires("hidapi/0.15.0")
-        self.requires("pjproject/2.16")
+        self.requires("pjproject/2.17")
         self.requires("openldap/2.6.13")
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
@@ -72,20 +72,20 @@ class GOnnectRecipe(ConanFile):
 
         if self.settings.os == "Windows":
             self.requires("wintoast/1.3.2")
+            self.requires("qhotkey/2026-03-19")
 
         if self.settings.os == "Linux":
             self.requires("libnotify/system")
             self.requires("libpulse/system")
 
         if self.options.with_conan_qt:
-            self.requires("qt/6.10.2")
+            self.requires("qt/6.10.3")
             self.requires("mpg123/1.33.0", override=True)
             self.requires("wayland/1.24.0", override=True)
 
         self.requires("openssl/3.5.5", override=True)
-        self.requires("qca/2.3.10")
         self.requires("qtwebdav/2025-03-16")
-        self.requires("qtkeychain/0.15.0")
+        self.requires("qtkeychain/0.16.0")
         self.requires("libusb/1.0.29")
 
     def build_requirements(self):

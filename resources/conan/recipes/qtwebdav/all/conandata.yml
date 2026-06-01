@@ -5,3 +5,4 @@ sources:
 patches:
 - patch_file: patches/fixcmake.patch
 - patch_file: patches/remove-deprecations.patch
+- patch_file: patches/ssl-certificates.patch

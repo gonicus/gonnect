@@ -26,8 +26,9 @@ QStringList CSVAddressBookFactory::configurations() const
     return res;
 }
 
-IAddressBookFeeder *CSVAddressBookFactory::createFeeder(const QString &id,
+IAddressBookFeeder *CSVAddressBookFactory::createFeeder(const QString &id, const int retryCount,
+                                                        const int retryInterval,
                                                         AddressBookManager *parent) const
 {
-    return new CsvFileAddressBookFeeder(id, parent);
+    return new CsvFileAddressBookFeeder(id, retryCount, retryInterval, parent);
 }

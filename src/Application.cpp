@@ -127,7 +127,7 @@ void Application::initialize()
     UISettings::instance().setParent(this);
 
     AddressBookManager::instance().reloadAddressBook();
-    DateEventFeederManager::instance().reload();
+    DateEventFeederManager::instance().reloadCalendar();
     SystemTrayMenu::instance(); // Ensure singleton is created
 
     AppSettings settings;

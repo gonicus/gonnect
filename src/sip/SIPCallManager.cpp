@@ -123,7 +123,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
 
     connect(dev, &HeadsetDeviceProxy::dial, this, [this](const QString &number) {
         if (m_calls.count() == 0) {
-            qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+            static_cast<Application *>(Application::instance())->rootWindow()->show();
             call(number);
         }
     });
@@ -765,7 +765,25 @@ void SIPCallManager::removeCall(SIPCall *call)
 
     // Automatically unhold last remaining call
     if (oldCount > 1 && m_calls.size() == 1 && m_calls.at(0)->isHolding()) {
-        m_calls.at(0)->unhold();
+        auto *remainingCall = m_calls.at(0);
+
+        // Make sure that unhold will be called in the next event loop iteration, because pjsip
+        // might still be doing stuff in this one which can cause a segfault.
+        // And the call might be in termination, hence the info.state check.
+        QTimer::singleShot(0, remainingCall, [remainingCall]() {
+            if (remainingCall->isHolding()) {
+                try {
+                    pj::CallInfo info = remainingCall->getInfo();
+
+                    if (info.state == PJSIP_INV_STATE_CONFIRMED) {
+                        remainingCall->unhold();
+                    }
+                } catch (pj::Error &) {
+                    // This means the call is terminated or currently in termination. That is fine,
+                    // but ignore the error.
+                }
+            }
+        });
     }
 
     updateCallCount();
