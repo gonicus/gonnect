@@ -340,7 +340,7 @@ void AudioPort::acquire()
     if (m_device.mode() == QAudioDevice::Mode::Input && !m_io.isNull()) {
         QObject::disconnect(m_warmUpDrain);
 
-         m_warmUpDrain = connect(m_io.data(), &QIODevice::readyRead, this, [this]() {
+        m_warmUpDrain = connect(m_io.data(), &QIODevice::readyRead, this, [this]() {
             if (m_isWarmingUp && !m_io.isNull()) {
                 m_io->readAll();
             }
