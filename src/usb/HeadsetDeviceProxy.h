@@ -66,6 +66,7 @@ private:
     HeadsetDevice *m_device = nullptr;
     ICallState::States m_oldCallState = ICallState::State::Idle;
 
+    QTimer m_callStartTimer;
     QTimer m_callEndTimer;
 
     bool m_inRemoteCallScreen = false;

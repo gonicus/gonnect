@@ -6,6 +6,7 @@
 #include "SIPCallManager.h"
 #include "SIPAccount.h"
 #include "AudioManager.h"
+#include "AudioPort.h"
 #include "ResponseLoader.h"
 #include "RingToneFactory.h"
 #include "RingTone.h"
@@ -373,6 +374,10 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                                 << "failed to start mic media transmission: " << err.info();
                         ErrorBus::instance().addFatalError(
                                 tr("Failed to initialize microphone audio"));
+                    }
+
+                    if (auto *port = dynamic_cast<AudioPort *>(&speaker_media)) {
+                        port->writeSilenceMS(120);
                     }
 
                     try {

@@ -49,6 +49,22 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
             m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
         }
     });
+
+    m_callStartTimer.setInterval(500ms);
+    m_callStartTimer.setSingleShot(true);
+    connect(&m_callStartTimer, &QTimer::timeout, this, [this]() {
+        if (!m_device) {
+            return;
+        }
+
+        const auto state = GlobalCallState::instance().globalCallState();
+        if ((state & ICallState::State::CallActive) && !(state & ICallState::State::OnHold)) {
+            m_inRemoteCallScreen = true;
+            m_device->setCallStatus(tr("Call active"));
+            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
+            updateRemoteContactInfo();
+        }
+    });
 }
 
 HeadsetDeviceProxy::~HeadsetDeviceProxy()
@@ -91,8 +107,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
             m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
         } else if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
-            m_device->setCallStatus(tr("Call active"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
+            m_callStartTimer.start();
         }
     }
 
@@ -103,8 +118,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
             m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
         } else if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
-            m_device->setCallStatus(tr("Call active"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
+            m_callStartTimer.start();
         }
     }
 
@@ -116,14 +130,14 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
             m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
         } else {
             m_inRemoteCallScreen = true;
-            m_device->setCallStatus(tr("Call active"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
+            m_callStartTimer.start();
         }
     }
 
     // IDLE
     if (changeMask && !state) {
         setIdle();
+        m_callStartTimer.stop();
         m_inRemoteCallScreen = false;
         m_callEndTimer.start();
     }
@@ -140,12 +154,13 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
     if (changeMask & State::CallActive) {
         if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
-            m_device->setCallStatus(tr("Call active"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
+            m_callStartTimer.start();
         }
     }
 
-    updateRemoteContactInfo();
+    if (!m_callStartTimer.isActive()) {
+        updateRemoteContactInfo();
+    }
 }
 
 void HeadsetDeviceProxy::updateRemoteContactInfo()
