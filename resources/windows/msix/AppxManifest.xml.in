@@ -3,8 +3,9 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap uap3 rescap">
+  IgnorableNamespaces="uap uap3 uap5 rescap">
 
   <Identity
     Name="GONICUSGmbH.GOnnect"
@@ -44,12 +45,12 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
       </uap:VisualElements>
       <Extensions>
-        <uap3:Extension Category="windows.startupTask">
-          <uap3:StartupTask
+        <uap5:Extension Category="windows.startupTask">
+          <uap5:StartupTask
             TaskId="GOnnectStartup"
             Enabled="false"
             DisplayName="GOnnect" />
-        </uap3:Extension>
+        </uap5:Extension>
       </Extensions>
     </Application>
   </Applications>
