@@ -638,7 +638,6 @@ qt_add_qml_module(gonnect
         chat/ChatUserSearchModel.cpp
         chat/ConferenceChatRoom.h
         chat/ConferenceChatRoom.cpp
-        chat/CrossSigningSecret.h
         chat/PublicChatRoom.h
 
         conference/ConferenceUser.h
