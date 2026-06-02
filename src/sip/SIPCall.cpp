@@ -291,14 +291,12 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
             if (m_isEstablished) {
                 ringToneFactory.endTone()->start();
-            } else {
-                if (!m_incoming) {
-                    if (statusCode == PJSIP_SC_BUSY_HERE) {
-                        ringToneFactory.busyTone()->start(5);
-                    } else if (static_cast<int>(statusCode) >= 400
-                               && static_cast<int>(statusCode) < 700) {
-                        ringToneFactory.congestionTone()->start(5);
-                    }
+            } else if (!m_incoming) {
+                if (statusCode == PJSIP_SC_BUSY_HERE) {
+                    ringToneFactory.busyTone()->start(5);
+                } else if (static_cast<int>(statusCode) >= 400
+                           && static_cast<int>(statusCode) < 700) {
+                    ringToneFactory.congestionTone()->start(5);
                 }
             }
         }

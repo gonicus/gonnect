@@ -203,7 +203,7 @@ void AudioPort::stopSinkIO()
     writeSilenceMS(SILENCE_BUFFER_MS);
 
     m_isDraining = true;
-    QTimer::singleShot(SILENCE_BUFFER_MS + 200, this, [this]() {
+    QTimer::singleShot(SILENCE_BUFFER_MS, this, [this]() {
         m_isDraining = false;
 
         if (m_sink) {
