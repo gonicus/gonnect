@@ -857,7 +857,7 @@ void SIPAccount::removeCall(SIPCall *call)
 {
     if (call) {
         m_calls.removeAll(call);
-        delete call;
+        call->deleteLater();
     }
 }
 

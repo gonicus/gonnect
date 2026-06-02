@@ -6,6 +6,7 @@
 #include "SIPCallManager.h"
 #include "SIPAccount.h"
 #include "AudioManager.h"
+#include "AudioPort.h"
 #include "ResponseLoader.h"
 #include "RingToneFactory.h"
 #include "RingTone.h"
@@ -79,6 +80,8 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         }
     }
 
+    AudioManager::instance().acquireDevice();
+
     // Setup rtt timeout
     m_rttTimeoutTimer.setSingleShot(true);
     m_rttTimeoutTimer.setInterval(6s);
@@ -96,6 +99,8 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
 
 SIPCall::~SIPCall()
 {
+    AudioManager::instance().releaseDevice();
+
     if (m_isEmergencyCall) {
         Q_EMIT ViewHelper::instance().hideEmergency();
     }
@@ -286,8 +291,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
 
             if (m_isEstablished) {
                 ringToneFactory.endTone()->start();
-            }
-            if (!m_incoming) {
+            } else if (!m_incoming) {
                 if (statusCode == PJSIP_SC_BUSY_HERE) {
                     ringToneFactory.busyTone()->start(5);
                 } else if (static_cast<int>(statusCode) >= 400
@@ -368,6 +372,10 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                                 << "failed to start mic media transmission: " << err.info();
                         ErrorBus::instance().addFatalError(
                                 tr("Failed to initialize microphone audio"));
+                    }
+
+                    if (auto *port = dynamic_cast<AudioPort *>(&speaker_media)) {
+                        port->writeSilenceMS(120);
                     }
 
                     try {
