@@ -119,15 +119,6 @@ if(LINUX)
     install(FILES resources/flatpak/de.gonicus.gonnect.search-provider.ini DESTINATION share/gnome-shell/search-providers)
 endif()
 
-if(WIN32)
-    install(FILES ${PROJECT_SOURCE_DIR}/resources/windows/msix/AppxManifest.xml
-        DESTINATION .
-        COMPONENT msix)
-    install(DIRECTORY ${PROJECT_SOURCE_DIR}/resources/windows/msix/Assets
-        DESTINATION .
-        COMPONENT msix)
-endif()
-
 if(PROJECT_IS_TOP_LEVEL)
     add_subdirectory(packaging)
 endif()
