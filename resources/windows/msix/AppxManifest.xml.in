@@ -34,7 +34,7 @@
   <Applications>
     <Application
       Id="App"
-      Executable="GOnnect.exe"
+      Executable="gonnect.exe"
       EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
         DisplayName="GOnnect"
