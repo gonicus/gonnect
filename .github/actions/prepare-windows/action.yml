@@ -46,6 +46,7 @@ runs:
     - name: Install Conan dependencies
       shell: cmd
       run: |
+        choco install protoc --yes
         conan config install resources/conan
         conan export-dependencies .
         conan install . --build=missing -s compiler.cppstd=20
