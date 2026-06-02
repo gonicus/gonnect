@@ -1,6 +1,6 @@
 #include "RingTone.h"
 #include "AudioManager.h"
-#include "ReadOnlyConfdSettings.h"
+#include "AudioPort.h"
 
 RingTone::RingTone(quint16 frequency1, quint16 frequency2, QList<QPair<quint16, quint16>> intervals,
                    qint8 loopIndex, QObject *parent)
@@ -40,8 +40,15 @@ void RingTone::start()
     m_isPlaying = true;
     m_currentIndex = 0;
 
+    AudioManager::instance().acquireDevice();
+
     if (m_stopTimer.isActive()) {
         m_stopTimer.stop();
+    }
+
+    // Bridge gap between previous audio source (mostly the call)
+    if (auto *port = dynamic_cast<AudioPort *>(&m_mediaSink)) {
+        port->writeSilenceMS(120);
     }
 
     m_toneGen.startTransmit(m_mediaSink);
@@ -55,20 +62,23 @@ void RingTone::stop()
     if (!m_isPlaying) {
         return;
     }
+
     if (m_loopTimer.isActive()) {
         m_loopTimer.stop();
     }
+
     m_currentIndex = 0;
     m_isPlaying = false;
     m_toneGen.stop();
     m_toneGen.stopTransmit(m_mediaSink);
+
+    AudioManager::instance().releaseDevice();
 
     Q_EMIT ready();
 }
 
 void RingTone::playNextTone()
 {
-
     // Create and play tone
     const auto &tuple = m_intervals.at(m_currentIndex);
 
@@ -92,16 +102,22 @@ void RingTone::playNextTone()
             if (m_repeatTimes > 0) {
                 --m_repeatTimes;
             } else if (m_repeatTimes == 0) {
-                stop();
+                scheduleStop(tuple.first + tuple.second);
                 return;
             }
         } else {
-            // No loop - stop the tone
-            m_stopTimer.setInterval(tuple.first + tuple.second);
-            m_stopTimer.start();
+            scheduleStop(tuple.first + tuple.second);
             return;
         }
     }
 
     m_loopTimer.start(tuple.first + tuple.second);
+}
+
+void RingTone::scheduleStop(unsigned delay)
+{
+    static constexpr unsigned PIPELINE_GRACE_MS = 400;
+
+    m_stopTimer.setInterval(delay + PIPELINE_GRACE_MS);
+    m_stopTimer.start();
 }

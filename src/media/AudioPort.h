@@ -24,6 +24,9 @@ public:
     QString getDeviceID() const;
     QString getSystemDeviceID() const;
 
+    void acquire();
+    void release();
+
     void setAudioDevice(QAudioDevice device);
     QAudioDevice audioDevice() { return m_device; }
 
@@ -32,6 +35,8 @@ public:
 
     qreal sourceLevel() const { return m_sourceAudioLevel; }
 
+    void writeSilenceMS(unsigned milliseconds);
+
 Q_SIGNALS:
     void startIdleTimer();
     void audioSourceChanged();
@@ -39,8 +44,6 @@ Q_SIGNALS:
     void sourceLevelChanged(qreal level);
 
 private:
-    void writeSilenceMS(unsigned milliseconds);
-
     void startIO();
     void stopIO();
 
@@ -55,6 +58,9 @@ private:
     void setSourceAudioLevel(qreal level);
 
     bool m_isMuted = false;
+    bool m_isDraining = false;
+    bool m_isWarmingUp = false;
+
     QAudioDevice m_device;
 
     QPointer<QIODevice> m_io;
@@ -67,4 +73,6 @@ private:
     pj::MediaFormatAudio m_pj_fmt;
 
     QAudioFormat m_audioFormat;
+
+    QMetaObject::Connection m_warmUpDrain;
 };

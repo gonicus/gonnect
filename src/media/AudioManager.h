@@ -67,6 +67,9 @@ public:
                                          void *userdata);
 #endif
 
+    void acquireDevice();
+    void releaseDevice();
+
     pj::AudioMedia &getPlaybackDevMedia() const;
     pj::AudioMedia &getCaptureDevMedia() const;
 
@@ -138,6 +141,8 @@ private:
 
     unsigned m_captureDeviceId = 0;
     unsigned m_currentAudioProfile = 0;
+
+    int m_acquireRefCount = 0;
 
     QTimer m_updateDebouncer;
     QList<SIPAudioDevice *> m_devices;
