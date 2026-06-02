@@ -9,7 +9,7 @@
   <Identity
     Name="GONICUSGmbH.GOnnect"
     Publisher="CN=GONICUS GmbH"
-    Version="VERSION_PLACEHOLDER"
+    Version="@MSIX_VERSION@"
     ProcessorArchitecture="x64" />
 
   <Properties>

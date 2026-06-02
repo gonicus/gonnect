@@ -192,15 +192,9 @@ jobs:
         #  github.ref == 'refs/heads/release'
         shell: powershell
         run: |
-          $version = "${{ github.ref_name }}".TrimStart('v') + ".0"
-          # Direkt aus dem Build-Output kopieren statt cmake --install
           New-Item -ItemType Directory -Path msix-layout -Force
-          Copy-Item build/Release/GOnnect.exe msix-layout/
-          # Qt-Deploy Output auch kopieren
           Copy-Item -Recurse build/Release/* msix-layout/ -Exclude "*.pdb","*.lib"
-          (Get-Content resources/windows/msix/AppxManifest.xml) `
-            -replace 'VERSION_PLACEHOLDER', $version |
-            Set-Content msix-layout/AppxManifest.xml
+          Copy-Item build/AppxManifest.xml msix-layout/AppxManifest.xml
           Copy-Item -Recurse resources/windows/msix/Assets msix-layout/Assets
 
       - name: Pack MSIX
