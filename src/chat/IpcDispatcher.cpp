@@ -2503,10 +2503,6 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
     QString suffix;
     if (filePath.contains('.')) {
         suffix = QString(".%1").arg(filePath.split('.').last());
-
-        if (suffix.length() > 4) {
-            suffix.clear();
-        }
     }
 
     const auto uuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
