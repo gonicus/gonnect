@@ -70,6 +70,9 @@ class GOnnectRecipe(ConanFile):
         self.requires("cmark/0.31.2")
         self.requires("ksyntaxhighlighting/6.26.0")
 
+        self.requires("protobuf-c/1.5.2")
+        self.requires("grpc/1.78.1")
+
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
 
