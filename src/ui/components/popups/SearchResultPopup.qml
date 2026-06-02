@@ -590,7 +590,7 @@ Popup {
                                     }
 
                                     Repeater {
-                                        id: phoneNumberRepeaterTwo
+                                        id: phoneNumberRepeater
                                         model: contactDelg.numbers
                                         delegate: SearchResultNumberItem {
                                             id: numberDelg
