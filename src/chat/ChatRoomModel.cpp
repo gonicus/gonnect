@@ -109,8 +109,7 @@ void ChatRoomModel::onChatProviderChanged()
                     const auto idx = createIndex(index, 0);
                     Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::TypingUserNames) });
                 });
-        connect(m_chatProvider, &IChatProvider::chatUserPropertiesChanged,
-                m_chatProviderContext,
+        connect(m_chatProvider, &IChatProvider::chatUserPropertiesChanged, m_chatProviderContext,
                 [this](ChatUser *, IChatRoom *chatRoom, qsizetype index) {
                     if (chatRoom) {
                         const auto idx = createIndex(index, 0);

@@ -50,8 +50,7 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
     });
 
     connect(this, &IConferenceConnector::largeVideoUserChanged, this, [this]() {
-        Q_EMIT executeSetLargeVideoUser(
-                m_largeVideoUser ? m_largeVideoUser->id() : "");
+        Q_EMIT executeSetLargeVideoUser(m_largeVideoUser ? m_largeVideoUser->id() : "");
     });
 
     auto &audioManager = AudioManager::instance();
@@ -785,8 +784,7 @@ void JitsiConnector::addUser(const QString &id, const QString &displayName)
         }
     }
 
-    auto user = new ConferenceUser(id, displayName,
-                                                 ConferenceUser::Role::User, this);
+    auto user = new ConferenceUser(id, displayName, ConferenceUser::Role::User, this);
     m_users.insert(i, user);
     Q_EMIT userAdded(i, user);
     Q_EMIT numberOfUsersChanged();
@@ -828,8 +826,8 @@ void JitsiConnector::setUserRole(const QString &id, const QString &roleString)
 
     if (id == m_jitsiId) {
         if (m_ownRole != role) {
-            qCInfo(lcJitsiConnector) << "Own role changed to"
-                                     << ConferenceUser::userRoleToString(role);
+            qCInfo(lcJitsiConnector)
+                    << "Own role changed to" << ConferenceUser::userRoleToString(role);
             m_ownRole = role;
             Q_EMIT ownRoleChanged();
         }
@@ -842,8 +840,8 @@ void JitsiConnector::setUserRole(const QString &id, const QString &roleString)
             user->setRole(role);
 
             qCInfo(lcJitsiConnector).noquote().nospace()
-                    << "Jitsi user " << user->displayName() << " (" << id
-                    << ") got new role" << ConferenceUser::userRoleToString(role);
+                    << "Jitsi user " << user->displayName() << " (" << id << ") got new role"
+                    << ConferenceUser::userRoleToString(role);
 
             Q_EMIT userRoleChanged(i, user, role);
             return;
@@ -851,8 +849,7 @@ void JitsiConnector::setUserRole(const QString &id, const QString &roleString)
     }
 
     qCWarning(lcJitsiConnector).noquote()
-            << "Jitsi user" << id << "got new role"
-            << ConferenceUser::userRoleToString(role)
+            << "Jitsi user" << id << "got new role" << ConferenceUser::userRoleToString(role)
             << "but could not be found in user list - ignoring";
 }
 
@@ -1130,24 +1127,12 @@ ContactInfo JitsiConnector::remoteContactInfo() const
 bool JitsiConnector::hasCapability(const Capability capabilityToCheck) const
 {
     const static QSet<Capability> m_capabilites = {
-        Capability::AudioMute,
-        Capability::ChatInCall,
-        Capability::Holdable,
-        Capability::RaiseHand,
-        Capability::ScreenShare,
-        Capability::Sharable,
-        Capability::Subtitles,
-        Capability::MuteAll,
-        Capability::NoiseSuppression,
-        Capability::UserRoles,
-        Capability::UserKickable,
-        Capability::RoomPassword,
-        Capability::ShareUrl,
-        Capability::Textpad,
-        Capability::TileView,
-        Capability::Whiteboard,
-        Capability::VideoMute,
-        Capability::VideoQualityAdjustable,
+        Capability::AudioMute,  Capability::ChatInCall,   Capability::Holdable,
+        Capability::RaiseHand,  Capability::ScreenShare,  Capability::Sharable,
+        Capability::Subtitles,  Capability::MuteAll,      Capability::NoiseSuppression,
+        Capability::UserRoles,  Capability::UserKickable, Capability::RoomPassword,
+        Capability::ShareUrl,   Capability::Textpad,      Capability::TileView,
+        Capability::Whiteboard, Capability::VideoMute,    Capability::VideoQualityAdjustable,
     };
     return m_capabilites.contains(capabilityToCheck);
 }
@@ -1467,8 +1452,7 @@ void JitsiConnector::kickUser(ConferenceUser *user)
     kickUser(user->id());
 }
 
-void JitsiConnector::grantUserRole(const QString &userId,
-                                          ConferenceUser::Role newRole)
+void JitsiConnector::grantUserRole(const QString &userId, ConferenceUser::Role newRole)
 {
     if (newRole != ConferenceUser::Role::Moderator) {
         qCCritical(lcJitsiConnector) << "Role" << newRole << "is not supported by Jitsi Meet";
@@ -1476,8 +1460,7 @@ void JitsiConnector::grantUserRole(const QString &userId,
     Q_EMIT executeGrantModeratorCommand(userId);
 }
 
-void JitsiConnector::grantUserRole(ConferenceUser *user,
-                                          ConferenceUser::Role newRole)
+void JitsiConnector::grantUserRole(ConferenceUser *user, ConferenceUser::Role newRole)
 {
     if (!user) {
         qCCritical(lcJitsiConnector) << "Cannot grant role to nullptr user";

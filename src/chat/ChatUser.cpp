@@ -5,8 +5,8 @@
 
 Q_LOGGING_CATEGORY(lcChatUser, "gonnect.app.chat.user")
 
-ChatUser::ChatUser(const QString &id, const QString &displayName,
-                                 bool hasPresenceState, QString avatarPath, IChatProvider *parent)
+ChatUser::ChatUser(const QString &id, const QString &displayName, bool hasPresenceState,
+                   QString avatarPath, IChatProvider *parent)
     : QObject{ parent },
       m_id{ id },
       m_displayName{ displayName },
