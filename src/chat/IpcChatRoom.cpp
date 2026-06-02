@@ -245,14 +245,14 @@ void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
 
     qsizetype idx = -1;
     for (qsizetype i = 0; i < m_chatUsers.length(); ++i) {
-        if (m_chatUsers.at(i)->computedName().localeAwareCompare(user->computedName()) < 0) {
+        if (m_chatUsers.at(i)->computedName().localeAwareCompare(user->computedName()) > 0) {
             idx = i;
             break;
         }
     }
 
     if (idx < 0) {
-        idx = std::max(static_cast<qsizetype>(0), m_chatUsers.length() - 1);
+        idx = std::max(static_cast<qsizetype>(0), m_chatUsers.length());
     }
 
     connect(user, &ChatUser::destroyed, this, [this](QObject *obj) {

@@ -350,11 +350,11 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
     })
 
     jitsiConn.executeSetLargeVideoUser.connect(id => {
-        api.executeCommand("setLargeVideoUser", id)
+        api.executeCommand("setLargeVideoParticipant", id)
     })
 
     jitsiConn.executeKickUserCommand.connect(id => {
-        api.executeCommand("kickUser", id)
+        api.executeCommand("kickParticipant", id)
     })
 
     jitsiConn.executeGrantModeratorCommand.connect(id => {
@@ -388,7 +388,7 @@ api.addListener("videoConferenceJoined", data => {
     api.getRoomsInfo().then(data => {
         for (const room of data.rooms) {
             if (room.isMainRoom) {
-                for (const user of room.users) {
+                for (const user of room.participants) {
                     jitsiConn.setUserRole(user.id, user.role)
                 }
             }
@@ -428,13 +428,13 @@ api.addListener("deviceListChanged", data => {
     })
 })
 
-api.addListener("userJoined", data => {
+api.addListener("participantJoined", data => {
     jitsiConn.addUser(data.id, data.displayName)
 })
-api.addListener("userLeft", data => {
+api.addListener("participantLeft", data => {
     jitsiConn.removeUser(data.id)
 })
-api.addListener("userRoleChanged", data => {
+api.addListener("participantRoleChanged", data => {
     jitsiConn.setUserRole(data.id, data.role)
 })
 

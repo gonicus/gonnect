@@ -757,7 +757,7 @@ Item {
             id: relatedMsg
             visible: !!relatedMsg.chatMessage
             nickName: relatedMsg.chatMessage?.nickName ?? ""
-            isStateUpdate: relatedMsg.chatMessage?.isStatUpdate?? false
+            isStateUpdate: relatedMsg.chatMessage?.isStateUpdate?? false
             isText: relatedMsg.chatMessage?.isText ?? false
             isSimpleText: relatedMsg.chatMessage?.isSimpleText ?? false
             isMultiText: relatedMsg.chatMessage?.isMultiText ?? false

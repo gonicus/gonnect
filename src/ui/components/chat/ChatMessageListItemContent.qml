@@ -55,7 +55,7 @@ Item {
 
     signal openDirectChatRequested(string userId)
 
-    readonly property bool isShortEmojiOnly: control.isText && ViewHelper.isShortEmojiString(control.message)
+    readonly property bool isShortEmojiOnly: control.isText && ViewHelper.isShortEmojiString(control.simpleText)
 
     // Text
     TextEdit {

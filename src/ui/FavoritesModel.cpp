@@ -76,7 +76,7 @@ void FavoritesModel::updateModel()
                         if (m_favoriteChatRooms.at(i).room == chatRoom) {
                             const auto idx = m_favorites.size() + i;
                             beginRemoveRows(QModelIndex(), idx, idx);
-                            m_favoriteChatRooms.removeAt(idx);
+                            m_favoriteChatRooms.removeAt(i);
                             endRemoveRows();
                             return;
                         }

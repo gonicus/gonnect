@@ -707,6 +707,7 @@ void IpcDispatcher::processResponse(
         for (const auto &room : list) {
             const auto &roomId = room.roomId();
             auto roomObj = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomId));
+            const auto roomIdx = m_rooms.indexOf(roomObj);
             handledRoomIds.insert(room.roomId());
 
             if (roomObj) {
@@ -749,12 +750,11 @@ void IpcDispatcher::processResponse(
                     roomObj->addUser(user, userRoomState);
 
                     if (user->id() == ownUserId) {
-                        Q_EMIT chatRoomOwnJoinStateChanged(m_rooms.indexOf(roomObj), roomObj,
-                                                           userRoomState);
+                        Q_EMIT chatRoomOwnJoinStateChanged(roomIdx, roomObj, userRoomState);
                     }
 
                     if (roomObj->isDirectChat()) {
-                        Q_EMIT chatUserPropertiesChanged(user, roomObj, m_rooms.indexOf(roomObj));
+                        Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
                     }
                 } else {
                     requestUser(userId);
@@ -768,6 +768,7 @@ void IpcDispatcher::processResponse(
             auto room = it.next();
             if (!handledRoomIds.contains(room->id())) {
                 removeNotificationsForRoom(room);
+                m_roomLookup.remove(room->id());
                 Q_EMIT chatRoomRemoved(indexOf(room), room);
                 it.remove();
                 room->deleteLater();
@@ -1580,39 +1581,34 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     m_rooms.append(roomObj);
     m_roomLookup.insert(room.roomId(), roomObj);
-    const auto index = m_rooms.length() - 1;
 
-    Q_EMIT chatRoomAdded(m_rooms.length() - 1, roomObj, tag);
+    const auto index = m_rooms.length() - 1;
+    Q_EMIT chatRoomAdded(index, roomObj, tag);
     Q_EMIT chatRoomPermissionsChanged(index, roomObj, roomObj->permissions());
 
-    connect(roomObj, &IChatRoom::avatarPathChanged, this, [this, roomObj, index]() {
-        Q_EMIT chatRoomAvatarPathChanged(index, roomObj, roomObj->avatarPath());
+    connect(roomObj, &IChatRoom::avatarPathChanged, this, [this, roomObj]() {
+        Q_EMIT chatRoomAvatarPathChanged(m_rooms.indexOf(roomObj), roomObj, roomObj->avatarPath());
     });
 
-    connect(roomObj, &IChatRoom::latestMessageDateTimeChanged, this, [this, roomObj, index]() {
-        Q_EMIT chatRoomLatestActivityChanged(index, roomObj, roomObj->latestMessageDateTime());
+    connect(roomObj, &IChatRoom::latestMessageDateTimeChanged, this, [this, roomObj]() {
+        Q_EMIT chatRoomLatestActivityChanged(m_rooms.indexOf(roomObj), roomObj,
+                                             roomObj->latestMessageDateTime());
     });
 
     connect(roomObj, &IChatRoom::ownUserJoinStateChanged, this,
             &IpcDispatcher::updateUnreadNotificationsCount);
 
-    connect(roomObj, &IChatRoom::notificationCountChanged, this,
-            [this, roomObj, index](qsizetype count) {
-                Q_EMIT chatRoomNotificationCountChanged(index, roomObj, count);
-                updateUnreadNotificationsCount();
-            });
+    connect(roomObj, &IChatRoom::notificationCountChanged, this, [this, roomObj](qsizetype count) {
+        Q_EMIT chatRoomNotificationCountChanged(m_rooms.indexOf(roomObj), roomObj, count);
+        updateUnreadNotificationsCount();
+    });
 
     return roomObj;
 }
 
 IpcChatRoom *IpcDispatcher::ipcChatRoomById(const QString &roomId) const
 {
-    for (auto room : std::as_const(m_rooms)) {
-        if (room->id() == roomId) {
-            return room;
-        }
-    }
-    return nullptr;
+    return m_roomLookup.value(roomId, nullptr);
 }
 
 QString IpcDispatcher::ensureDataFolderExists()
@@ -2174,13 +2170,7 @@ qsizetype IpcDispatcher::indexOf(IChatRoom *chatRoom) const
 
 IChatRoom *IpcDispatcher::chatRoomByRoomId(const QString &roomId) const
 {
-    for (auto room : std::as_const(m_rooms)) {
-        if (room->id() == roomId) {
-            return room;
-        }
-    }
-
-    return nullptr;
+    return m_roomLookup.value(roomId, nullptr);
 }
 
 QString IpcDispatcher::chatRoomIdForUser(const ChatUser *user) const
@@ -2329,7 +2319,7 @@ void IpcDispatcher::requestRoomChange(IChatRoom *chatRoom, const QString &name,
     RoomChangeRequest changeReq;
     changeReq.setRoomId(chatRoom->id());
 
-    bool hasChanged = true;
+    bool hasChanged = false;
 
     if (chatRoom->name() != name) {
         changeReq.setDisplayName(name);
@@ -2508,7 +2498,7 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
     const auto uuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
     const QString newPath = QString("%1/%2%3").arg(uploadFolderPath, uuid, suffix);
 
-    if (!QFile::copy(filePath.mid(7), newPath)) {
+    if (!QFile::copy(nonUrlPath, newPath)) {
         qCCritical(lcIpcDispatcher) << "Unable to copy" << filePath << "to" << newPath;
         return "";
     }

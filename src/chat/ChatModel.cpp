@@ -304,7 +304,7 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
         if (const auto rMsg = relatedMessage(item)) {
             return qobject_cast<ChatMessageContentUserStateChange *>(rMsg->content()) != nullptr;
         }
-        return "";
+        return false;
     }
 
     case static_cast<int>(Roles::RelatedMessageIsText): {
@@ -558,10 +558,20 @@ QString ChatModel::highlightMentions(const QString &orig, const ChatMessage &mes
     }
 
     QString str(orig);
+
     for (const auto *user : mentions) {
         const auto name = user->computedName();
-        str.replace(name, QString("[%1](chat://%2)").arg(name, user->id()));
+        if (name.isEmpty()) {
+            continue;
+        }
+
+        // Use word boundaries (\b) to prevent name splitting.
+        // escape(name) prevents regex injections.
+        const QRegularExpression regex(QString(R"(\b%1\b)").arg(QRegularExpression::escape(name)));
+        const QString replacement = QString("[%1](chat://%2)").arg(name, user->id());
+        str.replace(regex, replacement);
     }
+
     return str;
 }
 

@@ -121,7 +121,7 @@ Item {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Chat message")
-    Accessible.description: qsTr("Selected chat message - from %1, at %2: %3").arg(control.nickName).arg(control.timestamp).arg(control.message)
+    Accessible.description: qsTr("Selected chat message - from %1, at %2: %3").arg(control.nickName).arg(control.timestamp).arg(control.simpleText)
     Accessible.focusable: true
 
     QtObject {
