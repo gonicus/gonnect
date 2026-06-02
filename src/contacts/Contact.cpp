@@ -1,13 +1,13 @@
 #include "Contact.h"
-#include "ChatUserPresenceStateProvider.h"
 #include "FuzzyCompare.h"
 #include "PhoneNumberUtil.h"
-#include "ChatUser.h"
-#include "SIPBuddyPresenceStateProvider.h"
-#include "SIPManager.h"
 
 #ifndef APP_TESTS
+#  include "ChatUserPresenceStateProvider.h"
 #  include "AvatarManager.h"
+#  include "ChatUser.h"
+#  include "SIPBuddyPresenceStateProvider.h"
+#  include "SIPManager.h"
 #endif
 #include <QMetaEnum>
 
@@ -230,6 +230,7 @@ qreal Contact::matchesSearch(const QString &searchString) const
     return maxDist;
 }
 
+#ifndef APP_TESTS
 void Contact::addChatUser(ChatUser *user)
 {
     if (!m_chatUsers.contains(user)) {
@@ -272,6 +273,7 @@ PresenceStateAggregator *Contact::createPresenceStateObject() const
 
     return presenceObj;
 }
+#endif
 
 void Contact::init()
 {

@@ -92,12 +92,14 @@ public:
 
     qreal matchesSearch(const QString &searchString) const;
 
+#ifndef APP_TESTS
     void addChatUser(ChatUser *user);
     void removeChatUser(ChatUser *user);
     const QList<ChatUser *> &chatUsers() const { return m_chatUsers; }
 
     [[nodiscard("Caller must take ownership")]] PresenceStateAggregator *
     createPresenceStateObject() const;
+#endif
 
 private:
     void init();
