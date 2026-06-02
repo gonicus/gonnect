@@ -165,7 +165,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
             m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
         } else if (state & (State::RingingIncoming | State::KnockingIncoming)) {
             m_device->setCallStatus(state & State::RingingIncoming ? tr("Ringing")
-                                : tr("Call waiting"));
+                                                                   : tr("Call waiting"));
             m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
         } else if (state & State::RingingOutgoing) {
             m_device->setCallStatus(tr("Calling"));
