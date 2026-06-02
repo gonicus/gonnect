@@ -9,10 +9,10 @@ class ChatUsersProxyModel : public QSortFilterProxyModel
     QML_ELEMENT
     Q_CLASSINFO("DefaultProperty", "sourceModel")
 
-    Q_PROPERTY(QStringList excludedUserIds MEMBER m_excludedUserIds NOTIFY
-                       excludedUserIdsChanged FINAL)
-    Q_PROPERTY(QStringList selectedUserIds MEMBER m_selectedUserIds NOTIFY
-                       selectedUserIdsChanged FINAL)
+    Q_PROPERTY(QStringList excludedUserIds MEMBER m_excludedUserIds NOTIFY excludedUserIdsChanged
+                       FINAL)
+    Q_PROPERTY(QStringList selectedUserIds MEMBER m_selectedUserIds NOTIFY selectedUserIdsChanged
+                       FINAL)
     Q_PROPERTY(QString filterText MEMBER m_filterText NOTIFY filterTextChanged FINAL)
 
 public:

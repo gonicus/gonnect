@@ -1,11 +1,9 @@
 #include "ChatUsersProxyModel.h"
 #include "ChatUsersModel.h"
 
-ChatUsersProxyModel::ChatUsersProxyModel(QObject *parent)
-    : QSortFilterProxyModel{ parent }
+ChatUsersProxyModel::ChatUsersProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
-    connect(this, &ChatUsersProxyModel::selectedUserIdsChanged, this,
-            [this]() { invalidate(); });
+    connect(this, &ChatUsersProxyModel::selectedUserIdsChanged, this, [this]() { invalidate(); });
     connect(this, &ChatUsersProxyModel::excludedUserIdsChanged, this, [this]() {
         beginFilterChange();
         endFilterChange();
@@ -31,7 +29,7 @@ void ChatUsersProxyModel::toggleSelectedState(const QString &id)
 }
 
 bool ChatUsersProxyModel::lessThan(const QModelIndex &sourceLeft,
-                                          const QModelIndex &sourceRight) const
+                                   const QModelIndex &sourceRight) const
 {
     const auto model = qobject_cast<ChatUsersModel *>(sourceModel());
     if (!model) {

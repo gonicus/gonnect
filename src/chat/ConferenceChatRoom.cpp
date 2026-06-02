@@ -111,8 +111,7 @@ ChatUser *ConferenceChatRoom::chatUserById(const QString &userId) const
     return nullptr;
 }
 
-ConferenceChatRoom::UserRoomState
-ConferenceChatRoom::chatUserRoomState(ChatUser *user) const
+ConferenceChatRoom::UserRoomState ConferenceChatRoom::chatUserRoomState(ChatUser *user) const
 {
     Q_UNUSED(user)
 

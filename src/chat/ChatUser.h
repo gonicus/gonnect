@@ -16,15 +16,14 @@ class ChatUser : public QObject
     Q_PROPERTY(QString id READ id CONSTANT FINAL)
     Q_PROPERTY(QString computedName READ computedName NOTIFY displayNameChanged)
     Q_PROPERTY(bool hasPresenceState READ hasPresenceState NOTIFY hasPresenceStateChanged)
-    Q_PROPERTY(ChatUser::PresenceState presenceState READ presenceState NOTIFY
-                       presenceStateChanged)
+    Q_PROPERTY(ChatUser::PresenceState presenceState READ presenceState NOTIFY presenceStateChanged)
 
 public:
     enum class PresenceState { Unknown, Offline, Away, Online };
     Q_ENUM(PresenceState)
 
     explicit ChatUser(const QString &id, const QString &displayName, bool hasPresenceState,
-                             QString avatarPath, IChatProvider *parent);
+                      QString avatarPath, IChatProvider *parent);
 
     QString id() const { return m_id; }
 

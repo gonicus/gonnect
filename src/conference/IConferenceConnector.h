@@ -45,10 +45,9 @@ class IConferenceConnector : public ICallState
                        videoQualityChanged FINAL)
     Q_PROPERTY(QString ownId READ ownId NOTIFY ownIdChanged FINAL)
     Q_PROPERTY(ConferenceUser::Role ownRole READ ownRole NOTIFY ownRoleChanged FINAL)
-    Q_PROPERTY(uint numberOfUsers READ numberOfUsers NOTIFY
-                       numberOfUsersChanged FINAL)
-    Q_PROPERTY(ConferenceUser *largeVideoUser READ largeVideoUser NOTIFY
-                       largeVideoUserChanged FINAL)
+    Q_PROPERTY(uint numberOfUsers READ numberOfUsers NOTIFY numberOfUsersChanged FINAL)
+    Q_PROPERTY(
+            ConferenceUser *largeVideoUser READ largeVideoUser NOTIFY largeVideoUserChanged FINAL)
 
 public:
     IConferenceConnector(QObject *parent = nullptr) : ICallState{ parent } { }
@@ -154,10 +153,8 @@ public:
     virtual uint numberOfUsers() const = 0;
     Q_INVOKABLE virtual void kickUser(const QString &userId) = 0;
     virtual void kickUser(ConferenceUser *user) = 0;
-    Q_INVOKABLE virtual void grantUserRole(const QString &userId,
-                                                  ConferenceUser::Role newRole) = 0;
-    virtual void grantUserRole(ConferenceUser *user,
-                                      ConferenceUser::Role newRole) = 0;
+    Q_INVOKABLE virtual void grantUserRole(const QString &userId, ConferenceUser::Role newRole) = 0;
+    virtual void grantUserRole(ConferenceUser *user, ConferenceUser::Role newRole) = 0;
     virtual ConferenceUser *largeVideoUser() const = 0;
     virtual void setLargeVideoUser(ConferenceUser *user) = 0;
 
@@ -190,8 +187,7 @@ Q_SIGNALS:
     void ownRoleChanged();
     void userAdded(qsizetype index, ConferenceUser *user);
     void userRemoved(qsizetype index, ConferenceUser *user);
-    void userRoleChanged(qsizetype index, ConferenceUser *user,
-                                ConferenceUser::Role newRole);
+    void userRoleChanged(qsizetype index, ConferenceUser *user, ConferenceUser::Role newRole);
     void usersCleared();
     void numberOfUsersChanged();
     void largeVideoUserChanged();

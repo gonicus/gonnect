@@ -22,7 +22,7 @@ public:
     static QString userRoleToString(const Role role);
 
     explicit ConferenceUser(const QString &id, const QString &displayName, Role role,
-                                   QObject *parent = nullptr);
+                            QObject *parent = nullptr);
 
     QString id() const { return m_id; }
     QString displayName() const { return m_displayName; }

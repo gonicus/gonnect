@@ -8,7 +8,7 @@ QString ConferenceUser::userRoleToString(const Role role)
 }
 
 ConferenceUser::ConferenceUser(const QString &id, const QString &displayName,
-                                             ConferenceUser::Role role, QObject *parent)
+                               ConferenceUser::Role role, QObject *parent)
     : QObject{ parent }, m_id{ id }, m_displayName{ displayName }, m_role{ role }
 {
 }

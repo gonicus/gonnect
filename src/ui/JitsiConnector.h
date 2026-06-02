@@ -95,14 +95,9 @@ public:
     uint numberOfUsers() const override { return m_users.size(); }
     void kickUser(const QString &id) override;
     void kickUser(ConferenceUser *user) override;
-    void grantUserRole(const QString &userId,
-                              ConferenceUser::Role newRole) override;
-    void grantUserRole(ConferenceUser *user,
-                              ConferenceUser::Role newRole) override;
-    ConferenceUser *largeVideoUser() const override
-    {
-        return m_largeVideoUser;
-    };
+    void grantUserRole(const QString &userId, ConferenceUser::Role newRole) override;
+    void grantUserRole(ConferenceUser *user, ConferenceUser::Role newRole) override;
+    ConferenceUser *largeVideoUser() const override { return m_largeVideoUser; };
     void setLargeVideoUser(ConferenceUser *user) override;
     void muteAll() override;
     void setCallHistoryItem(
