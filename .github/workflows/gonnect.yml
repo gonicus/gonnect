@@ -192,7 +192,8 @@ jobs:
         #  github.ref == 'refs/heads/release'
         shell: powershell
         run: |
-          cmake --install build --config Release --prefix msix-stage
+          $workspace = "${{ github.workspace }}"
+          cmake --install build --config Release --prefix "$workspace/msix-stage"
           New-Item -ItemType Directory -Path msix-layout -Force
           Copy-Item -Recurse msix-stage/bin/* msix-layout/
           Copy-Item build/AppxManifest.xml msix-layout/AppxManifest.xml
