@@ -2,7 +2,7 @@
 
 #include "ICallState.h"
 #include "IChatRoom.h"
-#include "ConferenceParticipant.h"
+#include "ConferenceUser.h"
 #include "CallHistoryItem.h"
 
 #include <QPointer>
@@ -44,11 +44,11 @@ class IConferenceConnector : public ICallState
     Q_PROPERTY(IConferenceConnector::VideoQuality videoQuality READ videoQuality NOTIFY
                        videoQualityChanged FINAL)
     Q_PROPERTY(QString ownId READ ownId NOTIFY ownIdChanged FINAL)
-    Q_PROPERTY(ConferenceParticipant::Role ownRole READ ownRole NOTIFY ownRoleChanged FINAL)
-    Q_PROPERTY(uint numberOfParticipants READ numberOfParticipants NOTIFY
-                       numberOfParticipantsChanged FINAL)
-    Q_PROPERTY(ConferenceParticipant *largeVideoParticipant READ largeVideoParticipant NOTIFY
-                       largeVideoParticipantChanged FINAL)
+    Q_PROPERTY(ConferenceUser::Role ownRole READ ownRole NOTIFY ownRoleChanged FINAL)
+    Q_PROPERTY(uint numberOfUsers READ numberOfUsers NOTIFY
+                       numberOfUsersChanged FINAL)
+    Q_PROPERTY(ConferenceUser *largeVideoUser READ largeVideoUser NOTIFY
+                       largeVideoUserChanged FINAL)
 
 public:
     IConferenceConnector(QObject *parent = nullptr) : ICallState{ parent } { }
@@ -63,8 +63,8 @@ public:
         Subtitles,
         MuteAll,
         NoiseSuppression,
-        ParticipantRoles,
-        ParticipantKickable,
+        UserRoles,
+        UserKickable,
         RoomPassword,
         ShareUrl,
         Textpad,
@@ -140,7 +140,7 @@ public:
 
     virtual QString ownId() const = 0;
     virtual QString ownDisplayName() = 0;
-    virtual ConferenceParticipant::Role ownRole() const = 0;
+    virtual ConferenceUser::Role ownRole() const = 0;
 
     virtual bool hasWhiteboard() const = 0;
     Q_INVOKABLE virtual void toggleWhiteboard() = 0;
@@ -150,16 +150,16 @@ public:
     virtual bool hasDialIn() const = 0;
     Q_INVOKABLE virtual void requestDialInInfo() = 0;
 
-    virtual QList<ConferenceParticipant *> participants() const = 0;
-    virtual uint numberOfParticipants() const = 0;
-    Q_INVOKABLE virtual void kickParticipant(const QString &participantId) = 0;
-    virtual void kickParticipant(ConferenceParticipant *participant) = 0;
-    Q_INVOKABLE virtual void grantParticipantRole(const QString &participantId,
-                                                  ConferenceParticipant::Role newRole) = 0;
-    virtual void grantParticipantRole(ConferenceParticipant *participant,
-                                      ConferenceParticipant::Role newRole) = 0;
-    virtual ConferenceParticipant *largeVideoParticipant() const = 0;
-    virtual void setLargeVideoParticipant(ConferenceParticipant *participant) = 0;
+    virtual QList<ConferenceUser *> users() const = 0;
+    virtual uint numberOfUsers() const = 0;
+    Q_INVOKABLE virtual void kickUser(const QString &userId) = 0;
+    virtual void kickUser(ConferenceUser *user) = 0;
+    Q_INVOKABLE virtual void grantUserRole(const QString &userId,
+                                                  ConferenceUser::Role newRole) = 0;
+    virtual void grantUserRole(ConferenceUser *user,
+                                      ConferenceUser::Role newRole) = 0;
+    virtual ConferenceUser *largeVideoUser() const = 0;
+    virtual void setLargeVideoUser(ConferenceUser *user) = 0;
 
     Q_INVOKABLE virtual void muteAll() = 0;
     Q_INVOKABLE virtual void showVirtualBackgroundDialog() = 0;
@@ -188,12 +188,12 @@ Q_SIGNALS:
     void videoQualityChanged();
     void ownIdChanged();
     void ownRoleChanged();
-    void participantAdded(qsizetype index, ConferenceParticipant *participant);
-    void participantRemoved(qsizetype index, ConferenceParticipant *participant);
-    void participantRoleChanged(qsizetype index, ConferenceParticipant *participant,
-                                ConferenceParticipant::Role newRole);
-    void participantsCleared();
-    void numberOfParticipantsChanged();
-    void largeVideoParticipantChanged();
+    void userAdded(qsizetype index, ConferenceUser *user);
+    void userRemoved(qsizetype index, ConferenceUser *user);
+    void userRoleChanged(qsizetype index, ConferenceUser *user,
+                                ConferenceUser::Role newRole);
+    void usersCleared();
+    void numberOfUsersChanged();
+    void largeVideoUserChanged();
     void dialInfoReceived(QVariantMap numbers, QString code);
 };

@@ -47,7 +47,7 @@ Item {
     }
 
     TapHandler {
-        onSingleTapped: control.clicked()
+        onSingleTapped: () => control.clicked()
     }
 
     ToolTip.visible: groupButtonHoverHandler.hovered && !!control.tooltipText

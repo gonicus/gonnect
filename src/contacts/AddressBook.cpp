@@ -250,6 +250,16 @@ Contact *AddressBook::lookupByNumber(const QString &number) const
     return result;
 }
 
+Contact *AddressBook::lookupByEmail(const QString &emailAddr) const
+{
+    for (auto contact : std::as_const(m_contacts)) {
+        if (contact->mail() == emailAddr) {
+            return contact;
+        }
+    }
+    return nullptr;
+}
+
 Contact *AddressBook::lookupByContactId(const QString &contactId) const
 {
     return m_contacts.value(contactId, nullptr);

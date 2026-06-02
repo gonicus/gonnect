@@ -13,13 +13,20 @@ Rectangle {
 
     property bool highlighted
 
-    required property int type
-    required property string number
-    required property bool isSipStatusSubscriptable
-    required property bool isFavorite
-    required property string contactId
+    property int type
+    property string number
+    property bool isSipStatusSubscriptable
+    property bool isFavorite
+    property string contactId
+    property alias isFavorable: favIcon.visible
+
+    property bool isChat: false
 
     readonly property string typeIcon: {
+        if (control.isChat) {
+            return Icons.dialogMessages
+        }
+
         switch (control.type) {
             case Contact.NumberType.Commercial:
             return Icons.actor

@@ -31,7 +31,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
     m_dtmfTimer.setInterval(PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT + 10);
     m_dtmfTimer.callOnTimeout(this, &SIPCallManager::dispatchDtmfBuffer);
 
-    // End confernence mode if one participant hangs up
+    // End confernence mode if one user hangs up
     connect(this, &SIPCallManager::establishedCallsCountChanged, this, [this]() {
         if (m_isConferenceMode && m_establishedCallsCount < 2) {
             m_isConferenceMode = false;

@@ -118,15 +118,17 @@ BaseWindow {
     }
 
     function showPage(pageId : string) {
-        if (previousPage) {
-            previousPage.visible = false
+        if (control.previousPage) {
+            control.previousPage.visible = false
         }
 
-        let page = pageStack.getPage(pageId)
+        const page = pageStack.getPage(pageId)
         if (page) {
             page.visible = true
-            previousPage = page
+            control.previousPage = page
         }
+
+        control.updateTabSelection(pageId, GonnectWindow.PageType.Conference)
     }
 
     function openMeeting(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
@@ -225,6 +227,20 @@ BaseWindow {
                 keyEvent.accepted = true
                 ViewHelper.activateSearch()
 
+            } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
+
+                // Paste clipboard image content, if applicable
+                if (ClipboardHelper.hasImage()) {
+                    keyEvent.accepted = true
+
+                    if (mainTabBar.selectedPageType === GonnectWindow.PageType.Chats) {
+                        const page = control.getPage(mainTabBar.selectedPageId)
+                        if (page) {
+                            page.useImageFromClipboard()
+                        }
+                    }
+                }
+
             } else if (keyEvent.key === Qt.Key_M
                        && (keyEvent.modifiers & Qt.ControlModifier)
                        && (keyEvent.modifiers & Qt.ShiftModifier)) {
@@ -279,6 +295,8 @@ BaseWindow {
 
             Loader {
                 id: topDrawerLoader
+
+                onItemChanged: () => topDrawerLoader.item?.forceActiveFocus()
             }
         }
 
@@ -345,6 +363,8 @@ BaseWindow {
                         return homePage
                     case control.callPageId:
                         return callPage
+                    case control.chatsPageId:
+                        return chatsPage
                     case control.conferencePageId:
                         return conferencePage
                     case control.settingsPageId:
@@ -377,6 +397,7 @@ BaseWindow {
 
             Chats {
                 id: chatsPage
+                attachedData: mainTabBar.attachedData
                 visible: false
                 anchors.fill: parent
             }
@@ -434,8 +455,16 @@ BaseWindow {
         }
     }
 
+    readonly property Popup globalEmojiPickerPopupItem: EmojiPickerPopup {
+        id: globalEmojiPickerPopup
+        Component.onCompleted: () => ViewHelper.globalEmojiPickerPopup = globalEmojiPickerPopup
+    }
+
     readonly property Connections viewHelperConnections: Connections {
         target: ViewHelper
+        function onUrlCopyDialogRequested(url, text) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/UrlCopyDialog.qml", { url, text })
+        }
         function onShowDialPad() {
             const item = drawerStackView.push("qrc:/qt/qml/base/ui/components/controls/DtmfDialer.qml")
             item.dialed.connect(button => console.log(category, "TODO: DIAL", button))
@@ -443,9 +472,63 @@ BaseWindow {
         function onShowFirstAid() {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FirstAid.qml")
         }
+        function onShowChatUserSearchDialog(chatProvider : IChatProvider) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/ChatUserSearch.qml", { chatProvider })
+        }
+        function onShowPublicRoomSearchDialog(chatProvider : IChatProvider) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/PublicRoomSearch.qml", { chatProvider })
+        }
+        function onShowKnockRoomDialog(chatProvider : IChatProvider, roomId : string) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/KnockChatRoom.qml",
+                                 { chatProvider, roomId })
+        }
         function onShowConferenceChat() {
             control.ensureVisible()
             control.updateTabSelection(control.conferencePageId, GonnectWindow.PageType.Conference)
+        }
+        function onShowChatRoom(provider : IChatProvider, roomId : string) {
+            console.debug(category, `Showing room "${roomId}" for provider "${provider.id}" on page "${control.chatsPageId}"`)
+
+            control.ensureVisible()
+            control.showPage(control.chatsPageId, provider.id)
+
+            const page = pageStack.getPage(control.chatsPageId)
+            page.attachedData = provider
+            page.showChatRoom(roomId)
+        }
+        function onShowCreateRoomDialog(chatProvider : IChatProvider, invitedUserIds : list<string>, name : string) {
+            control.ensureVisible()
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/CreateChatRoom.qml",
+                                 { chatProvider, userIds: invitedUserIds, roomName : name })
+        }
+        function onShowEditRoomDialog(chatProvider : IChatProvider, roomId : string) {
+            control.ensureVisible()
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditChatRoom.qml",
+                                 { chatProvider, roomId })
+        }
+        function onShowInviteUserToRoomDialog(chatProvider : IChatProvider, roomId : string) {
+            control.ensureVisible()
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/InviteChatRoom.qml",
+                                 { chatProvider, roomId })
+        }
+        function onShowEditMessageDialog(chatProvider : IChatProvider, roomId : string, messageId : string, content : string) {
+            control.ensureVisible()
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditChatMessage.qml",
+                                 { chatProvider, roomId, messageId, text: content })
+        }
+        function onShowLargeImage(imageFilePath : url) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeImage.qml", { source : imageFilePath })
+        }
+        function onShowLargeVideo(videoFilePath : url, fileName : string, fileSize : int, thumbnailFilePath : url) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeVideo.qml", {
+                                     source : videoFilePath,
+                                     fileName,
+                                     fileSize,
+                                     thumbnailFilePath
+                                 })
+        }
+        function onShowStatusTextEditDialog() {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditStatusText.qml")
         }
         function onFullscreenToggle() {
             if (control.visibility === Window.FullScreen) {
@@ -458,10 +541,11 @@ BaseWindow {
 
     readonly property Popup mainDrawer: Popup {
         id: mainDrawer
-        width: drawerStackView.currentItem  ? Math.min(0.63 * control.width,  drawerStackView.currentItem?.implicitWidth)  : (0.63 * control.width)
-        height: drawerStackView.currentItem ? Math.min(0.63 * control.height, drawerStackView.currentItem?.implicitHeight) : (0.63 * control.height)
+        width: drawerStackView.currentItem  ? Math.min(0.63 * control.width,  drawerStackView.currentItem?.implicitWidth)  : 0
+        height: drawerStackView.currentItem ? Math.min(0.63 * control.height, drawerStackView.currentItem?.implicitHeight) : 0
         modal: true
         anchors.centerIn: parent
+        background.visible: !drawerStackView.currentItem || !drawerStackView.currentItem.hidePopupBackground
 
         onClosed: drawerStackView.clear()
 

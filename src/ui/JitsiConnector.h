@@ -6,7 +6,7 @@
 #include "ConferenceChatRoom.h"
 #include "IConferenceConnector.h"
 #include "JitsiMediaDevice.h"
-#include "ConferenceParticipant.h"
+#include "ConferenceUser.h"
 
 class CallHistoryItem;
 class SIPAudioDevice;
@@ -47,10 +47,10 @@ public:
 
     Q_INVOKABLE void onPasswordRequired();
 
-    Q_INVOKABLE void addParticipant(const QString &id, const QString &displayName);
-    Q_INVOKABLE void removeParticipant(const QString &id);
-    Q_INVOKABLE void setParticipantRole(const QString &id, const QString &roleString);
-    Q_INVOKABLE void setLargeVideoParticipantById(const QString &id);
+    Q_INVOKABLE void addUser(const QString &id, const QString &displayName);
+    Q_INVOKABLE void removeUser(const QString &id);
+    Q_INVOKABLE void setUserRole(const QString &id, const QString &roleString);
+    Q_INVOKABLE void setLargeVideoUserById(const QString &id);
 
     // Interface methods
     ContactInfo remoteContactInfo() const override;
@@ -90,20 +90,20 @@ public:
     bool isSubtitlesEnabled() const override { return m_isSubtitles; }
     IChatRoom *chatRoom() override { return m_chatRoom; }
     QString ownId() const override { return m_jitsiId; }
-    ConferenceParticipant::Role ownRole() const override;
-    QList<ConferenceParticipant *> participants() const override { return m_participants; }
-    uint numberOfParticipants() const override { return m_participants.size(); }
-    void kickParticipant(const QString &id) override;
-    void kickParticipant(ConferenceParticipant *participant) override;
-    void grantParticipantRole(const QString &participantId,
-                              ConferenceParticipant::Role newRole) override;
-    void grantParticipantRole(ConferenceParticipant *participant,
-                              ConferenceParticipant::Role newRole) override;
-    ConferenceParticipant *largeVideoParticipant() const override
+    ConferenceUser::Role ownRole() const override;
+    QList<ConferenceUser *> users() const override { return m_users; }
+    uint numberOfUsers() const override { return m_users.size(); }
+    void kickUser(const QString &id) override;
+    void kickUser(ConferenceUser *user) override;
+    void grantUserRole(const QString &userId,
+                              ConferenceUser::Role newRole) override;
+    void grantUserRole(ConferenceUser *user,
+                              ConferenceUser::Role newRole) override;
+    ConferenceUser *largeVideoUser() const override
     {
-        return m_largeVideoParticipant;
+        return m_largeVideoUser;
     };
-    void setLargeVideoParticipant(ConferenceParticipant *participant) override;
+    void setLargeVideoUser(ConferenceUser *user) override;
     void muteAll() override;
     void setCallHistoryItem(
             QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>()) override;
@@ -150,11 +150,11 @@ private:
     void addRoomMessage(QString message, QDateTime stamp = QDateTime::currentDateTime());
     QString jitsiDisplayName() const;
 
-    ConferenceParticipant::Role m_ownRole = ConferenceParticipant::Role::None;
+    ConferenceUser::Role m_ownRole = ConferenceUser::Role::None;
     QString m_jitsiId;
     QString m_muteTag;
     bool m_didExecuteAudioMuteToggle = false;
-    ConferenceParticipant *m_largeVideoParticipant = nullptr;
+    ConferenceUser *m_largeVideoUser = nullptr;
     ConferenceChatRoom *m_chatRoom = nullptr;
     bool m_isInConference = false;
     bool m_isAudioMuted = false;
@@ -181,7 +181,7 @@ private:
 
     QString m_roomName;
     QString m_displayName;
-    QList<ConferenceParticipant *> m_participants;
+    QList<ConferenceUser *> m_users;
     QPointer<CallHistoryItem> m_callHistoryItem;
     QDateTime m_establishedDateTime;
     QList<Notification *> m_chatNotifications;
@@ -211,8 +211,8 @@ Q_SIGNALS:
     void executeSetAudioOutputDeviceCommand(QString devicId);
     void executeSetVideoInputDeviceCommand(QString devicId);
     void executeSetNoiseSupressionCommand(bool value);
-    void executeSetLargeVideoParticipant(QString id);
-    void executeKickParticipantCommand(QString id);
+    void executeSetLargeVideoUser(QString id);
+    void executeKickUserCommand(QString id);
     void executeGrantModeratorCommand(QString id);
     void executeMuteAllCommand();
     void executeSetVideoQualityCommand(uint videoQuality);

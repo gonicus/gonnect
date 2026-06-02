@@ -82,6 +82,7 @@ private:
 
     bool m_ringingState = false;
     bool m_hasEstablishedCalls = false;
+    QString m_lastTrayIconPath;
 };
 
 class SystemTrayMenuWrapper

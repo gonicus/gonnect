@@ -5,6 +5,9 @@
 #include <pjsip/sip_msg.h>
 #include "Contact.h"
 #include "CallHistoryItem.h"
+#include "CrossSigningSecret.h"
+#include "ChatRoomProxyModel.h"
+#include "ChatMessageContentUserStateChange.h"
 
 class EnumTranslation : public QObject
 {
@@ -25,6 +28,13 @@ public:
 
     Q_INVOKABLE QString numberType(const Contact::NumberType numberType) const;
     Q_INVOKABLE QString callType(const CallHistoryItem::Type callType) const;
+    Q_INVOKABLE QString
+    crossSigningMethod(const CrossSigningSecret::CrossSigningMethod method) const;
+
+    Q_INVOKABLE QString chatRoomSortStrategy(const ChatRoomProxyModel::SortStrategy strategy) const;
+
+    Q_INVOKABLE QString userStateChange(const ChatMessageContentUserStateChange::State state,
+                                        const QString &name) const;
 
 private:
     explicit EnumTranslation(QObject *parent = nullptr);

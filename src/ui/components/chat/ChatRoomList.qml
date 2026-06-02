@@ -3,26 +3,59 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import base
 
-ListView {
+Repeater {
     id: control
 
     property alias chatProvider: roomModel.chatProvider
+    property alias filterText: proxyModel.filterText
+    property alias sortStrategy: proxyModel.sortStrategy
+    property alias onlyUnread: proxyModel.onlyUnread
+    property alias groupFavorites: proxyModel.groupFavorites
+
     property string selectedRoomId
+    property bool active: true
+    property bool showSectionHeader: false
+    property bool hasFavorites: false
 
-    readonly property IChatRoom chatRoom: control.chatProvider && control.selectedRoomId
-                                          ? control.chatProvider.chatRoomByRoomId(control.selectedRoomId)
-                                          : null
+    readonly property alias selectedListItem: internal.selectedListItem
 
-    onChatRoomChanged: () => control.resetUnreadCount()
-    onSelectedRoomIdChanged: () => control.resetUnreadCount()
+    signal roomSelected(string roomId)
 
-    function resetUnreadCount() {
-        if (control.selectedRoomId && control.chatRoom && control.selectedRoomId === control.chatRoom.id) {
-            control.chatRoom.resetUnreadCount()
+    onSelectedRoomIdChanged: () => internal.updateSelectedListItem()
+    onHasFavoritesChanged: () => internal.sectionHeaderUpdateRequired()
+    onItemAdded: () => internal.sectionHeaderUpdateRequired()
+    onItemRemoved: () => internal.sectionHeaderUpdateRequired()
+
+    readonly property QtObject _internal: QtObject {
+        id: internal
+
+        signal sectionHeaderUpdateRequired
+
+        property ChatRoomListItem selectedListItem
+
+        function updateSelectedListItem() {
+            Qt.callLater(() => {
+                if (!control.selectedRoomId) {
+                    internal.selectedListItem = null
+                }
+
+                const l = control.count
+                for (let i = 0; i < l; ++i) {
+                    const item = control.itemAt(i)
+                    if (item.roomId === control.selectedRoomId) {
+                        internal.selectedListItem = item
+                        return
+                    }
+                }
+
+                internal.selectedListItem = null
+            })
         }
     }
 
-    model: ChatRoomProxyModel {
+    readonly property ChatRoomProxyModel chatRoomProxyModel: ChatRoomProxyModel {
+        id: proxyModel
+
         ChatRoomModel {
             id: roomModel
         }
@@ -32,6 +65,8 @@ ListView {
     Accessible.name: qsTr("Chat room list")
     Accessible.description: qsTr("List of all chat rooms")
 
+    model: control.active ? proxyModel : null
+
     delegate: ChatRoomListItem {
         id: delg
         highlighted: control.selectedRoomId === delg.roomId
@@ -40,6 +75,56 @@ ListView {
             right: parent?.right
         }
 
-        onClicked: () => control.selectedRoomId = delg.roomId
+        Component.onCompleted: () => internal.sectionHeaderUpdateRequired()
+        onIndexChanged: () => internal.sectionHeaderUpdateRequired()
+        onIsFavoriteChanged: () => internal.sectionHeaderUpdateRequired()
+        onPrevItemChanged: () => internal.sectionHeaderUpdateRequired()
+
+        Connections {
+            target: internal
+            function onSectionHeaderUpdateRequired() {
+                let str = ""
+
+                if (control.showSectionHeader && control.hasFavorites) {
+                    delg.prevItem = delg.index > 0 ? control.itemAt(delg.index - 1) : null
+
+                    if (delg.index === 0) {
+                        str = qsTr("Favorites")
+                    } else if (!delg.isFavorite && (delg.prevItem?.isFavorite ?? false)) {
+                        str = qsTr("Others")
+                    }
+                }
+                delg.sectionHeader = str
+            }
+        }
+
+        Connections {
+            target: delg.prevItem
+            function onIsFavoriteChanged() { internal.sectionHeaderUpdateRequired() }
+        }
+
+        property ChatRoomListItem prevItem
+
+        onHighlightedChanged: () => internal.updateSelectedListItem()
+
+        onClicked: () => control.roomSelected(delg.roomId)
+        onFavoriteToggled: () => control.chatProvider.requestToggleRoomFavorite(
+                                     control.chatProvider.chatRoomByRoomId(delg.roomId))
+        onEditRoomTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, delg.roomId)
+        onInviteUsersTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, delg.roomId)
+        onLeaveRoomTriggered: () => {
+            const item = DialogFactory.createConfirmDialog({
+                             text: qsTr("Are you sure you really want to leave this chat?")
+                         })
+            const roomId = delg.roomId
+            item.accepted.connect(() => {
+                                      if (control.selectedRoomId === roomId) {
+                                          control.roomSelected("")
+                                      }
+
+                                      control.attachedData.requestRoomLeave(roomId)
+                                  })
+
+        }
     }
 }

@@ -16,14 +16,60 @@ class ChatModel : public QAbstractListModel
 public:
     enum class Roles {
         EventId = Qt::UserRole + 1,
+        RoomId,
         FromId,
+        AvatarPath,
         Timestamp,
         NickName,
-        Message,
+        UserState,
+        AffectedUserId,
+        SimpleText,
+        MultiText,
         ImageUrl,
+        FileUrl,
+        FileName,
+        FileSize,
+        ThumbnailFileUrl,
+        Reactions,
+
         IsPrivateMessage,
         IsOwnMessage,
-        IsSystemMessage
+        IsSystemMessage,
+        IsEncrypted,
+        IsPinned,
+        IsSameUserAsPrevious,
+        IsSameMinuteAsPrevious,
+        IsSameDayAsPrevious,
+        IsStateUpdate,
+        IsText,
+        IsSimpleText,
+        IsMultiText,
+        IsImage,
+        IsFile,
+        IsAudioFile,
+        IsVideoFile,
+
+        HasRelatedMessage,
+        RelatedMessageNickName,
+        RelatedMessageIsStateUpdate,
+        RelatedMessageIsText,
+        RelatedMessageIsSimpleText,
+        RelatedMessageIsMultiText,
+        RelatedMessageIsImage,
+        RelatedMessageIsFile,
+        RelatedMessageIsAudioFile,
+        RelatedMessageIsVideoFile,
+        RelatedMessageUserState,
+        RelatedMessageAffectedUserId,
+        RelatedMessageSimpleText,
+        RelatedMessageMultiText,
+        RelatedMessageImageUrl,
+        RelatedMessageFileUrl,
+        RelatedMessageFileName,
+        RelatedMessageFileSize,
+        RelatedMessageThumbnailFileUrl,
+
+        MentionedUserNames
     };
     explicit ChatModel(QObject *parent = nullptr);
 
@@ -39,6 +85,10 @@ private Q_SLOTS:
 
 private:
     QString addLinkTags(const QString &orig) const;
+    QString highlightMentions(const QString &orig, const ChatMessage &message) const;
+    ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
+    void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
+    QList<int> relatedContentRoles(const ChatMessage &messageObject) const;
 
     IChatRoom *m_chatRoom = nullptr;
     QObject *m_chatRoomContext = nullptr;

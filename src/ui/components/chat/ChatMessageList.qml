@@ -1,12 +1,19 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import base
 
 Item {
     id: control
 
     property alias chatRoom: chatModel.chatRoom
+    property IChatProvider chatProvider
+
+    readonly property alias isScrolledDown: listView.atYEnd
+    readonly property alias count: listView.count
+
+    signal respondTo(string messageId)
 
     QtObject {
         id: internal
@@ -16,6 +23,8 @@ Item {
 
     ListView {
         id: listView
+        spacing: 5
+        verticalLayoutDirection: ListView.BottomToTop
         anchors.fill: parent
         model: ChatProxyModel {
             ChatModel {
@@ -28,17 +37,16 @@ Item {
         Accessible.description: qsTr("List of all chat messages of the current chat room")
 
         delegate: ChatMessageListItem {
+            id: delg
+            chatProvider: control.chatProvider
             anchors {
                 left: parent?.left
                 right: parent?.right
             }
-        }
 
-        Component.onCompleted: () => listView.positionViewAtEnd()
-        onCountChanged: () => {
-            if (internal.autoScrollBottom) {
-                listView.positionViewAtEnd()
-            }
+            required property int index
+
+            onRespondTo: messageId => control.respondTo(messageId)
         }
 
         onMovementStarted: () => {
@@ -48,6 +56,14 @@ Item {
         onMovementEnded: () => {
             if (listView.atYEnd) {
                 internal.autoScrollBottom = true
+            } else if (listView.atYBeginning
+                       && control.chatRoom
+                       && control.chatRoom.isInitiallyLoaded
+                       && !control.chatRoom.isLoadingMessageHistory
+                       && !control.chatRoom.isCompletelyLoaded) {
+
+                // Load next batch from history
+                control.chatRoom.loadMessages()
             }
         }
     }
@@ -96,7 +112,7 @@ Item {
 
         function scrollAction() {
             internal.autoScrollBottom = true
-            listView.positionViewAtEnd()
+            listView.positionViewAtBeginning()
         }
     }
 }

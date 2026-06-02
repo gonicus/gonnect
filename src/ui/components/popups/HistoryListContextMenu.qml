@@ -35,7 +35,7 @@ Menu {
     Action {
         id: copyAction
         text: qsTr('Copy number')
-        onTriggered: () => ViewHelper.copyToClipboard(control.phoneNumber)
+        onTriggered: () => ClipboardHelper.copyToClipboard(control.phoneNumber)
 
         Accessible.role: Accessible.Button
         Accessible.name: copyAction.text

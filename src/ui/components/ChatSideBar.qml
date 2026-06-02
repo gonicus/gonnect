@@ -64,7 +64,7 @@ Item {
                 required property int index
                 required property string fromId
                 required property string nickName
-                required property string message
+                required property string simpleText
                 required property bool isOwnMessage
                 required property bool isSystemMessage
                 required property date timestamp
@@ -76,7 +76,7 @@ Item {
 
                 Accessible.role: Accessible.ListItem
                 Accessible.name: qsTr("Chat message")
-                Accessible.description: qsTr("Selected chat message from %1 at %2: %3").arg(delg.isSystemMessage ? qsTr("the server") : delg.isOwnMessage ? qsTr("you") : delg.nickName).arg(delg.timestamp).arg(delg.message)
+                Accessible.description: qsTr("Selected chat message from %1 at %2: %3").arg(delg.isSystemMessage ? qsTr("the server") : delg.isOwnMessage ? qsTr("you") : delg.nickName).arg(delg.timestamp).arg(delg.simpleText)
                 Accessible.focusable: true
 
                 states: [
@@ -150,7 +150,7 @@ Item {
                 ClipboardButton {
                     id: clipboardButton
                     visible: chatMessageHoverHandler.hovered
-                    text: delg.message.replace(/<.+?>/gm, "")
+                    text: delg.simpleText.replace(/<.+?>/gm, "")
                     anchors {
                         verticalCenter: messageBackground.verticalCenter
                         left: messageBackground.right
@@ -173,7 +173,7 @@ Item {
 
                     Label {
                         id: msgLabel
-                        text: delg.message
+                        text: delg.simpleText
                         color: delg.labelColor
                         linkColor: msgLabel.color
                         wrapMode: Label.Wrap
@@ -247,27 +247,25 @@ Item {
             }
 
             function selectEmoji() {
-                const item = emojiPickerComponent.createObject(emojiButton)
-                item.emojiPicked.connect(emoji => chatInputField.insert(chatInputField.cursorPosition, emoji))
-                item.open()
+                const item = ViewHelper.globalEmojiPickerPopup as Popup
+                if (item.visible) {
+                    item.close()
+                } else {
+                    item.emojiPicked.connect(emojiButton.onEmojiSelected)
+                    item.visibleChanged.connect(emojiButton.onEmojiPopupHide)
+
+                    item.openAt(emojiButton.mapToGlobal(emojiButton.x, emojiButton.y))
+                }
             }
-        }
 
-        Component {
-            id: emojiPickerComponent
-
-            Popup {
-                id: emojiPickerPopup
-                width: 300
-                height: 400
-                x: chatInputField.x + chatInputField.width - emojiPickerPopup.width
-                y: chatInputField.y - emojiPickerPopup.height
-
-                signal emojiPicked(string emoji)
-
-                EmojiPicker {
-                    anchors.fill: parent
-                    onEmojiPicked: emoji => emojiPickerPopup.emojiPicked(emoji)
+            function onEmojiSelected(emoji : string) {
+                chatInputField.insert(chatInputField.cursorPosition, emoji)
+            }
+            function onEmojiPopupHide() {
+                const item = ViewHelper.globalEmojiPickerPopup as Popup
+                if (!item.visible) {
+                    item.emojiPicked.disconnect(emojiButton.onEmojiSelected)
+                    item.visibleChanged.disconnect(emojiButton.onEmojiPopupHide)
                 }
             }
         }

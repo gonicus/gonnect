@@ -9,6 +9,7 @@
 #include "ErrorBus.h"
 #include "Credentials.h"
 #include "EnumTranslation.h"
+#include "GlobalStateAggregator.h"
 
 #include <QUuid>
 
@@ -19,6 +20,8 @@ intptr_t SIPAccount::runningMessageIndex = 0;
 SIPAccount::SIPAccount(const QString &group, QObject *parent)
     : QObject(parent), Account(), m_account(group)
 {
+    connect(this, &SIPAccount::isRegisteredChanged, this,
+            &SIPAccount::updatePresenceStateForwarding);
 }
 
 void SIPAccount::initialize()
@@ -1036,4 +1039,76 @@ SIPAccount::~SIPAccount()
 {
     qDeleteAll(m_calls);
     m_calls.clear();
+}
+
+void SIPAccount::updatePresenceStateForwarding()
+{
+    if (isRegistered() && !m_globalStateConnectionContext) {
+        // Establish
+        m_globalStateConnectionContext = new QObject(this);
+        auto &glob = GlobalStateAggregator::instance();
+
+        connect(&glob, &GlobalStateAggregator::presenceStateChanged, m_globalStateConnectionContext,
+                [this]() { forwardPresenceState(); });
+        connect(&glob, &GlobalStateAggregator::statusTextChanged, m_globalStateConnectionContext,
+                [this]() { forwardPresenceState(); });
+        forwardPresenceState();
+
+    } else if (!isRegistered() && m_globalStateConnectionContext) {
+        // Disconnect
+        m_globalStateConnectionContext->deleteLater();
+        m_globalStateConnectionContext = nullptr;
+    }
+}
+
+void SIPAccount::forwardPresenceState()
+{
+    if (!isRegistered()) {
+        return;
+    }
+
+    setOnlineStatus(createPresenceStatusFromGlobal());
+}
+
+pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const
+{
+    auto &glob = GlobalStateAggregator::instance();
+
+    pj::PresenceStatus pjStatus;
+    pjStatus.statusText = glob.statusText().toStdString();
+
+    switch (glob.presenceState()) {
+
+    case PresenceState::State::Unknown:
+        pjStatus.status = PJSUA_BUDDY_STATUS_UNKNOWN;
+        pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
+        break;
+
+    case PresenceState::State::Offline:
+        pjStatus.status = PJSUA_BUDDY_STATUS_OFFLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
+        break;
+
+    case PresenceState::State::Away:
+        pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_AWAY;
+        break;
+
+    case PresenceState::State::Busy:
+        pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_BUSY;
+        break;
+
+    case PresenceState::State::Available:
+        pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
+        break;
+
+    case PresenceState::State::Ringing:
+        pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
+        break;
+    }
+
+    return pjStatus;
 }

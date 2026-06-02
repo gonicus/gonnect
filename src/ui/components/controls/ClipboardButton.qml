@@ -29,7 +29,7 @@ Rectangle {
     }
 
     TapHandler {
-        onTapped: () => ViewHelper.copyToClipboard(control.text)
+        onTapped: () => ClipboardHelper.copyToClipboard(control.text)
     }
 
     HoverHandler {

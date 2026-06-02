@@ -66,6 +66,9 @@ class GOnnectRecipe(ConanFile):
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
         self.requires("logfault/0.8.1-1")
+        self.requires("hunspell/1.7.2")
+        self.requires("cmark/0.31.2")
+        self.requires("ksyntaxhighlighting/6.26.0")
 
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")

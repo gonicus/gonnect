@@ -235,29 +235,9 @@ Rectangle {
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
-            showBuddyStatus: avatarImage.hasBuddyState || avatarImage.isUnregistered
-            buddyStatus: SIPBuddyState.UNKNOWN
+            showPresenceStatus: !avatarImage.isUnregistered
+            presenceStatus: GlobalStateAggregator.presenceState
             isUnregistered: true
-
-            property bool hasBuddyState: ViewHelper.currentUser?.hasBuddyState ?? false
-
-            Component.onCompleted: () => {
-                avatarImage.updateBuddyStatus()
-            }
-
-            function updateBuddyStatus() {
-                avatarImage.buddyStatus = ViewHelper.currentUser?.hasBuddyState
-                        ? SIPManager.buddyStatus(ViewHelper.currentUser.subscriptableNumber)
-                        : SIPBuddyState.UNKNOWN
-            }
-
-            Connections {
-                target: SIPManager
-                enabled: ViewHelper.currentUser?.hasBuddyState ?? false
-                function onBuddyStateChanged(url : string, status : int) {
-                    avatarImage.updateBuddyStatus()
-                }
-            }
 
             Connections {
                 target: SIPAccountManager
@@ -267,6 +247,24 @@ Rectangle {
                     } else {
                         avatarImage.isUnregistered = true
                     }
+                }
+            }
+
+            TapHandler {
+                gesturePolicy: TapHandler.WithinBounds
+                grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+                exclusiveSignals: TapHandler.SingleTap
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onTapped: () => {
+                    ownAvatarContextMenuComponent.createObject(avatarImage).popup()
+                }
+            }
+
+            Component {
+                id: ownAvatarContextMenuComponent
+
+                OwnAvatarContextMenu {
+                    id: avatarContextMenu
                 }
             }
         }

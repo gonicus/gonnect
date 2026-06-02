@@ -498,7 +498,11 @@ void SystemTrayMenu::ringTimerCallback()
     QString noteDot = m_notificationCount ? "_note" : "";
 
     if (m_ringingState) {
-        m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring" + noteDot + ".svg"));
+        QString iconPath = ":/icons/gonnect_ring" + noteDot + ".svg";
+        if (iconPath != m_lastTrayIconPath) {
+            m_trayIcon->setIcon(QIcon(iconPath));
+            m_lastTrayIconPath = iconPath;
+        }
     } else {
         resetTrayIcon();
     }
@@ -512,23 +516,29 @@ void SystemTrayMenu::resetTrayIcon()
             ThemeManager::instance().trayColorScheme() == ThemeManager::ColorScheme::DARK;
     QString noteDot = m_notificationCount ? "_note" : "";
 
+    QString iconPath;
     const auto sipReg = SIPAccountManager::instance().sipRegistered();
     if (sipReg) {
         if (m_hasEstablishedCalls) {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
+            iconPath = ":/icons/gonnect_line" + noteDot + ".svg";
         } else {
             if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
-                m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
+                iconPath = ":/icons/gonnect_dark" + noteDot + ".svg";
             } else {
-                m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
+                iconPath = ":/icons/gonnect_light" + noteDot + ".svg";
             }
         }
     } else {
         if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_dark.svg"));
+            iconPath = ":/icons/gonnect_noreg_dark.svg";
         } else {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_light.svg"));
+            iconPath = ":/icons/gonnect_noreg_light.svg";
         }
+    }
+
+    if (iconPath != m_lastTrayIconPath) {
+        m_trayIcon->setIcon(QIcon(iconPath));
+        m_lastTrayIconPath = iconPath;
     }
 
     m_trayIcon->setVisible(true);

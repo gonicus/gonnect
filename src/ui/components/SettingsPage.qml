@@ -1452,7 +1452,7 @@ Item {
     FileDialog {
         id: ringToneFileDialog
         onAccepted: audioSettings.ringtone = ringToneFileDialog.selectedFile
-        nameFilters: ViewHelper.audioFileSelectors()
+        nameFilters: FileHelper.mediaFileSelectors(false)
     }
 
     Component {

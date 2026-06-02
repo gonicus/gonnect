@@ -3,6 +3,8 @@
 #include "Contact.h"
 #include "NumberStats.h"
 #include "NumberStat.h"
+#include "ChatUser.h"
+#include "IChatProvider.h"
 
 #include <QRegularExpression>
 
@@ -38,6 +40,7 @@ void SearchListModel::updateSearchResults()
         for (const auto contact : std::as_const(m_model)) {
             m_numberIndexOffsets.append(m_totalNumbersCount);
             m_totalNumbersCount += contact->phoneNumbers().size();
+            m_totalNumbersCount += contact->chatUsers().size();
         }
 
         endResetModel();
@@ -74,6 +77,7 @@ QHash<int, QByteArray> SearchListModel::roleNames() const
         { static_cast<int>(Roles::NumbersIndexOffset), "numbersIndexOffset" },
         { static_cast<int>(Roles::SourcePriority), "sourcePriority" },
         { static_cast<int>(Roles::SourceDisplayName), "sourceDisplayName" },
+        { static_cast<int>(Roles::ChatSources), "chatSources" },
     };
 }
 
@@ -86,7 +90,9 @@ QString SearchListModel::phoneNumberByIndex(quint16 index) const
             const auto offset = m_numberIndexOffsets.at(i);
             const auto innerIndex = index - offset;
             const auto contact = m_model.at(i);
-            if (contact && 0 <= innerIndex && innerIndex < contact->phoneNumbers().size()) {
+            const auto numPhoneNumbers = contact->phoneNumbers().size();
+
+            if (contact && 0 <= innerIndex && innerIndex < numPhoneNumbers) {
                 return contact->phoneNumbers().at(innerIndex).number;
             } else {
                 return ""; // Invalid index
@@ -165,6 +171,21 @@ QVariant SearchListModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::SourceDisplayName):
         return contact->contactSourceInfo().displayName;
+
+    case static_cast<int>(Roles::ChatSources): {
+        const auto users = contact->chatUsers();
+        QVariantList result;
+
+        for (const auto p : users) {
+            QVariantMap map;
+            map.insert("id", p->id());
+            map.insert("provider", QVariant::fromValue(p->chatProvider()));
+            map.insert("providerDisplayName", p->chatProvider()->displayName());
+            result.append(map);
+        }
+
+        return result;
+    }
 
     default:
         return contact->name();

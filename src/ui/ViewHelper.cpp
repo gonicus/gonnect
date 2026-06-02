@@ -20,12 +20,10 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
-#include <QMediaFormat>
 #include <QFileDialog>
 #include <QSystemTrayIcon>
 #include <QRegularExpression>
 #include <QUuid>
-#include <QMimeType>
 #include <QLoggingCategory>
 
 using namespace std::chrono_literals;
@@ -162,13 +160,6 @@ int ViewHelper::secondsDelta(const QDateTime &start, const QDateTime &end) const
     return start.secsTo(end);
 }
 
-void ViewHelper::copyToClipboard(const QString &str) const
-{
-    auto clipboard = QApplication::clipboard();
-    clipboard->setText(str, QClipboard::Clipboard);
-    clipboard->setText(str, QClipboard::Selection);
-}
-
 void ViewHelper::reloadAddressBook() const
 {
     AddressBookManager::instance().reloadAddressBook();
@@ -195,38 +186,6 @@ QString ViewHelper::currentUserName() const
         name = settings.value("generic/displayName").toString();
     }
     return name;
-}
-
-QStringList ViewHelper::audioFileSelectors() const
-{
-    QStringList result;
-    QStringList allSuffixes;
-    const auto formats = QMediaFormat().supportedFileFormats(QMediaFormat::Decode);
-
-    for (const auto format : formats) {
-        QMediaFormat mediaFormat(format);
-
-        const auto mimeType = mediaFormat.mimeType();
-        if (mimeType.isValid()) {
-            const QString filter = QMediaFormat::fileFormatDescription(format);
-            const auto suffixes = mimeType.suffixes();
-
-            QStringList globs;
-            globs.reserve(suffixes.length());
-
-            for (const auto &suffix : suffixes) {
-                globs.append(QString("*.%1").arg(suffix));
-            }
-            allSuffixes.append(globs);
-            result.append(QString("%1 (%2)").arg(filter, globs.join(QChar(' '))));
-        }
-    }
-
-    std::sort(result.begin(), result.end());
-
-    result.push_front(tr("Audio Files (%1)").arg(allSuffixes.join(QChar(' '))));
-
-    return result;
 }
 
 void ViewHelper::toggleFavorite(const QString &phoneNumber,
@@ -384,6 +343,11 @@ void ViewHelper::respondRecoveryKey(const QString &id, const QString &key)
     Q_EMIT recoveryKeyResponded(id, key);
 }
 
+void ViewHelper::requestUrlCopyDialog(const QUrl &url, const QString &text)
+{
+    Q_EMIT urlCopyDialogRequested(url, text);
+}
+
 void ViewHelper::requestRecoveryKey(const QString &id, const QString &displayName)
 {
     Q_EMIT recoveryKeyRequested(id, displayName);
@@ -501,4 +465,18 @@ void ViewHelper::toggleFullscreen()
 uint ViewHelper::numberOfGridCells() const
 {
     return 50;
+}
+
+QString ViewHelper::stripLinkTags(const QString &link) const
+{
+    static const QRegularExpression re(R"(<a[^>]*>(.*)<\/a>)");
+    auto s = link;
+    return s.replace(re, "\\1");
+}
+
+bool ViewHelper::isShortEmojiString(const QString &str) const
+{
+    static const QRegularExpression re(
+            R"(^(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*){1,3}$)");
+    return re.match(str).hasMatch();
 }

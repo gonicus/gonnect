@@ -9,6 +9,7 @@
 
 #include "SecretPortal.h"
 #include "AppSettings.h"
+#include "SecretGenerator.h"
 
 Q_LOGGING_CATEGORY(lcSecretPortal, "gonnect.secrets")
 

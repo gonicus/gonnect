@@ -201,7 +201,7 @@ distrobox enter gonnect
 cd <to where you've cloned this repository>
 conan config install resources/conan
 conan export-dependencies .
-conan install . --build=missing
+conan install . --build=missing -s compiler.cppstd=20
 cmake --preset conan-release .
 cmake --build --preset conan-release --parallel $(nproc --all)
 ```
@@ -248,7 +248,7 @@ cd <to where you have cloned this repository>
 conan config install resources/conan
 conan export-dependencies .
 conan profile detect
-conan install . --build=missing -s compiler.cppstd=17
+conan install . --build=missing -s compiler.cppstd=20
 
 # build gonnect
 cmake --preset conan-default .
