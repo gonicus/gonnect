@@ -56,10 +56,10 @@
   </Applications>
 
   <Capabilities>
-    <DeviceCapability Name="microphone" />
     <Capability Name="internetClient" />
     <Capability Name="internetClientServer" />
     <rescap:Capability Name="runFullTrust" />
+    <DeviceCapability Name="microphone" />
   </Capabilities>
 
 </Package>
