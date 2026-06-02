@@ -123,7 +123,7 @@ jobs:
       - name: Configure CMake
         env:
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
-        run: cmake --preset conan-release . -DBUILD_TESTING=ON
+        run: cmake --preset conan-release . -DBUILD_TESTING=ON --debug-find-pkg=Qt6Protobuf
 
       - name: Build
         run: cmake --build --preset conan-release --parallel $(nproc --all)
@@ -152,7 +152,7 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }}
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }} --debug-find-pkg=Qt6Protobuf
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
