@@ -192,8 +192,9 @@ jobs:
         #  github.ref == 'refs/heads/release'
         shell: powershell
         run: |
+          cmake --install build --config Release --prefix msix-stage
           New-Item -ItemType Directory -Path msix-layout -Force
-          Copy-Item -Recurse build/Release/* msix-layout/ -Exclude "*.pdb","*.lib"
+          Copy-Item -Recurse msix-stage/bin/* msix-layout/
           Copy-Item build/AppxManifest.xml msix-layout/AppxManifest.xml
           Copy-Item -Recurse resources/windows/msix/Assets msix-layout/Assets
 
