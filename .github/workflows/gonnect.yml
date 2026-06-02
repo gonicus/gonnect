@@ -180,11 +180,39 @@ jobs:
           endpoint: https://weu.codesigning.azure.net/
           signing-account-name: GONICUS-signing
           certificate-profile-name: gonicus-profile
-          files-folder: build/Release
-          files-folder-filter: exe
+          files: build/Release/GOnnect.exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
+
+      - name: Build MSIX layout
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: powershell
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v') + ".0"
+          cmake --install build/Release --prefix msix-layout
+          (Get-Content resources/windows/msix/AppxManifest.xml) `
+            -replace 'VERSION_PLACEHOLDER', $version |
+            Set-Content msix-layout/AppxManifest.xml
+          Copy-Item -Recurse resources/windows/msix/Assets msix-layout/Assets
+
+      - name: Pack MSIX
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: powershell
+        run: |
+          $makeappx = Get-ChildItem `
+            -Path "C:\Program Files (x86)\Windows Kits\10\bin" `
+            -Recurse -Filter "makeappx.exe" |
+            Sort-Object FullName | Select-Object -Last 1
+          & $makeappx.FullName pack /d msix-layout /p build/GOnnect_${{ github.ref_name }}.msix /nv
+
+      - name: Save MSIX
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: windows-msix
+          compression-level: 0
+          path: build/GOnnect*.msix
 
       - name: Build installer
         run: cd build && cpack ${{github.workspace}}
