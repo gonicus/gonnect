@@ -114,6 +114,7 @@ IChatRoom::UserRoomState IpcDispatcher::userRoomStateConv(
 
     qCCritical(lcIpcDispatcher) << "Unknown state:" << state;
     qFatal("Unknown state");
+    Q_UNREACHABLE();
 }
 
 ChatUser::PresenceState IpcDispatcher::presenceStateConv(
@@ -133,6 +134,7 @@ ChatUser::PresenceState IpcDispatcher::presenceStateConv(
 
     qCCritical(lcIpcDispatcher) << "Unknown state:" << state;
     qFatal("Unknown state");
+    Q_UNREACHABLE();
 }
 
 CrossSigningSecret::CrossSigningMethod IpcDispatcher::crossSigningMethodConv(
@@ -148,6 +150,7 @@ CrossSigningSecret::CrossSigningMethod IpcDispatcher::crossSigningMethodConv(
 
     qCCritical(lcIpcDispatcher) << "Unknown cross signing method:" << method;
     qFatal("Unknown method");
+    Q_UNREACHABLE();
 }
 
 CrossSigningMethodGadget::CrossSigningMethod
@@ -163,6 +166,7 @@ IpcDispatcher::crossSigningMethodReConv(const CrossSigningSecret::CrossSigningMe
 
     qCCritical(lcIpcDispatcher) << "Unknown cross signing method:" << method;
     qFatal("Unknown method");
+    Q_UNREACHABLE();
 }
 
 IpcDispatcher::IpcDispatcher(const QString &settingsGroup, const IpcConfig &configInfo,

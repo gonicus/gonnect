@@ -156,6 +156,21 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
             m_inRemoteCallScreen = true;
             m_callStartTimer.start();
         }
+    } else if (state) {
+        m_callStartTimer.stop();
+        m_inRemoteCallScreen = true;
+
+        if (state & State::OnHold) {
+            m_device->setCallStatus(tr("On Hold"));
+            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
+        } else if (state & (State::RingingIncoming | State::KnockingIncoming)) {
+            m_device->setCallStatus(state & State::RingingIncoming ? tr("Ringing")
+                                                                   : tr("Call waiting"));
+            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
+        } else if (state & State::RingingOutgoing) {
+            m_device->setCallStatus(tr("Calling"));
+            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
+        }
     }
 
     if (!m_callStartTimer.isActive()) {
