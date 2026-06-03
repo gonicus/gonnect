@@ -8,7 +8,7 @@ AllChatProvidersRoomProxyModel::AllChatProvidersRoomProxyModel(QObject *parent)
 {
     auto &manager = ChatConnectorManager::instance();
 
-    connect(&manager, &ChatConnectorManager::chatConnectorsChanged, [this]() {
+    connect(&manager, &ChatConnectorManager::chatConnectorsChanged, this, [this]() {
         auto providers = ChatConnectorManager::instance().chatConnectors();
         const auto currModels = sourceModels();
 

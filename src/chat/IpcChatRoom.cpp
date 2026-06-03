@@ -227,7 +227,7 @@ void IpcChatRoom::loadMessages()
 
     if (!m_isInitiallyLoaded) {
         m_isInitiallyLoaded = true;
-        Q_EMIT isInitiallyLoadedChanged();
+        Q_EMIT IChatRoom::isInitiallyLoadedChanged();
     }
 }
 
