@@ -52,7 +52,7 @@ public:
 
     Q_INVOKABLE CrossSigningSecret::CrossSigningMethod method() const { return m_method; }
     Q_INVOKABLE QString stringSecret() const { return m_stringSecret; }
-    Q_INVOKABLE QList<CrossSigningSymbol *> symbolSequence() const { return m_symbolSequence; }
+    Q_INVOKABLE ::QList<::CrossSigningSymbol *> symbolSequence() const { return m_symbolSequence; }
 
     void setMethod(CrossSigningMethod method) { m_method = method; }
     void setStringSecret(const QString &secret) { m_stringSecret = secret; }
