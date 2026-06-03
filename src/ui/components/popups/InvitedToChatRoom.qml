@@ -46,7 +46,7 @@ Item {
         }
 
         Label {
-            text: qsTr("The inviter has sent the following message to you:")
+            text: qsTr("Invitation message:")
             wrapMode: Text.Wrap
             visible: invitationTextLabelContainer.visible
             anchors {
