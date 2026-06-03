@@ -76,7 +76,7 @@ ChatMessageAttachmentRectangle {
                 color: Theme.secondaryTextColor
                 font.pixelSize: 12
                 text: qsTr("%1:%2 (%3)").arg(Math.floor((mediaPlayer.duration / 1000) / 60))
-                                        .arg(Math.floor((mediaPlayer.duration / 1000) % 60))
+                                        .arg(Math.floor((mediaPlayer.duration / 1000) % 60).toString().padStart(2, '0'))
                                         .arg(TextFormatHelper.formatFileSize(control.fileSize))
                 anchors {
                     left: parent.left

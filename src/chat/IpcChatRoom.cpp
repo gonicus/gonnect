@@ -118,15 +118,6 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)
         setUnreadCount(notificationCount() + 1);
     }
 
-    for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
-        if (m_messages.at(i)->timestamp() < message->timestamp()) {
-            m_messages.insert(i + 1, message);
-            m_messageLookup.insert(message->eventId(), message);
-            Q_EMIT chatMessageAdded(i + 1, message);
-            return;
-        }
-    }
-
     if (message->isVideoFile()) {
         // Since the thumbnail path is available later, it must produce a signal
         auto content = q_check_ptr(qobject_cast<ChatMessageContentVideoFile *>(message->content()));
@@ -134,6 +125,15 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)
                 [this, message]() {
                     Q_EMIT chatMessageContentChanged(indexOfMessage(message), message);
                 });
+    }
+
+    for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
+        if (m_messages.at(i)->timestamp() < message->timestamp()) {
+            m_messages.insert(i + 1, message);
+            m_messageLookup.insert(message->eventId(), message);
+            Q_EMIT chatMessageAdded(i + 1, message);
+            return;
+        }
     }
 
     m_messages.prepend(message);

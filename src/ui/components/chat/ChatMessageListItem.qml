@@ -389,7 +389,7 @@ Item {
                     } else if (messageContentItem.messageLabel.selectedText) {
                         messageContentItem.messageLabel.copy()
                     } else {
-                        ClipboardHelper.copyToClipboard(control.message)
+                        ClipboardHelper.copyToClipboard(control.simpleText)
                     }
                 }
             }

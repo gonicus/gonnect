@@ -22,7 +22,7 @@ Item {
         function createRoom() {
             if (createRoomButton.enabled) {
                 if (singleRoomRadioButton.checked) {
-                    if (!control.userIds.length === 1) {
+                    if (control.userIds.length !== 1) {
                         throw new Error("Expecting exactly one user id but got " + control.userIds.length)
                     }
 

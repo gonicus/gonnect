@@ -331,7 +331,7 @@ Item {
             }
 
             let end = cPos
-            while (end < lastIndex && !isSpace(text.charAt(end)) && !isSpace(text.charAt(end + 1))) {
+            while (end < lastIndex && !isSpace(text.charAt(end))) {
                 ++end
             }
 

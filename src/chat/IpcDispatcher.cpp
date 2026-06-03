@@ -1782,7 +1782,7 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
     } else if (avatarPath.isEmpty()) {
         const auto initials = ViewHelper::instance().initials(senderName);
         PersonCoinProvider personCoinProvider;
-        const auto avatarPath = personCoinProvider.makePath(initials, 48);
+        avatarPath = personCoinProvider.makePath(initials, 48);
 
         if (!QFileInfo::exists(avatarPath)) {
             QSize size;

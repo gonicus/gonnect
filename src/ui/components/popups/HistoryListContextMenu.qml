@@ -40,7 +40,7 @@ Menu {
         Accessible.role: Accessible.Button
         Accessible.name: copyAction.text
         Accessible.focusable: true
-        Accessible.onPressAction: () => ViewHelper.copyToClipboard(control.phoneNumber)
+        Accessible.onPressAction: () => ClipboardHelper.copyToClipboard(control.phoneNumber)
     }
 
     Action {

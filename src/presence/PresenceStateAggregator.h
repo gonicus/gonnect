@@ -37,7 +37,7 @@ private Q_SLOTS:
 
 private:
     QSet<IPresenceStateProvider *> m_stateProviders;
-    PresenceState::State m_presenceState;
+    PresenceState::State m_presenceState = PresenceState::State::Unknown;
     QString m_stateText;
 
 Q_SIGNALS:
