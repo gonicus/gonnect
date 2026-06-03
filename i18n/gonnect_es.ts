@@ -1111,7 +1111,7 @@
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="61"/>
-        <source>Optional text for the user that receives the knock:</source>
+        <source>Optional message for the user that receives the knock:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2998,13 +2998,8 @@
 <context>
     <name>MSOAuthManager</name>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="70"/>
-        <source>Failed to clear refresh token for Microsoft login: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/MSOAuthManager.cpp" line="105"/>
-        <source>Login successful.</source>
+        <source>Login successful</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3014,56 +3009,59 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="166"/>
-        <source>Failed to start login, the local system could not be set up to receive a response. Try again later.
-If the problem persists, try to close running applications that reserve/block network ports.</source>
+        <location filename="../src/MSOAuthManager.cpp" line="188"/>
+        <source>Login failed: %1
+%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="189"/>
-        <source>Login failed, the server reported an error:
-%1
-With error description: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/MSOAuthManager.cpp" line="202"/>
-        <source>Login failed due to a network error. Check your internet connectivity and try again.</source>
+        <location filename="../src/MSOAuthManager.cpp" line="205"/>
+        <source>Login failed: no token received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="208"/>
-        <source>Login failed because the Microsoft server returned an unexpected or incorrect response. Please try again later.</source>
+        <source>Login failed: server configuration error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MSOAuthManager.cpp" line="211"/>
+        <source>Login failed: configuration error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="214"/>
-        <source>Login failed, no token has been received.</source>
+        <source>Login failed: token expired</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="218"/>
-        <source>Login failed, possibly due to a server configuration error.</source>
+        <location filename="../src/MSOAuthManager.cpp" line="217"/>
+        <source>Login failed: unknown error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="222"/>
-        <source>Login failed, possibly due to a GOnnect configuration error.</source>
+        <location filename="../src/MSOAuthManager.cpp" line="70"/>
+        <source>Failed to clear refresh token for Microsoft login: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="227"/>
-        <source>Login failed, token expired. Please try again.</source>
+        <location filename="../src/MSOAuthManager.cpp" line="166"/>
+        <source>Failed to start login. The local system could not be set up to receive a response.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="231"/>
-        <source>Login failed, unknown error. Please try again.</source>
+        <location filename="../src/MSOAuthManager.cpp" line="198"/>
+        <source>Login failed: network error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="310"/>
-        <source>Failed to persist refresh token for Microsoft login: %2</source>
+        <location filename="../src/MSOAuthManager.cpp" line="201"/>
+        <source>Login failed: unexpected response from server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/MSOAuthManager.cpp" line="295"/>
+        <source>Failed to persist refresh token for Microsoft login: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

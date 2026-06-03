@@ -878,17 +878,17 @@
         <location filename="../src/chat/ChatConnectorManager.cpp" line="211"/>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="261"/>
         <source>Failed to receive secret for %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Empfangen des Schlüssels für %1: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="231"/>
         <source>Failed to save secret for %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Speichern des Schlüssels für %1: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="283"/>
         <source>Failed to store persistent storage secret for %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler beim Speichern des persistenten Sicherungsschlüssels für %1: %2</translation>
     </message>
 </context>
 <context>
@@ -896,7 +896,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="66"/>
         <source>Enter message...</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachricht eingeben...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="449"/>
@@ -942,42 +942,42 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="373"/>
         <source>Add reaction...</source>
-        <translation type="unfinished"></translation>
+        <translation>Reaktion hinzufügen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="383"/>
         <source>Copy to clipboard</source>
-        <translation type="unfinished">In die Zwischenablage kopieren</translation>
+        <translation>In die Zwischenablage kopieren</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="398"/>
         <source>Copy link to clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Link in die Zwischenablage kopieren</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="407"/>
         <source>Remove message...</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachricht löschen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="411"/>
         <source>Remove message</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachricht löschen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="412"/>
         <source>Do you really want to remove this message?</source>
-        <translation type="unfinished"></translation>
+        <translation>Möchtest Du diese Nachricht wirklich löschen?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="421"/>
         <source>Edit message...</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachricht bearbeiten...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="430"/>
         <source>Reply...</source>
-        <translation type="unfinished"></translation>
+        <translation>Antworten...</translation>
     </message>
 </context>
 <context>
@@ -1003,17 +1003,17 @@
     <message>
         <location filename="../src/ui/components/chat/ChatRoomList.qml" line="92"/>
         <source>Favorites</source>
-        <translation type="unfinished">Favoriten</translation>
+        <translation>Favoriten</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomList.qml" line="94"/>
         <source>Others</source>
-        <translation type="unfinished"></translation>
+        <translation>Andere</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomList.qml" line="117"/>
         <source>Are you sure you really want to leave this chat?</source>
-        <translation type="unfinished"></translation>
+        <translation>Möchtest Du diesen Chat wirklich verlassen?</translation>
     </message>
 </context>
 <context>
@@ -1031,22 +1031,22 @@
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="174"/>
         <source>Toggle favorite</source>
-        <translation type="unfinished"></translation>
+        <translation>Favorit umschalten</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="180"/>
         <source>Leave room...</source>
-        <translation type="unfinished"></translation>
+        <translation>Raum verlassen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="186"/>
         <source>Edit room...</source>
-        <translation type="unfinished"></translation>
+        <translation>Raum bearbeiten...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="193"/>
         <source>Invite users...</source>
-        <translation type="unfinished"></translation>
+        <translation>Teilnehmer einladen...</translation>
     </message>
 </context>
 <context>
@@ -1097,57 +1097,57 @@
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="45"/>
         <source>Select a room in the list or via search to open it.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle einen Raum aus der Liste oder über die Suche um ihn zu betreten.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="50"/>
         <source>You are currently not a member of this room.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du bist momentan kein Mitglied in diesem Raum.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="53"/>
         <source>Join</source>
-        <translation type="unfinished">Teilnehmen</translation>
+        <translation>Teilnehmen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="61"/>
-        <source>Optional text for the user that receives the knock:</source>
-        <translation type="unfinished"></translation>
+        <source>Optional message for the user that receives the knock:</source>
+        <translation>Optionale Nachricht für den Empfänger des Anklopfens:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="74"/>
         <source>Knock</source>
-        <translation type="unfinished">Anklopfen</translation>
+        <translation>Anklopfen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="82"/>
         <source>You can only join this room by being invited.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du kannst diesen Raum nur durch eine Einladung betreten.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="90"/>
         <source>You have been invited to join this room. Do you want to join it now?</source>
-        <translation type="unfinished"></translation>
+        <translation>Du wurdest in diesen Raum eingeladen. Möchtest Du ihn jetzt betreten?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="98"/>
         <source>Decline</source>
-        <translation type="unfinished">Abgelehnt</translation>
+        <translation>Abgelehnt</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="107"/>
         <source>Accept</source>
-        <translation type="unfinished">Annehmen</translation>
+        <translation>Annehmen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="118"/>
         <source>You knocked on the door and are waiting for someone to let you in.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du hast angeklopft und wartest darauf, dass Dich jemand hereinlässt.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="123"/>
         <source>You have been banned from this room and may not enter it again, unless a room administrator re-invites you.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du wurdest von diesem Raum ausgeschlossen und kannst erst wieder eintreten, wenn ein Raum-Adminstrator Dich erneut einläd.</translation>
     </message>
 </context>
 <context>
@@ -1163,105 +1163,105 @@
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="55"/>
         <source>You have left room &apos;%1&apos; for an unknown reason.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du hast den Raum &apos;%1&apos; ohne bekannten Grund verlassen.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="58"/>
         <source>You have successfully left room &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du hast erfolgreich den Raum &apos;%1&apos; verlassen.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="61"/>
         <source>You have been kicked out room &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du wurdest aus &apos;%1&apos; herausgeworfen.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="64"/>
         <source>You have been banned from &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du wurdest von &apos;%1&apos; verbannt.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="73"/>
         <source>Message from the causing user:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachricht vom auslösenden Benutzer:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="168"/>
         <source>Connecting...</source>
-        <translation type="unfinished"></translation>
+        <translation>Verbinde...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="306"/>
         <source>Show favorites on top</source>
-        <translation type="unfinished"></translation>
+        <translation>Zeige Favoriten oben</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="322"/>
         <source>Show unread chats on top</source>
-        <translation type="unfinished"></translation>
+        <translation>Zeige ungelesene Chats oben</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="356"/>
         <source>Search user...</source>
-        <translation type="unfinished">Benutzer suchen...</translation>
+        <translation>Benutzer suchen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="361"/>
         <source>Search public room...</source>
-        <translation type="unfinished"></translation>
+        <translation>Öffentliche Räume suchen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="366"/>
         <source>Create room...</source>
-        <translation type="unfinished"></translation>
+        <translation>Raum erstellen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="411"/>
         <source>Unread</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungelesen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="564"/>
         <source>Direct conversation with %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Direktunterhaltung mit %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="565"/>
         <source>Chat room %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Chat-Raum %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="595"/>
         <location filename="../src/ui/components/pages/Chats.qml" line="694"/>
         <source>Messages are loading...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lade Nachrichten...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="629"/>
         <source>Edit room...</source>
-        <translation type="unfinished"></translation>
+        <translation>Raum bearbeiten...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="635"/>
         <source>Invite users...</source>
-        <translation type="unfinished"></translation>
+        <translation>Teilnehmer einladen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="641"/>
         <source>Leave room...</source>
-        <translation type="unfinished"></translation>
+        <translation>Raum verlassen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="645"/>
         <source>Are you sure you really want to leave this chat?</source>
-        <translation type="unfinished"></translation>
+        <translation>Möchtest Du diesen Chat wirklich verlassen?</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/pages/Chats.qml" line="715"/>
         <source>%1 is/are typing</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%1 tippt</numerusform>
+            <numerusform>%1 tippen</numerusform>
         </translation>
     </message>
 </context>
@@ -1840,70 +1840,70 @@
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="123"/>
         <source>Waiting for chat provider...</source>
-        <translation type="unfinished"></translation>
+        <translation>Warte auf den Chat-Provider...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="145"/>
         <source>Your device is currently not verified. Please choose one of the following methods to verify it.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dein Gerät ist momentan nicht verifiziert. Bitte wähle eine der folgenden Methoden um es zu überprüfen.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="158"/>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="243"/>
         <source>Recovery key</source>
-        <translation type="unfinished">Wiederherstellungsschlüssel</translation>
+        <translation>Wiederherstellungsschlüssel</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="166"/>
         <source>Cross signing</source>
-        <translation type="unfinished"></translation>
+        <translation>Cross-Signing</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="192"/>
         <source>Waiting for response...</source>
-        <translation type="unfinished"></translation>
+        <translation>Warte auf Antwort...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="202"/>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="265"/>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="316"/>
         <source>Cancel</source>
-        <translation type="unfinished">Abbrechen</translation>
+        <translation>Abbrechen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="231"/>
         <source>Please enter your recovery key:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bitte gibt Deinen Wiederherstellungsschlüssel ein:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="254"/>
         <source>Verify</source>
-        <translation type="unfinished"></translation>
+        <translation>Überprüfen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="290"/>
         <source>Please choose one of the following cross-signing methods:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bitte wähle eine der folgenden Cross-Signing Methoden:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="342"/>
         <source>Please verify the code:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bitte überprüfe den Code:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="420"/>
         <source>Reject</source>
-        <translation type="unfinished">Ablehnen</translation>
+        <translation>Ablehnen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="429"/>
         <source>Accept</source>
-        <translation type="unfinished">Annehmen</translation>
+        <translation>Annehmen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="445"/>
         <source>Your device has successfully been verified!</source>
-        <translation type="unfinished"></translation>
+        <translation>Dein Gerät wurde erfolgreich verifiziert!</translation>
     </message>
 </context>
 <context>
@@ -2060,7 +2060,7 @@
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="36"/>
         <source>Search for emoji...</source>
-        <translation type="unfinished"></translation>
+        <translation>Emoji suchen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="63"/>
@@ -2264,63 +2264,63 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="224"/>
         <source>SAS string</source>
-        <translation type="unfinished"></translation>
+        <translation>SAS Zeichenkette</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="226"/>
         <source>SAS symbol</source>
-        <translation type="unfinished"></translation>
+        <translation>SAS Symbol</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="238"/>
         <source>Alphabetical</source>
-        <translation type="unfinished"></translation>
+        <translation>Alphabetisch</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="240"/>
         <source>Latest activity</source>
-        <translation type="unfinished"></translation>
+        <translation>Letzte Aktivität</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="253"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="271"/>
         <source>Unknown state for %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Unbekannter Status von %1</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="255"/>
         <source>%1 has joined</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 hat teilgenommen</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="257"/>
         <source>%1 has left</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 ist gegangen</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="259"/>
         <source>%1 has been invited</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 wurde eingeladen</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="261"/>
         <source>%1 has knocked</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 hat angeklopft</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="263"/>
         <source>%1 has been banned</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 wurde gebannt</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="265"/>
         <source>%1 has been unbanned</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 wurde zugelassen</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="267"/>
         <source>%1 has been kicked</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 wurde hinausgeworfen</translation>
     </message>
 </context>
 <context>
@@ -2757,7 +2757,7 @@
     <message>
         <location filename="../src/ui/components/popups/InviteChatRoom.qml" line="46"/>
         <source>Select the users that shall be invited to chat room &quot;%1&quot;. Those who already are users are excluded from the list.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle die Teilnehmer die in den Chat-Raum &quot;%1&quot; eingeladen werden sollen. Teilnehmer die bereits eingeladen sind, werden von der Liste ausgeschlossen.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InviteChatRoom.qml" line="57"/>
@@ -2804,62 +2804,63 @@
         <location filename="../src/chat/IpcDispatcher.cpp" line="587"/>
         <source>An IPC error ocurred (%1, %2 (code %3):
 %4</source>
-        <translation type="unfinished"></translation>
+        <translation>IPC-Fehler aufgetreten (%1, %2 (code %3):
+%4</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="592"/>
         <source>An IPC error ocurred (%1, %2 (code %3)</source>
-        <translation type="unfinished"></translation>
+        <translation>IPC-Fehler aufgetreten (%1, %2 (code %3)</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1727"/>
         <source>Image sent by %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Von %1 gesendetes Bild</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1729"/>
         <source>[%1] Image sent by %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1] Von %2 gesendetes Bild</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1735"/>
         <source>Audio file sent by %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Von %1 gesendete Audio-Datei</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1737"/>
         <source>[%1] Audio file sent by %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1] Von %2 gesendete Audio-Datei</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1744"/>
         <source>Video file sent by %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Von %1 gesendetes Video</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1746"/>
         <source>[%1] Video file sent by %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1] Von %2 gesendetes Video</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1753"/>
         <source>File sent by %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Von %1 gesendete Datei</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1755"/>
         <source>[%1] File sent by %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1] Von %2 gesendete Datei</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1762"/>
         <source>Message from %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachricht von %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1764"/>
         <source>[%1] Message from %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1] Von %2 gesendete Nachricht</translation>
     </message>
 </context>
 <context>
@@ -2998,73 +2999,72 @@
 <context>
     <name>MSOAuthManager</name>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="70"/>
-        <source>Failed to clear refresh token for Microsoft login: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/MSOAuthManager.cpp" line="105"/>
-        <source>Login successful.</source>
-        <translation type="unfinished"></translation>
+        <source>Login successful</source>
+        <translation>Anmeldung erfolgreich</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="148"/>
         <source>Login to the Microsoft account has been received by GOnnect. GOnnect will continue the authorization process now. You can close this page now.</source>
         <extracomment>This is text is displayed in the web browser after the user successfully logged in to the microsoft account.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Die Anmeldung am Microsoft-Konto wurde von GOnnect empfangen. GOnnect vervollständigt nun den Authorisierungsprozess. Du kannst Diese Seite nun schliessen.</translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="166"/>
-        <source>Failed to start login, the local system could not be set up to receive a response. Try again later.
-If the problem persists, try to close running applications that reserve/block network ports.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/MSOAuthManager.cpp" line="188"/>
+        <source>Login failed: %1
+%2</source>
+        <translation>Login fehlgeschlagen: %1
+%2</translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="189"/>
-        <source>Login failed, the server reported an error:
-%1
-With error description: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/MSOAuthManager.cpp" line="202"/>
-        <source>Login failed due to a network error. Check your internet connectivity and try again.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/MSOAuthManager.cpp" line="205"/>
+        <source>Login failed: no token received</source>
+        <translation>Login fehlgeschlagen: kein Token empfangen</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="208"/>
-        <source>Login failed because the Microsoft server returned an unexpected or incorrect response. Please try again later.</source>
-        <translation type="unfinished"></translation>
+        <source>Login failed: server configuration error</source>
+        <translation>Login fehlgeschlagen: Fehler in der Server-Konfiguration</translation>
+    </message>
+    <message>
+        <location filename="../src/MSOAuthManager.cpp" line="211"/>
+        <source>Login failed: configuration error</source>
+        <translation>Login fehlgeschlagen: Konfigurationsfehler</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="214"/>
-        <source>Login failed, no token has been received.</source>
-        <translation type="unfinished"></translation>
+        <source>Login failed: token expired</source>
+        <translation>Login fehlgeschlagen: Token abgelaufen</translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="218"/>
-        <source>Login failed, possibly due to a server configuration error.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/MSOAuthManager.cpp" line="217"/>
+        <source>Login failed: unknown error</source>
+        <translation>Anmeldung fehlgeschlagen: unbekannter Fehler</translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="222"/>
-        <source>Login failed, possibly due to a GOnnect configuration error.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/MSOAuthManager.cpp" line="70"/>
+        <source>Failed to clear refresh token for Microsoft login: %1</source>
+        <translation>Fehler beim Entfernen des Refresh-Tokens für das Microsoft-Login: %1</translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="227"/>
-        <source>Login failed, token expired. Please try again.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/MSOAuthManager.cpp" line="166"/>
+        <source>Failed to start login. The local system could not be set up to receive a response.</source>
+        <translation>Fehler beim Starten des Anmeldeprozesses. Das lokale System konnte nicht konfiguriert werden, um eine Antwort zu empfangen.</translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="231"/>
-        <source>Login failed, unknown error. Please try again.</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/MSOAuthManager.cpp" line="198"/>
+        <source>Login failed: network error</source>
+        <translation>Login fehlgeschlagen: Netzwerkfehler</translation>
     </message>
     <message>
-        <location filename="../src/MSOAuthManager.cpp" line="310"/>
-        <source>Failed to persist refresh token for Microsoft login: %2</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/MSOAuthManager.cpp" line="201"/>
+        <source>Login failed: unexpected response from server</source>
+        <translation>Login fehlgeschlagen: unerwartete Antwort vom Server</translation>
+    </message>
+    <message>
+        <location filename="../src/MSOAuthManager.cpp" line="295"/>
+        <source>Failed to persist refresh token for Microsoft login: %1</source>
+        <translation>Fehler beim Persistieren des Refresh-Tokens für das Microsoft-Login: %1</translation>
     </message>
 </context>
 <context>
@@ -4876,12 +4876,12 @@ With error description: %2</source>
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="374"/>
         <source>Failed to initialize microphone audio</source>
-        <translation type="unfinished"></translation>
+        <translation>Mikrofon konnte nicht initialisiert werden</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="386"/>
         <source>Failed to initialize call audio</source>
-        <translation type="unfinished"></translation>
+        <translation>Anrufton konnte nicht initialisiert werden</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="787"/>
@@ -5893,42 +5893,42 @@ With error description: %2</source>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="24"/>
         <source>User list</source>
-        <translation type="unfinished"></translation>
+        <translation>Benutzerliste</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="25"/>
         <source>List of all the users of the current chat room</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste aller Teilnehmer in diesem Chat-Raum</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="43"/>
         <source>Chat user</source>
-        <translation type="unfinished"></translation>
+        <translation>Chat-Teilnehmer</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="44"/>
         <source>Selected chat user: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Chat-Teilnehmer ausgewählt: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="45"/>
         <source>moderator</source>
-        <translation type="unfinished">Moderator</translation>
+        <translation>Moderator</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="46"/>
         <source>it&apos;s you</source>
-        <translation type="unfinished">das bist Du</translation>
+        <translation>das bist Du</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="156"/>
         <source>Kick</source>
-        <translation type="unfinished">Rauswerfen</translation>
+        <translation>Rauswerfen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="167"/>
         <source>Make moderator</source>
-        <translation type="unfinished">Zum Moderator machen</translation>
+        <translation>Zum Moderator machen</translation>
     </message>
 </context>
 <context>

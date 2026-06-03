@@ -58,7 +58,7 @@ Item {
         }
 
         Label {
-            text: qsTr("Optional text for the user that receives the knock:")
+            text: qsTr("Optional message for the user that receives the knock:")
             visible: knockButton.visible
             anchors.horizontalCenter: parent.horizontalCenter
         }
