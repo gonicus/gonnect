@@ -297,7 +297,7 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
-                        text: qsTr("Keep a call history for this number of days (from 1 to 999). Any row before this time span is automatically deleted. Changing this setting has an effect on the next day or a reboot of GOnnect.")
+                        text: qsTr("Keep a call history for this number of days (from 1 to 999). Any entry before this time span is automatically removed. Changing this setting has an effect on the next day or a restart of GOnnect.")
                     }
                 }
 

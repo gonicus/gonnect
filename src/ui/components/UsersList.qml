@@ -21,7 +21,7 @@ Item {
         }
 
         Accessible.role: Accessible.List
-        Accessible.name: qsTr("Users list")
+        Accessible.name: qsTr("User list")
         Accessible.description: qsTr("List of all the users of the current chat room")
 
         delegate: Item {
