@@ -15,7 +15,7 @@ IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, QObject *parent
     connect(this, &IpcChatRoom::chatUsersChanged, this, &IpcChatRoom::updateIsDirectChat);
     connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::avatarPathChanged);
     connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::hasPresenceState);
-    connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::presenceState);
+    connect(this, &IpcChatRoom::otherUserChanged, this, [this]() { presenceState(); });
     connect(this, &IpcChatRoom::chatUserRoomStateChanged, this,
             &IpcChatRoom::updateOwnUserJoinState);
 
@@ -227,7 +227,7 @@ void IpcChatRoom::loadMessages()
 
     if (!m_isInitiallyLoaded) {
         m_isInitiallyLoaded = true;
-        Q_EMIT isInitiallyLoadedChanged();
+        Q_EMIT IChatRoom::isInitiallyLoadedChanged();
     }
 }
 

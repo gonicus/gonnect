@@ -1797,7 +1797,7 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
 
     const QString roomId = chatRoom->id();
 
-    QObject::connect(notification, &Notification::actionInvoked,
+    QObject::connect(notification, &Notification::actionInvoked, this,
                      [this, roomId](QString, QVariantList) {
                          qCDebug(lcIpcDispatcher)
                                  << "showChatRoom action invoked per desktop notification for room"

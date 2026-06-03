@@ -72,7 +72,6 @@ public:
 
 Q_SIGNALS:
     void otherUserChanged();
-    void isInitiallyLoadedChanged();
 
 private Q_SLOTS:
     void updateIsDirectChat();
