@@ -5,9 +5,9 @@
 
 #include "CrossSigningSecret.h"
 #include "PublicChatRoom.h"
+#include "ChatUser.h"
 
 class IChatRoom;
-class ChatUser;
 
 class IChatProvider : public QObject
 {

@@ -2,6 +2,7 @@
 #include "ChatMessage.h"
 #include "ChatMessageContentText.h"
 #include "IConferenceConnector.h"
+#include "ChatUser.h"
 
 ConferenceChatRoom::ConferenceChatRoom(IConferenceConnector *parent) : IChatRoom{ parent } { }
 
