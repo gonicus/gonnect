@@ -60,3 +60,5 @@ Q_SIGNALS:
 };
 
 QDebug operator<<(QDebug debug, const ChatUser &user);
+
+Q_DECLARE_METATYPE(ChatUser *)
