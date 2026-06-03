@@ -245,12 +245,12 @@
     <message>
         <location filename="../src/ui/components/controls/AudioPlayer.qml" line="78"/>
         <source>%1:%2 (%3)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1:%2 (%3)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioPlayer.qml" line="137"/>
         <source>%1:%2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1:%2</translation>
     </message>
 </context>
 <context>
@@ -878,17 +878,17 @@
         <location filename="../src/chat/ChatConnectorManager.cpp" line="211"/>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="261"/>
         <source>Failed to receive secret for %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Impossibile ricevere il segreto per %1: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="231"/>
         <source>Failed to save secret for %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Impossibile salvare il segreto per %1: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="283"/>
         <source>Failed to store persistent storage secret for %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Impossibile memorizzare il segreto di archiviazione persistente per %1: %2</translation>
     </message>
 </context>
 <context>
@@ -896,7 +896,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="66"/>
         <source>Enter message...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Scrivi un messaggio...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="449"/>
@@ -942,7 +942,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="373"/>
         <source>Add reaction...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Aggiungi reazione...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="383"/>
@@ -952,32 +952,32 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="398"/>
         <source>Copy link to clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Copia link negli appunti</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="407"/>
         <source>Remove message...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rimuovi messaggio...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="411"/>
         <source>Remove message</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rimuovi messaggio</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="412"/>
         <source>Do you really want to remove this message?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vuoi davvero rimuovere questo messaggio?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="421"/>
         <source>Edit message...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Modifica messaggio...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="430"/>
         <source>Reply...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rispondi...</translation>
     </message>
 </context>
 <context>
@@ -985,7 +985,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemRelatedContent.qml" line="61"/>
         <source>Answer to message from %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rispondi al messaggio di %1</translation>
     </message>
 </context>
 <context>
@@ -1008,12 +1008,12 @@
     <message>
         <location filename="../src/ui/components/chat/ChatRoomList.qml" line="94"/>
         <source>Others</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Altri</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomList.qml" line="117"/>
         <source>Are you sure you really want to leave this chat?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sei sicuro di voler lasciare questa chat?</translation>
     </message>
 </context>
 <context>
@@ -1031,22 +1031,22 @@
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="174"/>
         <source>Toggle favorite</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Attiva/disattiva preferito</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="180"/>
         <source>Leave room...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Lascia la stanza...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="186"/>
         <source>Edit room...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Modifica stanza...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="193"/>
         <source>Invite users...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Invita utenti...</translation>
     </message>
 </context>
 <context>
@@ -1097,12 +1097,12 @@
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="45"/>
         <source>Select a room in the list or via search to open it.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Seleziona una stanza nell&apos;elenco o tramite la ricerca per aprirla.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="50"/>
         <source>You are currently not a member of this room.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Attualmente non sei membro di questa stanza.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="53"/>
@@ -1112,22 +1112,22 @@
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="61"/>
         <source>Optional message for the user that receives the knock:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Messaggio facoltativo per l&apos;utente che riceve la richiesta di ingresso:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="74"/>
         <source>Knock</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Bussa</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="82"/>
         <source>You can only join this room by being invited.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Puoi entrare in questa stanza solo su invito.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="90"/>
         <source>You have been invited to join this room. Do you want to join it now?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sei stato invitato a entrare in questa stanza. Vuoi entrare ora?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="98"/>
@@ -1142,12 +1142,12 @@
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="118"/>
         <source>You knocked on the door and are waiting for someone to let you in.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Hai bussato alla porta e stai aspettando che qualcuno ti faccia entrare.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="123"/>
         <source>You have been banned from this room and may not enter it again, unless a room administrator re-invites you.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sei stato bandito da questa stanza e non potrai più entrarvi, a meno che un amministratore della stanza non ti inviti di nuovo.</translation>
     </message>
 </context>
 <context>
@@ -1155,7 +1155,7 @@
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="80"/>
         <source>Search for users...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cerca utenti...</translation>
     </message>
 </context>
 <context>
@@ -1163,105 +1163,105 @@
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="55"/>
         <source>You have left room &apos;%1&apos; for an unknown reason.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Hai lasciato la stanza &apos;%1&apos; per un motivo sconosciuto.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="58"/>
         <source>You have successfully left room &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Hai lasciato con successo la stanza &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="61"/>
         <source>You have been kicked out room &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sei stato espulso dalla stanza &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="64"/>
         <source>You have been banned from &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sei stato bandito da &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="73"/>
         <source>Message from the causing user:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Messaggio dall&apos;utente che ha causato l&apos;azione:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="168"/>
         <source>Connecting...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Connessione...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="306"/>
         <source>Show favorites on top</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Mostra i preferiti in alto</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="322"/>
         <source>Show unread chats on top</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Mostra le chat non lette in alto</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="356"/>
         <source>Search user...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cerca utente...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="361"/>
         <source>Search public room...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cerca stanza pubblica...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="366"/>
         <source>Create room...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Crea stanza...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="411"/>
         <source>Unread</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Non letto</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="564"/>
         <source>Direct conversation with %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Conversazione diretta con %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="565"/>
         <source>Chat room %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Stanza chat %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="595"/>
         <location filename="../src/ui/components/pages/Chats.qml" line="694"/>
         <source>Messages are loading...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Caricamento dei messaggi...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="629"/>
         <source>Edit room...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Modifica stanza...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="635"/>
         <source>Invite users...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Invita utenti...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="641"/>
         <source>Leave room...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Lascia la stanza...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="645"/>
         <source>Are you sure you really want to leave this chat?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sei sicuro di voler lasciare questa chat?</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/pages/Chats.qml" line="715"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+            <numerusform>%1 sta scrivendo</numerusform>
+            <numerusform>%1 stanno scrivendo</numerusform>
         </translation>
     </message>
 </context>
@@ -1344,12 +1344,12 @@
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="544"/>
         <source>Enter a password to protect this conference room. Other users must enter it before taking part in the session.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Inserisci una password per proteggere questa stanza per conferenze. Gli altri utenti dovranno inserirla prima di partecipare alla sessione.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="558"/>
         <source>This password has been set for the conference room and must be entered by users before taking part in the session.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Questa password è stata impostata per la stanza per conferenze e deve essere inserita dagli utenti prima di partecipare alla sessione.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="572"/>
@@ -1569,32 +1569,32 @@
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="75"/>
         <source>Room name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nome della stanza</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="110"/>
         <source>Direct chat</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Chat diretta</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="118"/>
         <source>Group chat</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Chat di gruppo</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="135"/>
         <source>Join rule:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Regola di accesso:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="156"/>
         <source>These users will be invited to the chat:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Questi utenti verranno invitati alla chat:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="167"/>
         <source>Search user...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cerca utente...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="256"/>
@@ -1840,12 +1840,12 @@
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="123"/>
         <source>Waiting for chat provider...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">In attesa del provider della chat...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="145"/>
         <source>Your device is currently not verified. Please choose one of the following methods to verify it.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Il tuo dispositivo attualmente non è verificato. Scegli uno dei seguenti metodi per verificarlo.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="158"/>
@@ -1856,12 +1856,12 @@
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="166"/>
         <source>Cross signing</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Firma incrociata</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="192"/>
         <source>Waiting for response...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">In attesa di una risposta...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="202"/>
@@ -1873,22 +1873,22 @@
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="231"/>
         <source>Please enter your recovery key:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Inserisci la tua chiave di recupero:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="254"/>
         <source>Verify</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Verifica</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="290"/>
         <source>Please choose one of the following cross-signing methods:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Scegli uno dei seguenti metodi di firma incrociata:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="342"/>
         <source>Please verify the code:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Verifica il codice:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="420"/>
@@ -1903,7 +1903,7 @@
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="445"/>
         <source>Your device has successfully been verified!</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Il tuo dispositivo è stato verificato con successo!</translation>
     </message>
 </context>
 <context>
@@ -1937,7 +1937,7 @@
     <message>
         <location filename="../src/ui/components/popups/EditChatMessage.qml" line="60"/>
         <source>Edit text message</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Modifica messaggio di testo</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatMessage.qml" line="109"/>
@@ -1955,12 +1955,12 @@
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="79"/>
         <source>Room name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Nome della stanza</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="114"/>
         <source>Join rule:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Regola di accesso:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="133"/>
@@ -2006,12 +2006,12 @@
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="48"/>
         <source>Your status message...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Il tuo messaggio di stato...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="79"/>
         <source>Set</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Imposta</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="79"/>
@@ -2060,7 +2060,7 @@
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="36"/>
         <source>Search for emoji...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cerca emoji...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="63"/>
@@ -2264,63 +2264,63 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="224"/>
         <source>SAS string</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Stringa SAS</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="226"/>
         <source>SAS symbol</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Simbolo SAS</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="238"/>
         <source>Alphabetical</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Alfabetico</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="240"/>
         <source>Latest activity</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ultima attività</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="253"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="271"/>
         <source>Unknown state for %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Stato sconosciuto per %1</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="255"/>
         <source>%1 has joined</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 è entrato</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="257"/>
         <source>%1 has left</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 è uscito</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="259"/>
         <source>%1 has been invited</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 è stato invitato</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="261"/>
         <source>%1 has knocked</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 ha bussato</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="263"/>
         <source>%1 has been banned</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 è stato bandito</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="265"/>
         <source>%1 has been unbanned</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 è stato riammesso</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="267"/>
         <source>%1 has been kicked</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 è stato espulso</translation>
     </message>
 </context>
 <context>
@@ -2396,7 +2396,7 @@
     <message>
         <location filename="../src/ui/components/chat/FileAttachment.qml" line="26"/>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">File</translation>
     </message>
 </context>
 <context>
@@ -2404,22 +2404,22 @@
     <message>
         <location filename="../src/ui/FileHelper.cpp" line="19"/>
         <source>Image Files (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">File immagine (%1)</translation>
     </message>
     <message>
         <location filename="../src/ui/FileHelper.cpp" line="56"/>
         <source>Audio Files</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">File audio</translation>
     </message>
     <message>
         <location filename="../src/ui/FileHelper.cpp" line="58"/>
         <source>Media Files</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">File multimediali</translation>
     </message>
     <message>
         <location filename="../src/ui/FileHelper.cpp" line="61"/>
         <source>%1 (%2)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 (%2)</translation>
     </message>
 </context>
 <context>
@@ -2731,7 +2731,7 @@
     <message>
         <location filename="../src/ui/components/popups/ImageSendPreview.qml" line="57"/>
         <source>Do you want to send this image in chat room &apos;%1&apos;?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vuoi inviare questa immagine nella stanza chat &apos;%1&apos;?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ImageSendPreview.qml" line="71"/>
@@ -2741,7 +2741,7 @@
     <message>
         <location filename="../src/ui/components/popups/ImageSendPreview.qml" line="78"/>
         <source>Send</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Invia</translation>
     </message>
 </context>
 <context>
@@ -2757,17 +2757,17 @@
     <message>
         <location filename="../src/ui/components/popups/InviteChatRoom.qml" line="46"/>
         <source>Select the users that shall be invited to chat room &quot;%1&quot;. Those who already are users are excluded from the list.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Seleziona gli utenti da invitare nella stanza chat &quot;%1&quot;. Quelli che ne sono già membri vengono esclusi dall&apos;elenco.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InviteChatRoom.qml" line="57"/>
         <source>Search user...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cerca utente...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InviteChatRoom.qml" line="155"/>
         <source>Invite</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Invita</translation>
     </message>
 </context>
 <context>
@@ -2775,17 +2775,17 @@
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="40"/>
         <source>You have been invited to the chat room &quot;%1&quot;.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sei stato invitato nella stanza chat &quot;%1&quot;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="49"/>
         <source>Invitation message:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Messaggio di invito:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="84"/>
         <source>Do you want to join this chat room?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vuoi entrare in questa stanza chat?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="98"/>
@@ -2804,62 +2804,63 @@
         <location filename="../src/chat/IpcDispatcher.cpp" line="587"/>
         <source>An IPC error ocurred (%1, %2 (code %3):
 %4</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Si è verificato un errore IPC (%1, %2 (codice %3):
+%4</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="592"/>
         <source>An IPC error ocurred (%1, %2 (code %3)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Si è verificato un errore IPC (%1, %2 (codice %3)</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1727"/>
         <source>Image sent by %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Immagine inviata da %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1729"/>
         <source>[%1] Image sent by %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">[%1] Immagine inviata da %2</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1735"/>
         <source>Audio file sent by %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">File audio inviato da %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1737"/>
         <source>[%1] Audio file sent by %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">[%1] File audio inviato da %2</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1744"/>
         <source>Video file sent by %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Video inviato da %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1746"/>
         <source>[%1] Video file sent by %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">[%1] Video inviato da %2</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1753"/>
         <source>File sent by %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">File inviato da %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1755"/>
         <source>[%1] File sent by %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">[%1] File inviato da %2</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1762"/>
         <source>Message from %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Messaggio da %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="1764"/>
         <source>[%1] Message from %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">[%1] Messaggio da %2</translation>
     </message>
 </context>
 <context>
@@ -2887,7 +2888,7 @@
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="216"/>
         <source>Unnamed user</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Utente senza nome</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="606"/>
@@ -2929,17 +2930,17 @@
     <message>
         <location filename="../src/ui/components/controls/JoinRuleComboBox.qml" line="15"/>
         <source>Invite</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Invita</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/JoinRuleComboBox.qml" line="19"/>
         <source>Knock</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Bussa</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/JoinRuleComboBox.qml" line="23"/>
         <source>Public</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pubblico</translation>
     </message>
 </context>
 <context>
@@ -2947,17 +2948,17 @@
     <message>
         <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="42"/>
         <source>The room cannot be joined directly, but you can issue a request to become a member of it. Any user eligible to accept the request will be informed about it - with a message you can optionally enter below.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Non è possibile entrare direttamente nella stanza, ma puoi inviare una richiesta per diventarne membro. Qualsiasi utente autorizzato ad accettare la richiesta ne verrà informato, con un messaggio che puoi inserire facoltativamente qui sotto.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="53"/>
         <source>Optional message</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Messaggio facoltativo</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="76"/>
         <source>Request</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Richiedi</translation>
     </message>
 </context>
 <context>
@@ -3000,69 +3001,70 @@
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="105"/>
         <source>Login successful</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso riuscito</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="148"/>
         <source>Login to the Microsoft account has been received by GOnnect. GOnnect will continue the authorization process now. You can close this page now.</source>
         <extracomment>This is text is displayed in the web browser after the user successfully logged in to the microsoft account.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">GOnnect ha ricevuto l&apos;accesso all&apos;account Microsoft. GOnnect proseguirà ora con il processo di autorizzazione. Ora puoi chiudere questa pagina.</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="188"/>
         <source>Login failed: %1
 %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso non riuscito: %1
+%2</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="205"/>
         <source>Login failed: no token received</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso non riuscito: nessun token ricevuto</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="208"/>
         <source>Login failed: server configuration error</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso non riuscito: errore di configurazione del server</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="211"/>
         <source>Login failed: configuration error</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso non riuscito: errore di configurazione</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="214"/>
         <source>Login failed: token expired</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso non riuscito: token scaduto</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="217"/>
         <source>Login failed: unknown error</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso non riuscito: errore sconosciuto</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="70"/>
         <source>Failed to clear refresh token for Microsoft login: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Impossibile eliminare il token di aggiornamento per l&apos;accesso Microsoft: %1</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="166"/>
         <source>Failed to start login. The local system could not be set up to receive a response.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Impossibile avviare l&apos;accesso. Non è stato possibile configurare il sistema locale per ricevere una risposta.</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="198"/>
         <source>Login failed: network error</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso non riuscito: errore di rete</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="201"/>
         <source>Login failed: unexpected response from server</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso non riuscito: risposta imprevista dal server</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="295"/>
         <source>Failed to persist refresh token for Microsoft login: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Impossibile salvare il token di aggiornamento per l&apos;accesso Microsoft: %1</translation>
     </message>
 </context>
 <context>
@@ -3195,7 +3197,7 @@
     <message>
         <location filename="../src/ui/components/MainTabBar.qml" line="433"/>
         <source>Chat not available</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Chat non disponibile</translation>
     </message>
     <message>
         <location filename="../src/ui/components/MainTabBar.qml" line="466"/>
@@ -3287,12 +3289,12 @@
     <message>
         <location filename="../src/ui/components/dialogs/OauthLoginDialog.qml" line="10"/>
         <source>Login required</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Accesso richiesto</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/OauthLoginDialog.qml" line="37"/>
         <source>To begin the login, press &apos;Authenticate&apos;. A browser window will open asking you to login to your account and share the required data with GOnnect.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Per iniziare l&apos;accesso, premi &apos;Autentica&apos;. Si aprirà una finestra del browser che ti chiederà di accedere al tuo account e condividere i dati richiesti con GOnnect.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/OauthLoginDialog.qml" line="53"/>
@@ -3310,22 +3312,22 @@
     <message>
         <location filename="../src/ui/components/popups/OwnAvatarContextMenu.qml" line="27"/>
         <source>Do not disturb</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Non disturbare</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/OwnAvatarContextMenu.qml" line="42"/>
         <source>Away</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Assente</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/OwnAvatarContextMenu.qml" line="57"/>
         <source>Available</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Disponibile</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/OwnAvatarContextMenu.qml" line="74"/>
         <source>Set status text...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Imposta messaggio di stato...</translation>
     </message>
 </context>
 <context>
@@ -3477,22 +3479,22 @@
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="83"/>
         <source>Search for public chat rooms...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Cerca stanze chat pubbliche...</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="159"/>
         <source>%n member(s), topic: %1</source>
         <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+            <numerusform>%n membro, argomento: %1</numerusform>
+            <numerusform>%n membri, argomento: %1</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="160"/>
         <source>%n member(s)</source>
         <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+            <numerusform>%n membro</numerusform>
+            <numerusform>%n membri</numerusform>
         </translation>
     </message>
 </context>
@@ -4738,22 +4740,22 @@
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="29"/>
         <source>RTT message list</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Elenco messaggi RTT</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="30"/>
         <source>List of all the RTT messages of the current call</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Elenco di tutti i messaggi RTT della chiamata corrente</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="47"/>
         <source>RTT message</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Messaggio RTT</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="48"/>
         <source>Selected RTT message from %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Messaggio RTT selezionato da %1: %2</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="48"/>
@@ -4763,7 +4765,7 @@
     <message>
         <location filename="../src/ui/components/RTTDisplay.qml" line="48"/>
         <source>call participant</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">partecipante alla chiamata</translation>
     </message>
 </context>
 <context>
@@ -4810,7 +4812,7 @@
     <message>
         <location filename="../src/ui/components/RoomAvatar.qml" line="57"/>
         <source>Upload file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Carica file</translation>
     </message>
     <message>
         <location filename="../src/ui/components/RoomAvatar.qml" line="62"/>
@@ -4874,12 +4876,12 @@
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="374"/>
         <source>Failed to initialize microphone audio</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Impossibile inizializzare l&apos;audio del microfono</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="386"/>
         <source>Failed to initialize call audio</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Impossibile inizializzare l&apos;audio della chiamata</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCall.cpp" line="787"/>
@@ -5092,7 +5094,7 @@
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="293"/>
         <source>Create chat room &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Crea stanza chat &quot;%1&quot;</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="315"/>
@@ -5103,7 +5105,7 @@
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="339"/>
         <source>Chat rooms</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Stanze chat</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="360"/>
@@ -5171,7 +5173,7 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="300"/>
         <source>Keep a call history for this number of days (from 1 to 999). Any entry before this time span is automatically removed. Changing this setting has an effect on the next day or a restart of GOnnect.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Conserva la cronologia delle chiamate per questo numero di giorni (da 1 a 999). Qualsiasi voce precedente a questo intervallo viene rimossa automaticamente. La modifica di questa impostazione ha effetto il giorno successivo o al riavvio di GOnnect.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="305"/>
@@ -5302,8 +5304,8 @@
         <location filename="../src/ui/components/SettingsPage.qml" line="282"/>
         <source>day(s) of history</source>
         <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+            <numerusform>giorno di cronologia</numerusform>
+            <numerusform>giorni di cronologia</numerusform>
         </translation>
     </message>
     <message>
@@ -5458,7 +5460,7 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1439"/>
         <source>Reload contacts</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ricarica contatti</translation>
     </message>
 </context>
 <context>
@@ -5735,7 +5737,7 @@
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="121"/>
         <source>Leave conference &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Lascia la conferenza &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="151"/>
@@ -5824,32 +5826,32 @@
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="8"/>
         <source>0 B</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">0 B</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="12"/>
         <source>B</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">B</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="12"/>
         <source>KB</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">KB</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="12"/>
         <source>MB</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">MB</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="12"/>
         <source>GB</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">GB</translation>
     </message>
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="12"/>
         <source>TB</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">TB</translation>
     </message>
 </context>
 <context>
@@ -5883,7 +5885,7 @@
     <message>
         <location filename="../src/ui/components/popups/UrlCopyDialog.qml" line="56"/>
         <source>Copy and close</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Copia e chiudi</translation>
     </message>
 </context>
 <context>
@@ -5891,22 +5893,22 @@
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="24"/>
         <source>User list</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Elenco utenti</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="25"/>
         <source>List of all the users of the current chat room</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Elenco di tutti gli utenti della stanza chat corrente</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="43"/>
         <source>Chat user</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Utente della chat</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="44"/>
         <source>Selected chat user: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Utente della chat selezionato: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="45"/>
@@ -5950,12 +5952,12 @@
     <message>
         <location filename="../src/ui/components/controls/VideoPlayer.qml" line="55"/>
         <source>%1 (%2)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 (%2)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/VideoPlayer.qml" line="101"/>
         <source>%1:%2 / %3:%4</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1:%2 / %3:%4</translation>
     </message>
 </context>
 <context>
