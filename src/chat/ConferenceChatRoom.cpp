@@ -121,18 +121,18 @@ ConferenceChatRoom::UserRoomState ConferenceChatRoom::chatUserRoomState(ChatUser
     return UserRoomState::Unjoined;
 }
 
-static QList<ChatUser *> dummyList = {};
+Q_GLOBAL_STATIC(QList<ChatUser *>, s_dummyList)
 
 const QList<ChatUser *> &ConferenceChatRoom::chatUsers() const
 {
     // TODO
-    return dummyList;
+    return *s_dummyList;
 }
 
 const QList<ChatUser *> &ConferenceChatRoom::typingUsers() const
 {
     // TODO
-    return dummyList;
+    return *s_dummyList;
 }
 
 bool ConferenceChatRoom::isUserMemberOfRoom(const QString &userId) const

@@ -291,6 +291,7 @@ Q_SIGNALS:
 
     /// Result of a user search initialized via searchChatUser() with the given search id and the
     /// resulting list.
+    // clazy:skip
     void chatUserSearchResult(QString searchId, QList<ChatUser *> userList);
 
     ///  Result of a public room search via searchPublicRoomRequest() with the given search id.
