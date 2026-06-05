@@ -50,6 +50,8 @@ private:
 
     explicit SystemTrayMenu(QObject *parent = nullptr);
     void initMenu();
+    void requestTrayIcon(const QString &iconPath);
+    void applyTrayIcon();
 
     CallEntry *findCallEntry(const QString &remoteUri);
 
@@ -57,6 +59,7 @@ private:
     QString contactIcon(const NumberStat &numberStat) const;
 
     QTimer m_ringTimer;
+    QTimer m_trayIconUpdateTimer;
 
     QSystemTrayIcon *m_trayIcon = nullptr;
     QMenu *m_trayIconMenu = nullptr;
@@ -83,6 +86,7 @@ private:
     bool m_ringingState = false;
     bool m_hasEstablishedCalls = false;
     QString m_lastTrayIconPath;
+    QString m_desiredTrayIconPath;
 };
 
 class SystemTrayMenuWrapper
