@@ -43,11 +43,11 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
 
     updateMenu();
 
-    m_ringTimer.setInterval(750ms);
+    m_ringTimer.setInterval(800ms);
     connect(&m_ringTimer, &QTimer::timeout, this, &SystemTrayMenu::ringTimerCallback);
 
     m_trayIconUpdateTimer.setSingleShot(true);
-    m_trayIconUpdateTimer.setInterval(50ms);
+    m_trayIconUpdateTimer.setInterval(250ms);
     connect(&m_trayIconUpdateTimer, &QTimer::timeout, this, &SystemTrayMenu::applyTrayIcon);
 
     auto numStats = &NumberStats::instance();
