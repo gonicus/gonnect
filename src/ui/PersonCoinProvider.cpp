@@ -39,6 +39,8 @@ QImage PersonCoinProvider::requestImage(const QString &id, QSize *size, const QS
 
         // Draw image
         QImage image(*size, QImage::Format_ARGB32);
+        image.fill(Qt::transparent);
+
         QPainter p(&image);
         Theme &theme = Theme::instance();
 
@@ -58,6 +60,7 @@ QImage PersonCoinProvider::requestImage(const QString &id, QSize *size, const QS
         QFileInfo info(path);
         QDir dir;
         dir.mkpath(info.path());
+        p.end();
         image.save(path);
 
         return image;
