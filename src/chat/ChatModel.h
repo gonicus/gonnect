@@ -71,6 +71,8 @@ public:
 
         MentionedUserNames
     };
+    Q_ENUM(Roles)
+
     explicit ChatModel(QObject *parent = nullptr);
 
     QHash<int, QByteArray> roleNames() const override;
@@ -84,6 +86,10 @@ private Q_SLOTS:
     void updateRealMessagesCount();
 
 private:
+    static Roles toNormalRole(const Roles role);
+    static int toNormalRole(const int role);
+
+    QVariant rawData(int row, int role) const;
     QString addLinkTags(const QString &orig) const;
     QString highlightMentions(const QString &orig, const ChatMessage &message) const;
     ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
