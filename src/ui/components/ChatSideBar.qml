@@ -64,13 +64,14 @@ Item {
                 required property int index
                 required property string fromId
                 required property string nickName
-                required property string simpleText
                 required property bool isOwnMessage
                 required property bool isSystemMessage
                 required property date timestamp
+                required property QtObject content
 
                 readonly property Item prevDelg: delg.index > 0 ? chatListView.itemAtIndex(delg.index - 1) : null
                 readonly property string timeFormatted: Qt.formatTime(delg.timestamp, "hh:mm")
+                readonly property string simpleText: delg.content?.simpleText ?? ""
 
                 property color labelColor: Theme.primaryTextColor
 

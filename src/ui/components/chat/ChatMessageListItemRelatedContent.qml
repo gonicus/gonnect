@@ -9,24 +9,9 @@ Item {
     implicitWidth: relatedContent.implicitWidth
 
     property alias isStateUpdate: relatedContent.isStateUpdate
-    property alias isText: relatedContent.isText
-    property alias isSimpleText: relatedContent.isSimpleText
-    property alias isMultiText: relatedContent.isMultiText
-    property alias isImage: relatedContent.isImage
-    property alias isFile: relatedContent.isFile
-    property alias isAudioFile: relatedContent.isAudioFile
-    property alias isVideoFile: relatedContent.isVideoFile
-
+    property alias content: relatedContent.content
     property alias userState: relatedContent.userState
     property alias affectedUserName: relatedContent.affectedUserName
-    property alias simpleText: relatedContent.simpleText
-    property alias multiText: relatedContent.multiText
-    property alias imageUrl: relatedContent.imageUrl
-    property alias fileUrl: relatedContent.fileUrl
-    property alias fileName: relatedContent.fileName
-    property alias fileSize: relatedContent.fileSize
-    property alias thumbnailFileUrl: relatedContent.thumbnailFileUrl
-
     property string nickName
 
     Rectangle {

@@ -1,16 +1,12 @@
 #include "ChatMessage.h"
-#include "ChatMessageContentFile.h"
-#include "ChatMessageContentAudioFile.h"
-#include "ChatMessageContentVideoFile.h"
-#include "ChatMessageContentImage.h"
-#include "ChatMessageContentText.h"
 #include "ChatMessageContentUserStateChange.h"
 #include "ChatMessageReaction.h"
+#include "IChatRoom.h"
 
 ChatMessage::ChatMessage(const QString &eventId, const QString &fromId, const QString &nickName,
                          QObject *content, const QDateTime &timestamp, IChatRoom *chatRoom,
-                         Flags flags, QObject *parent)
-    : QObject{ parent },
+                         Flags flags = Flag::Unknown)
+    : QObject{ chatRoom },
       m_eventId{ eventId },
       m_fromId{ fromId },
       m_nickName{ nickName },
@@ -20,6 +16,12 @@ ChatMessage::ChatMessage(const QString &eventId, const QString &fromId, const QS
       m_chatRoom{ chatRoom }
 {
     Q_CHECK_PTR(chatRoom);
+
+    content->setParent(this);
+
+    if (auto *textContent = qobject_cast<ChatMessageContentText *>(content)) {
+        textContent->processText();
+    }
 }
 
 ChatMessage::~ChatMessage()
@@ -44,44 +46,6 @@ bool ChatMessage::isStateUpdate() const
     return qobject_cast<ChatMessageContentUserStateChange *>(m_content);
 }
 
-bool ChatMessage::isText() const
-{
-    return qobject_cast<ChatMessageContentText *>(m_content);
-}
-
-bool ChatMessage::isSimpleText() const
-{
-    if (const auto textContent = qobject_cast<const ChatMessageContentText *>(m_content)) {
-        return textContent->isSimpleText();
-    }
-    return false;
-}
-
-bool ChatMessage::isMultiText() const
-{
-    return isText() && !isSimpleText();
-}
-
-bool ChatMessage::isImage() const
-{
-    return qobject_cast<ChatMessageContentImage *>(m_content);
-}
-
-bool ChatMessage::isFile() const
-{
-    return qobject_cast<ChatMessageContentFile *>(m_content);
-}
-
-bool ChatMessage::isAudioFile() const
-{
-    return qobject_cast<ChatMessageContentAudioFile *>(m_content);
-}
-
-bool ChatMessage::isVideoFile() const
-{
-    return qobject_cast<ChatMessageContentVideoFile *>(m_content);
-}
-
 ChatMessageContentUserStateChange::State ChatMessage::state() const
 {
     if (const auto content = qobject_cast<ChatMessageContentUserStateChange *>(m_content)) {
@@ -94,62 +58,6 @@ QString ChatMessage::affectedUserId() const
 {
     if (const auto content = qobject_cast<ChatMessageContentUserStateChange *>(m_content)) {
         return content->affectedUserId();
-    }
-    return "";
-}
-
-QString ChatMessage::simpleText() const
-{
-    if (const auto content = qobject_cast<ChatMessageContentText *>(m_content)) {
-        return content->simpleText();
-    }
-    return "";
-}
-
-QList<ChatMessageContentPart *> ChatMessage::multiText() const
-{
-    if (const auto content = qobject_cast<ChatMessageContentText *>(m_content)) {
-        return content->contentParts();
-    }
-    return {};
-}
-
-QString ChatMessage::imageUrl() const
-{
-    if (const auto content = qobject_cast<ChatMessageContentImage *>(m_content)) {
-        return content->imagePath().toString();
-    }
-    return "";
-}
-
-QString ChatMessage::fileUrl() const
-{
-    if (const auto content = qobject_cast<ChatMessageContentFile *>(m_content)) {
-        return content->filePath();
-    }
-    return "";
-}
-
-QString ChatMessage::fileName() const
-{
-    if (const auto content = qobject_cast<ChatMessageContentFile *>(m_content)) {
-        return content->fileName();
-    }
-    return "";
-}
-
-qint64 ChatMessage::fileSize() const
-{
-    if (const auto content = qobject_cast<ChatMessageContentFile *>(m_content)) {
-        return content->fileSize();
-    }
-    return 0;
-}
-
-QString ChatMessage::thumbnailFilePath() const
-{
-    if (const auto content = qobject_cast<ChatMessageContentVideoFile *>(m_content)) {
-        return content->thumbnailFilePath();
     }
     return "";
 }

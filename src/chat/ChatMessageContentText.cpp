@@ -1,5 +1,8 @@
 #include "ChatMessageContentText.h"
+#include "ChatMessageTransformer.h"
+#include "ChatMessage.h"
 #include <cmark.h>
+#include <QEvent>
 
 ChatMessageContentText::ChatMessageContentText(const QString &text, QObject *parent)
     : QObject{ parent }
@@ -14,7 +17,7 @@ bool ChatMessageContentText::isSimpleText() const
 
 QString ChatMessageContentText::simpleText() const
 {
-    return m_rawText;
+    return m_simpleText;
 }
 
 void ChatMessageContentText::setText(const QString &text)
@@ -23,11 +26,24 @@ void ChatMessageContentText::setText(const QString &text)
         return;
     }
     m_rawText = text;
+    processText();
+}
 
+void ChatMessageContentText::processText()
+{
+    const auto *chatMessageObj = qobject_cast<ChatMessage *>(parent());
+    if (!chatMessageObj) {
+        return;
+    }
+
+    m_simpleText = ChatMessageTransformer::addLinkTags(m_rawText);
+    m_simpleText = ChatMessageTransformer::highlightMentions(m_simpleText, *chatMessageObj);
+
+    // Split into code/pre blocks
     qDeleteAll(m_parts);
     m_parts.clear();
 
-    const QByteArray utf8Data = text.toUtf8();
+    const QByteArray utf8Data = m_rawText.toUtf8();
     QString currentTextBuffer;
     cmark_node *doc =
             cmark_parse_document(utf8Data.constData(), utf8Data.size(), CMARK_OPT_DEFAULT);

@@ -10,9 +10,9 @@ Item {
     implicitWidth: {
         if (control.isStateUpdate) {
             return stateLabel.implicitWidth
-        } else if (control.isSimpleText) {
+        } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
             return messageLabel.implicitWidth
-        } else if (control.isImage) {
+        } else if (control.content instanceof ChatMessageContentImage) {
             return messageImage.sourceSize.width
         } else if (attachmentLoader.item) {
             return attachmentLoader.width
@@ -22,9 +22,9 @@ Item {
     implicitHeight: {
         if (control.isStateUpdate) {
             return stateLabel.implicitHeight
-        } else if (control.isSimpleText) {
+        } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
             return messageLabel.implicitHeight
-        } else if (control.isImage) {
+        } else if (control.content instanceof ChatMessageContentImage) {
             return messageImage.height
         } else if (attachmentLoader.item) {
             return attachmentLoader.height
@@ -32,36 +32,23 @@ Item {
         return 36
     }
 
+    required property QtObject content
     required property bool isStateUpdate
-    required property bool isText
-    required property bool isSimpleText
-    required property bool isMultiText
-    required property bool isImage
-    required property bool isFile
-    required property bool isAudioFile
-    required property bool isVideoFile
-
     required property int userState
     required property string affectedUserName
-    required property string simpleText
-    required property list<ChatMessageContentPart> multiText
-    required property string imageUrl
-    required property string fileUrl
-    required property string fileName
-    required property int fileSize
-    required property string thumbnailFileUrl
 
     readonly property alias messageLabel: messageLabel
 
     signal openDirectChatRequested(string userId)
 
-    readonly property bool isShortEmojiOnly: control.isText && ViewHelper.isShortEmojiString(control.simpleText)
+    readonly property bool isShortEmojiOnly: control.content instanceof ChatMessageContentText
+                                             && ViewHelper.isShortEmojiString(control.content.simpleText)
 
     // Text
     TextEdit {
         id: messageLabel
-        visible: control.isSimpleText
-        text: control.simpleText
+        visible: control.content instanceof ChatMessageContentText && control.content.isSimpleText
+        text: control.content instanceof ChatMessageContentText ? control.content.simpleText : ""
         wrapMode: Label.Wrap
         textFormat: Text.MarkdownText
         readOnly: true
@@ -113,7 +100,7 @@ Item {
     AnimatedImage {
         id: messageImage
         visible: false
-        source: control.imageUrl
+        source: control.content?.imagePath ?? ""
         height: Math.min(messageImage.sourceSize.height, 200)
         width: Math.min(messageImage.sourceSize.width, parent.width)
         fillMode: Image.PreserveAspectFit
@@ -134,7 +121,7 @@ Item {
 
     OpacityMask {
         id: messageImageOpacityMask
-        visible: control.isImage
+        visible: control.content instanceof ChatMessageContentImage
         maskSource: messageImageCornerCropper
         source: messageImage
         anchors.fill: messageImage
@@ -145,26 +132,27 @@ Item {
 
         TapHandler {
             onSingleTapped: () => {
-                ViewHelper.showLargeImage(control.imageUrl)
+                ViewHelper.showLargeImage(control.content?.imagePath ?? "")
             }
         }
     }
 
     Loader {
         id: attachmentLoader
-        visible: control.isFile || control.isMultiText
+        visible: control.content instanceof ChatMessageContentFile
+                 || (control.content instanceof ChatMessageContentText && !control.content.isSimpleText)
         anchors {
             left: parent.left
             top: messageLabel.top
         }
         source: {
-            if (control.isAudioFile) {
+            if (control.content instanceof ChatMessageContentAudioFile) {
                 return "qrc:/qt/qml/base/ui/components/controls/AudioPlayer.qml"
-            } else if (control.isVideoFile) {
+            } else if (control.content instanceof ChatMessageContentVideoFile) {
                 return "qrc:/qt/qml/base/ui/components/controls/VideoPlayer.qml"
-            } else if (control.isFile) {
+            } else if (control.content instanceof ChatMessageContentFile) {
                 return "qrc:/qt/qml/base/ui/components/chat/FileAttachment.qml"
-            } else if (control.isMultiText) {
+            } else if (control.content instanceof ChatMessageContentText) {
                 return "qrc:/qt/qml/base/ui/components/chat/MultiText.qml"
             }
             return ""
@@ -172,44 +160,15 @@ Item {
 
         Binding {
             target: attachmentLoader.item
+            property: "content"
+            value: control.content
+        }
+
+        Binding {
+            target: attachmentLoader.item
             when: !!attachmentLoader.item?.hasOwnProperty("availableWidth")
             property: "availableWidth"
             value: control.width
-        }
-
-        Binding {
-            target: attachmentLoader.item
-            when: !!attachmentLoader.item?.hasOwnProperty("fileUrl")
-            property: "fileUrl"
-            value: control.fileUrl
-        }
-
-        Binding {
-            target: attachmentLoader.item
-            when: !!attachmentLoader.item?.hasOwnProperty("fileName")
-            property: "fileName"
-            value: control.fileName
-        }
-
-        Binding {
-            target: attachmentLoader.item
-            when: !!attachmentLoader.item?.hasOwnProperty("fileSize")
-            property: "fileSize"
-            value: control.fileSize
-        }
-
-        Binding {
-            target: attachmentLoader.item
-            when: !!attachmentLoader.item?.hasOwnProperty("thumbnailFileUrl")
-            property: "thumbnailFileUrl"
-            value: control.thumbnailFileUrl
-        }
-
-        Binding {
-            target: attachmentLoader.item
-            when: !!attachmentLoader.item?.hasOwnProperty("multiText")
-            property: "multiText"
-            value: control.multiText
         }
     }
 }

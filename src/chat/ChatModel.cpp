@@ -1,14 +1,8 @@
 #include "ChatModel.h"
-#include "EmojiResolver.h"
 #include "ChatMessage.h"
 #include "ChatMessageReaction.h"
 #include "IChatProvider.h"
-#include "ChatMessageContentImage.h"
-#include "ChatMessageContentText.h"
-#include "ChatMessageContentFile.h"
-#include "ChatMessageContentVideoFile.h"
 #include "ChatMessageContentUserStateChange.h"
-#include <QRegularExpression>
 
 ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -25,15 +19,9 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::AvatarPath), "avatarPath" },
         { static_cast<int>(Roles::UserState), "userState" },
         { static_cast<int>(Roles::AffectedUserId), "affectedUserId" },
-        { static_cast<int>(Roles::SimpleText), "simpleText" },
-        { static_cast<int>(Roles::MultiText), "multiText" },
         { static_cast<int>(Roles::Timestamp), "timestamp" },
-        { static_cast<int>(Roles::ImageUrl), "imageUrl" },
-        { static_cast<int>(Roles::FileUrl), "fileUrl" },
-        { static_cast<int>(Roles::FileName), "fileName" },
-        { static_cast<int>(Roles::FileSize), "fileSize" },
-        { static_cast<int>(Roles::ThumbnailFileUrl), "thumbnailFileUrl" },
         { static_cast<int>(Roles::Reactions), "reactions" },
+        { static_cast<int>(Roles::Content), "content" },
 
         { static_cast<int>(Roles::IsPrivateMessage), "isPrivateMessage" },
         { static_cast<int>(Roles::IsOwnMessage), "isOwnMessage" },
@@ -44,34 +32,13 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::IsSameMinuteAsPrevious), "isSameMinuteAsPrevious" },
         { static_cast<int>(Roles::IsSameDayAsPrevious), "isSameDayAsPrevious" },
         { static_cast<int>(Roles::IsStateUpdate), "isStateUpdate" },
-        { static_cast<int>(Roles::IsText), "isText" },
-        { static_cast<int>(Roles::IsSimpleText), "isSimpleText" },
-        { static_cast<int>(Roles::IsMultiText), "isMultiText" },
-        { static_cast<int>(Roles::IsImage), "isImage" },
-        { static_cast<int>(Roles::IsFile), "isFile" },
-        { static_cast<int>(Roles::IsAudioFile), "isAudioFile" },
-        { static_cast<int>(Roles::IsVideoFile), "isVideoFile" },
 
         { static_cast<int>(Roles::HasRelatedMessage), "hasRelatedMessage" },
         { static_cast<int>(Roles::RelatedMessageNickName), "relatedMessageNickName" },
         { static_cast<int>(Roles::RelatedMessageIsStateUpdate), "relatedMessageIsStateUpdate" },
-        { static_cast<int>(Roles::RelatedMessageIsText), "relatedMessageIsText" },
-        { static_cast<int>(Roles::RelatedMessageIsSimpleText), "relatedMessageIsSimpleText" },
-        { static_cast<int>(Roles::RelatedMessageIsMultiText), "relatedMessageIsMultiText" },
-        { static_cast<int>(Roles::RelatedMessageIsImage), "relatedMessageIsImage" },
-        { static_cast<int>(Roles::RelatedMessageIsFile), "relatedMessageIsFile" },
-        { static_cast<int>(Roles::RelatedMessageIsAudioFile), "relatedMessageIsAudioFile" },
-        { static_cast<int>(Roles::RelatedMessageIsVideoFile), "relatedMessageIsVideoFile" },
         { static_cast<int>(Roles::RelatedMessageUserState), "relatedMessageUserState" },
         { static_cast<int>(Roles::RelatedMessageAffectedUserId), "relatedMessageAffectedUserId" },
-        { static_cast<int>(Roles::RelatedMessageSimpleText), "relatedMessageSimpleText" },
-        { static_cast<int>(Roles::RelatedMessageMultiText), "relatedMessageMultiText" },
-        { static_cast<int>(Roles::RelatedMessageImageUrl), "relatedMessageImageUrl" },
-        { static_cast<int>(Roles::RelatedMessageFileUrl), "relatedMessageFileUrl" },
-        { static_cast<int>(Roles::RelatedMessageFileName), "relatedMessageFileName" },
-        { static_cast<int>(Roles::RelatedMessageFileSize), "relatedMessageFileSize" },
-        { static_cast<int>(Roles::RelatedMessageThumbnailFileUrl),
-          "relatedMessageThumbnailFileUrl" },
+        { static_cast<int>(Roles::RelatedMessageContent), "relatedMessageContent" },
 
         { static_cast<int>(Roles::MentionedUserNames), "mentionedUserNames" },
     };
@@ -87,22 +54,9 @@ ChatModel::Roles ChatModel::toNormalRole(const Roles role)
     static const QHash<Roles, Roles> convMap = {
         { Roles::RelatedMessageNickName, Roles::NickName },
         { Roles::RelatedMessageIsStateUpdate, Roles::IsStateUpdate },
-        { Roles::RelatedMessageIsText, Roles::IsText },
-        { Roles::RelatedMessageIsSimpleText, Roles::IsSimpleText },
-        { Roles::RelatedMessageIsMultiText, Roles::IsMultiText },
-        { Roles::RelatedMessageIsImage, Roles::IsImage },
-        { Roles::RelatedMessageIsFile, Roles::IsFile },
-        { Roles::RelatedMessageIsAudioFile, Roles::IsAudioFile },
-        { Roles::RelatedMessageIsVideoFile, Roles::IsVideoFile },
         { Roles::RelatedMessageUserState, Roles::UserState },
         { Roles::RelatedMessageAffectedUserId, Roles::AffectedUserId },
-        { Roles::RelatedMessageSimpleText, Roles::SimpleText },
-        { Roles::RelatedMessageMultiText, Roles::MultiText },
-        { Roles::RelatedMessageImageUrl, Roles::ImageUrl },
-        { Roles::RelatedMessageFileUrl, Roles::FileUrl },
-        { Roles::RelatedMessageFileName, Roles::FileName },
-        { Roles::RelatedMessageFileSize, Roles::FileSize },
-        { Roles::RelatedMessageThumbnailFileUrl, Roles::ThumbnailFileUrl },
+        { Roles::RelatedMessageContent, Roles::Content },
     };
 
     return convMap.value(role, role);
@@ -192,26 +146,8 @@ QVariant ChatModel::rawData(int row, int role) const
                 ? (qobject_cast<ChatMessageContentUserStateChange *>(item->content()) != nullptr)
                 : false;
 
-    case static_cast<int>(Roles::IsText):
-        return item ? item->isText() : false;
-
-    case static_cast<int>(Roles::IsSimpleText):
-        return item ? item->isSimpleText() : false;
-
-    case static_cast<int>(Roles::IsMultiText):
-        return item ? item->isMultiText() : false;
-
-    case static_cast<int>(Roles::IsImage):
-        return item ? item->isImage() : false;
-
-    case static_cast<int>(Roles::IsFile):
-        return item ? item->isFile() : false;
-
-    case static_cast<int>(Roles::IsAudioFile):
-        return item ? item->isAudioFile() : false;
-
-    case static_cast<int>(Roles::IsVideoFile):
-        return item ? item->isVideoFile() : false;
+    case static_cast<int>(Roles::Content):
+        return QVariant::fromValue(item ? item->content() : nullptr);
 
     case static_cast<int>(Roles::UserState): {
         if (!item) {
@@ -233,83 +169,6 @@ QVariant ChatModel::rawData(int row, int role) const
             return stateContent->affectedUserId();
         }
         return "";
-    }
-
-    case static_cast<int>(Roles::SimpleText): {
-        if (!item) {
-            return "";
-        }
-        if (const auto textContent = qobject_cast<ChatMessageContentText *>(item->content())) {
-            const auto replacedText =
-                    EmojiResolver::instance().replaceEmojiCodes(textContent->simpleText());
-
-            if (item->flags() & ChatMessage::Flag::Markdown) {
-                return highlightMentions(replacedText, *item);
-            } else {
-                return addLinkTags(replacedText);
-            }
-        }
-        return "";
-    }
-
-    case static_cast<int>(Roles::MultiText): {
-        if (!item) {
-            return QVariant::fromValue(QList<ChatMessageContentPart *>());
-        }
-        if (const auto textContent = qobject_cast<ChatMessageContentText *>(item->content())) {
-            return QVariant::fromValue(textContent->contentParts());
-        }
-        return QVariant::fromValue(QList<ChatMessageContentPart *>());
-    }
-
-    case static_cast<int>(Roles::ImageUrl): {
-        if (!item) {
-            return QUrl();
-        }
-        if (const auto imageContent = qobject_cast<ChatMessageContentImage *>(item->content())) {
-            return imageContent->imagePath();
-        }
-        return QUrl();
-    }
-
-    case static_cast<int>(Roles::FileUrl): {
-        if (!item) {
-            return QUrl();
-        }
-        if (const auto fileContent = qobject_cast<ChatMessageContentFile *>(item->content())) {
-            return fileContent->filePath();
-        }
-        return QUrl();
-    }
-
-    case static_cast<int>(Roles::ThumbnailFileUrl): {
-        if (!item) {
-            return QUrl();
-        }
-        if (const auto fileContent = qobject_cast<ChatMessageContentVideoFile *>(item->content())) {
-            return fileContent->thumbnailFilePath();
-        }
-        return QUrl();
-    }
-
-    case static_cast<int>(Roles::FileName): {
-        if (!item) {
-            return "";
-        }
-        if (const auto fileContent = qobject_cast<ChatMessageContentFile *>(item->content())) {
-            return fileContent->fileName();
-        }
-        return QString();
-    }
-
-    case static_cast<int>(Roles::FileSize): {
-        if (!item) {
-            return QVariant::fromValue(static_cast<qint64>(0));
-        }
-        if (const auto fileContent = qobject_cast<ChatMessageContentFile *>(item->content())) {
-            return fileContent->fileSize();
-        }
-        return QVariant::fromValue(static_cast<qint64>(0));
     }
 
     case static_cast<int>(Roles::Timestamp):
@@ -427,11 +286,7 @@ void ChatModel::onChatRoomChanged()
                 [this](qsizetype idx, ChatMessage *msgObj) {
                     const auto modelIndex = createIndex(idx, 0);
                     Q_EMIT dataChanged(modelIndex, modelIndex,
-                                       { static_cast<int>(Roles::IsSimpleText),
-                                         static_cast<int>(Roles::IsMultiText),
-                                         static_cast<int>(Roles::SimpleText),
-                                         static_cast<int>(Roles::MultiText),
-                                         static_cast<int>(Roles::ThumbnailFileUrl) });
+                                       { static_cast<int>(Roles::Content) });
 
                     updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
                 });
@@ -479,51 +334,6 @@ void ChatModel::updateRealMessagesCount()
     }
 }
 
-QString ChatModel::addLinkTags(const QString &orig) const
-{
-    static const QRegularExpression re("^\\S+\\.\\S{2,}[^.]$",
-                                       QRegularExpression::CaseInsensitiveOption);
-
-    auto split = orig.split(' ');
-
-    QMutableListIterator it(split);
-    while (it.hasNext()) {
-        auto s = it.next();
-
-        const auto match = re.match(s);
-        if (match.hasMatch()) {
-            it.setValue(QString("<a href=\"%1\">%1</a>").arg(s));
-        }
-    }
-
-    return split.join(' ');
-}
-
-QString ChatModel::highlightMentions(const QString &orig, const ChatMessage &message) const
-{
-    const auto mentions = message.mentionedUsers();
-    if (mentions.isEmpty()) {
-        return orig;
-    }
-
-    QString str(orig);
-
-    for (const auto *user : mentions) {
-        const auto name = user->computedName();
-        if (name.isEmpty()) {
-            continue;
-        }
-
-        // Use word boundaries (\b) to prevent name splitting.
-        // escape(name) prevents regex injections.
-        const QRegularExpression regex(QString(R"(\b%1\b)").arg(QRegularExpression::escape(name)));
-        const QString replacement = QString("[%1](chat://%2)").arg(name, user->id());
-        str.replace(regex, replacement);
-    }
-
-    return str;
-}
-
 ChatMessage *ChatModel::relatedMessage(ChatMessage *originalMessage) const
 {
     if (originalMessage && !originalMessage->relatedMessageId().isEmpty()) {
@@ -553,27 +363,13 @@ void ChatModel::updateRelatedMessages(const QString &originalMessageId, const QL
 
 QList<int> ChatModel::relatedContentRoles(const ChatMessage &messageObject) const
 {
-    QList<int> roles = { static_cast<int>(Roles::RelatedMessageNickName) };
+    QList<int> roles = { static_cast<int>(Roles::RelatedMessageNickName),
+                         static_cast<int>(Roles::RelatedMessageContent) };
     const auto content = messageObject.content();
 
     if (qobject_cast<ChatMessageContentUserStateChange *>(content)) {
         roles.append(static_cast<int>(Roles::RelatedMessageUserState));
         roles.append(static_cast<int>(Roles::RelatedMessageAffectedUserId));
-
-    } else if (qobject_cast<ChatMessageContentText *>(content)) {
-        roles.append(static_cast<int>(Roles::RelatedMessageSimpleText));
-        roles.append(static_cast<int>(Roles::RelatedMessageMultiText));
-        roles.append(static_cast<int>(Roles::RelatedMessageIsMultiText));
-        roles.append(static_cast<int>(Roles::RelatedMessageIsSimpleText));
-
-    } else if (qobject_cast<ChatMessageContentImage *>(content)) {
-        roles.append(static_cast<int>(Roles::RelatedMessageImageUrl));
-
-    } else if (qobject_cast<ChatMessageContentFile *>(content)) {
-        roles.append(static_cast<int>(Roles::RelatedMessageFileUrl));
-        roles.append(static_cast<int>(Roles::RelatedMessageFileName));
-        roles.append(static_cast<int>(Roles::RelatedMessageFileSize));
-        roles.append(static_cast<int>(Roles::RelatedMessageThumbnailFileUrl));
     }
 
     return roles;

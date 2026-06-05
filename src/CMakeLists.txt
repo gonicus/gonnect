@@ -679,6 +679,8 @@ qt_add_qml_module(gonnect
         contacts/ResponseTreeModel.cpp
         contacts/IAddressBookFactory.h
 
+        helper/ChatMessageTransformer.h
+        helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
         helper/CodeHighlighter.cpp
         helper/SecretGenerator.h

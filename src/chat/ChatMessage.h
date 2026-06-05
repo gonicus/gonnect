@@ -19,24 +19,10 @@ class ChatMessage : public QObject
 
     Q_PROPERTY(QString eventId READ eventId CONSTANT FINAL)
     Q_PROPERTY(QString nickName READ nickName CONSTANT FINAL)
-
     Q_PROPERTY(bool isStateUpdate READ isStateUpdate CONSTANT FINAL)
-    Q_PROPERTY(bool isText READ isText CONSTANT FINAL)
-    Q_PROPERTY(bool isSimpleText READ isSimpleText CONSTANT FINAL)
-    Q_PROPERTY(bool isMultiText READ isMultiText CONSTANT FINAL)
-    Q_PROPERTY(bool isImage READ isImage CONSTANT FINAL)
-    Q_PROPERTY(bool isFile READ isFile CONSTANT FINAL)
-    Q_PROPERTY(bool isAudioFile READ isAudioFile CONSTANT FINAL)
-    Q_PROPERTY(bool isVideoFile READ isVideoFile CONSTANT FINAL)
-
     Q_PROPERTY(ChatMessageContentUserStateChange::State state READ state CONSTANT FINAL)
     Q_PROPERTY(QString affectedUserId READ affectedUserId CONSTANT FINAL)
-    Q_PROPERTY(QString simpleText READ simpleText CONSTANT FINAL)
-    Q_PROPERTY(QList<ChatMessageContentPart *> multiText READ multiText CONSTANT FINAL)
-    Q_PROPERTY(QString imageUrl READ imageUrl CONSTANT FINAL)
-    Q_PROPERTY(QString fileUrl READ fileUrl CONSTANT FINAL)
-    Q_PROPERTY(QString fileName READ fileName CONSTANT FINAL)
-    Q_PROPERTY(QString thumbnailFilePath READ thumbnailFilePath CONSTANT FINAL)
+    Q_PROPERTY(QObject *content READ content CONSTANT FINAL)
 
 public:
     enum class Flag {
@@ -54,7 +40,7 @@ public:
 
     explicit ChatMessage(const QString &eventId, const QString &fromId, const QString &nickName,
                          QObject *content, const QDateTime &timestamp, IChatRoom *chatRoom,
-                         Flags flags = Flag::Unknown, QObject *parent = nullptr);
+                         Flags flags);
 
     virtual ~ChatMessage();
 
@@ -68,23 +54,9 @@ public:
     IChatRoom *chatRoom() const { return m_chatRoom; }
 
     bool isStateUpdate() const;
-    bool isText() const;
-    bool isSimpleText() const;
-    bool isMultiText() const;
-    bool isImage() const;
-    bool isFile() const;
-    bool isAudioFile() const;
-    bool isVideoFile() const;
 
     ChatMessageContentUserStateChange::State state() const;
     QString affectedUserId() const;
-    QString simpleText() const;
-    QList<ChatMessageContentPart *> multiText() const;
-    QString imageUrl() const;
-    QString fileUrl() const;
-    QString fileName() const;
-    qint64 fileSize() const;
-    QString thumbnailFilePath() const;
 
     QString relatedMessageId() const { return m_relatedMessageId; }
     void setRelatedMessageId(const QString &id) { m_relatedMessageId = id; }

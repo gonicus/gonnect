@@ -23,13 +23,7 @@ public:
         NickName,
         UserState,
         AffectedUserId,
-        SimpleText,
-        MultiText,
-        ImageUrl,
-        FileUrl,
-        FileName,
-        FileSize,
-        ThumbnailFileUrl,
+        Content,
         Reactions,
 
         IsPrivateMessage,
@@ -41,33 +35,13 @@ public:
         IsSameMinuteAsPrevious,
         IsSameDayAsPrevious,
         IsStateUpdate,
-        IsText,
-        IsSimpleText,
-        IsMultiText,
-        IsImage,
-        IsFile,
-        IsAudioFile,
-        IsVideoFile,
 
         HasRelatedMessage,
         RelatedMessageNickName,
         RelatedMessageIsStateUpdate,
-        RelatedMessageIsText,
-        RelatedMessageIsSimpleText,
-        RelatedMessageIsMultiText,
-        RelatedMessageIsImage,
-        RelatedMessageIsFile,
-        RelatedMessageIsAudioFile,
-        RelatedMessageIsVideoFile,
         RelatedMessageUserState,
         RelatedMessageAffectedUserId,
-        RelatedMessageSimpleText,
-        RelatedMessageMultiText,
-        RelatedMessageImageUrl,
-        RelatedMessageFileUrl,
-        RelatedMessageFileName,
-        RelatedMessageFileSize,
-        RelatedMessageThumbnailFileUrl,
+        RelatedMessageContent,
 
         MentionedUserNames
     };
@@ -90,8 +64,6 @@ private:
     static int toNormalRole(const int role);
 
     QVariant rawData(int row, int role) const;
-    QString addLinkTags(const QString &orig) const;
-    QString highlightMentions(const QString &orig, const ChatMessage &message) const;
     ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
     void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
     QList<int> relatedContentRoles(const ChatMessage &messageObject) const;

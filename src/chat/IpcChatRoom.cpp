@@ -83,7 +83,8 @@ ChatMessage *IpcChatRoom::latestOwnTextMessage() const
 
     while (it.hasPrevious()) {
         auto *msg = it.previous();
-        if (msg->isText() && (msg->flags() & ChatMessage::Flag::OwnMessage)) {
+        if (qobject_cast<ChatMessageContentText *>(msg->content())
+            && (msg->flags() & ChatMessage::Flag::OwnMessage)) {
             return msg;
         }
     }
@@ -118,9 +119,8 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)
         setUnreadCount(notificationCount() + 1);
     }
 
-    if (message->isVideoFile()) {
+    if (auto *content = qobject_cast<ChatMessageContentVideoFile *>(message->content())) {
         // Since the thumbnail path is available later, it must produce a signal
-        auto content = q_check_ptr(qobject_cast<ChatMessageContentVideoFile *>(message->content()));
         connect(content, &ChatMessageContentVideoFile::thumbnailFilePathChanged, this,
                 [this, message]() {
                     Q_EMIT chatMessageContentChanged(indexOfMessage(message), message);

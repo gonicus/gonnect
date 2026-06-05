@@ -10,12 +10,12 @@ Column {
     id: control
     width: control.availableWidth
 
-    property list<ChatMessageContentPart> multiText
+    property ChatMessageContentText content
     property int availableWidth
 
     Repeater {
         id: rep
-        model: control.multiText
+        model: control.content?.contentParts ?? null
         delegate: Item {
             id: delg
             implicitHeight: delg.isCode ? codeBlockLoader.height : textLabel.height

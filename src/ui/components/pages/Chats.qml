@@ -758,22 +758,9 @@ Item {
             visible: !!relatedMsg.chatMessage
             nickName: relatedMsg.chatMessage?.nickName ?? ""
             isStateUpdate: relatedMsg.chatMessage?.isStateUpdate?? false
-            isText: relatedMsg.chatMessage?.isText ?? false
-            isSimpleText: relatedMsg.chatMessage?.isSimpleText ?? false
-            isMultiText: relatedMsg.chatMessage?.isMultiText ?? false
-            isImage: relatedMsg.chatMessage?.isImage ?? false
-            isFile: relatedMsg.chatMessage?.isFile ?? false
-            isAudioFile: relatedMsg.chatMessage?.isAudioFile ?? false
-            isVideoFile: relatedMsg.chatMessage?.isVideoFile ?? false
+            content: relatedMsg.chatMessage?.content ?? null
             userState: relatedMsg.chatMessage?.state ?? ChatMessageContentUserStateChange.State.Unknown
             affectedUserName: control.chatProvider?.userById(relatedMsg.chatMessage?.affectedUserId ?? "")?.computedName ?? ""
-            simpleText: relatedMsg.chatMessage?.simpleText ?? ""
-            multiText: relatedMsg.chatMessage?.multiText ?? ""
-            imageUrl: relatedMsg.chatMessage?.imageUrl ?? ""
-            fileUrl: relatedMsg.chatMessage?.fileUrl ?? ""
-            fileName: relatedMsg.chatMessage?.fileName ?? ""
-            fileSize: relatedMsg.chatMessage?.fileSize ?? 0
-            thumbnailFileUrl: relatedMsg.chatMessage?.thumbnailFileUrl ?? ""
             anchors {
                 left: replyBg.left
                 right: replyBg.right
@@ -818,7 +805,7 @@ Item {
                 if (chatRoom && chatProvider) {
                     const latestMsg = chatRoomList.chatRoom.latestOwnTextMessage()
                     if (latestMsg) {
-                        chatMessageBox.text = latestMsg.simpleText
+                        chatMessageBox.text = latestMsg.content.simpleText
                         chatMessageBox.editMessageId = latestMsg.eventId
                         // ViewHelper.showEditMessageDialog(chatProvider, chatRoom.id, latestMsg.eventId, latestMsg.message)
                     }

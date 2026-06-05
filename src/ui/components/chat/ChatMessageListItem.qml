@@ -26,47 +26,21 @@ Item {
     required property string avatarPath
     required property int userState
     required property string affectedUserId
-    required property string simpleText
-    required property list<ChatMessageContentPart> multiText
-    required property string imageUrl
-    required property string fileUrl
-    required property string fileName
-    required property string thumbnailFileUrl
-    required property int fileSize
     required property var reactions
+    required property QtObject content
 
     required property bool isOwnMessage
     required property bool isStateUpdate
-    required property bool isText
-    required property bool isSimpleText
-    required property bool isMultiText
-    required property bool isImage
-    required property bool isFile
-    required property bool isAudioFile
-    required property bool isVideoFile
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
     required property bool isSameDayAsPrevious
 
     required property bool hasRelatedMessage
     required property string relatedMessageNickName
+    required property QtObject relatedMessageContent
     required property bool relatedMessageIsStateUpdate
-    required property bool relatedMessageIsText
-    required property bool relatedMessageIsSimpleText
-    required property bool relatedMessageIsMultiText
-    required property bool relatedMessageIsImage
-    required property bool relatedMessageIsFile
-    required property bool relatedMessageIsAudioFile
-    required property bool relatedMessageIsVideoFile
     required property int relatedMessageUserState
     required property string relatedMessageAffectedUserId
-    required property string relatedMessageSimpleText
-    required property list<ChatMessageContentPart> relatedMessageMultiText
-    required property string relatedMessageImageUrl
-    required property string relatedMessageFileUrl
-    required property string relatedMessageThumbnailFileUrl
-    required property string relatedMessageFileName
-    required property int relatedMessageFileSize
 
     property IChatProvider chatProvider
 
@@ -121,8 +95,13 @@ Item {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Chat message")
-    Accessible.description: qsTr("Selected chat message - from %1, at %2: %3").arg(control.nickName).arg(control.timestamp).arg(control.simpleText)
     Accessible.focusable: true
+    Accessible.description: qsTr("Selected chat message - from %1, at %2: %3")
+                                .arg(control.nickName)
+                                .arg(control.timestamp)
+                                .arg(control.content instanceof ChatMessageContentText && control.content.isSimpleText
+                                     ? control.content.simpleText
+                                     : "")
 
     QtObject {
         id: internal
@@ -268,25 +247,10 @@ Item {
         onImplicitHeightChanged: () => Qt.callLater(() => relatedMessageItem.height = relatedMessageItem.implicitHeight)
 
         nickName: control.relatedMessageNickName
-
+        content: control.relatedMessageContent
         isStateUpdate: control.relatedMessageIsStateUpdate
-        isText: control.relatedMessageIsText
-        isSimpleText: control.relatedMessageIsSimpleText
-        isMultiText: control.relatedMessageIsMultiText
-        isImage: control.relatedMessageIsImage
-        isFile: control.relatedMessageIsFile
-        isAudioFile: control.relatedMessageIsAudioFile
-        isVideoFile: control.relatedMessageIsVideoFile
-
         userState: control.relatedMessageUserState
         affectedUserName: control.chatProvider?.userById(control.relatedMessageAffectedUserId)?.computedName ?? ""
-        simpleText: control.relatedMessageSimpleText
-        multiText: control.relatedMessageMultiText
-        imageUrl: control.relatedMessageImageUrl
-        fileUrl: control.relatedMessageFileUrl
-        fileName: control.relatedMessageFileName
-        fileSize: control.relatedMessageFileSize
-        thumbnailFileUrl: control.relatedMessageThumbnailFileUrl
     }
 
     Rectangle {
@@ -295,31 +259,17 @@ Item {
         radius: 6
         anchors {
             fill: messageContentItem
-            leftMargin: control.isText ? -4 : 0
-            margins: control.isImage ? -4 : 0
+            leftMargin: (control.content instanceof ChatMessageContentText) ? -4 : 0
+            margins: (control.content instanceof ChatMessageContentImage) ? -4 : 0
         }
     }
 
     ChatMessageListItemContent {
         id: messageContentItem
         isStateUpdate: control.isStateUpdate
-        isText: control.isText
-        isSimpleText: control.isSimpleText
-        isMultiText: control.isMultiText
-        isImage: control.isImage
-        isFile: control.isFile
-        isAudioFile: control.isAudioFile
-        isVideoFile: control.isVideoFile
-
         userState : control.userState
         affectedUserName: control.chatProvider?.userById(control.affectedUserId)?.computedName ?? ""
-        simpleText: control.simpleText
-        multiText: control.multiText
-        imageUrl: control.imageUrl
-        fileUrl: control.fileUrl
-        fileName: control.fileName
-        fileSize: control.fileSize
-        thumbnailFileUrl: control.thumbnailFileUrl
+        content: control.content
 
         onOpenDirectChatRequested: userId => {
             if (!userId) {
@@ -382,14 +332,14 @@ Item {
             Action {
                 text: qsTr("Copy to clipboard")
                 icon.source: Icons.editCopy
-                enabled: control.isText || control.isImage
+                enabled: control.content instanceof ChatMessageContentText || control.content instanceof ChatMessageContentImage
                 onTriggered: () => {
-                    if (control.isImage) {
-                        ClipboardHelper.copyImageToClipboard(control.imageUrl)
+                    if (control.content instanceof ChatMessageContentImage) {
+                        ClipboardHelper.copyImageToClipboard(control.content?.imagePath)
                     } else if (messageContentItem.messageLabel.selectedText) {
                         messageContentItem.messageLabel.copy()
                     } else {
-                        ClipboardHelper.copyToClipboard(control.simpleText)
+                        ClipboardHelper.copyToClipboard(control.content?.simpleText ?? "")
                     }
                 }
             }
@@ -422,7 +372,7 @@ Item {
                 icon.source: Icons.editor
                 enabled: control.isOwnMessage
                 onTriggered: () => {
-                    ViewHelper.showEditMessageDialog(control.chatProvider, control.roomId, control.eventId, control.simpleText)
+                    ViewHelper.showEditMessageDialog(control.chatProvider, control.roomId, control.eventId, control.content?.simpleText ?? "")
                 }
             }
 

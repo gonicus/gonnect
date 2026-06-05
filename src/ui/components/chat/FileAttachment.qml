@@ -12,17 +12,17 @@ ChatMessageAttachmentRectangle {
     width: fileLabel.implicitWidth + 2 * fileLabel.anchors.leftMargin
     color: hoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : Theme.backgroundSecondaryColor
 
-    property string fileName
-    property string fileUrl
+    property ChatMessageContentFile content
+
     property int fileSize
 
     IconLabel {
         id: fileLabel
         spacing: 10
-        text: control.fileSize > 0
-              ? `${control.fileName || qsTr("File")} (${TextFormatHelper.formatFileSize(control.fileSize)})`
-              : (control.fileName
-                 ? control.fileName
+        text: (control.content?.fileSize ?? 0) > 0
+              ? `${control.content?.fileName || qsTr("File")} (${TextFormatHelper.formatFileSize(control.content?.fileSize ?? 0)})`
+              : (control.content?.fileName
+                 ? control.content.fileName
                  : qsTr("File"))
         icon.source: Icons.mailAttachment
         font {
@@ -49,7 +49,7 @@ ChatMessageAttachmentRectangle {
         id: saveFileDialog
         fileMode: FileDialog.SaveFile
         currentFolder: `file://${FileHelper.downloadFolderPath()}`
-        selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.fileName}`
-        onAccepted: () => FileHelper.copyFile(control.fileUrl, saveFileDialog.selectedFile)
+        selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.control?.fileName ?? ""}`
+        onAccepted: () => FileHelper.copyFile(control.content?.fileUrl ?? "", saveFileDialog.selectedFile)
     }
 }

@@ -11,12 +11,11 @@ ChatMessageAttachmentRectangle {
     width: 300
     height: 80
 
-    property string fileName
-    property alias fileUrl: mediaPlayer.source
-    property int fileSize
+    property ChatMessageContentAudioFile content
 
     MediaPlayer {
         id: mediaPlayer
+        source: control.content?.fileUrl ?? ""
         audioOutput: AudioOutput {}
     }
 
@@ -62,7 +61,7 @@ ChatMessageAttachmentRectangle {
             }
 
             Label {
-                text: control.fileName
+                text: control.content?.fileName ?? ""
                 font.pixelSize: 18
                 elide: Label.ElideRight
                 anchors {
@@ -77,7 +76,7 @@ ChatMessageAttachmentRectangle {
                 font.pixelSize: 12
                 text: qsTr("%1:%2 (%3)").arg(Math.floor((mediaPlayer.duration / 1000) / 60))
                                         .arg(Math.floor((mediaPlayer.duration / 1000) % 60).toString().padStart(2, '0'))
-                                        .arg(TextFormatHelper.formatFileSize(control.fileSize))
+                                        .arg(TextFormatHelper.formatFileSize(control.content?.fileSize ?? 0))
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -147,7 +146,7 @@ ChatMessageAttachmentRectangle {
         id: saveFileDialog
         fileMode: FileDialog.SaveFile
         currentFolder: `file://${FileHelper.downloadFolderPath()}`
-        selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.fileName}`
-        onAccepted: () => FileHelper.copyFile(control.fileUrl, saveFileDialog.selectedFile)
+        selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.content?.fileName ?? ""}`
+        onAccepted: () => FileHelper.copyFile(control.content?.fileUrl ?? "", saveFileDialog.selectedFile)
     }
 }

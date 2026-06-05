@@ -12,22 +12,21 @@ ChatMessageAttachmentRectangle {
     implicitHeight: topBar.height + control.sourceSize.height + buttonBar.height
     height: 220
 
-    property alias fileUrl: mediaPlayer.source
-    property string fileName
-    property int fileSize
-    property alias thumbnailFileUrl: thumbnail.source
+    property ChatMessageContentVideoFile content
     property alias showFullscreenButton: fullScreenButton.visible
 
     readonly property size sourceSize: thumbnail.sourceSize
 
     MediaPlayer {
         id: mediaPlayer
+        source: control.content?.fileUrl ?? ""
         audioOutput: AudioOutput {}
         videoOutput: videoOutput
     }
 
     Image {
         id: thumbnail
+        source: control.content?.thumbnailFileUrl ?? ""
         width: (thumbnail.sourceSize.width && thumbnail.sourceSize.height)
                ? (thumbnail.sourceSize.width / thumbnail.sourceSize.height * thumbnail.height)
                : (1280 / 720)
@@ -52,7 +51,9 @@ ChatMessageAttachmentRectangle {
         }
 
         Label {
-            text: qsTr("%1 (%2)").arg(control.fileName || control.fileUrl).arg(TextFormatHelper.formatFileSize(control.fileSize))
+            text: qsTr("%1 (%2)")
+                      .arg((control.content?.fileName ?? "") || (control.content?.fileUrl ?? ""))
+                      .arg(TextFormatHelper.formatFileSize(control.content?.fileSize ?? 0))
             elide: Label.ElideRight
             anchors {
                 left: parent.left
@@ -136,7 +137,10 @@ ChatMessageAttachmentRectangle {
             BottomButtonBarButton {
                 id: fullScreenButton
                 icon: Icons.viewFullscreen
-                onClicked: () => ViewHelper.showLargeVideo(control.fileUrl, control.fileName, control.fileSize, control.thumbnailFileUrl)
+                onClicked: () => ViewHelper.showLargeVideo(control.content?.fileUrl ?? "",
+                                                           control.content?.fileName ?? "",
+                                                           control.content?.fileSize ?? 0,
+                                                           control.content?.thumbnailFileUrl ?? "")
             }
         ]
     }
@@ -145,7 +149,7 @@ ChatMessageAttachmentRectangle {
         id: saveFileDialog
         fileMode: FileDialog.SaveFile
         currentFolder: `file://${FileHelper.downloadFolderPath()}`
-        selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.fileName}`
-        onAccepted: () => FileHelper.copyFile(control.fileUrl, saveFileDialog.selectedFile)
+        selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.content?.fileName ?? ""}`
+        onAccepted: () => FileHelper.copyFile(control.content?.fileUrl ?? "", saveFileDialog.selectedFile)
     }
 }
