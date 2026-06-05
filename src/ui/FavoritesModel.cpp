@@ -158,8 +158,6 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
         // Row is in m_favorites
 
         const auto item = m_favorites.at(row);
-        ContactInfo contactInfo =
-                PhoneNumberUtil::instance().contactInfoBySipUrl(item->phoneNumber);
 
         switch (role) {
         case static_cast<int>(Roles::PhoneNumber):
