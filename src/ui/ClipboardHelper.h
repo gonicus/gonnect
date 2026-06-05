@@ -10,7 +10,7 @@ class ClipboardHelper : public QObject
 public:
     static ClipboardHelper &instance()
     {
-        ClipboardHelper *_instance = nullptr;
+        static ClipboardHelper *_instance = nullptr;
         if (!_instance) {
             _instance = new ClipboardHelper;
         }
