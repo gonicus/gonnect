@@ -40,11 +40,23 @@ QString highlightMentions(const QString &orig, const ChatMessage &message)
             continue;
         }
 
-        // Use word boundaries (\b) to prevent name splitting.
-        // escape(name) prevents regex injections.
-        const QRegularExpression regex(QString(R"(\b%1\b)").arg(QRegularExpression::escape(name)));
-        const QString replacement = QString("[%1](chat://%2)").arg(name, user->id());
-        str.replace(regex, replacement);
+        qsizetype pos = 0;
+        while ((pos = str.indexOf(name, pos)) != -1) {
+
+            const bool boundaryBefore = (pos == 0 || !str.at(pos - 1).isLetterOrNumber());
+            const int afterPos = pos + name.length();
+            const bool boundaryAfter =
+                    (afterPos >= str.length()) || !str.at(afterPos).isLetterOrNumber();
+
+            if (boundaryBefore && boundaryAfter) {
+                const QString replacement = QString("[%1](chat://%2)").arg(name, user->id());
+                str.replace(pos, name.length(), replacement);
+
+                pos += replacement.length();
+            } else {
+                pos += name.length();
+            }
+        }
     }
 
     return str;
