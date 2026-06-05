@@ -528,3 +528,37 @@ void AudioManager::setPlaybackAudioVolume(qreal volume)
         }
     }
 }
+
+void AudioManager::acquireDevice()
+{
+    if (++m_acquireRefCount > 1) {
+        return;
+    }
+
+    if (m_playbackAudioPort) {
+        m_playbackAudioPort->acquire();
+    }
+
+    if (m_captureAudioPort) {
+        m_captureAudioPort->acquire();
+    }
+}
+
+void AudioManager::releaseDevice()
+{
+    if (m_acquireRefCount == 0) {
+        return;
+    }
+
+    if (--m_acquireRefCount > 0) {
+        return;
+    }
+
+    if (m_playbackAudioPort) {
+        m_playbackAudioPort->release();
+    }
+
+    if (m_captureAudioPort) {
+        m_captureAudioPort->release();
+    }
+}
