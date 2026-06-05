@@ -113,7 +113,8 @@ public:
     void loadMessages(IChatRoom *chatRoom);
 
     // IChatProvider interface
-    virtual QList<IChatRoom *> chatRooms() override;
+    virtual qsizetype chatRoomsCount() override;
+    virtual IChatRoom *chatRoomByIndex(qsizetype index) override;
     virtual bool hasFavoriteRooms() const override;
     virtual qsizetype indexOf(IChatRoom *chatRoom) const override;
     virtual IChatRoom *chatRoomByRoomId(const QString &roomId) const override;

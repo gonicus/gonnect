@@ -41,7 +41,8 @@ public:
 
     virtual QString ownUserId() const = 0;
     virtual QString displayName() = 0;
-    virtual QList<IChatRoom *> chatRooms() = 0;
+    virtual qsizetype chatRoomsCount() = 0;
+    virtual IChatRoom *chatRoomByIndex(qsizetype index) = 0;
     virtual bool hasFavoriteRooms() const = 0;
     virtual qsizetype indexOf(IChatRoom *chatRoom) const = 0;
     Q_INVOKABLE virtual IChatRoom *chatRoomByRoomId(const QString &roomId) const = 0;

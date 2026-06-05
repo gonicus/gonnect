@@ -127,12 +127,12 @@ void ChatRoomModel::onChatProviderChanged()
 
 int ChatRoomModel::rowCount(const QModelIndex &) const
 {
-    return m_chatProvider ? m_chatProvider->chatRooms().size() : 0;
+    return m_chatProvider ? m_chatProvider->chatRoomsCount() : 0;
 }
 
 QVariant ChatRoomModel::data(const QModelIndex &index, int role) const
 {
-    const auto room = q_check_ptr(m_chatProvider->chatRooms().at(index.row()));
+    const auto room = q_check_ptr(m_chatProvider->chatRoomByIndex(index.row()));
 
     switch (role) {
     case static_cast<int>(Roles::RoomId):

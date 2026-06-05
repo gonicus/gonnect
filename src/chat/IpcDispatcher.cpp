@@ -404,6 +404,21 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom)
     sendRequest(req);
 }
 
+qsizetype IpcDispatcher::chatRoomsCount()
+{
+    return m_rooms.length();
+}
+
+IChatRoom *IpcDispatcher::chatRoomByIndex(qsizetype index)
+{
+    if (index < 0 || index >= m_rooms.length()) {
+        qCWarning(lcIpcDispatcher) << "Index" << index << "out of bounds for rooms which has"
+                                   << m_rooms.length() << "elements";
+        return nullptr;
+    }
+    return m_rooms.at(index);
+}
+
 void IpcDispatcher::requestRemoveMessage(const QString &roomId, const QString &messageId)
 {
     MessageRemoveRequest removeReq;
@@ -2150,16 +2165,6 @@ void IpcDispatcher::login()
         qCCritical(lcIpcDispatcher)
                 << "Unimplemented login flow:" << static_cast<quint64>(m_configInfo.loginFlow);
     }
-}
-
-QList<IChatRoom *> IpcDispatcher::chatRooms()
-{
-    QList<IChatRoom *> l;
-    l.reserve(m_rooms.length());
-    for (auto room : std::as_const(m_rooms)) {
-        l.append(qobject_cast<IChatRoom *>(room));
-    }
-    return l;
 }
 
 bool IpcDispatcher::hasFavoriteRooms() const

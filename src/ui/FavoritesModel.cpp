@@ -58,8 +58,6 @@ void FavoritesModel::updateModel()
     }
 
     for (auto provider : providers) {
-        const auto rooms = provider->chatRooms();
-
         connect(provider, &IChatProvider::chatRoomAdded, m_chatProviderContext,
                 [this, provider](qsizetype, IChatRoom *chatRoom, QString) {
                     if (chatRoom->isFavorite()) {
@@ -136,7 +134,8 @@ void FavoritesModel::updateModel()
                     }
                 });
 
-        for (auto room : rooms) {
+        for (qsizetype i = 0, l = provider->chatRoomsCount(); i < l; ++i) {
+            auto *room = provider->chatRoomByIndex(i);
             if (room->isFavorite()) {
                 m_favoriteChatRooms.append({ provider, room });
             }
