@@ -27,7 +27,11 @@ public:
         ChatProvider,
         Permissions,
         OwnJoinState,
-        TypingUserNames
+        TypingUserNames,
+
+        // Dummy element such that the enum can be extended in ChatRoomProxyModel; must remain the
+        // last/highest value in this enum
+        LastRole
     };
 
     int rowCount(const QModelIndex &parent) const override;

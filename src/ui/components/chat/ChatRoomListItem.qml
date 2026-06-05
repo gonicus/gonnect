@@ -20,7 +20,7 @@ Item {
     required property int ownJoinState
     required property list<string> typingUserNames
 
-    property alias sectionHeader: sectionHeaderItem.text
+    required property string sectionHeader
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Chat room")
@@ -38,7 +38,8 @@ Item {
 
     ChatRoomListSectionHeader {
         id: sectionHeaderItem
-        visible: !!control.sectionHeader
+        visible: !!sectionHeaderItem.text
+        text: control.sectionHeader
         anchors {
             top: parent.top
             topMargin: 20

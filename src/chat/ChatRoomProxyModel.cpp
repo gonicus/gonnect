@@ -6,20 +6,87 @@ ChatRoomProxyModel::ChatRoomProxyModel(QObject *parent) : QSortFilterProxyModel{
     connect(this, &QSortFilterProxyModel::sourceModelChanged, this,
             &ChatRoomProxyModel::onSourceModelChanged);
 
-    connect(this, &ChatRoomProxyModel::filterTextChanged, this, [this]() {
-        beginFilterChange();
-        endFilterChange();
-    });
+    connect(this, &ChatRoomProxyModel::sortStrategyChanged, this, &ChatRoomProxyModel::applySort);
 
-    connect(this, &ChatRoomProxyModel::onlyUnreadChanged, this, [this]() {
-        beginFilterChange();
-        endFilterChange();
-    });
-
-    connect(this, &ChatRoomProxyModel::sortStrategyChanged, this, [this]() { invalidate(); });
-    connect(this, &ChatRoomProxyModel::groupFavoritesChanged, this, [this]() { invalidate(); });
-
+    applySort();
     sort(0);
+}
+
+QHash<int, QByteArray> ChatRoomProxyModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    if (const auto model = sourceModel()) {
+        roles = model->roleNames();
+    }
+    roles[static_cast<int>(Roles::SectionHeader)] = "sectionHeader";
+    return roles;
+}
+
+QVariant ChatRoomProxyModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid()) {
+        return QVariant();
+    }
+
+    switch (role) {
+    case static_cast<int>(Roles::SectionHeader): {
+
+        if (!m_groupFavorites) {
+            return "";
+        }
+
+        if (index.row() == 0) {
+            return tr("Favorites");
+        }
+
+        // Previous element is favorite, current is not
+        using Roles = ChatRoomModel::Roles;
+
+        if (!mapToSource(index).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
+            QModelIndex prevIndex = index.sibling(index.row() - 1, 0);
+
+            if (prevIndex.isValid()
+                && mapToSource(prevIndex).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
+                return tr("Others");
+            }
+        }
+        return "";
+    }
+
+    default:
+        return QSortFilterProxyModel::data(index, role);
+    }
+}
+
+void ChatRoomProxyModel::setOnlyUnread(bool value)
+{
+    if (m_onlyUnread != value) {
+        beginFilterChange();
+        m_onlyUnread = value;
+        endFilterChange(Direction::Rows);
+        Q_EMIT onlyUnreadChanged();
+    }
+}
+
+void ChatRoomProxyModel::setGroupFavorites(bool value)
+{
+    if (m_groupFavorites != value) {
+        Q_EMIT layoutAboutToBeChanged();
+        m_groupFavorites = value;
+        this->invalidate();
+        Q_EMIT layoutChanged();
+        Q_EMIT groupFavoritesChanged();
+    }
+}
+
+void ChatRoomProxyModel::setFilterText(const QString &filterText)
+{
+    if (m_filterText != filterText) {
+        beginFilterChange();
+        m_filterText = filterText;
+        endFilterChange(Direction::Rows);
+        Q_EMIT filterTextChanged();
+    }
 }
 
 bool ChatRoomProxyModel::lessThan(const QModelIndex &sourceLeft,
@@ -106,28 +173,33 @@ bool ChatRoomProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) co
 
 void ChatRoomProxyModel::onSourceModelChanged()
 {
-    auto model = sourceModel();
-
-    if (m_sourceModelContext) {
-        m_sourceModelContext->deleteLater();
-        m_sourceModelContext = nullptr;
+    if (m_dataChangedConnection) {
+        QObject::disconnect(m_dataChangedConnection);
+        m_dataChangedConnection = QMetaObject::Connection();
     }
 
-    if (model) {
-        m_sourceModelContext = new QObject(this);
+    if (auto model = sourceModel()) {
+        using Roles = ChatRoomModel::Roles;
+        m_dataChangedConnection =
+                connect(model, &QAbstractListModel::dataChanged, this,
+                        [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
+                            if (roles.contains(static_cast<int>(Roles::IsFavorite))) {
+                                invalidate();
+                            }
+                        });
+    }
+}
 
-        connect(model, &QAbstractItemModel::dataChanged, m_sourceModelContext,
-                [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
-                    bool invalidated = false;
-                    if (roles.contains(static_cast<int>(ChatRoomModel::Roles::LatestMessageDate))) {
-                        invalidated = true;
-                        invalidate();
-                    }
-                    if (!invalidated
-                        && roles.contains(static_cast<int>(ChatRoomModel::Roles::UnreadCount))) {
-                        beginFilterChange();
-                        endFilterChange();
-                    }
-                });
+void ChatRoomProxyModel::applySort()
+{
+    using Roles = ChatRoomModel::Roles;
+
+    switch (m_sortStrategy) {
+    case SortStrategy::Alphabetical:
+        setSortRole(static_cast<int>(Roles::Name));
+        break;
+    case SortStrategy::LatestActivity:
+        setSortRole(static_cast<int>(Roles::LatestMessageDate));
+        break;
     }
 }

@@ -75,36 +75,6 @@ Repeater {
             right: parent?.right
         }
 
-        Component.onCompleted: () => internal.sectionHeaderUpdateRequired()
-        onIndexChanged: () => internal.sectionHeaderUpdateRequired()
-        onIsFavoriteChanged: () => internal.sectionHeaderUpdateRequired()
-        onPrevItemChanged: () => internal.sectionHeaderUpdateRequired()
-
-        Connections {
-            target: internal
-            function onSectionHeaderUpdateRequired() {
-                let str = ""
-
-                if (control.showSectionHeader && control.hasFavorites) {
-                    delg.prevItem = delg.index > 0 ? control.itemAt(delg.index - 1) : null
-
-                    if (delg.index === 0) {
-                        str = qsTr("Favorites")
-                    } else if (!delg.isFavorite && (delg.prevItem?.isFavorite ?? false)) {
-                        str = qsTr("Others")
-                    }
-                }
-                delg.sectionHeader = str
-            }
-        }
-
-        Connections {
-            target: delg.prevItem
-            function onIsFavoriteChanged() { internal.sectionHeaderUpdateRequired() }
-        }
-
-        property ChatRoomListItem prevItem
-
         onHighlightedChanged: () => internal.updateSelectedListItem()
 
         onClicked: () => control.roomSelected(delg.roomId)
