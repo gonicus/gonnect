@@ -62,10 +62,8 @@ Item {
         Timer {
             id: initialFocusTimer
             interval: 20
-            onTriggered: () => {
-                roomNameTextField.forceActiveFocus()
-                internal.preselectRoomType()
-            }
+            onTriggered: () => messageArea.forceActiveFocus()
+
         }
 
         Component.onCompleted: initialFocusTimer.start()

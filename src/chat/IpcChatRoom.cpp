@@ -440,9 +440,9 @@ void IpcChatRoom::updateOtherUser()
 
             connect(other, &ChatUser::avatarPathChanged, m_otherUserContext,
                     [this]() { Q_EMIT avatarPathChanged(); });
-
-            Q_EMIT otherUserChanged();
         }
+
+        Q_EMIT otherUserChanged();
     }
 }
 
