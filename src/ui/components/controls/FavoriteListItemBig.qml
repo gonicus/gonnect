@@ -21,15 +21,22 @@ Item {
     required property string avatarPath
     required property int numberType
     required property int contactType
+    required property IChatProvider chatProvider
 
     readonly property bool isJitsiUrl: delg.contactType === NumberStats.ContactType.JitsiMeetUrl
+    readonly property bool isChatRoom: delg.contactType === NumberStats.ContactType.ChatRoomId
     readonly property bool isReady: delg.buddyStatus === SIPBuddyState.READY
+
     property int buddyStatus: SIPBuddyState.UNKNOWN
 
     readonly property string typeIcon: {
 
         if (delg.isJitsiUrl) {
             return Icons.videoCall
+        }
+
+        if (delg.isChatRoom) {
+            return Icons.dialogMessages
         }
 
         switch (delg.numberType) {
@@ -86,9 +93,14 @@ Item {
         id: avatarImage
         size: 40
         initials: ViewHelper.initials(delg.name || delg.phoneNumber)
-        source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
-        showBuddyStatus: delg.hasBuddyState
-        buddyStatus: delg.buddyStatus
+        source: delg.hasAvatar
+                ? (delg.avatarPath.startsWith("file://")
+                   ? delg.avatarPath
+                   : ("file://" + delg.avatarPath))
+                : ""
+        showPresenceStatus: delg.hasBuddyState
+        presenceStatus: delg.buddyStatus
+        indicatorComponent: Component { BuddyStatusIndicator {} }
         anchors {
             left: parent.left
             leftMargin: 10
@@ -196,16 +208,32 @@ Item {
         }
     }
 
+    Component {
+        id: chatRoomContextMenuComponent
+
+        Menu {
+            Action {
+                id: favToggleAction
+                text: qsTr('Remove favorite')
+                onTriggered: () => delg.chatProvider.requestToggleRoomFavorite(
+                                       delg.chatProvider.chatRoomByRoomId(delg.phoneNumber))
+            }
+        }
+    }
+
     TapHandler {
         gesturePolicy: TapHandler.WithinBounds
         grabPermissions: PointerHandler.ApprovesTakeOverByAnything
         exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
         acceptedButtons: Qt.LeftButton | Qt.RightButton
+
         onDoubleTapped: () => delg.startMeetingOrCall()
         onTapped: (_, mouseButton) => {
             if (mouseButton === Qt.RightButton) {
                 if (delg.isJitsiUrl) {
                     jitsiHistoryListContextMenuComponent.createObject(delg).popup()
+                } else if (delg.isChatRoom) {
+                    chatRoomContextMenuComponent.createObject(delg).popup()
                 } else {
                     historyListContextMenuComponent.createObject(delg).popup()
                 }
@@ -218,6 +246,8 @@ Item {
             if (!ViewHelper.isActiveVideoCall) {
                 ViewHelper.requestMeeting(delg.phoneNumber)
             }
+        } else if (delg.isChatRoom) {
+            ViewHelper.showChatRoom(delg.chatProvider, delg.phoneNumber)
         } else {
             SIPCallManager.call(delg.phoneNumber)
         }

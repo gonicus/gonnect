@@ -123,7 +123,7 @@ jobs:
       - name: Configure CMake
         env:
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
-        run: cmake --preset conan-release . -DBUILD_TESTING=ON
+        run: cmake --preset conan-release . -DBUILD_TESTING=ON --debug-find-pkg=Qt6Protobuf
 
       - name: Build
         run: cmake --build --preset conan-release --parallel $(nproc --all)
@@ -152,7 +152,7 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }}
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }} --debug-find-pkg=Qt6Protobuf
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
@@ -305,7 +305,7 @@ jobs:
           xcb-util-cursor-devel xcb-util-keysyms-devel xcb-util-renderutil-devel libusb1-devel hidapi-devel \
           xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
           libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
-          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA \
+          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA protobuf-c-devel protobuf-devel grpc-devel protobuf-compiler \
           pip python3-devel nodejs
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -349,7 +349,7 @@ jobs:
         run: |
           conan config install resources/conan
           conan export-dependencies .
-          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
+          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20
 
       - name: Cached Conan packages
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5

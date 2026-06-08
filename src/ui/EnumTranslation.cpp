@@ -214,3 +214,59 @@ QString EnumTranslation::callType(const CallHistoryItem::Type callType) const
     qCWarning(lcEnumTranslation) << "Unknown call type:" << callType;
     return tr("Unknown");
 }
+
+QString
+EnumTranslation::crossSigningMethod(const CrossSigningSecret::CrossSigningMethod method) const
+{
+    switch (method) {
+
+    case CrossSigningSecret::CrossSigningMethod::SasString:
+        return tr("SAS string");
+    case CrossSigningSecret::CrossSigningMethod::SasSymbol:
+        return tr("SAS symbol");
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown cross-signing method:" << method;
+    return tr("Unknown");
+}
+
+QString EnumTranslation::chatRoomSortStrategy(const ChatRoomProxyModel::SortStrategy strategy) const
+{
+    switch (strategy) {
+
+    case ChatRoomProxyModel::SortStrategy::Alphabetical:
+        return tr("Alphabetical");
+    case ChatRoomProxyModel::SortStrategy::LatestActivity:
+        return tr("Latest activity");
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown enum value for chat room SortStrategy:" << strategy;
+    return tr("Unknown");
+}
+
+QString EnumTranslation::userStateChange(const ChatMessageContentUserStateChange::State state,
+                                         const QString &name) const
+{
+    switch (state) {
+
+    case ChatMessageContentUserStateChange::State::Unknown:
+        return tr("Unknown state for %1").arg(name);
+    case ChatMessageContentUserStateChange::State::Joined:
+        return tr("%1 has joined").arg(name);
+    case ChatMessageContentUserStateChange::State::Left:
+        return tr("%1 has left").arg(name);
+    case ChatMessageContentUserStateChange::State::Invited:
+        return tr("%1 has been invited").arg(name);
+    case ChatMessageContentUserStateChange::State::Knocked:
+        return tr("%1 has knocked").arg(name);
+    case ChatMessageContentUserStateChange::State::Banned:
+        return tr("%1 has been banned").arg(name);
+    case ChatMessageContentUserStateChange::State::Unbanned:
+        return tr("%1 has been unbanned").arg(name);
+    case ChatMessageContentUserStateChange::State::Kicked:
+        return tr("%1 has been kicked").arg(name);
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown enum value for user state change" << state;
+    return tr("Unknown state for %1").arg(name);
+}

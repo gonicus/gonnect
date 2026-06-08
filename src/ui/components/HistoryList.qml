@@ -156,10 +156,11 @@ Item {
                     initials: ViewHelper.initials(delg.contactName)
                     source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
                     visible: delg.hasAvatar || delg.name !== ""
-                    showBuddyStatus: delg.hasBuddyState || delg.isBlocked
-                    buddyStatus: delg.buddyStatus
+                    showPresenceStatus: delg.hasBuddyState || delg.isBlocked
+                    presenceStatus: delg.buddyStatus
                     isBlocked: delg.isBlocked
                     size: 40
+                    indicatorComponent: Component { BuddyStatusIndicator {} }
 
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40

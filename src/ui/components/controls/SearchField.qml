@@ -11,6 +11,7 @@ Item {
     implicitHeight: 30
 
     property alias text: searchInputField.text
+    property alias placeHolderText: placeholderLabel.text
 
     function giveFocus() {
         searchInputField.forceActiveFocus()
@@ -77,6 +78,8 @@ Item {
         id: searchInputField
         font.pixelSize: 14
         color: Theme.primaryTextColor
+        focus: true
+        focusPolicy: Qt.TabFocus
         anchors {
             verticalCenter: parent.verticalCenter
             left: searchIcon.right

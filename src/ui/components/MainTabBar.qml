@@ -196,9 +196,11 @@ Item {
             required property string iconSource
             required property var attachedData
 
-            readonly property bool isSelected: control.selectedPageId === delg.pageId
+            readonly property bool isSelected: control.selectedPageId === delg.pageId && control.subId === delg.subId
 
-            property int notifications: 0
+            property int notifications: (delg.attachedData && delg.attachedData instanceof IChatProvider)
+                                        ? delg.attachedData.unreadNotificationsCount
+                                        : 0
             property bool showNotificationBubble: delg.notifications > 0
 
             Accessible.role: Accessible.Button
@@ -420,6 +422,21 @@ Item {
                         attachedData: null
                     }
                 ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
+
+                if (ChatConnectorManager.isChatAvailable) {
+                    for (const conn of ChatConnectorManager.chatConnectors) {
+                        baseModel.push({
+                                           pageId: control.mainWindow.chatsPageId,
+                                           pageType: GonnectWindow.PageType.Chats,
+                                           iconSource: Icons.dialogMessages,
+                                           labelText: conn.displayName,
+                                           disabledTooltipText: qsTr("Chat not available"),
+                                           isEnabled: conn.isConnected,
+                                           showRedDot: false,
+                                           attachedData: conn
+                                       })
+                    }
+                }
 
                 return baseModel
             }

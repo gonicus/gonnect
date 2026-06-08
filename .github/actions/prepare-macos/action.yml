@@ -18,7 +18,7 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
-        brew install cyrus-sasl
+        brew install cyrus-sasl protobuf grpc
 
     - name: Get QT-Version
       id: get-qt
@@ -45,4 +45,4 @@ runs:
       run: |
         conan config install resources/conan
         conan export-dependencies .
-        conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
+        conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20

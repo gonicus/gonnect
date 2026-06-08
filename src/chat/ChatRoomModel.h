@@ -14,11 +14,31 @@ class ChatRoomModel : public QAbstractListModel
 public:
     ChatRoomModel(QObject *parent = nullptr);
 
-    enum class Roles { RoomId = Qt::UserRole + 1, Name, UnreadCount };
+    enum class Roles {
+        RoomId = Qt::UserRole + 1,
+        Name,
+        AvatarPath,
+        UnreadCount,
+        IsFavorite,
+        HasPresenceState,
+        PresenceState,
+        JoinRule,
+        LatestMessageDate,
+        ChatProvider,
+        Permissions,
+        OwnJoinState,
+        TypingUserNames,
+
+        // Dummy element such that the enum can be extended in ChatRoomProxyModel; must remain the
+        // last/highest value in this enum
+        LastRole
+    };
 
     int rowCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
+
+    Q_INVOKABLE QModelIndex indexForRoomId(const QString &roomId) const;
 
 private:
     IChatProvider *m_chatProvider = nullptr;
