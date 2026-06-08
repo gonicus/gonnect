@@ -304,8 +304,27 @@ void ChatConnectorManager::processSettingGroup(const QString &group)
         m_groupStates.remove(group);
         delete groupState;
 
+        connect(provider, &IChatProvider::unreadNotificationsCountChanged, this,
+                &ChatConnectorManager::updateUnreadNotificationsCount);
+
         Q_EMIT isChatAvailableChanged();
         Q_EMIT chatConnectorsChanged();
+
+        updateUnreadNotificationsCount();
+    }
+}
+
+void ChatConnectorManager::updateUnreadNotificationsCount()
+{
+    qsizetype count = 0;
+
+    for (const IChatProvider *provider : std::as_const(m_chatProviders)) {
+        count += provider->unreadNotificationsCount();
+    }
+
+    if (m_unreadNotificationsCount != count) {
+        m_unreadNotificationsCount = count;
+        Q_EMIT unreadNotificationsCountChanged();
     }
 }
 

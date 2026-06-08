@@ -193,7 +193,7 @@ BaseWindow {
         id: pages
     }
 
-    property int notifications: pageModel.notifications
+    property int notifications: pageModel.notifications + ChatConnectorManager.unreadNotificationsCount
 
     onNotificationsChanged: () => {
         SystemTrayMenu.setBadgeNumber(control.notifications)

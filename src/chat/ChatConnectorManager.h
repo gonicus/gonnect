@@ -13,6 +13,8 @@ class ChatConnectorManager : public QObject
     Q_PROPERTY(bool isChatAvailable READ isChatAvailable NOTIFY isChatAvailableChanged FINAL)
     Q_PROPERTY(QList<IChatProvider *> chatConnectors READ chatConnectors NOTIFY
                        chatConnectorsChanged FINAL)
+    Q_PROPERTY(qsizetype unreadNotificationsCount READ unreadNotificationsCount NOTIFY
+                       unreadNotificationsCountChanged FINAL)
 
 public:
     static ChatConnectorManager &instance()
@@ -31,6 +33,8 @@ public:
     bool isInitialized() const { return m_isInitialized; }
     bool isChatAvailable() const { return !m_chatProviders.isEmpty(); }
     QList<IChatProvider *> chatConnectors() const { return m_chatProviders; }
+
+    qsizetype unreadNotificationsCount() const { return m_unreadNotificationsCount; }
 
 private Q_SLOTS:
     void init();
@@ -52,14 +56,18 @@ private:
     void saveSecret(const QString &settingsGroup, const QString &secret) const;
     explicit ChatConnectorManager(QObject *parent = nullptr);
     void processSettingGroup(const QString &group);
+    void updateUnreadNotificationsCount();
 
     bool m_isInitialized = false;
     QHash<QString, SettingGroupStates *> m_groupStates;
     QList<IChatProvider *> m_chatProviders;
 
+    qsizetype m_unreadNotificationsCount = 0;
+
 Q_SIGNALS:
     void isChatAvailableChanged();
     void chatConnectorsChanged();
+    void unreadNotificationsCountChanged();
 };
 
 class ChatConnectorManagerWrapper
