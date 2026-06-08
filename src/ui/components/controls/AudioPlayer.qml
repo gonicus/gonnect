@@ -15,7 +15,7 @@ ChatMessageAttachmentRectangle {
 
     MediaPlayer {
         id: mediaPlayer
-        source: control.content?.fileUrl ?? ""
+        source: control.content?.filePath ?? ""
         audioOutput: AudioOutput {}
     }
 
@@ -147,6 +147,6 @@ ChatMessageAttachmentRectangle {
         fileMode: FileDialog.SaveFile
         currentFolder: `file://${FileHelper.downloadFolderPath()}`
         selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.content?.fileName ?? ""}`
-        onAccepted: () => FileHelper.copyFile(control.content?.fileUrl ?? "", saveFileDialog.selectedFile)
+        onAccepted: () => FileHelper.copyFile(control.content?.filePath ?? "", saveFileDialog.selectedFile)
     }
 }

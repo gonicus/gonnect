@@ -19,14 +19,14 @@ ChatMessageAttachmentRectangle {
 
     MediaPlayer {
         id: mediaPlayer
-        source: control.content?.fileUrl ?? ""
+        source: control.content?.filePath ?? ""
         audioOutput: AudioOutput {}
         videoOutput: videoOutput
     }
 
     Image {
         id: thumbnail
-        source: control.content?.thumbnailFileUrl ?? ""
+        source: control.content?.thumbnailFilePath ?? ""
         width: (thumbnail.sourceSize.width && thumbnail.sourceSize.height)
                ? (thumbnail.sourceSize.width / thumbnail.sourceSize.height * thumbnail.height)
                : (1280 / 720)
@@ -52,7 +52,7 @@ ChatMessageAttachmentRectangle {
 
         Label {
             text: qsTr("%1 (%2)")
-                      .arg((control.content?.fileName ?? "") || (control.content?.fileUrl ?? ""))
+                      .arg((control.content?.fileName ?? "") || (control.content?.filePath ?? ""))
                       .arg(TextFormatHelper.formatFileSize(control.content?.fileSize ?? 0))
             elide: Label.ElideRight
             anchors {
@@ -137,10 +137,10 @@ ChatMessageAttachmentRectangle {
             BottomButtonBarButton {
                 id: fullScreenButton
                 icon: Icons.viewFullscreen
-                onClicked: () => ViewHelper.showLargeVideo(control.content?.fileUrl ?? "",
+                onClicked: () => ViewHelper.showLargeVideo(control.content?.filePath ?? "",
                                                            control.content?.fileName ?? "",
                                                            control.content?.fileSize ?? 0,
-                                                           control.content?.thumbnailFileUrl ?? "")
+                                                           control.content?.thumbnailFilePath ?? "")
             }
         ]
     }
@@ -150,6 +150,6 @@ ChatMessageAttachmentRectangle {
         fileMode: FileDialog.SaveFile
         currentFolder: `file://${FileHelper.downloadFolderPath()}`
         selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.content?.fileName ?? ""}`
-        onAccepted: () => FileHelper.copyFile(control.content?.fileUrl ?? "", saveFileDialog.selectedFile)
+        onAccepted: () => FileHelper.copyFile(control.content?.filePath ?? "", saveFileDialog.selectedFile)
     }
 }
