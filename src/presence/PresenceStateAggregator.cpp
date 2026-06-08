@@ -36,10 +36,8 @@ void PresenceStateAggregator::updateAggregatedState()
     using State = PresenceState::State;
 
     static const QMap<State, quint8> prios = {
-        { State::Unknown, 0 },
-        { State::Available, 1 },
-        { State::Away, 2 },
-        { State::Busy, 3 },
+        { State::Unknown, 0 }, { State::Available, 1 }, { State::Away, 2 },
+        { State::Busy, 3 },    { State::Offline, 4 },   { State::Ringing, 5 },
     };
 
     State newState = State::Unknown;
