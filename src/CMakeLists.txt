@@ -21,6 +21,12 @@ find_package(logfault CONFIG REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 
+# FTS5 Testing
+find_package(ICU REQUIRED COMPONENTS uc i18n data)
+find_path(STEMMER_INCLUDE_DIR libstemmer.h)
+find_library(STEMMER_LIBRARY stemmer)
+
+
 if(UNIX)
     include(FindPkgConfig)
     find_package(PkgConfig REQUIRED)
@@ -614,6 +620,15 @@ qt_add_qml_module(gonnect
         chat/ChatMessageContentPart.cpp
         chat/ChatMessageReaction.h
         chat/ChatMessageReaction.cpp
+        # FTS5
+        chat/ChatMessageSearchIndexer.h
+        chat/ChatMessageSearchIndexer.cpp
+        chat/ChatMessageSearchModel.h
+        chat/ChatMessageSearchModel.cpp
+        chat/ChatMessageSearchPreprocessor.h
+        chat/ChatMessageSearchPreprocessor.cpp
+        chat/ChatMessageSearchProvider.h
+        chat/ChatMessageSearchProvider.cpp
         chat/ChatModel.h
         chat/ChatModel.cpp
         chat/ChatUser.h
@@ -888,9 +903,13 @@ target_link_libraries(gonnect
         ${PLATFORM_LIBRARIES}
         qt6keychain
         hid-rp
+        sqlite
         #hunspell::hunspell
         cmark::cmark
         KF6::SyntaxHighlighting
+        ICU::uc
+        ICU::i18n
+        ICU::data
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
         ${CARDDAV_CONTACT_FACTORY}
@@ -901,6 +920,7 @@ target_link_libraries(gonnect
         ${LDAP_ADDRESSBOOK_FACTORY}
         ${MSGRAPH_ADDRESSBOOK_FACTORY}
         ${MSGRAPH_CALENDAR_FACTORY}
+        ${STEMMER_LIBRARY}
 )
 
 qt_import_plugins(gonnect INCLUDE
@@ -935,6 +955,7 @@ target_include_directories(gonnect
     rtt
     ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${STEMMER_INCLUDE_DIR}
 )
 
 target_compile_definitions(gonnect
