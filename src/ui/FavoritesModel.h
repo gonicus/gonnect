@@ -5,6 +5,8 @@
 #include <QQmlEngine>
 
 struct NumberStat;
+class IChatRoom;
+class IChatProvider;
 
 class FavoritesModel : public QAbstractListModel
 {
@@ -12,18 +14,22 @@ class FavoritesModel : public QAbstractListModel
     QML_ELEMENT
 
 public:
+    struct FavRoom
+    {
+        IChatProvider *provider = nullptr;
+        IChatRoom *room = nullptr;
+    };
+
     enum class Roles {
         PhoneNumber = Qt::UserRole + 1,
-        ContactId,
         Name,
         Company,
         HasBuddyState,
         HasAvatar,
         AvatarPath,
-        IsAnonymous,
-        IsBlocked,
         NumberType,
-        ContactType
+        ContactType,
+        ChatProvider
     };
 
     explicit FavoritesModel(QObject *parent = nullptr);
@@ -37,4 +43,7 @@ private Q_SLOTS:
 
 private:
     QList<NumberStat *> m_favorites;
+    QList<FavRoom> m_favoriteChatRooms;
+
+    QObject *m_chatProviderContext = nullptr;
 };

@@ -7,22 +7,22 @@ import base
 Item {
     id: control
 
-    property alias conferenceConnector: participantsModel.conferenceConnector
+    property alias conferenceConnector: usersModel.conferenceConnector
 
-    readonly property alias count: participantListView.count
+    readonly property alias count: userListView.count
 
     ListView {
-        id: participantListView
+        id: userListView
         anchors.fill: parent
         topMargin: 10
         bottomMargin: 10
-        model: ParticipantsModel {
-            id: participantsModel
+        model: UsersModel {
+            id: usersModel
         }
 
         Accessible.role: Accessible.List
-        Accessible.name: qsTr("Participants list")
-        Accessible.description: qsTr("List of all the participants of the current chat room")
+        Accessible.name: qsTr("User list")
+        Accessible.description: qsTr("List of all the users of the current chat room")
 
         delegate: Item {
             id: delg
@@ -36,19 +36,19 @@ Item {
             required property string displayName
             required property int role
 
-            readonly property bool isModerator: delg.role === ConferenceParticipant.Role.Moderator
+            readonly property bool isModerator: delg.role === ConferenceUser.Role.Moderator
             readonly property bool isMe: delg.id === control.conferenceConnector?.ownId ?? false
 
             Accessible.role: Accessible.ListItem
-            Accessible.name: qsTr("Chat participant")
-            Accessible.description: qsTr("Selected chat participant: %1").arg(delg.displayName) +
+            Accessible.name: qsTr("Chat user")
+            Accessible.description: qsTr("Selected chat user: %1").arg(delg.displayName) +
                                     (", " + delg.isModerator ? qsTr("moderator") : "") +
                                     (", " + delg.isMe ? qsTr("it's you") : "")
             Accessible.focusable: true
 
             Rectangle {
                 id: selectedBackground
-                visible: control.conferenceConnector.largeVideoParticipant?.id === delg.id
+                visible: control.conferenceConnector.largeVideoUser?.id === delg.id
                 color: Theme.backgroundOffsetHoveredColor
                 radius: 4
                 anchors {
@@ -62,7 +62,7 @@ Item {
 
             Rectangle {
                 id: hoverBackground
-                visible: participantHoverHandler.hovered
+                visible: userHoverHandler.hovered
                 color: Theme.backgroundOffsetHoveredColor
                 radius: 4
                 anchors {
@@ -119,7 +119,7 @@ Item {
             }
 
             HoverHandler {
-                id: participantHoverHandler
+                id: userHoverHandler
             }
 
             TapHandler {
@@ -133,44 +133,44 @@ Item {
                         // the menu completely until fixed.
 
                         if (!delg.isMe && delg.isModerator) {
-                            participantContextMenuComponent.createObject(delg).popup()
+                            userContextMenuComponent.createObject(delg).popup()
                         }
                     } else {
-                        if (control.conferenceConnector.largeVideoParticipant?.id === delg.id) {
-                            control.conferenceConnector.setLargeVideoParticipantById("")
+                        if (control.conferenceConnector.largeVideoUser?.id === delg.id) {
+                            control.conferenceConnector.setLargeVideoUserById("")
                         } else {
-                            control.conferenceConnector.setLargeVideoParticipantById(delg.id)
+                            control.conferenceConnector.setLargeVideoUserById(delg.id)
                         }
                     }
                 }
             }
 
             Component {
-                id: participantContextMenuComponent
+                id: userContextMenuComponent
 
                 Menu {
-                    id: participantContextMenu
+                    id: userContextMenu
 
                     MenuItem {
-                        id: participantKick
+                        id: userKick
                         text: qsTr("Kick")
-                        onClicked: () => control.conferenceConnector.kickParticipant(delg.id)
+                        onClicked: () => control.conferenceConnector.kickUser(delg.id)
 
                         Accessible.role: Accessible.MenuItem
-                        Accessible.name: participantKick.text
+                        Accessible.name: userKick.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => participantKick.click()
+                        Accessible.onPressAction: () => userKick.click()
                     }
                     MenuItem {
-                        id: participantMakeMod
+                        id: userMakeMod
                         enabled: !delg.isModerator
                         text: qsTr("Make moderator")
-                        onClicked: () => control.conferenceConnector.grantParticipantRole(delg.id, ConferenceParticipant.Role.Moderator)
+                        onClicked: () => control.conferenceConnector.grantUserRole(delg.id, ConferenceUser.Role.Moderator)
 
                         Accessible.role: Accessible.MenuItem
-                        Accessible.name: participantMakeMod.text
+                        Accessible.name: userMakeMod.text
                         Accessible.focusable: true
-                        Accessible.onPressAction: () => participantMakeMod.click()
+                        Accessible.onPressAction: () => userMakeMod.click()
                     }
                 }
             }

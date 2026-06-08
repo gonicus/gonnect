@@ -43,8 +43,12 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
 
     updateMenu();
 
-    m_ringTimer.setInterval(750ms);
+    m_ringTimer.setInterval(800ms);
     connect(&m_ringTimer, &QTimer::timeout, this, &SystemTrayMenu::ringTimerCallback);
+
+    m_trayIconUpdateTimer.setSingleShot(true);
+    m_trayIconUpdateTimer.setInterval(250ms);
+    connect(&m_trayIconUpdateTimer, &QTimer::timeout, this, &SystemTrayMenu::applyTrayIcon);
 
     auto numStats = &NumberStats::instance();
     connect(numStats, &NumberStats::favoriteAdded, this, &SystemTrayMenu::updateFavorites);
@@ -495,10 +499,9 @@ void SystemTrayMenu::setRinging(bool flag)
 
 void SystemTrayMenu::ringTimerCallback()
 {
-    QString noteDot = m_notificationCount ? "_note" : "";
-
     if (m_ringingState) {
-        m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring" + noteDot + ".svg"));
+        const QString noteDot = m_notificationCount ? "_note" : "";
+        requestTrayIcon(":/icons/gonnect_ring" + noteDot + ".svg");
     } else {
         resetTrayIcon();
     }
@@ -512,23 +515,42 @@ void SystemTrayMenu::resetTrayIcon()
             ThemeManager::instance().trayColorScheme() == ThemeManager::ColorScheme::DARK;
     QString noteDot = m_notificationCount ? "_note" : "";
 
+    QString iconPath;
     const auto sipReg = SIPAccountManager::instance().sipRegistered();
     if (sipReg) {
         if (m_hasEstablishedCalls) {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
+            iconPath = ":/icons/gonnect_line" + noteDot + ".svg";
         } else {
             if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
-                m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
+                iconPath = ":/icons/gonnect_dark" + noteDot + ".svg";
             } else {
-                m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
+                iconPath = ":/icons/gonnect_light" + noteDot + ".svg";
             }
         }
     } else {
         if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_dark.svg"));
+            iconPath = ":/icons/gonnect_noreg_dark.svg";
         } else {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_noreg_light.svg"));
+            iconPath = ":/icons/gonnect_noreg_light.svg";
         }
+    }
+
+    requestTrayIcon(iconPath);
+}
+
+void SystemTrayMenu::requestTrayIcon(const QString &iconPath)
+{
+    m_desiredTrayIconPath = iconPath;
+    if (!m_trayIconUpdateTimer.isActive()) {
+        m_trayIconUpdateTimer.start();
+    }
+}
+
+void SystemTrayMenu::applyTrayIcon()
+{
+    if (m_desiredTrayIconPath != m_lastTrayIconPath) {
+        m_trayIcon->setIcon(QIcon(m_desiredTrayIconPath));
+        m_lastTrayIconPath = m_desiredTrayIconPath;
     }
 
     m_trayIcon->setVisible(true);

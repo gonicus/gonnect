@@ -44,10 +44,9 @@ QString LinuxNotificationManager::add(Notification *notification)
                                         notification->iconName().toStdString().c_str());
     } else {
         QByteArray iconData = notification->iconData();
-
         internalNotification = notify_notification_new(notification->title().toStdString().c_str(),
                                                        notification->body().toStdString().c_str(),
-                                                       iconData.isEmpty() ? "dummy" : nullptr);
+                                                       iconData.isEmpty() ? NULL : "dummy");
 
         if (!iconData.isEmpty()) {
             GdkPixbufLoader *loader = gdk_pixbuf_loader_new();

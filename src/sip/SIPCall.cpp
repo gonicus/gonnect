@@ -527,7 +527,7 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
             const QString newIdentity = matchResult.captured("identity");
             const pj::CallInfo ci = getInfo();
             setContactInfo(newIdentity, ci.role != PJSIP_ROLE_UAC);
-            qCDebug(lcSIPCall) << "New call participant identity found:" << newIdentity;
+            qCDebug(lcSIPCall) << "New call user identity found:" << newIdentity;
         }
     }
 }

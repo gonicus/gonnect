@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/components/CallSideBar.qml" line="204"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="204"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
@@ -13,9 +13,20 @@
     </message>
 </context>
 <context>
+    <name>Chats</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/pages/Chats.qml" line="715"/>
+        <source>%1 is/are typing</source>
+        <translation>
+            <numerusform>%1 is typing</numerusform>
+            <numerusform>%1 are typing</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/components/ConferenceButtonBar.qml" line="150"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="150"/>
         <source>%n minutes left</source>
         <translation>
             <numerusform>%n minute left</numerusform>
@@ -24,9 +35,28 @@
     </message>
 </context>
 <context>
+    <name>PublicRoomSearch</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="159"/>
+        <source>%n member(s), topic: %1</source>
+        <translation>
+            <numerusform>%n member, topic: %1</numerusform>
+            <numerusform>%n members, topic: %1</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="160"/>
+        <source>%n member(s)</source>
+        <translation>
+            <numerusform>%n member</numerusform>
+            <numerusform>%n members</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/StateManager.cpp" line="163"/>
+        <location filename="../src/StateManager.cpp" line="163"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>
@@ -36,9 +66,20 @@
     </message>
 </context>
 <context>
+    <name>SettingsPage</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/SettingsPage.qml" line="282"/>
+        <source>day(s) of history</source>
+        <translation>
+            <numerusform>day of history</numerusform>
+            <numerusform>days of history</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>ViewHelper</name>
     <message numerus="yes">
-        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/ViewHelper.cpp" line="140"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="138"/>
         <source>%n minute(s)</source>
         <translation>
             <numerusform>%n Minute</numerusform>
@@ -46,7 +87,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/ViewHelper.cpp" line="143"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="141"/>
         <source>1 hour and %n minute(s)</source>
         <translation>
             <numerusform>1 Stunde und %n Minute</numerusform>
@@ -54,7 +95,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/ViewHelper.cpp" line="145"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="143"/>
         <source>%n hour(s)</source>
         <translation>
             <numerusform>eine Stunde</numerusform>
@@ -65,7 +106,7 @@
 <context>
     <name>VoiceMailField</name>
     <message numerus="yes">
-        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/components/controls/VoiceMailField.qml" line="57"/>
+        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="57"/>
         <source>%n new voice mail(s)</source>
         <translation>
             <numerusform>%n new voice mail</numerusform>
@@ -73,7 +114,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../../../../../../../../../home/brms8522/projects/gonicus/gonnect/gonnect/src/ui/components/controls/VoiceMailField.qml" line="58"/>
+        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="58"/>
         <source>%n old voice mail(s)</source>
         <translation>
             <numerusform>%n old voice mail</numerusform>

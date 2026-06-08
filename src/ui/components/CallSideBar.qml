@@ -33,7 +33,7 @@ Item {
     /// Whether the chat is available at all (default: false)
     property alias chatAvailable: chatButton.visible
 
-    /// Whether the list of persons/participants is available at all (default: true)
+    /// Whether the list of persons/users is available at all (default: true)
     property alias personsAvailable: personCountButton.visible
 
     property IConferenceConnector conferenceConnector
@@ -55,7 +55,7 @@ Item {
         Caller,
         Chat,
         AdditionalInfo,
-        Participants
+        Users
     }
 
     readonly property alias selectedCallItem: callList.selectedItem
@@ -68,8 +68,8 @@ Item {
             function onCountChanged() { internal.updateAutoExtendCollapse() }
         }
 
-        readonly property Connections participantListConnections: Connections {
-            target: participantList
+        readonly property Connections userListConnections: Connections {
+            target: userList
             function onCountChanged() { internal.updateAutoExtendCollapse() }
         }
 
@@ -77,8 +77,8 @@ Item {
             const count = callList.count
 
             if (count > 1 && !control.extended) {
-                control.selectedSideBarMode = participantList.count
-                                              ? CallSideBar.SideBarMode.Participants
+                control.selectedSideBarMode = userList.count
+                                              ? CallSideBar.SideBarMode.Users
                                               : CallSideBar.SideBarMode.Caller
             } else if (count <= 1 && control.extended) {
                 control.selectedSideBarMode = CallSideBar.SideBarMode.None
@@ -111,9 +111,9 @@ Item {
                 }
             },
             State {
-                when: control.selectedSideBarMode === CallSideBar.Participants
+                when: control.selectedSideBarMode === CallSideBar.Users
                 PropertyChanges {
-                    participantList.visible: true
+                    userList.visible: true
                     personCountButton.highlighted: true
                 }
             }
@@ -200,13 +200,13 @@ Item {
             anchors.right: additionalInfoButton.visible ? additionalInfoButton.left : parent.right
             anchors.rightMargin: 5
             iconPath: Icons.avatarDefault
-            iconText: callList.count + participantList.count
-            text: qsTr("Person(s)", "", callList.count + participantList.count)
+            iconText: callList.count + userList.count
+            text: qsTr("Person(s)", "", callList.count + userList.count)
             onClicked: () => {
-                if (control.selectedSideBarMode === CallSideBar.Caller || control.selectedSideBarMode === CallSideBar.Participants) {
+                if (control.selectedSideBarMode === CallSideBar.Caller || control.selectedSideBarMode === CallSideBar.Users) {
                     control.selectedSideBarMode = CallSideBar.None
-                } else if (participantList.count) {
-                    control.selectedSideBarMode = CallSideBar.Participants
+                } else if (userList.count) {
+                    control.selectedSideBarMode = CallSideBar.Users
                 } else {
                     control.selectedSideBarMode = CallSideBar.Caller
                 }
@@ -255,8 +255,8 @@ Item {
         }
     }
 
-    ParticipantsList {
-        id: participantList
+    UsersList {
+        id: userList
         conferenceConnector: control.conferenceConnector
         clip: true
         visible: false

@@ -343,6 +343,19 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
     return nullptr;
 }
 
+QString SIPManager::toSipUri(const QString &var) const
+{
+    const auto accounts = SIPAccountManager::instance().accounts();
+    if (!accounts.count()) {
+        qCDebug(lcSIPManager) << "could not retrieve accounts";
+        return "";
+    }
+
+    // There is only one account as of now
+    const SIPAccount *account = accounts.first();
+    return account->toSipUri(var);
+}
+
 void SIPManager::suspend()
 {
     qCDebug(lcSIPManager) << "suspending SIP";
