@@ -40,6 +40,8 @@ Here's a short feature list:
  * Configurable identities for outgoing calls
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
  * **Jitsi Meet Integration: Upgrade call to Videoconference**
+ * Pluggable **chat support** via [GOuda](https://github.com/gonicus/gouda-proto)
+  * [Matrix chat](https://github.com/gonicus/gouda-matrix) support
  * Calendar sources for upcoming conferences
    * CalDAV
    * GNOME Calendar / Evolution Data Service
@@ -148,6 +150,36 @@ that the initializing participant will be a router for the audio streams of the 
 our experience, having more than three endpoints will produce bad sound quality, delays and
 other performance issues. Bigger conferences would require a specific configuration on the
 SIP server or another platform (like [Jitsi Meet](https://meet.jit.si/)).
+
+# Installation
+
+## Linux
+
+The main distribution channel is [flathub](https://flathub.org/en/apps/de.gonicus.gonnect).
+Depending on your setup, go to your software center (i.e. GNOME Software, KDE Discover) or
+the flathub website, search for GOnnect and click install.
+
+If you prefere the shell, make sure you've set up the [flathub remote](https://flathub.org/en/setup)
+and run:
+
+```
+flatpak install de.gonicus.gonnect
+```
+
+Plugins can be listed via:
+
+```
+flatpak search de.gonicus.gonnect.plugin
+```
+
+Installing them as desired with their flatpak ID (i.e. `flatpak install flatpak search de.gonicus.gonnect.plugin.Matrix`
+for matrix chat support) and restart GOnnect. For plugin configuration, refer to the
+plugin documentation.
+
+## Windows
+
+Download the NSIS installer from the github [releases](https://github.com/gonicus/gonnect/releases)
+and run the installer.
 
 # Translations
 
