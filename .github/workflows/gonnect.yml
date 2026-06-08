@@ -193,10 +193,18 @@ jobs:
         shell: powershell
         run: |
           $workspace = "${{ github.workspace }}"
-          cmake --install build --config Release --prefix "$workspace/msix-stage"
-          New-Item -ItemType Directory -Path msix-layout -Force
+          New-Item -ItemType Directory -Path "$workspace/msix-layout" -Force
+
           robocopy "$workspace\msix-stage\bin" "$workspace\msix-layout" /E /NJH /NJS
           if ($LASTEXITCODE -le 7) { $LASTEXITCODE = 0 }
+
+          $windeployqt = "$env:QT_ROOT_DIR\bin\windeployqt.exe"
+          & $windeployqt `
+            --qmldir "$workspace/src" `
+            --plugindir "$workspace/msix-layout/plugins" `
+            --no-translations `
+            "$workspace/msix-layout/gonnect.exe"
+
           Copy-Item build/AppxManifest.xml msix-layout/AppxManifest.xml
           Copy-Item -Recurse resources/windows/msix/Assets msix-layout/Assets
 
