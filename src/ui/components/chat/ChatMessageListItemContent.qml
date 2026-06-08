@@ -52,7 +52,7 @@ Item {
         wrapMode: Label.Wrap
         textFormat: Text.MarkdownText
         readOnly: true
-        font.pixelSize: control.isShortEmojiOnly ? 48 : 13
+        font.pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
         anchors {
             top: parent.top
             left: parent.left

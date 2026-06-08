@@ -35,6 +35,7 @@ Column {
                 id: textLabel
                 visible: !delg.isCode
                 text: delg.text
+                font.pixelSize: Theme.fontPixelSize
                 wrapMode: Label.WordWrap
                 anchors {
                     left: parent.left
