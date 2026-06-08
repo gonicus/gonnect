@@ -35,17 +35,28 @@ void PresenceStateAggregator::updateAggregatedState()
 {
     using State = PresenceState::State;
 
+    static const QMap<State, quint8> prios = {
+        { State::Unknown, 0 },
+        { State::Available, 1 },
+        { State::Away, 2 },
+        { State::Busy, 3 },
+    };
+
     State newState = State::Unknown;
-    QString newText;
+    quint8 currPrio = 0;
+    QStringList newTexts;
 
     // Collect and aggregate states
     for (const auto *provider : std::as_const(m_stateProviders)) {
-        if (newState != State::Busy && provider->presenceState() != State::Unknown) {
-            newState = provider->presenceState();
+        const auto currState = provider->presenceState();
+        const auto newPrio = prios.value(currState);
+        if (newPrio > currPrio) {
+            currPrio = newPrio;
+            newState = currState;
         }
 
         if (!provider->stateText().isEmpty()) {
-            newText = provider->stateText();
+            newTexts.append(provider->stateText());
         }
     }
 
@@ -55,6 +66,7 @@ void PresenceStateAggregator::updateAggregatedState()
         Q_EMIT presenceStateChanged();
     }
 
+    const auto newText = newTexts.join("; ");
     if (m_stateText != newText) {
         m_stateText = newText;
         Q_EMIT stateTextChanged();

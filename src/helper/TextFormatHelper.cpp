@@ -8,12 +8,10 @@ QString TextFormatHelper::formatFileSize(qint64 byteSize) const
         return tr("0 B");
     }
 
-    static const QStringList units = {
-        tr("B"), tr("KB"), tr("MB"), tr("GB"), tr("TB"),
-    };
+    static const QStringList units = { tr("B"), tr("KB"), tr("MB"), tr("GB"), tr("TB"), tr("PB") };
 
     quint8 i = static_cast<quint8>(std::floor(std::log(byteSize) / std::log(1024)));
-    i = std::min(i, static_cast<quint8>(5));
+    i = std::clamp<quint8>(i, 0, units.length() - 1);
 
     const qreal value = byteSize / std::pow(1024, i);
 

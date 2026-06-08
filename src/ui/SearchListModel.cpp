@@ -89,13 +89,14 @@ QString SearchListModel::phoneNumberByIndex(quint16 index) const
             && (i == l - 1 || m_numberIndexOffsets.at(i + 1) > index)) {
             const auto offset = m_numberIndexOffsets.at(i);
             const auto innerIndex = index - offset;
-            const auto contact = m_model.at(i);
-            const auto numPhoneNumbers = contact->phoneNumbers().size();
+            if (const auto contact = m_model.at(i)) {
+                const auto numPhoneNumbers = contact->phoneNumbers().size();
 
-            if (contact && 0 <= innerIndex && innerIndex < numPhoneNumbers) {
-                return contact->phoneNumbers().at(innerIndex).number;
-            } else {
-                return ""; // Invalid index
+                if (0 <= innerIndex && innerIndex < numPhoneNumbers) {
+                    return contact->phoneNumbers().at(innerIndex).number;
+                } else {
+                    return ""; // Invalid index
+                }
             }
         }
     }

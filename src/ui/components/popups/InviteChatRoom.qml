@@ -106,8 +106,6 @@ Item {
             required property bool hasPresenceState
             required property int presenceState
 
-            readonly property ChatUser user: control.chatProvider?.userById(delg.modelData) ?? null
-
             CheckBox {
                 id: selectedBox
                 checked: proxyModel.selectedUserIds.includes(delg.id)

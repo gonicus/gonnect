@@ -101,6 +101,11 @@ void IpcChatRoom::sendImage(const QString &filePath)
 {
     auto dispatcher = ipcDispatcher();
     const auto uploadedUrl = dispatcher->uploadFile(filePath);
+    if (uploadedUrl.isEmpty()) {
+        qCCritical(lcIpcChatRoom) << "Error on uploading image" << filePath;
+        return;
+    }
+
     dispatcher->sendImage(id(), uploadedUrl);
 }
 
@@ -108,6 +113,11 @@ void IpcChatRoom::sendFile(const QString &filePath)
 {
     auto dispatcher = ipcDispatcher();
     const auto uploadedUrl = dispatcher->uploadFile(filePath);
+    if (uploadedUrl.isEmpty()) {
+        qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;
+        return;
+    }
+
     dispatcher->sendFile(id(), uploadedUrl, filePath.split(QChar('/')).last());
 }
 
