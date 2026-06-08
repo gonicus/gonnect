@@ -812,16 +812,16 @@ void IpcDispatcher::processResponse(
 
         } else {
             // New user object
-            const bool hasPresenceState = user.hasPresenceState();
+            const bool hasStatus = user.hasStatus();
 
             QString avatarPath;
             if (user.hasAvatarPath()) {
                 avatarPath = makeDataRootPath(user.avatarPath());
             }
 
-            p = new ChatUser(id, displayName, hasPresenceState, avatarPath, this);
-            if (hasPresenceState) {
-                p->setPresenceState(presenceStateConv(user.presenceState()));
+            p = new ChatUser(id, displayName, hasStatus, avatarPath, this);
+            if (hasStatus) {
+                p->setPresenceState(presenceStateConv(user.status().state()));
 
                 if (auto directRoom = ipcDirectChatRoomForUser(p)) {
                     Q_EMIT chatUserPropertiesChanged(p, directRoom, indexOf(directRoom));
@@ -1408,18 +1408,18 @@ void IpcDispatcher::processResponse(
 
         m_verificationTimeoutTimer.start(2min);
 
-        auto *secret = new CrossSigningSecret(this);
+        CrossSigningSecret secret;
         switch (selectedEvent.selectedMethod()) {
 
         case CrossSigningMethodGadget::CrossSigningMethod::SasString: {
-            secret->setMethod(CrossSigningSecret::CrossSigningMethod::SasString);
+            secret.setMethod(CrossSigningSecret::CrossSigningMethod::SasString);
             GONNECT_ASSERT(selectedEvent.hasStringCode(),
                            "CrossSigningMethodselectedEvent must have string secret")
-            secret->setStringSecret(selectedEvent.stringCode());
+            secret.setStringSecret(selectedEvent.stringCode());
             break;
         }
         case CrossSigningMethodGadget::CrossSigningMethod::SasSymbol: {
-            secret->setMethod(CrossSigningSecret::CrossSigningMethod::SasSymbol);
+            secret.setMethod(CrossSigningSecret::CrossSigningMethod::SasSymbol);
             GONNECT_ASSERT(selectedEvent.hasSymbols(),
                            "CrossSigningMethodselectedEvent must have symbols")
             const auto symbols = selectedEvent.symbols().symbols();
@@ -1430,7 +1430,7 @@ void IpcDispatcher::processResponse(
             for (const auto &symbol : symbols) {
                 convSymbols.append(new CrossSigningSymbol(symbol.symbol(), symbol.description()));
             }
-            secret->setSymbolSeqence(convSymbols);
+            secret.setSymbolSeqence(convSymbols);
             break;
         }
         default:
