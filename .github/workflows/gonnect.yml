@@ -69,7 +69,7 @@ jobs:
       resources-windows: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-windows }}
       resources-macos: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-macos }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Get changes
         uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
@@ -112,7 +112,7 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -123,7 +123,7 @@ jobs:
       - name: Configure CMake
         env:
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
-        run: cmake --preset conan-release . -DBUILD_TESTING=ON
+        run: cmake --preset conan-release . -DBUILD_TESTING=ON --debug-find-pkg=Qt6Protobuf
 
       - name: Build
         run: cmake --build --preset conan-release --parallel $(nproc --all)
@@ -142,7 +142,7 @@ jobs:
     if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-windows == 'true' }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -152,7 +152,7 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }}
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }} --debug-find-pkg=Qt6Protobuf
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
@@ -264,7 +264,7 @@ jobs:
     if: ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-macos == 'true' }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -294,7 +294,7 @@ jobs:
     needs: changes
     if: ${{ inputs.run_format || needs.changes.outputs.src == 'true' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Run clang-format style check for C/C++/Protobuf programs.
         uses: jidicula/clang-format-action@654a770daa28443dd111d133e4083e21c1075674 # v4.18.0
         with:
@@ -312,7 +312,7 @@ jobs:
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -350,10 +350,10 @@ jobs:
           xcb-util-cursor-devel xcb-util-keysyms-devel xcb-util-renderutil-devel libusb1-devel hidapi-devel \
           xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
           libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
-          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA \
+          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA protobuf-c-devel protobuf-devel grpc-devel protobuf-compiler \
           pip python3-devel nodejs
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -394,7 +394,7 @@ jobs:
         run: |
           conan config install resources/conan
           conan export-dependencies .
-          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
+          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20
 
       - name: Cached Conan packages
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -422,7 +422,7 @@ jobs:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
       options: --privileged
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -448,7 +448,7 @@ jobs:
     if: ${{ (inputs.run_tests || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && needs.build.result == 'success' }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Prepare
         uses: ./.github/actions/prepare-linux

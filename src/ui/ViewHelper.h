@@ -27,6 +27,8 @@ class ViewHelper : public QObject
     Q_PROPERTY(IConferenceConnector::StartFlags nextMeetingStartFlags MEMBER m_nextMeetingStartFlags
                        NOTIFY nextMeetingStartFlagsChanged FINAL)
     Q_PROPERTY(QObject *topDrawer MEMBER m_topDrawer NOTIFY topDrawerChanged FINAL)
+    Q_PROPERTY(QObject *globalEmojiPickerPopup MEMBER m_globalEmojiPickerPopup NOTIFY
+                       globalEmojiPickerPopupChanged FINAL)
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
     Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
     Q_PROPERTY(bool canSyncSystemMute READ canSyncSystemMute CONSTANT FINAL)
@@ -65,7 +67,6 @@ public:
     Q_INVOKABLE QString minutesToNiceText(uint minutes) const;
     Q_INVOKABLE QString secondsToNiceText(int seconds) const;
     Q_INVOKABLE int secondsDelta(const QDateTime &start, const QDateTime &end) const;
-    Q_INVOKABLE void copyToClipboard(const QString &str) const;
     Q_INVOKABLE void reloadAddressBook() const;
 
     Q_INVOKABLE QString preprocessSearchText(const QString &in) const;
@@ -78,9 +79,6 @@ public:
 
     Contact *currentUser() const { return m_currentUser; }
     QString currentUserName() const;
-
-    /// List of file name filters for supported audio files (as used by a file picker dialog)
-    Q_INVOKABLE QStringList audioFileSelectors() const;
 
     Q_INVOKABLE void toggleFavorite(const QString &phoneNumber,
                                     const NumberStats::ContactType contactType) const;
@@ -106,6 +104,8 @@ public:
 
     void requestRecoveryKey(const QString &id, const QString &displayName);
     Q_INVOKABLE void respondRecoveryKey(const QString &id, const QString &key);
+
+    void requestUrlCopyDialog(const QUrl &url, const QString &text);
 
     Q_INVOKABLE uint durationCallVisibleAfterEnd() const { return GONNECT_CALL_VISIBLE_AFTER_END; }
 
@@ -139,6 +139,10 @@ public:
 
     Q_INVOKABLE uint numberOfGridCells() const;
 
+    Q_INVOKABLE QString stripLinkTags(const QString &link) const;
+
+    Q_INVOKABLE bool isShortEmojiString(const QString &str) const;
+
     QString culturalSphereExtension() const;
 
 public Q_SLOTS:
@@ -162,6 +166,7 @@ private:
     IConferenceConnector::StartFlags m_nextMeetingStartFlags =
             IConferenceConnector::StartFlag::AudioActive;
     QObject *m_topDrawer = nullptr;
+    QObject *m_globalEmojiPickerPopup = nullptr;
     bool m_isActiveVideoCall = false;
 
 Q_SIGNALS:
@@ -170,6 +175,7 @@ Q_SIGNALS:
     void currentUserChanged();
     void nextMeetingStartFlagsChanged();
     void topDrawerChanged();
+    void globalEmojiPickerPopupChanged();
     void isActiveVideoCallChanged();
 
     void showSettings();
@@ -180,10 +186,25 @@ Q_SIGNALS:
     void showDialPad();
     void showFirstAid();
     void showQuitConfirm();
+    void showChatRoom(IChatProvider *provider, QString roomId);
+    void showCreateRoomDialog(IChatProvider *provider, QStringList invitedUserIds,
+                              QString name = "");
+    void showEditRoomDialog(IChatProvider *provider, QString roomId);
+    void showInviteUserToRoomDialog(IChatProvider *provider, QString roomId);
+    void showEditMessageDialog(IChatProvider *provider, QString roomId, QString messageId,
+                               QString content);
+    void showStatusTextEditDialog();
     void showEmergency(QString accountId, int callId, QString displayName);
     void hideEmergency();
     void showConferenceChat();
     void fullscreenToggle();
+    void showChatUserSearchDialog(IChatProvider *provider);
+    void showPublicRoomSearchDialog(IChatProvider *provider);
+    void showKnockRoomDialog(IChatProvider *provider, QString roomId);
+    void showLargeImage(QUrl imageFilePath);
+    void showLargeVideo(QUrl videoFilePath, QString fileName = "", qint64 fileSize = 0,
+                        QString thumbnailFilePath = "");
+    void showSendPreviewImage(QUrl imageFilePath, QString roomId);
 
     void openMeetingRequested(QString meetingId, QString displayName,
                               IConferenceConnector::StartFlags startFlags,
@@ -202,6 +223,8 @@ Q_SIGNALS:
 
     void userVerificationRequested(QString id, QString verificationKey);
     void userVerificationResponded(QString id, bool isAccepted);
+
+    void urlCopyDialogRequested(QUrl url, QString text);
 };
 
 class ViewHelperWrapper

@@ -7,7 +7,7 @@ import base
 Item {
     id: control
     width: 400
-    height: 400
+    height: 430
 
     LoggingCategory {
         id: category
@@ -31,13 +31,22 @@ Item {
         console.warn(category, "unable to find rendered group item for group", groupIndex)
     }
 
+    SearchField {
+        id: searchField
+        placeHolderText: qsTr("Search for emoji...")
+        anchors {
+            left: parent.left
+            right: parent.right
+        }
+    }
+
     Flickable {
         id: tabbar
         height: 30
         clip: true
         contentWidth: groupButtonRow.implicitWidth
         anchors {
-            top: parent.top
+            top: searchField.bottom
             left: parent.left
             right: parent.right
         }
@@ -135,6 +144,7 @@ Item {
                         model: EmojiProxyModel {
                             sourceModel: emojiModel
                             group: sectionDelg.groupIndex
+                            filterText: searchField.text.trim()
                         }
                         delegate: EmojiButton {
                             id: emojiDelg

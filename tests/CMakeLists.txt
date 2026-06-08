@@ -33,6 +33,7 @@ target_include_directories(contactsTest
     PRIVATE
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/presence
         ${PROJECT_SOURCE_DIR}/src/sip
 )
 target_link_libraries(contactsTest

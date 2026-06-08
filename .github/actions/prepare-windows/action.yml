@@ -38,7 +38,7 @@ runs:
         cache: true
 
     - name: Install Conan
-      uses: conan-io/setup-conan@2f4bd34e8e0af00e1a77a66e1d284e06d71d703f # v1
+      uses: conan-io/setup-conan@ed3942a6883243f4af84e13e49c972f9440fa1c2 # v1
       with:
         version: 2.28.1
         cache_packages: true
@@ -46,6 +46,7 @@ runs:
     - name: Install Conan dependencies
       shell: cmd
       run: |
+        choco install protoc --yes
         conan config install resources/conan
         conan export-dependencies .
-        conan install . --build=missing -s compiler.cppstd=17
+        conan install . --build=missing -s compiler.cppstd=20

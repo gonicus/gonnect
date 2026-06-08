@@ -5,7 +5,7 @@
 
 class IConferenceConnector;
 
-class ParticipantsModel : public QAbstractListModel
+class UsersModel : public QAbstractListModel
 {
     Q_OBJECT
     QML_ELEMENT
@@ -16,7 +16,7 @@ class ParticipantsModel : public QAbstractListModel
 public:
     enum class Roles { Id = Qt::UserRole + 1, DisplayName, Role };
 
-    explicit ParticipantsModel(QObject *parent = nullptr);
+    explicit UsersModel(QObject *parent = nullptr);
 
     QHash<int, QByteArray> roleNames() const override;
     int rowCount(const QModelIndex &parent) const override;

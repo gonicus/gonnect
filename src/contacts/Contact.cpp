@@ -3,7 +3,11 @@
 #include "PhoneNumberUtil.h"
 
 #ifndef APP_TESTS
+#  include "ChatUserPresenceStateProvider.h"
 #  include "AvatarManager.h"
+#  include "ChatUser.h"
+#  include "SIPBuddyPresenceStateProvider.h"
+#  include "SIPManager.h"
 #endif
 #include <QMetaEnum>
 
@@ -225,6 +229,51 @@ qreal Contact::matchesSearch(const QString &searchString) const
 
     return maxDist;
 }
+
+#ifndef APP_TESTS
+void Contact::addChatUser(ChatUser *user)
+{
+    if (!m_chatUsers.contains(user)) {
+        m_chatUsers.append(user);
+
+        QObject::connect(user, &QObject::destroyed, this, [this](QObject *obj) {
+            if (auto user = qobject_cast<ChatUser *>(obj)) {
+                removeChatUser(user);
+            }
+        });
+    }
+}
+
+void Contact::removeChatUser(ChatUser *user)
+{
+    if (m_chatUsers.removeOne(user)) {
+        user->disconnect(this);
+    }
+}
+
+PresenceStateAggregator *Contact::createPresenceStateObject() const
+{
+    auto *presenceObj = new PresenceStateAggregator;
+
+    // SIP buddies
+    auto &sipManager = SIPManager::instance();
+    if (m_sipStatusSubscriptable) {
+        for (const auto &phoneNumber : std::as_const(m_phoneNumbers)) {
+            if (phoneNumber.isSipSubscriptable) {
+                presenceObj->registerStateProvider(
+                        new SIPBuddyPresenceStateProvider(sipManager.toSipUri(phoneNumber.number)));
+            }
+        }
+    }
+
+    // Chat users
+    for (auto *chatUser : std::as_const(m_chatUsers)) {
+        presenceObj->registerStateProvider(new ChatUserPresenceStateProvider(chatUser));
+    }
+
+    return presenceObj;
+}
+#endif
 
 void Contact::init()
 {

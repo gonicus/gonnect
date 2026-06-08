@@ -7,11 +7,19 @@
 #include "NotificationIcon.h"
 #include "NotificationManager.h"
 
+/// Number of chars that shall be displayed in the notification body.
+#define GONNECT_NOTIFICATION_MAX_MESSAGE_LENGTH 200
+
 Notification::Notification(const QString &title, const QString &body, Priority priority,
                            QObject *parent)
     : QObject(parent), m_title(title), m_body(body), m_priority(priority)
 {
     m_id = QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8();
+
+    if (m_body.length() > GONNECT_NOTIFICATION_MAX_MESSAGE_LENGTH) {
+        m_body.truncate(GONNECT_NOTIFICATION_MAX_MESSAGE_LENGTH - 3);
+        m_body += "...";
+    }
 }
 
 void Notification::setIcon(const QString &iconUri)
