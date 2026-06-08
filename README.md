@@ -41,7 +41,7 @@ Here's a short feature list:
  * Configurable Togglers (i.e. for call queues, CFNL, etc.)
  * **Jitsi Meet Integration: Upgrade call to Videoconference**
  * Pluggable **chat support** via [GOuda](https://github.com/gonicus/gouda-proto)
-  * [Matrix chat](https://github.com/gonicus/gouda-matrix) support
+   * [Matrix chat](https://github.com/gonicus/gouda-matrix) support
  * Calendar sources for upcoming conferences
    * CalDAV
    * GNOME Calendar / Evolution Data Service
