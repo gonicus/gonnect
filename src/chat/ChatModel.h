@@ -66,6 +66,7 @@ private:
     QVariant rawData(int row, int role) const;
     ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
     void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
+    static QList<int> nextItemContentRoles();
     QList<int> relatedContentRoles(const ChatMessage &messageObject) const;
 
     IChatRoom *m_chatRoom = nullptr;

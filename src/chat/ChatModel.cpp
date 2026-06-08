@@ -269,6 +269,12 @@ void ChatModel::onChatRoomChanged()
                     endInsertRows();
                     updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
                     updateRealMessagesCount();
+
+                    // Update next item for "previous" roles
+                    if (index < rowCount(QModelIndex()) - 1) {
+                        const auto nextIndex = createIndex(index + 1, 0);
+                        Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
+                    }
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
@@ -276,6 +282,13 @@ void ChatModel::onChatRoomChanged()
                     endRemoveRows();
                     updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
                     updateRealMessagesCount();
+
+                    // Update next item for "previous" roles
+                    // index is now the next after removing the row
+                    if (index < rowCount(QModelIndex())) {
+                        const auto nextIndex = createIndex(index, 0);
+                        Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
+                    }
                 });
         connect(m_chatRoom, &IChatRoom::chatMessagesReset, m_chatRoomContext, [this]() {
             beginResetModel();
@@ -359,6 +372,16 @@ void ChatModel::updateRelatedMessages(const QString &originalMessageId, const QL
             Q_EMIT dataChanged(modelIndex, modelIndex, roles);
         }
     }
+}
+
+QList<int> ChatModel::nextItemContentRoles()
+{
+    static const QList<int> roles = {
+        static_cast<int>(Roles::IsSameDayAsPrevious),
+        static_cast<int>(Roles::IsSameMinuteAsPrevious),
+        static_cast<int>(Roles::IsSameUserAsPrevious),
+    };
+    return roles;
 }
 
 QList<int> ChatModel::relatedContentRoles(const ChatMessage &messageObject) const
