@@ -208,12 +208,6 @@ jobs:
           Copy-Item "$workspace/build/AppxManifest.xml" "$workspace/msix-layout/AppxManifest.xml"
           Copy-Item -Recurse "resources/windows/msix/Assets" "$workspace/msix-layout/Assets"
 
-      - name: Debug layout
-        shell: powershell
-        run: |
-          Write-Host "=== msix-stage/bin Struktur (rekursiv) ==="
-          Get-ChildItem -Recurse msix-stage/bin | Select-Object FullName | Format-Table -AutoSize
-
       - name: Pack MSIX
         if: |
           startsWith(github.ref, 'refs/tags/v') ||
