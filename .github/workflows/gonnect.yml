@@ -136,7 +136,7 @@ jobs:
           retention-days: 1
 
   build-windows:
-    runs-on: windows-2025-vs2026
+    runs-on: windows-2025
     name: "Build GOnnect (Windows)"
     needs: changes
     if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-windows == 'true' }}
