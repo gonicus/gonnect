@@ -20,7 +20,10 @@ public:
 
     bool isSimpleText() const;
     QString simpleText() const;
+
     QList<ChatMessageContentPart *> contentParts() const { return m_parts; }
+    QString rawText() const;
+
     void setText(const QString &text);
 
     void processText();

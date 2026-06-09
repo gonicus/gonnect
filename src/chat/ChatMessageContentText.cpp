@@ -20,6 +20,11 @@ QString ChatMessageContentText::simpleText() const
     return m_simpleText;
 }
 
+QString ChatMessageContentText::rawText() const
+{
+    return m_rawText;
+}
+
 void ChatMessageContentText::setText(const QString &text)
 {
     if (m_rawText == text) {
