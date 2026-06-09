@@ -21,7 +21,7 @@
 #include "ViewHelper.h"
 #include "EnumTranslation.h"
 #include "GlobalStateAggregator.h"
-#include "ReadOnlyConfdSettings.h"
+// #include "ReadOnlyConfdSettings.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -151,6 +151,52 @@ CrossSigningSecret::CrossSigningMethod IpcDispatcher::crossSigningMethodConv(
     qCCritical(lcIpcDispatcher) << "Unknown cross signing method:" << method;
     qFatal("Unknown method");
     Q_UNREACHABLE();
+}
+
+NotificationSetting::Setting IpcDispatcher::notificationSettingProtoToIpc(
+        de::gonicus::gonnect::NotificationSettingGadget::NotificationSetting setting)
+{
+    switch (setting) {
+
+    case NotificationSettingGadget::NotificationSetting::AllMessages:
+        return NotificationSetting::Setting::All;
+    case NotificationSettingGadget::NotificationSetting::MentionsAndKeywordsOnly:
+        return NotificationSetting::Setting::MentionsAndKeywords;
+    case NotificationSettingGadget::NotificationSetting::Mute:
+        return NotificationSetting::Setting::Mute;
+    }
+
+    return NotificationSetting::Setting::None;
+}
+
+::RoomSettings
+IpcDispatcher::roomSettingsProtoToIpc(const de::gonicus::gonnect::RoomSettings &protoSettings)
+{
+    return { protoSettings.hasNotificationSetting()
+                     ? notificationSettingProtoToIpc(protoSettings.notificationSetting())
+                     : NotificationSetting::Setting::None };
+}
+
+NotificationSettingGadget::NotificationSetting
+IpcDispatcher::notificationSettingIpcToProto(NotificationSetting::Setting setting)
+{
+    using Setting = NotificationSettingGadget::NotificationSetting;
+
+    switch (setting) {
+
+    case NotificationSetting::Setting::All:
+        return Setting::AllMessages;
+    case NotificationSetting::Setting::MentionsAndKeywords:
+        return Setting::MentionsAndKeywordsOnly;
+    case NotificationSetting::Setting::Mute:
+        return Setting::Mute;
+    case NotificationSetting::Setting::None:
+        // Never happens as "None" is unknown in proto definition
+        break;
+    }
+
+    // Fallback to make compiler happy
+    return Setting::Mute;
 }
 
 CrossSigningMethodGadget::CrossSigningMethod
@@ -718,6 +764,10 @@ void IpcDispatcher::processResponse(
             qCCritical(lcIpcDispatcher) << "Unable to open browser for authorization at" << url;
         }
 
+    } else if (rc.hasGlobalSettingsEvent()) {
+        m_notificationSetting =
+                notificationSettingProtoToIpc(rc.globalSettingsEvent().notificationSetting());
+
     } else if (rc.hasRoomListResponse()) {
         const auto list = rc.roomListResponse().roomList();
         QSet<QString> handledRoomIds;
@@ -737,7 +787,7 @@ void IpcDispatcher::processResponse(
                 }
 
                 roomObj->setJoinRule(joinRuleGrpcToGonnect(room.joinRule()));
-
+                roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
             } else {
                 // Create new room
                 roomObj = addChatRoom(room);
@@ -1221,6 +1271,11 @@ void IpcDispatcher::processResponse(
         }
         const auto roomIndex = indexOf(room);
 
+        // Room settings
+        if (changeEvent.hasRoomSettings()) {
+            room->setRoomSettings(roomSettingsProtoToIpc(changeEvent.roomSettings()));
+        }
+
         // Name
         if (changeEvent.hasDisplayName()) {
             room->setName(changeEvent.displayName());
@@ -1467,6 +1522,27 @@ void IpcDispatcher::processResponse(
     }
 }
 
+bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
+{
+    if (const auto *textContent = qobject_cast<const ChatMessageContentText *>(message.content())) {
+        const QString escapedId = QRegularExpression::escape(ownUserId());
+        const QRegularExpression mentionRegex(QString(R"(\b(@room|%1)\b)").arg(escapedId));
+
+        if (textContent->isSimpleText()) {
+            return mentionRegex.match(textContent->simpleText()).hasMatch();
+        } else {
+            const auto parts = textContent->contentParts();
+            for (const auto part : parts) {
+                if (!part->isCode() && mentionRegex.match(part->text()).hasMatch()) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::Message &message,
                                                    bool isUnread)
 {
@@ -1588,6 +1664,7 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     roomObj->setPermissions(roomPermissionsGrpcToGonnect(room.permissions()));
     roomObj->setIsDirect(room.isDirect());
     roomObj->setIsFavorite(room.isFavorite());
+    roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
 
     if (room.hasLatestMessageTimestamp()) {
         roomObj->setLatestMessageDateTime(
@@ -1720,14 +1797,36 @@ void IpcDispatcher::setIsDeviceVerified(bool value)
 
 void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
 {
+    // Check if notifications should be send at all
     if (!messageObj || !shallSendDesktopNotification() || messageObj->fromId() == ownUserId()) {
         return;
     }
 
+    // Check global and room-specific notification settings
+    using NotificationSetting = NotificationSetting::Setting;
+    auto notificationSetting = m_notificationSetting;
+    IChatRoom *chatRoom = q_check_ptr(messageObj->chatRoom());
+
+    // Override in room
+    const auto roomNotificationSetting = chatRoom->roomSettings().notificationSetting;
+    if (roomNotificationSetting != NotificationSetting::None) {
+        notificationSetting = roomNotificationSetting;
+    }
+
+    if (notificationSetting == NotificationSetting::Mute
+        || notificationSetting == NotificationSetting::None) {
+        return;
+    }
+
+    if (notificationSetting == NotificationSetting::MentionsAndKeywords
+        && !hasOwnUserMention(*messageObj)) {
+        return;
+    }
+
+    // Create title and message
     QString message;
     QString title;
     const QString senderName = messageObj->nickName();
-    IChatRoom *chatRoom = q_check_ptr(messageObj->chatRoom());
 
     if (const auto stateContent =
                 qobject_cast<ChatMessageContentUserStateChange *>(messageObj->content())) {
@@ -1929,6 +2028,11 @@ void IpcDispatcher::onLoggedInChanged()
         connect(&glob, &GlobalStateAggregator::statusTextChanged, m_globalPresenceStateContext,
                 [this]() { forwardOwnPresenceState(); });
         forwardOwnPresenceState();
+
+        // Request global settings
+        auto req = createRequest();
+        req->setGlobalSettingsRequest(GlobalSettingsRequest());
+        sendRequest(req);
     }
 }
 

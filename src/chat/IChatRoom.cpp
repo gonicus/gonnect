@@ -25,3 +25,11 @@ void IChatRoom::setLatestMessageDateTime(const QDateTime &dateTime)
         Q_EMIT latestMessageDateTimeChanged();
     }
 }
+
+void IChatRoom::setRoomSettings(const RoomSettings &roomSettings)
+{
+    if (m_roomSettings != roomSettings) {
+        m_roomSettings = roomSettings;
+        Q_EMIT roomSettingsChanged();
+    }
+}
