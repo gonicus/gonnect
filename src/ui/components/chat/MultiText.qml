@@ -18,7 +18,9 @@ Column {
         model: control.content?.contentParts ?? null
         delegate: Item {
             id: delg
-            implicitHeight: delg.isCode ? codeBlockLoader.height : textLabel.height
+            implicitHeight: delg.isCode
+                            ? (codeBlockLoader.y + codeBlockLoader.height)
+                            : (textLabel.y + textLabel.height)
 
             required property int index
             required property ChatMessageContentPart modelData
@@ -34,6 +36,7 @@ Column {
             Label {
                 id: textLabel
                 visible: !delg.isCode
+                y: delg.index > 0 ? 5 : 0
                 text: delg.text
                 font.pixelSize: Theme.fontPixelSize
                 wrapMode: Label.WordWrap
@@ -47,6 +50,7 @@ Column {
                 id: codeBlockLoader
                 active: delg.isCode
                 source: "qrc:/qt/qml/base/ui/components/chat/CodeBlock.qml"
+                y: 5
                 anchors {
                     left: parent.left
                     right: parent.right
