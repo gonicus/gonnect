@@ -23,8 +23,12 @@ bool WindowsEventFilter::nativeEventFilter(const QByteArray &eventType, void *me
         bool blocking = InhibitHelper::instance().inhibitActive();
 
         if (msg->message == WM_QUERYENDSESSION) {
-            *result = blocking ? FALSE : TRUE;
-            return true;
+            if (blocking) {
+                *result = false;
+                return true;
+            }
+
+            return false;
         }
 
         if (msg->message == WM_ENDSESSION) {
@@ -41,7 +45,7 @@ WindowsInhibitHelper::WindowsInhibitHelper() : InhibitHelper{} { }
 
 bool WindowsInhibitHelper::inhibitActive() const
 {
-    return m_inhibit;
+    return m_screenSaverIsInhibited;
 }
 
 void WindowsInhibitHelper::inhibit(unsigned int flags, const QString &reason)
@@ -54,7 +58,7 @@ void WindowsInhibitHelper::inhibit(unsigned int flags, const QString &reason)
         auto hwnd = app->rootWindow()->winId();
         QString msg = QObject::tr("There are still phone calls going on");
         ShutdownBlockReasonCreate(reinterpret_cast<HWND>(hwnd),
-                                  reinterpret_cast<LPCWSTR>(msg.toStdString().c_str()));
+                                  reinterpret_cast<LPCWSTR>(msg.utf16()));
 
         qCDebug(lcInhibit) << "logout inhibit: active";
         m_inhibit = true;
@@ -75,6 +79,10 @@ void WindowsInhibitHelper::release()
 
 void WindowsInhibitHelper::inhibitScreenSaver(const QString &applicationName, const QString &reason)
 {
+    Q_UNUSED(applicationName)
+
+    inhibit(InhibitHelper::InhibitFlag::LOGOUT, reason);
+
     // https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadexecutionstate
     if (!m_screenSaverIsInhibited) {
         if (SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED)
@@ -88,6 +96,8 @@ void WindowsInhibitHelper::inhibitScreenSaver(const QString &applicationName, co
 
 void WindowsInhibitHelper::releaseScreenSaver()
 {
+    release();
+
     if (m_screenSaverIsInhibited) {
         if (SetThreadExecutionState(ES_CONTINUOUS) == NULL) {
             qCWarning(lcInhibit) << "failed to reset screen inhibit mode";
