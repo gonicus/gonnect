@@ -94,10 +94,9 @@ SystemTrayMenu::~SystemTrayMenu()
 
 void SystemTrayMenu::updateMenu()
 {
-
     const auto sipReg = SIPAccountManager::instance().sipRegistered();
     m_settingsWindowAction->setVisible(sipReg);
-    m_mainWindowAction->setText(sipReg ? tr("Dial...") : tr("Not registered..."));
+    m_mainWindowAction->setText(tr("Open..."));
     m_mainWindowAction->setIcon(sipReg ? QIcon::fromTheme("call-start-symbolic")
                                        : QIcon::fromTheme("view-refresh-symbolic"));
 
