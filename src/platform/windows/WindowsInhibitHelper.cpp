@@ -23,9 +23,7 @@ bool WindowsEventFilter::nativeEventFilter(const QByteArray &eventType, void *me
         bool blocking = InhibitHelper::instance().inhibitActive();
 
         if (msg->message == WM_QUERYENDSESSION) {
-            if (blocking) {
-                *result = false;
-            }
+            *result = blocking ? FALSE : TRUE;
             return true;
         }
 
