@@ -71,6 +71,7 @@ Item {
             id: codeLabel
             readOnly: true
             font.family: "monospace"
+            font.pixelSize: Theme.fontPixelSize
             anchors {
                 left: lineNumberCol.right
                 leftMargin: 12
