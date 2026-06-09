@@ -541,7 +541,7 @@ Item {
 
                             Label {
                                 id: newPasswordLabel
-                                text: qsTr("Enter a password to protect this conference room. Other participants must enter it before taking part in the session.")
+                                text: qsTr("Enter a password to protect this conference room. Other users must enter it before taking part in the session.")
                                 wrapMode: Text.Wrap
                                 anchors {
                                     left: parent.left
@@ -555,7 +555,7 @@ Item {
                             Label {
                                 id: existingPasswordLabel
                                 visible: false
-                                text: qsTr("This password has been set for the conference room and must be entered by participants before taking part in the session.")
+                                text: qsTr("This password has been set for the conference room and must be entered by users before taking part in the session.")
                                 wrapMode: Text.Wrap
                                 anchors {
                                     left: parent.left
@@ -828,7 +828,7 @@ Item {
             id: callSideBar
             anchors.fill: parent
             chatAvailable: confConn.hasCapability(IConferenceConnector.Capability.ChatInCall)
-            personsAvailable: confConn.hasCapability(IConferenceConnector.Capability.ParticipantRoles)
+            personsAvailable: confConn.hasCapability(IConferenceConnector.Capability.UserRoles)
             conferenceConnector: confConn
 
             Connections {

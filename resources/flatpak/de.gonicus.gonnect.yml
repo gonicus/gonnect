@@ -291,6 +291,31 @@ modules:
           type: git
           tag-pattern: ^(v[0-9.]+)$
 
+  - name: cmark
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/commonmark/cmark.git
+        tag: 0.31.2
+        commit: eec0eeba6d31189fd828314576494566d539b1e3
+        x-checker-data:
+          type: git
+          tag-pattern: ^([0-9.]+)$
+
+  - name: ksyntaxhighlighting
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://invent.kde.org/frameworks/syntax-highlighting.git
+        tag: v6.26.0
+        commit: 8a8789ca55c1209109f97a34b18e633c4240bee0
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([0-9.]+)$
+      - type: patch
+        path: patches/ecm-downgrade.patch
+
   - name: gonnect
     buildsystem: cmake-ninja
     config-opts:

@@ -27,9 +27,9 @@ Item {
 
         if (!ViewHelper.isSystrayAvailable() && settings.showTrayDialog) {
             const item = DialogFactory.createInfoDialog({
-                title: qsTr("No system tray available"),
-                                                        text: qsTr("GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.")
-            })
+                                                            title: qsTr("No system tray available"),
+                                                            text: qsTr("GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.")
+                                                        })
             item.accepted.connect(() => settings.showTrayDialog = false)
         }
 
@@ -157,7 +157,7 @@ Item {
     Connections {
         id: sipAccountManagerConnections
         target: SIPAccountManager
-
+        ignoreUnknownSignals: true
         function onAuthorizationFailed(accountId : string) {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for the SIP account:") })
             dialog.onPasswordAccepted.connect(pw => SIPAccountManager.setAccountCredentials(accountId, pw))

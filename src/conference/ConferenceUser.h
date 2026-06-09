@@ -3,7 +3,7 @@
 #include <QObject>
 #include <qqmlregistration.h>
 
-class ConferenceParticipant : public QObject
+class ConferenceUser : public QObject
 {
     Q_OBJECT
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
@@ -13,16 +13,16 @@ class ConferenceParticipant : public QObject
 
     Q_PROPERTY(QString id READ id CONSTANT FINAL)
     Q_PROPERTY(QString displayName READ displayName CONSTANT FINAL)
-    Q_PROPERTY(ConferenceParticipant::Role role READ role NOTIFY roleChanged FINAL)
+    Q_PROPERTY(ConferenceUser::Role role READ role NOTIFY roleChanged FINAL)
 
 public:
-    enum class Role { None, Participant, Moderator };
+    enum class Role { None, User, Moderator };
     Q_ENUM(Role)
 
-    static QString participantRoleToString(const Role role);
+    static QString userRoleToString(const Role role);
 
-    explicit ConferenceParticipant(const QString &id, const QString &displayName, Role role,
-                                   QObject *parent = nullptr);
+    explicit ConferenceUser(const QString &id, const QString &displayName, Role role,
+                            QObject *parent = nullptr);
 
     QString id() const { return m_id; }
     QString displayName() const { return m_displayName; }

@@ -47,6 +47,7 @@ public:
     QList<Contact *> search(const QString &searchString, bool includeBlocked = false) const;
     Contact *lookupBySipUrl(const QString &sipUrl) const;
     Contact *lookupByNumber(const QString &number) const;
+    Contact *lookupByEmail(const QString &emailAddr) const;
     Contact *lookupByContactId(const QString &contactId) const;
     Contact *lookupBySourceUid(const QString &sourceUid) const;
 

@@ -246,9 +246,9 @@ ListView {
 
                     function copyLink() {
                         if (delg.isJitsiMeeting) {
-                            ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
+                            ClipboardHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
                         } else {
-                            ViewHelper.copyToClipboard(delg.link)
+                            ClipboardHelper.copyToClipboard(delg.link)
                         }
                     }
                 }
