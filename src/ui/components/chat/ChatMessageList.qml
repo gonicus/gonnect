@@ -15,6 +15,20 @@ Item {
 
     signal respondTo(string messageId)
 
+    onChatRoomChanged: () => {
+        internal.autoScrollBottom = true
+        listView.positionViewAtBeginning()
+    }
+
+    Connections {
+        target: listView.model
+        function onModelReset() {
+            if (internal.autoScrollBottom) {
+                Qt.callLater(listView.positionViewAtBeginning)
+            }
+        }
+    }
+
     QtObject {
         id: internal
 
