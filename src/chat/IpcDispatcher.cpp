@@ -614,9 +614,8 @@ void IpcDispatcher::processResponse(
         const auto roomId = m_roomListTags.take(tag);
         if (!roomId.isEmpty()) {
             if (auto room = m_roomLookup.value(roomId, nullptr)) {
-                if (count) {
-                    room->setIsLoadingMessageHistory(false);
-                } else {
+                room->setIsLoadingMessageHistory(false);
+                if (!count) {
                     room->setIsCompletelyLoaded(true);
                 }
             }
