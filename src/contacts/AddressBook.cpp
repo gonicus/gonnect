@@ -135,10 +135,11 @@ void AddressBook::removeContact(const QString &sourceUid)
     QMutexLocker lock(&m_feederMutex);
 
     if (contact) {
-        m_contacts.remove(contact->id());
+        const auto contactId = contact->id();
+        m_contacts.remove(contactId);
         m_contactsBySourceId.remove(contact->sourceUid());
 
-        Q_EMIT contactRemoved(sourceUid);
+        Q_EMIT contactRemoved(contactId);
     }
 }
 
@@ -170,10 +171,11 @@ void AddressBook::removeContactsBySource(const QString &source)
                 Q_EMIT contactSourceInfosChanged();
             }
 
-            m_contacts.remove(contact->id());
+            const auto contactId = contact->id();
+            m_contacts.remove(contactId);
             m_contactsBySourceId.remove(sourceUid);
 
-            Q_EMIT contactRemoved(sourceUid);
+            Q_EMIT contactRemoved(contactId);
         }
     }
 }
@@ -268,4 +270,19 @@ Contact *AddressBook::lookupByContactId(const QString &contactId) const
 Contact *AddressBook::lookupBySourceUid(const QString &sourceUid) const
 {
     return m_contactsBySourceId.value(sourceUid, nullptr);
+}
+
+Contact *AddressBook::lookupByChatUser(const ChatUser *chatUser) const
+{
+    if (!chatUser) {
+        return nullptr;
+    }
+
+    for (Contact *contact : std::as_const(m_contacts)) {
+        if (contact->hasChatUser(chatUser)) {
+            return contact;
+        }
+    }
+
+    return nullptr;
 }

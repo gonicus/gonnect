@@ -16,12 +16,14 @@ class FavoritesProxyModel : public QSortFilterProxyModel
 public:
     explicit FavoritesProxyModel(QObject *parent = nullptr);
 
+    virtual QVariant data(const QModelIndex &index, int role) const override;
+
 protected:
     virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
-    virtual bool lessThan(const QModelIndex &sourceLeft,
-                          const QModelIndex &sourceRight) const override;
 
 private:
+    bool isJitsiAddr(const QVariantMap &addr) const;
+
     bool m_showJitsi = true;
     bool m_showChatRooms = true;
 

@@ -14,92 +14,83 @@ Item {
     }
 
     required property string name
-    required property string phoneNumber
     required property string company
     required property bool hasBuddyState
     required property bool hasAvatar
     required property string avatarPath
-    required property int numberType
-    required property int contactType
     required property IChatProvider chatProvider
-
-    readonly property bool isJitsiUrl: delg.contactType === NumberStats.ContactType.JitsiMeetUrl
-    readonly property bool isChatRoom: delg.contactType === NumberStats.ContactType.ChatRoomId
-    readonly property bool isReady: delg.buddyStatus === SIPBuddyState.READY
-
-    property int buddyStatus: SIPBuddyState.UNKNOWN
-
-    readonly property string typeIcon: {
-
-        if (delg.isJitsiUrl) {
-            return Icons.videoCall
-        }
-
-        if (delg.isChatRoom) {
-            return Icons.dialogMessages
-        }
-
-        switch (delg.numberType) {
-            case Contact.NumberType.Commercial:
-                return Icons.actor
-            case Contact.NumberType.Mobile:
-                return Icons.smartphone
-            case Contact.NumberType.Home:
-                return Icons.goHome
-            default:
-                return ''
-        }
-    }
+    required property IChatRoom chatRoom
+    required property var addresses
+    required property string subscribableNumber
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Favorite contact")
-    Accessible.description: qsTr("Selected favorite %1: %2").arg(delg.name).arg(delg.isJitsiUrl ? qsTr("tap to start meeting %1").arg(delg.phoneNumber) : qsTr("tap to call %1").arg(delg.phoneNumber))
+    Accessible.description: qsTr("Selected favorite %1: %2")
+                                .arg(delg.name)
+                                .arg(delg.isJitsiUrl
+                                     ? qsTr("tap to start meeting %1").arg(delg.phoneNumber)
+                                     : qsTr("tap to call %1").arg(delg.phoneNumber))
     Accessible.focusable: true
     Accessible.onPressAction: () => delg.startMeetingOrCall()
 
-    function updateBuddyStatus() {
-        delg.buddyStatus = delg.hasBuddyState
-                ? SIPManager.buddyStatus(delg.phoneNumber)
-                : SIPBuddyState.UNKNOWN
-    }
+    QtObject {
+        id: internal
 
-    function subscribeBuddyStatus() {
-        const buddy = SIPManager.getBuddy(delg.phoneNumber)
-        if (buddy !== null) {
-            buddy.subscribeToBuddyStatus()
+        property int buddyStatus: SIPBuddyState.UNKNOWN
+
+        function updateBuddyStatus() {
+            internal.buddyStatus = delg.hasBuddyState
+                    ? SIPManager.buddyStatus(delg.subscribableNumber)
+                    : SIPBuddyState.UNKNOWN
         }
-    }
 
-    Component.onCompleted: () => delg.updateBuddyStatus()
-
-    Connections {
-        target: SIPManager
-        enabled: delg.hasBuddyState
-        function onBuddyStateChanged(url : string, status : int) {
-            delg.updateBuddyStatus()
+        function subscribeBuddyStatus() {
+            const buddy = SIPManager.getBuddy(delg.subscribableNumber)
+            if (buddy !== null) {
+                buddy.subscribeToBuddyStatus()
+            }
         }
-    }
 
-    Rectangle {
-        id: rowBackground
-        anchors.fill: parent
-        radius: 4
-        color: rowHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+        Component.onCompleted: () => internal.updateBuddyStatus()
 
-        Accessible.ignored: true
+        readonly property Connections sipManagerConnections: Connections {
+            target: SIPManager
+            enabled: delg.hasBuddyState
+            function onBuddyStateChanged(url : string, status : int) {
+                internal.updateBuddyStatus()
+            }
+        }
+
+        function startMeetingOrCall(addr : var) {
+            switch (addr.contactType) {
+            case NumberStats.ContactType.JitsiMeetUrl:
+                if (!ViewHelper.isActiveVideoCall) {
+                    ViewHelper.requestMeeting(addr.addr)
+                }
+                break
+
+            case NumberStats.ContactType.ChatRoomId:
+                ViewHelper.showChatRoom(delg.chatProvider, addr.addr)
+                break
+
+            case NumberStats.ContactType.PhoneNumber:
+                SIPCallManager.call(addr)
+                break
+            }
+        }
     }
 
     AvatarImage {
         id: avatarImage
         size: 40
-        initials: ViewHelper.initials(delg.name || delg.phoneNumber)
+        initials: ViewHelper.initials(delg.name)
         source: delg.hasAvatar
                 ? (delg.avatarPath.startsWith("file://")
                    ? delg.avatarPath
                    : ("file://" + delg.avatarPath))
                 : ""
         showPresenceStatus: delg.hasBuddyState
-        presenceStatus: delg.buddyStatus
+        presenceStatus: internal.buddyStatus
         indicatorComponent: Component { BuddyStatusIndicator {} }
         anchors {
             left: parent.left
@@ -115,14 +106,14 @@ Item {
         anchors {
             left: avatarImage.right
             leftMargin: 10
-            right: typeDelgLabel.left
+            right: addressButtonRow.left
             rightMargin: 10
             verticalCenter: parent.verticalCenter
         }
 
         Label {
             id: contactNameLabel
-            text: delg.name || delg.phoneNumber
+            text: delg.name
             font.weight: Font.Medium
             elide: Label.ElideRight
             anchors {
@@ -164,17 +155,94 @@ Item {
         Accessible.ignored: true
     }
 
-    IconLabel {
-        id: typeDelgLabel
-        icon.source: delg.typeIcon
-        width: 20
+    Row {
+        id: addressButtonRow
+        height: avatarImage.size
         anchors {
             right: parent.right
-            rightMargin: avatarImage.anchors.leftMargin
+            rightMargin: 10
             verticalCenter: parent.verticalCenter
         }
 
-        Accessible.ignored: true
+        Repeater {
+            model: delg.addresses
+            delegate: Item {
+                id: addrDelg
+                width: addrDelg.height
+                anchors {
+                    top: parent?.top
+                    bottom: parent?.bottom
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: addrDelg.width / 2
+                    color: addrHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+                }
+
+                IconLabel {
+                    anchors.centerIn: parent
+                    icon {
+                        width: 24
+                        height: 24
+                        color: delg.enabled ? Theme.primaryTextColor : Theme.secondaryInactiveTextColor
+                        source: {
+                            switch (addrDelg.modelData.contactType) {
+                                case NumberStats.ContactType.JitsiMeetUrl:
+                                   return Icons.videoCall
+
+                                case NumberStats.ContactType.ChatRoomId:
+                                   return Icons.dialogMessages
+
+                                case NumberStats.ContactType.PhoneNumber: {
+                                    switch (addrDelg.modelData.numberType) {
+                                        case Contact.NumberType.Commercial:
+                                            return Icons.actor
+                                        case Contact.NumberType.Mobile:
+                                            return Icons.smartphone
+                                        case Contact.NumberType.Home:
+                                            return Icons.goHome
+                                    }
+                                }
+                            }
+                            return ''
+                        }
+                    }
+                }
+
+                required property var modelData
+
+                TapHandler {
+                    gesturePolicy: TapHandler.WithinBounds
+                    grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+                    exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                    onDoubleTapped: () => internal.startMeetingOrCall(addrDelg.modelData)
+                    onTapped: (_, mouseButton) => {
+                        if (mouseButton === Qt.RightButton) {
+                            switch (addrDelg.modelData.contactType) {
+                            case NumberStats.ContactType.JitsiMeetUrl:
+                                jitsiHistoryListContextMenuComponent.createObject(addrDelg, { addr: addrDelg.modelData }).popup()
+                                break
+
+                            case NumberStats.ContactType.ChatRoomId:
+                                chatRoomContextMenuComponent.createObject(addrDelg, { addr: addrDelg.modelData }).popup()
+                                break
+
+                            case NumberStats.ContactType.PhoneNumber:
+                                historyListContextMenuComponent.createObject(addrDelg, { addr: addrDelg.modelData }).popup()
+                                break
+                            }
+                        }
+                    }
+                }
+
+                HoverHandler {
+                    id: addrHoverHandler
+                }
+            }
+        }
     }
 
     Component {
@@ -182,13 +250,14 @@ Item {
 
         HistoryListContextMenu {
             id: rowContextMenu
-            phoneNumber: delg.phoneNumber
+            phoneNumber: rowContextMenu.addr.addr
             isFavorite: true
             isSipSubscriptable: delg.hasBuddyState
-            isReady: delg.isReady
-            onCallClicked: () => SIPCallManager.call(delg.phoneNumber)
-            onCallAsClicked: (identityId) => SIPCallManager.call("account0", delg.phoneNumber, "", identityId)
-            onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
+            onCallClicked: () => SIPCallManager.call(rowContextMenu.addr.addr)
+            onCallAsClicked: identityId => SIPCallManager.call("account0", rowContextMenu.addr.addr, "", identityId)
+            onNotifyWhenAvailableClicked: () => internal.subscribeBuddyStatus()
+
+            property var addr
         }
     }
 
@@ -198,13 +267,15 @@ Item {
         JitsiHistoryListContextMenu {
             id: rowJitsiContextMenu
             isFavorite: true
-            roomName: delg.phoneNumber
+            roomName: rowJitsiContextMenu.addr.addr
             width: 230
             onCallClicked: () => {
                 if (!ViewHelper.isActiveVideoCall) {
-                    ViewHelper.requestMeeting(delg.phoneNumber)
+                    ViewHelper.requestMeeting(rowJitsiContextMenu.addr.addr)
                 }
             }
+
+            property var addr
         }
     }
 
@@ -212,48 +283,14 @@ Item {
         id: chatRoomContextMenuComponent
 
         Menu {
+            id: chatRoomMenu
             Action {
                 id: favToggleAction
                 text: qsTr('Remove favorite')
                 onTriggered: () => delg.chatProvider.requestToggleRoomFavorite(
-                                       delg.chatProvider.chatRoomByRoomId(delg.phoneNumber))
+                                       delg.chatProvider.chatRoomByRoomId(chatRoomMenu.addr.addr))
             }
+            property var addr
         }
-    }
-
-    TapHandler {
-        gesturePolicy: TapHandler.WithinBounds
-        grabPermissions: PointerHandler.ApprovesTakeOverByAnything
-        exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onDoubleTapped: () => delg.startMeetingOrCall()
-        onTapped: (_, mouseButton) => {
-            if (mouseButton === Qt.RightButton) {
-                if (delg.isJitsiUrl) {
-                    jitsiHistoryListContextMenuComponent.createObject(delg).popup()
-                } else if (delg.isChatRoom) {
-                    chatRoomContextMenuComponent.createObject(delg).popup()
-                } else {
-                    historyListContextMenuComponent.createObject(delg).popup()
-                }
-            }
-        }
-    }
-
-    function startMeetingOrCall() {
-        if (delg.contactType === NumberStats.ContactType.JitsiMeetUrl) {
-            if (!ViewHelper.isActiveVideoCall) {
-                ViewHelper.requestMeeting(delg.phoneNumber)
-            }
-        } else if (delg.isChatRoom) {
-            ViewHelper.showChatRoom(delg.chatProvider, delg.phoneNumber)
-        } else {
-            SIPCallManager.call(delg.phoneNumber)
-        }
-    }
-
-    HoverHandler {
-        id: rowHoverHandler
     }
 }
