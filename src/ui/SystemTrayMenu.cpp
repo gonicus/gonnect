@@ -97,8 +97,6 @@ void SystemTrayMenu::updateMenu()
     const auto sipReg = SIPAccountManager::instance().sipRegistered();
     m_settingsWindowAction->setVisible(sipReg);
     m_mainWindowAction->setText(tr("Open..."));
-    m_mainWindowAction->setIcon(sipReg ? QIcon::fromTheme("call-start-symbolic")
-                                       : QIcon::fromTheme("view-refresh-symbolic"));
 
     updateConferences();
     updateCalls();
