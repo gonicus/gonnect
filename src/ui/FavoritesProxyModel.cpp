@@ -1,11 +1,10 @@
 #include "FavoritesProxyModel.h"
 #include "FavoritesModel.h"
 #include "NumberStats.h"
+#include "IChatRoom.h"
 
 FavoritesProxyModel::FavoritesProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
-    sort(0);
-
     connect(this, &FavoritesProxyModel::showJitsiChanged, this, [this]() {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         beginFilterChange();
@@ -24,10 +23,34 @@ FavoritesProxyModel::FavoritesProxyModel(QObject *parent) : QSortFilterProxyMode
     });
 }
 
+QVariant FavoritesProxyModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid()) {
+        return QVariant();
+    }
+
+    if ((!m_showJitsi || !m_showChatRooms)
+        && role == static_cast<int>(FavoritesModel::Roles::Addresses)) {
+        const QVariantList originalAddrs = mapToSource(index).data(role).toList();
+        QVariantList addrs;
+        addrs.reserve(originalAddrs.length());
+
+        for (const auto &addr : originalAddrs) {
+            if ((m_showJitsi || !isJitsiAddr(addr.toMap()))
+                && (m_showChatRooms || !isChatAddr(addr.toMap()))) {
+                addrs.append(addr);
+            }
+        }
+
+        return addrs;
+    }
+
+    return QSortFilterProxyModel::data(index, role);
+}
+
 bool FavoritesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     using Roles = FavoritesModel::Roles;
-    using ContactType = NumberStats::ContactType;
 
     const auto model = qobject_cast<FavoritesModel *>(sourceModel());
     if (!model) {
@@ -35,31 +58,39 @@ bool FavoritesProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sou
     }
 
     const auto index = model->index(sourceRow, 0, sourceParent);
-    const auto contactType =
-            qvariant_cast<ContactType>(model->data(index, static_cast<int>(Roles::ContactType)));
 
-    if (!m_showJitsi && contactType == ContactType::JitsiMeetUrl) {
-        return false;
-    }
-    if (!m_showChatRooms && contactType == ContactType::ChatRoomId) {
-        return false;
+    if (!m_showJitsi || !m_showChatRooms) {
+        const auto addrs = model->data(index, static_cast<int>(Roles::Addresses)).toList();
+        bool hasNonJitsiAddr = false;
+        bool hasNonChatAddr = false;
+        for (const auto &addr : addrs) {
+            if (!isJitsiAddr(addr.toMap())) {
+                hasNonJitsiAddr = true;
+            }
+            if (!isChatAddr(addr.toMap())) {
+                hasNonChatAddr = true;
+            }
+            if (hasNonChatAddr && hasNonJitsiAddr) {
+                break;
+            }
+        }
+
+        if ((!m_showJitsi && !hasNonJitsiAddr) || (!m_showChatRooms && !hasNonChatAddr)) {
+            return false;
+        }
     }
 
     return true;
 }
 
-bool FavoritesProxyModel::lessThan(const QModelIndex &sourceLeft,
-                                   const QModelIndex &sourceRight) const
+bool FavoritesProxyModel::isJitsiAddr(const QVariantMap &addr) const
 {
-    using Roles = FavoritesModel::Roles;
+    using ContactType = NumberStats::ContactType;
+    return static_cast<ContactType>(addr.value("contactType", -1).toInt())
+            == ContactType::JitsiMeetUrl;
+}
 
-    const auto model = qobject_cast<FavoritesModel *>(sourceModel());
-    if (!model) {
-        return false;
-    }
-
-    const auto leftName = model->data(sourceLeft, static_cast<int>(Roles::Name)).toString();
-    const auto rightName = model->data(sourceRight, static_cast<int>(Roles::Name)).toString();
-
-    return leftName.localeAwareCompare(rightName) < 0;
+bool FavoritesProxyModel::isChatAddr(const QVariantMap &addr) const
+{
+    return addr.value("chatRoom").value<IChatRoom *>();
 }

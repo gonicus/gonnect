@@ -52,7 +52,7 @@ public:
     void removeMessage(const QString &messageId);
 
     virtual bool isDirectChat() override { return m_isDirectChat; }
-    virtual bool hasPresenceState() override { return isDirectChat(); }
+    virtual bool hasPresenceState() override;
     virtual ChatUser::PresenceState presenceState() const override;
     virtual IChatRoom::UserRoomState ownUserJoinState() const override;
     virtual ChatUser *otherUser() const override;

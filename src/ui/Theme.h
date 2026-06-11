@@ -218,7 +218,6 @@ Q_SIGNALS:
 
 private:
     void setDarkMode(bool value);
-    QString toCamelCase(const QString &str) const;
     uint fontPixelSize() const { return 13; }
 
     ThemeVariant m_themeVariant = ThemeVariant::System;

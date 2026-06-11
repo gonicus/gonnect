@@ -93,6 +93,7 @@ public:
     qreal matchesSearch(const QString &searchString) const;
 
 #ifndef APP_TESTS
+    bool hasChatUser(const ChatUser *user) const;
     void addChatUser(ChatUser *user);
     void removeChatUser(ChatUser *user);
     const QList<ChatUser *> &chatUsers() const { return m_chatUsers; }

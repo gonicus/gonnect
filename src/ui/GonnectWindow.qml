@@ -547,7 +547,7 @@ BaseWindow {
         anchors.centerIn: parent
         background.visible: !drawerStackView.currentItem || !drawerStackView.currentItem.hidePopupBackground
 
-        onClosed: drawerStackView.clear()
+        onClosed: () => drawerStackView.clear()
 
         StackView {
             id: drawerStackView
