@@ -13,6 +13,8 @@ Item {
         right: parent?.right
     }
 
+    property bool isCompactMode: false
+
     required property string name
     required property string company
     required property bool hasBuddyState
@@ -27,6 +29,22 @@ Item {
     Accessible.name: qsTr("Favorite contact")
     Accessible.description: qsTr("Selected favorite %1").arg(delg.name)
     Accessible.focusable: false
+
+    states: [
+        State {
+            when: delg.isCompactMode
+
+            PropertyChanges {
+                addressButtonRow.visible: false
+                buttonRowRepeater.model: null
+                moreButton.visible: true
+            }
+            AnchorChanges {
+                target: nameCompanyContainer
+                anchors.right: moreButton.left
+            }
+        }
+    ]
 
     QtObject {
         id: internal
@@ -72,6 +90,52 @@ Item {
                 SIPCallManager.call(addr.addr)
                 break
             }
+        }
+
+        function tooltipText(addr : var) : string {
+            switch (addr.contactType) {
+                case NumberStats.ContactType.JitsiMeetUrl:
+                    return qsTr("Jitsi Meet (room '%1')").arg(addr.addr)
+
+                case NumberStats.ContactType.ChatRoomId:
+                    return qsTr("Chat with %1").arg(delg.name)
+
+                case NumberStats.ContactType.PhoneNumber: {
+                    switch (addr.numberType) {
+                        case Contact.NumberType.Commercial:
+                            return qsTr("Phone (Commercial, %1)").arg(addr.addr)
+
+                        case Contact.NumberType.Mobile:
+                            return qsTr("Phone (Mobile, %1)").arg(addr.addr)
+
+                        case Contact.NumberType.Home:
+                            return qsTr("Phone (Home, %1)").arg(addr.addr)
+                    }
+                }
+            }
+            return ''
+        }
+
+        function iconSource(addr : var) : string {
+            switch (addr.contactType) {
+                case NumberStats.ContactType.JitsiMeetUrl:
+                   return Icons.videoCall
+
+                case NumberStats.ContactType.ChatRoomId:
+                   return Icons.dialogMessages
+
+                case NumberStats.ContactType.PhoneNumber: {
+                    switch (addr.numberType) {
+                        case Contact.NumberType.Commercial:
+                            return Icons.actor
+                        case Contact.NumberType.Mobile:
+                            return Icons.smartphone
+                        case Contact.NumberType.Home:
+                            return Icons.goHome
+                    }
+                }
+            }
+            return ''
         }
     }
 
@@ -150,6 +214,88 @@ Item {
         Accessible.ignored: true
     }
 
+    Item {
+        id: moreButton
+        visible: false
+        width: avatarImage.size
+        height: avatarImage.size
+        anchors {
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: moreButton.width / 2
+            color: moreButtonHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+        }
+
+        IconLabel {
+            anchors.centerIn: parent
+            icon {
+                width: 24
+                height: 24
+                color: delg.enabled ? Theme.primaryTextColor : Theme.secondaryInactiveTextColor
+                source: Icons.overflowMenu
+            }
+        }
+
+        HoverHandler {
+            id: moreButtonHoverHandler
+        }
+
+        TapHandler {
+            onTapped: () => moreMenuComponent.createObject(moreButton).popup()
+        }
+    }
+
+    Component {
+        id: moreMenuComponent
+
+        Menu {
+            id: moreMenu
+            width: {
+                let maxWidth = 0
+                let paddingSize = 0
+                for (let i = 0; i < moreMenu.count; ++i) {
+                    const item = moreMenu.itemAt(i)
+                    if (item) {
+                        maxWidth = Math.max(item.contentItem.implicitWidth, maxWidth)
+                        paddingSize = Math.max(item.padding, paddingSize)
+                    }
+                }
+                return maxWidth + (paddingSize * 2)
+            }
+
+            onClosed: () => moreMenu.destroy()
+
+            Instantiator {
+                model: delg.addresses
+                delegate: MenuItem {
+                    id: menuDelg
+                    text: internal.tooltipText(menuDelg.modelData)
+                    icon.source: internal.iconSource(menuDelg.modelData)
+
+                    required property var modelData
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Favorite phone, chat or meeting button")
+                    Accessible.description: qsTr("Selected address %1").arg(menuDelg.modelData.addr)
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => internal.startMeetingOrCall(menuDelg.modelData)
+
+                    // ToolTip.visible: addrHoverHandler.hovered
+                    // ToolTip.text: internal.tooltipText(addrDelg.modelData)
+
+                    onTriggered: () => internal.startMeetingOrCall(menuDelg.modelData)
+                }
+
+                onObjectAdded: (index, object) => moreMenu.insertItem(index, object)
+                onObjectRemoved: (index, object) => moreMenu.removeItem(object)
+            }
+        }
+    }
+
     Row {
         id: addressButtonRow
         height: avatarImage.size
@@ -160,6 +306,7 @@ Item {
         }
 
         Repeater {
+            id: buttonRowRepeater
             model: delg.addresses
             delegate: Item {
                 id: addrDelg
@@ -176,29 +323,7 @@ Item {
                 Accessible.onPressAction: () => internal.startMeetingOrCall(addrDelg.modelData.addr)
 
                 ToolTip.visible: addrHoverHandler.hovered
-                ToolTip.text: {
-                    switch (addrDelg.modelData.contactType) {
-                        case NumberStats.ContactType.JitsiMeetUrl:
-                            return qsTr("Jitsi Meet (room '%1')").arg(addrDelg.modelData.addr)
-
-                        case NumberStats.ContactType.ChatRoomId:
-                            return qsTr("Chat with %1").arg(delg.name)
-
-                        case NumberStats.ContactType.PhoneNumber: {
-                            switch (addrDelg.modelData.numberType) {
-                                case Contact.NumberType.Commercial:
-                                    return qsTr("Phone (Commercial, %1)").arg(addrDelg.modelData.addr)
-
-                                case Contact.NumberType.Mobile:
-                                    return qsTr("Phone (Mobile, %1)").arg(addrDelg.modelData.addr)
-
-                                case Contact.NumberType.Home:
-                                    return qsTr("Phone (Home, %1)").arg(addrDelg.modelData.addr)
-                            }
-                        }
-                    }
-                    return ''
-                }
+                ToolTip.text: internal.tooltipText(addrDelg.modelData)
 
                 Rectangle {
                     anchors.fill: parent
@@ -212,27 +337,7 @@ Item {
                         width: 24
                         height: 24
                         color: delg.enabled ? Theme.primaryTextColor : Theme.secondaryInactiveTextColor
-                        source: {
-                            switch (addrDelg.modelData.contactType) {
-                                case NumberStats.ContactType.JitsiMeetUrl:
-                                   return Icons.videoCall
-
-                                case NumberStats.ContactType.ChatRoomId:
-                                   return Icons.dialogMessages
-
-                                case NumberStats.ContactType.PhoneNumber: {
-                                    switch (addrDelg.modelData.numberType) {
-                                        case Contact.NumberType.Commercial:
-                                            return Icons.actor
-                                        case Contact.NumberType.Mobile:
-                                            return Icons.smartphone
-                                        case Contact.NumberType.Home:
-                                            return Icons.goHome
-                                    }
-                                }
-                            }
-                            return ''
-                        }
+                        source: internal.iconSource(addrDelg.modelData)
                     }
                 }
 
