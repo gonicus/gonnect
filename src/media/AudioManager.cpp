@@ -130,8 +130,10 @@ void AudioManager::paMuteInputByName(const QString &name, bool state)
 
 void AudioManager::paGetInputMuteState(pa_context *context)
 {
-    if (context) {
-        QString name = AudioManager::instance().m_captureAudioPort->getSystemDeviceID();
+    auto captureAudioPort = AudioManager::instance().m_captureAudioPort;
+
+    if (context && captureAudioPort) {
+        QString name = captureAudioPort->getSystemDeviceID();
         pa_context_get_source_info_by_name(context, name.toStdString().data(),
                                            paInputMuteStateCallback, nullptr);
     }
@@ -141,7 +143,10 @@ void AudioManager::paInputMuteStateCallback(pa_context *, const pa_source_info *
                                             void *)
 {
     AudioManager &instance = AudioManager::instance();
-    if (!end && instance.m_captureAudioPort->getSystemDeviceID() == QString(source->name)) {
+    auto captureAudioPort = instance.m_captureAudioPort;
+
+    if (!end && captureAudioPort
+        && captureAudioPort->getSystemDeviceID() == QString(source->name)) {
         if (instance.m_paCallbackSuppress > 0) {
             instance.m_paCallbackSuppress--;
             return;
@@ -213,11 +218,15 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
         qCInfo(lcAudioManager) << "set playback device to default";
     }
 
-    auto playOutput = getQtAudioOutputForHash(m_playbackHash);
+    if (m_playOutput) {
+        delete m_playOutput;
+    }
+
+    m_playOutput = getQtAudioOutputForHash(m_playbackHash);
     if (m_playbackAudioPort) {
-        m_playbackAudioPort->setAudioDevice(playOutput->device());
+        m_playbackAudioPort->setAudioDevice(m_playOutput->device());
     } else {
-        m_playbackAudioPort = new AudioPort(playOutput->device());
+        m_playbackAudioPort = new AudioPort(m_playOutput->device());
         if (!m_playbackAudioPort->initialize()) {
             qCWarning(lcAudioManager) << "unable to initialize playback device";
         }
@@ -257,12 +266,16 @@ void AudioManager::setCaptureDeviceId(const QString &id)
         qCInfo(lcAudioManager) << "set capture device to default";
     }
 
-    auto captureInput = getQtAudioInputForHash(m_captureHash);
+    if (m_captureInput) {
+        delete m_captureInput;
+    }
+
+    m_captureInput = getQtAudioInputForHash(m_captureHash);
     if (m_captureAudioPort) {
-        m_captureAudioPort->setAudioDevice(captureInput->device());
+        m_captureAudioPort->setAudioDevice(m_captureInput->device());
 
     } else {
-        m_captureAudioPort = new AudioPort(captureInput->device());
+        m_captureAudioPort = new AudioPort(m_captureInput->device());
         if (!m_captureAudioPort->initialize()) {
             qCWarning(lcAudioManager) << "unable to initialize capture device";
         }
