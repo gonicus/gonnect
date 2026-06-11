@@ -359,7 +359,7 @@ Item {
                     item.emojiPicked.connect(emojiButton.onEmojiSelected)
                     item.visibleChanged.connect(emojiButton.onEmojiPopupHide)
 
-                    item.openAt(emojiButton.mapToGlobal(emojiButton.x, emojiButton.y))
+                    item.openAt(buttonBar.mapToItem(emojiButton.Window.window.contentItem, emojiButton.x, emojiButton.y))
                 }
             }
 

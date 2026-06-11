@@ -129,6 +129,7 @@ Item {
 
                 OwnAvatarContextMenu {
                     id: avatarContextMenu
+                    onClosed: () => avatarContextMenu.destroy()
                     x: -avatarContextMenu.implicitWidth
                 }
             }

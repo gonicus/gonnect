@@ -150,6 +150,7 @@ Item {
 
                 Menu {
                     id: userContextMenu
+                    onClosed: () => userContextMenu.destroy()
 
                     MenuItem {
                         id: userKick

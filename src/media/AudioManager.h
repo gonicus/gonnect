@@ -136,6 +136,9 @@ private:
     QString m_captureHash;
     QString m_ringHash;
 
+    QAudioOutput *m_playOutput = nullptr;
+    QAudioInput *m_captureInput = nullptr;
+
     AudioPort *m_playbackAudioPort = nullptr;
     AudioPort *m_captureAudioPort = nullptr;
 

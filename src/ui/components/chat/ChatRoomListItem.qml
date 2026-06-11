@@ -170,6 +170,8 @@ Item {
         id: contextMenuComponent
 
         Menu {
+            id: contextMenu
+            onClosed: () => contextMenu.destroy()
 
             Action {
                 text: qsTr("Toggle favorite")

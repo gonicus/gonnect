@@ -312,9 +312,11 @@ bool HeadsetDeviceProxy::open()
                 connect(
                         &ui, &UserInfo::displayNameChanged, this,
                         [this]() {
-                            m_device->setLocalUserName(UserInfo::instance().getDisplayName());
-                            m_device->setPresenceIcon(
-                                    ReportDescriptorEnums::TeamsPresenceIcon::Online);
+                            if (m_device) {
+                                m_device->setLocalUserName(UserInfo::instance().getDisplayName());
+                                m_device->setPresenceIcon(
+                                        ReportDescriptorEnums::TeamsPresenceIcon::Online);
+                            }
                         },
                         Qt::SingleShotConnection);
             } else {

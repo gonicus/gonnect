@@ -15,8 +15,6 @@
 #  include "platform/flatpak/TrustAnchors.h"
 #endif
 
-#include <QUuid>
-
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
 
 intptr_t SIPAccount::runningMessageIndex = 0;
@@ -185,7 +183,7 @@ void SIPAccount::initialize()
     m_accountConfig.mediaConfig.transportConfig.randomizePort =
             m_settings.value("randomizeRtpPorts", false).toBool();
 
-    m_rttEnabled = m_settings.value("realTimeText", true).toBool();
+    m_rttEnabled = m_settings.value("realTimeText", false).toBool();
 
     // Tweak IPv6 account settings
     if (m_transportNet == TRANSPORT_NET::IPv4) {
@@ -937,12 +935,12 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         opt.targetUri = m_accountConfig.regConfig.registrarUri;
         opt.headers = headers;
 
-        m_optionsRequestUuid = QUuid::createUuid().toByteArray();
+        m_optionsRequestId = ++SIPAccount::runningMessageIndex;
 
         pj::SendRequestParam prm;
         prm.method = "OPTIONS";
         prm.txOption = opt;
-        prm.userData = m_optionsRequestUuid.data();
+        prm.userData = reinterpret_cast<void *>(m_optionsRequestId);
 
         sendRequest(prm);
     }
@@ -950,10 +948,10 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
 
 void SIPAccount::onSendRequest(pj::OnSendRequestParam &prm)
 {
-    const QByteArray uuid(static_cast<char *>(prm.userData));
+    const auto requestId = reinterpret_cast<intptr_t>(prm.userData);
 
-    if (uuid == m_optionsRequestUuid) {
-        m_optionsRequestUuid.clear();
+    if (requestId != 0 && requestId == m_optionsRequestId) {
+        m_optionsRequestId = 0;
         const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
         m_isInstantMessagingAllowed = hasAllowGrant(header, "MESSAGE");
     }

@@ -13,6 +13,7 @@ class Theme : public QObject
             Theme::ThemeVariant themeVariant MEMBER m_themeVariant NOTIFY themeVariantChanged FINAL)
     Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY isDarkModeChanged FINAL)
     Q_PROPERTY(bool useOwnDecoration READ useOwnDecoration NOTIFY useOwnDecorationChanged FINAL)
+    Q_PROPERTY(uint fontPixelSize READ fontPixelSize CONSTANT FINAL)
 
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(
@@ -217,7 +218,7 @@ Q_SIGNALS:
 
 private:
     void setDarkMode(bool value);
-    QString toCamelCase(const QString &str) const;
+    uint fontPixelSize() const { return 13; }
 
     ThemeVariant m_themeVariant = ThemeVariant::System;
     bool m_isDarkMode = false;

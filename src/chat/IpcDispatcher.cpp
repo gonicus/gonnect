@@ -614,9 +614,8 @@ void IpcDispatcher::processResponse(
         const auto roomId = m_roomListTags.take(tag);
         if (!roomId.isEmpty()) {
             if (auto room = m_roomLookup.value(roomId, nullptr)) {
-                if (count) {
-                    room->setIsLoadingMessageHistory(false);
-                } else {
+                room->setIsLoadingMessageHistory(false);
+                if (!count) {
                     room->setIsCompletelyLoaded(true);
                 }
             }
@@ -1778,9 +1777,7 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
         } else {
             title = tr("[%1] Message from %2").arg(chatRoom->name(), senderName);
         }
-        if (textContent->isSimpleText()) {
-            message = textContent->simpleText();
-        }
+        message = textContent->simpleText();
     }
 
     auto notification = new Notification(title, message, Notification::Priority::normal, this);

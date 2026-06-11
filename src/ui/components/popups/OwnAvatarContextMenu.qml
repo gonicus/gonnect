@@ -7,6 +7,8 @@ import base
 Menu {
     id: control
 
+    onClosed: () => control.destroy()
+
     LoggingCategory {
         id: category
         name: "gonnect.qml.popup.OwnAvatarContextMenu"
