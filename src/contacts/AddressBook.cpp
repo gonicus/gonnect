@@ -159,7 +159,12 @@ void AddressBook::removeContactsBySource(const QString &source)
 
     QString sourceUid;
     bool sourceInfoCleared = false;
-    for (auto contact : std::as_const(m_contacts)) {
+
+    QMutableHashIterator it(m_contacts);
+    while (it.hasNext()) {
+        it.next();
+
+        const auto contact = it.value();
         if (contact->contactSourceInfo().configId == source) {
             sourceUid = contact->sourceUid();
 
@@ -172,9 +177,8 @@ void AddressBook::removeContactsBySource(const QString &source)
             }
 
             const auto contactId = contact->id();
-            m_contacts.remove(contactId);
             m_contactsBySourceId.remove(sourceUid);
-
+            it.remove();
             Q_EMIT contactRemoved(contactId);
         }
     }

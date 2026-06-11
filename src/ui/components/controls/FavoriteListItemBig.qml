@@ -320,7 +320,7 @@ Item {
                 Accessible.name: qsTr("Favorite phone, chat or meeting button")
                 Accessible.description: qsTr("Selected address %1").arg(addrDelg.modelData.addr)
                 Accessible.focusable: true
-                Accessible.onPressAction: () => internal.startMeetingOrCall(addrDelg.modelData.addr)
+                Accessible.onPressAction: () => internal.startMeetingOrCall(addrDelg.modelData)
 
                 ToolTip.visible: addrHoverHandler.hovered
                 ToolTip.text: internal.tooltipText(addrDelg.modelData)

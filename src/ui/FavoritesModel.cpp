@@ -249,7 +249,8 @@ int FavoritesModel::rowCount(const QModelIndex &) const
 
 QVariant FavoritesModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid() || index.row()
+        || static_cast<std::size_t>(index.row()) >= m_favorites.size()) {
         return QVariant();
     }
 
