@@ -48,7 +48,7 @@ void Sniffer::updateAudioLevel(const char *data, qint64 size)
     static constexpr qreal positiveRange = std::numeric_limits<qint16>().max();
 
     for (int i = 0; i < numSamples; ++i) { // i is index of sample
-        const auto word = static_cast<qint16>(*data);
+        const auto word = qAbs(qFromLittleEndian<qint16>(*data));
         const qreal realValue = static_cast<qreal>(word) / positiveRange * 100.0;
 
         max = std::max(max, realValue);
