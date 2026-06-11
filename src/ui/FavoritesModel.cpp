@@ -35,6 +35,7 @@ FavoritesModel::FavoritesModel(QObject *parent) : QAbstractListModel{ parent }
             [this](QString contactId) {
                 for (auto &favEntry : std::as_const(m_favorites)) {
                     if (favEntry->contact && favEntry->contact->id() == contactId) {
+                        m_favoriteContactLookup.remove(favEntry->contact);
                         favEntry->contact = nullptr;
                         scheduleModelUpdate();
                         return;
@@ -153,6 +154,7 @@ void FavoritesModel::updateModel()
 
             auto addr = std::make_unique<FavoriteEntry::Addr>();
             addr->contactType = NumberStats::ContactType::ChatRoomId;
+            addr->addr = room->id();
             entry->addrs.push_back(std::move(addr));
         }
     }
@@ -261,6 +263,9 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::HasBuddyState):
         return favEntry->contact && !favEntry->contact->subscriptableNumber().isEmpty();
 
+    case static_cast<int>(Roles::SubscribableNumber):
+        return favEntry->contact ? favEntry->contact->subscriptableNumber() : QString();
+
     case static_cast<int>(Roles::HasAvatar):
         return favEntry->contact && favEntry->contact->hasAvatar();
 
@@ -285,16 +290,6 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
             l.append(m);
         }
         return l;
-    }
-
-    case static_cast<int>(Roles::SubscribableNumber): {
-        for (const auto &addr : std::as_const(favEntry->addrs)) {
-            if (addr->isSubscribable) {
-                return addr->addr;
-            }
-        }
-
-        return QString();
     }
 
     case static_cast<int>(Roles::Name):

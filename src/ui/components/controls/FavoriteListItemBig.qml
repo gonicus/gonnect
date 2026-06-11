@@ -25,13 +25,8 @@ Item {
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Favorite contact")
-    Accessible.description: qsTr("Selected favorite %1: %2")
-                                .arg(delg.name)
-                                .arg(delg.isJitsiUrl
-                                     ? qsTr("tap to start meeting %1").arg(delg.phoneNumber)
-                                     : qsTr("tap to call %1").arg(delg.phoneNumber))
-    Accessible.focusable: true
-    Accessible.onPressAction: () => delg.startMeetingOrCall()
+    Accessible.description: qsTr("Selected favorite %1").arg(delg.name)
+    Accessible.focusable: false
 
     QtObject {
         id: internal
@@ -74,7 +69,7 @@ Item {
                 break
 
             case NumberStats.ContactType.PhoneNumber:
-                SIPCallManager.call(addr)
+                SIPCallManager.call(addr.addr)
                 break
             }
         }
@@ -173,6 +168,13 @@ Item {
                     top: parent?.top
                     bottom: parent?.bottom
                 }
+
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("Favorite phone, chat or meeting button")
+                Accessible.description: qsTr("Selected address %1").arg(addrDelg.modelData.addr.addr)
+                Accessible.focusable: true
+                Accessible.onPressAction: () => internal.startMeetingOrCall(addrDelg.modelData.addr)
+
 
                 Rectangle {
                     anchors.fill: parent
