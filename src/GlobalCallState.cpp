@@ -76,7 +76,7 @@ bool GlobalCallState::unregisterCallStateObject(ICallState *callStateObject)
 
     const bool wasRegistered = m_globalCallStateObjects.remove(callStateObject);
     if (wasRegistered) {
-        disconnect(callStateObject);
+        disconnect(callStateObject, nullptr, this, nullptr);
         updateGlobalCallState();
         Q_EMIT globalCallStateObjectsChanged();
     }
