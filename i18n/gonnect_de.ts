@@ -1260,7 +1260,7 @@
         <location filename="../src/ui/components/pages/Chats.qml" line="715"/>
         <source>%1 is/are typing</source>
         <translation>
-            <numerusform>%1 screibt gerade</numerusform>
+            <numerusform>%1 schreibt gerade</numerusform>
             <numerusform>%1 schreiben gerade</numerusform>
         </translation>
     </message>
