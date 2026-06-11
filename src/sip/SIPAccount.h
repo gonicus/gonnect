@@ -124,7 +124,7 @@ private:
 
     QString m_account;
     QString m_domain;
-    QByteArray m_optionsRequestUuid;
+    intptr_t m_optionsRequestId = 0;
     pj::AccountConfig m_accountConfig;
     pj::TransportConfig m_transportConfig;
 
