@@ -22,7 +22,6 @@ struct FavoriteEntry
         NumberStats::ContactType contactType = NumberStats::ContactType::PhoneNumber;
         Contact::NumberType numberType = Contact::NumberType::Unknown;
         QString addr;
-        bool isSubscribable = false;
     };
 
     std::vector<std::unique_ptr<Addr>> addrs;

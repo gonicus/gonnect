@@ -101,7 +101,6 @@ void FavoritesModel::updateModel()
             const auto numObj = entry->contact->phoneNumberObject(dbFav->phoneNumber);
             if (numObj.number == dbFav->phoneNumber) {
                 addr->numberType = numObj.type;
-                addr->isSubscribable = numObj.isSipSubscriptable;
             }
         }
 
