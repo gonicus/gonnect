@@ -272,6 +272,7 @@ Contact *AddressBook::lookupBySourceUid(const QString &sourceUid) const
     return m_contactsBySourceId.value(sourceUid, nullptr);
 }
 
+#ifndef APP_TESTS
 Contact *AddressBook::lookupByChatUser(const ChatUser *chatUser) const
 {
     if (!chatUser) {
@@ -286,3 +287,4 @@ Contact *AddressBook::lookupByChatUser(const ChatUser *chatUser) const
 
     return nullptr;
 }
+#endif

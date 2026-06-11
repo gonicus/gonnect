@@ -50,7 +50,10 @@ public:
     Contact *lookupByEmail(const QString &emailAddr) const;
     Contact *lookupByContactId(const QString &contactId) const;
     Contact *lookupBySourceUid(const QString &sourceUid) const;
+
+#ifndef APP_TESTS
     Contact *lookupByChatUser(const ChatUser *chatUser) const;
+#endif
 
     QString hashifyCn(const QString &cn) const;
 
