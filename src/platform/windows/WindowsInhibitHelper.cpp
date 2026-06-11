@@ -1,6 +1,7 @@
 #include "WindowsInhibitHelper.h"
 #include "InhibitHelper.h"
 #include "Application.h"
+#include "GlobalCallState.h"
 #include <QLoggingCategory>
 #include <windows.h>
 
@@ -41,24 +42,38 @@ bool WindowsEventFilter::nativeEventFilter(const QByteArray &eventType, void *me
     return false;
 }
 
-WindowsInhibitHelper::WindowsInhibitHelper() : InhibitHelper{} { }
+WindowsInhibitHelper::WindowsInhibitHelper() : InhibitHelper{}
+{
+    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this, [this]() {
+        if (inhibitActive()) {
+            inhibit(InhibitHelper::InhibitFlag::LOGOUT,
+                    QObject::tr("There are still phone calls going on"));
+        } else {
+            release();
+        }
+    });
+}
 
 bool WindowsInhibitHelper::inhibitActive() const
 {
-    return m_screenSaverIsInhibited;
+    return GlobalCallState::instance().globalCallState() & ICallState::State::CallActive;
 }
 
 void WindowsInhibitHelper::inhibit(unsigned int flags, const QString &reason)
 {
     Q_UNUSED(flags)
-    Q_UNUSED(reason)
 
     if (!m_inhibit) {
         auto app = static_cast<Application *>(Application::instance());
-        auto hwnd = app->rootWindow()->winId();
-        QString msg = QObject::tr("There are still phone calls going on");
-        ShutdownBlockReasonCreate(reinterpret_cast<HWND>(hwnd),
-                                  reinterpret_cast<LPCWSTR>(msg.utf16()));
+        auto rootWindow = app->rootWindow();
+        if (!rootWindow) {
+            // Retried on the next call state change
+            qCWarning(lcInhibit) << "cannot register shutdown block reason without root window";
+            return;
+        }
+
+        ShutdownBlockReasonCreate(reinterpret_cast<HWND>(rootWindow->winId()),
+                                  reinterpret_cast<LPCWSTR>(reason.utf16()));
 
         qCDebug(lcInhibit) << "logout inhibit: active";
         m_inhibit = true;
@@ -69,8 +84,9 @@ void WindowsInhibitHelper::release()
 {
     if (m_inhibit) {
         auto app = static_cast<Application *>(Application::instance());
-        auto hwnd = app->rootWindow()->winId();
-        ShutdownBlockReasonDestroy(reinterpret_cast<HWND>(hwnd));
+        if (auto rootWindow = app->rootWindow()) {
+            ShutdownBlockReasonDestroy(reinterpret_cast<HWND>(rootWindow->winId()));
+        }
 
         qCDebug(lcInhibit) << "logout inhibit: released";
         m_inhibit = false;
@@ -80,8 +96,7 @@ void WindowsInhibitHelper::release()
 void WindowsInhibitHelper::inhibitScreenSaver(const QString &applicationName, const QString &reason)
 {
     Q_UNUSED(applicationName)
-
-    inhibit(InhibitHelper::InhibitFlag::LOGOUT, reason);
+    Q_UNUSED(reason)
 
     // https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadexecutionstate
     if (!m_screenSaverIsInhibited) {
@@ -96,8 +111,6 @@ void WindowsInhibitHelper::inhibitScreenSaver(const QString &applicationName, co
 
 void WindowsInhibitHelper::releaseScreenSaver()
 {
-    release();
-
     if (m_screenSaverIsInhibited) {
         if (SetThreadExecutionState(ES_CONTINUOUS) == NULL) {
             qCWarning(lcInhibit) << "failed to reset screen inhibit mode";
