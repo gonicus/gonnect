@@ -23,6 +23,7 @@ protected:
 
 private:
     bool isJitsiAddr(const QVariantMap &addr) const;
+    bool isChatAddr(const QVariantMap &addr) const;
 
     bool m_showJitsi = true;
     bool m_showChatRooms = true;

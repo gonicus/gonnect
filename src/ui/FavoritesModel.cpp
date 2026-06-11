@@ -54,8 +54,6 @@ QHash<int, QByteArray> FavoritesModel::roleNames() const
         { static_cast<int>(Roles::HasBuddyState), "hasBuddyState" },
         { static_cast<int>(Roles::HasAvatar), "hasAvatar" },
         { static_cast<int>(Roles::AvatarPath), "avatarPath" },
-        { static_cast<int>(Roles::ChatProvider), "chatProvider" },
-        { static_cast<int>(Roles::ChatRoom), "chatRoom" },
         { static_cast<int>(Roles::Addresses), "addresses" },
         { static_cast<int>(Roles::SubscribableNumber), "subscribableNumber" },
     };
@@ -148,12 +146,11 @@ void FavoritesModel::updateModel()
                 m_favorites.push_back(std::move(favEntry));
             }
 
-            entry->chatProvider = provider;
-            entry->chatRoom = room;
-
             auto addr = std::make_unique<FavoriteEntry::Addr>();
             addr->contactType = NumberStats::ContactType::ChatRoomId;
             addr->addr = room->id();
+            addr->chatProvider = provider;
+            addr->chatRoom = room;
             entry->addrs.push_back(std::move(addr));
         }
     }
@@ -230,7 +227,13 @@ void FavoritesModel::addChatProviderSignals(IChatProvider &provider)
             [this](qsizetype, IChatRoom *chatRoom, QString) {
                 if (chatRoom->isFavorite()) {
                     for (std::size_t i = 0; i < m_favorites.size(); ++i) {
-                        if (chatRoom == m_favorites.at(i)->chatRoom) {
+                        const bool hasChatRoom =
+                                std::ranges::any_of(std::as_const(m_favorites.at(i)->addrs),
+                                                    [chatRoom](const auto &addr) {
+                                                        return addr->chatRoom == chatRoom;
+                                                    });
+
+                        if (hasChatRoom) {
                             const auto idx = createIndex(i, 0);
                             Q_EMIT dataChanged(idx, idx,
                                                { static_cast<int>(Roles::HasAvatar),
@@ -248,7 +251,7 @@ int FavoritesModel::rowCount(const QModelIndex &) const
 
 QVariant FavoritesModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row()
+    if (!index.isValid() || index.row() < 0
         || static_cast<std::size_t>(index.row()) >= m_favorites.size()) {
         return QVariant();
     }
@@ -273,12 +276,6 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
         return favEntry->contact && favEntry->contact->hasAvatar() ? favEntry->contact->avatarPath()
                                                                    : QString();
 
-    case static_cast<int>(Roles::ChatProvider):
-        return QVariant::fromValue(favEntry->chatProvider);
-
-    case static_cast<int>(Roles::ChatRoom):
-        return QVariant::fromValue(favEntry->chatRoom);
-
     case static_cast<int>(Roles::Addresses): {
         QVariantList l;
 
@@ -287,6 +284,8 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
             m["addr"] = addr->addr;
             m["contactType"] = static_cast<int>(addr->contactType);
             m["numberType"] = static_cast<int>(addr->numberType);
+            m["chatProvider"] = QVariant::fromValue(addr->chatProvider);
+            m["chatRoom"] = QVariant::fromValue(addr->chatRoom);
             l.append(m);
         }
         return l;
@@ -309,8 +308,10 @@ QString FavoriteEntry::name() const
         return contact->name();
     }
 
-    if (chatRoom) {
-        return chatRoom->name();
+    for (const auto &addr : std::as_const(addrs)) {
+        if (addr->chatRoom && !addr->chatRoom->name().isEmpty()) {
+            return addr->chatRoom->name();
+        }
     }
 
     for (const auto &addr : std::as_const(addrs)) {

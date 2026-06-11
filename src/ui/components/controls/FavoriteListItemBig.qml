@@ -20,8 +20,6 @@ Item {
     required property bool hasBuddyState
     required property bool hasAvatar
     required property string avatarPath
-    required property IChatProvider chatProvider
-    required property IChatRoom chatRoom
     required property var addresses
     required property string subscribableNumber
 
@@ -83,7 +81,7 @@ Item {
                 break
 
             case NumberStats.ContactType.ChatRoomId:
-                ViewHelper.showChatRoom(delg.chatProvider, addr.addr)
+                ViewHelper.showChatRoom(addr.chatProvider, addr.addr)
                 break
 
             case NumberStats.ContactType.PhoneNumber:
@@ -420,8 +418,7 @@ Item {
             Action {
                 id: favToggleAction
                 text: qsTr('Remove favorite')
-                onTriggered: () => delg.chatProvider.requestToggleRoomFavorite(
-                                       delg.chatProvider.chatRoomByRoomId(chatRoomMenu.addr.addr))
+                onTriggered: () => addr.chatProvider.requestToggleRoomFavorite(addr.chatRoom)
             }
             property var addr
         }
