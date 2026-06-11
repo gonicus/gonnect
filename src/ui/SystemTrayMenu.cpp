@@ -258,18 +258,20 @@ void SystemTrayMenu::updateCalls()
 
     // Find finished calls
     for (auto &callEntry : m_callEntries) {
-        if (!activeUris.contains(callEntry.remoteUri)) {
+        QString remoteUri = callEntry.remoteUri;
+
+        if (!activeUris.contains(remoteUri)) {
             callEntry.isFinished = true;
 
             if (m_callEntries.size()) {
-                QTimer::singleShot(GONNECT_CALL_VISIBLE_AFTER_END, this, [this, &callEntry]() {
+                QTimer::singleShot(GONNECT_CALL_VISIBLE_AFTER_END, this, [this, remoteUri]() {
                     bool changed = false;
 
                     QMutableListIterator it(m_callEntries);
                     while (it.hasNext()) {
                         it.next();
 
-                        if (it.value().remoteUri == callEntry.remoteUri) {
+                        if (it.value().remoteUri == remoteUri) {
                             it.remove();
                             changed = true;
                         }
