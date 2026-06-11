@@ -12,6 +12,8 @@ Menu {
     property string roomName
     property bool isFavorite
 
+    onClosed: control.destroy()
+
     Action {
         id: startAction
         text: qsTr('Start conference')

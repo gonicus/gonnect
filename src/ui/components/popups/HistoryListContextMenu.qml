@@ -21,6 +21,8 @@ Menu {
     property bool isBlocked
     property bool isSipSubscriptable
 
+    onClosed: control.destroy()
+
     Action {
         id: callAction
         text: qsTr('Call')
