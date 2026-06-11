@@ -275,6 +275,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         break;
 
     case PJSIP_INV_STATE_DISCONNECTED:
+        m_statsTimer.stop();
+
         if (!m_isEstablished && m_incoming) {
             Q_EMIT missed();
         }
@@ -430,7 +432,9 @@ void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
 
             // Handle backspace
             if (ch == UnicodeBackspace) {
-                m_currentRttBubble.removeLast();
+                if (!m_currentRttBubble.isEmpty()) {
+                    m_currentRttBubble.removeLast();
+                }
             }
 
             // Handle BEL
@@ -844,13 +848,24 @@ void SIPCall::addMetadata(const QString &data)
 
 void SIPCall::updateRtcpStats()
 {
-    pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (pj::Error &err) {
+        return;
+    }
 
     for (unsigned i = 0; i < ci.media.size(); ++i) {
         if (ci.media[i].type == PJMEDIA_TYPE_AUDIO) {
+            pj::StreamStat st;
+            pj::StreamInfo si;
 
-            pj::StreamStat st = getStreamStat(i);
-            pj::StreamInfo si = getStreamInfo(i);
+            try {
+                st = getStreamStat(i);
+                si = getStreamInfo(i);
+            } catch (pj::Error &err) {
+                continue;
+            }
 
             // Update basic information
             if (m_codec != si.codecName) {
