@@ -309,14 +309,14 @@ QString FavoriteEntry::name() const
         return contact->name();
     }
 
+    if (chatRoom) {
+        return chatRoom->name();
+    }
+
     for (const auto &addr : std::as_const(addrs)) {
         if (!addr->addr.isEmpty()) {
             return addr->addr;
         }
-    }
-
-    if (chatRoom) {
-        return chatRoom->name();
     }
 
     return QString();

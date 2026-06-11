@@ -171,10 +171,34 @@ Item {
 
                 Accessible.role: Accessible.Button
                 Accessible.name: qsTr("Favorite phone, chat or meeting button")
-                Accessible.description: qsTr("Selected address %1").arg(addrDelg.modelData.addr.addr)
+                Accessible.description: qsTr("Selected address %1").arg(addrDelg.modelData.addr)
                 Accessible.focusable: true
                 Accessible.onPressAction: () => internal.startMeetingOrCall(addrDelg.modelData.addr)
 
+                ToolTip.visible: addrHoverHandler.hovered
+                ToolTip.text: {
+                    switch (addrDelg.modelData.contactType) {
+                        case NumberStats.ContactType.JitsiMeetUrl:
+                            return qsTr("Jitsi Meet (room '%1')").arg(addrDelg.modelData.addr)
+
+                        case NumberStats.ContactType.ChatRoomId:
+                            return qsTr("Chat with %1").arg(delg.name)
+
+                        case NumberStats.ContactType.PhoneNumber: {
+                            switch (addrDelg.modelData.numberType) {
+                                case Contact.NumberType.Commercial:
+                                    return qsTr("Phone (Commercial, %1)").arg(addrDelg.modelData.addr)
+
+                                case Contact.NumberType.Mobile:
+                                    return qsTr("Phone (Mobile, %1)").arg(addrDelg.modelData.addr)
+
+                                case Contact.NumberType.Home:
+                                    return qsTr("Phone (Home, %1)").arg(addrDelg.modelData.addr)
+                            }
+                        }
+                    }
+                    return ''
+                }
 
                 Rectangle {
                     anchors.fill: parent
