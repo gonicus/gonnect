@@ -241,10 +241,9 @@ Item {
                 TapHandler {
                     gesturePolicy: TapHandler.WithinBounds
                     grabPermissions: PointerHandler.ApprovesTakeOverByAnything
-                    exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
+                    exclusiveSignals: TapHandler.SingleTap
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-                    onDoubleTapped: () => internal.startMeetingOrCall(addrDelg.modelData)
                     onTapped: (_, mouseButton) => {
                         if (mouseButton === Qt.RightButton) {
                             switch (addrDelg.modelData.contactType) {
@@ -260,6 +259,8 @@ Item {
                                 historyListContextMenuComponent.createObject(addrDelg, { addr: addrDelg.modelData }).popup()
                                 break
                             }
+                        } else {
+                            internal.startMeetingOrCall(addrDelg.modelData)
                         }
                     }
                 }
