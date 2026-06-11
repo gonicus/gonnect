@@ -170,11 +170,23 @@ void IpcChatRoom::removeMessage(const QString &messageId)
     }
 }
 
+bool IpcChatRoom::hasPresenceState()
+{
+    if (!isDirectChat()) {
+        return false;
+    }
+
+    if (const auto other = otherUser()) {
+        return other->hasPresenceState();
+    }
+
+    return false;
+}
+
 ChatUser::PresenceState IpcChatRoom::presenceState() const
 {
     if (m_isDirectChat) {
-        const auto other = otherUser();
-        if (other && other->hasPresenceState()) {
+        if (const auto other = otherUser(); other && other->hasPresenceState()) {
             return other->presenceState();
         }
     }
