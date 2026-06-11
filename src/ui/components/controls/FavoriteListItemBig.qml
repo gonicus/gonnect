@@ -311,6 +311,7 @@ Item {
 
         Menu {
             id: chatRoomMenu
+            onClosed: () => chatRoomMenu.destroy()
             Action {
                 id: favToggleAction
                 text: qsTr('Remove favorite')

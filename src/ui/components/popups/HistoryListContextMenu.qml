@@ -21,7 +21,7 @@ Menu {
     property bool isBlocked
     property bool isSipSubscriptable
 
-    onClosed: control.destroy()
+    onClosed: () => control.destroy()
 
     Action {
         id: callAction

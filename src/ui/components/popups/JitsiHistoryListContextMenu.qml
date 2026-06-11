@@ -12,7 +12,7 @@ Menu {
     property string roomName
     property bool isFavorite
 
-    onClosed: control.destroy()
+    onClosed: () => control.destroy()
 
     Action {
         id: startAction

@@ -318,6 +318,7 @@ Item {
 
         Menu {
             id: chatMessageContextMenu
+            onClosed: () => chatMessageContextMenu.destroy()
 
             Action {
                 text: qsTr("Add reaction...")
