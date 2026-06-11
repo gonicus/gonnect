@@ -326,7 +326,16 @@ Item {
                 onTriggered: () => {
                     const menuItem = chatMessageContextMenu.itemAt(0)
                     const coord = menuItem.mapToGlobal(menuItem.width / 2, menuItem.height / 2)
-                    internal.openEmojiPicker(coord)
+
+                    let x = 0, y = 0
+                    let parent = chatMessageContextMenu
+                    while (parent) {
+                        x += parent.x
+                        y += parent.y
+                        parent = parent.parent
+                    }
+
+                    internal.openEmojiPicker(Qt.point(x, y))
                 }
             }
 
@@ -477,7 +486,9 @@ Item {
             id: addReactionButton
 
             onClicked: () => {
-                internal.openEmojiPicker(reactionsContainer.mapToGlobal(addReactionButton.x, addReactionButton.y))
+                internal.openEmojiPicker(reactionsContainer.mapToItem(addReactionButton.Window.window.contentItem,
+                                                                      addReactionButton.x,
+                                                                      addReactionButton.y))
             }
         }
     }
