@@ -26,6 +26,7 @@ Item {
             anchors.fill: parent
             clip: true
             bottomMargin: 20
+            verticalLayoutDirection: ListView.BottomToTop
             model: ChatProxyModel {
                 ChatModel {
                     id: chatModel
