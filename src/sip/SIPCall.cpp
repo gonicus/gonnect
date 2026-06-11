@@ -430,7 +430,9 @@ void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
 
             // Handle backspace
             if (ch == UnicodeBackspace) {
-                m_currentRttBubble.removeLast();
+                if (!m_currentRttBubble.isEmpty()) {
+                    m_currentRttBubble.removeLast();
+                }
             }
 
             // Handle BEL
