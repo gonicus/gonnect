@@ -150,8 +150,8 @@ void SystemTrayMenu::updateOwnStatus()
 
         connect(action, &QAction::triggered, this, []() {
             auto &viewHelper = ViewHelper::instance();
-            viewHelper.activateSearch();
-            viewHelper.showStatusTextEditDialog();
+            Q_EMIT viewHelper.activateSearch();
+            Q_EMIT viewHelper.showStatusTextEditDialog();
         });
 
         m_trayIconMenu->insertMenu(m_ownStatusSeparator, m_presenceMenu);
