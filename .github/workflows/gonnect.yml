@@ -231,7 +231,7 @@ jobs:
           endpoint: https://weu.codesigning.azure.net/
           signing-account-name: GONICUS-signing
           certificate-profile-name: gonicus-profile
-          files: build/GOnnect.msix
+          files: ${{ github.workspace }}/build/GOnnect.msix
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256

@@ -86,7 +86,7 @@ class GOnnectRecipe(ConanFile):
             self.requires("mpg123/1.33.0", override=True)
             self.requires("wayland/1.24.0", override=True)
 
-        self.requires("openssl/3.5.5", override=True)
+        self.requires("openssl/3.6.3", override=True)
         self.requires("qtwebdav/2025-03-16")
         self.requires("qtkeychain/0.16.0")
         self.requires("libusb/1.0.30")
