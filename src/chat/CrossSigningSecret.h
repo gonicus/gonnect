@@ -4,9 +4,9 @@
 #include <qqmlintegration.h>
 #include "CrossSigningSymbol.h"
 
-class CrossSigningSecret : public QObject
+class CrossSigningSecret
 {
-    Q_OBJECT
+    Q_GADGET
     QML_ELEMENT
     QML_UNCREATABLE("")
 
@@ -14,8 +14,8 @@ public:
     enum class CrossSigningMethod { SasString, SasSymbol };
     Q_ENUM(CrossSigningMethod)
 
-    CrossSigningSecret(QObject *parent = nullptr) : QObject{ parent } { }
-    CrossSigningSecret(const CrossSigningSecret &other) : QObject(other.parent())
+    CrossSigningSecret() { }
+    CrossSigningSecret(const CrossSigningSecret &other)
     {
         m_method = other.m_method;
         m_stringSecret = other.m_stringSecret;
@@ -30,6 +30,8 @@ public:
         return *this;
     }
 
+    ~CrossSigningSecret() { qDeleteAll(m_symbolSequence); }
+
     Q_INVOKABLE CrossSigningSecret::CrossSigningMethod method() const { return m_method; }
     Q_INVOKABLE QString stringSecret() const { return m_stringSecret; }
 
@@ -41,9 +43,6 @@ public:
     void setSymbolSeqence(const QList<CrossSigningSymbol *> &sequence)
     {
         m_symbolSequence = sequence;
-        for (auto symbol : std::as_const(sequence)) {
-            symbol->setParent(this);
-        }
     }
 
 private:

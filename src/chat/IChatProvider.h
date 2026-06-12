@@ -230,7 +230,7 @@ Q_SIGNALS:
     void crossSigningMethodSelectRequired(QList<CrossSigningSecret::CrossSigningMethod> methods);
 
     /// Signals that the secret should be displayed to the user who then must accept
-    void crossSigningAcceptRequired(CrossSigningSecret *secret);
+    void crossSigningAcceptRequired(CrossSigningSecret secret);
 
     ///@}
 
