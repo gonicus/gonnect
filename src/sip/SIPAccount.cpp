@@ -11,6 +11,10 @@
 #include "EnumTranslation.h"
 #include "GlobalStateAggregator.h"
 
+#ifdef Q_OS_FLATPAK
+#  include "platform/flatpak/TrustAnchors.h"
+#endif
+
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
 
 intptr_t SIPAccount::runningMessageIndex = 0;
@@ -36,6 +40,10 @@ void SIPAccount::initialize()
     QString transport = m_settings.value("transport", "tls").toString();
     if (transport == "tls") {
         m_transportType = TRANSPORT_TYPE::TLS;
+#ifdef Q_OS_FLATPAK
+        m_transportConfig.tlsConfig.method = PJSIP_SSLV23_METHOD;
+        m_transportConfig.tlsConfig.CaBuf = TrustAnchors::instance().pemBundle();
+#endif
     } else if (transport == "udp") {
         m_transportType = TRANSPORT_TYPE::UDP;
     } else if (transport == "tcp") {
