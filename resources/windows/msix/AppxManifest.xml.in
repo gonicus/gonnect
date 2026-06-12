@@ -9,7 +9,7 @@
 
   <Identity
     Name="GONICUSGmbH.GOnnect"
-    Publisher="CN=GONICUS GmbH"
+    Publisher="CN=GONICUS GmbH, O=GONICUS GmbH, L=Arnsberg, S=North Rhine-Westphalia, C=DE"
     Version="@MSIX_VERSION@"
     ProcessorArchitecture="x64" />
 
