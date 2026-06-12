@@ -107,6 +107,9 @@ void FavoritesModel::updateModel()
 
     // Favorites from chat providers
     if (m_chatProviderContext) {
+        qDeleteAll(m_chatRoomContextObjects);
+        m_chatRoomContextObjects.clear();
+
         m_chatProviderContext->deleteLater();
         m_chatProviderContext = nullptr;
     }
@@ -121,6 +124,7 @@ void FavoritesModel::updateModel()
 
         for (qsizetype i = 0, l = provider->chatRoomsCount(); i < l; ++i) {
             auto *room = provider->chatRoomByIndex(i);
+            addChatRoomSignals(room);
             if (!room->isFavorite()) {
                 continue;
             }
@@ -208,40 +212,49 @@ void FavoritesModel::addChatProviderSignals(IChatProvider &provider)
 
     connect(&provider, &IChatProvider::chatRoomRemoved, m_chatProviderContext,
             [this](qsizetype, IChatRoom *chatRoom) {
+                if (auto ctx = m_chatRoomContextObjects.take(chatRoom)) {
+                    ctx->deleteLater();
+                }
                 if (chatRoom->isFavorite()) {
                     scheduleModelUpdate();
                 }
             });
+}
 
-    connect(&provider, &IChatProvider::chatRoomIsFavoriteChanged, m_chatProviderContext,
-            [this](qsizetype, IChatRoom *, bool) { scheduleModelUpdate(); });
+void FavoritesModel::addChatRoomSignals(IChatRoom *chatRoom)
+{
+    if (!chatRoom || m_chatRoomContextObjects.contains(chatRoom)) {
+        return;
+    }
 
-    connect(&provider, &IChatProvider::chatRoomNameChanged, m_chatProviderContext,
-            [this](qsizetype, IChatRoom *chatRoom, QString) {
-                if (chatRoom->isFavorite()) {
-                    scheduleModelUpdate();
+    auto ctx = new QObject(this);
+
+    connect(chatRoom, &IChatRoom::isFavoriteChanged, ctx, [this]() { scheduleModelUpdate(); });
+
+    connect(chatRoom, &IChatRoom::nameChanged, ctx, [this, chatRoom]() {
+        if (chatRoom->isFavorite()) {
+            scheduleModelUpdate();
+        }
+    });
+
+    connect(chatRoom, &IChatRoom::avatarPathChanged, ctx, [this, chatRoom]() {
+        if (chatRoom->isFavorite()) {
+            for (std::size_t i = 0; i < m_favorites.size(); ++i) {
+                const bool hasChatRoom = std::ranges::any_of(
+                        std::as_const(m_favorites.at(i)->addrs),
+                        [chatRoom](const auto &addr) { return addr->chatRoom == chatRoom; });
+
+                if (hasChatRoom) {
+                    const auto idx = createIndex(i, 0);
+                    Q_EMIT dataChanged(idx, idx,
+                                       { static_cast<int>(Roles::HasAvatar),
+                                         static_cast<int>(Roles::AvatarPath) });
                 }
-            });
+            }
+        }
+    });
 
-    connect(&provider, &IChatProvider::chatRoomAvatarPathChanged, m_chatProviderContext,
-            [this](qsizetype, IChatRoom *chatRoom, QString) {
-                if (chatRoom->isFavorite()) {
-                    for (std::size_t i = 0; i < m_favorites.size(); ++i) {
-                        const bool hasChatRoom =
-                                std::ranges::any_of(std::as_const(m_favorites.at(i)->addrs),
-                                                    [chatRoom](const auto &addr) {
-                                                        return addr->chatRoom == chatRoom;
-                                                    });
-
-                        if (hasChatRoom) {
-                            const auto idx = createIndex(i, 0);
-                            Q_EMIT dataChanged(idx, idx,
-                                               { static_cast<int>(Roles::HasAvatar),
-                                                 static_cast<int>(Roles::AvatarPath) });
-                        }
-                    }
-                }
-            });
+    m_chatRoomContextObjects.insert(chatRoom, ctx);
 }
 
 int FavoritesModel::rowCount(const QModelIndex &) const

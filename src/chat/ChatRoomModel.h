@@ -5,6 +5,8 @@
 
 #include "IChatProvider.h"
 
+class IChatRoom;
+
 class ChatRoomModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -41,8 +43,13 @@ public:
     Q_INVOKABLE QModelIndex indexForRoomId(const QString &roomId) const;
 
 private:
+    void connectChatRoomSignals(IChatRoom *chatRoom);
+    void emitDataChanged(IChatRoom *chatRoom, const QList<int> &roles);
+
     IChatProvider *m_chatProvider = nullptr;
     QObject *m_chatProviderContext = nullptr;
+
+    QHash<IChatRoom *, QObject *> m_chatRoomContextObjects;
 
 private Q_SLOTS:
     void onChatProviderChanged();
