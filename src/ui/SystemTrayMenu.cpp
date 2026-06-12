@@ -1,5 +1,6 @@
 #include "SystemTrayMenu.h"
 #include "GlobalCallState.h"
+#include "GlobalStateAggregator.h"
 #include "IConferenceConnector.h"
 #include "NumberStat.h"
 #include "ViewHelper.h"
@@ -13,12 +14,18 @@
 #include "Toggler.h"
 #include "Application.h"
 #include "ThemeManager.h"
+#include "EnumTranslation.h"
+
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcSystemTrayMenu, "gonnect.app.SystemTray")
 
 using namespace std::chrono_literals;
 
 SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
 {
     initMenu();
+    updateOwnStatus();
     updateConferences();
     updateCalls();
     updateFavorites();
@@ -49,6 +56,9 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
     m_trayIconUpdateTimer.setSingleShot(true);
     m_trayIconUpdateTimer.setInterval(250ms);
     connect(&m_trayIconUpdateTimer, &QTimer::timeout, this, &SystemTrayMenu::applyTrayIcon);
+
+    connect(&GlobalStateAggregator::instance(), &GlobalStateAggregator::presenceStateChanged, this,
+            &SystemTrayMenu::updateOwnStatus);
 
     auto numStats = &NumberStats::instance();
     connect(numStats, &NumberStats::favoriteAdded, this, &SystemTrayMenu::updateFavorites);
@@ -104,6 +114,53 @@ void SystemTrayMenu::updateMenu()
     updateMostCalled();
 }
 
+void SystemTrayMenu::updateOwnStatus()
+{
+    using State = PresenceState::State;
+
+    const auto &enumTr = EnumTranslation::instance();
+
+    const auto state = GlobalStateAggregator::instance().presenceState();
+    const auto label = enumTr.presenceState(state);
+    const auto actionText = QString("%1 %2").arg(charFor(state), label);
+
+    // Create menu
+    if (!m_presenceMenu) {
+        m_presenceMenu = new QMenu(m_trayIconMenu);
+
+        // States to select for setting
+        static const QList<State> menuStates = { State::Busy, State::Away, State::Available };
+        for (const auto menuState : menuStates) {
+            auto action = new QAction(
+                    QString("%1 %2").arg(charFor(menuState), enumTr.presenceState(menuState)),
+                    m_presenceMenu);
+            m_presenceMenu->addAction(action);
+
+            connect(action, &QAction::triggered, this, [menuState]() {
+                qCInfo(lcSystemTrayMenu)
+                        << "Changing global presence state via systray to" << menuState;
+                GlobalStateAggregator::instance().setPresenceState(menuState);
+            });
+        }
+
+        // Status text
+        m_presenceMenu->addSeparator();
+        auto action = new QAction(tr("Set status text..."), m_presenceMenu);
+        m_presenceMenu->addAction(action);
+
+        connect(action, &QAction::triggered, this, []() {
+            auto &viewHelper = ViewHelper::instance();
+            Q_EMIT viewHelper.activateSearch();
+            Q_EMIT viewHelper.showStatusTextEditDialog();
+        });
+
+        m_trayIconMenu->insertMenu(m_ownStatusSeparator, m_presenceMenu);
+    }
+
+    // Update presence state
+    m_presenceMenu->menuAction()->setText(actionText);
+}
+
 void SystemTrayMenu::updateConferences()
 {
     for (QAction *action : std::as_const(m_activeConferencesActions)) {
@@ -138,10 +195,11 @@ void SystemTrayMenu::initMenu()
 
     QAction *action = nullptr;
     m_mainWindowAction = action =
-            m_trayIconMenu->addAction(QIcon::fromTheme("call-start-symbolic"), tr("Dial..."));
+            m_trayIconMenu->addAction(QIcon::fromTheme("home"), tr("Open..."));
     connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::activateSearch);
 
     m_trayIconMenu->addSeparator();
+    m_ownStatusSeparator = m_trayIconMenu->addSeparator();
     m_activeConferencesSeparator = m_trayIconMenu->addSeparator();
     m_activeCallsSeparator = m_trayIconMenu->addSeparator();
     m_favoritesSeparator = m_trayIconMenu->addSeparator();
@@ -553,6 +611,27 @@ void SystemTrayMenu::applyTrayIcon()
     }
 
     m_trayIcon->setVisible(true);
+}
+
+QString SystemTrayMenu::charFor(const PresenceState::State state) const
+{
+    using State = PresenceState::State;
+
+    switch (state) {
+    case State::Unknown:
+    case State::Offline:
+        return "⚫";
+    case State::Away:
+        return "🟡";
+    case State::Busy:
+        return "🔴";
+    case State::Available:
+    case State::Ringing:
+        return "🟢";
+    }
+
+    qCWarning(lcSystemTrayMenu) << "Unknown PresenceState::State enum value:" << state;
+    return "";
 }
 
 void SystemTrayMenu::setBadgeNumber(unsigned number)

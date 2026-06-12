@@ -15,7 +15,7 @@
 <context>
     <name>Chats</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/pages/Chats.qml" line="715"/>
+        <location filename="../src/ui/components/pages/Chats.qml" line="723"/>
         <source>%1 is/are typing</source>
         <translation>
             <numerusform>%1 is typing</numerusform>
