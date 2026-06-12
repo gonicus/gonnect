@@ -549,7 +549,6 @@ void IpcDispatcher::processResponse(
 {
     const auto &rc = responseContainer;
     const auto tag = rc.tag();
-    const auto ownUserId = this->ownUserId();
 
     if (tag > 0) {
         if (auto timer = m_timeoutTimers.value(tag, nullptr)) {
