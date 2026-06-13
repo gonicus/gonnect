@@ -63,9 +63,11 @@ private Q_SLOTS:
 private:
     void sortInnerModel();
     void addChatProviderSignals(IChatProvider &provider);
+    void addChatRoomSignals(IChatRoom *chatRoom);
 
     std::vector<std::unique_ptr<FavoriteEntry>> m_favorites;
     QHash<Contact *, FavoriteEntry *> m_favoriteContactLookup;
+    QHash<IChatRoom *, QObject *> m_chatRoomContextObjects;
     QTimer m_modelUpdateTimer;
 
     QObject *m_chatProviderContext = nullptr;

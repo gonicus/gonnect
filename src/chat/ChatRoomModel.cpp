@@ -42,84 +42,105 @@ QModelIndex ChatRoomModel::indexForRoomId(const QString &roomId) const
     return QModelIndex();
 }
 
+void ChatRoomModel::connectChatRoomSignals(IChatRoom *chatRoom)
+{
+    if (!chatRoom || m_chatRoomContextObjects.contains(chatRoom)) {
+        return;
+    }
+
+    auto ctx = new QObject(this);
+
+    connect(chatRoom, &IChatRoom::nameChanged, ctx,
+            [this, chatRoom]() { emitDataChanged(chatRoom, { static_cast<int>(Roles::Name) }); });
+    connect(chatRoom, &IChatRoom::avatarPathChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::AvatarPath) });
+    });
+    connect(chatRoom, &IChatRoom::isFavoriteChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::IsFavorite) });
+    });
+    connect(chatRoom, &IChatRoom::joinRuleChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::JoinRule) });
+    });
+    connect(chatRoom, &IChatRoom::ownUserJoinStateChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::OwnJoinState) });
+    });
+    connect(chatRoom, &IChatRoom::notificationCountChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::UnreadCount) });
+    });
+    connect(chatRoom, &IChatRoom::latestMessageDateTimeChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::LatestMessageDate) });
+    });
+    connect(chatRoom, &IChatRoom::permissionsChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::Permissions) });
+    });
+    connect(chatRoom, &IChatRoom::typingParticpantsChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom, { static_cast<int>(Roles::TypingUserNames) });
+    });
+    connect(chatRoom, &IChatRoom::isDirectChatChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom,
+                        { static_cast<int>(Roles::Name), static_cast<int>(Roles::AvatarPath),
+                          static_cast<int>(Roles::HasPresenceState),
+                          static_cast<int>(Roles::PresenceState) });
+    });
+    connect(chatRoom, &IChatRoom::chatUsersChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom,
+                        { static_cast<int>(Roles::Name), static_cast<int>(Roles::AvatarPath),
+                          static_cast<int>(Roles::HasPresenceState),
+                          static_cast<int>(Roles::PresenceState) });
+    });
+    connect(chatRoom, &IChatRoom::chatUserRoomStateChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom,
+                        { static_cast<int>(Roles::Name), static_cast<int>(Roles::AvatarPath),
+                          static_cast<int>(Roles::HasPresenceState),
+                          static_cast<int>(Roles::PresenceState) });
+    });
+
+    m_chatRoomContextObjects.insert(chatRoom, std::move(ctx));
+}
+
+void ChatRoomModel::emitDataChanged(IChatRoom *chatRoom, const QList<int> &roles)
+{
+    if (!chatRoom) {
+        return;
+    }
+    const auto chatIndex = m_chatProvider->indexOfChatRoom(chatRoom);
+    if (chatIndex >= 0) {
+        const auto idx = createIndex(chatIndex, 0);
+        Q_EMIT dataChanged(idx, idx, roles);
+    }
+}
+
 void ChatRoomModel::onChatProviderChanged()
 {
     beginResetModel();
 
     if (m_chatProviderContext) {
+        qDeleteAll(m_chatRoomContextObjects);
+        m_chatRoomContextObjects.clear();
         m_chatProviderContext->deleteLater();
         m_chatProviderContext = nullptr;
     }
 
     if (m_chatProvider) {
         m_chatProviderContext = new QObject(this);
-
         connect(m_chatProvider, &IChatProvider::chatRoomAdded, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *, QString) {
+                [this](qsizetype index, IChatRoom *chatRoom, QString) {
                     beginInsertRows(QModelIndex(), index, index);
+                    connectChatRoomSignals(chatRoom);
                     endInsertRows();
                 });
         connect(m_chatProvider, &IChatProvider::chatRoomRemoved, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *) {
+                [this](qsizetype index, IChatRoom *chatRoom) {
                     beginRemoveRows(QModelIndex(), index, index);
+                    if (auto *ctx = m_chatRoomContextObjects.take(chatRoom)) {
+                        ctx->deleteLater();
+                    }
                     endRemoveRows();
                 });
-        connect(m_chatProvider, &IChatProvider::chatRoomNameChanged, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *, QString) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Name) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatRoomAvatarPathChanged, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *, QString) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::AvatarPath) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatRoomIsFavoriteChanged, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *, bool) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::IsFavorite) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatRoomJoinRuleChanged, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *, IChatRoom::JoinRule) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::JoinRule) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatRoomOwnJoinStateChanged, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *, IChatRoom::UserRoomState) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::OwnJoinState) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatRoomNotificationCountChanged,
-                m_chatProviderContext, [this](qsizetype index, IChatRoom *, qsizetype) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::UnreadCount) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatRoomLatestActivityChanged,
-                m_chatProviderContext, [this](qsizetype index, IChatRoom *, QDateTime) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::LatestMessageDate) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatRoomPermissionsChanged, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *, IChatRoom::Permissions) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Permissions) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatRoomTypingChanged, m_chatProviderContext,
-                [this](qsizetype index, IChatRoom *) {
-                    const auto idx = createIndex(index, 0);
-                    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::TypingUserNames) });
-                });
-        connect(m_chatProvider, &IChatProvider::chatUserPropertiesChanged, m_chatProviderContext,
-                [this](ChatUser *, IChatRoom *chatRoom, qsizetype index) {
-                    if (chatRoom) {
-                        const auto idx = createIndex(index, 0);
-                        Q_EMIT dataChanged(idx, idx,
-                                           { static_cast<int>(Roles::Name),
-                                             static_cast<int>(Roles::AvatarPath),
-                                             static_cast<int>(Roles::HasPresenceState),
-                                             static_cast<int>(Roles::PresenceState) });
-                    }
-                });
+
+        for (qsizetype i = 0, l = m_chatProvider->chatRoomsCount(); i < l; ++i) {
+            connectChatRoomSignals(m_chatProvider->chatRoomByIndex(i));
+        }
     }
 
     endResetModel();
