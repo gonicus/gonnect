@@ -11,7 +11,7 @@ Rectangle {
     width: 10
     height: control.width
     radius: control.width / 2
-    color: 'transparent'
+    color: EnumTranslation.presenceStateColor(control.status)
     border.width: 0
     border.color: Theme.borderColor
 
@@ -61,13 +61,6 @@ Rectangle {
 
     states: [
         State {
-            when: control.isUnregistered
-
-            PropertyChanges {
-                control.color: Theme.borderColor
-            }
-        },
-        State {
             when: control.isBlocked
 
             PropertyChanges {
@@ -85,39 +78,10 @@ Rectangle {
             }
         },
         State {
-            when: control.status === PresenceState.Offline
-
-            PropertyChanges {
-                control.color: Theme.borderColor
-            }
-        },
-        State {
-            when: control.status === PresenceState.Available
-
-            PropertyChanges {
-                control.color: Theme.greenColor
-            }
-        },
-        State {
             when: control.status === PresenceState.Ringing
 
             PropertyChanges {
                 ringingAnimation.running: true
-            }
-
-        },
-        State {
-            when: control.status === PresenceState.Away
-
-            PropertyChanges {
-                control.color: Theme.yellowColor
-            }
-        },
-        State {
-            when: control.status === PresenceState.Busy
-
-            PropertyChanges {
-                control.color: Theme.redColor
             }
         }
     ]
