@@ -186,6 +186,7 @@ Q_SIGNALS:
     void isCompletelyLoadedChanged();
     void latestMessageDateTimeChanged();
     void ownUserJoinStateChanged();
+    void otherUserChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.

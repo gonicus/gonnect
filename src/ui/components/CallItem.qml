@@ -17,6 +17,7 @@ Rectangle {
     required property int callId
     required property string accountId
     required property string phoneNumber
+    required property Contact contact
     required property string contactName
     required property string city
     required property string country

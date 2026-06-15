@@ -70,9 +70,6 @@ public:
 
     void setTypingUsers(const QList<ChatUser *> &users);
 
-Q_SIGNALS:
-    void otherUserChanged();
-
 private Q_SLOTS:
     void updateIsDirectChat();
     void updateOtherUser();
