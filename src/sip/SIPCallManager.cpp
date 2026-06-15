@@ -933,8 +933,20 @@ void SIPCallManager::dispatchDtmfBuffer()
                             m_dtmfGen = new DtmfGenerator(this);
                         }
 
-                        m_dtmfGen->playDtmf(val.front());
-                        call->dialDtmf(val.first(1).toStdString());
+                        const QChar digit = val.front();
+                        if (DtmfGenerator::isValid(digit)) {
+                            m_dtmfGen->playDtmf(digit);
+                            try {
+                                call->dialDtmf(val.first(1).toStdString());
+                            } catch (const pj::Error &err) {
+                                qCWarning(lcSIPCallManager)
+                                        << "error sending DTMF char" << digit << ":"
+                                        << QString::fromStdString(err.info());
+                            }
+
+                        } else {
+                            qCWarning(lcSIPCallManager) << "skipping invalid DTMF char" << digit;
+                        }
 
                         m_dtmfTimer.setInterval(PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT + 10);
                     }
