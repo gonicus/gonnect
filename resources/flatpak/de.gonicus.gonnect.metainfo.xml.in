@@ -154,6 +154,6 @@
     </screenshot>
   </screenshots>
 
-  <releases type="external"/>
+  @RELEASES@
 
 </component>
