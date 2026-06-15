@@ -51,7 +51,7 @@ void ChatRoomModel::connectChatRoomSignals(IChatRoom *chatRoom)
     auto ctx = new QObject(this);
 
     connect(chatRoom, &QObject::destroyed, ctx, [this, chatRoom](QObject *) {
-        const auto chatIndex = m_chatProvider->indexOfChatRoom(chatRoom);
+        const auto chatIndex = m_chatProvider->indexOf(chatRoom);
         if (chatIndex >= 0) {
             beginRemoveRows(QModelIndex(), chatIndex, chatIndex);
             if (auto *ctx = m_chatRoomContextObjects.take(chatRoom)) {
@@ -106,7 +106,7 @@ void ChatRoomModel::connectChatRoomSignals(IChatRoom *chatRoom)
                           static_cast<int>(Roles::PresenceState) });
     });
 
-    m_chatRoomContextObjects.insert(chatRoom, std::move(ctx));
+    m_chatRoomContextObjects.insert(chatRoom, ctx);
 }
 
 void ChatRoomModel::emitDataChanged(IChatRoom *chatRoom, const QList<int> &roles)
@@ -114,7 +114,7 @@ void ChatRoomModel::emitDataChanged(IChatRoom *chatRoom, const QList<int> &roles
     if (!chatRoom) {
         return;
     }
-    const auto chatIndex = m_chatProvider->indexOfChatRoom(chatRoom);
+    const auto chatIndex = m_chatProvider->indexOf(chatRoom);
     if (chatIndex >= 0) {
         const auto idx = createIndex(chatIndex, 0);
         Q_EMIT dataChanged(idx, idx, roles);
