@@ -229,6 +229,15 @@ void FavoritesModel::addChatRoomSignals(IChatRoom *chatRoom)
 
     auto ctx = new QObject(this);
 
+    connect(chatRoom, &QObject::destroyed, ctx, [this, chatRoom](QObject *) {
+        if (auto ctx = m_chatRoomContextObjects.take(chatRoom)) {
+            ctx->deleteLater();
+        }
+        if (chatRoom->isFavorite()) {
+            scheduleModelUpdate();
+        }
+    });
+
     connect(chatRoom, &IChatRoom::isFavoriteChanged, ctx, [this]() { scheduleModelUpdate(); });
 
     connect(chatRoom, &IChatRoom::nameChanged, ctx, [this, chatRoom]() {

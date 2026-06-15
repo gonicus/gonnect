@@ -115,7 +115,6 @@ public:
     // IChatProvider interface
     virtual qsizetype chatRoomsCount() override;
     virtual IChatRoom *chatRoomByIndex(qsizetype index) override;
-    virtual qsizetype indexOfChatRoom(const IChatRoom *chatRoom) const override;
     virtual bool hasFavoriteRooms() const override;
     virtual qsizetype indexOf(IChatRoom *chatRoom) const override;
     virtual IChatRoom *chatRoomByRoomId(const QString &roomId) const override;

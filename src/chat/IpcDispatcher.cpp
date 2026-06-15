@@ -416,11 +416,6 @@ IChatRoom *IpcDispatcher::chatRoomByIndex(qsizetype index)
     return m_rooms.at(index);
 }
 
-qsizetype IpcDispatcher::indexOfChatRoom(const IChatRoom *chatRoom) const
-{
-    return chatRoom ? m_rooms.indexOf(chatRoom) : -1;
-}
-
 void IpcDispatcher::requestRemoveMessage(const QString &roomId, const QString &messageId)
 {
     MessageRemoveRequest removeReq;
