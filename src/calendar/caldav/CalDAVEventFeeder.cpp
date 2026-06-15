@@ -138,17 +138,19 @@ void CalDAVEventFeeder::getNextItem()
 
     auto item = m_items.takeFirst();
     QNetworkReply *reply = m_webdav.get(item.path());
-
     connect(
             reply, &QNetworkReply::finished, this,
             [item, reply, this]() {
                 if (!reply) {
+                    getNextItem();
                     return;
                 }
 
                 if (reply->error() != QNetworkReply::NoError) {
                     qCDebug(lcCalDAVEventFeeder) << "WebDAV reply error:" << reply->error();
                     reply->deleteLater();
+
+                    getNextItem();
                     return;
                 }
 
@@ -171,7 +173,8 @@ void CalDAVEventFeeder::getNextItem()
                     success = processResponse(data, concreteSource);
                 }
 
-                // If iCal parsing fails at any point, we want to start over entirely
+                // If iCal parsing fails at any point, we want to start over entirely.
+                // Let processResponse() trigger a re-run on failure and clear the queue
                 if (success) {
                     getNextItem();
                 } else {
