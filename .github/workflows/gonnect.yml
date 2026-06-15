@@ -136,7 +136,7 @@ jobs:
           retention-days: 1
 
   build-windows:
-    runs-on: windows-2025
+    runs-on: windows-2025-vs2026
     name: "Build GOnnect (Windows)"
     needs: changes
     if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-windows == 'true' }}
@@ -180,16 +180,48 @@ jobs:
           endpoint: https://weu.codesigning.azure.net/
           signing-account-name: GONICUS-signing
           certificate-profile-name: gonicus-profile
-          files-folder: build/Release
-          files-folder-filter: exe
+          files: ${{ github.workspace }}/build/Release/GOnnect.exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
 
-      - name: Build installer
-        run: cd build && cpack ${{github.workspace}}
+      - name: Build MSIX layout
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        shell: powershell
+        run: |
+          $workspace = "${{ github.workspace }}"
+          New-Item -ItemType Directory -Path "$workspace/msix-layout" -Force
+      
+          Copy-Item "$workspace/build/Release/gonnect.exe" "$workspace/msix-layout/gonnect.exe"
+      
+          $windeployqt = "$env:QT_ROOT_DIR\bin\windeployqt.exe"
+          & $windeployqt `
+            --qmldir "$workspace/src" `
+            --plugindir "$workspace/msix-layout/plugins" `
+            --no-translations `
+            --release `
+            "$workspace/msix-layout/gonnect.exe"
+      
+          Copy-Item "$workspace/build/AppxManifest.xml" "$workspace/msix-layout/AppxManifest.xml"
+          Copy-Item -Recurse "resources/windows/msix/Assets" "$workspace/msix-layout/Assets"
 
-      - name: Sign installer
+      - name: Pack MSIX
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        shell: powershell
+        run: |
+          $makeappx = Get-ChildItem `
+            -Path "C:\Program Files (x86)\Windows Kits\10\bin" `
+            -Recurse -Filter "makeappx.exe" |
+            Sort-Object FullName | Select-Object -Last 1
+          & $makeappx.FullName pack /d msix-layout /p build/GOnnect.msix /nv
+
+      - name: Sign MSIX release artifact
         if: |
           startsWith(github.ref, 'refs/tags/v') ||
           github.ref == 'refs/heads/main' ||
@@ -199,18 +231,21 @@ jobs:
           endpoint: https://weu.codesigning.azure.net/
           signing-account-name: GONICUS-signing
           certificate-profile-name: gonicus-profile
-          files-folder: build
-          files-folder-filter: exe
+          files: ${{ github.workspace }}/build/GOnnect.msix
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
 
-      - name: Save installer
+      - name: Save MSIX
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: windows-installer.zip
+          name: windows-msix
           compression-level: 0
-          path: build/GOnnect*.exe
+          path: build/GOnnect*.msix
 
   build-macos:
     runs-on: macos-26

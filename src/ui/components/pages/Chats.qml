@@ -240,12 +240,15 @@ Item {
             id: sortMenuComponent
 
             Popup {
+                id: sortPopup
                 y: sortCardHeadingButton.height
                 contentHeight: sortCol.implicitHeight
                 contentWidth: Math.max(
                                   sortButtonGroup.buttons.reduce((acc, val) => Math.max(acc, val.implicitWidth), 0),
                                   unreadOnTopCheckBox.implicitWidth + unreadOnTopCheckBox.anchors.leftMargin
                                                                     + unreadOnTopCheckBox.anchors.rightMargin)
+
+                onClosed: () => sortPopup.destroy()
 
                 ButtonGroup {
                     id: sortButtonGroup
@@ -352,6 +355,8 @@ Item {
             id: roomListMenuComponent
 
             Menu {
+                id: roomListMenu
+                onClosed: () => roomListMenu.destroy()
                 Action {
                     text: qsTr("Search user...")
                     icon.source: Icons.systemSearch
@@ -625,6 +630,9 @@ Item {
             id: chatRoomMenuComponent
 
             Menu {
+                id: chatRoomMenu
+                onClosed: () => chatRoomMenu.destroy()
+
                 Action {
                     text: qsTr("Edit room...")
                     icon.source: Icons.editor

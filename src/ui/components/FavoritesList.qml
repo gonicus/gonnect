@@ -15,7 +15,9 @@ ListView {
         FavoritesModel {}
     }
 
-    delegate: FavoriteListItemBig {}
+    delegate: FavoriteListItemBig {
+        isCompactMode: control.width < 300
+    }
 
     Accessible.role: Accessible.List
     Accessible.name: qsTr("Favorites")

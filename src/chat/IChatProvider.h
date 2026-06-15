@@ -43,6 +43,7 @@ public:
     virtual QString displayName() = 0;
     virtual qsizetype chatRoomsCount() = 0;
     virtual IChatRoom *chatRoomByIndex(qsizetype index) = 0;
+    virtual qsizetype indexOfChatRoom(const IChatRoom *chatRoom) const = 0;
     virtual bool hasFavoriteRooms() const = 0;
     virtual qsizetype indexOf(IChatRoom *chatRoom) const = 0;
     Q_INVOKABLE virtual IChatRoom *chatRoomByRoomId(const QString &roomId) const = 0;
@@ -251,18 +252,7 @@ Q_SIGNALS:
     /// or given by indexOf(). The tag can be set when responding to a specific request; otherwise
     /// it must be the empty string.
     void chatRoomAdded(qsizetype index, IChatRoom *room, QString tag = "");
-    void chatRoomNameChanged(qsizetype index, IChatRoom *room, QString name);
-    void chatRoomIsFavoriteChanged(qsizetype index, IChatRoom *room, bool isFavorite);
-    void chatRoomAvatarPathChanged(qsizetype index, IChatRoom *room, QString avatarPath);
-    void chatRoomJoinRuleChanged(qsizetype index, IChatRoom *room, IChatRoom::JoinRule joinRule);
-    void chatRoomNotificationCountChanged(qsizetype index, IChatRoom *room, qsizetype count);
-    void chatRoomLatestActivityChanged(qsizetype index, IChatRoom *room, QDateTime dateTime);
-    void chatRoomPermissionsChanged(qsizetype index, IChatRoom *room,
-                                    IChatRoom::Permissions permissions);
     void chatRoomRemoved(qsizetype index, IChatRoom *room);
-    void chatRoomOwnJoinStateChanged(qsizetype index, IChatRoom *room,
-                                     IChatRoom::UserRoomState userRoomState);
-    void chatRoomTypingChanged(qsizetype index, IChatRoom *room);
 
     /// Signals that the client has joined the chat room.
     void chatRoomJoined(QString roomId);

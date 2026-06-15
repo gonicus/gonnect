@@ -231,6 +231,20 @@ qreal Contact::matchesSearch(const QString &searchString) const
 }
 
 #ifndef APP_TESTS
+bool Contact::hasChatUser(const ChatUser *user) const
+{
+    if (!user) {
+        return false;
+    }
+
+    for (const ChatUser *chatUser : std::as_const(m_chatUsers)) {
+        if (chatUser == user) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Contact::addChatUser(ChatUser *user)
 {
     if (!m_chatUsers.contains(user)) {

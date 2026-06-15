@@ -53,6 +53,9 @@ AvatarImage {
         id: indicatorContextMenu
 
         Menu {
+            id: indicatorMenu
+            onClosed: () => indicatorMenu.destroy()
+
             Action {
                 text: qsTr("Upload file")
                 icon.source: Icons.uploadMedia
