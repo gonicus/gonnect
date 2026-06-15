@@ -158,6 +158,8 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
                                                   "no valid portal available";
                     }
 #endif
+                } else if (error == QKeychain::EntryNotFound) {
+                    error = QKeychain::NoError;
                 } else if (error != QKeychain::NoError) {
                     message = tr("reading credentials for %1 failed: %2")
                                       .arg(key)
