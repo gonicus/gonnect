@@ -444,7 +444,8 @@ void HeadsetDevice::processEvents()
                                     Q_EMIT muteLockChanged(true, true);
                                 }
                             } else {
-                                qCDebug(lcHeadset) << "  Ignored mute echo within Mute-lock detection window";
+                                qCDebug(lcHeadset)
+                                        << "  Ignored mute echo within Mute-lock detection window";
                             }
                         } else {
                             // Genuine user press of the mute button.
@@ -716,7 +717,8 @@ void HeadsetDevice::sendASP(quint8 cmd)
     }
 }
 
-int HeadsetDevice::muteLockWindowMs() const {
+int HeadsetDevice::muteLockWindowMs() const
+{
     return m_appSettings.value("generic/muteLockProbeWindowMs", 300).toInt();
 }
 

@@ -198,7 +198,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
             switchScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
         } else if (state & State::CallActive) {
             if (m_currentScreen != ReportDescriptorEnums::TeamsScreenSelect::InCall
-                            && !m_callStartTimer.isActive()) {
+                && !m_callStartTimer.isActive()) {
                 enterActiveCall();
             }
         }
@@ -259,18 +259,16 @@ bool HeadsetDeviceProxy::refreshDevice()
                 GlobalMuteState::instance().setMuted(m_device->getMute(), m_muteSync.originate());
             }
         });
-        connect(m_device, &HeadsetDevice::muteLockChanged, this,
-                [this](bool locked, bool muted) {
-                    if (isEnabled()) {
-                        qCInfo(lcHeadsetProxy)
-                                << "Headset mute-lock changed - locked:" << locked
-                                << "muted:" << muted;
-                        if (locked) {
-                            GlobalMuteState::instance().setMuted(muted, m_muteSync.originate());
-                        }
-                        setMuteLocked(locked);
-                    }
-                });
+        connect(m_device, &HeadsetDevice::muteLockChanged, this, [this](bool locked, bool muted) {
+            if (isEnabled()) {
+                qCInfo(lcHeadsetProxy)
+                        << "Headset mute-lock changed - locked:" << locked << "muted:" << muted;
+                if (locked) {
+                    GlobalMuteState::instance().setMuted(muted, m_muteSync.originate());
+                }
+                setMuteLocked(locked);
+            }
+        });
         connect(m_device, &HeadsetDevice::busyLine, this, [this]() {
             if (isEnabled()) {
                 Q_EMIT busyLine();

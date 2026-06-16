@@ -83,7 +83,7 @@ private:
     MuteSyncGuard m_muteSync;
 
     ReportDescriptorEnums::TeamsScreenSelect m_currentScreen =
-        ReportDescriptorEnums::TeamsScreenSelect::HomeScreen;
+            ReportDescriptorEnums::TeamsScreenSelect::HomeScreen;
 };
 
 class HeadsetDeviceProxyWrapper
