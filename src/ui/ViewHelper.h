@@ -210,6 +210,8 @@ Q_SIGNALS:
                               IConferenceConnector::StartFlags startFlags,
                               QPointer<CallHistoryItem> callHistoryItem);
 
+    void meetingEstablished(QString roomName);
+
     void passwordRequested(QString id, QString host);
     void passwordResponded(QString id, QString password);
 

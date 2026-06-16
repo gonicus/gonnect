@@ -49,6 +49,12 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
         }
     });
 
+    connect(this, &IConferenceConnector::ownIdChanged, this, [this]() {
+        if (!m_jitsiId.isEmpty()) {
+            Q_EMIT ViewHelper::instance().meetingEstablished(m_roomName);
+        }
+    });
+
     connect(this, &IConferenceConnector::largeVideoUserChanged, this, [this]() {
         Q_EMIT executeSetLargeVideoUser(m_largeVideoUser ? m_largeVideoUser->id() : "");
     });
