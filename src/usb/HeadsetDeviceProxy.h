@@ -7,6 +7,7 @@
 #include "IHeadsetDevice.h"
 #include "ICallState.h"
 #include "AppSettings.h"
+#include "MuteSyncGuard.h"
 
 class HeadsetDevice;
 
@@ -14,6 +15,7 @@ class HeadsetDeviceProxy : public IHeadsetDevice
 {
     Q_OBJECT
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(bool muteLocked READ muteLocked NOTIFY muteLockedChanged)
 
 public:
     explicit HeadsetDeviceProxy(QObject *parent = nullptr);
@@ -47,12 +49,14 @@ public:
     virtual void setCallStatus(const QString &state);
 
     bool available() const { return !!m_device; }
+    bool muteLocked() const { return m_muteLocked; }
     void setMute(bool flag);
 
     ~HeadsetDeviceProxy();
 
 Q_SIGNALS:
     void nameChanged();
+    void muteLockedChanged();
 
 protected Q_SLOTS:
     void updateDeviceState(bool refreshAll = false);
@@ -61,6 +65,7 @@ protected Q_SLOTS:
 private:
     bool refreshDevice();
     bool isEnabled() { return m_settings.value("generic/useHeadset", true).toBool(); }
+    void setMuteLocked(bool locked);
 
     AppSettings m_settings;
     HeadsetDevice *m_device = nullptr;
@@ -70,7 +75,8 @@ private:
     QTimer m_callEndTimer;
 
     bool m_inRemoteCallScreen = false;
-    QString m_muteTag;
+    bool m_muteLocked = false;
+    MuteSyncGuard m_muteSync;
 };
 
 class HeadsetDeviceProxyWrapper

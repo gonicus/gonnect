@@ -2,6 +2,7 @@
 #include <hidapi.h>
 #include <QObject>
 #include <QTimer>
+#include <QElapsedTimer>
 #include "AppSettings.h"
 #include "IHeadsetDevice.h"
 #include "ReportDescriptorStructs.h"
@@ -42,6 +43,9 @@ public:
 
     void setMute(bool flag);
     bool getMute() const { return m_muted; }
+    bool getMuteLocked() const { return m_muteLocked; }
+
+    void probeMuteLock();
 
     QString path() const { return m_path; }
 
@@ -64,6 +68,9 @@ public:
 
     ~HeadsetDevice();
 
+Q_SIGNALS:
+    void muteLockChanged(bool locked, bool muted);
+
 private:
     bool displayFieldSupported(ReportDescriptorEnums::TeamsDisplayFieldSupport field);
     void setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport field,
@@ -74,6 +81,9 @@ private:
     void processEvents();
     unsigned currentFlags(const quint32 reportId) const;
     bool useHeadset() { return m_appSettings.value("generic/useHeadset", true).toBool(); }
+
+    void writeMuteToDevice(bool flag, bool armLockWindow);
+    int muteLockWindowMs() const;
 
     QStringList makeChunks(const QString &text, qsizetype chunkSize);
 
@@ -102,6 +112,12 @@ private:
     bool m_hookSwitch = false;
     bool m_line = false;
     bool m_muted = false;
+
+    bool m_mutePendingActive = false;
+    bool m_mutePendingValue = false;
+    QElapsedTimer m_mutePendingTimer;
+    bool m_muteLocked = false;
+
     bool m_flash = false;
     bool m_hold = false;
     bool m_ringing = false;

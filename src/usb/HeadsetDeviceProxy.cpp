@@ -24,11 +24,9 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
             [this](const bool value, const QString tag) {
-                if (m_muteTag.isEmpty() || m_muteTag != tag) {
+                // Ignore the echo of our own origination, otherwise re-apply
+                if (!m_muteSync.isOwnEcho(tag)) {
                     setMute(value);
-                } else if (!m_muteTag.isEmpty() && m_muteTag == tag) {
-                    // We started the change request so ignore propagation
-                    m_muteTag.clear();
                 }
             });
 
@@ -146,6 +144,9 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         GlobalMuteState::instance().reset();
         if (state & State::AudioActive) {
             setBusyLine(true);
+            if (m_device && !GlobalMuteState::instance().isMuted()) {
+                m_device->probeMuteLock();
+            }
         } else {
             setBusyLine(false);
         }
@@ -199,6 +200,14 @@ void HeadsetDeviceProxy::updateRemoteContactInfo()
     }
 }
 
+void HeadsetDeviceProxy::setMuteLocked(bool locked)
+{
+    if (m_muteLocked != locked) {
+        m_muteLocked = locked;
+        Q_EMIT muteLockedChanged();
+    }
+}
+
 bool HeadsetDeviceProxy::refreshDevice()
 {
     auto devs = USBDevices::instance().headsetDevices();
@@ -206,6 +215,9 @@ bool HeadsetDeviceProxy::refreshDevice()
         disconnect(m_device, nullptr, this, nullptr);
         m_device = nullptr;
     }
+
+    // A reattached or removed device carries no lock state
+    setMuteLocked(false);
 
     if (devs.count()) {
         m_device = devs.first();
@@ -220,10 +232,21 @@ bool HeadsetDeviceProxy::refreshDevice()
         connect(m_device, &HeadsetDevice::mute, this, [this]() {
             if (isEnabled()) {
                 Q_EMIT mute();
-                m_muteTag = QUuid::createUuid().toString();
-                GlobalMuteState::instance().toggleMute(m_muteTag);
+                GlobalMuteState::instance().setMuted(m_device->getMute(), m_muteSync.originate());
             }
         });
+        connect(m_device, &HeadsetDevice::muteLockChanged, this,
+                [this](bool locked, bool muted) {
+                    if (isEnabled()) {
+                        qCInfo(lcHeadsetProxy)
+                                << "Headset mute-lock changed - locked:" << locked
+                                << "muted:" << muted;
+                        if (locked) {
+                            GlobalMuteState::instance().setMuted(muted, m_muteSync.originate());
+                        }
+                        setMuteLocked(locked);
+                    }
+                });
         connect(m_device, &HeadsetDevice::busyLine, this, [this]() {
             if (isEnabled()) {
                 Q_EMIT busyLine();

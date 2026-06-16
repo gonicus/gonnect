@@ -574,10 +574,16 @@ Item {
 
         BarButton {
             id: audioInputDeviceButton
+
+            readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
+
             text: qsTr("Micro")
             iconPath: AudioManager.isAudioCaptureMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
-            enabled: control.areInCallButtonsEnabled
+            enabled: control.areInCallButtonsEnabled && !audioInputDeviceButton.micMuteLocked
             showDropdownButton: true
+            tooltipText: audioInputDeviceButton.micMuteLocked
+                ? qsTr("Microphone mute locked by headset")
+                : ""
             onClicked: () => GlobalMuteState.toggleMute()
             onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
 

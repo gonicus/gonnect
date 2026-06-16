@@ -7,6 +7,7 @@
 #include "IConferenceConnector.h"
 #include "JitsiMediaDevice.h"
 #include "ConferenceUser.h"
+#include "MuteSyncGuard.h"
 
 class CallHistoryItem;
 class SIPAudioDevice;
@@ -147,7 +148,7 @@ private:
 
     ConferenceUser::Role m_ownRole = ConferenceUser::Role::None;
     QString m_jitsiId;
-    QString m_muteTag;
+    MuteSyncGuard m_muteSync;
     bool m_didExecuteAudioMuteToggle = false;
     ConferenceUser *m_largeVideoUser = nullptr;
     ConferenceChatRoom *m_chatRoom = nullptr;

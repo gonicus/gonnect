@@ -68,15 +68,13 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
             &JitsiConnector::onHeadsetHookSwitchChanged);
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
-            [this](bool, const QString tag) {
+            [this](bool value, const QString tag) {
                 if (m_isOnHold) {
                     return;
                 }
 
-                if (m_muteTag.isEmpty() || m_muteTag != tag) {
+                if (!m_muteSync.isOwnEcho(tag) && m_isAudioMuted != value) {
                     toggleMute();
-                } else if (!m_muteTag.isEmpty() && m_muteTag == tag) {
-                    m_muteTag.clear();
                 }
             });
 
@@ -1385,8 +1383,7 @@ void JitsiConnector::setAudioMuted(bool value)
     }
 
     if (!m_didExecuteAudioMuteToggle) {
-        m_muteTag = QUuid::createUuid().toString();
-        GlobalMuteState::instance().toggleMute(m_muteTag);
+        GlobalMuteState::instance().setMuted(value, m_muteSync.originate());
     }
 
     m_didExecuteAudioMuteToggle = false;
