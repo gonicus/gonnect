@@ -167,8 +167,14 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         GlobalMuteState::instance().reset();
         if (state & State::AudioActive) {
             setBusyLine(true);
+            // Defer the mute-lock probe past this state change so that the
+            // headset can do it's HID communication.
             if (m_device && !GlobalMuteState::instance().isMuted()) {
-                m_device->probeMuteLock();
+                QTimer::singleShot(0, this, [this]() {
+                    if (m_device && !GlobalMuteState::instance().isMuted()) {
+                        m_device->probeMuteLock();
+                    }
+                });
             }
         } else {
             setBusyLine(false);

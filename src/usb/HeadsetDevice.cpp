@@ -276,6 +276,8 @@ void HeadsetDevice::probeMuteLock()
     }
 
     qCInfo(lcHeadset) << "Probing headset for mute-lock";
+    m_muteBurstCount = 0;
+    m_muteBurstTimer.invalidate();
     m_muted = false;
     writeMuteToDevice(false, true);
 }
@@ -390,9 +392,15 @@ void HeadsetDevice::setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMappi
 void HeadsetDevice::processEvents()
 {
     unsigned char data[64];
-    std::ranges::fill(data, 0);
 
-    if (auto len = hid_read_timeout(m_device, data, sizeof(data), 10)) {
+    while (true) {
+        std::ranges::fill(data, 0);
+
+        auto len = hid_read_timeout(m_device, data, sizeof(data), 10);
+        if (len <= 0) {
+            break;
+        }
+
         quint8 reportId = data[0];
 
         if (len >= 2 && m_inputReportIds.contains(reportId)) {
@@ -443,24 +451,46 @@ void HeadsetDevice::processEvents()
                                     writeMuteToDevice(true, false);
                                     Q_EMIT muteLockChanged(true, true);
                                 }
+
+                                m_muteBurstCount = muteBurstThreshold();
+                                m_muteBurstTimer.restart();
                             } else {
                                 qCDebug(lcHeadset)
                                         << "  Ignored mute echo within Mute-lock detection window";
                             }
                         } else {
-                            // Genuine user press of the mute button.
-                            const bool wasLocked = m_muteLocked;
-                            m_muted = !m_muted;
-                            m_muteLocked = false;
+                            if (m_muteBurstTimer.isValid()
+                                && m_muteBurstTimer.elapsed() < muteBurstWindowMs()) {
+                                m_muteBurstCount++;
+                            } else {
+                                m_muteBurstCount = 1;
+                            }
+                            m_muteBurstTimer.restart();
 
-                            qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
-                            writeMuteToDevice(m_muted, false);
+                            if (m_muteBurstCount >= muteBurstThreshold()) {
+                                if (!m_muteLocked || !m_muted) {
+                                    m_muteLocked = true;
+                                    m_muted = true;
+                                    qCInfo(lcHeadset)
+                                            << "  Mute flap collapsed to muted (burst of"
+                                            << m_muteBurstCount << "toggles)";
+                                    writeMuteToDevice(true, false);
+                                    Q_EMIT muteLockChanged(true, true);
+                                }
+                            } else {
+                                const bool wasLocked = m_muteLocked;
+                                m_muted = !m_muted;
+                                m_muteLocked = false;
 
-                            Q_EMIT mute();
+                                qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
+                                writeMuteToDevice(m_muted, false);
 
-                            if (wasLocked) {
-                                qCInfo(lcHeadset) << "  Mute-lock released";
-                                Q_EMIT muteLockChanged(false, m_muted);
+                                Q_EMIT mute();
+
+                                if (wasLocked) {
+                                    qCInfo(lcHeadset) << "  Mute-lock released";
+                                    Q_EMIT muteLockChanged(false, m_muted);
+                                }
                             }
                         }
                     }
@@ -719,7 +749,17 @@ void HeadsetDevice::sendASP(quint8 cmd)
 
 int HeadsetDevice::muteLockWindowMs() const
 {
-    return m_appSettings.value("generic/muteLockProbeWindowMs", 300).toInt();
+    return m_appSettings.value("generic/muteLockProbeWindowMs", 700).toInt();
+}
+
+int HeadsetDevice::muteBurstWindowMs() const
+{
+    return m_appSettings.value("generic/muteBurstWindowMs", 1000).toInt();
+}
+
+int HeadsetDevice::muteBurstThreshold() const
+{
+    return m_appSettings.value("generic/muteBurstThreshold", 2).toInt();
 }
 
 UsageInfo::UsageInfo(qsizetype bitPosition, quint32 size, quint8 reportId)

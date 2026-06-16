@@ -84,6 +84,8 @@ private:
 
     void writeMuteToDevice(bool flag, bool armLockWindow);
     int muteLockWindowMs() const;
+    int muteBurstWindowMs() const;
+    int muteBurstThreshold() const;
 
     QStringList makeChunks(const QString &text, qsizetype chunkSize);
 
@@ -117,6 +119,9 @@ private:
     bool m_mutePendingValue = false;
     QElapsedTimer m_mutePendingTimer;
     bool m_muteLocked = false;
+
+    int m_muteBurstCount = 0;
+    QElapsedTimer m_muteBurstTimer;
 
     bool m_flash = false;
     bool m_hold = false;
