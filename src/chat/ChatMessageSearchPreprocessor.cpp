@@ -3,7 +3,7 @@
 
 #include "ChatMessageSearchPreprocessor.h"
 
-Q_LOGGING_CATEGORY(lcChatMessageSearchPreprocessor, "gonnect.chat.messagesearchpreprocessor")
+Q_LOGGING_CATEGORY(lcChatMessageSearchPreprocessor, "gonnect.chat.message.search.preprocessor")
 
 ChatMessageSearchPreprocessor::ChatMessageSearchPreprocessor(QObject *parent) : QObject(parent)
 {
@@ -26,7 +26,7 @@ ChatMessageSearchPreprocessor::ChatMessageSearchPreprocessor(QObject *parent) : 
     // Snowball stemmers for German and English (UTF-8 encoding).
     m_stemmerDe = sb_stemmer_new("german", "UTF_8");
     m_stemmerEn = sb_stemmer_new("english", "UTF_8");
-    if (!m_stemmerDe || m_stemmerEn) {
+    if (!m_stemmerDe || !m_stemmerEn) {
         qCWarning(lcChatMessageSearchPreprocessor) << "Failed to initialize stemmers";
     }
 }

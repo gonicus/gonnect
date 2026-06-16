@@ -1,3 +1,4 @@
+#include <QLoggingCategory>
 #include <QRegularExpression>
 
 #include "ReadOnlyConfdSettings.h"
@@ -6,6 +7,8 @@
 
 // INFO: Uses SQLCipher amalgamation (AES-256 + FTS5): https://github.com/sqlcipher/sqlcipher
 #include <sqlite3.h>
+
+Q_LOGGING_CATEGORY(lcChatMessageSearchIndexer, "gonnect.chat.message.search.indexer")
 
 ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ parent }
 {
@@ -42,7 +45,7 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
             // Mapping table
             "CREATE TABLE IF NOT EXISTS messages_source ("
             "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "    uuid TEXT UNIQUE," // Message ID
+            "    uuid TEXT," // Message ID
             "    source TEXT" // Provider ID + Room ID
             ");"
 
@@ -59,9 +62,13 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
 
             "CREATE INDEX IF NOT EXISTS idx_messages_source ON messages_source(source);");
     if (!exec(initStatement)) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+
         sqlite3_close(m_db);
         m_db = nullptr;
     }
+
+    // TODO: Retry on error?
 }
 
 bool ChatMessageSearchIndexer::addMessage(const Message &message)
@@ -269,8 +276,8 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
     // Results are ordered ascending by rank (FTS5 BM25 is negative: closer
     // to zero = worse; more negative = better match).
     const QString searchStatement =
-            "SELECT m.uuid, f.rank FROM messages_fts f JOIN messages_source m ON f.rowid = m.id"
-            "WHERE messages_fts MATCH ? ORDER BY rank lIMIT ?;";
+            "SELECT m.uuid, f.rank FROM messages_fts f JOIN messages_source m ON f.rowid = m.id "
+            "WHERE messages_fts MATCH ? ORDER BY rank LIMIT ?;";
 
     Statement search;
     if (sqlite3_prepare_v2(m_db, searchStatement.toUtf8(), -1, &search.statement, nullptr)

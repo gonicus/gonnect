@@ -1,8 +1,12 @@
+#include <QLoggingCategory>
+
 #include "ChatMessageSearchProvider.h"
 #include "ChatConnectorManager.h"
 #include "ChatMessage.h"
 
 #include "ChatMessageSearchIndexer.h"
+
+Q_LOGGING_CATEGORY(lcChatMessageSearchProvider, "gonnect.chat.message.search.provider")
 
 ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{ parent }
 {
@@ -27,8 +31,14 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
                 }
             }
 
-            ChatMessageSearchIndexer::instance().addMessages(messages);
-            ChatMessageSearchIndexer::instance().optimize();
+            if (!messages.isEmpty()) {
+                if (!ChatMessageSearchIndexer::instance().addMessages(messages)) {
+                    qCWarning(lcChatMessageSearchProvider)
+                            << "Failed to add messages to indexer:"
+                            << ChatMessageSearchIndexer::instance().lastError();
+                };
+                ChatMessageSearchIndexer::instance().optimize();
+            }
 
             // Connect to chat room changes as long as the associated context lives
             connect(room, &IChatRoom::chatMessageAdded, context,
@@ -70,7 +80,11 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
         m_model->reset();
 
         auto results = ChatMessageSearchIndexer::instance().search(m_searchPhrase);
-        if (!results.isEmpty()) {
+        if (results.isEmpty()) {
+            qCWarning(lcChatMessageSearchProvider)
+                    << "Message search did not return any results:"
+                    << ChatMessageSearchIndexer::instance().lastError();
+        } else {
             m_model->addResults(results);
         }
     });
@@ -80,6 +94,8 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
 
 void ChatMessageSearchProvider::resetChatProviders()
 {
+    qCWarning(lcChatMessageSearchProvider) << "Reloading chat providers";
+
     m_chatRoomsByUid.clear();
     qDeleteAll(m_chatRoomContextsByUid);
     m_chatRoomContextsByUid.clear();
@@ -90,7 +106,9 @@ void ChatMessageSearchProvider::resetChatProviders()
     }
 
     m_chatProviders = ChatConnectorManager::instance().chatConnectors();
-    if (!m_chatProviders.isEmpty()) {
+    if (m_chatProviders.isEmpty()) {
+        qCWarning(lcChatMessageSearchProvider) << "No chat providers found";
+    } else {
         m_chatProviderContext = new QObject(this);
 
         for (auto provider : std::as_const(m_chatProviders)) {
