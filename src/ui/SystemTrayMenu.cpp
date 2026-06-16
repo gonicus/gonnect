@@ -195,7 +195,7 @@ void SystemTrayMenu::initMenu()
 
     QAction *action = nullptr;
     m_mainWindowAction = action =
-            m_trayIconMenu->addAction(QIcon::fromTheme("home"), tr("Open..."));
+            m_trayIconMenu->addAction(QIcon::fromTheme("go-home"), tr("Open..."));
     connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::activateSearch);
 
     m_trayIconMenu->addSeparator();
