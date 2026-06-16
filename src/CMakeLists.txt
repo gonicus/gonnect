@@ -415,6 +415,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/LargeImage.qml
         ui/components/popups/LargeVideo.qml
         ui/components/popups/Menu.qml
+        ui/components/popups/MessageSearch.qml
         ui/components/popups/OwnAvatarContextMenu.qml
         ui/components/popups/PublicRoomSearch.qml
         ui/components/popups/SearchResultPopup.qml

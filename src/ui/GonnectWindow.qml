@@ -478,6 +478,9 @@ BaseWindow {
         function onShowPublicRoomSearchDialog(chatProvider : IChatProvider) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/PublicRoomSearch.qml", { chatProvider })
         }
+        function onShowMessageSearchDialog() {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/MessageSearch.qml")
+        }
         function onShowKnockRoomDialog(chatProvider : IChatProvider, roomId : string) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/KnockChatRoom.qml",
                                  { chatProvider, roomId })

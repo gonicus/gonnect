@@ -14,6 +14,7 @@ class ChatMessageSearchProvider : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ChatMessageSearchProvider)
 
+    Q_PROPERTY(ChatMessageSearchModel *model READ model CONSTANT)
     Q_PROPERTY(QString searchPhrase MEMBER m_searchPhrase NOTIFY searchPhraseChanged)
 
 public:
@@ -29,6 +30,8 @@ public:
     }
 
     ~ChatMessageSearchProvider();
+
+    ChatMessageSearchModel *model() const { return m_model; }
 
     void resetChatProviders();
 

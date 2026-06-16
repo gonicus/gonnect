@@ -368,6 +368,11 @@ Item {
                     onTriggered: () => ViewHelper.showPublicRoomSearchDialog(control.attachedData)
                 }
                 Action {
+                    text: qsTr("Search messages...")
+                    icon.source: Icons.systemSearch
+                    onTriggered: () => ViewHelper.showMessageSearchDialog()
+                }
+                Action {
                     text: qsTr("Create room...")
                     icon.source: Icons.listAdd
                     onTriggered: () => ViewHelper.showCreateRoomDialog(control.attachedData, [])
