@@ -471,9 +471,8 @@ void HeadsetDevice::processEvents()
                                 if (!m_muteLocked || !m_muted) {
                                     m_muteLocked = true;
                                     m_muted = true;
-                                    qCInfo(lcHeadset)
-                                            << "  Mute flap collapsed to muted (burst of"
-                                            << m_muteBurstCount << "toggles)";
+                                    qCInfo(lcHeadset) << "  Mute flap collapsed to muted (burst of"
+                                                      << m_muteBurstCount << "toggles)";
                                     writeMuteToDevice(true, false);
                                     Q_EMIT muteLockChanged(true, true);
                                 }
