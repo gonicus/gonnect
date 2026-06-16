@@ -44,30 +44,53 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
 
         if (GlobalCallState::instance().globalCallState() == ICallState::State::Idle) {
             m_device->setCallStatus(tr("Call ended"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
         }
     });
 
     m_callStartTimer.setInterval(500ms);
     m_callStartTimer.setSingleShot(true);
-    connect(&m_callStartTimer, &QTimer::timeout, this, [this]() {
-        if (!m_device) {
-            return;
-        }
-
-        const auto state = GlobalCallState::instance().globalCallState();
-        if ((state & ICallState::State::CallActive) && !(state & ICallState::State::OnHold)) {
-            m_inRemoteCallScreen = true;
-            m_device->setCallStatus(tr("Call active"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
-            updateRemoteContactInfo();
-        }
-    });
+    connect(&m_callStartTimer, &QTimer::timeout, this, [this]() { showInCallScreen(); });
 }
 
 HeadsetDeviceProxy::~HeadsetDeviceProxy()
 {
     close();
+}
+
+void HeadsetDeviceProxy::switchScreen(ReportDescriptorEnums::TeamsScreenSelect screen)
+{
+    if (!m_device) {
+        return;
+    }
+
+    m_currentScreen = screen;
+    m_device->selectScreen(screen);
+}
+
+void HeadsetDeviceProxy::showInCallScreen()
+{
+    if (!m_device) {
+        return;
+    }
+
+    const auto state = GlobalCallState::instance().globalCallState();
+    if ((state & ICallState::State::CallActive) && !(state & ICallState::State::OnHold)) {
+        m_callStartTimer.stop();
+        m_inRemoteCallScreen = true;
+        m_device->setCallStatus(tr("Call active"));
+        switchScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
+        updateRemoteContactInfo();
+    }
+}
+
+void HeadsetDeviceProxy::enterActiveCall()
+{
+    if (m_currentScreen == ReportDescriptorEnums::TeamsScreenSelect::IncomingCall) {
+        showInCallScreen();
+    } else if (!m_callStartTimer.isActive()) {
+        m_callStartTimer.start();
+    }
 }
 
 void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
@@ -93,7 +116,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::RingingIncoming) {
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("Ringing"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
         }
     }
 
@@ -102,7 +125,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::KnockingIncoming) {
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("Call waiting"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
         } else if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
             m_callStartTimer.start();
@@ -113,10 +136,10 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::RingingOutgoing) {
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("Calling"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
         } else if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
-            m_callStartTimer.start();
+            enterActiveCall();
         }
     }
 
@@ -125,10 +148,10 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::OnHold) {
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("On Hold"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
         } else {
             m_inRemoteCallScreen = true;
-            m_callStartTimer.start();
+            enterActiveCall();
         }
     }
 
@@ -155,7 +178,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
     if (changeMask & State::CallActive) {
         if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
-            m_callStartTimer.start();
+            enterActiveCall();
         }
     } else if (state) {
         m_inRemoteCallScreen = true;
@@ -163,19 +186,20 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::OnHold) {
             m_callStartTimer.stop();
             m_device->setCallStatus(tr("On Hold"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
         } else if (state & (State::RingingIncoming | State::KnockingIncoming)) {
             m_callStartTimer.stop();
             m_device->setCallStatus(state & State::RingingIncoming ? tr("Ringing")
                                                                    : tr("Call waiting"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
         } else if (state & State::RingingOutgoing) {
             m_callStartTimer.stop();
             m_device->setCallStatus(tr("Calling"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
         } else if (state & State::CallActive) {
-            if (!m_callStartTimer.isActive()) {
-                m_callStartTimer.start();
+            if (m_currentScreen != ReportDescriptorEnums::TeamsScreenSelect::InCall
+                            && !m_callStartTimer.isActive()) {
+                enterActiveCall();
             }
         }
     }

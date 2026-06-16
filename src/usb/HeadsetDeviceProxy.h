@@ -67,6 +67,10 @@ private:
     bool isEnabled() { return m_settings.value("generic/useHeadset", true).toBool(); }
     void setMuteLocked(bool locked);
 
+    void switchScreen(ReportDescriptorEnums::TeamsScreenSelect screen);
+    void showInCallScreen();
+    void enterActiveCall();
+
     AppSettings m_settings;
     HeadsetDevice *m_device = nullptr;
     ICallState::States m_oldCallState = ICallState::State::Idle;
@@ -77,6 +81,9 @@ private:
     bool m_inRemoteCallScreen = false;
     bool m_muteLocked = false;
     MuteSyncGuard m_muteSync;
+
+    ReportDescriptorEnums::TeamsScreenSelect m_currentScreen =
+        ReportDescriptorEnums::TeamsScreenSelect::HomeScreen;
 };
 
 class HeadsetDeviceProxyWrapper
