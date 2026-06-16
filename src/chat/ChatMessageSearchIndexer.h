@@ -47,14 +47,14 @@ public:
 
     struct Message
     {
-        QString id;
-        QString source;
+        QString messageUid;
+        QString roomUid;
         QString body;
     };
 
     struct SearchResult
     {
-        QString id;
+        QString messageUid;
         double rank; // FTS5 BM25 rank: negative == better
     };
 
@@ -62,7 +62,7 @@ public:
     bool addMessages(const QList<Message> &messages);
 
     bool removeMessage(const QString &id);
-    bool removeMessagesBySource(const QString &source);
+    bool removeMessagesByRoom(const QString &roomUid);
 
     bool updateMessage(const Message &message);
 

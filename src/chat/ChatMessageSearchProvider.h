@@ -45,7 +45,6 @@ private:
     QList<IChatProvider *> m_chatProviders;
     QObject *m_chatProviderContext = nullptr;
 
-    // UID (Source) = Provider ID + Room ID
     QHash<QString, IChatRoom *> m_chatRoomsByUid;
     QHash<QString, QObject *> m_chatRoomContextsByUid;
 
@@ -74,13 +73,3 @@ public:
 private:
     ChatMessageSearchProviderWrapper() = default;
 };
-
-/*
-    Provider should be an interface to the Indexer features, which under the hood
-    uses the Preprocessor for stemming, the Provider then stores results in the Model
-
-    1. Provider listens for Message changes across ChatRooms and keeps Indexer updated
-
-    2. QML UI search should, when finished, trigged searchPhraseChanged, Provider will
-    then trigger the Indexer for a search ans store results in the Model
-*/

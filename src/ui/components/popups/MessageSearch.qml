@@ -10,25 +10,13 @@ Item {
     implicitHeight: 600
 
     // TODO: The singleton instance should likely be started ASAP
-    // to get some intitial message loading done
+    // to get some intitial message loading done prior to the first search
     property var searchProvider: ChatMessageSearchProvider
 
     QtObject {
         id: internal
 
         property Item selectedItem
-
-        readonly property Timer searchDebouncer: Timer {
-            id: searchDebounceTimer
-            interval: 200
-
-            onTriggered: () => {
-                const phrase = searchTextField.text.trim()
-                if (phrase.length >= 3) {
-                    control.searchProvider.searchPhrase = phrase
-                }
-            }
-        }
 
         readonly property Timer focusTimer: Timer {
             interval: 100
@@ -81,7 +69,7 @@ Item {
             margins: 20
         }
 
-        onTextEdited: () => searchDebounceTimer.start()
+        onTextEdited: () => control.searchProvider.searchPhrase = searchTextField.text.trim()
     }
 
     HeaderIconButton {
@@ -108,8 +96,8 @@ Item {
         delegate: Item {
             id: delg
 
-            required property string id
-            required property int rank
+            required property string messageUid
+            required property double rank
 
             height: 50
             anchors {
@@ -125,9 +113,9 @@ Item {
                 radius: 4
             }
 
-            // TODO: Map message ID (Matrix event id?) to message
+            // TODO: Map messageUid to message text
             Label {
-                text: delg.id
+                text: delg.messageUid
                 elide: Text.ElideRight
                 anchors {
                     bottom: parent.verticalCenter

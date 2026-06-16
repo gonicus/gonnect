@@ -43,16 +43,16 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
             "PRAGMA synchronous = NORMAL;"
 
             // Mapping table
-            "CREATE TABLE IF NOT EXISTS messages_source ("
+            "CREATE TABLE IF NOT EXISTS messages_map ("
             "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "    uuid TEXT," // Message ID
-            "    source TEXT" // Provider ID + Room ID
+            "    message_uid TEXT,"
+            "    room_uid TEXT"
             ");"
 
             // FTS5 virtual table
             // requires SQLite >= 3.43.0 for contentless_delete (by id only)
             // requires SQLite >= 3.38.0 for the trigram tokenizer
-            // INFO: Using messages_fts.rowid == messages_source.id
+            // INFO: Using messages_fts.rowid == messages_map.id
             "CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5("
             "    body,"
             "    content='',"
@@ -60,7 +60,7 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
             "    tokenize='trigram'"
             ");"
 
-            "CREATE INDEX IF NOT EXISTS idx_messages_source ON messages_source(source);");
+            "CREATE INDEX IF NOT EXISTS idx_messages_map ON messages_map(room_uid);");
     if (!exec(initStatement)) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
 
@@ -78,9 +78,10 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
     }
 
     // Mapping
-    const QString mappingStatement = "INSERT INTO messages_source(uuid, source) VALUES (?,?);";
-    const QByteArray uuid = message.id.toUtf8();
-    const QByteArray source = message.source.toUtf8();
+    const QString mappingStatement =
+            "INSERT INTO messages_map(message_uid, room_uid) VALUES (?,?);";
+    const QByteArray message_uid = message.messageUid.toUtf8();
+    const QByteArray room_uid = message.roomUid.toUtf8();
 
     Statement mapping;
     if (sqlite3_prepare_v2(m_db, mappingStatement.toUtf8(), -1, &mapping.statement, nullptr)
@@ -88,8 +89,8 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_text(mapping.statement, 1, uuid.constData(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(mapping.statement, 2, source.constData(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(mapping.statement, 1, message_uid.constData(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(mapping.statement, 2, room_uid.constData(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(mapping.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -149,7 +150,7 @@ bool ChatMessageSearchIndexer::removeMessage(const QString &id)
     }
 
     // Mapping
-    const QString mappingStatement = "DELETE FROM messages_source WHERE uuid = ? RETURNING id;";
+    const QString mappingStatement = "DELETE FROM messages_map WHERE message_uid = ? RETURNING id;";
 
     Statement mapping;
     if (sqlite3_prepare_v2(m_db, mappingStatement.toUtf8(), -1, &mapping.statement, nullptr)
@@ -184,7 +185,7 @@ bool ChatMessageSearchIndexer::removeMessage(const QString &id)
     return true;
 }
 
-bool ChatMessageSearchIndexer::removeMessagesBySource(const QString &source)
+bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid)
 {
     if (!m_db) {
         return false;
@@ -192,14 +193,14 @@ bool ChatMessageSearchIndexer::removeMessagesBySource(const QString &source)
 
     // FTS
     const QString ftsStatement = "DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM "
-                                 "messages_source WHERE source = ?)";
+                                 "messages_map WHERE room_uid = ?)";
 
     Statement fts;
     if (sqlite3_prepare_v2(m_db, ftsStatement.toUtf8(), -1, &fts.statement, nullptr) != SQLITE_OK) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_text(fts.statement, 1, source.toUtf8(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(fts.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(fts.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -207,7 +208,7 @@ bool ChatMessageSearchIndexer::removeMessagesBySource(const QString &source)
     }
 
     // Mapping
-    const QString mappingStatement = "DELETE FROM messages_source WHERE source = ?;";
+    const QString mappingStatement = "DELETE FROM messages_map WHERE room_uid = ?;";
 
     Statement mapping;
     if (sqlite3_prepare_v2(m_db, mappingStatement.toUtf8(), -1, &mapping.statement, nullptr)
@@ -215,7 +216,7 @@ bool ChatMessageSearchIndexer::removeMessagesBySource(const QString &source)
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_text(mapping.statement, 1, source.toUtf8(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(mapping.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(mapping.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -231,7 +232,7 @@ bool ChatMessageSearchIndexer::updateMessage(const Message &message)
         return false;
     }
 
-    if (!removeMessage(message.id) || !addMessage(message)) {
+    if (!removeMessage(message.messageUid) || !addMessage(message)) {
         exec("ROLLBACK;");
         return false;
     }
@@ -275,9 +276,9 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
     // FTS5 rank is a special hidden column; expose it explicitly (unqualified in ORDER BY).
     // Results are ordered ascending by rank (FTS5 BM25 is negative: closer
     // to zero = worse; more negative = better match).
-    const QString searchStatement =
-            "SELECT m.uuid, f.rank FROM messages_fts f JOIN messages_source m ON f.rowid = m.id "
-            "WHERE messages_fts MATCH ? ORDER BY rank LIMIT ?;";
+    const QString searchStatement = "SELECT m.message_uid, f.rank FROM messages_fts f JOIN "
+                                    "messages_map m ON f.rowid = m.id "
+                                    "WHERE messages_fts MATCH ? ORDER BY rank LIMIT ?;";
 
     Statement search;
     if (sqlite3_prepare_v2(m_db, searchStatement.toUtf8(), -1, &search.statement, nullptr)
@@ -292,7 +293,7 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
 
     while (sqlite3_step(search.statement) == SQLITE_ROW) {
         SearchResult result;
-        result.id = QString::fromUtf8(
+        result.messageUid = QString::fromUtf8(
                 reinterpret_cast<const char *>(sqlite3_column_text(search.statement, 0)));
         result.rank = sqlite3_column_double(search.statement, 1);
         results.append(result);

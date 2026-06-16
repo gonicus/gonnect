@@ -15,9 +15,9 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
     connect(&ChatConnectorManager::instance(), &ChatConnectorManager::chatConnectorsChanged, this,
             &ChatMessageSearchProvider::resetChatProviders);
 
-    connect(this, &ChatMessageSearchProvider::chatRoomAdded, this, [this](QString uid) {
-        auto room = m_chatRoomsByUid[uid];
-        auto context = m_chatRoomContextsByUid[uid];
+    connect(this, &ChatMessageSearchProvider::chatRoomAdded, this, [this](QString roomUid) {
+        auto room = m_chatRoomsByUid[roomUid];
+        auto context = m_chatRoomContextsByUid[roomUid];
         if (room && context) {
             QList<ChatMessageSearchIndexer::Message> messages;
 
@@ -26,7 +26,8 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
                 if (chatMessage && chatMessage->content()) {
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                        messages.append({ chatMessage->eventId(), uid, textContent->rawText() });
+                        messages.append(
+                                { chatMessage->eventId(), roomUid, textContent->rawText() });
                     }
                 }
             }
@@ -42,12 +43,13 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
 
             // Connect to chat room changes as long as the associated context lives
             connect(room, &IChatRoom::chatMessageAdded, context,
-                    [uid](qsizetype, ChatMessage *chatMessage) {
+                    [roomUid](qsizetype, ChatMessage *chatMessage) {
                         if (chatMessage && chatMessage->content()) {
                             if (const auto textContent = qobject_cast<ChatMessageContentText *>(
                                         chatMessage->content())) {
                                 ChatMessageSearchIndexer::instance().addMessage(
-                                        { chatMessage->eventId(), uid, textContent->rawText() });
+                                        { chatMessage->eventId(), roomUid,
+                                          textContent->rawText() });
                             }
                         }
                     });
@@ -59,33 +61,40 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
                         }
                     });
             connect(room, &IChatRoom::chatMessageContentChanged, context,
-                    [uid](qsizetype, ChatMessage *chatMessage) {
+                    [roomUid](qsizetype, ChatMessage *chatMessage) {
                         if (chatMessage && chatMessage->content()) {
                             if (const auto textContent = qobject_cast<ChatMessageContentText *>(
                                         chatMessage->content())) {
                                 ChatMessageSearchIndexer::instance().updateMessage(
-                                        { chatMessage->eventId(), uid, textContent->rawText() });
+                                        { chatMessage->eventId(), roomUid,
+                                          textContent->rawText() });
                             }
                         }
                     });
-            connect(room, &IChatRoom::chatMessagesReset, context,
-                    [uid]() { ChatMessageSearchIndexer::instance().removeMessagesBySource(uid); });
+            connect(room, &IChatRoom::chatMessagesReset, context, [roomUid]() {
+                ChatMessageSearchIndexer::instance().removeMessagesByRoom(roomUid);
+            });
         }
     });
 
-    connect(this, &ChatMessageSearchProvider::chatRoomDeleted, this,
-            [](QString uid) { ChatMessageSearchIndexer::instance().removeMessagesBySource(uid); });
+    connect(this, &ChatMessageSearchProvider::chatRoomDeleted, this, [](QString roomUid) {
+        ChatMessageSearchIndexer::instance().removeMessagesByRoom(roomUid);
+    });
 
     connect(this, &ChatMessageSearchProvider::searchPhraseChanged, this, [this]() {
-        m_model->reset();
+        if (m_model->rowCount() > 0) {
+            m_model->reset();
+        }
 
-        auto results = ChatMessageSearchIndexer::instance().search(m_searchPhrase);
-        if (results.isEmpty()) {
-            qCWarning(lcChatMessageSearchProvider)
-                    << "Message search did not return any results:"
-                    << ChatMessageSearchIndexer::instance().lastError();
-        } else {
-            m_model->addResults(results);
+        if (m_searchPhrase.size() >= 3) {
+            auto results = ChatMessageSearchIndexer::instance().search(m_searchPhrase);
+            if (results.isEmpty()) {
+                qCWarning(lcChatMessageSearchProvider)
+                        << "Message search did not return any results:"
+                        << ChatMessageSearchIndexer::instance().lastError();
+            } else {
+                m_model->addResults(results);
+            }
         }
     });
 
@@ -95,6 +104,8 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
 void ChatMessageSearchProvider::resetChatProviders()
 {
     qCWarning(lcChatMessageSearchProvider) << "Reloading chat providers";
+
+    // TODO: Clear SQLite tables
 
     m_chatRoomsByUid.clear();
     qDeleteAll(m_chatRoomContextsByUid);
@@ -120,46 +131,49 @@ void ChatMessageSearchProvider::resetChatProviders()
             for (int i = 0; i < roomCount; i++) {
                 auto room = provider->chatRoomByIndex(i);
                 if (room) {
-                    QString uid = QString("%1-%2").arg(room->id(), provider->id());
+                    QString roomUid = room->id();
 
-                    m_chatRoomsByUid.insert(uid, room);
-                    m_chatRoomContextsByUid.insert(uid, new QObject(this));
+                    m_chatRoomsByUid.insert(roomUid, room);
+                    m_chatRoomContextsByUid.insert(roomUid, new QObject(this));
 
-                    Q_EMIT chatRoomAdded(uid);
+                    Q_EMIT chatRoomAdded(roomUid);
                 }
             }
 
             // Connect to chat provider changes as long as the shared context lives
             connect(provider, &IChatProvider::chatRoomAdded, m_chatProviderContext,
-                    [this, provider](qsizetype, IChatRoom *room, QString) {
+                    [this](qsizetype, IChatRoom *room, QString) {
                         if (room) {
-                            QString uid = QString("%1-%2").arg(room->id(), provider->id());
+                            QString roomUid = room->id();
 
-                            m_chatRoomsByUid.insert(uid, room);
-                            m_chatRoomContextsByUid.insert(uid, new QObject(this));
+                            m_chatRoomsByUid.insert(roomUid, room);
+                            m_chatRoomContextsByUid.insert(roomUid, new QObject(this));
 
-                            Q_EMIT chatRoomAdded(uid);
+                            Q_EMIT chatRoomAdded(roomUid);
                         }
                     });
             connect(provider, &IChatProvider::chatRoomRemoved, m_chatProviderContext,
-                    [this, provider](qsizetype, IChatRoom *room) {
+                    [this](qsizetype, IChatRoom *room) {
                         if (room) {
-                            QString uid = QString("%1-%2").arg(room->id(), provider->id());
+                            QString roomUid = room->id();
 
-                            if (m_chatRoomsByUid.remove(uid)) {
-                                m_chatRoomContextsByUid[uid]->deleteLater();
-                                m_chatRoomContextsByUid[uid] = nullptr;
+                            if (m_chatRoomsByUid.remove(roomUid)) {
+                                m_chatRoomContextsByUid[roomUid]->deleteLater();
+                                m_chatRoomContextsByUid[roomUid] = nullptr;
 
-                                Q_EMIT chatRoomDeleted(uid);
+                                Q_EMIT chatRoomDeleted(roomUid);
                             }
                         }
                     });
+            // TODO: What about renamed chat rooms?
         }
     }
 }
 
 ChatMessageSearchProvider::~ChatMessageSearchProvider()
 {
+    // TODO: Clear SQLite tables
+
     if (m_model) {
         delete m_model;
         m_model = nullptr;

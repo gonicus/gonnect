@@ -7,7 +7,7 @@ ChatMessageSearchModel::ChatMessageSearchModel(QObject *parent) : QAbstractListM
 QHash<int, QByteArray> ChatMessageSearchModel::roleNames() const
 {
     return {
-        { static_cast<int>(Roles::Id), "id" },
+        { static_cast<int>(Roles::MessageUid), "messageUid" },
         { static_cast<int>(Roles::Rank), "rank" },
     };
 }
@@ -26,19 +26,26 @@ QVariant ChatMessageSearchModel::data(const QModelIndex &index, int role) const
     const auto result = m_results.at(index.row());
 
     switch (role) {
-    case static_cast<int>(Roles::Id):
-        return result.id;
+    case static_cast<int>(Roles::MessageUid):
+        return result.messageUid;
     case static_cast<int>(Roles::Rank):
         return result.rank;
     default:
-        return result.id;
+        return result.messageUid;
     }
 }
 
 void ChatMessageSearchModel::addResults(
         const QList<ChatMessageSearchIndexer::SearchResult> &results)
 {
-    beginInsertRows(QModelIndex(), m_results.size(), m_results.size());
+    if (results.isEmpty()) {
+        return;
+    }
+
+    int firstRow = m_results.size();
+    int lastRow = firstRow + results.size() - 1;
+
+    beginInsertRows(QModelIndex(), firstRow, lastRow);
     for (auto &result : results) {
         m_results.append(result);
     }
