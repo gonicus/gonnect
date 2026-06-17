@@ -84,7 +84,7 @@ void ChatRoomModel::connectChatRoomSignals(IChatRoom *chatRoom)
     connect(chatRoom, &IChatRoom::permissionsChanged, ctx, [this, chatRoom]() {
         emitDataChanged(chatRoom, { static_cast<int>(Roles::Permissions) });
     });
-    connect(chatRoom, &IChatRoom::typingParticpantsChanged, ctx, [this, chatRoom]() {
+    connect(chatRoom, &IChatRoom::typingUsersChanged, ctx, [this, chatRoom]() {
         emitDataChanged(chatRoom, { static_cast<int>(Roles::TypingUserNames) });
     });
     connect(chatRoom, &IChatRoom::isDirectChatChanged, ctx, [this, chatRoom]() {

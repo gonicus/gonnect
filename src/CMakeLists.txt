@@ -331,6 +331,7 @@ qt_add_qml_module(gonnect
         ${gonnect_qml_singletons}
 
         ui/components/chat/AddReactionButton.qml
+        ui/components/chat/Chat.qml
         ui/components/chat/ChatMessageAttachmentRectangle.qml
         ui/components/chat/ChatMessageBox.qml
         ui/components/chat/ChatMessageList.qml
@@ -365,6 +366,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/FavoriteListItemBig.qml
         ui/components/controls/FirstAidButton.qml
         ui/components/controls/HeaderIconButton.qml
+        ui/components/controls/HideableMenuItem.qml
         ui/components/controls/JoinRuleComboBox.qml
         ui/components/controls/Label.qml
         ui/components/controls/MenuContactInfo.qml
@@ -695,6 +697,8 @@ qt_add_qml_module(gonnect
         contacts/ResponseTreeModel.cpp
         contacts/IAddressBookFactory.h
 
+        helper/AggregatedDirectRoomsOfContact.h
+        helper/AggregatedDirectRoomsOfContact.cpp
         helper/ChatMessageTransformer.h
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h

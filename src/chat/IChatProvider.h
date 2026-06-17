@@ -12,6 +12,13 @@ class IChatRoom;
 class IChatProvider : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("")
+    Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
+
+    Q_PROPERTY(IChatProvider::Capabilities capabilities READ capabilities NOTIFY capabilitiesChanged
+                       FINAL)
+
     Q_PROPERTY(bool isConnected READ isConnected NOTIFY isConnectedChanged FINAL)
     Q_PROPERTY(QString id READ id CONSTANT FINAL)
     Q_PROPERTY(QString displayName READ displayName CONSTANT FINAL)
@@ -28,12 +35,24 @@ class IChatProvider : public QObject
                        isInVerificationProcessChanged FINAL)
     Q_PROPERTY(bool hasFavoriteRooms READ hasFavoriteRooms NOTIFY hasFavoriteRoomsChanged FINAL)
 
-    QML_ELEMENT
-    QML_UNCREATABLE("")
-
 public:
+    enum class Capability {
+        EditMessage = 1 << 0,
+        RemoveMessage = 1 << 1,
+        Reactions = 1 << 2,
+        MessageRelations = 1 << 3,
+        UploadMedia = 1 << 4,
+        UploadFile = 1 << 5,
+        Markdown = 1 << 6,
+    };
+    Q_ENUM(Capability)
+    Q_DECLARE_FLAGS(Capabilities, Capability)
+    Q_FLAG(Capabilities)
+
     explicit IChatProvider(const QString &settingsGroup, QObject *parent = nullptr);
     virtual ~IChatProvider() { }
+
+    virtual Capabilities capabilities() const = 0;
 
     QString id() const { return m_settingsGroup; }
     bool isConnected() const { return m_isConnected; }
@@ -243,6 +262,7 @@ protected:
     qsizetype m_unreadNotificationsCount = 0;
 
 Q_SIGNALS:
+    void capabilitiesChanged();
     void isConnectedChanged();
     void hasFavoriteRoomsChanged();
     void unreadNotificationsCountChanged();
@@ -295,3 +315,5 @@ Q_SIGNALS:
     /// reviewed and/or sent.
     void clipboardImageUploaded(QUrl imageFilePath, IChatRoom *chatRoom);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(IChatProvider::Capabilities)

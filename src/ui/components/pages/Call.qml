@@ -321,8 +321,9 @@ Item {
         CallSideBar {
             id: callSideBar
             anchors.fill: parent
-            chatAvailable: false
+            roomsAggregator: AggregatedDirectRoomsOfContact {
+                contact: control.selectedCallItem?.contact ?? null
+            }
         }
     }
-
 }

@@ -22,6 +22,7 @@ Item {
     property bool highlighted: false
     property alias showDropdownButton: dropDownIconContainer.visible
     property alias showIndicatorBadge: indicatorBadge.visible
+    property string tooltipText: ""
 
     states: [
         State {
@@ -139,4 +140,7 @@ Item {
             onTapped: () => control.dropDownClicked()
         }
     }
+
+    ToolTip.visible: buttonHoverHandler.hovered && !!control.tooltipText
+    ToolTip.text: control.tooltipText
 }

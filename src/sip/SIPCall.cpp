@@ -285,7 +285,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         ringToneFactory.zipTone()->stop();
         ringToneFactory.ringingTone()->stop();
 
-        if (!m_isSilent) {
+        if (!m_isSilent
+            && !(GlobalCallState::instance().globalCallState() & ICallState::State::Migrating)) {
             setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
 
             if (m_isEstablished) {
