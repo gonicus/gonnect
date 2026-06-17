@@ -66,6 +66,8 @@ public:
                            QObject *parent = nullptr);
     ~IpcDispatcher();
 
+    virtual Capabilities capabilities() const override;
+
     virtual QString ownUserId() const override { return m_configInfo.userId; }
 
     /// Make the headless client try to login to the backend with the given credentials.

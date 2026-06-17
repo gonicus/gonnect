@@ -223,6 +223,22 @@ IpcDispatcher::~IpcDispatcher()
     m_userRoomStateCache.clear();
 }
 
+IChatProvider::Capabilities IpcDispatcher::capabilities() const
+{
+    // clang-format off
+    using CAP = IChatProvider::Capability;
+    static const IChatProvider::Capabilities s_capabilties =
+            CAP::EditMessage
+            | CAP::RemoveMessage
+            | CAP::MessageRelations
+            | CAP::Reactions
+            | CAP::UploadFile
+            | CAP::UploadMedia
+            | CAP::Markdown;
+    return s_capabilties;
+    // clang-format on
+}
+
 void IpcDispatcher::loginWithCredentials(const QString &userId, const QString &secret)
 {
     LoginUsernamePasswordRequest credReq;

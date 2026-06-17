@@ -35,7 +35,10 @@ class IChatRoom : public QObject
     Q_PROPERTY(QDateTime latestMessageDateTime READ latestMessageDateTime NOTIFY
                        latestMessageDateTimeChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> chatUsers READ chatUsers NOTIFY chatUsersChanged FINAL)
+    Q_PROPERTY(QList<ChatUser *> typingUsers READ typingUsers NOTIFY typingUsersChanged FINAL)
     Q_PROPERTY(qsizetype chatUserCount READ chatUserCount NOTIFY chatUsersChanged FINAL)
+    Q_PROPERTY(qsizetype notificationCount READ notificationCount NOTIFY notificationCountChanged
+                       FINAL)
 
 public:
     enum class UserRoomState { Unjoined, Joined, Invited, Knocked, Banned };
@@ -215,5 +218,5 @@ Q_SIGNALS:
 
     /// Send when a user started or stopped typing. Use typingUsers() to retrieve the
     /// list of currently typing users.
-    void typingParticpantsChanged();
+    void typingUsersChanged();
 };
