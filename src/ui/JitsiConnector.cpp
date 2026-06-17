@@ -1233,7 +1233,10 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
                                                  << displayName << ") with flags:" << startFlags;
 
     auto &globalCallState = GlobalCallState::instance();
-    globalCallState.holdAllCalls(this);
+
+    if (!(globalCallState.globalCallState() & ICallState::State::Migrating)) {
+        globalCallState.holdAllCalls(this);
+    }
 
     if (isOnHold()) {
         toggleHold();
@@ -1287,7 +1290,7 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
         }
     });
 
-    Q_EMIT GlobalCallState::instance().callStarted(true);
+    Q_EMIT globalCallState.callStarted(true);
 }
 
 void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
