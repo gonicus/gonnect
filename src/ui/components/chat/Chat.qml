@@ -92,7 +92,7 @@ Item {
             right: messageListCardHeadingButton.left
         }
 
-        onToggled: () => chatRoomList.chatProvider?.requestToggleRoomFavorite(control.chatRoom)
+        onToggled: () => control.chatProvider?.requestToggleRoomFavorite(control.chatRoom)
     }
 
     CardHeadingMoreMenuButton {
@@ -113,26 +113,26 @@ Item {
             id: chatRoomMenu
             onClosed: () => chatRoomMenu.destroy()
 
-            Action {
+            HideableMenuItem {
                 text: qsTr("Edit room...")
                 icon.source: Icons.editor
-                enabled: !!(control.selectedChatRoom?.permissions & IChatRoom.Permission.CanEdit)
-                onTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, chatRoomList.selectedRoomId)
+                visible: !!(control.chatRoom?.permissions & IChatRoom.Permission.CanEdit)
+                onTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, control.chatRoom.id)
             }
-            Action {
+            HideableMenuItem {
                 text: qsTr("Invite users...")
                 icon.source: Icons.listAdd
-                enabled: !!(control.selectedChatRoom?.permissions & IChatRoom.Permission.CanInvite)
-                onTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, chatRoomList.selectedRoomId)
+                visible: !!(control.chatRoom?.permissions & IChatRoom.Permission.CanInvite)
+                onTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, control.chatRoom.id)
             }
-            Action {
+            HideableMenuItem {
                 text: qsTr("Leave room...")
                 icon.source: Icons.dialogCancel
                 onTriggered: () => {
                     const item = DialogFactory.createConfirmDialog({
                                      text: qsTr("Are you sure you really want to leave this chat?")
                                  })
-                    const roomId = chatRoomList.selectedRoomId
+                    const roomId = control.chatRoom.id
                     item.accepted.connect(() => control.chatProvider.requestRoomLeave(roomId))
                 }
             }
@@ -305,7 +305,7 @@ Item {
 
                 if (chatMessageBox.editMessageId) {
                     // Edit existing message
-                    chatRoomList.chatProvider.requestEditMessage(control.chatRoom.id, chatMessageBox.editMessageId, chatMessageBox.text)
+                    control.chatProvider.requestEditMessage(control.chatRoom.id, chatMessageBox.editMessageId, chatMessageBox.text)
                     chatMessageBox.editMessageId = ""
                 } else {
                     // Send new message

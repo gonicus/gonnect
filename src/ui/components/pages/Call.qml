@@ -321,7 +321,9 @@ Item {
         CallSideBar {
             id: callSideBar
             anchors.fill: parent
-            roomsAggregator: AggregatedDirectRoomsOfContact { }
+            roomsAggregator: AggregatedDirectRoomsOfContact {
+                contact: control.selectedCallItem?.contact ?? null
+            }
         }
     }
 }

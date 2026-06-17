@@ -187,7 +187,7 @@ Item {
             iconPath: Icons.dialogMessages
             visible: !!(control.roomsAggregator?.chatRooms.length)
             text: qsTr("Chat")
-            showIndicatorBadge: !chatSideBar.visible && chatSideBar.lastMessageCount < chatSideBar.messageCount
+            showIndicatorBadge: !chatSideBar.visible && chatSideBar.lastMessageCount < (chatSideBar.chatRoom?.notificationCount ?? 0)
             onClicked: () => {
                 if (control.selectedSideBarMode === CallSideBar.Chat) {
                     control.selectedSideBarMode = CallSideBar.None

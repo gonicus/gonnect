@@ -68,7 +68,7 @@ void AggregatedDirectRoomsOfContact::updateBestMatchingRoom()
             newChatRoom = rooms.at(0);
 
         } else if (rooms.size()) {
-            quint8 dist = 0;
+            qreal dist = 0.0;
             const auto contactName = m_contact->name();
 
             for (auto *room : rooms) {
@@ -141,6 +141,7 @@ void AggregatedDirectRoomsOfContact::addRoom(IChatRoom *room)
     Q_CHECK_PTR(room);
 
     QList<IChatRoom *> newList;
+    removeRoom(room);
     if (processRoom(room, newList)) {
         auto newChatRooms = m_chatRooms + newList;
         sortChatRoomList(newChatRooms);
