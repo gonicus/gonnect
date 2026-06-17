@@ -417,7 +417,7 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
                                                  : callInfo->contactInfo.phoneNumber;
 
     case static_cast<int>(Roles::Contact):
-        return QVariant::fromValue(callInfo->contactInfo.contact);
+        return QVariant::fromValue(callInfo->contactInfo.contact.data());
 
     case static_cast<int>(Roles::ContactName):
         return !callInfo->contactInfo.displayName.isEmpty() ? callInfo->contactInfo.displayName
