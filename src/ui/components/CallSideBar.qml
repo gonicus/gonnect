@@ -38,6 +38,8 @@ Item {
 
     property IConferenceConnector conferenceConnector
 
+    property AggregatedDirectRoomsOfContact roomsAggregator: null
+
     onChatAvailableChanged: {
         if (!control.chatAvailable && control.selectedSideBarMode === CallSideBar.Chat) {
             control.selectedSideBarMode === CallSideBar.None
@@ -183,7 +185,7 @@ Item {
                               : parent.right)
             anchors.rightMargin: 5
             iconPath: Icons.dialogMessages
-            visible: false
+            visible: !!(control.roomsAggregator?.chatRooms.length)
             text: qsTr("Chat")
             showIndicatorBadge: !chatSideBar.visible && chatSideBar.lastMessageCount < chatSideBar.messageCount
             onClicked: () => {
@@ -271,7 +273,17 @@ Item {
     ChatSideBar {
         id: chatSideBar
         visible: false
-        chatRoom: control.conferenceConnector?.chatRoom() ?? null
+        chatProvider: control.roomsAggregator?.providerOfRoom(chatSideBar.chatRoom) ?? null
+        chatRoom: {
+            const aggr = control.roomsAggregator
+            if (aggr && aggr.bestMatchingChatRoom) {
+                return aggr.bestMatchingChatRoom
+            }
+            if (control.conferenceConnector) {
+                return control.conferenceConnector.chatRoom()
+            }
+            return null
+        }
         anchors {
             top: headerBar.bottom
             bottom: parent.bottom
@@ -283,7 +295,7 @@ Item {
 
         onVisibleChanged: () => {
             if (!chatSideBar.visible) {
-                chatSideBar.lastMessageCount = chatSideBar.messageCount
+                chatSideBar.lastMessageCount = chatSideBar.chatRoom?.notificationCount ?? 0
             }
         }
 
