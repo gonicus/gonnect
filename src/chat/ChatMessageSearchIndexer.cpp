@@ -14,10 +14,11 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
 {
     // TODO: Use proper settings names, wallet, etc.
     ReadOnlyConfdSettings settings;
-    QString path = settings.value("generic/chatSearchCachePath", "").toString();
-    QString password = settings.value("generic/chatSearchCachePassword", "").toString();
+    const QByteArray path = settings.value("generic/chatSearchCachePath", "").toString().toUtf8();
+    const QByteArray password =
+            settings.value("generic/chatSearchCachePassword", "").toString().toUtf8();
 
-    int status = sqlite3_open(path.toUtf8(), &m_db);
+    int status = sqlite3_open(path, &m_db);
     if (status != SQLITE_OK) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
 
@@ -27,7 +28,7 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
         return;
     }
 
-    status = sqlite3_key(m_db, password.toUtf8(), password.size());
+    status = sqlite3_key(m_db, password, password.size());
     if (status != SQLITE_OK) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
 
@@ -45,7 +46,7 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
             // Mapping table
             "CREATE TABLE IF NOT EXISTS messages_map ("
             "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "    message_uid TEXT,"
+            "    message_uid TEXT UNIQUE,"
             "    room_uid TEXT"
             ");"
 

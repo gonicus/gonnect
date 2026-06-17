@@ -18,7 +18,7 @@ ChatMessageSearchPreprocessor::ChatMessageSearchPreprocessor(QObject *parent) : 
     m_transliterator = icu::Transliterator::createFromRules(
             "de-norm", icu::UnicodeString(transliterationRules.toUtf8(), "UTF-8"), UTRANS_FORWARD,
             pe, err);
-    if (err != U_ZERO_ERROR) {
+    if (U_FAILURE(err)) {
         qCWarning(lcChatMessageSearchPreprocessor)
                 << "Error during ICU initialization:" << u_errorName(err);
     }

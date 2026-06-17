@@ -35,6 +35,8 @@ public:
 
     void resetChatProviders();
 
+    QString getChatMessageText(const QString &roomUid, const QString &messageUid);
+
 private:
     ChatMessageSearchProvider(QObject *parent = nullptr);
 

@@ -1,10 +1,10 @@
 #include <QLoggingCategory>
 
 #include "ChatMessageSearchProvider.h"
+#include "ChatMessageSearchIndexer.h"
+
 #include "ChatConnectorManager.h"
 #include "ChatMessage.h"
-
-#include "ChatMessageSearchIndexer.h"
 
 Q_LOGGING_CATEGORY(lcChatMessageSearchProvider, "gonnect.chat.message.search.provider")
 
@@ -16,8 +16,8 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
             &ChatMessageSearchProvider::resetChatProviders);
 
     connect(this, &ChatMessageSearchProvider::chatRoomAdded, this, [this](QString roomUid) {
-        auto room = m_chatRoomsByUid[roomUid];
-        auto context = m_chatRoomContextsByUid[roomUid];
+        auto room = m_chatRoomsByUid.value(roomUid);
+        auto context = m_chatRoomContextsByUid.value(roomUid);
         if (room && context) {
             QList<ChatMessageSearchIndexer::Message> messages;
 
@@ -158,8 +158,7 @@ void ChatMessageSearchProvider::resetChatProviders()
                             QString roomUid = room->id();
 
                             if (m_chatRoomsByUid.remove(roomUid)) {
-                                m_chatRoomContextsByUid[roomUid]->deleteLater();
-                                m_chatRoomContextsByUid[roomUid] = nullptr;
+                                m_chatRoomContextsByUid.take(roomUid)->deleteLater();
 
                                 Q_EMIT chatRoomDeleted(roomUid);
                             }
@@ -168,6 +167,26 @@ void ChatMessageSearchProvider::resetChatProviders()
             // TODO: What about renamed chat rooms?
         }
     }
+}
+
+QString ChatMessageSearchProvider::getChatMessageText(const QString &roomUid,
+                                                      const QString &messageUid)
+{
+    auto room = m_chatRoomsByUid.value(roomUid);
+    if (!room) {
+        return "";
+    }
+
+    auto message = room->chatMessageById(messageUid);
+    if (!message) {
+        return "";
+    }
+
+    if (const auto textContent = qobject_cast<ChatMessageContentText *>(message->content())) {
+        return textContent->rawText();
+    }
+
+    return "";
 }
 
 ChatMessageSearchProvider::~ChatMessageSearchProvider()

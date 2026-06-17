@@ -55,7 +55,7 @@ public:
     struct SearchResult
     {
         QString messageUid;
-        double rank; // FTS5 BM25 rank: negative == better
+        double rank = 0.0; // FTS5 BM25 rank: negative == better
     };
 
     bool addMessage(const Message &message);
