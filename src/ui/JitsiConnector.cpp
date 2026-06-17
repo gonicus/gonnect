@@ -46,14 +46,15 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
     connect(this, &JitsiConnector::isInConferenceChanged, this, [this]() {
         if (isInConference()) {
             m_establishedDateTime = QDateTime::currentDateTime();
+        } else {
+            m_meetingEstablishedEmitted = false;
         }
     });
 
-    connect(this, &IConferenceConnector::ownIdChanged, this, [this]() {
-        if (!m_jitsiId.isEmpty()) {
-            Q_EMIT ViewHelper::instance().meetingEstablished(m_roomName);
-        }
-    });
+    connect(this, &IConferenceConnector::ownIdChanged, this,
+            &JitsiConnector::checkMeetingEstablished);
+    connect(this, &IConferenceConnector::numberOfUsersChanged, this,
+            &JitsiConnector::checkMeetingEstablished);
 
     connect(this, &IConferenceConnector::largeVideoUserChanged, this, [this]() {
         Q_EMIT executeSetLargeVideoUser(m_largeVideoUser ? m_largeVideoUser->id() : "");
@@ -95,6 +96,17 @@ JitsiConnector::~JitsiConnector()
 QString JitsiConnector::ownDisplayName()
 {
     return ViewHelper::instance().currentUserName();
+}
+
+void JitsiConnector::checkMeetingEstablished()
+{
+    if (m_meetingEstablishedEmitted || !m_isInConference || m_jitsiId.isEmpty()
+        || m_users.size() < 2) {
+        return;
+    }
+
+    m_meetingEstablishedEmitted = true;
+    Q_EMIT ViewHelper::instance().meetingEstablished(m_roomName);
 }
 
 void JitsiConnector::setJitsiId(QString id)

@@ -127,6 +127,7 @@ private:
     void toggleMute();
 
     void checkJitsiBackendFeatures();
+    void checkMeetingEstablished();
 
     void setHasWhiteboard(bool value);
     void setHasTextpad(bool value);
@@ -153,6 +154,7 @@ private:
     ConferenceUser *m_largeVideoUser = nullptr;
     ConferenceChatRoom *m_chatRoom = nullptr;
     bool m_isInConference = false;
+    bool m_meetingEstablishedEmitted = false;
     bool m_isAudioMuted = false;
     bool m_isVideoMuted = false;
     bool m_isVideoAvailable = false;
