@@ -7,6 +7,7 @@
 #include "IConferenceConnector.h"
 #include "JitsiMediaDevice.h"
 #include "ConferenceUser.h"
+#include "MuteSyncGuard.h"
 
 class CallHistoryItem;
 class SIPAudioDevice;
@@ -126,6 +127,7 @@ private:
     void toggleMute();
 
     void checkJitsiBackendFeatures();
+    void checkMeetingEstablished();
 
     void setHasWhiteboard(bool value);
     void setHasTextpad(bool value);
@@ -147,11 +149,12 @@ private:
 
     ConferenceUser::Role m_ownRole = ConferenceUser::Role::None;
     QString m_jitsiId;
-    QString m_muteTag;
+    MuteSyncGuard m_muteSync;
     bool m_didExecuteAudioMuteToggle = false;
     ConferenceUser *m_largeVideoUser = nullptr;
     ConferenceChatRoom *m_chatRoom = nullptr;
     bool m_isInConference = false;
+    bool m_meetingEstablishedEmitted = false;
     bool m_isAudioMuted = false;
     bool m_isVideoMuted = false;
     bool m_isVideoAvailable = false;

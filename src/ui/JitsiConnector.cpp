@@ -46,8 +46,15 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
     connect(this, &JitsiConnector::isInConferenceChanged, this, [this]() {
         if (isInConference()) {
             m_establishedDateTime = QDateTime::currentDateTime();
+        } else {
+            m_meetingEstablishedEmitted = false;
         }
     });
+
+    connect(this, &IConferenceConnector::ownIdChanged, this,
+            &JitsiConnector::checkMeetingEstablished);
+    connect(this, &IConferenceConnector::numberOfUsersChanged, this,
+            &JitsiConnector::checkMeetingEstablished);
 
     connect(this, &IConferenceConnector::largeVideoUserChanged, this, [this]() {
         Q_EMIT executeSetLargeVideoUser(m_largeVideoUser ? m_largeVideoUser->id() : "");
@@ -68,15 +75,13 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
             &JitsiConnector::onHeadsetHookSwitchChanged);
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
-            [this](bool, const QString tag) {
+            [this](bool value, const QString tag) {
                 if (m_isOnHold) {
                     return;
                 }
 
-                if (m_muteTag.isEmpty() || m_muteTag != tag) {
+                if (!m_muteSync.isOwnEcho(tag) && m_isAudioMuted != value) {
                     toggleMute();
-                } else if (!m_muteTag.isEmpty() && m_muteTag == tag) {
-                    m_muteTag.clear();
                 }
             });
 
@@ -91,6 +96,17 @@ JitsiConnector::~JitsiConnector()
 QString JitsiConnector::ownDisplayName()
 {
     return ViewHelper::instance().currentUserName();
+}
+
+void JitsiConnector::checkMeetingEstablished()
+{
+    if (m_meetingEstablishedEmitted || !m_isInConference || m_jitsiId.isEmpty()
+        || m_users.size() < 2) {
+        return;
+    }
+
+    m_meetingEstablishedEmitted = true;
+    Q_EMIT ViewHelper::instance().meetingEstablished(m_roomName);
 }
 
 void JitsiConnector::setJitsiId(QString id)
@@ -1217,7 +1233,10 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
                                                  << displayName << ") with flags:" << startFlags;
 
     auto &globalCallState = GlobalCallState::instance();
-    globalCallState.holdAllCalls(this);
+
+    if (!(globalCallState.globalCallState() & ICallState::State::Migrating)) {
+        globalCallState.holdAllCalls(this);
+    }
 
     if (isOnHold()) {
         toggleHold();
@@ -1271,7 +1290,7 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
         }
     });
 
-    Q_EMIT GlobalCallState::instance().callStarted(true);
+    Q_EMIT globalCallState.callStarted(true);
 }
 
 void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
@@ -1385,8 +1404,7 @@ void JitsiConnector::setAudioMuted(bool value)
     }
 
     if (!m_didExecuteAudioMuteToggle) {
-        m_muteTag = QUuid::createUuid().toString();
-        GlobalMuteState::instance().toggleMute(m_muteTag);
+        GlobalMuteState::instance().setMuted(value, m_muteSync.originate());
     }
 
     m_didExecuteAudioMuteToggle = false;
