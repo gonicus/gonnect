@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <QObject>
 #include <QQmlEngine>
 
@@ -33,7 +35,11 @@ public:
 
     ChatMessageSearchModel *model() const { return m_model; }
 
-    void resetChatProviders();
+    void updateChatProviders();
+    void loadChatProvider(IChatProvider *provider);
+
+    void loadChatRoom(IChatRoom *room);
+    void removeChatRoom(IChatRoom *room);
 
     QString getChatMessageText(const QString &roomUid, const QString &messageUid);
 
@@ -44,11 +50,31 @@ private:
 
     QString m_searchPhrase;
 
-    QList<IChatProvider *> m_chatProviders;
-    QObject *m_chatProviderContext = nullptr;
+    struct ProviderConnection
+    {
+        std::shared_ptr<QObject> context;
+        IChatProvider *provider = nullptr;
 
-    QHash<QString, IChatRoom *> m_chatRoomsByUid;
-    QHash<QString, QObject *> m_chatRoomContextsByUid;
+        ProviderConnection() : context(std::make_shared<QObject>()) { }
+
+        ProviderConnection(IChatProvider *provider)
+            : context(std::make_shared<QObject>()), provider(provider)
+        {
+        }
+    };
+
+    struct RoomConnection
+    {
+        std::shared_ptr<QObject> context;
+        IChatRoom *room = nullptr;
+
+        RoomConnection() : context(std::make_shared<QObject>()) { }
+
+        RoomConnection(IChatRoom *room) : context(std::make_shared<QObject>()), room(room) { }
+    };
+
+    QHash<QString, ProviderConnection> m_chatProvidersByUid;
+    QHash<QString, RoomConnection> m_chatRoomsByUid;
 
 Q_SIGNALS:
     void chatRoomAdded(QString uid);
