@@ -6,6 +6,7 @@
 #include "NumberStats.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Ringer.h"
+#include "Pinger.h"
 #include "AuthManager.h"
 #include "GlobalCallState.h"
 #include "USBDevices.h"
@@ -38,6 +39,10 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
     m_ringerTimer.setSingleShot(true);
     m_ringerTimer.setInterval(3s);
     m_ringerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayRingTone);
+
+    m_pingerTimer.setSingleShot(true);
+    m_pingerTimer.setInterval(3s);
+    m_pingerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayNotificationTone);
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
             &ViewHelper::updateCurrentUser);
@@ -206,6 +211,20 @@ QString ViewHelper::initials(const QString &name) const
     return QString("%1%2").arg(name.at(0), splitted.at(splitted.length() - 1).at(0)).toUpper();
 }
 
+void ViewHelper::testPlayRingTone(qreal volume)
+{
+    stopTestPlayRingTone();
+
+    m_ringer = new Ringer(this);
+    m_ringer->start(volume);
+    m_ringerTimer.start();
+
+    if (!m_isPlayingRingTone) {
+        m_isPlayingRingTone = true;
+        Q_EMIT isPlayingRingToneChanged();
+    }
+}
+
 void ViewHelper::stopTestPlayRingTone()
 {
     if (m_isPlayingRingTone) {
@@ -216,6 +235,38 @@ void ViewHelper::stopTestPlayRingTone()
 
         m_isPlayingRingTone = false;
         Q_EMIT isPlayingRingToneChanged();
+    }
+}
+
+void ViewHelper::testPlayNotificationTone(qreal volume)
+{
+    stopTestPlayNotificationTone();
+
+    m_pinger = new Pinger(this);
+    connect(m_pinger, &Pinger::stopped, this, [this]() { stopTestPlayNotificationTone(); });
+    m_pinger->ping(volume);
+    m_pingerTimer.start();
+
+    if (!m_isPlayingNotificationTone) {
+        m_isPlayingNotificationTone = true;
+        Q_EMIT isPlayingNotificationToneChanged();
+    }
+}
+
+void ViewHelper::stopTestPlayNotificationTone()
+{
+    if (m_isPlayingNotificationTone) {
+        m_pingerTimer.stop();
+
+        if (m_pinger) {
+            auto *pinger = m_pinger;
+            m_pinger = nullptr;
+            pinger->stop();
+            pinger->deleteLater();
+        }
+
+        m_isPlayingNotificationTone = false;
+        Q_EMIT isPlayingNotificationToneChanged();
     }
 }
 
@@ -286,20 +337,6 @@ void ViewHelper::quitApplication()
         Q_EMIT showQuitConfirm();
     } else {
         quitApplicationNoConfirm();
-    }
-}
-
-void ViewHelper::testPlayRingTone(qreal volume)
-{
-    stopTestPlayRingTone();
-
-    m_ringer = new Ringer(this);
-    m_ringer->start(volume);
-    m_ringerTimer.start();
-
-    if (!m_isPlayingRingTone) {
-        m_isPlayingRingTone = true;
-        Q_EMIT isPlayingRingToneChanged();
     }
 }
 

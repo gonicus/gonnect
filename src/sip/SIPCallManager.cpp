@@ -203,7 +203,8 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
         return;
     }
 
-    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::urgent, call);
+    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::urgent, false,
+                              call);
 
     if (m_settings.value("generic/inverseAcceptReject", false).toBool()) {
         n->addButton(tr("Reject"), "reject", "call.decline", {});
@@ -727,8 +728,8 @@ void SIPCallManager::addCall(SIPCall *call)
 
         QPointer<SIPAccount> account = call->account();
 
-        auto n =
-                new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, this);
+        auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal,
+                                  false, this);
 
         auto &am = AvatarManager::instance();
         QString avatar = c ? am.avatarPathFor(c->id()) : "";

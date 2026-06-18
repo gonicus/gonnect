@@ -105,7 +105,8 @@ void SIPBuddy::notifyOnceWhenBuddyAvailable()
     }
 
     // Create notification object
-    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, this);
+    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, true,
+                              this);
 
     auto &am = AvatarManager::instance();
     QString avatar = c ? am.avatarPathFor(c->id()) : "";

@@ -342,6 +342,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
 
+        ui/components/controls/AudioFileSelector.qml
         ui/components/controls/AudioLevelButton.qml
         ui/components/controls/AudioPlayer.qml
         ui/components/controls/BarButton.qml
@@ -371,6 +372,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/TextField.qml
         ui/components/controls/VideoPlayer.qml
         ui/components/controls/VoiceMailField.qml
+        ui/components/controls/VolumeSlider.qml
 
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
@@ -558,6 +560,8 @@ qt_add_qml_module(gonnect
         sip/SIPTemplateController.cpp
         sip/SIPUserAgentConfig.h
         sip/SIPUserAgentConfig.cpp
+        sip/Pinger.h
+        sip/Pinger.cpp
         sip/PreferredIdentity.h
         sip/PreferredIdentity.cpp
         sip/PreferredIdentityValidator.h

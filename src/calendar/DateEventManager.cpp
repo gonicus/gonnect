@@ -392,8 +392,8 @@ void DateEventManager::onTimerTimeout()
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
                 QString message = isJitsiMeeting ? tr("Conference starting soon")
                                                  : tr("Appointment starting soon");
-                auto notification =
-                        new Notification(message, summary, Notification::Priority::high, &notMan);
+                auto notification = new Notification(message, summary, Notification::Priority::high,
+                                                     true, &notMan);
 
                 notification->setIcon(":/icons/gonnect.svg");
                 if (isJitsiMeeting) {

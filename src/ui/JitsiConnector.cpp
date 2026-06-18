@@ -186,7 +186,7 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
     AppSettings settings;
     if (settings.value("generic/jitsiChatAsNotifications", true).toBool()) {
         auto notification = new Notification(tr("New chat message"), message,
-                                             Notification::Priority::normal, this);
+                                             Notification::Priority::normal, true, this);
         notification->setIcon(":/icons/gonnect.svg");
 
         m_chatNotifications.append(notification);
@@ -1268,7 +1268,7 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
 
     // Create notification about ongoing conference
     m_inConferenceNotification = new Notification(tr("Active conference"), this->displayName(),
-                                                  Notification::Priority::normal, this);
+                                                  Notification::Priority::normal, false, this);
     m_inConferenceNotification->setDisplayHint(Notification::tray
                                                | Notification::hideContentOnLockScreen);
     m_inConferenceNotification->setCategory("call.ongoing");

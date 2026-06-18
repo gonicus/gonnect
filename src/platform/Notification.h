@@ -26,7 +26,8 @@ public:
     Q_ENUM(DisplayHint)
 
     explicit Notification(const QString &title, const QString &body,
-                          Priority priority = Priority::normal, QObject *parent = nullptr);
+                          Priority priority = Priority::normal, bool playPing = false,
+                          QObject *parent = nullptr);
     ~Notification();
 
     // TODO: set display-hint
@@ -49,6 +50,7 @@ public:
     QString title() const { return m_title; }
     QString body() const { return m_body; }
     QString category() const { return m_category; }
+    bool playPing() const { return m_playPing; }
 
     bool hasThemedIcon() const;
     QString iconName() const { return m_iconUri; }
@@ -91,6 +93,7 @@ private:
     unsigned m_displayHint = 0;
     unsigned m_version = 1;
 
+    bool m_playPing = false;
     bool m_roundedIcon = false;
 
     Priority m_priority = Priority::normal;

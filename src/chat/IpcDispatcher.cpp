@@ -1759,7 +1759,8 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
         message = textContent->simpleText();
     }
 
-    auto notification = new Notification(title, message, Notification::Priority::normal, this);
+    auto notification =
+            new Notification(title, message, Notification::Priority::normal, true, this);
 
     QString avatarPath = chatRoom->avatarPath();
     if (avatarPath.isEmpty() && chatRoom->isDirectChat()) {
