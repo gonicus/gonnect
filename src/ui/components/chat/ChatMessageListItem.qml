@@ -375,8 +375,13 @@ Item {
                         title: qsTr("Remove message"),
                         text: qsTr("Do you really want to remove this message?")
                     })
+
+                    const roomId = control.roomId
+                    const eventId = control.eventId
+                    const chatProvider = control.chatProvider
+
                     item.accepted.connect(() => {
-                        control.chatProvider.requestRemoveMessage(control.roomId, control.eventId)
+                        chatProvider.requestRemoveMessage(roomId, eventId)
                     })
                 }
             }

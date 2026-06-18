@@ -36,8 +36,7 @@ void ChatMessageContentText::processText()
         return;
     }
 
-    m_simpleText = ChatMessageTransformer::addLinkTags(m_rawText);
-    m_simpleText = ChatMessageTransformer::highlightMentions(m_simpleText, *chatMessageObj);
+    m_simpleText = convertText(m_rawText);
 
     // Split into code/pre blocks
     qDeleteAll(m_parts);
@@ -61,8 +60,8 @@ void ChatMessageContentText::processText()
 
                 // Remaining normal text
                 if (!currentTextBuffer.isEmpty()) {
-                    m_parts.append(new ChatMessageContentPart(false, currentTextBuffer.trimmed(),
-                                                              "", this));
+                    m_parts.append(new ChatMessageContentPart(
+                            false, convertText(currentTextBuffer.trimmed()), "", this));
                     currentTextBuffer.clear();
                 }
 
@@ -83,7 +82,7 @@ void ChatMessageContentText::processText()
                     // Remaining normal text
                     if (!currentTextBuffer.isEmpty()) {
                         m_parts.append(new ChatMessageContentPart(
-                                false, currentTextBuffer.trimmed(), "", this));
+                                false, convertText(currentTextBuffer.trimmed()), "", this));
                         currentTextBuffer.clear();
                     }
 
@@ -105,7 +104,8 @@ void ChatMessageContentText::processText()
 
     // Remaining buffered text
     if (!currentTextBuffer.isEmpty()) {
-        m_parts.append(new ChatMessageContentPart(false, currentTextBuffer.trimmed(), "", this));
+        m_parts.append(new ChatMessageContentPart(false, convertText(currentTextBuffer.trimmed()),
+                                                  "", this));
         currentTextBuffer.clear();
     }
 
@@ -113,4 +113,14 @@ void ChatMessageContentText::processText()
     cmark_node_free(doc);
 
     Q_EMIT contentChanged();
+}
+
+QString ChatMessageContentText::convertText(const QString &originalText) const
+{
+    if (const auto *chatMessageObj = qobject_cast<ChatMessage *>(parent())) {
+        return ChatMessageTransformer::addLinkTags(
+                ChatMessageTransformer::highlightMentions(originalText, *chatMessageObj));
+    }
+
+    return ChatMessageTransformer::addLinkTags(originalText);
 }

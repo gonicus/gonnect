@@ -174,5 +174,13 @@ Item {
             property: "availableWidth"
             value: control.width
         }
+
+        Connections {
+            target: attachmentLoader.item
+            ignoreUnknownSignals: true
+            function openDirectChatRequested(userId : string) {
+                control.openDirectChatRequested(userId)
+            }
+        }
     }
 }
