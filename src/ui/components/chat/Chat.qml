@@ -287,7 +287,12 @@ Item {
 
         onSendFile: filePath => control.chatRoom.sendFile(filePath)
         onSendImage: imagePath => control.chatRoom.sendImage(imagePath)
-        onImageFromClipboardReceived: () => control.useImageFromClipboard()
+        onImageFromClipboardReceived: () => {
+            if (control.chatProvider && control.chatRoom) {
+                control.chatProvider.uploadImageFromClipboard(control.chatRoom.id)
+            }
+        }
+
         onEditLastMessage: () => {
             const chatProvider = control.chatProvider
             const chatRoom = control.chatRoom
