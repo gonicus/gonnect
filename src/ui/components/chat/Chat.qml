@@ -196,7 +196,7 @@ Item {
             bottom: chatMessageBox.visible ? chatMessageBox.top : parent.bottom
         }
 
-        readonly property list<string> typingUserNames: control.chatRoom?.typingUsers.filter(user => user.computedName) ?? []
+        readonly property list<string> typingUserNames: control.chatRoom?.typingUsers.map(user => user.computedName) ?? []
 
         Label {
             id: typingUsersLabel
@@ -287,7 +287,12 @@ Item {
 
         onSendFile: filePath => control.chatRoom.sendFile(filePath)
         onSendImage: imagePath => control.chatRoom.sendImage(imagePath)
-        onImageFromClipboardReceived: () => control.useImageFromClipboard()
+        onImageFromClipboardReceived: () => {
+            if (control.chatProvider && control.chatRoom) {
+                control.chatProvider.uploadImageFromClipboard(control.chatRoom.id)
+            }
+        }
+
         onEditLastMessage: () => {
             const chatProvider = control.chatProvider
             const chatRoom = control.chatRoom
@@ -332,6 +337,25 @@ Item {
             bottom: parent.bottom
             leftMargin: 10
             rightMargin: 10
+        }
+    }
+
+    Timer {
+        id: readTimer
+        interval: 2000
+        onTriggered: () => {
+            if (control.Window.active && control.isScrolledDown && control.chatRoom) {
+                control.chatRoom.resetUnreadCount()
+            }
+        }
+    }
+
+    HoverHandler {
+        id: chatHoverHandler
+        onPointChanged: () => {
+            if (!readTimer.running && control.Window.active) {
+                readTimer.start()
+            }
         }
     }
 }

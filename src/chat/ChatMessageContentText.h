@@ -29,6 +29,7 @@ public:
     void processText();
 
 private:
+    QString convertText(const QString &originalText) const;
     QString m_rawText;
     QString m_simpleText;
     QList<ChatMessageContentPart *> m_parts;

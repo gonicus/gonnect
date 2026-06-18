@@ -7,22 +7,19 @@ namespace ChatMessageTransformer {
 
 QString addLinkTags(const QString &orig)
 {
-    static const QRegularExpression re("^\\S+\\.\\S{2,}[^.]$",
-                                       QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression re(
+            R"(\b(?:https?://|ftp://|www\.)[^\s<>]+(?:\([^\s<>]*\)|[^\s<>\p{Punct}]))",
+            QRegularExpression::CaseInsensitiveOption);
 
-    auto split = orig.split(' ');
+    QString result = orig;
 
-    QMutableListIterator it(split);
-    while (it.hasNext()) {
-        auto s = it.next();
+    result.replace(re, R"(<a href="\1">\1</a>)");
 
-        const auto match = re.match(s);
-        if (match.hasMatch()) {
-            it.setValue(QString("<a href=\"%1\">%1</a>").arg(s));
-        }
-    }
+    static const QRegularExpression wwwRe(R"(<a href="www\.)",
+                                          QRegularExpression::CaseInsensitiveOption);
+    result.replace(wwwRe, R"(<a href="http://www.)");
 
-    return split.join(' ');
+    return result;
 }
 
 QString highlightMentions(const QString &orig, const ChatMessage &message)

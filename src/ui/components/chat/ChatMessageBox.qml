@@ -450,7 +450,7 @@ Item {
 
         FileDialog {
             id: uploadMediaDialog
-            nameFilters: FileHelper.mediaFileSelectors(true)
+            nameFilters: FileHelper.imageFileSelectors()
             onAccepted: () => control.sendImage(uploadMediaDialog.selectedFile)
         }
 

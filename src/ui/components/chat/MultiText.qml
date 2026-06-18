@@ -13,6 +13,8 @@ Column {
     property ChatMessageContentText content
     property int availableWidth
 
+    signal openDirectChatRequested(string userId)
+
     Repeater {
         id: rep
         model: control.content?.contentParts ?? null
@@ -33,16 +35,34 @@ Column {
                 right: parent?.right
             }
 
-            Label {
+            TextEdit {
                 id: textLabel
                 visible: !delg.isCode
                 y: delg.index > 0 ? 5 : 0
                 text: delg.text
                 font.pixelSize: Theme.fontPixelSize
                 wrapMode: Label.WordWrap
+                textFormat: Text.MarkdownText
+                readOnly: true
+                cursorDelegate: null
                 anchors {
                     left: parent.left
                     right: parent.right
+                }
+
+                HoverHandler {
+                    id: hoverHandler
+                    cursorShape: textLabel.hoveredLink !== ""
+                                 ? Qt.PointingHandCursor
+                                 : Qt.IBeamCursor
+                }
+
+                onLinkActivated: link => {
+                    if (link.startsWith("chat://")) {
+                        control.openDirectChatRequested(link.substring(7))
+                    } else {
+                        Qt.openUrlExternally(link)
+                    }
                 }
             }
 

@@ -5132,7 +5132,7 @@
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="293"/>
         <source>Create chat room &quot;%1&quot;</source>
-        <translation>Char-Raum &quot;%1&quot; erstellen</translation>
+        <translation>Chat-Raum &quot;%1&quot; erstellen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="315"/>
