@@ -151,7 +151,6 @@ qt_add_executable(gonnect
 )
 
 set_target_properties(gonnect PROPERTIES
-    QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_ICON_FILE gonnect.icns
