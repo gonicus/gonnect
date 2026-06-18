@@ -518,25 +518,6 @@ Item {
             bottomMargin: 24
         }
 
-        Timer {
-            id: readTimer
-            interval: 2000
-            onTriggered: () => {
-                if (control.Window.active && chat.isScrolledDown) {
-                    chatRoomList.resetUnreadCount()
-                }
-            }
-        }
-
-        HoverHandler {
-            id: chatHoverHandler
-            onPointChanged: () => {
-                if (!readTimer.running && control.Window.active) {
-                    readTimer.start()
-                }
-            }
-        }
-
         Chat {
             id: chat
             anchors.fill: parent

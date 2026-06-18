@@ -339,4 +339,23 @@ Item {
             rightMargin: 10
         }
     }
+
+    Timer {
+        id: readTimer
+        interval: 2000
+        onTriggered: () => {
+            if (control.Window.active && control.isScrolledDown && control.chatRoom) {
+                control.chatRoom.resetUnreadCount()
+            }
+        }
+    }
+
+    HoverHandler {
+        id: chatHoverHandler
+        onPointChanged: () => {
+            if (!readTimer.running && control.Window.active) {
+                readTimer.start()
+            }
+        }
+    }
 }
