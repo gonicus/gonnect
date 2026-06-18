@@ -196,7 +196,7 @@ Item {
             bottom: chatMessageBox.visible ? chatMessageBox.top : parent.bottom
         }
 
-        readonly property list<string> typingUserNames: control.chatRoom?.typingUsers.filter(user => user.computedName) ?? []
+        readonly property list<string> typingUserNames: control.chatRoom?.typingUsers.map(user => user.computedName) ?? []
 
         Label {
             id: typingUsersLabel
