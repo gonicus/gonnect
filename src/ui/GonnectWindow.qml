@@ -221,7 +221,7 @@ BaseWindow {
                 keyEvent.accepted = true
                 ViewHelper.toggleFullscreen()
 
-            } else if (keyEvent.key === Qt.Key_F && (keyEvent.modifiers & Qt.ControlModifier)) {
+            } else if ([Qt.Key_F, Qt.Key_K].includes(keyEvent.key) && (keyEvent.modifiers & Qt.ControlModifier)) {
 
                 // Focus search field
                 keyEvent.accepted = true
