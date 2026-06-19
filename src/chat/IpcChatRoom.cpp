@@ -109,6 +109,15 @@ void IpcChatRoom::sendFile(const QString &filePath)
     dispatcher->sendFile(id(), uploadedUrl, filePath.split(QChar('/')).last());
 }
 
+void IpcChatRoom::sendTypingPing()
+{
+    if (auto *dispatcher = ipcDispatcher()) {
+        dispatcher->sendTypingPing(id());
+    } else {
+        qCCritical(lcIpcChatRoom) << "IpcChatRoom has no IpcDispatcher as parent";
+    }
+}
+
 void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)
 {
     Q_CHECK_PTR(message);

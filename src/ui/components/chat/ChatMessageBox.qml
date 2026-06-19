@@ -24,10 +24,65 @@ Item {
 
     readonly property bool hasMessage: !!messageField.text.trim()
 
-    onChatRoomChanged: () => control.clear()
+    onChatRoomChanged: () => {
+                           control.clear()
+
+                           internal.typingTimer.stop()
+                           internal.lastPingTime = 0
+                           internal.hasTypedWhileWaiting = false
+                       }
 
     function clear() {
         messageField.clear()
+    }
+
+    QtObject {
+        id: internal
+
+        property double lastPingTime: 0
+        property bool hasTypedWhileWaiting: false
+
+        readonly property Timer typingTimer: Timer {
+            running: false
+            repeat: false
+            interval: 2000
+            onTriggered: () => {
+                if (internal.hasTypedWhileWaiting) {
+                    internal.executePing()
+                }
+            }
+        }
+
+        function executePing() {
+            if (control.chatRoom) {
+                control.chatRoom.sendTypingPing()
+                internal.lastPingTime = Date.now()
+                internal.hasTypedWhileWaiting = false
+                internal.typingTimer.start()
+            }
+        }
+
+        function sendIsTyping() {
+            if (!control.chatRoom) {
+                return
+            }
+
+            const currentTime = Date.now()
+            const timeSinceLastPing = currentTime - internal.lastPingTime
+
+            if (timeSinceLastPing >= 2000) {
+                // Enough time passed since last ping
+                internal.executePing()
+            } else {
+                // Too early
+                internal.hasTypedWhileWaiting = true
+
+                if (!internal.typingTimer.running) {
+                    internal.typingTimer.interval = 2000 - timeSinceLastPing
+                    internal.typingTimer.start()
+                }
+            }
+        }
     }
 
     // SpellCheckHighlighter {
@@ -89,6 +144,7 @@ Item {
         property int lastCursorPosition: 0
 
         onTextEdited: () => {
+            internal.sendIsTyping()
 
             // Find current word at cursor
             const bounds = messageField.currentWordBoundings()

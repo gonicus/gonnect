@@ -97,6 +97,10 @@ public:
     /// Given a local file url, send a message with this file as an attachment.
     Q_INVOKABLE virtual void sendFile(const QString &filePath) = 0;
 
+    /// Send that the user is currently typing. Shall be called every 2 seconds as long as the user
+    /// is typing.
+    Q_INVOKABLE virtual void sendTypingPing() = 0;
+
     /// If the messages of this room have been loaded initially.
     virtual bool isInitiallyLoaded() const = 0;
 

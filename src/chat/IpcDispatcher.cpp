@@ -328,6 +328,15 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     sendRequest(req);
 }
 
+void IpcDispatcher::sendTypingPing(const QString &roomId)
+{
+    auto req = createRequest(false);
+    RoomTypingRequest typingReq;
+    typingReq.setRoomId(roomId);
+    req->setRoomTypingRequest(typingReq);
+    sendRequest(req);
+}
+
 void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
                              const QString &originalFileName)
 {

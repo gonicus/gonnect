@@ -39,6 +39,7 @@ public:
     virtual ChatMessage *latestOwnTextMessage() const override;
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
     virtual void sendFile(const QString &filePath) override;
+    virtual void sendTypingPing() override;
 
     /// Add an already existing message to the room; does not send a new message. Takes ownership of
     /// the object.
