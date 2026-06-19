@@ -21,7 +21,7 @@ Item {
         from: 0
         to: 100
         stepSize: 1
-        value: 100
+        value: 90
         anchors {
             left: parent.left
             right: volumeLabel.left

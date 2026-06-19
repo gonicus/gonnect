@@ -1,9 +1,12 @@
 #include "Pinger.h"
 #include "AppSettings.h"
 #include "AudioManager.h"
+#include "SIPAudioDevice.h"
 
 #include <QAudioOutput>
 #include <QLoggingCategory>
+#include <QMediaDevices>
+#include <QAudioDevice>
 
 Q_LOGGING_CATEGORY(lcPinger, "gonnect.sip.pinger")
 

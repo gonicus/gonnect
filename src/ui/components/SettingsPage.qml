@@ -1137,7 +1137,7 @@ Item {
                         }
 
                         Accessible.role: Accessible.Column
-                        Accessible.name: notificationToneVolumeHeader.text
+                        Accessible.name: ringToneVolumeHeader.text
                         Accessible.description: qsTr("Currently set to: ") + ringToneVolumeSlider.labelText
 
                         Label {

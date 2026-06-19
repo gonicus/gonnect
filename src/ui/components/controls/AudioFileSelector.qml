@@ -113,8 +113,8 @@ Rectangle {
         onClicked: () => toneFileDialog.open()
 
         Accessible.role: Accessible.Button
-        Accessible.name: qsTr("Pick ring tone")
-        Accessible.description: qsTr("Select the ring tone you want to use for incoming calls")
+        Accessible.name: qsTr("Pick sound file")
+        Accessible.description: qsTr("Select the sound file you want to use")
         Accessible.focusable: true
         Accessible.onPressAction: () => pickToneButton.click()
     }
