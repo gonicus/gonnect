@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/CallSideBar.qml" line="204"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="206"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
@@ -13,11 +13,11 @@
     </message>
 </context>
 <context>
-    <name>Chats</name>
+    <name>Chat</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/pages/Chats.qml" line="723"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="203"/>
         <source>%1 is/are typing</source>
-        <translation>
+        <translation type="unfinished">
             <numerusform>%1 is typing</numerusform>
             <numerusform>%1 are typing</numerusform>
         </translation>
@@ -68,7 +68,7 @@
 <context>
     <name>SettingsPage</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/SettingsPage.qml" line="282"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="285"/>
         <source>day(s) of history</source>
         <translation>
             <numerusform>day of history</numerusform>
@@ -79,7 +79,7 @@
 <context>
     <name>ViewHelper</name>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="138"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="143"/>
         <source>%n minute(s)</source>
         <translation>
             <numerusform>%n Minute</numerusform>
@@ -87,7 +87,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="141"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="146"/>
         <source>1 hour and %n minute(s)</source>
         <translation>
             <numerusform>1 Stunde und %n Minute</numerusform>
@@ -95,7 +95,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/ViewHelper.cpp" line="143"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="148"/>
         <source>%n hour(s)</source>
         <translation>
             <numerusform>eine Stunde</numerusform>
