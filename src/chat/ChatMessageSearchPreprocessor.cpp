@@ -27,7 +27,10 @@ ChatMessageSearchPreprocessor::ChatMessageSearchPreprocessor(QObject *parent) : 
     m_stemmerEn = sb_stemmer_new("english", "UTF_8");
     if (!m_stemmerDe || !m_stemmerEn) {
         qCWarning(lcChatMessageSearchPreprocessor) << "Failed to initialize stemmers";
+        return;
     }
+
+    m_isInitialized = true;
 }
 
 ChatMessageSearchPreprocessor::~ChatMessageSearchPreprocessor()

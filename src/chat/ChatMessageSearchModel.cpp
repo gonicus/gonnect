@@ -8,6 +8,7 @@ QHash<int, QByteArray> ChatMessageSearchModel::roleNames() const
 {
     return {
         { static_cast<int>(Roles::MessageUid), "messageUid" },
+        { static_cast<int>(Roles::RoomUid), "roomUid" },
         { static_cast<int>(Roles::Rank), "rank" },
     };
 }
@@ -28,6 +29,8 @@ QVariant ChatMessageSearchModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case static_cast<int>(Roles::MessageUid):
         return result.messageUid;
+    case static_cast<int>(Roles::RoomUid):
+        return result.roomUid;
     case static_cast<int>(Roles::Rank):
         return result.rank;
     default:

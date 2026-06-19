@@ -20,7 +20,11 @@ public:
 
     QString process(const QString &text);
 
+    bool isInitialized() const { return m_isInitialized; }
+
 private:
+    bool m_isInitialized = false;
+
     icu::Transliterator *m_transliterator = nullptr;
 
     sb_stemmer *m_stemmerDe = NULL;

@@ -21,8 +21,9 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
     if (!m_model) {
         return;
     }
+
     m_indexer = new ChatMessageSearchIndexer(this);
-    if (!m_indexer) {
+    if (!m_indexer || !m_indexer->isInitialized()) {
         return;
     }
 
@@ -38,8 +39,7 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
             auto results = m_indexer->search(m_searchPhrase);
             if (results.isEmpty()) {
                 qCWarning(lcChatMessageSearchProvider)
-                        << "Message search did not return any results:"
-                        << m_indexer->lastError();
+                        << "Message search did not return any results:" << m_indexer->lastError();
             } else {
                 m_model->addResults(results);
             }
@@ -154,8 +154,7 @@ void ChatMessageSearchProvider::loadChatRoom(IChatRoom *room)
     if (!messages.isEmpty()) {
         if (!m_indexer->addMessages(messages)) {
             qCWarning(lcChatMessageSearchProvider)
-                    << "Failed to add messages to indexer:"
-                    << m_indexer->lastError();
+                    << "Failed to add messages to indexer:" << m_indexer->lastError();
         };
         m_indexer->optimize();
     }
@@ -171,11 +170,12 @@ void ChatMessageSearchProvider::loadChatRoom(IChatRoom *room)
                     }
                 }
             });
-    connect(room, &IChatRoom::chatMessageRemoved, context, [this](qsizetype, ChatMessage *chatMessage) {
-        if (chatMessage) {
-            m_indexer->removeMessage(chatMessage->eventId());
-        }
-    });
+    connect(room, &IChatRoom::chatMessageRemoved, context,
+            [this](qsizetype, ChatMessage *chatMessage) {
+                if (chatMessage) {
+                    m_indexer->removeMessage(chatMessage->eventId());
+                }
+            });
     connect(room, &IChatRoom::chatMessageContentChanged, context,
             [this, roomUid](qsizetype, ChatMessage *chatMessage) {
                 if (chatMessage && chatMessage->content()) {

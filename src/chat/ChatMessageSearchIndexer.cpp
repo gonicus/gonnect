@@ -12,7 +12,7 @@ Q_LOGGING_CATEGORY(lcChatMessageSearchIndexer, "gonnect.chat.message.search.inde
 ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ parent }
 {
     m_preprocessor = new ChatMessageSearchPreprocessor(this);
-    if (!m_preprocessor) {
+    if (!m_preprocessor || !m_preprocessor->isInitialized()) {
         return;
     }
 
@@ -71,9 +71,10 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
 
         sqlite3_close(m_db);
         m_db = nullptr;
+        return;
     }
 
-    // TODO: Retry on error?
+    m_isInitialized = true;
 }
 
 ChatMessageSearchIndexer::~ChatMessageSearchIndexer()
@@ -285,9 +286,10 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
     // FTS5 rank is a special hidden column; expose it explicitly (unqualified in ORDER BY).
     // Results are ordered ascending by rank (FTS5 BM25 is negative: closer
     // to zero = worse; more negative = better match).
-    const QString searchStatement = "SELECT m.message_uid, f.rank FROM messages_fts f JOIN "
-                                    "messages_map m ON f.rowid = m.id "
-                                    "WHERE messages_fts MATCH ? ORDER BY rank LIMIT ?;";
+    const QString searchStatement =
+            "SELECT m.message_uid, m.room_uid, f.rank FROM messages_fts f JOIN "
+            "messages_map m ON f.rowid = m.id "
+            "WHERE messages_fts MATCH ? ORDER BY rank LIMIT ?;";
 
     Statement search;
     if (sqlite3_prepare_v2(m_db, searchStatement.toUtf8(), -1, &search.statement, nullptr)
@@ -304,7 +306,9 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
         SearchResult result;
         result.messageUid = QString::fromUtf8(
                 reinterpret_cast<const char *>(sqlite3_column_text(search.statement, 0)));
-        result.rank = sqlite3_column_double(search.statement, 1);
+        result.roomUid = QString::fromUtf8(
+                reinterpret_cast<const char *>(sqlite3_column_text(search.statement, 1)));
+        result.rank = sqlite3_column_double(search.statement, 2);
         results.append(result);
     }
 

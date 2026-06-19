@@ -100,6 +100,7 @@ Item {
             id: delg
 
             required property string messageUid
+            required property string roomUid
             required property double rank
 
             height: 50
@@ -118,7 +119,7 @@ Item {
 
             // TODO: Map messageUid to message text
             Label {
-                text: delg.messageUid
+                text: "%1 (%2)".arg(delg.messageUid).arg(delg.roomUid)
                 elide: Text.ElideRight
                 anchors {
                     bottom: parent.verticalCenter

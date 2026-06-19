@@ -11,7 +11,7 @@ class ChatMessageSearchModel : public QAbstractListModel
     QML_ELEMENT
 
 public:
-    enum class Roles { MessageUid = Qt::UserRole + 1, Rank };
+    enum class Roles { MessageUid = Qt::UserRole + 1, RoomUid, Rank };
 
     explicit ChatMessageSearchModel(QObject *parent = nullptr);
 

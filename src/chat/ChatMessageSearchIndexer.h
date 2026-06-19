@@ -16,6 +16,8 @@ public:
     ChatMessageSearchIndexer(QObject *parent = nullptr);
     ~ChatMessageSearchIndexer();
 
+    bool isInitialized() const { return m_isInitialized; }
+
     bool isOpen() const { return m_db != nullptr; }
     QString lastError() const { return m_error; }
 
@@ -43,6 +45,7 @@ public:
     struct SearchResult
     {
         QString messageUid;
+        QString roomUid;
         double rank = 0.0; // FTS5 BM25 rank: negative == better
     };
 
@@ -60,6 +63,8 @@ public:
 
 private:
     bool exec(const QString &statement);
+
+    bool m_isInitialized = false;
 
     ChatMessageSearchPreprocessor *m_preprocessor = nullptr;
 
