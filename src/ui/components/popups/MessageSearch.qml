@@ -96,7 +96,6 @@ Item {
         model: ChatMessageSearchProvider.model
         delegate: Item {
             id: delg
-            clip: true
 
             required property string messageUid
             required property double rank
