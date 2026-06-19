@@ -8,6 +8,13 @@
 
 Q_LOGGING_CATEGORY(lcChatMessageSearchProvider, "gonnect.chat.message.search.provider")
 
+/*
+    The DB should persist across Gonnect restarts - however, how will we deal with messages having
+    been added/deleted/edited while Gonnect and thus the DB weren't active?
+
+    INSERT OR IGNORE INTO at ChatMessageSearchIndexer::addMessage() is just a temp hack
+*/
+
 ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{ parent }
 {
     m_model = new ChatMessageSearchModel(this);
@@ -217,8 +224,6 @@ QString ChatMessageSearchProvider::getChatMessageText(const QString &roomUid,
 
 ChatMessageSearchProvider::~ChatMessageSearchProvider()
 {
-    // TODO: Clear SQLite tables?
-
     if (m_model) {
         delete m_model;
         m_model = nullptr;

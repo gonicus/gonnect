@@ -92,9 +92,11 @@ Item {
             right: parent.right
             margins: 20
         }
+        clip: true
         model: ChatMessageSearchProvider.model
         delegate: Item {
             id: delg
+            clip: true
 
             required property string messageUid
             required property double rank

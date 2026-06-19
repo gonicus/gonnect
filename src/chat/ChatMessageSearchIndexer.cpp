@@ -80,7 +80,7 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
 
     // Mapping
     const QString mappingStatement =
-            "INSERT INTO messages_map(message_uid, room_uid) VALUES (?,?);";
+            "INSERT OR IGNORE INTO messages_map(message_uid, room_uid) VALUES (?,?);";
     const QByteArray message_uid = message.messageUid.toUtf8();
     const QByteArray room_uid = message.roomUid.toUtf8();
 
@@ -99,7 +99,7 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
     }
 
     // FTS
-    const QString ftsStatement = "INSERT INTO messages_fts(rowid, body) VALUES (?,?);";
+    const QString ftsStatement = "INSERT OR IGNORE INTO messages_fts(rowid, body) VALUES (?,?);";
     const sqlite_int64 inserted_id = sqlite3_last_insert_rowid(m_db);
     const QByteArray body =
             ChatMessageSearchPreprocessor::instance().process(message.body).toUtf8();
