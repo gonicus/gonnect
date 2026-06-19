@@ -369,6 +369,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/Switch.qml
         ui/components/controls/TabBar.qml
         ui/components/controls/TabButton.qml
+        ui/components/controls/TextEdit.qml
         ui/components/controls/TextField.qml
         ui/components/controls/VideoPlayer.qml
         ui/components/controls/VoiceMailField.qml

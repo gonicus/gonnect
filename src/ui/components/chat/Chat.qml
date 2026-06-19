@@ -133,7 +133,8 @@ Item {
                                      text: qsTr("Are you sure you really want to leave this chat?")
                                  })
                     const roomId = control.chatRoom.id
-                    item.accepted.connect(() => control.chatProvider.requestRoomLeave(roomId))
+                    const chatProvider = control.chatProvider
+                    item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
                 }
             }
         }
@@ -173,9 +174,8 @@ Item {
 
             BusyIndicator {
                 running: bigLoadingItem.visible
-                width: 40
-                height: 40
                 circleColor: Theme.secondaryTextColor
+                contentItem.antialiasing: true
             }
 
             Label {
