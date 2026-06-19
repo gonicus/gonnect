@@ -7,9 +7,6 @@ namespace ChatMessageTransformer {
 
 QString addLinkTags(const QString &orig)
 {
-    static const QRegularExpression re(R"(\b(?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}]))",
-                                       QRegularExpression::CaseInsensitiveOption);
-
     static const QRegularExpression reWithGroup(
             R"(\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
             QRegularExpression::CaseInsensitiveOption);
