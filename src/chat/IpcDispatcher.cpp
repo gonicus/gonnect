@@ -1226,6 +1226,10 @@ void IpcDispatcher::processResponse(
             QList<ChatUser *> l;
             l.reserve(changeEvent.typingUserIdList().length());
             for (const auto &id : typingUserIds) {
+                if (id == ownUserId()) {
+                    continue;
+                }
+
                 auto user = m_users.value(id, nullptr);
                 if (user) {
                     l.append(user);
