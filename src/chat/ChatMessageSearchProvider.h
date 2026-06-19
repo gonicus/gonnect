@@ -42,7 +42,8 @@ public:
     void loadChatRoom(IChatRoom *room);
     void removeChatRoom(IChatRoom *room);
 
-    QString getChatMessageText(const QString &roomUid, const QString &messageUid);
+    ChatMessage *getChatMessage(const QString &roomUid, const QString &messageUid);
+    QString getChatMessageText(ChatMessage *message);
 
 private:
     ChatMessageSearchProvider(QObject *parent = nullptr);

@@ -115,7 +115,7 @@ void ChatMessageSearchProvider::loadChatProvider(IChatProvider *provider)
     connect(provider, &IChatProvider::chatRoomRemoved, context,
             [this](qsizetype, IChatRoom *room) { removeChatRoom(room); });
 
-    // TODO: What about renamed chat rooms?
+    // TODO: Do chatRoomJoined/chatRoomLeft also emit added/removed?
 }
 
 void ChatMessageSearchProvider::loadChatRoom(IChatRoom *room)
@@ -203,21 +203,25 @@ void ChatMessageSearchProvider::removeChatRoom(IChatRoom *room)
     m_indexer->removeMessagesByRoom(roomUid);
 }
 
-QString ChatMessageSearchProvider::getChatMessageText(const QString &roomUid,
-                                                      const QString &messageUid)
+ChatMessage *ChatMessageSearchProvider::getChatMessage(const QString &roomUid,
+                                                       const QString &messageUid)
 {
     auto it = m_chatRoomsByUid.find(roomUid);
     if (it == m_chatRoomsByUid.end()) {
-        return "";
+        return nullptr;
     }
 
     RoomConnection &conn = it.value();
     auto room = conn.room;
     if (!room) {
-        return "";
+        return nullptr;
     }
 
-    auto message = room->chatMessageById(messageUid);
+    return room->chatMessageById(messageUid);
+}
+
+QString ChatMessageSearchProvider::getChatMessageText(ChatMessage *message)
+{
     if (!message) {
         return "";
     }
