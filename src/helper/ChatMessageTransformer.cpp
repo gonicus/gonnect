@@ -7,13 +7,12 @@ namespace ChatMessageTransformer {
 
 QString addLinkTags(const QString &orig)
 {
-    static const QRegularExpression re(
-            R"(\b(?:https?://|ftp://|www\.)[^\s<>]+(?:\([^\s<>]*\)|[^\s<>\p{Punct}]))",
+    static const QRegularExpression reWithGroup(
+            R"(\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
             QRegularExpression::CaseInsensitiveOption);
 
     QString result = orig;
-
-    result.replace(re, R"(<a href="\1">\1</a>)");
+    result.replace(reWithGroup, R"(<a href="\1">\1</a>)");
 
     static const QRegularExpression wwwRe(R"(<a href="www\.)",
                                           QRegularExpression::CaseInsensitiveOption);
