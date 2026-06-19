@@ -687,6 +687,8 @@ qt_add_qml_module(gonnect
 
         helper/AggregatedDirectRoomsOfContact.h
         helper/AggregatedDirectRoomsOfContact.cpp
+        helper/AudioHelper.h
+        helper/AudioHelper.cpp
         helper/ChatMessageTransformer.h
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
