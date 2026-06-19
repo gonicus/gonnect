@@ -30,7 +30,6 @@ public:
     virtual ChatMessage *chatMessageById(const QString &id) const override;
     virtual ChatMessage *latestOwnTextMessage() const override { return nullptr; }
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
-    virtual void sendImage(const QString &filePath) override { Q_UNUSED(filePath) }
     virtual void sendFile(const QString &filePath) override { Q_UNUSED(filePath) }
     virtual bool isDirectChat() override { return false; }
     virtual bool isFavorite() override { return false; }

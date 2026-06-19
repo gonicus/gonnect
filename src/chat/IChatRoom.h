@@ -94,9 +94,6 @@ public:
     Q_INVOKABLE virtual void sendMessage(const QString &message,
                                          const QString &relatedMessageId = "") = 0;
 
-    /// Given a local file url, send a message with this image.
-    Q_INVOKABLE virtual void sendImage(const QString &filePath) = 0;
-
     /// Given a local file url, send a message with this file as an attachment.
     Q_INVOKABLE virtual void sendFile(const QString &filePath) = 0;
 

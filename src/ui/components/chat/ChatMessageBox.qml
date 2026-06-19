@@ -13,7 +13,6 @@ Item {
                        Math.floor(0.8 * parent.height))
 
     signal sendMessage
-    signal sendImage(string filePath)
     signal sendFile(string filePath)
     signal imageFromClipboardReceived
     signal editLastMessage
@@ -451,7 +450,7 @@ Item {
         FileDialog {
             id: uploadMediaDialog
             nameFilters: FileHelper.imageFileSelectors()
-            onAccepted: () => control.sendImage(uploadMediaDialog.selectedFile)
+            onAccepted: () => control.sendFile(uploadMediaDialog.selectedFile)
         }
 
         FileDialog {
