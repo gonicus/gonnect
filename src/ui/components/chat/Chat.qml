@@ -173,9 +173,8 @@ Item {
 
             BusyIndicator {
                 running: bigLoadingItem.visible
-                width: 40
-                height: 40
                 circleColor: Theme.secondaryTextColor
+                contentItem.antialiasing: true
             }
 
             Label {
