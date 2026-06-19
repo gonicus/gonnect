@@ -3,7 +3,6 @@
 
 #include "ReadOnlyConfdSettings.h"
 #include "ChatMessageSearchIndexer.h"
-#include "ChatMessageSearchPreprocessor.h"
 
 // INFO: Uses SQLCipher amalgamation (AES-256 + FTS5): https://github.com/sqlcipher/sqlcipher
 #include <sqlite3.h>
@@ -12,6 +11,11 @@ Q_LOGGING_CATEGORY(lcChatMessageSearchIndexer, "gonnect.chat.message.search.inde
 
 ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ parent }
 {
+    m_preprocessor = new ChatMessageSearchPreprocessor(this);
+    if (!m_preprocessor) {
+        return;
+    }
+
     // TODO: Use proper settings names, wallet, etc.
     ReadOnlyConfdSettings settings;
     const QByteArray path = settings.value("generic/chatSearchCachePath", "").toString().toUtf8();
@@ -72,6 +76,19 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
     // TODO: Retry on error?
 }
 
+ChatMessageSearchIndexer::~ChatMessageSearchIndexer()
+{
+    if (m_db) {
+        sqlite3_close(m_db);
+        m_db = nullptr;
+    }
+
+    if (m_preprocessor) {
+        delete m_preprocessor;
+        m_preprocessor = nullptr;
+    }
+}
+
 bool ChatMessageSearchIndexer::addMessage(const Message &message)
 {
     if (!m_db) {
@@ -101,8 +118,7 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
     // FTS
     const QString ftsStatement = "INSERT OR IGNORE INTO messages_fts(rowid, body) VALUES (?,?);";
     const sqlite_int64 inserted_id = sqlite3_last_insert_rowid(m_db);
-    const QByteArray body =
-            ChatMessageSearchPreprocessor::instance().process(message.body).toUtf8();
+    const QByteArray body = m_preprocessor->process(message.body).toUtf8();
 
     Statement fts;
     if (sqlite3_prepare_v2(m_db, ftsStatement.toUtf8(), -1, &fts.statement, nullptr) != SQLITE_OK) {
@@ -241,14 +257,6 @@ bool ChatMessageSearchIndexer::updateMessage(const Message &message)
     return exec("COMMIT;");
 }
 
-ChatMessageSearchIndexer::~ChatMessageSearchIndexer()
-{
-    if (m_db) {
-        sqlite3_close(m_db);
-        m_db = nullptr;
-    }
-}
-
 QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(const QString &query,
                                                                                int limit)
 {
@@ -260,7 +268,7 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
 
     // INFO: The FTS5 trigram tokenizer needs at least 3 characters to produce a
     // token. Shorter queries would match nothing (or cause an FTS error).
-    const QString processed = ChatMessageSearchPreprocessor::instance().process(query.simplified());
+    const QString processed = m_preprocessor->process(query.simplified());
     if (processed.length() < 3) {
         return results;
     }

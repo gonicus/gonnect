@@ -1,5 +1,4 @@
 #include <QLoggingCategory>
-#include <QRegularExpression>
 
 #include "ChatMessageSearchPreprocessor.h"
 
@@ -67,9 +66,9 @@ QString ChatMessageSearchPreprocessor::process(const QString &text)
     us.toUTF8String(utf8Out);
 
     // Step 2 & 3: Per-token Snowball stemming
-    static const QRegularExpression splitter(QStringLiteral(R"(\s+)"));
-    const QStringList tokens = QString::fromUtf8(utf8Out.c_str(), utf8Out.length())
-                                       .split(splitter, Qt::SkipEmptyParts);
+    const QStringList tokens = QString::fromUtf8(utf8Out.data(), utf8Out.size())
+                                       .simplified()
+                                       .split(u' ', Qt::SkipEmptyParts);
 
     QStringList out;
     out.reserve(tokens.size());

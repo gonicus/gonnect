@@ -9,8 +9,6 @@ Item {
     implicitWidth: 800
     implicitHeight: 600
 
-    // TODO: The singleton instance should likely be started ASAP
-    // to get some intitial message loading done prior to the first search
     property var searchProvider: ChatMessageSearchProvider
 
     QtObject {
@@ -32,6 +30,10 @@ Item {
                 control.StackView.view.popCurrentItem(StackView.Immediate)
             }
         }
+    }
+
+    Component.onDestruction: {
+        control.searchProvider.searchPhrase = ""
     }
 
     Keys.onReturnPressed: () => internal.selectMessage()
@@ -85,6 +87,7 @@ Item {
 
     ListView {
         id: searchResultListView
+        clip: true
         anchors {
             top: searchTextField.bottom
             bottom: parent.bottom
@@ -92,7 +95,6 @@ Item {
             right: parent.right
             margins: 20
         }
-        clip: true
         model: ChatMessageSearchProvider.model
         delegate: Item {
             id: delg

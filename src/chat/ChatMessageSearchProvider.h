@@ -7,6 +7,7 @@
 
 #include "IChatRoom.h"
 
+#include "ChatMessageSearchIndexer.h"
 #include "ChatMessageSearchModel.h"
 
 class IChatProvider;
@@ -46,6 +47,7 @@ public:
 private:
     ChatMessageSearchProvider(QObject *parent = nullptr);
 
+    ChatMessageSearchIndexer *m_indexer = nullptr;
     ChatMessageSearchModel *m_model = nullptr;
 
     QString m_searchPhrase;

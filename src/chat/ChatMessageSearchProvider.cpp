@@ -18,6 +18,13 @@ Q_LOGGING_CATEGORY(lcChatMessageSearchProvider, "gonnect.chat.message.search.pro
 ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{ parent }
 {
     m_model = new ChatMessageSearchModel(this);
+    if (!m_model) {
+        return;
+    }
+    m_indexer = new ChatMessageSearchIndexer(this);
+    if (!m_indexer) {
+        return;
+    }
 
     connect(&ChatConnectorManager::instance(), &ChatConnectorManager::chatConnectorsChanged, this,
             &ChatMessageSearchProvider::updateChatProviders);
@@ -28,11 +35,11 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
         }
 
         if (m_searchPhrase.size() >= 3) {
-            auto results = ChatMessageSearchIndexer::instance().search(m_searchPhrase);
+            auto results = m_indexer->search(m_searchPhrase);
             if (results.isEmpty()) {
                 qCWarning(lcChatMessageSearchProvider)
                         << "Message search did not return any results:"
-                        << ChatMessageSearchIndexer::instance().lastError();
+                        << m_indexer->lastError();
             } else {
                 m_model->addResults(results);
             }
@@ -145,42 +152,42 @@ void ChatMessageSearchProvider::loadChatRoom(IChatRoom *room)
     }
 
     if (!messages.isEmpty()) {
-        if (!ChatMessageSearchIndexer::instance().addMessages(messages)) {
+        if (!m_indexer->addMessages(messages)) {
             qCWarning(lcChatMessageSearchProvider)
                     << "Failed to add messages to indexer:"
-                    << ChatMessageSearchIndexer::instance().lastError();
+                    << m_indexer->lastError();
         };
-        ChatMessageSearchIndexer::instance().optimize();
+        m_indexer->optimize();
     }
 
     // Connect to chat room changes as long as the associated context lives
     connect(room, &IChatRoom::chatMessageAdded, context,
-            [roomUid](qsizetype, ChatMessage *chatMessage) {
+            [this, roomUid](qsizetype, ChatMessage *chatMessage) {
                 if (chatMessage && chatMessage->content()) {
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                        ChatMessageSearchIndexer::instance().addMessage(
+                        m_indexer->addMessage(
                                 { chatMessage->eventId(), roomUid, textContent->rawText() });
                     }
                 }
             });
-    connect(room, &IChatRoom::chatMessageRemoved, context, [](qsizetype, ChatMessage *chatMessage) {
+    connect(room, &IChatRoom::chatMessageRemoved, context, [this](qsizetype, ChatMessage *chatMessage) {
         if (chatMessage) {
-            ChatMessageSearchIndexer::instance().removeMessage(chatMessage->eventId());
+            m_indexer->removeMessage(chatMessage->eventId());
         }
     });
     connect(room, &IChatRoom::chatMessageContentChanged, context,
-            [roomUid](qsizetype, ChatMessage *chatMessage) {
+            [this, roomUid](qsizetype, ChatMessage *chatMessage) {
                 if (chatMessage && chatMessage->content()) {
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                        ChatMessageSearchIndexer::instance().updateMessage(
+                        m_indexer->updateMessage(
                                 { chatMessage->eventId(), roomUid, textContent->rawText() });
                     }
                 }
             });
     connect(room, &IChatRoom::chatMessagesReset, context,
-            [roomUid]() { ChatMessageSearchIndexer::instance().removeMessagesByRoom(roomUid); });
+            [this, roomUid]() { m_indexer->removeMessagesByRoom(roomUid); });
 }
 
 void ChatMessageSearchProvider::removeChatRoom(IChatRoom *room)
@@ -193,7 +200,7 @@ void ChatMessageSearchProvider::removeChatRoom(IChatRoom *room)
 
     m_chatRoomsByUid.remove(roomUid);
 
-    ChatMessageSearchIndexer::instance().removeMessagesByRoom(roomUid);
+    m_indexer->removeMessagesByRoom(roomUid);
 }
 
 QString ChatMessageSearchProvider::getChatMessageText(const QString &roomUid,

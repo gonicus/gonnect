@@ -3,8 +3,7 @@
 #include <QObject>
 #include <QDateTime>
 
-#include <QtQml/qqml.h>
-#include <QtQml/qqmlregistration.h>
+#include "ChatMessageSearchPreprocessor.h"
 
 struct sqlite3;
 struct sqlite3_stmt;
@@ -12,20 +11,9 @@ struct sqlite3_stmt;
 class ChatMessageSearchIndexer : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(ChatMessageSearchIndexer)
 
 public:
-    Q_REQUIRED_RESULT static ChatMessageSearchIndexer &instance()
-    {
-        static ChatMessageSearchIndexer *_instance = nullptr;
-
-        if (_instance == nullptr) {
-            _instance = new ChatMessageSearchIndexer();
-        }
-
-        return *_instance;
-    }
-
+    ChatMessageSearchIndexer(QObject *parent = nullptr);
     ~ChatMessageSearchIndexer();
 
     bool isOpen() const { return m_db != nullptr; }
@@ -71,27 +59,10 @@ public:
     bool optimize();
 
 private:
-    ChatMessageSearchIndexer(QObject *parent = nullptr);
-
     bool exec(const QString &statement);
+
+    ChatMessageSearchPreprocessor *m_preprocessor = nullptr;
 
     sqlite3 *m_db = nullptr;
     QString m_error;
-};
-
-class ChatMessageSearchIndexerWrapper
-{
-    Q_GADGET
-    QML_FOREIGN(ChatMessageSearchIndexer)
-    QML_NAMED_ELEMENT(ChatMessageSearchIndexer)
-    QML_SINGLETON
-
-public:
-    static ChatMessageSearchIndexer *create(QQmlEngine *, QJSEngine *)
-    {
-        return &ChatMessageSearchIndexer::instance();
-    }
-
-private:
-    ChatMessageSearchIndexerWrapper() = default;
 };
