@@ -154,7 +154,7 @@ void AudioManager::paInputMuteStateCallback(pa_context *, const pa_source_info *
 
         auto &gms = GlobalMuteState::instance();
         if (source->mute != gms.isMuted()) {
-            gms.toggleMute();
+            gms.setMuted(source->mute);
         }
     }
 }

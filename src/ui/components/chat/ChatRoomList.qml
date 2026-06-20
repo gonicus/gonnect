@@ -92,7 +92,7 @@ Repeater {
                                           control.roomSelected("")
                                       }
 
-                                      control.attachedData.requestRoomLeave(roomId)
+                                      control.chatProvider.requestRoomLeave(roomId)
                                   })
 
         }

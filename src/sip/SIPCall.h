@@ -48,6 +48,7 @@ public:
     bool isIncoming() const { return m_incoming; }
 
     void call(const QString &dst_uri, const pj::CallOpParam &prm);
+    void setPostDialDtmf(const QString &dtmf) { m_postTask = dtmf; }
 
     void addMetadata(const QString &data);
     bool hasMetadata() const { return m_hasMetadata; }

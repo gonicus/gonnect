@@ -370,7 +370,7 @@ void IpcChatRoom::setTypingUsers(const QList<ChatUser *> &users)
                   return left->computedName().localeAwareCompare(right->computedName()) < 0;
               });
 
-    Q_EMIT typingParticpantsChanged();
+    Q_EMIT typingUsersChanged();
 }
 
 IChatRoom::UserRoomState IpcChatRoom::chatUserRoomState(ChatUser *user) const

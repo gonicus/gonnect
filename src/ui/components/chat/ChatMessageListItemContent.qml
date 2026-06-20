@@ -8,7 +8,9 @@ import base
 Item {
     id: control
     implicitWidth: {
-        if (control.isStateUpdate) {
+        if (!control.content) {
+            return 0
+        } else if (control.isStateUpdate) {
             return stateLabel.implicitWidth
         } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
             return messageLabel.implicitWidth
@@ -20,7 +22,9 @@ Item {
         return 36
     }
     implicitHeight: {
-        if (control.isStateUpdate) {
+        if (!control.content) {
+            return 0
+        } else if (control.isStateUpdate) {
             return stateLabel.implicitHeight
         } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
             return messageLabel.implicitHeight
@@ -169,6 +173,14 @@ Item {
             when: !!attachmentLoader.item?.hasOwnProperty("availableWidth")
             property: "availableWidth"
             value: control.width
+        }
+
+        Connections {
+            target: attachmentLoader.item
+            ignoreUnknownSignals: true
+            function openDirectChatRequested(userId : string) {
+                control.openDirectChatRequested(userId)
+            }
         }
     }
 }

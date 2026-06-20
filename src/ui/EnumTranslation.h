@@ -36,6 +36,9 @@ public:
     Q_INVOKABLE QString userStateChange(const ChatMessageContentUserStateChange::State state,
                                         const QString &name) const;
 
+    Q_INVOKABLE QString presenceState(const PresenceState::State state) const;
+    Q_INVOKABLE QColor presenceStateColor(const PresenceState::State state) const;
+
 private:
     explicit EnumTranslation(QObject *parent = nullptr);
 };

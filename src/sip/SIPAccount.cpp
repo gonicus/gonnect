@@ -498,6 +498,13 @@ QString SIPAccount::call(const QString &number, const QString &contactId,
 
     generatePreferredIdentityHeader(number, preferredIdentity, prm);
 
+    if (!PhoneNumberUtil::isSipUri(number)) {
+        const QString postDialDtmf = number.section(',', 1, -1, QString::SectionIncludeLeadingSep);
+        if (!postDialDtmf.isEmpty()) {
+            call->setPostDialDtmf(postDialDtmf);
+        }
+    }
+
     try {
         call->call(sipUrl, prm);
         m_calls.push_back(call);

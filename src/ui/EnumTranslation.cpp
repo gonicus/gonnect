@@ -1,5 +1,7 @@
 #include "EnumTranslation.h"
+#include "Theme.h"
 #include <QLoggingCategory>
+#include <QColor>
 
 Q_LOGGING_CATEGORY(lcEnumTranslation, "gonnect.app.EnumTranslation")
 
@@ -269,4 +271,47 @@ QString EnumTranslation::userStateChange(const ChatMessageContentUserStateChange
 
     qCWarning(lcEnumTranslation) << "Unknown enum value for user state change" << state;
     return tr("Unknown state for %1").arg(name);
+}
+
+QString EnumTranslation::presenceState(const PresenceState::State state) const
+{
+    switch (state) {
+
+    case PresenceState::State::Unknown:
+        return tr("Unknown");
+    case PresenceState::State::Offline:
+        return tr("Offline");
+    case PresenceState::State::Away:
+        return tr("Away");
+    case PresenceState::State::Busy:
+        return tr("Do not disturb");
+    case PresenceState::State::Available:
+        return tr("Available");
+    case PresenceState::State::Ringing:
+        return tr("Ringing");
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown enum value for presence state" << state;
+    return tr("Unknown");
+}
+
+QColor EnumTranslation::presenceStateColor(const PresenceState::State state) const
+{
+    switch (state) {
+
+    case PresenceState::State::Unknown:
+        return QColor("transparent");
+    case PresenceState::State::Offline:
+        return Theme::instance().borderColor();
+    case PresenceState::State::Away:
+        return Theme::instance().yellowColor();
+    case PresenceState::State::Busy:
+        return Theme::instance().redColor();
+    case PresenceState::State::Available:
+    case PresenceState::State::Ringing:
+        return Theme::instance().greenColor();
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown enum value for presence state" << state;
+    return QColor("transparent");
 }

@@ -17,10 +17,12 @@ ChatMessage::ChatMessage(const QString &eventId, const QString &fromId, const QS
 {
     Q_CHECK_PTR(chatRoom);
 
-    content->setParent(this);
+    if (content) {
+        content->setParent(this);
 
-    if (auto *textContent = qobject_cast<ChatMessageContentText *>(content)) {
-        textContent->processText();
+        if (auto *textContent = qobject_cast<ChatMessageContentText *>(content)) {
+            textContent->processText();
+        }
     }
 }
 

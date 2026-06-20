@@ -46,6 +46,8 @@ Item {
 
     property string clickedLink
 
+    readonly property int capabilities: control.chatProvider?.capabilities ?? 0
+
     signal respondTo(string messageId)
 
     states: [
@@ -320,8 +322,9 @@ Item {
             id: chatMessageContextMenu
             onClosed: () => chatMessageContextMenu.destroy()
 
-            Action {
+            HideableMenuItem {
                 text: qsTr("Add reaction...")
+                visible: !!(control.capabilities & IChatProvider.Capability.Reactions)
                 icon.source: Icons.smileyAdd
                 onTriggered: () => {
                     const menuItem = chatMessageContextMenu.itemAt(0)
@@ -339,7 +342,7 @@ Item {
                 }
             }
 
-            Action {
+            HideableMenuItem {
                 text: qsTr("Copy to clipboard")
                 icon.source: Icons.editCopy
                 enabled: control.content instanceof ChatMessageContentText || control.content instanceof ChatMessageContentImage
@@ -354,7 +357,7 @@ Item {
                 }
             }
 
-            Action {
+            HideableMenuItem {
                 text: qsTr("Copy link to clipboard")
                 icon.source: Icons.editCopy
                 enabled: !!control.clickedLink
@@ -363,30 +366,37 @@ Item {
                 }
             }
 
-            Action {
+            HideableMenuItem {
                 text: qsTr("Remove message...")
                 icon.source: Icons.editDelete
+                visible: !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
                 onTriggered: () => {
                     const item = DialogFactory.createConfirmDialog({
                         title: qsTr("Remove message"),
                         text: qsTr("Do you really want to remove this message?")
                     })
+
+                    const roomId = control.roomId
+                    const eventId = control.eventId
+                    const chatProvider = control.chatProvider
+
                     item.accepted.connect(() => {
-                        control.chatProvider.requestRemoveMessage(control.roomId, control.eventId)
+                        chatProvider.requestRemoveMessage(roomId, eventId)
                     })
                 }
             }
 
-            Action {
+            HideableMenuItem {
                 text: qsTr("Edit message...")
                 icon.source: Icons.editor
-                enabled: control.isOwnMessage
+                visible: control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
                 onTriggered: () => {
                     ViewHelper.showEditMessageDialog(control.chatProvider, control.roomId, control.eventId, control.content?.simpleText ?? "")
                 }
             }
 
-            Action {
+            HideableMenuItem {
+                visible: !!(control.capabilities & IChatProvider.Capability.MessageRelations)
                 text: qsTr("Reply...")
                 icon.source: Icons.mailReplyCustom
                 onTriggered: () => control.respondTo(control.eventId)

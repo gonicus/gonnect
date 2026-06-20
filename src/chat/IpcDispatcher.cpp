@@ -21,7 +21,6 @@
 #include "ViewHelper.h"
 #include "EnumTranslation.h"
 #include "GlobalStateAggregator.h"
-#include "ReadOnlyConfdSettings.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -203,8 +202,6 @@ IpcDispatcher::IpcDispatcher(const QString &settingsGroup, const IpcConfig &conf
     connect(this, &IpcDispatcher::capabilitiesInitializedChanged, this,
             &IpcDispatcher::updateConnected);
 
-    connect(this, &IChatProvider::chatRoomIsFavoriteChanged, this,
-            &IpcDispatcher::updateHasFavoriteRooms);
     connect(this, &IChatProvider::chatRoomAdded, this, &IpcDispatcher::updateHasFavoriteRooms);
     connect(this, &IChatProvider::chatRoomAdded, this,
             &IpcDispatcher::updateUnreadNotificationsCount);
@@ -224,6 +221,22 @@ IpcDispatcher::~IpcDispatcher()
 
     qDeleteAll(m_userRoomStateCache.values());
     m_userRoomStateCache.clear();
+}
+
+IChatProvider::Capabilities IpcDispatcher::capabilities() const
+{
+    // clang-format off
+    using CAP = IChatProvider::Capability;
+    static const IChatProvider::Capabilities s_capabilties =
+            CAP::EditMessage
+            | CAP::RemoveMessage
+            | CAP::MessageRelations
+            | CAP::Reactions
+            | CAP::UploadFile
+            | CAP::UploadMedia
+            | CAP::Markdown;
+    return s_capabilties;
+    // clang-format on
 }
 
 void IpcDispatcher::loginWithCredentials(const QString &userId, const QString &secret)
@@ -547,7 +560,6 @@ void IpcDispatcher::processResponse(
 {
     const auto &rc = responseContainer;
     const auto tag = rc.tag();
-    const auto ownUserId = this->ownUserId();
 
     if (tag > 0) {
         if (auto timer = m_timeoutTimers.value(tag, nullptr)) {
@@ -732,7 +744,6 @@ void IpcDispatcher::processResponse(
                 // Update existing room
                 if (room.hasDisplayName() && roomObj->name() != room.displayName()) {
                     roomObj->setName(room.displayName());
-                    Q_EMIT chatRoomNameChanged(indexOf(roomObj), roomObj, roomObj->name());
                 }
 
                 roomObj->setJoinRule(joinRuleGrpcToGonnect(room.joinRule()));
@@ -766,11 +777,6 @@ void IpcDispatcher::processResponse(
                 auto user = m_users.value(userId, nullptr);
                 if (user) {
                     roomObj->addUser(user, userRoomState);
-
-                    if (user->id() == ownUserId) {
-                        Q_EMIT chatRoomOwnJoinStateChanged(roomIdx, roomObj, userRoomState);
-                    }
-
                     if (roomObj->isDirectChat()) {
                         Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
                     }
@@ -865,12 +871,6 @@ void IpcDispatcher::processResponse(
                     room->setUserRoomState(p, userRoomState);
                 } else {
                     room->addUser(p, userRoomState);
-
-                    if (p->id() == ownUserId) {
-                        Q_EMIT chatRoomOwnJoinStateChanged(m_rooms.indexOf(room), room,
-                                                           userRoomState);
-                    }
-
                     if (room->isDirectChat()) {
                         Q_EMIT chatUserPropertiesChanged(p, room, m_rooms.indexOf(room));
                     }
@@ -1218,12 +1218,10 @@ void IpcDispatcher::processResponse(
                                         << "aborting further processing";
             return;
         }
-        const auto roomIndex = indexOf(room);
 
         // Name
         if (changeEvent.hasDisplayName()) {
             room->setName(changeEvent.displayName());
-            Q_EMIT chatRoomNameChanged(roomIndex, room, room->name());
         }
 
         // Unread count
@@ -1242,19 +1240,17 @@ void IpcDispatcher::processResponse(
         // Favorite
         if (changeEvent.hasIsFavorite() && changeEvent.isFavorite() != room->isFavorite()) {
             room->setIsFavorite(changeEvent.isFavorite());
-            Q_EMIT chatRoomIsFavoriteChanged(roomIndex, room, changeEvent.isFavorite());
+            updateHasFavoriteRooms();
         }
 
         // Room permissions
         if (changeEvent.hasPermissions()) {
             room->setPermissions(roomPermissionsGrpcToGonnect(changeEvent.permissions()));
-            Q_EMIT chatRoomPermissionsChanged(roomIndex, room, room->permissions());
         }
 
         // Avatar
         if (changeEvent.hasAvatarPath()) {
             room->setAvatarPath(makeDataRootPath(changeEvent.avatarPath()));
-            Q_EMIT chatRoomAvatarPathChanged(roomIndex, room, room->avatarPath());
         }
 
         // Update typing users
@@ -1271,7 +1267,6 @@ void IpcDispatcher::processResponse(
                 }
             }
             room->setTypingUsers(l);
-            Q_EMIT chatRoomTypingChanged(roomIndex, room);
         }
 
         // Update user states
@@ -1303,10 +1298,6 @@ void IpcDispatcher::processResponse(
                         room->addUser(user, userRoomState);
                     } else {
                         room->setUserRoomState(user, userRoomState);
-                    }
-
-                    if (user->id() == ownUserId) {
-                        Q_EMIT chatRoomOwnJoinStateChanged(roomIndex, room, userRoomState);
                     }
                 } else {
                     requestUser(userId);
@@ -1602,24 +1593,12 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     const auto index = m_rooms.length() - 1;
     Q_EMIT chatRoomAdded(index, roomObj, tag);
-    Q_EMIT chatRoomPermissionsChanged(index, roomObj, roomObj->permissions());
-
-    connect(roomObj, &IChatRoom::avatarPathChanged, this, [this, roomObj]() {
-        Q_EMIT chatRoomAvatarPathChanged(m_rooms.indexOf(roomObj), roomObj, roomObj->avatarPath());
-    });
-
-    connect(roomObj, &IChatRoom::latestMessageDateTimeChanged, this, [this, roomObj]() {
-        Q_EMIT chatRoomLatestActivityChanged(m_rooms.indexOf(roomObj), roomObj,
-                                             roomObj->latestMessageDateTime());
-    });
 
     connect(roomObj, &IChatRoom::ownUserJoinStateChanged, this,
             &IpcDispatcher::updateUnreadNotificationsCount);
 
-    connect(roomObj, &IChatRoom::notificationCountChanged, this, [this, roomObj](qsizetype count) {
-        Q_EMIT chatRoomNotificationCountChanged(m_rooms.indexOf(roomObj), roomObj, count);
-        updateUnreadNotificationsCount();
-    });
+    connect(roomObj, &IChatRoom::notificationCountChanged, this,
+            [this](qsizetype) { updateUnreadNotificationsCount(); });
 
     return roomObj;
 }

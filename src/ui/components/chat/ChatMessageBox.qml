@@ -21,6 +21,7 @@ Item {
     property alias chatRoom: userSelectPopup.chatRoom
     property string editMessageId
     property alias text: messageField.text
+    property int capabilities
 
     readonly property bool hasMessage: !!messageField.text.trim()
 
@@ -347,6 +348,8 @@ Item {
             bottom: parent.bottom
         }
 
+        readonly property bool groupedFormatOptions: buttonBar.width < 370
+
 
         BottomButtonBarButton {
             id: emojiButton
@@ -375,53 +378,79 @@ Item {
                 }
             }
         }
-        BottomButtonBarSeparator {}
+
+        BottomButtonBarSeparator {
+            visible: control.capabilities & IChatProvider.Capability.Markdown
+        }
         BottomButtonBarButton {
             id: boldButton
             icon: Icons.formatTextBold
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("**", "**")
         }
         BottomButtonBarButton {
             id: italicButton
             icon: Icons.formatTextItalic
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("*", "*")
         }
         BottomButtonBarButton {
             id: strikethroughButton
             icon: Icons.formatTextStrikethrough
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("<del>", "</del>")
         }
         BottomButtonBarButton {
             id: inlineCodeButton
             icon: Icons.formatTextCode
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("`", "`")
         }
         BottomButtonBarButton {
             id: codeBlockButton
             icon: Icons.addSubtitle
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("\n> ", "")
         }
-        BottomButtonBarSeparator {}
+
+        BottomButtonBarButton {
+            id: formatMenuButton
+            visible: buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
+            icon: Icons.overflowMenu
+            onClicked: () => formatMenuComponent.createObject(formatMenuButton).popup()
+        }
+
+        BottomButtonBarSeparator {
+            visible: control.capabilities & IChatProvider.Capability.Markdown
+        }
+
         BottomButtonBarButton {
             id: linkButton
             icon: Icons.link
+            visible: control.capabilities & IChatProvider.Capability.Markdown
             onClicked: () => messageField.insertOrRemove("[", "]()")
         }
-        BottomButtonBarSeparator {}
+
+        BottomButtonBarSeparator {
+            visible: addVideoButton.visible || addFileButton.visible
+        }
+
         BottomButtonBarButton {
             id: addVideoButton
             icon: Icons.uploadMedia
+            visible: control.capabilities & IChatProvider.Capability.UploadMedia
             onClicked: () => uploadMediaDialog.open()
         }
         BottomButtonBarButton {
             id: addFileButton
             icon: Icons.mailAttachment
+            visible: control.capabilities & IChatProvider.Capability.UploadFile
             onClicked: () => uploadFileDialog.open()
         }
 
         FileDialog {
             id: uploadMediaDialog
-            nameFilters: FileHelper.mediaFileSelectors(true)
+            nameFilters: FileHelper.imageFileSelectors()
             onAccepted: () => control.sendImage(uploadMediaDialog.selectedFile)
         }
 
@@ -443,6 +472,41 @@ Item {
                 }
             }
         ]
+    }
+
+    Component {
+        id: formatMenuComponent
+
+        Menu {
+            id: formatMenu
+            onClosed: () => formatMenu.destroy()
+
+            MenuItem {
+                text: qsTr("Bold")
+                icon.source: Icons.formatTextBold
+                onTriggered: () => messageField.insertOrRemove("**", "**")
+            }
+            MenuItem {
+                text: qsTr("Italic")
+                icon.source: Icons.formatTextItalic
+                onTriggered: () => messageField.insertOrRemove("*", "*")
+            }
+            MenuItem {
+                text: qsTr("Strikethrough")
+                icon.source: Icons.formatTextStrikethrough
+                onTriggered: () => messageField.insertOrRemove("<del>", "</del>")
+            }
+            MenuItem {
+                text: qsTr("Inline code")
+                icon.source: Icons.formatTextCode
+                onTriggered: () => messageField.insertOrRemove("`", "`")
+            }
+            MenuItem {
+                text: qsTr("Code block")
+                icon.source: Icons.overflowMenu
+                onTriggered: () => messageField.insertOrRemove("\n> ", "")
+            }
+        }
     }
 
     Accessible.role: Accessible.EditableText

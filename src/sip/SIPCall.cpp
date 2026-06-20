@@ -129,9 +129,6 @@ SIPCall::~SIPCall()
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
 {
-    // Extract "," DTMF string and store them for later playback
-    m_postTask = dst_uri.section(',', 1, -1, QString::SectionIncludeLeadingSep);
-
     if (m_account && m_account->isRTTEnabled()) {
         makeCall(dst_uri.toStdString(), prm);
     } else {
@@ -288,7 +285,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         ringToneFactory.zipTone()->stop();
         ringToneFactory.ringingTone()->stop();
 
-        if (!m_isSilent) {
+        if (!m_isSilent
+            && !(GlobalCallState::instance().globalCallState() & ICallState::State::Migrating)) {
             setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
 
             if (m_isEstablished) {

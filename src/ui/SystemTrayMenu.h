@@ -6,6 +6,7 @@
 
 #include "SIPBuddy.h"
 #include "AppSettings.h"
+#include "PresenceState.h"
 
 struct NumberStat;
 
@@ -31,6 +32,7 @@ public:
 
 private Q_SLOTS:
     void updateMenu();
+    void updateOwnStatus();
     void updateConferences();
     void updateCalls();
     void updateFavorites();
@@ -52,6 +54,7 @@ private:
     void initMenu();
     void requestTrayIcon(const QString &iconPath);
     void applyTrayIcon();
+    QString charFor(const PresenceState::State state) const;
 
     CallEntry *findCallEntry(const QString &remoteUri);
 
@@ -63,9 +66,11 @@ private:
 
     QSystemTrayIcon *m_trayIcon = nullptr;
     QMenu *m_trayIconMenu = nullptr;
+    QMenu *m_presenceMenu = nullptr;
 
     QAction *m_mainWindowAction = nullptr;
     QAction *m_settingsWindowAction = nullptr;
+    QAction *m_ownStatusSeparator = nullptr;
     QAction *m_activeConferencesSeparator = nullptr;
     QAction *m_activeCallsSeparator = nullptr;
     QAction *m_mostCalledSeparator = nullptr;
