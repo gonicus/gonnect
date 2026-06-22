@@ -286,7 +286,6 @@ Item {
         }
 
         onSendFile: filePath => control.chatRoom.sendFile(filePath)
-        onSendImage: imagePath => control.chatRoom.sendImage(imagePath)
         onImageFromClipboardReceived: () => {
             if (control.chatProvider && control.chatRoom) {
                 control.chatProvider.uploadImageFromClipboard(control.chatRoom.id)

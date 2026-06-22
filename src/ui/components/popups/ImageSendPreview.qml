@@ -77,7 +77,7 @@ Item {
                 highlighted: true
                 text: qsTr("Send")
                 onClicked: () => {
-                    control.chatRoom.sendImage(control.source)
+                    control.chatRoom.sendFile(control.source)
                     control.close()
                 }
             }

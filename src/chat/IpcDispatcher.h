@@ -96,9 +96,7 @@ public:
     void sendMessage(const QString &roomId, const QString &text,
                      const QString &relatedMessageId = "");
 
-    /// Send a message in the specified room with the image specified by the file. The image must
-    /// have already been uploaded.
-    void sendImage(const QString &roomId, const QString &filePath);
+    void sendTypingPing(const QString &roomId);
 
     /// Send a message in the specified room with the file as an attachment. The file must
     /// have already been uploaded.
