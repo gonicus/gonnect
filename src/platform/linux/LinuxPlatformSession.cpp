@@ -82,6 +82,7 @@ void LinuxPlatformSession::stop()
     }
     m_pwLoop = nullptr;
     m_screenCastNodeIds.clear();
+    pw_deinit();
 
     // PulseAudio
     m_mainloopTimer.stop();

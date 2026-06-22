@@ -249,8 +249,8 @@ void ViewHelper::testPlayNotificationTone(qreal volume)
 
     m_pinger = new Pinger(this);
     connect(m_pinger, &Pinger::stopped, this, [this]() { stopTestPlayNotificationTone(); });
-    m_pinger->ping(volume);
     m_pingerTimer.start();
+    m_pinger->ping(volume);
 }
 
 void ViewHelper::stopTestPlayNotificationTone()
