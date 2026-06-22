@@ -184,7 +184,8 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
 
     // System notification
     AppSettings settings;
-    if (settings.value("generic/jitsiChatAsNotifications", true).toBool()) {
+    if (settings.value("generic/jitsiChatAsNotifications", true).toBool()
+        && !PlatformSession::instance().isScreenShareActive()) {
         auto notification = new Notification(tr("New chat message"), message,
                                              Notification::Priority::normal, true, this);
         notification->setIcon(":/icons/gonnect.svg");
@@ -1267,28 +1268,30 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     }
 
     // Create notification about ongoing conference
-    m_inConferenceNotification = new Notification(tr("Active conference"), this->displayName(),
-                                                  Notification::Priority::normal, false, this);
-    m_inConferenceNotification->setDisplayHint(Notification::tray
-                                               | Notification::hideContentOnLockScreen);
-    m_inConferenceNotification->setCategory("call.ongoing");
-    m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
-    m_inConferenceNotification->setIcon(":/icons/gonnect.svg");
+    if (!PlatformSession::instance().isScreenShareActive()) {
+        m_inConferenceNotification = new Notification(tr("Active conference"), this->displayName(),
+                                                      Notification::Priority::normal, false, this);
+        m_inConferenceNotification->setDisplayHint(Notification::tray
+                                                   | Notification::hideContentOnLockScreen);
+        m_inConferenceNotification->setCategory("call.ongoing");
+        m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
+        m_inConferenceNotification->setIcon(":/icons/gonnect.svg");
 
-    QString ref = NotificationManager::instance().add(m_inConferenceNotification);
-    connect(m_inConferenceNotification, &Notification::actionInvoked, this,
-            [this, ref](QString action, QVariantList) {
-                if (action == "hangup") {
-                    NotificationManager::instance().remove(ref);
-                    leaveConference();
-                }
-            });
+        QString ref = NotificationManager::instance().add(m_inConferenceNotification);
+        connect(m_inConferenceNotification, &Notification::actionInvoked, this,
+                [this, ref](QString action, QVariantList) {
+                    if (action == "hangup") {
+                        NotificationManager::instance().remove(ref);
+                        leaveConference();
+                    }
+                });
 
-    connect(m_inConferenceNotification, &QObject::destroyed, this, [this](QObject *obj) {
-        if (m_inConferenceNotification == obj) {
-            m_inConferenceNotification = nullptr;
-        }
-    });
+        connect(m_inConferenceNotification, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_inConferenceNotification == obj) {
+                m_inConferenceNotification = nullptr;
+            }
+        });
+    }
 
     Q_EMIT globalCallState.callStarted(true);
 }

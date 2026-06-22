@@ -17,7 +17,9 @@ public:
     virtual void stop() = 0;
     virtual void setCaptureDeviceId(const QString &systemDeviceId) = 0;
     virtual void syncSystemMute(bool muted) = 0;
+    virtual bool isScreenShareActive() const = 0;
 
 Q_SIGNALS:
     void systemMuteChanged(bool muted);
+    void screenShareActiveChanged(bool active);
 };

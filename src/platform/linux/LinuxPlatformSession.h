@@ -1,8 +1,10 @@
 #pragma once
 
 #include <pulse/pulseaudio.h>
+#include <pipewire/pipewire.h>
+#include <QSet>
 #include <QTimer>
-#include "PlatformSession.h"
+#include "../PlatformSession.h"
 
 class LinuxPlatformSession : public PlatformSession
 {
@@ -17,11 +19,13 @@ public:
     void stop() override;
     void setCaptureDeviceId(const QString &systemDeviceId) override;
     void syncSystemMute(bool muted) override;
+    bool isScreenShareActive() const override { return m_screenShareActive; }
 
 private Q_SLOTS:
     void mainloopIterate();
 
 private:
+    // PulseAudio
     static void subscriptionEventCallback(pa_context *context, pa_subscription_event_type_t type,
                                           uint32_t index, void *userdata);
     static void contextStateCallback(pa_context *context, void *userdata);
@@ -35,4 +39,19 @@ private:
     QTimer m_mainloopTimer;
     int m_callbackSuppress = 0;
     QString m_captureDeviceId;
+
+    // Pipewire
+    static void pwRegistryGlobal(void *data, uint32_t id, uint32_t permissions, const char *type,
+                                 uint32_t version, const struct spa_dict *props);
+    static void pwRegistryGlobalRemove(void *data, uint32_t id);
+    void setScreenShareActive(bool active);
+
+    struct pw_main_loop *m_pwMainLoop = nullptr;
+    struct pw_loop *m_pwLoop = nullptr;
+    struct pw_context *m_pwContext = nullptr;
+    struct pw_core *m_pwCore = nullptr;
+    struct pw_registry *m_pwRegistry = nullptr;
+    struct spa_hook m_pwRegistryListener;
+    QSet<uint32_t> m_screenCastNodeIds;
+    bool m_screenShareActive = false;
 };

@@ -16,4 +16,5 @@ public:
     void stop() override { }
     void setCaptureDeviceId(const QString &) override { }
     void syncSystemMute(bool) override { }
+    bool isScreenShareActive() const override { return false; }
 };

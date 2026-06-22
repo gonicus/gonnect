@@ -777,6 +777,10 @@ void SIPCall::onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm)
 
 void SIPCall::createOngoingCallNotification()
 {
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return;
+    }
+
     pj::CallInfo ci = getInfo();
 
     // Create notification text

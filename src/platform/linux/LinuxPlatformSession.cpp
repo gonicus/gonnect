@@ -19,29 +19,71 @@ LinuxPlatformSession::LinuxPlatformSession(QObject *parent) : PlatformSession(pa
 
 LinuxPlatformSession::~LinuxPlatformSession()
 {
-    stop();
+    LinuxPlatformSession::stop();
 }
 
 void LinuxPlatformSession::start()
 {
-    if (m_paMainloop) {
-        return;
+    // PulseAudio
+    if (!m_paMainloop) {
+        m_paMainloop = pa_mainloop_new();
+        m_paContext = pa_context_new(pa_mainloop_get_api(m_paMainloop), "GOnnect");
+
+        pa_context_set_state_callback(m_paContext, contextStateCallback, nullptr);
+        pa_context_set_subscribe_callback(m_paContext, subscriptionEventCallback, nullptr);
+
+        pa_context_connect(m_paContext, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+
+        connect(&m_mainloopTimer, &QTimer::timeout, this, &LinuxPlatformSession::mainloopIterate);
+        m_mainloopTimer.start(100ms);
     }
 
-    m_paMainloop = pa_mainloop_new();
-    m_paContext = pa_context_new(pa_mainloop_get_api(m_paMainloop), "GOnnect");
+    // Pipewire
+    if (!m_pwContext) {
+        pw_init(nullptr, nullptr);
 
-    pa_context_set_state_callback(m_paContext, contextStateCallback, nullptr);
-    pa_context_set_subscribe_callback(m_paContext, subscriptionEventCallback, nullptr);
+        m_pwMainLoop = pw_main_loop_new(nullptr);
+        m_pwLoop = pw_main_loop_get_loop(m_pwMainLoop);
+        m_pwContext = pw_context_new(m_pwLoop, nullptr, 0);
+        m_pwCore = pw_context_connect(m_pwContext, nullptr, 0);
 
-    pa_context_connect(m_paContext, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+        if (m_pwCore) {
+            m_pwRegistry = pw_core_get_registry(m_pwCore, PW_VERSION_REGISTRY, 0);
 
-    connect(&m_mainloopTimer, &QTimer::timeout, this, &LinuxPlatformSession::mainloopIterate);
-    m_mainloopTimer.start(100ms);
+            static const pw_registry_events registryEvents = {
+                .version = PW_VERSION_REGISTRY_EVENTS,
+                .global = pwRegistryGlobal,
+                .global_remove = pwRegistryGlobalRemove,
+            };
+            pw_registry_add_listener(m_pwRegistry, &m_pwRegistryListener, &registryEvents, nullptr);
+        }
+    }
 }
 
 void LinuxPlatformSession::stop()
 {
+    // Pipewire
+    if (m_pwRegistry) {
+        spa_hook_remove(&m_pwRegistryListener);
+        pw_proxy_destroy((struct pw_proxy *)m_pwRegistry);
+        m_pwRegistry = nullptr;
+    }
+    if (m_pwCore) {
+        pw_core_disconnect(m_pwCore);
+        m_pwCore = nullptr;
+    }
+    if (m_pwContext) {
+        pw_context_destroy(m_pwContext);
+        m_pwContext = nullptr;
+    }
+    if (m_pwMainLoop) {
+        pw_main_loop_destroy(m_pwMainLoop);
+        m_pwMainLoop = nullptr;
+    }
+    m_pwLoop = nullptr;
+    m_screenCastNodeIds.clear();
+
+    // PulseAudio
     m_mainloopTimer.stop();
 
     if (m_paContext) {
@@ -56,10 +98,53 @@ void LinuxPlatformSession::stop()
     }
 }
 
+void LinuxPlatformSession::pwRegistryGlobal(void *data, uint32_t id, uint32_t permissions,
+                                            const char *type, uint32_t version,
+                                            const struct spa_dict *props)
+{
+    Q_UNUSED(data)
+    Q_UNUSED(permissions)
+    Q_UNUSED(version)
+
+    auto &self = static_cast<LinuxPlatformSession &>(PlatformSession::instance());
+
+    if (props && strcmp(type, PW_TYPE_INTERFACE_Node) == 0) {
+        const char *mediaClass = spa_dict_lookup(props, "media.class");
+        if (mediaClass && strcmp(mediaClass, "Stream/Output/Video") == 0) {
+            self.m_screenCastNodeIds.insert(id);
+            if (self.m_screenCastNodeIds.size() == 1) {
+                self.setScreenShareActive(true);
+            }
+        }
+    }
+}
+
+void LinuxPlatformSession::pwRegistryGlobalRemove(void *data, uint32_t id)
+{
+    Q_UNUSED(data)
+
+    auto &self = static_cast<LinuxPlatformSession &>(PlatformSession::instance());
+
+    if (self.m_screenCastNodeIds.remove(id) && self.m_screenCastNodeIds.isEmpty()) {
+        self.setScreenShareActive(false);
+    }
+}
+
+void LinuxPlatformSession::setScreenShareActive(bool active)
+{
+    if (m_screenShareActive != active) {
+        m_screenShareActive = active;
+        Q_EMIT screenShareActiveChanged(active);
+    }
+}
+
 void LinuxPlatformSession::mainloopIterate()
 {
     if (m_paMainloop) {
         pa_mainloop_iterate(m_paMainloop, 0, nullptr);
+    }
+    if (m_pwLoop) {
+        pw_loop_iterate(m_pwLoop, 0);
     }
 }
 

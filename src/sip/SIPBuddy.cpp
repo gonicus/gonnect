@@ -9,6 +9,7 @@
 #include "NotificationManager.h"
 #include "PhoneNumberUtil.h"
 #include "AvatarManager.h"
+#include "PlatformSession.h"
 
 Q_LOGGING_CATEGORY(lcSIPBuddy, "gonnect.sip.buddy")
 
@@ -82,6 +83,10 @@ void SIPBuddy::subscribeToBuddyStatus()
 
 void SIPBuddy::notifyOnceWhenBuddyAvailable()
 {
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return;
+    }
+
     // Create notification text
     const auto contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(m_uri);
     const Contact *c = contactInfo.contact;

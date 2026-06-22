@@ -71,9 +71,11 @@ if(APPLE)
 elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
+    pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
 
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
+        PkgConfig::LIBPIPEWIRE
         PkgConfig::LIBNOTIFY
         Qt6::DBus)
 

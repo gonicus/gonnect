@@ -21,6 +21,7 @@
 #include "ViewHelper.h"
 #include "EnumTranslation.h"
 #include "GlobalStateAggregator.h"
+#include "PlatformSession.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -1821,13 +1822,11 @@ void IpcDispatcher::removeNotificationsForRoom(IChatRoom *room)
 
 bool IpcDispatcher::shallSendDesktopNotification()
 {
-    if (!m_shallSendDesktopNotificationInitialized) {
-        AppSettings settings;
-        m_shallSendDesktopNotification =
-                settings.value("generic/jitsiChatAsNotifications", true).toBool();
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return false;
     }
-
-    return m_shallSendDesktopNotification;
+    AppSettings settings;
+    return settings.value("generic/jitsiChatAsNotifications", true).toBool();
 }
 
 RequestContainer *IpcDispatcher::createRequest(bool withTag)
