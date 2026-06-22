@@ -152,8 +152,8 @@ void SIPManager::setPreferredCodecs()
                                          PJMEDIA_CODEC_PRIO_NORMAL, PJMEDIA_CODEC_PRIO_LOWEST };
 
     ReadOnlyConfdSettings globalSettings;
-    const QList<QString> preferredCodecs = globalSettings.value("sip/preferredCodecs", "")
-                                                   .toStringList();
+    const QList<QString> preferredCodecs =
+            globalSettings.value("sip/preferredCodecs", "").toStringList();
     if (preferredCodecs.empty()) {
         return;
     }
@@ -166,8 +166,9 @@ void SIPManager::setPreferredCodecs()
             registeredCodecs << QString::fromStdString(c.codecId);
         }
     } catch (const pj::Error &err) {
-        qCWarning(lcSIPManager) << "failed to enumerate codecs - skipping preferred codec selection:"
-                                        << QString::fromStdString(err.info());
+        qCWarning(lcSIPManager)
+                << "failed to enumerate codecs - skipping preferred codec selection:"
+                << QString::fromStdString(err.info());
         return;
     }
 
@@ -187,9 +188,8 @@ void SIPManager::setPreferredCodecs()
         }
 
         if (!matched) {
-            qCWarning(lcSIPManager)
-                    << "ignoring unknown preferred codec" << preferredCodec
-                    << "- not among registered codecs" << registeredCodecs;
+            qCWarning(lcSIPManager) << "ignoring unknown preferred codec" << preferredCodec
+                                    << "- not among registered codecs" << registeredCodecs;
         }
     }
 
@@ -205,7 +205,7 @@ void SIPManager::setPreferredCodecs()
             m_ep.codecSetPriority(registered.toStdString(), PJMEDIA_CODEC_PRIO_DISABLED);
         } catch (const pj::Error &err) {
             qCWarning(lcSIPManager) << "failed to disable codec" << registered << ":"
-                                 << QString::fromStdString(err.info());
+                                    << QString::fromStdString(err.info());
         }
     }
 
@@ -216,7 +216,7 @@ void SIPManager::setPreferredCodecs()
             qCDebug(lcSIPManager) << "using codec" << codecId << ", with priority" << priority;
         } catch (const pj::Error &err) {
             qCWarning(lcSIPManager) << "failed to enable codec" << codecId << ":"
-                                        << QString::fromStdString(err.info());
+                                    << QString::fromStdString(err.info());
         }
     }
 }
