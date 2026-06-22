@@ -8,7 +8,7 @@ command: gonnect
 
 add-extensions:
   de.gonicus.gonnect.plugin:
-    version: '2'
+    version: '3'
     directory: plugins
     subdirectories: true
     no-autodownload: true
