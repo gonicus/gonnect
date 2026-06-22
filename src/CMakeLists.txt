@@ -72,9 +72,6 @@ elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
     pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
-
-    set_source_files_properties(platform/linux/LinuxPlatformSession.cpp
-       PROPERTIES COMPILE_OPTIONS "-Wno-gnu-statement-expression-from-macro-expansion")
        
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
@@ -155,6 +152,9 @@ qt_add_executable(gonnect
     ${DBUS_SOURCES}
 )
 
+set_source_files_properties(platform/linux/LinuxPlatformSession.cpp
+    PROPERTIES COMPILE_OPTIONS "-Wno-gnu-statement-expression-from-macro-expansion")
+       
 set_target_properties(gonnect PROPERTIES
     QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
     WIN32_EXECUTABLE TRUE
@@ -225,7 +225,9 @@ if(FLATPAK)
         platform/flatpak/FlatpakGlobalShortcuts.h
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
-        platform/linux/LinuxDesktopSearchProvider.cpp)
+        platform/linux/LinuxDesktopSearchProvider.cpp
+        platform/linux/LinuxPlatformSession.h
+        platform/linux/LinuxPlatformSession.cpp)
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
