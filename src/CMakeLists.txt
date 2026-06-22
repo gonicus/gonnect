@@ -73,6 +73,9 @@ elseif(LINUX)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
     pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
 
+    set_source_files_properties(platform/linux/LinuxPlatformSession.cpp
+       PROPERTIES COMPILE_OPTIONS "-Wno-gnu-statement-expression-from-macro-expansion")
+       
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
         PkgConfig::LIBPIPEWIRE
