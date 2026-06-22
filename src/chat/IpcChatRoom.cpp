@@ -97,18 +97,6 @@ void IpcChatRoom::sendMessage(const QString &message, const QString &relatedMess
     ipcDispatcher()->sendMessage(id(), message, relatedMessageId);
 }
 
-void IpcChatRoom::sendImage(const QString &filePath)
-{
-    auto dispatcher = ipcDispatcher();
-    const auto uploadedUrl = dispatcher->uploadFile(filePath);
-    if (uploadedUrl.isEmpty()) {
-        qCCritical(lcIpcChatRoom) << "Error on uploading image" << filePath;
-        return;
-    }
-
-    dispatcher->sendImage(id(), uploadedUrl);
-}
-
 void IpcChatRoom::sendFile(const QString &filePath)
 {
     auto dispatcher = ipcDispatcher();
@@ -119,6 +107,15 @@ void IpcChatRoom::sendFile(const QString &filePath)
     }
 
     dispatcher->sendFile(id(), uploadedUrl, filePath.split(QChar('/')).last());
+}
+
+void IpcChatRoom::sendTypingPing()
+{
+    if (auto *dispatcher = ipcDispatcher()) {
+        dispatcher->sendTypingPing(id());
+    } else {
+        qCCritical(lcIpcChatRoom) << "IpcChatRoom has no IpcDispatcher as parent";
+    }
 }
 
 void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)

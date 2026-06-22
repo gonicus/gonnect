@@ -688,6 +688,8 @@ qt_add_qml_module(gonnect
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
         helper/CodeHighlighter.cpp
+        helper/FileContentHelper.h
+        helper/FileContentHelper.cpp
         helper/SecretGenerator.h
         helper/SecretGenerator.cpp
         # helper/SpellCheckHighlighter.h

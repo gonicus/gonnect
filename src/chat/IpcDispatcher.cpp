@@ -8,6 +8,7 @@
 #include "AddressBook.h"
 #include "PublicChatRoom.h"
 #include "ErrorBus.h"
+#include "FileContentHelper.h"
 #include "ChatMessageContentText.h"
 #include "ChatMessageContentImage.h"
 #include "ChatMessageContentFile.h"
@@ -327,22 +328,12 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     sendRequest(req);
 }
 
-void IpcDispatcher::sendImage(const QString &roomId, const QString &filePath)
+void IpcDispatcher::sendTypingPing(const QString &roomId)
 {
-    if (!chatRoomByRoomId(roomId)) {
-        qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
-        return;
-    }
-
-    auto req = createRequest();
-    MessageSendRequest msgReq;
-    msgReq.setRoomId(roomId);
-
-    MessageContentImage content;
-    content.setImagePath(makeRelativeToDataRootPath(filePath));
-
-    msgReq.setImage(content);
-    req->setMessageSendRequest(msgReq);
+    auto req = createRequest(false);
+    RoomTypingRequest typingReq;
+    typingReq.setRoomId(roomId);
+    req->setRoomTypingRequest(typingReq);
     sendRequest(req);
 }
 
@@ -817,7 +808,7 @@ void IpcDispatcher::processResponse(
 
         } else {
             // New user object
-            const bool hasPresenceState = user.hasPresenceState();
+            const bool hasPresenceState = user.hasStatus();
 
             QString avatarPath;
             if (user.hasAvatarPath()) {
@@ -826,7 +817,7 @@ void IpcDispatcher::processResponse(
 
             p = new ChatUser(id, displayName, hasPresenceState, avatarPath, this);
             if (hasPresenceState) {
-                p->setPresenceState(presenceStateConv(user.presenceState()));
+                p->setPresenceState(presenceStateConv(user.status().state()));
 
                 if (auto directRoom = ipcDirectChatRoomForUser(p)) {
                     Q_EMIT chatUserPropertiesChanged(p, directRoom, indexOf(directRoom));
@@ -1006,60 +997,36 @@ void IpcDispatcher::processResponse(
                 hasContentChanged = true;
                 messageTextContent->setText(changeEvent.text().content());
             }
-        } else if (const auto messageImageContent =
-                           qobject_cast<ChatMessageContentImage *>(message->content())) {
-            if (changeEvent.hasImage()) {
-                const auto convImgPath = makeDataRootPath(changeEvent.image().imagePath());
-                if (convImgPath != messageImageContent->imagePath()) {
-                    hasContentChanged = true;
-                    messageImageContent->setImagePath(convImgPath);
-                }
-            }
-        } else if (const auto messageAudioFileContent =
-                           qobject_cast<ChatMessageContentAudioFile *>(message->content())) {
-            if (changeEvent.hasAudioFile()) {
-                const auto convFilePath = makeDataRootPath(changeEvent.audioFile().filePath());
-                if (convFilePath != messageAudioFileContent->filePath()) {
-                    hasContentChanged = true;
-                    messageAudioFileContent->setFilePath(convFilePath);
-                }
-                if (changeEvent.audioFile().hasFileName()) {
-                    const auto fileName = changeEvent.audioFile().fileName();
-                    if (fileName != messageAudioFileContent->fileName()) {
+        } else {
+            // File
+
+            using FileType = FileContentHelper::FileType;
+            const auto fileType = FileContentHelper::fileType(
+                    changeEvent.hasFile() ? changeEvent.file().filePath() : "");
+
+            if (const auto messageImageContent =
+                        qobject_cast<ChatMessageContentImage *>(message->content())) {
+                if (fileType == FileType::Image) {
+                    const auto convImgPath = makeDataRootPath(changeEvent.file().filePath());
+                    if (convImgPath != messageImageContent->imagePath()) {
                         hasContentChanged = true;
-                        messageAudioFileContent->setFileName(fileName);
+                        messageImageContent->setImagePath(convImgPath);
                     }
                 }
-            }
-        } else if (const auto messageVideoFileContent =
-                           qobject_cast<ChatMessageContentVideoFile *>(message->content())) {
-            if (changeEvent.hasVideoFile()) {
-                const auto convFilePath = makeDataRootPath(changeEvent.videoFile().filePath());
-                if (convFilePath != messageVideoFileContent->filePath()) {
-                    hasContentChanged = true;
-                    messageVideoFileContent->setFilePath(convFilePath);
-                }
-                if (changeEvent.videoFile().hasFileName()) {
-                    const auto fileName = changeEvent.videoFile().fileName();
-                    if (fileName != messageVideoFileContent->fileName()) {
+            } else if (const auto messageFileContent =
+                               qobject_cast<ChatMessageContentFile *>(message->content())) {
+                if (changeEvent.hasFile()) {
+                    const auto convFilePath = makeDataRootPath(changeEvent.file().filePath());
+                    if (convFilePath != messageFileContent->filePath()) {
                         hasContentChanged = true;
-                        messageVideoFileContent->setFileName(fileName);
+                        messageFileContent->setFilePath(convFilePath);
                     }
-                }
-            }
-        } else if (const auto messageFileContent =
-                           qobject_cast<ChatMessageContentFile *>(message->content())) {
-            if (changeEvent.hasFile()) {
-                const auto convFilePath = makeDataRootPath(changeEvent.file().filePath());
-                if (convFilePath != messageFileContent->filePath()) {
-                    hasContentChanged = true;
-                    messageFileContent->setFilePath(convFilePath);
-                }
-                if (changeEvent.file().hasFileName()) {
-                    const auto fileName = changeEvent.file().fileName();
-                    if (fileName != messageFileContent->fileName()) {
-                        hasContentChanged = true;
-                        messageFileContent->setFileName(fileName);
+                    if (changeEvent.file().hasFileName()) {
+                        const auto fileName = changeEvent.file().fileName();
+                        if (fileName != messageFileContent->fileName()) {
+                            hasContentChanged = true;
+                            messageFileContent->setFileName(fileName);
+                        }
                     }
                 }
             }
@@ -1259,6 +1226,10 @@ void IpcDispatcher::processResponse(
             QList<ChatUser *> l;
             l.reserve(changeEvent.typingUserIdList().length());
             for (const auto &id : typingUserIds) {
+                if (id == ownUserId()) {
+                    continue;
+                }
+
                 auto user = m_users.value(id, nullptr);
                 if (user) {
                     l.append(user);
@@ -1494,22 +1465,26 @@ ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::M
 
     QObject *content = nullptr;
 
+    using FileType = FileContentHelper::FileType;
+    const auto fileType =
+            FileContentHelper::fileType(message.hasFile() ? message.file().filePath() : "");
+
     if (message.hasMembershipChange()) {
         content = new ChatMessageContentUserStateChange(
                 userStateGrpcToGonnect(message.membershipChange().change()),
                 message.membershipChange().affectedUserId());
-    } else if (message.hasImage()) {
-        content = new ChatMessageContentImage(makeDataRootPath(message.image().imagePath()));
+    } else if (fileType == FileType::Image) {
+        content = new ChatMessageContentImage(makeDataRootPath(message.file().filePath()));
     } else if (message.hasText()) {
         content = new ChatMessageContentText(message.text().content());
-    } else if (message.hasAudioFile()) {
+    } else if (fileType == FileType::Audio) {
         content = new ChatMessageContentAudioFile(
-                makeDataRootPath(message.audioFile().filePath()),
-                message.audioFile().hasFileName() ? message.audioFile().fileName() : "");
-    } else if (message.hasVideoFile()) {
+                makeDataRootPath(message.file().filePath()),
+                message.file().hasFileName() ? message.file().fileName() : "");
+    } else if (fileType == FileType::Video) {
         content = new ChatMessageContentVideoFile(
-                makeDataRootPath(message.videoFile().filePath()),
-                message.videoFile().hasFileName() ? message.videoFile().fileName() : "");
+                makeDataRootPath(message.file().filePath()),
+                message.file().hasFileName() ? message.file().fileName() : "");
     } else if (message.hasFile()) {
         content = new ChatMessageContentFile(
                 makeDataRootPath(message.file().filePath()),
