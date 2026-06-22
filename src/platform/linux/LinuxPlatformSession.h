@@ -15,7 +15,7 @@ public:
     explicit LinuxPlatformSession(QObject *parent = nullptr);
     ~LinuxPlatformSession() override;
 
-    void start() override;
+    void start(bool enableMuteSync = true) override;
     void stop() override;
     void setCaptureDeviceId(const QString &systemDeviceId) override;
     void syncSystemMute(bool muted) override;

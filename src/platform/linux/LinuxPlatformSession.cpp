@@ -22,10 +22,10 @@ LinuxPlatformSession::~LinuxPlatformSession()
     LinuxPlatformSession::stop();
 }
 
-void LinuxPlatformSession::start()
+void LinuxPlatformSession::start(bool enableMuteSync)
 {
     // PulseAudio
-    if (!m_paMainloop) {
+    if (enableMuteSync && !m_paMainloop) {
         m_paMainloop = pa_mainloop_new();
         m_paContext = pa_context_new(pa_mainloop_get_api(m_paMainloop), "GOnnect");
 

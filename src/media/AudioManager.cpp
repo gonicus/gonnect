@@ -16,12 +16,10 @@ using namespace std::chrono_literals;
 
 AudioManager::AudioManager(QObject *parent) : QObject(parent)
 {
-    if (!noSyncSystemMute()) {
-        auto &session = PlatformSession::instance();
-        connect(&session, &PlatformSession::systemMuteChanged, this,
-                [this](bool muted) { GlobalMuteState::instance().setMuted(muted); });
-        session.start();
-    }
+    auto &session = PlatformSession::instance();
+    connect(&session, &PlatformSession::systemMuteChanged, this,
+            [](bool muted) { GlobalMuteState::instance().setMuted(muted); });
+    session.start(!noSyncSystemMute());
 
     // Use Qt mechanism to get notified for updates and re-initialize on changes
     m_updateDebouncer.setSingleShot(true);
@@ -56,9 +54,7 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
 AudioManager::~AudioManager()
 {
-    if (!noSyncSystemMute()) {
-        PlatformSession::instance().stop();
-    }
+    PlatformSession::instance().stop();
 }
 
 void AudioManager::initialize()

@@ -24,6 +24,7 @@
 #include "GlobalCallState.h"
 #include "ChatMessage.h"
 #include "ErrorBus.h"
+#include "PlatformSession.h"
 
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>

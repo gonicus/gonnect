@@ -13,7 +13,7 @@ public:
     explicit PlatformSession(QObject *parent = nullptr) : QObject(parent) { }
     ~PlatformSession() = default;
 
-    virtual void start() = 0;
+    virtual void start(bool enableMuteSync = true) = 0;
     virtual void stop() = 0;
     virtual void setCaptureDeviceId(const QString &systemDeviceId) = 0;
     virtual void syncSystemMute(bool muted) = 0;

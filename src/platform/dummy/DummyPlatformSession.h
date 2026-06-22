@@ -12,7 +12,7 @@ public:
     explicit DummyPlatformSession() : PlatformSession() { }
     ~DummyPlatformSession() override = default;
 
-    void start() override { }
+    void start(bool) override { }
     void stop() override { }
     void setCaptureDeviceId(const QString &) override { }
     void syncSystemMute(bool) override { }
