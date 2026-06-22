@@ -51,6 +51,9 @@ Item {
         location: ViewHelper.userConfigPath
         category: "audio" + AudioManager.currentProfile
 
+        property string notificationTone
+        property alias notificationVolume: notificationToneVolumeSlider.value
+
         property string ringtone
         property alias ringtonePause: ringTonePauseSlider.value
         property alias ringtoneVolume: ringToneVolumeSlider.value
@@ -1113,107 +1116,17 @@ Item {
                             Accessible.ignored: true
                         }
 
-                        Rectangle {
-                            height: outputRingToneAudioSelector.height
-                            radius: 4
-                            color: 'transparent'
-                            border.width: 1
-                            border.color: Theme.borderColor
+                        AudioFileSelector {
+                            filePath: audioSettings.ringtone
+                            isPlaying: ViewHelper.isPlayingRingTone
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
 
-                            Accessible.role: Accessible.StaticText
-                            Accessible.name: ringToneName.text
-
-                            Label {
-                                id: ringToneName
-                                text: {
-                                    const ringToneFilePath = audioSettings.ringtone
-                                    if (ringToneFilePath) {
-                                        if (ringToneFilePath.startsWith("file://")) {
-                                            return ringToneFilePath.substring(7)
-                                        }
-                                        return ringToneFilePath
-                                    }
-                                    return qsTr('Default')
-                                }
-                                color: audioSettings.ringtone ? Theme.primaryTextColor : Theme.secondaryTextColor
-                                maximumLineCount: 2
-                                wrapMode: Label.Wrap
-                                elide: Label.ElideRight
-                                anchors {
-                                    left: parent.left
-                                    leftMargin: 10
-                                    right: testPlayRingToneButton.visible
-                                           ? testPlayRingToneButton.left
-                                           : (resetToDefaultRingToneButton.visible
-                                              ? resetToDefaultRingToneButton.left
-                                              : pickRingToneButton.left)
-                                    rightMargin: 10
-                                    verticalCenter: parent.verticalCenter
-                                }
-
-                                Accessible.ignored: true
-                            }
-
-                            Button {
-                                id: testPlayRingToneButton
-                                width: resetToDefaultRingToneButton.height
-                                icon.source: ViewHelper.isPlayingRingTone ? Icons.mediaPlaybackPause : Icons.mediaPlaybackStart
-                                anchors {
-                                    right: resetToDefaultRingToneButton.visible ? resetToDefaultRingToneButton.left : pickRingToneButton.left
-                                    rightMargin: 10
-                                    verticalCenter: parent.verticalCenter
-                                }
-
-                                onClicked: () => {
-                                    if (ViewHelper.isPlayingRingTone) {
-                                        ViewHelper.stopTestPlayRingTone()
-                                    } else {
-                                        ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
-                                    }
-                                }
-                            }
-
-                            Button {
-                                id: resetToDefaultRingToneButton
-                                width: resetToDefaultRingToneButton.height
-                                icon.source: Icons.editDelete
-                                visible: !!audioSettings.ringtone
-                                anchors {
-                                    right: pickRingToneButton.left
-                                    rightMargin: 10
-                                    verticalCenter: parent.verticalCenter
-                                }
-
-                                onClicked: () => audioSettings.ringtone = ""
-
-                                Accessible.role: Accessible.Button
-                                Accessible.name: qsTr("Reset ring tone")
-                                Accessible.description: qsTr("Reset the ring tone to its default option")
-                                Accessible.focusable: true
-                                Accessible.onPressAction: () => resetToDefaultRingToneButton.click()
-                            }
-
-                            Button {
-                                id: pickRingToneButton
-                                icon.source: Icons.folderOpen
-                                width: pickRingToneButton.height
-                                anchors {
-                                    right: parent.right
-                                    rightMargin: 10
-                                    verticalCenter: parent.verticalCenter
-                                }
-                                onClicked: () => ringToneFileDialog.open()
-
-                                Accessible.role: Accessible.Button
-                                Accessible.name: qsTr("Pick ring tone")
-                                Accessible.description: qsTr("Select the ring tone you want to use for incoming calls")
-                                Accessible.focusable: true
-                                Accessible.onPressAction: () => pickRingToneButton.click()
-                            }
+                            onStartTestPlay: () => ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
+                            onStopTestPlay: () => ViewHelper.stopTestPlayRingTone()
+                            onFileSelected: newFilePath => audioSettings.ringtone = newFilePath
                         }
                     }
 
@@ -1225,7 +1138,7 @@ Item {
 
                         Accessible.role: Accessible.Column
                         Accessible.name: ringToneVolumeHeader.text
-                        Accessible.description: qsTr("Currently set to: ") + ringToneVolumeSliderLabel.text
+                        Accessible.description: qsTr("Currently set to: ") + ringToneVolumeSlider.labelText
 
                         Label {
                             id: ringToneVolumeHeader
@@ -1238,57 +1151,14 @@ Item {
                             Accessible.ignored: true
                         }
 
-                        Item {
-                            height: ringToneVolumeSlider.height
+                        VolumeSlider {
+                            id: ringToneVolumeSlider
                             anchors {
                                 left: parent.left
                                 right: parent.right
                             }
 
-                            Slider {
-                                id: ringToneVolumeSlider
-                                from: 0
-                                to: 100
-                                stepSize: 1
-                                value: 100
-                                anchors {
-                                    left: parent.left
-                                    right: ringToneVolumeSliderLabel.left
-                                    rightMargin: 20
-                                }
-
-                                onMoved: () => {
-                                    ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
-                                }
-
-                                Accessible.role: Accessible.Slider
-                                Accessible.name: qsTr("Adjust %1").arg(ringToneVolumeHeader.text)
-                                Accessible.focusable: true
-                                Accessible.onIncreaseAction: () => {
-                                    if (ringToneVolumeSlider.value < ringToneVolumeSlider.to) {
-                                        ringToneVolumeSlider.value += ringToneVolumeSlider.stepSize
-                                    }
-                                }
-                                Accessible.onDecreaseAction: () => {
-                                    if (ringToneVolumeSlider.value > ringToneVolumeSlider.from) {
-                                        ringToneVolumeSlider.value -= ringToneVolumeSlider.stepSize
-                                    }
-                                }
-                            }
-
-                            Label {
-                                id: ringToneVolumeSliderLabel
-                                //: Label for showing percentage
-                                text: qsTr('%1 %').arg(ringToneVolumeSlider.value.toLocaleString(Qt.locale(), "f", 0))
-                                horizontalAlignment: Label.AlignRight
-                                width: 40
-                                anchors {
-                                    right: parent.right
-                                    verticalCenter: ringToneVolumeSlider.verticalCenter
-                                }
-
-                                Accessible.ignored: true
-                            }
+                            onMoved: () => ViewHelper.testPlayRingTone(ringToneVolumeSlider.value / 100.0)
                         }
                     }
 
@@ -1361,6 +1231,75 @@ Item {
 
                                 Accessible.ignored: true
                             }
+                        }
+                    }
+
+                    // Notification audio
+                    Column {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        Accessible.role: Accessible.Column
+                        Accessible.name: notificationToneHeader.text
+
+                        Label {
+                            id: notificationToneHeader
+                            text: qsTr('Notification tone')
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+
+                            Accessible.ignored: true
+                        }
+
+                        AudioFileSelector {
+                            filePath: audioSettings.notificationTone
+                            placeholderText: qsTr('None')
+                            isPlaying: ViewHelper.isPlayingNotificationTone
+                            showPlayOnEmptyFile: false
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+
+                            onFileSelected: newFilePath => audioSettings.notificationTone = newFilePath
+                            onStartTestPlay: () => ViewHelper.testPlayNotificationTone(notificationToneVolumeSlider.value / 100.0)
+                            onStopTestPlay: () => ViewHelper.stopTestPlayNotificationTone()
+                        }
+                    }
+
+                    Column {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        Accessible.role: Accessible.Column
+                        Accessible.name: notificationToneVolumeHeader.text
+                        Accessible.description: qsTr("Currently set to: ") + notificationToneVolumeSlider.labelText
+
+                        Label {
+                            id: notificationToneVolumeHeader
+                            text: qsTr('Notification tone volume')
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+
+                            Accessible.ignored: true
+                        }
+
+                        VolumeSlider {
+                            id: notificationToneVolumeSlider
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+
+                            onMoved: () => ViewHelper.testPlayNotificationTone(notificationToneVolumeSlider.value / 100.0)
                         }
                     }
                 }
@@ -1447,12 +1386,6 @@ Item {
                 }
             }
         }
-    }
-
-    FileDialog {
-        id: ringToneFileDialog
-        onAccepted: audioSettings.ringtone = ringToneFileDialog.selectedFile
-        nameFilters: FileHelper.mediaFileSelectors(false)
     }
 
     Component {
