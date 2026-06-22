@@ -249,7 +249,9 @@ elseif(LINUX)
         platform/dummy/DummyInhibitHelper.cpp
 
         platform/linux/LinuxDesktopSearchProvider.h
-        platform/linux/LinuxDesktopSearchProvider.cpp)
+        platform/linux/LinuxDesktopSearchProvider.cpp
+        platform/linux/LinuxPlatformSession.h
+        platform/linux/LinuxPlatformSession.cpp)
 
 elseif(APPLE)
     set(PLATFORM_SOURCES
@@ -270,7 +272,9 @@ elseif(APPLE)
         platform/dummy/DummyGlobalShortcuts.h
         platform/dummy/DummyGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
-        platform/dummy/DummySearchProvider.cpp)
+        platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
         platform/windows/WindowsUserInfo.cpp
@@ -293,6 +297,8 @@ elseif(WIN32)
         platform/windows/WindowsGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
         platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp
     )
 else()
     set(PLATFORM_SOURCES
@@ -313,7 +319,9 @@ else()
         platform/dummy/DummyGlobalShortcuts.h
         platform/dummy/DummyGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
-        platform/dummy/DummySearchProvider.cpp)
+        platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp)
 endif()
 
 qt_add_qml_module(gonnect
@@ -727,6 +735,7 @@ qt_add_qml_module(gonnect
         platform/InhibitHelper.h
         platform/GlobalShortcuts.h
         platform/SearchProvider.h
+        platform/PlatformSession.h
         ${PLATFORM_SOURCES}
 
         presence/ChatUserPresenceStateProvider.h
