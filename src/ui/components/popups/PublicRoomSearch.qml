@@ -104,6 +104,7 @@ Item {
 
     ListView {
         id: searchResultListView
+        clip: true
         anchors {
             top: searchTextField.bottom
             bottom: parent.bottom

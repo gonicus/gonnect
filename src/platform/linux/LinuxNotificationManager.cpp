@@ -1,6 +1,7 @@
 #include <libnotify/notify.h>
 #include <QApplication>
 #include "LinuxNotificationManager.h"
+#include "Pinger.h"
 
 NotificationManager &NotificationManager::instance()
 {
@@ -134,6 +135,13 @@ QString LinuxNotificationManager::add(Notification *notification)
     notify_notification_show(internalNotification, NULL);
     m_notifications.insert(id, notification);
     m_internalNotifications.insert(id, internalNotification);
+
+    // Ping sound
+    if (notification->playPing()) {
+        auto *pinger = new Pinger(this);
+        connect(pinger, &Pinger::stopped, this, [pinger]() { pinger->deleteLater(); });
+        pinger->ping();
+    }
 
     return notification->id();
 }

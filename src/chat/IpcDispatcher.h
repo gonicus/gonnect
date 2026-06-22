@@ -255,8 +255,6 @@ private:
     void removeNotificationsForRoom(IChatRoom *room);
 
     bool shallSendDesktopNotification();
-    bool m_shallSendDesktopNotification = false;
-    bool m_shallSendDesktopNotificationInitialized = false;
 
     QRegularExpression m_idConvRegex;
     bool m_useIdConversion = false;
