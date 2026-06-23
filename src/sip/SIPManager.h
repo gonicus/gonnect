@@ -100,6 +100,7 @@ private:
     pj::Endpoint m_ep;
 
     bool m_suspended = false;
+    bool m_initialized = false;
 
     QSet<QString> m_buddyStateQueue;
 };

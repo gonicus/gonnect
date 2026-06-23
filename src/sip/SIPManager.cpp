@@ -144,6 +144,8 @@ void SIPManager::initialize()
     if (!isConfigured()) {
         Q_EMIT notConfigured();
     }
+
+    m_initialized = true;
 }
 
 void SIPManager::setPreferredCodecs()
@@ -447,6 +449,10 @@ void SIPManager::resume()
 
 void SIPManager::handleNetworkChanged()
 {
+    if (!m_initialized) {
+        return;
+    }
+
     if (m_suspended) {
         resume();
         return;
