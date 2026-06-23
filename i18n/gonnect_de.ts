@@ -1090,7 +1090,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemRelatedContent.qml" line="46"/>
         <source>Answer to message from %1</source>
-        <translation>Auf Nachricht von %1 antworten</translation>
+        <translation>Antwort auf Nachricht von %1</translation>
     </message>
 </context>
 <context>

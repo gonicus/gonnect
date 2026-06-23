@@ -196,6 +196,9 @@ Q_SIGNALS:
     /// chatMessages(). Ownership remains in this room object.
     void chatMessageAdded(qsizetype index, ChatMessage *chatMessage);
 
+    /// Send when a chat message has been added but not in the indexed list.
+    void chatMessageOutOfSequenceReceived(ChatMessage *chatMessage);
+
     /// Send when a chat message has been removed. index is the one in the list returned by
     /// chatMessages() before the message has been removed. The ChatMessage object is deleted
     /// right after sending the message.

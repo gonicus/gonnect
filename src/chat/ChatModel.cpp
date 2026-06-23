@@ -3,6 +3,7 @@
 #include "ChatMessageReaction.h"
 #include "IChatProvider.h"
 #include "ChatMessageContentUserStateChange.h"
+#include "IpcChatRoom.h"
 
 ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -84,150 +85,37 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
             return QVariant();
         }
 
+        if (auto *room = qobject_cast<IpcChatRoom *>(m_chatRoom)) {
+            room->ensureMessageLoaded(item->relatedMessageId());
+        }
+
         const auto relatedMessage = m_chatRoom->chatMessageById(item->relatedMessageId());
         if (!relatedMessage) {
             return QVariant();
         }
         const auto relatedIndex = messages.indexOf(relatedMessage);
-        if (relatedIndex < 0) {
-            return QVariant();
+        if (relatedIndex >= 0) {
+            return rawData(messages.at(relatedIndex), normalizedRole);
         }
-
-        return rawData(relatedIndex, normalizedRole);
+        return rawData(relatedMessage, normalizedRole);
     }
 
-    return rawData(index.row(), role);
-}
+    const auto item = m_chatRoom->chatMessages().at(index.row());
 
-QVariant ChatModel::rawData(int row, int role) const
-{
-    const auto item = m_chatRoom->chatMessages().at(row);
-
-    switch (role) {
-    case static_cast<int>(Roles::EventId):
-        return item ? item->eventId() : "";
-
-    case static_cast<int>(Roles::RoomId):
-        return m_chatRoom->id();
-
-    case static_cast<int>(Roles::FromId):
-        return item ? item->fromId() : "";
-
-    case static_cast<int>(Roles::NickName):
-        return item ? item->nickName() : "";
-
-    case static_cast<int>(Roles::AvatarPath): {
-        if (!item) {
-            return "";
-        }
-        if (const auto user = m_chatRoom->chatUserById(item->fromId())) {
-            return user->avatarPath();
-        }
-
-        return "";
-    }
-
-    case static_cast<int>(Roles::MentionedUserNames): {
-        if (!item) {
-            return "";
-        }
-        QStringList names;
-        const auto users = item->mentionedUsers();
-        names.reserve(users.size());
-
-        for (const auto user : users) {
-            names.append(user->computedName());
-        }
-        return names;
-    }
-
-    case static_cast<int>(Roles::IsStateUpdate):
-        return item
-                ? (qobject_cast<ChatMessageContentUserStateChange *>(item->content()) != nullptr)
-                : false;
-
-    case static_cast<int>(Roles::Content):
-        return QVariant::fromValue(item ? item->content() : nullptr);
-
-    case static_cast<int>(Roles::UserState): {
-        if (!item) {
-            return QVariant::fromValue(ChatMessageContentUserStateChange::State::Unknown);
-        }
-        if (const auto stateContent =
-                    qobject_cast<ChatMessageContentUserStateChange *>(item->content())) {
-            return QVariant::fromValue(stateContent->state());
-        }
-        return QVariant::fromValue(ChatMessageContentUserStateChange::State::Unknown);
-    }
-
-    case static_cast<int>(Roles::AffectedUserId): {
-        if (!item) {
-            return "";
-        }
-        if (const auto stateContent =
-                    qobject_cast<ChatMessageContentUserStateChange *>(item->content())) {
-            return stateContent->affectedUserId();
-        }
-        return "";
-    }
-
-    case static_cast<int>(Roles::Timestamp):
-        return item ? item->timestamp() : QVariant();
-
-    case static_cast<int>(Roles::Reactions): {
-        QVariantList l;
-        if (!item) {
-            return l;
-        }
-        const auto reactions = item->reactions();
-
-        auto chatProvider = qobject_cast<IChatProvider *>(m_chatRoom->parent());
-        QString ownUserId;
-        if (chatProvider) {
-            ownUserId = chatProvider->ownUserId();
-        }
-
-        for (const auto *reaction : reactions) {
-            QVariantMap m;
-            m.insert("reaction", reaction->reaction());
-            m.insert("count", reaction->count());
-            m.insert("isOwnReaction", ownUserId.isEmpty() ? false : reaction->isUser(ownUserId));
-            l.append(m);
-        }
-
-        return l;
-    }
-
-    case static_cast<int>(Roles::IsPrivateMessage):
-        return item ? static_cast<bool>(item->flags() & ChatMessage::Flag::PrivateMessage) : false;
-
-    case static_cast<int>(Roles::IsOwnMessage):
-        return item ? static_cast<bool>(item->flags() & ChatMessage::Flag::OwnMessage) : false;
-
-    case static_cast<int>(Roles::IsSystemMessage):
-        return item ? static_cast<bool>(item->flags() & ChatMessage::Flag::SystemMessage) : false;
-
-    case static_cast<int>(Roles::IsEncrypted):
-        return item ? static_cast<bool>(item->flags() & ChatMessage::Flag::Encrypted) : false;
-
-    case static_cast<int>(Roles::IsPinned):
-        return item ? static_cast<bool>(item->flags() & ChatMessage::Flag::Pinned) : false;
-
-    case static_cast<int>(Roles::IsSameUserAsPrevious): {
-        if (row > 0) {
-            if (const auto prev = m_chatRoom->chatMessages().at(row - 1)) {
+    if (role == static_cast<int>(Roles::IsSameUserAsPrevious)) {
+        if (index.row() > 0) {
+            if (const auto prev = m_chatRoom->chatMessages().at(index.row() - 1)) {
                 return prev->fromId() == item->fromId();
             }
         }
         return false;
     }
 
-    case static_cast<int>(Roles::IsSameMinuteAsPrevious): {
-        if (row > 0) {
-            if (const auto prev = m_chatRoom->chatMessages().at(row - 1)) {
+    if (role == static_cast<int>(Roles::IsSameMinuteAsPrevious)) {
+        if (index.row() > 0) {
+            if (const auto prev = m_chatRoom->chatMessages().at(index.row() - 1)) {
                 const auto prevDateTime = prev->timestamp();
                 const auto itemDateTime = item->timestamp();
-
                 return prevDateTime.date() == itemDateTime.date()
                         && prevDateTime.time().hour() == itemDateTime.time().hour()
                         && prevDateTime.time().minute() == itemDateTime.time().minute();
@@ -236,17 +124,114 @@ QVariant ChatModel::rawData(int row, int role) const
         return false;
     }
 
-    case static_cast<int>(Roles::IsSameDayAsPrevious): {
-        if (row > 0) {
-            if (const auto prev = m_chatRoom->chatMessages().at(row - 1)) {
+    if (role == static_cast<int>(Roles::IsSameDayAsPrevious)) {
+        if (index.row() > 0) {
+            if (const auto prev = m_chatRoom->chatMessages().at(index.row() - 1)) {
                 return prev->timestamp().date() == item->timestamp().date();
             }
         }
         return false;
     }
 
+    return rawData(item, role);
+}
+
+QVariant ChatModel::rawData(const ChatMessage *item, int role) const
+{
+    if (!item) {
+        return QVariant();
+    }
+
+    switch (role) {
+    case static_cast<int>(Roles::EventId):
+        return item->eventId();
+
+    case static_cast<int>(Roles::FromId):
+        return item->fromId();
+
+    case static_cast<int>(Roles::NickName):
+        return item->nickName();
+
+    case static_cast<int>(Roles::RoomId):
+        return m_chatRoom->id();
+
+    case static_cast<int>(Roles::AvatarPath): {
+        if (const auto user = m_chatRoom->chatUserById(item->fromId())) {
+            return user->avatarPath();
+        }
+        return QString();
+    }
+
+    case static_cast<int>(Roles::Timestamp):
+        return item->timestamp();
+
+    case static_cast<int>(Roles::Reactions): {
+        QVariantList l;
+        const auto reactions = item->reactions();
+        auto chatProvider = qobject_cast<IChatProvider *>(m_chatRoom->parent());
+        QString ownUserId;
+        if (chatProvider) {
+            ownUserId = chatProvider->ownUserId();
+        }
+        for (const auto *reaction : reactions) {
+            QVariantMap m;
+            m.insert("reaction", reaction->reaction());
+            m.insert("count", reaction->count());
+            m.insert("isOwnReaction", ownUserId.isEmpty() ? false : reaction->isUser(ownUserId));
+            l.append(m);
+        }
+        return l;
+    }
+
+    case static_cast<int>(Roles::Content):
+        return QVariant::fromValue(item->content());
+
+    case static_cast<int>(Roles::IsStateUpdate):
+        return qobject_cast<ChatMessageContentUserStateChange *>(item->content()) != nullptr;
+
+    case static_cast<int>(Roles::UserState): {
+        if (const auto stateContent =
+                    qobject_cast<ChatMessageContentUserStateChange *>(item->content())) {
+            return QVariant::fromValue(stateContent->state());
+        }
+        return QVariant::fromValue(ChatMessageContentUserStateChange::State::Unknown);
+    }
+
+    case static_cast<int>(Roles::AffectedUserId): {
+        if (const auto stateContent =
+                    qobject_cast<ChatMessageContentUserStateChange *>(item->content())) {
+            return stateContent->affectedUserId();
+        }
+        return QString();
+    }
+
+    case static_cast<int>(Roles::IsPrivateMessage):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::PrivateMessage);
+
+    case static_cast<int>(Roles::IsOwnMessage):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::OwnMessage);
+
+    case static_cast<int>(Roles::IsSystemMessage):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::SystemMessage);
+
+    case static_cast<int>(Roles::IsEncrypted):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::Encrypted);
+
+    case static_cast<int>(Roles::IsPinned):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::Pinned);
+
     case static_cast<int>(Roles::HasRelatedMessage):
-        return item ? !item->relatedMessageId().isEmpty() : false;
+        return !item->relatedMessageId().isEmpty();
+
+    case static_cast<int>(Roles::MentionedUserNames): {
+        QStringList names;
+        const auto users = item->mentionedUsers();
+        names.reserve(users.size());
+        for (const auto user : users) {
+            names.append(user->computedName());
+        }
+        return names;
+    }
     }
 
     return QVariant();
@@ -289,6 +274,13 @@ void ChatModel::onChatRoomChanged()
                         const auto nextIndex = createIndex(index, 0);
                         Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
                     }
+                });
+        connect(m_chatRoom, &IChatRoom::chatMessageOutOfSequenceReceived, m_chatRoomContext,
+                [this](ChatMessage *msgObj) {
+                    if (!msgObj) {
+                        return;
+                    }
+                    updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
                 });
         connect(m_chatRoom, &IChatRoom::chatMessagesReset, m_chatRoomContext, [this]() {
             beginResetModel();
