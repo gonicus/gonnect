@@ -472,8 +472,8 @@ void SIPManager::handleNetworkChanged()
     try {
         pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
     } catch (pj::Error &err) {
-        qCCritical(lcSIPManager)
-                << "error handling IP change:" << QString::fromLocal8Bit(err.info(false));
+        qCCritical(lcSIPManager) << "error handling IP change:"
+                                 << QString::fromLocal8Bit(err.info(false));
     }
 
     // Force an immediate re-REGISTER.
@@ -481,9 +481,8 @@ void SIPManager::handleNetworkChanged()
         try {
             account->setRegistration(true);
         } catch (pj::Error &err) {
-            qCWarning(lcSIPManager)
-                    << "re-register after network change failed:"
-                    << QString::fromLocal8Bit(err.info(false));
+            qCWarning(lcSIPManager) << "re-register after network change failed:"
+                                    << QString::fromLocal8Bit(err.info(false));
         }
     }
 }

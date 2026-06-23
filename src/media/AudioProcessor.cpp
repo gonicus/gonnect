@@ -7,7 +7,7 @@
 Q_LOGGING_CATEGORY(lcAudioProcessor, "gonnect.sip.audio.processor")
 
 AudioProcessor::AudioProcessor(unsigned clockRate, unsigned channelCount, unsigned samplesPerFrame,
-                             unsigned tailMs, unsigned features)
+                               unsigned tailMs, unsigned features)
 {
     m_frameBytes = samplesPerFrame * channelCount * sizeof(pj_int16_t);
     m_echoCancellation = features & EchoCancellation;

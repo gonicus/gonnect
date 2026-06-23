@@ -6,7 +6,6 @@
 struct pjmedia_echo_state;
 struct pj_pool_t;
 
-
 class AudioProcessor
 {
 public:
@@ -17,7 +16,7 @@ public:
     };
 
     AudioProcessor(unsigned clockRate, unsigned channelCount, unsigned samplesPerFrame,
-                  unsigned tailMs, unsigned features);
+                   unsigned tailMs, unsigned features);
     ~AudioProcessor();
 
     AudioProcessor(const AudioProcessor &) = delete;
