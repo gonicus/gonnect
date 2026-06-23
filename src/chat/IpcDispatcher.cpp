@@ -1593,6 +1593,13 @@ ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::M
         return nullptr;
     }
 
+    if (auto *existing = room->chatMessageById(message.messageId())) {
+        if (!isIndependent && !room->hasMessage(existing)) {
+            room->addExistingMessage(existing, false, false);
+        }
+        return existing;
+    }
+
     ChatMessage::Flags flags = m_configInfo.userId == message.senderId()
             ? ChatMessage::Flag::OwnMessage
             : ChatMessage::Flag::Unknown;
