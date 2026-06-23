@@ -723,6 +723,8 @@ qt_add_qml_module(gonnect
         media/AudioManager.cpp
         media/AudioPort.h
         media/AudioPort.cpp
+        media/AudioProcessor.h
+        media/AudioProcessor.cpp
         media/Sniffer.h
         media/Sniffer.cpp
         media/VideoManager.h

@@ -166,8 +166,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                                 << " contactId " << m_contactId;
 
     if (statusCode == PJSIP_SC_RINGING) {
-        ringToneFactory.ringingTone()->start();
         if (!m_isSilent && !m_incoming) {
+            ringToneFactory.ringingTone()->start();
             removeCallState(ICallState::State::InProgress);
             addCallState(ICallState::State::RingingOutgoing);
             m_isInProgress = false;
