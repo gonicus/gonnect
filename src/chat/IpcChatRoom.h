@@ -43,7 +43,7 @@ public:
 
     /// Add an already existing message to the room; does not send a new message. Takes ownership of
     /// the object.
-    void addExistingMessage(ChatMessage *message, bool isUnread);
+    void addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent);
 
     bool hasMessage(const QString &messageId) const { return m_messageLookup.contains(messageId); }
     bool hasMessage(const ChatMessage *message) const { return m_messages.contains(message); }
