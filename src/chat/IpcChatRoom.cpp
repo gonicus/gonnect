@@ -24,8 +24,8 @@ IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, QObject *parent
 
 IpcChatRoom::~IpcChatRoom()
 {
+    qDeleteAll(m_messageLookup);
     m_messageLookup.clear();
-    qDeleteAll(m_messages);
 }
 
 void IpcChatRoom::setName(const QString &name)
