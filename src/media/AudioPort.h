@@ -6,7 +6,7 @@
 #include <QAudioFormat>
 #include <pjsua2.hpp>
 
-class EchoCanceller;
+class AudioProcessor;
 
 class AudioPort : public QObject, public pj::AudioMediaPort
 {
@@ -20,9 +20,8 @@ public:
     bool initialize();
     void setMuted(bool value);
 
-    // Shared echo canceller; the capture port feeds it microphone frames, the
-    // playback port feeds it the played reference. May be nullptr (disabled).
-    void setEchoCanceller(EchoCanceller *echoCanceller);
+    // Optional shared microphone audio processor (AGC/AEC/ANC)
+    void setAudioProcessor(AudioProcessor *audioProcessor);
 
     void onFrameRequested(pj::MediaFrame &frame) override;
     void onFrameReceived(pj::MediaFrame &frame) override;
@@ -60,14 +59,12 @@ private:
 
     bool initFmt();
 
-    // Microphone tx level: neutral (1.0) when the echo canceller does AGC,
-    // otherwise the fixed boost. Avoids fighting the AGC gain.
     float activeTxLevel() const;
 
     void updateAudioLevel(const char *data, qint64 size);
     void setSourceAudioLevel(qreal level);
 
-    EchoCanceller *m_echoCanceller = nullptr;
+    AudioProcessor *m_audioProcessor = nullptr;
 
     bool m_isMuted = false;
     bool m_isDraining = false;

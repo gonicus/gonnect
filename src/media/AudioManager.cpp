@@ -4,13 +4,12 @@
 #include <QAudioDevice>
 #include <QAudioOutput>
 #include <QAudioInput>
-
 #include <pjsua-lib/pjsua.h>
 
 #include "AudioManager.h"
 #include "SIPManager.h"
 #include "media/AudioPort.h"
-#include "media/EchoCanceller.h"
+#include "media/AudioProcessor.h"
 #include "GlobalMuteState.h"
 
 Q_LOGGING_CATEGORY(lcAudioManager, "gonnect.sip.audio")
@@ -57,65 +56,60 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
 AudioManager::~AudioManager()
 {
-    // Detach AGC/AEC
+    // Detach AudioProcessor
     if (m_captureAudioPort) {
-        m_captureAudioPort->setEchoCanceller(nullptr);
+        m_captureAudioPort->setAudioProcessor(nullptr);
     }
     if (m_playbackAudioPort) {
-        m_playbackAudioPort->setEchoCanceller(nullptr);
+        m_playbackAudioPort->setAudioProcessor(nullptr);
     }
-    if (m_echoCanceller && pjsua_get_state() == PJSUA_STATE_RUNNING) {
-        delete m_echoCanceller;
+    if (m_audioProcessor && pjsua_get_state() == PJSUA_STATE_RUNNING) {
+        delete m_audioProcessor;
     }
-    m_echoCanceller = nullptr;
+    m_audioProcessor = nullptr;
 
     PlatformSession::instance().stop();
 }
 
-EchoCanceller *AudioManager::echoCanceller()
+AudioProcessor *AudioManager::audioProcessor()
 {
-    if (m_echoCancellerInitialized) {
-        return m_echoCanceller;
+    if (m_audioProcessorInitialized) {
+        return m_audioProcessor;
     }
 
-    // Noise suppression is the primary goal and on by default. Acoustic echo
-    // cancellation and AGC are opt-in: on headsets there is no echo to cancel
-    // and AEC3 can add faint rhythmic artifacts, so it stays off unless asked.
     unsigned features = 0;
-    if (m_settings.value("media/noiseSuppression", true).toBool()) {
-        features |= EchoCanceller::NoiseSuppression;
+    if (m_settings.value("media/anc", true).toBool()) {
+        features |= AudioProcessor::NoiseSuppression;
     }
-    if (m_settings.value("media/echoCancellation", false).toBool()) {
-        features |= EchoCanceller::EchoCancellation;
+    if (m_settings.value("media/aec", true).toBool()) {
+        features |= AudioProcessor::EchoCancellation;
     }
-    if (m_settings.value("media/automaticGainControl", true).toBool()) {
-        features |= EchoCanceller::GainControl;
+    if (m_settings.value("media/agc", true).toBool()) {
+        features |= AudioProcessor::GainControl;
     }
 
     if (features == 0) {
-        m_echoCancellerInitialized = true;
-        qCInfo(lcAudioManager) << "Noise suppression / echo cancellation disabled via settings";
+        m_audioProcessorInitialized = true;
+        qCInfo(lcAudioManager) << "audio processing (AEC/ANC/AGC) disabled by configuration";
         return nullptr;
     }
 
     // AudioPort always feeds pjsip 16 kHz mono 16-bit PCM in 20 ms frames
-    // (see AudioPort::initFmt), so the echo canceller is configured to match.
     const unsigned clockRate = 16000;
     const unsigned channels = 1;
     const unsigned samplesPerFrame = clockRate * 20 / 1000;
-    const unsigned tailMs = m_settings.value("media/ecTailLen", 200).toUInt();
+    const unsigned tailMs = m_settings.value("media/aecTailLen", 200).toUInt();
 
-    auto *ec = new EchoCanceller(clockRate, channels, samplesPerFrame, tailMs, features);
+    auto *ec = new AudioProcessor(clockRate, channels, samplesPerFrame, tailMs, features);
     if (!ec->isValid()) {
-        // pjsip media subsystem may not be ready yet; allow a retry on the next
-        // device (re)configuration rather than permanently disabling.
         delete ec;
         return nullptr;
     }
 
-    m_echoCanceller = ec;
-    m_echoCancellerInitialized = true;
-    return m_echoCanceller;
+    m_audioProcessor = ec;
+    m_audioProcessorInitialized = true;
+
+    return m_audioProcessor;
 }
 
 void AudioManager::initialize()
@@ -202,7 +196,7 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
                 &AudioManager::playbackAudioVolumeChanged);
     }
 
-    m_playbackAudioPort->setEchoCanceller(echoCanceller());
+    m_playbackAudioPort->setAudioProcessor(audioProcessor());
 
     Q_EMIT playbackDeviceIdChanged();
 }
@@ -255,12 +249,8 @@ void AudioManager::setCaptureDeviceId(const QString &id)
                 &AudioManager::captureAudioVolumeChanged);
     }
 
-<<<<<<< Updated upstream
-=======
-    m_captureAudioPort->setEchoCanceller(echoCanceller());
+    m_captureAudioPort->setAudioProcessor(audioProcessor());
 
-#ifdef Q_OS_LINUX
->>>>>>> Stashed changes
     if (!noSyncSystemMute()) {
         auto systemId = m_captureAudioPort ? m_captureAudioPort->getSystemDeviceID() : QString();
         PlatformSession::instance().setCaptureDeviceId(systemId);
