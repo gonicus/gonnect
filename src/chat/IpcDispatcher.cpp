@@ -416,9 +416,8 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     GONNECT_ASSERT(!messageId.isEmpty(), "messageId must not be empty")
 
     if (m_failedMessageIds.contains(messageId)) {
-        qCInfo(lcIpcDispatcher)
-                << "Message" << messageId
-                << "has already failed to load - skipping.";
+        qCInfo(lcIpcDispatcher) << "Message" << messageId
+                                << "has already failed to load - skipping.";
         return;
     }
 
