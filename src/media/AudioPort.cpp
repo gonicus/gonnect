@@ -4,6 +4,7 @@
 #include <SIPAudioDevice.h>
 #include <pjmedia/port.h>
 #include "AudioPort.h"
+#include "AudioProcessor.h"
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
 #define NORMAL_AUDIO_LEVEL 1.6f
@@ -36,7 +37,7 @@ bool AudioPort::initialize()
 
     if (m_device.mode() == QAudioDevice::Mode::Input) {
         try {
-            adjustTxLevel(NORMAL_AUDIO_LEVEL);
+            adjustTxLevel(activeTxLevel());
         } catch (pj::Error &err) {
             qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
         }
@@ -45,12 +46,34 @@ bool AudioPort::initialize()
     return true;
 }
 
+float AudioPort::activeTxLevel() const
+{
+    // Fixed level or AGC?
+    if (m_audioProcessor && m_audioProcessor->hasGainControl()) {
+        return 1.0f;
+    }
+    return NORMAL_AUDIO_LEVEL;
+}
+
+void AudioPort::setAudioProcessor(AudioProcessor *audioProcessor)
+{
+    m_audioProcessor = audioProcessor;
+
+    if (m_device.mode() == QAudioDevice::Mode::Input && !m_isMuted) {
+        try {
+            adjustTxLevel(activeTxLevel());
+        } catch (pj::Error &err) {
+            qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
+        }
+    }
+}
+
 void AudioPort::setMuted(bool value)
 {
     if (m_isMuted != value) {
         if (m_device.mode() == QAudioDevice::Mode::Input) {
             try {
-                adjustTxLevel(value ? 0.0f : NORMAL_AUDIO_LEVEL);
+                adjustTxLevel(value ? 0.0f : activeTxLevel());
             } catch (pj::Error &err) {
                 qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
             }
@@ -290,7 +313,13 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
     if (!m_isMuted) {
         frame.buf = std::vector<unsigned char>(bytes.constBegin(), bytes.constEnd());
         frame.type = PJMEDIA_FRAME_TYPE_AUDIO;
-        updateAudioLevel(bytes, bytes.size());
+
+        // Optionally apply AGC/ANC/AEC
+        if (m_audioProcessor) {
+            m_audioProcessor->capture(frame.buf.data(), static_cast<unsigned>(frame.buf.size()));
+        }
+
+        updateAudioLevel(reinterpret_cast<const char *>(frame.buf.data()), frame.buf.size());
     } else {
         setSourceAudioLevel(0);
     }
@@ -316,6 +345,11 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
     }
 
     m_isWarmingUp = false;
+
+    // Register the frame about to be played as the echo reference.
+    if (m_audioProcessor) {
+        m_audioProcessor->playback(frame.buf.data(), static_cast<unsigned>(frame.size));
+    }
 
     m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);
 

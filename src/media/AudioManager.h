@@ -12,6 +12,7 @@
 #include "platform/PlatformSession.h"
 
 class AudioPort;
+class AudioProcessor;
 class QAudioOutput;
 class QAudioInput;
 
@@ -108,6 +109,9 @@ private:
     bool noSyncSystemMute() { return m_settings.value("generic/noSyncSystemMute", false).toBool(); }
 
     AudioManager(QObject *parent = nullptr);
+
+    AudioProcessor *audioProcessor();
+
     void refreshAudioDevices();
     void doProfileElection();
     bool isDeviceAvailable(const QString &hash);
@@ -123,6 +127,9 @@ private:
 
     AudioPort *m_playbackAudioPort = nullptr;
     AudioPort *m_captureAudioPort = nullptr;
+
+    AudioProcessor *m_audioProcessor = nullptr;
+    bool m_audioProcessorInitialized = false;
 
     unsigned m_captureDeviceId = 0;
     unsigned m_currentAudioProfile = 0;

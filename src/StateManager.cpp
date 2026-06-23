@@ -96,7 +96,7 @@ void StateManager::initialize()
     });
     connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
         if (NetworkHelper::instance().hasConnectivity()) {
-            SIPManager::instance().resume();
+            SIPManager::instance().handleNetworkChanged();
         }
     });
 }
