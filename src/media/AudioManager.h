@@ -12,6 +12,7 @@
 #include "platform/PlatformSession.h"
 
 class AudioPort;
+class EchoCanceller;
 class QAudioOutput;
 class QAudioInput;
 
@@ -108,6 +109,11 @@ private:
     bool noSyncSystemMute() { return m_settings.value("generic/noSyncSystemMute", false).toBool(); }
 
     AudioManager(QObject *parent = nullptr);
+
+    // Lazily creates the shared echo canceller (if enabled via settings) and
+    // returns it; may return nullptr when disabled or initialization failed.
+    EchoCanceller *echoCanceller();
+
     void refreshAudioDevices();
     void doProfileElection();
     bool isDeviceAvailable(const QString &hash);
@@ -123,6 +129,9 @@ private:
 
     AudioPort *m_playbackAudioPort = nullptr;
     AudioPort *m_captureAudioPort = nullptr;
+
+    EchoCanceller *m_echoCanceller = nullptr;
+    bool m_echoCancellerInitialized = false;
 
     unsigned m_captureDeviceId = 0;
     unsigned m_currentAudioProfile = 0;

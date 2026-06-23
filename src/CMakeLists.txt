@@ -156,6 +156,7 @@ set_source_files_properties(platform/linux/LinuxPlatformSession.cpp
     PROPERTIES COMPILE_OPTIONS "-Wno-gnu-statement-expression-from-macro-expansion")
        
 set_target_properties(gonnect PROPERTIES
+    QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_ICON_FILE gonnect.icns
@@ -721,6 +722,8 @@ qt_add_qml_module(gonnect
         media/AudioManager.cpp
         media/AudioPort.h
         media/AudioPort.cpp
+        media/EchoCanceller.h
+        media/EchoCanceller.cpp
         media/Sniffer.h
         media/Sniffer.cpp
         media/VideoManager.h

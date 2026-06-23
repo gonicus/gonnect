@@ -2390,7 +2390,7 @@
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="28"/>
         <source>Selected favorite %1</source>
-        <translation>Ausgewählter Favorit</translation>
+        <translation>Ausgewählter Favorit %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="96"/>

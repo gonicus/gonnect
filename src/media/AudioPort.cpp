@@ -4,6 +4,7 @@
 #include <SIPAudioDevice.h>
 #include <pjmedia/port.h>
 #include "AudioPort.h"
+#include "EchoCanceller.h"
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
 #define NORMAL_AUDIO_LEVEL 1.6f
@@ -36,7 +37,7 @@ bool AudioPort::initialize()
 
     if (m_device.mode() == QAudioDevice::Mode::Input) {
         try {
-            adjustTxLevel(NORMAL_AUDIO_LEVEL);
+            adjustTxLevel(activeTxLevel());
         } catch (pj::Error &err) {
             qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
         }
@@ -45,12 +46,37 @@ bool AudioPort::initialize()
     return true;
 }
 
+float AudioPort::activeTxLevel() const
+{
+    // The WebRTC AGC adjusts the capture gain itself; applying the fixed boost
+    // on top would make the two fight, so keep the level neutral in that case.
+    if (m_echoCanceller && m_echoCanceller->hasGainControl()) {
+        return 1.0f;
+    }
+    return NORMAL_AUDIO_LEVEL;
+}
+
+void AudioPort::setEchoCanceller(EchoCanceller *echoCanceller)
+{
+    m_echoCanceller = echoCanceller;
+
+    // The echo canceller is assigned after initialize(), so re-evaluate the
+    // microphone boost now that we know whether AGC is in play.
+    if (m_device.mode() == QAudioDevice::Mode::Input && !m_isMuted) {
+        try {
+            adjustTxLevel(activeTxLevel());
+        } catch (pj::Error &err) {
+            qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
+        }
+    }
+}
+
 void AudioPort::setMuted(bool value)
 {
     if (m_isMuted != value) {
         if (m_device.mode() == QAudioDevice::Mode::Input) {
             try {
-                adjustTxLevel(value ? 0.0f : NORMAL_AUDIO_LEVEL);
+                adjustTxLevel(value ? 0.0f : activeTxLevel());
             } catch (pj::Error &err) {
                 qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
             }
@@ -290,7 +316,15 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
     if (!m_isMuted) {
         frame.buf = std::vector<unsigned char>(bytes.constBegin(), bytes.constEnd());
         frame.type = PJMEDIA_FRAME_TYPE_AUDIO;
-        updateAudioLevel(bytes, bytes.size());
+
+        // Remove echo and suppress noise on the captured microphone frame
+        // before it is handed to pjsip (replaces the EC/NS that pjsip's
+        // sound device layer would normally provide).
+        if (m_echoCanceller) {
+            m_echoCanceller->capture(frame.buf.data(), static_cast<unsigned>(frame.buf.size()));
+        }
+
+        updateAudioLevel(reinterpret_cast<const char *>(frame.buf.data()), frame.buf.size());
     } else {
         setSourceAudioLevel(0);
     }
@@ -316,6 +350,12 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
     }
 
     m_isWarmingUp = false;
+
+    // Register the frame about to be played as the echo reference. This does
+    // not modify the buffer, so the audio output is unaffected.
+    if (m_echoCanceller) {
+        m_echoCanceller->playback(frame.buf.data(), static_cast<unsigned>(frame.size));
+    }
 
     m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);
 

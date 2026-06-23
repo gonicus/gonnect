@@ -5,9 +5,12 @@
 #include <QAudioOutput>
 #include <QAudioInput>
 
+#include <pjsua-lib/pjsua.h>
+
 #include "AudioManager.h"
 #include "SIPManager.h"
 #include "media/AudioPort.h"
+#include "media/EchoCanceller.h"
 #include "GlobalMuteState.h"
 
 Q_LOGGING_CATEGORY(lcAudioManager, "gonnect.sip.audio")
@@ -54,7 +57,65 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
 AudioManager::~AudioManager()
 {
+    // Detach AGC/AEC
+    if (m_captureAudioPort) {
+        m_captureAudioPort->setEchoCanceller(nullptr);
+    }
+    if (m_playbackAudioPort) {
+        m_playbackAudioPort->setEchoCanceller(nullptr);
+    }
+    if (m_echoCanceller && pjsua_get_state() == PJSUA_STATE_RUNNING) {
+        delete m_echoCanceller;
+    }
+    m_echoCanceller = nullptr;
+
     PlatformSession::instance().stop();
+}
+
+EchoCanceller *AudioManager::echoCanceller()
+{
+    if (m_echoCancellerInitialized) {
+        return m_echoCanceller;
+    }
+
+    // Noise suppression is the primary goal and on by default. Acoustic echo
+    // cancellation and AGC are opt-in: on headsets there is no echo to cancel
+    // and AEC3 can add faint rhythmic artifacts, so it stays off unless asked.
+    unsigned features = 0;
+    if (m_settings.value("media/noiseSuppression", true).toBool()) {
+        features |= EchoCanceller::NoiseSuppression;
+    }
+    if (m_settings.value("media/echoCancellation", false).toBool()) {
+        features |= EchoCanceller::EchoCancellation;
+    }
+    if (m_settings.value("media/automaticGainControl", true).toBool()) {
+        features |= EchoCanceller::GainControl;
+    }
+
+    if (features == 0) {
+        m_echoCancellerInitialized = true;
+        qCInfo(lcAudioManager) << "Noise suppression / echo cancellation disabled via settings";
+        return nullptr;
+    }
+
+    // AudioPort always feeds pjsip 16 kHz mono 16-bit PCM in 20 ms frames
+    // (see AudioPort::initFmt), so the echo canceller is configured to match.
+    const unsigned clockRate = 16000;
+    const unsigned channels = 1;
+    const unsigned samplesPerFrame = clockRate * 20 / 1000;
+    const unsigned tailMs = m_settings.value("media/ecTailLen", 200).toUInt();
+
+    auto *ec = new EchoCanceller(clockRate, channels, samplesPerFrame, tailMs, features);
+    if (!ec->isValid()) {
+        // pjsip media subsystem may not be ready yet; allow a retry on the next
+        // device (re)configuration rather than permanently disabling.
+        delete ec;
+        return nullptr;
+    }
+
+    m_echoCanceller = ec;
+    m_echoCancellerInitialized = true;
+    return m_echoCanceller;
 }
 
 void AudioManager::initialize()
@@ -141,6 +202,8 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
                 &AudioManager::playbackAudioVolumeChanged);
     }
 
+    m_playbackAudioPort->setEchoCanceller(echoCanceller());
+
     Q_EMIT playbackDeviceIdChanged();
 }
 
@@ -192,6 +255,12 @@ void AudioManager::setCaptureDeviceId(const QString &id)
                 &AudioManager::captureAudioVolumeChanged);
     }
 
+<<<<<<< Updated upstream
+=======
+    m_captureAudioPort->setEchoCanceller(echoCanceller());
+
+#ifdef Q_OS_LINUX
+>>>>>>> Stashed changes
     if (!noSyncSystemMute()) {
         auto systemId = m_captureAudioPort ? m_captureAudioPort->getSystemDeviceID() : QString();
         PlatformSession::instance().setCaptureDeviceId(systemId);
