@@ -23,7 +23,7 @@ Item {
 
         property string verificationError
         property list<int> availableMethods
-        property CrossSigningSecret secret
+        property crossSigningSecret secret
     }
 
     function updateState() {
@@ -55,7 +55,7 @@ Item {
             internal.availableMethods = methods
             control.state = "CROSS_SIGNING_METHOD_SELECT"
         }
-        function onCrossSigningAcceptRequired(secret : CrossSigningSecret) {
+        function onCrossSigningAcceptRequired(secret : crossSigningSecret) {
             internal.secret = secret
             control.state = "CROSS_SIGNING_CODE"
         }
@@ -352,7 +352,7 @@ Item {
             Label {
                 wrapMode: Text.Wrap
                 horizontalAlignment: Label.AlignHCenter
-                visible: internal.secret?.method() === CrossSigningSecret.CrossSigningMethod.SasString
+                visible: internal.secret?.method() === crossSigningSecret.CrossSigningMethod.SasString
                 text: internal.secret?.stringSecret() ?? ""
                 font {
                     family: "Monospace"
@@ -365,7 +365,7 @@ Item {
             }
 
             Row {
-                visible: internal.secret?.method() === CrossSigningSecret.CrossSigningMethod.SasSymbol
+                visible: internal.secret?.method() === crossSigningSecret.CrossSigningMethod.SasSymbol
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 80
                 spacing: 10
