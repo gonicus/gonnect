@@ -6,6 +6,8 @@
 #include <QAudioFormat>
 #include <pjsua2.hpp>
 
+class AudioProcessor;
+
 class AudioPort : public QObject, public pj::AudioMediaPort
 {
     Q_OBJECT
@@ -17,6 +19,9 @@ public:
 
     bool initialize();
     void setMuted(bool value);
+
+    // Optional shared microphone audio processor (AGC/AEC/ANC)
+    void setAudioProcessor(AudioProcessor *audioProcessor);
 
     void onFrameRequested(pj::MediaFrame &frame) override;
     void onFrameReceived(pj::MediaFrame &frame) override;
@@ -54,8 +59,12 @@ private:
 
     bool initFmt();
 
+    float activeTxLevel() const;
+
     void updateAudioLevel(const char *data, qint64 size);
     void setSourceAudioLevel(qreal level);
+
+    AudioProcessor *m_audioProcessor = nullptr;
 
     bool m_isMuted = false;
     bool m_isDraining = false;

@@ -4,10 +4,12 @@
 #include <QAudioDevice>
 #include <QAudioOutput>
 #include <QAudioInput>
+#include <pjsua-lib/pjsua.h>
 
 #include "AudioManager.h"
 #include "SIPManager.h"
 #include "media/AudioPort.h"
+#include "media/AudioProcessor.h"
 #include "GlobalMuteState.h"
 
 Q_LOGGING_CATEGORY(lcAudioManager, "gonnect.sip.audio")
@@ -54,7 +56,60 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
 AudioManager::~AudioManager()
 {
+    // Detach AudioProcessor
+    if (m_captureAudioPort) {
+        m_captureAudioPort->setAudioProcessor(nullptr);
+    }
+    if (m_playbackAudioPort) {
+        m_playbackAudioPort->setAudioProcessor(nullptr);
+    }
+    if (m_audioProcessor && pjsua_get_state() == PJSUA_STATE_RUNNING) {
+        delete m_audioProcessor;
+    }
+    m_audioProcessor = nullptr;
+
     PlatformSession::instance().stop();
+}
+
+AudioProcessor *AudioManager::audioProcessor()
+{
+    if (m_audioProcessorInitialized) {
+        return m_audioProcessor;
+    }
+
+    unsigned features = 0;
+    if (m_settings.value("media/anc", true).toBool()) {
+        features |= AudioProcessor::NoiseSuppression;
+    }
+    if (m_settings.value("media/aec", true).toBool()) {
+        features |= AudioProcessor::EchoCancellation;
+    }
+    if (m_settings.value("media/agc", true).toBool()) {
+        features |= AudioProcessor::GainControl;
+    }
+
+    if (features == 0) {
+        m_audioProcessorInitialized = true;
+        qCInfo(lcAudioManager) << "audio processing (AEC/ANC/AGC) disabled by configuration";
+        return nullptr;
+    }
+
+    // AudioPort always feeds pjsip 16 kHz mono 16-bit PCM in 20 ms frames
+    const unsigned clockRate = 16000;
+    const unsigned channels = 1;
+    const unsigned samplesPerFrame = clockRate * 20 / 1000;
+    const unsigned tailMs = m_settings.value("media/aecTailLen", 200).toUInt();
+
+    auto *ec = new AudioProcessor(clockRate, channels, samplesPerFrame, tailMs, features);
+    if (!ec->isValid()) {
+        delete ec;
+        return nullptr;
+    }
+
+    m_audioProcessor = ec;
+    m_audioProcessorInitialized = true;
+
+    return m_audioProcessor;
 }
 
 void AudioManager::initialize()
@@ -141,6 +196,8 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
                 &AudioManager::playbackAudioVolumeChanged);
     }
 
+    m_playbackAudioPort->setAudioProcessor(audioProcessor());
+
     Q_EMIT playbackDeviceIdChanged();
 }
 
@@ -191,6 +248,8 @@ void AudioManager::setCaptureDeviceId(const QString &id)
         connect(m_captureAudioPort, &AudioPort::audioSourceChanged, this,
                 &AudioManager::captureAudioVolumeChanged);
     }
+
+    m_captureAudioPort->setAudioProcessor(audioProcessor());
 
     if (!noSyncSystemMute()) {
         auto systemId = m_captureAudioPort ? m_captureAudioPort->getSystemDeviceID() : QString();
