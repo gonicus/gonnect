@@ -74,15 +74,18 @@ ChatMessage *IpcChatRoom::chatMessageById(const QString &id) const
         return nullptr;
     }
 
-    if (auto *msg = m_messageLookup.value(id, nullptr)) {
-        return msg;
+    return m_messageLookup.value(id, nullptr);
+}
+
+void IpcChatRoom::ensureMessageLoaded(const QString &id)
+{
+    if (id.isEmpty() || m_messageLookup.contains(id)) {
+        return;
     }
 
     if (auto *dispatcher = ipcDispatcher()) {
         dispatcher->loadSingleMessage(m_id, id);
     }
-
-    return nullptr;
 }
 
 ChatMessage *IpcChatRoom::latestOwnTextMessage() const

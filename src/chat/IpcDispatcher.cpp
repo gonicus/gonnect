@@ -411,8 +411,15 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom)
 
 void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &messageId)
 {
-    GONNECT_ASSERT(!roomId.isEmpty(), "messageId must not be empty")
+    GONNECT_ASSERT(!roomId.isEmpty(), "roomId must not be empty")
     GONNECT_ASSERT(!messageId.isEmpty(), "messageId must not be empty")
+
+    if (m_failedMessageIds.contains(messageId)) {
+        qCInfo(lcIpcDispatcher)
+                << "Message" << messageId
+                << "has already failed to load - skipping.";
+        return;
+    }
 
     const auto it = std::find(m_singleMessageTags.cbegin(), m_singleMessageTags.cend(), messageId);
     if (it != m_singleMessageTags.cend()) {
@@ -557,6 +564,12 @@ void IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 time
         timer->setInterval(timeoutSeconds * 1000);
         timer->callOnTimeout(this, [timer, tag, timeoutSeconds, this]() {
             m_timeoutTimers.remove(tag);
+
+            const auto messageId = m_singleMessageTags.take(tag);
+            if (!messageId.isEmpty()) {
+                m_failedMessageIds.insert(messageId);
+            }
+
             timer->deleteLater();
 
             qCCritical(lcIpcDispatcher) << "IPC request with tag" << tag << "has timeout after"
@@ -588,7 +601,10 @@ void IpcDispatcher::processResponse(
                 timer->deleteLater();
             }
         } else if (rc.hasError()) {
-            m_singleMessageTags.remove(tag);
+            const auto failedMessageId = m_singleMessageTags.take(tag);
+            if (!failedMessageId.isEmpty()) {
+                m_failedMessageIds.insert(failedMessageId);
+            }
             qCCritical(lcIpcDispatcher) << "Received IPC message with tag" << tag
                                         << "although not waiting for it, but it is an error and "
                                            "will be processed anyway.";
@@ -609,6 +625,11 @@ void IpcDispatcher::processResponse(
 
     // Unpack and process payload
     if (rc.hasError()) {
+        const auto failedMessageId = m_singleMessageTags.take(tag);
+        if (!failedMessageId.isEmpty()) {
+            m_failedMessageIds.insert(failedMessageId);
+        }
+
         const auto err = rc.error();
         const auto code = static_cast<quint64>(err.type());
         const QString codeStr = QMetaEnum::fromType<Error::ErrorType>().valueToKey(code);

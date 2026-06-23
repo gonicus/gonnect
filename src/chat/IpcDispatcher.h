@@ -331,6 +331,9 @@ private:
     /// MultipartEnd message.
     QHash<quint64, qsizetype> m_multipartCount;
 
+    /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
+    QSet<QString> m_failedMessageIds;
+
 Q_SIGNALS:
 
     /// The IpcDispatcher, the sub process and the local socket communication have been successfully

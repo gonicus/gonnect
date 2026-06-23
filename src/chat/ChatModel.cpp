@@ -3,6 +3,7 @@
 #include "ChatMessageReaction.h"
 #include "IChatProvider.h"
 #include "ChatMessageContentUserStateChange.h"
+#include "IpcChatRoom.h"
 
 ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -82,6 +83,10 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
 
         if (item->relatedMessageId().isEmpty()) {
             return QVariant();
+        }
+
+        if (auto *room = qobject_cast<IpcChatRoom *>(m_chatRoom)) {
+            room->ensureMessageLoaded(item->relatedMessageId());
         }
 
         const auto relatedMessage = m_chatRoom->chatMessageById(item->relatedMessageId());
