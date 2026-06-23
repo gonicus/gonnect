@@ -23,12 +23,12 @@ void Pinger::ping(qreal customVolume)
     auto currentProfile = AudioManager::instance().currentProfile();
 
     // Load sound file path
-    const auto source =
+    auto source =
             settings.value(QString("audio%1/notificationTone").arg(currentProfile), "").toString();
 
+    // Fallback sound
     if (source.isEmpty()) {
-        Q_EMIT stopped();
-        return;
+        source = "qrc:/audio/message-new-instant.wav";
     }
 
     if (!m_player) {
