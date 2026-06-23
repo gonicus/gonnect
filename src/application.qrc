@@ -10,6 +10,7 @@
     </qresource>
     <qresource prefix="/audio">
         <file alias="phone-incoming-call.mp3" compress-algo="none">../resources/sounds/phone-incoming-call.mp3</file>
+        <file alias="message-new-instant.wav" compress-algo="none">../resources/sounds/message-new-instant.wav</file>
     </qresource>
     <qresource prefix="/emblems">
         <file alias="call-missed.png" compress-algo="none">../resources/artwork/emblems/call-missed.png</file>
