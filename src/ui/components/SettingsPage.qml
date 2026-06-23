@@ -1257,9 +1257,7 @@ Item {
 
                         AudioFileSelector {
                             filePath: audioSettings.notificationTone
-                            placeholderText: qsTr('None')
                             isPlaying: ViewHelper.isPlayingNotificationTone
-                            showPlayOnEmptyFile: false
                             anchors {
                                 left: parent.left
                                 right: parent.right
