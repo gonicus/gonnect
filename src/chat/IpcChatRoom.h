@@ -36,6 +36,7 @@ public:
     virtual void resetUnreadCount() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
     virtual ChatMessage *chatMessageById(const QString &id) const override;
+    void ensureMessageLoaded(const QString &id);
     virtual ChatMessage *latestOwnTextMessage() const override;
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
     virtual void sendFile(const QString &filePath) override;
@@ -43,7 +44,7 @@ public:
 
     /// Add an already existing message to the room; does not send a new message. Takes ownership of
     /// the object.
-    void addExistingMessage(ChatMessage *message, bool isUnread);
+    void addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent);
 
     bool hasMessage(const QString &messageId) const { return m_messageLookup.contains(messageId); }
     bool hasMessage(const ChatMessage *message) const { return m_messages.contains(message); }
