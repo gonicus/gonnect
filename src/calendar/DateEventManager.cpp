@@ -3,6 +3,7 @@
 #include "DateEventManager.h"
 #include "DateEvent.h"
 #include "NotificationManager.h"
+#include "PlatformSession.h"
 #include "ViewHelper.h"
 
 #include <QRegularExpression>
@@ -387,13 +388,14 @@ void DateEventManager::onTimerTimeout()
             const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
             const auto isOtherLink = dateEvent->isOtherLink();
 
-            if (!m_alreadyNotifiedDates.contains(eventHash)
+            if (!PlatformSession::instance().isScreenShareActive()
+                && !m_alreadyNotifiedDates.contains(eventHash)
                 && !m_notificationIds.contains(eventHash) && start.date() == today
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
                 QString message = isJitsiMeeting ? tr("Conference starting soon")
                                                  : tr("Appointment starting soon");
-                auto notification =
-                        new Notification(message, summary, Notification::Priority::high, &notMan);
+                auto notification = new Notification(message, summary, Notification::Priority::high,
+                                                     true, &notMan);
 
                 notification->setIcon(":/icons/gonnect.svg");
                 if (isJitsiMeeting) {
