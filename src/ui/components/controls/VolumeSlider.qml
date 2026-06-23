@@ -48,7 +48,9 @@ Item {
     Label {
         id: volumeLabel
         //: Label for showing percentage
-        text: qsTr('%1 %').arg(slider.value.toLocaleString(Qt.locale(), "f", 0))
+        text: slider.value
+              ? qsTr('%1 %').arg(slider.value.toLocaleString(Qt.locale(), "f", 0))
+              : qsTr("Off")
         horizontalAlignment: Label.AlignRight
         width: 40
         anchors {
