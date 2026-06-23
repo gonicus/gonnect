@@ -49,7 +49,7 @@ ChatMessageAttachmentRectangle {
         id: saveFileDialog
         fileMode: FileDialog.SaveFile
         currentFolder: `file://${FileHelper.downloadFolderPath()}`
-        selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.control?.fileName ?? ""}`
+        selectedFile: `file://${FileHelper.downloadFolderPath()}/${control.content?.fileName ?? ""}`
         onAccepted: () => FileHelper.copyFile(control.content?.filePath ?? "", saveFileDialog.selectedFile)
     }
 }

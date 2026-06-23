@@ -240,12 +240,15 @@ Item {
             id: sortMenuComponent
 
             Popup {
+                id: sortPopup
                 y: sortCardHeadingButton.height
                 contentHeight: sortCol.implicitHeight
                 contentWidth: Math.max(
                                   sortButtonGroup.buttons.reduce((acc, val) => Math.max(acc, val.implicitWidth), 0),
                                   unreadOnTopCheckBox.implicitWidth + unreadOnTopCheckBox.anchors.leftMargin
                                                                     + unreadOnTopCheckBox.anchors.rightMargin)
+
+                onClosed: () => sortPopup.destroy()
 
                 ButtonGroup {
                     id: sortButtonGroup
@@ -352,6 +355,8 @@ Item {
             id: roomListMenuComponent
 
             Menu {
+                id: roomListMenu
+                onClosed: () => roomListMenu.destroy()
                 Action {
                     text: qsTr("Search user...")
                     icon.source: Icons.systemSearch
@@ -445,13 +450,7 @@ Item {
 
                     onRoomSelected: (roomId) => chatRoomList.selectRoom(roomId)
                     onSelectedRoomIdChanged: () => chatRoomList.resetUnreadCount()
-                    onChatRoomChanged: () => {
-                        chatRoomList.resetUnreadCount()
-
-                        if (chatRoomList.chatRoom && !chatRoomList.chatRoom.isInitiallyLoaded) {
-                            chatRoomList.chatRoom.loadMessages()
-                        }
-                    }
+                    onChatRoomChanged: () => chatRoomList.resetUnreadCount()
 
                     readonly property IChatRoom chatRoom: chatRoomList.chatProvider && chatRoomList.selectedRoomId
                                                           ? chatRoomList.chatProvider.chatRoomByRoomId(chatRoomList.selectedRoomId)
@@ -519,331 +518,11 @@ Item {
             bottomMargin: 24
         }
 
-        Timer {
-            id: readTimer
-            interval: 2000
-            onTriggered: () => {
-                if (control.Window.active && chatMessageList.isScrolledDown) {
-                    chatRoomList.resetUnreadCount()
-                }
-            }
-        }
-
-        HoverHandler {
-            id: chatHoverHandler
-            onPointChanged: () => {
-                if (!readTimer.running && control.Window.active) {
-                    readTimer.start()
-                }
-            }
-        }
-
-        AvatarImage {
-            id: avatarImage
-            visible: !!chatMessageList.chatRoom
-            size: 30
-            source: chatMessageList.chatRoom?.avatarPath ?? ""
-            initials: chatMessageList.chatRoom ? ViewHelper.initials(chatMessageList.chatRoom.name) : ""
-            showPresenceStatus: !!(chatRoomList.chatRoom?.hasPresenceState)
-            presenceStatus: chatRoomList.chatRoom?.presenceState ?? ChatUser.PresenceState.Unknown
-            indicatorComponent: Component { ChatUserPresenceStatusIndicator {} }
-            anchors {
-                left: parent.left
-                leftMargin: 10
-                verticalCenter: messageListCardHeading.verticalCenter
-            }
-        }
-
-        CardHeading {
-            id: messageListCardHeading
-            visible: !!chatMessageList.chatRoom
-            leftPadding: avatarImage.x + avatarImage.width - 10
-            rightPadding: parent.width - favCardHeadingButton.y
-            text: chatMessageList.chatRoom
-                  ? (chatMessageList.chatRoom.isDirectChat
-                     ? qsTr("Direct conversation with %1").arg(chatMessageList.chatRoom.name)
-                     : qsTr("Chat room %1").arg(chatMessageList.chatRoom.name))
-                  : ""
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-            }
-        }
-
-        Row {
-            id: titleLoadingIndicatorRow
-            spacing: 4
-            visible: !!(chatRoomList.chatRoom?.isLoadingMessageHistory && !bigLoadingItem.visible)
-            anchors {
-                right: favCardHeadingButton.left
-                rightMargin: 12
-                top: messageListCardHeading.top
-                bottom: messageListCardHeading.bottom
-            }
-
-            BusyIndicator {
-                id: titleLoadingIndicator
-                running: titleLoadingIndicatorRow.visible
-                width: titleLoadingIndicator.height
-                height: 24
-                circleColor: Theme.secondaryTextColor
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Label {
-                text: qsTr("Messages are loading...")
-                color: Theme.secondaryTextColor
-                anchors.verticalCenter: parent.verticalCenter
-            }
-        }
-
-        FavIcon {
-            id: favCardHeadingButton
-            visible: messageListCardHeading.visible
-            isFavorite: chatMessageList.chatRoom?.isFavorite ?? false
-            anchors {
-                verticalCenter: messageListCardHeading.verticalCenter
-                right: messageListCardHeadingButton.left
-            }
-
-            onToggled: () => chatRoomList.chatProvider?.requestToggleRoomFavorite(chatMessageList.chatRoom)
-        }
-
-        CardHeadingMoreMenuButton {
-            id: messageListCardHeadingButton
-            visible: messageListCardHeading.visible
-            anchors {
-                top: parent.top
-                right: parent.right
-            }
-
-            onClicked: () => chatRoomMenuComponent.createObject(messageListCardHeadingButton).popup()
-        }
-
-        Component {
-            id: chatRoomMenuComponent
-
-            Menu {
-                Action {
-                    text: qsTr("Edit room...")
-                    icon.source: Icons.editor
-                    enabled: !!(control.selectedChatRoom?.permissions & IChatRoom.Permission.CanEdit)
-                    onTriggered: () => ViewHelper.showEditRoomDialog(control.attachedData, chatRoomList.selectedRoomId)
-                }
-                Action {
-                    text: qsTr("Invite users...")
-                    icon.source: Icons.listAdd
-                    enabled: !!(control.selectedChatRoom?.permissions & IChatRoom.Permission.CanInvite)
-                    onTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.attachedData, chatRoomList.selectedRoomId)
-                }
-                Action {
-                    text: qsTr("Leave room...")
-                    icon.source: Icons.dialogCancel
-                    onTriggered: () => {
-                        const item = DialogFactory.createConfirmDialog({
-                                         text: qsTr("Are you sure you really want to leave this chat?")
-                                     })
-                        const roomId = chatRoomList.selectedRoomId
-                        item.accepted.connect(() => control.attachedData.requestRoomLeave(roomId))
-                    }
-                }
-            }
-        }
-
-        ChatMessageList {
-            id: chatMessageList
+        Chat {
+            id: chat
+            anchors.fill: parent
             chatProvider: control.attachedData
-            chatRoom: chatRoomList.chatRoom
-            clip: true
-            visible: chatRoomList.chatRoom?.ownUserJoinState === IChatRoom.UserRoomState.Joined ?? false
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
-                bottom: typingUsersList.visible
-                        ? typingUsersList.top
-                        : (chatMessageBox.visible
-                           ? chatMessageBox.top
-                           : parent.bottom)
-                bottomMargin: 20
-                leftMargin: 10
-                rightMargin: 10
-            }
-
-            onRespondTo: messageId => relatedMsg.chatMessage = chatRoomList.chatRoom?.chatMessageById(messageId) ?? null
-        }
-
-        Item {
-            id: bigLoadingItem
-            visible: !!(chatRoomList.chatRoom?.isLoadingMessageHistory && !chatMessageList.count)
-            anchors.fill: chatMessageList
-
-            Row {
-                spacing: 20
-                anchors.centerIn: parent
-
-                BusyIndicator {
-                    running: bigLoadingItem.visible
-                    width: 40
-                    height: 40
-                    circleColor: Theme.secondaryTextColor
-                }
-
-                Label {
-                    text: qsTr("Messages are loading...")
-                    color: Theme.secondaryTextColor
-                    font.pixelSize: 22
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-        }
-
-        Item {
-            id: typingUsersList
-            height: 20
-            anchors  {
-                left: parent.left
-                right: parent.right
-                bottom: chatMessageBox.visible ? chatMessageBox.top : parent.bottom
-            }
-
-            readonly property list<string> typingUserNames: chatRoomList.selectedListItem?.typingUserNames ?? []
-
-            Label {
-                id: typingUsersLabel
-                text: qsTr("%1 is/are typing", "", typingUsersList.typingUserNames.length).arg(typingUsersList.typingUserNames.join(", "))
-                wrapMode: Label.Wrap
-                color: Theme.secondaryInactiveTextColor
-                font.pixelSize: 12
-                visible: typingUsersList.typingUserNames.length > 0
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    leftMargin: 10
-                    rightMargin: 10
-                    verticalCenter: parent.verticalCenter
-                }
-            }
-        }
-
-        Rectangle {
-            id: replyBg
-            color: Theme.backgroundColor
-            height: relatedMsg.height
-            visible: relatedMsg.visible
-            topLeftRadius: 8
-            topRightRadius: 8
-            anchors {
-                top: relatedMsg.top
-                left: chatMessageBox.left
-                right: chatMessageBox.right
-                bottom: chatMessageBox.top
-                topMargin: -10
-            }
-
-            Rectangle {
-                height: 1
-                color: Theme.borderColor
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                }
-            }
-        }
-
-        ChatMessageListItemRelatedContent {
-            id: relatedMsg
-            visible: !!relatedMsg.chatMessage
-            nickName: relatedMsg.chatMessage?.nickName ?? ""
-            isStateUpdate: relatedMsg.chatMessage?.isStateUpdate?? false
-            content: relatedMsg.chatMessage?.content ?? null
-            userState: relatedMsg.chatMessage?.state ?? ChatMessageContentUserStateChange.State.Unknown
-            affectedUserName: control.chatProvider?.userById(relatedMsg.chatMessage?.affectedUserId ?? "")?.computedName ?? ""
-            anchors {
-                left: replyBg.left
-                right: replyBg.right
-                leftMargin: 10
-                bottom: chatMessageBox.top
-                bottomMargin: 10
-            }
-
-            property ChatMessage chatMessage
-        }
-
-        HeaderIconButton {
-            id: closeButton
-            visible: relatedMsg.visible
-            iconSource: Icons.mobileCloseApp
-            anchors {
-                top: replyBg.top
-                right: replyBg.right
-                topMargin: 10
-                rightMargin: 10
-            }
-
-            onClicked: () => relatedMsg.chatMessage = null
-        }
-
-        ChatMessageBox {
-            id: chatMessageBox
-            visible: chatRoomList.chatRoom?.ownUserJoinState === IChatRoom.UserRoomState.Joined ?? false
-            chatRoom: chatMessageList.chatRoom
-            anchors {
-                left: parent.left
-                right: parent.right
-                bottom: parent.bottom
-            }
-
-            onSendFile: filePath => chatMessageList.chatRoom.sendFile(filePath)
-            onSendImage: imagePath => chatMessageList.chatRoom.sendImage(imagePath)
-            onImageFromClipboardReceived: () => control.useImageFromClipboard()
-            onEditLastMessage: () => {
-                const chatProvider = control.attachedData
-                const chatRoom = chatRoomList.chatRoom
-                if (chatRoom && chatProvider) {
-                    const latestMsg = chatRoomList.chatRoom.latestOwnTextMessage()
-                    if (latestMsg) {
-                        chatMessageBox.text = latestMsg.content.simpleText
-                        chatMessageBox.editMessageId = latestMsg.eventId
-                        // ViewHelper.showEditMessageDialog(chatProvider, chatRoom.id, latestMsg.eventId, latestMsg.message)
-                    }
-                }
-            }
-            onSendMessage: () => {
-                if (chatMessageBox.hasMessage) {
-
-                    if (chatMessageBox.editMessageId) {
-                        // Edit existing message
-                        chatRoomList.chatProvider.requestEditMessage(chatRoomList.chatRoom.id, chatMessageBox.editMessageId, chatMessageBox.text)
-                        chatMessageBox.editMessageId = ""
-                    } else {
-                        // Send new message
-                        chatMessageList.chatRoom.sendMessage(chatMessageBox.text,
-                                                             relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "")
-                    }
-
-                    relatedMsg.chatMessage = null
-                    chatMessageBox.clear()
-                }
-            }
-        }
-
-        ChatUnjoinedPage {
-            id: chatUnjoinedPage
-            chatProvider: control.attachedData
-            chatRoom: chatRoomList.chatRoom
-            joinState: chatRoomList.chatRoom?.ownUserJoinState === IChatRoom.UserRoomState.Unjoined
-            visible: chatRoomList.chatRoom?.ownUserJoinState !== IChatRoom.UserRoomState.Joined ?? false
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
-                bottom: parent.bottom
-                leftMargin: 10
-                rightMargin: 10
-            }
+            chatRoom: control.selectedChatRoom
         }
     }
 }

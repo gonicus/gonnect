@@ -24,6 +24,7 @@
 #include "GlobalCallState.h"
 #include "ChatMessage.h"
 #include "ErrorBus.h"
+#include "PlatformSession.h"
 
 #include <QLoggingCategory>
 #include <QNetworkAccessManager>
@@ -46,8 +47,15 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
     connect(this, &JitsiConnector::isInConferenceChanged, this, [this]() {
         if (isInConference()) {
             m_establishedDateTime = QDateTime::currentDateTime();
+        } else {
+            m_meetingEstablishedEmitted = false;
         }
     });
+
+    connect(this, &IConferenceConnector::ownIdChanged, this,
+            &JitsiConnector::checkMeetingEstablished);
+    connect(this, &IConferenceConnector::numberOfUsersChanged, this,
+            &JitsiConnector::checkMeetingEstablished);
 
     connect(this, &IConferenceConnector::largeVideoUserChanged, this, [this]() {
         Q_EMIT executeSetLargeVideoUser(m_largeVideoUser ? m_largeVideoUser->id() : "");
@@ -68,15 +76,13 @@ JitsiConnector::JitsiConnector(QObject *parent) : IConferenceConnector{ parent }
             &JitsiConnector::onHeadsetHookSwitchChanged);
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
-            [this](bool, const QString tag) {
+            [this](bool value, const QString tag) {
                 if (m_isOnHold) {
                     return;
                 }
 
-                if (m_muteTag.isEmpty() || m_muteTag != tag) {
+                if (!m_muteSync.isOwnEcho(tag) && m_isAudioMuted != value) {
                     toggleMute();
-                } else if (!m_muteTag.isEmpty() && m_muteTag == tag) {
-                    m_muteTag.clear();
                 }
             });
 
@@ -91,6 +97,17 @@ JitsiConnector::~JitsiConnector()
 QString JitsiConnector::ownDisplayName()
 {
     return ViewHelper::instance().currentUserName();
+}
+
+void JitsiConnector::checkMeetingEstablished()
+{
+    if (m_meetingEstablishedEmitted || !m_isInConference || m_jitsiId.isEmpty()
+        || m_users.size() < 2) {
+        return;
+    }
+
+    m_meetingEstablishedEmitted = true;
+    Q_EMIT ViewHelper::instance().meetingEstablished(m_roomName);
 }
 
 void JitsiConnector::setJitsiId(QString id)
@@ -168,9 +185,10 @@ void JitsiConnector::addIncomingMessage(QString fromId, QString nickName, QStrin
 
     // System notification
     AppSettings settings;
-    if (settings.value("generic/jitsiChatAsNotifications", true).toBool()) {
+    if (settings.value("generic/jitsiChatAsNotifications", true).toBool()
+        && !PlatformSession::instance().isScreenShareActive()) {
         auto notification = new Notification(tr("New chat message"), message,
-                                             Notification::Priority::normal, this);
+                                             Notification::Priority::normal, true, this);
         notification->setIcon(":/icons/gonnect.svg");
 
         m_chatNotifications.append(notification);
@@ -1217,7 +1235,10 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
                                                  << displayName << ") with flags:" << startFlags;
 
     auto &globalCallState = GlobalCallState::instance();
-    globalCallState.holdAllCalls(this);
+
+    if (!(globalCallState.globalCallState() & ICallState::State::Migrating)) {
+        globalCallState.holdAllCalls(this);
+    }
 
     if (isOnHold()) {
         toggleHold();
@@ -1248,30 +1269,32 @@ void JitsiConnector::joinConference(const QString &conferenceId, const QString &
     }
 
     // Create notification about ongoing conference
-    m_inConferenceNotification = new Notification(tr("Active conference"), this->displayName(),
-                                                  Notification::Priority::normal, this);
-    m_inConferenceNotification->setDisplayHint(Notification::tray
-                                               | Notification::hideContentOnLockScreen);
-    m_inConferenceNotification->setCategory("call.ongoing");
-    m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
-    m_inConferenceNotification->setIcon(":/icons/gonnect.svg");
+    if (!PlatformSession::instance().isScreenShareActive()) {
+        m_inConferenceNotification = new Notification(tr("Active conference"), this->displayName(),
+                                                      Notification::Priority::normal, false, this);
+        m_inConferenceNotification->setDisplayHint(Notification::tray
+                                                   | Notification::hideContentOnLockScreen);
+        m_inConferenceNotification->setCategory("call.ongoing");
+        m_inConferenceNotification->addButton(tr("Hang up"), "hangup", "call.hang-up", {});
+        m_inConferenceNotification->setIcon(":/icons/gonnect.svg");
 
-    QString ref = NotificationManager::instance().add(m_inConferenceNotification);
-    connect(m_inConferenceNotification, &Notification::actionInvoked, this,
-            [this, ref](QString action, QVariantList) {
-                if (action == "hangup") {
-                    NotificationManager::instance().remove(ref);
-                    leaveConference();
-                }
-            });
+        QString ref = NotificationManager::instance().add(m_inConferenceNotification);
+        connect(m_inConferenceNotification, &Notification::actionInvoked, this,
+                [this, ref](QString action, QVariantList) {
+                    if (action == "hangup") {
+                        NotificationManager::instance().remove(ref);
+                        leaveConference();
+                    }
+                });
 
-    connect(m_inConferenceNotification, &QObject::destroyed, this, [this](QObject *obj) {
-        if (m_inConferenceNotification == obj) {
-            m_inConferenceNotification = nullptr;
-        }
-    });
+        connect(m_inConferenceNotification, &QObject::destroyed, this, [this](QObject *obj) {
+            if (m_inConferenceNotification == obj) {
+                m_inConferenceNotification = nullptr;
+            }
+        });
+    }
 
-    Q_EMIT GlobalCallState::instance().callStarted(true);
+    Q_EMIT globalCallState.callStarted(true);
 }
 
 void JitsiConnector::enterPassword(const QString &password, bool rememberPassword)
@@ -1385,8 +1408,7 @@ void JitsiConnector::setAudioMuted(bool value)
     }
 
     if (!m_didExecuteAudioMuteToggle) {
-        m_muteTag = QUuid::createUuid().toString();
-        GlobalMuteState::instance().toggleMute(m_muteTag);
+        GlobalMuteState::instance().setMuted(value, m_muteSync.originate());
     }
 
     m_didExecuteAudioMuteToggle = false;

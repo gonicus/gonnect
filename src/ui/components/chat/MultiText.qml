@@ -13,12 +13,16 @@ Column {
     property ChatMessageContentText content
     property int availableWidth
 
+    signal openDirectChatRequested(string userId)
+
     Repeater {
         id: rep
         model: control.content?.contentParts ?? null
         delegate: Item {
             id: delg
-            implicitHeight: delg.isCode ? codeBlockLoader.height : textLabel.height
+            implicitHeight: delg.isCode
+                            ? (codeBlockLoader.y + codeBlockLoader.height)
+                            : (textLabel.y + textLabel.height)
 
             required property int index
             required property ChatMessageContentPart modelData
@@ -31,14 +35,34 @@ Column {
                 right: parent?.right
             }
 
-            Label {
+            TextEdit {
                 id: textLabel
                 visible: !delg.isCode
+                y: delg.index > 0 ? 5 : 0
                 text: delg.text
+                font.pixelSize: Theme.fontPixelSize
                 wrapMode: Label.WordWrap
+                textFormat: Text.MarkdownText
+                readOnly: true
+                cursorDelegate: null
                 anchors {
                     left: parent.left
                     right: parent.right
+                }
+
+                HoverHandler {
+                    id: hoverHandler
+                    cursorShape: textLabel.hoveredLink !== ""
+                                 ? Qt.PointingHandCursor
+                                 : Qt.IBeamCursor
+                }
+
+                onLinkActivated: link => {
+                    if (link.startsWith("chat://")) {
+                        control.openDirectChatRequested(link.substring(7))
+                    } else {
+                        Qt.openUrlExternally(link)
+                    }
                 }
             }
 
@@ -46,6 +70,7 @@ Column {
                 id: codeBlockLoader
                 active: delg.isCode
                 source: "qrc:/qt/qml/base/ui/components/chat/CodeBlock.qml"
+                y: 5
                 anchors {
                     left: parent.left
                     right: parent.right

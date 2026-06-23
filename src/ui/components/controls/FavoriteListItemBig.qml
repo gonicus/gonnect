@@ -13,93 +13,141 @@ Item {
         right: parent?.right
     }
 
+    property bool isCompactMode: false
+
     required property string name
-    required property string phoneNumber
     required property string company
     required property bool hasBuddyState
     required property bool hasAvatar
     required property string avatarPath
-    required property int numberType
-    required property int contactType
-    required property IChatProvider chatProvider
-
-    readonly property bool isJitsiUrl: delg.contactType === NumberStats.ContactType.JitsiMeetUrl
-    readonly property bool isChatRoom: delg.contactType === NumberStats.ContactType.ChatRoomId
-    readonly property bool isReady: delg.buddyStatus === SIPBuddyState.READY
-
-    property int buddyStatus: SIPBuddyState.UNKNOWN
-
-    readonly property string typeIcon: {
-
-        if (delg.isJitsiUrl) {
-            return Icons.videoCall
-        }
-
-        if (delg.isChatRoom) {
-            return Icons.dialogMessages
-        }
-
-        switch (delg.numberType) {
-            case Contact.NumberType.Commercial:
-                return Icons.actor
-            case Contact.NumberType.Mobile:
-                return Icons.smartphone
-            case Contact.NumberType.Home:
-                return Icons.goHome
-            default:
-                return ''
-        }
-    }
+    required property var addresses
+    required property string subscribableNumber
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Favorite contact")
-    Accessible.description: qsTr("Selected favorite %1: %2").arg(delg.name).arg(delg.isJitsiUrl ? qsTr("tap to start meeting %1").arg(delg.phoneNumber) : qsTr("tap to call %1").arg(delg.phoneNumber))
-    Accessible.focusable: true
-    Accessible.onPressAction: () => delg.startMeetingOrCall()
+    Accessible.description: qsTr("Selected favorite %1").arg(delg.name)
+    Accessible.focusable: false
 
-    function updateBuddyStatus() {
-        delg.buddyStatus = delg.hasBuddyState
-                ? SIPManager.buddyStatus(delg.phoneNumber)
-                : SIPBuddyState.UNKNOWN
-    }
+    states: [
+        State {
+            when: delg.isCompactMode
 
-    function subscribeBuddyStatus() {
-        const buddy = SIPManager.getBuddy(delg.phoneNumber)
-        if (buddy !== null) {
-            buddy.subscribeToBuddyStatus()
+            PropertyChanges {
+                addressButtonRow.visible: false
+                buttonRowRepeater.model: null
+                moreButton.visible: true
+            }
+            AnchorChanges {
+                target: nameCompanyContainer
+                anchors.right: moreButton.left
+            }
         }
-    }
+    ]
 
-    Component.onCompleted: () => delg.updateBuddyStatus()
+    QtObject {
+        id: internal
 
-    Connections {
-        target: SIPManager
-        enabled: delg.hasBuddyState
-        function onBuddyStateChanged(url : string, status : int) {
-            delg.updateBuddyStatus()
+        property int buddyStatus: SIPBuddyState.UNKNOWN
+
+        function updateBuddyStatus() {
+            internal.buddyStatus = delg.hasBuddyState
+                    ? SIPManager.buddyStatus(delg.subscribableNumber)
+                    : SIPBuddyState.UNKNOWN
         }
-    }
 
-    Rectangle {
-        id: rowBackground
-        anchors.fill: parent
-        radius: 4
-        color: rowHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+        function subscribeBuddyStatus() {
+            const buddy = SIPManager.getBuddy(delg.subscribableNumber)
+            if (buddy !== null) {
+                buddy.subscribeToBuddyStatus()
+            }
+        }
 
-        Accessible.ignored: true
+        Component.onCompleted: () => internal.updateBuddyStatus()
+
+        readonly property Connections sipManagerConnections: Connections {
+            target: SIPManager
+            enabled: delg.hasBuddyState
+            function onBuddyStateChanged(url : string, status : int) {
+                internal.updateBuddyStatus()
+            }
+        }
+
+        function startMeetingOrCall(addr : var) {
+            switch (addr.contactType) {
+            case NumberStats.ContactType.JitsiMeetUrl:
+                if (!ViewHelper.isActiveVideoCall) {
+                    ViewHelper.requestMeeting(addr.addr)
+                }
+                break
+
+            case NumberStats.ContactType.ChatRoomId:
+                ViewHelper.showChatRoom(addr.chatProvider, addr.addr)
+                break
+
+            case NumberStats.ContactType.PhoneNumber:
+                SIPCallManager.call(addr.addr)
+                break
+            }
+        }
+
+        function tooltipText(addr : var) : string {
+            switch (addr.contactType) {
+                case NumberStats.ContactType.JitsiMeetUrl:
+                    return qsTr("Jitsi Meet (room '%1')").arg(addr.addr)
+
+                case NumberStats.ContactType.ChatRoomId:
+                    return qsTr("Chat with %1").arg(delg.name)
+
+                case NumberStats.ContactType.PhoneNumber: {
+                    switch (addr.numberType) {
+                        case Contact.NumberType.Commercial:
+                            return qsTr("Phone (Commercial, %1)").arg(addr.addr)
+
+                        case Contact.NumberType.Mobile:
+                            return qsTr("Phone (Mobile, %1)").arg(addr.addr)
+
+                        case Contact.NumberType.Home:
+                            return qsTr("Phone (Home, %1)").arg(addr.addr)
+                    }
+                }
+            }
+            return ''
+        }
+
+        function iconSource(addr : var) : string {
+            switch (addr.contactType) {
+                case NumberStats.ContactType.JitsiMeetUrl:
+                   return Icons.videoCall
+
+                case NumberStats.ContactType.ChatRoomId:
+                   return Icons.dialogMessages
+
+                case NumberStats.ContactType.PhoneNumber: {
+                    switch (addr.numberType) {
+                        case Contact.NumberType.Commercial:
+                            return Icons.actor
+                        case Contact.NumberType.Mobile:
+                            return Icons.smartphone
+                        case Contact.NumberType.Home:
+                            return Icons.goHome
+                    }
+                }
+            }
+            return ''
+        }
     }
 
     AvatarImage {
         id: avatarImage
         size: 40
-        initials: ViewHelper.initials(delg.name || delg.phoneNumber)
+        initials: ViewHelper.initials(delg.name)
         source: delg.hasAvatar
                 ? (delg.avatarPath.startsWith("file://")
                    ? delg.avatarPath
                    : ("file://" + delg.avatarPath))
                 : ""
         showPresenceStatus: delg.hasBuddyState
-        presenceStatus: delg.buddyStatus
+        presenceStatus: internal.buddyStatus
         indicatorComponent: Component { BuddyStatusIndicator {} }
         anchors {
             left: parent.left
@@ -115,14 +163,14 @@ Item {
         anchors {
             left: avatarImage.right
             leftMargin: 10
-            right: typeDelgLabel.left
+            right: addressButtonRow.left
             rightMargin: 10
             verticalCenter: parent.verticalCenter
         }
 
         Label {
             id: contactNameLabel
-            text: delg.name || delg.phoneNumber
+            text: delg.name
             font.weight: Font.Medium
             elide: Label.ElideRight
             anchors {
@@ -164,17 +212,167 @@ Item {
         Accessible.ignored: true
     }
 
-    IconLabel {
-        id: typeDelgLabel
-        icon.source: delg.typeIcon
-        width: 20
+    Item {
+        id: moreButton
+        visible: false
+        width: avatarImage.size
+        height: avatarImage.size
         anchors {
             right: parent.right
-            rightMargin: avatarImage.anchors.leftMargin
             verticalCenter: parent.verticalCenter
         }
 
-        Accessible.ignored: true
+        Rectangle {
+            anchors.fill: parent
+            radius: moreButton.width / 2
+            color: moreButtonHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+        }
+
+        IconLabel {
+            anchors.centerIn: parent
+            icon {
+                width: 24
+                height: 24
+                color: delg.enabled ? Theme.primaryTextColor : Theme.secondaryInactiveTextColor
+                source: Icons.overflowMenu
+            }
+        }
+
+        HoverHandler {
+            id: moreButtonHoverHandler
+        }
+
+        TapHandler {
+            onTapped: () => moreMenuComponent.createObject(moreButton).popup()
+        }
+    }
+
+    Component {
+        id: moreMenuComponent
+
+        Menu {
+            id: moreMenu
+            width: {
+                let maxWidth = 0
+                let paddingSize = 0
+                for (let i = 0; i < moreMenu.count; ++i) {
+                    const item = moreMenu.itemAt(i)
+                    if (item) {
+                        maxWidth = Math.max(item.contentItem.implicitWidth, maxWidth)
+                        paddingSize = Math.max(item.padding, paddingSize)
+                    }
+                }
+                return maxWidth + (paddingSize * 2)
+            }
+
+            onClosed: () => moreMenu.destroy()
+
+            Instantiator {
+                model: delg.addresses
+                delegate: MenuItem {
+                    id: menuDelg
+                    text: internal.tooltipText(menuDelg.modelData)
+                    icon.source: internal.iconSource(menuDelg.modelData)
+
+                    required property var modelData
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Favorite phone, chat or meeting button")
+                    Accessible.description: qsTr("Selected address %1").arg(menuDelg.modelData.addr)
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => internal.startMeetingOrCall(menuDelg.modelData)
+
+                    // ToolTip.visible: addrHoverHandler.hovered
+                    // ToolTip.text: internal.tooltipText(addrDelg.modelData)
+
+                    onTriggered: () => internal.startMeetingOrCall(menuDelg.modelData)
+                }
+
+                onObjectAdded: (index, object) => moreMenu.insertItem(index, object)
+                onObjectRemoved: (index, object) => moreMenu.removeItem(object)
+            }
+        }
+    }
+
+    Row {
+        id: addressButtonRow
+        height: avatarImage.size
+        anchors {
+            right: parent.right
+            rightMargin: 10
+            verticalCenter: parent.verticalCenter
+        }
+
+        Repeater {
+            id: buttonRowRepeater
+            model: delg.addresses
+            delegate: Item {
+                id: addrDelg
+                width: addrDelg.height
+                anchors {
+                    top: parent?.top
+                    bottom: parent?.bottom
+                }
+
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("Favorite phone, chat or meeting button")
+                Accessible.description: qsTr("Selected address %1").arg(addrDelg.modelData.addr)
+                Accessible.focusable: true
+                Accessible.onPressAction: () => internal.startMeetingOrCall(addrDelg.modelData)
+
+                ToolTip.visible: addrHoverHandler.hovered
+                ToolTip.text: internal.tooltipText(addrDelg.modelData)
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: addrDelg.width / 2
+                    color: addrHoverHandler.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
+                }
+
+                IconLabel {
+                    anchors.centerIn: parent
+                    icon {
+                        width: 24
+                        height: 24
+                        color: delg.enabled ? Theme.primaryTextColor : Theme.secondaryInactiveTextColor
+                        source: internal.iconSource(addrDelg.modelData)
+                    }
+                }
+
+                required property var modelData
+
+                TapHandler {
+                    gesturePolicy: TapHandler.WithinBounds
+                    grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+                    exclusiveSignals: TapHandler.SingleTap
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                    onTapped: (_, mouseButton) => {
+                        if (mouseButton === Qt.RightButton) {
+                            switch (addrDelg.modelData.contactType) {
+                            case NumberStats.ContactType.JitsiMeetUrl:
+                                jitsiHistoryListContextMenuComponent.createObject(addrDelg, { addr: addrDelg.modelData }).popup()
+                                break
+
+                            case NumberStats.ContactType.ChatRoomId:
+                                chatRoomContextMenuComponent.createObject(addrDelg, { addr: addrDelg.modelData }).popup()
+                                break
+
+                            case NumberStats.ContactType.PhoneNumber:
+                                historyListContextMenuComponent.createObject(addrDelg, { addr: addrDelg.modelData }).popup()
+                                break
+                            }
+                        } else {
+                            internal.startMeetingOrCall(addrDelg.modelData)
+                        }
+                    }
+                }
+
+                HoverHandler {
+                    id: addrHoverHandler
+                }
+            }
+        }
     }
 
     Component {
@@ -182,13 +380,14 @@ Item {
 
         HistoryListContextMenu {
             id: rowContextMenu
-            phoneNumber: delg.phoneNumber
+            phoneNumber: rowContextMenu.addr.addr
             isFavorite: true
             isSipSubscriptable: delg.hasBuddyState
-            isReady: delg.isReady
-            onCallClicked: () => SIPCallManager.call(delg.phoneNumber)
-            onCallAsClicked: (identityId) => SIPCallManager.call("account0", delg.phoneNumber, "", identityId)
-            onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
+            onCallClicked: () => SIPCallManager.call(rowContextMenu.addr.addr)
+            onCallAsClicked: identityId => SIPCallManager.call("account0", rowContextMenu.addr.addr, "", identityId)
+            onNotifyWhenAvailableClicked: () => internal.subscribeBuddyStatus()
+
+            property var addr
         }
     }
 
@@ -198,13 +397,15 @@ Item {
         JitsiHistoryListContextMenu {
             id: rowJitsiContextMenu
             isFavorite: true
-            roomName: delg.phoneNumber
+            roomName: rowJitsiContextMenu.addr.addr
             width: 230
             onCallClicked: () => {
                 if (!ViewHelper.isActiveVideoCall) {
-                    ViewHelper.requestMeeting(delg.phoneNumber)
+                    ViewHelper.requestMeeting(rowJitsiContextMenu.addr.addr)
                 }
             }
+
+            property var addr
         }
     }
 
@@ -212,48 +413,14 @@ Item {
         id: chatRoomContextMenuComponent
 
         Menu {
+            id: chatRoomMenu
+            onClosed: () => chatRoomMenu.destroy()
             Action {
                 id: favToggleAction
                 text: qsTr('Remove favorite')
-                onTriggered: () => delg.chatProvider.requestToggleRoomFavorite(
-                                       delg.chatProvider.chatRoomByRoomId(delg.phoneNumber))
+                onTriggered: () => addr.chatProvider.requestToggleRoomFavorite(addr.chatRoom)
             }
+            property var addr
         }
-    }
-
-    TapHandler {
-        gesturePolicy: TapHandler.WithinBounds
-        grabPermissions: PointerHandler.ApprovesTakeOverByAnything
-        exclusiveSignals: TapHandler.SingleTap | TapHandler.DoubleTap
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onDoubleTapped: () => delg.startMeetingOrCall()
-        onTapped: (_, mouseButton) => {
-            if (mouseButton === Qt.RightButton) {
-                if (delg.isJitsiUrl) {
-                    jitsiHistoryListContextMenuComponent.createObject(delg).popup()
-                } else if (delg.isChatRoom) {
-                    chatRoomContextMenuComponent.createObject(delg).popup()
-                } else {
-                    historyListContextMenuComponent.createObject(delg).popup()
-                }
-            }
-        }
-    }
-
-    function startMeetingOrCall() {
-        if (delg.contactType === NumberStats.ContactType.JitsiMeetUrl) {
-            if (!ViewHelper.isActiveVideoCall) {
-                ViewHelper.requestMeeting(delg.phoneNumber)
-            }
-        } else if (delg.isChatRoom) {
-            ViewHelper.showChatRoom(delg.chatProvider, delg.phoneNumber)
-        } else {
-            SIPCallManager.call(delg.phoneNumber)
-        }
-    }
-
-    HoverHandler {
-        id: rowHoverHandler
     }
 }

@@ -24,11 +24,9 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
             [this](const bool value, const QString tag) {
-                if (m_muteTag.isEmpty() || m_muteTag != tag) {
+                // Ignore the echo of our own origination, otherwise re-apply
+                if (!m_muteSync.isOwnEcho(tag)) {
                     setMute(value);
-                } else if (!m_muteTag.isEmpty() && m_muteTag == tag) {
-                    // We started the change request so ignore propagation
-                    m_muteTag.clear();
                 }
             });
 
@@ -46,30 +44,53 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
 
         if (GlobalCallState::instance().globalCallState() == ICallState::State::Idle) {
             m_device->setCallStatus(tr("Call ended"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
         }
     });
 
     m_callStartTimer.setInterval(500ms);
     m_callStartTimer.setSingleShot(true);
-    connect(&m_callStartTimer, &QTimer::timeout, this, [this]() {
-        if (!m_device) {
-            return;
-        }
-
-        const auto state = GlobalCallState::instance().globalCallState();
-        if ((state & ICallState::State::CallActive) && !(state & ICallState::State::OnHold)) {
-            m_inRemoteCallScreen = true;
-            m_device->setCallStatus(tr("Call active"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
-            updateRemoteContactInfo();
-        }
-    });
+    connect(&m_callStartTimer, &QTimer::timeout, this, [this]() { showInCallScreen(); });
 }
 
 HeadsetDeviceProxy::~HeadsetDeviceProxy()
 {
     close();
+}
+
+void HeadsetDeviceProxy::switchScreen(ReportDescriptorEnums::TeamsScreenSelect screen)
+{
+    if (!m_device) {
+        return;
+    }
+
+    m_currentScreen = screen;
+    m_device->selectScreen(screen);
+}
+
+void HeadsetDeviceProxy::showInCallScreen()
+{
+    if (!m_device) {
+        return;
+    }
+
+    const auto state = GlobalCallState::instance().globalCallState();
+    if ((state & ICallState::State::CallActive) && !(state & ICallState::State::OnHold)) {
+        m_callStartTimer.stop();
+        m_inRemoteCallScreen = true;
+        m_device->setCallStatus(tr("Call active"));
+        switchScreen(ReportDescriptorEnums::TeamsScreenSelect::InCall);
+        updateRemoteContactInfo();
+    }
+}
+
+void HeadsetDeviceProxy::enterActiveCall()
+{
+    if (m_currentScreen == ReportDescriptorEnums::TeamsScreenSelect::IncomingCall) {
+        showInCallScreen();
+    } else if (!m_callStartTimer.isActive()) {
+        m_callStartTimer.start();
+    }
 }
 
 void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
@@ -95,7 +116,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::RingingIncoming) {
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("Ringing"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
         }
     }
 
@@ -104,7 +125,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::KnockingIncoming) {
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("Call waiting"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
         } else if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
             m_callStartTimer.start();
@@ -115,10 +136,10 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::RingingOutgoing) {
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("Calling"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
         } else if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
-            m_callStartTimer.start();
+            enterActiveCall();
         }
     }
 
@@ -127,10 +148,10 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::OnHold) {
             m_inRemoteCallScreen = true;
             m_device->setCallStatus(tr("On Hold"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
         } else {
             m_inRemoteCallScreen = true;
-            m_callStartTimer.start();
+            enterActiveCall();
         }
     }
 
@@ -146,6 +167,15 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         GlobalMuteState::instance().reset();
         if (state & State::AudioActive) {
             setBusyLine(true);
+            // Defer the mute-lock probe past this state change so that the
+            // headset can do it's HID communication.
+            if (m_device && !GlobalMuteState::instance().isMuted()) {
+                QTimer::singleShot(0, this, [this]() {
+                    if (m_device && !GlobalMuteState::instance().isMuted()) {
+                        m_device->probeMuteLock();
+                    }
+                });
+            }
         } else {
             setBusyLine(false);
         }
@@ -154,7 +184,7 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
     if (changeMask & State::CallActive) {
         if (state & State::CallActive) {
             m_inRemoteCallScreen = true;
-            m_callStartTimer.start();
+            enterActiveCall();
         }
     } else if (state) {
         m_inRemoteCallScreen = true;
@@ -162,19 +192,20 @@ void HeadsetDeviceProxy::updateDeviceState(bool refreshAll)
         if (state & State::OnHold) {
             m_callStartTimer.stop();
             m_device->setCallStatus(tr("On Hold"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HoldCall);
         } else if (state & (State::RingingIncoming | State::KnockingIncoming)) {
             m_callStartTimer.stop();
             m_device->setCallStatus(state & State::RingingIncoming ? tr("Ringing")
                                                                    : tr("Call waiting"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::IncomingCall);
         } else if (state & State::RingingOutgoing) {
             m_callStartTimer.stop();
             m_device->setCallStatus(tr("Calling"));
-            m_device->selectScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
+            switchScreen(ReportDescriptorEnums::TeamsScreenSelect::OutgoingCall);
         } else if (state & State::CallActive) {
-            if (!m_callStartTimer.isActive()) {
-                m_callStartTimer.start();
+            if (m_currentScreen != ReportDescriptorEnums::TeamsScreenSelect::InCall
+                && !m_callStartTimer.isActive()) {
+                enterActiveCall();
             }
         }
     }
@@ -199,6 +230,14 @@ void HeadsetDeviceProxy::updateRemoteContactInfo()
     }
 }
 
+void HeadsetDeviceProxy::setMuteLocked(bool locked)
+{
+    if (m_muteLocked != locked) {
+        m_muteLocked = locked;
+        Q_EMIT muteLockedChanged();
+    }
+}
+
 bool HeadsetDeviceProxy::refreshDevice()
 {
     auto devs = USBDevices::instance().headsetDevices();
@@ -206,6 +245,9 @@ bool HeadsetDeviceProxy::refreshDevice()
         disconnect(m_device, nullptr, this, nullptr);
         m_device = nullptr;
     }
+
+    // A reattached or removed device carries no lock state
+    setMuteLocked(false);
 
     if (devs.count()) {
         m_device = devs.first();
@@ -220,8 +262,17 @@ bool HeadsetDeviceProxy::refreshDevice()
         connect(m_device, &HeadsetDevice::mute, this, [this]() {
             if (isEnabled()) {
                 Q_EMIT mute();
-                m_muteTag = QUuid::createUuid().toString();
-                GlobalMuteState::instance().toggleMute(m_muteTag);
+                GlobalMuteState::instance().setMuted(m_device->getMute(), m_muteSync.originate());
+            }
+        });
+        connect(m_device, &HeadsetDevice::muteLockChanged, this, [this](bool locked, bool muted) {
+            if (isEnabled()) {
+                qCInfo(lcHeadsetProxy)
+                        << "Headset mute-lock changed - locked:" << locked << "muted:" << muted;
+                if (locked) {
+                    GlobalMuteState::instance().setMuted(muted, m_muteSync.originate());
+                }
+                setMuteLocked(locked);
             }
         });
         connect(m_device, &HeadsetDevice::busyLine, this, [this]() {
@@ -312,9 +363,11 @@ bool HeadsetDeviceProxy::open()
                 connect(
                         &ui, &UserInfo::displayNameChanged, this,
                         [this]() {
-                            m_device->setLocalUserName(UserInfo::instance().getDisplayName());
-                            m_device->setPresenceIcon(
-                                    ReportDescriptorEnums::TeamsPresenceIcon::Online);
+                            if (m_device) {
+                                m_device->setLocalUserName(UserInfo::instance().getDisplayName());
+                                m_device->setPresenceIcon(
+                                        ReportDescriptorEnums::TeamsPresenceIcon::Online);
+                            }
                         },
                         Qt::SingleShotConnection);
             } else {

@@ -8,6 +8,7 @@
 #include "AddressBook.h"
 #include "PublicChatRoom.h"
 #include "ErrorBus.h"
+#include "FileContentHelper.h"
 #include "ChatMessageContentText.h"
 #include "ChatMessageContentImage.h"
 #include "ChatMessageContentFile.h"
@@ -21,7 +22,8 @@
 #include "ViewHelper.h"
 #include "EnumTranslation.h"
 #include "GlobalStateAggregator.h"
-// #include "ReadOnlyConfdSettings.h"
+#include "ReadOnlyConfdSettings.h"
+#include "PlatformSession.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -249,8 +251,6 @@ IpcDispatcher::IpcDispatcher(const QString &settingsGroup, const IpcConfig &conf
     connect(this, &IpcDispatcher::capabilitiesInitializedChanged, this,
             &IpcDispatcher::updateConnected);
 
-    connect(this, &IChatProvider::chatRoomIsFavoriteChanged, this,
-            &IpcDispatcher::updateHasFavoriteRooms);
     connect(this, &IChatProvider::chatRoomAdded, this, &IpcDispatcher::updateHasFavoriteRooms);
     connect(this, &IChatProvider::chatRoomAdded, this,
             &IpcDispatcher::updateUnreadNotificationsCount);
@@ -270,6 +270,22 @@ IpcDispatcher::~IpcDispatcher()
 
     qDeleteAll(m_userRoomStateCache.values());
     m_userRoomStateCache.clear();
+}
+
+IChatProvider::Capabilities IpcDispatcher::capabilities() const
+{
+    // clang-format off
+    using CAP = IChatProvider::Capability;
+    static const IChatProvider::Capabilities s_capabilties =
+            CAP::EditMessage
+            | CAP::RemoveMessage
+            | CAP::MessageRelations
+            | CAP::Reactions
+            | CAP::UploadFile
+            | CAP::UploadMedia
+            | CAP::Markdown;
+    return s_capabilties;
+    // clang-format on
 }
 
 void IpcDispatcher::loginWithCredentials(const QString &userId, const QString &secret)
@@ -360,22 +376,12 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     sendRequest(req);
 }
 
-void IpcDispatcher::sendImage(const QString &roomId, const QString &filePath)
+void IpcDispatcher::sendTypingPing(const QString &roomId)
 {
-    if (!chatRoomByRoomId(roomId)) {
-        qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
-        return;
-    }
-
-    auto req = createRequest();
-    MessageSendRequest msgReq;
-    msgReq.setRoomId(roomId);
-
-    MessageContentImage content;
-    content.setImagePath(makeRelativeToDataRootPath(filePath));
-
-    msgReq.setImage(content);
-    req->setMessageSendRequest(msgReq);
+    auto req = createRequest(false);
+    RoomTypingRequest typingReq;
+    typingReq.setRoomId(roomId);
+    req->setRoomTypingRequest(typingReq);
     sendRequest(req);
 }
 
@@ -593,7 +599,6 @@ void IpcDispatcher::processResponse(
 {
     const auto &rc = responseContainer;
     const auto tag = rc.tag();
-    const auto ownUserId = this->ownUserId();
 
     if (tag > 0) {
         if (auto timer = m_timeoutTimers.value(tag, nullptr)) {
@@ -660,9 +665,8 @@ void IpcDispatcher::processResponse(
         const auto roomId = m_roomListTags.take(tag);
         if (!roomId.isEmpty()) {
             if (auto room = m_roomLookup.value(roomId, nullptr)) {
-                if (count) {
-                    room->setIsLoadingMessageHistory(false);
-                } else {
+                room->setIsLoadingMessageHistory(false);
+                if (!count) {
                     room->setIsCompletelyLoaded(true);
                 }
             }
@@ -783,7 +787,6 @@ void IpcDispatcher::processResponse(
                 // Update existing room
                 if (room.hasDisplayName() && roomObj->name() != room.displayName()) {
                     roomObj->setName(room.displayName());
-                    Q_EMIT chatRoomNameChanged(indexOf(roomObj), roomObj, roomObj->name());
                 }
 
                 roomObj->setJoinRule(joinRuleGrpcToGonnect(room.joinRule()));
@@ -817,11 +820,6 @@ void IpcDispatcher::processResponse(
                 auto user = m_users.value(userId, nullptr);
                 if (user) {
                     roomObj->addUser(user, userRoomState);
-
-                    if (user->id() == ownUserId) {
-                        Q_EMIT chatRoomOwnJoinStateChanged(roomIdx, roomObj, userRoomState);
-                    }
-
                     if (roomObj->isDirectChat()) {
                         Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
                     }
@@ -862,15 +860,15 @@ void IpcDispatcher::processResponse(
 
         } else {
             // New user object
-            const bool hasStatus = user.hasStatus();
+            const bool hasPresenceState = user.hasStatus();
 
             QString avatarPath;
             if (user.hasAvatarPath()) {
                 avatarPath = makeDataRootPath(user.avatarPath());
             }
 
-            p = new ChatUser(id, displayName, hasStatus, avatarPath, this);
-            if (hasStatus) {
+            p = new ChatUser(id, displayName, hasPresenceState, avatarPath, this);
+            if (hasPresenceState) {
                 p->setPresenceState(presenceStateConv(user.status().state()));
 
                 if (auto directRoom = ipcDirectChatRoomForUser(p)) {
@@ -916,12 +914,6 @@ void IpcDispatcher::processResponse(
                     room->setUserRoomState(p, userRoomState);
                 } else {
                     room->addUser(p, userRoomState);
-
-                    if (p->id() == ownUserId) {
-                        Q_EMIT chatRoomOwnJoinStateChanged(m_rooms.indexOf(room), room,
-                                                           userRoomState);
-                    }
-
                     if (room->isDirectChat()) {
                         Q_EMIT chatUserPropertiesChanged(p, room, m_rooms.indexOf(room));
                     }
@@ -1057,60 +1049,36 @@ void IpcDispatcher::processResponse(
                 hasContentChanged = true;
                 messageTextContent->setText(changeEvent.text().content());
             }
-        } else if (const auto messageImageContent =
-                           qobject_cast<ChatMessageContentImage *>(message->content())) {
-            if (changeEvent.hasImage()) {
-                const auto convImgPath = makeDataRootPath(changeEvent.image().imagePath());
-                if (convImgPath != messageImageContent->imagePath()) {
-                    hasContentChanged = true;
-                    messageImageContent->setImagePath(convImgPath);
-                }
-            }
-        } else if (const auto messageAudioFileContent =
-                           qobject_cast<ChatMessageContentAudioFile *>(message->content())) {
-            if (changeEvent.hasAudioFile()) {
-                const auto convFilePath = makeDataRootPath(changeEvent.audioFile().filePath());
-                if (convFilePath != messageAudioFileContent->filePath()) {
-                    hasContentChanged = true;
-                    messageAudioFileContent->setFilePath(convFilePath);
-                }
-                if (changeEvent.audioFile().hasFileName()) {
-                    const auto fileName = changeEvent.audioFile().fileName();
-                    if (fileName != messageAudioFileContent->fileName()) {
+        } else {
+            // File
+
+            using FileType = FileContentHelper::FileType;
+            const auto fileType = FileContentHelper::fileType(
+                    changeEvent.hasFile() ? changeEvent.file().filePath() : "");
+
+            if (const auto messageImageContent =
+                        qobject_cast<ChatMessageContentImage *>(message->content())) {
+                if (fileType == FileType::Image) {
+                    const auto convImgPath = makeDataRootPath(changeEvent.file().filePath());
+                    if (convImgPath != messageImageContent->imagePath()) {
                         hasContentChanged = true;
-                        messageAudioFileContent->setFileName(fileName);
+                        messageImageContent->setImagePath(convImgPath);
                     }
                 }
-            }
-        } else if (const auto messageVideoFileContent =
-                           qobject_cast<ChatMessageContentVideoFile *>(message->content())) {
-            if (changeEvent.hasVideoFile()) {
-                const auto convFilePath = makeDataRootPath(changeEvent.videoFile().filePath());
-                if (convFilePath != messageVideoFileContent->filePath()) {
-                    hasContentChanged = true;
-                    messageVideoFileContent->setFilePath(convFilePath);
-                }
-                if (changeEvent.videoFile().hasFileName()) {
-                    const auto fileName = changeEvent.videoFile().fileName();
-                    if (fileName != messageVideoFileContent->fileName()) {
+            } else if (const auto messageFileContent =
+                               qobject_cast<ChatMessageContentFile *>(message->content())) {
+                if (changeEvent.hasFile()) {
+                    const auto convFilePath = makeDataRootPath(changeEvent.file().filePath());
+                    if (convFilePath != messageFileContent->filePath()) {
                         hasContentChanged = true;
-                        messageVideoFileContent->setFileName(fileName);
+                        messageFileContent->setFilePath(convFilePath);
                     }
-                }
-            }
-        } else if (const auto messageFileContent =
-                           qobject_cast<ChatMessageContentFile *>(message->content())) {
-            if (changeEvent.hasFile()) {
-                const auto convFilePath = makeDataRootPath(changeEvent.file().filePath());
-                if (convFilePath != messageFileContent->filePath()) {
-                    hasContentChanged = true;
-                    messageFileContent->setFilePath(convFilePath);
-                }
-                if (changeEvent.file().hasFileName()) {
-                    const auto fileName = changeEvent.file().fileName();
-                    if (fileName != messageFileContent->fileName()) {
-                        hasContentChanged = true;
-                        messageFileContent->setFileName(fileName);
+                    if (changeEvent.file().hasFileName()) {
+                        const auto fileName = changeEvent.file().fileName();
+                        if (fileName != messageFileContent->fileName()) {
+                            hasContentChanged = true;
+                            messageFileContent->setFileName(fileName);
+                        }
                     }
                 }
             }
@@ -1269,7 +1237,6 @@ void IpcDispatcher::processResponse(
                                         << "aborting further processing";
             return;
         }
-        const auto roomIndex = indexOf(room);
 
         // Room settings
         if (changeEvent.hasRoomSettings()) {
@@ -1279,7 +1246,6 @@ void IpcDispatcher::processResponse(
         // Name
         if (changeEvent.hasDisplayName()) {
             room->setName(changeEvent.displayName());
-            Q_EMIT chatRoomNameChanged(roomIndex, room, room->name());
         }
 
         // Unread count
@@ -1298,19 +1264,17 @@ void IpcDispatcher::processResponse(
         // Favorite
         if (changeEvent.hasIsFavorite() && changeEvent.isFavorite() != room->isFavorite()) {
             room->setIsFavorite(changeEvent.isFavorite());
-            Q_EMIT chatRoomIsFavoriteChanged(roomIndex, room, changeEvent.isFavorite());
+            updateHasFavoriteRooms();
         }
 
         // Room permissions
         if (changeEvent.hasPermissions()) {
             room->setPermissions(roomPermissionsGrpcToGonnect(changeEvent.permissions()));
-            Q_EMIT chatRoomPermissionsChanged(roomIndex, room, room->permissions());
         }
 
         // Avatar
         if (changeEvent.hasAvatarPath()) {
             room->setAvatarPath(makeDataRootPath(changeEvent.avatarPath()));
-            Q_EMIT chatRoomAvatarPathChanged(roomIndex, room, room->avatarPath());
         }
 
         // Update typing users
@@ -1319,6 +1283,10 @@ void IpcDispatcher::processResponse(
             QList<ChatUser *> l;
             l.reserve(changeEvent.typingUserIdList().length());
             for (const auto &id : typingUserIds) {
+                if (id == ownUserId()) {
+                    continue;
+                }
+
                 auto user = m_users.value(id, nullptr);
                 if (user) {
                     l.append(user);
@@ -1327,7 +1295,6 @@ void IpcDispatcher::processResponse(
                 }
             }
             room->setTypingUsers(l);
-            Q_EMIT chatRoomTypingChanged(roomIndex, room);
         }
 
         // Update user states
@@ -1359,10 +1326,6 @@ void IpcDispatcher::processResponse(
                         room->addUser(user, userRoomState);
                     } else {
                         room->setUserRoomState(user, userRoomState);
-                    }
-
-                    if (user->id() == ownUserId) {
-                        Q_EMIT chatRoomOwnJoinStateChanged(roomIndex, room, userRoomState);
                     }
                 } else {
                     requestUser(userId);
@@ -1580,22 +1543,26 @@ ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::M
 
     QObject *content = nullptr;
 
+    using FileType = FileContentHelper::FileType;
+    const auto fileType =
+            FileContentHelper::fileType(message.hasFile() ? message.file().filePath() : "");
+
     if (message.hasMembershipChange()) {
         content = new ChatMessageContentUserStateChange(
                 userStateGrpcToGonnect(message.membershipChange().change()),
                 message.membershipChange().affectedUserId());
-    } else if (message.hasImage()) {
-        content = new ChatMessageContentImage(makeDataRootPath(message.image().imagePath()));
+    } else if (fileType == FileType::Image) {
+        content = new ChatMessageContentImage(makeDataRootPath(message.file().filePath()));
     } else if (message.hasText()) {
         content = new ChatMessageContentText(message.text().content());
-    } else if (message.hasAudioFile()) {
+    } else if (fileType == FileType::Audio) {
         content = new ChatMessageContentAudioFile(
-                makeDataRootPath(message.audioFile().filePath()),
-                message.audioFile().hasFileName() ? message.audioFile().fileName() : "");
-    } else if (message.hasVideoFile()) {
+                makeDataRootPath(message.file().filePath()),
+                message.file().hasFileName() ? message.file().fileName() : "");
+    } else if (fileType == FileType::Video) {
         content = new ChatMessageContentVideoFile(
-                makeDataRootPath(message.videoFile().filePath()),
-                message.videoFile().hasFileName() ? message.videoFile().fileName() : "");
+                makeDataRootPath(message.file().filePath()),
+                message.file().hasFileName() ? message.file().fileName() : "");
     } else if (message.hasFile()) {
         content = new ChatMessageContentFile(
                 makeDataRootPath(message.file().filePath()),
@@ -1680,24 +1647,12 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     const auto index = m_rooms.length() - 1;
     Q_EMIT chatRoomAdded(index, roomObj, tag);
-    Q_EMIT chatRoomPermissionsChanged(index, roomObj, roomObj->permissions());
-
-    connect(roomObj, &IChatRoom::avatarPathChanged, this, [this, roomObj]() {
-        Q_EMIT chatRoomAvatarPathChanged(m_rooms.indexOf(roomObj), roomObj, roomObj->avatarPath());
-    });
-
-    connect(roomObj, &IChatRoom::latestMessageDateTimeChanged, this, [this, roomObj]() {
-        Q_EMIT chatRoomLatestActivityChanged(m_rooms.indexOf(roomObj), roomObj,
-                                             roomObj->latestMessageDateTime());
-    });
 
     connect(roomObj, &IChatRoom::ownUserJoinStateChanged, this,
             &IpcDispatcher::updateUnreadNotificationsCount);
 
-    connect(roomObj, &IChatRoom::notificationCountChanged, this, [this, roomObj](qsizetype count) {
-        Q_EMIT chatRoomNotificationCountChanged(m_rooms.indexOf(roomObj), roomObj, count);
-        updateUnreadNotificationsCount();
-    });
+    connect(roomObj, &IChatRoom::notificationCountChanged, this,
+            [this](qsizetype) { updateUnreadNotificationsCount(); });
 
     return roomObj;
 }
@@ -1877,12 +1832,11 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
         } else {
             title = tr("[%1] Message from %2").arg(chatRoom->name(), senderName);
         }
-        if (textContent->isSimpleText()) {
-            message = textContent->simpleText();
-        }
+        message = textContent->simpleText();
     }
 
-    auto notification = new Notification(title, message, Notification::Priority::normal, this);
+    auto notification =
+            new Notification(title, message, Notification::Priority::normal, true, this);
 
     QString avatarPath = chatRoom->avatarPath();
     if (avatarPath.isEmpty() && chatRoom->isDirectChat()) {
@@ -1943,13 +1897,11 @@ void IpcDispatcher::removeNotificationsForRoom(IChatRoom *room)
 
 bool IpcDispatcher::shallSendDesktopNotification()
 {
-    if (!m_shallSendDesktopNotificationInitialized) {
-        AppSettings settings;
-        m_shallSendDesktopNotification =
-                settings.value("generic/jitsiChatAsNotifications", true).toBool();
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return false;
     }
-
-    return m_shallSendDesktopNotification;
+    AppSettings settings;
+    return settings.value("generic/jitsiChatAsNotifications", true).toBool();
 }
 
 RequestContainer *IpcDispatcher::createRequest(bool withTag)

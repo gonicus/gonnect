@@ -64,7 +64,7 @@ class PjSIPConan(ConanFile):
         if self.options.with_samplerate:
             self.requires("libsamplerate/0.2.2")
         if self.options.with_opus:
-            self.requires("opus/1.5.2")
+            self.requires("opus/1.6.1")
         if self.options.with_amr:
             self.requires("opencore-amr/0.1.6")
             if self.settings.os != "Windows":

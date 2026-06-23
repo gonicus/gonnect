@@ -43,7 +43,10 @@ class IChatRoom : public QObject
     Q_PROPERTY(QDateTime latestMessageDateTime READ latestMessageDateTime NOTIFY
                        latestMessageDateTimeChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> chatUsers READ chatUsers NOTIFY chatUsersChanged FINAL)
+    Q_PROPERTY(QList<ChatUser *> typingUsers READ typingUsers NOTIFY typingUsersChanged FINAL)
     Q_PROPERTY(qsizetype chatUserCount READ chatUserCount NOTIFY chatUsersChanged FINAL)
+    Q_PROPERTY(qsizetype notificationCount READ notificationCount NOTIFY notificationCountChanged
+                       FINAL)
 
 public:
     enum class UserRoomState { Unjoined, Joined, Invited, Knocked, Banned };
@@ -102,11 +105,12 @@ public:
     Q_INVOKABLE virtual void sendMessage(const QString &message,
                                          const QString &relatedMessageId = "") = 0;
 
-    /// Given a local file url, send a message with this image.
-    Q_INVOKABLE virtual void sendImage(const QString &filePath) = 0;
-
     /// Given a local file url, send a message with this file as an attachment.
     Q_INVOKABLE virtual void sendFile(const QString &filePath) = 0;
+
+    /// Send that the user is currently typing. Shall be called every 2 seconds as long as the user
+    /// is typing.
+    Q_INVOKABLE virtual void sendTypingPing() = 0;
 
     /// If the messages of this room have been loaded initially.
     virtual bool isInitiallyLoaded() const = 0;
@@ -199,6 +203,7 @@ Q_SIGNALS:
     void isCompletelyLoadedChanged();
     void latestMessageDateTimeChanged();
     void ownUserJoinStateChanged();
+    void otherUserChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.
@@ -227,5 +232,5 @@ Q_SIGNALS:
 
     /// Send when a user started or stopped typing. Use typingUsers() to retrieve the
     /// list of currently typing users.
-    void typingParticpantsChanged();
+    void typingUsersChanged();
 };

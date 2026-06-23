@@ -75,6 +75,8 @@ public:
                            QObject *parent = nullptr);
     ~IpcDispatcher();
 
+    virtual Capabilities capabilities() const override;
+
     virtual QString ownUserId() const override { return m_configInfo.userId; }
 
     /// Make the headless client try to login to the backend with the given credentials.
@@ -103,9 +105,7 @@ public:
     void sendMessage(const QString &roomId, const QString &text,
                      const QString &relatedMessageId = "");
 
-    /// Send a message in the specified room with the image specified by the file. The image must
-    /// have already been uploaded.
-    void sendImage(const QString &roomId, const QString &filePath);
+    void sendTypingPing(const QString &roomId);
 
     /// Send a message in the specified room with the file as an attachment. The file must
     /// have already been uploaded.
@@ -265,8 +265,6 @@ private:
     void removeNotificationsForRoom(IChatRoom *room);
 
     bool shallSendDesktopNotification();
-    bool m_shallSendDesktopNotification = false;
-    bool m_shallSendDesktopNotificationInitialized = false;
 
     QRegularExpression m_idConvRegex;
     bool m_useIdConversion = false;

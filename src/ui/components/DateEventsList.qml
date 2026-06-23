@@ -213,6 +213,8 @@ ListView {
             id: dateEventContextMenuComponent
 
             Menu {
+                id: dateEventMenu
+                onClosed: () => dateEventMenu.destroy()
                 Action {
                     id: joinAction
                     text: delg.isJitsiMeeting ? qsTr('Join') : qsTr('Open')

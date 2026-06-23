@@ -7,6 +7,8 @@ import base
 Menu {
     id: control
 
+    onClosed: () => control.destroy()
+
     LoggingCategory {
         id: category
         name: "gonnect.qml.popup.OwnAvatarContextMenu"
@@ -24,7 +26,7 @@ Menu {
 
     MenuItem {
         id: dndAction
-        text: qsTr("Do not disturb")
+        text: EnumTranslation.presenceState(PresenceState.Busy)
         icon {
             source: Icons.imUserBusy
             color: "transparent"
@@ -39,7 +41,7 @@ Menu {
 
     MenuItem {
         id: awayAction
-        text: qsTr("Away")
+        text: EnumTranslation.presenceState(PresenceState.Away)
         icon {
             source: Icons.imUserAway
             color: "transparent"
@@ -54,7 +56,7 @@ Menu {
 
     MenuItem {
         id: availableAction
-        text: qsTr("Available")
+        text: EnumTranslation.presenceState(PresenceState.Available)
         icon {
             source: Icons.imUserOnline
             color: "transparent"

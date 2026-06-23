@@ -38,8 +38,8 @@ public:
     virtual ChatMessage *chatMessageById(const QString &id) const override;
     virtual ChatMessage *latestOwnTextMessage() const override;
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
-    virtual void sendImage(const QString &filePath) override;
     virtual void sendFile(const QString &filePath) override;
+    virtual void sendTypingPing() override;
 
     /// Add an already existing message to the room; does not send a new message. Takes ownership of
     /// the object.
@@ -52,7 +52,7 @@ public:
     void removeMessage(const QString &messageId);
 
     virtual bool isDirectChat() override { return m_isDirectChat; }
-    virtual bool hasPresenceState() override { return isDirectChat(); }
+    virtual bool hasPresenceState() override;
     virtual ChatUser::PresenceState presenceState() const override;
     virtual IChatRoom::UserRoomState ownUserJoinState() const override;
     virtual ChatUser *otherUser() const override;
@@ -69,9 +69,6 @@ public:
     virtual void clear() override;
 
     void setTypingUsers(const QList<ChatUser *> &users);
-
-Q_SIGNALS:
-    void otherUserChanged();
 
 private Q_SLOTS:
     void updateIsDirectChat();

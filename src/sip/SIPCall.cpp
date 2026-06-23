@@ -129,9 +129,6 @@ SIPCall::~SIPCall()
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
 {
-    // Extract "," DTMF string and store them for later playback
-    m_postTask = dst_uri.section(',', 1, -1, QString::SectionIncludeLeadingSep);
-
     if (m_account && m_account->isRTTEnabled()) {
         makeCall(dst_uri.toStdString(), prm);
     } else {
@@ -275,6 +272,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         break;
 
     case PJSIP_INV_STATE_DISCONNECTED:
+        m_statsTimer.stop();
+
         if (!m_isEstablished && m_incoming) {
             Q_EMIT missed();
         }
@@ -286,7 +285,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         ringToneFactory.zipTone()->stop();
         ringToneFactory.ringingTone()->stop();
 
-        if (!m_isSilent) {
+        if (!m_isSilent
+            && !(GlobalCallState::instance().globalCallState() & ICallState::State::Migrating)) {
             setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
 
             if (m_isEstablished) {
@@ -430,7 +430,9 @@ void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
 
             // Handle backspace
             if (ch == UnicodeBackspace) {
-                m_currentRttBubble.removeLast();
+                if (!m_currentRttBubble.isEmpty()) {
+                    m_currentRttBubble.removeLast();
+                }
             }
 
             // Handle BEL
@@ -775,6 +777,10 @@ void SIPCall::onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm)
 
 void SIPCall::createOngoingCallNotification()
 {
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return;
+    }
+
     pj::CallInfo ci = getInfo();
 
     // Create notification text
@@ -799,7 +805,8 @@ void SIPCall::createOngoingCallNotification()
         bodyParts.append(countries.join(", "));
     }
 
-    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, this);
+    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, false,
+                              this);
 
     auto &am = AvatarManager::instance();
     QString avatar = c ? am.avatarPathFor(c->id()) : "";
@@ -844,13 +851,24 @@ void SIPCall::addMetadata(const QString &data)
 
 void SIPCall::updateRtcpStats()
 {
-    pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (pj::Error &err) {
+        return;
+    }
 
     for (unsigned i = 0; i < ci.media.size(); ++i) {
         if (ci.media[i].type == PJMEDIA_TYPE_AUDIO) {
+            pj::StreamStat st;
+            pj::StreamInfo si;
 
-            pj::StreamStat st = getStreamStat(i);
-            pj::StreamInfo si = getStreamInfo(i);
+            try {
+                st = getStreamStat(i);
+                si = getStreamInfo(i);
+            } catch (pj::Error &err) {
+                continue;
+            }
 
             // Update basic information
             if (m_codec != si.codecName) {

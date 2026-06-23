@@ -168,12 +168,3 @@ void Theme::setDarkMode(bool value)
         Q_EMIT isDarkModeChanged();
     }
 }
-
-QString Theme::toCamelCase(const QString &str) const
-{
-    QStringList parts = str.split(QChar('_'));
-    for (int i = 1; i < parts.size(); ++i) {
-        parts[i].replace(0, 1, parts[i][0].toUpper());
-    }
-    return parts.join("");
-}

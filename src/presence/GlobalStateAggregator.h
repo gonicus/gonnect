@@ -8,8 +8,8 @@ class GlobalStateAggregator : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(PresenceState::State presenceState MEMBER m_presenceState NOTIFY presenceStateChanged
-                       FINAL)
+    Q_PROPERTY(PresenceState::State presenceState READ presenceState WRITE setPresenceState NOTIFY
+                       presenceStateChanged FINAL)
     Q_PROPERTY(QString statusText MEMBER m_statusText NOTIFY statusTextChanged FINAL)
 
 public:
@@ -22,6 +22,7 @@ public:
         return *_instance;
     };
 
+    void setPresenceState(PresenceState::State state);
     PresenceState::State presenceState() const { return m_presenceState; }
     QString statusText() const { return m_statusText; }
 

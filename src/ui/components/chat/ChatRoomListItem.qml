@@ -18,7 +18,6 @@ Item {
     required property int presenceState
     required property int permissions
     required property int ownJoinState
-    required property list<string> typingUserNames
 
     required property string sectionHeader
 
@@ -170,6 +169,8 @@ Item {
         id: contextMenuComponent
 
         Menu {
+            id: contextMenu
+            onClosed: () => contextMenu.destroy()
 
             Action {
                 text: qsTr("Toggle favorite")

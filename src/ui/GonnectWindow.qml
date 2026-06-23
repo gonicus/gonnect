@@ -221,7 +221,7 @@ BaseWindow {
                 keyEvent.accepted = true
                 ViewHelper.toggleFullscreen()
 
-            } else if (keyEvent.key === Qt.Key_F && (keyEvent.modifiers & Qt.ControlModifier)) {
+            } else if ([Qt.Key_F, Qt.Key_K].includes(keyEvent.key) && (keyEvent.modifiers & Qt.ControlModifier)) {
 
                 // Focus search field
                 keyEvent.accepted = true
@@ -541,13 +541,17 @@ BaseWindow {
 
     readonly property Popup mainDrawer: Popup {
         id: mainDrawer
-        width: drawerStackView.currentItem  ? Math.min(0.63 * control.width,  drawerStackView.currentItem?.implicitWidth)  : 0
-        height: drawerStackView.currentItem ? Math.min(0.63 * control.height, drawerStackView.currentItem?.implicitHeight) : 0
+        width: drawerStackView.currentItem
+               ? Util.clamp(drawerStackView.currentItem.implicitWidth, 0.63 * control.width, control.width - 100)
+               : 0
+        height: drawerStackView.currentItem
+                ? Util.clamp(drawerStackView.currentItem.implicitHeight, 0.63 * control.height, control.height - 100)
+                : 0
         modal: true
         anchors.centerIn: parent
         background.visible: !drawerStackView.currentItem || !drawerStackView.currentItem.hidePopupBackground
 
-        onClosed: drawerStackView.clear()
+        onClosed: () => drawerStackView.clear()
 
         StackView {
             id: drawerStackView
