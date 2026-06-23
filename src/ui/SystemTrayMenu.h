@@ -92,6 +92,8 @@ private:
     bool m_hasEstablishedCalls = false;
     QString m_lastTrayIconPath;
     QString m_desiredTrayIconPath;
+
+    QHash<PresenceState::State, QAction *> m_stateActions;
 };
 
 class SystemTrayMenuWrapper

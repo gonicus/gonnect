@@ -135,6 +135,7 @@ void SystemTrayMenu::updateOwnStatus()
                     QString("%1 %2").arg(charFor(menuState), enumTr.presenceState(menuState)),
                     m_presenceMenu);
             m_presenceMenu->addAction(action);
+            m_stateActions.insert(menuState, action);
 
             connect(action, &QAction::triggered, this, [menuState]() {
                 qCInfo(lcSystemTrayMenu)
@@ -155,6 +156,13 @@ void SystemTrayMenu::updateOwnStatus()
         });
 
         m_trayIconMenu->insertMenu(m_ownStatusSeparator, m_presenceMenu);
+    }
+
+    // Update visibility of state selector
+    QHashIterator it(m_stateActions);
+    while (it.hasNext()) {
+        it.next();
+        it.value()->setVisible(it.key() != state);
     }
 
     // Update presence state

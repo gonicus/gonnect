@@ -19,6 +19,7 @@
 #include "AppSettings.h"
 #include "Notification.h"
 #include "NotificationManager.h"
+#include "ReadOnlyConfdSettings.h"
 #include "ViewHelper.h"
 #include "EnumTranslation.h"
 #include "GlobalStateAggregator.h"
@@ -512,12 +513,41 @@ void IpcDispatcher::init()
     m_ipc.setBinaryPath(plugin->binPath);
     QStringList args;
 
-    // ReadOnlyConfdSettings settings;
-    // if (settings.value("logging/level", 1).toUInt() > 3) {
-    //     args.append({ "--log-file-path",
-    //     QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) });
-    // }
+    // Convert and set log level
+    ReadOnlyConfdSettings settings;
+    const auto configLogLevel = settings.value("logging/level", 2).toUInt();
+    QString argLogLevel("off");
 
+    switch (configLogLevel) {
+    case 1:
+        argLogLevel = "error";
+        break;
+    case 2:
+        argLogLevel = "warn";
+        break;
+    case 3:
+        argLogLevel = "info";
+        break;
+    case 4:
+        argLogLevel = "debug";
+        break;
+    case 5:
+        argLogLevel = "debug";
+        break;
+    case 6:
+        argLogLevel = "debug";
+        break;
+    }
+    if (configLogLevel >= 7) {
+        argLogLevel = "trace";
+    }
+
+    args.append({ "--log-level", argLogLevel });
+
+    // args.append({ "--log-file-path",
+    // QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) });
+
+    // Set positional arguments
     args.append({ m_ipc.fullRequestServerName(), m_ipc.fullResponseServerName() });
 
     m_ipc.setBinaryArguments(args);
