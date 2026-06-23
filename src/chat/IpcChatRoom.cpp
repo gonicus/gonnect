@@ -24,8 +24,8 @@ IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, QObject *parent
 
 IpcChatRoom::~IpcChatRoom()
 {
+    qDeleteAll(m_messageLookup);
     m_messageLookup.clear();
-    qDeleteAll(m_messages);
 }
 
 void IpcChatRoom::setName(const QString &name)
@@ -73,7 +73,19 @@ ChatMessage *IpcChatRoom::chatMessageById(const QString &id) const
     if (id.isEmpty()) {
         return nullptr;
     }
+
     return m_messageLookup.value(id, nullptr);
+}
+
+void IpcChatRoom::ensureMessageLoaded(const QString &id)
+{
+    if (id.isEmpty() || m_messageLookup.contains(id)) {
+        return;
+    }
+
+    if (auto *dispatcher = ipcDispatcher()) {
+        dispatcher->loadSingleMessage(m_id, id);
+    }
 }
 
 ChatMessage *IpcChatRoom::latestOwnTextMessage() const
@@ -118,7 +130,7 @@ void IpcChatRoom::sendTypingPing()
     }
 }
 
-void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)
+void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent)
 {
     Q_CHECK_PTR(message);
 
@@ -134,18 +146,23 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)
                 });
     }
 
-    for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
-        if (m_messages.at(i)->timestamp() < message->timestamp()) {
-            m_messages.insert(i + 1, message);
-            m_messageLookup.insert(message->eventId(), message);
-            Q_EMIT chatMessageAdded(i + 1, message);
-            return;
+    if (isIndependent) {
+        m_messageLookup.insert(message->eventId(), message);
+        Q_EMIT chatMessageOutOfSequenceReceived(message);
+    } else {
+        for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
+            if (m_messages.at(i)->timestamp() < message->timestamp()) {
+                m_messages.insert(i + 1, message);
+                m_messageLookup.insert(message->eventId(), message);
+                Q_EMIT chatMessageAdded(i + 1, message);
+                return;
+            }
         }
-    }
 
-    m_messages.prepend(message);
-    m_messageLookup.insert(message->eventId(), message);
-    Q_EMIT chatMessageAdded(0, message);
+        m_messages.prepend(message);
+        m_messageLookup.insert(message->eventId(), message);
+        Q_EMIT chatMessageAdded(0, message);
+    }
 }
 
 qsizetype IpcChatRoom::indexOfMessage(const ChatMessage *message) const

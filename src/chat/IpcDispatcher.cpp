@@ -410,6 +410,36 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom)
     sendRequest(req);
 }
 
+void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &messageId)
+{
+    GONNECT_ASSERT(!roomId.isEmpty(), "roomId must not be empty")
+    GONNECT_ASSERT(!messageId.isEmpty(), "messageId must not be empty")
+
+    if (m_failedMessageIds.contains(messageId)) {
+        qCInfo(lcIpcDispatcher) << "Message" << messageId
+                                << "has already failed to load - skipping.";
+        return;
+    }
+
+    const auto it = std::find(m_singleMessageTags.cbegin(), m_singleMessageTags.cend(), messageId);
+    if (it != m_singleMessageTags.cend()) {
+        qCInfo(lcIpcDispatcher)
+                << "Message" << messageId
+                << "has already been requested, but response is pending - ignoring.";
+        return;
+    }
+
+    auto req = createRequest();
+    m_singleMessageTags.insert(req->tag(), messageId);
+
+    MessageRequest msgReq;
+    msgReq.setRoomId(roomId);
+    msgReq.setMessageId(messageId);
+
+    req->setMessageRequest(msgReq);
+    sendRequest(req);
+}
+
 qsizetype IpcDispatcher::chatRoomsCount()
 {
     return m_rooms.length();
@@ -563,6 +593,12 @@ void IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 time
         timer->setInterval(timeoutSeconds * 1000);
         timer->callOnTimeout(this, [timer, tag, timeoutSeconds, this]() {
             m_timeoutTimers.remove(tag);
+
+            const auto messageId = m_singleMessageTags.take(tag);
+            if (!messageId.isEmpty()) {
+                m_failedMessageIds.insert(messageId);
+            }
+
             timer->deleteLater();
 
             qCCritical(lcIpcDispatcher) << "IPC request with tag" << tag << "has timeout after"
@@ -585,7 +621,7 @@ void IpcDispatcher::processResponse(
 
     if (tag > 0) {
         if (auto timer = m_timeoutTimers.value(tag, nullptr)) {
-            if (rc.hasMessageReceivedEvent()) {
+            if (rc.hasMessageReceivedEvent() && !m_singleMessageTags.contains(tag)) {
                 m_multipartCount.insert(tag, m_multipartCount.value(tag, 0) + 1);
                 timer->start();
             } else {
@@ -594,6 +630,10 @@ void IpcDispatcher::processResponse(
                 timer->deleteLater();
             }
         } else if (rc.hasError()) {
+            const auto failedMessageId = m_singleMessageTags.take(tag);
+            if (!failedMessageId.isEmpty()) {
+                m_failedMessageIds.insert(failedMessageId);
+            }
             qCCritical(lcIpcDispatcher) << "Received IPC message with tag" << tag
                                         << "although not waiting for it, but it is an error and "
                                            "will be processed anyway.";
@@ -614,6 +654,11 @@ void IpcDispatcher::processResponse(
 
     // Unpack and process payload
     if (rc.hasError()) {
+        const auto failedMessageId = m_singleMessageTags.take(tag);
+        if (!failedMessageId.isEmpty()) {
+            m_failedMessageIds.insert(failedMessageId);
+        }
+
         const auto err = rc.error();
         const auto code = static_cast<quint64>(err.type());
         const QString codeStr = QMetaEnum::fromType<Error::ErrorType>().valueToKey(code);
@@ -946,8 +991,10 @@ void IpcDispatcher::processResponse(
 
     } else if (rc.hasMessageReceivedEvent()) {
 
+        const bool isIndependent = m_singleMessageTags.remove(tag);
         const bool isUnread = !tag;
-        const auto chatMessageObj = addReceivedChatMessage(rc.messageReceivedEvent(), isUnread);
+        const auto chatMessageObj =
+                addReceivedChatMessage(rc.messageReceivedEvent(), isUnread, isIndependent);
         if (isUnread) {
             makeNotificationNewMessage(chatMessageObj);
         }
@@ -1460,7 +1507,7 @@ void IpcDispatcher::processResponse(
 }
 
 ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::Message &message,
-                                                   bool isUnread)
+                                                   bool isUnread, bool isIndependent)
 {
     auto room = ipcChatRoomById(message.roomId());
 
@@ -1543,7 +1590,7 @@ ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::M
         }
     }
 
-    room->addExistingMessage(newChatMessage, isUnread);
+    room->addExistingMessage(newChatMessage, isUnread, isIndependent);
 
     // Reactions
     bool hasReactionAdded = false;

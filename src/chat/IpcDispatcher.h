@@ -112,6 +112,9 @@ public:
     /// Initial load of room messages.
     void loadMessages(IChatRoom *chatRoom);
 
+    /// Load a single messe. It will be available in lookup, but not in the indexed message list.
+    void loadSingleMessage(const QString &roomId, const QString &messageId);
+
     // IChatProvider interface
     virtual qsizetype chatRoomsCount() override;
     virtual IChatRoom *chatRoomByIndex(qsizetype index) override;
@@ -230,8 +233,8 @@ private:
     /// Dispatch the response container and its content payload.
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
-    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message,
-                                        bool isUnread);
+    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
+                                        bool isIndependent);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
@@ -320,9 +323,16 @@ private:
     /// yet.
     QHash<quint64, QString> m_roomListTags;
 
+    /// Map of chat messages that have been requested indvidually (i.e. not in bulk) and have not
+    /// received an answer yet. Key is the request tag, value the message id.
+    QHash<quint64, QString> m_singleMessageTags;
+
     /// Map of ipc tag to a count of the parts that have been received for this tag, w/o the
     /// MultipartEnd message.
     QHash<quint64, qsizetype> m_multipartCount;
+
+    /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
+    QSet<QString> m_failedMessageIds;
 
 Q_SIGNALS:
 
