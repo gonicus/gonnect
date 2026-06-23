@@ -47,6 +47,7 @@ public:
     void initialize();
     void shutdown();
 
+    void handleNetworkChanged();
     void suspend();
     void resume();
 
