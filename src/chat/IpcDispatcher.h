@@ -243,8 +243,8 @@ private:
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
-    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message,
-                                        bool isUnread, bool isIndependent);
+    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
+                                        bool isIndependent);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
