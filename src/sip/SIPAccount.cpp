@@ -715,6 +715,12 @@ QString SIPAccount::toSipUri(const QString &var) const
         }
     }
 
+    // Add transport to outgoing calls
+    if (!sipUrl.isEmpty() && !sipUrl.startsWith("sips:", Qt::CaseInsensitive)
+        && !sipUrl.contains("transport=", Qt::CaseInsensitive)) {
+        sipUrl = addTransport(sipUrl);
+    }
+
     return sipUrl;
 }
 
