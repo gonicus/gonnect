@@ -1565,15 +1565,20 @@ void IpcDispatcher::processResponse(
 bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
 {
     if (const auto *textContent = qobject_cast<const ChatMessageContentText *>(message.content())) {
-        const QString escapedId = QRegularExpression::escape(ownUserId());
-        const QRegularExpression mentionRegex(QString(R"(\b(@room|%1)\b)").arg(escapedId));
+
+        const auto mentions = message.mentionedUsers();
+        for (const auto *user : mentions) {
+            if (user->id() == ownUserId()) {
+                return true;
+            }
+        }
 
         if (textContent->isSimpleText()) {
-            return mentionRegex.match(textContent->simpleText()).hasMatch();
+            return textContent->simpleText().contains(u"@room");
         } else {
             const auto parts = textContent->contentParts();
             for (const auto part : parts) {
-                if (!part->isCode() && mentionRegex.match(part->text()).hasMatch()) {
+                if (!part->isCode() && part->text().contains(u"@room")) {
                     return true;
                 }
             }
