@@ -344,7 +344,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     // Collect user ids of room users
     const auto &users = chatRoom->chatUsers();
     QSet<QString> userIds;
-    QSet<QString> mentionedUserIds;
+    QStringList mentionedUserIds;
     userIds.reserve(users.size());
     mentionedUserIds.reserve(users.size());
 
@@ -356,7 +356,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     const auto splitted = text.split(QChar(QChar::SpecialCharacter::Space));
     for (const auto &word : splitted) {
         if (userIds.contains(word)) {
-            mentionedUserIds.insert(word);
+            mentionedUserIds.append(word);
         }
     }
 
@@ -373,6 +373,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     content.setContent(text);
 
     msgReq.setText(content);
+    msgReq.setMentionedUserIds(mentionedUserIds);
     req->setMessageSendRequest(msgReq);
     sendRequest(req);
 }

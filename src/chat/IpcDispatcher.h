@@ -301,7 +301,7 @@ private:
     bool m_isInVerificationProcess = false;
     QString m_verificationFlowId;
 
-    NotificationSetting::Setting m_notificationSetting = NotificationSetting::Setting::Mute;
+    NotificationSetting::Setting m_notificationSetting = NotificationSetting::Setting::All;
 
     QSet<QString> m_requestedUserIds;
     QList<const ChatUser *> m_userList;
