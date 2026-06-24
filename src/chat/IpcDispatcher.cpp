@@ -23,7 +23,6 @@
 #include "ViewHelper.h"
 #include "EnumTranslation.h"
 #include "GlobalStateAggregator.h"
-#include "ReadOnlyConfdSettings.h"
 #include "PlatformSession.h"
 
 #include <QDir>
@@ -264,6 +263,8 @@ IpcDispatcher::IpcDispatcher(const QString &settingsGroup, const IpcConfig &conf
 
 IpcDispatcher::~IpcDispatcher()
 {
+    m_ipc.stop();
+
     for (auto l : std::as_const(m_chatNotifications)) {
         delete l;
     }

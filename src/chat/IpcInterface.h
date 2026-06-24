@@ -26,6 +26,10 @@ public:
     /// isRunningChanged() will be emitted. If isRunning() does not become true, an error occurred.
     void start();
 
+    /// Stops the subprocess gracefully by closing the local sockets and then sending SIGTERM and
+    /// SIGKILL. Does nothing when it is not running.
+    void stop();
+
     /// Whether the subprocess is running and IPC has been successfully established.
     bool isRunning() const { return m_isRunning; }
 
