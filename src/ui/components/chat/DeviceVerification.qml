@@ -352,7 +352,7 @@ Item {
             Label {
                 wrapMode: Text.Wrap
                 horizontalAlignment: Label.AlignHCenter
-                visible: internal.secret?.method() === crossSigningSecret.CrossSigningMethod.SasString
+                visible: internal.secret?.method() === CrossSigningSecret.CrossSigningMethod.SasString
                 text: internal.secret?.stringSecret() ?? ""
                 font {
                     family: "Monospace"
@@ -365,7 +365,7 @@ Item {
             }
 
             Row {
-                visible: internal.secret?.method() === crossSigningSecret.CrossSigningMethod.SasSymbol
+                visible: internal.secret?.method() === CrossSigningSecret.CrossSigningMethod.SasSymbol
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 80
                 spacing: 10
@@ -380,7 +380,7 @@ Item {
                             bottom: parent?.bottom
                         }
 
-                        required property CrossSigningSymbol modelData
+                        required property crossSigningSymbol modelData
 
                         Label {
                             text: symbolDelg.modelData.symbol()

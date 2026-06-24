@@ -1520,10 +1520,10 @@ void IpcDispatcher::processResponse(
             const auto symbols = selectedEvent.symbols().symbols();
             GONNECT_ASSERT(symbols.size(), "Symbols may not be empty")
 
-            QList<CrossSigningSymbol *> convSymbols;
+            QList<CrossSigningSymbol> convSymbols;
             convSymbols.reserve(symbols.size());
             for (const auto &symbol : symbols) {
-                convSymbols.append(new CrossSigningSymbol(symbol.symbol(), symbol.description()));
+                convSymbols.append(CrossSigningSymbol(symbol.symbol(), symbol.description()));
             }
             secret.setSymbolSeqence(convSymbols);
             break;
