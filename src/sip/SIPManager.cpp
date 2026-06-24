@@ -180,6 +180,10 @@ void SIPManager::setPreferredCodecs()
         const int priority = codecPriorities.at(qMin(i, codecPriorities.count() - 1));
         const QString prefix = preferredCodec + "/";
 
+        if (preferredCodec.isEmpty()) {
+            continue;
+        }
+
         bool matched = false;
         for (const QString &registered : std::as_const(registeredCodecs)) {
             if (registered.compare(preferredCodec, Qt::CaseInsensitive) == 0
