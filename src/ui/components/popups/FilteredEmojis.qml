@@ -7,8 +7,7 @@ import base
 Popup {
     id: control
     implicitWidth: 280
-    implicitHeight: Math.min(400, col.implicitHeight) + 20
-    contentHeight: flickable.height
+    implicitHeight: Math.min(400, listView.contentHeight) + 20
 
     signal accepted(string emoji)
 
@@ -16,21 +15,21 @@ Popup {
 
     property int selectedIndex: -1
 
-    readonly property alias count: emojiRepeater.count
+    readonly property alias count: listView.count
 
     function emojiAt(index : int) : string {
-        const item = emojiRepeater.itemAt(index)
+        const item = listView.itemAtIndex(index)
         if (item) {
             return item.emoji
         }
-        console.error(category, `Index ${index} is out of bounds (bounds: [0;${emojiRepeater.count}[)`)
+        console.error(category, `Index ${index} is out of bounds (bounds: [0;${listView.count}[)`)
         return ""
     }
 
     function decrementIndex() {
         let newIndex = control.selectedIndex - 1
         if (newIndex < -1) {
-            newIndex = emojiRepeater.count - 1
+            newIndex = listView.count - 1
         }
         control.selectedIndex = newIndex
         control.scrollCurrentSelectionIntoView()
@@ -38,7 +37,7 @@ Popup {
 
     function incrementIndex() {
         let newIndex = control.selectedIndex + 1
-        if (newIndex >= emojiRepeater.count) {
+        if (newIndex >= listView.count) {
             newIndex = -1
         }
         control.selectedIndex = newIndex
@@ -46,12 +45,12 @@ Popup {
     }
 
     function scrollCurrentSelectionIntoView() {
-        const item = emojiRepeater.itemAt(control.selectedIndex)
+        const item = listView.itemAtIndex(control.selectedIndex)
         if (item) {
-            if (item.y < flickable.contentY) {
-                flickable.contentY = item.index * item.height
-            } else if (item.y + item.height > flickable.contentY + flickable.height) {
-                flickable.contentY = (item.index + 1) * item.height - flickable.height
+            if (item.y < listView.contentY) {
+                listView.contentY = item.index * item.height
+            } else if (item.y + item.height > listView.contentY + listView.height) {
+                listView.contentY = (item.index + 1) * item.height - listView.height
             }
         }
     }
@@ -68,75 +67,67 @@ Popup {
         property int maxItemWidth
     }
 
-    Flickable {
-        id: flickable
+    ListView {
+        id: listView
         anchors.fill: parent
-        contentHeight: col.implicitHeight
         clip: true
         ScrollBar.vertical: ScrollBar { width: 5 }
 
-        Column {
-            id: col
+        model: EmojiProxyModel {
+            id: proxyModel
 
-            Repeater {
-                id: emojiRepeater
-                model: EmojiProxyModel {
-                    id: proxyModel
+            EmojiModel {}
+        }
 
-                    EmojiModel {}
-                }
+        delegate: MenuItem {
+            id: delg
 
-                delegate: MenuItem {
-                    id: delg
+            required property int index
+            required property string emoji
+            required property string label
 
-                    required property int index
-                    required property string emoji
-                    required property string label
+            leftPadding: 10
+            rightPadding: 10
+            hoverEnabled: true
+            highlighted: control.selectedIndex === delg.index
+            width: internal.maxItemWidth
 
-                    leftPadding: 10
-                    rightPadding: 10
-                    hoverEnabled: true
-                    highlighted: control.selectedIndex === delg.index
-                    width: internal.maxItemWidth
+            onImplicitWidthChanged: () => internal.maxItemWidth = Math.max(internal.maxItemWidth, delg.implicitWidth)
 
-                    onImplicitWidthChanged: () => internal.maxItemWidth = Math.max(internal.maxItemWidth, delg.implicitWidth)
+            contentItem: Row {
+                spacing: delg.spacing
 
-                    contentItem: Row {
-                        spacing: delg.spacing
-
-                        Label {
-                            id: emojiIconLabel
-                            text: delg.emoji
-                            anchors.verticalCenter: parent.verticalCenter
-                            horizontalAlignment: Label.AlignHCenter
-                            verticalAlignment: Label.AlignVCenter
-                            font {
-                                family: "Noto Color Emoji"
-                                pixelSize: 20
-                            }
-
-                            Accessible.ignored: true
-                        }
-
-                        Label {
-                            text: delg.label
-                            font: delg.font
-                            anchors.verticalCenter: parent.verticalCenter
-                            color: delg.enabled ? delg.Material.foreground : delg.Material.hintTextColor
-                        }
+                Label {
+                    id: emojiIconLabel
+                    text: delg.emoji
+                    anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: Label.AlignHCenter
+                    verticalAlignment: Label.AlignVCenter
+                    font {
+                        family: "Noto Color Emoji"
+                        pixelSize: 20
                     }
 
-                    onTriggered: () => control.accepted(delg.emoji)
-
-                    HoverHandler {
-                        id: delgHoveredHandler
-                        onHoveredChanged: () => {
-                            if (delgHoveredHandler.hovered) {
-                                control.selectedIndex = delg.index
-                            }
-                        }
-                    }
+                    Accessible.ignored: true
                 }
+
+                Label {
+                    text: delg.label
+                    font: delg.font
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: delg.enabled ? delg.Material.foreground : delg.Material.hintTextColor
+                }
+            }
+
+            onTriggered: () => control.accepted(delg.emoji)
+
+            HoverHandler {
+                id: delgHoveredHandler
+                onHoveredChanged: () => {
+                                      if (delgHoveredHandler.hovered) {
+                                          control.selectedIndex = delg.index
+                                      }
+                                  }
             }
         }
     }

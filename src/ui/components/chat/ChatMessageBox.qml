@@ -111,10 +111,10 @@ Item {
             }
 
             const globalCoord = window.contentItem.mapFromItem(messageField, messageField.cursorRectangle)
-            popup.x = Math.max(0, globalCoord.x > window.contentItem.width / 2
-                                  ? globalCoord.x - popup.width
-                                  : globalCoord.x)
-            popup.y = Qt.binding(() => Math.max(0, globalCoord.y - popup.contentHeight - messageField.cursorRectangle.height))
+            popup.x = globalCoord.x > window.contentItem.width / 2
+                      ? globalCoord.x - popup.width
+                      : globalCoord.x
+            popup.y = Qt.binding(() => globalCoord.y - popup.implicitHeight - messageField.cursorRectangle.height)
 
             popup.open()
 
