@@ -5,8 +5,16 @@
 #include <qqmlregistration.h>
 
 #include "ChatUser.h"
+#include "NotificationSetting.h"
 
 class ChatMessage;
+
+struct RoomSettings
+{
+    NotificationSetting::Setting notificationSetting = NotificationSetting::Setting::None;
+
+    auto operator<=>(const RoomSettings &) const = default;
+};
 
 class IChatRoom : public QObject
 {
@@ -80,6 +88,9 @@ public:
 
     QDateTime latestMessageDateTime() const { return m_latestMessageDateTime; };
     void setLatestMessageDateTime(const QDateTime &dateTime);
+
+    RoomSettings roomSettings() const { return m_roomSettings; }
+    void setRoomSettings(const RoomSettings &roomSettings);
 
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
@@ -171,11 +182,13 @@ public:
     virtual void clear() = 0;
 
 private:
+    RoomSettings m_roomSettings;
     QDateTime m_latestMessageDateTime;
     bool m_isLoadingMessageHistory = false;
     bool m_isCompletelyLoaded = false;
 
 Q_SIGNALS:
+    void roomSettingsChanged();
     void nameChanged(QString name);
     void avatarPathChanged();
     void isFavoriteChanged();

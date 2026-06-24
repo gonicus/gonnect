@@ -6,7 +6,6 @@ import base
 Item {
     id: control
     implicitHeight: relatedCol.implicitHeight
-    implicitWidth: relatedContent.implicitWidth
 
     property alias isStateUpdate: relatedContent.isStateUpdate
     property alias content: relatedContent.content
