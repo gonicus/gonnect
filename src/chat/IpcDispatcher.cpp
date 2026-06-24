@@ -577,11 +577,7 @@ void IpcDispatcher::init()
         argLogLevel = "info";
         break;
     case 4:
-        argLogLevel = "debug";
-        break;
     case 5:
-        argLogLevel = "debug";
-        break;
     case 6:
         argLogLevel = "debug";
         break;
@@ -1048,7 +1044,7 @@ void IpcDispatcher::processResponse(
         const bool isUnread = !tag;
         const auto chatMessageObj =
                 addReceivedChatMessage(rc.messageReceivedEvent(), isUnread, isIndependent);
-        if (isUnread) {
+        if (isUnread && !isIndependent) {
             makeNotificationNewMessage(chatMessageObj);
         }
 
