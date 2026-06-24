@@ -6,8 +6,9 @@ import base
 
 Popup {
     id: control
-    implicitWidth: control.maxItemWidth + 20
+    implicitWidth: 280
     implicitHeight: Math.min(400, col.implicitHeight) + 20
+    contentHeight: flickable.height
 
     signal accepted(string emoji)
 
@@ -16,15 +17,6 @@ Popup {
     property int selectedIndex: -1
 
     readonly property alias count: emojiRepeater.count
-
-    readonly property int maxItemWidth: {
-        let width = 0
-        for (let i = 0; i < emojiRepeater.count; ++i) {
-            const item = emojiRepeater.itemAt(i)
-            width = Math.max(width, item.implicitWidth)
-        }
-        return width
-    }
 
     function emojiAt(index : int) : string {
         const item = emojiRepeater.itemAt(index)
@@ -70,6 +62,12 @@ Popup {
         defaultLogLevel: LoggingCategory.Warning
     }
 
+    QtObject {
+        id: internal
+
+        property int maxItemWidth
+    }
+
     Flickable {
         id: flickable
         anchors.fill: parent
@@ -87,6 +85,7 @@ Popup {
 
                     EmojiModel {}
                 }
+
                 delegate: MenuItem {
                     id: delg
 
@@ -98,7 +97,9 @@ Popup {
                     rightPadding: 10
                     hoverEnabled: true
                     highlighted: control.selectedIndex === delg.index
-                    width: control.maxItemWidth
+                    width: internal.maxItemWidth
+
+                    onImplicitWidthChanged: () => internal.maxItemWidth = Math.max(internal.maxItemWidth, delg.implicitWidth)
 
                     contentItem: Row {
                         spacing: delg.spacing

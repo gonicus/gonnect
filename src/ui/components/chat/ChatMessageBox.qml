@@ -53,6 +53,8 @@ Item {
             }
         }
 
+        property bool emojiSignalsConnected: false
+
         function executePing() {
             if (control.chatRoom) {
                 control.chatRoom.sendTypingPing()
@@ -83,6 +85,61 @@ Item {
                 }
             }
         }
+
+        function showEmojiPopup(filterText : string) {
+            const popup = ViewHelper.globalFilteredEmojiPickerPopup as FilteredEmojis
+            if (!popup) {
+                return
+            }
+
+            popup.filterText = filterText
+
+            if (!popup.count) {
+                internal.closeEmojiPopup()
+                return
+            }
+
+            if (!internal.emojiSignalsConnected) {
+                internal.emojiSignalsConnected = true
+                popup.accepted.connect(internal.onEmojiAccepted)
+                popup.visibleChanged.connect(internal.onEmojiPopupCleanup)
+            }
+
+            const window = messageField.Window
+            if (!window) {
+                return
+            }
+
+            const globalCoord = window.contentItem.mapFromItem(messageField, messageField.cursorRectangle)
+            popup.x = Math.max(0, globalCoord.x > window.contentItem.width / 2
+                                  ? globalCoord.x - popup.width
+                                  : globalCoord.x)
+            popup.y = Qt.binding(() => Math.max(0, globalCoord.y - popup.contentHeight - messageField.cursorRectangle.height))
+
+            popup.open()
+
+        }
+
+        function closeEmojiPopup() {
+            const popup = ViewHelper.globalFilteredEmojiPickerPopup as Popup
+            if (popup?.opened) {
+                popup.close()
+            }
+        }
+
+        function onEmojiAccepted(emoji : string) {
+            messageField.replaceCurrentWord(emoji)
+            internal.closeEmojiPopup()
+        }
+
+        function onEmojiPopupCleanup() {
+            const popup = ViewHelper.globalFilteredEmojiPickerPopup as FilteredEmojis
+            if (popup && !popup.visible && internal.emojiSignalsConnected) {
+                internal.emojiSignalsConnected = false
+                popup.accepted.disconnect(internal.onEmojiAccepted)
+                popup.visibleChanged.disconnect(internal.onEmojiPopupCleanup)
+            }
+        }
     }
 
     // SpellCheckHighlighter {
@@ -95,15 +152,6 @@ Item {
         onAccepted: id => {
             messageField.replaceCurrentWord(id)
             userSelectPopup.close()
-        }
-    }
-
-    FilteredEmojis {
-        id: emojiSelectPopup
-
-        onAccepted: emoji => {
-            messageField.replaceCurrentWord(emoji)
-            emojiSelectPopup.close()
         }
     }
 
@@ -179,38 +227,13 @@ Item {
 
             // Check if emoji popup shall be made
             } else if (currWord.startsWith(":") && currWord.length > 2) {
-                emojiSelectPopup.filterText = currWord.substring(1)
-
-                if (emojiSelectPopup.count) {
-                    let topMostItem = control
-                    while (topMostItem.parent) {
-                        topMostItem = topMostItem.parent
-                    }
-
-                    const cursorCoord = messageField.cursorRectangle
-                    const globalCoord = topMostItem.mapFromItem(messageField, cursorCoord.x, cursorCoord.y)
-                    if (globalCoord.x > topMostItem.width / 2) {
-                        emojiSelectPopup.x = Qt.binding(() => cursorCoord.x - emojiSelectPopup.width)
-                    } else {
-                        emojiSelectPopup.x = cursorCoord.x
-                    }
-
-                    emojiSelectPopup.y = Qt.binding(() => cursorCoord.y - emojiSelectPopup.height)
-
-                    if (!emojiSelectPopup.opened) {
-                        emojiSelectPopup.open()
-                    }
-                } else if (emojiSelectPopup.opened) {
-                    emojiSelectPopup.close()
-                }
+                internal.showEmojiPopup(currWord.substring(1))
 
             } else {
                 if (userSelectPopup.opened) {
                     userSelectPopup.close()
                 }
-                if (emojiSelectPopup.opened) {
-                    emojiSelectPopup.close()
-                }
+                internal.closeEmojiPopup()
             }
         }
 
@@ -218,6 +241,8 @@ Item {
             if (!control.enabled) {
                 return
             }
+
+            const emojiPopup = ViewHelper.globalFilteredEmojiPickerPopup as Popup
 
             if (userSelectPopup.opened) {
                 // User mentions
@@ -244,28 +269,28 @@ Item {
                     }
                 }
 
-            } else if (emojiSelectPopup.opened) {
+            } else if (emojiPopup?.opened) {
                 // Emoji popup
 
                 if (keyEvent.key === Qt.Key_Up) {
                     keyEvent.accepted = true
-                    emojiSelectPopup.decrementIndex()
+                    emojiPopup.decrementIndex()
                 } else if (keyEvent.key === Qt.Key_Down) {
                     keyEvent.accepted = true
-                    emojiSelectPopup.incrementIndex()
+                    emojiPopup.incrementIndex()
                 } else if ([Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)) {
 
                     // Navigate emoji popup
-                    if (emojiSelectPopup.selectedIndex >= 0) {
+                    if (emojiPopup.selectedIndex >= 0) {
                         // Insert selected entry
                         keyEvent.accepted = true
-                        emojiSelectPopup.accepted(emojiSelectPopup.emojiAt(emojiSelectPopup.selectedIndex))
-                    } else if (emojiSelectPopup.count === 1) {
+                        emojiPopup.accepted(emojiPopup.emojiAt(emojiPopup.selectedIndex))
+                    } else if (emojiPopup.count === 1) {
                         // Insert sole entry
                         keyEvent.accepted = true
-                        emojiSelectPopup.accepted(emojiSelectPopup.emojiAt(0))
+                        emojiPopup.accepted(emojiPopup.emojiAt(0))
                     } else {
-                        emojiSelectPopup.close()
+                        emojiPopup.close()
                     }
                 }
 
