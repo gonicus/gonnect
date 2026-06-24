@@ -970,7 +970,7 @@ bool SIPAccount::isInstantMessagingAllowed() const
     return m_shallNegotiateCapabilities && m_isInstantMessagingAllowed;
 }
 
-QString SIPAccount::addTransport(const QString &in)
+QString SIPAccount::addTransport(const QString &in) const
 {
     if (m_transportType == TRANSPORT_TYPE::TLS) {
         return in + ";transport=tls";
