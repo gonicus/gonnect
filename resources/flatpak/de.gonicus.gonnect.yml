@@ -150,8 +150,8 @@ modules:
           tag-pattern: ^([0-9]+\.[0-9]+(\.[0-9]+)?)$
       - type: patch
         path: patches/pjproject-site-config.patch
-      - type: patch
-        path: patches/pjsip-pres-crash.patch
+      #- type: patch
+      #  path: patches/pjsip-pres-crash.patch
 
   - name: openldap
     config-opts:
