@@ -95,7 +95,7 @@ private:
                                          pj::CallOpParam &prm);
     bool hasAllowGrant(const QString &header, const QString &grant) const;
 
-    QString addTransport(const QString &uri);
+    QString addTransport(const QString &uri) const;
 
     MwiInfo parseMwiBody(const QString &body);
     void parseMessageCount(const QString &value, quint16 &newMessages, quint16 &oldMessages);
