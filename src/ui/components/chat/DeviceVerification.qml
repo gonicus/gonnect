@@ -23,7 +23,7 @@ Item {
 
         property string verificationError
         property list<int> availableMethods
-        property CrossSigningSecret secret
+        property crossSigningSecret secret
     }
 
     function updateState() {
@@ -55,7 +55,7 @@ Item {
             internal.availableMethods = methods
             control.state = "CROSS_SIGNING_METHOD_SELECT"
         }
-        function onCrossSigningAcceptRequired(secret : CrossSigningSecret) {
+        function onCrossSigningAcceptRequired(secret : crossSigningSecret) {
             internal.secret = secret
             control.state = "CROSS_SIGNING_CODE"
         }
@@ -380,7 +380,7 @@ Item {
                             bottom: parent?.bottom
                         }
 
-                        required property CrossSigningSymbol modelData
+                        required property crossSigningSymbol modelData
 
                         Label {
                             text: symbolDelg.modelData.symbol()

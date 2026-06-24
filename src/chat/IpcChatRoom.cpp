@@ -172,11 +172,12 @@ qsizetype IpcChatRoom::indexOfMessage(const ChatMessage *message) const
 
 void IpcChatRoom::removeMessage(const QString &messageId)
 {
+    m_messageLookup.remove(messageId);
+
     for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
         if (m_messages.at(i)->eventId() == messageId) {
             auto message = m_messages.at(i);
             m_messages.removeAt(i);
-            m_messageLookup.remove(messageId);
             Q_EMIT chatMessageRemoved(i, message);
             delete message;
             return;

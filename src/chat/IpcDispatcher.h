@@ -3,6 +3,7 @@
 #include "IChatProvider.h"
 #include "IpcConfig.h"
 #include "IpcInterface.h"
+#include "NotificationSetting.h"
 #include "chat.qpb.h"
 #include "IChatRoom.h"
 #include "ChatUser.h"
@@ -61,6 +62,14 @@ public:
         LoggedIn = static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::LoggedIn),
     };
     Q_ENUM(ConnectionState)
+
+    static de::gonicus::gonnect::NotificationSettingGadget::NotificationSetting
+    notificationSettingIpcToProto(NotificationSetting::Setting setting);
+    static NotificationSetting::Setting notificationSettingProtoToIpc(
+            de::gonicus::gonnect::NotificationSettingGadget::NotificationSetting setting);
+
+    static ::RoomSettings
+    roomSettingsProtoToIpc(const de::gonicus::gonnect::RoomSettings &protoSettings);
 
     explicit IpcDispatcher(const QString &settingsGroup, const IpcConfig &configInfo,
                            QObject *parent = nullptr);
@@ -233,6 +242,7 @@ private:
     /// Dispatch the response container and its content payload.
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
+    bool hasOwnUserMention(const ChatMessage &message) const;
     ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
                                         bool isIndependent);
 
@@ -290,6 +300,8 @@ private:
     bool m_isCrossSigningVerificationAvailable = false;
     bool m_isInVerificationProcess = false;
     QString m_verificationFlowId;
+
+    NotificationSetting::Setting m_notificationSetting = NotificationSetting::Setting::All;
 
     QSet<QString> m_requestedUserIds;
     QList<const ChatUser *> m_userList;
