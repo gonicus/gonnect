@@ -47,6 +47,7 @@ public:
     void initialize();
     void shutdown();
 
+    void handleNetworkChanged();
     void suspend();
     void resume();
 
@@ -97,6 +98,7 @@ private:
     pj::Endpoint m_ep;
 
     bool m_suspended = false;
+    bool m_initialized = false;
 
     QSet<QString> m_buddyStateQueue;
 };
