@@ -114,10 +114,11 @@ Item {
             popup.x = globalCoord.x > window.contentItem.width / 2
                       ? globalCoord.x - popup.width
                       : globalCoord.x
+
+            // Create binding because popup.implicitHeight can change while open
             popup.y = Qt.binding(() => globalCoord.y - popup.implicitHeight - messageField.cursorRectangle.height)
 
             popup.open()
-
         }
 
         function closeEmojiPopup() {
