@@ -291,12 +291,36 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::SubscribableNumber):
         return favEntry->contact ? favEntry->contact->subscriptableNumber() : QString();
 
-    case static_cast<int>(Roles::HasAvatar):
-        return favEntry->contact && favEntry->contact->hasAvatar();
+    case static_cast<int>(Roles::HasAvatar): {
+        if (favEntry->contact) {
+            return favEntry->contact->hasAvatar();
+        }
 
-    case static_cast<int>(Roles::AvatarPath):
-        return favEntry->contact && favEntry->contact->hasAvatar() ? favEntry->contact->avatarPath()
-                                                                   : QString();
+        for (const auto &addr : std::as_const(favEntry->addrs)) {
+            if (addr->chatRoom && !addr->chatRoom->avatarPath().isEmpty()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    case static_cast<int>(Roles::AvatarPath): {
+        if (favEntry->contact && favEntry->contact->hasAvatar()) {
+            return favEntry->contact->avatarPath();
+        }
+
+        for (const auto &addr : std::as_const(favEntry->addrs)) {
+            if (addr->chatRoom) {
+                const auto path = addr->chatRoom->avatarPath();
+                if (!path.isEmpty()) {
+                    return path;
+                }
+            }
+        }
+
+        return QString();
+    }
 
     case static_cast<int>(Roles::Addresses): {
         QVariantList l;
