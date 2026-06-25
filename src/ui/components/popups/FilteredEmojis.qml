@@ -45,13 +45,8 @@ Popup {
     }
 
     function scrollCurrentSelectionIntoView() {
-        const item = listView.itemAtIndex(control.selectedIndex)
-        if (item) {
-            if (item.y < listView.contentY) {
-                listView.contentY = item.index * item.height
-            } else if (item.y + item.height > listView.contentY + listView.height) {
-                listView.contentY = (item.index + 1) * item.height - listView.height
-            }
+        if (control.selectedIndex >= 0) {
+            listView.positionViewAtIndex(control.selectedIndex, ListView.Contain)
         }
     }
 
