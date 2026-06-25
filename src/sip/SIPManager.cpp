@@ -145,6 +145,11 @@ void SIPManager::initialize()
         Q_EMIT notConfigured();
     }
 
+    // Install network recovery timer
+    m_networkRecoveryTimer.setSingleShot(true);
+    m_networkRecoveryTimer.setInterval(1s);
+    connect(&m_networkRecoveryTimer, &QTimer::timeout, this, &SIPManager::recoverFromNetworkChange);
+
     m_initialized = true;
 }
 
@@ -445,6 +450,16 @@ void SIPManager::handleNetworkChanged()
         return;
     }
 
+    qCDebug(lcSIPManager) << "network changed - scheduling SIP recovery";
+    m_networkRecoveryTimer.start();
+}
+
+void SIPManager::recoverFromNetworkChange()
+{
+    if (!m_initialized || m_suspended) {
+        return;
+    }
+
     qCDebug(lcSIPManager) << "network changed - recovering SIP";
 
     auto accounts = SIPAccountManager::instance().accounts();
@@ -461,16 +476,6 @@ void SIPManager::handleNetworkChanged()
     } catch (pj::Error &err) {
         qCCritical(lcSIPManager) << "error handling IP change:"
                                  << QString::fromLocal8Bit(err.info(false));
-    }
-
-    // Force an immediate re-REGISTER.
-    for (auto account : std::as_const(accounts)) {
-        try {
-            account->setRegistration(true);
-        } catch (pj::Error &err) {
-            qCWarning(lcSIPManager) << "re-register after network change failed:"
-                                    << QString::fromLocal8Bit(err.info(false));
-        }
     }
 }
 
