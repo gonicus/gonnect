@@ -56,12 +56,6 @@ Popup {
         defaultLogLevel: LoggingCategory.Warning
     }
 
-    QtObject {
-        id: internal
-
-        property int maxItemWidth
-    }
-
     ListView {
         id: listView
         anchors.fill: parent
@@ -85,9 +79,7 @@ Popup {
             rightPadding: 10
             hoverEnabled: true
             highlighted: control.selectedIndex === delg.index
-            width: internal.maxItemWidth
-
-            onImplicitWidthChanged: () => internal.maxItemWidth = Math.max(internal.maxItemWidth, delg.implicitWidth)
+            width: listView.width
 
             contentItem: Row {
                 spacing: delg.spacing
