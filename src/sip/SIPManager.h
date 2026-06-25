@@ -85,10 +85,13 @@ private:
     SIPManager(QObject *parent = nullptr);
 
     void updatePreferredIdentities();
+    void recoverFromNetworkChange();
 
     QList<PreferredIdentity *> m_preferredIdentities;
     QList<PreferredIdentity *> m_enrolledPreferredIdentities;
     QString m_defaultPreferredIdentity;
+
+    QTimer m_networkRecoveryTimer;
 
     std::unique_ptr<AppSettings> m_settings = nullptr;
 
