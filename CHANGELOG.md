@@ -1,3 +1,15 @@
+## [2.2.1](https://github.com/gonicus/gonnect/compare/v2.2.0...v2.2.1) (2026-06-25)
+
+
+### Bug Fixes
+
+* add transport to SIP calls ([8d6cb7a](https://github.com/gonicus/gonnect/commit/8d6cb7a869ccb47733e8ef4be2c76bed8c0c17b4))
+* hidapi build with new libusb ([ef15f64](https://github.com/gonicus/gonnect/commit/ef15f64359286661fd04bc36c8435db74410a0b2))
+* improve network handling ([9ea7748](https://github.com/gonicus/gonnect/commit/9ea7748addb9e7da240205bd4bf94d89fe1bf2e0))
+* make addTransport const ([6e1a81d](https://github.com/gonicus/gonnect/commit/6e1a81d7ec6049c44b0cf4ac60490a704d8fb840))
+* make preferredCodecs work ([5836d58](https://github.com/gonicus/gonnect/commit/5836d58e1ccfa75e99ec8048943c407e5fafa8f3))
+* pjsip network change crash ([f6b615f](https://github.com/gonicus/gonnect/commit/f6b615f203df797c1276f5b17974e9c26f0e6e65))
+
 # [2.2.0](https://github.com/gonicus/gonnect/compare/v2.1.0...v2.2.0) (2026-06-01)
 
 
