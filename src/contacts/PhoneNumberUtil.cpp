@@ -213,6 +213,19 @@ bool PhoneNumberUtil::isEmergencyCallUrl(const QString &sipUrl)
     return false;
 }
 
+QString PhoneNumberUtil::bareURI(const QString &sipUrl)
+{
+    static const QRegularExpression bareSipRegex("^(.*<)?(sips?:[^@]*@[^>]*)(>.*)?$",
+                                                 QRegularExpression::CaseInsensitiveOption);
+
+    const auto matchResult = bareSipRegex.match(sipUrl);
+    if (matchResult.hasMatch()) {
+        return matchResult.captured(2);
+    }
+
+    return "";
+}
+
 bool PhoneNumberUtil::isNumberAnonymous(const QString &sipUrl)
 {
     static bool _initialized = false;

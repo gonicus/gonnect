@@ -697,7 +697,7 @@ QString SIPAccount::toSipUri(const QString &var) const
     QString sipUrl;
 
     if (PhoneNumberUtil::isSipUri(var)) {
-        sipUrl = var;
+        sipUrl = PhoneNumberUtil::bareURI(var);
     } else {
         QString number = var;
 
