@@ -92,6 +92,8 @@ private:
     QString m_defaultPreferredIdentity;
 
     QTimer m_networkRecoveryTimer;
+    int m_networkRecoveryAttempts = 0;
+    static constexpr int s_maxNetworkRecoveryAttempts = 6;
 
     std::unique_ptr<AppSettings> m_settings = nullptr;
 
