@@ -144,8 +144,6 @@ void SIPManager::initialize()
     if (!isConfigured()) {
         Q_EMIT notConfigured();
     }
-
-    m_initialized = true;
 }
 
 void SIPManager::setPreferredCodecs()
@@ -443,46 +441,6 @@ void SIPManager::resume()
         // Re-activate account registration
         for (auto account : std::as_const(accounts)) {
             account->setRegistration(true);
-        }
-    }
-}
-
-void SIPManager::handleNetworkChanged()
-{
-    if (!m_initialized) {
-        return;
-    }
-
-    if (m_suspended) {
-        resume();
-        return;
-    }
-
-    qCDebug(lcSIPManager) << "network changed - recovering SIP";
-
-    auto accounts = SIPAccountManager::instance().accounts();
-
-    // Re-registration after a network timeout leaves broken buddies around
-    // (see SIPAccount::onRegState), so flag for a buddy reinit on next success.
-    for (auto account : std::as_const(accounts)) {
-        account->setAfterResume();
-    }
-
-    // Restart the transport listeners and shut down stale TCP/TLS transports.
-    try {
-        pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
-    } catch (pj::Error &err) {
-        qCCritical(lcSIPManager) << "error handling IP change:"
-                                 << QString::fromLocal8Bit(err.info(false));
-    }
-
-    // Force an immediate re-REGISTER.
-    for (auto account : std::as_const(accounts)) {
-        try {
-            account->setRegistration(true);
-        } catch (pj::Error &err) {
-            qCWarning(lcSIPManager) << "re-register after network change failed:"
-                                    << QString::fromLocal8Bit(err.info(false));
         }
     }
 }
