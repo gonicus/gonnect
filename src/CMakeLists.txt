@@ -374,6 +374,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/EmojiPicker.qml
         ui/components/controls/FavIcon.qml
         ui/components/controls/FavoriteListItemBig.qml
+        ui/components/controls/FileDropArea.qml
         ui/components/controls/FirstAidButton.qml
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/HideableMenuItem.qml

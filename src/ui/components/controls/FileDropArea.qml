@@ -1,0 +1,87 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.impl
+
+Item {
+    id: control
+    implicitWidth: label.implicitWidth
+    implicitHeight: label.implicitHeight
+
+    signal dropAccepted(string url)
+
+    Item {
+        visible: dropInArea.containsDrag
+        anchors.fill: parent
+
+        Rectangle {
+            anchors.fill: parent
+            color: Theme.backgroundColor
+            opacity: 0.68
+        }
+
+        Rectangle {
+            color: 'transparent'
+            radius: 20
+            border {
+                color: Theme.primaryTextColor
+                width: 5
+            }
+            anchors {
+                fill: parent
+                margins: 20
+            }
+        }
+
+        IconLabel {
+            id: label
+            anchors.centerIn: parent
+            color: Theme.primaryTextColor
+            font.pixelSize: 24
+            text: dropInArea.isInputValid ? qsTr("Send attachment") : qsTr("Only (single) files allowed")
+            spacing: 20
+            icon {
+                color: Theme.primaryTextColor
+                width: 36
+                height: 36
+                source: dropInArea.isInputValid ? Icons.uploadMedia : Icons.dialogCancel
+            }
+        }
+    }
+
+    DropArea {
+        id: dropInArea
+        anchors.fill: parent
+        onEntered: drag => {
+                       let valid = drag.hasUrls && drag.urls.length === 1
+                       if (valid) {
+                           const url = drag.urls[0].toString()
+                           valid = url.startsWith("file://")
+                       }
+
+                       dropInArea.isInputValid = valid
+
+                       if (valid) {
+                           drag.accept(Qt.CopyAction)
+                       }
+                   }
+
+        onDropped: drop => {
+                       let valid = drop.hasUrls && drop.urls.length === 1
+                       let url = ""
+                       if (valid) {
+                           url = drop.urls[0].toString()
+                           valid = url.startsWith("file://")
+                       }
+
+
+                       if (valid) {
+                           drop.accept(Qt.CopyAction)
+                           control.dropAccepted(url)
+                       }
+                   }
+
+        property bool isInputValid: false
+    }
+}
