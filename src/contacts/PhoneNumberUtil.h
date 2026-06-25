@@ -49,6 +49,7 @@ public:
     static QString nameFromSipUrl(const QString &sipUrl);
     static bool isEmergencyCallUrl(const QString &sipUrl);
     static bool isNumberAnonymous(const QString &sipUrl);
+    static QString bareURI(const QString &sipUrl);
 
 private:
     PhoneNumberUtil();
