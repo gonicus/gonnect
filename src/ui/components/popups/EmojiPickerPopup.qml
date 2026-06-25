@@ -55,10 +55,15 @@ Popup {
         property int corner: Qt.TopLeftCorner
         property point lastPos: Qt.point(0, 0)
 
+        readonly property Timer loadTimer: Timer {
+            interval: 5
+            onTriggered: () => emojiPickerLoader.active = true
+        }
+
         onIsExpandedChanged: () => Qt.callLater(internal.adjustPosition)
 
         function adjustPosition() {
-            const w = 300
+            const w = control.width
             const h = control.contentHeight
 
             switch (internal.corner) {
@@ -84,11 +89,6 @@ Popup {
                 control.y = internal.lastPos.y
                 break
             }
-        }
-
-        readonly property Timer loadTimer: Timer {
-            interval: 5
-            onTriggered: () => emojiPickerLoader.active = true
         }
     }
 
@@ -143,12 +143,12 @@ Popup {
 
         TapHandler {
             onSingleTapped: () => {
-                internal.isExpanded = !internal.isExpanded
+                                internal.isExpanded = !internal.isExpanded
 
-                if (!emojiPickerLoader.active) {
-                    internal.loadTimer.start()
-                }
-            }
+                                if (!emojiPickerLoader.active) {
+                                    internal.loadTimer.start()
+                                }
+                            }
         }
     }
 

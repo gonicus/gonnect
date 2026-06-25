@@ -460,6 +460,11 @@ BaseWindow {
         Component.onCompleted: () => ViewHelper.globalEmojiPickerPopup = globalEmojiPickerPopup
     }
 
+    readonly property Popup globalFilteredEmojiPopupItem: FilteredEmojis {
+        id: globalFilteredEmojiPopup
+        Component.onCompleted: () => ViewHelper.globalFilteredEmojiPickerPopup = globalFilteredEmojiPopup
+    }
+
     readonly property Connections viewHelperConnections: Connections {
         target: ViewHelper
         function onUrlCopyDialogRequested(url, text) {

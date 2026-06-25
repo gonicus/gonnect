@@ -32,6 +32,8 @@ class ViewHelper : public QObject
     Q_PROPERTY(QObject *topDrawer MEMBER m_topDrawer NOTIFY topDrawerChanged FINAL)
     Q_PROPERTY(QObject *globalEmojiPickerPopup MEMBER m_globalEmojiPickerPopup NOTIFY
                        globalEmojiPickerPopupChanged FINAL)
+    Q_PROPERTY(QObject *globalFilteredEmojiPickerPopup MEMBER m_globalFilteredEmojiPickerPopup
+                       NOTIFY globalFilteredEmojiPickerPopupChanged FINAL)
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
     Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
     Q_PROPERTY(bool canSyncSystemMute READ canSyncSystemMute CONSTANT FINAL)
@@ -177,6 +179,7 @@ private:
             IConferenceConnector::StartFlag::AudioActive;
     QObject *m_topDrawer = nullptr;
     QObject *m_globalEmojiPickerPopup = nullptr;
+    QObject *m_globalFilteredEmojiPickerPopup = nullptr;
     bool m_isActiveVideoCall = false;
 
 Q_SIGNALS:
@@ -187,6 +190,7 @@ Q_SIGNALS:
     void nextMeetingStartFlagsChanged();
     void topDrawerChanged();
     void globalEmojiPickerPopupChanged();
+    void globalFilteredEmojiPickerPopupChanged();
     void isActiveVideoCallChanged();
 
     void showSettings();
