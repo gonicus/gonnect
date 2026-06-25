@@ -137,8 +137,8 @@ elseif(LINUX)
     )
 
 elseif(WIN32)
-    list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib)
-    list(APPEND APP_SOURCES gonnect.rc)
+    list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib Qt6::ProtobufPrivate)
+    list(APPEND APP_SOURCES src/platform/windows/QtProtobufMsvcLinkFix.cpp gonnect.rc)
 endif()
 
 qt_add_resources(APP_SOURCES application.qrc)
