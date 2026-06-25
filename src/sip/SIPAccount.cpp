@@ -106,6 +106,17 @@ void SIPAccount::initialize()
 
         m_accountConfig.regConfig.retryIntervalSec = 30;
         m_accountConfig.regConfig.registrarUri = registrarUri.toStdString();
+
+        unsigned registrationTimeout = m_settings.value("registrationTimeout", 0).toUInt(&ok);
+        if (!ok) {
+            qCCritical(lcSIPAccount) << "invalid value for 'registrationTimeout':"
+                                     << m_settings.value("registrationTimeout");
+            Q_EMIT initialized(false);
+            return;
+        }
+        if (registrationTimeout > 0) {
+            m_accountConfig.regConfig.timeoutSec = registrationTimeout;
+        }
     } else {
         qCCritical(lcSIPAccount) << "'registrarUri' is required";
         ErrorBus::instance().addFatalError(tr("'registrarUri' is required"));
