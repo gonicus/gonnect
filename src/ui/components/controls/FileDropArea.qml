@@ -11,17 +11,36 @@ Item {
 
     signal dropAccepted(string url)
 
+    property bool compact: false
+
+    states: [
+        State {
+            when: control.compact
+
+            PropertyChanges {
+                outlineBg.anchors.margins: 5
+                outlineBg.border.width: 2
+                outlineBg.radius: 5
+                label.icon.width: 20
+                label.icon.height: 20
+                label.font.pixelSize: 16
+            }
+        }
+    ]
+
     Item {
         visible: dropInArea.containsDrag
         anchors.fill: parent
 
         Rectangle {
-            anchors.fill: parent
-            color: Theme.backgroundColor
-            opacity: 0.68
+            anchors.fill: outlineBg
+            radius: outlineBg.radius
+            color: Theme.backgroundSecondaryColor
+            opacity: 0.85
         }
 
         Rectangle {
+            id: outlineBg
             color: 'transparent'
             radius: 20
             border {

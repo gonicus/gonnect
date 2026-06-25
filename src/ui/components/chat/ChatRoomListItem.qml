@@ -34,6 +34,7 @@ Item {
     signal leaveRoomTriggered
     signal editRoomTriggered
     signal inviteUsersTriggered
+    signal fileDropped(string url)
 
     ChatRoomListSectionHeader {
         id: sectionHeaderItem
@@ -163,6 +164,12 @@ Item {
                 }
             }
         }
+    }
+
+    FileDropArea {
+        anchors.fill: content
+        compact: true
+        onDropAccepted: url => control.fileDropped(url)
     }
 
     Component {
