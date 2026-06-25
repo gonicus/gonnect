@@ -451,7 +451,8 @@ void SIPManager::handleNetworkChanged()
     }
 
     qCDebug(lcSIPManager) << "network changed - scheduling SIP recovery";
-    m_networkRecoveryTimer.start();
+    m_networkRecoveryAttempts = 0;
+    m_networkRecoveryTimer.start(1s);
 }
 
 void SIPManager::recoverFromNetworkChange()
@@ -460,23 +461,34 @@ void SIPManager::recoverFromNetworkChange()
         return;
     }
 
-    qCDebug(lcSIPManager) << "network changed - recovering SIP";
+    qCDebug(lcSIPManager) << "network settled - recovering SIP (attempt"
+                          << (m_networkRecoveryAttempts + 1) << "of"
+                          << s_maxNetworkRecoveryAttempts << ")";
 
     auto accounts = SIPAccountManager::instance().accounts();
 
-    // Re-registration after a network timeout leaves broken buddies around
-    // (see SIPAccount::onRegState), so flag for a buddy reinit on next success.
     for (auto account : std::as_const(accounts)) {
         account->setAfterResume();
     }
 
-    // Restart the transport listeners and shut down stale TCP/TLS transports.
     try {
         pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
     } catch (pj::Error &err) {
-        qCCritical(lcSIPManager) << "error handling IP change:"
-                                 << QString::fromLocal8Bit(err.info(false));
+        if (++m_networkRecoveryAttempts < s_maxNetworkRecoveryAttempts) {
+            const auto delay = std::min(seconds(1 << m_networkRecoveryAttempts), 8s);
+            qCWarning(lcSIPManager).nospace()
+                    << "IP change handling failed, retrying in " << delay.count()
+                    << "s: " << QString::fromLocal8Bit(err.info(false));
+            m_networkRecoveryTimer.start(delay);
+        } else {
+            qCCritical(lcSIPManager)
+                    << "giving up SIP recovery after" << m_networkRecoveryAttempts
+                    << "attempts:" << QString::fromLocal8Bit(err.info(false));
+        }
+        return;
     }
+
+    m_networkRecoveryAttempts = 0;
 }
 
 void SIPManager::shutdown()
