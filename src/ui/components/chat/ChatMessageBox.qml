@@ -121,6 +121,8 @@ Item {
         }
 
         function closeEmojiPopup() {
+            internal.onEmojiPopupCleanup()
+
             const popup = ViewHelper.globalFilteredEmojiPickerPopup as Popup
             if (popup?.opened) {
                 popup.close()
