@@ -44,6 +44,11 @@ Item {
     Connections {
         target: control.chatProvider
 
+        function onIsInVerificationProcessChanged() {
+            if (!control.chatProvider?.isInVerificationProcess) {
+                control.state = "UNVERIFIED"
+            }
+        }
         function onIsDeviceVerifiedChanged() {
             control.state = control.chatProvider?.isDeviceVerified ? "FINISHED" : "UNVERIFIED"
         }
@@ -167,7 +172,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 onClicked: () => {
                     control.chatProvider?.requestCrossSigningStart()
-                    control.state = "CROSS_SIGNING_METHOD_SELECT"
+                    control.state = "WAITING_FOR_RESPONSE"
                 }
             }
         }
@@ -206,7 +211,7 @@ Item {
                 horizontalCenter: parent.horizontalCenter
             }
             onClicked: () => {
-                control.state = "WAITING_FOR_RESPONSE"
+                control.state = "UNVERIFIED"
                 control.chatProvider.requestVerificationAbort()
             }
         }
@@ -316,7 +321,7 @@ Item {
                 text: qsTr("Cancel")
                 anchors.horizontalCenter: parent.horizontalCenter
                 onClicked: () => {
-                    control.state = "WAITING_FOR_RESPONSE"
+                    control.state = "UNVERIFIED"
                     control.chatProvider.requestVerificationAbort()
                 }
             }
@@ -419,7 +424,7 @@ Item {
                     id: codeRejectButton
                     text: qsTr("Reject")
                     onClicked: () => {
-                        control.state = "WAITING_FOR_RESPONSE"
+                        control.state = "UNVERIFIED"
                         control.chatProvider.requestVerificationAbort()
                     }
                 }
