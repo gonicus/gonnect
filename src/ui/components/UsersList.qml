@@ -76,7 +76,7 @@ Item {
 
             AvatarImage {
                 id: avatarImage
-                initials: ViewHelper.initials(delg.displayName)
+                initials: ViewHelper.initials(delg.displayName) || qsTr("?")
                 size: 40
                 anchors {
                     left: parent.left
@@ -102,7 +102,7 @@ Item {
 
             Label {
                 id: nameLabel
-                text: delg.displayName
+                text: delg.displayName || qsTr("Unnamed user")
                 wrapMode: Label.WordWrap
                 maximumLineCount: 2
                 elide: Label.ElideRight
