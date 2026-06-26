@@ -294,7 +294,6 @@ Item {
                 control.chatProvider.uploadImageFromClipboard(control.chatRoom.id)
             }
         }
-
         onEditLastMessage: () => {
             const chatProvider = control.chatProvider
             const chatRoom = control.chatRoom
