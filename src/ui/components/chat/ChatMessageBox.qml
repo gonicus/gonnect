@@ -341,6 +341,7 @@ Item {
                        && !(keyEvent.modifiers & Qt.ShiftModifier)) {
 
                 // Send message
+                keyEvent.accepted = true
                 control.sendMessage()
 
             } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
