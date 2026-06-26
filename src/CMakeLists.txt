@@ -137,8 +137,9 @@ elseif(LINUX)
     )
 
 elseif(WIN32)
+    find_package(Qt6 REQUIRED COMPONENTS ProtobufPrivate)
     list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib Qt6::ProtobufPrivate)
-    list(APPEND APP_SOURCES src/platform/windows/QtProtobufMsvcLinkFix.cpp gonnect.rc)
+    list(APPEND APP_SOURCES platform/windows/QtProtobufMsvcLinkFix.cpp gonnect.rc)
 endif()
 
 qt_add_resources(APP_SOURCES application.qrc)
