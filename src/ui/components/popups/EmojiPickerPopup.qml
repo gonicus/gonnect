@@ -142,6 +142,8 @@ Popup {
         }
 
         TapHandler {
+            gesturePolicy: TapHandler.WithinBounds
+            grabPermissions: PointerHandler.ApprovesTakeOverByAnything
             onSingleTapped: () => {
                                 internal.isExpanded = !internal.isExpanded
 

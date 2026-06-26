@@ -47,6 +47,8 @@ Item {
     }
 
     TapHandler {
+        gesturePolicy: TapHandler.WithinBounds
+        grabPermissions: PointerHandler.ApprovesTakeOverByAnything
         onSingleTapped: () => control.clicked()
     }
 
