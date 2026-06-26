@@ -513,7 +513,13 @@ QString ViewHelper::stripLinkTags(const QString &link) const
 
 bool ViewHelper::isShortEmojiString(const QString &str) const
 {
+    const auto trimmed = str.trimmed();
+
+    if (trimmed.size() > 3) {
+        return false;
+    }
+
     static const QRegularExpression re(
             R"(^(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*){1,3}$)");
-    return re.match(str).hasMatch();
+    return re.match(trimmed).hasMatch();
 }
