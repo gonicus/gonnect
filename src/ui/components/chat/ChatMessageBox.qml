@@ -32,6 +32,10 @@ Item {
                            internal.hasTypedWhileWaiting = false
                        }
 
+    function giveFocus() {
+        messageField.forceActiveFocus()
+    }
+
     function clear() {
         messageField.clear()
     }

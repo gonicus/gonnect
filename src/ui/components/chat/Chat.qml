@@ -160,7 +160,10 @@ Item {
             rightMargin: 10
         }
 
-        onRespondTo: messageId => relatedMsg.chatMessage = control.chatRoom?.chatMessageById(messageId) ?? null
+        onRespondTo: messageId => {
+                         relatedMsg.chatMessage = control.chatRoom?.chatMessageById(messageId) ?? null
+                         chatMessageBox.giveFocus()
+                     }
     }
 
     Item {
