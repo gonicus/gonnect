@@ -11,6 +11,9 @@
 #include "SIPUserAgentConfig.h"
 #include "SIPAccountManager.h"
 #include "AudioManager.h"
+#include <pjsua-lib/pjsua.h>
+#include <pjsip/sip_endpoint.h>
+#include <pjlib-util/resolver.h>
 #include "VideoManager.h"
 #include "TogglerManager.h"
 
@@ -117,6 +120,8 @@ void SIPManager::initialize()
     setPreferredCodecs();
 
     m_ep.libStart();
+
+    configureDnsResolver();
 
     // Load Accounts + Transports
     auto &sam = SIPAccountManager::instance();
@@ -505,6 +510,29 @@ void SIPManager::recoverFromNetworkChange()
     }
 
     m_networkRecoveryAttempts = 0;
+}
+
+void SIPManager::configureDnsResolver()
+{
+    // Disable pjsip's DNS response cache - the OS already has a cache
+    pjsip_endpoint *endpt = pjsua_get_pjsip_endpt();
+    if (!endpt) {
+        return;
+    }
+    pj_dns_resolver *resolver = pjsip_endpt_get_resolver(endpt);
+    if (!resolver) {
+        return;
+    }
+
+    pj_dns_settings settings;
+    pj_dns_resolver_get_settings(resolver, &settings);
+    settings.cache_max_ttl = 0;
+    const pj_status_t status = pj_dns_resolver_set_settings(resolver, &settings);
+    if (status != PJ_SUCCESS) {
+        char errbuf[PJ_ERR_MSG_SIZE];
+        pj_strerror(status, errbuf, sizeof(errbuf));
+        qCWarning(lcSIPManager) << "failed to disable DNS resolver cache:" << errbuf;
+    }
 }
 
 void SIPManager::shutdown()
