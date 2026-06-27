@@ -10,6 +10,7 @@
 
 #include <QTimer>
 #include <QLoggingCategory>
+#include <QMutexLocker>
 #include <QPluginLoader>
 
 Q_LOGGING_CATEGORY(lcDateEventFeederManager, "gonnect.app.dateevents.feeder.manager")
@@ -129,8 +130,6 @@ void DateEventFeederManager::processQueue()
         return;
     }
 
-    bool reconnectRequired = false;
-
     QMutableStringListIterator it(m_feederConfigIds);
     while (it.hasNext()) {
         const auto &configId = it.next();
@@ -156,19 +155,20 @@ void DateEventFeederManager::processQueue()
                             << "No connectivity state yet - trying later";
 
                     networkAvailable = false;
-                    reconnectRequired = true;
+                    setupReconnectSignal();
                     continue;
                 }
 
                 networkHelper.isReachable(urlToCheck)
-                        .then(this, [feeder, urlToCheck, &reconnectRequired](bool isReachable) {
+                        .then(this, [this, feeder, configId, urlToCheck](bool isReachable) {
                             if (isReachable) {
                                 feeder->init();
                             } else {
                                 qCWarning(lcDateEventFeederManager)
                                         << "Feeder URL" << urlToCheck << "is not reachable";
 
-                                reconnectRequired = true;
+                                requeueConfigId(configId);
+                                setupReconnectSignal();
                             }
                         });
             }
@@ -178,9 +178,13 @@ void DateEventFeederManager::processQueue()
     }
 
     m_queueMutex.unlock();
+}
 
-    if (reconnectRequired) {
-        setupReconnectSignal();
+void DateEventFeederManager::requeueConfigId(const QString &configId)
+{
+    QMutexLocker locker(&m_queueMutex);
+    if (!m_feederConfigIds.contains(configId)) {
+        m_feederConfigIds.append(configId);
     }
 }
 

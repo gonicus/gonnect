@@ -90,8 +90,6 @@ void AddressBookManager::processAddressBookQueue()
         return;
     }
 
-    bool reconnectRequired = false;
-
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {
         QString group = it.next();
@@ -125,12 +123,12 @@ void AddressBookManager::processAddressBookQueue()
                     qCWarning(lcAddressBookManager) << "No connectivity state yet - trying later";
 
                     networkAvailable = false;
-                    reconnectRequired = true;
+                    scheduleReconnect();
                     continue;
                 }
 
                 nh.isReachable(checkURL).then(
-                        this, [feeder, checkURL, &reconnectRequired](bool isReachable) {
+                        this, [this, feeder, group, checkURL](bool isReachable) {
                             if (isReachable) {
                                 feeder->process();
                                 Q_EMIT AddressBook::instance().contactsReady();
@@ -138,7 +136,8 @@ void AddressBookManager::processAddressBookQueue()
                                 qCWarning(lcAddressBookManager)
                                         << "Feeder URL" << checkURL << "is not reachable";
 
-                                reconnectRequired = true;
+                                requeueGroup(group);
+                                scheduleReconnect();
                             }
                         });
             }
@@ -148,12 +147,30 @@ void AddressBookManager::processAddressBookQueue()
     }
 
     m_queueMutex.unlock();
+}
 
-    if (reconnectRequired) {
-        connect(
-                &nh, &NetworkHelper::connectivityChanged, this,
-                [this]() { processAddressBookQueue(); }, Qt::ConnectionType::SingleShotConnection);
+void AddressBookManager::requeueGroup(const QString &group)
+{
+    QMutexLocker locker(&m_queueMutex);
+    if (!m_addressBookQueue.contains(group)) {
+        m_addressBookQueue.append(group);
     }
+}
+
+void AddressBookManager::scheduleReconnect()
+{
+    if (m_reconnectScheduled) {
+        return;
+    }
+
+    m_reconnectScheduled = true;
+    connect(
+            &NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
+            [this]() {
+                m_reconnectScheduled = false;
+                processAddressBookQueue();
+            },
+            Qt::ConnectionType::SingleShotConnection);
 }
 
 void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
