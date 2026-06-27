@@ -469,8 +469,8 @@ void SIPManager::recoverFromNetworkChange()
     }
 
     qCDebug(lcSIPManager) << "network settled - recovering SIP (attempt"
-                          << (m_networkRecoveryAttempts + 1) << "of"
-                          << s_maxNetworkRecoveryAttempts << ")";
+                          << (m_networkRecoveryAttempts + 1) << "of" << s_maxNetworkRecoveryAttempts
+                          << ")";
 
     auto accounts = SIPAccountManager::instance().accounts();
 
@@ -490,9 +490,8 @@ void SIPManager::recoverFromNetworkChange()
                     << "s: " << QString::fromLocal8Bit(err.info(false));
             m_networkRecoveryTimer.start(delay);
         } else {
-            qCCritical(lcSIPManager)
-                    << "giving up SIP recovery after" << m_networkRecoveryAttempts
-                    << "attempts:" << QString::fromLocal8Bit(err.info(false));
+            qCCritical(lcSIPManager) << "giving up SIP recovery after" << m_networkRecoveryAttempts
+                                     << "attempts:" << QString::fromLocal8Bit(err.info(false));
         }
         return;
     }
