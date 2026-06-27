@@ -10,7 +10,9 @@
 #include "SIPMediaConfig.h"
 #include "SIPUserAgentConfig.h"
 #include "SIPAccountManager.h"
+#include "NetworkHelper.h"
 #include "AudioManager.h"
+
 #include <pjsua-lib/pjsua.h>
 #include <pjsip/sip_endpoint.h>
 #include <pjlib-util/resolver.h>
@@ -476,6 +478,8 @@ void SIPManager::recoverFromNetworkChange()
         account->setAfterResume();
     }
 
+    resetDnsResolver();
+
     try {
         pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
     } catch (pj::Error &err) {
@@ -516,6 +520,50 @@ void SIPManager::configureDnsResolver()
         char errbuf[PJ_ERR_MSG_SIZE];
         pj_strerror(status, errbuf, sizeof(errbuf));
         qCWarning(lcSIPManager) << "failed to disable DNS resolver cache:" << errbuf;
+    }
+}
+
+void SIPManager::resetDnsResolver()
+{
+    pjsip_endpoint *endpt = pjsua_get_pjsip_endpt();
+    if (!endpt) {
+        return;
+    }
+
+    pj_dns_resolver *resolver = pjsip_endpt_get_resolver(endpt);
+    if (!resolver) {
+        // No DNS resolver configured
+        return;
+    }
+
+    ReadOnlyConfdSettings settings;
+    const QStringList nameservers =
+            settings.value("ua/nameservers", NetworkHelper::instance().nameservers()).toStringList();
+
+    std::vector<std::string> storage;
+    storage.reserve(nameservers.size());
+    for (const auto &ns : nameservers) {
+        if (!ns.isEmpty()) {
+            storage.push_back(ns.toStdString());
+        }
+    }
+
+    if (storage.empty()) {
+        return;
+    }
+
+    std::vector<pj_str_t> servers;
+    servers.reserve(storage.size());
+    for (auto &s : storage) {
+        servers.push_back(pj_str(const_cast<char *>(s.c_str())));
+    }
+
+    const pj_status_t status = pj_dns_resolver_set_ns(
+            resolver, static_cast<unsigned>(servers.size()), servers.data(), nullptr);
+    if (status != PJ_SUCCESS) {
+        char errbuf[PJ_ERR_MSG_SIZE];
+        pj_strerror(status, errbuf, sizeof(errbuf));
+        qCWarning(lcSIPManager) << "failed to reset DNS resolver nameservers:" << errbuf;
     }
 }
 
