@@ -104,7 +104,10 @@ void SIPAccount::initialize()
 
         registrarUri = addTransport(registrarUri);
 
-        m_accountConfig.regConfig.retryIntervalSec = 30;
+        // Configure retry intervals to be more responsive for UI use
+        m_accountConfig.regConfig.retryIntervalSec = 10;
+        m_accountConfig.regConfig.firstRetryIntervalSec = 3;
+        m_accountConfig.regConfig.randomRetryIntervalSec = 4;
         m_accountConfig.regConfig.registrarUri = registrarUri.toStdString();
 
         unsigned registrationTimeout = m_settings.value("registrationTimeout", 0).toUInt(&ok);
