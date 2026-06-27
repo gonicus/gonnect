@@ -157,6 +157,10 @@ void SIPManager::initialize()
     m_networkRecoveryTimer.setInterval(1s);
     connect(&m_networkRecoveryTimer, &QTimer::timeout, this, &SIPManager::recoverFromNetworkChange);
 
+    // Configure registration recovery watchdog
+    m_registrationCheckTimer.setSingleShot(true);
+    connect(&m_registrationCheckTimer, &QTimer::timeout, this, &SIPManager::checkRecovery);
+
     m_initialized = true;
 }
 
@@ -459,6 +463,7 @@ void SIPManager::handleNetworkChanged()
 
     qCDebug(lcSIPManager) << "network changed - scheduling SIP recovery";
     m_networkRecoveryAttempts = 0;
+    m_registrationCheckTimer.stop();
     m_networkRecoveryTimer.start(1s);
 }
 
@@ -467,6 +472,8 @@ void SIPManager::recoverFromNetworkChange()
     if (!m_initialized || m_suspended) {
         return;
     }
+
+    m_registrationCheckTimer.stop();
 
     qCDebug(lcSIPManager) << "network settled - recovering SIP (attempt"
                           << (m_networkRecoveryAttempts + 1) << "of" << s_maxNetworkRecoveryAttempts
@@ -496,7 +503,48 @@ void SIPManager::recoverFromNetworkChange()
         return;
     }
 
-    m_networkRecoveryAttempts = 0;
+    // Check if registration worked - if DNS worked, but the route to the SIP
+    // server was not yet established, we're running into a case where pijsip
+    // never tries to register again.
+    m_registrationCheckTimer.start(20s);
+}
+
+void SIPManager::checkRecovery()
+{
+    if (!m_initialized || m_suspended) {
+        return;
+    }
+
+    const auto accounts = SIPAccountManager::instance().accounts();
+
+    if (accounts.isEmpty()) {
+        m_networkRecoveryAttempts = 0;
+        return;
+    }
+
+    bool allRegistered = true;
+    for (auto account : std::as_const(accounts)) {
+        if (!account->isRegistered()) {
+            allRegistered = false;
+            break;
+        }
+    }
+
+    if (allRegistered) {
+        qCDebug(lcSIPManager) << "SIP recovered successfully";
+        m_networkRecoveryAttempts = 0;
+        return;
+    }
+
+    if (++m_networkRecoveryAttempts < s_maxNetworkRecoveryAttempts) {
+        const auto delay = std::min(seconds(1 << m_networkRecoveryAttempts), 8s);
+        qCWarning(lcSIPManager).nospace()
+                << "SIP recovery did not register - retrying in " << delay.count() << "seconds";
+        m_networkRecoveryTimer.start(delay);
+    } else {
+        qCCritical(lcSIPManager) << "giving up SIP recovery after" << m_networkRecoveryAttempts
+                                 << "attempts";
+    }
 }
 
 void SIPManager::configureDnsResolver()
