@@ -85,6 +85,7 @@ private:
     void updatePreferredIdentities();
     void recoverFromNetworkChange();
 
+    void configureDnsResolver();
     QList<PreferredIdentity *> m_preferredIdentities;
     QList<PreferredIdentity *> m_enrolledPreferredIdentities;
     QString m_defaultPreferredIdentity;
