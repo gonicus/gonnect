@@ -86,6 +86,7 @@ private:
 
     void updatePreferredIdentities();
     void recoverFromNetworkChange();
+    void checkRecovery();
 
     void configureDnsResolver();
     void resetDnsResolver();
@@ -95,6 +96,7 @@ private:
     QString m_defaultPreferredIdentity;
 
     QTimer m_networkRecoveryTimer;
+    QTimer m_registrationCheckTimer;
     int m_networkRecoveryAttempts = 0;
     static constexpr int s_maxNetworkRecoveryAttempts = 6;
 
