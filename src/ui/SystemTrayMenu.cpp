@@ -27,6 +27,7 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
 
     m_trayIcon = new QSystemTrayIcon(this);
     m_trayIcon->setContextMenu(m_trayIconMenu);
+    m_trayIcon->show();
 
     connect(m_trayIcon, &QSystemTrayIcon::activated, this,
             [](QSystemTrayIcon::ActivationReason reason) {
@@ -80,7 +81,6 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateConferences);
 
     resetTrayIcon();
-    applyTrayIcon();
 }
 
 SystemTrayMenu::~SystemTrayMenu()
@@ -461,33 +461,24 @@ void SystemTrayMenu::updateBuddyState(const QString uri, SIPBuddyState::STATUS)
         QHashIterator favoriteIterator(m_favoriteActions);
         while (favoriteIterator.hasNext()) {
             favoriteIterator.next();
-
-            if (const auto *stat = NumberStats::instance().numberStat(favoriteIterator.key())) {
-                favoriteIterator.value()->setText(contactText(*stat));
-            }
+            favoriteIterator.value()->setText(
+                    contactText(*(NumberStats::instance().numberStat(favoriteIterator.key()))));
         }
 
         QHashIterator mostCalledIterator(m_mostCalledActions);
         while (mostCalledIterator.hasNext()) {
             mostCalledIterator.next();
-
-            if (const auto *stat = NumberStats::instance().numberStat(mostCalledIterator.key())) {
-                mostCalledIterator.value()->setText(contactText(*stat));
-            }
+            mostCalledIterator.value()->setText(
+                    contactText(*(NumberStats::instance().numberStat(mostCalledIterator.key()))));
         }
     } else {
         const auto number = PhoneNumberUtil::numberFromSipUrl(uri);
-        const auto *stat = NumberStats::instance().numberStat(number);
-        if (!stat) {
-            return;
-        }
 
         if (auto action = m_favoriteActions.value(number, nullptr)) {
-            action->setText(contactText(*stat));
+            action->setText(contactText(*(NumberStats::instance().numberStat(number))));
         }
-
         if (auto action = m_mostCalledActions.value(number, nullptr)) {
-            action->setText(contactText(*stat));
+            action->setText(contactText(*(NumberStats::instance().numberStat(number))));
         }
     }
 }
