@@ -36,8 +36,7 @@ void FlatpakNetworkHelper::updateNetworkState()
     reply.waitForFinished();
 
     if (reply.isError()) {
-        qCWarning(lcNetwork) << "failed to query network status:"
-                             << reply.error().message();
+        qCWarning(lcNetwork) << "failed to query network status:" << reply.error().message();
         return;
     }
 
@@ -53,7 +52,8 @@ void FlatpakNetworkHelper::updateNetworkState()
         bool ok = false;
         const unsigned connectivity = res.value("connectivity").toUInt(&ok);
         if (!ok) {
-            qCCritical(lcNetwork) << "error parsing unsigned integer connectivity status from portal";
+            qCCritical(lcNetwork)
+                    << "error parsing unsigned integer connectivity status from portal";
             return;
         }
 

@@ -554,7 +554,8 @@ void SIPManager::resetDnsResolver()
 
     ReadOnlyConfdSettings settings;
     const QStringList nameservers =
-            settings.value("ua/nameservers", NetworkHelper::instance().nameservers()).toStringList();
+            settings.value("ua/nameservers", NetworkHelper::instance().nameservers())
+                    .toStringList();
 
     std::vector<std::string> storage;
     storage.reserve(nameservers.size());
