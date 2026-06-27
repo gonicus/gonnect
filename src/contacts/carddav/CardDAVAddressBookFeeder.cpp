@@ -22,7 +22,11 @@ using namespace std::chrono_literals;
 CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, const int retryCount,
                                                    const int retryInterval,
                                                    AddressBookManager *parent)
-    : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
+    : QObject(parent),
+      m_group(group),
+      m_retryCount(retryCount),
+      m_retryInterval(retryInterval),
+      m_initialRetryCount(retryCount)
 {
     m_manager = qobject_cast<AddressBookManager *>(parent);
 }
@@ -300,6 +304,8 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
 
 void CardDAVAddressBookFeeder::onParserFinished()
 {
+    m_retryCount = m_initialRetryCount;
+
     const auto list = m_webdavParser.getList();
     for (const auto &item : list) {
         const auto cacheId = item.name();
@@ -410,7 +416,24 @@ void CardDAVAddressBookFeeder::process()
 
 QUrl CardDAVAddressBookFeeder::networkCheckURL() const
 {
-    return QUrl();
+    ReadOnlyConfdSettings settings;
+    settings.beginGroup(m_group);
+    const bool useSSL = settings.value("useSSL", false).toBool();
+    const QString host = settings.value("host", "").toString();
+    const QString path = settings.value("path", "").toString();
+    const int port = settings.value("port", useSSL ? 443 : 80).toInt();
+    settings.endGroup();
+
+    if (host.isEmpty()) {
+        return QUrl();
+    }
+
+    QUrl url;
+    url.setScheme(useSSL ? "https" : "http");
+    url.setHost(host);
+    url.setPort(port);
+    url.setPath(path);
+    return url;
 }
 
 #undef CARDDAV_MAGIC
