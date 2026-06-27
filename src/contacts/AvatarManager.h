@@ -18,7 +18,7 @@ public:
         return *_instance;
     }
 
-    QList<const Contact *> initialLoad();
+    QList<const Contact *> initialLoad(bool *isFirstRun = nullptr);
 
     QString avatarPathFor(const QString &id);
 
