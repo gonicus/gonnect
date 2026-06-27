@@ -1022,8 +1022,9 @@ void SIPAccount::reinitBuddies()
 
     qCInfo(lcSIPAccount) << "re-subscribing to" << uris.size() << "buddies after re-registration";
 
-    qDeleteAll(m_buddies);
+    const auto savedBuddies = m_buddies;
     m_buddies.clear();
+    qDeleteAll(savedBuddies);
 
     for (const auto &uri : std::as_const(uris)) {
         auto buddy = new SIPBuddy(this, uri);
