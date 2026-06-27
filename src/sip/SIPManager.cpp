@@ -10,7 +10,12 @@
 #include "SIPMediaConfig.h"
 #include "SIPUserAgentConfig.h"
 #include "SIPAccountManager.h"
+#include "NetworkHelper.h"
 #include "AudioManager.h"
+
+#include <pjsua-lib/pjsua.h>
+#include <pjsip/sip_endpoint.h>
+#include <pjlib-util/resolver.h>
 #include "VideoManager.h"
 #include "TogglerManager.h"
 
@@ -118,6 +123,8 @@ void SIPManager::initialize()
 
     m_ep.libStart();
 
+    configureDnsResolver();
+
     // Load Accounts + Transports
     auto &sam = SIPAccountManager::instance();
     connect(&sam, &SIPAccountManager::accountsChanged, this, [this]() {
@@ -149,6 +156,10 @@ void SIPManager::initialize()
     m_networkRecoveryTimer.setSingleShot(true);
     m_networkRecoveryTimer.setInterval(1s);
     connect(&m_networkRecoveryTimer, &QTimer::timeout, this, &SIPManager::recoverFromNetworkChange);
+
+    // Configure registration recovery watchdog
+    m_registrationCheckTimer.setSingleShot(true);
+    connect(&m_registrationCheckTimer, &QTimer::timeout, this, &SIPManager::checkRecovery);
 
     m_initialized = true;
 }
@@ -464,7 +475,9 @@ void SIPManager::handleNetworkChanged()
     }
 
     qCDebug(lcSIPManager) << "network changed - scheduling SIP recovery";
-    m_networkRecoveryTimer.start();
+    m_networkRecoveryAttempts = 0;
+    m_registrationCheckTimer.stop();
+    m_networkRecoveryTimer.start(1s);
 }
 
 void SIPManager::recoverFromNetworkChange()
@@ -473,22 +486,145 @@ void SIPManager::recoverFromNetworkChange()
         return;
     }
 
-    qCDebug(lcSIPManager) << "network changed - recovering SIP";
+    m_registrationCheckTimer.stop();
+
+    qCDebug(lcSIPManager) << "network settled - recovering SIP (attempt"
+                          << (m_networkRecoveryAttempts + 1) << "of" << s_maxNetworkRecoveryAttempts
+                          << ")";
 
     auto accounts = SIPAccountManager::instance().accounts();
 
-    // Re-registration after a network timeout leaves broken buddies around
-    // (see SIPAccount::onRegState), so flag for a buddy reinit on next success.
     for (auto account : std::as_const(accounts)) {
         account->setAfterResume();
     }
 
-    // Restart the transport listeners and shut down stale TCP/TLS transports.
+    resetDnsResolver();
+
     try {
         pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
     } catch (pj::Error &err) {
-        qCCritical(lcSIPManager) << "error handling IP change:"
-                                 << QString::fromLocal8Bit(err.info(false));
+        if (++m_networkRecoveryAttempts < s_maxNetworkRecoveryAttempts) {
+            const auto delay = std::min(seconds(1 << m_networkRecoveryAttempts), 8s);
+            qCWarning(lcSIPManager).nospace()
+                    << "IP change handling failed, retrying in " << delay.count()
+                    << "s: " << QString::fromLocal8Bit(err.info(false));
+            m_networkRecoveryTimer.start(delay);
+        } else {
+            qCCritical(lcSIPManager) << "giving up SIP recovery after" << m_networkRecoveryAttempts
+                                     << "attempts:" << QString::fromLocal8Bit(err.info(false));
+        }
+        return;
+    }
+
+    // Check if registration worked - if DNS worked, but the route to the SIP
+    // server was not yet established, we're running into a case where pijsip
+    // never tries to register again.
+    m_registrationCheckTimer.start(20s);
+}
+
+void SIPManager::checkRecovery()
+{
+    if (!m_initialized || m_suspended) {
+        return;
+    }
+
+    const auto accounts = SIPAccountManager::instance().accounts();
+
+    if (accounts.isEmpty()) {
+        m_networkRecoveryAttempts = 0;
+        return;
+    }
+
+    bool allRegistered = true;
+    for (auto account : std::as_const(accounts)) {
+        if (!account->isRegistered()) {
+            allRegistered = false;
+            break;
+        }
+    }
+
+    if (allRegistered) {
+        qCDebug(lcSIPManager) << "SIP recovered successfully";
+        m_networkRecoveryAttempts = 0;
+        return;
+    }
+
+    if (++m_networkRecoveryAttempts < s_maxNetworkRecoveryAttempts) {
+        const auto delay = std::min(seconds(1 << m_networkRecoveryAttempts), 8s);
+        qCWarning(lcSIPManager).nospace()
+                << "SIP recovery did not register - retrying in " << delay.count() << "seconds";
+        m_networkRecoveryTimer.start(delay);
+    } else {
+        qCCritical(lcSIPManager) << "giving up SIP recovery after" << m_networkRecoveryAttempts
+                                 << "attempts";
+    }
+}
+
+void SIPManager::configureDnsResolver()
+{
+    // Disable pjsip's DNS response cache - the OS already has a cache
+    pjsip_endpoint *endpt = pjsua_get_pjsip_endpt();
+    if (!endpt) {
+        return;
+    }
+    pj_dns_resolver *resolver = pjsip_endpt_get_resolver(endpt);
+    if (!resolver) {
+        return;
+    }
+
+    pj_dns_settings settings;
+    pj_dns_resolver_get_settings(resolver, &settings);
+    settings.cache_max_ttl = 0;
+    const pj_status_t status = pj_dns_resolver_set_settings(resolver, &settings);
+    if (status != PJ_SUCCESS) {
+        char errbuf[PJ_ERR_MSG_SIZE];
+        pj_strerror(status, errbuf, sizeof(errbuf));
+        qCWarning(lcSIPManager) << "failed to disable DNS resolver cache:" << errbuf;
+    }
+}
+
+void SIPManager::resetDnsResolver()
+{
+    pjsip_endpoint *endpt = pjsua_get_pjsip_endpt();
+    if (!endpt) {
+        return;
+    }
+
+    pj_dns_resolver *resolver = pjsip_endpt_get_resolver(endpt);
+    if (!resolver) {
+        // No DNS resolver configured
+        return;
+    }
+
+    ReadOnlyConfdSettings settings;
+    const QStringList nameservers =
+            settings.value("ua/nameservers", NetworkHelper::instance().nameservers())
+                    .toStringList();
+
+    std::vector<std::string> storage;
+    storage.reserve(nameservers.size());
+    for (const auto &ns : nameservers) {
+        if (!ns.isEmpty()) {
+            storage.push_back(ns.toStdString());
+        }
+    }
+
+    if (storage.empty()) {
+        return;
+    }
+
+    std::vector<pj_str_t> servers;
+    servers.reserve(storage.size());
+    for (auto &s : storage) {
+        servers.push_back(pj_str(const_cast<char *>(s.c_str())));
+    }
+
+    const pj_status_t status = pj_dns_resolver_set_ns(
+            resolver, static_cast<unsigned>(servers.size()), servers.data(), nullptr);
+    if (status != PJ_SUCCESS) {
+        char errbuf[PJ_ERR_MSG_SIZE];
+        pj_strerror(status, errbuf, sizeof(errbuf));
+        qCWarning(lcSIPManager) << "failed to reset DNS resolver nameservers:" << errbuf;
     }
 }
 

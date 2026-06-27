@@ -177,14 +177,9 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
          scriptableAttributes.isEmpty() ? QStringList() : scriptableAttributes.split(QChar(',')),
          settings.value("baseNumber", "").toString());
 
-    feedAddressBook();
+    m_isProcessing = true;
 
-    const auto dirtyContacts = AvatarManager::instance().initialLoad();
-    if (dirtyContacts.isEmpty()) {
-        loadAllAvatars(m_ldapConfig);
-    } else {
-        loadAvatars(dirtyContacts);
-    }
+    feedAddressBook();
 
     settings.endGroup();
 }
@@ -468,10 +463,12 @@ void LDAPAddressBookFeeder::startContactQuery()
             qCCritical(lcLDAPAddressBookFeeder)
                     << "Timeout on search request: " << ldap_err2string(ldapResult);
             ErrorBus::instance().addError(tr("LDAP timeout: %1").arg(ldap_err2string(ldapResult)));
+            Q_EMIT feederFailed();
         } else { // Error
             qCCritical(lcLDAPAddressBookFeeder)
                     << "Error on search request: " << ldap_err2string(ldapResult);
             ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(ldapResult)));
+            Q_EMIT feederFailed();
         }
     })->start();
 }
@@ -605,4 +602,29 @@ void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
 
     LDAPInitializer::freeLDAPHandle(m_ldap);
     m_ldap = nullptr;
+
+    QMetaObject::invokeMethod(
+            this, []() { Q_EMIT AddressBook::instance().contactsReady(); }, Qt::QueuedConnection);
+
+    QMetaObject::invokeMethod(this, [this]() { loadAvatarsForContacts(); }, Qt::QueuedConnection);
+}
+
+void LDAPAddressBookFeeder::loadAvatarsForContacts()
+{
+    // Not configured - mark us as ready
+    if (m_attrs.name.isEmpty() || m_attrs.avatar.isEmpty()) {
+        m_isProcessing = false;
+        return;
+    }
+
+    bool firstRun = false;
+    const auto dirtyContacts = AvatarManager::instance().initialLoad(&firstRun);
+
+    if (firstRun) {
+        loadAllAvatars(m_ldapConfig);
+    } else if (!dirtyContacts.isEmpty()) {
+        loadAvatars(dirtyContacts);
+    } else {
+        m_isProcessing = false;
+    }
 }
