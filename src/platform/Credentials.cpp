@@ -128,7 +128,7 @@ void Credentials::set(const QString &key, const QString &secret, CredentialsResp
             Qt::QueuedConnection);
 
     writeJob->setTextData(secret);
-    enqueueJob(key, [this, writeJob, key]() {
+    enqueueJob(key, [writeJob, key]() {
         qCDebug(lcCredentials) << "starting credential write job for" << key;
         writeJob->start();
     });
@@ -205,7 +205,7 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
             },
             Qt::QueuedConnection);
 
-    enqueueJob(key, [this, readJob, key]() {
+    enqueueJob(key, [readJob, key]() {
         qCDebug(lcCredentials) << "starting credential read job for" << key;
         readJob->start();
     });
