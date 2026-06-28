@@ -69,6 +69,30 @@ void Credentials::initialize()
     setIsInitialized(true);
 }
 
+void Credentials::enqueueJob(const QString &key, std::function<void()> fn)
+{
+    m_jobQueue.enqueue(std::move(fn));
+
+    if (m_jobRunning) {
+        qCDebug(lcCredentials).nospace()
+                << "queued credential job for " << key << " (" << m_jobQueue.size() << " pending)";
+    } else {
+        runNextJob();
+    }
+}
+
+void Credentials::runNextJob()
+{
+    if (m_jobQueue.isEmpty()) {
+        m_jobRunning = false;
+        return;
+    }
+
+    m_jobRunning = true;
+    auto fn = m_jobQueue.dequeue();
+    fn();
+}
+
 void Credentials::set(const QString &key, const QString &secret, CredentialsResponse callback)
 {
     auto writeJob = new QKeychain::WritePasswordJob(APP_ID);
@@ -98,12 +122,16 @@ void Credentials::set(const QString &key, const QString &secret, CredentialsResp
 
                 m_writeCredentialJobs.removeAll(writeJob);
                 writeJob->deleteLater();
+
+                runNextJob();
             },
             Qt::QueuedConnection);
 
-    qCDebug(lcCredentials) << "starting credential write job for" << key;
     writeJob->setTextData(secret);
-    writeJob->start();
+    enqueueJob(key, [this, writeJob, key]() {
+        qCDebug(lcCredentials) << "starting credential write job for" << key;
+        writeJob->start();
+    });
 }
 
 void Credentials::get(const QString &key, CredentialsResponse callback)
@@ -172,9 +200,13 @@ void Credentials::get(const QString &key, CredentialsResponse callback)
 
                 m_readCredentialJobs.removeAll(readJob);
                 readJob->deleteLater();
+
+                runNextJob();
             },
             Qt::QueuedConnection);
 
-    qCDebug(lcCredentials) << "starting credential read job for" << key;
-    readJob->start();
+    enqueueJob(key, [this, readJob, key]() {
+        qCDebug(lcCredentials) << "starting credential read job for" << key;
+        readJob->start();
+    });
 }
