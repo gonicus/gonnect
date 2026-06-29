@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QQmlEngine>
 #include "MainPageSelection.h"
+#include "IChatRoom.h"
 
 class ICallState;
 
@@ -13,6 +14,8 @@ class SelectionState : public QObject
 
     Q_PROPERTY(
             MainPageSelection selectedPage MEMBER m_selectedPage NOTIFY selectedPageChanged FINAL)
+    Q_PROPERTY(IChatRoom *selectedChatRoom READ selectedChatRoom WRITE setSelectedChatRoom NOTIFY
+                       selectedChatRoomChanged FINAL)
     Q_PROPERTY(ICallState *callInForeground READ callInForeground WRITE setCallInForeground NOTIFY
                        callInForegroundChanged FINAL)
 
@@ -33,15 +36,22 @@ public:
     void setCallInForeground(ICallState *call);
     Q_INVOKABLE void setCallInForeground(const QString &accountId, int callId);
 
+    IChatRoom *selectedChatRoom() const { return m_selectedChatRoom; }
+    void setSelectedChatRoom(IChatRoom *chatRoom);
+
 private:
     explicit SelectionState(QObject *parent = nullptr);
 
     MainPageSelection m_selectedPage;
+    IChatRoom *m_selectedChatRoom = nullptr;
+    QMetaObject::Connection m_selectedChatRoomDestroyedConnection;
+
     ICallState *m_callInForeground = nullptr;
     QMetaObject::Connection m_callInForegroundDestroyedConnection;
 
 Q_SIGNALS:
     void selectedPageChanged();
+    void selectedChatRoomChanged();
     void callInForegroundChanged();
 };
 
