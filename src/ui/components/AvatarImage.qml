@@ -21,6 +21,7 @@ Item {
     property bool isBlocked
     property bool isUnregistered
     property alias indicatorComponent: statusIndicatorLoader.sourceComponent
+    property Component menuComponent
 
     readonly property bool hasSource: control.source.toString() !== ""  // toString() is necessary, see QTBUG-63629
 
@@ -96,5 +97,15 @@ Item {
         }
 
         Accessible.ignored: true
+    }
+
+    TapHandler {
+        enabled: !!control.menuComponent
+        onTapped: () => {
+                      const menu = control.menuComponent.createObject(control)
+                      if (menu) {
+                          menu.popup()
+                      }
+                  }
     }
 }

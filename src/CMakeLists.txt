@@ -375,6 +375,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/EmojiPicker.qml
         ui/components/controls/FavIcon.qml
         ui/components/controls/FavoriteListItemBig.qml
+        ui/components/controls/FileDropArea.qml
         ui/components/controls/FirstAidButton.qml
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/HideableMenuItem.qml
@@ -526,8 +527,11 @@ qt_add_qml_module(gonnect
         ReadOnlyConfdSettings.h
         KeychainSettings.cpp
         KeychainSettings.h
+        MainPageSelection.h
         PluginManager.h
         PluginManager.cpp
+        SelectionState.h
+        SelectionState.cpp
         StateManager.cpp
         StateManager.h
         Ticker.h

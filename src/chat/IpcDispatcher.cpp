@@ -24,6 +24,7 @@
 #include "EnumTranslation.h"
 #include "GlobalStateAggregator.h"
 #include "PlatformSession.h"
+#include "SelectionState.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -1842,6 +1843,17 @@ void IpcDispatcher::makeNotificationNewMessage(ChatMessage *messageObj)
     // Check if notifications should be send at all
     if (!messageObj || !shallSendDesktopNotification() || messageObj->fromId() == ownUserId()) {
         return;
+    }
+
+    // Check if not active and in foreground anyway
+    auto &selectionState = SelectionState::instance();
+    if (selectionState.isMainWindowActive()
+        && selectionState.selectedPage().type == MainPageSelection::PageType::Chats) {
+
+        if (const auto *selectedChatRoom = selectionState.selectedChatRoom();
+            selectedChatRoom && selectedChatRoom == messageObj->chatRoom()) {
+            return;
+        }
     }
 
     // Check global and room-specific notification settings

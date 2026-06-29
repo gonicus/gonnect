@@ -2,7 +2,9 @@
 
 #include <QMimeDatabase>
 #include <QMimeType>
-#include <QUrl>
+#include <QFileInfo>
+
+FileContentHelper::FileContentHelper(QObject *parent) : QObject{ parent } { }
 
 FileContentHelper::FileType FileContentHelper::fileType(const QString &filePath)
 {
@@ -30,4 +32,11 @@ FileContentHelper::FileType FileContentHelper::fileType(const QString &filePath)
     return FileType::Other;
 }
 
-FileContentHelper::FileContentHelper() { }
+bool FileContentHelper::isLocalFileAndNotDirectory(const QUrl &url) const
+{
+    if (!url.isLocalFile()) {
+        return false;
+    }
+    const QFileInfo checkFile(url.toLocalFile());
+    return checkFile.isFile();
+}

@@ -12,7 +12,6 @@ Repeater {
     property alias onlyUnread: proxyModel.onlyUnread
     property alias groupFavorites: proxyModel.groupFavorites
 
-    property string selectedRoomId
     property bool active: true
     property bool showSectionHeader: false
     property bool hasFavorites: false
@@ -21,7 +20,6 @@ Repeater {
 
     signal roomSelected(string roomId)
 
-    onSelectedRoomIdChanged: () => internal.updateSelectedListItem()
     onHasFavoritesChanged: () => internal.sectionHeaderUpdateRequired()
     onItemAdded: () => internal.sectionHeaderUpdateRequired()
     onItemRemoved: () => internal.sectionHeaderUpdateRequired()
@@ -35,14 +33,15 @@ Repeater {
 
         function updateSelectedListItem() {
             Qt.callLater(() => {
-                if (!control.selectedRoomId) {
+                const selectedRoom = SelectionState.selectedChatRoom
+                if (!selectedRoom) {
                     internal.selectedListItem = null
                 }
 
                 const l = control.count
                 for (let i = 0; i < l; ++i) {
                     const item = control.itemAt(i)
-                    if (item.roomId === control.selectedRoomId) {
+                    if (item.roomId === selectedRoom.id) {
                         internal.selectedListItem = item
                         return
                     }
@@ -50,6 +49,14 @@ Repeater {
 
                 internal.selectedListItem = null
             })
+        }
+
+        readonly property Connections selectionStateConnections: Connections {
+            target: SelectionState
+
+            function onSelectedChatRoomChanged() {
+                internal.updateSelectedListItem()
+            }
         }
     }
 
@@ -69,7 +76,7 @@ Repeater {
 
     delegate: ChatRoomListItem {
         id: delg
-        highlighted: control.selectedRoomId === delg.roomId
+        highlighted: SelectionState.selectedChatRoom?.id === delg.roomId
         anchors {
             left: parent?.left
             right: parent?.right
@@ -78,6 +85,7 @@ Repeater {
         onHighlightedChanged: () => internal.updateSelectedListItem()
 
         onClicked: () => control.roomSelected(delg.roomId)
+        onFileDropped: url => control.chatProvider.chatRoomByRoomId(delg.roomId).sendFile(url)
         onFavoriteToggled: () => control.chatProvider.requestToggleRoomFavorite(
                                      control.chatProvider.chatRoomByRoomId(delg.roomId))
         onEditRoomTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, delg.roomId)
@@ -88,7 +96,7 @@ Repeater {
                          })
             const roomId = delg.roomId
             item.accepted.connect(() => {
-                                      if (control.selectedRoomId === roomId) {
+                                      if (SelectionState.selectedChatRoom?.id === roomId) {
                                           control.roomSelected("")
                                       }
 

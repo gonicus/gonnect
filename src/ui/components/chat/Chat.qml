@@ -359,4 +359,9 @@ Item {
             }
         }
     }
+
+    FileDropArea {
+        anchors.fill: parent
+        onDropAccepted: url => control.chatRoom?.sendFile(url)
+    }
 }
