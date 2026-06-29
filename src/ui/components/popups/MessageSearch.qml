@@ -98,16 +98,14 @@ Item {
         model: ChatMessageSearchProvider.model
         delegate: Item {
             id: delg
+            width: ListView.view.width
+            height: resultColumn.implicitHeight + 10
 
             required property string messageUid
             required property string roomUid
             required property double rank
 
-            height: 50
-            anchors {
-                left: parent?.left
-                right: parent?.right
-            }
+            property ChatMessage message: control.searchProvider.getChatMessage(roomUid, messageUid)
 
             Rectangle {
                 id: background
@@ -117,31 +115,29 @@ Item {
                 radius: 4
             }
 
-            // TODO: Map messageUid to message text
-            Label {
-                text: "%1 (%2)".arg(delg.messageUid).arg(delg.roomUid)
-                elide: Text.ElideRight
+            Column {
+                id : resultColumn
                 anchors {
-                    bottom: parent.verticalCenter
                     left: parent.left
                     right: parent.right
-                    leftMargin: 20
-                    rightMargin: 20
+                    margins: 10
                 }
-            }
+                spacing: 4
 
-            Label {
-                id: secondaryLabel
-                color: Theme.secondaryTextColor
-                elide: Text.ElideRight
-                maximumLineCount: 1
-                text: delg.rank
-                anchors {
-                    top: parent.verticalCenter
-                    left: parent.left
-                    right: parent.right
-                    leftMargin: 20
-                    rightMargin: 20
+                Label {
+                    id: messageText
+                    width: parent.width
+                    text: control.searchProvider.getChatMessageText(delg.message)
+                    wrapMode: Text.WordWrap
+                    //maximumLineCount: 10
+                }
+
+                Label {
+                    id: messageSender
+                    width: parent.width
+                    text: qsTr("From: %1").arg(delg.message?.nickName ?? "")
+                    color: Theme.secondaryTextColor
+                    elide: Text.ElideRight
                 }
             }
 

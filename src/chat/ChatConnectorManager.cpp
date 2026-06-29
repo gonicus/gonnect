@@ -86,6 +86,7 @@ void ChatConnectorManager::init()
 
     // INFO: We're hooking up the message search provider early to get notified
     // about all provider/room changes
+    // Warn: No ref tracking atm, thus no destruction...
     (void)ChatMessageSearchProvider::instance();
 
     static const QRegularExpression groupRegex = QRegularExpression("^chat[0-9]+$");

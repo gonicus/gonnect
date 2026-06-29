@@ -166,7 +166,7 @@ void ChatMessageSearchProvider::loadChatRoom(IChatRoom *room)
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
                         m_indexer->addMessage(
-                                { chatMessage->eventId(), roomUid, textContent->rawText() });
+                                { chatMessage->eventId(), roomUid, textContent->simpleText() });
                     }
                 }
             });
@@ -182,7 +182,7 @@ void ChatMessageSearchProvider::loadChatRoom(IChatRoom *room)
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
                         m_indexer->updateMessage(
-                                { chatMessage->eventId(), roomUid, textContent->rawText() });
+                                { chatMessage->eventId(), roomUid, textContent->simpleText() });
                     }
                 }
             });
