@@ -515,11 +515,11 @@ bool ViewHelper::isShortEmojiString(const QString &str) const
 {
     const auto trimmed = str.trimmed();
 
-    if (trimmed.size() > 3) {
+    if (trimmed.size() > 50) { // Bigger size as emojis can be much more than a single unicode char
         return false;
     }
 
     static const QRegularExpression re(
-            R"(^(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*){1,3}$)");
+            R"(^(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)(?:\s*(?:\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)){0,2}$)");
     return re.match(trimmed).hasMatch();
 }
