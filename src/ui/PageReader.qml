@@ -33,7 +33,7 @@ Item {
             const pageIconId = UISettings.getUISetting(pageId, "iconId", "")
 
             const tab = tabRoot.createTab(pageId,
-                                          GonnectWindow.PageType.Base,
+                                          MainPageSelection.PageType.Base,
                                           pageIconId,
                                           pageName)
 

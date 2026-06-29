@@ -16,10 +16,6 @@ Item {
         defaultLogLevel: LoggingCategory.Warning
     }
 
-    property string selectedPageId: ""
-    property int selectedPageType: -1
-    property var attachedData: null
-
     property var mainWindow
 
     property int dynamicPageCount: 0
@@ -53,7 +49,7 @@ Item {
             SM.uiHasActiveEditDialog = true
 
             item.accepted.connect((name, iconId) => {
-                                      const tab = control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
+                                      const tab = control.createTab(id, MainPageSelection.PageType.Base, iconId, name)
                                       control.mainWindow.createPage(id, name, iconId, tab)
                                   })
             item.show()
@@ -196,8 +192,6 @@ Item {
             required property string iconSource
             required property var attachedData
 
-            readonly property bool isSelected: control.selectedPageId === delg.pageId && control.subId === delg.subId
-
             property int notifications: (delg.attachedData && delg.attachedData instanceof IChatProvider)
                                         ? delg.attachedData.unreadNotificationsCount
                                         : 0
@@ -211,16 +205,17 @@ Item {
 
             function switchTab() {
                 if (delg.isEnabled) {
-                    control.selectedPageId = delg.pageId
-                    control.selectedPageType = delg.pageType
-                    control.attachedData = delg.attachedData
+                    SelectionState.selectedPage = {
+                        id: delg.pageId,
+                        type: delg.pageType,
+                        attachedData: delg.attachedData ? (delg.attachedData as QtObject) : undefined
+                    }
                 }
             }
 
             Rectangle {
                 id: hoverBackground
-                visible: delg.isSelected
-                         || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
+                visible: delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode)
                 radius: 8
                 color: Theme.backgroundSecondaryColor
                 anchors {
@@ -394,8 +389,8 @@ Item {
             model: {
                 const baseModel = [
                     {
-                        pageId: control.mainWindow.homePageId,
-                        pageType: GonnectWindow.PageType.Base,
+                        pageId: SelectionState.homePageId(),
+                        pageType: MainPageSelection.PageType.Base,
                         iconSource: Icons.userHome,
                         labelText: qsTr("Home"),
                         disabledTooltipText: qsTr("Home"),
@@ -403,31 +398,31 @@ Item {
                         showActiveBorder: false,
                         attachedData: null
                     }, {
-                        pageId: control.mainWindow.conferencePageId,
-                        pageType: GonnectWindow.PageType.Conference,
+                        pageId: SelectionState.conferencePageId(),
+                        pageType: MainPageSelection.PageType.Conference,
                         iconSource: Icons.userGroupNew,
                         labelText: qsTr("Conference"),
                         disabledTooltipText: qsTr("No active conference"),
                         isEnabled: control.hasActiveConference,
-                        showActiveBorder: control.hasActiveConference && control.selectedPageId !== control.mainWindow.conferencePageId,
+                        showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
                         attachedData: null
                     }, {
-                        pageId: control.mainWindow.callPageId,
-                        pageType: GonnectWindow.PageType.Call,
+                        pageId: SelectionState.callPageId(),
+                        pageType: MainPageSelection.PageType.Call,
                         iconSource: Icons.callStart,
                         labelText: qsTr("Call"),
                         disabledTooltipText: qsTr("No active call"),
                         isEnabled: control.hasActiveCall,
-                        showActiveBorder: control.hasActiveUnfinishedCall && control.selectedPageId !== control.mainWindow.callPageId,
+                        showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
                         attachedData: null
                     }
-                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
+                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
 
                 if (ChatConnectorManager.isChatAvailable) {
                     for (const conn of ChatConnectorManager.chatConnectors) {
                         baseModel.push({
-                                           pageId: control.mainWindow.chatsPageId,
-                                           pageType: GonnectWindow.PageType.Chats,
+                                           pageId: SelectionState.chatsPageId(),
+                                           pageType: MainPageSelection.PageType.Chats,
                                            iconSource: Icons.dialogMessages,
                                            labelText: conn.displayName,
                                            disabledTooltipText: qsTr("Chat not available"),
@@ -460,8 +455,8 @@ Item {
             delegate: tabDelegate
             model: [
                 {
-                    pageId: control.mainWindow.settingsPageId,
-                    pageType: GonnectWindow.PageType.Settings,
+                    pageId: SelectionState.settingsPageId(),
+                    pageType: MainPageSelection.PageType.Settings,
                     iconSource: Icons.settingsConfigure,
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
@@ -590,8 +585,8 @@ Item {
             id: editPageAction
             text: qsTr("Edit")
             icon.source: Icons.editor
-            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
-                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+            enabled: optionMenu.selectedTabButton?.pageType === MainPageSelection.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== SelectionState.homePageId()
             onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
 
             Accessible.role: Accessible.Button
@@ -605,8 +600,8 @@ Item {
             id: deletePageAction
             text: qsTr("Delete")
             icon.source: Icons.editDelete
-            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
-                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+            enabled: optionMenu.selectedTabButton?.pageType === MainPageSelection.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== SelectionState.homePageId()
 
             onTriggered: () => deletePageAction.deletePage()
 
@@ -622,18 +617,15 @@ Item {
                     let newIndex
                     let tabOrder = control.getTabList().filter((button) => button.isEnabled)
 
-                    if (optionMenu.selectedTabButton.isSelected) {
-                        // If the actively selected button is deleted, move up/down
-                        curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
-                        if (curIndex > 0) {
-                            newIndex = curIndex - 1
-                        } else if (curIndex < tabOrder.length - 1) {
-                            newIndex = curIndex + 1
-                        }
-
-                        mainWindow.updateTabSelection(tabOrder[newIndex].pageId,
-                                                      tabOrder[newIndex].pageType)
+                    curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
+                    if (curIndex > 0) {
+                        newIndex = curIndex - 1
+                    } else if (curIndex < tabOrder.length - 1) {
+                        newIndex = curIndex + 1
                     }
+
+                    mainWindow.showPage(tabOrder[newIndex].pageId,
+                                                  tabOrder[newIndex].pageType)
 
                     mainWindow.removePage(optionMenu.selectedTabButton.pageId)
                     optionMenu.selectedTabButton.destroy()
