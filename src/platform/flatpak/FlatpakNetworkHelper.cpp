@@ -35,25 +35,34 @@ void FlatpakNetworkHelper::updateNetworkState()
     QDBusPendingReply<QVariantMap> reply = m_portal->GetStatus();
     reply.waitForFinished();
 
-    bool connected = true;
-
     if (reply.isError()) {
-        qCCritical(lcNetwork) << "failed to query network status:" << reply.error().message();
-    } else if (reply.isValid()) {
-        QVariantMap res = reply.value();
+        qCWarning(lcNetwork) << "failed to query network status:" << reply.error().message();
+        return;
+    }
 
-        if (res.contains("connectivity")) {
-            bool ok;
-            unsigned connectivity = res.value("connectivity").toUInt(&ok);
-            if (ok) {
-                connected = !!connectivity;
-            }
-        } else if (res.contains("available")) {
-            connected = true;
-        } else {
-            qCWarning(lcNetwork) << "status request does not contain usable fields - falling back "
-                                    "to 'full network reachable'";
+    if (!reply.isValid()) {
+        qCWarning(lcNetwork) << "network status is not valid - skipping";
+        return;
+    }
+
+    const QVariantMap res = reply.value();
+    bool connected = false;
+
+    if (res.contains("connectivity")) {
+        bool ok = false;
+        const unsigned connectivity = res.value("connectivity").toUInt(&ok);
+        if (!ok) {
+            qCCritical(lcNetwork)
+                    << "error parsing unsigned integer connectivity status from portal";
+            return;
         }
+
+        connected = !!connectivity;
+    } else if (res.contains("available")) {
+        connected = res.value("available").toBool();
+    } else {
+        qCWarning(lcNetwork) << "status request does not contain usable fields - skipping";
+        return;
     }
 
     if (connected != m_connectivity) {

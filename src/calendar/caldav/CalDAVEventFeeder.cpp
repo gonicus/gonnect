@@ -12,7 +12,7 @@ Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
 using namespace std::chrono_literals;
 
 CalDAVEventFeeder::CalDAVEventFeeder(QObject *parent, const CalDAVEventFeederConfig &config)
-    : QObject(parent), m_config(config)
+    : QObject(parent), m_config(config), m_initialRetryCount(config.retryCount)
 {
     ReadOnlyConfdSettings settings;
     m_webdav.setVerifyCa(settings.value("generic/verifyServer", true).toBool());
@@ -122,6 +122,8 @@ void CalDAVEventFeeder::onError(QString error)
 
 void CalDAVEventFeeder::onParserFinished()
 {
+    m_config.retryCount = m_initialRetryCount;
+
     m_concreteSources.clear();
     m_items = m_webdavParser.getList();
 

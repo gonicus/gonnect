@@ -43,6 +43,7 @@ private:
 
     void setTimeData();
     void processQueue();
+    void requeueConfigId(const QString &configId);
     void setupReconnectSignal();
 
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;

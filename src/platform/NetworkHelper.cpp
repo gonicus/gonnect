@@ -121,9 +121,10 @@ void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reac
         break;
     }
 
-    if (m_connectivity != connected) {
-        m_connectivity = connected;
+    const bool changed = (m_connectivity != connected);
+    m_connectivity = connected;
 
+    if (changed || connected) {
         Q_EMIT connectivityChanged();
     }
 }

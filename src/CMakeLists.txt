@@ -137,12 +137,13 @@ elseif(LINUX)
     )
 
 elseif(WIN32)
-    list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib)
-    list(APPEND APP_SOURCES gonnect.rc)
+    find_package(Qt6 REQUIRED COMPONENTS ProtobufPrivate)
+    list(APPEND PLATFORM_LIBRARIES Iphlpapi.lib Qt6::ProtobufPrivate)
+    list(APPEND APP_SOURCES platform/windows/QtProtobufMsvcLinkFix.cpp gonnect.rc)
 endif()
 
-qt_add_big_resources(APP_SOURCES application.qrc)
-qt_add_big_resources(APP_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/icons.qrc)
+qt_add_resources(APP_SOURCES application.qrc)
+qt_add_resources(APP_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/icons.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
 qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
 

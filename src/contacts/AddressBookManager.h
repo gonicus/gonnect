@@ -36,10 +36,13 @@ private:
     QMutex m_queueMutex;
 
     void processAddressBookQueue();
+    void requeueGroup(const QString &group);
+    void scheduleReconnect();
 
     QHash<QString, IAddressBookFeeder *> m_addressBookFeeders;
 
     QStringList m_addressBookConfigs;
     QStringList m_addressBookQueue;
+    bool m_reconnectScheduled = false;
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
 };
