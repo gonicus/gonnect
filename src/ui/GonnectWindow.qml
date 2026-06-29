@@ -39,6 +39,8 @@ BaseWindow {
     }
 
     onActiveChanged: () => {
+        SelectionState.setIsMainWindowActive(control.active)
+
         if (control.active) {
             SIPCallManager.resetMissedCalls()
         }
@@ -46,6 +48,7 @@ BaseWindow {
 
     Component.onCompleted: () => {
         Qt.callLater(() => {
+            SelectionState.setIsMainWindowActive(control.active)
             control.showPage(SelectionState.homePageId(), MainPageSelection.PageType.Base)
         })
     }

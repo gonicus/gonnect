@@ -13,6 +13,8 @@ class SelectionState : public QObject
     Q_DISABLE_COPY_MOVE(SelectionState)
 
     Q_PROPERTY(
+            bool isMainWindowActive READ isMainWindowActive NOTIFY isMainWindowActiveChanged FINAL)
+    Q_PROPERTY(
             MainPageSelection selectedPage MEMBER m_selectedPage NOTIFY selectedPageChanged FINAL)
     Q_PROPERTY(IChatRoom *selectedChatRoom READ selectedChatRoom WRITE setSelectedChatRoom NOTIFY
                        selectedChatRoomChanged FINAL)
@@ -32,6 +34,11 @@ public:
     Q_INVOKABLE static QString conferencePageId() { return "page_conference"; }
     Q_INVOKABLE static QString settingsPageId() { return "page_settings"; }
 
+    bool isMainWindowActive() const { return m_isMainWindowActive; }
+    Q_INVOKABLE void setIsMainWindowActive(bool value);
+
+    const MainPageSelection &selectedPage() const { return m_selectedPage; }
+
     ICallState *callInForeground() const { return m_callInForeground; }
     void setCallInForeground(ICallState *call);
     Q_INVOKABLE void setCallInForeground(const QString &accountId, int callId);
@@ -42,6 +49,8 @@ public:
 private:
     explicit SelectionState(QObject *parent = nullptr);
 
+    bool m_isMainWindowActive = false;
+
     MainPageSelection m_selectedPage;
     IChatRoom *m_selectedChatRoom = nullptr;
     QMetaObject::Connection m_selectedChatRoomDestroyedConnection;
@@ -50,6 +59,7 @@ private:
     QMetaObject::Connection m_callInForegroundDestroyedConnection;
 
 Q_SIGNALS:
+    void isMainWindowActiveChanged();
     void selectedPageChanged();
     void selectedChatRoomChanged();
     void callInForegroundChanged();

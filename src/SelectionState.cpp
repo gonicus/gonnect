@@ -6,6 +6,14 @@
 
 SelectionState::SelectionState(QObject *parent) : QObject{ parent } { }
 
+void SelectionState::setIsMainWindowActive(bool value)
+{
+    if (m_isMainWindowActive != value) {
+        m_isMainWindowActive = value;
+        Q_EMIT isMainWindowActiveChanged();
+    }
+}
+
 void SelectionState::setCallInForeground(ICallState *call)
 {
     if (m_callInForeground != call) {
