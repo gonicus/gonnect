@@ -21,6 +21,7 @@ Item {
 
     required property string eventId
     required property string roomId
+    required property string fromId
     required property date timestamp
     required property string nickName
     required property string avatarPath
@@ -199,6 +200,19 @@ Item {
             leftMargin: 10
             top: parent.top
             topMargin: 15
+        }
+
+        menuComponent: Component {
+            Menu {
+                id: avatarPopup
+                onClosed: () => avatarPopup.destroy()
+
+                MenuItem {
+                    text: control.fromId
+                    icon.source: Icons.editCopy
+                    onTriggered: () => ClipboardHelper.copyToClipboard(control.fromId)
+                }
+            }
         }
     }
 

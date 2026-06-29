@@ -54,10 +54,7 @@ Item {
         ChatMessageListItemContent {
             id: relatedContent
             messageLabel.color: Theme.secondaryTextColor
-            anchors {
-                left: parent.left
-                right: parent.right
-            }
+            width: relatedCol.width
         }
     }
 }
