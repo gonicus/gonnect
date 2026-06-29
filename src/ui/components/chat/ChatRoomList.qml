@@ -36,6 +36,7 @@ Repeater {
                 const selectedRoom = SelectionState.selectedChatRoom
                 if (!selectedRoom) {
                     internal.selectedListItem = null
+                    return
                 }
 
                 const l = control.count
