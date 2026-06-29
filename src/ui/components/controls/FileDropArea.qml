@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.impl
+import base
 
 Item {
     id: control
@@ -78,6 +79,9 @@ Item {
                            const url = drag.urls[0].toString()
                            valid = url.startsWith("file://")
                        }
+                       if (valid) {
+                           valid = FileContentHelper.isLocalFileAndNotDirectory(drag.urls[0])
+                       }
 
                        dropInArea.isInputValid = valid
 
@@ -93,7 +97,9 @@ Item {
                            url = drop.urls[0].toString()
                            valid = url.startsWith("file://")
                        }
-
+                       if (valid) {
+                           valid = FileContentHelper.isLocalFileAndNotDirectory(url)
+                       }
 
                        if (valid) {
                            drop.accept(Qt.CopyAction)

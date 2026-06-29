@@ -292,8 +292,8 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
         return favEntry->contact ? favEntry->contact->subscriptableNumber() : QString();
 
     case static_cast<int>(Roles::HasAvatar): {
-        if (favEntry->contact) {
-            return favEntry->contact->hasAvatar();
+        if (favEntry->contact && favEntry->contact->hasAvatar()) {
+            return true;
         }
 
         for (const auto &addr : std::as_const(favEntry->addrs)) {
