@@ -467,9 +467,8 @@ void HeadsetDevice::processEvents()
                             }
                             m_muteBurstTimer.restart();
 
-                            if (m_muteBurstCount >= muteBurstThreshold()) {
-                                if (!m_muteLocked || !m_muted) {
-                                    m_muteLocked = true;
+                            if (m_muteLocked && m_muteBurstCount >= muteBurstThreshold()) {
+                                if (!m_muted) {
                                     m_muted = true;
                                     qCInfo(lcHeadset) << "  Mute flap collapsed to muted (burst of"
                                                       << m_muteBurstCount << "toggles)";

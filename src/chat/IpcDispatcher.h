@@ -3,6 +3,7 @@
 #include "IChatProvider.h"
 #include "IpcConfig.h"
 #include "IpcInterface.h"
+#include "NotificationSetting.h"
 #include "chat.qpb.h"
 #include "IChatRoom.h"
 #include "ChatUser.h"
@@ -62,6 +63,14 @@ public:
     };
     Q_ENUM(ConnectionState)
 
+    static de::gonicus::gonnect::NotificationSettingGadget::NotificationSetting
+    notificationSettingIpcToProto(NotificationSetting::Setting setting);
+    static NotificationSetting::Setting notificationSettingProtoToIpc(
+            de::gonicus::gonnect::NotificationSettingGadget::NotificationSetting setting);
+
+    static ::RoomSettings
+    roomSettingsProtoToIpc(const de::gonicus::gonnect::RoomSettings &protoSettings);
+
     explicit IpcDispatcher(const QString &settingsGroup, const IpcConfig &configInfo,
                            QObject *parent = nullptr);
     ~IpcDispatcher();
@@ -96,9 +105,7 @@ public:
     void sendMessage(const QString &roomId, const QString &text,
                      const QString &relatedMessageId = "");
 
-    /// Send a message in the specified room with the image specified by the file. The image must
-    /// have already been uploaded.
-    void sendImage(const QString &roomId, const QString &filePath);
+    void sendTypingPing(const QString &roomId);
 
     /// Send a message in the specified room with the file as an attachment. The file must
     /// have already been uploaded.
@@ -113,6 +120,9 @@ public:
 
     /// Initial load of room messages.
     void loadMessages(IChatRoom *chatRoom);
+
+    /// Load a single messe. It will be available in lookup, but not in the indexed message list.
+    void loadSingleMessage(const QString &roomId, const QString &messageId);
 
     // IChatProvider interface
     virtual qsizetype chatRoomsCount() override;
@@ -232,8 +242,9 @@ private:
     /// Dispatch the response container and its content payload.
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
-    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message,
-                                        bool isUnread);
+    bool hasOwnUserMention(const ChatMessage &message) const;
+    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
+                                        bool isIndependent);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
@@ -257,8 +268,6 @@ private:
     void removeNotificationsForRoom(IChatRoom *room);
 
     bool shallSendDesktopNotification();
-    bool m_shallSendDesktopNotification = false;
-    bool m_shallSendDesktopNotificationInitialized = false;
 
     QRegularExpression m_idConvRegex;
     bool m_useIdConversion = false;
@@ -292,6 +301,8 @@ private:
     bool m_isInVerificationProcess = false;
     QString m_verificationFlowId;
 
+    NotificationSetting::Setting m_notificationSetting = NotificationSetting::Setting::All;
+
     QSet<QString> m_requestedUserIds;
     QList<const ChatUser *> m_userList;
 
@@ -324,9 +335,16 @@ private:
     /// yet.
     QHash<quint64, QString> m_roomListTags;
 
+    /// Map of chat messages that have been requested indvidually (i.e. not in bulk) and have not
+    /// received an answer yet. Key is the request tag, value the message id.
+    QHash<quint64, QString> m_singleMessageTags;
+
     /// Map of ipc tag to a count of the parts that have been received for this tag, w/o the
     /// MultipartEnd message.
     QHash<quint64, qsizetype> m_multipartCount;
+
+    /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
+    QSet<QString> m_failedMessageIds;
 
 Q_SIGNALS:
 

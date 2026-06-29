@@ -4,10 +4,12 @@
 #include <QAudioDevice>
 #include <QAudioOutput>
 #include <QAudioInput>
+#include <pjsua-lib/pjsua.h>
 
 #include "AudioManager.h"
 #include "SIPManager.h"
 #include "media/AudioPort.h"
+#include "media/AudioProcessor.h"
 #include "GlobalMuteState.h"
 
 Q_LOGGING_CATEGORY(lcAudioManager, "gonnect.sip.audio")
@@ -16,21 +18,10 @@ using namespace std::chrono_literals;
 
 AudioManager::AudioManager(QObject *parent) : QObject(parent)
 {
-#ifdef Q_OS_LINUX
-    // PulseAudio handling
-    if (!noSyncSystemMute()) {
-        m_paMainloop = pa_mainloop_new();
-        m_paContext = pa_context_new(pa_mainloop_get_api(m_paMainloop), "GOnnect");
-
-        pa_context_set_state_callback(m_paContext, paContextStateCallback, nullptr);
-        pa_context_set_subscribe_callback(m_paContext, paSubscriptionEventCallback, nullptr);
-
-        pa_context_connect(m_paContext, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
-
-        connect(&m_paMainloopTimer, &QTimer::timeout, this, &AudioManager::paMainloopIterate);
-        m_paMainloopTimer.start(100ms);
-    }
-#endif
+    auto &session = PlatformSession::instance();
+    connect(&session, &PlatformSession::systemMuteChanged, this,
+            [](bool muted) { GlobalMuteState::instance().setMuted(muted); });
+    session.start(!noSyncSystemMute());
 
     // Use Qt mechanism to get notified for updates and re-initialize on changes
     m_updateDebouncer.setSingleShot(true);
@@ -50,13 +41,9 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
     connect(this, &AudioManager::isAudioCaptureMutedChanged, this, [this]() {
         if (m_captureAudioPort) {
-#ifdef Q_OS_LINUX
             if (!noSyncSystemMute()) {
-                m_paCallbackSuppress++;
-                paMuteInputByName(m_captureAudioPort->getSystemDeviceID(), m_isAudioCaptureMuted);
-                qCInfo(lcAudioManager) << "Sent mute state" << m_isAudioCaptureMuted << "to system";
+                PlatformSession::instance().syncSystemMute(m_isAudioCaptureMuted);
             }
-#endif
             m_captureAudioPort->setMuted(m_isAudioCaptureMuted);
         } else {
             qCCritical(lcAudioManager) << "Missing capture audio port - cannot set muted flag";
@@ -69,16 +56,60 @@ AudioManager::AudioManager(QObject *parent) : QObject(parent)
 
 AudioManager::~AudioManager()
 {
-#ifdef Q_OS_LINUX
-    if (m_paContext) {
-        pa_context_disconnect(m_paContext);
-        pa_context_unref(m_paContext);
+    // Detach AudioProcessor
+    if (m_captureAudioPort) {
+        m_captureAudioPort->setAudioProcessor(nullptr);
+    }
+    if (m_playbackAudioPort) {
+        m_playbackAudioPort->setAudioProcessor(nullptr);
+    }
+    if (m_audioProcessor && pjsua_get_state() == PJSUA_STATE_RUNNING) {
+        delete m_audioProcessor;
+    }
+    m_audioProcessor = nullptr;
+
+    PlatformSession::instance().stop();
+}
+
+AudioProcessor *AudioManager::audioProcessor()
+{
+    if (m_audioProcessorInitialized) {
+        return m_audioProcessor;
     }
 
-    if (m_paMainloop) {
-        pa_mainloop_free(m_paMainloop);
+    unsigned features = 0;
+    if (m_settings.value("media/anc", true).toBool()) {
+        features |= AudioProcessor::NoiseSuppression;
     }
-#endif
+    if (m_settings.value("media/aec", true).toBool()) {
+        features |= AudioProcessor::EchoCancellation;
+    }
+    if (m_settings.value("media/agc", true).toBool()) {
+        features |= AudioProcessor::GainControl;
+    }
+
+    if (features == 0) {
+        m_audioProcessorInitialized = true;
+        qCInfo(lcAudioManager) << "audio processing (AEC/ANC/AGC) disabled by configuration";
+        return nullptr;
+    }
+
+    // AudioPort always feeds pjsip 16 kHz mono 16-bit PCM in 20 ms frames
+    const unsigned clockRate = 16000;
+    const unsigned channels = 1;
+    const unsigned samplesPerFrame = clockRate * 20 / 1000;
+    const unsigned tailMs = m_settings.value("media/aecTailLen", 200).toUInt();
+
+    auto *ec = new AudioProcessor(clockRate, channels, samplesPerFrame, tailMs, features);
+    if (!ec->isValid()) {
+        delete ec;
+        return nullptr;
+    }
+
+    m_audioProcessor = ec;
+    m_audioProcessorInitialized = true;
+
+    return m_audioProcessor;
 }
 
 void AudioManager::initialize()
@@ -89,76 +120,6 @@ void AudioManager::initialize()
     setCaptureDeviceId(m_captureHash);
     setPlaybackDeviceId(m_playbackHash);
 }
-
-#ifdef Q_OS_LINUX
-void AudioManager::paMainloopIterate()
-{
-    if (m_paMainloop) {
-        // We won't block for non-queued events (0)
-        pa_mainloop_iterate(m_paMainloop, 0, nullptr);
-    }
-}
-
-void AudioManager::paSubscriptionEventCallback(pa_context *context,
-                                               pa_subscription_event_type_t type, uint32_t index,
-                                               void *userdata)
-{
-    Q_UNUSED(userdata)
-
-    if ((type & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) == PA_SUBSCRIPTION_EVENT_SOURCE) {
-        pa_context_get_source_info_by_index(context, index, paInputMuteStateCallback, nullptr);
-    }
-}
-
-void AudioManager::paContextStateCallback(pa_context *context, void *userdata)
-{
-    Q_UNUSED(userdata)
-
-    pa_context_state_t state = pa_context_get_state(context);
-    if (state == PA_CONTEXT_READY) {
-        pa_context_subscribe(context, PA_SUBSCRIPTION_MASK_SOURCE, nullptr, nullptr);
-    }
-}
-
-void AudioManager::paMuteInputByName(const QString &name, bool state)
-{
-    if (m_paContext) {
-        pa_context_set_source_mute_by_name(m_paContext, name.toStdString().data(), state, nullptr,
-                                           nullptr);
-    }
-}
-
-void AudioManager::paGetInputMuteState(pa_context *context)
-{
-    auto captureAudioPort = AudioManager::instance().m_captureAudioPort;
-
-    if (context && captureAudioPort) {
-        QString name = captureAudioPort->getSystemDeviceID();
-        pa_context_get_source_info_by_name(context, name.toStdString().data(),
-                                           paInputMuteStateCallback, nullptr);
-    }
-}
-
-void AudioManager::paInputMuteStateCallback(pa_context *, const pa_source_info *source, int end,
-                                            void *)
-{
-    AudioManager &instance = AudioManager::instance();
-    auto captureAudioPort = instance.m_captureAudioPort;
-
-    if (!end && captureAudioPort
-        && captureAudioPort->getSystemDeviceID() == QString(source->name)) {
-        if (instance.m_paCallbackSuppress > 0) {
-            instance.m_paCallbackSuppress--;
-            return;
-        }
-
-        auto &gms = GlobalMuteState::instance();
-        if (source->mute != gms.isMuted()) {
-            gms.setMuted(source->mute);
-        }
-    }
-}
-#endif
 
 void AudioManager::refreshAudioDevices()
 {
@@ -235,6 +196,8 @@ void AudioManager::setPlaybackDeviceId(const QString &id)
                 &AudioManager::playbackAudioVolumeChanged);
     }
 
+    m_playbackAudioPort->setAudioProcessor(audioProcessor());
+
     Q_EMIT playbackDeviceIdChanged();
 }
 
@@ -286,12 +249,12 @@ void AudioManager::setCaptureDeviceId(const QString &id)
                 &AudioManager::captureAudioVolumeChanged);
     }
 
-#ifdef Q_OS_LINUX
+    m_captureAudioPort->setAudioProcessor(audioProcessor());
+
     if (!noSyncSystemMute()) {
-        // Get the initial mute state of the input device
-        paGetInputMuteState(m_paContext);
+        auto systemId = m_captureAudioPort ? m_captureAudioPort->getSystemDeviceID() : QString();
+        PlatformSession::instance().setCaptureDeviceId(systemId);
     }
-#endif
 
     Q_EMIT captureDeviceIdChanged();
 }

@@ -160,6 +160,7 @@ class PjSIPConan(ConanFile):
             file.write('\n\n#define PJMEDIA_HAS_RTCP_XR 1\n')
             file.write('\n\n#define PJMEDIA_HAS_DTMF_FLASH 0\n')
             file.write('\n\n#define PJSIP_MAX_PKT_LEN 8192\n')
+            file.write('\n\n#define PJMEDIA_RTP_PT_TELEPHONE_EVENTS 101\n')
 
             if self.settings.os == "Macos":
                 file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')

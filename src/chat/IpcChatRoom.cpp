@@ -24,8 +24,8 @@ IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, QObject *parent
 
 IpcChatRoom::~IpcChatRoom()
 {
+    qDeleteAll(m_messageLookup);
     m_messageLookup.clear();
-    qDeleteAll(m_messages);
 }
 
 void IpcChatRoom::setName(const QString &name)
@@ -73,7 +73,19 @@ ChatMessage *IpcChatRoom::chatMessageById(const QString &id) const
     if (id.isEmpty()) {
         return nullptr;
     }
+
     return m_messageLookup.value(id, nullptr);
+}
+
+void IpcChatRoom::ensureMessageLoaded(const QString &id)
+{
+    if (id.isEmpty() || m_messageLookup.contains(id)) {
+        return;
+    }
+
+    if (auto *dispatcher = ipcDispatcher()) {
+        dispatcher->loadSingleMessage(m_id, id);
+    }
 }
 
 ChatMessage *IpcChatRoom::latestOwnTextMessage() const
@@ -97,18 +109,6 @@ void IpcChatRoom::sendMessage(const QString &message, const QString &relatedMess
     ipcDispatcher()->sendMessage(id(), message, relatedMessageId);
 }
 
-void IpcChatRoom::sendImage(const QString &filePath)
-{
-    auto dispatcher = ipcDispatcher();
-    const auto uploadedUrl = dispatcher->uploadFile(filePath);
-    if (uploadedUrl.isEmpty()) {
-        qCCritical(lcIpcChatRoom) << "Error on uploading image" << filePath;
-        return;
-    }
-
-    dispatcher->sendImage(id(), uploadedUrl);
-}
-
 void IpcChatRoom::sendFile(const QString &filePath)
 {
     auto dispatcher = ipcDispatcher();
@@ -121,7 +121,16 @@ void IpcChatRoom::sendFile(const QString &filePath)
     dispatcher->sendFile(id(), uploadedUrl, filePath.split(QChar('/')).last());
 }
 
-void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)
+void IpcChatRoom::sendTypingPing()
+{
+    if (auto *dispatcher = ipcDispatcher()) {
+        dispatcher->sendTypingPing(id());
+    } else {
+        qCCritical(lcIpcChatRoom) << "IpcChatRoom has no IpcDispatcher as parent";
+    }
+}
+
+void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent)
 {
     Q_CHECK_PTR(message);
 
@@ -137,18 +146,23 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread)
                 });
     }
 
-    for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
-        if (m_messages.at(i)->timestamp() < message->timestamp()) {
-            m_messages.insert(i + 1, message);
-            m_messageLookup.insert(message->eventId(), message);
-            Q_EMIT chatMessageAdded(i + 1, message);
-            return;
+    if (isIndependent) {
+        m_messageLookup.insert(message->eventId(), message);
+        Q_EMIT chatMessageOutOfSequenceReceived(message);
+    } else {
+        for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
+            if (m_messages.at(i)->timestamp() < message->timestamp()) {
+                m_messages.insert(i + 1, message);
+                m_messageLookup.insert(message->eventId(), message);
+                Q_EMIT chatMessageAdded(i + 1, message);
+                return;
+            }
         }
-    }
 
-    m_messages.prepend(message);
-    m_messageLookup.insert(message->eventId(), message);
-    Q_EMIT chatMessageAdded(0, message);
+        m_messages.prepend(message);
+        m_messageLookup.insert(message->eventId(), message);
+        Q_EMIT chatMessageAdded(0, message);
+    }
 }
 
 qsizetype IpcChatRoom::indexOfMessage(const ChatMessage *message) const
@@ -158,11 +172,12 @@ qsizetype IpcChatRoom::indexOfMessage(const ChatMessage *message) const
 
 void IpcChatRoom::removeMessage(const QString &messageId)
 {
+    m_messageLookup.remove(messageId);
+
     for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
         if (m_messages.at(i)->eventId() == messageId) {
             auto message = m_messages.at(i);
             m_messages.removeAt(i);
-            m_messageLookup.remove(messageId);
             Q_EMIT chatMessageRemoved(i, message);
             delete message;
             return;

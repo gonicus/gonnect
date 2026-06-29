@@ -53,3 +53,23 @@ bool EmojiProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceP
 
     return true;
 }
+
+int EmojiProxyModel::firstIndexOfGroup(int groupIndex) const
+{
+    const auto model = qobject_cast<const EmojiModel *>(sourceModel());
+    if (!model) {
+        return -1;
+    }
+
+    const int count = rowCount();
+    for (int i = 0; i < count; ++i) {
+        const auto sourceIdx = mapToSource(index(i, 0));
+        if (!sourceIdx.isValid()) {
+            continue;
+        }
+        if (model->groupAt(sourceIdx.row()) == groupIndex) {
+            return i;
+        }
+    }
+    return -1;
+}

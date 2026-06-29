@@ -11,6 +11,7 @@
 #include "HeadsetDeviceProxy.h"
 
 class Ringer;
+class Pinger;
 class Contact;
 class CallHistoryItem;
 
@@ -22,6 +23,8 @@ class ViewHelper : public QObject
     Q_PROPERTY(QString userConfigPath READ userConfigPath CONSTANT FINAL)
     Q_PROPERTY(bool isDebugRun READ isDebugRun CONSTANT FINAL)
     Q_PROPERTY(bool isPlayingRingTone READ isPlayingRingTone NOTIFY isPlayingRingToneChanged FINAL)
+    Q_PROPERTY(bool isPlayingNotificationTone READ isPlayingNotificationTone NOTIFY
+                       isPlayingNotificationToneChanged FINAL)
     Q_PROPERTY(Contact *currentUser READ currentUser NOTIFY currentUserChanged FINAL)
     Q_PROPERTY(QString currentUserName READ currentUserName NOTIFY currentUserChanged FINAL)
     Q_PROPERTY(IConferenceConnector::StartFlags nextMeetingStartFlags MEMBER m_nextMeetingStartFlags
@@ -29,6 +32,8 @@ class ViewHelper : public QObject
     Q_PROPERTY(QObject *topDrawer MEMBER m_topDrawer NOTIFY topDrawerChanged FINAL)
     Q_PROPERTY(QObject *globalEmojiPickerPopup MEMBER m_globalEmojiPickerPopup NOTIFY
                        globalEmojiPickerPopupChanged FINAL)
+    Q_PROPERTY(QObject *globalFilteredEmojiPickerPopup MEMBER m_globalFilteredEmojiPickerPopup
+                       NOTIFY globalFilteredEmojiPickerPopupChanged FINAL)
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
     Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
     Q_PROPERTY(bool canSyncSystemMute READ canSyncSystemMute CONSTANT FINAL)
@@ -89,6 +94,10 @@ public:
     Q_INVOKABLE void testPlayRingTone(qreal volume);
     Q_INVOKABLE void stopTestPlayRingTone();
     bool isPlayingRingTone() const { return m_isPlayingRingTone; }
+
+    Q_INVOKABLE void testPlayNotificationTone(qreal volume);
+    Q_INVOKABLE void stopTestPlayNotificationTone();
+    bool isPlayingNotificationTone() const { return m_isPlayingNotificationTone; }
 
     Q_INVOKABLE void resetTrayIcon() const;
 
@@ -160,22 +169,28 @@ private:
     QHash<QRegularExpression, QString> m_preprocessRegexs;
 
     bool m_isPlayingRingTone = false;
+    bool m_isPlayingNotificationTone = false;
     Ringer *m_ringer = nullptr;
     QTimer m_ringerTimer;
+    Pinger *m_pinger = nullptr;
+    QTimer m_pingerTimer;
     Contact *m_currentUser = nullptr;
     IConferenceConnector::StartFlags m_nextMeetingStartFlags =
             IConferenceConnector::StartFlag::AudioActive;
     QObject *m_topDrawer = nullptr;
     QObject *m_globalEmojiPickerPopup = nullptr;
+    QObject *m_globalFilteredEmojiPickerPopup = nullptr;
     bool m_isActiveVideoCall = false;
 
 Q_SIGNALS:
     void activateSearch();
     void isPlayingRingToneChanged();
+    void isPlayingNotificationToneChanged();
     void currentUserChanged();
     void nextMeetingStartFlagsChanged();
     void topDrawerChanged();
     void globalEmojiPickerPopupChanged();
+    void globalFilteredEmojiPickerPopupChanged();
     void isActiveVideoCallChanged();
 
     void showSettings();

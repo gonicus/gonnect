@@ -48,3 +48,9 @@ QVariant EmojiModel::data(const QModelIndex &index, int role) const
         return emojiInfo->label;
     }
 }
+
+int EmojiModel::groupAt(int row) const
+{
+    const auto emojiInfo = EmojiResolver::instance().ordered().at(row);
+    return emojiInfo ? emojiInfo->group : -1;
+}

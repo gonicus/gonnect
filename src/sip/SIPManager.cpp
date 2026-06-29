@@ -144,6 +144,8 @@ void SIPManager::initialize()
     if (!isConfigured()) {
         Q_EMIT notConfigured();
     }
+
+    m_initialized = true;
 }
 
 void SIPManager::setPreferredCodecs()
@@ -151,46 +153,73 @@ void SIPManager::setPreferredCodecs()
     const QList<int> codecPriorities = { PJMEDIA_CODEC_PRIO_HIGHEST, PJMEDIA_CODEC_PRIO_NEXT_HIGHER,
                                          PJMEDIA_CODEC_PRIO_NORMAL, PJMEDIA_CODEC_PRIO_LOWEST };
 
-    static const QRegularExpression filterRegex("\\s*,\\s*");
-
     ReadOnlyConfdSettings globalSettings;
-    const QList<QString> preferredCodecs = globalSettings.value("sip/preferredCodecs", "")
-                                                   .toString()
-                                                   .split(filterRegex, Qt::SkipEmptyParts);
+    const QList<QString> preferredCodecs =
+            globalSettings.value("sip/preferredCodecs", "").toStringList();
     if (preferredCodecs.empty()) {
         return;
     }
 
     // Check if there's valid codecs in our preference list
-    int invalidCodecs = 0;
-    for (const auto &pC : preferredCodecs) {
-        try {
-            m_ep.codecGetParam(pC.toStdString()); // throws if codec is unknown
-        } catch (pj::Error &err) {
-            invalidCodecs++;
+    QStringList registeredCodecs;
+    try {
+        const auto &codecs = m_ep.codecEnum2();
+        for (const auto &c : std::as_const(codecs)) {
+            registeredCodecs << QString::fromStdString(c.codecId);
+        }
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPManager)
+                << "failed to enumerate codecs - skipping preferred codec selection:"
+                << QString::fromStdString(err.info());
+        return;
+    }
+
+    QList<std::pair<QString, int>> resolvedCodecs;
+    for (int i = 0; i < preferredCodecs.count(); i++) {
+        const QString &preferredCodec = preferredCodecs.at(i);
+        const int priority = codecPriorities.at(qMin(i, codecPriorities.count() - 1));
+        const QString prefix = preferredCodec + "/";
+
+        bool matched = false;
+        for (const QString &registered : std::as_const(registeredCodecs)) {
+            if (registered.compare(preferredCodec, Qt::CaseInsensitive) == 0
+                || registered.startsWith(prefix, Qt::CaseInsensitive)) {
+                resolvedCodecs.append({ registered, priority });
+                matched = true;
+            }
+        }
+
+        if (!matched) {
+            qCWarning(lcSIPManager) << "ignoring unknown preferred codec" << preferredCodec
+                                    << "- not among registered codecs" << registeredCodecs;
         }
     }
-    if (invalidCodecs >= preferredCodecs.count()) {
-        qCDebug(lcSIPManager)
+
+    if (resolvedCodecs.empty()) {
+        qCWarning(lcSIPManager)
                 << "no valid preferred codec found - skipping preferred codec selection";
         return;
     }
 
     // Disable all codecs
-    const auto &codecs = m_ep.codecEnum2();
-    for (const auto &c : codecs) {
-        m_ep.codecSetPriority(c.codecId, PJMEDIA_CODEC_PRIO_DISABLED);
+    for (const QString &registered : std::as_const(registeredCodecs)) {
+        try {
+            m_ep.codecSetPriority(registered.toStdString(), PJMEDIA_CODEC_PRIO_DISABLED);
+        } catch (const pj::Error &err) {
+            qCWarning(lcSIPManager) << "failed to disable codec" << registered << ":"
+                                    << QString::fromStdString(err.info());
+        }
     }
 
     // Only enable/use config codecs
-    for (int i = 0; i < preferredCodecs.count(); i++) {
-        int priorityIndex =
-                (i < codecPriorities.count()) ? codecPriorities.at(i) : codecPriorities.count() - 1;
-        QString preferredCodec = preferredCodecs.at(i);
-
-        m_ep.codecSetPriority(preferredCodec.toStdString(), priorityIndex);
-        qCDebug(lcSIPManager) << "using codec" << preferredCodec << ", with priority"
-                              << priorityIndex;
+    for (const auto &[codecId, priority] : std::as_const(resolvedCodecs)) {
+        try {
+            m_ep.codecSetPriority(codecId.toStdString(), priority);
+            qCDebug(lcSIPManager) << "using codec" << codecId << ", with priority" << priority;
+        } catch (const pj::Error &err) {
+            qCWarning(lcSIPManager) << "failed to enable codec" << codecId << ":"
+                                    << QString::fromStdString(err.info());
+        }
     }
 }
 
@@ -414,6 +443,46 @@ void SIPManager::resume()
         // Re-activate account registration
         for (auto account : std::as_const(accounts)) {
             account->setRegistration(true);
+        }
+    }
+}
+
+void SIPManager::handleNetworkChanged()
+{
+    if (!m_initialized) {
+        return;
+    }
+
+    if (m_suspended) {
+        resume();
+        return;
+    }
+
+    qCDebug(lcSIPManager) << "network changed - recovering SIP";
+
+    auto accounts = SIPAccountManager::instance().accounts();
+
+    // Re-registration after a network timeout leaves broken buddies around
+    // (see SIPAccount::onRegState), so flag for a buddy reinit on next success.
+    for (auto account : std::as_const(accounts)) {
+        account->setAfterResume();
+    }
+
+    // Restart the transport listeners and shut down stale TCP/TLS transports.
+    try {
+        pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
+    } catch (pj::Error &err) {
+        qCCritical(lcSIPManager) << "error handling IP change:"
+                                 << QString::fromLocal8Bit(err.info(false));
+    }
+
+    // Force an immediate re-REGISTER.
+    for (auto account : std::as_const(accounts)) {
+        try {
+            account->setRegistration(true);
+        } catch (pj::Error &err) {
+            qCWarning(lcSIPManager) << "re-register after network change failed:"
+                                    << QString::fromLocal8Bit(err.info(false));
         }
     }
 }

@@ -5,8 +5,16 @@
 #include <qqmlregistration.h>
 
 #include "ChatUser.h"
+#include "NotificationSetting.h"
 
 class ChatMessage;
+
+struct RoomSettings
+{
+    NotificationSetting::Setting notificationSetting = NotificationSetting::Setting::None;
+
+    auto operator<=>(const RoomSettings &) const = default;
+};
 
 class IChatRoom : public QObject
 {
@@ -81,6 +89,9 @@ public:
     QDateTime latestMessageDateTime() const { return m_latestMessageDateTime; };
     void setLatestMessageDateTime(const QDateTime &dateTime);
 
+    RoomSettings roomSettings() const { return m_roomSettings; }
+    void setRoomSettings(const RoomSettings &roomSettings);
+
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
 
@@ -94,11 +105,12 @@ public:
     Q_INVOKABLE virtual void sendMessage(const QString &message,
                                          const QString &relatedMessageId = "") = 0;
 
-    /// Given a local file url, send a message with this image.
-    Q_INVOKABLE virtual void sendImage(const QString &filePath) = 0;
-
     /// Given a local file url, send a message with this file as an attachment.
     Q_INVOKABLE virtual void sendFile(const QString &filePath) = 0;
+
+    /// Send that the user is currently typing. Shall be called every 2 seconds as long as the user
+    /// is typing.
+    Q_INVOKABLE virtual void sendTypingPing() = 0;
 
     /// If the messages of this room have been loaded initially.
     virtual bool isInitiallyLoaded() const = 0;
@@ -170,11 +182,13 @@ public:
     virtual void clear() = 0;
 
 private:
+    RoomSettings m_roomSettings;
     QDateTime m_latestMessageDateTime;
     bool m_isLoadingMessageHistory = false;
     bool m_isCompletelyLoaded = false;
 
 Q_SIGNALS:
+    void roomSettingsChanged();
     void nameChanged(QString name);
     void avatarPathChanged();
     void isFavoriteChanged();
@@ -194,6 +208,9 @@ Q_SIGNALS:
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.
     void chatMessageAdded(qsizetype index, ChatMessage *chatMessage);
+
+    /// Send when a chat message has been added but not in the indexed list.
+    void chatMessageOutOfSequenceReceived(ChatMessage *chatMessage);
 
     /// Send when a chat message has been removed. index is the one in the list returned by
     /// chatMessages() before the message has been removed. The ChatMessage object is deleted

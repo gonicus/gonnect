@@ -11,8 +11,8 @@
 #define GONNECT_NOTIFICATION_MAX_MESSAGE_LENGTH 200
 
 Notification::Notification(const QString &title, const QString &body, Priority priority,
-                           QObject *parent)
-    : QObject(parent), m_title(title), m_body(body), m_priority(priority)
+                           bool playPing, QObject *parent)
+    : QObject(parent), m_title(title), m_body(body), m_playPing{ playPing }, m_priority(priority)
 {
     m_id = QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8();
 

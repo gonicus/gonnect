@@ -15,6 +15,7 @@ class EmojiProxyModel : public QSortFilterProxyModel
 
 public:
     explicit EmojiProxyModel(QObject *parent = nullptr);
+    Q_INVOKABLE int firstIndexOfGroup(int groupIndex) const;
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;

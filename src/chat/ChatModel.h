@@ -63,7 +63,7 @@ private:
     static Roles toNormalRole(const Roles role);
     static int toNormalRole(const int role);
 
-    QVariant rawData(int row, int role) const;
+    QVariant rawData(const ChatMessage *item, int role) const;
     ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
     void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
     static QList<int> nextItemContentRoles();

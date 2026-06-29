@@ -117,6 +117,32 @@ void IpcInterface::start()
     m_process.waitForStarted();
 }
 
+void IpcInterface::stop()
+{
+    if (!m_isRunning) {
+        return;
+    }
+    setIsRunning(false);
+
+    m_socketRequest->close();
+    m_socketRequest->deleteLater();
+    m_socketRequest.clear();
+
+    m_socketResponse->close();
+    m_socketResponse->deleteLater();
+    m_socketResponse.clear();
+
+    if (m_process.state() != QProcess::NotRunning) {
+        m_process.terminate();
+        m_process.waitForFinished(500);
+    }
+
+    if (m_process.state() != QProcess::NotRunning) {
+        m_process.kill();
+        m_process.waitForFinished(100);
+    }
+}
+
 quint64 IpcInterface::writeData(const QByteArray &data)
 {
     // Serialize and send request

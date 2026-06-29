@@ -77,9 +77,11 @@ if(APPLE)
 elseif(LINUX)
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify IMPORTED_TARGET)
     pkg_check_modules(LIBPULSE REQUIRED libpulse IMPORTED_TARGET)
-
+    pkg_check_modules(LIBPIPEWIRE REQUIRED libpipewire-0.3 IMPORTED_TARGET)
+       
     list(APPEND PLATFORM_LIBRARIES
         PkgConfig::LIBPULSE
+        PkgConfig::LIBPIPEWIRE
         PkgConfig::LIBNOTIFY
         Qt6::DBus)
 
@@ -156,6 +158,9 @@ qt_add_executable(gonnect
     ${DBUS_SOURCES}
 )
 
+set_source_files_properties(platform/linux/LinuxPlatformSession.cpp
+    PROPERTIES COMPILE_OPTIONS "-Wno-gnu-statement-expression-from-macro-expansion")
+       
 set_target_properties(gonnect PROPERTIES
     QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
     WIN32_EXECUTABLE TRUE
@@ -226,7 +231,9 @@ if(FLATPAK)
         platform/flatpak/FlatpakGlobalShortcuts.h
         platform/flatpak/FlatpakGlobalShortcuts.cpp
         platform/linux/LinuxDesktopSearchProvider.h
-        platform/linux/LinuxDesktopSearchProvider.cpp)
+        platform/linux/LinuxDesktopSearchProvider.cpp
+        platform/linux/LinuxPlatformSession.h
+        platform/linux/LinuxPlatformSession.cpp)
 
 elseif(LINUX)
     set(PLATFORM_SOURCES
@@ -255,7 +262,9 @@ elseif(LINUX)
         platform/dummy/DummyInhibitHelper.cpp
 
         platform/linux/LinuxDesktopSearchProvider.h
-        platform/linux/LinuxDesktopSearchProvider.cpp)
+        platform/linux/LinuxDesktopSearchProvider.cpp
+        platform/linux/LinuxPlatformSession.h
+        platform/linux/LinuxPlatformSession.cpp)
 
 elseif(APPLE)
     set(PLATFORM_SOURCES
@@ -276,7 +285,9 @@ elseif(APPLE)
         platform/dummy/DummyGlobalShortcuts.h
         platform/dummy/DummyGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
-        platform/dummy/DummySearchProvider.cpp)
+        platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp)
 elseif(WIN32)
     set(PLATFORM_SOURCES
         platform/windows/WindowsUserInfo.cpp
@@ -299,6 +310,8 @@ elseif(WIN32)
         platform/windows/WindowsGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
         platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp
     )
 else()
     set(PLATFORM_SOURCES
@@ -319,7 +332,9 @@ else()
         platform/dummy/DummyGlobalShortcuts.h
         platform/dummy/DummyGlobalShortcuts.cpp
         platform/dummy/DummySearchProvider.h
-        platform/dummy/DummySearchProvider.cpp)
+        platform/dummy/DummySearchProvider.cpp
+        platform/dummy/DummyPlatformSession.h
+        platform/dummy/DummyPlatformSession.cpp)
 endif()
 
 qt_add_qml_module(gonnect
@@ -348,6 +363,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
 
+        ui/components/controls/AudioFileSelector.qml
         ui/components/controls/AudioLevelButton.qml
         ui/components/controls/AudioPlayer.qml
         ui/components/controls/BarButton.qml
@@ -378,6 +394,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/TextField.qml
         ui/components/controls/VideoPlayer.qml
         ui/components/controls/VoiceMailField.qml
+        ui/components/controls/VolumeSlider.qml
 
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
@@ -566,6 +583,8 @@ qt_add_qml_module(gonnect
         sip/SIPTemplateController.cpp
         sip/SIPUserAgentConfig.h
         sip/SIPUserAgentConfig.cpp
+        sip/Pinger.h
+        sip/Pinger.cpp
         sip/PreferredIdentity.h
         sip/PreferredIdentity.cpp
         sip/PreferredIdentityValidator.h
@@ -659,6 +678,7 @@ qt_add_qml_module(gonnect
         chat/ConferenceChatRoom.cpp
         chat/CrossSigningSecret.h
         chat/CrossSigningSymbol.h
+        chat/NotificationSetting.h
         chat/PublicChatRoom.h
 
         conference/ConferenceUser.h
@@ -700,10 +720,14 @@ qt_add_qml_module(gonnect
 
         helper/AggregatedDirectRoomsOfContact.h
         helper/AggregatedDirectRoomsOfContact.cpp
+        helper/AudioHelper.h
+        helper/AudioHelper.cpp
         helper/ChatMessageTransformer.h
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
         helper/CodeHighlighter.cpp
+        helper/FileContentHelper.h
+        helper/FileContentHelper.cpp
         helper/SecretGenerator.h
         helper/SecretGenerator.cpp
         # helper/SpellCheckHighlighter.h
@@ -715,6 +739,8 @@ qt_add_qml_module(gonnect
         media/AudioManager.cpp
         media/AudioPort.h
         media/AudioPort.cpp
+        media/AudioProcessor.h
+        media/AudioProcessor.cpp
         media/Sniffer.h
         media/Sniffer.cpp
         media/VideoManager.h
@@ -737,6 +763,7 @@ qt_add_qml_module(gonnect
         platform/InhibitHelper.h
         platform/GlobalShortcuts.h
         platform/SearchProvider.h
+        platform/PlatformSession.h
         ${PLATFORM_SOURCES}
 
         presence/ChatUserPresenceStateProvider.h

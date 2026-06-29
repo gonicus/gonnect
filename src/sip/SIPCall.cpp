@@ -166,8 +166,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                                 << " contactId " << m_contactId;
 
     if (statusCode == PJSIP_SC_RINGING) {
-        ringToneFactory.ringingTone()->start();
         if (!m_isSilent && !m_incoming) {
+            ringToneFactory.ringingTone()->start();
             removeCallState(ICallState::State::InProgress);
             addCallState(ICallState::State::RingingOutgoing);
             m_isInProgress = false;
@@ -777,6 +777,10 @@ void SIPCall::onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm)
 
 void SIPCall::createOngoingCallNotification()
 {
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return;
+    }
+
     pj::CallInfo ci = getInfo();
 
     // Create notification text
@@ -801,7 +805,8 @@ void SIPCall::createOngoingCallNotification()
         bodyParts.append(countries.join(", "));
     }
 
-    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, this);
+    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, false,
+                              this);
 
     auto &am = AvatarManager::instance();
     QString avatar = c ? am.avatarPathFor(c->id()) : "";

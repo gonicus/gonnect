@@ -2,10 +2,6 @@
 
 #include <QObject>
 
-#ifdef Q_OS_LINUX
-#  include <pulse/pulseaudio.h>
-#endif
-
 #include <QMediaDevices>
 #include <QTimer>
 #include <QtQml/qqml.h>
@@ -13,8 +9,10 @@
 
 #include "AppSettings.h"
 #include "SIPAudioDevice.h"
+#include "platform/PlatformSession.h"
 
 class AudioPort;
+class AudioProcessor;
 class QAudioOutput;
 class QAudioInput;
 
@@ -56,16 +54,6 @@ public:
     QList<SIPAudioDevice *> devices() const { return m_devices; }
 
     void initialize();
-
-#ifdef Q_OS_LINUX
-    static void paSubscriptionEventCallback(pa_context *context, pa_subscription_event_type_t type,
-                                            uint32_t index, void *userdata);
-    static void paContextStateCallback(pa_context *context, void *userdata);
-    void paMuteInputByName(const QString &name, bool state);
-    void paGetInputMuteState(pa_context *context);
-    static void paInputMuteStateCallback(pa_context *context, const pa_source_info *source, int end,
-                                         void *userdata);
-#endif
 
     void acquireDevice();
     void releaseDevice();
@@ -117,15 +105,13 @@ Q_SIGNALS:
     void isAudioCaptureMutedChanged();
     void externalRingerChanged();
 
-private Q_SLOTS:
-#ifdef Q_OS_LINUX
-    void paMainloopIterate();
-#endif
-
 private:
     bool noSyncSystemMute() { return m_settings.value("generic/noSyncSystemMute", false).toBool(); }
 
     AudioManager(QObject *parent = nullptr);
+
+    AudioProcessor *audioProcessor();
+
     void refreshAudioDevices();
     void doProfileElection();
     bool isDeviceAvailable(const QString &hash);
@@ -142,6 +128,9 @@ private:
     AudioPort *m_playbackAudioPort = nullptr;
     AudioPort *m_captureAudioPort = nullptr;
 
+    AudioProcessor *m_audioProcessor = nullptr;
+    bool m_audioProcessorInitialized = false;
+
     unsigned m_captureDeviceId = 0;
     unsigned m_currentAudioProfile = 0;
 
@@ -155,13 +144,6 @@ private:
     AppSettings m_settings;
 
     bool m_externalRinger = false;
-
-#ifdef Q_OS_LINUX
-    pa_mainloop *m_paMainloop = nullptr;
-    QTimer m_paMainloopTimer;
-    pa_context *m_paContext = nullptr;
-    int m_paCallbackSuppress = 0;
-#endif
 };
 
 class AudioManagerWrapper
