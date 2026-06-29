@@ -184,4 +184,22 @@ Item {
             }
         }
     }
+
+    Label {
+        id: hintLabel
+        visible: searchResultListView.count === 0
+        color: Theme.secondaryTextColor
+        font.pixelSize: 16
+        anchors.centerIn: searchResultListView
+        text: {
+            const l = searchTextField.text.trim().length
+            if (l > 0 && l < 3) {
+                return qsTr("Please enter at least three characters...")
+            }
+            if (l > 0) {
+                return qsTr("No chat rooms found.")
+            }
+            return qsTr("Please enter a search phrase...")
+        }
+    }
 }

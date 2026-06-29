@@ -160,7 +160,10 @@ Item {
             rightMargin: 10
         }
 
-        onRespondTo: messageId => relatedMsg.chatMessage = control.chatRoom?.chatMessageById(messageId) ?? null
+        onRespondTo: messageId => {
+                         relatedMsg.chatMessage = control.chatRoom?.chatMessageById(messageId) ?? null
+                         chatMessageBox.giveFocus()
+                     }
     }
 
     Item {
@@ -291,7 +294,6 @@ Item {
                 control.chatProvider.uploadImageFromClipboard(control.chatRoom.id)
             }
         }
-
         onEditLastMessage: () => {
             const chatProvider = control.chatProvider
             const chatRoom = control.chatRoom

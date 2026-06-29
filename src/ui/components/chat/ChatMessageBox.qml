@@ -25,19 +25,36 @@ Item {
     readonly property bool hasMessage: !!messageField.text.trim()
 
     onChatRoomChanged: () => {
-                           control.clear()
-
                            internal.typingTimer.stop()
                            internal.lastPingTime = 0
                            internal.hasTypedWhileWaiting = false
+
+                           const room = control.chatRoom
+                           if (room && internal.savedInput[room.id] !== undefined) {
+                               chatMessageBox.text = internal.savedInput[room.id]
+                               messageField.forceActiveFocus()
+                               messageField.selectAll()
+                           } else {
+                               messageField.clear()
+                               messageField.forceActiveFocus()
+                           }
                        }
 
+    function giveFocus() {
+        messageField.forceActiveFocus()
+    }
+
     function clear() {
+        if (control.chatRoom) {
+            delete internal.savedInput[control.chatRoom.id]
+        }
         messageField.clear()
     }
 
     QtObject {
         id: internal
+
+        property var savedInput: ({})
 
         property double lastPingTime: 0
         property bool hasTypedWhileWaiting: false
@@ -197,6 +214,11 @@ Item {
         onTextEdited: () => {
             internal.sendIsTyping()
 
+            // Save entered text for later restore
+            if (control.chatRoom) {
+                internal.savedInput[control.chatRoom.id] = chatMessageBox.text
+            }
+
             // Find current word at cursor
             const bounds = messageField.currentWordBoundings()
             const currWord = text.substring(bounds[0], bounds[1])
@@ -322,6 +344,7 @@ Item {
                        && !(keyEvent.modifiers & Qt.ShiftModifier)) {
 
                 // Send message
+                keyEvent.accepted = true
                 control.sendMessage()
 
             } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
