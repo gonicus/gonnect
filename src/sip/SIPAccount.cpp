@@ -104,8 +104,22 @@ void SIPAccount::initialize()
 
         registrarUri = addTransport(registrarUri);
 
-        m_accountConfig.regConfig.retryIntervalSec = 30;
+        // Configure retry intervals to be more responsive for UI use
+        m_accountConfig.regConfig.retryIntervalSec = 10;
+        m_accountConfig.regConfig.firstRetryIntervalSec = 3;
+        m_accountConfig.regConfig.randomRetryIntervalSec = 4;
         m_accountConfig.regConfig.registrarUri = registrarUri.toStdString();
+
+        unsigned registrationTimeout = m_settings.value("registrationTimeout", 0).toUInt(&ok);
+        if (!ok) {
+            qCCritical(lcSIPAccount) << "invalid value for 'registrationTimeout':"
+                                     << m_settings.value("registrationTimeout");
+            Q_EMIT initialized(false);
+            return;
+        }
+        if (registrationTimeout > 0) {
+            m_accountConfig.regConfig.timeoutSec = registrationTimeout;
+        }
     } else {
         qCCritical(lcSIPAccount) << "'registrarUri' is required";
         ErrorBus::instance().addFatalError(tr("'registrarUri' is required"));
@@ -705,7 +719,7 @@ QString SIPAccount::toSipUri(const QString &var) const
     QString sipUrl;
 
     if (PhoneNumberUtil::isSipUri(var)) {
-        sipUrl = var;
+        sipUrl = PhoneNumberUtil::bareURI(var);
     } else {
         QString number = var;
 
@@ -721,6 +735,12 @@ QString SIPAccount::toSipUri(const QString &var) const
             qCCritical(lcSIPAccount) << "invalid SIP URI passed:" << sipUrl;
             sipUrl = "";
         }
+    }
+
+    // Add transport to outgoing calls
+    if (!sipUrl.isEmpty() && !sipUrl.startsWith("sips:", Qt::CaseInsensitive)
+        && !sipUrl.contains("transport=", Qt::CaseInsensitive)) {
+        sipUrl = addTransport(sipUrl);
     }
 
     return sipUrl;
@@ -964,7 +984,7 @@ bool SIPAccount::isInstantMessagingAllowed() const
     return m_shallNegotiateCapabilities && m_isInstantMessagingAllowed;
 }
 
-QString SIPAccount::addTransport(const QString &in)
+QString SIPAccount::addTransport(const QString &in) const
 {
     if (m_transportType == TRANSPORT_TYPE::TLS) {
         return in + ";transport=tls";
@@ -1021,8 +1041,9 @@ void SIPAccount::reinitBuddies()
 
     qCInfo(lcSIPAccount) << "re-subscribing to" << uris.size() << "buddies after re-registration";
 
-    qDeleteAll(m_buddies);
+    const auto savedBuddies = m_buddies;
     m_buddies.clear();
+    qDeleteAll(savedBuddies);
 
     for (const auto &uri : std::as_const(uris)) {
         auto buddy = new SIPBuddy(this, uri);

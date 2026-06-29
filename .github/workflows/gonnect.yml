@@ -123,7 +123,7 @@ jobs:
       - name: Configure CMake
         env:
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
-        run: cmake --preset conan-release . -DBUILD_TESTING=ON --debug-find-pkg=Qt6Protobuf
+        run: cmake --preset conan-release . -DBUILD_TESTING=ON
 
       - name: Build
         run: cmake --build --preset conan-release --parallel $(nproc --all)
@@ -152,7 +152,7 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }} --debug-find-pkg=Qt6Protobuf
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }}
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
@@ -341,7 +341,7 @@ jobs:
           xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
           libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
           libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA protobuf-c-devel protobuf-devel grpc-devel protobuf-compiler \
-          pip python3-devel nodejs pipewire-devel
+          pip python3-devel nodejs pipewire-devel llvm-ar
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:

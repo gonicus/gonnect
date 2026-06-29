@@ -39,6 +39,7 @@ private:
     void init(const LDAPInitializer::Config &ldapConfig,
               QStringList sipStatusSubscriptableAttributes = {}, const QString &baseNumber = "");
     void feedAddressBook();
+    void loadAvatarsForContacts();
     void loadAvatars(const QList<const Contact *> &contacts);
     void loadAllAvatars(const LDAPInitializer::Config &ldapConfig);
     void processImpl(const QString &password);
