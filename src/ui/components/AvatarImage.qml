@@ -101,6 +101,11 @@ Item {
 
     TapHandler {
         enabled: !!control.menuComponent
-        onTapped: () => control.menuComponent.createObject(control).popup()
+        onTapped: () => {
+                      const menu = control.menuComponent.createObject(control)
+                      if (menu) {
+                          menu.popup()
+                      }
+                  }
     }
 }
