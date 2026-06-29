@@ -527,8 +527,11 @@ qt_add_qml_module(gonnect
         ReadOnlyConfdSettings.h
         KeychainSettings.cpp
         KeychainSettings.h
+        MainPageSelection.h
         PluginManager.h
         PluginManager.cpp
+        SelectionState.h
+        SelectionState.cpp
         StateManager.cpp
         StateManager.h
         Ticker.h

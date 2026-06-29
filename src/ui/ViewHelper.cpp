@@ -455,12 +455,6 @@ void ViewHelper::requestExternalAppointment(const QString &link)
     }
 }
 
-void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
-{
-    GlobalCallState::instance().setCallInForeground(
-            SIPCallManager::instance().findCall(accountId, callId));
-}
-
 bool ViewHelper::hasNonSilentCall() const
 {
     const auto globalStateObject = GlobalCallState::instance().globalCallStateObjects();
