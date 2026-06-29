@@ -197,6 +197,8 @@ Item {
                                         : 0
             property bool showNotificationBubble: delg.notifications > 0
 
+            readonly property bool isSelected: SelectionState.selectedPage.id === delg.pageId
+
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Selected tab")
             Accessible.description: qsTr("The currently selected tab")
@@ -215,7 +217,7 @@ Item {
 
             Rectangle {
                 id: hoverBackground
-                visible: delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode)
+                visible: delg.isSelected || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
                 radius: 8
                 color: Theme.backgroundSecondaryColor
                 anchors {
