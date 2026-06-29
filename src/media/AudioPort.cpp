@@ -59,7 +59,7 @@ void AudioPort::setAudioProcessor(AudioProcessor *audioProcessor)
 {
     m_audioProcessor = audioProcessor;
 
-    if (m_device.mode() == QAudioDevice::Mode::Input && !m_isMuted) {
+    if (audioProcessor && m_device.mode() == QAudioDevice::Mode::Input && !m_isMuted) {
         try {
             adjustTxLevel(activeTxLevel());
         } catch (pj::Error &err) {

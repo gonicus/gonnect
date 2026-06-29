@@ -109,6 +109,17 @@ void SIPAccount::initialize()
         m_accountConfig.regConfig.firstRetryIntervalSec = 3;
         m_accountConfig.regConfig.randomRetryIntervalSec = 4;
         m_accountConfig.regConfig.registrarUri = registrarUri.toStdString();
+
+        unsigned registrationTimeout = m_settings.value("registrationTimeout", 0).toUInt(&ok);
+        if (!ok) {
+            qCCritical(lcSIPAccount) << "invalid value for 'registrationTimeout':"
+                                     << m_settings.value("registrationTimeout");
+            Q_EMIT initialized(false);
+            return;
+        }
+        if (registrationTimeout > 0) {
+            m_accountConfig.regConfig.timeoutSec = registrationTimeout;
+        }
     } else {
         qCCritical(lcSIPAccount) << "'registrarUri' is required";
         ErrorBus::instance().addFatalError(tr("'registrarUri' is required"));
@@ -1030,8 +1041,9 @@ void SIPAccount::reinitBuddies()
 
     qCInfo(lcSIPAccount) << "re-subscribing to" << uris.size() << "buddies after re-registration";
 
-    qDeleteAll(m_buddies);
+    const auto savedBuddies = m_buddies;
     m_buddies.clear();
+    qDeleteAll(savedBuddies);
 
     for (const auto &uri : std::as_const(uris)) {
         auto buddy = new SIPBuddy(this, uri);
