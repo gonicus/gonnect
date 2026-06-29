@@ -45,6 +45,9 @@ Item {
     }
 
     function clear() {
+        if (control.chatRoom) {
+            delete internal.savedInput[control.chatRoom.id]
+        }
         messageField.clear()
     }
 
