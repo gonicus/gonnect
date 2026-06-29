@@ -1,3 +1,11 @@
+## [2.3.1](https://github.com/gonicus/gonnect/compare/v2.3.0...v2.3.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* network issues ([#530](https://github.com/gonicus/gonnect/issues/530)) ([e67d250](https://github.com/gonicus/gonnect/commit/e67d250ed08c840ef909b67863bd54dc0713b871))
+* queue credential jobs ([c1461bf](https://github.com/gonicus/gonnect/commit/c1461bfca6915724a62f73530c607827fbef8194)), closes [#527](https://github.com/gonicus/gonnect/issues/527)
+
 # [2.3.0](https://github.com/gonicus/gonnect/compare/v2.2.0...v2.3.0) (2026-06-25)
 
 
