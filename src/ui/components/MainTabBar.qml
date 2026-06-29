@@ -614,9 +614,9 @@ Item {
             Accessible.onPressAction: () => deletePageAction.deletePage()
 
             function deletePage() {
-                if (optionMenu.selectedTabButton !== null) {
+                if (optionMenu.selectedTabButton !== null && SelectionState.selectedPage.id === optionMenu.selectedTabButton.pageId) {
                     let curIndex
-                    let newIndex
+                    let newIndex = -1
                     let tabOrder = control.getTabList().filter((button) => button.isEnabled)
 
                     curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
@@ -626,8 +626,10 @@ Item {
                         newIndex = curIndex + 1
                     }
 
-                    mainWindow.showPage(tabOrder[newIndex].pageId,
-                                                  tabOrder[newIndex].pageType)
+                    if (newIndex >= 0) {
+                        mainWindow.showPage(tabOrder[newIndex].pageId,
+                                                      tabOrder[newIndex].pageType)
+                    }
 
                     mainWindow.removePage(optionMenu.selectedTabButton.pageId)
                     optionMenu.selectedTabButton.destroy()
