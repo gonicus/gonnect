@@ -140,7 +140,7 @@ BaseWindow {
         pageModel.remove(page)
         page.model.removeAll()
         page.destroy()
-        delete page
+        delete pageStack.pages[pageId]
 
         mainTabBar.saveTabList()
     }
