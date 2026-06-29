@@ -10,18 +10,15 @@ Item {
 
     property IChatProvider attachedData
 
-    readonly property IChatRoom selectedChatRoom: control.attachedData && chatRoomList.selectedRoomId
-                                                  ? control.attachedData.chatRoomByRoomId(chatRoomList.selectedRoomId)
-                                                  : null
-
     function showChatRoom(roomId : string) {
         console.debug(category, `Showing room "${roomId}" on chats page`)
         chatRoomList.selectRoom(roomId)
     }
 
     function useImageFromClipboard() {
-        if (control.selectedChatRoom) {
-            control.attachedData.uploadImageFromClipboard(chatRoomList.selectedRoomId)
+        const chatRoom = SelectionState.selectedChatRoom
+        if (chatRoom) {
+            control.attachedData.uploadImageFromClipboard(chatRoom.id)
         }
     }
 
@@ -431,7 +428,6 @@ Item {
                 ChatRoomList {
                     id: unreadRoomList
                     chatProvider: control.attachedData ?? null
-                    selectedRoomId: chatRoomList.selectedRoomId
                     onlyUnread: true
                     active: sortSettings.showUnreadRoomsInOwnGroup
                     anchors {
@@ -453,26 +449,21 @@ Item {
                         right: parent.right
                     }
 
-                    onRoomSelected: (roomId) => chatRoomList.selectRoom(roomId)
-                    onSelectedRoomIdChanged: () => chatRoomList.resetUnreadCount()
-                    onChatRoomChanged: () => chatRoomList.resetUnreadCount()
+                    onRoomSelected: roomId => chatRoomList.selectRoom(roomId)
 
-                    readonly property IChatRoom chatRoom: chatRoomList.chatProvider && chatRoomList.selectedRoomId
-                                                          ? chatRoomList.chatProvider.chatRoomByRoomId(chatRoomList.selectedRoomId)
-                                                          : null
-
-                    function resetUnreadCount() {
-                        if (chatRoomList.selectedRoomId
-                                && chatRoomList.chatRoom
-                                && chatRoomList.selectedRoomId === chatRoomList.chatRoom.id
-                                && chatRoomList.selectedListItem?.ownJoinState === IChatRoom.UserRoomState.Joined) {
-
-                            chatRoomList.chatRoom.resetUnreadCount()
+                    readonly property Connections selectionStateConnections: Connections {
+                        target: SelectionState
+                        function onSelectedChatRoomChanged() {
+                            const chatRoom = SelectionState.selectedChatRoom
+                            if (chatRoom && (chatRoom.ownUserJoinState === IChatRoom.UserRoomState.Joined)) {
+                                chatRoom.resetUnreadCount()
+                            }
                         }
                     }
 
                     function selectRoom(roomId : string) {
-                        chatRoomList.selectedRoomId = roomId
+
+                        SelectionState.selectedChatRoom = control.attachedData?.chatRoomByRoomId(roomId) ?? null
 
                         // Find index of item to scroll ListView such that it is visible
                         if (roomId) {
@@ -527,7 +518,7 @@ Item {
             id: chat
             anchors.fill: parent
             chatProvider: control.attachedData
-            chatRoom: control.selectedChatRoom
+            chatRoom: SelectionState.selectedChatRoom
         }
     }
 }

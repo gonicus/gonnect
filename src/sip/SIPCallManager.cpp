@@ -19,6 +19,7 @@
 #include "GlobalCallState.h"
 #include "Application.h"
 #include "PlatformSession.h"
+#include "SelectionState.h"
 
 Q_LOGGING_CATEGORY(lcSIPCallManager, "gonnect.sip.callmanager")
 
@@ -391,11 +392,10 @@ void SIPCallManager::addMetadata(const QString &id, const QString &data)
     }
 }
 
-void SIPCallManager::holdOtherCalls(const SIPCall *call)
+void SIPCallManager::holdOtherCalls(SIPCall *call)
 {
-    auto &globalCallState = GlobalCallState::instance();
-    globalCallState.setProperty("callInForeground", QVariant::fromValue(call));
-    globalCallState.holdAllCalls(call);
+    SelectionState::instance().setCallInForeground(qobject_cast<ICallState *>(call));
+    GlobalCallState::instance().holdAllCalls(call);
 }
 
 void SIPCallManager::holdAllCalls() const
