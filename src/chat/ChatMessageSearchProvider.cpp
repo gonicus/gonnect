@@ -74,13 +74,18 @@ void ChatMessageSearchProvider::updateChatProviders()
     }
 
     // Stale providers
-    for (auto it = m_chatProvidersByUid.begin(); it != m_chatProvidersByUid.end();) {
-        if (!activeIds.contains(it.key())) {
-            it = m_chatProvidersByUid.erase(it);
-        } else {
-            ++it;
+    QMutableHashIterator<QString, ProviderConnection> it(m_chatProvidersByUid);
+    while (it.hasNext()) {
+        it.next();
+        QString providerUid = it.key();
+
+        if (!activeIds.contains(providerUid)) {
+            removeChatRoomsByProvider(providerUid);
+
+            it.remove();
         }
     }
+
 }
 
 void ChatMessageSearchProvider::loadChatProvider(IChatProvider *provider)
@@ -106,19 +111,19 @@ void ChatMessageSearchProvider::loadChatProvider(IChatProvider *provider)
 
     const auto roomCount = provider->chatRoomsCount();
     for (int i = 0; i < roomCount; i++) {
-        loadChatRoom(provider->chatRoomByIndex(i));
+        loadChatRoom(providerUid, provider->chatRoomByIndex(i));
     }
 
     // Connect to chat provider changes as long as the associated context lives
     connect(provider, &IChatProvider::chatRoomAdded, context,
-            [this](qsizetype, IChatRoom *room, QString) { loadChatRoom(room); });
+            [providerUid, this](qsizetype, IChatRoom *room, QString) { loadChatRoom(providerUid, room); });
     connect(provider, &IChatProvider::chatRoomRemoved, context,
             [this](qsizetype, IChatRoom *room) { removeChatRoom(room); });
 
     // TODO: Do chatRoomJoined/chatRoomLeft also emit added/removed?
 }
 
-void ChatMessageSearchProvider::loadChatRoom(IChatRoom *room)
+void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRoom *room)
 {
     if (!room) {
         return;
@@ -126,7 +131,7 @@ void ChatMessageSearchProvider::loadChatRoom(IChatRoom *room)
 
     QString roomUid = room->id();
 
-    m_chatRoomsByUid.emplace(roomUid, room);
+    m_chatRoomsByUid.emplace(roomUid, providerUid, room);
 
     auto it = m_chatRoomsByUid.find(roomUid);
     if (it == m_chatRoomsByUid.end()) {
@@ -201,6 +206,21 @@ void ChatMessageSearchProvider::removeChatRoom(IChatRoom *room)
     m_chatRoomsByUid.remove(roomUid);
 
     m_indexer->removeMessagesByRoom(roomUid);
+}
+
+void ChatMessageSearchProvider::removeChatRoomsByProvider(const QString &providerUid)
+{
+    QMutableHashIterator<QString, RoomConnection> it(m_chatRoomsByUid);
+    while (it.hasNext()) {
+        it.next();
+        QString roomUid = it.key();
+
+        if (it.value().providerUid == providerUid) {
+            it.remove();
+
+            m_indexer->removeMessagesByRoom(roomUid);
+        }
+    }
 }
 
 ChatMessage *ChatMessageSearchProvider::getChatMessage(const QString &roomUid,

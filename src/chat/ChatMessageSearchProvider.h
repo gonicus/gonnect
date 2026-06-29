@@ -39,8 +39,10 @@ public:
     void updateChatProviders();
     void loadChatProvider(IChatProvider *provider);
 
-    void loadChatRoom(IChatRoom *room);
+    void loadChatRoom(const QString &providerUid, IChatRoom *room);
     void removeChatRoom(IChatRoom *room);
+
+    void removeChatRoomsByProvider(const QString &providerUid);
 
     Q_INVOKABLE ChatMessage *getChatMessage(const QString &roomUid, const QString &messageUid);
     Q_INVOKABLE QString getChatMessageText(ChatMessage *message);
@@ -69,11 +71,15 @@ private:
     struct RoomConnection
     {
         std::shared_ptr<QObject> context;
+        QString providerUid;
         IChatRoom *room = nullptr;
 
         RoomConnection() : context(std::make_shared<QObject>()) { }
 
-        RoomConnection(IChatRoom *room) : context(std::make_shared<QObject>()), room(room) { }
+        RoomConnection(QString providerUid, IChatRoom *room)
+            : context(std::make_shared<QObject>()), providerUid(providerUid), room(room)
+        {
+        }
     };
 
     QHash<QString, ProviderConnection> m_chatProvidersByUid;
