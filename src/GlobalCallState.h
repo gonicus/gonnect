@@ -14,8 +14,6 @@ class GlobalCallState : public QObject
     Q_OBJECT
     Q_PROPERTY(ICallState::States globalCallState READ globalCallState NOTIFY globalCallStateChanged
                        FINAL)
-    Q_PROPERTY(ICallState *callInForeground READ callInForeground WRITE setCallInForeground NOTIFY
-                       callInForegroundChanged FINAL)
     Q_PROPERTY(
             qsizetype activeCallsCount READ activeCallsCount NOTIFY activeCallsCountChanged FINAL)
     Q_PROPERTY(qsizetype nonIdleCallsCount READ nonIdleCallsCount NOTIFY nonIdleCallsCountChanged
@@ -45,9 +43,6 @@ public:
     qsizetype activeCallsCount() const;
     qsizetype nonIdleCallsCount() const;
 
-    void setCallInForeground(ICallState *call);
-    ICallState *callInForeground() const { return m_callInForeground; }
-
     Q_INVOKABLE void triggerHold();
 
     Q_INVOKABLE void holdAllCalls(const ICallState *stateObjectToSkip = nullptr) const;
@@ -57,7 +52,6 @@ public:
 private Q_SLOTS:
     void updateGlobalCallState();
     void updateRinger();
-    void onCallInForegroundChanged();
     void updateRemoteContactInfo();
 
 private:
@@ -70,8 +64,6 @@ private:
 
     ICallState::States m_globalCallState = ICallState::State::Idle;
     QSet<ICallState *> m_globalCallStateObjects;
-    ICallState *m_callInForeground = nullptr;
-    QObject *m_foregroundCallContext = nullptr;
 
     Ringer *m_ringer = nullptr;
     ContactInfo m_remoteContactInfo;
@@ -81,7 +73,6 @@ private:
 Q_SIGNALS:
     void globalCallStateChanged();
     void remoteContactInfoChanged();
-    void callInForegroundChanged();
     void isPhoneConferenceChanged();
     void globalCallStateObjectsChanged();
     void activeCallsCountChanged();

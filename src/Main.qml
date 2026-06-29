@@ -54,8 +54,8 @@ Item {
             gonnectWindow.focusSearchBox()
         }
         function onShowSettings() {
-            gonnectWindow.updateTabSelection(gonnectWindow.settingsPageId,
-                                             GonnectWindow.PageType.Settings)
+            gonnectWindow.showPage(SelectionState.settingsPageId(),
+                                             MainPageSelection.PageType.Settings)
             gonnectWindow.ensureVisible()
         }
         function onShowShortcuts() { shortcutsWindowComponent.createObject(baseItem).show() }
