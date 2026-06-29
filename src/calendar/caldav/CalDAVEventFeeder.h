@@ -46,6 +46,7 @@ private:
     QList<size_t> m_checksums;
 
     CalDAVEventFeederConfig m_config;
+    int m_initialRetryCount = 0;
 
     QTimer m_calendarRefreshTimer;
 

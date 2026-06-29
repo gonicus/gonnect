@@ -30,8 +30,10 @@ BaseWidget {
 
     onCleanupRequested: {
         // INFO: Avoid WebEngineView freezes on deletion, especially with invalid URL's
-        webView.stop()
-        webView.url = "about:blank"
+        if (webViewLoader.item) {
+            webViewLoader.item.stop()
+            webViewLoader.item.url = "about:blank"
+        }
     }
 
     Rectangle {
@@ -53,8 +55,9 @@ BaseWidget {
             }
         }
 
-        WebEngineView {
-            id: webView
+        Loader {
+            id: webViewLoader
+
             anchors {
                 top: webviewHeading.bottom
                 bottom: parent.bottom
@@ -67,36 +70,48 @@ BaseWidget {
                 rightMargin: 15
             }
 
-            url: Theme.isDarkMode ? control.darkModeUrl : control.lightModeUrl
-            backgroundColor: Theme.backgroundColor
-            settings {
-                autoLoadImages: true
-                errorPageEnabled: true
-                javascriptEnabled: true
-                localStorageEnabled: true
-                localContentCanAccessFileUrls: true
-            }
+            asynchronous: true
+            sourceComponent: webViewComponent
+        }
 
-            onLoadingChanged: function(loadRequest) {
-                if (loadRequest.status === WebEngineView.LoadFailedStatus) {
-                    console.error("Failed to load page:", loadRequest.url,
-                                  ", error message:", loadRequest.errorString)
+        Component {
+            id: webViewComponent
+
+            WebEngineView {
+                id: webView
+
+                url: Theme.isDarkMode ? control.darkModeUrl : control.lightModeUrl
+                backgroundColor: Theme.backgroundColor
+                settings {
+                    autoLoadImages: true
+                    errorPageEnabled: true
+                    javascriptEnabled: true
+                    localStorageEnabled: true
+                    localContentCanAccessFileUrls: true
+                }
+
+                onLoadingChanged: function(loadRequest) {
+                    if (loadRequest.status === WebEngineView.LoadFailedStatus) {
+                        console.error("Failed to load page:", loadRequest.url,
+                                      ", error message:", loadRequest.errorString)
+                    }
+                }
+
+                onCertificateError: function(error) {
+                    console.log("Certificate error encountered:", error.description);
+
+                    if (control.acceptAllCerts) {
+                        // Self hosted stuff
+                        error.acceptCertificate()
+
+                        // Do not jump to default behaviour
+                        return true
+                    }
+
+                    return false
                 }
             }
 
-            onCertificateError: function(error) {
-                console.log("Certificate error encountered:", error.description);
-
-                if (control.acceptAllCerts) {
-                    // Self hosted stuff
-                    error.acceptCertificate()
-
-                    // Do not jump to default behaviour
-                    return true
-                }
-
-                return false
-            }
         }
     }
 }

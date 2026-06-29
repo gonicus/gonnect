@@ -1,6 +1,7 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
+#include <QtProtobuf>
 #include "Application.h"
 #include "GlobalInfo.h"
 #include "PersonCoinProvider.h"
@@ -88,6 +89,8 @@ int main(int argc, char *argv[])
         app.sendArguments();
         return 2;
     }
+
+    qRegisterProtobufTypes();
 
     app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
 
