@@ -118,11 +118,11 @@ BaseWindow {
 
     function updateCallInForeground() {
         if (SelectionState.selectedPage.type === MainPageSelection.PageType.Conference) {
-            GlobalCallState.callInForeground = conferencePage.iConferenceConnector
+            SelectionState.callInForeground = conferencePage.iConferenceConnector
         } else if (SelectionState.selectedPage.type === MainPageSelection.PageType.Call) {
             const selectedCallItem = callPage.selectedCallItem
             if (selectedCallItem) {
-                ViewHelper.setCallInForegroundByIds(selectedCallItem.accountId, selectedCallItem.callId)
+                SelectionState.setCallInForeground(selectedCallItem.accountId, selectedCallItem.callId)
             }
         }
     }

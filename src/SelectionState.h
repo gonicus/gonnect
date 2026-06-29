@@ -2,8 +2,9 @@
 
 #include <QObject>
 #include <QQmlEngine>
-
 #include "MainPageSelection.h"
+
+class ICallState;
 
 class SelectionState : public QObject
 {
@@ -12,6 +13,8 @@ class SelectionState : public QObject
 
     Q_PROPERTY(
             MainPageSelection selectedPage MEMBER m_selectedPage NOTIFY selectedPageChanged FINAL)
+    Q_PROPERTY(ICallState *callInForeground READ callInForeground WRITE setCallInForeground NOTIFY
+                       callInForegroundChanged FINAL)
 
 public:
     static SelectionState &instance()
@@ -26,13 +29,20 @@ public:
     Q_INVOKABLE static QString conferencePageId() { return "page_conference"; }
     Q_INVOKABLE static QString settingsPageId() { return "page_settings"; }
 
+    ICallState *callInForeground() const { return m_callInForeground; }
+    void setCallInForeground(ICallState *call);
+    Q_INVOKABLE void setCallInForeground(const QString &accountId, int callId);
+
 private:
     explicit SelectionState(QObject *parent = nullptr);
 
     MainPageSelection m_selectedPage;
+    ICallState *m_callInForeground = nullptr;
+    QMetaObject::Connection m_callInForegroundDestroyedConnection;
 
 Q_SIGNALS:
     void selectedPageChanged();
+    void callInForegroundChanged();
 };
 
 class SelectionStateWrapper
