@@ -36,6 +36,8 @@ public:
 
     ChatMessageSearchModel *model() const { return m_model; }
 
+    Q_INVOKABLE IChatProvider *getChatProviderByRoom(const QString &roomUid);
+
     void updateChatProviders();
     void loadChatProvider(IChatProvider *provider);
 

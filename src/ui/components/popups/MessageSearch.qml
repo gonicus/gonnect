@@ -25,8 +25,13 @@ Item {
 
         function selectMessage() {
             if (internal.selectedItem) {
-                // TODO: Go to chat room that contains message item
-                //ViewHelper.showChatRoom(provider : IChatProvider, roomId : string)
+                const roomUid = internal.selectedItem.roomUid
+                const provider = control.searchProvider.getChatProviderByRoom(roomUid)
+                if (provider) {
+                    // TODO: This only switches to the room, without jumping to the
+                    // concrete message
+                    ViewHelper.showChatRoom(provider, roomUid)
+                }
 
                 control.StackView.view.popCurrentItem(StackView.Immediate)
             }

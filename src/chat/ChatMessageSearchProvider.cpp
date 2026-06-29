@@ -47,6 +47,25 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
     });
 }
 
+IChatProvider *ChatMessageSearchProvider::getChatProviderByRoom(const QString &roomUid)
+{
+    auto rit = m_chatRoomsByUid.find(roomUid);
+    if (rit == m_chatRoomsByUid.end()) {
+        return nullptr;
+    }
+
+    RoomConnection &rconn = rit.value();
+    QString providerUid = rconn.providerUid;
+
+    auto pit = m_chatProvidersByUid.find(providerUid);
+    if (pit == m_chatProvidersByUid.end()) {
+        return nullptr;
+    }
+
+    ProviderConnection &conn = pit.value();
+    return conn.provider;
+}
+
 void ChatMessageSearchProvider::updateChatProviders()
 {
     qCWarning(lcChatMessageSearchProvider) << "Syncing chat providers for search";
@@ -85,7 +104,6 @@ void ChatMessageSearchProvider::updateChatProviders()
             it.remove();
         }
     }
-
 }
 
 void ChatMessageSearchProvider::loadChatProvider(IChatProvider *provider)
@@ -116,7 +134,9 @@ void ChatMessageSearchProvider::loadChatProvider(IChatProvider *provider)
 
     // Connect to chat provider changes as long as the associated context lives
     connect(provider, &IChatProvider::chatRoomAdded, context,
-            [providerUid, this](qsizetype, IChatRoom *room, QString) { loadChatRoom(providerUid, room); });
+            [providerUid, this](qsizetype, IChatRoom *room, QString) {
+                loadChatRoom(providerUid, room);
+            });
     connect(provider, &IChatProvider::chatRoomRemoved, context,
             [this](qsizetype, IChatRoom *room) { removeChatRoom(room); });
 
