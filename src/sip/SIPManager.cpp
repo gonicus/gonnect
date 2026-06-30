@@ -12,7 +12,6 @@
 #include "SIPAccountManager.h"
 #include "NetworkHelper.h"
 #include "AudioManager.h"
-#include "ErrorBus.h"
 
 #include <pjsua-lib/pjsua.h>
 #include <pjsip/sip_endpoint.h>
