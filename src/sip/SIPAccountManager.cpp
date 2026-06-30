@@ -57,6 +57,8 @@ void SIPAccountManager::initialize()
                             Q_EMIT connectionError(code, message);
                         }
                     });
+            connect(sipAccount, &SIPAccount::registrationTimedOut, this,
+                    &SIPAccountManager::registrationTimedOut);
             connect(sipAccount, &SIPAccount::voiceMessagesWaitingChanged, this,
                     &SIPAccountManager::voiceMessagesWaitingChanged);
 

@@ -12,6 +12,7 @@
 #include "SIPAccountManager.h"
 #include "NetworkHelper.h"
 #include "AudioManager.h"
+#include "ErrorBus.h"
 
 #include <pjsua-lib/pjsua.h>
 #include <pjsip/sip_endpoint.h>
@@ -160,6 +161,13 @@ void SIPManager::initialize()
     // Configure registration recovery watchdog
     m_registrationCheckTimer.setSingleShot(true);
     connect(&m_registrationCheckTimer, &QTimer::timeout, this, &SIPManager::checkRecovery);
+    connect(&sam, &SIPAccountManager::registrationTimedOut, this,
+            &SIPManager::onRegistrationTimedOut);
+    connect(&sam, &SIPAccountManager::sipRegisteredChanged, this, [this](bool registered) {
+        if (registered) {
+            m_registrationTimeouts = 0;
+        }
+    });
 
     m_initialized = true;
 }
@@ -516,6 +524,9 @@ void SIPManager::recoverFromNetworkChange()
         } else {
             qCCritical(lcSIPManager) << "giving up SIP recovery after" << m_networkRecoveryAttempts
                                      << "attempts:" << QString::fromLocal8Bit(err.info(false));
+
+            Q_EMIT SIPAccountManager::instance().connectionError(
+                    408, tr("Network error: failed to recover SIP connection"));
         }
         return;
     }
@@ -630,6 +641,28 @@ void SIPManager::resetDnsResolver()
         pj_strerror(status, errbuf, sizeof(errbuf));
         qCWarning(lcSIPManager) << "failed to reset DNS resolver nameservers:" << errbuf;
     }
+}
+
+void SIPManager::onRegistrationTimedOut()
+{
+    if (!m_initialized || m_suspended) {
+        return;
+    }
+
+    if (m_networkRecoveryTimer.isActive() || m_registrationCheckTimer.isActive()) {
+        return;
+    }
+
+    if (++m_registrationTimeouts < s_maxRegistrationTimeouts) {
+        return;
+    }
+
+    qCWarning(lcSIPManager) << "registration timed out" << m_registrationTimeouts
+                            << "times in a row - forcing SIP transport reset";
+
+    m_registrationTimeouts = 0;
+    m_networkRecoveryAttempts = 0;
+    m_networkRecoveryTimer.start(1s);
 }
 
 void SIPManager::shutdown()
