@@ -15,9 +15,6 @@ Item {
     property int newVoicemailCount: SIPAccountManager.newVoiceMessageCount
     property int oldVoicemailCount: SIPAccountManager.oldVoiceMessageCount
 
-    property bool hasVoicemail: control.totalVoicemailCount > 0
-    property bool hasNewVoicemail: control.newVoicemailCount > 0
-
     property bool messagesWaiting: SIPAccountManager.messagesWaiting
     property bool messagesWaitingWithUnknownCount: control.messagesWaiting && control.totalVoicemailCount === 0
 
