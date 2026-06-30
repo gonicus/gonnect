@@ -70,9 +70,10 @@ Item {
         }
     }
 
-    TextArea {
-        id: contentTextField
-        wrapMode: TextEdit.Wrap
+    Flickable {
+        id: textAreaFlickable
+        clip: true
+        contentHeight: contentTextField.implicitHeight
         anchors {
             top: title.bottom
             left: parent.left
@@ -85,21 +86,32 @@ Item {
             bottomMargin: 10
         }
 
-        Timer {
-            id: initialFocusTimer
-            interval: 20
-            onTriggered: () => {
-                contentTextField.forceActiveFocus()
-                contentTextField.selectAll()
+        ScrollBar.vertical: ScrollBar { width: 5 }
+
+        TextArea {
+            id: contentTextField
+            wrapMode: TextEdit.Wrap
+            anchors {
+                left: parent.left
+                right: parent.right
             }
-        }
 
-        Component.onCompleted: initialFocusTimer.start()
+            Timer {
+                id: initialFocusTimer
+                interval: 20
+                onTriggered: () => {
+                    contentTextField.forceActiveFocus()
+                    contentTextField.selectAll()
+                }
+            }
 
-        Keys.onPressed: keyEvent => {
-            if ([Qt.Key_Return, Qt.Key_Enter].includes(keyEvent.key) && !(keyEvent.modifiers & Qt.ShiftModifier)) {
-                keyEvent.accepted = true
-                saveButton.click()
+            Component.onCompleted: initialFocusTimer.start()
+
+            Keys.onPressed: keyEvent => {
+                if ([Qt.Key_Return, Qt.Key_Enter].includes(keyEvent.key) && !(keyEvent.modifiers & Qt.ShiftModifier)) {
+                    keyEvent.accepted = true
+                    saveButton.click()
+                }
             }
         }
     }
