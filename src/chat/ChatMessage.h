@@ -19,6 +19,7 @@ class ChatMessage : public QObject
 
     Q_PROPERTY(QString eventId READ eventId CONSTANT FINAL)
     Q_PROPERTY(QString nickName READ nickName CONSTANT FINAL)
+    Q_PROPERTY(QDateTime timestamp READ timestamp CONSTANT FINAL)
     Q_PROPERTY(bool isStateUpdate READ isStateUpdate CONSTANT FINAL)
     Q_PROPERTY(ChatMessageContentUserStateChange::State state READ state CONSTANT FINAL)
     Q_PROPERTY(QString affectedUserId READ affectedUserId CONSTANT FINAL)
