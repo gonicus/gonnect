@@ -104,6 +104,11 @@ if(BUILD_TOOLS)
     add_subdirectory(emoji)
 endif()
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/resources/templates/templates.qrc.in
+    ${PROJECT_BINARY_DIR}/resources/templates/templates.qrc @ONLY
+)
+
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
 
