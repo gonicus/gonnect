@@ -43,11 +43,10 @@ static int setup_unix_signal_handlers()
 
 int main(int argc, char *argv[])
 {
-    qSetMessagePattern(
-            "\033[32m%{time h:mm:ss.zzz}%{if-category}\033[32m %{category}:%{endif} "
-            "%{if-debug}\033[34m%{function}%{endif}%{if-warning}\033[31m%{backtrace "
-            "depth=3}%{endif}%{if-critical}\033[31m%{backtrace "
-            "depth=3}%{endif}%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
+    qSetMessagePattern("\033[32m%{time h:mm:ss.zzz}%{if-category}\033[32m %{category}:%{endif} "
+                       "%{if-debug}\033[34m%{function}%{endif}%{if-warning}\033[31m%{endif}"
+                       "%{if-critical}\033[31m%{endif}"
+                       "%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
     setup_unix_signal_handlers();
 
     QtWebEngineQuick::initialize();
