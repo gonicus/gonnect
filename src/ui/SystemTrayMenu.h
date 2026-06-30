@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QQmlEngine>
+
 #include <QObject>
 #include <QSystemTrayIcon>
 #include <QMenu>
@@ -104,7 +106,8 @@ class SystemTrayMenuWrapper
     QML_SINGLETON
 
 public:
-    static SystemTrayMenu *create(QQmlEngine *, QJSEngine *) { return &SystemTrayMenu::instance(); }
+    static SystemTrayMenu *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&SystemTrayMenu::instance(), QQmlEngine::CppOwnership);
+        return &SystemTrayMenu::instance(); }
 
 private:
     SystemTrayMenuWrapper() = default;

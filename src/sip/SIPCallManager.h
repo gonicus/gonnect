@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QTimer>
 #include <QtQml/qqml.h>
@@ -173,7 +175,8 @@ class SIPCallManagerWrapper
     QML_SINGLETON
 
 public:
-    static SIPCallManager *create(QQmlEngine *, QJSEngine *) { return &SIPCallManager::instance(); }
+    static SIPCallManager *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&SIPCallManager::instance(), QQmlEngine::CppOwnership);
+        return &SIPCallManager::instance(); }
 
 private:
     SIPCallManagerWrapper() = default;

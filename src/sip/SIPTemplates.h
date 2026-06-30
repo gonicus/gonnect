@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
@@ -44,7 +46,8 @@ class SIPTemplatesWrapper
     QML_SINGLETON
 
 public:
-    static SIPTemplates *create(QQmlEngine *, QJSEngine *) { return &SIPTemplates::instance(); }
+    static SIPTemplates *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&SIPTemplates::instance(), QQmlEngine::CppOwnership);
+        return &SIPTemplates::instance(); }
 
 private:
     SIPTemplatesWrapper() = default;

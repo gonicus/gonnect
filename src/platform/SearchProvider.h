@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QQmlEngine>
+
 #include <QObject>
 #include <QHash>
 #include <QtQml/qqml.h>
@@ -26,7 +28,8 @@ class SearchProviderWrapper
     QML_SINGLETON
 
 public:
-    static SearchProvider *create(QQmlEngine *, QJSEngine *) { return &SearchProvider::instance(); }
+    static SearchProvider *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&SearchProvider::instance(), QQmlEngine::CppOwnership);
+        return &SearchProvider::instance(); }
 
 private:
     SearchProviderWrapper() = default;

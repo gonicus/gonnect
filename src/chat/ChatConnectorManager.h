@@ -80,6 +80,7 @@ class ChatConnectorManagerWrapper
 public:
     static ChatConnectorManager *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&ChatConnectorManager::instance(), QQmlEngine::CppOwnership);
         return &ChatConnectorManager::instance();
     }
 

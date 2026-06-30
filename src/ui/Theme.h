@@ -295,7 +295,8 @@ class ThemeWrapper
     QML_SINGLETON
 
 public:
-    static Theme *create(QQmlEngine *, QJSEngine *) { return &Theme::instance(); }
+    static Theme *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&Theme::instance(), QQmlEngine::CppOwnership);
+        return &Theme::instance(); }
 
 private:
     ThemeWrapper() = default;

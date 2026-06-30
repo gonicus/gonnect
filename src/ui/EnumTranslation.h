@@ -53,6 +53,7 @@ class EnumTranslationWrapper
 public:
     static EnumTranslation *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&EnumTranslation::instance(), QQmlEngine::CppOwnership);
         return &EnumTranslation::instance();
     }
 

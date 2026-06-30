@@ -250,7 +250,8 @@ class ViewHelperWrapper
     QML_SINGLETON
 
 public:
-    static ViewHelper *create(QQmlEngine *, QJSEngine *) { return &ViewHelper::instance(); }
+    static ViewHelper *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&ViewHelper::instance(), QQmlEngine::CppOwnership);
+        return &ViewHelper::instance(); }
 
 private:
     ViewHelperWrapper() = default;

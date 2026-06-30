@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QQmlEngine>
+
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
@@ -81,7 +83,8 @@ class RTTProviderWrapper
     QML_SINGLETON
 
 public:
-    static RTTProvider *create(QQmlEngine *, QJSEngine *) { return &RTTProvider::instance(); }
+    static RTTProvider *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&RTTProvider::instance(), QQmlEngine::CppOwnership);
+        return &RTTProvider::instance(); }
 
 private:
     RTTProviderWrapper() = default;

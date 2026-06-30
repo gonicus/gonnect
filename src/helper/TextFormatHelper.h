@@ -33,6 +33,7 @@ class TextFormatHelperWrapper
 public:
     static TextFormatHelper *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&TextFormatHelper::instance(), QQmlEngine::CppOwnership);
         return &TextFormatHelper::instance();
     }
 

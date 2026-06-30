@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
@@ -123,7 +125,8 @@ class SIPManagerWrapper
     QML_SINGLETON
 
 public:
-    static SIPManager *create(QQmlEngine *, QJSEngine *) { return &SIPManager::instance(); }
+    static SIPManager *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&SIPManager::instance(), QQmlEngine::CppOwnership);
+        return &SIPManager::instance(); }
 
 private:
     SIPManagerWrapper() = default;

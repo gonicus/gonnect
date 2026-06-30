@@ -73,7 +73,8 @@ class SelectionStateWrapper
     QML_SINGLETON
 
 public:
-    static SelectionState *create(QQmlEngine *, QJSEngine *) { return &SelectionState::instance(); }
+    static SelectionState *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&SelectionState::instance(), QQmlEngine::CppOwnership);
+        return &SelectionState::instance(); }
 
 private:
     SelectionStateWrapper() = default;

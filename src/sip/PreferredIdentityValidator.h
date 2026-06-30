@@ -39,6 +39,7 @@ class PreferredIdentityValidatorWrapper
 public:
     static PreferredIdentityValidator *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&PreferredIdentityValidator::instance(), QQmlEngine::CppOwnership);
         return &PreferredIdentityValidator::instance();
     }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QQmlEngine>
+
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
@@ -49,7 +51,8 @@ class UISettingsWrapper
     QML_SINGLETON
 
 public:
-    static UISettings *create(QQmlEngine *, QJSEngine *) { return &UISettings::instance(); }
+    static UISettings *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&UISettings::instance(), QQmlEngine::CppOwnership);
+        return &UISettings::instance(); }
 
 private:
     UISettingsWrapper() = default;
