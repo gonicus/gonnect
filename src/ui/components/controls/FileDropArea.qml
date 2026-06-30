@@ -29,6 +29,12 @@ Item {
         }
     ]
 
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.FileDropArea"
+        defaultLogLevel: LoggingCategory.Debug
+    }
+
     Item {
         visible: dropInArea.containsDrag
         anchors.fill: parent
@@ -74,13 +80,19 @@ Item {
         id: dropInArea
         anchors.fill: parent
         onEntered: drag => {
+
+                       console.debug(category, "FileDropArea entered", "has Urls?", drag.hasUrls, "urls", drag.urls)
+
                        let valid = drag.hasUrls && drag.urls.length === 1
                        if (valid) {
                            const url = drag.urls[0].toString()
                            valid = url.startsWith("file://")
+
+                           console.debug(category, "has file url", url)
                        }
                        if (valid) {
                            valid = FileContentHelper.isLocalFileAndNotDirectory(drag.urls[0])
+                           console.debug(category, "is local and not directory", valid)
                        }
 
                        dropInArea.isInputValid = valid
