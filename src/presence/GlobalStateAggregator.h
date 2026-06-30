@@ -47,6 +47,8 @@ class GlobalStateAggregatorWrapper
 public:
     static GlobalStateAggregator *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&GlobalStateAggregator::instance(),
+                                       QQmlEngine::CppOwnership);
         return &GlobalStateAggregator::instance();
     }
 

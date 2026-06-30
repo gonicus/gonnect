@@ -91,6 +91,7 @@ class GlobalCallStateWrapper
 public:
     static GlobalCallState *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&GlobalCallState::instance(), QQmlEngine::CppOwnership);
         return &GlobalCallState::instance();
     }
 

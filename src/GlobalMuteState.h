@@ -47,6 +47,7 @@ class GlobalMuteStateWrapper
 public:
     static GlobalMuteState *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&GlobalMuteState::instance(), QQmlEngine::CppOwnership);
         return &GlobalMuteState::instance();
     }
 
