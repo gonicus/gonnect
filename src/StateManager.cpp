@@ -86,7 +86,7 @@ void StateManager::initialize()
         if (action == "dial") {
             static_cast<Application *>(Application::instance())->rootWindow()->show();
             static_cast<Application *>(Application::instance())->rootWindow()->raise();
-            ViewHelper::instance().activateSearch();
+            Q_EMIT ViewHelper::instance().activateSearch();
         } else if (action == "hangup") {
             cm.endAllCalls();
         } else if (action == "redial") {
