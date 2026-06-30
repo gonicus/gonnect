@@ -18,6 +18,12 @@ Item {
     property bool hasVoicemail: control.totalVoicemailCount > 0
     property bool hasNewVoicemail: control.newVoicemailCount > 0
 
+    property bool messagesWaiting: SIPAccountManager.messagesWaiting
+    property bool messagesWaitingWithUnknownCount: control.messagesWaiting && control.totalVoicemailCount === 0
+
+    property bool hasVoicemail: control.totalVoicemailCount > 0 || control.messagesWaiting
+    property bool hasNewVoicemail: control.newVoicemailCount > 0 || control.messagesWaitingWithUnknownCount
+
     Accessible.role: Accessible.Button
     Accessible.name: qsTr("Listen to voicemail")
     Accessible.onPressAction: () => SIPAccountManager.callVoiceBox("account0")
@@ -53,9 +59,11 @@ Item {
 
         Label {
             id: voicemailCount
-            text: control.hasNewVoicemail
-                  ? qsTr("%n new voice mail(s)", "", control.newVoicemailCount)
-                  : qsTr("%n old voice mail(s)", "", control.oldVoicemailCount)
+            text: control.messagesWaitingWithUnknownCount
+                  ? qsTr("New voice mail")
+                  : control.hasNewVoicemail
+                    ? qsTr("%n new voice mail(s)", "", control.newVoicemailCount)
+                    : qsTr("%n old voice mail(s)", "", control.oldVoicemailCount)
             font.pixelSize: 16
             font.weight: Font.Medium
             elide: Text.ElideRight
