@@ -83,8 +83,11 @@ class RTTProviderWrapper
     QML_SINGLETON
 
 public:
-    static RTTProvider *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&RTTProvider::instance(), QQmlEngine::CppOwnership);
-        return &RTTProvider::instance(); }
+    static RTTProvider *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&RTTProvider::instance(), QQmlEngine::CppOwnership);
+        return &RTTProvider::instance();
+    }
 
 private:
     RTTProviderWrapper() = default;

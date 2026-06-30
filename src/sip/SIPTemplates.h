@@ -46,8 +46,11 @@ class SIPTemplatesWrapper
     QML_SINGLETON
 
 public:
-    static SIPTemplates *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&SIPTemplates::instance(), QQmlEngine::CppOwnership);
-        return &SIPTemplates::instance(); }
+    static SIPTemplates *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&SIPTemplates::instance(), QQmlEngine::CppOwnership);
+        return &SIPTemplates::instance();
+    }
 
 private:
     SIPTemplatesWrapper() = default;

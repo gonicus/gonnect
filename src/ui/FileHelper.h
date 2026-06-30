@@ -45,8 +45,11 @@ class FileHelperWrapper
     QML_SINGLETON
 
 public:
-    static FileHelper *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&FileHelper::instance(), QQmlEngine::CppOwnership);
-        return &FileHelper::instance(); }
+    static FileHelper *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&FileHelper::instance(), QQmlEngine::CppOwnership);
+        return &FileHelper::instance();
+    }
 
 private:
     FileHelperWrapper() = default;

@@ -36,8 +36,11 @@ class ErrorBusWrapper
     QML_SINGLETON
 
 public:
-    static ErrorBus *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&ErrorBus::instance(), QQmlEngine::CppOwnership);
-        return &ErrorBus::instance(); }
+    static ErrorBus *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&ErrorBus::instance(), QQmlEngine::CppOwnership);
+        return &ErrorBus::instance();
+    }
 
 private:
     ErrorBusWrapper() = default;

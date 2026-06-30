@@ -87,8 +87,11 @@ class StateManagerWrapper
     QML_SINGLETON
 
 public:
-    static StateManager *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&StateManager::instance(), QQmlEngine::CppOwnership);
-        return &StateManager::instance(); }
+    static StateManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&StateManager::instance(), QQmlEngine::CppOwnership);
+        return &StateManager::instance();
+    }
 
 private:
     StateManagerWrapper() = default;

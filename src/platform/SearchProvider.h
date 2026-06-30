@@ -28,8 +28,11 @@ class SearchProviderWrapper
     QML_SINGLETON
 
 public:
-    static SearchProvider *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&SearchProvider::instance(), QQmlEngine::CppOwnership);
-        return &SearchProvider::instance(); }
+    static SearchProvider *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&SearchProvider::instance(), QQmlEngine::CppOwnership);
+        return &SearchProvider::instance();
+    }
 
 private:
     SearchProviderWrapper() = default;

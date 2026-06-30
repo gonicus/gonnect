@@ -112,8 +112,11 @@ class AuthManagerWrapper
     QML_SINGLETON
 
 public:
-    static AuthManager *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&AuthManager::instance(), QQmlEngine::CppOwnership);
-        return &AuthManager::instance(); }
+    static AuthManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&AuthManager::instance(), QQmlEngine::CppOwnership);
+        return &AuthManager::instance();
+    }
 
 private:
     AuthManagerWrapper() = default;

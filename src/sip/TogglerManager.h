@@ -54,8 +54,11 @@ class TogglerManagerWrapper
     QML_SINGLETON
 
 public:
-    static TogglerManager *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&TogglerManager::instance(), QQmlEngine::CppOwnership);
-        return &TogglerManager::instance(); }
+    static TogglerManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&TogglerManager::instance(), QQmlEngine::CppOwnership);
+        return &TogglerManager::instance();
+    }
 
 private:
     TogglerManagerWrapper() = default;

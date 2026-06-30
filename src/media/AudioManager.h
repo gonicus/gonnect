@@ -156,8 +156,11 @@ class AudioManagerWrapper
     QML_SINGLETON
 
 public:
-    static AudioManager *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&AudioManager::instance(), QQmlEngine::CppOwnership);
-        return &AudioManager::instance(); }
+    static AudioManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&AudioManager::instance(), QQmlEngine::CppOwnership);
+        return &AudioManager::instance();
+    }
 
 private:
     AudioManagerWrapper() = default;

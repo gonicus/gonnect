@@ -51,8 +51,11 @@ class UISettingsWrapper
     QML_SINGLETON
 
 public:
-    static UISettings *create(QQmlEngine *, QJSEngine *) { QQmlEngine::setObjectOwnership(&UISettings::instance(), QQmlEngine::CppOwnership);
-        return &UISettings::instance(); }
+    static UISettings *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&UISettings::instance(), QQmlEngine::CppOwnership);
+        return &UISettings::instance();
+    }
 
 private:
     UISettingsWrapper() = default;
