@@ -86,12 +86,23 @@ bool GlobalCallState::unregisterCallStateObject(ICallState *callStateObject)
 void GlobalCallState::updateGlobalCallState()
 {
     ICallState::States globalState = ICallState::State::Idle;
+    bool hasNonHoldCall = false;
+
     for (const auto obj : std::as_const(m_globalCallStateObjects)) {
         auto state = obj->callState();
         globalState |= state;
+
+        if ((state & ICallState::State::CallActive) && !(state & ICallState::State::OnHold)) {
+            hasNonHoldCall = true;
+        }
+    }
+
+    if (hasNonHoldCall) {
+        globalState.setFlag(ICallState::State::OnHold, false);
     }
 
     setGlobalCallState(globalState);
+
     updateRemoteContactInfo();
     Q_EMIT activeCallsCountChanged();
     Q_EMIT nonIdleCallsCountChanged();
