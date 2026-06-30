@@ -610,6 +610,10 @@ void IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 time
         qWarning() << "Local socket is not ready - aborting";
         return;
     }
+    if (m_connectionState != ConnectionState::Connected) {
+        qCWarning(lcIpcDispatcher) << "Cannot send request - IPC is not connected";
+        return;
+    }
 
     // Check which contents are set
     const QStringList types = contentTypes(*request);
@@ -753,10 +757,6 @@ void IpcDispatcher::processResponse(
 
         switch (resp.code()) {
 
-        case StatusUpdate_QtProtobufNested::StatusCode::Disconnected:
-            qCInfo(lcIpcDispatcher) << "  Status: Disconnected";
-            break;
-
         case StatusUpdate_QtProtobufNested::StatusCode::Connected:
             qCInfo(lcIpcDispatcher) << "  Status: Connected";
             break;
@@ -774,6 +774,18 @@ void IpcDispatcher::processResponse(
                 req->setRoomListRequest(roomListReq);
                 sendRequest(req);
             }
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::LoggedOut:
+            qCInfo(lcIpcDispatcher) << "  Status: LoggedOut";
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::NetworkUnavailable:
+            qCInfo(lcIpcDispatcher) << "  Status: NetworkUnavailable";
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::SessionInvalid:
+            qCInfo(lcIpcDispatcher) << "  Status: SessionInvalid";
             break;
         }
 
