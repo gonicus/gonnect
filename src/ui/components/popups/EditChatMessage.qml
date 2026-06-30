@@ -70,10 +70,8 @@ Item {
         }
     }
 
-    Flickable {
-        id: textAreaFlickable
-        clip: true
-        contentHeight: contentTextField.implicitHeight
+    ScrollView {
+        id: textAreaScrollView
         anchors {
             top: title.bottom
             left: parent.left
@@ -86,15 +84,9 @@ Item {
             bottomMargin: 10
         }
 
-        ScrollBar.vertical: ScrollBar { width: 5 }
-
         TextArea {
             id: contentTextField
             wrapMode: TextEdit.Wrap
-            anchors {
-                left: parent.left
-                right: parent.right
-            }
 
             Timer {
                 id: initialFocusTimer
