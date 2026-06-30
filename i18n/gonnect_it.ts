@@ -1962,12 +1962,12 @@
         <translation type="unfinished">Modifica messaggio di testo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/EditChatMessage.qml" line="121"/>
+        <location filename="../src/ui/components/popups/EditChatMessage.qml" line="113"/>
         <source>Save</source>
         <translation type="unfinished">Salva</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/EditChatMessage.qml" line="121"/>
+        <location filename="../src/ui/components/popups/EditChatMessage.qml" line="113"/>
         <source>Remove</source>
         <translation type="unfinished">Rimuovi</translation>
     </message>

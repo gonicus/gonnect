@@ -1965,12 +1965,12 @@
         <translation type="unfinished">Редагувати текстове повідомлення</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/EditChatMessage.qml" line="121"/>
+        <location filename="../src/ui/components/popups/EditChatMessage.qml" line="113"/>
         <source>Save</source>
         <translation type="unfinished">Зберегти</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/EditChatMessage.qml" line="121"/>
+        <location filename="../src/ui/components/popups/EditChatMessage.qml" line="113"/>
         <source>Remove</source>
         <translation type="unfinished">Видалити</translation>
     </message>
