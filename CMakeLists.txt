@@ -104,9 +104,10 @@ if(BUILD_TOOLS)
     add_subdirectory(emoji)
 endif()
 
-# Copy sample configuration to the resource directory
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/docs/modules/ROOT/examples/sample.conf
-     DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/resources/templates)
+configure_file(
+    ${PROJECT_SOURCE_DIR}/resources/templates/templates.qrc.in
+    ${PROJECT_BINARY_DIR}/resources/templates/templates.qrc @ONLY
+)
 
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
