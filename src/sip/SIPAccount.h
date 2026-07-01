@@ -108,12 +108,12 @@ private:
     QList<SIPBuddy *> m_buddies;
     QList<pjsua_transport_id> m_transportIds;
 
-    bool m_messagesWaiting = false;
     quint16 m_newVoiceMessages = 0;
     quint16 m_readVoiceMessages = 0;
     QString m_messageAccount;
     QString m_voiceMailUri;
 
+    bool m_messagesWaiting = false;
     bool m_isRegistered = false;
     bool m_isInstantMessagingAllowed = false;
     bool m_shallNegotiateCapabilities = true;
@@ -136,6 +136,7 @@ private:
 Q_SIGNALS:
     void initialized(bool success);
     void isRegisteredChanged();
+    void registrationTimedOut();
     void voiceMessagesWaitingChanged();
     void authorizationFailed();
     void connectionError(int code, QString message);

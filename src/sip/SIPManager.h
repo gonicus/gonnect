@@ -89,6 +89,7 @@ private:
     void updatePreferredIdentities();
     void recoverFromNetworkChange();
     void checkRecovery();
+    void onRegistrationTimedOut();
 
     void configureDnsResolver();
     void resetDnsResolver();
@@ -99,8 +100,12 @@ private:
 
     QTimer m_networkRecoveryTimer;
     QTimer m_registrationCheckTimer;
-    int m_networkRecoveryAttempts = 0;
-    static constexpr int s_maxNetworkRecoveryAttempts = 6;
+
+    unsigned m_registrationTimeouts = 0;
+    static constexpr unsigned s_maxRegistrationTimeouts = 2;
+
+    unsigned m_networkRecoveryAttempts = 0;
+    static constexpr unsigned s_maxNetworkRecoveryAttempts = 6;
 
     std::unique_ptr<AppSettings> m_settings = nullptr;
 
