@@ -51,7 +51,8 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
             "CREATE TABLE IF NOT EXISTS messages_map ("
             "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
             "    message_uid TEXT UNIQUE,"
-            "    room_uid TEXT"
+            "    room_uid TEXT,"
+            "    timestamp INTEGER"
             ");"
 
             // FTS5 virtual table
@@ -98,7 +99,7 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
 
     // Mapping
     const QString mappingStatement =
-            "INSERT OR IGNORE INTO messages_map(message_uid, room_uid) VALUES (?,?);";
+            "INSERT OR IGNORE INTO messages_map(message_uid, room_uid, timestamp) VALUES (?,?,?);";
     const QByteArray message_uid = message.messageUid.toUtf8();
     const QByteArray room_uid = message.roomUid.toUtf8();
 
@@ -110,6 +111,7 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
     }
     sqlite3_bind_text(mapping.statement, 1, message_uid.constData(), -1, SQLITE_STATIC);
     sqlite3_bind_text(mapping.statement, 2, room_uid.constData(), -1, SQLITE_STATIC);
+    sqlite3_bind_int64(mapping.statement, 3, message.timestamp);
 
     if (sqlite3_step(mapping.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -244,6 +246,47 @@ bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid)
     return true;
 }
 
+bool ChatMessageSearchIndexer::removeMessagesByStaleDate(qint64 timestamp)
+{
+    if (!m_db) {
+        return false;
+    }
+
+    // FTS
+    const QString ftsStatement = "DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM "
+                                 "messages_map WHERE timestamp < ?)";
+
+    Statement fts;
+    if (sqlite3_prepare_v2(m_db, ftsStatement.toUtf8(), -1, &fts.statement, nullptr) != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return false;
+    }
+    sqlite3_bind_int64(fts.statement, 1, timestamp);
+
+    if (sqlite3_step(fts.statement) != SQLITE_DONE) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return false;
+    }
+
+    // Mapping
+    const QString mappingStatement = "DELETE FROM messages_map WHERE timestamp < ?;";
+
+    Statement mapping;
+    if (sqlite3_prepare_v2(m_db, mappingStatement.toUtf8(), -1, &mapping.statement, nullptr)
+        != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return false;
+    }
+    sqlite3_bind_int64(mapping.statement, 1, timestamp);
+
+    if (sqlite3_step(mapping.statement) != SQLITE_DONE) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return false;
+    }
+
+    return true;
+}
+
 bool ChatMessageSearchIndexer::updateMessage(const Message &message)
 {
     if (!exec("BEGIN TRANSACTION;")) {
@@ -258,6 +301,32 @@ bool ChatMessageSearchIndexer::updateMessage(const Message &message)
     return exec("COMMIT;");
 }
 
+QString ChatMessageSearchIndexer::getLatestMessageUid()
+{
+    if (!m_db) {
+        return "";
+    }
+
+    const QString queryStatement =
+            "SELECT message_uid FROM messages_map ORDER BY timestamp DESC LIMIT 1;";
+
+    Statement query;
+    if (sqlite3_prepare_v2(m_db, queryStatement.toUtf8(), -1, &query.statement, nullptr)
+        != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return "";
+    }
+
+    if (sqlite3_step(query.statement) == SQLITE_ROW) {
+        const auto *latestMessageUid = sqlite3_column_text(query.statement, 0);
+        if (latestMessageUid) {
+            return QString::fromUtf8(reinterpret_cast<const char *>(latestMessageUid));
+        }
+    }
+
+    return "";
+}
+
 QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(const QString &query,
                                                                                int limit)
 {
@@ -269,16 +338,14 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
 
     // INFO: The FTS5 trigram tokenizer needs at least 3 characters to produce a
     // token. Shorter queries would match nothing (or cause an FTS error).
-    const QString processed = m_preprocessor->process(query.simplified());
-    if (processed.length() < 3) {
+    QString processedQuery = m_preprocessor->process(query.simplified());
+    if (processedQuery.length() < 3) {
         return results;
     }
 
     // Strip FTS5 operator characters that would cause query parse errors.
     static const QRegularExpression ftsSpecial(QStringLiteral(R"([\"*()\^:])"));
-    QString safeQuery = processed;
-    safeQuery.remove(ftsSpecial);
-    safeQuery = safeQuery.simplified();
+    QString safeQuery = processedQuery.remove(ftsSpecial).simplified();
     if (safeQuery.isEmpty()) {
         return results;
     }
@@ -304,10 +371,17 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
 
     while (sqlite3_step(search.statement) == SQLITE_ROW) {
         SearchResult result;
-        result.messageUid = QString::fromUtf8(
-                reinterpret_cast<const char *>(sqlite3_column_text(search.statement, 0)));
-        result.roomUid = QString::fromUtf8(
-                reinterpret_cast<const char *>(sqlite3_column_text(search.statement, 1)));
+
+        const auto *messageUid = sqlite3_column_text(search.statement, 0);
+        if (messageUid) {
+            result.messageUid = QString::fromUtf8(reinterpret_cast<const char *>(messageUid));
+        }
+
+        const auto *roomUid = sqlite3_column_text(search.statement, 1);
+        if (roomUid) {
+            result.roomUid = QString::fromUtf8(reinterpret_cast<const char *>(roomUid));
+        }
+
         result.rank = sqlite3_column_double(search.statement, 2);
         results.append(result);
     }

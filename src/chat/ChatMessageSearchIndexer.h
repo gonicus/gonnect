@@ -40,6 +40,7 @@ public:
         QString messageUid;
         QString roomUid;
         QString body;
+        qint64 timestamp;
     };
 
     struct SearchResult
@@ -54,8 +55,11 @@ public:
 
     bool removeMessage(const QString &id);
     bool removeMessagesByRoom(const QString &roomUid);
+    bool removeMessagesByStaleDate(qint64 timestamp);
 
     bool updateMessage(const Message &message);
+
+    QString getLatestMessageUid();
 
     QList<SearchResult> search(const QString &query, int limit = 20);
 

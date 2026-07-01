@@ -171,7 +171,8 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
         if (chatMessage && chatMessage->content()) {
             if (const auto textContent =
                         qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                messages.append({ chatMessage->eventId(), roomUid, textContent->rawText() });
+                messages.append({ chatMessage->eventId(), roomUid, textContent->rawText(),
+                                  chatMessage->timestamp().toMSecsSinceEpoch() });
             }
         }
     }
@@ -190,8 +191,9 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
                 if (chatMessage && chatMessage->content()) {
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                        m_indexer->addMessage(
-                                { chatMessage->eventId(), roomUid, textContent->simpleText() });
+                        m_indexer->addMessage({ chatMessage->eventId(), roomUid,
+                                                textContent->simpleText(),
+                                                chatMessage->timestamp().toMSecsSinceEpoch() });
                     }
                 }
             });
@@ -206,8 +208,9 @@ void ChatMessageSearchProvider::loadChatRoom(const QString &providerUid, IChatRo
                 if (chatMessage && chatMessage->content()) {
                     if (const auto textContent =
                                 qobject_cast<ChatMessageContentText *>(chatMessage->content())) {
-                        m_indexer->updateMessage(
-                                { chatMessage->eventId(), roomUid, textContent->simpleText() });
+                        m_indexer->updateMessage({ chatMessage->eventId(), roomUid,
+                                                   textContent->simpleText(),
+                                                   chatMessage->timestamp().toMSecsSinceEpoch() });
                     }
                 }
             });
