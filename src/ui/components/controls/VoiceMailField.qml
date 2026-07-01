@@ -20,7 +20,7 @@ Item {
         }
     }
 
-    property int totalVoicemailCount: control.messagesWaitingWithUnknownCount ? 1 : (control.realVoicemailCount)
+    property int totalVoicemailCount: control.messagesWaitingWithUnknownCount ? 1 : control.realVoicemailCount
 
     property int realVoicemailCount: control.newVoicemailCount + control.oldVoicemailCount
     property int newVoicemailCount: SIPAccountManager.newVoiceMessageCount
