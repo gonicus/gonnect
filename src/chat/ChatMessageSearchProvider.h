@@ -106,6 +106,7 @@ class ChatMessageSearchProviderWrapper
 public:
     static ChatMessageSearchProvider *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&ChatMessageSearchProvider::instance(), QQmlEngine::CppOwnership);
         return &ChatMessageSearchProvider::instance();
     }
 
