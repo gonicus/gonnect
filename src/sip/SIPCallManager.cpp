@@ -73,31 +73,25 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
             return;
         }
 
-        // Were're busy with one call and there's one incoming -> end call active call and pick
-        // incoming one
+        // Were're busy with two calls - distinguish between "active + incoming"
+        // and "active + hold".
         if (!dev->getHookSwitch() && callsCount == 2) {
             SIPCall *_activeCall = nullptr;
             SIPCall *_incomingCall = nullptr;
 
             for (auto call : std::as_const(m_calls)) {
-                if (_activeCall && _incomingCall) {
-                    break;
-                }
-
-                if (call->isEstablished() && call->isActive()) {
+                if (call->isEstablished() && call->isActive() && !call->isHolding()) {
                     _activeCall = call;
-                    continue;
-                }
-
-                if (!call->isEstablished() && call->isIncoming()) {
+                } else if (!call->isEstablished() && call->isIncoming()) {
                     _incomingCall = call;
-                    continue;
                 }
             }
 
             if (_activeCall && _incomingCall) {
                 endCall(_activeCall);
                 _incomingCall->accept();
+            } else if (_activeCall) {
+                endCall(_activeCall);
             }
 
             return;
@@ -776,7 +770,7 @@ void SIPCallManager::removeCall(SIPCall *call)
                     pj::CallInfo info = remainingCall->getInfo();
 
                     if (info.state == PJSIP_INV_STATE_CONFIRMED) {
-                        remainingCall->unhold();
+                        remainingCall->toggleHold();
                     }
                 } catch (pj::Error &) {
                     // This means the call is terminated or currently in termination. That is fine,

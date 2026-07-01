@@ -634,13 +634,13 @@ bool SIPAccount::callVoiceBox()
 {
     if (!m_voiceMailUri.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via" << m_voiceMailUri;
-        call(m_voiceMailUri);
+        SIPCallManager::instance().call(m_account, m_voiceMailUri);
         return true;
 
     } else if (!m_messageAccount.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account"
                               << m_messageAccount;
-        call(m_messageAccount);
+        SIPCallManager::instance().call(m_account, m_messageAccount);
         return true;
     }
 
@@ -1022,8 +1022,9 @@ void SIPAccount::reinitBuddies()
 
     qCInfo(lcSIPAccount) << "re-subscribing to" << uris.size() << "buddies after re-registration";
 
-    qDeleteAll(m_buddies);
+    const auto savedBuddies = m_buddies;
     m_buddies.clear();
+    qDeleteAll(savedBuddies);
 
     for (const auto &uri : std::as_const(uris)) {
         auto buddy = new SIPBuddy(this, uri);
