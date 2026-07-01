@@ -11,14 +11,25 @@ Item {
     implicitWidth: voicemailRow.width
     implicitHeight: 30
 
-    property int totalVoicemailCount: control.newVoicemailCount + control.oldVoicemailCount
+    // Only display the icon if the widget heading is not long enough
+    property double maxWidth: 0
+    Connections {
+        target: parent
+        function onWidthChanged() {
+            maxWidth = parent.width / 4
+        }
+    }
+
+    property int totalVoicemailCount: control.messagesWaitingWithUnknownCount ? 1 : (control.realVoicemailCount)
+
+    property int realVoicemailCount: control.newVoicemailCount + control.oldVoicemailCount
     property int newVoicemailCount: SIPAccountManager.newVoiceMessageCount
     property int oldVoicemailCount: SIPAccountManager.oldVoiceMessageCount
 
+    property bool messagesWaitingWithUnknownCount: control.messagesWaiting && control.realVoicemailCount === 0
     property bool messagesWaiting: SIPAccountManager.messagesWaiting
-    property bool messagesWaitingWithUnknownCount: control.messagesWaiting && control.totalVoicemailCount === 0
 
-    property bool hasVoicemail: control.totalVoicemailCount > 0 || control.messagesWaiting
+    property bool hasVoicemail: control.realVoicemailCount > 0 || control.messagesWaiting
     property bool hasNewVoicemail: control.newVoicemailCount > 0 || control.messagesWaitingWithUnknownCount
 
     Accessible.role: Accessible.Button
@@ -65,6 +76,7 @@ Item {
             font.weight: Font.Medium
             elide: Text.ElideRight
             color: Theme.secondaryTextColor
+            visible: (voicemailIcon.implicitWidth + voicemailCount.implicitWidth) < control.maxWidth
 
             Accessible.ignored: true
         }
