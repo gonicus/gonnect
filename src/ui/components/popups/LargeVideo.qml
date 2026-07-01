@@ -11,10 +11,7 @@ Item {
 
     readonly property bool hidePopupBackground: true
 
-    property alias source: videoPlayer.fileUrl
-    property alias fileName: videoPlayer.fileName
-    property alias fileSize: videoPlayer.fileSize
-    property alias thumbnailFilePath: videoPlayer.thumbnailFileUrl
+    property alias content: videoPlayer.content
 
     VideoPlayer {
         id: videoPlayer

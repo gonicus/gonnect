@@ -70,9 +70,8 @@ Item {
         }
     }
 
-    TextArea {
-        id: contentTextField
-        wrapMode: TextEdit.Wrap
+    ScrollView {
+        id: textAreaScrollView
         anchors {
             top: title.bottom
             left: parent.left
@@ -85,21 +84,26 @@ Item {
             bottomMargin: 10
         }
 
-        Timer {
-            id: initialFocusTimer
-            interval: 20
-            onTriggered: () => {
-                contentTextField.forceActiveFocus()
-                contentTextField.selectAll()
+        TextArea {
+            id: contentTextField
+            wrapMode: TextEdit.Wrap
+
+            Timer {
+                id: initialFocusTimer
+                interval: 20
+                onTriggered: () => {
+                    contentTextField.forceActiveFocus()
+                    contentTextField.selectAll()
+                }
             }
-        }
 
-        Component.onCompleted: initialFocusTimer.start()
+            Component.onCompleted: initialFocusTimer.start()
 
-        Keys.onPressed: keyEvent => {
-            if ([Qt.Key_Return, Qt.Key_Enter].includes(keyEvent.key) && !(keyEvent.modifiers & Qt.ShiftModifier)) {
-                keyEvent.accepted = true
-                saveButton.click()
+            Keys.onPressed: keyEvent => {
+                if ([Qt.Key_Return, Qt.Key_Enter].includes(keyEvent.key) && !(keyEvent.modifiers & Qt.ShiftModifier)) {
+                    keyEvent.accepted = true
+                    saveButton.click()
+                }
             }
         }
     }

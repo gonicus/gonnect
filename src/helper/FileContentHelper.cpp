@@ -32,11 +32,29 @@ FileContentHelper::FileType FileContentHelper::fileType(const QString &filePath)
     return FileType::Other;
 }
 
-bool FileContentHelper::isLocalFileAndNotDirectory(const QUrl &url) const
+bool FileContentHelper::isLocalFile(const QUrl &url) const
 {
     if (!url.isLocalFile()) {
         return false;
     }
     const QFileInfo checkFile(url.toLocalFile());
     return checkFile.isFile();
+}
+
+bool FileContentHelper::isLocalDirectory(const QUrl &url) const
+{
+    if (!url.isLocalFile()) {
+        return false;
+    }
+    const QFileInfo checkFile(url.toLocalFile());
+    return checkFile.isDir();
+}
+
+bool FileContentHelper::isLocalReadable(const QUrl &url) const
+{
+    if (!url.isLocalFile()) {
+        return false;
+    }
+    const QFileInfo checkFile(url.toLocalFile());
+    return checkFile.isReadable();
 }
