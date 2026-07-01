@@ -1104,7 +1104,7 @@
         <translation type="unfinished">فهرست همه اتاق‌های گفتگو</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatRoomList.qml" line="96"/>
+        <location filename="../src/ui/components/chat/ChatRoomList.qml" line="99"/>
         <source>Are you sure you really want to leave this chat?</source>
         <translation type="unfinished">آیا واقعاً می‌خواهید این گفتگو را ترک کنید؟</translation>
     </message>
@@ -2477,28 +2477,23 @@
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="112"/>
-        <location filename="../src/ui/components/controls/FileDropArea.qml" line="136"/>
+        <location filename="../src/ui/components/controls/FileDropArea.qml" line="135"/>
         <source>Not a file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/FileDropArea.qml" line="116"/>
-        <source>Only single file allowed</source>
+        <location filename="../src/ui/components/controls/FileDropArea.qml" line="119"/>
+        <source>No valid files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/FileDropArea.qml" line="124"/>
+        <location filename="../src/ui/components/controls/FileDropArea.qml" line="127"/>
         <source>Disallowed type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/FileDropArea.qml" line="128"/>
+        <location filename="../src/ui/components/controls/FileDropArea.qml" line="131"/>
         <source>File not readable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/FileDropArea.qml" line="132"/>
-        <source>Directories are not allowed</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2523,6 +2518,26 @@
         <location filename="../src/ui/FileHelper.cpp" line="61"/>
         <source>%1 (%2)</source>
         <translation type="unfinished">%1 (%2)</translation>
+    </message>
+</context>
+<context>
+    <name>FileSelectionOverview</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="32"/>
+        <source>Shall the following file(s) be sent? (%1)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="120"/>
+        <source>Cancel</source>
+        <translation type="unfinished">لغو</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="127"/>
+        <source>Ok</source>
+        <translation type="unfinished">تأیید</translation>
     </message>
 </context>
 <context>

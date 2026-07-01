@@ -33,6 +33,12 @@ public:
     /// Return absolute path to the default download folder.
     Q_INVOKABLE QString downloadFolderPath() const;
 
+    /// Return the size of the file at the specified path or 0.
+    Q_INVOKABLE qint64 fileSizeFromPath(const QString &path) const;
+
+    /// Return the summed size all files.
+    Q_INVOKABLE qint64 fileSizesFromPaths(const QList<QUrl> &urls) const;
+
 private:
     explicit FileHelper(QObject *parent = nullptr);
 };

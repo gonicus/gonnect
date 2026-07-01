@@ -186,24 +186,35 @@ void ChatRoomProxyModel::onSourceModelChanged()
         using Roles = ChatRoomModel::Roles;
         m_dataChangedConnection =
                 connect(model, &QAbstractListModel::dataChanged, this,
-                        [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
+                        [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                               const QList<int> &roles) {
+                            const auto mappedTopLeft = mapFromSource(topLeft);
+                            const auto mappedBottomRight = mapFromSource(bottomRight);
+
+                            if (mappedTopLeft.isValid() && mappedBottomRight.isValid()) {
+                                Q_EMIT dataChanged(mappedTopLeft, mappedBottomRight, roles);
+                            }
+
                             if (roles.isEmpty()) {
                                 invalidate();
                                 sort(0);
                                 return;
                             }
 
-                            const bool isRoleOfInterest =
+                            const bool isSortRole =
                                     std::any_of(roles.cbegin(), roles.cend(), [](const int role) {
-                                        static const QSet<int> interestingRoles = {
+                                        static const QSet<int> sortRoles = {
                                             static_cast<int>(Roles::IsFavorite),
                                             static_cast<int>(Roles::LatestMessageDate),
                                             static_cast<int>(Roles::Name),
+                                            static_cast<int>(Roles::UnreadCount),
+                                            static_cast<int>(Roles::OwnJoinState),
+                                            static_cast<int>(Roles::RoomId),
                                         };
-                                        return interestingRoles.contains(role);
+                                        return sortRoles.contains(role);
                                     });
 
-                            if (isRoleOfInterest) {
+                            if (isSortRole) {
                                 invalidate();
                                 sort(0);
                             }
