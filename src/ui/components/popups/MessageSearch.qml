@@ -141,7 +141,7 @@ Item {
                 Label {
                     id: messageSender
                     width: parent.width
-                    text: qsTr("From: %1 at %2").arg(delg.message?.nickName ?? "")
+                    text: qsTr("From: %1 on %2").arg(delg.message?.nickName ?? "")
                                                 .arg(delg.message?.timestamp ?? "")
                     color: Theme.secondaryTextColor
                     elide: Text.ElideRight

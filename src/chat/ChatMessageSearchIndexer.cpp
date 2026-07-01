@@ -16,62 +16,22 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
         return;
     }
 
-    // TODO: Use proper settings names, wallet, etc.
-    ReadOnlyConfdSettings settings;
-    const QByteArray path = settings.value("generic/chatSearchCachePath", "").toString().toUtf8();
-    const QByteArray password =
-            settings.value("generic/chatSearchCachePassword", "").toString().toUtf8();
-
-    int status = sqlite3_open(path, &m_db);
-    if (status != SQLITE_OK) {
-        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
-
-        sqlite3_close(m_db);
-        m_db = nullptr;
-
+    if (!openDB()) {
         return;
     }
 
-    status = sqlite3_key(m_db, password, password.size());
-    if (status != SQLITE_OK) {
-        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
-
-        sqlite3_close(m_db);
-        m_db = nullptr;
-
-        return;
-    }
-
-    QString initStatement = tr(
-            // Performance pragmas (safe with WAL)
-            "PRAGMA journal_mode = WAL;"
-            "PRAGMA synchronous = NORMAL;"
-
-            // Mapping table
-            "CREATE TABLE IF NOT EXISTS messages_map ("
-            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "    message_uid TEXT UNIQUE,"
-            "    room_uid TEXT,"
-            "    timestamp INTEGER"
-            ");"
-
-            // FTS5 virtual table
-            // requires SQLite >= 3.43.0 for contentless_delete (by id only)
-            // requires SQLite >= 3.38.0 for the trigram tokenizer
-            // INFO: Using messages_fts.rowid == messages_map.id
-            "CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5("
-            "    body,"
-            "    content='',"
-            "    contentless_delete=1,"
-            "    tokenize='trigram'"
-            ");"
-
-            "CREATE INDEX IF NOT EXISTS idx_messages_map ON messages_map(room_uid);");
-    if (!exec(initStatement)) {
-        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
-
-        sqlite3_close(m_db);
-        m_db = nullptr;
+    auto state = checkDB();
+    if (state == ChatMessageSearchIndexer::State::Complete) {
+        // Schema as expected
+        // TODO: 30 days just as an example atm
+        qint64 timestamp =
+                QDateTime(QDate::currentDate(), QTime(0, 0, 0)).addDays(-30).toMSecsSinceEpoch();
+        removeMessagesByStaleDate(timestamp);
+    } else if (state == ChatMessageSearchIndexer::State::Incomplete) {
+        // Schema non-/partially existent
+        initDB();
+    } else {
+        // Failed to check
         return;
     }
 
@@ -399,15 +359,121 @@ bool ChatMessageSearchIndexer::optimize()
     }
 }
 
+bool ChatMessageSearchIndexer::openDB()
+{
+    // TODO: Use proper settings names, wallet, etc.
+    ReadOnlyConfdSettings settings;
+    const QByteArray path = settings.value("generic/chatSearchCachePath", "").toString().toUtf8();
+    const QByteArray password =
+            settings.value("generic/chatSearchCachePassword", "").toString().toUtf8();
+
+    int status = sqlite3_open(path, &m_db);
+    if (status != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+
+        sqlite3_close(m_db);
+        m_db = nullptr;
+        return false;
+    }
+
+    status = sqlite3_key(m_db, password, password.size());
+    if (status != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+
+        sqlite3_close(m_db);
+        m_db = nullptr;
+        return false;
+    }
+
+    // Performance pragmas (safe with WAL)
+    QString pragmas = "PRAGMA journal_mode = WAL;"
+                      "PRAGMA synchronous = NORMAL;";
+    if (!exec(pragmas)) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+
+        sqlite3_close(m_db);
+        m_db = nullptr;
+        return false;
+    }
+
+    return true;
+}
+
+ChatMessageSearchIndexer::State ChatMessageSearchIndexer::checkDB()
+{
+    if (!m_db) {
+        return ChatMessageSearchIndexer::State::Failed;
+    }
+
+    QString dbCheck = "SELECT COUNT(*) FROM sqlite_master "
+                      "WHERE type='table' AND name IN ('messages_map', 'messages_fts');";
+
+    Statement check;
+    if (sqlite3_prepare_v2(m_db, dbCheck.toUtf8(), -1, &check.statement, nullptr) != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+
+        return ChatMessageSearchIndexer::State::Failed;
+    }
+
+    if (sqlite3_step(check.statement) == SQLITE_ROW) {
+        int tableCount = sqlite3_column_int(check.statement, 0);
+        // Check if both tables exist
+        if (tableCount == 2) {
+            return ChatMessageSearchIndexer::State::Complete;
+        } else {
+            return ChatMessageSearchIndexer::State::Incomplete;
+        }
+    }
+
+    return ChatMessageSearchIndexer::State::Failed;
+}
+
+bool ChatMessageSearchIndexer::initDB()
+{
+    if (!m_db) {
+        return false;
+    }
+
+    // Tables (FTS and mapping)
+    // requires SQLite >= 3.43.0 for contentless_delete (by id only)
+    QString initStatement =
+            "CREATE TABLE IF NOT EXISTS messages_map ("
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    message_uid TEXT UNIQUE,"
+            "    room_uid TEXT,"
+            "    timestamp INTEGER"
+            ");"
+
+            "CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5("
+            "    body,"
+            "    content='',"
+            "    contentless_delete=1,"
+            "    tokenize='trigram'"
+            ");"
+
+            "CREATE INDEX IF NOT EXISTS idx_messages_map ON messages_map(room_uid);";
+    if (!exec(initStatement)) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+
+        sqlite3_close(m_db);
+        m_db = nullptr;
+        return false;
+    }
+
+    return true;
+}
+
 bool ChatMessageSearchIndexer::exec(const QString &statement)
 {
-    char *error = nullptr;
+    if (!m_db) {
+        return false;
+    }
 
+    char *error = nullptr;
     int status = sqlite3_exec(m_db, statement.toUtf8(), nullptr, nullptr, &error);
     if (status != SQLITE_OK) {
         m_error = QString::fromUtf8(error);
         sqlite3_free(error);
-
         return false;
     }
 

@@ -66,6 +66,16 @@ public:
     bool optimize();
 
 private:
+    enum class State {
+        Complete, // All tables exist
+        Incomplete, // No/some tables exist
+        Failed, // Query failed
+    };
+
+    bool openDB();
+    State checkDB();
+    bool initDB();
+
     bool exec(const QString &statement);
 
     bool m_isInitialized = false;
