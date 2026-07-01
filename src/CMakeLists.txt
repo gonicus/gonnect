@@ -151,7 +151,7 @@ endif()
 qt_add_resources(APP_SOURCES application.qrc)
 qt_add_resources(APP_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/icons.qrc)
 qt_add_resources(APP_SOURCES ../migrate/migrationscripts.qrc)
-qt_add_resources(APP_SOURCES ../resources/templates/templates.qrc)
+qt_add_resources(APP_SOURCES ${PROJECT_BINARY_DIR}/resources/templates/templates.qrc)
 
 qt_add_executable(gonnect
     ${app_icon_macos}
@@ -381,6 +381,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/EmojiPicker.qml
         ui/components/controls/FavIcon.qml
         ui/components/controls/FavoriteListItemBig.qml
+        ui/components/controls/FileDropArea.qml
         ui/components/controls/FirstAidButton.qml
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/HideableMenuItem.qml

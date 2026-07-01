@@ -38,6 +38,7 @@ class ClipboardHelperWrapper
 public:
     static ClipboardHelper *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&ClipboardHelper::instance(), QQmlEngine::CppOwnership);
         return &ClipboardHelper::instance();
     }
 

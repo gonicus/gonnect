@@ -15,7 +15,7 @@
 <context>
     <name>Chat</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="203"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="206"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 is typing</numerusform>
@@ -37,7 +37,7 @@
 <context>
     <name>PublicRoomSearch</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="159"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="160"/>
         <source>%n member(s), topic: %1</source>
         <translation>
             <numerusform>%n member, topic: %1</numerusform>
@@ -45,7 +45,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="160"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="161"/>
         <source>%n member(s)</source>
         <translation>
             <numerusform>%n member</numerusform>
@@ -56,7 +56,7 @@
 <context>
     <name>QObject</name>
     <message numerus="yes">
-        <location filename="../src/StateManager.cpp" line="163"/>
+        <location filename="../src/StateManager.cpp" line="165"/>
         <source>There are %n active call(s).</source>
         <comment>calls</comment>
         <translation>

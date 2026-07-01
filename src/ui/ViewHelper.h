@@ -4,6 +4,7 @@
 #include <QQmlEngine>
 #include <QStandardPaths>
 
+#include "ChatMessageContentVideoFile.h"
 #include "appversion.h"
 #include "Application.h"
 #include "NumberStats.h"
@@ -216,8 +217,7 @@ Q_SIGNALS:
     void showMessageSearchDialog();
     void showKnockRoomDialog(IChatProvider *provider, QString roomId);
     void showLargeImage(QUrl imageFilePath);
-    void showLargeVideo(QUrl videoFilePath, QString fileName = "", qint64 fileSize = 0,
-                        QString thumbnailFilePath = "");
+    void showLargeVideo(ChatMessageContentVideoFile *file);
     void showSendPreviewImage(QUrl imageFilePath, QString roomId);
 
     void openMeetingRequested(QString meetingId, QString displayName,
@@ -251,7 +251,11 @@ class ViewHelperWrapper
     QML_SINGLETON
 
 public:
-    static ViewHelper *create(QQmlEngine *, QJSEngine *) { return &ViewHelper::instance(); }
+    static ViewHelper *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&ViewHelper::instance(), QQmlEngine::CppOwnership);
+        return &ViewHelper::instance();
+    }
 
 private:
     ViewHelperWrapper() = default;

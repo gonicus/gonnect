@@ -36,6 +36,7 @@ Repeater {
                 const selectedRoom = SelectionState.selectedChatRoom
                 if (!selectedRoom) {
                     internal.selectedListItem = null
+                    return
                 }
 
                 const l = control.count
@@ -85,6 +86,7 @@ Repeater {
         onHighlightedChanged: () => internal.updateSelectedListItem()
 
         onClicked: () => control.roomSelected(delg.roomId)
+        onFileDropped: url => control.chatProvider.chatRoomByRoomId(delg.roomId).sendFile(url)
         onFavoriteToggled: () => control.chatProvider.requestToggleRoomFavorite(
                                      control.chatProvider.chatRoomByRoomId(delg.roomId))
         onEditRoomTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, delg.roomId)
