@@ -86,7 +86,10 @@ Repeater {
         onHighlightedChanged: () => internal.updateSelectedListItem()
 
         onClicked: () => control.roomSelected(delg.roomId)
-        onFileDropped: url => control.chatProvider.chatRoomByRoomId(delg.roomId).sendFile(url)
+        onFilesDropped: urls => {
+                            const room = control.chatProvider.chatRoomByRoomId(delg.roomId)
+                            ViewHelper.showFileUploadDialog(room, urls)
+                        }
         onFavoriteToggled: () => control.chatProvider.requestToggleRoomFavorite(
                                      control.chatProvider.chatRoomByRoomId(delg.roomId))
         onEditRoomTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, delg.roomId)

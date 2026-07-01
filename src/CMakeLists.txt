@@ -420,6 +420,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/EditChatMessage.qml
         ui/components/popups/EditStatusText.qml
         ui/components/popups/EmojiPickerPopup.qml
+        ui/components/popups/FileSelectionOverview.qml
         ui/components/popups/FilteredEmojis.qml
         ui/components/popups/FirstAid.qml
         ui/components/popups/HistoryListContextMenu.qml

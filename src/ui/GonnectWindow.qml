@@ -505,6 +505,13 @@ BaseWindow {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditChatMessage.qml",
                                  { chatProvider, roomId, messageId, text: content })
         }
+        function onShowFileUploadDialog(chatRoom : IChatRoom, fileUrls : list<url>) {
+            if (!chatRoom) {
+                throw new Error("chatRoom is mandatory")
+            }
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FileSelectionOverview.qml",
+                                 { chatRoom, fileUrls })
+        }
         function onShowLargeImage(imageFilePath : url) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeImage.qml", { source : imageFilePath })
         }
@@ -528,7 +535,7 @@ BaseWindow {
     readonly property Popup mainDrawer: Popup {
         id: mainDrawer
         width: drawerStackView.currentItem
-               ? Util.clamp(drawerStackView.currentItem.implicitWidth, 0.63 * control.width, control.width - 100)
+               ? Util.clamp(drawerStackView.currentItem.implicitWidth, 0.38 * control.width, control.width - 100)
                : 0
         height: drawerStackView.currentItem
                 ? Util.clamp(drawerStackView.currentItem.implicitHeight, 0.63 * control.height, control.height - 100)

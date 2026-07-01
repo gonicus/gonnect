@@ -362,6 +362,6 @@ Item {
 
     FileDropArea {
         anchors.fill: parent
-        onDropAccepted: url => control.chatRoom?.sendFile(url)
+        onDropAccepted: urls => ViewHelper.showFileUploadDialog(control.chatRoom, urls)
     }
 }
