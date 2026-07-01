@@ -508,12 +508,9 @@ BaseWindow {
         function onShowLargeImage(imageFilePath : url) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeImage.qml", { source : imageFilePath })
         }
-        function onShowLargeVideo(videoFilePath : url, fileName : string, fileSize : int, thumbnailFilePath : url) {
+        function onShowLargeVideo(videoContent : ChatMessageContentVideoFile) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeVideo.qml", {
-                                     source : videoFilePath,
-                                     fileName,
-                                     fileSize,
-                                     thumbnailFilePath
+                                     content: videoContent
                                  })
         }
         function onShowStatusTextEditDialog() {
