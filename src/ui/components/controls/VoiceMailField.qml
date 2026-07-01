@@ -11,7 +11,7 @@ Item {
     implicitWidth: voicemailRow.width
     implicitHeight: 30
 
-    // Only display the icon if the widget heading is not long enough
+    // Only display the label if the widget heading is not long enough
     property double maxWidth: 0
     Connections {
         target: parent
