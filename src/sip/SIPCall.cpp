@@ -145,8 +145,6 @@ QString SIPCall::hopReasonToString(const QString &reason) const
         return tr("do not disturb");
     } else if (reason == "deflection" || reason == "deflection-immediate") {
         return tr("rejected");
-    } else if (reason == "unknown") {
-        return "";
     }
 
     return "";
