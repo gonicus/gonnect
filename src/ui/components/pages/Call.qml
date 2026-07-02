@@ -118,7 +118,8 @@ Item {
                 right: parent.right
                 bottom: nameLabel.top
 
-                topMargin: control.isRttEnabled ? 30
+                topMargin: (control.isRttEnabled || (callRoutingGrid.visible && callRoutingRep.count))
+                           ? 30
                            : Math.max(24, 24 + callMainCard.height / 2 - 254)
                 bottomMargin: 15
             }
@@ -126,7 +127,9 @@ Item {
             Loader {
                 id: avatarLoader
                 width: parent.width
-                height: control.isRttEnabled ? parent.height / 2 : parent.height
+                height: (control.isRttEnabled || (callRoutingGrid.visible && callRoutingRep.count))
+                        ? parent.height / 2
+                        : parent.height
                 sourceComponent: SIPCallManager.isConferenceMode ? multiAvatarComponent : singleAvatarComponent
             }
 
@@ -203,6 +206,43 @@ Item {
 
                 RTTDisplay {
                     id: rttDisplay
+                }
+            }
+        }
+
+        GridLayout {
+            id: callRoutingGrid
+            visible: !control.isRttEnabled && callRoutingRep.count > 0
+            columns: 3
+            columnSpacing: 5
+            rowSpacing: 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: avatarLoader.y + avatarLoader.implicitHeight + (parent.height - (avatarLoader.y + avatarLoader.height)) / 2 - callRoutingGrid.height / 2
+
+            Repeater {
+                id: callRoutingRep
+                model: {
+                    const callItem = callSideBar.selectedCallItem
+                    if (callItem && (callItem.isIncoming || callItem.isEstablished)) {
+                        return CallRoutingHelper.routingHopsForCall(callItem.accountId, callItem.callId)
+                    }
+                    return null
+                }
+                delegate: Repeater {
+                    id: repDelg
+
+                    required property string phoneNumber
+                    required property string reasonText
+
+                    model: [ repDelg.phoneNumber, "→", repDelg.reasonText ]
+
+                    delegate: Label {
+                        id: innerDelg
+                        text: innerDelg.modelData
+                        color: Theme.secondaryTextColor
+
+                        required property string modelData
+                    }
                 }
             }
         }

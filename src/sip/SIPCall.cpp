@@ -184,7 +184,6 @@ void SIPCall::parseCallRouting(const QString &rawHeaders)
 
     QStringList headerLines = rawHeaders.toLower().split("\r\n");
 
-    qCritical() << "### -----------------------------";
     for (const QString &headerLine : std::as_const(headerLines)) {
 
         // History-Info

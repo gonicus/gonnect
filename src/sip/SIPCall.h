@@ -81,6 +81,8 @@ public:
     bool isSignalingEncrypted() const { return m_signalingEncrypted; }
     bool isMediaEncrypted() const { return m_mediaEncrypted; }
 
+    QList<SIPCallRoutingHop> routingHops() const { return m_callRoutingHops; }
+
     /// \name SIP call quality information
     ///@{
 

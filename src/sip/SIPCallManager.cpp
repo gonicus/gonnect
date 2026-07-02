@@ -20,6 +20,8 @@
 #include "Application.h"
 #include "PlatformSession.h"
 #include "SelectionState.h"
+#include "CallRoutingHelper.h"
+#include "CallRoutingHopInfo.h"
 
 Q_LOGGING_CATEGORY(lcSIPCallManager, "gonnect.sip.callmanager")
 
@@ -192,6 +194,20 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
         }
         if (countries.size()) {
             bodyParts.append(countries.join(", "));
+        }
+
+        const auto hops = CallRoutingHelper::routingHopsForCall(*call);
+        if (!hops.isEmpty()) {
+            if (!bodyParts.isEmpty()) {
+                bodyParts.append("");
+            }
+
+            for (const auto &hop : hops) {
+                const auto displayName = hop.contact && !hop.contact->name().isEmpty()
+                        ? QString("%1 (%2)").arg(hop.contact->name(), hop.phoneNumber)
+                        : hop.phoneNumber;
+                bodyParts.append(QString("%1 → %2").arg(displayName, hop.reasonText));
+            }
         }
 
         // Create notification object

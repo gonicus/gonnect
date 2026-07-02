@@ -4,7 +4,6 @@
 
 struct SIPCallRoutingHop
 {
-
     // SIP URI of hop
     QString uri;
 
@@ -14,7 +13,7 @@ struct SIPCallRoutingHop
     // Translated human readable reason
     QString reasonText;
 
-    // Hinstory-Info index or empty
+    // History info index or empty
     QString index;
 
     // Source for this hop: true for diversion, false for history-info

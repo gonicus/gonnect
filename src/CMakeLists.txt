@@ -781,6 +781,9 @@ qt_add_qml_module(gonnect
 
         ui/CallsModel.h
         ui/CallsModel.cpp
+        ui/CallRoutingHelper.h
+        ui/CallRoutingHelper.cpp
+        ui/CallRoutingHopInfo.h
         ui/ClipboardHelper.h
         ui/ClipboardHelper.cpp
         ui/DateEventsModel.h
