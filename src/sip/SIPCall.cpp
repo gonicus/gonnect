@@ -195,8 +195,7 @@ void SIPCall::parseCallRouting(const QString &rawHeaders)
             if (uriMatch.hasMatch()) {
                 hop.uri = uriMatch.captured(1);
 
-                auto causeMatch = causeRe.match(hop.uri); // cause steckt im URI
-
+                auto causeMatch = causeRe.match(value);
                 if (causeMatch.hasMatch()) {
                     hop.reason = causeMatch.captured(1).toInt();
                     hop.reasonText = hopCauseToString(hop.reason);

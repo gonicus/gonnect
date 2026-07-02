@@ -223,7 +223,6 @@ Item {
                     model: {
                         const callItem = callSideBar.selectedCallItem
                         if (callItem && (callItem.isIncoming || callItem.isEstablished)) {
-                            const routes = CallRoutingHelper.routingHopsForCall(callItem.accountId, callItem.callId)
                             return CallRoutingHelper.routingHopsForCall(callItem.accountId, callItem.callId)
                         }
                         return null
