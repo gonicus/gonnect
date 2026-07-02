@@ -152,6 +152,7 @@ private:
     void createOngoingCallNotification();
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
+    QStringList routingHopNumbers() const;
 
     QList<SIPCallRoutingHop> m_callRoutingHops;
 

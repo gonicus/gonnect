@@ -247,6 +247,10 @@ void SIPCall::parseCallRouting(const QString &rawHeaders)
     } else {
         m_callRoutingHops = historyInfoHops;
     }
+
+    if (m_historyItem) {
+        m_historyItem->setHops(routingHopNumbers());
+    }
 }
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
@@ -792,9 +796,9 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
             historyType |= Type::Outgoing;
         }
 
-        m_historyItem = CallHistory::instance().addHistoryItem(historyType, m_account->id(), sipUrl,
-                                                               m_contactId,
-                                                               m_contactInfo.isSipSubscriptable);
+        m_historyItem = CallHistory::instance().addHistoryItem(
+                historyType, m_account->id(), sipUrl, m_contactId, m_contactInfo.isSipSubscriptable,
+                routingHopNumbers());
 
         Q_EMIT contactChanged();
     }
@@ -1111,4 +1115,15 @@ float SIPCall::calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double 
     }
 
     return 1.0f + (0.035f * R) + (0.000007f * R * (R - 60.0f) * (100.0f - R));
+}
+
+QStringList SIPCall::routingHopNumbers() const
+{
+    QStringList hops;
+    hops.reserve(m_callRoutingHops.size());
+    std::ranges::transform(std::as_const(m_callRoutingHops), std::back_inserter(hops),
+                           [](const SIPCallRoutingHop &hop) -> QString {
+                               return PhoneNumberUtil::numberFromSipUrl(hop.uri);
+                           });
+    return hops;
 }
