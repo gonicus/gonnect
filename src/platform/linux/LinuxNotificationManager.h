@@ -22,6 +22,7 @@ public:
 
 private:
     void handleAction(QString id, QString action, QVariantList parameters);
+    void handleClosed(_NotifyNotification *internalNotification);
 
     QMap<QString, Notification *> m_notifications;
     QMap<QString, _NotifyNotification *> m_internalNotifications;

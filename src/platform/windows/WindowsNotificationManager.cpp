@@ -49,7 +49,31 @@ public:
 
     void toastActivated(std::wstring response) const override { }
 
-    void toastDismissed(WinToastDismissalReason state) const override { }
+    void toastDismissed(WinToastDismissalReason state) const override
+    {
+        auto *notification = m_manager.notification(m_notificationId);
+        if (!notification) {
+            return;
+        }
+
+        Notification::CloseReason reason;
+        switch (state) {
+        case UserCanceled:
+            reason = Notification::CloseReason::dismissedByUser;
+            break;
+        case TimedOut:
+            reason = Notification::CloseReason::expired;
+            break;
+        case ApplicationHidden:
+            reason = Notification::CloseReason::closedProgrammatically;
+            break;
+        default:
+            reason = Notification::CloseReason::reasonUnknown;
+            break;
+        }
+
+        Q_EMIT notification->closed(reason);
+    }
 
     void toastFailed() const override { qCCritical(winNotificationCat) << "toast failed"; }
 

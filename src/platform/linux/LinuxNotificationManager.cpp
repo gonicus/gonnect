@@ -28,6 +28,43 @@ void LinuxNotificationManager::handleAction(QString id, QString action, QVariant
     }
 }
 
+void LinuxNotificationManager::handleClosed(_NotifyNotification *internalNotification)
+{
+    const int rawReason = notify_notification_get_closed_reason(internalNotification);
+
+    QString id;
+    for (auto iter = m_internalNotifications.constBegin();
+         iter != m_internalNotifications.constEnd(); ++iter) {
+        if (iter.value() == internalNotification) {
+            id = iter.key();
+            break;
+        }
+    }
+
+    auto notification = m_notifications.value(id, nullptr);
+    if (!notification) {
+        return;
+    }
+
+    Notification::CloseReason reason;
+    switch (rawReason) {
+    case 1:
+        reason = Notification::CloseReason::expired;
+        break;
+    case 2:
+        reason = Notification::CloseReason::dismissedByUser;
+        break;
+    case 3:
+        reason = Notification::CloseReason::closedProgrammatically;
+        break;
+    default:
+        reason = Notification::CloseReason::reasonUnknown;
+        break;
+    }
+
+    Q_EMIT notification->closed(reason);
+}
+
 QString LinuxNotificationManager::add(Notification *notification)
 {
     if (!notification) {
@@ -131,6 +168,13 @@ QString LinuxNotificationManager::add(Notification *notification)
                 },
                 (gpointer)notification, NULL);
     }
+
+    // Capture "dismissed by user"
+    g_signal_connect(internalNotification, "closed",
+                     G_CALLBACK(+[](NotifyNotification *internal, gpointer user_data) {
+                         static_cast<LinuxNotificationManager *>(user_data)->handleClosed(internal);
+                     }),
+                     (gpointer)this);
 
     notify_notification_show(internalNotification, NULL);
     m_notifications.insert(id, notification);

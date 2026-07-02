@@ -25,6 +25,14 @@ public:
     };
     Q_ENUM(DisplayHint)
 
+    enum CloseReason {
+        expired = 1,
+        dismissedByUser = 2,
+        closedProgrammatically = 3,
+        reasonUnknown = 4
+    };
+    Q_ENUM(CloseReason)
+
     explicit Notification(const QString &title, const QString &body,
                           Priority priority = Priority::normal, bool playPing = false,
                           QObject *parent = nullptr);
@@ -72,6 +80,7 @@ public:
 
 Q_SIGNALS:
     void actionInvoked(QString action, QVariantList parameters);
+    void closed(Notification::CloseReason reason);
 
 private:
     QString priority() const;
