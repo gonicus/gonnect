@@ -8,6 +8,7 @@
 #include "ICallState.h"
 #include "ResponseItem.h"
 #include "SIPCallManager.h"
+#include "SIPCallRoutingHop.h"
 
 class SIPAccount;
 class CallHistoryItem;
@@ -47,6 +48,8 @@ public:
     void setIncoming(bool flag) { m_incoming = flag; }
     bool isIncoming() const { return m_incoming; }
 
+    void parseCallRouting(const QString &rawHeaders);
+
     void call(const QString &dst_uri, const pj::CallOpParam &prm);
     void setPostDialDtmf(const QString &dtmf) { m_postTask = dtmf; }
 
@@ -77,6 +80,8 @@ public:
     SIPCallManager::SecurityLevel securityLevel() const { return m_securityLevel; }
     bool isSignalingEncrypted() const { return m_signalingEncrypted; }
     bool isMediaEncrypted() const { return m_mediaEncrypted; }
+
+    QList<SIPCallRoutingHop> routingHops() const { return m_callRoutingHops; }
 
     /// \name SIP call quality information
     ///@{
@@ -147,6 +152,11 @@ private:
     void createOngoingCallNotification();
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
+
+    QList<SIPCallRoutingHop> m_callRoutingHops;
+
+    QString hopReasonToString(const QString &reason) const;
+    QString hopCauseToString(int cause) const;
 
     QTimer m_statsTimer;
     QTimer m_rttTimeoutTimer;

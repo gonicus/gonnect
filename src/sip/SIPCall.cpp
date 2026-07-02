@@ -127,6 +127,128 @@ SIPCall::~SIPCall()
                        []() { GlobalCallState::instance().unholdOtherCall(); });
 }
 
+QString SIPCall::hopReasonToString(const QString &reason) const
+{
+    if (reason == "unconditional") {
+        return tr("redirected");
+    } else if (reason == "no-answer") {
+        return tr("not answered");
+    } else if (reason == "user-busy" || reason == "mobile-busy") {
+        return tr("busy");
+    } else if (reason == "away") {
+        return tr("away");
+    } else if (reason == "follow-me") {
+        return tr("forwarded");
+    } else if (reason == "time-of-day") {
+        return tr("time base redirection");
+    } else if (reason == "do-not-disturb") {
+        return tr("do not disturb");
+    } else if (reason == "deflection" || reason == "deflection-immediate") {
+        return tr("rejected");
+    }
+
+    return "";
+}
+
+QString SIPCall::hopCauseToString(int cause) const
+{
+    switch (cause) {
+    case 302:
+        return tr("redirected");
+    case 408:
+        return tr("not answered");
+    case 486:
+        return tr("busy");
+    case 487:
+        return tr("aborted");
+    case 480:
+        return tr("not reachable");
+    default:
+        return cause > 0 ? tr("Code %1").arg(cause) : "";
+    }
+}
+
+void SIPCall::parseCallRouting(const QString &rawHeaders)
+{
+    static QRegularExpression uriRe(R"(<([^>]+)>)");
+    static QRegularExpression causeRe(R"(cause=(\d+))");
+    static QRegularExpression indexRe(R"(index=([\d.]+))");
+    static QRegularExpression reasonRe(R"(reason=([^;,\r\n]+))");
+
+    // Parse SIP Diversion (draft-levy-sip-diversion-08) and History-Info (RFC 7044)
+    // headers and feed it to a list of call hops.
+    QList<SIPCallRoutingHop> historyInfoHops;
+    QList<SIPCallRoutingHop> diversionHops;
+
+    QStringList headerLines = rawHeaders.toLower().split("\r\n");
+
+    for (const QString &headerLine : std::as_const(headerLines)) {
+
+        // History-Info
+        if (headerLine.startsWith("history-info:")) {
+            const QString value = headerLine.mid(13).trimmed();
+
+            SIPCallRoutingHop hop;
+            hop.diversion = false;
+
+            auto uriMatch = uriRe.match(value);
+            if (uriMatch.hasMatch()) {
+                hop.uri = uriMatch.captured(1);
+
+                auto causeMatch = causeRe.match(hop.uri); // cause steckt im URI
+                if (causeMatch.hasMatch()) {
+                    hop.reason = causeMatch.captured(1).toInt();
+                    hop.reasonText = hopCauseToString(hop.reason);
+                }
+
+                auto indexMatch = indexRe.match(value);
+                if (indexMatch.hasMatch()) {
+                    hop.index = indexMatch.captured(1);
+                }
+
+                qCDebug(lcSIPCall) << "Adding call routing hop from History-Info header:" << value;
+                historyInfoHops.append(hop);
+            } else {
+                qCWarning(lcSIPCall) << "History-Info header has no URI - skipping";
+            }
+
+            continue;
+        }
+
+        if (headerLine.startsWith("diversion:")) {
+            const QString value = headerLine.mid(10).trimmed();
+
+            SIPCallRoutingHop hop;
+            hop.diversion = true;
+
+            auto uriMatch = uriRe.match(value);
+            if (uriMatch.hasMatch()) {
+                hop.uri = uriMatch.captured(1);
+
+                auto reasonMatch = reasonRe.match(value);
+                if (reasonMatch.hasMatch()) {
+                    hop.reasonText = hopReasonToString(reasonMatch.captured(1));
+                }
+
+                qCDebug(lcSIPCall) << "Adding call routing hop from Diversion header:" << value;
+                diversionHops.append(hop);
+            } else {
+                qCWarning(lcSIPCall) << "Diversion header has no URI - skipping";
+            }
+
+            continue;
+        }
+    }
+
+    // Prefer history-info as defined by qualified RFC
+    if (historyInfoHops.isEmpty()) {
+        std::reverse(diversionHops.begin(), diversionHops.end());
+        m_callRoutingHops = diversionHops;
+    } else {
+        m_callRoutingHops = historyInfoHops;
+    }
+}
+
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
 {
     if (m_account && m_account->isRTTEnabled()) {
