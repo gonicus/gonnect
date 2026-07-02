@@ -78,10 +78,10 @@ AudioProcessor *AudioManager::audioProcessor()
     }
 
     unsigned features = 0;
-    if (m_settings.value("media/anc", true).toBool()) {
+    if (m_settings.value("media/anc", false).toBool()) {
         features |= AudioProcessor::NoiseSuppression;
     }
-    if (m_settings.value("media/aec", true).toBool()) {
+    if (m_settings.value("media/aec", false).toBool()) {
         features |= AudioProcessor::EchoCancellation;
     }
     if (m_settings.value("media/agc", true).toBool()) {
