@@ -203,8 +203,9 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             }
 
             for (const auto &hop : hops) {
-                const auto displayName = hop.contact && !hop.contact->name().isEmpty()
-                        ? QString("%1 (%2)").arg(hop.contact->name(), hop.phoneNumber)
+                const auto contactName = hop.contactName();
+                const auto displayName = !contactName.isEmpty()
+                        ? QString("%1 (%2)").arg(contactName, hop.phoneNumber)
                         : hop.phoneNumber;
                 bodyParts.append(QString("%1 → %2").arg(displayName, hop.reasonText));
             }

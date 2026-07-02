@@ -233,8 +233,9 @@ Item {
 
                     required property string phoneNumber
                     required property string reasonText
+                    required property string contactName
 
-                    model: [ repDelg.phoneNumber, "→", repDelg.reasonText ]
+                    model: [ repDelg.contactName ? `${repDelg.contactName} (${repDelg.phoneNumber})` : repDelg.phoneNumber, "→", repDelg.reasonText ]
 
                     delegate: Label {
                         id: innerDelg
