@@ -127,9 +127,11 @@ Item {
             Loader {
                 id: avatarLoader
                 width: parent.width
-                height: (control.isRttEnabled || (callRoutingGrid.visible && callRoutingRep.count))
+                height: control.isRttEnabled
                         ? parent.height / 2
-                        : parent.height
+                        : (callRoutingGrid.visible && callRoutingRep.count)
+                          ? avatarLoader.implicitHeight
+                          : parent.height
                 sourceComponent: SIPCallManager.isConferenceMode ? multiAvatarComponent : singleAvatarComponent
             }
 
@@ -208,41 +210,55 @@ Item {
                     id: rttDisplay
                 }
             }
-        }
 
-        GridLayout {
-            id: callRoutingGrid
-            visible: !control.isRttEnabled && callRoutingRep.count > 0
-            columns: 3
-            columnSpacing: 5
-            rowSpacing: 5
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: avatarLoader.y + avatarLoader.implicitHeight + (parent.height - (avatarLoader.y + avatarLoader.height)) / 2 - callRoutingGrid.height / 2
+            Column {
+                id: callRoutingGrid
+                visible: !control.isRttEnabled && callRoutingRep.count > 0
+                spacing: 5
+                anchors.horizontalCenter: parent.horizontalCenter
+                topPadding: 30
 
-            Repeater {
-                id: callRoutingRep
-                model: {
-                    const callItem = callSideBar.selectedCallItem
-                    if (callItem && (callItem.isIncoming || callItem.isEstablished)) {
-                        return CallRoutingHelper.routingHopsForCall(callItem.accountId, callItem.callId)
+                Repeater {
+                    id: callRoutingRep
+                    model: {
+                        const callItem = callSideBar.selectedCallItem
+                        if (callItem && (callItem.isIncoming || callItem.isEstablished)) {
+                            const routes = CallRoutingHelper.routingHopsForCall(callItem.accountId, callItem.callId)
+                            return CallRoutingHelper.routingHopsForCall(callItem.accountId, callItem.callId)
+                        }
+                        return null
                     }
-                    return null
-                }
-                delegate: Repeater {
-                    id: repDelg
 
-                    required property string phoneNumber
-                    required property string reasonText
-                    required property string contactName
+                    delegate: Item {
+                        id: hop
+                        anchors.horizontalCenter: parent?.horizontalCenter
+                        implicitWidth: mainLabel.implicitWidth
+                        implicitHeight: mainLabel.y + mainLabel.implicitHeight
 
-                    model: [ repDelg.contactName ? `${repDelg.contactName} (${repDelg.phoneNumber})` : repDelg.phoneNumber, "→", repDelg.reasonText ]
+                        required property int index
+                        required property string phoneNumber
+                        required property string reasonText
+                        required property string contactName
 
-                    delegate: Label {
-                        id: innerDelg
-                        text: innerDelg.modelData
-                        color: Theme.secondaryTextColor
+                        readonly property string contactString: hop.contactName ? `${hop.contactName} (${hop.phoneNumber})` : hop.phoneNumber
 
-                        required property string modelData
+                        Label {
+                            id: arrowLabel
+                            visible: hop.index > 0
+                            text: '↓'
+                            color: Theme.secondaryTextColor
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        Label {
+                            id: mainLabel
+                            text: hop.reasonText ? `${hop.contactString} (${hop.reasonText})` : hop.contactString
+                            color: Theme.secondaryTextColor
+                            anchors {
+                                top: arrowLabel.visible ? arrowLabel.bottom : parent.top
+                                topMargin: arrowLabel.visible ? 5 : 0
+                            }
+                        }
                     }
                 }
             }

@@ -198,17 +198,23 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
 
         const auto hops = CallRoutingHelper::routingHopsForCall(*call);
         if (!hops.isEmpty()) {
-            if (!bodyParts.isEmpty()) {
-                bodyParts.append("");
-            }
+            QStringList hopParts;
+            hopParts.append(tr("Via:"));
 
+            bool first = true;
             for (const auto &hop : hops) {
+                if (!first) {
+                    hopParts.append("→");
+                }
+                first = false;
+
                 const auto contactName = hop.contactName();
                 const auto displayName = !contactName.isEmpty()
                         ? QString("%1 (%2)").arg(contactName, hop.phoneNumber)
                         : hop.phoneNumber;
-                bodyParts.append(QString("%1 → %2").arg(displayName, hop.reasonText));
+                hopParts.append(displayName);
             }
+            bodyParts.append(hopParts.join(' '));
         }
 
         // Create notification object
@@ -218,7 +224,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             return;
         }
 
-        n = new Notification(title, bodyParts.join("\n"), Notification::Priority::urgent, false,
+        n = new Notification(title, bodyParts.join(", "), Notification::Priority::urgent, false,
                              call);
 
         if (m_settings.value("generic/inverseAcceptReject", false).toBool()) {

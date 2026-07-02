@@ -16,6 +16,5 @@ public:
     explicit CallRoutingHelper(QObject *parent = nullptr);
 
     static QList<CallRoutingHopInfo> routingHopsForCall(const SIPCall &call);
-    Q_INVOKABLE QList<CallRoutingHopInfo> routingHopsForCall(const QString &accountId,
-                                                             int callId) const;
+    Q_INVOKABLE QVariantList routingHopsForCall(const QString &accountId, int callId) const;
 };

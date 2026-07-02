@@ -25,15 +25,22 @@ QList<CallRoutingHopInfo> CallRoutingHelper::routingHopsForCall(const SIPCall &c
     return l;
 }
 
-QList<CallRoutingHopInfo> CallRoutingHelper::routingHopsForCall(const QString &accountId,
-                                                                int callId) const
+QVariantList CallRoutingHelper::routingHopsForCall(const QString &accountId, int callId) const
 {
-    const auto call = SIPCallManager::instance().findCall(accountId, callId);
-    if (!call) {
-        qCCritical(lcCallRoutingHelper)
-                << "Unable to find call" << callId << "for account" << accountId;
-        return {};
-    }
+    if (const auto call = SIPCallManager::instance().findCall(accountId, callId)) {
+        const auto hops = routingHopsForCall(*call);
+        QVariantList result;
+        result.reserve(hops.size());
 
-    return routingHopsForCall(*call);
+        for (const auto &hop : hops) {
+            QVariantMap map;
+            map["phoneNumber"] = hop.phoneNumber;
+            map["reasonText"] = hop.reasonText;
+            map["contactName"] = hop.contactName();
+            result.append(map);
+        }
+
+        return result;
+    }
+    return {};
 }
