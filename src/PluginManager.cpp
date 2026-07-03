@@ -81,7 +81,7 @@ void PluginManager::init()
     ReadOnlyConfdSettings settings;
     auto pluginInfo = new PluginInfo;
     pluginInfo->binPath = settings.value("generic/headlessClientPath", "").toString();
-    pluginInfo->displayName = "YAMA";
+    pluginInfo->displayName = "gouda-matrix";
     pluginInfo->version = "0.1.0";
     pluginInfo->type = "chat-ipc";
     m_pluginInfos.append(pluginInfo);
