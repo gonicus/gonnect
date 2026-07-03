@@ -193,17 +193,20 @@ void ChatRoomProxyModel::onSourceModelChanged()
                                 return;
                             }
 
-                            const bool isRoleOfInterest =
+                            const bool isSortRole =
                                     std::any_of(roles.cbegin(), roles.cend(), [](const int role) {
-                                        static const QSet<int> interestingRoles = {
+                                        static const QSet<int> sortRoles = {
                                             static_cast<int>(Roles::IsFavorite),
                                             static_cast<int>(Roles::LatestMessageDate),
                                             static_cast<int>(Roles::Name),
+                                            static_cast<int>(Roles::UnreadCount),
+                                            static_cast<int>(Roles::OwnJoinState),
+                                            static_cast<int>(Roles::RoomId),
                                         };
-                                        return interestingRoles.contains(role);
+                                        return sortRoles.contains(role);
                                     });
 
-                            if (isRoleOfInterest) {
+                            if (isSortRole) {
                                 invalidate();
                                 sort(0);
                             }
