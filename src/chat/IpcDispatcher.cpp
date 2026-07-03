@@ -2657,6 +2657,9 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
 
     const QUrl sourceUrl(filePath);
     const auto nonUrlPath = sourceUrl.isLocalFile() ? sourceUrl.toLocalFile() : filePath;
+    if (nonUrlPath.startsWith(uploadFolderPath)) {
+        return QString("file://%1").arg(nonUrlPath);
+    }
 
     QString suffix;
     if (filePath.contains('.')) {
