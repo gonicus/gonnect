@@ -855,6 +855,7 @@ void SIPAccount::hangup(const int callId)
             foundCall->hangup(prm);
         } catch (pj::Error &err) {
             qCCritical(lcSIPAccount) << "failed to hangup call" << ":" << err.info(false);
+            removeCall(foundCall);
         }
     }
 }
