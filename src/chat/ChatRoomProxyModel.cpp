@@ -186,15 +186,7 @@ void ChatRoomProxyModel::onSourceModelChanged()
         using Roles = ChatRoomModel::Roles;
         m_dataChangedConnection =
                 connect(model, &QAbstractListModel::dataChanged, this,
-                        [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                               const QList<int> &roles) {
-                            const auto mappedTopLeft = mapFromSource(topLeft);
-                            const auto mappedBottomRight = mapFromSource(bottomRight);
-
-                            if (mappedTopLeft.isValid() && mappedBottomRight.isValid()) {
-                                Q_EMIT dataChanged(mappedTopLeft, mappedBottomRight, roles);
-                            }
-
+                        [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
                             if (roles.isEmpty()) {
                                 invalidate();
                                 sort(0);
