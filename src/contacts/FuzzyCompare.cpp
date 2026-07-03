@@ -49,12 +49,6 @@ qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
         return 0;
     }
 
-    // Convert to lower if case-sensitive is false
-    // if (caseSensitive == false) {
-    //     std::transform(a.begin(), a.end(), a.begin(), ::tolower);
-    //     std::transform(b.begin(), b.end(), b.begin(), ::tolower);
-    // }
-
     // Exit early if they're an exact match.
     if (a == b) {
         return 1;
@@ -62,8 +56,8 @@ qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
 
     range = (std::max(aSize, bSize) / 2) - 1;
 
-    std::vector<int> aMatches(aSize);
-    std::vector<int> bMatches(bSize);
+    QVarLengthArray<bool, 64> aMatches(aSize, false);
+    QVarLengthArray<bool, 64> bMatches(bSize, false);
 
     for (int i = 0; i < aSize; i++) {
 
