@@ -1,48 +1,46 @@
-#include <QRegularExpression>
 #include <numeric>
+#include <QVarLengthArray>
 #include "FuzzyCompare.h"
 
-quint8 FuzzyCompare::levenshteinDistance(const QString &a, const QString &b)
+int FuzzyCompare::levenshteinDistance(const QString &a, const QString &b)
 {
-    const auto n = b.size();
-    QList<quint8> v0(n + 1);
-    QList<quint8> v1(n + 1);
+    const int aSize = a.size();
+    const int bSize = b.size();
+
+    if (aSize == 0) {
+        return bSize;
+    }
+    if (bSize == 0) {
+        return aSize;
+    }
+
+    QVarLengthArray<int, 128> v0(bSize + 1);
+    QVarLengthArray<int, 128> v1(bSize + 1);
 
     std::iota(v0.begin(), v0.end(), 0);
 
-    for (int i = 0; i < a.size(); ++i) {
+    for (int i = 0; i < aSize; ++i) {
         v1[0] = i + 1;
 
-        for (int j = 0; j < n; ++j) {
-            const quint8 deletionCost = v0[j + 1] + 1;
-            const quint8 insertionCost = v1[j] + 1;
-            quint8 substitutionCost = 0;
-
-            if (a[i] == b[j]) {
-                substitutionCost = v0[j];
-            } else {
-                substitutionCost = v0[j] + 1;
-            }
-
-            v1[j + 1] = std::min({ deletionCost, insertionCost, substitutionCost });
+        for (int j = 0; j < bSize; ++j) {
+            const int deletionCost = v0[j + 1] + 1;
+            const int insertionCost = v1[j] + 1;
+            const int substitutionCost = v0[j] + (a[i] == b[j] ? 0 : 1);
+            v1[j + 1] = std::min(std::min(deletionCost, insertionCost), substitutionCost);
         }
 
-        v0 = v1;
+        std::swap(v0, v1);
     }
 
-    return v0[n];
+    return v0[bSize];
 }
 
 qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
 {
-    // const bool caseSensitive = false;
+    qreal m = 0;
 
-    float m = 0;
-    int low, high, range;
-    int k = 0, numTrans = 0;
-
-    const auto aSize = a.size();
-    const auto bSize = b.size();
+    const int aSize = a.size();
+    const int bSize = b.size();
 
     // Exit early if either are empty
     if (aSize == 0 || bSize == 0) {
@@ -54,32 +52,21 @@ qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
         return 1;
     }
 
-    range = (std::max(aSize, bSize) / 2) - 1;
+    const int range = (std::max(aSize, bSize) / 2) - 1;
 
     QVarLengthArray<bool, 64> aMatches(aSize, false);
     QVarLengthArray<bool, 64> bMatches(bSize, false);
 
     for (int i = 0; i < aSize; i++) {
 
-        // Low Value;
-        if (i >= range) {
-            low = i - range;
-        } else {
-            low = 0;
-        }
-
-        // High Value;
-        if (i + range <= (bSize - 1)) {
-            high = i + range;
-        } else {
-            high = bSize - 1;
-        }
+        const int low = std::max(0, i - range);
+        const int high = std::min(bSize - 1, i + range);
 
         for (int j = low; j <= high; j++) {
-            if (aMatches[i] != 1 && bMatches[j] != 1 && a[i] == b[j]) {
+            if (!aMatches[i] && !bMatches[j] && a[i] == b[j]) {
                 m += 1;
-                aMatches[i] = 1;
-                bMatches[j] = 1;
+                aMatches[i] = true;
+                bMatches[j] = true;
                 break;
             }
         }
@@ -91,25 +78,28 @@ qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
     }
 
     // Count the transpositions.
+    int k = 0;
+    int numTrans = 0;
+
     for (int i = 0; i < aSize; i++) {
-        if (aMatches[i] == 1) {
-            int j;
-            for (j = k; j < bSize; j++) {
-                if (bMatches[j] == 1) {
+        if (aMatches[i]) {
+            int j = k;
+            for (; j < bSize; j++) {
+                if (bMatches[j]) {
                     k = j + 1;
                     break;
                 }
             }
 
-            if (a[i] != b[j]) {
+            if (j < bSize && a[i] != b[j]) {
                 numTrans += 1;
             }
         }
     }
 
-    float weight = (m / aSize + m / bSize + (m - (numTrans / 2)) / m) / 3;
-    float l = 0;
-    float p = 0.1;
+    qreal weight = (m / aSize + m / bSize + (m - (numTrans / 2.0)) / m) / 3;
+    qreal l = 0;
+    qreal p = 0.1;
     if (weight > 0.7) {
         while (l < aSize && l < bSize && a[l] == b[l] && l < 4) {
             l += 1;
