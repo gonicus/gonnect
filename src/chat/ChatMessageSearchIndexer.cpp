@@ -165,15 +165,18 @@ bool ChatMessageSearchIndexer::removeMessage(const QString &id)
     return true;
 }
 
-bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid)
+bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid, bool byDate,
+                                                    qint64 timestamp)
 {
     if (!m_db) {
         return false;
     }
 
     // FTS
-    const QString ftsStatement = "DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM "
-                                 "messages_map WHERE room_uid = ?)";
+    const QString ftsStatement =
+            QString("DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM "
+                    "messages_map WHERE %1);")
+                    .arg(byDate ? "room_uid = ? AND timestamp < ?" : "room_uid = ?");
 
     Statement fts;
     if (sqlite3_prepare_v2(m_db, ftsStatement.toUtf8(), -1, &fts.statement, nullptr) != SQLITE_OK) {
@@ -181,6 +184,9 @@ bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid)
         return false;
     }
     sqlite3_bind_text(fts.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
+    if (byDate) {
+        sqlite3_bind_int64(fts.statement, 2, timestamp);
+    }
 
     if (sqlite3_step(fts.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -188,7 +194,9 @@ bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid)
     }
 
     // Mapping
-    const QString mappingStatement = "DELETE FROM messages_map WHERE room_uid = ?;";
+    const QString mappingStatement =
+            QString("DELETE FROM messages_map WHERE %1;")
+                    .arg(byDate ? "room_uid = ? AND timestamp < ?" : "room_uid = ?");
 
     Statement mapping;
     if (sqlite3_prepare_v2(m_db, mappingStatement.toUtf8(), -1, &mapping.statement, nullptr)
@@ -197,47 +205,9 @@ bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid)
         return false;
     }
     sqlite3_bind_text(mapping.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
-
-    if (sqlite3_step(mapping.statement) != SQLITE_DONE) {
-        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
-        return false;
+    if (byDate) {
+        sqlite3_bind_int64(mapping.statement, 2, timestamp);
     }
-
-    return true;
-}
-
-bool ChatMessageSearchIndexer::removeMessagesByStaleDate(qint64 timestamp)
-{
-    if (!m_db) {
-        return false;
-    }
-
-    // FTS
-    const QString ftsStatement = "DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM "
-                                 "messages_map WHERE timestamp < ?)";
-
-    Statement fts;
-    if (sqlite3_prepare_v2(m_db, ftsStatement.toUtf8(), -1, &fts.statement, nullptr) != SQLITE_OK) {
-        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
-        return false;
-    }
-    sqlite3_bind_int64(fts.statement, 1, timestamp);
-
-    if (sqlite3_step(fts.statement) != SQLITE_DONE) {
-        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
-        return false;
-    }
-
-    // Mapping
-    const QString mappingStatement = "DELETE FROM messages_map WHERE timestamp < ?;";
-
-    Statement mapping;
-    if (sqlite3_prepare_v2(m_db, mappingStatement.toUtf8(), -1, &mapping.statement, nullptr)
-        != SQLITE_OK) {
-        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
-        return false;
-    }
-    sqlite3_bind_int64(mapping.statement, 1, timestamp);
 
     if (sqlite3_step(mapping.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -261,14 +231,14 @@ bool ChatMessageSearchIndexer::updateMessage(const Message &message)
     return exec("COMMIT;");
 }
 
-QString ChatMessageSearchIndexer::getLatestMessageUid()
+QString ChatMessageSearchIndexer::getLatestMessageUidByRoom(const QString &roomUid)
 {
     if (!m_db) {
         return "";
     }
 
-    const QString queryStatement =
-            "SELECT message_uid FROM messages_map ORDER BY timestamp DESC LIMIT 1;";
+    const QString queryStatement = "SELECT message_uid FROM messages_map WHERE room_uid = ? "
+                                   "ORDER BY timestamp DESC LIMIT 1;";
 
     Statement query;
     if (sqlite3_prepare_v2(m_db, queryStatement.toUtf8(), -1, &query.statement, nullptr)
@@ -276,6 +246,7 @@ QString ChatMessageSearchIndexer::getLatestMessageUid()
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return "";
     }
+    sqlite3_bind_text(query.statement, 1, roomUid.toUtf8(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(query.statement) == SQLITE_ROW) {
         const auto *latestMessageUid = sqlite3_column_text(query.statement, 0);

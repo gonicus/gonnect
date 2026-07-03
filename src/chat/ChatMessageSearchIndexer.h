@@ -54,12 +54,11 @@ public:
     bool addMessages(const QList<Message> &messages);
 
     bool removeMessage(const QString &id);
-    bool removeMessagesByRoom(const QString &roomUid);
-    bool removeMessagesByStaleDate(qint64 timestamp);
+    bool removeMessagesByRoom(const QString &roomUid, bool byDate = false, qint64 timestamp = 0);
 
     bool updateMessage(const Message &message);
 
-    QString getLatestMessageUid();
+    QString getLatestMessageUidByRoom(const QString &roomUid);
 
     QList<SearchResult> search(const QString &query, int limit = 20);
 
