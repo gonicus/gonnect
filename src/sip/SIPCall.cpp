@@ -148,6 +148,9 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_managerNotified = true;
     }
 
+    if (!isActive()) {
+        return;
+    }
     const pj::CallInfo ci = getInfo();
     const auto remoteUri = QString::fromStdString(ci.remoteUri);
 
