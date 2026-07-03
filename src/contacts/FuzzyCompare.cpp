@@ -22,10 +22,12 @@ int FuzzyCompare::levenshteinDistance(const QString &a, const QString &b)
     for (int i = 0; i < aSize; ++i) {
         v1[0] = i + 1;
 
+        const QChar aCharLower = a[i].toLower();
+
         for (int j = 0; j < bSize; ++j) {
             const int deletionCost = v0[j + 1] + 1;
             const int insertionCost = v1[j] + 1;
-            const int substitutionCost = v0[j] + (a[i] == b[j] ? 0 : 1);
+            const int substitutionCost = v0[j] + (aCharLower == b[j].toLower() ? 0 : 1);
             v1[j + 1] = std::min(std::min(deletionCost, insertionCost), substitutionCost);
         }
 
@@ -48,7 +50,7 @@ qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
     }
 
     // Exit early if they're an exact match.
-    if (a == b) {
+    if (QString::compare(a, b, Qt::CaseInsensitive) == 0) {
         return 1;
     }
 
@@ -63,7 +65,7 @@ qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
         const int high = std::min(bSize - 1, i + range);
 
         for (int j = low; j <= high; j++) {
-            if (!aMatches[i] && !bMatches[j] && a[i] == b[j]) {
+            if (!aMatches[i] && !bMatches[j] && a[i].toLower() == b[j].toLower()) {
                 m += 1;
                 aMatches[i] = true;
                 bMatches[j] = true;
@@ -91,7 +93,7 @@ qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
                 }
             }
 
-            if (j < bSize && a[i] != b[j]) {
+            if (j < bSize && a[i].toLower() != b[j].toLower()) {
                 numTrans += 1;
             }
         }
@@ -101,7 +103,7 @@ qreal FuzzyCompare::jaroWinklerDistance(const QString &a, const QString &b)
     qreal l = 0;
     qreal p = 0.1;
     if (weight > 0.7) {
-        while (l < aSize && l < bSize && a[l] == b[l] && l < 4) {
+        while (l < aSize && l < bSize && a[l].toLower() == b[l].toLower() && l < 4) {
             l += 1;
         }
 
