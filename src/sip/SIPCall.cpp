@@ -148,7 +148,18 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_managerNotified = true;
     }
 
-    const pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "onCallState: call info unavailable, treating as disconnected:"
+                             << QString::fromStdString(err.info(false));
+        m_statsTimer.stop();
+        m_account->removeCall(this);
+        m_isEstablished = false;
+        m_earlyCallState = false;
+        return;
+    }
     const auto remoteUri = QString::fromStdString(ci.remoteUri);
 
     if (!m_isSilent && !m_historyItem) {
@@ -325,7 +336,14 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
     auto &audManager = AudioManager::instance();
 
-    pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "onCallMediaState: call info unavailable, session terminated:"
+                             << QString::fromStdString(err.info(false));
+        return;
+    }
     pj::AudioMedia aud_med;
 
     pj::AudioMedia &speaker_media = audManager.getPlaybackDevMedia();
@@ -507,7 +525,14 @@ void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 
 pj::AudioMedia *SIPCall::audioMedia() const
 {
-    const auto callInfo = getInfo();
+    pj::CallInfo callInfo;
+    try {
+        callInfo = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "audioMedia: call info unavailable, session terminated:"
+                             << QString::fromStdString(err.info(false));
+        return nullptr;
+    }
 
     for (unsigned i = 0; i < callInfo.media.size(); ++i) {
         if (callInfo.media[i].type == PJMEDIA_TYPE_AUDIO) {
