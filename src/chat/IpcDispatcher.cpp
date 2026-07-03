@@ -25,6 +25,7 @@
 #include "GlobalStateAggregator.h"
 #include "PlatformSession.h"
 #include "SelectionState.h"
+#include "FileHelper.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -589,8 +590,13 @@ void IpcDispatcher::init()
 
     args.append({ "--log-level", argLogLevel });
 
-    // args.append({ "--log-file-path",
-    // QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) });
+    const auto logFilePath = FileHelper::instance().makeLogFilePath(plugin->displayName);
+    if (logFilePath.isEmpty()) {
+        qCWarning(lcIpcDispatcher)
+                << "Unable to create valid log file path - --log-file-path will not be set";
+    } else {
+        args.append({ "--log-file-path", logFilePath });
+    }
 
     // Set positional arguments
     args.append({ m_ipc.fullRequestServerName(), m_ipc.fullResponseServerName() });

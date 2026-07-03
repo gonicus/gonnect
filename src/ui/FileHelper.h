@@ -10,11 +10,8 @@ class FileHelper : public QObject
 public:
     static FileHelper &instance()
     {
-        static FileHelper *_instance = nullptr;
-        if (!_instance) {
-            _instance = new FileHelper;
-        }
-        return *_instance;
+        static FileHelper fh;
+        return fh;
     };
 
     /// List of file name filters for supported image files (as used by a file picker dialog)
@@ -32,6 +29,9 @@ public:
 
     /// Return absolute path to the default download folder.
     Q_INVOKABLE QString downloadFolderPath() const;
+
+    /// Creates a file path to a log file from the name and ensures the folder path exists.
+    QString makeLogFilePath(const QString &name) const;
 
 private:
     explicit FileHelper(QObject *parent = nullptr);
