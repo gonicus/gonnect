@@ -775,6 +775,29 @@ void SIPCall::onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm)
     // TODO: account calls[]?
 }
 
+void SIPCall::onCallTransferStatus(pj::OnCallTransferStatusParam &prm)
+{
+    const int code = prm.statusCode;
+    const QString reason = QString::fromStdString(prm.reason);
+
+    if (code < 200) {
+        prm.cont = true;
+        return;
+    }
+
+    QPointer<SIPCall> self(this);
+    QTimer::singleShot(0, m_account, [self, code, reason]() {
+        if (!self) {
+            return;
+        }
+        if (code / 100 == 2) {
+            Q_EMIT self->transferSucceeded();
+        } else {
+            Q_EMIT self->transferFailed(code, reason);
+        }
+    });
+}
+
 void SIPCall::createOngoingCallNotification()
 {
     if (PlatformSession::instance().isScreenShareActive()) {

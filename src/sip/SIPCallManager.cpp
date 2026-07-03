@@ -543,8 +543,47 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
         return;
     }
 
-    toCall->xferReplaces(*fromCall, pj::CallOpParam());
-    endCall(toCall);
+    QPointer<SIPCall> fromPtr(fromCall);
+    QPointer<SIPCall> toPtr(toCall);
+
+    auto *guard = new QObject(this);
+
+    connect(toCall, &SIPCall::transferSucceeded, guard, [guard, fromPtr, toPtr]() {
+        if (toPtr) {
+            toPtr->account()->hangup(toPtr->getId());
+        }
+        if (fromPtr) {
+            fromPtr->account()->hangup(fromPtr->getId());
+        }
+        guard->deleteLater();
+    });
+
+    connect(toCall, &SIPCall::transferFailed, guard,
+            [guard, toPtr](int code, const QString &reason) {
+                qCCritical(lcSIPCallManager) << "Call transfer failed:" << code << reason;
+
+                if (toPtr && toPtr->isHolding()) {
+                    toPtr->unhold();
+                }
+                guard->deleteLater();
+            });
+
+    // Timeout if no final NOTIFY received
+    QTimer::singleShot(30s, guard, [guard, toPtr]() {
+        qCWarning(lcSIPCallManager) << "Call transfer timed out without final NOTIFY";
+        if (toPtr && toPtr->isHolding()) {
+            toPtr->unhold();
+        }
+        guard->deleteLater();
+    });
+
+    // Actual transfer
+    try {
+        toCall->xferReplaces(*fromCall, pj::CallOpParam());
+    } catch (const pj::Error &err) {
+        qCCritical(lcSIPCallManager) << "xferReplaces faild:" << QString::fromStdString(err.info());
+        guard->deleteLater();
+    }
 }
 
 SIPCall *SIPCallManager::findCall(const QString &accountId, int callId) const

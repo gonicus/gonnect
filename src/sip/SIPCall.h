@@ -27,6 +27,7 @@ public:
     void onCallState(pj::OnCallStateParam &prm) override;
     void onCallTransferRequest(pj::OnCallTransferRequestParam &prm) override;
     void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm) override;
+    void onCallTransferStatus(pj::OnCallTransferStatusParam &prm) override;
     void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
     void onInstantMessage(pj::OnInstantMessageParam &prm) override;
     void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
@@ -114,6 +115,8 @@ Q_SIGNALS:
     void missed();
     void ringing();
     void establishedChanged();
+    void transferSucceeded();
+    void transferFailed(int statusCode, QString reason);
     void earlyCallStateChanged();
     void isHoldingChanged();
     void isBlockedChanged();
