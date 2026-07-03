@@ -82,10 +82,28 @@ bool FileHelper::copyFile(const QString &fromPath, const QString &toPath) const
 
 QString FileHelper::fileNameFromPath(const QString &path) const
 {
-    return QFile(path).fileName();
+    const QUrl url = QUrl::fromUserInput(path);
+    return QFileInfo(url.toLocalFile()).fileName();
 }
 
 QString FileHelper::downloadFolderPath() const
 {
     return QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+}
+
+qint64 FileHelper::fileSizeFromPath(const QString &path) const
+{
+    const QUrl url = QUrl::fromUserInput(path);
+    return QFileInfo(url.toLocalFile()).size();
+}
+
+qint64 FileHelper::fileSizesFromPaths(const QList<QUrl> &urls) const
+{
+    qint64 sum = 0;
+
+    for (const auto &url : urls) {
+        sum += QFileInfo(url.toLocalFile()).size();
+    }
+
+    return sum;
 }

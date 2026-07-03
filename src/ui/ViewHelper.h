@@ -208,6 +208,7 @@ Q_SIGNALS:
     void showEditMessageDialog(IChatProvider *provider, QString roomId, QString messageId,
                                QString content);
     void showStatusTextEditDialog();
+    void showFileUploadDialog(IChatRoom *chatRoom, QList<QUrl> fileUrls);
     void showEmergency(QString accountId, int callId, QString displayName);
     void hideEmergency();
     void showConferenceChat();
@@ -217,7 +218,6 @@ Q_SIGNALS:
     void showKnockRoomDialog(IChatProvider *provider, QString roomId);
     void showLargeImage(QUrl imageFilePath);
     void showLargeVideo(ChatMessageContentVideoFile *file);
-    void showSendPreviewImage(QUrl imageFilePath, QString roomId);
 
     void openMeetingRequested(QString meetingId, QString displayName,
                               IConferenceConnector::StartFlags startFlags,

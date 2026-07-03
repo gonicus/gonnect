@@ -35,6 +35,17 @@
     </message>
 </context>
 <context>
+    <name>FileSelectionOverview</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="32"/>
+        <source>Shall the following file(s) be sent? (%1)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>PublicRoomSearch</name>
     <message numerus="yes">
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="160"/>
