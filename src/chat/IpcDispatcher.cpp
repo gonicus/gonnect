@@ -2649,10 +2649,8 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
         return "";
     }
 
-    const auto nonUrlPath = filePath.startsWith("file://") ? filePath.mid(7) : filePath;
-    if (nonUrlPath.startsWith(uploadFolderPath)) {
-        return QString("file://%1").arg(nonUrlPath);
-    }
+    const QUrl sourceUrl(filePath);
+    const auto nonUrlPath = sourceUrl.isLocalFile() ? sourceUrl.toLocalFile() : filePath;
 
     QString suffix;
     if (filePath.contains('.')) {
@@ -2661,9 +2659,13 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
 
     const auto uuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
     const QString newPath = QString("%1/%2%3").arg(uploadFolderPath, uuid, suffix);
+    QFile sourceFile(nonUrlPath);
 
-    if (!QFile::copy(nonUrlPath, newPath)) {
-        qCCritical(lcIpcDispatcher) << "Unable to copy" << filePath << "to" << newPath;
+    if (!sourceFile.copy(newPath)) {
+        const QFileDevice::FileError err = sourceFile.error();
+        const QString errorMsg = sourceFile.errorString();
+        qCCritical(lcIpcDispatcher) << "Unable to copy" << filePath << "to" << newPath
+                                    << "code:" << err << "error message:" << errorMsg;
         return "";
     }
 
