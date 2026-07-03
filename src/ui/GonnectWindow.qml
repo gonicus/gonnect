@@ -506,11 +506,12 @@ BaseWindow {
                                  { chatProvider, roomId, messageId, text: content })
         }
         function onShowFileUploadDialog(chatRoom : IChatRoom, fileUrls : list<url>) {
-            if (!chatRoom) {
-                throw new Error("chatRoom is mandatory")
+            if (chatRoom) {
+                drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FileSelectionOverview.qml",
+                                     { chatRoom, fileUrls })
+            } else {
+                console.error("showFileUploadDialog was called width chatRoom=nullptr and is therefore ignored")
             }
-            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FileSelectionOverview.qml",
-                                 { chatRoom, fileUrls })
         }
         function onShowLargeImage(imageFilePath : url) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeImage.qml", { source : imageFilePath })
