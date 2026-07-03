@@ -152,8 +152,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_statsTimer.stop();
         if (!m_isSilent
             && !(GlobalCallState::instance().globalCallState() & ICallState::State::Migrating)) {
-            setCallState(ICallState::State::Idle
-                         | (callState() & ICallState::State::Migrating));
+            setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
         }
         m_account->removeCall(this);
         m_isEstablished = false;
@@ -174,8 +173,7 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         ringToneFactory.ringingTone()->stop();
         if (!m_isSilent
             && !(GlobalCallState::instance().globalCallState() & ICallState::State::Migrating)) {
-            setCallState(ICallState::State::Idle
-                         | (callState() & ICallState::State::Migrating));
+            setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
         }
         if (isEmergencyCall()) {
             Q_EMIT ViewHelper::instance().hideEmergency();
