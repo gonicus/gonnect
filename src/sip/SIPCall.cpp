@@ -151,15 +151,30 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     if (!isActive()) {
         return;
     }
-    const pj::CallInfo ci = getInfo();
+
+    auto &ringToneFactory = RingToneFactory::instance();
+
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "Error: onCallState called, but was already terminated:"
+                             << err.info(false);
+        m_statsTimer.stop();
+        ringToneFactory.zipTone()->stop();
+        ringToneFactory.ringingTone()->stop();
+        m_account->removeCall(this);
+        m_isEstablished = false;
+        m_earlyCallState = false;
+        return;
+    }
+
     const auto remoteUri = QString::fromStdString(ci.remoteUri);
 
     if (!m_isSilent && !m_historyItem) {
         setContactInfo(remoteUri, ci.role != PJSIP_ROLE_UAC);
         updateIsBlocked();
     }
-
-    auto &ringToneFactory = RingToneFactory::instance();
 
     const auto statusCode = ci.lastStatusCode;
     qCInfo(lcSIPCall).nospace() << "Call State: " << ci.stateText << " (" << remoteUri << ")"
@@ -787,6 +802,7 @@ void SIPCall::onCallTransferStatus(pj::OnCallTransferStatusParam &prm)
         prm.cont = true;
         return;
     }
+    prm.cont = false;
 
     QPointer<SIPCall> self(this);
     QTimer::singleShot(0, m_account, [self, code, reason]() {
