@@ -10,7 +10,7 @@ Item {
     implicitWidth: label.implicitWidth
     implicitHeight: label.implicitHeight
 
-    signal dropAccepted(string url)
+    signal dropAccepted(list<url> url)
 
     property bool compact: false
 
@@ -86,14 +86,15 @@ Item {
                    }
 
         onDropped: drop => {
-                       if (dropInArea.isValid(drop)) {
+                       if (dropInArea.isInputValid) {
                            drop.accept(Qt.CopyAction)
-                           control.dropAccepted(drop.urls[0].toString())
+                           control.dropAccepted(FileContentHelper.uploadableUrls(dropInArea.uploadUrls))
                        }
                    }
 
         property bool isInputValid: false
         property string invalidMessage
+        property list<url> uploadUrls
 
         function isValid(ev) {
 
@@ -112,31 +113,32 @@ Item {
                 bailOut(qsTr("Not a file"), "drag event has no urls")
                 return false
             }
-            if (ev.urls.length !== 1) {
-                bailOut(qsTr("Only single file allowed"), `${ev.urls.length} urls in drag event`)
+
+            const urls = FileContentHelper.uploadableUrls(ev.urls)
+
+            if (!urls.length) {
+                bailOut(qsTr("No valid files"), "no uploadable urls")
                 return false
             }
 
-            const url = ev.urls[0]
-            console.debug(category, "file url", url)
+            for (const url of urls) {
+                console.debug(category, "Checking single file url", url)
 
-            if (!url.toString().startsWith("file://")) {
-                bailOut(qsTr("Disallowed type"), "Not a local file url")
-                return false
-            }
-            if (!FileContentHelper.isLocalReadable(url)) {
-                bailOut(qsTr("File not readable"), "File not readable")
-                return false
-            }
-            if (FileContentHelper.isLocalDirectory(url)) {
-                bailOut(qsTr("Directories are not allowed"), "Url points to a directory, not a file")
-                return false
-            }
-            if (!FileContentHelper.isLocalFile(url)) {
-                bailOut(qsTr("Not a file"), "Url does not point to a valid file")
-                return false
+                if (!url.toString().startsWith("file://")) {
+                    bailOut(qsTr("Disallowed type"), "Not a local file url")
+                    return false
+                }
+                if (!FileContentHelper.isLocalReadable(url)) {
+                    bailOut(qsTr("File not readable"), "File not readable")
+                    return false
+                }
+                if (!FileContentHelper.isLocalDirectory(url) && !FileContentHelper.isLocalFile(url)) {
+                    bailOut(qsTr("Not a file"), "Url does not point to a valid local file")
+                    return false
+                }
             }
 
+            dropInArea.uploadUrls = urls
             dropInArea.isInputValid = true
             return true
         }

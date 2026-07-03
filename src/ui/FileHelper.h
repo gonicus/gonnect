@@ -33,6 +33,12 @@ public:
     /// Creates a file path to a log file from the name and ensures the folder path exists.
     QString makeLogFilePath(const QString &name) const;
 
+    /// Return the size of the file at the specified path or 0.
+    Q_INVOKABLE qint64 fileSizeFromPath(const QString &path) const;
+
+    /// Return the summed size all files.
+    Q_INVOKABLE qint64 fileSizesFromPaths(const QList<QUrl> &urls) const;
+
 private:
     explicit FileHelper(QObject *parent = nullptr);
 };

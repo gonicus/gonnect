@@ -33,6 +33,8 @@ public:
     Q_INVOKABLE bool isLocalDirectory(const QUrl &url) const;
     Q_INVOKABLE bool isLocalReadable(const QUrl &url) const;
 
+    Q_INVOKABLE QList<QUrl> uploadableUrls(const QList<QUrl> &urls) const;
+
 private:
     FileContentHelper(QObject *parent = nullptr);
 };

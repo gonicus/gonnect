@@ -110,7 +110,7 @@ Item {
         id: internal
 
         function openEmojiPicker(p : point) {
-            const item = ViewHelper.globalEmojiPickerPopup as Popup
+            const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
             if (item.visible) {
                 item.close()
             } else {
@@ -125,11 +125,11 @@ Item {
             control.chatProvider.toggleReaction(control.roomId,
                                                 control.eventId,
                                                 emoji)
-            ;(ViewHelper.globalEmojiPickerPopup as Popup).close()
+            ;(ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup).close()
         }
 
         function onEmojiPopupHide() {
-            const item = ViewHelper.globalEmojiPickerPopup as Popup
+            const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
             if (!item.visible) {
                 item.emojiPicked.disconnect(internal.onEmojiSelected)
                 item.visibleChanged.disconnect(internal.onEmojiPopupHide)
