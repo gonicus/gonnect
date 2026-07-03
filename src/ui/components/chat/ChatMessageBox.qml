@@ -461,7 +461,7 @@ Item {
             id: emojiButton
             icon: Icons.smiley
             onClicked: () => {
-                const item = ViewHelper.globalEmojiPickerPopup as Popup
+                const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
                 if (item.visible) {
                     item.close()
                 } else {
@@ -477,7 +477,7 @@ Item {
             }
 
             function onEmojiPopupHide() {
-                const item = ViewHelper.globalEmojiPickerPopup as Popup
+                const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
                 if (!item.visible) {
                     item.emojiPicked.disconnect(emojiButton.onEmojiSelected)
                     item.visibleChanged.disconnect(emojiButton.onEmojiPopupHide)

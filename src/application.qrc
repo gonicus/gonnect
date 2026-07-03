@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
+        <file>ui/components/popups/FileSelectionOverview.qml</file>
     </qresource>
     <qresource prefix="/emojis">
         <file alias="emojis.dat">../resources/emojis/emojis.dat</file>
