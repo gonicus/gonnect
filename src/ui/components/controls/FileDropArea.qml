@@ -86,14 +86,15 @@ Item {
                    }
 
         onDropped: drop => {
-                       if (dropInArea.isValid(drop)) {
+                       if (dropInArea.isInputValid) {
                            drop.accept(Qt.CopyAction)
-                           control.dropAccepted(FileContentHelper.uploadableUrls(drop.urls))
+                           control.dropAccepted(FileContentHelper.uploadableUrls(dropInArea.uploadUrls))
                        }
                    }
 
         property bool isInputValid: false
         property string invalidMessage
+        property list<url> uploadUrls
 
         function isValid(ev) {
 
@@ -137,6 +138,7 @@ Item {
                 }
             }
 
+            dropInArea.uploadUrls = urls
             dropInArea.isInputValid = true
             return true
         }
