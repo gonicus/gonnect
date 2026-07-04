@@ -5,6 +5,7 @@
 #include "ChatMessageContentText.h"
 #include "ChatMessageContentVideoFile.h"
 
+#include <QFileInfo>
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(lcIpcChatRoom, "gonnect.app.chat.IpcChatRoom")
@@ -118,7 +119,10 @@ void IpcChatRoom::sendFile(const QString &filePath)
         return;
     }
 
-    dispatcher->sendFile(id(), uploadedUrl, filePath.split(QChar('/')).last());
+    const QUrl url(filePath);
+    const auto originalFileName = url.isLocalFile() ? QFileInfo(url.toLocalFile()).fileName()
+                                                    : filePath.split(QChar('/')).last();
+    dispatcher->sendFile(id(), uploadedUrl, originalFileName);
 }
 
 void IpcChatRoom::sendTypingPing()
