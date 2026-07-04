@@ -1,11 +1,15 @@
 #include "FileHelper.h"
 
 #include <QFile>
+#include <QDir>
+#include <QFileInfo>
 #include <QMediaFormat>
 #include <QMimeType>
 #include <QImageReader>
 #include <QStandardPaths>
-#include <QFileInfo>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcFileHelper, "gonnect.app.ui.FileHelper")
 
 FileHelper::FileHelper(QObject *parent) : QObject{ parent } { }
 
@@ -89,6 +93,26 @@ QString FileHelper::fileNameFromPath(const QString &path) const
 QString FileHelper::downloadFolderPath() const
 {
     return QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+}
+
+QString FileHelper::makeLogFilePath(const QString &name) const
+{
+    const QString baseDirStr =
+            QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    const QString subFolderName = "log";
+
+    QDir baseDir(baseDirStr);
+    if (!baseDir.mkpath(subFolderName)) {
+        qCCritical(lcFileHelper) << "Error, folder" << baseDir.filePath(subFolderName)
+                                 << "could not be created";
+        return QString();
+    }
+
+    baseDir.cd(subFolderName);
+    const QString finalFilePath = baseDir.filePath(name + QStringLiteral(".log"));
+
+    qCInfo(lcFileHelper) << "Created log file path" << finalFilePath;
+    return finalFilePath;
 }
 
 qint64 FileHelper::fileSizeFromPath(const QString &path) const
