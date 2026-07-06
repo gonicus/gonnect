@@ -575,6 +575,10 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
                 guard->deleteLater();
             });
 
+    // Fallback: transfer finished if one leg is teared down
+    connect(toCall, &QObject::destroyed, guard, [guard]() { guard->deleteLater(); });
+    connect(fromCall, &QObject::destroyed, guard, [guard]() { guard->deleteLater(); });
+
     // Timeout if no final NOTIFY received
     QTimer::singleShot(30s, guard, [guard, toPtr]() {
         qCWarning(lcSIPCallManager) << "Call transfer timed out without final NOTIFY";
