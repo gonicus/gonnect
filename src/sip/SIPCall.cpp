@@ -304,7 +304,9 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             && !(GlobalCallState::instance().globalCallState() & ICallState::State::Migrating)) {
             setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
 
-            if (m_isEstablished) {
+            if (m_inTransfer) {
+                // Don't play any tones when in transfer
+            } else if (m_isEstablished) {
                 ringToneFactory.endTone()->start();
             } else if (!m_incoming) {
                 if (statusCode == PJSIP_SC_BUSY_HERE) {

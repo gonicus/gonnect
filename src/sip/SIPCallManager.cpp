@@ -553,6 +553,9 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
     QPointer<SIPCall> fromPtr(fromCall);
     QPointer<SIPCall> toPtr(toCall);
 
+    fromCall->setInTransfer(true);
+    toCall->setInTransfer(true);
+
     auto *guard = new QObject(this);
 
     connect(toCall, &SIPCall::transferSucceeded, guard, [guard, fromPtr, toPtr]() {
@@ -566,8 +569,15 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
     });
 
     connect(toCall, &SIPCall::transferFailed, guard,
-            [guard, toPtr](int code, const QString &reason) {
+            [guard, fromPtr, toPtr](int code, const QString &reason) {
                 qCCritical(lcSIPCallManager) << "Call transfer failed:" << code << reason;
+
+                if (fromPtr) {
+                    fromPtr->setInTransfer(false);
+                }
+                if (toPtr) {
+                    toPtr->setInTransfer(false);
+                }
 
                 if (toPtr && toPtr->isHolding()) {
                     toPtr->unhold();
@@ -580,8 +590,16 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
     connect(fromCall, &QObject::destroyed, guard, [guard]() { guard->deleteLater(); });
 
     // Timeout if no final NOTIFY received
-    QTimer::singleShot(30s, guard, [guard, toPtr]() {
+    QTimer::singleShot(30s, guard, [guard, fromPtr, toPtr]() {
         qCWarning(lcSIPCallManager) << "Call transfer timed out without final NOTIFY";
+
+        if (fromPtr) {
+            fromPtr->setInTransfer(false);
+        }
+        if (toPtr) {
+            toPtr->setInTransfer(false);
+        }
+
         if (toPtr && toPtr->isHolding()) {
             toPtr->unhold();
         }
@@ -592,7 +610,10 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
     try {
         toCall->xferReplaces(*fromCall, pj::CallOpParam());
     } catch (const pj::Error &err) {
-        qCCritical(lcSIPCallManager) << "xferReplaces faild:" << QString::fromStdString(err.info());
+        qCCritical(lcSIPCallManager)
+                << "xferReplaces failed:" << QString::fromStdString(err.info());
+        fromPtr->setInTransfer(false);
+        toPtr->setInTransfer(false);
         guard->deleteLater();
     }
 }
