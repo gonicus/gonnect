@@ -1,8 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
+import QtQuick.Controls
 import QtQuick.Controls.impl
 import base
 
@@ -25,9 +24,6 @@ Popup {
         name: "gonnect.qml.SearchResultPopup"
         defaultLogLevel: LoggingCategory.Warning
     }
-
-    Material.accent: Theme.accentColor
-    Material.theme: Theme.isDarkMode ? Material.Dark : Material.Light
 
     property string searchText
 
@@ -727,13 +723,7 @@ Popup {
 
     background: Rectangle {
         radius: 4
-        color: parent.Material.dialogColor
-
-        layer.enabled: control.enabled
-        layer.effect: RoundedElevationEffect {
-            elevation: 4
-            roundedScale: Material.ExtraSmallScale
-        }
+        color: Theme.backgroundColor
     }
 }
 

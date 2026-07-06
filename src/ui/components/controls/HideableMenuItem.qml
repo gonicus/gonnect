@@ -1,6 +1,6 @@
 import QtQuick
 
-import QtQuick.Controls.Material
+import QtQuick.Controls
 
 MenuItem {
     id: control

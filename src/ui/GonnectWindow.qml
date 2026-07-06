@@ -423,7 +423,7 @@ BaseWindow {
         }
     }
 
-    readonly property Popup globalEmojiPickerPopupItem: EmojiPickerPopup {
+    readonly property var globalEmojiPickerPopupItem: EmojiPickerPopup {
         id: globalEmojiPickerPopup
         Component.onCompleted: () => ViewHelper.globalEmojiPickerPopup = globalEmojiPickerPopup
     }

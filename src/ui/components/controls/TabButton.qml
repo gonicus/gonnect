@@ -2,9 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Templates as T
-import QtQuick.Controls.impl
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
+import QtQuick.Controls
 import base
 
 
@@ -22,7 +20,7 @@ T.TabButton {
 
     icon.width: 24
     icon.height: 24
-    icon.color: !enabled ? Material.hintTextColor : down || checked ? Material.accentColor : Material.foreground
+    icon.color: !enabled ? Theme.secondaryInactiveTextColor : down || checked ? Theme.accentColor : Theme.primaryTextColor
 
     font.family: "Noto Sans"
     font.pixelSize: 16
@@ -35,7 +33,7 @@ T.TabButton {
 
     contentItem: Label {
         text: control.text
-        color: !control.enabled ? control.Material.hintTextColor : control.down || control.checked ? control.Material.accentColor : Theme.secondaryTextColor
+        color: !control.enabled ? Theme.secondaryInactiveTextColor : control.down || control.checked ? Theme.accentColor : Theme.secondaryTextColor
         horizontalAlignment: Label.AlignHCenter
         elide: Label.ElideRight
 
@@ -45,7 +43,7 @@ T.TabButton {
     }
 
     background: Rectangle {
-        color: control.hovered ? control.Material.rippleColor : 'transparent'
+        color: control.hovered ? Theme.backgroundOffsetHoveredColor : 'transparent'
 
         topLeftRadius: control.topLeftRadius
         topRightRadius: control.topRightRadius

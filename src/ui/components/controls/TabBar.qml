@@ -2,8 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Templates as T
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
+import QtQuick.Controls
 import base
 
 T.TabBar {
@@ -45,7 +44,7 @@ T.TabBar {
                 height: 2
                 width: parent.width
                 y: control.position === T.TabBar.Footer ? 0 : parent.height - height
-                color: control.Material.accentColor
+                color: Theme.accentColor
             }
         }
     }
@@ -57,11 +56,6 @@ T.TabBar {
         bottomLeftRadius: control.bottomLeftRadius
         bottomRightRadius: control.bottomRightRadius
 
-        layer.enabled: control.Material.elevation > 0
-        layer.effect: ElevationEffect {
-            elevation: control.Material.elevation
-            fullWidth: true
-        }
 
         Rectangle {
             color: Theme.borderColor

@@ -5,7 +5,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Controls.impl
-import QtQuick.Controls.Material
+import QtQuick.Controls
 import base
 
 BaseWindow {

@@ -3,8 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Templates as T
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
+import QtQuick.Controls
 import QtQuick.Window
 
 T.Menu {
@@ -26,9 +25,6 @@ T.Menu {
     verticalPadding: 8
 
     transformOrigin: !cascade ? Item.Top : (mirrored ? Item.TopRight : Item.TopLeft)
-
-    Material.elevation: 4
-    Material.roundedScale: Material.ExtraSmallScale
 
     delegate: MenuItem { }
 
@@ -59,25 +55,19 @@ T.Menu {
 
     background: Rectangle {
         implicitWidth: 200
-        implicitHeight: control.Material.menuItemHeight
+        implicitHeight: 48
         // FullScale doesn't make sense for Menu.
-        radius: control.Material.roundedScale
-        color: control.Material.dialogColor
-
-        layer.enabled: control.Material.elevation > 0
-        layer.effect: RoundedElevationEffect {
-            elevation: control.Material.elevation
-            roundedScale: control.background.radius
-        }
+        radius: 4
+        color: Theme.backgroundColor
     }
 
     T.Overlay.modal: Rectangle {
-        color: control.Material.backgroundDimColor
+        color: "#60000000"
         Behavior on opacity { NumberAnimation { duration: 150 } }
     }
 
     T.Overlay.modeless: Rectangle {
-        color: control.Material.backgroundDimColor
+        color: "#60000000"
         Behavior on opacity { NumberAnimation { duration: 150 } }
     }
 }

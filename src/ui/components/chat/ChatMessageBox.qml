@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Dialogs
-import QtQuick.Controls.Material
+import QtQuick.Controls
 import QtQuick.Controls.impl
 import base
 

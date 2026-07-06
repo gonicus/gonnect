@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls.Material
+import QtQuick.Controls
 import QtWebEngine
 import QtWebChannel
 import base
