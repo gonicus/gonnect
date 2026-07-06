@@ -334,11 +334,12 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
 
     // Check if there is already a call for that target number
     for (auto call : std::as_const(m_calls)) {
-        auto callRemoteNumber = PhoneNumberUtil::numberFromSipUrl(
-                QString::fromStdString(call->getInfo().remoteUri));
+        const auto remoteUri = call->sipUrl();
+        auto callRemoteNumber = PhoneNumberUtil::numberFromSipUrl(remoteUri);
+
         if (number == callRemoteNumber) {
             qCInfo(lcSIPCallManager) << "skipping additional call to already connected URI"
-                                     << call->getInfo().remoteUri;
+                                     << remoteUri;
             return "";
         }
     }
@@ -606,7 +607,7 @@ SIPCall *SIPCallManager::findCall(const QString &remoteUri) const
 {
     if (!remoteUri.isEmpty()) {
         for (auto call : std::as_const(m_calls)) {
-            if (QString::fromStdString(call->getInfo().remoteUri) == remoteUri) {
+            if (call->sipUrl() == remoteUri) {
                 return call;
             }
         }
