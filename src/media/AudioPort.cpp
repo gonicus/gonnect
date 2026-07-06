@@ -151,7 +151,14 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
 {
     if (m_sink) {
         if (!m_io.isNull()) {
-            pj::MediaFormatAudio fmt = getPortInfo().format;
+            pj::MediaFormatAudio fmt;
+            try {
+                fmt = getPortInfo().format;
+            } catch (pj::Error &err) {
+                qCWarning(lcAudioPort)
+                        << "failed to get port info for silence write: " << err.info();
+                return;
+            }
             unsigned byteCount =
                     (fmt.clockRate * fmt.channelCount * (fmt.bitsPerSample / 8) * milliseconds)
                     / 1000;

@@ -879,9 +879,13 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
 {
     SIPCall *call = new SIPCall(this, iprm.callId);
     call->setIncoming(true);
-    pj::CallInfo ci = call->getInfo();
 
-    qCInfo(lcSIPAccount) << "Incoming Call:" << ci.remoteUri << " [" << ci.stateText << "]";
+    try {
+        const pj::CallInfo ci = call->getInfo();
+        qCInfo(lcSIPAccount) << "Incoming Call:" << ci.remoteUri << " [" << ci.stateText << "]";
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to get call info for incoming call:" << err.info();
+    }
 
     m_calls.push_back(call);
 
@@ -890,7 +894,14 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
 
 void SIPAccount::onRegState(pj::OnRegStateParam &prm)
 {
-    pj::AccountInfo ai = getInfo();
+    pj::AccountInfo ai;
+    try {
+        ai = getInfo();
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to get account info in onRegState:" << err.info();
+        return;
+    }
+
     qCInfo(lcSIPAccount).noquote().nospace()
             << "Account " << m_account
             << (ai.regIsActive ? " registered: (code=" : " unregister: (code=") << prm.code << ")";
@@ -990,7 +1001,12 @@ void SIPAccount::setCredentials(const QString &password)
     if (m_accountConfig.sipConfig.authCreds.size()) {
         pj::AuthCredInfo &info = m_accountConfig.sipConfig.authCreds.front();
         info.data = password.toStdString();
-        modify(m_accountConfig);
+        try {
+            modify(m_accountConfig);
+        } catch (pj::Error &err) {
+            qCCritical(lcSIPAccount)
+                    << "failed to update account config with new password:" << err.info();
+        }
     }
 
     // Update storage

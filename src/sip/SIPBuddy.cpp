@@ -41,7 +41,13 @@ SIPBuddy::~SIPBuddy() { }
 
 void SIPBuddy::onBuddyState()
 {
-    pj::BuddyInfo bi = getInfo();
+    pj::BuddyInfo bi;
+    try {
+        bi = getInfo();
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPBuddy) << "failed to get buddy info in onBuddyState:" << err.info(false);
+        return;
+    }
 
     SIPBuddyState::STATUS status = SIPBuddyState::STATUS::UNKNOWN;
     QString statusText = QString::fromStdString(bi.presStatus.statusText);

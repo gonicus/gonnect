@@ -104,6 +104,8 @@ public:
     void removeCall(SIPCall *call);
     void updateCallCount();
 
+    void updateConferenceBridge();
+
     QList<SIPCall *> calls() const { return m_calls; }
 
     ~SIPCallManager() = default;
