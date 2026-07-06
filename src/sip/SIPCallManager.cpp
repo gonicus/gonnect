@@ -314,7 +314,13 @@ void SIPCallManager::initBridge()
 {
     if (!m_bridgeConfigured) {
         auto &audDevManager = SIPManager::instance().endpoint().audDevManager();
-        audDevManager.setNullDev();
+        try {
+            audDevManager.setNullDev();
+        } catch (const pj::Error &err) {
+            qCCritical(lcSIPCallManager)
+                    << "failed to set null audio device:" << QString::fromStdString(err.info());
+            return;
+        }
 
         m_bridgeConfigured = true;
     }

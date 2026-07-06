@@ -53,12 +53,16 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     // This can only be done here for incoming calls, because an outgoing call has its infos not set
     // yet. But incoming calls must be treated here to check whether the contact/number is blocked
     if (callId >= 0) {
-        const pj::CallInfo ci = getInfo();
-        const auto remoteUri = QString::fromStdString(ci.remoteUri);
+        try {
+            const pj::CallInfo ci = getInfo();
+            const auto remoteUri = QString::fromStdString(ci.remoteUri);
 
-        if (!m_isSilent && !m_historyItem) {
-            setContactInfo(remoteUri, ci.role != PJSIP_ROLE_UAC);
-            updateIsBlocked();
+            if (!m_isSilent && !m_historyItem) {
+                setContactInfo(remoteUri, ci.role != PJSIP_ROLE_UAC);
+                updateIsBlocked();
+            }
+        } catch (const pj::Error &err) {
+            qCWarning(lcSIPCall) << "failed to get call info in constructor: " << err.info();
         }
     }
 
@@ -381,7 +385,12 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     RingToneFactory::instance().zipTone()->stop();
 
                     qCInfo(lcSIPCall) << "Found media, index" << i << "of" << ci.media.size();
-                    aud_med = getAudioMedia(i);
+                    try {
+                        aud_med = getAudioMedia(i);
+                    } catch (const pj::Error &err) {
+                        qCCritical(lcSIPCall) << "failed to get audio media: " << err.info();
+                        continue;
+                    }
 
                     try {
                         mic_media.startTransmit(aud_med);
@@ -552,7 +561,13 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
         const auto matchResult = regex.match(header);
         if (matchResult.hasMatch()) {
             const QString newIdentity = matchResult.captured("identity");
-            const pj::CallInfo ci = getInfo();
+            pj::CallInfo ci;
+            try {
+                ci = getInfo();
+            } catch (const pj::Error &err) {
+                qCWarning(lcSIPCall) << "failed to get call info in onCallTsxState: " << err.info();
+                return;
+            }
             setContactInfo(newIdentity, ci.role != PJSIP_ROLE_UAC);
             qCDebug(lcSIPCall) << "New call user identity found:" << newIdentity;
         }
@@ -829,7 +844,14 @@ void SIPCall::createOngoingCallNotification()
         return;
     }
 
-    pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to get call info in createOngoingCallNotification: "
+                             << err.info();
+        return;
+    }
 
     // Create notification text
     const auto contactInfo =
