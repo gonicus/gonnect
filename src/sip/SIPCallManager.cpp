@@ -679,32 +679,7 @@ void SIPCallManager::startConference()
         unholdAllCalls();
 
         QTimer::singleShot(100, this, [this]() {
-            if (m_calls.count() == 2) {
-                pj::AudioMedia *audioMedia1 = m_calls.at(0)->audioMedia();
-                pj::AudioMedia *audioMedia2 = m_calls.at(1)->audioMedia();
-
-                if (audioMedia1 && audioMedia2) {
-                    try {
-                        audioMedia1->startTransmit(*audioMedia2);
-                    } catch (pj::Error err) {
-                        qCCritical(lcSIPCallManager)
-                                << "Error transmitting audioMedia1 to audioMedia2:\n"
-                                << "  status:" << err.status << "\n"
-                                << "  reason:" << err.reason << "\n"
-                                << "  file and line:" << err.srcFile << err.srcLine;
-                    }
-                    try {
-                        audioMedia2->startTransmit(*audioMedia1);
-                    } catch (pj::Error err) {
-                        qCCritical(lcSIPCallManager)
-                                << "Error transmitting audioMedia2 to audioMedia1:\n"
-                                << "  status:" << err.status << "\n"
-                                << "  reason:" << err.reason << "\n"
-                                << "  file and line:" << err.srcFile << err.srcLine << "\n";
-                    }
-                }
-            }
-
+            updateConferenceBridge();
             GlobalCallState::instance().setIsPhoneConference(true);
             Q_EMIT isConferenceModeChanged();
         });
@@ -722,6 +697,36 @@ void SIPCallManager::endConference()
         Q_EMIT isConferenceModeChanged();
     } else {
         qCWarning(lcSIPCallManager) << "Not in conference mode";
+    }
+}
+
+void SIPCallManager::updateConferenceBridge()
+{
+    if (!m_isConferenceMode && m_calls.count() != 2) {
+        return;
+    }
+
+    pj::AudioMedia *audioMedia1 = m_calls.at(0)->audioMedia();
+    pj::AudioMedia *audioMedia2 = m_calls.at(1)->audioMedia();
+
+    if (audioMedia1 && audioMedia2) {
+        try {
+            audioMedia1->startTransmit(*audioMedia2);
+        } catch (pj::Error err) {
+            qCCritical(lcSIPCallManager) << "Error transmitting audioMedia1 to audioMedia2:\n"
+                                         << "  status:" << err.status << "\n"
+                                         << "  reason:" << err.reason << "\n"
+                                         << "  file and line:" << err.srcFile << err.srcLine;
+        }
+        try {
+            audioMedia2->startTransmit(*audioMedia1);
+        } catch (pj::Error err) {
+            qCCritical(lcSIPCallManager)
+                    << "Error transmitting audioMedia2 to audioMedia1:\n"
+                    << "  status:" << err.status << "\n"
+                    << "  reason:" << err.reason << "\n"
+                    << "  file and line:" << err.srcFile << err.srcLine << "\n";
+        }
     }
 }
 

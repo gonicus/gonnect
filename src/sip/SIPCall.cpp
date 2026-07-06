@@ -431,6 +431,10 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                                     this, m_sniffer->audioLevel());
                         });
                     }
+
+                    if (SIPCallManager::instance().isConferenceMode()) {
+                        SIPCallManager::instance().updateConferenceBridge();
+                    }
                 }
 
                 break;
