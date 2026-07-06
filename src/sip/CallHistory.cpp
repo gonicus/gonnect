@@ -295,7 +295,7 @@ void CallHistory::readFromDatabase()
                         query.value("contactId").toString(),
                         query.value("isSipSubscriptable").toBool(), query.value("id").toLongLong(),
                         query.value("durationSeconds").toUInt(), type,
-                        query.value("hops").toString().split(';'), this);
+                        query.value("hops").toString().split(';', Qt::SkipEmptyParts), this);
 
                 m_historyItems.push_back(item);
             }

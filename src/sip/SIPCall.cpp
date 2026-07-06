@@ -170,22 +170,22 @@ QString SIPCall::hopCauseToString(int cause) const
 
 void SIPCall::parseCallRouting(const QString &rawHeaders)
 {
-    static QRegularExpression uriRe(R"(<([^>]+)>)");
-    static QRegularExpression causeRe(R"(cause=(\d+))");
-    static QRegularExpression indexRe(R"(index=([\d.]+))");
-    static QRegularExpression reasonRe(R"(reason=([^;,\r\n]+))");
+    static const QRegularExpression uriRe(R"(<([^>]+)>)");
+    static const QRegularExpression causeRe(R"(cause=(\d+))", QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression indexRe(R"(index=([\d.]+))", QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression reasonRe(R"(reason=\"?([^;,\"\r\n]+))", QRegularExpression::CaseInsensitiveOption);
 
     // Parse SIP Diversion (draft-levy-sip-diversion-08) and History-Info (RFC 7044)
     // headers and feed it to a list of call hops.
     QList<SIPCallRoutingHop> historyInfoHops;
     QList<SIPCallRoutingHop> diversionHops;
 
-    QStringList headerLines = rawHeaders.toLower().split("\r\n");
+    QStringList headerLines = rawHeaders.split("\r\n");
 
     for (const QString &headerLine : std::as_const(headerLines)) {
 
         // History-Info
-        if (headerLine.startsWith("history-info:")) {
+        if (headerLine.startsWith("History-Info:", Qt::CaseInsensitive)) {
             const QString value = headerLine.mid(13).trimmed();
 
             SIPCallRoutingHop hop;
@@ -215,7 +215,7 @@ void SIPCall::parseCallRouting(const QString &rawHeaders)
             continue;
         }
 
-        if (headerLine.startsWith("diversion:")) {
+        if (headerLine.startsWith("Diversion:", Qt::CaseInsensitive)) {
             const QString value = headerLine.mid(10).trimmed();
 
             SIPCallRoutingHop hop;
