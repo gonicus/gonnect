@@ -272,7 +272,8 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom)
         msgReq.setFromMessageId(existingMessages.first()->eventId());
     }
 
-    const auto tag = sendRequest([&](RequestContainer &req) { req.setRoomMessagesRequest(msgReq); });
+    const auto tag =
+            sendRequest([&](RequestContainer &req) { req.setRoomMessagesRequest(msgReq); });
     m_roomListTags.insert(tag, chatRoom->id());
 }
 
@@ -967,7 +968,8 @@ QString IpcDispatcher::searchChatUser(const QString &searchPhrase)
     searchReq.setQuery(searchPhrase);
     searchReq.setLimit(50);
 
-    const auto tag = sendRequest([&](RequestContainer &req) { req.setUserSearchRequest(searchReq); });
+    const auto tag =
+            sendRequest([&](RequestContainer &req) { req.setUserSearchRequest(searchReq); });
     return QString::number(tag);
 }
 

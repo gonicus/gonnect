@@ -143,12 +143,12 @@ void IpcDispatcher::handleError(const de::gonicus::gonnect::ResponseContainer &r
         return;
     }
 
-    qCCritical(lcIpcDispatcher)
-            << QString("Error on IPC chat %1: %2 (%3 (%4))")
-                       .arg(m_settingsGroup,
-                            err.hasErrorString() ? err.errorString() : "<no error message>",
-                            codeStr)
-                       .arg(code);
+    qCCritical(lcIpcDispatcher) << QString("Error on IPC chat %1: %2 (%3 (%4))")
+                                           .arg(m_settingsGroup,
+                                                err.hasErrorString() ? err.errorString()
+                                                                     : "<no error message>",
+                                                codeStr)
+                                           .arg(code);
 
     if (err.hasErrorString()) {
         ErrorBus::instance().addError(tr("An IPC error ocurred (%1, %2 (code %3):\n%4")
@@ -671,8 +671,7 @@ void IpcDispatcher::handlePublicRoomListResponse(
                                   m_nextPublicRoomListResponseToken);
 }
 
-void IpcDispatcher::handleRoomChangeEvent(
-        const de::gonicus::gonnect::RoomChangeEvent &changeEvent)
+void IpcDispatcher::handleRoomChangeEvent(const de::gonicus::gonnect::RoomChangeEvent &changeEvent)
 {
     const auto &roomId = changeEvent.roomId();
     auto *room = m_roomLookup.value(roomId, nullptr);
@@ -800,8 +799,7 @@ void IpcDispatcher::handleVerificationStatusEvent(
 
     setIsDeviceVerified(statusEvent.isVerified());
 
-    if (m_isRecoveryKeyVerificationAvailable
-        != statusEvent.isRecoveryKeyVerificationAvailable()) {
+    if (m_isRecoveryKeyVerificationAvailable != statusEvent.isRecoveryKeyVerificationAvailable()) {
         m_isRecoveryKeyVerificationAvailable = statusEvent.isRecoveryKeyVerificationAvailable();
         Q_EMIT isRecoveryKeyVerificationAvailableChanged();
     }

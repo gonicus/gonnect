@@ -228,18 +228,18 @@ private:
     void handleUserSearchResponse(const de::gonicus::gonnect::UserSearchResponse &response,
                                   quint64 tag);
     void handleInvitedEvent(const de::gonicus::gonnect::InvitedEvent &invitedEvent);
-    void handlePublicRoomListResponse(
-            const de::gonicus::gonnect::PublicRoomListResponse &response, quint64 tag);
+    void handlePublicRoomListResponse(const de::gonicus::gonnect::PublicRoomListResponse &response,
+                                      quint64 tag);
     void handleRoomChangeEvent(const de::gonicus::gonnect::RoomChangeEvent &changeEvent);
     void handleRoomLeftEvent(const de::gonicus::gonnect::RoomLeftEvent &leftEvent);
-    void handleVerificationStatusEvent(
-            const de::gonicus::gonnect::VerificationStatusEvent &statusEvent);
-    void handleCrossSigningPromptEvent(
-            const de::gonicus::gonnect::CrossSigningPromptEvent &promptEvent);
+    void
+    handleVerificationStatusEvent(const de::gonicus::gonnect::VerificationStatusEvent &statusEvent);
+    void
+    handleCrossSigningPromptEvent(const de::gonicus::gonnect::CrossSigningPromptEvent &promptEvent);
     void handleCrossSigningStartResponse(
             const de::gonicus::gonnect::CrossSigningStartResponse &startResponse);
-    void handleCrossSigningStartEvent(
-            const de::gonicus::gonnect::CrossSigningStartEvent &startEvent);
+    void
+    handleCrossSigningStartEvent(const de::gonicus::gonnect::CrossSigningStartEvent &startEvent);
     void handleCrossSigningMethodSelectedEvent(
             const de::gonicus::gonnect::CrossSigningMethodSelectedEvent &selectedEvent);
     void handleVerificationEndEvent(const de::gonicus::gonnect::VerificationEndEvent &endEvent);

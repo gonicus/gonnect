@@ -19,8 +19,8 @@ ChatUser::PresenceState
 presenceStateConv(de::gonicus::gonnect::PresenceStateGadget::PresenceState state);
 
 /// Convert CrossSigningMethod method from grpc to CrossSigningSecret definition.
-CrossSigningSecret::CrossSigningMethod crossSigningMethodConv(
-        de::gonicus::gonnect::CrossSigningMethodGadget::CrossSigningMethod method);
+CrossSigningSecret::CrossSigningMethod
+crossSigningMethodConv(de::gonicus::gonnect::CrossSigningMethodGadget::CrossSigningMethod method);
 
 /// Convert CrossSigningMethod method from CrossSigningSecret definition to grpc.
 de::gonicus::gonnect::CrossSigningMethodGadget::CrossSigningMethod
