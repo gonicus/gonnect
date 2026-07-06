@@ -51,7 +51,10 @@ bool GlobalCallState::registerCallStateObject(ICallState *callStateObject)
         m_globalCallStateObjects.insert(callStateObject);
 
         connect(callStateObject, &QObject::destroyed, this, [this](QObject *obj) {
-            if (m_globalCallStateObjects.remove(static_cast<ICallState *>(obj))) {
+            auto *callState = static_cast<ICallState *>(obj);
+            m_silencedRingingCalls.remove(callState);
+
+            if (m_globalCallStateObjects.remove(callState)) {
                 updateGlobalCallState();
                 Q_EMIT globalCallStateObjectsChanged();
             }
@@ -146,6 +149,14 @@ void GlobalCallState::setRemoteContactInfo(const ContactInfo &info)
     }
 }
 
+void GlobalCallState::silenceRing(ICallState *call)
+{
+    if (call) {
+        m_silencedRingingCalls.insert(call);
+        updateRinger();
+    }
+}
+
 void GlobalCallState::triggerHold()
 {
     auto *callInForeground = SelectionState::instance().callInForeground();
@@ -198,7 +209,16 @@ void GlobalCallState::unholdAllCalls() const
 
 void GlobalCallState::updateRinger()
 {
-    const bool isRinging = m_globalCallState & ICallState::State::RingingIncoming;
+    const auto ringingCalls = filteredCallStateObjected(ICallState::State::RingingIncoming);
+
+    bool isRinging = false;
+    m_silencedRingingCalls.intersect(ringingCalls);
+    for (auto *call : std::as_const(ringingCalls)) {
+        if (!m_silencedRingingCalls.contains(call)) {
+            isRinging = true;
+            break;
+        }
+    }
 
     if (isRinging && !m_ringer) {
         m_ringer = new Ringer(this);

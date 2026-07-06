@@ -242,6 +242,12 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             }
         });
 
+        connect(n, &Notification::closed, call, [call](Notification::CloseReason reason) {
+            if (reason == Notification::CloseReason::dismissedByUser) {
+                GlobalCallState::instance().silenceRing(call);
+            }
+        });
+
         QString ref = NotificationManager::instance().add(n);
         call->setNotificationRef(ref);
         connect(call, &SIPCall::destroyed, this,

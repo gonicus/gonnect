@@ -49,6 +49,8 @@ public:
     Q_INVOKABLE void unholdOtherCall() const;
     Q_INVOKABLE void unholdAllCalls() const;
 
+    Q_INVOKABLE void silenceRing(ICallState *call);
+
 private Q_SLOTS:
     void updateGlobalCallState();
     void updateRinger();
@@ -64,6 +66,7 @@ private:
 
     ICallState::States m_globalCallState = ICallState::State::Idle;
     QSet<ICallState *> m_globalCallStateObjects;
+    QSet<ICallState *> m_silencedRingingCalls;
 
     Ringer *m_ringer = nullptr;
     ContactInfo m_remoteContactInfo;
