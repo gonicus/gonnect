@@ -13,14 +13,14 @@ It currently supports:
 
 ## Main entry points
 
-* `src/CMakeLists.txt` is the the main cmake file for the main application (although another file is top level to integrate sub folders)
+* `src/CMakeLists.txt` is the main cmake file for the main application (although another file is top level to integrate sub folders)
 * `src/Application.h` constructs and set ups the main application
 * `src/ui/GonnectWindow.qml` is the main qml window file (used by `src/Main.qml` as the top-most loaded file)
 * `src/ui/components/MainTabBar.qml` is the main navigation button bar for the application
-* `src/platform/NotificationManager.h` manages all destkop notifications, which are a main feature of the app
+* `src/platform/NotificationManager.h` manages all desktop notifications, which are a main feature of the app
 * `src/GlobalCallState.h` aggregates the states of `src/ICallState.h` objects
 * `src/presences/GlobalStateAggregator.h` aggregates presence state of different providers
-* `src/GlobalMutesState.h` is the global point for audio mute and tries to communicate between own headset support, os and providers such as Jitsi Meet.
+* `src/GlobalMuteState.h` is the global point for audio mute and tries to communicate between own headset support, os and providers such as Jitsi Meet.
 
 
 ## SIP
@@ -39,6 +39,17 @@ Main UI components:
 * `src/ui/components/pages/CallDetails.qml` and `src/ui/components/pages/CallDetails.qml` show the details of an ongoing call
 * `src/ui/components/pages/CallButtonBar.qml` is the main button bar for actions on the call
 * `src/ui/components/pages/CallSideBar.qml` holds additional views and infos for a call
+
+
+## HID
+
+GOnnect supports various busylights, videolights and headsets via USB HID. Headsets that follow the *Telephony Usage Page* are supported.
+Additional features are addressed for headsets that follow the Microsoft Teams specification (i.e. display support). Home of the USB
+related implementation is `src/usb`.
+
+* `src/usb/ReportDescriptorParser.h` is the descriptor parser
+* `src/usb/busylight` keeps the busylight/videolight implementations
+* `src/usb/HeadsetDevice.h` and `src/usb/HeadsetDeviceProxy.h` deal with the headsets
 
 
 ## Jitsi Meet
@@ -77,6 +88,12 @@ The single calendar feeders are located in subfolders beneath `src/calendar/`, s
 The main app is programmed with Qt ≥ 6.10 with C++ 23 and QML.
 
 It uses the [PJSIP](https://github.com/pjsip/pjproject) framework and its [doc](https://docs.pjsip.org/en/latest/) for SIP functionality.
+
+
+## Packaging and platforms
+
+GOnnect is served as a Flatpak for Linux and as MSIX for Microsoft Windows. Platform related code lives in `src/platform`. Flatpak
+is prefered over "plain Linux" style packages and as much as possible should be handled over existing FDO portals.
 
 
 ## Code style and guidelines
