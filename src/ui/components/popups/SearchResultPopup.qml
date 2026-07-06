@@ -35,8 +35,25 @@ Popup {
     signal returnFocus
 
     readonly property int colWidth: flickableContainer.width / 3
+    readonly property string immediateSearchPhrase: ViewHelper.preprocessSearchText(control.searchText)
 
-    onSearchTextChanged: () => Qt.callLater(keyNavigator.keyDown)
+    Timer {
+        id: searchDebounceTimer
+        interval: 200
+        onTriggered: () => {
+                         searchListModel.searchPhrase = control.immediateSearchPhrase
+                         Qt.callLater(keyNavigator.keyDown)
+                     }
+    }
+
+    onSearchTextChanged: () => {
+                             if (control.immediateSearchPhrase === "") {
+                                 searchDebounceTimer.stop()
+                                 searchListModel.searchPhrase = ""
+                             } else {
+                                 searchDebounceTimer.start()
+                             }
+                         }
 
     function initialKeyDown() { keyNavigator.keyDown() }
     function initialKeyUp() { keyNavigator.keyUp() }
@@ -65,7 +82,6 @@ Popup {
 
     SearchListModel {
         id: searchListModel
-        searchPhrase: ViewHelper.preprocessSearchText(control.searchText)
     }
 
     contentItem: Item {
@@ -237,7 +253,7 @@ Popup {
 
                         SearchResultItem {
                             id: callDirectItem
-                            mainText: qsTr('Call "%1"').arg(searchListModel.searchPhrase)
+                            mainText: qsTr('Call "%1"').arg(control.immediateSearchPhrase)
                             width: control.colWidth
                             visible: callDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === callDirectItem
@@ -249,20 +265,20 @@ Popup {
                                 }
                             }
 
-                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(searchListModel.searchPhrase)
+                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(control.immediateSearchPhrase)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(callDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                SIPCallManager.call("account0", searchListModel.searchPhrase, "", identitySelector.currentValue)
+                                SIPCallManager.call("account0", control.immediateSearchPhrase, "", identitySelector.currentValue)
                                 control.primaryActionTriggered()
                             }
                         }
 
                         SearchResultItem {
                             id: roomDirectItem
-                            mainText: qsTr('Open room "%1"').arg(searchListModel.searchPhrase)
+                            mainText: qsTr('Open room "%1"').arg(control.immediateSearchPhrase)
                             secondaryText: qsTr('Jitsi Meet')
                             width: control.colWidth
                             visible: roomDirectItem.shallBeVisible
@@ -277,20 +293,20 @@ Popup {
 
                             readonly property bool shallBeVisible: ViewHelper.isJitsiAvailable
                                                                    && !ViewHelper.isActiveVideoCall
-                                                                   && ViewHelper.isValidJitsiRoomName(searchListModel.searchPhrase)
+                                                                   && ViewHelper.isValidJitsiRoomName(control.immediateSearchPhrase)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(roomDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                ViewHelper.requestMeeting(searchListModel.searchPhrase)
+                                ViewHelper.requestMeeting(control.immediateSearchPhrase)
                                 control.primaryActionTriggered()
                             }
                         }
 
                         SearchResultItem {
                             id: createChatRoomItem
-                            mainText: qsTr('Create chat room "%1"').arg(searchListModel.searchPhrase)
+                            mainText: qsTr('Create chat room "%1"').arg(control.immediateSearchPhrase)
                             width: control.colWidth
                             visible: ChatConnectorManager.isChatAvailable
                             canBeHighlighted: false
@@ -326,7 +342,7 @@ Popup {
                                     onTriggerPrimaryAction: () => {
                                         ViewHelper.showCreateRoomDialog(chatProviderDelg.modelData,
                                                                         [],
-                                                                        searchListModel.searchPhrase)
+                                                                        control.immediateSearchPhrase)
                                         control.primaryActionTriggered()
                                     }
                                 }

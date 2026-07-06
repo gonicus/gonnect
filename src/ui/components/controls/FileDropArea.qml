@@ -10,7 +10,7 @@ Item {
     implicitWidth: label.implicitWidth
     implicitHeight: label.implicitHeight
 
-    signal dropAccepted(string url)
+    signal dropAccepted(list<url> url)
 
     property bool compact: false
 
@@ -28,6 +28,12 @@ Item {
             }
         }
     ]
+
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.FileDropArea"
+        defaultLogLevel: LoggingCategory.Debug
+    }
 
     Item {
         visible: dropInArea.containsDrag
@@ -59,7 +65,7 @@ Item {
             anchors.centerIn: parent
             color: Theme.primaryTextColor
             font.pixelSize: 24
-            text: dropInArea.isInputValid ? qsTr("Send attachment") : qsTr("Only (single) files allowed")
+            text: dropInArea.isInputValid ? qsTr("Send attachment") : dropInArea.invalidMessage
             spacing: 20
             icon {
                 color: Theme.primaryTextColor
@@ -74,39 +80,67 @@ Item {
         id: dropInArea
         anchors.fill: parent
         onEntered: drag => {
-                       let valid = drag.hasUrls && drag.urls.length === 1
-                       if (valid) {
-                           const url = drag.urls[0].toString()
-                           valid = url.startsWith("file://")
-                       }
-                       if (valid) {
-                           valid = FileContentHelper.isLocalFileAndNotDirectory(drag.urls[0])
-                       }
-
-                       dropInArea.isInputValid = valid
-
-                       if (valid) {
+                       if (dropInArea.isValid(drag)) {
                            drag.accept(Qt.CopyAction)
                        }
                    }
 
         onDropped: drop => {
-                       let valid = drop.hasUrls && drop.urls.length === 1
-                       let url = ""
-                       if (valid) {
-                           url = drop.urls[0].toString()
-                           valid = url.startsWith("file://")
-                       }
-                       if (valid) {
-                           valid = FileContentHelper.isLocalFileAndNotDirectory(url)
-                       }
-
-                       if (valid) {
+                       if (dropInArea.isInputValid) {
                            drop.accept(Qt.CopyAction)
-                           control.dropAccepted(url)
+                           control.dropAccepted(FileContentHelper.uploadableUrls(dropInArea.uploadUrls))
                        }
                    }
 
         property bool isInputValid: false
+        property string invalidMessage
+        property list<url> uploadUrls
+
+        function isValid(ev) {
+
+            console.debug(category, "FileDropArea checking validity", "has Urls:", ev.hasUrls, "urls:", ev.urls)
+
+            const bailOut = (msg, logMsg = "") => {
+                if (logMsg) {
+                    console.debug(category, logMsg)
+                }
+
+                dropInArea.isInputValid = false
+                dropInArea.invalidMessage = msg
+            }
+
+            if (!ev.hasUrls) {
+                bailOut(qsTr("Not a file"), "drag event has no urls")
+                return false
+            }
+
+            const urls = FileContentHelper.uploadableUrls(ev.urls)
+
+            if (!urls.length) {
+                bailOut(qsTr("No valid files"), "no uploadable urls")
+                return false
+            }
+
+            for (const url of urls) {
+                console.debug(category, "Checking single file url", url)
+
+                if (!url.toString().startsWith("file://")) {
+                    bailOut(qsTr("Disallowed type"), "Not a local file url")
+                    return false
+                }
+                if (!FileContentHelper.isLocalReadable(url)) {
+                    bailOut(qsTr("File not readable"), "File not readable")
+                    return false
+                }
+                if (!FileContentHelper.isLocalDirectory(url) && !FileContentHelper.isLocalFile(url)) {
+                    bailOut(qsTr("Not a file"), "Url does not point to a valid local file")
+                    return false
+                }
+            }
+
+            dropInArea.uploadUrls = urls
+            dropInArea.isInputValid = true
+            return true
+        }
     }
 }

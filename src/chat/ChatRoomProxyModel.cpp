@@ -35,12 +35,16 @@ QVariant ChatRoomProxyModel::data(const QModelIndex &index, int role) const
             return "";
         }
 
-        if (index.row() == 0) {
-            return tr("Favorites");
-        }
-
         // Previous element is favorite, current is not
         using Roles = ChatRoomModel::Roles;
+
+        if (index.row() == 0) {
+            if (mapToSource(index).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
+                return tr("Favorites");
+            } else {
+                return tr("Others");
+            }
+        }
 
         if (!mapToSource(index).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
             QModelIndex prevIndex = index.sibling(index.row() - 1, 0);
@@ -183,11 +187,32 @@ void ChatRoomProxyModel::onSourceModelChanged()
         m_dataChangedConnection =
                 connect(model, &QAbstractListModel::dataChanged, this,
                         [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
-                            if (roles.contains(static_cast<int>(Roles::IsFavorite))) {
+                            if (roles.isEmpty()) {
                                 invalidate();
+                                sort(0);
+                                return;
+                            }
+
+                            const bool isSortRole =
+                                    std::any_of(roles.cbegin(), roles.cend(), [](const int role) {
+                                        static const QSet<int> sortRoles = {
+                                            static_cast<int>(Roles::IsFavorite),
+                                            static_cast<int>(Roles::LatestMessageDate),
+                                            static_cast<int>(Roles::Name),
+                                            static_cast<int>(Roles::UnreadCount),
+                                            static_cast<int>(Roles::OwnJoinState),
+                                            static_cast<int>(Roles::RoomId),
+                                        };
+                                        return sortRoles.contains(role);
+                                    });
+
+                            if (isSortRole) {
+                                invalidate();
+                                sort(0);
                             }
                         });
     }
+    sort(0);
 }
 
 void ChatRoomProxyModel::applySort()

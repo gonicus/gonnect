@@ -24,6 +24,8 @@ SIPAccount::SIPAccount(const QString &group, QObject *parent)
 
 void SIPAccount::initialize()
 {
+    m_accountConfig.presConfig.publishEnabled = true;
+
     bool ok = false;
     static QRegularExpression sipURI = QRegularExpression("^(sips?):([^@]+)(?:@(.+))?$");
 
@@ -653,13 +655,13 @@ bool SIPAccount::callVoiceBox()
 {
     if (!m_voiceMailUri.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via" << m_voiceMailUri;
-        call(m_voiceMailUri);
+        SIPCallManager::instance().call(m_account, m_voiceMailUri);
         return true;
 
     } else if (!m_messageAccount.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account"
                               << m_messageAccount;
-        call(m_messageAccount);
+        SIPCallManager::instance().call(m_account, m_messageAccount);
         return true;
     }
 

@@ -505,15 +505,20 @@ BaseWindow {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditChatMessage.qml",
                                  { chatProvider, roomId, messageId, text: content })
         }
+        function onShowFileUploadDialog(chatRoom : IChatRoom, fileUrls : list<url>) {
+            if (chatRoom) {
+                drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FileSelectionOverview.qml",
+                                     { chatRoom, fileUrls })
+            } else {
+                console.error("showFileUploadDialog was called width chatRoom=nullptr and is therefore ignored")
+            }
+        }
         function onShowLargeImage(imageFilePath : url) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeImage.qml", { source : imageFilePath })
         }
-        function onShowLargeVideo(videoFilePath : url, fileName : string, fileSize : int, thumbnailFilePath : url) {
+        function onShowLargeVideo(videoContent : ChatMessageContentVideoFile) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeVideo.qml", {
-                                     source : videoFilePath,
-                                     fileName,
-                                     fileSize,
-                                     thumbnailFilePath
+                                     content: videoContent
                                  })
         }
         function onShowStatusTextEditDialog() {
@@ -531,7 +536,7 @@ BaseWindow {
     readonly property Popup mainDrawer: Popup {
         id: mainDrawer
         width: drawerStackView.currentItem
-               ? Util.clamp(drawerStackView.currentItem.implicitWidth, 0.63 * control.width, control.width - 100)
+               ? Util.clamp(drawerStackView.currentItem.implicitWidth, 0.38 * control.width, control.width - 100)
                : 0
         height: drawerStackView.currentItem
                 ? Util.clamp(drawerStackView.currentItem.implicitHeight, 0.63 * control.height, control.height - 100)

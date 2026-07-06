@@ -118,6 +118,7 @@ private:
     QString m_mail;
     QDateTime m_lastModified;
     QStringList m_splittedName;
+    QString m_fullNameLower;
     QList<PhoneNumber> m_phoneNumbers;
     bool m_sipStatusSubscriptionInitialized = false;
     bool m_sipStatusSubscriptable = false;
