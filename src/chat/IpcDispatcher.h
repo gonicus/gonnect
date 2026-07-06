@@ -7,7 +7,6 @@
 #include "chat.qpb.h"
 #include "IChatRoom.h"
 #include "ChatUser.h"
-#include "ChatMessageContentUserStateChange.h"
 
 #include <QLocalServer>
 #include <QLocalSocket>
@@ -18,6 +17,8 @@
 #include <QtEndian>
 #include <QUrl>
 #include <QRegularExpression>
+
+#include <utility>
 
 class IpcChatRoom;
 class ChatMessage;
@@ -39,22 +40,6 @@ public:
     /// Whether the config requires a secret of sorts (e.g. password) in order to be used.
     static bool requiresSecret(const IpcConfig &config);
 
-    /// Convert UserRoomState value from grpc to IChatRoom definition.
-    static IChatRoom::UserRoomState
-    userRoomStateConv(const de::gonicus::gonnect::UserRoomStateGadget::UserRoomState state);
-
-    /// Convert PresenceState value from grpc to IChatRoom definition.
-    static ChatUser::PresenceState
-    presenceStateConv(const de::gonicus::gonnect::PresenceStateGadget::PresenceState state);
-
-    /// Convert CrossSigningMethod method from grpc to CrossSigningSecret definition.
-    static CrossSigningSecret::CrossSigningMethod crossSigningMethodConv(
-            const de::gonicus::gonnect::CrossSigningMethodGadget::CrossSigningMethod method);
-
-    /// Convert CrossSigningMethod method from CrossSigningSecret definition to grpc.
-    static de::gonicus::gonnect::CrossSigningMethodGadget::CrossSigningMethod
-    crossSigningMethodReConv(const CrossSigningSecret::CrossSigningMethod method);
-
     enum class ConnectionState {
         Disconnected =
                 static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::Disconnected),
@@ -62,14 +47,6 @@ public:
         LoggedIn = static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::LoggedIn),
     };
     Q_ENUM(ConnectionState)
-
-    static de::gonicus::gonnect::NotificationSettingGadget::NotificationSetting
-    notificationSettingIpcToProto(NotificationSetting::Setting setting);
-    static NotificationSetting::Setting notificationSettingProtoToIpc(
-            de::gonicus::gonnect::NotificationSettingGadget::NotificationSetting setting);
-
-    static ::RoomSettings
-    roomSettingsProtoToIpc(const de::gonicus::gonnect::RoomSettings &protoSettings);
 
     explicit IpcDispatcher(const QString &settingsGroup, const IpcConfig &configInfo,
                            QObject *parent = nullptr);
@@ -203,22 +180,6 @@ private:
     /// The content type that is set in this response container.
     static const QString contentType(const de::gonicus::gonnect::ResponseContainer &container);
 
-    static IChatRoom::JoinRule
-    joinRuleGrpcToGonnect(const de::gonicus::gonnect::RoomJoinRuleGadget::RoomJoinRule grpcRule);
-    static de::gonicus::gonnect::RoomJoinRuleGadget::RoomJoinRule
-    joinRuleGonnectToGrpc(const IChatRoom::JoinRule joinRule);
-
-    static IChatRoom::LeaveReason leaveReasonGrpcToGonnect(
-            const de::gonicus::gonnect::RoomLeftEvent::RoomLeaveReason leaveReason);
-    static de::gonicus::gonnect::RoomLeftEvent::RoomLeaveReason
-    leaveReasonGonnectToGrpc(const IChatRoom::LeaveReason leaveReason);
-
-    static ChatMessageContentUserStateChange::State userStateGrpcToGonnect(
-            de::gonicus::gonnect::MessageContentMembershipChange::MembershipChange change);
-
-    static IChatRoom::Permissions
-    roomPermissionsGrpcToGonnect(const de::gonicus::gonnect::RoomPermissions permissions);
-
     /// Setup and start sub process.
     void init();
 
@@ -227,28 +188,80 @@ private:
     /// has been received.
     void login();
 
-    /// Serialize and send a the request. This method takes ownership of the request object and
-    /// destroys it after usage. If requestContainer has a tag, an answer to the request must be
-    /// received within timeoutSeconds, or a timeout occurs. If the container has no tag or
-    /// timeoutSeconds is 0, no timeout check is being made.
-    void sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
-                     quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS);
+    /// Create a request container, let fill set its payload, then serialize and send it. If
+    /// withTag is true, a unique tag is generated - an answer to the request must then be received
+    /// within timeoutSeconds, or a timeout occurs. Otherwise the container carries the zero id for
+    /// fire and forget requests. Returns the tag of the sent request (0 for fire and forget).
+    template <typename FillFunc>
+    quint64 sendRequest(FillFunc &&fill, bool withTag = true,
+                        quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS)
+    {
+        de::gonicus::gonnect::RequestContainer container;
+        container.setTag(withTag ? m_nextFreeTag++ : 0);
+        fill(container);
+        sendRequestContainer(container, timeoutSeconds);
+        return container.tag();
+    }
 
-    /// Create a new empty container message. Caller takes ownership of the returned object.
-    /// If withTag is true, a unique tag is generated. Otherwise it is the zero id for fire and
-    /// forget requests.
-    [[nodiscard]] de::gonicus::gonnect::RequestContainer *createRequest(bool withTag = true);
+    /// Serialize and send the request container after sanity checks; starts the timeout timer for
+    /// tagged requests. Use sendRequest() instead of calling this directly.
+    void sendRequestContainer(de::gonicus::gonnect::RequestContainer &container,
+                              quint32 timeoutSeconds);
 
-    /// Dispatch the response container and its content payload.
+    /// Dispatch the response container and its content payload to the matching handler below.
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
+
+    // Response handlers (implemented in IpcDispatcherResponses.cpp)
+    void handleError(const de::gonicus::gonnect::ResponseContainer &responseContainer);
+    void handleMultipartEnd(quint64 tag);
+    void handleStatusUpdate(const de::gonicus::gonnect::StatusUpdate &statusUpdate);
+    void handleLoginFlowsResponse(const de::gonicus::gonnect::LoginFlowsResponse &response);
+    void handleCapabilityEvent(const de::gonicus::gonnect::CapabilityEvent &event);
+    void handleLoginSSOResponse(const de::gonicus::gonnect::LoginSSOResponse &response);
+    void handleRoomListResponse(const de::gonicus::gonnect::RoomListResponse &response);
+    void handleUserResponse(const de::gonicus::gonnect::User &user);
+    void handleUserChangeEvent(const de::gonicus::gonnect::UserChangeEvent &changeEvent);
+    void handleMessageReceivedEvent(const de::gonicus::gonnect::Message &message, quint64 tag);
+    void handleMessageChangeEvent(const de::gonicus::gonnect::MessageChangeEvent &changeEvent);
+    void handleMessageRemoveEvent(const de::gonicus::gonnect::MessageRemoveEvent &removeEvent);
+    void handleReactionEvent(const de::gonicus::gonnect::Reaction &reaction, bool added);
+    void handleUserSearchResponse(const de::gonicus::gonnect::UserSearchResponse &response,
+                                  quint64 tag);
+    void handleInvitedEvent(const de::gonicus::gonnect::InvitedEvent &invitedEvent);
+    void handlePublicRoomListResponse(
+            const de::gonicus::gonnect::PublicRoomListResponse &response, quint64 tag);
+    void handleRoomChangeEvent(const de::gonicus::gonnect::RoomChangeEvent &changeEvent);
+    void handleRoomLeftEvent(const de::gonicus::gonnect::RoomLeftEvent &leftEvent);
+    void handleVerificationStatusEvent(
+            const de::gonicus::gonnect::VerificationStatusEvent &statusEvent);
+    void handleCrossSigningPromptEvent(
+            const de::gonicus::gonnect::CrossSigningPromptEvent &promptEvent);
+    void handleCrossSigningStartResponse(
+            const de::gonicus::gonnect::CrossSigningStartResponse &startResponse);
+    void handleCrossSigningStartEvent(
+            const de::gonicus::gonnect::CrossSigningStartEvent &startEvent);
+    void handleCrossSigningMethodSelectedEvent(
+            const de::gonicus::gonnect::CrossSigningMethodSelectedEvent &selectedEvent);
+    void handleVerificationEndEvent(const de::gonicus::gonnect::VerificationEndEvent &endEvent);
+
+    /// Request the initial room list (joined and unjoined rooms).
+    void requestRoomList();
+
+    /// Remove the room from the model and lookup, drop its notifications and delete it.
+    void removeRoom(IpcChatRoom *room);
+
+    /// Return the user room state cache for the given room, creating it if necessary.
+    QHash<QString, IChatRoom::UserRoomState> *ensureUserRoomStateCache(const QString &roomId);
+
+    /// If the tag belongs to a pending single message request, mark that message as failed so it
+    /// will not be requested again.
+    void markSingleMessageFailed(quint64 tag);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
     ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
                                         bool isIndependent);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
-    IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
-                             IChatRoom::JoinRule joinRule, bool isDirect, const QString &tag = "");
 
     IpcChatRoom *ipcChatRoomById(const QString &roomId) const;
 
@@ -263,6 +276,11 @@ private:
 
     void setIsInVerificationProcess(bool value);
     void setIsDeviceVerified(bool value);
+
+    /// Title and message body of the desktop notification for the given message, depending on its
+    /// content type.
+    std::pair<QString, QString> notificationTitleAndMessage(ChatMessage *messageObj,
+                                                            IChatRoom *chatRoom) const;
 
     void makeNotificationNewMessage(ChatMessage *messageObj);
     void removeNotificationsForRoom(IChatRoom *room);

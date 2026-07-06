@@ -621,6 +621,10 @@ qt_add_qml_module(gonnect
         chat/IpcConfig.h
         chat/IpcDispatcher.h
         chat/IpcDispatcher.cpp
+        chat/IpcDispatcherAsserts.h
+        chat/IpcDispatcherResponses.cpp
+        chat/IpcProtoConversion.h
+        chat/IpcProtoConversion.cpp
         chat/IpcInterface.h
         chat/IpcInterface.cpp
         chat/ChatConnectorManager.h
