@@ -2,6 +2,10 @@
 #include "AudioManager.h"
 #include "AudioPort.h"
 
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcRingTone, "gonnect.sip.ringtone")
+
 RingTone::RingTone(quint16 frequency1, quint16 frequency2, QList<QPair<quint16, quint16>> intervals,
                    qint8 loopIndex, QObject *parent)
     : QObject(parent),
@@ -12,7 +16,11 @@ RingTone::RingTone(quint16 frequency1, quint16 frequency2, QList<QPair<quint16, 
       m_intervals(intervals)
 {
 
-    m_toneGen.createToneGenerator();
+    try {
+        m_toneGen.createToneGenerator();
+    } catch (const pj::Error &err) {
+        qCCritical(lcRingTone) << "failed to create ring tone generator:" << err.info();
+    }
 
     m_loopTimer.callOnTimeout(this, &RingTone::playNextTone);
     m_loopTimer.setSingleShot(true);
@@ -51,7 +59,11 @@ void RingTone::start()
         port->writeSilenceMS(120);
     }
 
-    m_toneGen.startTransmit(m_mediaSink);
+    try {
+        m_toneGen.startTransmit(m_mediaSink);
+    } catch (const pj::Error &err) {
+        qCWarning(lcRingTone) << "failed to start ring tone transmission:" << err.info();
+    }
     playNextTone();
 }
 
@@ -69,8 +81,12 @@ void RingTone::stop()
 
     m_currentIndex = 0;
     m_isPlaying = false;
-    m_toneGen.stop();
-    m_toneGen.stopTransmit(m_mediaSink);
+    try {
+        m_toneGen.stop();
+        m_toneGen.stopTransmit(m_mediaSink);
+    } catch (const pj::Error &err) {
+        qCWarning(lcRingTone) << "failed to stop ring tone:" << err.info();
+    }
 
     AudioManager::instance().releaseDevice();
 
@@ -92,7 +108,11 @@ void RingTone::playNextTone()
 
     tones.push_back(tone);
 
-    m_toneGen.play(tones, m_loopIndex >= 0);
+    try {
+        m_toneGen.play(tones, m_loopIndex >= 0);
+    } catch (const pj::Error &err) {
+        qCWarning(lcRingTone) << "failed to play ring tone:" << err.info();
+    }
 
     // Restart timer
     ++m_currentIndex;
