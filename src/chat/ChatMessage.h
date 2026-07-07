@@ -22,7 +22,7 @@ class ChatMessage : public QObject
     Q_PROPERTY(bool isStateUpdate READ isStateUpdate CONSTANT FINAL)
     Q_PROPERTY(ChatMessageContentUserStateChange::State state READ state CONSTANT FINAL)
     Q_PROPERTY(QString affectedUserId READ affectedUserId CONSTANT FINAL)
-    Q_PROPERTY(QObject *content READ content CONSTANT FINAL)
+    Q_PROPERTY(QObject *content READ content NOTIFY contentChanged FINAL)
 
 public:
     enum class Flag {
@@ -52,6 +52,7 @@ public:
     Flags flags() const { return m_flags; }
     QObject *content() const { return m_content; }
     IChatRoom *chatRoom() const { return m_chatRoom; }
+    void setContent(QObject *content);
 
     bool isStateUpdate() const;
 
@@ -99,6 +100,9 @@ private:
     QHash<QString, ChatMessageReaction *> m_reactions;
 
     QSet<ChatUser *> m_mentionedPartpicipants;
+
+Q_SIGNALS:
+    void contentChanged();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ChatMessage::Flags)

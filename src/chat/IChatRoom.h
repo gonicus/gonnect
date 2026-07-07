@@ -6,8 +6,7 @@
 
 #include "ChatUser.h"
 #include "NotificationSetting.h"
-
-class ChatMessage;
+#include "ChatMessage.h"
 
 struct RoomSettings
 {
@@ -218,7 +217,8 @@ Q_SIGNALS:
     void chatMessageRemoved(qsizetype index, ChatMessage *chatMessage);
 
     void chatMessageContentChanged(qsizetype index, ChatMessage *chatMessage);
-    void chatMessageFlagsChanged(qsizetype index, ChatMessage *chatMessage);
+    void chatMessageFlagsChanged(qsizetype index, ChatMessage *chatMessage,
+                                 ChatMessage::Flags previousFlags);
     void chatMessageReactionsChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageMentionedUsersChanged(qsizetype index, ChatMessage *chatMessage);
 
