@@ -27,6 +27,7 @@ public:
     void onCallState(pj::OnCallStateParam &prm) override;
     void onCallTransferRequest(pj::OnCallTransferRequestParam &prm) override;
     void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm) override;
+    void onCallTransferStatus(pj::OnCallTransferStatusParam &prm) override;
     void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
     void onInstantMessage(pj::OnInstantMessageParam &prm) override;
     void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
@@ -46,6 +47,9 @@ public:
     bool isEmergencyCall() const;
     void setIncoming(bool flag) { m_incoming = flag; }
     bool isIncoming() const { return m_incoming; }
+
+    void setInTransfer(bool flag) { m_inTransfer = flag; }
+    bool isIntransfer() const { return m_inTransfer; }
 
     void call(const QString &dst_uri, const pj::CallOpParam &prm);
     void setPostDialDtmf(const QString &dtmf) { m_postTask = dtmf; }
@@ -114,6 +118,8 @@ Q_SIGNALS:
     void missed();
     void ringing();
     void establishedChanged();
+    void transferSucceeded();
+    void transferFailed(int statusCode, QString reason);
     void earlyCallStateChanged();
     void isHoldingChanged();
     void isBlockedChanged();
@@ -162,6 +168,7 @@ private:
     Sniffer *m_sniffer = nullptr;
 
     bool m_incoming = false;
+    bool m_inTransfer = false;
     bool m_isEstablished = false;
     bool m_wasEstablished = false;
     bool m_managerNotified = false;
