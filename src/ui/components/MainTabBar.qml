@@ -116,6 +116,7 @@ Item {
         let tabOrder = []
 
         tabOrder.push(...topMenuCol.children)
+
         return tabOrder.filter((button) => button.pageId)
     }
 
@@ -136,33 +137,33 @@ Item {
     }
 
     function sortTabList() {
-        let tabList = UISettings.getUISetting("generic", "tabBarOrder", "").split(",")
-        if (!tabList.length > 0) {
+        const savedSetting = UISettings.getUISetting("generic", "tabBarOrder", "");
+        const savedIds = savedSetting ? savedSetting.split(",") : [];
+        if (savedSetting === "" || savedIds.length === 0) {
             return
         }
 
-        let tabOrder = []
-        let newOrder = []
+        const tabOrder = [...topMenuCol.children].filter((button) => button.pageId)
+        const existingIds = tabOrder.map((button) => button.pageId)
+        const validIds = savedIds.filter((id) => existingIds.includes(id))
+        const remaining = [...tabOrder]
+        const newOrder = []
 
-        tabOrder.push(...topMenuCol.children)
+        for (const id of validIds) {
+            const idx = remaining.findIndex((button) => button.pageId === id)
+            if (idx >= 0) {
+                newOrder.push(...remaining.splice(idx, 1))
+            }
+        }
+        newOrder.push(...remaining)
 
-        tabList.forEach((tabId) => {
-            tabOrder.forEach((button) => {
-                if (button.pageId && button.pageId === tabId) {
-                    newOrder.push(button)
-                }
-            })
-        })
-
-        newOrder.forEach((button) => {
+        for (const button of newOrder) {
             button.parent = null
             button.visible = false
 
             button.parent = topMenuCol
             button.visible = true
-        })
-
-        control.saveTabList()
+        }
     }
 
     Rectangle {
@@ -376,6 +377,58 @@ Item {
         }
     }
 
+    property var tabMenuModel: {
+        const baseModel = [
+            {
+                pageId: SelectionState.homePageId(),
+                pageType: MainPageSelection.PageType.Base,
+                iconSource: Icons.userHome,
+                labelText: qsTr("Home"),
+                disabledTooltipText: qsTr("Home"),
+                isEnabled: true,
+                showActiveBorder: false,
+                attachedData: null
+            }, {
+                pageId: SelectionState.conferencePageId(),
+                pageType: MainPageSelection.PageType.Conference,
+                iconSource: Icons.userGroupNew,
+                labelText: qsTr("Conference"),
+                disabledTooltipText: qsTr("No active conference"),
+                isEnabled: control.hasActiveConference,
+                showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
+                attachedData: null
+            }, {
+                pageId: SelectionState.callPageId(),
+                pageType: MainPageSelection.PageType.Call,
+                iconSource: Icons.callStart,
+                labelText: qsTr("Call"),
+                disabledTooltipText: qsTr("No active call"),
+                isEnabled: control.hasActiveCall,
+                showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
+                attachedData: null
+            }
+        ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
+
+        if (ChatConnectorManager.isChatAvailable) {
+            for (const conn of ChatConnectorManager.chatConnectors) {
+                baseModel.push({
+                                   pageId: SelectionState.chatsPageId(),
+                                   pageType: MainPageSelection.PageType.Chats,
+                                   iconSource: Icons.dialogMessages,
+                                   labelText: conn.displayName,
+                                   disabledTooltipText: qsTr("Chat not available"),
+                                   isEnabled: conn.isConnected,
+                                   showRedDot: false,
+                                   attachedData: conn
+                               })
+            }
+        }
+
+        return baseModel
+    }
+
+    onTabMenuModelChanged: Qt.callLater(control.sortTabList)
+
     Column {
         id: topMenuCol
         topPadding: 20
@@ -388,55 +441,7 @@ Item {
         Repeater {
             id: menuRepeater
             delegate: tabDelegate
-            model: {
-                const baseModel = [
-                    {
-                        pageId: SelectionState.homePageId(),
-                        pageType: MainPageSelection.PageType.Base,
-                        iconSource: Icons.userHome,
-                        labelText: qsTr("Home"),
-                        disabledTooltipText: qsTr("Home"),
-                        isEnabled: true,
-                        showActiveBorder: false,
-                        attachedData: null
-                    }, {
-                        pageId: SelectionState.conferencePageId(),
-                        pageType: MainPageSelection.PageType.Conference,
-                        iconSource: Icons.userGroupNew,
-                        labelText: qsTr("Conference"),
-                        disabledTooltipText: qsTr("No active conference"),
-                        isEnabled: control.hasActiveConference,
-                        showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
-                        attachedData: null
-                    }, {
-                        pageId: SelectionState.callPageId(),
-                        pageType: MainPageSelection.PageType.Call,
-                        iconSource: Icons.callStart,
-                        labelText: qsTr("Call"),
-                        disabledTooltipText: qsTr("No active call"),
-                        isEnabled: control.hasActiveCall,
-                        showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
-                        attachedData: null
-                    }
-                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
-
-                if (ChatConnectorManager.isChatAvailable) {
-                    for (const conn of ChatConnectorManager.chatConnectors) {
-                        baseModel.push({
-                                           pageId: SelectionState.chatsPageId(),
-                                           pageType: MainPageSelection.PageType.Chats,
-                                           iconSource: Icons.dialogMessages,
-                                           labelText: conn.displayName,
-                                           disabledTooltipText: qsTr("Chat not available"),
-                                           isEnabled: conn.isConnected,
-                                           showRedDot: false,
-                                           attachedData: conn
-                                       })
-                    }
-                }
-
-                return baseModel
-            }
+            model: control.tabMenuModel
         }
 
         Component.onCompleted: () => mainWindow.loadPages()
@@ -499,7 +504,7 @@ Item {
                 const index = control.getTabList().findIndex(button => button.pageId === selButton.pageId)
                 if (index >= 0) {
                     menuInternal.isFirst = index === 0
-                    menuInternal.isLast = index === topMenuCol.children.length - 2
+                    menuInternal.isLast = index === control.getTabList().length - 1
                 } else {
                     menuInternal.isFirst = false
                     menuInternal.isLast = false
