@@ -147,7 +147,7 @@ int USBDevices::hotplugHandler(libusb_context *, libusb_device *device, libusb_h
 void USBDevices::refresh()
 {
     QMutexLocker lock(&s_enumerateMutex);
-    QString lastPath;
+    QSet<QString> handledPaths;
     auto &busylightDeviceManager = BusylightDeviceManager::instance();
 
     // Collect devices previously in use
@@ -191,17 +191,21 @@ void USBDevices::refresh()
     for (; deviceInfo; deviceInfo = deviceInfo->next) {
 
         QString path = deviceInfo->path;
-        if (previousPaths.contains(path) || path == lastPath) {
+        if (previousPaths.contains(path) || handledPaths.contains(path)) {
             continue;
         }
 
-        lastPath = path;
-
-        if (!busylightDeviceManager.createBusylightDevice(*deviceInfo)) {
+        bool created = busylightDeviceManager.createBusylightDevice(*deviceInfo);
+        if (!created) {
             HeadsetDevice *hd = parseReportDescriptor(deviceInfo);
             if (hd) {
                 m_headsetDevices.push_back(hd);
+                created = true;
             }
+        }
+
+        if (created) {
+            handledPaths.insert(path);
         }
     }
 
