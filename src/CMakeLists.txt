@@ -562,6 +562,8 @@ qt_add_qml_module(gonnect
         sip/SIPAudioDevice.cpp
         sip/SIPBuddy.h
         sip/SIPBuddy.cpp
+        sip/SIPCallRoutingHop.h
+        sip/SIPCallRoutingHop.cpp
         sip/SIPCall.h
         sip/SIPCall.cpp
         sip/SIPCallManager.h
@@ -781,6 +783,9 @@ qt_add_qml_module(gonnect
 
         ui/CallsModel.h
         ui/CallsModel.cpp
+        ui/CallRoutingHelper.h
+        ui/CallRoutingHelper.cpp
+        ui/CallRoutingHopInfo.h
         ui/ClipboardHelper.h
         ui/ClipboardHelper.cpp
         ui/DateEventsModel.h

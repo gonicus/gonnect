@@ -1499,6 +1499,7 @@ void IpcDispatcher::processResponse(
 
         QList<CrossSigningSecret::CrossSigningMethod> methods;
         const auto &availableMethods = startEvent.availableMethods();
+        methods.reserve(availableMethods.size());
         for (const auto &method : availableMethods) {
             methods.append(crossSigningMethodConv(method));
         }

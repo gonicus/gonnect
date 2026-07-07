@@ -118,7 +118,8 @@ Item {
                 right: parent.right
                 bottom: nameLabel.top
 
-                topMargin: control.isRttEnabled ? 30
+                topMargin: (control.isRttEnabled || (callRoutingGrid.visible && callRoutingRep.count))
+                           ? 30
                            : Math.max(24, 24 + callMainCard.height / 2 - 254)
                 bottomMargin: 15
             }
@@ -126,7 +127,11 @@ Item {
             Loader {
                 id: avatarLoader
                 width: parent.width
-                height: control.isRttEnabled ? parent.height / 2 : parent.height
+                height: control.isRttEnabled
+                        ? parent.height / 2
+                        : (callRoutingGrid.visible && callRoutingRep.count)
+                          ? avatarLoader.implicitHeight
+                          : parent.height
                 sourceComponent: SIPCallManager.isConferenceMode ? multiAvatarComponent : singleAvatarComponent
             }
 
@@ -203,6 +208,57 @@ Item {
 
                 RTTDisplay {
                     id: rttDisplay
+                }
+            }
+
+            Column {
+                id: callRoutingGrid
+                visible: !control.isRttEnabled && callRoutingRep.count > 0
+                spacing: 5
+                anchors.horizontalCenter: parent.horizontalCenter
+                topPadding: 30
+
+                Repeater {
+                    id: callRoutingRep
+                    model: {
+                        const callItem = callSideBar.selectedCallItem
+                        if (callItem && (callItem.isIncoming || callItem.isEstablished)) {
+                            return CallRoutingHelper.routingHopsForCall(callItem.accountId, callItem.callId)
+                        }
+                        return null
+                    }
+
+                    delegate: Item {
+                        id: hop
+                        anchors.horizontalCenter: parent?.horizontalCenter
+                        implicitWidth: mainLabel.implicitWidth
+                        implicitHeight: mainLabel.y + mainLabel.implicitHeight
+
+                        required property int index
+                        required property string phoneNumber
+                        required property string reasonText
+                        required property string contactName
+
+                        readonly property string contactString: hop.contactName ? `${hop.contactName} (${hop.phoneNumber})` : hop.phoneNumber
+
+                        Label {
+                            id: arrowLabel
+                            visible: hop.index > 0
+                            text: '↓'
+                            color: Theme.secondaryTextColor
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        Label {
+                            id: mainLabel
+                            text: hop.reasonText ? `${hop.contactString} (${hop.reasonText})` : hop.contactString
+                            color: Theme.secondaryTextColor
+                            anchors {
+                                top: arrowLabel.visible ? arrowLabel.bottom : parent.top
+                                topMargin: arrowLabel.visible ? 5 : 0
+                            }
+                        }
+                    }
                 }
             }
         }

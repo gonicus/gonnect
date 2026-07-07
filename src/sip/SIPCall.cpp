@@ -131,6 +131,36 @@ SIPCall::~SIPCall()
                        []() { GlobalCallState::instance().unholdOtherCall(); });
 }
 
+void SIPCall::parseCallRouting(pjsip_msg *msg)
+{
+    static const pj_str_t historyInfoName = { const_cast<char *>("History-Info"), 12 };
+    static const pj_str_t diversionName = { const_cast<char *>("Diversion"), 9 };
+
+    QStringList historyInfoHeaders;
+    QStringList diversionHeaders;
+
+    if (msg) {
+        for (const pjsip_hdr *hdr = msg->hdr.next; hdr != &msg->hdr; hdr = hdr->next) {
+            const bool isHistoryInfo = pj_stricmp(&hdr->name, &historyInfoName) == 0;
+            const bool isDiversion = !isHistoryInfo && pj_stricmp(&hdr->name, &diversionName) == 0;
+            if (!isHistoryInfo && !isDiversion) {
+                continue;
+            }
+
+            const auto *gs = reinterpret_cast<const pjsip_generic_string_hdr *>(hdr);
+            const auto value = QString::fromUtf8(gs->hvalue.ptr, static_cast<int>(gs->hvalue.slen));
+
+            (isHistoryInfo ? historyInfoHeaders : diversionHeaders).append(value);
+        }
+    }
+
+    m_callRoutingHops = SIPCallRoutingHop::parse(historyInfoHeaders, diversionHeaders);
+
+    if (m_historyItem) {
+        m_historyItem->setHops(routingHopNumbers());
+    }
+}
+
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
 {
     if (m_account && m_account->isRTTEnabled()) {
@@ -716,9 +746,9 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
             historyType |= Type::Outgoing;
         }
 
-        m_historyItem = CallHistory::instance().addHistoryItem(historyType, m_account->id(), sipUrl,
-                                                               m_contactId,
-                                                               m_contactInfo.isSipSubscriptable);
+        m_historyItem = CallHistory::instance().addHistoryItem(
+                historyType, m_account->id(), sipUrl, m_contactId, m_contactInfo.isSipSubscriptable,
+                routingHopNumbers());
 
         Q_EMIT contactChanged();
     }
@@ -1065,4 +1095,15 @@ float SIPCall::calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double 
     }
 
     return 1.0f + (0.035f * R) + (0.000007f * R * (R - 60.0f) * (100.0f - R));
+}
+
+QStringList SIPCall::routingHopNumbers() const
+{
+    QStringList hops;
+    hops.reserve(m_callRoutingHops.size());
+    std::ranges::transform(std::as_const(m_callRoutingHops), std::back_inserter(hops),
+                           [](const SIPCallRoutingHop &hop) -> QString {
+                               return PhoneNumberUtil::numberFromSipUrl(hop.uri);
+                           });
+    return hops;
 }

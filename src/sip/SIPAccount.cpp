@@ -901,6 +901,9 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
     SIPCall *call = new SIPCall(this, iprm.callId);
     call->setIncoming(true);
 
+    const auto *rxData = static_cast<const pjsip_rx_data *>(iprm.rdata.pjRxData);
+    call->parseCallRouting(rxData ? rxData->msg_info.msg : nullptr);
+
     try {
         const pj::CallInfo ci = call->getInfo();
         qCInfo(lcSIPAccount) << "Incoming Call:" << ci.remoteUri << " [" << ci.stateText << "]";
@@ -1053,6 +1056,7 @@ void SIPAccount::reinitBuddies()
     }
 
     QStringList uris;
+    uris.reserve(m_buddies.size());
     for (auto buddy : std::as_const(m_buddies)) {
         uris.push_back(buddy->uri());
     }

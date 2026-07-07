@@ -20,6 +20,8 @@
 #include "Application.h"
 #include "PlatformSession.h"
 #include "SelectionState.h"
+#include "CallRoutingHelper.h"
+#include "CallRoutingHopInfo.h"
 
 Q_LOGGING_CATEGORY(lcSIPCallManager, "gonnect.sip.callmanager")
 
@@ -194,6 +196,20 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             bodyParts.append(countries.join(", "));
         }
 
+        const auto hops = CallRoutingHelper::routingHopsForCall(*call);
+        if (!hops.isEmpty()) {
+            QStringList hopParts;
+            hopParts.reserve(hops.size());
+
+            for (const auto &hop : hops) {
+                const auto contactName = hop.contactName();
+                hopParts.append(!contactName.isEmpty()
+                                        ? QString("%1 (%2)").arg(contactName, hop.phoneNumber)
+                                        : hop.phoneNumber);
+            }
+            bodyParts.append(tr("Via: %1").arg(hopParts.join(" → ")));
+        }
+
         // Create notification object
         if (call->isBlocked()) {
             qCInfo(lcSIPCallManager) << "Incoming call from" << displayName
@@ -201,7 +217,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             return;
         }
 
-        n = new Notification(title, bodyParts.join("\n"), Notification::Priority::urgent, false,
+        n = new Notification(title, bodyParts.join(", "), Notification::Priority::urgent, false,
                              call);
 
         if (m_settings.value("generic/inverseAcceptReject", false).toBool()) {
@@ -362,6 +378,7 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
 QStringList SIPCallManager::callIds() const
 {
     QStringList res;
+    res.reserve(m_calls.size());
 
     for (auto call : std::as_const(m_calls)) {
         res.push_back(call->uuid());
