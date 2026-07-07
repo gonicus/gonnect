@@ -137,8 +137,9 @@ Item {
     }
 
     function sortTabList() {
-        const savedIds = UISettings.getUISetting("generic", "tabBarOrder", "").split(",")
-        if (savedIds.length === 0) {
+        const savedSetting = UISettings.getUISetting("generic", "tabBarOrder", "");
+        const savedIds = savedSetting ? savedSetting.split(",") : [];
+        if (savedSetting === "" || savedIds.length === 0) {
             return
         }
 
@@ -156,16 +157,13 @@ Item {
         }
         newOrder.push(...remaining)
 
-        if (newOrder.length > 0) {
-            for (const button of newOrder) {
-                button.parent = null
-                button.visible = false
+        for (const button of newOrder) {
+            button.parent = null
+            button.visible = false
 
-                button.parent = topMenuCol
-                button.visible = true
-            }
+            button.parent = topMenuCol
+            button.visible = true
         }
-
     }
 
     Rectangle {
