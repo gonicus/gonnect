@@ -5,32 +5,19 @@
 #include "ReportDescriptorParser.h"
 
 #include "hid/rdf/descriptor_view.hpp"
-#include "hid/rdf/parser.hpp"
 
 Q_LOGGING_CATEGORY(lcParser, "gonnect.usb.parser")
 
 ReportDescriptorParser::ReportDescriptorParser(QObject *parent) : QObject(parent) { }
 
-using desc_view = hid::rdf::ce_descriptor_view;
-
 typedef hid::rdf::global::tag GlobalTag;
 typedef hid::rdf::main::tag MainTag;
 typedef hid::rdf::local::tag LocalTag;
-
-class Parser : public hid::rdf::parser<desc_view::iterator>
-{
-public:
-    constexpr Parser(const desc_view &desc_view) : hid::rdf::parser<desc_view::iterator>()
-    {
-        hid::rdf::parser<desc_view::iterator>::parse_items(desc_view);
-    }
-};
 
 std::shared_ptr<ApplicationCollection> ReportDescriptorParser::parse(const QByteArray &data)
 {
     const hid::rdf::descriptor_view descView(
             reinterpret_cast<const unsigned char *>(data.constData()), data.size());
-    const Parser p(descView);
 
     static const QList<hid::rdf::main::tag> usageTypeTags = { MainTag::INPUT, MainTag::OUTPUT,
                                                               MainTag::FEATURE };
@@ -191,7 +178,6 @@ ReportDescriptorParser::parseTeamsReportIDs(const QByteArray &data)
     // even need that, but as it can be done by linear parsing, just do it...
     const hid::rdf::descriptor_view descView(
             reinterpret_cast<const unsigned char *>(data.constData()), data.size());
-    const Parser p(descView);
 
     bool inTeamsPage = false;
     quint8 uCDisplayCollectionLevel = 0xFF;
