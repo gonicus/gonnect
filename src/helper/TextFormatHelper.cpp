@@ -1,5 +1,8 @@
 #include "TextFormatHelper.h"
 
+#include <cmath>
+#include <algorithm>
+
 TextFormatHelper::TextFormatHelper(QObject *parent) : QObject{ parent } { }
 
 QString TextFormatHelper::formatFileSize(qint64 byteSize) const
