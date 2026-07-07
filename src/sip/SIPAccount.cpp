@@ -900,8 +900,10 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
 {
     SIPCall *call = new SIPCall(this, iprm.callId);
     call->setIncoming(true);
-    call->parseCallRouting(QString::fromStdString(iprm.rdata.wholeMsg));
-  
+
+    const auto *rxData = static_cast<const pjsip_rx_data *>(iprm.rdata.pjRxData);
+    call->parseCallRouting(rxData ? rxData->msg_info.msg : nullptr);
+
     try {
         const pj::CallInfo ci = call->getInfo();
         qCInfo(lcSIPAccount) << "Incoming Call:" << ci.remoteUri << " [" << ci.stateText << "]";

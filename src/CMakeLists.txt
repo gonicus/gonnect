@@ -563,6 +563,7 @@ qt_add_qml_module(gonnect
         sip/SIPBuddy.h
         sip/SIPBuddy.cpp
         sip/SIPCallRoutingHop.h
+        sip/SIPCallRoutingHop.cpp
         sip/SIPCall.h
         sip/SIPCall.cpp
         sip/SIPCallManager.h

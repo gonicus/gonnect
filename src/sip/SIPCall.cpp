@@ -131,126 +131,30 @@ SIPCall::~SIPCall()
                        []() { GlobalCallState::instance().unholdOtherCall(); });
 }
 
-QString SIPCall::hopReasonToString(const QString &reason) const
+void SIPCall::parseCallRouting(pjsip_msg *msg)
 {
-    if (reason == "unconditional") {
-        return tr("redirected");
-    } else if (reason == "no-answer") {
-        return tr("not answered");
-    } else if (reason == "user-busy" || reason == "mobile-busy") {
-        return tr("busy");
-    } else if (reason == "away") {
-        return tr("away");
-    } else if (reason == "follow-me") {
-        return tr("forwarded");
-    } else if (reason == "time-of-day") {
-        return tr("time base redirection");
-    } else if (reason == "do-not-disturb") {
-        return tr("do not disturb");
-    } else if (reason == "deflection" || reason == "deflection-immediate") {
-        return tr("rejected");
-    }
+    static const pj_str_t historyInfoName = { const_cast<char *>("History-Info"), 12 };
+    static const pj_str_t diversionName = { const_cast<char *>("Diversion"), 9 };
 
-    return "";
-}
+    QStringList historyInfoHeaders;
+    QStringList diversionHeaders;
 
-QString SIPCall::hopCauseToString(int cause) const
-{
-    switch (cause) {
-    case 302:
-        return tr("redirected");
-    case 408:
-        return tr("not answered");
-    case 486:
-        return tr("busy");
-    case 487:
-        return tr("aborted");
-    case 480:
-        return tr("not reachable");
-    default:
-        return cause > 0 ? tr("Code %1").arg(cause) : "";
-    }
-}
-
-void SIPCall::parseCallRouting(const QString &rawHeaders)
-{
-    static const QRegularExpression uriRe(R"(<([^>]+)>)");
-    static const QRegularExpression causeRe(R"(cause=(\d+))", QRegularExpression::CaseInsensitiveOption);
-    static const QRegularExpression indexRe(R"(index=([\d.]+))", QRegularExpression::CaseInsensitiveOption);
-    static const QRegularExpression reasonRe(R"(reason=\"?([^;,\"\r\n]+))", QRegularExpression::CaseInsensitiveOption);
-
-    // Parse SIP Diversion (draft-levy-sip-diversion-08) and History-Info (RFC 7044)
-    // headers and feed it to a list of call hops.
-    QList<SIPCallRoutingHop> historyInfoHops;
-    QList<SIPCallRoutingHop> diversionHops;
-
-    QStringList headerLines = rawHeaders.split("\r\n");
-
-    for (const QString &headerLine : std::as_const(headerLines)) {
-
-        // History-Info
-        if (headerLine.startsWith("History-Info:", Qt::CaseInsensitive)) {
-            const QString value = headerLine.mid(13).trimmed();
-
-            SIPCallRoutingHop hop;
-            hop.diversion = false;
-
-            auto uriMatch = uriRe.match(value);
-            if (uriMatch.hasMatch()) {
-                hop.uri = uriMatch.captured(1);
-
-                auto causeMatch = causeRe.match(value);
-                if (causeMatch.hasMatch()) {
-                    hop.reason = causeMatch.captured(1).toInt();
-                    hop.reasonText = hopCauseToString(hop.reason);
-                }
-
-                auto indexMatch = indexRe.match(value);
-                if (indexMatch.hasMatch()) {
-                    hop.index = indexMatch.captured(1);
-                }
-
-                qCDebug(lcSIPCall) << "Adding call routing hop from History-Info header:" << value;
-                historyInfoHops.append(hop);
-            } else {
-                qCWarning(lcSIPCall) << "History-Info header has no URI - skipping";
+    if (msg) {
+        for (const pjsip_hdr *hdr = msg->hdr.next; hdr != &msg->hdr; hdr = hdr->next) {
+            const bool isHistoryInfo = pj_stricmp(&hdr->name, &historyInfoName) == 0;
+            const bool isDiversion = !isHistoryInfo && pj_stricmp(&hdr->name, &diversionName) == 0;
+            if (!isHistoryInfo && !isDiversion) {
+                continue;
             }
 
-            continue;
-        }
+            const auto *gs = reinterpret_cast<const pjsip_generic_string_hdr *>(hdr);
+            const auto value = QString::fromUtf8(gs->hvalue.ptr, static_cast<int>(gs->hvalue.slen));
 
-        if (headerLine.startsWith("Diversion:", Qt::CaseInsensitive)) {
-            const QString value = headerLine.mid(10).trimmed();
-
-            SIPCallRoutingHop hop;
-            hop.diversion = true;
-
-            auto uriMatch = uriRe.match(value);
-            if (uriMatch.hasMatch()) {
-                hop.uri = uriMatch.captured(1);
-
-                auto reasonMatch = reasonRe.match(value);
-                if (reasonMatch.hasMatch()) {
-                    hop.reasonText = hopReasonToString(reasonMatch.captured(1));
-                }
-
-                qCDebug(lcSIPCall) << "Adding call routing hop from Diversion header:" << value;
-                diversionHops.append(hop);
-            } else {
-                qCWarning(lcSIPCall) << "Diversion header has no URI - skipping";
-            }
-
-            continue;
+            (isHistoryInfo ? historyInfoHeaders : diversionHeaders).append(value);
         }
     }
 
-    // Prefer history-info as defined by qualified RFC
-    if (historyInfoHops.isEmpty()) {
-        std::reverse(diversionHops.begin(), diversionHops.end());
-        m_callRoutingHops = diversionHops;
-    } else {
-        m_callRoutingHops = historyInfoHops;
-    }
+    m_callRoutingHops = SIPCallRoutingHop::parse(historyInfoHeaders, diversionHeaders);
 
     if (m_historyItem) {
         m_historyItem->setHops(routingHopNumbers());

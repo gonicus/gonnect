@@ -18,4 +18,13 @@ struct SIPCallRoutingHop
 
     // Source for this hop: true for diversion, false for history-info
     bool diversion = false;
+
+    static QList<SIPCallRoutingHop> parse(const QStringList &historyInfoHeaders,
+                                          const QStringList &diversionHeaders);
+    static SIPCallRoutingHop parseHistoryInfoEntry(const QString &value);
+    static SIPCallRoutingHop parseDiversionEntry(const QString &value);
+
+    static QStringList splitHeaderEntries(const QString &value);
+    static QString hopReasonToString(const QString &reason);
+    static QString hopCauseToString(int cause);
 };

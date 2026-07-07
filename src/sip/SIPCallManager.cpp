@@ -199,22 +199,15 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
         const auto hops = CallRoutingHelper::routingHopsForCall(*call);
         if (!hops.isEmpty()) {
             QStringList hopParts;
-            hopParts.append(tr("Via:"));
+            hopParts.reserve(hops.size());
 
-            bool first = true;
             for (const auto &hop : hops) {
-                if (!first) {
-                    hopParts.append("→");
-                }
-                first = false;
-
                 const auto contactName = hop.contactName();
-                const auto displayName = !contactName.isEmpty()
-                        ? QString("%1 (%2)").arg(contactName, hop.phoneNumber)
-                        : hop.phoneNumber;
-                hopParts.append(displayName);
+                hopParts.append(!contactName.isEmpty()
+                                        ? QString("%1 (%2)").arg(contactName, hop.phoneNumber)
+                                        : hop.phoneNumber);
             }
-            bodyParts.append(hopParts.join(' '));
+            bodyParts.append(tr("Via: %1").arg(hopParts.join(" → ")));
         }
 
         // Create notification object

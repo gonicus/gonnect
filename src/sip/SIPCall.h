@@ -49,7 +49,7 @@ public:
     void setIncoming(bool flag) { m_incoming = flag; }
     bool isIncoming() const { return m_incoming; }
 
-    void parseCallRouting(const QString &rawHeaders);
+    void parseCallRouting(pjsip_msg *msg);
     void setInTransfer(bool flag) { m_inTransfer = flag; }
     bool isIntransfer() const { return m_inTransfer; }
 
@@ -160,9 +160,6 @@ private:
     QStringList routingHopNumbers() const;
 
     QList<SIPCallRoutingHop> m_callRoutingHops;
-
-    QString hopReasonToString(const QString &reason) const;
-    QString hopCauseToString(int cause) const;
 
     QTimer m_statsTimer;
     QTimer m_rttTimeoutTimer;
