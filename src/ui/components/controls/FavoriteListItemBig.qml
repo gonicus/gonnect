@@ -31,7 +31,7 @@ Item {
     LoggingCategory {
         id: category
         name: "gonnect.qml.controls.FavoriteListItemBig"
-        defaultLogLevel: LoggingCategory.Info
+        defaultLogLevel: LoggingCategory.Warning
     }
 
     states: [
@@ -115,7 +115,7 @@ Item {
                         case Contact.NumberType.Home:
                             return qsTr("Phone (Home, %1)").arg(addr.addr)
 
-                        case Contact.NumberType.Home:
+                        case Contact.NumberType.Unknown:
                             return qsTr("Phone (%1)").arg(addr.addr)
                     }
                 }
