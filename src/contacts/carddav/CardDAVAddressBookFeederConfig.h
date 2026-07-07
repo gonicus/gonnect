@@ -4,6 +4,7 @@
 
 struct CardDAVAddressBookFeederConfig
 {
+    QString baseNumber;
     QString host;
     QString path;
     QString user;
