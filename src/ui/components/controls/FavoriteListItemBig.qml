@@ -125,46 +125,32 @@ Item {
 
         function iconSource(addr : var) : string {
 
-            console.debug(category, "Requested iconSource() for", JSON.stringify(addr))
-            console.debug(category, "  addr.contactType", addr.contactType)
-
             switch (addr.contactType) {
-                case NumberStats.ContactType.JitsiMeetUrl: {
-                   console.debug(category, "  contact type JitsiMeetUrl matched, returning", Icons.videoCall)
+                case NumberStats.ContactType.JitsiMeetUrl:
                    return Icons.videoCall
-                }
 
-                case NumberStats.ContactType.ChatRoomId: {
-                   console.debug(category, "  contact type ChatRoomId matched, returning", Icons.videoCall)
+                case NumberStats.ContactType.ChatRoomId:
                    return Icons.dialogMessages
-                }
 
                 case NumberStats.ContactType.PhoneNumber: {
-                    console.debug(category, "  contact type PhoneNumber matched, matching numberType", addr.numberType)
-
                     switch (addr.numberType) {
-                        case Contact.NumberType.Commercial: {
-                            console.debug(category, "    number type Commercial matched, returning", Icons.actor)
+                        case Contact.NumberType.Commercial:
                             return Icons.actor
-                        }
-                        case Contact.NumberType.Mobile: {
-                            console.debug(category, "    number type Mobile matched, returning", Icons.smartphone)
+
+                        case Contact.NumberType.Mobile:
                             return Icons.smartphone
-                        }
-                        case Contact.NumberType.Home: {
-                            console.debug(category, "    number type Home matched, returning", Icons.goHome)
+
+                        case Contact.NumberType.Home:
                             return Icons.goHome
-                        }
-                        case Contact.NumberType.Unknown: {
-                            console.debug(category, "    number type Unknown matched, returning", Icons.callStart)
+
+                        case Contact.NumberType.Unknown:
                             return Icons.callStart
-                        }
                     }
-                    console.error(category, "    number type", addr.numberType, "could not be matched")
+                    console.error(category, "Number type", addr.numberType, "could not be matched")
                 }
             }
 
-            console.error(category, "  contact type", addr.contactType, "could not be matched")
+            console.error(category, "Contact type", addr.contactType, "could not be matched")
             return ''
         }
     }
