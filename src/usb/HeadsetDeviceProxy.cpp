@@ -23,8 +23,18 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
             [this]() { updateDeviceState(); });
 
     connect(&GlobalCallState::instance(), &GlobalCallState::ringingStopped, this, [this]() {
+        if (!m_device) {
+            return;
+        }
+
         setRing(false);
+
+        if (GlobalCallState::instance().globalCallState() & ICallState::State::CallActive) {
+            return;
+        }
+
         m_device->setCallStatus(tr("Call ended"));
+
         switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
     });
 
