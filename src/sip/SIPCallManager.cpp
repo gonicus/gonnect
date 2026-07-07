@@ -378,6 +378,7 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
 QStringList SIPCallManager::callIds() const
 {
     QStringList res;
+    res.resize(m_calls.size());
 
     for (auto call : std::as_const(m_calls)) {
         res.push_back(call->uuid());

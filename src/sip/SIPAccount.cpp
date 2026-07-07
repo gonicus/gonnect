@@ -1056,6 +1056,7 @@ void SIPAccount::reinitBuddies()
     }
 
     QStringList uris;
+    uris.reserve(m_buddies.size());
     for (auto buddy : std::as_const(m_buddies)) {
         uris.push_back(buddy->uri());
     }
