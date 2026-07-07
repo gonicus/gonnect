@@ -22,12 +22,11 @@ HeadsetDeviceProxy::HeadsetDeviceProxy(QObject *parent) : IHeadsetDevice(parent)
     connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
             [this]() { updateDeviceState(); });
 
-    connect(&GlobalCallState::instance(), &GlobalCallState::ringingStopped, this,
-            [this]() {
-                setRing(false);
-                m_device->setCallStatus(tr("Call ended"));
-                switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
-            });
+    connect(&GlobalCallState::instance(), &GlobalCallState::ringingStopped, this, [this]() {
+        setRing(false);
+        m_device->setCallStatus(tr("Call ended"));
+        switchScreen(ReportDescriptorEnums::TeamsScreenSelect::HomeScreen);
+    });
 
     connect(&GlobalMuteState::instance(), &GlobalMuteState::isMutedChangedWithTag, this,
             [this](const bool value, const QString tag) {

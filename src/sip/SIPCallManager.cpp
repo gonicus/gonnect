@@ -360,8 +360,8 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
         auto callRemoteNumber = PhoneNumberUtil::numberFromSipUrl(remoteUri);
 
         if (number == callRemoteNumber) {
-            qCInfo(lcSIPCallManager) << "skipping additional call to already connected URI"
-                                     << remoteUri;
+            qCInfo(lcSIPCallManager)
+                    << "skipping additional call to already connected URI" << remoteUri;
             return "";
         }
     }
