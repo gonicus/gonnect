@@ -23,10 +23,7 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
     auto state = checkDB();
     if (state == ChatMessageSearchIndexer::State::Complete) {
         // Schema as expected
-        // TODO: 30 days just as an example atm
-        qint64 timestamp =
-                QDateTime(QDate::currentDate(), QTime(0, 0, 0)).addDays(-30).toMSecsSinceEpoch();
-        removeMessagesByStaleDate(timestamp);
+        // TODO: Delete stale message, pull diff by room
     } else if (state == ChatMessageSearchIndexer::State::Incomplete) {
         // Schema non-/partially existent
         initDB();
