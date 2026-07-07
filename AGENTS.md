@@ -103,7 +103,7 @@ There is a Conan sub command (export-dependencies) which can be installed using:
 conan config install resources/conan
 ```
 
-After "export-depndencies" is exposed, all the dependencies that are not provided by the conan-center-index
+After "export-dependencies" is exposed, all the dependencies that are not provided by the conan-center-index
 can be exported using (needs to be done after something changes in `resources/conan`):
 
 ```bash
