@@ -62,6 +62,8 @@ void LinuxNotificationManager::handleClosed(_NotifyNotification *internalNotific
         break;
     }
 
+    qCritical() << "#### CLOSED" << reason;
+
     Q_EMIT notification->closed(reason);
 }
 

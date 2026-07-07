@@ -227,6 +227,7 @@ void GlobalCallState::updateRinger()
     } else if (m_ringer && !isRinging) {
         m_ringer->deleteLater();
         m_ringer = nullptr;
+        Q_EMIT ringingStopped();
     }
 }
 

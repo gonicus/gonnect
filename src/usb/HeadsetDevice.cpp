@@ -290,6 +290,10 @@ void HeadsetDevice::setRing(bool flag)
         return;
     }
 
+    if (m_ringing == flag) {
+        return;
+    }
+
     m_ringing = flag;
 
     if (m_hidUsages.contains(UsageId::LED_Ring)) {

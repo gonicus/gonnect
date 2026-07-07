@@ -82,6 +82,7 @@ Q_SIGNALS:
     void nonIdleCallsCountChanged();
     void callStarted(bool isConference);
     void callEnded(bool isConference);
+    void ringingStopped();
 };
 
 class GlobalCallStateWrapper
