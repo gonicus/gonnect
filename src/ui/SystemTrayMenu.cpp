@@ -238,7 +238,7 @@ void SystemTrayMenu::updateCalls()
     // Current calls
     m_hasEstablishedCalls = false;
     for (const auto call : activeCalls) {
-        const auto remoteUri = QString::fromStdString(call->getInfo().remoteUri);
+        const auto remoteUri = call->sipUrl();
         activeUris.insert(remoteUri);
 
         SystemTrayMenu::CallEntry *entry = findCallEntry(remoteUri);
