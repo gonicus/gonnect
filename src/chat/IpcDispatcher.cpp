@@ -759,10 +759,6 @@ void IpcDispatcher::processResponse(
 
         switch (resp.code()) {
 
-        case StatusUpdate_QtProtobufNested::StatusCode::Disconnected:
-            qCInfo(lcIpcDispatcher) << "  Status: Disconnected";
-            break;
-
         case StatusUpdate_QtProtobufNested::StatusCode::Connected:
             qCInfo(lcIpcDispatcher) << "  Status: Connected";
             break;
@@ -780,6 +776,18 @@ void IpcDispatcher::processResponse(
                 req->setRoomListRequest(roomListReq);
                 sendRequest(req);
             }
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::LoggedOut:
+            qCInfo(lcIpcDispatcher) << "  Status: LoggedOut";
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::NetworkUnavailable:
+            qCInfo(lcIpcDispatcher) << "  Status: NetworkUnavailable";
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::SessionInvalid:
+            qCInfo(lcIpcDispatcher) << "  Status: SessionInvalid";
             break;
         }
 
@@ -1491,6 +1499,7 @@ void IpcDispatcher::processResponse(
 
         QList<CrossSigningSecret::CrossSigningMethod> methods;
         const auto &availableMethods = startEvent.availableMethods();
+        methods.reserve(availableMethods.size());
         for (const auto &method : availableMethods) {
             methods.append(crossSigningMethodConv(method));
         }

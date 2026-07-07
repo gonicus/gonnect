@@ -56,10 +56,13 @@ public:
     crossSigningMethodReConv(const CrossSigningSecret::CrossSigningMethod method);
 
     enum class ConnectionState {
-        Disconnected =
-                static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::Disconnected),
+        LoggedOut = static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::LoggedOut),
         Connected = static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::Connected),
         LoggedIn = static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::LoggedIn),
+        NetworkUnavailable = static_cast<int>(
+                de::gonicus::gonnect::StatusUpdate::StatusCode::NetworkUnavailable),
+        SessionInvalid =
+                static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::SessionInvalid),
     };
     Q_ENUM(ConnectionState)
 
@@ -287,7 +290,7 @@ private:
     IpcConfig m_configInfo;
     QProtobufSerializer m_protoSerializer;
     quint64 m_nextFreeTag = 1;
-    ConnectionState m_connectionState = ConnectionState::Disconnected;
+    ConnectionState m_connectionState = ConnectionState::LoggedOut;
     QList<IpcChatRoom *> m_rooms;
     QHash<QString, IpcChatRoom *> m_roomLookup;
     QString m_nextPublicRoomListResponseToken;

@@ -8,8 +8,12 @@ DtmfGenerator::DtmfGenerator(QObject *parent)
     : QObject{ parent }, m_mediaSink(AudioManager::instance().getPlaybackDevMedia())
 {
 
-    m_toneGen.createToneGenerator();
-    m_toneGen.startTransmit(m_mediaSink);
+    try {
+        m_toneGen.createToneGenerator();
+        m_toneGen.startTransmit(m_mediaSink);
+    } catch (const pj::Error &err) {
+        qCCritical(lcDtmfGenerator) << "failed to initialize DTMF tone generator:" << err.info();
+    }
 }
 
 void DtmfGenerator::playDtmf(const QChar &key)
@@ -26,7 +30,11 @@ void DtmfGenerator::playDtmf(const QChar &key)
     digitDesc.on_msec = PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT;
     digitDesc.off_msec = 0;
 
-    m_toneGen.playDigits({ digitDesc });
+    try {
+        m_toneGen.playDigits({ digitDesc });
+    } catch (const pj::Error &err) {
+        qCWarning(lcDtmfGenerator) << "failed to play DTMF tone" << lower << ":" << err.info();
+    }
 }
 
 bool DtmfGenerator::isValid(const QChar &key)
