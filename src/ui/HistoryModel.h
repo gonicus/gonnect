@@ -33,7 +33,8 @@ public:
         IsFavorite,
         IsBlocked,
         Type,
-        HasBuddyState
+        HasBuddyState,
+        Hops
     };
 
     explicit HistoryModel(QObject *parent = nullptr);

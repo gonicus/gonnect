@@ -121,7 +121,11 @@ void SIPManager::initialize()
     // Set codec preference
     setPreferredCodecs();
 
-    m_ep.libStart();
+    try {
+        m_ep.libStart();
+    } catch (pj::Error &err) {
+        qCFatal(lcSIPManager) << "failed to start SIP library: " << err.info();
+    }
 
     configureDnsResolver();
 
@@ -429,7 +433,12 @@ void SIPManager::suspend()
     pj::IpChangeParam param;
     param.shutdownTransport = true;
     param.restartListener = false;
-    pj::Endpoint::instance().handleIpChange(param);
+    try {
+        pj::Endpoint::instance().handleIpChange(param);
+    } catch (pj::Error &err) {
+        qCCritical(lcSIPManager) << "error handling IP change:"
+                                 << QString::fromLocal8Bit(err.info(false));
+    }
 }
 
 void SIPManager::resume()

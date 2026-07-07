@@ -35,7 +35,7 @@ Rectangle {
             case Contact.NumberType.Home:
             return Icons.goHome
             default:
-            return ''
+            return Icons.callStart
         }
     }
 

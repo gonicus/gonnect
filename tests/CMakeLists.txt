@@ -42,3 +42,23 @@ target_link_libraries(contactsTest
         Qt6::Quick
         Qt6::Test
 )
+
+qt_add_executable(callRoutingTest
+    CallRouting.test.cpp
+    CallRouting.test.h
+    ${PROJECT_SOURCE_DIR}/src/sip/SIPCallRoutingHop.cpp
+    ${PROJECT_SOURCE_DIR}/src/sip/SIPCallRoutingHop.h
+)
+
+add_test(NAME callRoutingTest COMMAND callRoutingTest)
+
+target_include_directories(callRoutingTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/src/sip
+)
+target_link_libraries(callRoutingTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Test
+)

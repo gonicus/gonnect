@@ -25,6 +25,7 @@
 #include "GlobalStateAggregator.h"
 #include "PlatformSession.h"
 #include "SelectionState.h"
+#include "FileHelper.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -589,8 +590,13 @@ void IpcDispatcher::init()
 
     args.append({ "--log-level", argLogLevel });
 
-    // args.append({ "--log-file-path",
-    // QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) });
+    const auto logFilePath = FileHelper::instance().makeLogFilePath(plugin->displayName);
+    if (logFilePath.isEmpty()) {
+        qCWarning(lcIpcDispatcher)
+                << "Unable to create valid log file path - --log-file-path will not be set";
+    } else {
+        args.append({ "--log-file-path", logFilePath });
+    }
 
     // Set positional arguments
     args.append({ m_ipc.fullRequestServerName(), m_ipc.fullResponseServerName() });
@@ -753,10 +759,6 @@ void IpcDispatcher::processResponse(
 
         switch (resp.code()) {
 
-        case StatusUpdate_QtProtobufNested::StatusCode::Disconnected:
-            qCInfo(lcIpcDispatcher) << "  Status: Disconnected";
-            break;
-
         case StatusUpdate_QtProtobufNested::StatusCode::Connected:
             qCInfo(lcIpcDispatcher) << "  Status: Connected";
             break;
@@ -774,6 +776,18 @@ void IpcDispatcher::processResponse(
                 req->setRoomListRequest(roomListReq);
                 sendRequest(req);
             }
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::LoggedOut:
+            qCInfo(lcIpcDispatcher) << "  Status: LoggedOut";
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::NetworkUnavailable:
+            qCInfo(lcIpcDispatcher) << "  Status: NetworkUnavailable";
+            break;
+
+        case StatusUpdate_QtProtobufNested::StatusCode::SessionInvalid:
+            qCInfo(lcIpcDispatcher) << "  Status: SessionInvalid";
             break;
         }
 
@@ -1485,6 +1499,7 @@ void IpcDispatcher::processResponse(
 
         QList<CrossSigningSecret::CrossSigningMethod> methods;
         const auto &availableMethods = startEvent.availableMethods();
+        methods.reserve(availableMethods.size());
         for (const auto &method : availableMethods) {
             methods.append(crossSigningMethodConv(method));
         }
@@ -2649,7 +2664,8 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
         return "";
     }
 
-    const auto nonUrlPath = filePath.startsWith("file://") ? filePath.mid(7) : filePath;
+    const QUrl sourceUrl(filePath);
+    const auto nonUrlPath = sourceUrl.isLocalFile() ? sourceUrl.toLocalFile() : filePath;
     if (nonUrlPath.startsWith(uploadFolderPath)) {
         return QString("file://%1").arg(nonUrlPath);
     }
@@ -2661,9 +2677,13 @@ QString IpcDispatcher::uploadFile(const QString &filePath)
 
     const auto uuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
     const QString newPath = QString("%1/%2%3").arg(uploadFolderPath, uuid, suffix);
+    QFile sourceFile(nonUrlPath);
 
-    if (!QFile::copy(nonUrlPath, newPath)) {
-        qCCritical(lcIpcDispatcher) << "Unable to copy" << filePath << "to" << newPath;
+    if (!sourceFile.copy(newPath)) {
+        const QFileDevice::FileError err = sourceFile.error();
+        const QString errorMsg = sourceFile.errorString();
+        qCCritical(lcIpcDispatcher) << "Unable to copy" << filePath << "to" << newPath
+                                    << "code:" << err << "error message:" << errorMsg;
         return "";
     }
 

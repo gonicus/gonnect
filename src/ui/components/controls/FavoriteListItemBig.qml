@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls.Material
+import QtQuick.Controls
 import QtQuick.Controls.impl
 import base
 
@@ -27,6 +27,12 @@ Item {
     Accessible.name: qsTr("Favorite contact")
     Accessible.description: qsTr("Selected favorite %1").arg(delg.name)
     Accessible.focusable: false
+
+    LoggingCategory {
+        id: category
+        name: "gonnect.qml.controls.FavoriteListItemBig"
+        defaultLogLevel: LoggingCategory.Warning
+    }
 
     states: [
         State {
@@ -108,6 +114,9 @@ Item {
 
                         case Contact.NumberType.Home:
                             return qsTr("Phone (Home, %1)").arg(addr.addr)
+
+                        case Contact.NumberType.Unknown:
+                            return qsTr("Phone (%1)").arg(addr.addr)
                     }
                 }
             }
@@ -115,6 +124,7 @@ Item {
         }
 
         function iconSource(addr : var) : string {
+
             switch (addr.contactType) {
                 case NumberStats.ContactType.JitsiMeetUrl:
                    return Icons.videoCall
@@ -126,13 +136,21 @@ Item {
                     switch (addr.numberType) {
                         case Contact.NumberType.Commercial:
                             return Icons.actor
+
                         case Contact.NumberType.Mobile:
                             return Icons.smartphone
+
                         case Contact.NumberType.Home:
                             return Icons.goHome
+
+                        case Contact.NumberType.Unknown:
+                            return Icons.callStart
                     }
+                    console.error(category, "Number type", addr.numberType, "could not be matched")
                 }
             }
+
+            console.error(category, "Contact type", addr.contactType, "could not be matched")
             return ''
         }
     }

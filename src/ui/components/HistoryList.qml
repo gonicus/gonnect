@@ -109,6 +109,7 @@ Item {
             required property bool hasBuddyState
             required property bool hasAvatar
             required property string avatarPath
+            required property list<string> hops
 
             property int buddyStatus: SIPBuddyState.UNKNOWN
             readonly property bool isReady: delg.buddyStatus === SIPBuddyState.READY
@@ -228,7 +229,9 @@ Item {
                     Label {
                         id: phoneNumberLabel
                         elide: Label.ElideRight
-                        text: delg.remotePhoneNumber
+                        text: delg.remotePhoneNumber + (delg.hops.length > 0
+                                                        ? qsTr(", via %1").arg(delg.hops.join(" → "))
+                                                        : "")
                         anchors {
                             left: parent.left
                             right: parent.right
