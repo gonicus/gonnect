@@ -5,6 +5,10 @@
 #include "ChatMessageContentUserStateChange.h"
 #include "IpcChatRoom.h"
 
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcChatModel, "gonnect.app.chat.ChatModel")
+
 ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
 {
     connect(this, &ChatModel::chatRoomChanged, this, &ChatModel::onChatRoomChanged);
@@ -302,11 +306,28 @@ void ChatModel::onChatRoomChanged()
                                        { static_cast<int>(Roles::MentionedUserNames) });
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageFlagsChanged, m_chatRoomContext,
-                [this](qsizetype idx, ChatMessage *) {
+                [this](qsizetype idx, ChatMessage *chatMessage, ChatMessage::Flags previousFlags) {
+                    if (!chatMessage) {
+                        qCCritical(lcChatModel)
+                                << "Ignoring IChatRoom::chatMessageFlagsChanged signal with "
+                                   "nullptr for parameter ChatMessage* chatMessage";
+                        return;
+                    }
+
+                    QList<int> affectedRoles;
+                    const auto currentFlags = chatMessage->flags();
+                    const auto changedFlags = previousFlags ^ currentFlags;
+
+                    if (changedFlags & ChatMessage::Flag::Encrypted) {
+                        affectedRoles.append(static_cast<int>(Roles::IsEncrypted));
+                        affectedRoles.append(static_cast<int>(Roles::Content));
+                    }
+                    if (changedFlags & ChatMessage::Flag::Pinned) {
+                        affectedRoles.append(static_cast<int>(Roles::IsPinned));
+                    }
+
                     const auto modelIndex = createIndex(idx, 0);
-                    Q_EMIT dataChanged(modelIndex, modelIndex,
-                                       { static_cast<int>(Roles::IsEncrypted),
-                                         static_cast<int>(Roles::IsPinned) });
+                    Q_EMIT dataChanged(modelIndex, modelIndex, affectedRoles);
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageReactionsChanged, m_chatRoomContext,
                 [this](qsizetype idx, ChatMessage *) {

@@ -26,6 +26,18 @@ class Notification;
 
 #define GONNECT_IPC_TIMEOUT_SECS 29
 
+template <typename T>
+concept MessageDeliverer = requires(T obj) {
+    { obj.hasText() } -> std::same_as<bool>;
+    { obj.text() } -> std::convertible_to<const de::gonicus::gonnect::MessageContentText &>;
+    { obj.hasFile() } -> std::same_as<bool>;
+    { obj.file() } -> std::convertible_to<const de::gonicus::gonnect::MessageContentFile &>;
+    { obj.hasMembershipChange() } -> std::same_as<bool>;
+    {
+        obj.membershipChange()
+    } -> std::convertible_to<const de::gonicus::gonnect::MessageContentMembershipChange &>;
+};
+
 class IpcDispatcher : public IChatProvider
 {
     Q_OBJECT
@@ -221,6 +233,9 @@ private:
 
     static IChatRoom::Permissions
     roomPermissionsGrpcToGonnect(const de::gonicus::gonnect::RoomPermissions permissions);
+
+    template <MessageDeliverer T>
+    [[nodiscard]] QObject *createMessageContent(const T &message) const;
 
     /// Setup and start sub process.
     void init();
