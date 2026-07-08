@@ -17,7 +17,7 @@ QImage PersonCoinProvider::requestImage(const QString &id, QSize *size, const QS
     // Determine size
     int w = 100, h = 100;
 
-    if (requestedSize.isValid()) {
+    if (requestedSize.isValid() && requestedSize.width() > 0 && requestedSize.height() > 0) {
         w = requestedSize.width();
         h = requestedSize.height();
 
