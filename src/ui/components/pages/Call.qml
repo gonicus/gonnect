@@ -180,7 +180,7 @@ Item {
 
                                 CallerBigAvatar {
                                     id: bigAvatar
-                                    bubbleSize: Math.min(avatarLoader.control / 850 * callMainCard.height, control.maxAvatarSize)
+                                    bubbleSize: Math.min(control.maxAvatarSize / 850 * callMainCard.height, control.maxAvatarSize)
                                     name: callerDelg.contactName
                                     avatarUrl: callerDelg.avatarPath
                                     isIncoming: callerDelg.isIncoming
