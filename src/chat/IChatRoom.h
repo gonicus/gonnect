@@ -171,7 +171,7 @@ public:
     /// (secondarily). The list or its content must not be modified.
     virtual const QList<ChatUser *> &chatUsers() const = 0;
 
-    virtual UserRoomState chatUserRoomState(ChatUser *user) const = 0;
+    Q_INVOKABLE virtual UserRoomState chatUserRoomState(ChatUser *user) const = 0;
 
     /// List of all users which are currently typing, ordered by their display name
     /// (primarily) or id (secondarily). The list or its content must not be modified.

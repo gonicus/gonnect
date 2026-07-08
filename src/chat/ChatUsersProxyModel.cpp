@@ -4,10 +4,7 @@
 ChatUsersProxyModel::ChatUsersProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
     connect(this, &ChatUsersProxyModel::selectedUserIdsChanged, this, [this]() { invalidate(); });
-    connect(this, &ChatUsersProxyModel::excludedUserIdsChanged, this, [this]() {
-        beginFilterChange();
-        endFilterChange();
-    });
+    connect(this, &ChatUsersProxyModel::excludedUserIdsChanged, this, [this]() { invalidate(); });
     connect(this, &ChatUsersProxyModel::filterTextChanged, this, [this]() {
         beginFilterChange();
         endFilterChange();
@@ -62,7 +59,7 @@ bool ChatUsersProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) c
         return false;
     }
 
-    if (m_filterText.isEmpty()) {
+    if (m_filterText.isEmpty() && m_excludedUserIds.isEmpty() && m_selectedUserIds.isEmpty()) {
         return true;
     }
 
@@ -73,8 +70,8 @@ bool ChatUsersProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) c
     if (m_excludedUserIds.contains(id)) {
         return false;
     }
-    if (m_selectedUserIds.contains(id)) {
-        return true;
+    if (!m_selectedUserIds.isEmpty() && !m_selectedUserIds.contains(id)) {
+        return false;
     }
 
     const auto &name = model->data(idx, static_cast<int>(Roles::Name)).toString();

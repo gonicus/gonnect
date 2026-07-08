@@ -371,6 +371,7 @@ void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
     }
 
     auto user = q_check_ptr(m_chatUsers.at(index));
+
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(index, user, state);
 }

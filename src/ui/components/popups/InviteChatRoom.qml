@@ -77,7 +77,32 @@ Item {
         model: ChatUsersProxyModel {
             id: proxyModel
             filterText: searchField.text
-            excludedUserIds: internal.room?.chatUsers.map(user => user.id)
+
+            function updateExcludedUserIds() {
+                Qt.callLater(() => {
+                    const room = internal.room
+                    if (!room) {
+                        proxyModel.excludedUserIds = []
+                        return
+                    }
+
+                    const allowedStates = IChatRoom.UserRoomState.Unjoined | IChatRoom.UserRoomState.Knocked | IChatRoom.UserRoomState.Banned
+                    proxyModel.excludedUserIds = room.chatUsers.filter(user => room.chatUserRoomState(user) & allowedStates).map(user => user.id)
+                })
+            }
+
+            Component.onCompleted: () => { proxyModel.updateExcludedUserIds() }
+
+            readonly property Connections internalConnections: Connections {
+                target: internal
+                function onRoomChanged() { proxyModel.updateExcludedUserIds() }
+            }
+
+            readonly property Connections chatRoomConnections: Connections {
+                target: internal.room
+                function onChatUserRoomStateChanged() { proxyModel.updateExcludedUserIds() }
+                function onChatUsersChanged() { proxyModel.updateExcludedUserIds() }
+            }
 
             ChatUsersModel {
                 chatProvider: control.chatProvider
