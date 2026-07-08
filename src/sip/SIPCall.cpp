@@ -661,7 +661,10 @@ void SIPCall::accept()
     }
 
     m_hasAccepted = true;
-    pj::CallOpParam prm;
+
+    pj::CallOpParam prm(true);
+    prm.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
+
     prm.statusCode = PJSIP_SC_OK;
     answer(prm);
 }
