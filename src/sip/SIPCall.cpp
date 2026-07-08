@@ -630,6 +630,7 @@ bool SIPCall::unhold()
 {
     pj::CallOpParam op(true);
     op.opt.flag = PJSUA_CALL_UNHOLD;
+    op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
     setIsHolding(false);
 
