@@ -5,3 +5,4 @@ sources:
 patches:
   '2.17':
     - patch_file: patches/02-pjsip-pres-crash-fix.patch
+    - patch_file: patches/03-pjproject-invite-fix.patch
