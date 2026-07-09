@@ -40,6 +40,12 @@ Item {
 
     property AggregatedDirectRoomsOfContact roomsAggregator: null
 
+    function useImageFromClipboard() {
+        if (chatSideBar.visible && chatSideBar.chatProvider && chatSideBar.chatRoom) {
+            chatSideBar.chatProvider.uploadImageFromClipboard(chatSideBar.chatRoom.id)
+        }
+    }
+
     onChatAvailableChanged: {
         if (!control.chatAvailable && control.selectedSideBarMode === CallSideBar.Chat) {
             control.selectedSideBarMode === CallSideBar.None

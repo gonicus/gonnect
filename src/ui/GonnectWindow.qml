@@ -213,13 +213,13 @@ BaseWindow {
 
                 // Paste clipboard image content, if applicable
                 if (ClipboardHelper.hasImage()) {
-                    if (SelectionState.selectedPage.type === MainPageSelection.PageType.Chats) {
-                        const page = control.getPage(SelectionState.selectedPage.id)
-                        if (page) {
-                            keyEvent.accepted = true
-                            page.useImageFromClipboard()
-                        }
-                    }
+                    return
+                }
+
+                const page = control.getPage(SelectionState.selectedPage.id)
+                if (page && page.hasOwnProperty("useImageFromClipboard") && typeof page["useImageFromClipboard"] === "function") {
+                    keyEvent.accepted = true
+                    page.useImageFromClipboard()
                 }
 
             } else if (keyEvent.key === Qt.Key_M
