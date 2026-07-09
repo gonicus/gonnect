@@ -47,6 +47,8 @@ public:
     bool isInstantMessagingAllowed() const;
     bool isRTTEnabled() const { return m_rttEnabled; }
 
+    bool usesCiscoHoldSignaling() const { return m_ciscoHoldSignaling; }
+
     QString call(const QString &number, const QString &contactId = "",
                  const QString &preferredIdentity = "auto", bool silent = false);
     void hangup(const int callId);
@@ -119,6 +121,7 @@ private:
     bool m_shallNegotiateCapabilities = true;
     bool m_useInstantMessagingWithoutCheck = true;
     bool m_rttEnabled = true;
+    bool m_ciscoHoldSignaling = false;
     bool m_afterResume = false;
     QObject *m_globalStateConnectionContext = nullptr;
 

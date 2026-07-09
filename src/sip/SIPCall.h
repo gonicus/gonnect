@@ -158,6 +158,7 @@ private:
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
     QStringList routingHopNumbers() const;
+    void addCiscoHoldSignaling(pj::CallOpParam &op, const char *action) const;
 
     QList<SIPCallRoutingHop> m_callRoutingHops;
 

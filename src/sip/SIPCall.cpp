@@ -610,9 +610,20 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
     }
 }
 
+void SIPCall::addCiscoHoldSignaling(pj::CallOpParam &op, const char *action) const
+{
+    if (m_account && m_account->usesCiscoHoldSignaling()) {
+        pj::SipHeader hdr;
+        hdr.hName = "Call-Info";
+        hdr.hValue = std::string("<urn:x-cisco-remotecc:") + action + ">";
+        op.txOption.headers.push_back(hdr);
+    }
+}
+
 bool SIPCall::hold()
 {
     pj::CallOpParam op(true);
+    addCiscoHoldSignaling(op, "hold");
 
     setIsHolding(true);
 
@@ -631,6 +642,7 @@ bool SIPCall::unhold()
     pj::CallOpParam op(true);
     op.opt.flag = PJSUA_CALL_UNHOLD;
     op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
+    addCiscoHoldSignaling(op, "resume");
 
     setIsHolding(false);
 

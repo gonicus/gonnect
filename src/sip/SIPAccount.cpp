@@ -197,9 +197,12 @@ void SIPAccount::initialize()
             m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC3264;
         } else if (callHoldType == "rfc2543") {
             m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC2543;
+        } else if (callHoldType == "cisco") {
+            m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC3264;
+            m_ciscoHoldSignaling = true;
         } else {
             qCCritical(lcSIPAccount)
-                    << "invalid value for 'callHoldType' [rfc3264, rfc2543]:" << callHoldType;
+                    << "invalid value for 'callHoldType' [rfc3264, rfc2543, cisco]:" << callHoldType;
             Q_EMIT initialized(false);
             return;
         }
