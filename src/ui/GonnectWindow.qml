@@ -213,11 +213,10 @@ BaseWindow {
 
                 // Paste clipboard image content, if applicable
                 if (ClipboardHelper.hasImage()) {
-                    keyEvent.accepted = true
-
                     if (SelectionState.selectedPage.type === MainPageSelection.PageType.Chats) {
                         const page = control.getPage(SelectionState.selectedPage.id)
                         if (page) {
+                            keyEvent.accepted = true
                             page.useImageFromClipboard()
                         }
                     }

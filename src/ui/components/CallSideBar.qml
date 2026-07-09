@@ -293,6 +293,8 @@ Item {
 
         property int lastMessageCount: 0
 
+        Component.onCompleted: () => chatSideBar.updateChatRoom()
+
         onVisibleChanged: () => {
             if (!chatSideBar.visible) {
                 chatSideBar.lastMessageCount = chatSideBar.chatRoom?.notificationCount ?? 0
@@ -303,7 +305,33 @@ Item {
             target: control.conferenceConnector
             function onIsInConferenceChanged() {
                 chatSideBar.lastMessageCount = 0
+                chatSideBar.updateChatRoom()
             }
+        }
+
+        Connections {
+            target: control
+            function onRoomsAggregatorChanged() { chatSideBar.updateChatRoom() }
+        }
+
+        Connections {
+            target: control.roomsAggregator
+            function onBestMatchingChatRoomChanged() { chatSideBar.updateChatRoom() }
+        }
+
+        function updateChatRoom() {
+            Qt.callLater(() => {
+                const aggr = control.roomsAggregator
+                if (aggr && aggr.bestMatchingChatRoom) {
+                    chatSideBar.chatRoom = aggr.bestMatchingChatRoom
+                    return
+                }
+                if (control.conferenceConnector) {
+                    chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+                    return
+                }
+                chatSideBar.chatRoom = null
+            })
         }
     }
 
