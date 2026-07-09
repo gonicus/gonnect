@@ -64,6 +64,7 @@ public:
     virtual void setUserRoomState(qsizetype index, UserRoomState state) override;
     virtual ChatUser *chatUserById(const QString &userId) const override;
     virtual bool isUserMemberOfRoom(const QString &userId) const override;
+    virtual bool isUserInvitable(ChatUser *user) const override;
     virtual const QList<ChatUser *> &chatUsers() const override;
     virtual UserRoomState chatUserRoomState(ChatUser *user) const override;
     virtual const QList<ChatUser *> &typingUsers() const override;

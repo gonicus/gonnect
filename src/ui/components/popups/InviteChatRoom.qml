@@ -86,8 +86,8 @@ Item {
                         return
                     }
 
-                    const allowedStates = IChatRoom.UserRoomState.Unjoined | IChatRoom.UserRoomState.Knocked | IChatRoom.UserRoomState.Banned
-                    proxyModel.excludedUserIds = room.chatUsers.filter(user => room.chatUserRoomState(user) & allowedStates).map(user => user.id)
+                    proxyModel.excludedUserIds = room.chatUsers.filter(user => !room.isUserInvitable(user))
+                                                               .map(user => user.id)
                 })
             }
 

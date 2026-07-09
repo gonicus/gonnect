@@ -415,6 +415,18 @@ bool IpcChatRoom::isUserMemberOfRoom(const QString &userId) const
     return user && okStates.contains(m_userRoomStates.value(user));
 }
 
+bool IpcChatRoom::isUserInvitable(ChatUser *user) const
+{
+    if (!user) {
+        return false;
+    }
+
+    static const QSet<UserRoomState> allowedStates = { UserRoomState::Unjoined,
+                                                       UserRoomState::Banned };
+
+    return allowedStates.contains(chatUserRoomState(user));
+}
+
 const QList<ChatUser *> &IpcChatRoom::chatUsers() const
 {
     return m_chatUsers;
