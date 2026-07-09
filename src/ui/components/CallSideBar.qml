@@ -280,16 +280,6 @@ Item {
         id: chatSideBar
         visible: false
         chatProvider: control.roomsAggregator?.providerOfRoom(chatSideBar.chatRoom) ?? null
-        chatRoom: {
-            const aggr = control.roomsAggregator
-            if (aggr && aggr.bestMatchingChatRoom) {
-                return aggr.bestMatchingChatRoom
-            }
-            if (control.conferenceConnector) {
-                return control.conferenceConnector.chatRoom()
-            }
-            return null
-        }
         anchors {
             top: headerBar.bottom
             bottom: parent.bottom
