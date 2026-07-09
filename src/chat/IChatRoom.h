@@ -164,6 +164,9 @@ public:
     /// Whether the user is has joined the room.
     virtual bool isUserMemberOfRoom(const QString &userId) const = 0;
 
+    /// Whether the given user can be invited to become a participant in this room.
+    Q_INVOKABLE virtual bool isUserInvitable(ChatUser *user) const = 0;
+
     /// Returns the ChatUser object pointer for the given id or nullptr.
     virtual ChatUser *chatUserById(const QString &userId) const = 0;
 

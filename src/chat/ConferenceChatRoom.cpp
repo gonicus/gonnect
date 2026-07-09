@@ -142,6 +142,13 @@ bool ConferenceChatRoom::isUserMemberOfRoom(const QString &userId) const
     return false;
 }
 
+bool ConferenceChatRoom::isUserInvitable(ChatUser *user) const
+{
+    // Conference rooms do not support invitations at all
+    Q_UNUSED(user)
+    return false;
+}
+
 void ConferenceChatRoom::clear()
 {
     qDeleteAll(m_messages);

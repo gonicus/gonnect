@@ -371,6 +371,7 @@ void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
     }
 
     auto user = q_check_ptr(m_chatUsers.at(index));
+
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(index, user, state);
 }
@@ -412,6 +413,18 @@ bool IpcChatRoom::isUserMemberOfRoom(const QString &userId) const
     static const QSet<UserRoomState> okStates = { UserRoomState::Joined, UserRoomState::Invited,
                                                   UserRoomState::Knocked };
     return user && okStates.contains(m_userRoomStates.value(user));
+}
+
+bool IpcChatRoom::isUserInvitable(ChatUser *user) const
+{
+    if (!user) {
+        return false;
+    }
+
+    static const QSet<UserRoomState> allowedStates = { UserRoomState::Unjoined,
+                                                       UserRoomState::Banned };
+
+    return allowedStates.contains(chatUserRoomState(user));
 }
 
 const QList<ChatUser *> &IpcChatRoom::chatUsers() const

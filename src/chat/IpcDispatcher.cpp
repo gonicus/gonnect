@@ -998,7 +998,7 @@ void IpcDispatcher::processResponse(
                     continue;
                 }
 
-                if (room->isUserMemberOfRoom(p->id())) {
+                if (room->chatUserById(p->id())) {
                     room->setUserRoomState(p, userRoomState);
                 } else {
                     room->addUser(p, userRoomState);
@@ -1331,6 +1331,7 @@ void IpcDispatcher::processResponse(
         const auto changeEvent = rc.roomChangeEvent();
         const auto &roomId = changeEvent.roomId();
         IpcChatRoom *room = nullptr;
+
         for (auto r : std::as_const(m_rooms)) {
             if (r->id() == roomId) {
                 room = r;
@@ -1427,11 +1428,10 @@ void IpcDispatcher::processResponse(
 
                 auto user = m_users.value(userId, nullptr);
                 if (user) {
-
-                    if (room->chatUserRoomState(user) == IChatRoom::UserRoomState::Unjoined) {
-                        room->addUser(user, userRoomState);
-                    } else {
+                    if (room->chatUserById(user->id())) {
                         room->setUserRoomState(user, userRoomState);
+                    } else {
+                        room->addUser(user, userRoomState);
                     }
                 } else {
                     requestUser(userId);
