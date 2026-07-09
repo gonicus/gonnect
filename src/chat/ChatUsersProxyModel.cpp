@@ -59,7 +59,7 @@ bool ChatUsersProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) c
         return false;
     }
 
-    if (m_filterText.isEmpty() && m_excludedUserIds.isEmpty() && m_selectedUserIds.isEmpty()) {
+    if (m_filterText.isEmpty() && m_excludedUserIds.isEmpty()) {
         return true;
     }
 
@@ -70,8 +70,8 @@ bool ChatUsersProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) c
     if (m_excludedUserIds.contains(id)) {
         return false;
     }
-    if (!m_selectedUserIds.isEmpty() && !m_selectedUserIds.contains(id)) {
-        return false;
+    if (m_selectedUserIds.contains(id)) {
+        return true;
     }
 
     const auto &name = model->data(idx, static_cast<int>(Roles::Name)).toString();
