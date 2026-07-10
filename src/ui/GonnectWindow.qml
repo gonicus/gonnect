@@ -212,7 +212,7 @@ BaseWindow {
             } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
 
                 // Paste clipboard image content, if applicable
-                if (ClipboardHelper.hasImage()) {
+                if (!ClipboardHelper.hasImage()) {
                     return
                 }
 

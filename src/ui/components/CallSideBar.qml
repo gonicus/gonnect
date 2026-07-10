@@ -48,7 +48,7 @@ Item {
 
     onChatAvailableChanged: {
         if (!control.chatAvailable && control.selectedSideBarMode === CallSideBar.Chat) {
-            control.selectedSideBarMode === CallSideBar.None
+            control.selectedSideBarMode = CallSideBar.None
         }
     }
 
