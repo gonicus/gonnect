@@ -100,6 +100,10 @@ public:
 
     [[nodiscard("Caller must take ownership")]] PresenceStateAggregator *
     createPresenceStateObject() const;
+
+Q_SIGNALS:
+    void chatUsersChanged();
+
 #endif
 
 private:

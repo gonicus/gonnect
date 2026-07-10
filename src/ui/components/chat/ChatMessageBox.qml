@@ -431,8 +431,8 @@ Item {
             } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
                 // Clipboard paste
 
+                keyEvent.accepted = true
                 if (ClipboardHelper.hasImage()) {
-                    keyEvent.accepted = true
                     control.imageFromClipboardReceived()
                 } else if (ClipboardHelper.hasText()) {
                     keyEvent.accepted = true

@@ -8,6 +8,14 @@ ChatRoomProxyModel::ChatRoomProxyModel(QObject *parent) : QSortFilterProxyModel{
 
     connect(this, &ChatRoomProxyModel::sortStrategyChanged, this, &ChatRoomProxyModel::applySort);
 
+    connect(this, &ChatRoomProxyModel::showSectionHeaderChanged, this, [&]() {
+        const auto rows = rowCount();
+        if (rows > 0) {
+            Q_EMIT dataChanged(index(0, 0), index(rows - 1, 0),
+                               { static_cast<int>(Roles::SectionHeader) });
+        }
+    });
+
     applySort();
     sort(0);
 }
@@ -31,29 +39,37 @@ QVariant ChatRoomProxyModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case static_cast<int>(Roles::SectionHeader): {
 
-        if (!m_groupFavorites) {
+        if (!m_showSectionHeader) {
             return "";
         }
 
-        // Previous element is favorite, current is not
-        using Roles = ChatRoomModel::Roles;
+        if (m_groupFavorites) {
+
+            // Previous element is favorite, current is not
+            using Roles = ChatRoomModel::Roles;
+
+            if (index.row() == 0) {
+                if (mapToSource(index).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
+                    return tr("Favorites");
+                } else {
+                    return tr("Others");
+                }
+            }
+
+            if (!mapToSource(index).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
+                QModelIndex prevIndex = index.sibling(index.row() - 1, 0);
+
+                if (prevIndex.isValid()
+                    && mapToSource(prevIndex).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
+                    return tr("Others");
+                }
+            }
+        }
 
         if (index.row() == 0) {
-            if (mapToSource(index).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
-                return tr("Favorites");
-            } else {
-                return tr("Others");
-            }
+            return tr("Others");
         }
 
-        if (!mapToSource(index).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
-            QModelIndex prevIndex = index.sibling(index.row() - 1, 0);
-
-            if (prevIndex.isValid()
-                && mapToSource(prevIndex).data(static_cast<int>(Roles::IsFavorite)).toBool()) {
-                return tr("Others");
-            }
-        }
         return "";
     }
 
