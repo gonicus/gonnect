@@ -28,10 +28,12 @@ Item {
                            internal.typingTimer.stop()
                            internal.lastPingTime = 0
                            internal.hasTypedWhileWaiting = false
+                           messageField.lastCursorPosition = 0
+                           control.editMessageId = ""
 
                            const room = control.chatRoom
                            if (room && internal.savedInput[room.id] !== undefined) {
-                               chatMessageBox.text = internal.savedInput[room.id]
+                               messageField.text = internal.savedInput[room.id]
                                messageField.forceActiveFocus()
                                messageField.selectAll()
                            } else {
@@ -215,8 +217,8 @@ Item {
             internal.sendIsTyping()
 
             // Save entered text for later restore
-            if (control.chatRoom) {
-                internal.savedInput[control.chatRoom.id] = chatMessageBox.text
+            if (control.chatRoom && !control.editMessageId) {
+                internal.savedInput[control.chatRoom.id] = messageField.text
             }
 
             // Find current word at cursor
