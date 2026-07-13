@@ -307,6 +307,7 @@ BaseWindow {
             showSearch: !SM.uiEditMode
             anchors {
                 top: parent.top
+                topMargin: 5
                 left: mainTabBar.right
                 right: parent.right
             }
@@ -321,6 +322,7 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
+                topMargin: controlBar.visible ? 5 : 0
                 bottom: bottomBar.visible ? bottomBar.top : parent.bottom
                 bottomMargin: 2 * Theme.d
             }
@@ -391,7 +393,7 @@ BaseWindow {
                 right: parent.right
                 left: mainTabBar.right
                 bottom: parent.bottom
-                bottomMargin: Theme.d + 6  // extra padding for window shadow
+                bottomMargin: Theme.d + (Theme.useOwnDecoration ? 6 : 3)  // extra padding for window shadow
             }
 
             TogglerList {

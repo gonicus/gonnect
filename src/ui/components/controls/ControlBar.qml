@@ -70,10 +70,10 @@ Item {
     }
 
     Row {
-        spacing: 10
+        spacing: Theme.d
         anchors {
             right: parent.right
-            rightMargin: 20
+            rightMargin: Theme.d * 2
             verticalCenter: parent.verticalCenter
         }
 
