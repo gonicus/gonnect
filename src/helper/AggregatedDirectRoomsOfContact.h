@@ -36,9 +36,11 @@ private:
     QList<IChatRoom *> m_chatRooms;
     QHash<IChatProvider *, QObject *> m_providerContextObjects;
     QHash<IChatRoom *, QObject *> m_roomContextObjects;
+    QMetaObject::Connection m_contactConn;
 
 private Q_SLOTS:
     void onContactChanged();
+    void updateChatRooms();
     void updateBestMatchingRoom();
 
 Q_SIGNALS:

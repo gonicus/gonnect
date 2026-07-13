@@ -27,18 +27,27 @@ Item {
     // The avatar should grow in relation to card height, but only to maximum of 202-254 px
     property int maxAvatarSize: control.isRttEnabled ? 202 : 254
 
-    Keys.onPressed: (event) => {
+    Keys.onPressed: (keyEvent) => {
+
+                        if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
+                            if (ClipboardHelper.hasImage()) {
+                                keyEvent.accepted = false
+                                control.useImageFromClipboard()
+                                return
+                            }
+                        }
+
                         const callItem = callSideBar.selectedCallItem
 
-                        if (event.isAutoRepeat || !callItem) {
+                        if (keyEvent.isAutoRepeat || !callItem) {
                             return
                         }
 
-                        const key = event.text.toUpperCase()
+                        const key = keyEvent.text.toUpperCase()
                         const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "A", "B", "C", "D" ]
 
                         if (dtmfKeys.includes(key)) {
-                            event.accepted = true
+                            keyEvent.accepted = true
                             SIPCallManager.sendDtmf(callItem.accountId, callItem.callId, key)
 
                             dtmfFeedbackLabel.text = key
@@ -73,6 +82,10 @@ Item {
             }
         }
     ]
+
+    function useImageFromClipboard() {
+        callSideBar.useImageFromClipboard()
+    }
 
     Card {
         id: callMainCard
@@ -180,7 +193,7 @@ Item {
 
                                 CallerBigAvatar {
                                     id: bigAvatar
-                                    bubbleSize: Math.min(avatarLoader.control / 850 * callMainCard.height, control.maxAvatarSize)
+                                    bubbleSize: Math.min(control.maxAvatarSize / 850 * callMainCard.height, control.maxAvatarSize)
                                     name: callerDelg.contactName
                                     avatarUrl: callerDelg.avatarPath
                                     isIncoming: callerDelg.isIncoming

@@ -43,6 +43,29 @@ void ChatMessage::setEventId(const QString &eventId)
     }
 }
 
+void ChatMessage::setContent(QObject *content)
+{
+    if (m_content != content) {
+
+        if (m_content) {
+            m_content->deleteLater();
+            m_content = nullptr;
+        }
+
+        m_content = content;
+
+        if (content) {
+            content->setParent(this);
+
+            if (auto *textContent = qobject_cast<ChatMessageContentText *>(content)) {
+                textContent->processText();
+            }
+        }
+
+        Q_EMIT contentChanged();
+    }
+}
+
 bool ChatMessage::isStateUpdate() const
 {
     return qobject_cast<ChatMessageContentUserStateChange *>(m_content);

@@ -6,8 +6,7 @@
 
 #include "ChatUser.h"
 #include "NotificationSetting.h"
-
-class ChatMessage;
+#include "ChatMessage.h"
 
 struct RoomSettings
 {
@@ -165,6 +164,9 @@ public:
     /// Whether the user is has joined the room.
     virtual bool isUserMemberOfRoom(const QString &userId) const = 0;
 
+    /// Whether the given user can be invited to become a participant in this room.
+    Q_INVOKABLE virtual bool isUserInvitable(ChatUser *user) const = 0;
+
     /// Returns the ChatUser object pointer for the given id or nullptr.
     virtual ChatUser *chatUserById(const QString &userId) const = 0;
 
@@ -218,7 +220,8 @@ Q_SIGNALS:
     void chatMessageRemoved(qsizetype index, ChatMessage *chatMessage);
 
     void chatMessageContentChanged(qsizetype index, ChatMessage *chatMessage);
-    void chatMessageFlagsChanged(qsizetype index, ChatMessage *chatMessage);
+    void chatMessageFlagsChanged(qsizetype index, ChatMessage *chatMessage,
+                                 ChatMessage::Flags previousFlags);
     void chatMessageReactionsChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageMentionedUsersChanged(qsizetype index, ChatMessage *chatMessage);
 

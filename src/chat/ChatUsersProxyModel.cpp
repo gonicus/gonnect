@@ -4,14 +4,8 @@
 ChatUsersProxyModel::ChatUsersProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
     connect(this, &ChatUsersProxyModel::selectedUserIdsChanged, this, [this]() { invalidate(); });
-    connect(this, &ChatUsersProxyModel::excludedUserIdsChanged, this, [this]() {
-        beginFilterChange();
-        endFilterChange();
-    });
-    connect(this, &ChatUsersProxyModel::filterTextChanged, this, [this]() {
-        beginFilterChange();
-        endFilterChange();
-    });
+    connect(this, &ChatUsersProxyModel::excludedUserIdsChanged, this, [this]() { invalidate(); });
+    connect(this, &ChatUsersProxyModel::filterTextChanged, this, [this]() { invalidate(); });
 
     sort(0);
 }
@@ -62,14 +56,14 @@ bool ChatUsersProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) c
         return false;
     }
 
-    if (m_filterText.isEmpty()) {
+    if (m_filterText.isEmpty() && m_excludedUserIds.isEmpty()) {
         return true;
     }
 
     using Roles = ChatUsersModel::Roles;
-    const auto idx = createIndex(sourceRow, 0);
+    const auto idx = model->index(sourceRow, 0);
 
-    const auto &id = model->data(idx, static_cast<int>(Roles::Id)).toString();
+    const auto &id = idx.data(static_cast<int>(Roles::Id)).toString();
     if (m_excludedUserIds.contains(id)) {
         return false;
     }
@@ -77,6 +71,6 @@ bool ChatUsersProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) c
         return true;
     }
 
-    const auto &name = model->data(idx, static_cast<int>(Roles::Name)).toString();
+    const auto &name = idx.data(static_cast<int>(Roles::Name)).toString();
     return name.contains(m_filterText, Qt::CaseSensitivity::CaseInsensitive);
 }

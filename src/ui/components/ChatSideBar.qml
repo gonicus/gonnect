@@ -10,6 +10,23 @@ Item {
     property alias chatRoom: chat.chatRoom
     property alias chatProvider: chat.chatProvider
 
+    Connections {
+        target: control.chatProvider
+        function onClipboardImageUploaded(imageFilePath, chatRoom) {
+            ViewHelper.topDrawer.loader.sourceComponent = imagePreviewComponent
+
+            const item = ViewHelper.topDrawer.loader.item
+            item.source = `file://${imageFilePath}`
+            item.chatRoom = chatRoom
+        }
+    }
+
+    Component {
+        id: imagePreviewComponent
+
+        ImageSendPreview {}
+    }
+
     Chat {
         id: chat
         showTitleBar: false

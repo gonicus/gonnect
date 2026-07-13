@@ -134,6 +134,14 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
         return;
     }
 
+    auto stripBaseNumber = [this](QString num) {
+        const auto baseNumber = m_config.baseNumber;
+        if (num.startsWith(baseNumber)) {
+            num = num.sliced(baseNumber.size());
+        }
+        return num;
+    };
+
     // Process vcard
     std::istringstream stringStream(data.toStdString());
     TextReader reader(stringStream);
@@ -162,7 +170,8 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
                 email = QString::fromStdString(prop.getValue());
             } else if (propName == "TEL") {
                 phoneNumbers.append({ Contact::NumberType::Unknown,
-                                      QString::fromStdString(prop.getValue()), false });
+                                      stripBaseNumber(QString::fromStdString(prop.getValue())),
+                                      false });
             } else if (propName == "PHOTO") {
 
                 auto propParams = prop.params();
@@ -404,9 +413,12 @@ void CardDAVAddressBookFeeder::process()
         m_priority = 0;
     }
 
-    m_config = { settings.value("host", "").toString(), settings.value("path", "").toString(),
+    m_config = { settings.value("baseNumber", "").toString(),
+                 settings.value("host", "").toString(),
+                 settings.value("path", "").toString(),
                  settings.value("user", "").toString(),
-                 settings.value("port", useSSL ? 443 : 80).toInt(), useSSL };
+                 settings.value("port", useSSL ? 443 : 80).toInt(),
+                 useSSL };
 
     init();
     feedAddressBook();

@@ -428,6 +428,7 @@ Item {
                 ChatRoomList {
                     id: unreadRoomList
                     chatProvider: control.attachedData ?? null
+                    showSectionHeader: false
                     onlyUnread: true
                     active: sortSettings.showUnreadRoomsInOwnGroup
                     anchors {

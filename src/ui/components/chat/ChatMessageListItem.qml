@@ -325,7 +325,8 @@ Item {
                 control.clickedLink = ""
             }
 
-            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup()
+            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
+            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
         }
     }
 
@@ -342,17 +343,10 @@ Item {
                 icon.source: Icons.smileyAdd
                 onTriggered: () => {
                     const menuItem = chatMessageContextMenu.itemAt(0)
-                    const coord = menuItem.mapToGlobal(menuItem.width / 2, menuItem.height / 2)
+                    const coord = menuItem.mapToItem(control.Window.window.contentItem,
+                                                     menuItem.width / 2, menuItem.height / 2)
 
-                    let x = 0, y = 0
-                    let parent = chatMessageContextMenu
-                    while (parent) {
-                        x += parent.x
-                        y += parent.y
-                        parent = parent.parent
-                    }
-
-                    internal.openEmojiPicker(Qt.point(x, y))
+                    internal.openEmojiPicker(coord)
                 }
             }
 

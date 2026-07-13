@@ -90,6 +90,39 @@ The main app is programmed with Qt ≥ 6.10 with C++ 23 and QML.
 It uses the [PJSIP](https://github.com/pjsip/pjproject) framework and its [doc](https://docs.pjsip.org/en/latest/) for SIP functionality.
 
 
+## Building
+
+GOnnect can be build with two different build systems:
+
+* Conan v2 and CMake (use distrobox)
+* Flatpak builder
+
+There is a Conan sub command (export-dependencies) which can be installed using:
+
+```bash
+conan config install resources/conan
+```
+
+After "export-dependencies" is exposed, all the dependencies that are not provided by the conan-center-index
+can be exported using (needs to be done after something changes in `resources/conan`):
+
+```bash
+conan export-dependencies .
+```
+
+Building the Conan dependencies works as usual, but requires at least cppstd 20:
+
+```bash
+conan install . --build=missing -s compiler.cppstd=20 -s build_type=RelWithDebInfo
+```
+
+This also installs Conan presets that are used for doing the final build:
+
+```bash
+cmake --preset conan-relwithdebinfo .
+cmake --build --preset conan-relwithdebinfo
+```
+
 ## Packaging and platforms
 
 GOnnect is served as a Flatpak for Linux and as MSIX for Microsoft Windows. Platform related code lives in `src/platform`. Flatpak

@@ -13,7 +13,7 @@ Repeater {
     property alias groupFavorites: proxyModel.groupFavorites
 
     property bool active: true
-    property bool showSectionHeader: false
+    property alias showSectionHeader: proxyModel.showSectionHeader
     property bool hasFavorites: false
 
     readonly property alias selectedListItem: internal.selectedListItem
