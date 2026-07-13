@@ -36,6 +36,8 @@ class IChatProvider : public QObject
     Q_PROPERTY(bool hasFavoriteRooms READ hasFavoriteRooms NOTIFY hasFavoriteRoomsChanged FINAL)
 
 public:
+    static inline constexpr quint32 defaultMessageLimit = 42;
+
     enum class Capability {
         EditMessage = 1 << 0,
         RemoveMessage = 1 << 1,
@@ -168,6 +170,10 @@ public:
 
     /// Receive an image from the clipboard and send it as a message in the given room.
     Q_INVOKABLE virtual void uploadImageFromClipboard(const QString &roomId) = 0;
+
+    /// Load n more messages in the given room.
+    virtual void loadMessages(IChatRoom *chatRoom,
+                              quint32 n = IChatProvider::defaultMessageLimit) = 0;
 
     /*! \name Device Verification
      *
