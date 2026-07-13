@@ -74,7 +74,7 @@ Item {
             font.pixelSize: Theme.fontPixelSize
             anchors {
                 left: lineNumberCol.right
-                leftMargin: 12
+                leftMargin: Theme.d
             }
 
             CodeHighlighter {

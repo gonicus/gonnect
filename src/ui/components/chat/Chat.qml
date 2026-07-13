@@ -62,7 +62,7 @@ Item {
         anchors {
             horizontalCenter: !control.showTitleBar ? messageListCardHeading.horizontalCenter : undefined
             right: control.showTitleBar ? favCardHeadingButton.left : undefined
-            rightMargin: 12
+            rightMargin: Theme.d
             top: messageListCardHeading.top
             bottom: messageListCardHeading.bottom
         }

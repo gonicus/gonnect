@@ -287,7 +287,7 @@ Item {
                                 left: historyDaysToKeepInputField.right
                                 right: parent.right
                                 verticalCenter: historyDaysToKeepInputField.verticalCenter
-                                leftMargin: 12
+                                leftMargin: Theme.d
                             }
                         }
                     }

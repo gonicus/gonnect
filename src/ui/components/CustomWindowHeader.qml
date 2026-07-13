@@ -193,10 +193,10 @@ Rectangle {
     SearchResultPopup {
         id: resultPopup
         x: control.width / 2 - resultPopup.width / 2
-        y: searchField.height + 12
+        y: searchField.height + Theme.d
         width: control.width * 0.75
         height: control.Window ? control.Window.height * 0.75 : 0
-        topMargin: 12 + searchField.height
+        topMargin: Theme.d + searchField.height
         searchText: searchField.text
 
         onPrimaryActionTriggered: () => {

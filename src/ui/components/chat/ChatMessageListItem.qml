@@ -420,7 +420,7 @@ Item {
             left: nameLabel.left
             right: timestampLabel.left
             top: messageContentItem.bottom
-            topMargin: 12
+            topMargin: Theme.d
         }
 
         Repeater {

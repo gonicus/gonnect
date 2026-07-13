@@ -399,7 +399,7 @@ BaseWindow {
                 anchors {
                     left: parent.left
                     right: rightRow.left
-                    rightMargin: 24
+                    rightMargin: Theme.d * 2
                     verticalCenter: rightRow.verticalCenter
                 }
             }

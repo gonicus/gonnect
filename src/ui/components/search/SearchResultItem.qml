@@ -22,8 +22,8 @@ Item {
 
     Column {
         id: delegateColumn
-        topPadding: 12
-        bottomPadding: 12
+        topPadding: Theme.d
+        bottomPadding: Theme.d
         spacing: 4
         anchors {
             left: parent.left
