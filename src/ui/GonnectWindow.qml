@@ -212,15 +212,14 @@ BaseWindow {
             } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
 
                 // Paste clipboard image content, if applicable
-                if (ClipboardHelper.hasImage()) {
-                    keyEvent.accepted = true
+                if (!ClipboardHelper.hasImage()) {
+                    return
+                }
 
-                    if (SelectionState.selectedPage.type === MainPageSelection.PageType.Chats) {
-                        const page = control.getPage(SelectionState.selectedPage.id)
-                        if (page) {
-                            page.useImageFromClipboard()
-                        }
-                    }
+                const page = control.getPage(SelectionState.selectedPage.id)
+                if (page && page.hasOwnProperty("useImageFromClipboard") && typeof page["useImageFromClipboard"] === "function") {
+                    keyEvent.accepted = true
+                    page.useImageFromClipboard()
                 }
 
             } else if (keyEvent.key === Qt.Key_M

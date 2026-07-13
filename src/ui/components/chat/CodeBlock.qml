@@ -82,6 +82,22 @@ Item {
                 quickDocument: codeLabel.textDocument
             }
         }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.NoButton
+
+            onWheel: (wheel) => {
+                         if (wheel.modifiers & Qt.ShiftModifier) {
+                             const nextX = codeFlick.contentX - wheel.angleDelta.y
+                             const maxX = codeFlick.contentWidth - codeFlick.width
+                             codeFlick.contentX = Util.clamp(nextX, 0, maxX)
+                             wheel.accepted = true
+                         } else {
+                             wheel.accepted = false
+                         }
+                     }
+        }
     }
 
     ClipboardButton {

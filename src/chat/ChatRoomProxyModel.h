@@ -11,6 +11,8 @@ class ChatRoomProxyModel : public QSortFilterProxyModel
     Q_CLASSINFO("DefaultProperty", "sourceModel")
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
 
+    Q_PROPERTY(
+            bool showSectionHeader MEMBER m_showSectionHeader NOTIFY showSectionHeaderChanged FINAL)
     Q_PROPERTY(bool onlyUnread READ onlyUnread WRITE setOnlyUnread NOTIFY onlyUnreadChanged FINAL)
     Q_PROPERTY(bool groupFavorites READ groupFavorites WRITE setGroupFavorites NOTIFY
                        groupFavoritesChanged FINAL)
@@ -50,6 +52,7 @@ protected:
 private:
     QMetaObject::Connection m_dataChangedConnection;
     QObject *m_sourceModelContext = nullptr;
+    bool m_showSectionHeader = true;
     bool m_onlyUnread = false;
     bool m_groupFavorites = false;
     QString m_filterText;
@@ -61,6 +64,7 @@ private Q_SLOTS:
     void applySort();
 
 Q_SIGNALS:
+    void showSectionHeaderChanged();
     void onlyUnreadChanged();
     void groupFavoritesChanged();
     void filterTextChanged();

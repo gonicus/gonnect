@@ -8,8 +8,8 @@ import base
 
 Item {
     id: control
-    height: Util.clamp(messageField.contentHeight + messageField.anchors.margins * 2 + buttonBar.height,
-                       100,
+    height: Util.clamp(messageField.contentHeight + messageField.anchors.margins * 2 + buttonBar.height + (editBanner.visible ? editBanner.height : 0),
+                       100 + (editBanner.visible ? editBanner.height : 0),
                        Math.floor(0.8 * parent.height))
 
     signal sendMessage
@@ -23,15 +23,18 @@ Item {
     property int capabilities
 
     readonly property bool hasMessage: !!messageField.text.trim()
+    readonly property bool isEditing: !!control.editMessageId
 
     onChatRoomChanged: () => {
                            internal.typingTimer.stop()
                            internal.lastPingTime = 0
                            internal.hasTypedWhileWaiting = false
+                           messageField.lastCursorPosition = 0
+                           control.editMessageId = ""
 
                            const room = control.chatRoom
                            if (room && internal.savedInput[room.id] !== undefined) {
-                               chatMessageBox.text = internal.savedInput[room.id]
+                               messageField.text = internal.savedInput[room.id]
                                messageField.forceActiveFocus()
                                messageField.selectAll()
                            } else {
@@ -176,12 +179,90 @@ Item {
     }
 
     Rectangle {
+        id: editingFrame
+        color: "transparent"
+        visible: control.isEditing
+        z: -1
+        border {
+            width: 1
+            color: editBanner.color
+        }
+        anchors {
+            fill: parent
+            margins: -1
+        }
+    }
+
+    Rectangle {
+        id: separatorLine
         height: 1
+        visible: !control.isEditing
         color: Theme.borderColor
         anchors {
             top: parent.top
             left: parent.left
             right: parent.right
+        }
+    }
+
+    Rectangle {
+        id: editBanner
+        visible: control.isEditing
+        height: editBanner.visible ? 28 : 0
+        color: Theme.accentColor
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+
+        Label {
+            text: qsTr("Edit last message")
+            font.pixelSize: 14
+            color: Theme.foregroundWhiteColor
+            anchors {
+                left: parent.left
+                leftMargin: 10
+                verticalCenter: parent.verticalCenter
+            }
+        }
+
+        RoundButton {
+            id: closeEditingButton
+            flat: true
+            padding: 0
+            width: closeEditingButton.height
+            radius: closeEditingButton.height / 2
+
+            leftInset: 2
+            rightInset: 2
+            topInset: 2
+            bottomInset: 2
+
+            icon {
+                width: 14
+                height: 14
+                source: Icons.mobileCloseApp
+                color: Theme.foregroundWhiteColor
+            }
+
+            anchors {
+                top: parent.top
+                bottom: parent.bottom
+                right: parent.right
+                rightMargin: 5
+            }
+
+            onClicked: () => {
+                control.editMessageId = ""
+                messageField.clear()
+            }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Cancel edit")
+            Accessible.description: qsTr("Discard the current message edit")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => closeEditingButton.clicked()
         }
     }
 
@@ -202,7 +283,7 @@ Item {
         font.pixelSize: 14
         wrapMode: TextEdit.Wrap
         anchors {
-            top: parent.top
+            top: editBanner.bottom
             left: parent.left
             right: parent.right
             bottom: buttonBar.top
@@ -215,8 +296,8 @@ Item {
             internal.sendIsTyping()
 
             // Save entered text for later restore
-            if (control.chatRoom) {
-                internal.savedInput[control.chatRoom.id] = chatMessageBox.text
+            if (control.chatRoom && !control.isEditing) {
+                internal.savedInput[control.chatRoom.id] = messageField.text
             }
 
             // Find current word at cursor
@@ -350,8 +431,8 @@ Item {
             } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
                 // Clipboard paste
 
+                keyEvent.accepted = true
                 if (ClipboardHelper.hasImage()) {
-                    keyEvent.accepted = true
                     control.imageFromClipboardReceived()
                 } else if (ClipboardHelper.hasText()) {
                     keyEvent.accepted = true

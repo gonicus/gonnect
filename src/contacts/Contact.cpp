@@ -254,6 +254,8 @@ void Contact::addChatUser(ChatUser *user)
                 removeChatUser(user);
             }
         });
+
+        Q_EMIT chatUsersChanged();
     }
 }
 
@@ -261,6 +263,7 @@ void Contact::removeChatUser(ChatUser *user)
 {
     if (m_chatUsers.removeOne(user)) {
         user->disconnect(this);
+        Q_EMIT chatUsersChanged();
     }
 }
 
