@@ -38,8 +38,6 @@
 
 Q_LOGGING_CATEGORY(lcIpcDispatcher, "gonnect.app.chat.IpcDispatcher")
 
-#define GONNECT_INITIAL_MESSAGE_LIMIT 42
-
 #define GONNECT_ASSERT_HAS_VERIFICATION                                               \
     if (!hasDeviceVerification()) {                                                   \
         qCCritical(lcIpcDispatcher) << "Received verification content although "      \
@@ -435,7 +433,7 @@ void IpcDispatcher::markAsRead(const QString &roomId)
     sendRequest(req);
 }
 
-void IpcDispatcher::loadMessages(IChatRoom *chatRoom)
+void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
 {
     Q_CHECK_PTR(chatRoom);
 
@@ -449,7 +447,7 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom)
     m_roomListTags.insert(req->tag(), chatRoom->id());
     RoomMessagesRequest msgReq;
     msgReq.setRoomId(chatRoom->id());
-    msgReq.setLimit(GONNECT_INITIAL_MESSAGE_LIMIT);
+    msgReq.setLimit(n);
     msgReq.setOrder(MessagesOrderGadget::MessagesOrder::Backward);
 
     const auto &existingMessages = chatRoom->chatMessages();
@@ -2826,4 +2824,3 @@ void IpcDispatcher::selectCrossSigningMethod(CrossSigningSecret::CrossSigningMet
 #undef GONNECT_ASSERT_IS_IN_VERIFICATION_PROCESS
 #undef GONNECT_ASSERT_IS_NOT_IN_VERIFICATION_PROCESS
 #undef GONNECT_ASSERT_HAS_VERIFICATION
-#undef GONNECT_INITIAL_MESSAGE_LIMIT

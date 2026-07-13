@@ -133,8 +133,8 @@ public:
     /// Mark the given room as read such there are no unread notifications or messages afterwards.
     void markAsRead(const QString &roomId);
 
-    /// Initial load of room messages.
-    void loadMessages(IChatRoom *chatRoom);
+    virtual void loadMessages(IChatRoom *chatRoom,
+                              quint32 n = IChatProvider::defaultMessageLimit) override;
 
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
