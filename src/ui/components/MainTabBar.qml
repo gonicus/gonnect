@@ -431,7 +431,7 @@ Item {
 
     Column {
         id: topMenuCol
-        topPadding: 2 * Theme.d
+        topPadding: Theme.d
         spacing: Theme.d
         anchors {
             left: parent.left
@@ -449,7 +449,7 @@ Item {
 
     Column {
         id: bottomMenuCol
-        bottomPadding: 2 * Theme.d
+        bottomPadding: Theme.d
         spacing: Theme.d
         anchors {
             left: parent.left

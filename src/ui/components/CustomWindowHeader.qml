@@ -150,7 +150,7 @@ Rectangle {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: 2 * Theme.d
+            leftMargin: Theme.d
         }
     }
 
@@ -210,7 +210,7 @@ Rectangle {
         spacing: Theme.d
         anchors {
             right: parent.right
-            rightMargin: 2 * Theme.d
+            rightMargin: Theme.d
             verticalCenter: parent.verticalCenter
         }
 

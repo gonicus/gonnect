@@ -323,7 +323,7 @@ Window {
             Loader {
                 id: windowHeaderLoader
                 active: control.useOwnDecoration
-                height: 6 * Theme.d + 6
+                height: 4 * Theme.d + 6
                 anchors {
                     top: parent.top
                     left: parent.left
