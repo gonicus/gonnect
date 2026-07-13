@@ -322,6 +322,7 @@ BaseWindow {
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
                 bottom: bottomBar.visible ? bottomBar.top : parent.bottom
+                bottomMargin: 2 * Theme.d
             }
 
             function getPage(pageId : string) : Item {
@@ -385,11 +386,12 @@ BaseWindow {
         Item {
             id: bottomBar
             visible: true
-            height: 35
+            height: 30
             anchors {
                 right: parent.right
                 left: mainTabBar.right
                 bottom: parent.bottom
+                bottomMargin: Theme.d + 6  // extra padding for window shadow
             }
 
             TogglerList {
@@ -410,7 +412,7 @@ BaseWindow {
                 anchors {
                     right: parent.right
                     bottom: parent.bottom
-                    rightMargin: 6
+                    rightMargin: 2 * Theme.d
                 }
 
                 FirstAidButton {

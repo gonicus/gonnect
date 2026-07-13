@@ -7,8 +7,8 @@ import base
 Rectangle {
     id: control
     color: Theme.backgroundSecondaryColor
-    height: 44
-    radius: 8
+    height: 4 * Theme.d
+    radius: Theme.d / 2
     anchors {
         top: parent?.top
         left: parent?.left
@@ -142,15 +142,15 @@ Rectangle {
     }
 
     Image {
-        width: 24
-        height: 24
+        width: 2 * Theme.d
+        height: 2 * Theme.d
         source: "qrc:/icons/gonnect.svg"
-        sourceSize.width: 24
-        sourceSize.height: 24
+        sourceSize.width: 2 * Theme.d
+        sourceSize.height: 2 * Theme.d
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: 10
+            leftMargin: 2 * Theme.d
         }
     }
 
@@ -207,10 +207,10 @@ Rectangle {
     }
 
     Row {
-        spacing: 10
+        spacing: Theme.d
         anchors {
             right: parent.right
-            rightMargin: 8
+            rightMargin: 2 * Theme.d
             verticalCenter: parent.verticalCenter
         }
 

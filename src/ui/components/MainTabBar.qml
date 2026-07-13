@@ -7,7 +7,7 @@ import base
 
 Item {
     id: control
-    implicitWidth: 54 + 2 * 8
+    implicitWidth: 4 * Theme.d + 2 * Theme.d
     implicitHeight: topMenuCol.implicitHeight
 
     LoggingCategory {
@@ -177,7 +177,7 @@ Item {
 
         Item {
             id: delg
-            height: 54
+            height: 4 * Theme.d
             enabled: true
             anchors {
                 left: parent?.left
@@ -219,12 +219,12 @@ Item {
             Rectangle {
                 id: hoverBackground
                 visible: delg.isSelected || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
-                radius: 8
+                radius: Theme.d / 2
                 color: Theme.backgroundSecondaryColor
                 anchors {
                     fill: parent
-                    leftMargin: 8
-                    rightMargin: 8
+                    leftMargin: Theme.d
+                    rightMargin: Theme.d
                 }
 
                 // Options
@@ -276,7 +276,7 @@ Item {
 
             Rectangle {
                 id: activeBg
-                radius: 8
+                radius: Theme.d / 2
                 color: Theme.activeIndicatorColor
                 anchors.fill: hoverBackground
                 visible: delg.showActiveBorder
@@ -309,8 +309,8 @@ Item {
                 anchors.centerIn: parent
                 icon {
                     source: delg.iconSource
-                    width: 32
-                    height: 32
+                    width: 3 * Theme.d
+                    height: 3 * Theme.d
                     color: delg.isEnabled
                     ? Theme.primaryTextColor
                     : Theme.secondaryInactiveTextColor
@@ -355,7 +355,7 @@ Item {
                     text: delg.notifications > notificationBubble.maxNotifications
                           ? "99+" : delg.notifications.toString()
                     anchors.centerIn: parent
-                }
+            }
 
                 Accessible.ignored: true
             }
@@ -431,8 +431,8 @@ Item {
 
     Column {
         id: topMenuCol
-        topPadding: 20
-        spacing: 10
+        topPadding: 2 * Theme.d
+        spacing: Theme.d
         anchors {
             left: parent.left
             right: parent.right
@@ -449,8 +449,8 @@ Item {
 
     Column {
         id: bottomMenuCol
-        bottomPadding: 20
-        spacing: 10
+        bottomPadding: 2 * Theme.d
+        spacing: Theme.d
         anchors {
             left: parent.left
             right: parent.right

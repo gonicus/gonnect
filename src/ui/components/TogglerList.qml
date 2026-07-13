@@ -8,9 +8,9 @@ import base
 ListView {
     id: togglerList
     implicitHeight: 30
-    leftMargin: 20
-    rightMargin: 20
-    spacing: 20
+    leftMargin: 2 * Theme.d
+    rightMargin: 2 * Theme.d
+    spacing: Theme.d
     orientation: ListView.Horizontal
     model: TogglerProxyModel {
         displayFilter: Toggler.STATUS
