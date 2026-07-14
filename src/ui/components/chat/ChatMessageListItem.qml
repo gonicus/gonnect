@@ -162,7 +162,7 @@ Item {
 
         Label {
             id: dayLabel
-            text: control.timestamp.toLocaleDateString(Qt.locale(), "dddd, d. MMMM")
+            text: control.timestamp.toLocaleDateString(Qt.locale(), "dddd, d. MMMM yyyy")
             color: Theme.secondaryTextColor
             font {
                 weight: Font.DemiBold
