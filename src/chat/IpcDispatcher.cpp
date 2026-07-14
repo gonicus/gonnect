@@ -394,17 +394,17 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
             nickName = ownUserId();
         }
         auto *pendingContent = new ChatMessageContentText(text);
-        auto *pendingMsg = new ChatMessage(
-                tempEventId, ownUserId(), nickName, pendingContent,
-                QDateTime::currentDateTimeUtc(), room,
-                ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Markdown
-                        | ChatMessage::Flag::Pending);
+        auto *pendingMsg =
+                new ChatMessage(tempEventId, ownUserId(), nickName, pendingContent,
+                                QDateTime::currentDateTimeUtc(), room,
+                                ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Markdown
+                                        | ChatMessage::Flag::Pending);
         if (!relatedMessageId.isEmpty()) {
             pendingMsg->setRelatedMessageId(relatedMessageId);
         }
         room->addExistingMessage(pendingMsg, false, false);
     }
-    m_pendingMessages.insert(tag, {roomId, tempEventId});
+    m_pendingMessages.insert(tag, { roomId, tempEventId });
 
     sendRequest(req);
 }
@@ -579,16 +579,15 @@ void IpcDispatcher::retrySendMessage(const QString &roomId, const QString &faile
 
     auto msg = room->chatMessageById(failedMessageId);
     if (!msg) {
-        qCCritical(lcIpcDispatcher) << "Unable to find message with id" << failedMessageId
-                                    << "for retrying";
+        qCCritical(lcIpcDispatcher)
+                << "Unable to find message with id" << failedMessageId << "for retrying";
         return;
     }
 
     auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
     if (!textContent) {
-        qCCritical(lcIpcDispatcher)
-                << "Retry is only supported for text messages, but message" << failedMessageId
-                << "has no text content";
+        qCCritical(lcIpcDispatcher) << "Retry is only supported for text messages, but message"
+                                    << failedMessageId << "has no text content";
         return;
     }
 
@@ -805,12 +804,14 @@ void IpcDispatcher::processResponse(
         }
 
         // Mark pending message as failed on error
-        if (const auto pendingInfo = m_pendingMessages.take(tag); !pendingInfo.tempEventId.isEmpty()) {
+        if (const auto pendingInfo = m_pendingMessages.take(tag);
+            !pendingInfo.tempEventId.isEmpty()) {
             if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
                 if (auto chatMsg = room->chatMessageById(pendingInfo.tempEventId)) {
-                    room->setMessageFlags(pendingInfo.tempEventId,
-                                          (chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending))
-                                                  | ChatMessage::Flag::Failed);
+                    room->setMessageFlags(
+                            pendingInfo.tempEventId,
+                            (chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending))
+                                    | ChatMessage::Flag::Failed);
                 }
             }
         }
@@ -1127,14 +1128,15 @@ void IpcDispatcher::processResponse(
     } else if (rc.hasMessageSendResponse()) {
 
         // Update pending optimistic message with real server event ID
-        if (const auto pendingInfo = m_pendingMessages.take(tag); !pendingInfo.tempEventId.isEmpty()) {
+        if (const auto pendingInfo = m_pendingMessages.take(tag);
+            !pendingInfo.tempEventId.isEmpty()) {
             if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
                 const auto &msgResponse = rc.messageSendResponse();
                 room->updateMessageEventId(pendingInfo.tempEventId, msgResponse.messageId());
                 if (auto chatMsg = room->chatMessageById(msgResponse.messageId())) {
-                    room->setMessageFlags(msgResponse.messageId(),
-                                          chatMsg->flags()
-                                                  & ~ChatMessage::Flags(ChatMessage::Flag::Pending));
+                    room->setMessageFlags(
+                            msgResponse.messageId(),
+                            chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending));
                 }
             }
         }
@@ -1142,13 +1144,15 @@ void IpcDispatcher::processResponse(
     } else if (rc.hasMessageReceivedEvent()) {
 
         // Update pending optimistic message with real server data if applicable
-        if (const auto pendingInfo = m_pendingMessages.take(tag); !pendingInfo.tempEventId.isEmpty()) {
+        if (const auto pendingInfo = m_pendingMessages.take(tag);
+            !pendingInfo.tempEventId.isEmpty()) {
             if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
                 const auto &msg = rc.messageReceivedEvent();
                 room->updateMessageEventId(pendingInfo.tempEventId, msg.messageId());
                 if (auto chatMsg = room->chatMessageById(msg.messageId())) {
-                    room->setMessageFlags(msg.messageId(),
-                                          chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending));
+                    room->setMessageFlags(
+                            msg.messageId(),
+                            chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending));
                     // Update timestamp to server time
                     const auto serverTs =
                             QDateTime::fromMSecsSinceEpoch(msg.timestamp(), QTimeZone::utc());

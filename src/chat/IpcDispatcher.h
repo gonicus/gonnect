@@ -365,7 +365,8 @@ private:
     /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
     QSet<QString> m_failedMessageIds;
 
-    struct PendingMessageInfo {
+    struct PendingMessageInfo
+    {
         QString roomId;
         QString tempEventId;
     };
