@@ -33,6 +33,9 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::IsSystemMessage), "isSystemMessage" },
         { static_cast<int>(Roles::IsEncrypted), "isEncrypted" },
         { static_cast<int>(Roles::IsPinned), "isPinned" },
+        { static_cast<int>(Roles::IsPending), "isPending" },
+        { static_cast<int>(Roles::IsFailed), "isFailed" },
+        { static_cast<int>(Roles::IsLastOwnMessage), "isLastOwnMessage" },
         { static_cast<int>(Roles::IsSameUserAsPrevious), "isSameUserAsPrevious" },
         { static_cast<int>(Roles::IsSameMinuteAsPrevious), "isSameMinuteAsPrevious" },
         { static_cast<int>(Roles::IsSameDayAsPrevious), "isSameDayAsPrevious" },
@@ -224,6 +227,27 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
     case static_cast<int>(Roles::IsPinned):
         return static_cast<bool>(item->flags() & ChatMessage::Flag::Pinned);
 
+    case static_cast<int>(Roles::IsPending):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::Pending);
+
+    case static_cast<int>(Roles::IsFailed):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::Failed);
+
+    case static_cast<int>(Roles::IsLastOwnMessage): {
+        if (!m_chatRoom) {
+            return false;
+        }
+        const auto &messages = m_chatRoom->chatMessages();
+        for (const auto msg : messages) {
+            if (msg->flags() & ChatMessage::Flag::OwnMessage
+                    && !(msg->flags() & ChatMessage::Flag::Pending)
+                    && !(msg->flags() & ChatMessage::Flag::Failed)) {
+                return msg == item;
+            }
+        }
+        return false;
+    }
+
     case static_cast<int>(Roles::HasRelatedMessage):
         return !item->relatedMessageId().isEmpty();
 
@@ -264,6 +288,12 @@ void ChatModel::onChatRoomChanged()
                         const auto nextIndex = createIndex(index + 1, 0);
                         Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
                     }
+
+                    // IsLastOwnMessage might have changed for all items
+                    const auto lastTop = createIndex(0, 0);
+                    const auto lastBottom = createIndex(rowCount(QModelIndex()) - 1, 0);
+                    Q_EMIT dataChanged(lastTop, lastBottom,
+                                       { static_cast<int>(Roles::IsLastOwnMessage) });
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
@@ -278,6 +308,12 @@ void ChatModel::onChatRoomChanged()
                         const auto nextIndex = createIndex(index, 0);
                         Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
                     }
+
+                    // IsLastOwnMessage might have changed for all items
+                    const auto lastTop = createIndex(0, 0);
+                    const auto lastBottom = createIndex(rowCount(QModelIndex()) - 1, 0);
+                    Q_EMIT dataChanged(lastTop, lastBottom,
+                                       { static_cast<int>(Roles::IsLastOwnMessage) });
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageOutOfSequenceReceived, m_chatRoomContext,
                 [this](ChatMessage *msgObj) {
@@ -325,9 +361,24 @@ void ChatModel::onChatRoomChanged()
                     if (changedFlags & ChatMessage::Flag::Pinned) {
                         affectedRoles.append(static_cast<int>(Roles::IsPinned));
                     }
+                    if (changedFlags & ChatMessage::Flag::Pending) {
+                        affectedRoles.append(static_cast<int>(Roles::IsPending));
+                    }
+                    if (changedFlags & ChatMessage::Flag::Failed) {
+                        affectedRoles.append(static_cast<int>(Roles::IsFailed));
+                    }
 
                     const auto modelIndex = createIndex(idx, 0);
                     Q_EMIT dataChanged(modelIndex, modelIndex, affectedRoles);
+
+                    if (changedFlags
+                        & (ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Pending
+                           | ChatMessage::Flag::Failed)) {
+                        const auto lastTop = createIndex(0, 0);
+                        const auto lastBottom = createIndex(rowCount(QModelIndex()) - 1, 0);
+                        Q_EMIT dataChanged(lastTop, lastBottom,
+                                           { static_cast<int>(Roles::IsLastOwnMessage) });
+                    }
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageReactionsChanged, m_chatRoomContext,
                 [this](qsizetype idx, ChatMessage *) {

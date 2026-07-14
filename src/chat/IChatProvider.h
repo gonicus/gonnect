@@ -148,6 +148,10 @@ public:
     Q_INVOKABLE virtual void requestRemoveMessage(const QString &roomId,
                                                   const QString &messageId) = 0;
 
+    /// Retry sending a message that has previously failed.
+    Q_INVOKABLE virtual void retrySendMessage(const QString &roomId,
+                                              const QString &failedMessageId) = 0;
+
     /// Request to edit (i.e. change the text content) the message with the given id. This method
     /// should not be called with an empty string - use requestRemoveMessage() instead.
     Q_INVOKABLE virtual void requestEditMessage(const QString &roomId, const QString &messageId,

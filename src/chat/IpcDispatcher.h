@@ -171,6 +171,7 @@ public:
     virtual void requestUser(const QString &userId) override;
 
     virtual void requestRemoveMessage(const QString &roomId, const QString &messageId) override;
+    virtual void retrySendMessage(const QString &roomId, const QString &failedMessageId) override;
     virtual void requestEditMessage(const QString &roomId, const QString &messageId,
                                     const QString &newContent) override;
 
@@ -364,9 +365,17 @@ private:
     /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
     QSet<QString> m_failedMessageIds;
 
+    struct PendingMessageInfo {
+        QString roomId;
+        QString tempEventId;
+    };
+
     /// Tags of message requests that are currently being send, i.e. MessageSendRequest has been
     /// made, but neither MessageSendResponse nor an Error has returned yet.
     QSet<quint64> m_sendingMessageTags;
+
+    /// Tags of pending (optimistic) messages that have been locally added but not yet confirmed.
+    QHash<quint64, PendingMessageInfo> m_pendingMessages;
 
 Q_SIGNALS:
 

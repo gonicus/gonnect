@@ -96,8 +96,9 @@ ChatMessage *IpcChatRoom::latestOwnTextMessage() const
 
     while (it.hasPrevious()) {
         auto *msg = it.previous();
-        if (qobject_cast<ChatMessageContentText *>(msg->content())
-            && (msg->flags() & ChatMessage::Flag::OwnMessage)) {
+        if ((msg->flags() & ChatMessage::Flag::OwnMessage)
+            && qobject_cast<ChatMessageContentText *>(msg->content())
+            && !(msg->flags() & ChatMessage::Flag::Pending)) {
             return msg;
         }
     }
@@ -185,6 +186,25 @@ void IpcChatRoom::removeMessage(const QString &messageId)
             Q_EMIT chatMessageRemoved(i, message);
             delete message;
             return;
+        }
+    }
+}
+
+void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString &newEventId)
+{
+    if (auto msg = m_messageLookup.take(oldEventId)) {
+        msg->setEventId(newEventId);
+        m_messageLookup.insert(newEventId, msg);
+    }
+}
+
+void IpcChatRoom::setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags)
+{
+    if (auto msg = m_messageLookup.value(eventId)) {
+        const auto prevFlags = msg->flags();
+        if (prevFlags != newFlags) {
+            msg->setFlags(newFlags);
+            Q_EMIT chatMessageFlagsChanged(indexOfMessage(msg), msg, prevFlags);
         }
     }
 }

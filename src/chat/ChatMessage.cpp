@@ -40,6 +40,7 @@ void ChatMessage::setEventId(const QString &eventId)
 {
     if (m_eventId != eventId) {
         m_eventId = eventId;
+        Q_EMIT eventIdChanged();
     }
 }
 

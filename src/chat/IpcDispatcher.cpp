@@ -380,6 +380,32 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     msgReq.setText(content);
     msgReq.setMentionedUserIds(mentionedUserIds);
     req->setMessageSendRequest(msgReq);
+
+    // Create optimistic (pending) message for immediate display
+    const auto tag = req->tag();
+    const auto tempEventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    if (auto room = ipcChatRoomById(roomId)) {
+        QString nickName;
+        if (auto *ownUser = m_users.value(ownUserId(), nullptr)) {
+            nickName = ownUser->displayName();
+        } else if (!m_configInfo.displayName.isEmpty()) {
+            nickName = m_configInfo.displayName;
+        } else {
+            nickName = ownUserId();
+        }
+        auto *pendingContent = new ChatMessageContentText(text);
+        auto *pendingMsg = new ChatMessage(
+                tempEventId, ownUserId(), nickName, pendingContent,
+                QDateTime::currentDateTimeUtc(), room,
+                ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Markdown
+                        | ChatMessage::Flag::Pending);
+        if (!relatedMessageId.isEmpty()) {
+            pendingMsg->setRelatedMessageId(relatedMessageId);
+        }
+        room->addExistingMessage(pendingMsg, false, false);
+    }
+    m_pendingMessages.insert(tag, {roomId, tempEventId});
+
     sendRequest(req);
 }
 
@@ -540,6 +566,37 @@ void IpcDispatcher::requestEditMessage(const QString &roomId, const QString &mes
     auto req = createRequest();
     req->setMessageChangeRequest(changeReq);
     sendRequest(req);
+}
+
+void IpcDispatcher::retrySendMessage(const QString &roomId, const QString &failedMessageId)
+{
+    auto room = ipcChatRoomById(roomId);
+    if (!room) {
+        qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId
+                                    << "for retrying message" << failedMessageId;
+        return;
+    }
+
+    auto msg = room->chatMessageById(failedMessageId);
+    if (!msg) {
+        qCCritical(lcIpcDispatcher) << "Unable to find message with id" << failedMessageId
+                                    << "for retrying";
+        return;
+    }
+
+    auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
+    if (!textContent) {
+        qCCritical(lcIpcDispatcher)
+                << "Retry is only supported for text messages, but message" << failedMessageId
+                << "has no text content";
+        return;
+    }
+
+    const auto text = textContent->simpleText();
+    const auto relatedMessageId = msg->relatedMessageId();
+
+    room->removeMessage(failedMessageId);
+    sendMessage(roomId, text, relatedMessageId);
 }
 
 void IpcDispatcher::init()
@@ -745,6 +802,17 @@ void IpcDispatcher::processResponse(
             ErrorBus::instance().addError(tr("An IPC error ocurred (%1, %2 (code %3)")
                                                   .arg(m_settingsGroup, codeStr)
                                                   .arg(code));
+        }
+
+        // Mark pending message as failed on error
+        if (const auto pendingInfo = m_pendingMessages.take(tag); !pendingInfo.tempEventId.isEmpty()) {
+            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
+                if (auto chatMsg = room->chatMessageById(pendingInfo.tempEventId)) {
+                    room->setMessageFlags(pendingInfo.tempEventId,
+                                          (chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending))
+                                                  | ChatMessage::Flag::Failed);
+                }
+            }
         }
 
     } else if (rc.hasMultipartEnd()) {
@@ -1058,16 +1126,45 @@ void IpcDispatcher::processResponse(
 
     } else if (rc.hasMessageSendResponse()) {
 
-        // Obsolete - if exists to prevent fallback crash
+        // Update pending optimistic message with real server event ID
+        if (const auto pendingInfo = m_pendingMessages.take(tag); !pendingInfo.tempEventId.isEmpty()) {
+            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
+                const auto &msgResponse = rc.messageSendResponse();
+                room->updateMessageEventId(pendingInfo.tempEventId, msgResponse.messageId());
+                if (auto chatMsg = room->chatMessageById(msgResponse.messageId())) {
+                    room->setMessageFlags(msgResponse.messageId(),
+                                          chatMsg->flags()
+                                                  & ~ChatMessage::Flags(ChatMessage::Flag::Pending));
+                }
+            }
+        }
 
     } else if (rc.hasMessageReceivedEvent()) {
 
-        const bool isIndependent = m_singleMessageTags.remove(tag);
-        const bool isUnread = !tag;
-        const auto chatMessageObj =
-                addReceivedChatMessage(rc.messageReceivedEvent(), isUnread, isIndependent);
-        if (isUnread && !isIndependent) {
-            makeNotificationNewMessage(chatMessageObj);
+        // Update pending optimistic message with real server data if applicable
+        if (const auto pendingInfo = m_pendingMessages.take(tag); !pendingInfo.tempEventId.isEmpty()) {
+            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
+                const auto &msg = rc.messageReceivedEvent();
+                room->updateMessageEventId(pendingInfo.tempEventId, msg.messageId());
+                if (auto chatMsg = room->chatMessageById(msg.messageId())) {
+                    room->setMessageFlags(msg.messageId(),
+                                          chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending));
+                    // Update timestamp to server time
+                    const auto serverTs =
+                            QDateTime::fromMSecsSinceEpoch(msg.timestamp(), QTimeZone::utc());
+                    if (serverTs.isValid()) {
+                        room->setLatestMessageDateTime(serverTs);
+                    }
+                }
+            }
+        } else {
+            const bool isIndependent = m_singleMessageTags.remove(tag);
+            const bool isUnread = !tag;
+            const auto chatMessageObj =
+                    addReceivedChatMessage(rc.messageReceivedEvent(), isUnread, isIndependent);
+            if (isUnread && !isIndependent) {
+                makeNotificationNewMessage(chatMessageObj);
+            }
         }
 
     } else if (rc.hasMessageChangeEvent()) {

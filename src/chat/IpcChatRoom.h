@@ -52,6 +52,9 @@ public:
 
     void removeMessage(const QString &messageId);
 
+    void updateMessageEventId(const QString &oldEventId, const QString &newEventId);
+    void setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags);
+
     virtual bool isDirectChat() override { return m_isDirectChat; }
     virtual bool hasPresenceState() override;
     virtual ChatUser::PresenceState presenceState() const override;
