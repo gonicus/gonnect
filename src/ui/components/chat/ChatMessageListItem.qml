@@ -33,7 +33,6 @@ Item {
     required property bool isOwnMessage
     required property bool isPending
     required property bool isFailed
-    required property bool isLastOwnMessage
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
@@ -251,20 +250,6 @@ Item {
         }
 
         Accessible.ignored: true
-    }
-
-    IconLabel {
-        visible: control.isLastOwnMessage
-        z: 1
-        anchors {
-            right: timestampLabel.left
-            rightMargin: 4
-            verticalCenter: timestampLabel.verticalCenter
-        }
-        icon.source: Icons.checkbox
-        icon.color: Theme.primaryTextColor
-        icon.width: 14
-        icon.height: 14
     }
 
     IconLabel {
