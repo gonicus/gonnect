@@ -21,15 +21,11 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
     }
 
     auto state = checkDB();
-    if (state == ChatMessageSearchIndexer::State::Complete) {
-        // Schema as expected
-        // TODO: Delete stale message, pull diff by room
+    if (state == ChatMessageSearchIndexer::State::Failed) {
+        return;
     } else if (state == ChatMessageSearchIndexer::State::Incomplete) {
         // Schema non-/partially existent
         initDB();
-    } else {
-        // Failed to check
-        return;
     }
 
     m_isInitialized = true;
@@ -56,7 +52,7 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
 
     // Mapping
     const QString mappingStatement =
-            "INSERT OR IGNORE INTO messages_map(message_uid, room_uid, timestamp) VALUES (?,?,?);";
+            "INSERT OR REPLACE INTO messages_map(message_uid, room_uid, timestamp) VALUES (?,?,?);";
     const QByteArray message_uid = message.messageUid.toUtf8();
     const QByteArray room_uid = message.roomUid.toUtf8();
 
@@ -76,19 +72,32 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
     }
 
     // FTS
-    const QString ftsStatement = "INSERT OR IGNORE INTO messages_fts(rowid, body) VALUES (?,?);";
-    const sqlite_int64 inserted_id = sqlite3_last_insert_rowid(m_db);
-    const QByteArray body = m_preprocessor->process(message.body).toUtf8();
+    const QString ftsRemoveStatement = "DELETE FROM messages_fts WHERE message_uid = ?;";
 
-    Statement fts;
-    if (sqlite3_prepare_v2(m_db, ftsStatement.toUtf8(), -1, &fts.statement, nullptr) != SQLITE_OK) {
+    Statement ftsRemove;
+    if (sqlite3_prepare_v2(m_db, ftsRemoveStatement.toUtf8(), -1, &ftsRemove.statement, nullptr) != SQLITE_OK) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_int64(fts.statement, 1, inserted_id);
-    sqlite3_bind_text(fts.statement, 2, body.constData(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(ftsRemove.statement, 1, message_uid.constData(), -1, SQLITE_STATIC);
 
-    if (sqlite3_step(fts.statement) != SQLITE_DONE) {
+    if (sqlite3_step(ftsRemove.statement) != SQLITE_DONE) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return false;
+    }
+
+    const QString ftsInsertStatement = "INSERT INTO messages_fts(message_uid, body) VALUES (?,?);";
+    const QByteArray body = m_preprocessor->process(message.body).toUtf8();
+
+    Statement ftsInsert;
+    if (sqlite3_prepare_v2(m_db, ftsInsertStatement.toUtf8(), -1, &ftsInsert.statement, nullptr) != SQLITE_OK) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
+        return false;
+    }
+    sqlite3_bind_text(ftsInsert.statement,1, message_uid.constData(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(ftsInsert.statement, 2, body.constData(), -1, SQLITE_STATIC);
+
+    if (sqlite3_step(ftsInsert.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
@@ -127,7 +136,7 @@ bool ChatMessageSearchIndexer::removeMessage(const QString &id)
     }
 
     // Mapping
-    const QString mappingStatement = "DELETE FROM messages_map WHERE message_uid = ? RETURNING id;";
+    const QString mappingStatement = "DELETE FROM messages_map WHERE message_uid = ?;";
 
     Statement mapping;
     if (sqlite3_prepare_v2(m_db, mappingStatement.toUtf8(), -1, &mapping.statement, nullptr)
@@ -137,22 +146,20 @@ bool ChatMessageSearchIndexer::removeMessage(const QString &id)
     }
     sqlite3_bind_text(mapping.statement, 1, id.toUtf8(), -1, SQLITE_STATIC);
 
-    int deleted_id = -1;
-    if (sqlite3_step(mapping.statement) == SQLITE_ROW) {
-        deleted_id = sqlite3_column_int(mapping.statement, 0);
-    } else {
+    if (sqlite3_step(mapping.statement) != SQLITE_DONE) {
+        m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
 
     // FTS
-    const QString ftsStatement = "DELETE FROM messages_fts WHERE rowid = ?;";
+    const QString ftsStatement = "DELETE FROM messages_fts WHERE message_uid = ?;";
 
     Statement fts;
     if (sqlite3_prepare_v2(m_db, ftsStatement.toUtf8(), -1, &fts.statement, nullptr) != SQLITE_OK) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_int64(fts.statement, 1, deleted_id);
+    sqlite3_bind_text(fts.statement, 1, id.toUtf8(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(fts.statement) != SQLITE_DONE) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
@@ -171,7 +178,7 @@ bool ChatMessageSearchIndexer::removeMessagesByRoom(const QString &roomUid, bool
 
     // FTS
     const QString ftsStatement =
-            QString("DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM "
+            QString("DELETE FROM messages_fts WHERE message_uid IN (SELECT message_uid FROM "
                     "messages_map WHERE %1);")
                     .arg(byDate ? "room_uid = ? AND timestamp < ?" : "room_uid = ?");
 
@@ -283,7 +290,7 @@ QList<ChatMessageSearchIndexer::SearchResult> ChatMessageSearchIndexer::search(c
     // to zero = worse; more negative = better match).
     const QString searchStatement =
             "SELECT m.message_uid, m.room_uid, f.rank FROM messages_fts f JOIN "
-            "messages_map m ON f.rowid = m.id "
+            "messages_map m ON f.message_uid = m.message_uid "
             "WHERE messages_fts MATCH ? ORDER BY rank LIMIT ?;";
 
     Statement search;
@@ -355,7 +362,8 @@ bool ChatMessageSearchIndexer::openDB()
 
     // Performance pragmas (safe with WAL)
     QString pragmas = "PRAGMA journal_mode = WAL;"
-                      "PRAGMA synchronous = NORMAL;";
+                      "PRAGMA synchronous = NORMAL;"
+                      "PRAGMA foreign_keys = ON;";
     if (!exec(pragmas)) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
 
@@ -403,7 +411,6 @@ bool ChatMessageSearchIndexer::initDB()
     }
 
     // Tables (FTS and mapping)
-    // requires SQLite >= 3.43.0 for contentless_delete (by id only)
     QString initStatement =
             "CREATE TABLE IF NOT EXISTS messages_map ("
             "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -413,13 +420,13 @@ bool ChatMessageSearchIndexer::initDB()
             ");"
 
             "CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5("
+            "    message_uid UNINDEXED,"
             "    body,"
-            "    content='',"
-            "    contentless_delete=1,"
             "    tokenize='trigram'"
             ");"
 
-            "CREATE INDEX IF NOT EXISTS idx_messages_map ON messages_map(room_uid);";
+            "CREATE INDEX IF NOT EXISTS idx_messages_room ON messages_map(room_uid);"
+            "CREATE INDEX IF NOT EXISTS idx_messages_time ON messages_map(timestamp);";
     if (!exec(initStatement)) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
 

@@ -58,6 +58,7 @@ public:
 
     bool updateMessage(const Message &message);
 
+    // TODO: Return Message {}
     QString getLatestMessageUidByRoom(const QString &roomUid);
 
     QList<SearchResult> search(const QString &query, int limit = 20);
