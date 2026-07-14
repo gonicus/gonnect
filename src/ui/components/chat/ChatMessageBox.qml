@@ -52,6 +52,7 @@ Item {
             delete internal.savedInput[control.chatRoom.id]
         }
         messageField.clear()
+        messageField.lastCursorPosition = 0
     }
 
     QtObject {
@@ -256,6 +257,7 @@ Item {
             onClicked: () => {
                 control.editMessageId = ""
                 messageField.clear()
+                messageField.lastCursorPosition = 0
             }
 
             Accessible.role: Accessible.Button
@@ -419,6 +421,7 @@ Item {
             } else if (keyEvent.key === Qt.Key_Escape && control.editMessageId) {
                 control.editMessageId = ""
                 messageField.clear()
+                messageField.lastCursorPosition = 0
 
             } else if (control.hasMessage
                        && [Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)
