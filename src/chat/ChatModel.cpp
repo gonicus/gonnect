@@ -353,10 +353,9 @@ void ChatModel::onChatRoomChanged()
                     Q_EMIT dataChanged(modelIndex, modelIndex, affectedRoles);
 
                     if (changedFlags
-                        & (ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Pending
-                           | ChatMessage::Flag::Failed)
-                        && m_lastOwnMessage != nullptr
-                        && (chatMessage == m_lastOwnMessage
+                                & (ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Pending
+                                   | ChatMessage::Flag::Failed)
+                        && (m_lastOwnMessage == nullptr || chatMessage == m_lastOwnMessage
                             || changedFlags & ChatMessage::Flag::OwnMessage)) {
                         updateLastOwnMessage();
                     }
@@ -453,13 +452,12 @@ void ChatModel::updateLastOwnMessage()
     const auto &messages = m_chatRoom->chatMessages();
     for (const auto msg : messages) {
         if (msg->flags() & ChatMessage::Flag::OwnMessage
-                && !(msg->flags() & ChatMessage::Flag::Pending)
-                && !(msg->flags() & ChatMessage::Flag::Failed)) {
+            && !(msg->flags() & ChatMessage::Flag::Pending)
+            && !(msg->flags() & ChatMessage::Flag::Failed)) {
             m_lastOwnMessage = msg;
         }
     }
     const auto lastTop = createIndex(0, 0);
     const auto lastBottom = createIndex(rowCount(QModelIndex()) - 1, 0);
-    Q_EMIT dataChanged(lastTop, lastBottom,
-                       { static_cast<int>(Roles::IsLastOwnMessage) });
+    Q_EMIT dataChanged(lastTop, lastBottom, { static_cast<int>(Roles::IsLastOwnMessage) });
 }
