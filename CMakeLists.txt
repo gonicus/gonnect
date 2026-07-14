@@ -37,6 +37,7 @@ option(CMAKE_UNITY_BUILD "Enable unity builds" OFF)
 option(ENABLE_PCH "Enable precompiled headers" OFF)
 option(BUILD_TESTING "Build tests" OFF)
 option(BUILD_TOOLS "Build tools" OFF)
+option(ENABLE_MULTI_INSTANCE "Allow multiple GOnnect instances" OFF)
 
 # Contacts / Calendar plugins
 option(ENABLE_AKONADI "Enable Akonadi plugins" OFF)
@@ -50,6 +51,10 @@ set(APP_ID "de.gonicus.gonnect")
 add_definitions(-DAPP_ID="${APP_ID}")
 if(FLATPAK)
     add_definitions(-DQ_OS_FLATPAK)
+endif()
+
+if(ENABLE_MULTI_INSTANCE)
+    add_definitions(-DMULTI_INSTANCE)
 endif()
 
 if(LINUX)
