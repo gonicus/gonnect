@@ -269,7 +269,7 @@ Item {
     Label {
         text: qsTr("Enter message...")
         color: Theme.secondaryInactiveTextColor
-        visible: messageField.text === "" && !messageField.activeFocus
+        visible: messageField.text === ""
         anchors {
             top: messageField.top
             left: messageField.left
