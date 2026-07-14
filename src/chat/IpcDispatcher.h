@@ -364,6 +364,10 @@ private:
     /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
     QSet<QString> m_failedMessageIds;
 
+    /// Tags of message requests that are currently being send, i.e. MessageSendRequest has been
+    /// made, but neither MessageSendResponse nor an Error has returned yet.
+    QSet<quint64> m_sendingMessageTags;
+
 Q_SIGNALS:
 
     /// The IpcDispatcher, the sub process and the local socket communication have been successfully

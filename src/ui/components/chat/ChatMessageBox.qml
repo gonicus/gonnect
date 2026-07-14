@@ -541,6 +541,7 @@ Item {
         BottomButtonBarButton {
             id: emojiButton
             icon: Icons.smiley
+            toolTipText: qsTr("Open emoji picker popup")
             onClicked: () => {
                 const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
                 if (item.visible) {
@@ -572,30 +573,35 @@ Item {
         BottomButtonBarButton {
             id: boldButton
             icon: Icons.formatTextBold
+            toolTipText: qsTr("Bold")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("**", "**")
         }
         BottomButtonBarButton {
             id: italicButton
             icon: Icons.formatTextItalic
+            toolTipText: qsTr("Italic")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("*", "*")
         }
         BottomButtonBarButton {
             id: strikethroughButton
             icon: Icons.formatTextStrikethrough
+            toolTipText: qsTr("Strikethrough")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("<del>", "</del>")
         }
         BottomButtonBarButton {
             id: inlineCodeButton
             icon: Icons.formatTextCode
+            toolTipText: qsTr("Inline preformatted/code")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("`", "`")
         }
         BottomButtonBarButton {
             id: codeBlockButton
             icon: Icons.addSubtitle
+            toolTipText: qsTr("Block preformatted/code")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("\n> ", "")
         }
@@ -603,6 +609,7 @@ Item {
         BottomButtonBarButton {
             id: formatMenuButton
             visible: buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
+            toolTipText: qsTr("Text format options")
             icon: Icons.overflowMenu
             onClicked: () => formatMenuComponent.createObject(formatMenuButton).popup()
         }
@@ -614,6 +621,7 @@ Item {
         BottomButtonBarButton {
             id: linkButton
             icon: Icons.link
+            toolTipText: qsTr("Add hyperlink")
             visible: control.capabilities & IChatProvider.Capability.Markdown
             onClicked: () => messageField.insertOrRemove("[", "]()")
         }
@@ -625,12 +633,14 @@ Item {
         BottomButtonBarButton {
             id: addVideoButton
             icon: Icons.uploadMedia
+            toolTipText: qsTr("Select and upload image")
             visible: control.capabilities & IChatProvider.Capability.UploadMedia
             onClicked: () => uploadMediaDialog.open()
         }
         BottomButtonBarButton {
             id: addFileButton
             icon: Icons.mailAttachment
+            toolTipText: qsTr("Select and upload file")
             visible: control.capabilities & IChatProvider.Capability.UploadFile
             onClicked: () => uploadFileDialog.open()
         }
@@ -651,6 +661,7 @@ Item {
                 id: sendButton
                 icon: Icons.documentSend
                 enabled: control.hasMessage
+                toolTipText: qsTr("Send message to chat room")
 
                 onClicked: () => {
                     if (control.enabled && control.hasMessage) {

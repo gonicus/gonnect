@@ -150,11 +150,13 @@ Item {
             left: parent.left
             right: parent.right
             top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
-            bottom: typingUsersList.visible
-                    ? typingUsersList.top
-                    : (chatMessageBox.visible
-                       ? chatMessageBox.top
-                       : parent.bottom)
+            bottom: isSendingMessageItem.visible
+                    ? isSendingMessageItem.top
+                    : (typingUsersList.visible
+                       ? typingUsersList.top
+                       : (chatMessageBox.visible
+                          ? chatMessageBox.top
+                          : parent.bottom))
             bottomMargin: 20
             leftMargin: 10
             rightMargin: 10
@@ -186,6 +188,35 @@ Item {
                 color: Theme.secondaryTextColor
                 font.pixelSize: 22
                 anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+    }
+
+    Item {
+        id: isSendingMessageItem
+        height: 20
+        anchors  {
+            left: parent.left
+            right: parent.right
+            bottom: typingUsersLabel.visible
+                    ? typingUsersList.top
+                    : (chatMessageBox.visible
+                       ? chatMessageBox.top
+                       : parent.bottom)
+        }
+
+        Label {
+            id: sendingMessageLabel
+            text: qsTr("Sending message...")
+            color: Theme.secondaryInactiveTextColor
+            font.pixelSize: 12
+            visible: control.chatProvider?.isSendingMessage ?? false
+            anchors {
+                left: parent.left
+                right: parent.right
+                leftMargin: 10
+                rightMargin: 10
+                verticalCenter: parent.verticalCenter
             }
         }
     }
