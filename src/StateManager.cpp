@@ -21,7 +21,7 @@ Q_LOGGING_CATEGORY(lcStateHandling, "gonnect.state")
 
 StateManager::StateManager(QObject *parent) : QObject(parent)
 {
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(MULTI_INSTANCE)
     m_activationAdapter = new DBusActivationAdapter(this);
     m_apiEndpoint = new GOnnectDBusAPI(this);
 
