@@ -63,6 +63,7 @@ Item {
     RoomAvatar {
         id: avatarImg
         chatProvider: control.chatProvider
+        initials: ' '
         anchors {
             top: parent.top
             left: parent.left
@@ -80,7 +81,7 @@ Item {
             margins: 20
         }
 
-        onTextChanged: () => avatarImg.initials = ViewHelper.initials(roomNameTextField.text.trim())
+        onTextChanged: () => avatarImg.initials = ViewHelper.initials(roomNameTextField.text.trim()) || ' '
 
         Timer {
             id: initialFocusTimer
