@@ -190,7 +190,7 @@ Item {
 
     Card {
         id: sideBar
-        width: control.width * 1 / 4
+        width: Math.floor(control.width * 1 / 4)
         anchors {
             top: parent.top
             left: parent.left
