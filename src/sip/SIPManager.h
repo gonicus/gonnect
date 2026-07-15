@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
@@ -73,6 +75,8 @@ public:
 
     Q_INVOKABLE SIPBuddy *getBuddy(const QString &var);
 
+    QString toSipUri(const QString &var) const;
+
 Q_SIGNALS:
     void preferredIdentitiesChanged();
     void defaultPreferredIdentityChanged();
@@ -121,7 +125,11 @@ class SIPManagerWrapper
     QML_SINGLETON
 
 public:
-    static SIPManager *create(QQmlEngine *, QJSEngine *) { return &SIPManager::instance(); }
+    static SIPManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&SIPManager::instance(), QQmlEngine::CppOwnership);
+        return &SIPManager::instance();
+    }
 
 private:
     SIPManagerWrapper() = default;

@@ -402,7 +402,7 @@ QDateTime CalDAVEventFeeder::createDateTimeFromTimeType(icaltimetype &datetime)
         treat it as local/floating.
 
         A floating 20220816T054500 simply applies to the current timezone.
-        Events with participants that are located in different timezones would
+        Events with users that are located in different timezones would
         hence take place "several times" on a given day.
 
         See: https://www.rfc-editor.org/rfc/rfc5545#section-3.3.5

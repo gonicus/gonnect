@@ -1,13 +1,14 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.Material
 import base
 
 
 Item {
     id: control
     width: 400
-    height: 400
+    height: 430
 
     LoggingCategory {
         id: category
@@ -20,15 +21,21 @@ Item {
     signal emojiPicked(string emoji)
 
     function scrollToGroup(groupIndex : int) {
-        for (let i = 0; i < emojiList.count; ++i) {
-            const item = emojiList.itemAt(i)
-            if (item.groupIndex === groupIndex) {
-                emojiFlickable.contentY = Math.min(item.y, emojiFlickable.contentHeight - emojiFlickable.height)
-                return
-            }
+        const idx = emojiProxy.firstIndexOfGroup(groupIndex)
+        if (idx >= 0) {
+            emojiGrid.positionViewAtIndex(idx, GridView.Beginning)
+        } else {
+            console.warn(category, "no visible items for group", groupIndex)
         }
+    }
 
-        console.warn(category, "unable to find rendered group item for group", groupIndex)
+    SearchField {
+        id: searchField
+        placeHolderText: qsTr("Search for emoji...")
+        anchors {
+            left: parent.left
+            right: parent.right
+        }
     }
 
     Flickable {
@@ -37,7 +44,7 @@ Item {
         clip: true
         contentWidth: groupButtonRow.implicitWidth
         anchors {
-            top: parent.top
+            top: searchField.bottom
             left: parent.left
             right: parent.right
         }
@@ -85,9 +92,11 @@ Item {
         }
     }
 
-    Flickable {
-        id: emojiFlickable
-        contentHeight: emojiContainer.implicitHeight
+    GridView {
+        id: emojiGrid
+        cellWidth: 30
+        cellHeight: emojiGrid.cellWidth
+        interactive: true
         clip: true
         anchors {
             top: tabbar.bottom
@@ -96,59 +105,27 @@ Item {
             bottom: parent.bottom
         }
 
-        Column {
-            id: emojiContainer
-            anchors {
-                left: parent.left
-                right: parent.right
-            }
+        Accessible.role: Accessible.Column
+        Accessible.name: qsTr("Select Emoji")
+        Accessible.focusable: true
 
-            Accessible.role: Accessible.Column
-            Accessible.name: qsTr("Select Emoji")
-            Accessible.focusable: true
-
-            Repeater {
-                id: emojiList
-                model: emojiGroupsRepeater.model
-
-                delegate: Item {
-                    id: sectionDelg
-                    implicitHeight: emojiGrid.height
-                    height: sectionDelg.implicitHeight
-                    anchors {
-                        left: parent?.left
-                        right: parent?.right
-                    }
-
-                    required property int groupIndex
-
-                    GridView {
-                        id: emojiGrid
-                        cellWidth: 30
-                        cellHeight: emojiGrid.cellWidth
-                        height: emojiGrid.contentHeight
-                        interactive: false
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                        model: EmojiProxyModel {
-                            sourceModel: emojiModel
-                            group: sectionDelg.groupIndex
-                        }
-                        delegate: EmojiButton {
-                            id: emojiDelg
-                            emojiChar: emojiDelg.emoji
-                            tooltipText: emojiDelg.label
-
-                            required property string emoji
-                            required property string label
-
-                            onClicked: () => control.emojiPicked(emojiDelg.emoji)
-                        }
-                    }
-                }
-            }
+        model: EmojiProxyModel {
+            id: emojiProxy
+            sourceModel: emojiModel
+            filterText: searchField.text.trim()
         }
+
+        delegate: EmojiButton {
+            id: emojiDelg
+            emojiChar: emojiDelg.emoji
+            tooltipText: emojiDelg.label
+
+            required property string emoji
+            required property string label
+
+            onClicked: () => control.emojiPicked(emojiDelg.emoji)
+        }
+
+        ScrollBar.vertical: ScrollBar { width: 5 }
     }
 }

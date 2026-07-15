@@ -109,6 +109,7 @@ Item {
             required property bool hasBuddyState
             required property bool hasAvatar
             required property string avatarPath
+            required property list<string> hops
 
             property int buddyStatus: SIPBuddyState.UNKNOWN
             readonly property bool isReady: delg.buddyStatus === SIPBuddyState.READY
@@ -156,10 +157,11 @@ Item {
                     initials: ViewHelper.initials(delg.contactName)
                     source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
                     visible: delg.hasAvatar || delg.name !== ""
-                    showBuddyStatus: delg.hasBuddyState || delg.isBlocked
-                    buddyStatus: delg.buddyStatus
+                    showPresenceStatus: delg.hasBuddyState || delg.isBlocked
+                    presenceStatus: delg.buddyStatus
                     isBlocked: delg.isBlocked
                     size: 40
+                    indicatorComponent: Component { BuddyStatusIndicator {} }
 
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
@@ -227,7 +229,9 @@ Item {
                     Label {
                         id: phoneNumberLabel
                         elide: Label.ElideRight
-                        text: delg.remotePhoneNumber
+                        text: delg.remotePhoneNumber + (delg.hops.length > 0
+                                                        ? qsTr(", via %1").arg(delg.hops.join(" → "))
+                                                        : "")
                         anchors {
                             left: parent.left
                             right: parent.right

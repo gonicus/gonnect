@@ -66,6 +66,9 @@ class GOnnectRecipe(ConanFile):
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
         self.requires("logfault/0.8.1-1")
+        #self.requires("hunspell/1.7.2")
+        self.requires("cmark/0.31.2")
+        self.requires("ksyntaxhighlighting/6.26.0")
 
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
@@ -79,13 +82,13 @@ class GOnnectRecipe(ConanFile):
             self.requires("libpulse/system")
 
         if self.options.with_conan_qt:
-            self.requires("qt/6.10.3")
+            self.requires("qt/6.11.1")
             self.requires("mpg123/1.33.0", override=True)
             self.requires("wayland/1.24.0", override=True)
 
-        self.requires("openssl/3.5.5", override=True)
+        self.requires("openssl/3.6.3", override=True)
         self.requires("qtwebdav/2025-03-16")
-        self.requires("qtkeychain/0.16.0")
+        self.requires("qtkeychain/0.17.0")
         self.requires("libusb/1.0.30")
 
     def build_requirements(self):

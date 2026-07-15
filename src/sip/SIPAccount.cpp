@@ -9,8 +9,7 @@
 #include "ErrorBus.h"
 #include "Credentials.h"
 #include "EnumTranslation.h"
-
-#include <QUuid>
+#include "GlobalStateAggregator.h"
 
 Q_LOGGING_CATEGORY(lcSIPAccount, "gonnect.sip.account")
 
@@ -19,10 +18,14 @@ intptr_t SIPAccount::runningMessageIndex = 0;
 SIPAccount::SIPAccount(const QString &group, QObject *parent)
     : QObject(parent), Account(), m_account(group)
 {
+    connect(this, &SIPAccount::isRegisteredChanged, this,
+            &SIPAccount::updatePresenceStateForwarding);
 }
 
 void SIPAccount::initialize()
 {
+    m_accountConfig.presConfig.publishEnabled = true;
+
     bool ok = false;
     static QRegularExpression sipURI = QRegularExpression("^(sips?):([^@]+)(?:@(.+))?$");
 
@@ -108,6 +111,17 @@ void SIPAccount::initialize()
         m_accountConfig.regConfig.firstRetryIntervalSec = 3;
         m_accountConfig.regConfig.randomRetryIntervalSec = 4;
         m_accountConfig.regConfig.registrarUri = registrarUri.toStdString();
+
+        unsigned registrationTimeout = m_settings.value("registrationTimeout", 0).toUInt(&ok);
+        if (!ok) {
+            qCCritical(lcSIPAccount) << "invalid value for 'registrationTimeout':"
+                                     << m_settings.value("registrationTimeout");
+            Q_EMIT initialized(false);
+            return;
+        }
+        if (registrationTimeout > 0) {
+            m_accountConfig.regConfig.timeoutSec = registrationTimeout;
+        }
     } else {
         qCCritical(lcSIPAccount) << "'registrarUri' is required";
         ErrorBus::instance().addFatalError(tr("'registrarUri' is required"));
@@ -177,7 +191,7 @@ void SIPAccount::initialize()
     m_accountConfig.mediaConfig.transportConfig.randomizePort =
             m_settings.value("randomizeRtpPorts", false).toBool();
 
-    m_rttEnabled = m_settings.value("realTimeText", true).toBool();
+    m_rttEnabled = m_settings.value("realTimeText", false).toBool();
 
     // Tweak IPv6 account settings
     if (m_transportNet == TRANSPORT_NET::IPv4) {
@@ -491,6 +505,13 @@ QString SIPAccount::call(const QString &number, const QString &contactId,
     prm.opt.videoCount = 0;
 
     generatePreferredIdentityHeader(number, preferredIdentity, prm);
+
+    if (!PhoneNumberUtil::isSipUri(number)) {
+        const QString postDialDtmf = number.section(',', 1, -1, QString::SectionIncludeLeadingSep);
+        if (!postDialDtmf.isEmpty()) {
+            call->setPostDialDtmf(postDialDtmf);
+        }
+    }
 
     try {
         call->call(sipUrl, prm);
@@ -866,7 +887,7 @@ void SIPAccount::removeCall(SIPCall *call)
 {
     if (call) {
         m_calls.removeAll(call);
-        delete call;
+        call->deleteLater();
     }
 }
 
@@ -879,6 +900,9 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
 {
     SIPCall *call = new SIPCall(this, iprm.callId);
     call->setIncoming(true);
+
+    const auto *rxData = static_cast<const pjsip_rx_data *>(iprm.rdata.pjRxData);
+    call->parseCallRouting(rxData ? rxData->msg_info.msg : nullptr);
 
     try {
         const pj::CallInfo ci = call->getInfo();
@@ -946,12 +970,12 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         opt.targetUri = m_accountConfig.regConfig.registrarUri;
         opt.headers = headers;
 
-        m_optionsRequestUuid = QUuid::createUuid().toByteArray();
+        m_optionsRequestId = ++SIPAccount::runningMessageIndex;
 
         pj::SendRequestParam prm;
         prm.method = "OPTIONS";
         prm.txOption = opt;
-        prm.userData = m_optionsRequestUuid.data();
+        prm.userData = reinterpret_cast<void *>(m_optionsRequestId);
 
         sendRequest(prm);
     }
@@ -959,10 +983,10 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
 
 void SIPAccount::onSendRequest(pj::OnSendRequestParam &prm)
 {
-    const QByteArray uuid(static_cast<char *>(prm.userData));
+    const auto requestId = reinterpret_cast<intptr_t>(prm.userData);
 
-    if (uuid == m_optionsRequestUuid) {
-        m_optionsRequestUuid.clear();
+    if (requestId != 0 && requestId == m_optionsRequestId) {
+        m_optionsRequestId = 0;
         const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
         m_isInstantMessagingAllowed = hasAllowGrant(header, "MESSAGE");
     }
@@ -1032,6 +1056,7 @@ void SIPAccount::reinitBuddies()
     }
 
     QStringList uris;
+    uris.reserve(m_buddies.size());
     for (auto buddy : std::as_const(m_buddies)) {
         uris.push_back(buddy->uri());
     }
@@ -1062,4 +1087,80 @@ SIPAccount::~SIPAccount()
 {
     qDeleteAll(m_calls);
     m_calls.clear();
+}
+
+void SIPAccount::updatePresenceStateForwarding()
+{
+    if (isRegistered() && !m_globalStateConnectionContext) {
+        // Establish
+        m_globalStateConnectionContext = new QObject(this);
+        auto &glob = GlobalStateAggregator::instance();
+
+        connect(&glob, &GlobalStateAggregator::presenceStateChanged, m_globalStateConnectionContext,
+                [this]() { forwardPresenceState(); });
+        connect(&glob, &GlobalStateAggregator::statusTextChanged, m_globalStateConnectionContext,
+                [this]() { forwardPresenceState(); });
+        forwardPresenceState();
+
+    } else if (!isRegistered() && m_globalStateConnectionContext) {
+        // Disconnect
+        m_globalStateConnectionContext->deleteLater();
+        m_globalStateConnectionContext = nullptr;
+    }
+}
+
+void SIPAccount::forwardPresenceState()
+{
+    if (!isRegistered()) {
+        return;
+    }
+
+    try {
+        setOnlineStatus(createPresenceStatusFromGlobal());
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to forward presence state:" << err.info();
+    }
+}
+
+pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const
+{
+    auto &glob = GlobalStateAggregator::instance();
+
+    pj::PresenceStatus pjStatus;
+    pjStatus.statusText = glob.statusText().toStdString();
+
+    switch (glob.presenceState()) {
+
+    case PresenceState::State::Unknown:
+        pjStatus.status = PJSUA_BUDDY_STATUS_UNKNOWN;
+        pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
+        break;
+
+    case PresenceState::State::Offline:
+        pjStatus.status = PJSUA_BUDDY_STATUS_OFFLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
+        break;
+
+    case PresenceState::State::Away:
+        pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_AWAY;
+        break;
+
+    case PresenceState::State::Busy:
+        pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_BUSY;
+        break;
+
+    case PresenceState::State::Available:
+        pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
+        break;
+
+    case PresenceState::State::Ringing:
+        pjStatus.status = PJSUA_BUDDY_STATUS_ONLINE;
+        pjStatus.activity = PJRPID_ACTIVITY_UNKNOWN;
+        break;
+    }
+
+    return pjStatus;
 }

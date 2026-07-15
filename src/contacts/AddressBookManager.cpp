@@ -218,7 +218,16 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
 
                     ReadOnlyConfdSettings settings;
                     settings.beginGroup(group);
-                    viewHelper.requestPassword(group, settings.value("host", "").toString());
+
+                    auto name = settings.value("host", "").toString();
+                    if (name.isEmpty()) {
+                        name = settings.value("url", "").toString();
+                    }
+                    if (name.isEmpty()) {
+                        name = group;
+                    }
+
+                    viewHelper.requestPassword(group, name);
                     settings.endGroup();
                 }
             });

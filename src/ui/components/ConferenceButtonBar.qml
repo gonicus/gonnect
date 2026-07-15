@@ -207,11 +207,11 @@ Item {
 
                     MenuItem {
                         text: qsTr("Copy room name")
-                        onTriggered: () => ViewHelper.copyToClipboard(control.iConferenceConnector.conferenceName)
+                        onTriggered: () => ClipboardHelper.copyToClipboard(control.iConferenceConnector.conferenceName)
                     }
                     MenuItem {
                         text: qsTr("Copy room link")
-                        onTriggered: () => ViewHelper.copyToClipboard(control.iConferenceConnector.conferenceUrl)
+                        onTriggered: () => ClipboardHelper.copyToClipboard(control.iConferenceConnector.conferenceUrl)
                     }
                     MenuItem {
                         text: qsTr("Open in browser")
@@ -387,14 +387,14 @@ Item {
 
                     MenuItem {
                         id: setPasswordMenuItem
-                        visible: control.iConferenceConnector.ownRole === ConferenceParticipant.Role.Moderator
+                        visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
                                  && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.RoomPassword)
                         text: qsTr("Set room password...")
                         onClicked: () => control.openSetPasswordDialog()
                     }
 
                     MenuItem {
-                        visible: control.iConferenceConnector.ownRole === ConferenceParticipant.Role.Moderator
+                        visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
                                  && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.MuteAll)
                         text: qsTr("Mute everyone")
                         onClicked: () => control.iConferenceConnector.muteAll()
@@ -440,7 +440,7 @@ Item {
             onClicked: () => {
                 const conn = control.iConferenceConnector
 
-                if (conn.ownRole === ConferenceParticipant.Role.Moderator && conn.numberOfParticipants > 1) {
+                if (conn.ownRole === ConferenceUser.Role.Moderator && conn.numberOfUsers > 1) {
                     leaveMenu.popup(hangupButton, -leaveMenu.width + hangupButton.width, hangupButton.height)
                 } else {
                     hangupButton.enabled = false

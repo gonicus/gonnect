@@ -1,0 +1,13 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/templates">
+        <file>@PROJECT_SOURCE_DIR@/docs/modules/ROOT/examples/sample.conf</file>
+        <file>@PROJECT_SOURCE_DIR@/resources/templates/sipgate.conf</file>
+        <file>@PROJECT_SOURCE_DIR@/resources/templates/starface.conf</file>
+        <file>@PROJECT_SOURCE_DIR@/resources/templates/fritzbox.conf</file>
+        <file>@PROJECT_SOURCE_DIR@/resources/templates/telekom.conf</file>
+        <file>@PROJECT_SOURCE_DIR@/resources/templates/easybell_phoneline.conf</file>
+        <file>@PROJECT_SOURCE_DIR@/resources/templates/easybell_pbx.conf</file>
+        <file>@PROJECT_SOURCE_DIR@/resources/templates/1und1.conf</file>
+    </qresource>
+</RCC>

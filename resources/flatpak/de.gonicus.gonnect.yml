@@ -8,7 +8,7 @@ command: gonnect
 
 add-extensions:
   de.gonicus.gonnect.plugin:
-    version: '2'
+    version: '3'
     directory: plugins
     subdirectories: true
     no-autodownload: true
@@ -195,8 +195,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/frankosterfeld/qtkeychain.git
-        tag: 0.16.0
-        commit: aa6da344e1a20b9194e12bace3665caeea6b6304
+        tag: 0.17.0
+        commit: 875f77d9f61bd97fd84cca47ce3bc71186dfbd09
         x-checker-data:
           type: git
           tag-pattern: ^([0-9]+\.[0-9]+\.[0-9]+)$
@@ -292,6 +292,31 @@ modules:
         x-checker-data:
           type: git
           tag-pattern: ^(v[0-9.]+)$
+
+  - name: cmark
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/commonmark/cmark.git
+        tag: 0.31.2
+        commit: eec0eeba6d31189fd828314576494566d539b1e3
+        x-checker-data:
+          type: git
+          tag-pattern: ^([0-9.]+)$
+
+  - name: ksyntaxhighlighting
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://invent.kde.org/frameworks/syntax-highlighting.git
+        tag: v6.26.0
+        commit: 8a8789ca55c1209109f97a34b18e633c4240bee0
+        x-checker-data:
+          type: git
+          tag-pattern: ^v([0-9.]+)$
+      - type: patch
+        path: patches/ecm-downgrade.patch
 
   - name: gonnect
     buildsystem: cmake-ninja

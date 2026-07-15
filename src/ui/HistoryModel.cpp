@@ -75,6 +75,7 @@ QHash<int, QByteArray> HistoryModel::roleNames() const
         { static_cast<int>(Roles::IsBlocked), "isBlocked" },
         { static_cast<int>(Roles::Type), "type" },
         { static_cast<int>(Roles::HasBuddyState), "hasBuddyState" },
+        { static_cast<int>(Roles::Hops), "hops" },
     };
 }
 
@@ -199,6 +200,28 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::HasBuddyState):
         return item->isSipSubscriptable();
+
+    case static_cast<int>(Roles::Hops): {
+        const auto &hops = item->hops();
+
+        if (hops.isEmpty()) {
+            return hops;
+        }
+
+        QStringList l;
+        l.reserve(hops.size());
+        const auto &addressBook = AddressBook::instance();
+        for (const auto &hop : hops) {
+            const Contact *contact = addressBook.lookupByNumber(hop);
+            if (contact && !contact->name().isEmpty()) {
+                l.append(QString("%1 (%2)").arg(contact->name(), hop));
+            } else {
+                l.append(hop);
+            }
+        }
+
+        return l;
+    }
 
     default:
         return QVariant();

@@ -16,10 +16,6 @@ Item {
         defaultLogLevel: LoggingCategory.Warning
     }
 
-    property string selectedPageId: ""
-    property int selectedPageType: -1
-    property var attachedData: null
-
     property var mainWindow
 
     property int dynamicPageCount: 0
@@ -53,7 +49,7 @@ Item {
             SM.uiHasActiveEditDialog = true
 
             item.accepted.connect((name, iconId) => {
-                                      const tab = control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
+                                      const tab = control.createTab(id, MainPageSelection.PageType.Base, iconId, name)
                                       control.mainWindow.createPage(id, name, iconId, tab)
                                   })
             item.show()
@@ -120,6 +116,7 @@ Item {
         let tabOrder = []
 
         tabOrder.push(...topMenuCol.children)
+
         return tabOrder.filter((button) => button.pageId)
     }
 
@@ -140,33 +137,33 @@ Item {
     }
 
     function sortTabList() {
-        let tabList = UISettings.getUISetting("generic", "tabBarOrder", "").split(",")
-        if (!tabList.length > 0) {
+        const savedSetting = UISettings.getUISetting("generic", "tabBarOrder", "");
+        const savedIds = savedSetting ? savedSetting.split(",") : [];
+        if (savedSetting === "" || savedIds.length === 0) {
             return
         }
 
-        let tabOrder = []
-        let newOrder = []
+        const tabOrder = [...topMenuCol.children].filter((button) => button.pageId)
+        const existingIds = tabOrder.map((button) => button.pageId)
+        const validIds = savedIds.filter((id) => existingIds.includes(id))
+        const remaining = [...tabOrder]
+        const newOrder = []
 
-        tabOrder.push(...topMenuCol.children)
+        for (const id of validIds) {
+            const idx = remaining.findIndex((button) => button.pageId === id)
+            if (idx >= 0) {
+                newOrder.push(...remaining.splice(idx, 1))
+            }
+        }
+        newOrder.push(...remaining)
 
-        tabList.forEach((tabId) => {
-            tabOrder.forEach((button) => {
-                if (button.pageId && button.pageId === tabId) {
-                    newOrder.push(button)
-                }
-            })
-        })
-
-        newOrder.forEach((button) => {
+        for (const button of newOrder) {
             button.parent = null
             button.visible = false
 
             button.parent = topMenuCol
             button.visible = true
-        })
-
-        control.saveTabList()
+        }
     }
 
     Rectangle {
@@ -196,10 +193,12 @@ Item {
             required property string iconSource
             required property var attachedData
 
-            readonly property bool isSelected: control.selectedPageId === delg.pageId
-
-            property int notifications: 0
+            property int notifications: (delg.attachedData && delg.attachedData instanceof IChatProvider)
+                                        ? delg.attachedData.unreadNotificationsCount
+                                        : 0
             property bool showNotificationBubble: delg.notifications > 0
+
+            readonly property bool isSelected: SelectionState.selectedPage.id === delg.pageId
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Selected tab")
@@ -209,16 +208,17 @@ Item {
 
             function switchTab() {
                 if (delg.isEnabled) {
-                    control.selectedPageId = delg.pageId
-                    control.selectedPageType = delg.pageType
-                    control.attachedData = delg.attachedData
+                    SelectionState.selectedPage = {
+                        id: delg.pageId,
+                        type: delg.pageType,
+                        attachedData: delg.attachedData ? (delg.attachedData as QtObject) : undefined
+                    }
                 }
             }
 
             Rectangle {
                 id: hoverBackground
-                visible: delg.isSelected
-                         || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
+                visible: delg.isSelected || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
                 radius: 8
                 color: Theme.backgroundSecondaryColor
                 anchors {
@@ -377,6 +377,58 @@ Item {
         }
     }
 
+    property var tabMenuModel: {
+        const baseModel = [
+            {
+                pageId: SelectionState.homePageId(),
+                pageType: MainPageSelection.PageType.Base,
+                iconSource: Icons.userHome,
+                labelText: qsTr("Home"),
+                disabledTooltipText: qsTr("Home"),
+                isEnabled: true,
+                showActiveBorder: false,
+                attachedData: null
+            }, {
+                pageId: SelectionState.conferencePageId(),
+                pageType: MainPageSelection.PageType.Conference,
+                iconSource: Icons.userGroupNew,
+                labelText: qsTr("Conference"),
+                disabledTooltipText: qsTr("No active conference"),
+                isEnabled: control.hasActiveConference,
+                showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
+                attachedData: null
+            }, {
+                pageId: SelectionState.callPageId(),
+                pageType: MainPageSelection.PageType.Call,
+                iconSource: Icons.callStart,
+                labelText: qsTr("Call"),
+                disabledTooltipText: qsTr("No active call"),
+                isEnabled: control.hasActiveCall,
+                showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
+                attachedData: null
+            }
+        ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
+
+        if (ChatConnectorManager.isChatAvailable) {
+            for (const conn of ChatConnectorManager.chatConnectors) {
+                baseModel.push({
+                                   pageId: SelectionState.chatsPageId(),
+                                   pageType: MainPageSelection.PageType.Chats,
+                                   iconSource: Icons.dialogMessages,
+                                   labelText: conn.displayName,
+                                   disabledTooltipText: qsTr("Chat not available"),
+                                   isEnabled: conn.isConnected,
+                                   showRedDot: false,
+                                   attachedData: conn
+                               })
+            }
+        }
+
+        return baseModel
+    }
+
+    onTabMenuModelChanged: Qt.callLater(control.sortTabList)
+
     Column {
         id: topMenuCol
         topPadding: 20
@@ -389,40 +441,7 @@ Item {
         Repeater {
             id: menuRepeater
             delegate: tabDelegate
-            model: {
-                const baseModel = [
-                    {
-                        pageId: control.mainWindow.homePageId,
-                        pageType: GonnectWindow.PageType.Base,
-                        iconSource: Icons.userHome,
-                        labelText: qsTr("Home"),
-                        disabledTooltipText: qsTr("Home"),
-                        isEnabled: true,
-                        showActiveBorder: false,
-                        attachedData: null
-                    }, {
-                        pageId: control.mainWindow.conferencePageId,
-                        pageType: GonnectWindow.PageType.Conference,
-                        iconSource: Icons.userGroupNew,
-                        labelText: qsTr("Conference"),
-                        disabledTooltipText: qsTr("No active conference"),
-                        isEnabled: control.hasActiveConference,
-                        showActiveBorder: control.hasActiveConference && control.selectedPageId !== control.mainWindow.conferencePageId,
-                        attachedData: null
-                    }, {
-                        pageId: control.mainWindow.callPageId,
-                        pageType: GonnectWindow.PageType.Call,
-                        iconSource: Icons.callStart,
-                        labelText: qsTr("Call"),
-                        disabledTooltipText: qsTr("No active call"),
-                        isEnabled: control.hasActiveCall,
-                        showActiveBorder: control.hasActiveUnfinishedCall && control.selectedPageId !== control.mainWindow.callPageId,
-                        attachedData: null
-                    }
-                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
-
-                return baseModel
-            }
+            model: control.tabMenuModel
         }
 
         Component.onCompleted: () => mainWindow.loadPages()
@@ -443,8 +462,8 @@ Item {
             delegate: tabDelegate
             model: [
                 {
-                    pageId: control.mainWindow.settingsPageId,
-                    pageType: GonnectWindow.PageType.Settings,
+                    pageId: SelectionState.settingsPageId(),
+                    pageType: MainPageSelection.PageType.Settings,
                     iconSource: Icons.settingsConfigure,
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
@@ -485,7 +504,7 @@ Item {
                 const index = control.getTabList().findIndex(button => button.pageId === selButton.pageId)
                 if (index >= 0) {
                     menuInternal.isFirst = index === 0
-                    menuInternal.isLast = index === topMenuCol.children.length - 2
+                    menuInternal.isLast = index === control.getTabList().length - 1
                 } else {
                     menuInternal.isFirst = false
                     menuInternal.isLast = false
@@ -573,8 +592,8 @@ Item {
             id: editPageAction
             text: qsTr("Edit")
             icon.source: Icons.editor
-            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
-                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+            enabled: optionMenu.selectedTabButton?.pageType === MainPageSelection.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== SelectionState.homePageId()
             onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
 
             Accessible.role: Accessible.Button
@@ -588,8 +607,8 @@ Item {
             id: deletePageAction
             text: qsTr("Delete")
             icon.source: Icons.editDelete
-            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
-                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+            enabled: optionMenu.selectedTabButton?.pageType === MainPageSelection.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== SelectionState.homePageId()
 
             onTriggered: () => deletePageAction.deletePage()
 
@@ -600,21 +619,20 @@ Item {
             Accessible.onPressAction: () => deletePageAction.deletePage()
 
             function deletePage() {
-                if (optionMenu.selectedTabButton !== null) {
+                if (optionMenu.selectedTabButton !== null && SelectionState.selectedPage.id === optionMenu.selectedTabButton.pageId) {
                     let curIndex
-                    let newIndex
+                    let newIndex = -1
                     let tabOrder = control.getTabList().filter((button) => button.isEnabled)
 
-                    if (optionMenu.selectedTabButton.isSelected) {
-                        // If the actively selected button is deleted, move up/down
-                        curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
-                        if (curIndex > 0) {
-                            newIndex = curIndex - 1
-                        } else if (curIndex < tabOrder.length - 1) {
-                            newIndex = curIndex + 1
-                        }
+                    curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
+                    if (curIndex > 0) {
+                        newIndex = curIndex - 1
+                    } else if (curIndex < tabOrder.length - 1) {
+                        newIndex = curIndex + 1
+                    }
 
-                        mainWindow.updateTabSelection(tabOrder[newIndex].pageId,
+                    if (newIndex >= 0) {
+                        mainWindow.showPage(tabOrder[newIndex].pageId,
                                                       tabOrder[newIndex].pageType)
                     }
 

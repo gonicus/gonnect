@@ -6,6 +6,7 @@
 #include "NumberStats.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Ringer.h"
+#include "Pinger.h"
 #include "AuthManager.h"
 #include "GlobalCallState.h"
 #include "USBDevices.h"
@@ -20,12 +21,10 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
-#include <QMediaFormat>
 #include <QFileDialog>
 #include <QSystemTrayIcon>
 #include <QRegularExpression>
 #include <QUuid>
-#include <QMimeType>
 #include <QLoggingCategory>
 
 using namespace std::chrono_literals;
@@ -40,6 +39,10 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
     m_ringerTimer.setSingleShot(true);
     m_ringerTimer.setInterval(3s);
     m_ringerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayRingTone);
+
+    m_pingerTimer.setSingleShot(true);
+    m_pingerTimer.setInterval(3s);
+    m_pingerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayNotificationTone);
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
             &ViewHelper::updateCurrentUser);
@@ -162,13 +165,6 @@ int ViewHelper::secondsDelta(const QDateTime &start, const QDateTime &end) const
     return start.secsTo(end);
 }
 
-void ViewHelper::copyToClipboard(const QString &str) const
-{
-    auto clipboard = QApplication::clipboard();
-    clipboard->setText(str, QClipboard::Clipboard);
-    clipboard->setText(str, QClipboard::Selection);
-}
-
 void ViewHelper::reloadAddressBook() const
 {
     AddressBookManager::instance().reloadAddressBook();
@@ -197,38 +193,6 @@ QString ViewHelper::currentUserName() const
     return name;
 }
 
-QStringList ViewHelper::audioFileSelectors() const
-{
-    QStringList result;
-    QStringList allSuffixes;
-    const auto formats = QMediaFormat().supportedFileFormats(QMediaFormat::Decode);
-
-    for (const auto format : formats) {
-        QMediaFormat mediaFormat(format);
-
-        const auto mimeType = mediaFormat.mimeType();
-        if (mimeType.isValid()) {
-            const QString filter = QMediaFormat::fileFormatDescription(format);
-            const auto suffixes = mimeType.suffixes();
-
-            QStringList globs;
-            globs.reserve(suffixes.length());
-
-            for (const auto &suffix : suffixes) {
-                globs.append(QString("*.%1").arg(suffix));
-            }
-            allSuffixes.append(globs);
-            result.append(QString("%1 (%2)").arg(filter, globs.join(QChar(' '))));
-        }
-    }
-
-    std::sort(result.begin(), result.end());
-
-    result.push_front(tr("Audio Files (%1)").arg(allSuffixes.join(QChar(' '))));
-
-    return result;
-}
-
 void ViewHelper::toggleFavorite(const QString &phoneNumber,
                                 const NumberStats::ContactType contactType) const
 {
@@ -247,6 +211,20 @@ QString ViewHelper::initials(const QString &name) const
     return QString("%1%2").arg(name.at(0), splitted.at(splitted.length() - 1).at(0)).toUpper();
 }
 
+void ViewHelper::testPlayRingTone(qreal volume)
+{
+    stopTestPlayRingTone();
+
+    m_ringer = new Ringer(this);
+    m_ringer->start(volume);
+    m_ringerTimer.start();
+
+    if (!m_isPlayingRingTone) {
+        m_isPlayingRingTone = true;
+        Q_EMIT isPlayingRingToneChanged();
+    }
+}
+
 void ViewHelper::stopTestPlayRingTone()
 {
     if (m_isPlayingRingTone) {
@@ -257,6 +235,38 @@ void ViewHelper::stopTestPlayRingTone()
 
         m_isPlayingRingTone = false;
         Q_EMIT isPlayingRingToneChanged();
+    }
+}
+
+void ViewHelper::testPlayNotificationTone(qreal volume)
+{
+    stopTestPlayNotificationTone();
+
+    if (!m_isPlayingNotificationTone) {
+        m_isPlayingNotificationTone = true;
+        Q_EMIT isPlayingNotificationToneChanged();
+    }
+
+    m_pinger = new Pinger(this);
+    connect(m_pinger, &Pinger::stopped, this, [this]() { stopTestPlayNotificationTone(); });
+    m_pingerTimer.start();
+    m_pinger->ping(volume);
+}
+
+void ViewHelper::stopTestPlayNotificationTone()
+{
+    if (m_isPlayingNotificationTone) {
+        m_pingerTimer.stop();
+
+        if (m_pinger) {
+            auto *pinger = m_pinger;
+            m_pinger = nullptr;
+            pinger->stop();
+            pinger->deleteLater();
+        }
+
+        m_isPlayingNotificationTone = false;
+        Q_EMIT isPlayingNotificationToneChanged();
     }
 }
 
@@ -330,20 +340,6 @@ void ViewHelper::quitApplication()
     }
 }
 
-void ViewHelper::testPlayRingTone(qreal volume)
-{
-    stopTestPlayRingTone();
-
-    m_ringer = new Ringer(this);
-    m_ringer->start(volume);
-    m_ringerTimer.start();
-
-    if (!m_isPlayingRingTone) {
-        m_isPlayingRingTone = true;
-        Q_EMIT isPlayingRingToneChanged();
-    }
-}
-
 HeadsetDeviceProxy *ViewHelper::headsetDeviceProxy() const
 {
     return USBDevices::instance().getHeadsetDeviceProxy();
@@ -382,6 +378,11 @@ void ViewHelper::respondOauthLoginClosed(const QString &id)
 void ViewHelper::respondRecoveryKey(const QString &id, const QString &key)
 {
     Q_EMIT recoveryKeyResponded(id, key);
+}
+
+void ViewHelper::requestUrlCopyDialog(const QUrl &url, const QString &text)
+{
+    Q_EMIT urlCopyDialogRequested(url, text);
 }
 
 void ViewHelper::requestRecoveryKey(const QString &id, const QString &displayName)
@@ -454,12 +455,6 @@ void ViewHelper::requestExternalAppointment(const QString &link)
     }
 }
 
-void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
-{
-    GlobalCallState::instance().setCallInForeground(
-            SIPCallManager::instance().findCall(accountId, callId));
-}
-
 bool ViewHelper::hasNonSilentCall() const
 {
     const auto globalStateObject = GlobalCallState::instance().globalCallStateObjects();
@@ -501,4 +496,24 @@ void ViewHelper::toggleFullscreen()
 uint ViewHelper::numberOfGridCells() const
 {
     return 50;
+}
+
+QString ViewHelper::stripLinkTags(const QString &link) const
+{
+    static const QRegularExpression re(R"(<a[^>]*>(.*)<\/a>)");
+    auto s = link;
+    return s.replace(re, "\\1");
+}
+
+bool ViewHelper::isShortEmojiString(const QString &str) const
+{
+    const auto trimmed = str.trimmed();
+
+    if (trimmed.size() > 50) { // Bigger size as emojis can be much more than a single unicode char
+        return false;
+    }
+
+    static const QRegularExpression re(
+            R"(^(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)(?:\s*(?:\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)){0,2}$)");
+    return re.match(trimmed).hasMatch();
 }

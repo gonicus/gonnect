@@ -1,7 +1,7 @@
-<!DOCTYPE RCC>
 <RCC>
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
+        <file>ui/components/popups/FileSelectionOverview.qml</file>
     </qresource>
     <qresource prefix="/emojis">
         <file alias="emojis.dat">../resources/emojis/emojis.dat</file>
@@ -10,11 +10,12 @@
         <file alias="groups.dat">../resources/emojis/groups.dat</file>
     </qresource>
     <qresource prefix="/audio">
-        <file compress-algo="none" alias="phone-incoming-call.mp3">../resources/sounds/phone-incoming-call.mp3</file>
+        <file alias="phone-incoming-call.mp3" compress-algo="none">../resources/sounds/phone-incoming-call.mp3</file>
+        <file alias="message-new-instant.wav" compress-algo="none">../resources/sounds/message-new-instant.wav</file>
     </qresource>
     <qresource prefix="/emblems">
-        <file compress-algo="none" alias="call-missed.png">../resources/artwork/emblems/call-missed.png</file>
-        <file compress-algo="none" alias="call-incoming.png">../resources/artwork/emblems/call-incoming.png</file>
+        <file alias="call-missed.png" compress-algo="none">../resources/artwork/emblems/call-missed.png</file>
+        <file alias="call-incoming.png" compress-algo="none">../resources/artwork/emblems/call-incoming.png</file>
     </qresource>
     <qresource prefix="/font">
         <file alias="NotoColorEmoji-Regular.ttf">../resources/font/NotoColorEmoji-Regular.ttf</file>

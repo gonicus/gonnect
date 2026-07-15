@@ -1,10 +1,32 @@
 #pragma once
 
+#include "Contact.h"
+#include "NumberStats.h"
+
 #include <QAbstractListModel>
 #include <QObject>
 #include <QQmlEngine>
 
 struct NumberStat;
+class IChatRoom;
+class IChatProvider;
+
+struct FavoriteEntry
+{
+    Contact *contact = nullptr;
+    struct Addr
+    {
+        NumberStats::ContactType contactType = NumberStats::ContactType::PhoneNumber;
+        Contact::NumberType numberType = Contact::NumberType::Unknown;
+        QString addr;
+        IChatProvider *chatProvider = nullptr;
+        IChatRoom *chatRoom = nullptr;
+    };
+
+    std::vector<std::unique_ptr<Addr>> addrs;
+
+    QString name() const;
+};
 
 class FavoritesModel : public QAbstractListModel
 {
@@ -12,18 +34,20 @@ class FavoritesModel : public QAbstractListModel
     QML_ELEMENT
 
 public:
+    struct FavRoom
+    {
+        IChatProvider *provider = nullptr;
+        IChatRoom *room = nullptr;
+    };
+
     enum class Roles {
-        PhoneNumber = Qt::UserRole + 1,
-        ContactId,
-        Name,
+        Name = Qt::UserRole + 1,
         Company,
         HasBuddyState,
         HasAvatar,
         AvatarPath,
-        IsAnonymous,
-        IsBlocked,
-        NumberType,
-        ContactType
+        Addresses,
+        SubscribableNumber,
     };
 
     explicit FavoritesModel(QObject *parent = nullptr);
@@ -33,8 +57,19 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
 
 private Q_SLOTS:
+    void scheduleModelUpdate();
     void updateModel();
 
 private:
-    QList<NumberStat *> m_favorites;
+    void sortInnerModel();
+    void addChatProviderSignals(IChatProvider &provider);
+    void addChatRoomSignals(IChatRoom *chatRoom);
+
+    std::vector<std::unique_ptr<FavoriteEntry>> m_favorites;
+    QHash<Contact *, FavoriteEntry *> m_favoriteContactLookup;
+    QHash<IChatRoom *, QObject *> m_chatRoomContextObjects;
+    QTimer m_modelUpdateTimer;
+
+    QObject *m_chatProviderContext = nullptr;
+    bool m_isUpdating = false;
 };

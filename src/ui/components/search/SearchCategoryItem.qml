@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls.impl
 import base
 
 Item {
@@ -12,27 +13,13 @@ Item {
     signal clicked
 
     property alias name: buttonLabel.text
-    property alias highlighted: highlightedBackground.visible
+    property bool highlighted
 
     Accessible.role: Accessible.ColumnHeader
     Accessible.name: qsTr("Search result category filter %1").arg(control.name)
     Accessible.description: qsTr("Filter for the individual search result items by category")
     Accessible.focusable: true
     Accessible.onPressAction: () => control.selectCategory()
-
-    Rectangle {
-        id: highlightedBackground
-        anchors.fill: parent
-        visible: false
-        color: Theme.backgroundSecondaryColor
-        radius: 5
-        border {
-            width: 1
-            color: Theme.borderColor
-        }
-
-        Accessible.ignored: true
-    }
 
     Rectangle {
         id: hoveredBackground
@@ -48,14 +35,25 @@ Item {
         Accessible.ignored: true
     }
 
+    IconLabel {
+        id: checkIconLabel
+        width: 16
+        icon.source: control.highlighted ? Icons.dataSuccess : Icons.dataError
+        anchors {
+            left: parent.left
+            leftMargin: 12
+            verticalCenter: parent.verticalCenter
+        }
+    }
+
     Label {
         id: buttonLabel
         font.weight: Font.Medium
         anchors {
             verticalCenter: parent.verticalCenter
-            left: parent.left
+            left: checkIconLabel.right
             right: parent.right
-            leftMargin: 12
+            leftMargin: 6
             rightMargin: 12
         }
 

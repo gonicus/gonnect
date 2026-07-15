@@ -12,54 +12,32 @@ Item {
     implicitWidth: control.size
     implicitHeight: control.size
 
-    property alias initials: initialsLabel.text
-    property alias source: img.source
+    property string initials
+    property url source
     property int size: 24
 
-    property alias showBuddyStatus: buddyStatusIndicatorContainer.visible
-    property alias buddyStatus: buddyStatusIndicator.status
-    property alias isBlocked: buddyStatusIndicator.isBlocked
-    property alias isUnregistered: buddyStatusIndicator.isUnregistered
+    property alias showPresenceStatus: statusIndicatorContainer.visible
+    property int presenceStatus
+    property bool isBlocked
+    property bool isUnregistered
+    property alias indicatorComponent: statusIndicatorLoader.sourceComponent
+    property Component menuComponent
 
-    states: [
-        State {
-            when: control.source.toString() !== ""  // toString() is necessary, see QTBUG-63629
-            PropertyChanges {
-                initialBackground.visible: false
-                initialsLabel.visible: false
-                opacityMask.visible: true
-            }
-        }
-    ]
-
-    Rectangle {
-        id: initialBackground
-        anchors.fill: parent
-        color: Theme.backgroundInitials
-        radius: initialBackground.width / 2
-
-        Accessible.ignored: true
-    }
-
-    Label {
-        id: initialsLabel
-        anchors.centerIn: parent
-        font.pixelSize: 0.4 * control.size
-        color: Theme.foregroundInitials
-
-        Accessible.role: Accessible.StaticText
-        Accessible.name: initialsLabel.text
-        Accessible.description: qsTr("Initials of this contact")
-    }
+    readonly property bool hasSource: control.source.toString() !== ""  // toString() is necessary, see QTBUG-63629
 
     Image {
         id: img
-        cache: false
+        cache: true
         visible: false
         anchors.fill: parent
-        fillMode: Image.PreserveAspectFit
+        fillMode: Image.PreserveAspectCrop
         sourceSize.width: control.size
         sourceSize.height: control.size
+        source: control.hasSource
+                ? control.source
+                : (control.initials
+                   ? `image://personcoin/${control.initials}`
+                   : "")
     }
 
     Rectangle {
@@ -74,28 +52,60 @@ Item {
 
     OpacityMask {
         id: opacityMask
-        visible: false
         anchors.fill: parent
         source: img
         maskSource: mask
     }
 
     Rectangle {
-        id: buddyStatusIndicatorContainer
+        id: statusIndicatorContainer
         color: Theme.backgroundColor
-        x: control.width / 2 + Math.sqrt(((control.width / 2) * (control.width / 2)) / 2) - buddyStatusIndicatorContainer.width / 2
-        y: buddyStatusIndicatorContainer.x
-        width: 10
-        height: buddyStatusIndicatorContainer.width
-        radius: buddyStatusIndicatorContainer.width / 2
+        x: control.width / 2 + Math.sqrt(((control.width / 2) * (control.width / 2)) / 2) - statusIndicatorContainer.width / 2
+        y: statusIndicatorContainer.x
+        width: 8/24 * control.size
+        height: statusIndicatorContainer.width
+        radius: statusIndicatorContainer.width / 2
         visible: false
 
-        BuddyStatusIndicator {
-            id: buddyStatusIndicator
+        Loader {
+            id: statusIndicatorLoader
             width: parent.width - 2
+            height: statusIndicatorLoader.width
+            active: control.showPresenceStatus
             anchors.centerIn: parent
+            sourceComponent: Component {
+                PresenceStatusIndicator {}
+            }
+
+            onItemChanged: () => {
+                const item = statusIndicatorLoader.item
+
+                if (item) {
+                    if (item.hasOwnProperty("status")) {
+                        item.status = Qt.binding(() => control.presenceStatus)
+                    }
+
+                    if (item.hasOwnProperty("isBlocked")) {
+                        item.isBlocked = Qt.binding(() => control.isBlocked)
+                    }
+
+                    if (item.hasOwnProperty("isUnregistered")) {
+                        item.isUnregistered = Qt.binding(() => control.isUnregistered)
+                    }
+                }
+            }
         }
 
         Accessible.ignored: true
+    }
+
+    TapHandler {
+        enabled: !!control.menuComponent
+        onTapped: eventPoint => {
+                      const menu = control.menuComponent.createObject(control)
+                      if (menu) {
+                          menu.popup(eventPoint.position.x, eventPoint.position.y)
+                      }
+                  }
     }
 }

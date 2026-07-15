@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <releases>
+  <release version="2.5.0-beta.1" date="2026-07-15"/>
   <release version="2.4.0" date="2026-07-07"/>
   <release version="2.3.2" date="2026-07-01"/>
   <release version="2.3.1" date="2026-06-29"/>

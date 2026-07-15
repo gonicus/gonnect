@@ -6,6 +6,8 @@
 #include <QAudioFormat>
 #include <pjsua2.hpp>
 
+class AudioProcessor;
+
 class AudioPort : public QObject, public pj::AudioMediaPort
 {
     Q_OBJECT
@@ -18,11 +20,17 @@ public:
     bool initialize();
     void setMuted(bool value);
 
+    // Optional shared microphone audio processor (AGC/AEC/ANC)
+    void setAudioProcessor(AudioProcessor *audioProcessor);
+
     void onFrameRequested(pj::MediaFrame &frame) override;
     void onFrameReceived(pj::MediaFrame &frame) override;
 
     QString getDeviceID() const;
     QString getSystemDeviceID() const;
+
+    void acquire();
+    void release();
 
     void setAudioDevice(QAudioDevice device);
     QAudioDevice audioDevice() { return m_device; }
@@ -32,6 +40,8 @@ public:
 
     qreal sourceLevel() const { return m_sourceAudioLevel; }
 
+    void writeSilenceMS(unsigned milliseconds);
+
 Q_SIGNALS:
     void startIdleTimer();
     void audioSourceChanged();
@@ -39,8 +49,6 @@ Q_SIGNALS:
     void sourceLevelChanged(qreal level);
 
 private:
-    void writeSilenceMS(unsigned milliseconds);
-
     void startIO();
     void stopIO();
 
@@ -51,10 +59,17 @@ private:
 
     bool initFmt();
 
+    float activeTxLevel() const;
+
     void updateAudioLevel(const char *data, qint64 size);
     void setSourceAudioLevel(qreal level);
 
+    AudioProcessor *m_audioProcessor = nullptr;
+
     bool m_isMuted = false;
+    bool m_isDraining = false;
+    bool m_isWarmingUp = false;
+
     QAudioDevice m_device;
 
     QPointer<QIODevice> m_io;
@@ -67,4 +82,6 @@ private:
     pj::MediaFormatAudio m_pj_fmt;
 
     QAudioFormat m_audioFormat;
+
+    QMetaObject::Connection m_warmUpDrain;
 };

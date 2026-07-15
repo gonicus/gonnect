@@ -200,6 +200,10 @@ void SIPManager::setPreferredCodecs()
         const int priority = codecPriorities.at(qMin(i, codecPriorities.count() - 1));
         const QString prefix = preferredCodec + "/";
 
+        if (preferredCodec.isEmpty()) {
+            continue;
+        }
+
         bool matched = false;
         for (const QString &registered : std::as_const(registeredCodecs)) {
             if (registered.compare(preferredCodec, Qt::CaseInsensitive) == 0
@@ -390,6 +394,19 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
 
     qCDebug(lcSIPManager) << "could not find the corresponding buddy";
     return nullptr;
+}
+
+QString SIPManager::toSipUri(const QString &var) const
+{
+    const auto accounts = SIPAccountManager::instance().accounts();
+    if (!accounts.count()) {
+        qCDebug(lcSIPManager) << "could not retrieve accounts";
+        return "";
+    }
+
+    // There is only one account as of now
+    const SIPAccount *account = accounts.first();
+    return account->toSipUri(var);
 }
 
 void SIPManager::suspend()

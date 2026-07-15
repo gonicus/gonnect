@@ -21,6 +21,8 @@ Menu {
     property bool isBlocked
     property bool isSipSubscriptable
 
+    onClosed: () => control.destroy()
+
     Action {
         id: callAction
         text: qsTr('Call')
@@ -35,12 +37,12 @@ Menu {
     Action {
         id: copyAction
         text: qsTr('Copy number')
-        onTriggered: () => ViewHelper.copyToClipboard(control.phoneNumber)
+        onTriggered: () => ClipboardHelper.copyToClipboard(control.phoneNumber)
 
         Accessible.role: Accessible.Button
         Accessible.name: copyAction.text
         Accessible.focusable: true
-        Accessible.onPressAction: () => ViewHelper.copyToClipboard(control.phoneNumber)
+        Accessible.onPressAction: () => ClipboardHelper.copyToClipboard(control.phoneNumber)
     }
 
     Action {

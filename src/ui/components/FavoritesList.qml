@@ -10,15 +10,19 @@ ListView {
     clip: true
     model: FavoritesProxyModel {
         showJitsi: ViewHelper.isJitsiAvailable
+        showChatRooms: ChatConnectorManager.isChatAvailable
 
         FavoritesModel {}
+    }
+
+    delegate: FavoriteListItemBig {
+        isCompactMode: control.width < 300
     }
 
     Accessible.role: Accessible.List
     Accessible.name: qsTr("Favorites")
     Accessible.description: qsTr("List of all contacts that have been marked as favorites")
 
-    delegate: FavoriteListItemSmall {}
     header: Rectangle {
         id: headerItem
         radius: 4
