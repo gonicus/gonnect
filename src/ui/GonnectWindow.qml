@@ -324,7 +324,7 @@ BaseWindow {
                 top: controlBar.visible ? controlBar.bottom : parent.top
                 topMargin: controlBar.visible ? 5 : 0
                 bottom: bottomBar.visible ? bottomBar.top : parent.bottom
-                bottomMargin: 2 * Theme.d
+                bottomMargin: Theme.d
             }
 
             function getPage(pageId : string) : Item {
@@ -393,7 +393,7 @@ BaseWindow {
                 right: parent.right
                 left: mainTabBar.right
                 bottom: parent.bottom
-                bottomMargin: Theme.d + (Theme.useOwnDecoration ? 6 : 3)  // extra padding for window shadow
+                bottomMargin: Theme.d / 2 - (Theme.useOwnDecoration ? 0 : 3)  // extra padding for window border
             }
 
             TogglerList {

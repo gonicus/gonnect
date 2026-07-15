@@ -507,7 +507,7 @@ Item {
             left: sideBar.right
             leftMargin: Theme.d * 2
             rightMargin: Theme.d * 2
-            bottomMargin: 6
+            bottomMargin: Theme.d / 2 + 2
         }
 
         Chat {
