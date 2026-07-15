@@ -265,8 +265,8 @@ private:
 
     bool hasOwnUserMention(const ChatMessage &message) const;
     ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
-                                                bool isUnread, bool isIndependent,
-                                                ChatMessage *chatMessage);
+                                                   bool isUnread, bool isIndependent,
+                                                   ChatMessage *chatMessage);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
