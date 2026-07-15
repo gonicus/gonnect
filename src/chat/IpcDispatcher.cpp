@@ -342,6 +342,12 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
         return;
     }
 
+    auto ipcRoom = ipcChatRoomById(roomId);
+    if (!ipcRoom) {
+        qCCritical(lcIpcDispatcher) << "Unable to find ipc room for room id" << roomId;
+        return;
+    }
+
     // Collect user ids of room users
     const auto &users = chatRoom->chatUsers();
     QSet<QString> userIds;
@@ -386,24 +392,23 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     ChatMessage *pendingMsg = nullptr;
 
-    if (auto room = ipcChatRoomById(roomId)) {
-        QString nickName;
-        if (auto *ownUser = m_users.value(ownUserId(), nullptr)) {
-            nickName = ownUser->displayName();
-        } else if (!m_configInfo.displayName.isEmpty()) {
-            nickName = m_configInfo.displayName;
-        } else {
-            nickName = ownUserId();
-        }
-        auto *pendingContent = new ChatMessageContentText(text);
-        pendingMsg = new ChatMessage(tempEventId, ownUserId(), nickName, pendingContent,
-                                     QDateTime::currentDateTimeUtc(), room,
-                                     Flag::OwnMessage | Flag::Markdown | Flag::Pending);
-        if (!relatedMessageId.isEmpty()) {
-            pendingMsg->setRelatedMessageId(relatedMessageId);
-        }
-        room->addExistingMessage(pendingMsg, false, false);
+    QString nickName;
+    if (auto *ownUser = m_users.value(ownUserId(), nullptr)) {
+        nickName = ownUser->displayName();
+    } else if (!m_configInfo.displayName.isEmpty()) {
+        nickName = m_configInfo.displayName;
+    } else {
+        nickName = ownUserId();
     }
+    auto *pendingContent = new ChatMessageContentText(text);
+    pendingMsg = new ChatMessage(tempEventId, ownUserId(), nickName, pendingContent,
+                                 QDateTime::currentDateTimeUtc(), ipcRoom,
+                                 Flag::OwnMessage | Flag::Markdown | Flag::Pending);
+    if (!relatedMessageId.isEmpty()) {
+        pendingMsg->setRelatedMessageId(relatedMessageId);
+    }
+    ipcRoom->addExistingMessage(pendingMsg, false, false);
+
     m_pendingMessages.insert(tag, { roomId, tempEventId });
 
     if (!sendRequest(req)) {
@@ -413,7 +418,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
             auto flags = pendingMsg->flags();
             flags.setFlag(Flag::Pending, false);
             flags.setFlag(Flag::Failed, true);
-            pendingMsg->setFlags(flags);
+            ipcRoom->setMessageFlags(tempEventId, flags);
         }
     }
 }
@@ -1730,13 +1735,14 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
                                                  bool isUnread, bool isIndependent,
                                                  ChatMessage *chatMessage)
 {
-    const bool isNew = !chatMessage;
     auto room = ipcChatRoomById(message.roomId());
 
     if (!room) {
         qCCritical(lcIpcDispatcher) << "Received message for unknown room" << message.roomId();
         return nullptr;
     }
+
+    const bool isNew = !chatMessage;
 
     if (!chatMessage) {
         chatMessage = room->chatMessageById(message.messageId());
@@ -1768,8 +1774,13 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
     if (chatMessage) {
         room->updateMessageEventId(chatMessage->eventId(), message.messageId());
         chatMessage->setTimestamp(dateTime);
-        chatMessage->setFlags(flags);
+        room->setMessageFlags(chatMessage->eventId(), flags);
         chatMessage->setContent(content);
+
+        if (!isNew) {
+            auto idx = room->indexOfMessage(chatMessage);
+            room->chatMessageContentChanged(idx, chatMessage);
+        }
 
     } else {
         const auto user = m_users.value(message.senderId(), nullptr);
