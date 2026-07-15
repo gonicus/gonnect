@@ -15,6 +15,10 @@ Item {
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
+    function giveFocus() {
+        chatMessageBox.giveFocus()
+    }
+
     onChatRoomChanged: () => {
         const room = control.chatRoom
         if (room && !room.isInitiallyLoaded) {
