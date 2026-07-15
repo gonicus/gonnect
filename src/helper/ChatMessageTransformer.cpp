@@ -9,7 +9,8 @@ QString addLinkTags(const QString &orig)
 {
     static const QRegularExpression re(
             R"((<a\b[^>]*>.*?</a>)|(<a\b[^>]*href\s*=\s*"[^"]*")|\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
-            QRegularExpression::CaseInsensitiveOption);
+            QRegularExpression::CaseInsensitiveOption
+                    | QRegularExpression::DotMatchesEverythingOption);
 
     QString result;
     int lastPos = 0;
