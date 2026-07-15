@@ -153,14 +153,23 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
                 });
     }
 
+    const auto eventId = message->eventId();
+
     if (isIndependent) {
-        m_messageLookup.insert(message->eventId(), message);
+        m_messageLookup.insert(eventId, message);
         Q_EMIT chatMessageOutOfSequenceReceived(message);
     } else {
+
+        if (m_messageLookup.contains(eventId)) {
+            // Remove existing entries and add again for correct order
+            m_messageLookup.remove(eventId);
+            m_messages.removeOne(message);
+        }
+
         for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
             if (m_messages.at(i)->timestamp() < message->timestamp()) {
                 m_messages.insert(i + 1, message);
-                m_messageLookup.insert(message->eventId(), message);
+                m_messageLookup.insert(eventId, message);
                 Q_EMIT chatMessageAdded(i + 1, message);
                 return;
             }

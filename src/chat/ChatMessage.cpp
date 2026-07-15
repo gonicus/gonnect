@@ -44,6 +44,14 @@ void ChatMessage::setEventId(const QString &eventId)
     }
 }
 
+void ChatMessage::setTimestamp(const QDateTime &timestamp)
+{
+    if (m_timestamp != timestamp) {
+        m_timestamp = timestamp;
+        Q_EMIT timestampChanged();
+    }
+}
+
 void ChatMessage::setContent(QObject *content)
 {
     if (m_content != content) {

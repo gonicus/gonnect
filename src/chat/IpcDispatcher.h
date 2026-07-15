@@ -264,7 +264,7 @@ private:
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
-    ChatMessage *addOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
+    ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
                                                 bool isUnread, bool isIndependent,
                                                 ChatMessage *chatMessage);
 

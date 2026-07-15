@@ -1164,7 +1164,7 @@ void IpcDispatcher::processResponse(
 
         const bool isIndependent = m_singleMessageTags.remove(tag);
         const bool isUnread = !tag;
-        const auto chatMessageObj = addOrUpdateReceivedChatMessage(
+        const auto chatMessageObj = createOrUpdateReceivedChatMessage(
                 rc.messageReceivedEvent(), isUnread, isIndependent, chatMessage);
         if (isUnread && !isIndependent) {
             makeNotificationNewMessage(chatMessageObj);
@@ -1726,9 +1726,9 @@ bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
 }
 
 ChatMessage *
-IpcDispatcher::addOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
-                                              bool isUnread, bool isIndependent,
-                                              ChatMessage *chatMessage)
+IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
+                                                 bool isUnread, bool isIndependent,
+                                                 ChatMessage *chatMessage)
 {
     auto room = ipcChatRoomById(message.roomId());
 
@@ -1766,6 +1766,7 @@ IpcDispatcher::addOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Messag
 
     if (chatMessage) {
         room->updateMessageEventId(chatMessage->eventId(), message.messageId());
+        chatMessage->setTimestamp(dateTime);
         chatMessage->setFlags(flags);
         chatMessage->setContent(content);
 
