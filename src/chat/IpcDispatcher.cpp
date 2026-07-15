@@ -1730,6 +1730,7 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
                                                  bool isUnread, bool isIndependent,
                                                  ChatMessage *chatMessage)
 {
+    const bool isNew = !chatMessage;
     auto room = ipcChatRoomById(message.roomId());
 
     if (!room) {
@@ -1797,7 +1798,9 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         }
     }
 
-    room->addExistingMessage(chatMessage, isUnread, isIndependent);
+    if (isNew) {
+        room->addExistingMessage(chatMessage, isUnread, isIndependent);
+    }
 
     // Reactions
     bool hasReactionAdded = false;
