@@ -20,11 +20,3 @@ void IChatProvider::setUnreadNotificationsCount(qsizetype count)
         Q_EMIT unreadNotificationsCountChanged();
     }
 }
-
-void IChatProvider::setIsSendingMessage(bool value)
-{
-    if (m_isSendingMessage != value) {
-        m_isSendingMessage = value;
-        Q_EMIT isSendingMessageChanged();
-    }
-}

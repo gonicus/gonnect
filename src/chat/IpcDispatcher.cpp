@@ -364,9 +364,6 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     // Assemble request
     auto req = createRequest();
 
-    m_sendingMessageTags.insert(req->tag());
-    setIsSendingMessage(true);
-
     MessageSendRequest msgReq;
     msgReq.setRoomId(roomId);
 
@@ -744,11 +741,6 @@ void IpcDispatcher::processResponse(
     const auto tag = rc.tag();
 
     if (tag > 0) {
-
-        if (m_sendingMessageTags.remove(tag)) {
-            setIsSendingMessage(!m_sendingMessageTags.isEmpty());
-        }
-
         if (auto timer = m_timeoutTimers.value(tag, nullptr)) {
             if (rc.hasMessageReceivedEvent() && !m_singleMessageTags.contains(tag)) {
                 m_multipartCount.insert(tag, m_multipartCount.value(tag, 0) + 1);

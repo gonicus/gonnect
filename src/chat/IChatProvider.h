@@ -34,7 +34,6 @@ class IChatProvider : public QObject
     Q_PROPERTY(bool isInVerificationProcess READ isInVerificationProcess NOTIFY
                        isInVerificationProcessChanged FINAL)
     Q_PROPERTY(bool hasFavoriteRooms READ hasFavoriteRooms NOTIFY hasFavoriteRoomsChanged FINAL)
-    Q_PROPERTY(bool isSendingMessage READ isSendingMessage NOTIFY isSendingMessageChanged FINAL)
 
 public:
     static inline constexpr quint32 defaultMessageLimit = 42;
@@ -60,7 +59,6 @@ public:
     QString id() const { return m_settingsGroup; }
     bool isConnected() const { return m_isConnected; }
     qsizetype unreadNotificationsCount() const { return m_unreadNotificationsCount; }
-    bool isSendingMessage() const { return m_isSendingMessage; }
 
     virtual QString ownUserId() const = 0;
     virtual QString displayName() = 0;
@@ -268,9 +266,7 @@ Q_SIGNALS:
 protected:
     void setIsConnected(bool value);
     void setUnreadNotificationsCount(qsizetype count);
-    void setIsSendingMessage(bool value);
 
-    bool m_isSendingMessage = false;
     bool m_isConnected = false;
     QString m_settingsGroup;
     qsizetype m_unreadNotificationsCount = 0;
@@ -280,7 +276,6 @@ Q_SIGNALS:
     void isConnectedChanged();
     void hasFavoriteRoomsChanged();
     void unreadNotificationsCountChanged();
-    void isSendingMessageChanged();
 
     /// Send when a chat room has been added at the given index in the list returned by chatRooms()
     /// or given by indexOf(). The tag can be set when responding to a specific request; otherwise

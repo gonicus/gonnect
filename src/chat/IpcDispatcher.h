@@ -374,10 +374,6 @@ private:
         QString tempEventId;
     };
 
-    /// Tags of message requests that are currently being send, i.e. MessageSendRequest has been
-    /// made, but neither MessageSendResponse nor an Error has returned yet.
-    QSet<quint64> m_sendingMessageTags;
-
     /// Tags of pending (optimistic) messages that have been locally added but not yet confirmed.
     QHash<quint64, PendingMessageInfo> m_pendingMessages;
 
