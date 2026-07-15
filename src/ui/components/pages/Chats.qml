@@ -149,7 +149,7 @@ Item {
             fill: parent
             leftMargin: Theme.d * 2
             rightMargin: Theme.d * 2
-            bottomMargin: Theme.d * 2
+            bottomMargin: 6
         }
 
         BusyIndicator {
@@ -179,7 +179,7 @@ Item {
             fill: parent
             leftMargin: Theme.d * 2
             rightMargin: Theme.d * 2
-            bottomMargin: Theme.d * 2
+            bottomMargin: 6
         }
 
         DeviceVerification {
@@ -197,7 +197,7 @@ Item {
             bottom: parent.bottom
             leftMargin: Theme.d * 2
             rightMargin: Theme.d * 2
-            bottomMargin: Theme.d * 2
+            bottomMargin: 6
         }
 
         Item {
@@ -507,7 +507,7 @@ Item {
             left: sideBar.right
             leftMargin: Theme.d * 2
             rightMargin: Theme.d * 2
-            bottomMargin: Theme.d * 2
+            bottomMargin: 6
         }
 
         Chat {

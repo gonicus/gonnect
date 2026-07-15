@@ -323,7 +323,7 @@ Item {
         anchors {
             top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
             left: nameLabel.left
-            right: timestampLabel.left
+            right: retryButton.visible ? retryButton.left : timestampLabel.left
             rightMargin: 10
         }
     }
@@ -350,12 +350,33 @@ Item {
         }
     }
 
-    TapHandler {
-        onTapped: () => {
-            if (control.isFailed) {
-                control.retryMessage(control.eventId)
-            }
+    Button {
+        id: retryButton
+        text: qsTr("Retry")
+        icon.source: Icons.viewRefresh
+        visible: control.isFailed
+        flat: true
+        height: timestampLabel.implicitHeight
+
+        topInset: 0
+        bottomInset: 0
+        padding: 0
+        topPadding: 0
+        bottomPadding: 0
+        leftPadding: 0
+        rightPadding: 0
+
+        anchors {
+            right: timestampLabel.left
+            rightMargin: 10
+            bottom: messageContentItem.bottom
         }
+
+        onClicked: () => {
+                       if (retryButton.visible && retryButton.enabled) {
+                           control.retryMessage(control.eventId)
+                       }
+                   }
     }
 
     Component {

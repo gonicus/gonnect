@@ -91,14 +91,16 @@ void IpcChatRoom::ensureMessageLoaded(const QString &id)
 
 ChatMessage *IpcChatRoom::latestOwnTextMessage() const
 {
+    using Flag = ChatMessage::Flag;
+
     QListIterator it(m_messages);
     it.toBack();
 
     while (it.hasPrevious()) {
         auto *msg = it.previous();
-        if ((msg->flags() & ChatMessage::Flag::OwnMessage)
+        if ((msg->flags() & Flag::OwnMessage)
             && qobject_cast<ChatMessageContentText *>(msg->content())
-            && !(msg->flags() & ChatMessage::Flag::Pending)) {
+            && !(msg->flags() & (Flag::Pending | Flag::Failed))) {
             return msg;
         }
     }

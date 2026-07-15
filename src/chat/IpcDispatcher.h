@@ -250,7 +250,9 @@ private:
     /// destroys it after usage. If requestContainer has a tag, an answer to the request must be
     /// received within timeoutSeconds, or a timeout occurs. If the container has no tag or
     /// timeoutSeconds is 0, no timeout check is being made.
-    void sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
+    /// The return value indicates whether the request has successfully been send. It does not
+    /// represent a response to the request.
+    bool sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
                      quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS);
 
     /// Create a new empty container message. Caller takes ownership of the returned object.
@@ -262,8 +264,9 @@ private:
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
-    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
-                                        bool isIndependent);
+    ChatMessage *addOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
+                                                bool isUnread, bool isIndependent,
+                                                ChatMessage *chatMessage);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
