@@ -125,18 +125,31 @@ void ReadOnlyConfdSettings::readConfd()
 QString ReadOnlyConfdSettings::replacePlaceholders(const QString &settingsStringValue) const
 {
     static const QRegularExpression envPlaceholder("%ENV\\[([a-zA-Z0-9][A-Za-z0-9_]*)\\]%");
-    static const QRegularExpression cfgPlaceholder("%CFG\\[([A_Za-z_/]+)\\]%");
+    static const QRegularExpression cfgPlaceholder("%CFG\\[([A-Za-z_/]+)\\]%");
 
     QString str = settingsStringValue;
 
-    auto envMatch = envPlaceholder.match(str);
-    if (envMatch.hasMatch()) {
-        str.replace(envPlaceholder,
-                    qEnvironmentVariable(envMatch.captured(1).toStdString().c_str()));
+    // Iterate backwards because replacements would change match positions
+    auto envIt = envPlaceholder.globalMatch(str);
+    QList<QRegularExpressionMatch> envList;
+    while (envIt.hasNext()) {
+        envList.append(envIt.next());
     }
-    auto cfgMatch = cfgPlaceholder.match(str);
-    if (cfgMatch.hasMatch()) {
-        str.replace(cfgPlaceholder, value(cfgMatch.captured(1)).toString());
+    for (qsizetype i = envList.size() - 1; i >= 0; --i) {
+        const auto envMatch = envList.at(i);
+        const auto value = qEnvironmentVariable(envMatch.captured(1).toStdString().c_str());
+        str.replace(envMatch.capturedStart(0), envMatch.capturedLength(0), value);
+    }
+
+    auto cfgIt = cfgPlaceholder.globalMatch(str);
+    QList<QRegularExpressionMatch> cfgList;
+    while (cfgIt.hasNext()) {
+        cfgList.append(cfgIt.next());
+    }
+    for (qsizetype i = cfgList.size() - 1; i >= 0; --i) {
+        const auto cfgMatch = cfgList.at(i);
+        str.replace(cfgMatch.capturedStart(0), cfgMatch.capturedLength(0),
+                    value(cfgMatch.captured(1)).toString());
     }
 
     return str;
