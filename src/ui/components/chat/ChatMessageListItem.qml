@@ -344,8 +344,10 @@ Item {
                 control.clickedLink = ""
             }
 
-            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
-            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
+            if (!control.isFailed) {
+                const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
+                chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
+            }
         }
     }
 
