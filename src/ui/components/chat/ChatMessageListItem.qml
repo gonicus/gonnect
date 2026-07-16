@@ -254,7 +254,6 @@ Item {
 
     IconLabel {
         visible: control.isFailed
-        z: 1
         anchors {
             right: timestampLabel.left
             rightMargin: 4
