@@ -195,8 +195,9 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
             qCDebug(lcAudioPort).nospace()
                     << "silence write: " << written << " of " << byteCount << " bytes ("
                     << milliseconds << "ms @ " << fmt.clockRate << "Hz/" << fmt.channelCount
-                    << "ch/" << fmt.bitsPerSample << "bit), sink bufferSize="
-                    << m_sink->bufferSize() << ", bytesFree=" << m_sink->bytesFree();
+                    << "ch/" << fmt.bitsPerSample
+                    << "bit), sink bufferSize=" << m_sink->bufferSize()
+                    << ", bytesFree=" << m_sink->bytesFree();
         }
     }
 }
@@ -323,6 +324,15 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
     }
 
     auto bytes = m_io->read(frame.size);
+
+    if (++m_captureFrames % 50 == 0 && !m_source.isNull()) {
+        const auto queued = m_source->bytesAvailable();
+        qCDebug(lcAudioPort).nospace()
+                << "capture: read " << bytes.size() << " of " << frame.size
+                << " bytes, source bufferSize=" << m_source->bufferSize() << ", queued=" << queued
+                << " bytes (" << (m_audioFormat.durationForBytes(queued) / 1000)
+                << "ms), processor=" << (m_audioProcessor ? "on" : "off");
+    }
 
     if (!m_isMuted) {
         frame.buf = std::vector<unsigned char>(bytes.constBegin(), bytes.constEnd());
