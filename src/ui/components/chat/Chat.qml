@@ -15,6 +15,10 @@ Item {
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
+    function giveFocus() {
+        chatMessageBox.giveFocus()
+    }
+
     onChatRoomChanged: () => {
         const room = control.chatRoom
         if (room && !room.isInitiallyLoaded) {
@@ -62,7 +66,7 @@ Item {
         anchors {
             horizontalCenter: !control.showTitleBar ? messageListCardHeading.horizontalCenter : undefined
             right: control.showTitleBar ? favCardHeadingButton.left : undefined
-            rightMargin: 12
+            rightMargin: Theme.d
             top: messageListCardHeading.top
             bottom: messageListCardHeading.bottom
         }
@@ -164,6 +168,11 @@ Item {
                          relatedMsg.chatMessage = control.chatRoom?.chatMessageById(messageId) ?? null
                          chatMessageBox.giveFocus()
                      }
+        onRetryMessage: messageId => {
+                            if (control.chatProvider) {
+                                control.chatProvider.retrySendMessage(control.chatRoom.id, messageId)
+                            }
+                        }
     }
 
     Item {

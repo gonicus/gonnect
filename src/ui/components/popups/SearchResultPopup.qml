@@ -9,8 +9,8 @@ import base
 Popup {
     id: control
     transformOrigin: Item.Top
-    topMargin: 12
-    bottomMargin: 12
+    topMargin: Theme.d
+    bottomMargin: Theme.d
     verticalPadding: 8
     topPadding: 0
     bottomPadding: 0
@@ -115,7 +115,7 @@ Popup {
                 top: parent.top
                 left: parent.left
                 bottom: parent.bottom
-                margins: 12
+                margins: Theme.d
             }
 
             Accessible.role: Accessible.Column
@@ -165,7 +165,7 @@ Popup {
                 top: parent.top
                 bottom: parent.bottom
                 left: filterBar.right
-                leftMargin: 12
+                leftMargin: Theme.d
             }
 
             Accessible.ignored: true
@@ -178,7 +178,7 @@ Popup {
                 right: parent.right
                 bottom: parent.bottom
                 left: verticalSeparatorLine.right
-                margins: 12
+                margins: Theme.d
             }
 
             Accessible.role: Accessible.Column
@@ -225,19 +225,19 @@ Popup {
                     bottom: parent.bottom
                     left: parent.left
                     right: parent.right
-                    topMargin: 12
-                    bottomMargin: 12
+                    topMargin: Theme.d
+                    bottomMargin: Theme.d
                 }
 
                 ScrollBar.vertical: ScrollBar { width: 5 }
 
                 Column {
                     id: flickableContainer
-                    spacing: 24
+                    spacing: Theme.d * 2
                     anchors {
                         left: parent.left
                         right: parent.right
-                        margins: 12
+                        margins: Theme.d
                     }
 
                     SearchResultCategory {

@@ -307,6 +307,7 @@ BaseWindow {
             showSearch: !SM.uiEditMode
             anchors {
                 top: parent.top
+                topMargin: 5
                 left: mainTabBar.right
                 right: parent.right
             }
@@ -321,7 +322,9 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
+                topMargin: controlBar.visible ? 5 : 0
                 bottom: bottomBar.visible ? bottomBar.top : parent.bottom
+                bottomMargin: Theme.d
             }
 
             function getPage(pageId : string) : Item {
@@ -385,11 +388,12 @@ BaseWindow {
         Item {
             id: bottomBar
             visible: true
-            height: 35
+            height: 30
             anchors {
                 right: parent.right
                 left: mainTabBar.right
                 bottom: parent.bottom
+                bottomMargin: Theme.d / 2 - (Theme.useOwnDecoration ? 0 : 3)  // extra padding for window border
             }
 
             TogglerList {
@@ -399,7 +403,7 @@ BaseWindow {
                 anchors {
                     left: parent.left
                     right: rightRow.left
-                    rightMargin: 24
+                    rightMargin: Theme.d * 2
                     verticalCenter: rightRow.verticalCenter
                 }
             }
@@ -410,7 +414,7 @@ BaseWindow {
                 anchors {
                     right: parent.right
                     bottom: parent.bottom
-                    rightMargin: 6
+                    rightMargin: 2 * Theme.d
                 }
 
                 FirstAidButton {

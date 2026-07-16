@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Controls.impl
 import base
 
@@ -16,6 +17,11 @@ Item {
 
     property alias icon: buttonIcon.icon.source
 
+    property string toolTipText
+
+    ToolTip.text: control.toolTipText
+    ToolTip.visible: control.enabled && hoverHandler.hovered && !!control.toolTipText.trim()
+
     IconLabel {
         id: buttonIcon
         anchors.centerIn: parent
@@ -25,7 +31,7 @@ Item {
             color: control.enabled
                    ? (hoverHandler.hovered
                       ? Theme.primaryTextColor
-                      : Theme.secondaryTextColor)
+                      : (Theme.isDarkMode ? Theme.secondaryTextColor : Theme.foregroundHeaderIcons))
                    : Theme.secondaryInactiveTextColor
         }
     }

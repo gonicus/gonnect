@@ -40,6 +40,15 @@ void ChatMessage::setEventId(const QString &eventId)
 {
     if (m_eventId != eventId) {
         m_eventId = eventId;
+        Q_EMIT eventIdChanged();
+    }
+}
+
+void ChatMessage::setTimestamp(const QDateTime &timestamp)
+{
+    if (m_timestamp != timestamp) {
+        m_timestamp = timestamp;
+        Q_EMIT timestampChanged();
     }
 }
 

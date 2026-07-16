@@ -5,7 +5,7 @@ import base
 
 Rectangle {
     id: control
-    width: 2
+    width: 1
     color: Theme.borderColor
     anchors {
         top: parent?.top

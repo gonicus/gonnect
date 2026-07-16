@@ -31,6 +31,8 @@ Item {
     required property QtObject content
 
     required property bool isOwnMessage
+    required property bool isPending
+    required property bool isFailed
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
@@ -50,6 +52,7 @@ Item {
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
     signal respondTo(string messageId)
+    signal retryMessage(string eventId)
 
     states: [
         State {
@@ -162,7 +165,7 @@ Item {
 
         Label {
             id: dayLabel
-            text: control.timestamp.toLocaleDateString(Qt.locale(), "dddd, d. MMMM")
+            text: control.timestamp.toLocaleDateString(Qt.locale(), "dddd, d. MMMM yyyy")
             color: Theme.secondaryTextColor
             font {
                 weight: Font.DemiBold
@@ -249,6 +252,19 @@ Item {
         Accessible.ignored: true
     }
 
+    IconLabel {
+        visible: control.isFailed
+        anchors {
+            right: timestampLabel.left
+            rightMargin: 4
+            verticalCenter: timestampLabel.verticalCenter
+        }
+        icon.source: Icons.dataError
+        icon.color: Theme.redColor
+        icon.width: 14
+        icon.height: 14
+    }
+
     ChatMessageListItemRelatedContent {
         id: relatedMessageItem
         visible: control.hasRelatedMessage
@@ -286,6 +302,9 @@ Item {
         userState : control.userState
         affectedUserName: control.chatProvider?.userById(control.affectedUserId)?.computedName ?? ""
         content: control.content
+        textColor: control.isPending ? Theme.inactiveTextColor
+                  : control.isFailed ? Theme.redColor
+                  : Theme.primaryTextColor
 
         onOpenDirectChatRequested: userId => {
             if (!userId) {
@@ -303,7 +322,7 @@ Item {
         anchors {
             top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
             left: nameLabel.left
-            right: timestampLabel.left
+            right: retryButton.visible ? retryButton.left : timestampLabel.left
             rightMargin: 10
         }
     }
@@ -328,6 +347,35 @@ Item {
             const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
             chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
         }
+    }
+
+    Button {
+        id: retryButton
+        text: qsTr("Retry")
+        icon.source: Icons.viewRefresh
+        visible: control.isFailed
+        flat: true
+        height: timestampLabel.implicitHeight
+
+        topInset: 0
+        bottomInset: 0
+        padding: 0
+        topPadding: 0
+        bottomPadding: 0
+        leftPadding: 0
+        rightPadding: 0
+
+        anchors {
+            right: timestampLabel.left
+            rightMargin: 10
+            bottom: messageContentItem.bottom
+        }
+
+        onClicked: () => {
+                       if (retryButton.visible && retryButton.enabled) {
+                           control.retryMessage(control.eventId)
+                       }
+                   }
     }
 
     Component {
@@ -420,7 +468,7 @@ Item {
             left: nameLabel.left
             right: timestampLabel.left
             top: messageContentItem.bottom
-            topMargin: 12
+            topMargin: Theme.d
         }
 
         Repeater {

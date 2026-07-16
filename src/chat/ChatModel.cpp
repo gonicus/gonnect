@@ -33,6 +33,8 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::IsSystemMessage), "isSystemMessage" },
         { static_cast<int>(Roles::IsEncrypted), "isEncrypted" },
         { static_cast<int>(Roles::IsPinned), "isPinned" },
+        { static_cast<int>(Roles::IsPending), "isPending" },
+        { static_cast<int>(Roles::IsFailed), "isFailed" },
         { static_cast<int>(Roles::IsSameUserAsPrevious), "isSameUserAsPrevious" },
         { static_cast<int>(Roles::IsSameMinuteAsPrevious), "isSameMinuteAsPrevious" },
         { static_cast<int>(Roles::IsSameDayAsPrevious), "isSameDayAsPrevious" },
@@ -224,6 +226,12 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
     case static_cast<int>(Roles::IsPinned):
         return static_cast<bool>(item->flags() & ChatMessage::Flag::Pinned);
 
+    case static_cast<int>(Roles::IsPending):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::Pending);
+
+    case static_cast<int>(Roles::IsFailed):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::Failed);
+
     case static_cast<int>(Roles::HasRelatedMessage):
         return !item->relatedMessageId().isEmpty();
 
@@ -324,6 +332,12 @@ void ChatModel::onChatRoomChanged()
                     }
                     if (changedFlags & ChatMessage::Flag::Pinned) {
                         affectedRoles.append(static_cast<int>(Roles::IsPinned));
+                    }
+                    if (changedFlags & ChatMessage::Flag::Pending) {
+                        affectedRoles.append(static_cast<int>(Roles::IsPending));
+                    }
+                    if (changedFlags & ChatMessage::Flag::Failed) {
+                        affectedRoles.append(static_cast<int>(Roles::IsFailed));
                     }
 
                     const auto modelIndex = createIndex(idx, 0);

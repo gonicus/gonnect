@@ -171,6 +171,7 @@ public:
     virtual void requestUser(const QString &userId) override;
 
     virtual void requestRemoveMessage(const QString &roomId, const QString &messageId) override;
+    virtual void retrySendMessage(const QString &roomId, const QString &failedMessageId) override;
     virtual void requestEditMessage(const QString &roomId, const QString &messageId,
                                     const QString &newContent) override;
 
@@ -249,7 +250,9 @@ private:
     /// destroys it after usage. If requestContainer has a tag, an answer to the request must be
     /// received within timeoutSeconds, or a timeout occurs. If the container has no tag or
     /// timeoutSeconds is 0, no timeout check is being made.
-    void sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
+    /// The return value indicates whether the request has successfully been send. It does not
+    /// represent a response to the request.
+    bool sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
                      quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS);
 
     /// Create a new empty container message. Caller takes ownership of the returned object.
@@ -261,8 +264,9 @@ private:
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
-    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
-                                        bool isIndependent);
+    ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
+                                                   bool isUnread, bool isIndependent,
+                                                   ChatMessage *chatMessage);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
@@ -363,6 +367,15 @@ private:
 
     /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
     QSet<QString> m_failedMessageIds;
+
+    struct PendingMessageInfo
+    {
+        QString roomId;
+        QString tempEventId;
+    };
+
+    /// Tags of pending (optimistic) messages that have been locally added but not yet confirmed.
+    QHash<quint64, PendingMessageInfo> m_pendingMessages;
 
 Q_SIGNALS:
 
