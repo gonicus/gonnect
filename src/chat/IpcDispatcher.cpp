@@ -1742,11 +1742,11 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         return nullptr;
     }
 
-    const bool isNew = !chatMessage;
-
     if (!chatMessage) {
         chatMessage = room->chatMessageById(message.messageId());
     }
+
+    const bool isNew = !chatMessage;
 
     ChatMessage::Flags flags = m_configInfo.userId == message.senderId()
             ? ChatMessage::Flag::OwnMessage
@@ -1779,7 +1779,7 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
 
         if (!isNew) {
             auto idx = room->indexOfMessage(chatMessage);
-            room->chatMessageContentChanged(idx, chatMessage);
+            Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
         }
 
     } else {
