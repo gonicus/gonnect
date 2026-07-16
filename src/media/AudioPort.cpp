@@ -9,6 +9,7 @@ Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
 #define NORMAL_AUDIO_LEVEL 1.6f
 #define SILENCE_BUFFER_MS 1000
+#define SILENCE_PREFILL_MS 1000
 
 using namespace std::chrono_literals;
 
@@ -189,7 +190,13 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
             // Write silence to allow USB headsets to switch audio mode without
             // ugly crackling noise.
             QByteArray silence(byteCount, 0);
-            m_io->write(silence);
+            const qint64 written = m_io->write(silence);
+
+            qCDebug(lcAudioPort).nospace()
+                    << "silence write: " << written << " of " << byteCount << " bytes ("
+                    << milliseconds << "ms @ " << fmt.clockRate << "Hz/" << fmt.channelCount
+                    << "ch/" << fmt.bitsPerSample << "bit), sink bufferSize="
+                    << m_sink->bufferSize() << ", bytesFree=" << m_sink->bytesFree();
         }
     }
 }
@@ -218,7 +225,7 @@ void AudioPort::startSinkIO()
     m_sink = new QAudioSink(m_device, m_audioFormat);
     m_io = m_sink->start();
 
-    writeSilenceMS(SILENCE_BUFFER_MS);
+    writeSilenceMS(SILENCE_PREFILL_MS);
 
     Q_EMIT audioSinkChanged();
 }
