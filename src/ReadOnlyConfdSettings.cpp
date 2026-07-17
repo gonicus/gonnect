@@ -124,8 +124,8 @@ void ReadOnlyConfdSettings::readConfd()
 
 QString ReadOnlyConfdSettings::replacePlaceholders(const QString &settingsStringValue) const
 {
-    static const QRegularExpression envPlaceholder("%ENV\\[([a-zA-Z0-9][A-Za-z0-9_]*)\\]%");
-    static const QRegularExpression cfgPlaceholder("%CFG\\[([A-Za-z_/]+)\\]%");
+    static const QRegularExpression envPlaceholder(R"(%ENV\[([a-zA-Z][A-Za-z0-9_]*)\]%)");
+    static const QRegularExpression cfgPlaceholder(R"(%CFG\[([A-Za-z0-9_/.\-]+)\]%)");
 
     QString str = settingsStringValue;
 
