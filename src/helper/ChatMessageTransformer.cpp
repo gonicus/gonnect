@@ -8,7 +8,7 @@ namespace ChatMessageTransformer {
 QString addLinkTags(const QString &orig)
 {
     static const QRegularExpression re(
-            R"((<a\b[^>]*>.*?</a>)|(<a\b[^>]*href\s*=\s*"[^"]*")|\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
+            R"((<a\b[^>]*>.*?</a>)|(<a\b[^>]*href\s*=\s*"[^"]*")|(\[[^\]]*\]\([^)]*\))|\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
             QRegularExpression::CaseInsensitiveOption
                     | QRegularExpression::DotMatchesEverythingOption);
 
@@ -22,7 +22,7 @@ QString addLinkTags(const QString &orig)
         result.append(orig.sliced(lastPos, match.capturedStart() - lastPos));
 
         QString fullMatch = match.captured(0);
-        QString url = match.captured(3);
+        QString url = match.captured(4);
 
         if (!url.isEmpty()) {
             QString href = url;
