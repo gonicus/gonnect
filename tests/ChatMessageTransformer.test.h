@@ -21,4 +21,6 @@ private slots:
     void testAddLinkTagsMarkdownLink();
     void testAddLinkTagsMixedContent();
     void testAddLinkTagsEmptyString();
+
+    void testFixNewLines();
 };

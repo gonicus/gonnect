@@ -44,6 +44,19 @@ QString addLinkTags(const QString &orig)
     return result;
 }
 
+QString fixNewLines(const QString &orig)
+{
+    QString str(orig);
+
+    static const QRegularExpression multiNewlineRegex(QStringLiteral(R"(\n(?=\n))"));
+    str.replace(multiNewlineRegex, QStringLiteral("\n\u2060"));
+
+    static const QRegularExpression singleNewlineRegex(QStringLiteral(R"((?<!\n)\n(?!\n))"));
+    str.replace(singleNewlineRegex, QStringLiteral("\\\n"));
+
+    return str;
+}
+
 #ifndef APP_TESTS
 QString highlightMentions(const QString &orig, const ChatMessage &message)
 {
