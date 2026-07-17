@@ -344,10 +344,8 @@ Item {
                 control.clickedLink = ""
             }
 
-            if (!control.isFailed) {
-                const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
-                chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
-            }
+            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
+            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
         }
     }
 
@@ -389,7 +387,7 @@ Item {
 
             HideableMenuItem {
                 text: qsTr("Add reaction...")
-                visible: !!(control.capabilities & IChatProvider.Capability.Reactions)
+                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.Reactions)
                 icon.source: Icons.smileyAdd
                 onTriggered: () => {
                     const menuItem = chatMessageContextMenu.itemAt(0)
@@ -427,7 +425,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Remove message...")
                 icon.source: Icons.editDelete
-                visible: !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
+                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
                 onTriggered: () => {
                     const item = DialogFactory.createConfirmDialog({
                         title: qsTr("Remove message"),
@@ -447,14 +445,14 @@ Item {
             HideableMenuItem {
                 text: qsTr("Edit message...")
                 icon.source: Icons.editor
-                visible: control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
+                visible: !control.isFailed && !control.isPending && control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
                 onTriggered: () => {
                     ViewHelper.showEditMessageDialog(control.chatProvider, control.roomId, control.eventId, control.content?.simpleText ?? "")
                 }
             }
 
             HideableMenuItem {
-                visible: !!(control.capabilities & IChatProvider.Capability.MessageRelations)
+                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.MessageRelations)
                 text: qsTr("Reply...")
                 icon.source: Icons.mailReplyCustom
                 onTriggered: () => control.respondTo(control.eventId)
