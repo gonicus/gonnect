@@ -1,5 +1,8 @@
 #include "ChatMessageTransformer.h"
-#include "ChatUser.h"
+
+#ifndef APP_TESTS
+#  include "ChatUser.h"
+#endif
 
 #include <QRegularExpression>
 
@@ -41,6 +44,7 @@ QString addLinkTags(const QString &orig)
     return result;
 }
 
+#ifndef APP_TESTS
 QString highlightMentions(const QString &orig, const ChatMessage &message)
 {
     const auto mentions = message.mentionedUsers();
@@ -77,5 +81,6 @@ QString highlightMentions(const QString &orig, const ChatMessage &message)
 
     return str;
 }
+#endif
 
 } // namespace ChatMessageTransformer
