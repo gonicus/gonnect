@@ -3,6 +3,10 @@
 
 ChatRoomProxyModel::ChatRoomProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
+    m_sortDebounceTimer.setSingleShot(true);
+    m_sortDebounceTimer.setInterval(20);
+    m_sortDebounceTimer.callOnTimeout(this, [this]() { invalidate(); });
+
     connect(this, &QSortFilterProxyModel::sourceModelChanged, this,
             &ChatRoomProxyModel::onSourceModelChanged);
 
@@ -204,8 +208,7 @@ void ChatRoomProxyModel::onSourceModelChanged()
                 connect(model, &QAbstractListModel::dataChanged, this,
                         [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
                             if (roles.isEmpty()) {
-                                invalidate();
-                                sort(0);
+                                m_sortDebounceTimer.start();
                                 return;
                             }
 
@@ -223,12 +226,11 @@ void ChatRoomProxyModel::onSourceModelChanged()
                                     });
 
                             if (isSortRole) {
-                                invalidate();
-                                sort(0);
+                                m_sortDebounceTimer.start();
                             }
                         });
     }
-    sort(0);
+    m_sortDebounceTimer.start();
 }
 
 void ChatRoomProxyModel::applySort()

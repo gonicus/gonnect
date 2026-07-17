@@ -2,6 +2,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QQmlEngine>
+#include <QTimer>
 #include "ChatRoomModel.h"
 
 class ChatRoomProxyModel : public QSortFilterProxyModel
@@ -58,6 +59,7 @@ private:
     QString m_filterText;
     ChatRoomProxyModel::SortStrategy m_sortStrategy =
             ChatRoomProxyModel::SortStrategy::Alphabetical;
+    QTimer m_sortDebounceTimer;
 
 private Q_SLOTS:
     void onSourceModelChanged();
