@@ -60,20 +60,25 @@ QStringList ReadOnlyConfdSettings::getUserGroups()
 
 void ReadOnlyConfdSettings::readConfd()
 {
-    static const QRegularExpression configFileName("^\\d+-[a-zA-Z0-9_-]+.conf$");
+    static const QRegularExpression configFileName(R"(\d+-[a-zA-Z0-9_-]+\.conf$)");
 
-    const QString basePath =
-            QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/gonnect";
-
+    // Collect ini files
     QStringList entries;
 
     if (qEnvironmentVariable("container") == "flatpak") {
         const auto fpBaseDir = QDir("/app/etc/gonnect");
-        entries += fpBaseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+        const auto files = fpBaseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+        for (const auto &entry : files) {
+            entries += fpBaseDir.absoluteFilePath(entry);
+        }
     }
 
-    const auto baseDir = QDir(basePath);
-    entries += baseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+    const auto baseDir =
+            QDir(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/gonnect/");
+    const auto files = baseDir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+    for (const auto &entry : files) {
+        entries += baseDir.absoluteFilePath(entry);
+    }
 
 #ifdef Q_OS_LINUX
     // Filter scope and replace %ENV[variablename]% and %CONF[config/key]% placeholders
@@ -85,7 +90,7 @@ void ReadOnlyConfdSettings::readConfd()
     for (auto &entry : std::as_const(entries)) {
         if (configFileName.match(entry).hasMatch()) {
 
-            const QSettings tmpSettings(basePath + "/" + entry, QSettings::IniFormat);
+            const QSettings tmpSettings(entry, QSettings::IniFormat);
 
             // Check if the configuration snippet is relevant to us
             const QString onlyForGroup = tmpSettings.value("scope/group").toString();
