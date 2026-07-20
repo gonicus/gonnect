@@ -36,6 +36,17 @@ Item {
             left: parent.left
             right: parent.right
         }
+
+        Component.onCompleted: () => searchField.giveFocus()
+
+        Connections {
+            target: control.Window
+            function onActiveChanged() {
+                if (control.Window.active) {
+                    searchField.giveFocus()
+                }
+            }
+        }
     }
 
     Flickable {
