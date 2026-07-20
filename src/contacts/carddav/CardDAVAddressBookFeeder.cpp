@@ -439,6 +439,17 @@ void CardDAVAddressBookFeeder::process()
     m_sipStatusSubscriptableAttributes =
             subScriptableAttributes.isEmpty() ? QStringList() : subScriptableAttributes;
 
+    // Unpack list in single string
+    if (m_sipStatusSubscriptableAttributes.size() == 1
+        && m_sipStatusSubscriptableAttributes.at(0).contains(',')) {
+        m_sipStatusSubscriptableAttributes =
+                m_sipStatusSubscriptableAttributes.at(0).split(',', Qt::SkipEmptyParts);
+
+        for (auto &attr : m_sipStatusSubscriptableAttributes) {
+            attr = std::move(attr).toLower().trimmed();
+        }
+    }
+
     qCDebug(lcCardDAVAddressBookFeeder) << "Read subscribable attributes from config for" << m_group
                                         << ":" << m_sipStatusSubscriptableAttributes;
 
