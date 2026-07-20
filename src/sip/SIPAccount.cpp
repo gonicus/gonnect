@@ -48,6 +48,16 @@ void SIPAccount::initialize()
         return;
     }
 
+    static const QRegularExpression macRegex("^[0-9A-Fa-f]{12}$");
+    m_ciscoDeviceMac = m_settings.value("ciscoDeviceMac", "").toString();
+    if (!m_ciscoDeviceMac.isEmpty() && !macRegex.match(m_ciscoDeviceMac).hasMatch()) {
+        qCCritical(lcSIPAccount) << "invalid ciscoDeviceMac [12 digits hex]:" << m_ciscoDeviceMac;
+        Q_EMIT initialized(false);
+        return;
+    }
+
+    const bool isCisco = !m_ciscoDeviceMac.isEmpty();
+
     QString net = m_settings.value("network", "auto").toString();
     if (net == "auto") {
         m_transportNet = TRANSPORT_NET::AUTO;
@@ -219,7 +229,7 @@ void SIPAccount::initialize()
     m_accountConfig.mediaConfig.lockCodecEnabled = lockCodecEnabled;
 
     // Transport
-    int port = m_settings.value("port", 5061).toInt(&ok);
+    int port = m_settings.value("port", isCisco ? 0 : 5061).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'port':" << port;
         Q_EMIT initialized(false);
@@ -227,7 +237,7 @@ void SIPAccount::initialize()
     }
     m_transportConfig.port = port;
 
-    int portRange = m_settings.value("portRange", 10).toInt(&ok);
+    int portRange = m_settings.value("portRange", isCisco ? 0 : 10).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'portRange':" << portRange;
         Q_EMIT initialized(false);
@@ -347,6 +357,10 @@ void SIPAccount::initialize()
 
     m_accountConfig.mediaConfig.rtcpXrEnabled = m_settings.value("rtcpXrEnabled", false).toBool();
     m_accountConfig.mediaConfig.rtcpMuxEnabled = m_settings.value("rtcpMuxEnabled", false).toBool();
+
+    if (!m_ciscoDeviceMac.isEmpty()) {
+        ciscoSetup();
+    }
 
     m_settings.endGroup();
 
@@ -1163,4 +1177,48 @@ pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const
     }
 
     return pjStatus;
+}
+
+void SIPAccount::ciscoSetup()
+{
+    // Setup based on cisco document OL-25254-01 - sanity check
+    if (m_transportType != TRANSPORT_TYPE::TLS) {
+        qCWarning(lcSIPAccount) << "Cisco setup requires TLS";
+    }
+    if (m_accountConfig.mediaConfig.srtpUse == PJMEDIA_SRTP_DISABLED) {
+        qCWarning(lcSIPAccount) << "Cisco setup requires sRTP";
+    }
+
+    if (m_settings.value("sipOutboundUse", false).toBool()) {
+        qCWarning(lcSIPAccount)
+                << "Cisco setup expects no RFC 5626 outbound - ignoring sipOutboundUse";
+    }
+    m_accountConfig.natConfig.sipOutboundUse = 0;
+
+    // Append header parameters behind the >
+    m_accountConfig.regConfig.contactParams =
+            QString(";+sip.instance=\"<urn:uuid:00000000-0000-0000-0000-%1>\""
+                    ";+u.sip!model.ccm.cisco.com=\"%2\"")
+                    .arg(m_ciscoDeviceMac.toUpper(), m_ciscoDeviceModel)
+                    .toStdString();
+
+    // Announce support of Call-Info security status (X-cisco-callinfo),
+    // sRTP to RTP fallback (X-cisco-srtp-fallback) and the SIP interface
+    // specification 5.1.0.
+    pj::SipHeader supported;
+    supported.hName = "Supported";
+    supported.hValue = "replaces, norefersub, X-cisco-callinfo, X-cisco-srtp-fallback, "
+                       "X-cisco-sis-5.1.0";
+    m_accountConfig.regConfig.headers.push_back(supported);
+
+    // Single crypto line with AES_CM_128_HMAC_SHA1_32
+    pj::SrtpCrypto crypto;
+    crypto.name = "AES_CM_128_HMAC_SHA1_32";
+    crypto.key = "";
+    crypto.flags = 0;
+    m_accountConfig.mediaConfig.srtpOpt.cryptos.clear();
+    m_accountConfig.mediaConfig.srtpOpt.cryptos.push_back(crypto);
+
+    qCInfo(lcSIPAccount) << "registering account" << m_account << "as Cisco device model"
+                         << m_ciscoDeviceModel << "with MAC" << m_ciscoDeviceMac.toUpper();
 }

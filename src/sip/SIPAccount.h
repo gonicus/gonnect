@@ -93,6 +93,8 @@ private:
 
     void generatePreferredIdentityHeader(const QString &var, const QString &preferredIdentity,
                                          pj::CallOpParam &prm);
+    void ciscoSetup();
+
     bool hasAllowGrant(const QString &header, const QString &grant) const;
 
     QString addTransport(const QString &uri) const;
@@ -113,6 +115,9 @@ private:
     quint16 m_readVoiceMessages = 0;
     QString m_messageAccount;
     QString m_voiceMailUri;
+
+    QString m_ciscoDeviceMac;
+    unsigned m_ciscoDeviceModel = 588;
 
     bool m_isRegistered = false;
     bool m_isInstantMessagingAllowed = false;
