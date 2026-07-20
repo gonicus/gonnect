@@ -454,7 +454,7 @@ void CardDAVAddressBookFeeder::process()
                                         << ":" << m_sipStatusSubscriptableAttributes;
 
     for (QString &attr : m_sipStatusSubscriptableAttributes) {
-        attr = std::move(attr).toLower();
+        attr = std::move(attr).toLower().trimmed();
     }
 
     m_config = { settings.value("baseNumber", "").toString(),
