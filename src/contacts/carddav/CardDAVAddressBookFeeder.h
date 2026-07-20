@@ -63,6 +63,7 @@ private:
     int m_retryInterval = 0;
     int m_initialRetryCount = 0;
 
+    bool m_areWebDavConnectionsInitialized = false;
     bool m_pendingError = false;
     bool m_pendingAuth = false;
 };

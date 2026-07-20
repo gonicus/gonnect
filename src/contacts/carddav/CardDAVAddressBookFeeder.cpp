@@ -5,6 +5,7 @@
 #include "ReadOnlyConfdSettings.h"
 #include "AuthManager.h"
 #include "PhoneNumberUtil.h"
+#include "ErrorBus.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -44,17 +45,20 @@ void CardDAVAddressBookFeeder::init()
 
     loadCachedData(m_settingsHash);
 
-    connect(&m_webdavParser, &QWebdavDirParser::finished, this,
-            &CardDAVAddressBookFeeder::onParserFinished);
+    if (!m_areWebDavConnectionsInitialized) {
+        m_areWebDavConnectionsInitialized = true;
+        connect(&m_webdavParser, &QWebdavDirParser::finished, this,
+                &CardDAVAddressBookFeeder::onParserFinished);
 
-    connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
-            &CardDAVAddressBookFeeder::onError);
-    connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
+        connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
+                &CardDAVAddressBookFeeder::onError);
+        connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
 
-    connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
-        m_pendingAuth = true;
-        checkErrorStatus();
-    });
+        connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
+            m_pendingAuth = true;
+            checkErrorStatus();
+        });
+    }
 }
 
 void CardDAVAddressBookFeeder::checkErrorStatus()
@@ -79,11 +83,19 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
                     if (m_retryCount > 0) {
                         m_retryCount--;
 
-                        qCWarning(lcCardDAVAddressBookFeeder)
-                                << "Failed to process CardDAV sources - trying later";
+                        qCWarning(lcCardDAVAddressBookFeeder) << "Failed to process CardDAV sources"
+                                                              << m_group << "- trying later";
 
                         QTimer::singleShot(m_retryInterval, this,
                                            [this]() { feedAddressBook(true); });
+                    } else {
+                        qCCritical(lcCardDAVAddressBookFeeder)
+                                << "Repeatedly failed to access CardDAV source" << m_group;
+
+                        ErrorBus::instance().error(
+                                tr("CardDAV source %1 repeatedly failed").arg(m_group));
+
+                        m_isProcessing = false;
                     }
                 }
 
@@ -378,6 +390,8 @@ void CardDAVAddressBookFeeder::onParserFinished()
                 },
                 Qt::ConnectionType::SingleShotConnection);
     }
+
+    m_isProcessing = false;
 }
 
 void CardDAVAddressBookFeeder::flushCacheImpl()
@@ -412,6 +426,9 @@ void CardDAVAddressBookFeeder::flushCacheImpl()
 
 void CardDAVAddressBookFeeder::process()
 {
+    m_isProcessing = true;
+    m_retryCount = m_initialRetryCount;
+
     ReadOnlyConfdSettings settings;
     settings.beginGroup(m_group);
 

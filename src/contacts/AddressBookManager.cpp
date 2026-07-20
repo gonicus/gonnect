@@ -21,7 +21,18 @@ using namespace Qt::Literals::StringLiterals;
 
 Q_LOGGING_CATEGORY(lcAddressBookManager, "gonnect.app.addressbook")
 
-AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent } { }
+AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
+{
+
+    m_retryTimer.setSingleShot(true);
+    m_retryTimer.setInterval(10s);
+    m_retryTimer.callOnTimeout(this, [this]() {
+        if (m_reconnectScheduled) {
+            m_reconnectScheduled = false;
+            processAddressBookQueue();
+        }
+    });
+}
 
 QString AddressBookManager::secret(const QString &group) const
 {
@@ -86,7 +97,7 @@ void AddressBookManager::processAddressBookQueue()
     auto &nh = NetworkHelper::instance();
 
     if (!m_queueMutex.tryLock()) {
-        qCFatal(lcAddressBookManager) << "Failed to acquire lock for the feeder queue";
+        qCCritical(lcAddressBookManager) << "Failed to acquire lock for the feeder queue";
         return;
     }
 
@@ -164,10 +175,13 @@ void AddressBookManager::scheduleReconnect()
     }
 
     m_reconnectScheduled = true;
+    m_retryTimer.stop();
+    m_retryTimer.start();
     connect(
             &NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
             [this]() {
                 m_reconnectScheduled = false;
+                m_retryTimer.stop();
                 processAddressBookQueue();
             },
             Qt::ConnectionType::SingleShotConnection);

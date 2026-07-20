@@ -38,6 +38,7 @@ private:
     void processAddressBookQueue();
     void requeueGroup(const QString &group);
     void scheduleReconnect();
+    QTimer m_retryTimer;
 
     QHash<QString, IAddressBookFeeder *> m_addressBookFeeders;
 

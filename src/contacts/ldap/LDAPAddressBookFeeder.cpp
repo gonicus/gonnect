@@ -50,7 +50,6 @@ void LDAPAddressBookFeeder::init(const LDAPInitializer::Config &ldapConfig,
 void LDAPAddressBookFeeder::resetFeeder()
 {
     m_isProcessing = false;
-
     m_ldapConfig = {};
 
     if (m_ldap) {
@@ -401,8 +400,11 @@ QUrl LDAPAddressBookFeeder::networkCheckURL() const
 {
     ReadOnlyConfdSettings settings;
 
-    QString url = settings.value(m_group + "/url", "").toString();
-    return QUrl(url);
+    QUrl url(settings.value(m_group + "/url", "").toString());
+    if (url.port() == -1) {
+        url.setPort(389); // default port
+    }
+    return url;
 }
 
 void LDAPAddressBookFeeder::startContactQuery()

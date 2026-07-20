@@ -85,7 +85,7 @@ QFuture<bool> NetworkHelper::isReachable(const QUrl &url)
         testSocket.connectToHost(url.host(), url.port());
         testSocket.waitForConnected(1000);
 
-        bool state = testSocket.state() == QTcpSocket::UnconnectedState;
+        bool state = testSocket.state() != QTcpSocket::UnconnectedState;
         testSocket.close();
 
         if (!state) {
