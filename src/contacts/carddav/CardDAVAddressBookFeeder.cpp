@@ -4,6 +4,7 @@
 #include "AvatarManager.h"
 #include "ReadOnlyConfdSettings.h"
 #include "AuthManager.h"
+#include "PhoneNumberUtil.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -136,7 +137,7 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
     }
 
     auto stripBaseNumber = [this](QString num) {
-        const auto baseNumber = m_config.baseNumber;
+        const auto baseNumber = PhoneNumberUtil::cleanPhoneNumber(m_config.baseNumber);
         if (num.startsWith(baseNumber)) {
             num = num.sliced(baseNumber.size());
         }
@@ -191,7 +192,8 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
                     }
                 }
                 phoneNumbers.append({ Contact::NumberType::Unknown,
-                                      stripBaseNumber(QString::fromStdString(prop.getValue())),
+                                      stripBaseNumber(PhoneNumberUtil::cleanPhoneNumber(
+                                              QString::fromStdString(prop.getValue()))),
                                       subscriptable });
             } else if (propName == "PHOTO") {
 
