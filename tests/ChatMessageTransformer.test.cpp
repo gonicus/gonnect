@@ -75,6 +75,22 @@ void ChatMessageTransformerTest::testAddLinkTagsEmptyString()
     QCOMPARE(T::addLinkTags(""), QString(""));
 }
 
+void ChatMessageTransformerTest::testAddLinkTagsMarkdownLinkParensInUrl()
+{
+    const QString input = QStringLiteral("[text](https://en.wikipedia.org/wiki/Foo_(bar))");
+    QCOMPARE(T::addLinkTags(input), input);
+}
+
+void ChatMessageTransformerTest::testAddLinkTagsPlainUrlWithParens()
+{
+    const QString input = "https://en.wikipedia.org/wiki/Foo_(bar)";
+    const QString expected =
+            QStringLiteral("<a "
+                           "href=\"https://en.wikipedia.org/wiki/Foo_(bar\">https://"
+                           "en.wikipedia.org/wiki/Foo_(bar</a>)");
+    QCOMPARE(T::addLinkTags(input), expected);
+}
+
 void ChatMessageTransformerTest::testFixNewLines()
 {
     QCOMPARE(T::fixNewLines(""), "");
