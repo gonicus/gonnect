@@ -117,10 +117,11 @@ void ChatMessageContentText::processText()
 
 QString ChatMessageContentText::convertText(const QString &originalText) const
 {
+    namespace T = ChatMessageTransformer;
+
     if (const auto *chatMessageObj = qobject_cast<ChatMessage *>(parent())) {
-        return ChatMessageTransformer::addLinkTags(
-                ChatMessageTransformer::highlightMentions(originalText, *chatMessageObj));
+        return T::addLinkTags(T::fixNewLines(T::highlightMentions(originalText, *chatMessageObj)));
     }
 
-    return ChatMessageTransformer::addLinkTags(originalText);
+    return T::addLinkTags(T::fixNewLines(originalText));
 }

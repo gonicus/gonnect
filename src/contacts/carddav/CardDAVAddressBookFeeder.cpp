@@ -81,7 +81,8 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
                         qCWarning(lcCardDAVAddressBookFeeder)
                                 << "Failed to process CardDAV sources - trying later";
 
-                        QTimer::singleShot(m_retryInterval, this, [this]() { feedAddressBook(); });
+                        QTimer::singleShot(m_retryInterval, this,
+                                           [this]() { feedAddressBook(true); });
                     }
                 }
 
@@ -169,9 +170,27 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
             } else if (propName == "EMAIL") {
                 email = QString::fromStdString(prop.getValue());
             } else if (propName == "TEL") {
+                bool subscriptable = false;
+                auto propParams = prop.params();
+                for (const auto &param : propParams) {
+                    if (param.first == "TYPE") {
+                        const auto types = QString::fromStdString(param.second)
+                                                   .split(QChar(','), Qt::SkipEmptyParts);
+                        for (const auto &type : types) {
+                            if (m_sipStatusSubscriptableAttributes.contains(
+                                        type.trimmed().toLower())) {
+                                subscriptable = true;
+                                break;
+                            }
+                        }
+                        if (subscriptable) {
+                            break;
+                        }
+                    }
+                }
                 phoneNumbers.append({ Contact::NumberType::Unknown,
                                       stripBaseNumber(QString::fromStdString(prop.getValue())),
-                                      false });
+                                      subscriptable });
             } else if (propName == "PHOTO") {
 
                 auto propParams = prop.params();
@@ -411,6 +430,15 @@ void CardDAVAddressBookFeeder::process()
     if (!ok) {
         qCWarning(lcCardDAVAddressBookFeeder) << "Could not parse priority value for" << m_group;
         m_priority = 0;
+    }
+
+    const auto subScriptableAttributes =
+            settings.value("sipStatusSubscriptableAttributes", "").toStringList();
+    m_sipStatusSubscriptableAttributes =
+            subScriptableAttributes.isEmpty() ? QStringList() : subScriptableAttributes;
+
+    for (QString &attr : m_sipStatusSubscriptableAttributes) {
+        attr = std::move(attr).toLower();
     }
 
     m_config = { settings.value("baseNumber", "").toString(),

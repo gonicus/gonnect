@@ -128,8 +128,8 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     QString url = settings.value(m_group + "/url", "").toString();
 
     settings.beginGroup(m_group);
-    const auto scriptableAttributes =
-            settings.value("sipStatusSubscriptableAttributes", "").toString();
+    const auto subscribableAttributes =
+            settings.value("sipStatusSubscriptableAttributes", "").toStringList();
 
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
     LDAPInitializer::BindMethod bindMethod;
@@ -173,9 +173,7 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     m_attrs.avatar = settings.value("attrAvatar", "jpegPhoto").toByteArray();
     m_pageSize = settings.value("pageSize", 500).toInt();
 
-    init(ldapConfig,
-         scriptableAttributes.isEmpty() ? QStringList() : scriptableAttributes.split(QChar(',')),
-         settings.value("baseNumber", "").toString());
+    init(ldapConfig, subscribableAttributes, settings.value("baseNumber", "").toString());
 
     m_isProcessing = true;
 

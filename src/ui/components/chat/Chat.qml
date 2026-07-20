@@ -46,7 +46,9 @@ Item {
         id: messageListCardHeading
         visible: titleLoadingIndicatorRow.visible || (control.showTitleBar && !!control.chatRoom)
         leftPadding: avatarImage.x + avatarImage.width - 10
-        rightPadding: parent.width - favCardHeadingButton.y
+        rightPadding: titleLoadingIndicatorRow.visible
+                      ? parent.width - titleLoadingIndicatorRow.x
+                      : parent.width - favCardHeadingButton.x
         text: control.showTitleBar && control.chatRoom
               ? (control.chatRoom.isDirectChat
                  ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
