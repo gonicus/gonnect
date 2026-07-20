@@ -432,10 +432,13 @@ void CardDAVAddressBookFeeder::process()
     }
 
     const auto subScriptableAttributes =
-            settings.value("sipStatusSubscriptableAttributes", "").toString();
-    m_sipStatusSubscriptableAttributes = subScriptableAttributes.isEmpty()
-            ? QStringList()
-            : subScriptableAttributes.toLower().split(QChar(','));
+            settings.value("sipStatusSubscriptableAttributes", "").toStringList();
+    m_sipStatusSubscriptableAttributes =
+            subScriptableAttributes.isEmpty() ? QStringList() : subScriptableAttributes;
+
+    for (QString &attr : m_sipStatusSubscriptableAttributes) {
+        attr = std::move(attr).toLower();
+    }
 
     m_config = { settings.value("baseNumber", "").toString(),
                  settings.value("host", "").toString(),

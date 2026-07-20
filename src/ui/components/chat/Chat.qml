@@ -47,7 +47,7 @@ Item {
         visible: titleLoadingIndicatorRow.visible || (control.showTitleBar && !!control.chatRoom)
         leftPadding: avatarImage.x + avatarImage.width - 10
         rightPadding: titleLoadingIndicatorRow.visible
-                      ? parent.width - titleLoadingIndicatorRow
+                      ? parent.width - titleLoadingIndicatorRow.x
                       : parent.width - favCardHeadingButton.x
         text: control.showTitleBar && control.chatRoom
               ? (control.chatRoom.isDirectChat
