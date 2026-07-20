@@ -57,6 +57,7 @@ private:
     BlockInfo m_blockInfo;
 
     CardDAVAddressBookFeederConfig m_config;
+    QStringList m_sipStatusSubscriptableAttributes;
 
     int m_retryCount = 0;
     int m_retryInterval = 0;

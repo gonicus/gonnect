@@ -1,11 +1,18 @@
 #pragma once
 
 #include <QString>
-#include "ChatMessage.h"
+
+#ifndef APP_TESTS
+#  include "ChatMessage.h"
+#endif
 
 namespace ChatMessageTransformer {
 
 QString addLinkTags(const QString &orig);
+QString fixNewLines(const QString &orig);
+
+#ifndef APP_TESTS
 QString highlightMentions(const QString &orig, const ChatMessage &message);
+#endif
 
 } // namespace ChatMessageTransformer

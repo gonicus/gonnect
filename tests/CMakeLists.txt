@@ -166,3 +166,23 @@ target_link_libraries(usbTest
         Qt6::Core
         Qt6::Test
 )
+
+qt_add_executable(chatMessageTransformerTest
+    ChatMessageTransformer.test.cpp
+    ChatMessageTransformer.test.h
+    ${PROJECT_SOURCE_DIR}/src/helper/ChatMessageTransformer.cpp
+    ${PROJECT_SOURCE_DIR}/src/helper/ChatMessageTransformer.h
+)
+
+add_test(NAME chatMessageTransformerTest COMMAND chatMessageTransformerTest)
+
+target_include_directories(chatMessageTransformerTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/src/helper
+)
+target_link_libraries(chatMessageTransformerTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Test
+)
