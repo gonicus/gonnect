@@ -172,27 +172,15 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
             } else if (propName == "TEL") {
                 bool subscriptable = false;
 
-                qCDebug(lcCardDAVAddressBookFeeder)
-                        << "Checking card" << remoteUid << name << "if subscribable";
-                qCDebug(lcCardDAVAddressBookFeeder) << "Checking phone number" << prop.getValue();
-                qCDebug(lcCardDAVAddressBookFeeder)
-                        << "Subscribable types:" << m_sipStatusSubscriptableAttributes;
-
                 auto propParams = prop.params();
                 for (const auto &param : propParams) {
                     if (param.first == "TYPE") {
 
                         const auto types = QString::fromStdString(param.second)
                                                    .split(QChar(','), Qt::SkipEmptyParts);
-
-                        qCDebug(lcCardDAVAddressBookFeeder)
-                                << "Has types" << param.second << "parsed as" << types;
-
                         for (const auto &type : types) {
                             if (m_sipStatusSubscriptableAttributes.contains(
                                         type.trimmed().toLower())) {
-                                qCDebug(lcCardDAVAddressBookFeeder)
-                                        << "  subscribable type found:" << type;
                                 subscriptable = true;
                                 break;
                             }
