@@ -81,7 +81,8 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
                         qCWarning(lcCardDAVAddressBookFeeder)
                                 << "Failed to process CardDAV sources - trying later";
 
-                        QTimer::singleShot(m_retryInterval, this, [this]() { feedAddressBook(); });
+                        QTimer::singleShot(m_retryInterval, this,
+                                           [this]() { feedAddressBook(true); });
                     }
                 }
 
