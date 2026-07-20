@@ -684,7 +684,7 @@ void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
 
 SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
 {
-    QString sipUrl = toSipUri(var);
+    QString sipUrl = toSipUri(var).toLower();
 
     if (sipUrl.isEmpty()) {
         return SIPBuddyState::STATUS::UNKNOWN;
@@ -698,6 +698,7 @@ SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
     }
 
     // We don't have a buddy yet - try to subscribe
+    qCInfo(lcSIPAccount) << "Creating SIPBuddy for" << sipUrl << m_buddies.size();
     auto buddy = new SIPBuddy(this, sipUrl);
     QString uri = buddy->uri();
     qCInfo(lcSIPAccount) << "subscribing to buddy" << uri;
