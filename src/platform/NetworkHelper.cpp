@@ -10,6 +10,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QEventLoop>
+#include <netdb.h>
 
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
 
@@ -81,8 +82,20 @@ NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 QFuture<bool> NetworkHelper::isReachable(const QUrl &url)
 {
     return QtConcurrent::run([url]() -> bool {
+        int port = url.port();
+        if (port < 0) {
+            QString scheme = url.scheme();
+            struct servent *sptr = getservbyname(scheme.toStdString().c_str(), "tcp");
+            if (!sptr) {
+                qCCritical(lcNetwork) << "cannot map scheme" << scheme << "to port";
+                return false;
+            }
+
+            port = ntohs(sptr->s_port);
+        }
+
         QTcpSocket testSocket;
-        testSocket.connectToHost(url.host(), url.port());
+        testSocket.connectToHost(url.host(), port);
         testSocket.waitForConnected(1000);
 
         bool state = testSocket.state() != QTcpSocket::UnconnectedState;

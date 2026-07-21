@@ -399,12 +399,7 @@ void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapCo
 QUrl LDAPAddressBookFeeder::networkCheckURL() const
 {
     ReadOnlyConfdSettings settings;
-
-    QUrl url(settings.value(m_group + "/url", "").toString());
-    if (url.port() == -1) {
-        url.setPort(389); // default port
-    }
-    return url;
+    return QUrl(settings.value(m_group + "/url", "").toString());
 }
 
 void LDAPAddressBookFeeder::startContactQuery()
