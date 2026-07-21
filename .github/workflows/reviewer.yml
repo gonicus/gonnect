@@ -30,10 +30,25 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.issue.number }}
         run: |
-          PR_JSON=$(curl -s -H "Authorization: token $GH_TOKEN" \
+          set -euo pipefail
+
+          HTTP_CODE=$(curl -s -o /tmp/pr.json -w "%{http_code}" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER")
-          jq --argjson pr "$PR_JSON" '. + {pull_request: $pr}' "$GITHUB_EVENT_PATH" > "$RUNNER_TEMP/event.json"
+
+          echo "GitHub API status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::PR-access failed (HTTP $HTTP_CODE)"
+            cat /tmp/pr.json
+            exit 1
+          fi
+
+          jq --slurpfile pr /tmp/pr.json '. + {pull_request: $pr[0]}' "$GITHUB_EVENT_PATH" > "$RUNNER_TEMP/event.json"
           echo "GITHUB_EVENT_PATH=$RUNNER_TEMP/event.json" >> "$GITHUB_ENV"
+
+          echo "DEBUG: $(jq '.pull_request.number' "$RUNNER_TEMP/event.json")"
 
       - name: Run OpenRabbit Review
         uses: aryanbrite/openrabbit@main
