@@ -1204,7 +1204,8 @@ void SIPAccount::ciscoSetup()
     m_accountConfig.regConfig.contactParams =
             QString(";+sip.instance=\"<urn:uuid:00000000-0000-0000-0000-%1>\""
                     ";+u.sip!model.ccm.cisco.com=\"%2\"")
-                    .arg(m_ciscoDeviceMac.toUpper(), m_ciscoDeviceModel)
+                    .arg(m_ciscoDeviceMac.toUpper())
+                    .arg(m_ciscoDeviceModel)
                     .toStdString();
 
     // Announce support of Call-Info security status (X-cisco-callinfo),
