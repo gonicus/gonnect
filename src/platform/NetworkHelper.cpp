@@ -11,13 +11,6 @@
 #include <QNetworkReply>
 #include <QEventLoop>
 
-#ifdef Q_OS_WIN
-#  include <winsock2.h>
-#  pragma comment(lib, "Ws2_32.lib")
-#else
-#  include <netdb.h>
-#endif
-
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
 
 QFuture<QString> NetworkHelper::fetchUrlAsString(const QUrl &url)
@@ -76,22 +69,21 @@ int NetworkHelper::getStandardPort(const QUrl &url)
         return url.port();
     }
 
+    static const QHash<QString, int> protocolMap = {
+        { QStringLiteral("http"), 80 },    { QStringLiteral("https"), 443 },
+        { QStringLiteral("ldap"), 389 },   { QStringLiteral("ldaps"), 636 },
+        { QStringLiteral("caldav"), 80 },  { QStringLiteral("caldavs"), 443 },
+        { QStringLiteral("carddav"), 80 }, { QStringLiteral("carddavs"), 443 }
+    };
+
     const QString scheme = url.scheme().toLower();
-    const QByteArray schemeBytes = scheme.toUtf8();
+    int port = protocolMap.value(scheme, -1);
 
-    struct servent serv;
-    struct servent *result = nullptr;
-    char buffer[1024];
-
-    const int res =
-            getservbyname_r(schemeBytes.constData(), "tcp", &serv, buffer, sizeof(buffer), &result);
-
-    if (res != 0 || !result) {
+    if (port < 0) {
         qCCritical(lcNetwork) << "Cannot map scheme" << scheme << "to port";
-        return -1;
     }
 
-    return ntohs(result->s_port);
+    return port;
 }
 
 NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
