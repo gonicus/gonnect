@@ -10,7 +10,13 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QEventLoop>
-#include <netdb.h>
+
+#ifdef Q_OS_WIN
+#  include <winsock2.h>
+#  pragma comment(lib, "Ws2_32.lib")
+#else
+#  include <netdb.h>
+#endif
 
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
 
@@ -64,6 +70,30 @@ QFuture<QJsonDocument> NetworkHelper::fetchUrlAsJson(const QUrl &url)
     });
 }
 
+int NetworkHelper::getStandardPort(const QUrl &url)
+{
+    if (url.port() >= 0) {
+        return url.port();
+    }
+
+    const QString scheme = url.scheme().toLower();
+    const QByteArray schemeBytes = scheme.toUtf8();
+
+    struct servent serv;
+    struct servent *result = nullptr;
+    char buffer[1024];
+
+    const int res =
+            getservbyname_r(schemeBytes.constData(), "tcp", &serv, buffer, sizeof(buffer), &result);
+
+    if (res != 0 || !result) {
+        qCCritical(lcNetwork) << "Cannot map scheme" << scheme << "to port";
+        return -1;
+    }
+
+    return ntohs(result->s_port);
+}
+
 NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 {
     if (!QNetworkInformation::loadDefaultBackend()) {
@@ -82,16 +112,10 @@ NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 QFuture<bool> NetworkHelper::isReachable(const QUrl &url)
 {
     return QtConcurrent::run([url]() -> bool {
-        int port = url.port();
+        int port = getStandardPort(url);
         if (port < 0) {
-            QString scheme = url.scheme();
-            struct servent *sptr = getservbyname(scheme.toStdString().c_str(), "tcp");
-            if (!sptr) {
-                qCCritical(lcNetwork) << "cannot map scheme" << scheme << "to port";
-                return false;
-            }
-
-            port = ntohs(sptr->s_port);
+            qCCritical(lcNetwork) << "Cannot find standard port for" << url;
+            return false;
         }
 
         QTcpSocket testSocket;
