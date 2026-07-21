@@ -957,6 +957,11 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
         reinitBuddies();
     }
 
+    if (!m_ciscoDeviceMac.isEmpty() && prm.code == PJSIP_SC_OK && prm.expiration > 0) {
+        const auto *rxData = static_cast<const pjsip_rx_data *>(prm.rdata.pjRxData);
+        ciscoUpdateSrtpFallback(rxData ? rxData->msg_info.msg : nullptr);
+    }
+
     if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED
         || prm.code == PJSIP_SC_FORBIDDEN) {
         Q_EMIT authorizationFailed();
@@ -1219,6 +1224,68 @@ void SIPAccount::ciscoSetup()
     m_accountConfig.mediaConfig.srtpOpt.cryptos.clear();
     m_accountConfig.mediaConfig.srtpOpt.cryptos.push_back(crypto);
 
+    // The sRTP to RTP fallback is off until CUCM confirms it for the line in the REGISTER
+    // response, see ciscoUpdateSrtpFallback(). Until then we only offer and accept sRTP.
+    if (!m_ciscoDeviceMac.isEmpty()
+        && m_accountConfig.mediaConfig.srtpUse != PJMEDIA_SRTP_DISABLED) {
+        m_accountConfig.mediaConfig.srtpUse = PJMEDIA_SRTP_MANDATORY;
+        m_accountConfig.mediaConfig.srtpOpt.optionalOfferSavp = false;
+    }
+
     qCInfo(lcSIPAccount) << "registering account" << m_account << "as Cisco device model"
                          << m_ciscoDeviceModel << "with MAC" << m_ciscoDeviceMac.toUpper();
+}
+
+void SIPAccount::ciscoUpdateSrtpFallback(const pjsip_msg *msg)
+{
+    if (m_ciscoDeviceMac.isEmpty()
+        || m_accountConfig.mediaConfig.srtpUse == PJMEDIA_SRTP_DISABLED) {
+        return;
+    }
+
+    static const pj_str_t fallbackTag = { const_cast<char *>("X-cisco-srtp-fallback"), 21 };
+
+    bool advertised = false;
+    if (msg) {
+        const auto *hdr = static_cast<const pjsip_supported_hdr *>(
+                pjsip_msg_find_hdr(msg, PJSIP_H_SUPPORTED, nullptr));
+
+        while (hdr && !advertised) {
+            for (unsigned i = 0; i < hdr->count; ++i) {
+                if (pj_stricmp(&hdr->values[i], &fallbackTag) == 0) {
+                    advertised = true;
+                    break;
+                }
+            }
+
+            hdr = static_cast<const pjsip_supported_hdr *>(
+                    pjsip_msg_find_hdr(msg, PJSIP_H_SUPPORTED, hdr->next));
+        }
+    }
+
+    const bool enabled = advertised && isSignalingEncrypted();
+
+    if (enabled == m_ciscoSrtpFallbackEnabled) {
+        return;
+    }
+
+    if (advertised && !isSignalingEncrypted()) {
+        qCWarning(lcSIPAccount) << "ignoring X-cisco-srtp-fallback on insecure signaling for"
+                                << m_account;
+    }
+
+    m_ciscoSrtpFallbackEnabled = enabled;
+
+    m_accountConfig.mediaConfig.srtpUse = enabled ? PJMEDIA_SRTP_OPTIONAL : PJMEDIA_SRTP_MANDATORY;
+    m_accountConfig.mediaConfig.srtpOpt.optionalOfferSavp = enabled;
+
+    try {
+        modify(m_accountConfig);
+    } catch (const pj::Error &err) {
+        qCCritical(lcSIPAccount) << "failed to apply sRTP fallback state:" << err.info();
+        return;
+    }
+
+    qCInfo(lcSIPAccount) << "Cisco sRTP to RTP fallback" << (enabled ? "enabled" : "disabled")
+                         << "for account" << m_account;
 }

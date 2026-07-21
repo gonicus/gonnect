@@ -94,6 +94,7 @@ private:
     void generatePreferredIdentityHeader(const QString &var, const QString &preferredIdentity,
                                          pj::CallOpParam &prm);
     void ciscoSetup();
+    void ciscoUpdateSrtpFallback(const pjsip_msg *msg);
 
     bool hasAllowGrant(const QString &header, const QString &grant) const;
 
@@ -118,6 +119,7 @@ private:
 
     QString m_ciscoDeviceMac;
     unsigned m_ciscoDeviceModel = 588;
+    bool m_ciscoSrtpFallbackEnabled = false;
 
     bool m_isRegistered = false;
     bool m_isInstantMessagingAllowed = false;
