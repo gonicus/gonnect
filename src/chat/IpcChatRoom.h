@@ -23,7 +23,7 @@ public:
     void setIsFavorite(bool value);
 
     virtual QString id() override { return m_id; };
-    virtual QString name() override { return m_name; };
+    virtual QString name() override;
     virtual QString avatarPath() override;
     virtual bool isFavorite() override { return m_isFavorite; }
     virtual IChatRoom::JoinRule joinRule() override { return m_joinRule; }
