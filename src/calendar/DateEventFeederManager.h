@@ -6,6 +6,7 @@
 #include <QDateTime>
 #include <QHash>
 #include <QMutex>
+#include <atomic>
 
 class IDateEventFeeder;
 
@@ -32,6 +33,7 @@ private:
     explicit DateEventFeederManager(QObject *parent = nullptr);
 
     QMutex m_queueMutex;
+    std::atomic<int> m_remainingMutexLockTries = 10;
 
     QDateTime m_currentTime;
     QDateTime m_timeRangeStart;

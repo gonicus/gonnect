@@ -98,10 +98,18 @@ void AddressBookManager::processAddressBookQueue()
     auto &nh = NetworkHelper::instance();
 
     if (!m_queueMutex.tryLock()) {
-        qCCritical(lcAddressBookManager) << "Failed to acquire lock for the feeder queue";
-        QTimer::singleShot(5s, this, &AddressBookManager::processAddressBookQueue);
+        if (--m_remainingMutexLockTries > 0) {
+            qCWarning(lcAddressBookManager)
+                    << "Failed to acquire lock for the feeder queue, trying again."
+                    << m_remainingMutexLockTries << "tries left.";
+            QTimer::singleShot(5s, this, &AddressBookManager::processAddressBookQueue);
+        } else {
+            qCCritical(lcAddressBookManager)
+                    << "Repeatedly failed to acquire lock for the feeder queue - giving up";
+        }
         return;
     }
+    m_remainingMutexLockTries = 10;
 
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {

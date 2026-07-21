@@ -4,6 +4,7 @@
 #include <QHash>
 #include <QMutex>
 #include <QTimer>
+#include <atomic>
 
 class IAddressBookFeeder;
 
@@ -34,6 +35,7 @@ private:
 
     QString secret(const QString &group) const;
     QMutex m_queueMutex;
+    std::atomic<int> m_remainingMutexLockTries = 10;
 
     void processAddressBookQueue();
     void requeueGroup(const QString &group);

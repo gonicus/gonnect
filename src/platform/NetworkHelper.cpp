@@ -106,7 +106,6 @@ QFuture<bool> NetworkHelper::isReachable(const QUrl &url)
     return QtConcurrent::run([url]() -> bool {
         int port = getStandardPort(url);
         if (port < 0) {
-            qCCritical(lcNetwork) << "Cannot find standard port for" << url;
             return false;
         }
 

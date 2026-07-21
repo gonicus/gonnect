@@ -128,10 +128,19 @@ void DateEventFeederManager::processQueue()
     auto &networkHelper = NetworkHelper::instance();
 
     if (!m_queueMutex.tryLock()) {
-        qCCritical(lcDateEventFeederManager) << "Failed to acquire lock for the feeder queue";
-        QTimer::singleShot(5s, this, &DateEventFeederManager::processQueue);
+
+        if (--m_remainingMutexLockTries > 0) {
+            qCWarning(lcDateEventFeederManager)
+                    << "Failed to acquire lock for the feeder queue, trying again."
+                    << m_remainingMutexLockTries << "tries left.";
+            QTimer::singleShot(5s, this, &DateEventFeederManager::processQueue);
+        } else {
+            qCCritical(lcDateEventFeederManager)
+                    << "Repeatedly failed to acquire lock for the feeder queue - giving up";
+        }
         return;
     }
+    m_remainingMutexLockTries = 10;
 
     QMutableStringListIterator it(m_feederConfigIds);
     while (it.hasNext()) {
