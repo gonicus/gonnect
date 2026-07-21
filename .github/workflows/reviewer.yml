@@ -25,5 +25,6 @@ jobs:
           llm_api_key: ${{ secrets.LLM_API_KEY }}
           llm_provider: openrouter
           llm_model: openrouter/free
+          pr_number: ${{ github.event.issue.number }}
           review_mode: both
           tone_mode: balanced
