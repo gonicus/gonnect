@@ -684,7 +684,7 @@ void SIPAccount::onInstantMessage(pj::OnInstantMessageParam &prm)
 
 SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
 {
-    QString sipUrl = toSipUri(var).toLower();
+    QString sipUrl = toSipUri(var);
 
     if (sipUrl.isEmpty()) {
         return SIPBuddyState::STATUS::UNKNOWN;
@@ -746,7 +746,7 @@ QString SIPAccount::toSipUri(const QString &var) const
         sipUrl = addTransport(sipUrl);
     }
 
-    return sipUrl;
+    return sipUrl.toLower();
 }
 
 void SIPAccount::generatePreferredIdentityHeader(const QString &var,

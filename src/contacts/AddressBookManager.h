@@ -46,4 +46,5 @@ private:
     QStringList m_addressBookQueue;
     bool m_reconnectScheduled = false;
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
+    QMetaObject::Connection m_connectivityConnection;
 };

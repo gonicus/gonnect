@@ -15,6 +15,8 @@
 
 Q_LOGGING_CATEGORY(lcDateEventFeederManager, "gonnect.app.dateevents.feeder.manager")
 
+using namespace std::chrono_literals;
+
 DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ parent }
 {
     setTimeData();
@@ -126,7 +128,8 @@ void DateEventFeederManager::processQueue()
     auto &networkHelper = NetworkHelper::instance();
 
     if (!m_queueMutex.tryLock()) {
-        qCFatal(lcDateEventFeederManager) << "Failed to acquire lock for the feeder queue";
+        qCCritical(lcDateEventFeederManager) << "Failed to acquire lock for the feeder queue";
+        QTimer::singleShot(5s, this, &DateEventFeederManager::processQueue);
         return;
     }
 

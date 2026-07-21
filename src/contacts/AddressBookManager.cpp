@@ -98,6 +98,7 @@ void AddressBookManager::processAddressBookQueue()
 
     if (!m_queueMutex.tryLock()) {
         qCCritical(lcAddressBookManager) << "Failed to acquire lock for the feeder queue";
+        QTimer::singleShot(5s, this, &AddressBookManager::processAddressBookQueue);
         return;
     }
 
@@ -177,7 +178,9 @@ void AddressBookManager::scheduleReconnect()
     m_reconnectScheduled = true;
     m_retryTimer.stop();
     m_retryTimer.start();
-    connect(
+
+    disconnect(m_connectivityConnection);
+    m_connectivityConnection = connect(
             &NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
             [this]() {
                 m_reconnectScheduled = false;
@@ -204,11 +207,22 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                 } else if (error == QKeychain::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
 
+                    auto *timeoutTimer = new QTimer(this);
+                    timeoutTimer->setSingleShot(true);
+                    timeoutTimer->callOnTimeout(this, [timeoutTimer, callback]() {
+                        callback("");
+                        timeoutTimer->deleteLater();
+                    });
+                    timeoutTimer->start(10s);
+
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,
-                            [secretKey, group, callback, this](const QString &id,
-                                                               const QString &password) {
+                            [this, secretKey, group, callback,
+                             timeoutTimer](const QString &id, const QString &password) {
                                 if (id == group) {
+                                    timeoutTimer->stop();
+                                    timeoutTimer->deleteLater();
+
                                     QObject::disconnect(m_viewHelperConnections.value(group));
                                     m_viewHelperConnections.remove(group);
 
@@ -243,6 +257,8 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
 
                     viewHelper.requestPassword(group, name);
                     settings.endGroup();
+                } else {
+                    callback(QString());
                 }
             });
 }

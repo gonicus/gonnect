@@ -148,8 +148,8 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
         return;
     }
 
-    auto stripBaseNumber = [this](QString num) {
-        const auto baseNumber = PhoneNumberUtil::cleanPhoneNumber(m_config.baseNumber);
+    const auto baseNumber = PhoneNumberUtil::cleanPhoneNumber(m_config.baseNumber);
+    auto stripBaseNumber = [&baseNumber](QString num) {
         if (num.startsWith(baseNumber)) {
             num = num.sliced(baseNumber.size());
         }
@@ -184,11 +184,9 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
                 email = QString::fromStdString(prop.getValue());
             } else if (propName == "TEL") {
                 bool subscriptable = false;
-
                 auto propParams = prop.params();
                 for (const auto &param : propParams) {
                     if (param.first == "TYPE") {
-
                         const auto types = QString::fromStdString(param.second)
                                                    .split(QChar(','), Qt::SkipEmptyParts);
                         for (const auto &type : types) {
@@ -203,10 +201,15 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
                         }
                     }
                 }
-                phoneNumbers.append({ Contact::NumberType::Unknown,
-                                      stripBaseNumber(PhoneNumberUtil::cleanPhoneNumber(
-                                              QString::fromStdString(prop.getValue()))),
-                                      subscriptable });
+
+                auto phoneNumber = QString::fromStdString(prop.getValue());
+                phoneNumber = PhoneNumberUtil::isSipUri(phoneNumber)
+                        ? phoneNumber
+                        : PhoneNumberUtil::cleanPhoneNumber(phoneNumber);
+                phoneNumber = stripBaseNumber(phoneNumber);
+
+                phoneNumbers.append({ Contact::NumberType::Unknown, phoneNumber, subscriptable });
+
             } else if (propName == "PHOTO") {
 
                 auto propParams = prop.params();
@@ -463,10 +466,6 @@ void CardDAVAddressBookFeeder::process()
         && m_sipStatusSubscriptableAttributes.at(0).contains(',')) {
         m_sipStatusSubscriptableAttributes =
                 m_sipStatusSubscriptableAttributes.at(0).split(',', Qt::SkipEmptyParts);
-
-        for (auto &attr : m_sipStatusSubscriptableAttributes) {
-            attr = std::move(attr).toLower().trimmed();
-        }
     }
 
     qCDebug(lcCardDAVAddressBookFeeder) << "Read subscribable attributes from config for" << m_group

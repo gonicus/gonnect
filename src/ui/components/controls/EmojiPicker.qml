@@ -37,7 +37,11 @@ Item {
             right: parent.right
         }
 
-        Component.onCompleted: () => searchField.giveFocus()
+        Component.onCompleted: () => {
+                                   if (control.Window?.active) {
+                                       searchField.giveFocus()
+                                   }
+                               }
 
         Connections {
             target: control.Window
