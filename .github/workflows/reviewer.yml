@@ -50,6 +50,14 @@ jobs:
 
           echo "DEBUG: $(jq '.pull_request.number' "$RUNNER_TEMP/event.json")"
 
+      - name: Debug
+        run: |
+          echo "GITHUB_EVENT_PATH ist: $GITHUB_EVENT_PATH"
+          echo "--- contents  ---"
+          cat "$GITHUB_EVENT_PATH"
+          echo "--- pull_request.number from jq ---"
+          jq '.pull_request.number' "$GITHUB_EVENT_PATH"
+
       - name: Run OpenRabbit Review
         uses: aryanbrite/openrabbit@main
         with:
