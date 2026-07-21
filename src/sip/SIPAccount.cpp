@@ -533,7 +533,7 @@ long SIPAccount::sendMessage(const QString &recipient, const QString &message,
     SIPBuddy *foundBuddy = nullptr;
 
     for (const auto buddy : std::as_const(m_buddies)) {
-        if (buddy->uri() == sipUrl) {
+        if (buddy->uri().compare(sipUrl, Qt::CaseInsensitive) == 0) {
             foundBuddy = buddy;
         }
     }
@@ -692,7 +692,7 @@ SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
 
     // Do we have such a buddy already?
     for (auto buddy : std::as_const(m_buddies)) {
-        if (buddy->uri() == sipUrl) {
+        if (buddy->uri().compare(sipUrl, Qt::CaseInsensitive) == 0) {
             return buddy->status();
         }
     }
@@ -746,7 +746,7 @@ QString SIPAccount::toSipUri(const QString &var) const
         sipUrl = addTransport(sipUrl);
     }
 
-    return sipUrl.toLower();
+    return sipUrl;
 }
 
 void SIPAccount::generatePreferredIdentityHeader(const QString &var,
