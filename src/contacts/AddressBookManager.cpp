@@ -29,6 +29,7 @@ AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
     m_retryTimer.callOnTimeout(this, [this]() {
         if (m_reconnectScheduled) {
             m_reconnectScheduled = false;
+            disconnect(m_connectivityConnection);
             processAddressBookQueue();
         }
     });
