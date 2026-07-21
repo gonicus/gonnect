@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <QObject>
 #include <QHash>
 #include <QByteArray>
@@ -36,14 +37,21 @@ Q_SIGNALS:
 
 private:
     void clearCStringlist(char **attrs) const;
+    char **toCStringList(const QList<QByteArray> &values) const;
+
     void init(const LDAPInitializer::Config &ldapConfig,
               QStringList sipStatusSubscriptableAttributes = {}, const QString &baseNumber = "");
     void feedAddressBook();
     void loadAvatarsForContacts();
     void loadAvatars(const QList<const Contact *> &contacts);
     void loadAllAvatars(const LDAPInitializer::Config &ldapConfig);
+
     void processImpl(const QString &password);
-    void processResult(LDAPMessage *ldapMessage);
+    bool pagedSearch(LDAP *ldap, const LDAPInitializer::Config &ldapConfig, char **attrs,
+                     const std::function<void(LDAP *, LDAPMessage *)> &onEntry) const;
+    void parseContactEntry(LDAP *ldap, LDAPMessage *entry);
+    void parseAvatarEntry(LDAP *ldap, LDAPMessage *entry, const QByteArray &avatarAttr);
+
     void startContactQuery();
 
     void resetFeeder();
@@ -66,9 +74,8 @@ private:
     LDAPInitializer::Config m_ldapConfig;
 
     AddressBookManager *m_manager = nullptr;
-
     LDAP *m_ldap = nullptr;
-    int m_ldapSearchMessageId = -1;
+
     QString m_group;
     QString m_baseNumber;
     QStringList m_sipStatusSubscriptableAttributes;
@@ -78,4 +85,5 @@ private:
     bool m_authFailed = false;
     int m_retryCount = 0;
     int m_retryInterval = 0;
+    int m_pageSize = 500;
 };

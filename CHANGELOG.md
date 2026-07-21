@@ -1,3 +1,26 @@
+# [2.4.0](https://github.com/gonicus/gonnect/compare/v2.3.2...v2.4.0) (2026-07-07)
+
+
+### Bug Fixes
+
+* async xfer ([#551](https://github.com/gonicus/gonnect/issues/551)) ([f25cc6a](https://github.com/gonicus/gonnect/commit/f25cc6a6957c0a9c808fd013e93e2efcf511fe00))
+* use LDAP paged results ([#547](https://github.com/gonicus/gonnect/issues/547)) ([f37b94d](https://github.com/gonicus/gonnect/commit/f37b94db2d6ef9f7d90b329eacd03519a93cbfb6))
+
+
+### Features
+
+* **carddav:** strip base numbers ([#561](https://github.com/gonicus/gonnect/issues/561)) ([bb3c806](https://github.com/gonicus/gonnect/commit/bb3c806e3a8e38d308dd87acaf30f5f269ab449a))
+
+## [2.3.2](https://github.com/gonicus/gonnect/compare/v2.3.1...v2.3.2) (2026-07-01)
+
+
+### Bug Fixes
+
+* address crash on budy cleanup ([30ef127](https://github.com/gonicus/gonnect/commit/30ef127213511814de481b1083f3e637c67b87ea))
+* allow mwi without message count ([#538](https://github.com/gonicus/gonnect/issues/538)) ([574d5e1](https://github.com/gonicus/gonnect/commit/574d5e1fcbb958656bea57a67504a05a516d2e0c))
+* continue webdav calendar queue on reply error ([#502](https://github.com/gonicus/gonnect/issues/502)) ([f680ec0](https://github.com/gonicus/gonnect/commit/f680ec0dd8635a376b5f231449c21b416103b7ce))
+* hold on makel ([#535](https://github.com/gonicus/gonnect/issues/535)) ([215376e](https://github.com/gonicus/gonnect/commit/215376ed1a59821c31f9ba7c52981955bb2bda9a))
+
 ## [2.3.1](https://github.com/gonicus/gonnect/compare/v2.3.0...v2.3.1) (2026-06-29)
 
 

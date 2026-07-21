@@ -655,13 +655,13 @@ bool SIPAccount::callVoiceBox()
 {
     if (!m_voiceMailUri.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via" << m_voiceMailUri;
-        call(m_voiceMailUri);
+        SIPCallManager::instance().call(m_account, m_voiceMailUri);
         return true;
 
     } else if (!m_messageAccount.isEmpty()) {
         qCDebug(lcSIPAccount) << "calling voice mail via fallback from Message-Account"
                               << m_messageAccount;
-        call(m_messageAccount);
+        SIPCallManager::instance().call(m_account, m_messageAccount);
         return true;
     }
 
@@ -900,9 +900,16 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
 {
     SIPCall *call = new SIPCall(this, iprm.callId);
     call->setIncoming(true);
-    pj::CallInfo ci = call->getInfo();
 
-    qCInfo(lcSIPAccount) << "Incoming Call:" << ci.remoteUri << " [" << ci.stateText << "]";
+    const auto *rxData = static_cast<const pjsip_rx_data *>(iprm.rdata.pjRxData);
+    call->parseCallRouting(rxData ? rxData->msg_info.msg : nullptr);
+
+    try {
+        const pj::CallInfo ci = call->getInfo();
+        qCInfo(lcSIPAccount) << "Incoming Call:" << ci.remoteUri << " [" << ci.stateText << "]";
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to get call info for incoming call:" << err.info();
+    }
 
     m_calls.push_back(call);
 
@@ -911,7 +918,14 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
 
 void SIPAccount::onRegState(pj::OnRegStateParam &prm)
 {
-    pj::AccountInfo ai = getInfo();
+    pj::AccountInfo ai;
+    try {
+        ai = getInfo();
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to get account info in onRegState:" << err.info();
+        return;
+    }
+
     qCInfo(lcSIPAccount).noquote().nospace()
             << "Account " << m_account
             << (ai.regIsActive ? " registered: (code=" : " unregister: (code=") << prm.code << ")";
@@ -1016,7 +1030,12 @@ void SIPAccount::setCredentials(const QString &password)
     if (m_accountConfig.sipConfig.authCreds.size()) {
         pj::AuthCredInfo &info = m_accountConfig.sipConfig.authCreds.front();
         info.data = password.toStdString();
-        modify(m_accountConfig);
+        try {
+            modify(m_accountConfig);
+        } catch (pj::Error &err) {
+            qCCritical(lcSIPAccount)
+                    << "failed to update account config with new password:" << err.info();
+        }
     }
 
     // Update storage
@@ -1042,6 +1061,7 @@ void SIPAccount::reinitBuddies()
     }
 
     QStringList uris;
+    uris.reserve(m_buddies.size());
     for (auto buddy : std::as_const(m_buddies)) {
         uris.push_back(buddy->uri());
     }
@@ -1100,7 +1120,11 @@ void SIPAccount::forwardPresenceState()
         return;
     }
 
-    setOnlineStatus(createPresenceStatusFromGlobal());
+    try {
+        setOnlineStatus(createPresenceStatusFromGlobal());
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to forward presence state:" << err.info();
+    }
 }
 
 pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const

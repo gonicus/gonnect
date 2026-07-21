@@ -53,12 +53,16 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     // This can only be done here for incoming calls, because an outgoing call has its infos not set
     // yet. But incoming calls must be treated here to check whether the contact/number is blocked
     if (callId >= 0) {
-        const pj::CallInfo ci = getInfo();
-        const auto remoteUri = QString::fromStdString(ci.remoteUri);
+        try {
+            const pj::CallInfo ci = getInfo();
+            const auto remoteUri = QString::fromStdString(ci.remoteUri);
 
-        if (!m_isSilent && !m_historyItem) {
-            setContactInfo(remoteUri, ci.role != PJSIP_ROLE_UAC);
-            updateIsBlocked();
+            if (!m_isSilent && !m_historyItem) {
+                setContactInfo(remoteUri, ci.role != PJSIP_ROLE_UAC);
+                updateIsBlocked();
+            }
+        } catch (const pj::Error &err) {
+            qCWarning(lcSIPCall) << "failed to get call info in constructor: " << err.info();
         }
     }
 
@@ -127,6 +131,36 @@ SIPCall::~SIPCall()
                        []() { GlobalCallState::instance().unholdOtherCall(); });
 }
 
+void SIPCall::parseCallRouting(pjsip_msg *msg)
+{
+    static const pj_str_t historyInfoName = { const_cast<char *>("History-Info"), 12 };
+    static const pj_str_t diversionName = { const_cast<char *>("Diversion"), 9 };
+
+    QStringList historyInfoHeaders;
+    QStringList diversionHeaders;
+
+    if (msg) {
+        for (const pjsip_hdr *hdr = msg->hdr.next; hdr != &msg->hdr; hdr = hdr->next) {
+            const bool isHistoryInfo = pj_stricmp(&hdr->name, &historyInfoName) == 0;
+            const bool isDiversion = !isHistoryInfo && pj_stricmp(&hdr->name, &diversionName) == 0;
+            if (!isHistoryInfo && !isDiversion) {
+                continue;
+            }
+
+            const auto *gs = reinterpret_cast<const pjsip_generic_string_hdr *>(hdr);
+            const auto value = QString::fromUtf8(gs->hvalue.ptr, static_cast<int>(gs->hvalue.slen));
+
+            (isHistoryInfo ? historyInfoHeaders : diversionHeaders).append(value);
+        }
+    }
+
+    m_callRoutingHops = SIPCallRoutingHop::parse(historyInfoHeaders, diversionHeaders);
+
+    if (m_historyItem) {
+        m_historyItem->setHops(routingHopNumbers());
+    }
+}
+
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
 {
     if (m_account && m_account->isRTTEnabled()) {
@@ -148,7 +182,18 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_managerNotified = true;
     }
 
-    const pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "onCallState: call info unavailable, treating as disconnected:"
+                             << QString::fromStdString(err.info(false));
+        m_statsTimer.stop();
+        m_account->removeCall(this);
+        m_isEstablished = false;
+        m_earlyCallState = false;
+        return;
+    }
     const auto remoteUri = QString::fromStdString(ci.remoteUri);
 
     if (!m_isSilent && !m_historyItem) {
@@ -289,7 +334,9 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             && !(GlobalCallState::instance().globalCallState() & ICallState::State::Migrating)) {
             setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
 
-            if (m_isEstablished) {
+            if (m_inTransfer) {
+                // Don't play any tones when in transfer
+            } else if (m_isEstablished) {
                 ringToneFactory.endTone()->start();
             } else if (!m_incoming) {
                 if (statusCode == PJSIP_SC_BUSY_HERE) {
@@ -325,7 +372,14 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
     auto &audManager = AudioManager::instance();
 
-    pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "onCallMediaState: call info unavailable, session terminated:"
+                             << QString::fromStdString(err.info(false));
+        return;
+    }
     pj::AudioMedia aud_med;
 
     pj::AudioMedia &speaker_media = audManager.getPlaybackDevMedia();
@@ -363,7 +417,12 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     RingToneFactory::instance().zipTone()->stop();
 
                     qCInfo(lcSIPCall) << "Found media, index" << i << "of" << ci.media.size();
-                    aud_med = getAudioMedia(i);
+                    try {
+                        aud_med = getAudioMedia(i);
+                    } catch (const pj::Error &err) {
+                        qCCritical(lcSIPCall) << "failed to get audio media: " << err.info();
+                        continue;
+                    }
 
                     try {
                         mic_media.startTransmit(aud_med);
@@ -401,6 +460,10 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                             Q_EMIT SIPCallManager::instance().audioLevelChanged(
                                     this, m_sniffer->audioLevel());
                         });
+                    }
+
+                    if (SIPCallManager::instance().isConferenceMode()) {
+                        SIPCallManager::instance().updateConferenceBridge();
                     }
                 }
 
@@ -507,7 +570,14 @@ void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
 
 pj::AudioMedia *SIPCall::audioMedia() const
 {
-    const auto callInfo = getInfo();
+    pj::CallInfo callInfo;
+    try {
+        callInfo = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "audioMedia: call info unavailable, session terminated:"
+                             << QString::fromStdString(err.info(false));
+        return nullptr;
+    }
 
     for (unsigned i = 0; i < callInfo.media.size(); ++i) {
         if (callInfo.media[i].type == PJMEDIA_TYPE_AUDIO) {
@@ -527,7 +597,13 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
         const auto matchResult = regex.match(header);
         if (matchResult.hasMatch()) {
             const QString newIdentity = matchResult.captured("identity");
-            const pj::CallInfo ci = getInfo();
+            pj::CallInfo ci;
+            try {
+                ci = getInfo();
+            } catch (const pj::Error &err) {
+                qCWarning(lcSIPCall) << "failed to get call info in onCallTsxState: " << err.info();
+                return;
+            }
             setContactInfo(newIdentity, ci.role != PJSIP_ROLE_UAC);
             qCDebug(lcSIPCall) << "New call user identity found:" << newIdentity;
         }
@@ -554,6 +630,7 @@ bool SIPCall::unhold()
 {
     pj::CallOpParam op(true);
     op.opt.flag = PJSUA_CALL_UNHOLD;
+    op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
     setIsHolding(false);
 
@@ -585,7 +662,10 @@ void SIPCall::accept()
     }
 
     m_hasAccepted = true;
-    pj::CallOpParam prm;
+
+    pj::CallOpParam prm(true);
+    prm.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
+
     prm.statusCode = PJSIP_SC_OK;
     answer(prm);
 }
@@ -670,9 +750,9 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
             historyType |= Type::Outgoing;
         }
 
-        m_historyItem = CallHistory::instance().addHistoryItem(historyType, m_account->id(), sipUrl,
-                                                               m_contactId,
-                                                               m_contactInfo.isSipSubscriptable);
+        m_historyItem = CallHistory::instance().addHistoryItem(
+                historyType, m_account->id(), sipUrl, m_contactId, m_contactInfo.isSipSubscriptable,
+                routingHopNumbers());
 
         Q_EMIT contactChanged();
     }
@@ -775,13 +855,43 @@ void SIPCall::onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm)
     // TODO: account calls[]?
 }
 
+void SIPCall::onCallTransferStatus(pj::OnCallTransferStatusParam &prm)
+{
+    const int code = prm.statusCode;
+    const QString reason = QString::fromStdString(prm.reason);
+
+    if (code < 200) {
+        prm.cont = true;
+        return;
+    }
+
+    QPointer<SIPCall> self(this);
+    QTimer::singleShot(0, m_account, [self, code, reason]() {
+        if (!self) {
+            return;
+        }
+        if (code / 100 == 2) {
+            Q_EMIT self->transferSucceeded();
+        } else {
+            Q_EMIT self->transferFailed(code, reason);
+        }
+    });
+}
+
 void SIPCall::createOngoingCallNotification()
 {
     if (PlatformSession::instance().isScreenShareActive()) {
         return;
     }
 
-    pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to get call info in createOngoingCallNotification: "
+                             << err.info();
+        return;
+    }
 
     // Create notification text
     const auto contactInfo =
@@ -989,4 +1099,15 @@ float SIPCall::calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double 
     }
 
     return 1.0f + (0.035f * R) + (0.000007f * R * (R - 60.0f) * (100.0f - R));
+}
+
+QStringList SIPCall::routingHopNumbers() const
+{
+    QStringList hops;
+    hops.reserve(m_callRoutingHops.size());
+    std::ranges::transform(std::as_const(m_callRoutingHops), std::back_inserter(hops),
+                           [](const SIPCallRoutingHop &hop) -> QString {
+                               return PhoneNumberUtil::numberFromSipUrl(hop.uri);
+                           });
+    return hops;
 }

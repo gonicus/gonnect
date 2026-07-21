@@ -38,6 +38,21 @@ void AggregatedDirectRoomsOfContact::setChatRooms(const QList<IChatRoom *> chatR
 
 void AggregatedDirectRoomsOfContact::onContactChanged()
 {
+    if (m_contactConn) {
+        QObject::disconnect(m_contactConn);
+        m_contactConn = QMetaObject::Connection();
+    }
+
+    if (m_contact) {
+        m_contactConn = connect(m_contact, &Contact::chatUsersChanged, this,
+                                &AggregatedDirectRoomsOfContact::updateChatRooms);
+    }
+
+    updateChatRooms();
+}
+
+void AggregatedDirectRoomsOfContact::updateChatRooms()
+{
     QList<IChatRoom *> chatRooms;
 
     qDeleteAll(m_providerContextObjects);

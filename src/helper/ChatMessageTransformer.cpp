@@ -1,5 +1,8 @@
 #include "ChatMessageTransformer.h"
-#include "ChatUser.h"
+
+#ifndef APP_TESTS
+#  include "ChatUser.h"
+#endif
 
 #include <QRegularExpression>
 
@@ -7,20 +10,54 @@ namespace ChatMessageTransformer {
 
 QString addLinkTags(const QString &orig)
 {
-    static const QRegularExpression reWithGroup(
-            R"(\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
-            QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression re(
+            R"((<a\b[^>]*>.*?</a>)|(<a\b[^>]*href\s*=\s*"[^"]*")|(\[[^\]]*\]\([^)]*\))|\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
+            QRegularExpression::CaseInsensitiveOption
+                    | QRegularExpression::DotMatchesEverythingOption);
 
-    QString result = orig;
-    result.replace(reWithGroup, R"(<a href="\1">\1</a>)");
+    QString result;
+    int lastPos = 0;
+    auto it = re.globalMatch(orig);
 
-    static const QRegularExpression wwwRe(R"(<a href="www\.)",
-                                          QRegularExpression::CaseInsensitiveOption);
-    result.replace(wwwRe, R"(<a href="http://www.)");
+    while (it.hasNext()) {
+        auto match = it.next();
 
+        result.append(orig.sliced(lastPos, match.capturedStart() - lastPos));
+
+        QString fullMatch = match.captured(0);
+        QString url = match.captured(4);
+
+        if (!url.isEmpty()) {
+            QString href = url;
+            if (href.startsWith("www.", Qt::CaseInsensitive)) {
+                href.prepend("https://");
+            }
+            result.append(QString(R"(<a href="%1">%2</a>)").arg(href, url));
+        } else {
+            result.append(fullMatch);
+        }
+
+        lastPos = match.capturedEnd();
+    }
+
+    result.append(orig.sliced(lastPos));
     return result;
 }
 
+QString fixNewLines(const QString &orig)
+{
+    QString str(orig);
+
+    static const QRegularExpression multiNewlineRegex(QStringLiteral(R"(\n(?=\n))"));
+    str.replace(multiNewlineRegex, QStringLiteral("\n\u2060"));
+
+    static const QRegularExpression singleNewlineRegex(QStringLiteral(R"((?<!\n)\n(?!\n))"));
+    str.replace(singleNewlineRegex, QStringLiteral("\\\n"));
+
+    return str;
+}
+
+#ifndef APP_TESTS
 QString highlightMentions(const QString &orig, const ChatMessage &message)
 {
     const auto mentions = message.mentionedUsers();
@@ -57,5 +94,6 @@ QString highlightMentions(const QString &orig, const ChatMessage &message)
 
     return str;
 }
+#endif
 
 } // namespace ChatMessageTransformer

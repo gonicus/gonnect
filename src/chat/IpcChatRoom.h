@@ -52,6 +52,9 @@ public:
 
     void removeMessage(const QString &messageId);
 
+    void updateMessageEventId(const QString &oldEventId, const QString &newEventId);
+    void setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags);
+
     virtual bool isDirectChat() override { return m_isDirectChat; }
     virtual bool hasPresenceState() override;
     virtual ChatUser::PresenceState presenceState() const override;
@@ -64,6 +67,7 @@ public:
     virtual void setUserRoomState(qsizetype index, UserRoomState state) override;
     virtual ChatUser *chatUserById(const QString &userId) const override;
     virtual bool isUserMemberOfRoom(const QString &userId) const override;
+    virtual bool isUserInvitable(ChatUser *user) const override;
     virtual const QList<ChatUser *> &chatUsers() const override;
     virtual UserRoomState chatUserRoomState(ChatUser *user) const override;
     virtual const QList<ChatUser *> &typingUsers() const override;

@@ -31,6 +31,8 @@ Item {
     required property QtObject content
 
     required property bool isOwnMessage
+    required property bool isPending
+    required property bool isFailed
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
@@ -50,6 +52,7 @@ Item {
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
     signal respondTo(string messageId)
+    signal retryMessage(string eventId)
 
     states: [
         State {
@@ -110,7 +113,7 @@ Item {
         id: internal
 
         function openEmojiPicker(p : point) {
-            const item = ViewHelper.globalEmojiPickerPopup as Popup
+            const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
             if (item.visible) {
                 item.close()
             } else {
@@ -125,11 +128,11 @@ Item {
             control.chatProvider.toggleReaction(control.roomId,
                                                 control.eventId,
                                                 emoji)
-            ;(ViewHelper.globalEmojiPickerPopup as Popup).close()
+            ;(ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup).close()
         }
 
         function onEmojiPopupHide() {
-            const item = ViewHelper.globalEmojiPickerPopup as Popup
+            const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
             if (!item.visible) {
                 item.emojiPicked.disconnect(internal.onEmojiSelected)
                 item.visibleChanged.disconnect(internal.onEmojiPopupHide)
@@ -162,7 +165,7 @@ Item {
 
         Label {
             id: dayLabel
-            text: control.timestamp.toLocaleDateString(Qt.locale(), "dddd, d. MMMM")
+            text: control.timestamp.toLocaleDateString(Qt.locale(), "dddd, d. MMMM yyyy")
             color: Theme.secondaryTextColor
             font {
                 weight: Font.DemiBold
@@ -249,6 +252,19 @@ Item {
         Accessible.ignored: true
     }
 
+    IconLabel {
+        visible: control.isFailed
+        anchors {
+            right: timestampLabel.left
+            rightMargin: 4
+            verticalCenter: timestampLabel.verticalCenter
+        }
+        icon.source: Icons.dataError
+        icon.color: Theme.redColor
+        icon.width: 14
+        icon.height: 14
+    }
+
     ChatMessageListItemRelatedContent {
         id: relatedMessageItem
         visible: control.hasRelatedMessage
@@ -286,6 +302,9 @@ Item {
         userState : control.userState
         affectedUserName: control.chatProvider?.userById(control.affectedUserId)?.computedName ?? ""
         content: control.content
+        textColor: control.isPending ? Theme.inactiveTextColor
+                  : control.isFailed ? Theme.redColor
+                  : Theme.primaryTextColor
 
         onOpenDirectChatRequested: userId => {
             if (!userId) {
@@ -303,7 +322,7 @@ Item {
         anchors {
             top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
             left: nameLabel.left
-            right: timestampLabel.left
+            right: retryButton.visible ? retryButton.left : timestampLabel.left
             rightMargin: 10
         }
     }
@@ -325,8 +344,38 @@ Item {
                 control.clickedLink = ""
             }
 
-            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup()
+            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
+            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
         }
+    }
+
+    Button {
+        id: retryButton
+        text: qsTr("Retry")
+        icon.source: Icons.viewRefresh
+        visible: control.isFailed
+        flat: true
+        height: timestampLabel.implicitHeight
+
+        topInset: 0
+        bottomInset: 0
+        padding: 0
+        topPadding: 0
+        bottomPadding: 0
+        leftPadding: 0
+        rightPadding: 0
+
+        anchors {
+            right: timestampLabel.left
+            rightMargin: 10
+            bottom: messageContentItem.bottom
+        }
+
+        onClicked: () => {
+                       if (retryButton.visible && retryButton.enabled) {
+                           control.retryMessage(control.eventId)
+                       }
+                   }
     }
 
     Component {
@@ -338,21 +387,14 @@ Item {
 
             HideableMenuItem {
                 text: qsTr("Add reaction...")
-                visible: !!(control.capabilities & IChatProvider.Capability.Reactions)
+                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.Reactions)
                 icon.source: Icons.smileyAdd
                 onTriggered: () => {
                     const menuItem = chatMessageContextMenu.itemAt(0)
-                    const coord = menuItem.mapToGlobal(menuItem.width / 2, menuItem.height / 2)
+                    const coord = menuItem.mapToItem(control.Window.window.contentItem,
+                                                     menuItem.width / 2, menuItem.height / 2)
 
-                    let x = 0, y = 0
-                    let parent = chatMessageContextMenu
-                    while (parent) {
-                        x += parent.x
-                        y += parent.y
-                        parent = parent.parent
-                    }
-
-                    internal.openEmojiPicker(Qt.point(x, y))
+                    internal.openEmojiPicker(coord)
                 }
             }
 
@@ -383,7 +425,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Remove message...")
                 icon.source: Icons.editDelete
-                visible: !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
+                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
                 onTriggered: () => {
                     const item = DialogFactory.createConfirmDialog({
                         title: qsTr("Remove message"),
@@ -403,14 +445,14 @@ Item {
             HideableMenuItem {
                 text: qsTr("Edit message...")
                 icon.source: Icons.editor
-                visible: control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
+                visible: !control.isFailed && !control.isPending && control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
                 onTriggered: () => {
                     ViewHelper.showEditMessageDialog(control.chatProvider, control.roomId, control.eventId, control.content?.simpleText ?? "")
                 }
             }
 
             HideableMenuItem {
-                visible: !!(control.capabilities & IChatProvider.Capability.MessageRelations)
+                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.MessageRelations)
                 text: qsTr("Reply...")
                 icon.source: Icons.mailReplyCustom
                 onTriggered: () => control.respondTo(control.eventId)
@@ -426,7 +468,7 @@ Item {
             left: nameLabel.left
             right: timestampLabel.left
             top: messageContentItem.bottom
-            topMargin: 12
+            topMargin: Theme.d
         }
 
         Repeater {

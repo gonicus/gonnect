@@ -5,6 +5,7 @@
 #include "ChatMessageContentText.h"
 #include "ChatMessageContentVideoFile.h"
 
+#include <QFileInfo>
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(lcIpcChatRoom, "gonnect.app.chat.IpcChatRoom")
@@ -90,13 +91,16 @@ void IpcChatRoom::ensureMessageLoaded(const QString &id)
 
 ChatMessage *IpcChatRoom::latestOwnTextMessage() const
 {
+    using Flag = ChatMessage::Flag;
+
     QListIterator it(m_messages);
     it.toBack();
 
     while (it.hasPrevious()) {
         auto *msg = it.previous();
-        if (qobject_cast<ChatMessageContentText *>(msg->content())
-            && (msg->flags() & ChatMessage::Flag::OwnMessage)) {
+        if ((msg->flags() & Flag::OwnMessage)
+            && qobject_cast<ChatMessageContentText *>(msg->content())
+            && !(msg->flags() & (Flag::Pending | Flag::Failed))) {
             return msg;
         }
     }
@@ -118,7 +122,10 @@ void IpcChatRoom::sendFile(const QString &filePath)
         return;
     }
 
-    dispatcher->sendFile(id(), uploadedUrl, filePath.split(QChar('/')).last());
+    const QUrl url(filePath);
+    const auto originalFileName = url.isLocalFile() ? QFileInfo(url.toLocalFile()).fileName()
+                                                    : filePath.split(QChar('/')).last();
+    dispatcher->sendFile(id(), uploadedUrl, originalFileName);
 }
 
 void IpcChatRoom::sendTypingPing()
@@ -146,14 +153,17 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
                 });
     }
 
+    const auto eventId = message->eventId();
+
     if (isIndependent) {
-        m_messageLookup.insert(message->eventId(), message);
+        m_messageLookup.insert(eventId, message);
         Q_EMIT chatMessageOutOfSequenceReceived(message);
     } else {
+
         for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
             if (m_messages.at(i)->timestamp() < message->timestamp()) {
                 m_messages.insert(i + 1, message);
-                m_messageLookup.insert(message->eventId(), message);
+                m_messageLookup.insert(eventId, message);
                 Q_EMIT chatMessageAdded(i + 1, message);
                 return;
             }
@@ -181,6 +191,25 @@ void IpcChatRoom::removeMessage(const QString &messageId)
             Q_EMIT chatMessageRemoved(i, message);
             delete message;
             return;
+        }
+    }
+}
+
+void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString &newEventId)
+{
+    if (auto msg = m_messageLookup.take(oldEventId)) {
+        msg->setEventId(newEventId);
+        m_messageLookup.insert(newEventId, msg);
+    }
+}
+
+void IpcChatRoom::setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags)
+{
+    if (auto msg = m_messageLookup.value(eventId)) {
+        const auto prevFlags = msg->flags();
+        if (prevFlags != newFlags) {
+            msg->setFlags(newFlags);
+            Q_EMIT chatMessageFlagsChanged(indexOfMessage(msg), msg, prevFlags);
         }
     }
 }
@@ -367,6 +396,7 @@ void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
     }
 
     auto user = q_check_ptr(m_chatUsers.at(index));
+
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(index, user, state);
 }
@@ -408,6 +438,18 @@ bool IpcChatRoom::isUserMemberOfRoom(const QString &userId) const
     static const QSet<UserRoomState> okStates = { UserRoomState::Joined, UserRoomState::Invited,
                                                   UserRoomState::Knocked };
     return user && okStates.contains(m_userRoomStates.value(user));
+}
+
+bool IpcChatRoom::isUserInvitable(ChatUser *user) const
+{
+    if (!user) {
+        return false;
+    }
+
+    static const QSet<UserRoomState> allowedStates = { UserRoomState::Unjoined,
+                                                       UserRoomState::Banned };
+
+    return allowedStates.contains(chatUserRoomState(user));
 }
 
 const QList<ChatUser *> &IpcChatRoom::chatUsers() const

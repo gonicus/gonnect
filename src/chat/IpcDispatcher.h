@@ -26,6 +26,18 @@ class Notification;
 
 #define GONNECT_IPC_TIMEOUT_SECS 29
 
+template <typename T>
+concept MessageDeliverer = requires(T obj) {
+    { obj.hasText() } -> std::same_as<bool>;
+    { obj.text() } -> std::convertible_to<const de::gonicus::gonnect::MessageContentText &>;
+    { obj.hasFile() } -> std::same_as<bool>;
+    { obj.file() } -> std::convertible_to<const de::gonicus::gonnect::MessageContentFile &>;
+    { obj.hasMembershipChange() } -> std::same_as<bool>;
+    {
+        obj.membershipChange()
+    } -> std::convertible_to<const de::gonicus::gonnect::MessageContentMembershipChange &>;
+};
+
 class IpcDispatcher : public IChatProvider
 {
     Q_OBJECT
@@ -56,10 +68,13 @@ public:
     crossSigningMethodReConv(const CrossSigningSecret::CrossSigningMethod method);
 
     enum class ConnectionState {
-        Disconnected =
-                static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::Disconnected),
+        LoggedOut = static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::LoggedOut),
         Connected = static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::Connected),
         LoggedIn = static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::LoggedIn),
+        NetworkUnavailable = static_cast<int>(
+                de::gonicus::gonnect::StatusUpdate::StatusCode::NetworkUnavailable),
+        SessionInvalid =
+                static_cast<int>(de::gonicus::gonnect::StatusUpdate::StatusCode::SessionInvalid),
     };
     Q_ENUM(ConnectionState)
 
@@ -118,8 +133,8 @@ public:
     /// Mark the given room as read such there are no unread notifications or messages afterwards.
     void markAsRead(const QString &roomId);
 
-    /// Initial load of room messages.
-    void loadMessages(IChatRoom *chatRoom);
+    virtual void loadMessages(IChatRoom *chatRoom,
+                              quint32 n = IChatProvider::defaultMessageLimit) override;
 
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
@@ -156,6 +171,7 @@ public:
     virtual void requestUser(const QString &userId) override;
 
     virtual void requestRemoveMessage(const QString &roomId, const QString &messageId) override;
+    virtual void retrySendMessage(const QString &roomId, const QString &failedMessageId) override;
     virtual void requestEditMessage(const QString &roomId, const QString &messageId,
                                     const QString &newContent) override;
 
@@ -219,6 +235,9 @@ private:
     static IChatRoom::Permissions
     roomPermissionsGrpcToGonnect(const de::gonicus::gonnect::RoomPermissions permissions);
 
+    template <MessageDeliverer T>
+    [[nodiscard]] QObject *createMessageContent(const T &message) const;
+
     /// Setup and start sub process.
     void init();
 
@@ -231,7 +250,9 @@ private:
     /// destroys it after usage. If requestContainer has a tag, an answer to the request must be
     /// received within timeoutSeconds, or a timeout occurs. If the container has no tag or
     /// timeoutSeconds is 0, no timeout check is being made.
-    void sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
+    /// The return value indicates whether the request has successfully been send. It does not
+    /// represent a response to the request.
+    bool sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
                      quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS);
 
     /// Create a new empty container message. Caller takes ownership of the returned object.
@@ -243,8 +264,9 @@ private:
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
-    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
-                                        bool isIndependent);
+    ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
+                                                   bool isUnread, bool isIndependent,
+                                                   ChatMessage *chatMessage);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
@@ -287,7 +309,7 @@ private:
     IpcConfig m_configInfo;
     QProtobufSerializer m_protoSerializer;
     quint64 m_nextFreeTag = 1;
-    ConnectionState m_connectionState = ConnectionState::Disconnected;
+    ConnectionState m_connectionState = ConnectionState::LoggedOut;
     QList<IpcChatRoom *> m_rooms;
     QHash<QString, IpcChatRoom *> m_roomLookup;
     QString m_nextPublicRoomListResponseToken;
@@ -345,6 +367,15 @@ private:
 
     /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
     QSet<QString> m_failedMessageIds;
+
+    struct PendingMessageInfo
+    {
+        QString roomId;
+        QString tempEventId;
+    };
+
+    /// Tags of pending (optimistic) messages that have been locally added but not yet confirmed.
+    QHash<quint64, PendingMessageInfo> m_pendingMessages;
 
 Q_SIGNALS:
 

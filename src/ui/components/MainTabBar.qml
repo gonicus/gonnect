@@ -7,7 +7,7 @@ import base
 
 Item {
     id: control
-    implicitWidth: 54 + 2 * 8
+    implicitWidth: 4 * Theme.d + 2 * Theme.d
     implicitHeight: topMenuCol.implicitHeight
 
     LoggingCategory {
@@ -116,6 +116,7 @@ Item {
         let tabOrder = []
 
         tabOrder.push(...topMenuCol.children)
+
         return tabOrder.filter((button) => button.pageId)
     }
 
@@ -136,33 +137,33 @@ Item {
     }
 
     function sortTabList() {
-        let tabList = UISettings.getUISetting("generic", "tabBarOrder", "").split(",")
-        if (!tabList.length > 0) {
+        const savedSetting = UISettings.getUISetting("generic", "tabBarOrder", "");
+        const savedIds = savedSetting ? savedSetting.split(",") : [];
+        if (savedSetting === "" || savedIds.length === 0) {
             return
         }
 
-        let tabOrder = []
-        let newOrder = []
+        const tabOrder = [...topMenuCol.children].filter((button) => button.pageId)
+        const existingIds = tabOrder.map((button) => button.pageId)
+        const validIds = savedIds.filter((id) => existingIds.includes(id))
+        const remaining = [...tabOrder]
+        const newOrder = []
 
-        tabOrder.push(...topMenuCol.children)
+        for (const id of validIds) {
+            const idx = remaining.findIndex((button) => button.pageId === id)
+            if (idx >= 0) {
+                newOrder.push(...remaining.splice(idx, 1))
+            }
+        }
+        newOrder.push(...remaining)
 
-        tabList.forEach((tabId) => {
-            tabOrder.forEach((button) => {
-                if (button.pageId && button.pageId === tabId) {
-                    newOrder.push(button)
-                }
-            })
-        })
-
-        newOrder.forEach((button) => {
+        for (const button of newOrder) {
             button.parent = null
             button.visible = false
 
             button.parent = topMenuCol
             button.visible = true
-        })
-
-        control.saveTabList()
+        }
     }
 
     Rectangle {
@@ -176,7 +177,7 @@ Item {
 
         Item {
             id: delg
-            height: 54
+            height: 4 * Theme.d
             enabled: true
             anchors {
                 left: parent?.left
@@ -218,12 +219,12 @@ Item {
             Rectangle {
                 id: hoverBackground
                 visible: delg.isSelected || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
-                radius: 8
+                radius: Theme.d / 2
                 color: Theme.backgroundSecondaryColor
                 anchors {
                     fill: parent
-                    leftMargin: 8
-                    rightMargin: 8
+                    leftMargin: Theme.d
+                    rightMargin: Theme.d
                 }
 
                 // Options
@@ -275,7 +276,7 @@ Item {
 
             Rectangle {
                 id: activeBg
-                radius: 8
+                radius: Theme.d / 2
                 color: Theme.activeIndicatorColor
                 anchors.fill: hoverBackground
                 visible: delg.showActiveBorder
@@ -308,8 +309,8 @@ Item {
                 anchors.centerIn: parent
                 icon {
                     source: delg.iconSource
-                    width: 32
-                    height: 32
+                    width: 3 * Theme.d
+                    height: 3 * Theme.d
                     color: delg.isEnabled
                     ? Theme.primaryTextColor
                     : Theme.secondaryInactiveTextColor
@@ -354,7 +355,7 @@ Item {
                     text: delg.notifications > notificationBubble.maxNotifications
                           ? "99+" : delg.notifications.toString()
                     anchors.centerIn: parent
-                }
+            }
 
                 Accessible.ignored: true
             }
@@ -376,10 +377,62 @@ Item {
         }
     }
 
+    property var tabMenuModel: {
+        const baseModel = [
+            {
+                pageId: SelectionState.homePageId(),
+                pageType: MainPageSelection.PageType.Base,
+                iconSource: Icons.userHome,
+                labelText: qsTr("Home"),
+                disabledTooltipText: qsTr("Home"),
+                isEnabled: true,
+                showActiveBorder: false,
+                attachedData: null
+            }, {
+                pageId: SelectionState.conferencePageId(),
+                pageType: MainPageSelection.PageType.Conference,
+                iconSource: Icons.userGroupNew,
+                labelText: qsTr("Conference"),
+                disabledTooltipText: qsTr("No active conference"),
+                isEnabled: control.hasActiveConference,
+                showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
+                attachedData: null
+            }, {
+                pageId: SelectionState.callPageId(),
+                pageType: MainPageSelection.PageType.Call,
+                iconSource: Icons.callStart,
+                labelText: qsTr("Call"),
+                disabledTooltipText: qsTr("No active call"),
+                isEnabled: control.hasActiveCall,
+                showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
+                attachedData: null
+            }
+        ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
+
+        if (ChatConnectorManager.isChatAvailable) {
+            for (const conn of ChatConnectorManager.chatConnectors) {
+                baseModel.push({
+                                   pageId: SelectionState.chatsPageId(),
+                                   pageType: MainPageSelection.PageType.Chats,
+                                   iconSource: Icons.dialogMessages,
+                                   labelText: conn.displayName,
+                                   disabledTooltipText: qsTr("Chat not available"),
+                                   isEnabled: conn.isConnected,
+                                   showRedDot: false,
+                                   attachedData: conn
+                               })
+            }
+        }
+
+        return baseModel
+    }
+
+    onTabMenuModelChanged: Qt.callLater(control.sortTabList)
+
     Column {
         id: topMenuCol
-        topPadding: 20
-        spacing: 10
+        topPadding: Theme.d
+        spacing: Theme.d
         anchors {
             left: parent.left
             right: parent.right
@@ -388,55 +441,7 @@ Item {
         Repeater {
             id: menuRepeater
             delegate: tabDelegate
-            model: {
-                const baseModel = [
-                    {
-                        pageId: SelectionState.homePageId(),
-                        pageType: MainPageSelection.PageType.Base,
-                        iconSource: Icons.userHome,
-                        labelText: qsTr("Home"),
-                        disabledTooltipText: qsTr("Home"),
-                        isEnabled: true,
-                        showActiveBorder: false,
-                        attachedData: null
-                    }, {
-                        pageId: SelectionState.conferencePageId(),
-                        pageType: MainPageSelection.PageType.Conference,
-                        iconSource: Icons.userGroupNew,
-                        labelText: qsTr("Conference"),
-                        disabledTooltipText: qsTr("No active conference"),
-                        isEnabled: control.hasActiveConference,
-                        showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
-                        attachedData: null
-                    }, {
-                        pageId: SelectionState.callPageId(),
-                        pageType: MainPageSelection.PageType.Call,
-                        iconSource: Icons.callStart,
-                        labelText: qsTr("Call"),
-                        disabledTooltipText: qsTr("No active call"),
-                        isEnabled: control.hasActiveCall,
-                        showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
-                        attachedData: null
-                    }
-                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
-
-                if (ChatConnectorManager.isChatAvailable) {
-                    for (const conn of ChatConnectorManager.chatConnectors) {
-                        baseModel.push({
-                                           pageId: SelectionState.chatsPageId(),
-                                           pageType: MainPageSelection.PageType.Chats,
-                                           iconSource: Icons.dialogMessages,
-                                           labelText: conn.displayName,
-                                           disabledTooltipText: qsTr("Chat not available"),
-                                           isEnabled: conn.isConnected,
-                                           showRedDot: false,
-                                           attachedData: conn
-                                       })
-                    }
-                }
-
-                return baseModel
-            }
+            model: control.tabMenuModel
         }
 
         Component.onCompleted: () => mainWindow.loadPages()
@@ -444,8 +449,8 @@ Item {
 
     Column {
         id: bottomMenuCol
-        bottomPadding: 20
-        spacing: 10
+        bottomPadding: Theme.d
+        spacing: Theme.d
         anchors {
             left: parent.left
             right: parent.right
@@ -499,7 +504,7 @@ Item {
                 const index = control.getTabList().findIndex(button => button.pageId === selButton.pageId)
                 if (index >= 0) {
                     menuInternal.isFirst = index === 0
-                    menuInternal.isLast = index === topMenuCol.children.length - 2
+                    menuInternal.isLast = index === control.getTabList().length - 1
                 } else {
                     menuInternal.isFirst = false
                     menuInternal.isLast = false

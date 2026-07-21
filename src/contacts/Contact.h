@@ -100,6 +100,10 @@ public:
 
     [[nodiscard("Caller must take ownership")]] PresenceStateAggregator *
     createPresenceStateObject() const;
+
+Q_SIGNALS:
+    void chatUsersChanged();
+
 #endif
 
 private:
@@ -118,6 +122,7 @@ private:
     QString m_mail;
     QDateTime m_lastModified;
     QStringList m_splittedName;
+    QString m_fullNameLower;
     QList<PhoneNumber> m_phoneNumbers;
     bool m_sipStatusSubscriptionInitialized = false;
     bool m_sipStatusSubscriptable = false;

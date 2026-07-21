@@ -20,6 +20,8 @@
 #include "Application.h"
 #include "PlatformSession.h"
 #include "SelectionState.h"
+#include "CallRoutingHelper.h"
+#include "CallRoutingHopInfo.h"
 
 Q_LOGGING_CATEGORY(lcSIPCallManager, "gonnect.sip.callmanager")
 
@@ -194,6 +196,20 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             bodyParts.append(countries.join(", "));
         }
 
+        const auto hops = CallRoutingHelper::routingHopsForCall(*call);
+        if (!hops.isEmpty()) {
+            QStringList hopParts;
+            hopParts.reserve(hops.size());
+
+            for (const auto &hop : hops) {
+                const auto contactName = hop.contactName();
+                hopParts.append(!contactName.isEmpty()
+                                        ? QString("%1 (%2)").arg(contactName, hop.phoneNumber)
+                                        : hop.phoneNumber);
+            }
+            bodyParts.append(tr("Via: %1").arg(hopParts.join(" → ")));
+        }
+
         // Create notification object
         if (call->isBlocked()) {
             qCInfo(lcSIPCallManager) << "Incoming call from" << displayName
@@ -201,7 +217,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             return;
         }
 
-        n = new Notification(title, bodyParts.join("\n"), Notification::Priority::urgent, false,
+        n = new Notification(title, bodyParts.join(", "), Notification::Priority::urgent, false,
                              call);
 
         if (m_settings.value("generic/inverseAcceptReject", false).toBool()) {
@@ -314,7 +330,13 @@ void SIPCallManager::initBridge()
 {
     if (!m_bridgeConfigured) {
         auto &audDevManager = SIPManager::instance().endpoint().audDevManager();
-        audDevManager.setNullDev();
+        try {
+            audDevManager.setNullDev();
+        } catch (const pj::Error &err) {
+            qCCritical(lcSIPCallManager)
+                    << "failed to set null audio device:" << QString::fromStdString(err.info());
+            return;
+        }
 
         m_bridgeConfigured = true;
     }
@@ -328,11 +350,12 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
 
     // Check if there is already a call for that target number
     for (auto call : std::as_const(m_calls)) {
-        auto callRemoteNumber = PhoneNumberUtil::numberFromSipUrl(
-                QString::fromStdString(call->getInfo().remoteUri));
+        const auto remoteUri = call->sipUrl();
+        auto callRemoteNumber = PhoneNumberUtil::numberFromSipUrl(remoteUri);
+
         if (number == callRemoteNumber) {
-            qCInfo(lcSIPCallManager) << "skipping additional call to already connected URI"
-                                     << call->getInfo().remoteUri;
+            qCInfo(lcSIPCallManager)
+                    << "skipping additional call to already connected URI" << remoteUri;
             return "";
         }
     }
@@ -355,6 +378,7 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
 QStringList SIPCallManager::callIds() const
 {
     QStringList res;
+    res.reserve(m_calls.size());
 
     for (auto call : std::as_const(m_calls)) {
         res.push_back(call->uuid());
@@ -543,8 +567,72 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
         return;
     }
 
-    toCall->xferReplaces(*fromCall, pj::CallOpParam());
-    endCall(toCall);
+    QPointer<SIPCall> fromPtr(fromCall);
+    QPointer<SIPCall> toPtr(toCall);
+
+    fromCall->setInTransfer(true);
+    toCall->setInTransfer(true);
+
+    auto *guard = new QObject(this);
+
+    connect(toCall, &SIPCall::transferSucceeded, guard, [guard, fromPtr, toPtr]() {
+        if (toPtr) {
+            toPtr->account()->hangup(toPtr->getId());
+        }
+        if (fromPtr) {
+            fromPtr->account()->hangup(fromPtr->getId());
+        }
+        guard->deleteLater();
+    });
+
+    connect(toCall, &SIPCall::transferFailed, guard,
+            [guard, fromPtr, toPtr](int code, const QString &reason) {
+                qCCritical(lcSIPCallManager) << "Call transfer failed:" << code << reason;
+
+                if (fromPtr) {
+                    fromPtr->setInTransfer(false);
+                }
+                if (toPtr) {
+                    toPtr->setInTransfer(false);
+                }
+
+                if (toPtr && toPtr->isHolding()) {
+                    toPtr->unhold();
+                }
+                guard->deleteLater();
+            });
+
+    // Fallback: transfer finished if one leg is teared down
+    connect(toCall, &QObject::destroyed, guard, [guard]() { guard->deleteLater(); });
+    connect(fromCall, &QObject::destroyed, guard, [guard]() { guard->deleteLater(); });
+
+    // Timeout if no final NOTIFY received
+    QTimer::singleShot(30s, guard, [guard, fromPtr, toPtr]() {
+        qCWarning(lcSIPCallManager) << "Call transfer timed out without final NOTIFY";
+
+        if (fromPtr) {
+            fromPtr->setInTransfer(false);
+        }
+        if (toPtr) {
+            toPtr->setInTransfer(false);
+        }
+
+        if (toPtr && toPtr->isHolding()) {
+            toPtr->unhold();
+        }
+        guard->deleteLater();
+    });
+
+    // Actual transfer
+    try {
+        toCall->xferReplaces(*fromCall, pj::CallOpParam());
+    } catch (const pj::Error &err) {
+        qCCritical(lcSIPCallManager)
+                << "xferReplaces failed:" << QString::fromStdString(err.info());
+        fromPtr->setInTransfer(false);
+        toPtr->setInTransfer(false);
+        guard->deleteLater();
+    }
 }
 
 SIPCall *SIPCallManager::findCall(const QString &accountId, int callId) const
@@ -561,7 +649,7 @@ SIPCall *SIPCallManager::findCall(const QString &remoteUri) const
 {
     if (!remoteUri.isEmpty()) {
         for (auto call : std::as_const(m_calls)) {
-            if (QString::fromStdString(call->getInfo().remoteUri) == remoteUri) {
+            if (call->sipUrl() == remoteUri) {
                 return call;
             }
         }
@@ -608,32 +696,7 @@ void SIPCallManager::startConference()
         unholdAllCalls();
 
         QTimer::singleShot(100, this, [this]() {
-            if (m_calls.count() == 2) {
-                pj::AudioMedia *audioMedia1 = m_calls.at(0)->audioMedia();
-                pj::AudioMedia *audioMedia2 = m_calls.at(1)->audioMedia();
-
-                if (audioMedia1 && audioMedia2) {
-                    try {
-                        audioMedia1->startTransmit(*audioMedia2);
-                    } catch (pj::Error err) {
-                        qCCritical(lcSIPCallManager)
-                                << "Error transmitting audioMedia1 to audioMedia2:\n"
-                                << "  status:" << err.status << "\n"
-                                << "  reason:" << err.reason << "\n"
-                                << "  file and line:" << err.srcFile << err.srcLine;
-                    }
-                    try {
-                        audioMedia2->startTransmit(*audioMedia1);
-                    } catch (pj::Error err) {
-                        qCCritical(lcSIPCallManager)
-                                << "Error transmitting audioMedia2 to audioMedia1:\n"
-                                << "  status:" << err.status << "\n"
-                                << "  reason:" << err.reason << "\n"
-                                << "  file and line:" << err.srcFile << err.srcLine << "\n";
-                    }
-                }
-            }
-
+            updateConferenceBridge();
             GlobalCallState::instance().setIsPhoneConference(true);
             Q_EMIT isConferenceModeChanged();
         });
@@ -651,6 +714,36 @@ void SIPCallManager::endConference()
         Q_EMIT isConferenceModeChanged();
     } else {
         qCWarning(lcSIPCallManager) << "Not in conference mode";
+    }
+}
+
+void SIPCallManager::updateConferenceBridge()
+{
+    if (!m_isConferenceMode && m_calls.count() != 2) {
+        return;
+    }
+
+    pj::AudioMedia *audioMedia1 = m_calls.at(0)->audioMedia();
+    pj::AudioMedia *audioMedia2 = m_calls.at(1)->audioMedia();
+
+    if (audioMedia1 && audioMedia2) {
+        try {
+            audioMedia1->startTransmit(*audioMedia2);
+        } catch (pj::Error err) {
+            qCCritical(lcSIPCallManager) << "Error transmitting audioMedia1 to audioMedia2:\n"
+                                         << "  status:" << err.status << "\n"
+                                         << "  reason:" << err.reason << "\n"
+                                         << "  file and line:" << err.srcFile << err.srcLine;
+        }
+        try {
+            audioMedia2->startTransmit(*audioMedia1);
+        } catch (pj::Error err) {
+            qCCritical(lcSIPCallManager)
+                    << "Error transmitting audioMedia2 to audioMedia1:\n"
+                    << "  status:" << err.status << "\n"
+                    << "  reason:" << err.reason << "\n"
+                    << "  file and line:" << err.srcFile << err.srcLine << "\n";
+        }
     }
 }
 

@@ -8,6 +8,7 @@
 #include "ICallState.h"
 #include "ResponseItem.h"
 #include "SIPCallManager.h"
+#include "SIPCallRoutingHop.h"
 
 class SIPAccount;
 class CallHistoryItem;
@@ -27,6 +28,7 @@ public:
     void onCallState(pj::OnCallStateParam &prm) override;
     void onCallTransferRequest(pj::OnCallTransferRequestParam &prm) override;
     void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm) override;
+    void onCallTransferStatus(pj::OnCallTransferStatusParam &prm) override;
     void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
     void onInstantMessage(pj::OnInstantMessageParam &prm) override;
     void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
@@ -46,6 +48,10 @@ public:
     bool isEmergencyCall() const;
     void setIncoming(bool flag) { m_incoming = flag; }
     bool isIncoming() const { return m_incoming; }
+
+    void parseCallRouting(pjsip_msg *msg);
+    void setInTransfer(bool flag) { m_inTransfer = flag; }
+    bool isIntransfer() const { return m_inTransfer; }
 
     void call(const QString &dst_uri, const pj::CallOpParam &prm);
     void setPostDialDtmf(const QString &dtmf) { m_postTask = dtmf; }
@@ -77,6 +83,8 @@ public:
     SIPCallManager::SecurityLevel securityLevel() const { return m_securityLevel; }
     bool isSignalingEncrypted() const { return m_signalingEncrypted; }
     bool isMediaEncrypted() const { return m_mediaEncrypted; }
+
+    QList<SIPCallRoutingHop> routingHops() const { return m_callRoutingHops; }
 
     /// \name SIP call quality information
     ///@{
@@ -114,6 +122,8 @@ Q_SIGNALS:
     void missed();
     void ringing();
     void establishedChanged();
+    void transferSucceeded();
+    void transferFailed(int statusCode, QString reason);
     void earlyCallStateChanged();
     void isHoldingChanged();
     void isBlockedChanged();
@@ -147,6 +157,9 @@ private:
     void createOngoingCallNotification();
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
+    QStringList routingHopNumbers() const;
+
+    QList<SIPCallRoutingHop> m_callRoutingHops;
 
     QTimer m_statsTimer;
     QTimer m_rttTimeoutTimer;
@@ -162,6 +175,7 @@ private:
     Sniffer *m_sniffer = nullptr;
 
     bool m_incoming = false;
+    bool m_inTransfer = false;
     bool m_isEstablished = false;
     bool m_wasEstablished = false;
     bool m_managerNotified = false;

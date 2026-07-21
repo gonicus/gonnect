@@ -74,13 +74,29 @@ Item {
             font.pixelSize: Theme.fontPixelSize
             anchors {
                 left: lineNumberCol.right
-                leftMargin: 12
+                leftMargin: Theme.d
             }
 
             CodeHighlighter {
                 id: codeHighlighter
                 quickDocument: codeLabel.textDocument
             }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.NoButton
+
+            onWheel: (wheel) => {
+                         if (wheel.modifiers & Qt.ShiftModifier) {
+                             const nextX = codeFlick.contentX - wheel.angleDelta.y
+                             const maxX = codeFlick.contentWidth - codeFlick.width
+                             codeFlick.contentX = Util.clamp(nextX, 0, maxX)
+                             wheel.accepted = true
+                         } else {
+                             wheel.accepted = false
+                         }
+                     }
         }
     }
 

@@ -212,15 +212,14 @@ BaseWindow {
             } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
 
                 // Paste clipboard image content, if applicable
-                if (ClipboardHelper.hasImage()) {
-                    keyEvent.accepted = true
+                if (!ClipboardHelper.hasImage()) {
+                    return
+                }
 
-                    if (SelectionState.selectedPage.type === MainPageSelection.PageType.Chats) {
-                        const page = control.getPage(SelectionState.selectedPage.id)
-                        if (page) {
-                            page.useImageFromClipboard()
-                        }
-                    }
+                const page = control.getPage(SelectionState.selectedPage.id)
+                if (page && page.hasOwnProperty("useImageFromClipboard") && typeof page["useImageFromClipboard"] === "function") {
+                    keyEvent.accepted = true
+                    page.useImageFromClipboard()
                 }
 
             } else if (keyEvent.key === Qt.Key_M
@@ -308,6 +307,7 @@ BaseWindow {
             showSearch: !SM.uiEditMode
             anchors {
                 top: parent.top
+                topMargin: 5
                 left: mainTabBar.right
                 right: parent.right
             }
@@ -322,7 +322,9 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
+                topMargin: controlBar.visible ? 5 : 0
                 bottom: bottomBar.visible ? bottomBar.top : parent.bottom
+                bottomMargin: Theme.d
             }
 
             function getPage(pageId : string) : Item {
@@ -386,11 +388,12 @@ BaseWindow {
         Item {
             id: bottomBar
             visible: true
-            height: 35
+            height: 30
             anchors {
                 right: parent.right
                 left: mainTabBar.right
                 bottom: parent.bottom
+                bottomMargin: Theme.d / 2 - (Theme.useOwnDecoration ? 0 : 3)  // extra padding for window border
             }
 
             TogglerList {
@@ -400,7 +403,7 @@ BaseWindow {
                 anchors {
                     left: parent.left
                     right: rightRow.left
-                    rightMargin: 24
+                    rightMargin: Theme.d * 2
                     verticalCenter: rightRow.verticalCenter
                 }
             }
@@ -411,7 +414,7 @@ BaseWindow {
                 anchors {
                     right: parent.right
                     bottom: parent.bottom
-                    rightMargin: 6
+                    rightMargin: 2 * Theme.d
                 }
 
                 FirstAidButton {
@@ -505,15 +508,20 @@ BaseWindow {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditChatMessage.qml",
                                  { chatProvider, roomId, messageId, text: content })
         }
+        function onShowFileUploadDialog(chatRoom : IChatRoom, fileUrls : list<url>) {
+            if (chatRoom) {
+                drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FileSelectionOverview.qml",
+                                     { chatRoom, fileUrls })
+            } else {
+                console.error("showFileUploadDialog was called width chatRoom=nullptr and is therefore ignored")
+            }
+        }
         function onShowLargeImage(imageFilePath : url) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeImage.qml", { source : imageFilePath })
         }
-        function onShowLargeVideo(videoFilePath : url, fileName : string, fileSize : int, thumbnailFilePath : url) {
+        function onShowLargeVideo(videoContent : ChatMessageContentVideoFile) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeVideo.qml", {
-                                     source : videoFilePath,
-                                     fileName,
-                                     fileSize,
-                                     thumbnailFilePath
+                                     content: videoContent
                                  })
         }
         function onShowStatusTextEditDialog() {
@@ -531,7 +539,7 @@ BaseWindow {
     readonly property Popup mainDrawer: Popup {
         id: mainDrawer
         width: drawerStackView.currentItem
-               ? Util.clamp(drawerStackView.currentItem.implicitWidth, 0.63 * control.width, control.width - 100)
+               ? Util.clamp(drawerStackView.currentItem.implicitWidth, 0.38 * control.width, control.width - 100)
                : 0
         height: drawerStackView.currentItem
                 ? Util.clamp(drawerStackView.currentItem.implicitHeight, 0.63 * control.height, control.height - 100)

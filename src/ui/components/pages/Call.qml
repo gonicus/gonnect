@@ -27,18 +27,27 @@ Item {
     // The avatar should grow in relation to card height, but only to maximum of 202-254 px
     property int maxAvatarSize: control.isRttEnabled ? 202 : 254
 
-    Keys.onPressed: (event) => {
+    Keys.onPressed: (keyEvent) => {
+
+                        if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
+                            if (ClipboardHelper.hasImage()) {
+                                keyEvent.accepted = false
+                                control.useImageFromClipboard()
+                                return
+                            }
+                        }
+
                         const callItem = callSideBar.selectedCallItem
 
-                        if (event.isAutoRepeat || !callItem) {
+                        if (keyEvent.isAutoRepeat || !callItem) {
                             return
                         }
 
-                        const key = event.text.toUpperCase()
+                        const key = keyEvent.text.toUpperCase()
                         const dtmfKeys = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "#", "*", "A", "B", "C", "D" ]
 
                         if (dtmfKeys.includes(key)) {
-                            event.accepted = true
+                            keyEvent.accepted = true
                             SIPCallManager.sendDtmf(callItem.accountId, callItem.callId, key)
 
                             dtmfFeedbackLabel.text = key
@@ -74,6 +83,10 @@ Item {
         }
     ]
 
+    function useImageFromClipboard() {
+        callSideBar.useImageFromClipboard()
+    }
+
     Card {
         id: callMainCard
         anchors {
@@ -82,7 +95,7 @@ Item {
             bottom: parent.bottom
             right: verticalDragbarDummy.left
 
-            leftMargin: 24
+            leftMargin: Theme.d * 2
             bottomMargin: 8
         }
 
@@ -118,15 +131,20 @@ Item {
                 right: parent.right
                 bottom: nameLabel.top
 
-                topMargin: control.isRttEnabled ? 30
-                           : Math.max(24, 24 + callMainCard.height / 2 - 254)
+                topMargin: (control.isRttEnabled || (callRoutingGrid.visible && callRoutingRep.count))
+                           ? 30
+                           : Math.max(Theme.d * 2, Theme.d * 2 + callMainCard.height / 2 - 254)
                 bottomMargin: 15
             }
 
             Loader {
                 id: avatarLoader
                 width: parent.width
-                height: control.isRttEnabled ? parent.height / 2 : parent.height
+                height: control.isRttEnabled
+                        ? parent.height / 2
+                        : (callRoutingGrid.visible && callRoutingRep.count)
+                          ? avatarLoader.implicitHeight
+                          : parent.height
                 sourceComponent: SIPCallManager.isConferenceMode ? multiAvatarComponent : singleAvatarComponent
             }
 
@@ -175,7 +193,7 @@ Item {
 
                                 CallerBigAvatar {
                                     id: bigAvatar
-                                    bubbleSize: Math.min(avatarLoader.control / 850 * callMainCard.height, control.maxAvatarSize)
+                                    bubbleSize: Math.min(control.maxAvatarSize / 850 * callMainCard.height, control.maxAvatarSize)
                                     name: callerDelg.contactName
                                     avatarUrl: callerDelg.avatarPath
                                     isIncoming: callerDelg.isIncoming
@@ -203,6 +221,57 @@ Item {
 
                 RTTDisplay {
                     id: rttDisplay
+                }
+            }
+
+            Column {
+                id: callRoutingGrid
+                visible: !control.isRttEnabled && callRoutingRep.count > 0
+                spacing: 5
+                anchors.horizontalCenter: parent.horizontalCenter
+                topPadding: 30
+
+                Repeater {
+                    id: callRoutingRep
+                    model: {
+                        const callItem = callSideBar.selectedCallItem
+                        if (callItem && (callItem.isIncoming || callItem.isEstablished)) {
+                            return CallRoutingHelper.routingHopsForCall(callItem.accountId, callItem.callId)
+                        }
+                        return null
+                    }
+
+                    delegate: Item {
+                        id: hop
+                        anchors.horizontalCenter: parent?.horizontalCenter
+                        implicitWidth: mainLabel.implicitWidth
+                        implicitHeight: mainLabel.y + mainLabel.implicitHeight
+
+                        required property int index
+                        required property string phoneNumber
+                        required property string reasonText
+                        required property string contactName
+
+                        readonly property string contactString: hop.contactName ? `${hop.contactName} (${hop.phoneNumber})` : hop.phoneNumber
+
+                        Label {
+                            id: arrowLabel
+                            visible: hop.index > 0
+                            text: '↓'
+                            color: Theme.secondaryTextColor
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        Label {
+                            id: mainLabel
+                            text: hop.reasonText ? `${hop.contactString} (${hop.reasonText})` : hop.contactString
+                            color: Theme.secondaryTextColor
+                            anchors {
+                                top: arrowLabel.visible ? arrowLabel.bottom : parent.top
+                                topMargin: arrowLabel.visible ? 5 : 0
+                            }
+                        }
+                    }
                 }
             }
         }

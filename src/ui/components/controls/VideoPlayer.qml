@@ -58,8 +58,8 @@ ChatMessageAttachmentRectangle {
             anchors {
                 left: parent.left
                 right: parent.right
-                leftMargin: 12
-                rightMargin: 12
+                leftMargin: Theme.d
+                rightMargin: Theme.d
                 verticalCenter: parent.verticalCenter
             }
         }
@@ -137,10 +137,7 @@ ChatMessageAttachmentRectangle {
             BottomButtonBarButton {
                 id: fullScreenButton
                 icon: Icons.viewFullscreen
-                onClicked: () => ViewHelper.showLargeVideo(control.content?.filePath ?? "",
-                                                           control.content?.fileName ?? "",
-                                                           control.content?.fileSize ?? 0,
-                                                           control.content?.thumbnailFilePath ?? "")
+                onClicked: () => ViewHelper.showLargeVideo(control.content)
             }
         ]
     }

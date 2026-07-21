@@ -15,6 +15,10 @@ Item {
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
+    function giveFocus() {
+        chatMessageBox.giveFocus()
+    }
+
     onChatRoomChanged: () => {
         const room = control.chatRoom
         if (room && !room.isInitiallyLoaded) {
@@ -42,7 +46,9 @@ Item {
         id: messageListCardHeading
         visible: titleLoadingIndicatorRow.visible || (control.showTitleBar && !!control.chatRoom)
         leftPadding: avatarImage.x + avatarImage.width - 10
-        rightPadding: parent.width - favCardHeadingButton.y
+        rightPadding: titleLoadingIndicatorRow.visible
+                      ? parent.width - titleLoadingIndicatorRow.x
+                      : parent.width - favCardHeadingButton.x
         text: control.showTitleBar && control.chatRoom
               ? (control.chatRoom.isDirectChat
                  ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
@@ -62,7 +68,7 @@ Item {
         anchors {
             horizontalCenter: !control.showTitleBar ? messageListCardHeading.horizontalCenter : undefined
             right: control.showTitleBar ? favCardHeadingButton.left : undefined
-            rightMargin: 12
+            rightMargin: Theme.d
             top: messageListCardHeading.top
             bottom: messageListCardHeading.bottom
         }
@@ -164,6 +170,11 @@ Item {
                          relatedMsg.chatMessage = control.chatRoom?.chatMessageById(messageId) ?? null
                          chatMessageBox.giveFocus()
                      }
+        onRetryMessage: messageId => {
+                            if (control.chatProvider) {
+                                control.chatProvider.retrySendMessage(control.chatRoom.id, messageId)
+                            }
+                        }
     }
 
     Item {
@@ -362,6 +373,6 @@ Item {
 
     FileDropArea {
         anchors.fill: parent
-        onDropAccepted: url => control.chatRoom?.sendFile(url)
+        onDropAccepted: urls => ViewHelper.showFileUploadDialog(control.chatRoom, urls)
     }
 }

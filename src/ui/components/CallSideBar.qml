@@ -40,9 +40,15 @@ Item {
 
     property AggregatedDirectRoomsOfContact roomsAggregator: null
 
+    function useImageFromClipboard() {
+        if (chatSideBar.visible && chatSideBar.chatProvider && chatSideBar.chatRoom) {
+            chatSideBar.chatProvider.uploadImageFromClipboard(chatSideBar.chatRoom.id)
+        }
+    }
+
     onChatAvailableChanged: {
         if (!control.chatAvailable && control.selectedSideBarMode === CallSideBar.Chat) {
-            control.selectedSideBarMode === CallSideBar.None
+            control.selectedSideBarMode = CallSideBar.None
         }
     }
 
@@ -274,16 +280,6 @@ Item {
         id: chatSideBar
         visible: false
         chatProvider: control.roomsAggregator?.providerOfRoom(chatSideBar.chatRoom) ?? null
-        chatRoom: {
-            const aggr = control.roomsAggregator
-            if (aggr && aggr.bestMatchingChatRoom) {
-                return aggr.bestMatchingChatRoom
-            }
-            if (control.conferenceConnector) {
-                return control.conferenceConnector.chatRoom()
-            }
-            return null
-        }
         anchors {
             top: headerBar.bottom
             bottom: parent.bottom
@@ -293,8 +289,12 @@ Item {
 
         property int lastMessageCount: 0
 
+        Component.onCompleted: () => chatSideBar.updateChatRoom()
+
         onVisibleChanged: () => {
-            if (!chatSideBar.visible) {
+            if (chatSideBar.visible) {
+                chatSideBar.giveFocus()
+            } else {
                 chatSideBar.lastMessageCount = chatSideBar.chatRoom?.notificationCount ?? 0
             }
         }
@@ -303,7 +303,33 @@ Item {
             target: control.conferenceConnector
             function onIsInConferenceChanged() {
                 chatSideBar.lastMessageCount = 0
+                chatSideBar.updateChatRoom()
             }
+        }
+
+        Connections {
+            target: control
+            function onRoomsAggregatorChanged() { chatSideBar.updateChatRoom() }
+        }
+
+        Connections {
+            target: control.roomsAggregator
+            function onBestMatchingChatRoomChanged() { chatSideBar.updateChatRoom() }
+        }
+
+        function updateChatRoom() {
+            Qt.callLater(() => {
+                const aggr = control.roomsAggregator
+                if (aggr && aggr.bestMatchingChatRoom) {
+                    chatSideBar.chatRoom = aggr.bestMatchingChatRoom
+                    return
+                }
+                if (control.conferenceConnector) {
+                    chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+                    return
+                }
+                chatSideBar.chatRoom = null
+            })
         }
     }
 

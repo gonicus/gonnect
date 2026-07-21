@@ -41,7 +41,7 @@ Item {
         icon.source: control.highlighted ? Icons.dataSuccess : Icons.dataError
         anchors {
             left: parent.left
-            leftMargin: 12
+            leftMargin: Theme.d
             verticalCenter: parent.verticalCenter
         }
     }
@@ -54,7 +54,7 @@ Item {
             left: checkIconLabel.right
             right: parent.right
             leftMargin: 6
-            rightMargin: 12
+            rightMargin: Theme.d
         }
 
         Accessible.ignored: true

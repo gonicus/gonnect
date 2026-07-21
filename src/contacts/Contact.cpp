@@ -195,16 +195,15 @@ qreal Contact::matchesSearch(const QString &searchString) const
     }
 
     // Full name
-    const auto fullName = m_splittedName.join(' ');
-    if (searchString.compare(fullName, Qt::CaseSensitivity::CaseInsensitive) == 0) {
+    if (searchString.compare(m_fullNameLower, Qt::CaseSensitivity::CaseInsensitive) == 0) {
         return 1;
     }
 
-    if (fullName.startsWith(searchString, Qt::CaseSensitivity::CaseInsensitive)) {
+    if (m_fullNameLower.startsWith(searchString, Qt::CaseSensitivity::CaseInsensitive)) {
         return 0.98;
     }
 
-    const qreal dist = FuzzyCompare::jaroWinklerDistance(fullName, searchString);
+    const qreal dist = FuzzyCompare::jaroWinklerDistance(m_fullNameLower, searchString);
     maxDist = std::max(dist, maxDist);
     if (maxDist == 1.0) {
         return maxDist;
@@ -255,6 +254,8 @@ void Contact::addChatUser(ChatUser *user)
                 removeChatUser(user);
             }
         });
+
+        Q_EMIT chatUsersChanged();
     }
 }
 
@@ -262,6 +263,7 @@ void Contact::removeChatUser(ChatUser *user)
 {
     if (m_chatUsers.removeOne(user)) {
         user->disconnect(this);
+        Q_EMIT chatUsersChanged();
     }
 }
 
@@ -292,6 +294,7 @@ PresenceStateAggregator *Contact::createPresenceStateObject() const
 void Contact::init()
 {
     m_splittedName = PhoneNumberUtil::clearInternationalChars(m_name).toLower().split(' ');
+    m_fullNameLower = m_splittedName.join(' ');
 
     updateSipStatusSubscriptable();
 }

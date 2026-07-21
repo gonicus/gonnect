@@ -109,6 +109,17 @@ uint SIPAccountManager::sipRegisterRetryInterval() const
     return 30;
 }
 
+bool SIPAccountManager::messagesWaiting() const
+{
+    for (const auto account : std::as_const(m_accounts)) {
+        if (account->messagesWaiting()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 qint16 SIPAccountManager::newVoiceMessageCount() const
 {
     for (const auto account : std::as_const(m_accounts)) {

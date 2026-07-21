@@ -24,7 +24,7 @@ ChatMessageAttachmentRectangle {
         anchors {
             left: parent.left
             right: parent.right
-            leftMargin: 12
+            leftMargin: Theme.d
             top: parent.top
             bottom: sliderContainer.top
         }
@@ -54,7 +54,7 @@ ChatMessageAttachmentRectangle {
             anchors {
                 left: playButton.right
                 right: downloadButton.left
-                rightMargin: 12
+                rightMargin: Theme.d
 
                 verticalCenter: parent.verticalCenter
                 verticalCenterOffset: 2
@@ -106,7 +106,7 @@ ChatMessageAttachmentRectangle {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            margins: 12
+            margins: Theme.d
         }
 
         Slider {

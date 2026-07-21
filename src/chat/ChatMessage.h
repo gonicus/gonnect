@@ -17,12 +17,12 @@ class ChatMessage : public QObject
     QML_UNCREATABLE("")
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
 
-    Q_PROPERTY(QString eventId READ eventId CONSTANT FINAL)
+    Q_PROPERTY(QString eventId READ eventId NOTIFY eventIdChanged FINAL)
     Q_PROPERTY(QString nickName READ nickName CONSTANT FINAL)
     Q_PROPERTY(bool isStateUpdate READ isStateUpdate CONSTANT FINAL)
     Q_PROPERTY(ChatMessageContentUserStateChange::State state READ state CONSTANT FINAL)
     Q_PROPERTY(QString affectedUserId READ affectedUserId CONSTANT FINAL)
-    Q_PROPERTY(QObject *content READ content CONSTANT FINAL)
+    Q_PROPERTY(QObject *content READ content NOTIFY contentChanged FINAL)
 
 public:
     enum class Flag {
@@ -33,6 +33,8 @@ public:
         Markdown = 1 << 3,
         Pinned = 1 << 4,
         Encrypted = 1 << 5,
+        Pending = 1 << 6,
+        Failed = 1 << 7,
     };
     Q_ENUM(Flag)
     Q_DECLARE_FLAGS(Flags, Flag)
@@ -49,9 +51,11 @@ public:
     QString fromId() const { return m_fromId; }
     QString nickName() const { return m_nickName; }
     QDateTime timestamp() const { return m_timestamp; }
+    void setTimestamp(const QDateTime &timestamp);
     Flags flags() const { return m_flags; }
     QObject *content() const { return m_content; }
     IChatRoom *chatRoom() const { return m_chatRoom; }
+    void setContent(QObject *content);
 
     bool isStateUpdate() const;
 
@@ -99,6 +103,11 @@ private:
     QHash<QString, ChatMessageReaction *> m_reactions;
 
     QSet<ChatUser *> m_mentionedPartpicipants;
+
+Q_SIGNALS:
+    void contentChanged();
+    void eventIdChanged();
+    void timestampChanged();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ChatMessage::Flags)

@@ -137,13 +137,13 @@ Item {
         anchors.fill: parent
 
         Column {
-            spacing: 24
+            spacing: Theme.d * 2
             anchors {
                 verticalCenter: parent.verticalCenter
                 left: parent.left
                 right: parent.right
-                leftMargin: 24
-                rightMargin: 24
+                leftMargin: Theme.d * 2
+                rightMargin: Theme.d * 2
             }
 
             Label {
@@ -186,9 +186,9 @@ Item {
         BusyIndicator {
             running: waitingForResponseScreen.visible
             anchors {
-                horizontalCenter: parent.horizontalCenter
+            horizontalCenter: parent.horizontalCenter
                 bottom: parent.verticalCenter
-                bottomMargin: 24
+                bottomMargin: Theme.d * 2
             }
         }
 
@@ -199,7 +199,7 @@ Item {
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: parent.verticalCenter
-                topMargin: 24
+                topMargin: Theme.d * 2
             }
         }
 
@@ -207,7 +207,7 @@ Item {
             text: qsTr("Cancel")
             anchors {
                 top: waitingForResponseLabel.bottom
-                topMargin: 24
+                topMargin: Theme.d * 2
                 horizontalCenter: parent.horizontalCenter
             }
             onClicked: () => {
@@ -223,13 +223,13 @@ Item {
         anchors.fill: parent
 
         Column {
-            spacing: 24
+            spacing: Theme.d * 2
             anchors {
                 verticalCenter: parent.verticalCenter
                 left: parent.left
                 right: parent.right
-                leftMargin: 24
-                rightMargin: 24
+                leftMargin: Theme.d * 2
+                rightMargin: Theme.d * 2
             }
 
             Label {
@@ -282,13 +282,13 @@ Item {
         anchors.fill: parent
 
         Column {
-            spacing: 24
+            spacing: Theme.d * 2
             anchors {
                 verticalCenter: parent.verticalCenter
                 left: parent.left
                 right: parent.right
-                leftMargin: 24
-                rightMargin: 24
+                leftMargin: Theme.d * 2
+                rightMargin: Theme.d * 2
             }
 
             Label {
@@ -334,13 +334,13 @@ Item {
         anchors.fill: parent
 
         Column {
-            spacing: 24
+            spacing: Theme.d * 2
             anchors {
                 verticalCenter: parent.verticalCenter
                 left: parent.left
                 right: parent.right
-                leftMargin: 24
-                rightMargin: 24
+                leftMargin: Theme.d * 2
+                rightMargin: Theme.d * 2
             }
 
             Label {
@@ -417,7 +417,7 @@ Item {
 
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 24
+                spacing: Theme.d * 2
                 height: codeRejectButton.implicitHeight
 
                 Button {

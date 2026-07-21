@@ -40,6 +40,38 @@ void ChatMessage::setEventId(const QString &eventId)
 {
     if (m_eventId != eventId) {
         m_eventId = eventId;
+        Q_EMIT eventIdChanged();
+    }
+}
+
+void ChatMessage::setTimestamp(const QDateTime &timestamp)
+{
+    if (m_timestamp != timestamp) {
+        m_timestamp = timestamp;
+        Q_EMIT timestampChanged();
+    }
+}
+
+void ChatMessage::setContent(QObject *content)
+{
+    if (m_content != content) {
+
+        if (m_content) {
+            m_content->deleteLater();
+            m_content = nullptr;
+        }
+
+        m_content = content;
+
+        if (content) {
+            content->setParent(this);
+
+            if (auto *textContent = qobject_cast<ChatMessageContentText *>(content)) {
+                textContent->processText();
+            }
+        }
+
+        Q_EMIT contentChanged();
     }
 }
 

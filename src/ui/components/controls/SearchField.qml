@@ -22,7 +22,7 @@ Item {
 
     states: [
         State {
-            when: !control.activeFocus && searchInputField.text.trim() === ""
+            when: searchInputField.text.trim() === ""
             PropertyChanges {
                 placeholderLabel.visible: true
             }
@@ -40,8 +40,14 @@ Item {
         color: Theme.backgroundSecondaryColor
         radius: 6
         border.width: 1
-        border.color: Theme.borderColor
+        border.color: control.enabled && (searchInputField.activeFocus || hovHandler.hovered)
+                      ? control.Material.primaryTextColor
+                      : control.Material.hintTextColor
         anchors.fill: parent
+    }
+
+    HoverHandler {
+        id: hovHandler
     }
 
     IconLabel {
