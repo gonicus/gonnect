@@ -27,3 +27,4 @@ jobs:
           llm_model: openrouter/free
           review_mode: both
           tone_mode: balanced
+          pr_number: ${{ github.event.issue.number }}
