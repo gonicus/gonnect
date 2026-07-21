@@ -206,23 +206,11 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                     callback(secret);
                 } else if (error == QKeychain::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
-
-                    auto *timeoutTimer = new QTimer(this);
-                    timeoutTimer->setSingleShot(true);
-                    timeoutTimer->callOnTimeout(this, [timeoutTimer, callback]() {
-                        callback("");
-                        timeoutTimer->deleteLater();
-                    });
-                    timeoutTimer->start(10s);
-
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,
-                            [this, secretKey, group, callback,
-                             timeoutTimer](const QString &id, const QString &password) {
+                            [this, secretKey, group, callback](const QString &id,
+                                                               const QString &password) {
                                 if (id == group) {
-                                    timeoutTimer->stop();
-                                    timeoutTimer->deleteLater();
-
                                     QObject::disconnect(m_viewHelperConnections.value(group));
                                     m_viewHelperConnections.remove(group);
 
