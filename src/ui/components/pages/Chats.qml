@@ -43,6 +43,11 @@ Item {
                 showChatRoomTimer.roomId = room.id
             }
         }
+        function onChatRoomCreationCompleted(room : IChatRoom, tag : string) {
+            if (tag) {
+                showChatRoomTimer.roomId = room.id
+            }
+        }
 
         function onChatRoomLeft(roomId : string, roomName : string, leaveReason : int, message : string) {
             let reasonStr = ""
