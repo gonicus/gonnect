@@ -14,6 +14,7 @@ public:
     explicit IpcChatRoom(const QString &id, const QString &name, QObject *parent = nullptr);
     virtual ~IpcChatRoom();
 
+    QString customName() const { return m_name; }
     void setName(const QString &name);
     void setAvatarPath(const QString &path);
     void setJoinRule(IChatRoom::JoinRule joinRule);
@@ -23,7 +24,7 @@ public:
     void setIsFavorite(bool value);
 
     virtual QString id() override { return m_id; };
-    virtual QString name() override { return m_name; };
+    virtual QString name() override;
     virtual QString avatarPath() override;
     virtual bool isFavorite() override { return m_isFavorite; }
     virtual IChatRoom::JoinRule joinRule() override { return m_joinRule; }
