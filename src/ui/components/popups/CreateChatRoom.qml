@@ -73,16 +73,7 @@ Item {
     RoomAvatar {
         id: avatarImg
         chatProvider: control.chatProvider
-        initials: {
-            const roomName = roomNameTextField.text.trim()
-            if (roomName) {
-                return ViewHelper.initials(roomName)
-            }
-            if (internal.directUserName) {
-                return ViewHelper.initials(internal.directUserName)
-            }
-            return ' '
-        }
+        initials: ViewHelper.initials(roomNameTextField.text.trim() || internal.directUserName) || ' '
         anchors {
             top: parent.top
             left: parent.left
