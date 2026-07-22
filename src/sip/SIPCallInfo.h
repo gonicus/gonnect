@@ -10,28 +10,15 @@ struct SIPCallInfo
 
 public:
     // Security status of the whole call as judged by CUCM
-    enum Security {
-        Unknown,
-        NotAuthenticated,
-        Authenticated,
-        Encrypted
-    };
+    enum Security { Unknown, NotAuthenticated, Authenticated, Encrypted };
     Q_ENUM(Security)
 
     // Tone requested by CUCM
-    enum UiState {
-        None,
-        Ringout,
-        Busy
-    };
+    enum UiState { None, Ringout, Busy };
     Q_ENUM(UiState)
 
     // Urgency presented by CUCM
-    enum Priority {
-        Normal,
-        Urgent,
-        Emergency
-    };
+    enum Priority { Normal, Urgent, Emergency };
     Q_ENUM(Priority)
 
     bool isValid() const { return m_valid; }

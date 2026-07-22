@@ -131,6 +131,26 @@ target_link_libraries(sipTest
         Qt6::Test
 )
 
+qt_add_executable(callInfoTest
+    CallInfo.test.cpp
+    CallInfo.test.h
+    ${PROJECT_SOURCE_DIR}/src/sip/SIPCallInfo.cpp
+    ${PROJECT_SOURCE_DIR}/src/sip/SIPCallInfo.h
+)
+
+add_test(NAME callInfoTest COMMAND callInfoTest)
+
+target_include_directories(callInfoTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/src/sip
+)
+target_link_libraries(callInfoTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Test
+)
+
 qt_add_executable(usbTest
     Usb.test.cpp
     Usb.test.h

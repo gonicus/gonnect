@@ -116,7 +116,7 @@ SIPCallInfo SIPCallInfo::parse(const QStringList &callInfoHeaders)
                     info.m_gci = value;
                 }
 
-                //TODO: there are more (orientation, call-instance, etc.)
+                // TODO: there are more (orientation, call-instance, etc.)
             }
         }
     }

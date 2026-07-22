@@ -46,6 +46,7 @@ public:
     bool isRegistered() const { return m_isRegistered; }
     bool isInstantMessagingAllowed() const;
     bool isRTTEnabled() const { return m_rttEnabled; }
+    bool isCiscoDevice() const { return !m_ciscoDeviceMac.isEmpty(); }
 
     QString call(const QString &number, const QString &contactId = "",
                  const QString &preferredIdentity = "auto", bool silent = false);
