@@ -104,6 +104,7 @@ void AddressBookManager::processAddressBookQueue()
                     << m_remainingMutexLockTries << "tries left.";
             QTimer::singleShot(5s, this, &AddressBookManager::processAddressBookQueue);
         } else {
+            m_remainingMutexLockTries = 10;
             qCCritical(lcAddressBookManager)
                     << "Repeatedly failed to acquire lock for the feeder queue - giving up";
         }

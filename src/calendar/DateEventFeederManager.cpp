@@ -138,6 +138,7 @@ void DateEventFeederManager::processQueue()
                     << m_remainingMutexLockTries << "tries left.";
             QTimer::singleShot(5s, this, &DateEventFeederManager::processQueue);
         } else {
+            m_remainingMutexLockTries = 10;
             qCCritical(lcDateEventFeederManager)
                     << "Repeatedly failed to acquire lock for the feeder queue - giving up";
         }
