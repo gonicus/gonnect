@@ -992,7 +992,7 @@ void IpcDispatcher::processResponse(
 
     } else if (rc.hasRoomCreatedEvent()) {
         const auto &roomProto = rc.roomCreatedEvent();
-        const auto tag = QString::number(rc.tag());
+        const auto tag = rc.tag() ? QString::number(rc.tag()) : QString();
         auto roomObj = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomProto.roomId()));
         if (!roomObj) {
             roomObj = addChatRoom(roomProto, tag);
@@ -1876,9 +1876,13 @@ void IpcDispatcher::processRoomUsers(const de::gonicus::gonnect::Room &room, Ipc
         // Set or request user
         auto user = m_users.value(userId, nullptr);
         if (user) {
-            roomObj->addUser(user, userRoomState);
-            if (roomObj->isDirectChat()) {
-                Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
+            if (roomObj->chatUserById(user->id())) {
+                roomObj->setUserRoomState(user, userRoomState);
+            } else {
+                roomObj->addUser(user, userRoomState);
+                if (roomObj->isDirectChat()) {
+                    Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
+                }
             }
         } else {
             requestUser(userId);
