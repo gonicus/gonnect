@@ -5,6 +5,7 @@
 #include "SIPCall.h"
 #include "SIPCallManager.h"
 #include "SIPAccount.h"
+#include "SIPRemotePartyId.h"
 #include "AudioManager.h"
 #include "AudioPort.h"
 #include "ResponseLoader.h"
@@ -593,6 +594,7 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
                 static_cast<const pjsip_rx_data *>(prm.e.body.tsxState.src.rdata.pjRxData);
         const pjsip_msg *msg = rxData ? rxData->msg_info.msg : nullptr;
         parseCallInfo(msg);
+        parseRemotePartyId(msg);
     }
 
     const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
@@ -1227,4 +1229,73 @@ void SIPCall::addCiscoRemoteCcHeader(pj::CallOpParam &op, const char *feature) c
     header.hName = "Call-Info";
     header.hValue = std::string("<urn:X-cisco-remotecc:") + feature + ">";
     op.txOption.headers.push_back(header);
+}
+
+void SIPCall::parseRemotePartyId(const pjsip_msg *msg)
+{
+    static const pj_str_t rpidName = { const_cast<char *>("Remote-Party-ID"), 15 };
+
+    if (!msg) {
+        return;
+    }
+
+    QStringList headers;
+
+    for (const pjsip_hdr *hdr = msg->hdr.next; hdr != &msg->hdr; hdr = hdr->next) {
+        if (pj_stricmp(&hdr->name, &rpidName) != 0) {
+            continue;
+        }
+
+        const auto *gs = reinterpret_cast<const pjsip_generic_string_hdr *>(hdr);
+        headers.append(QString::fromUtf8(gs->hvalue.ptr, static_cast<int>(gs->hvalue.slen)));
+    }
+
+    if (headers.isEmpty()) {
+        return;
+    }
+
+    const auto parties = SIPRemotePartyId::parse(headers);
+    if (parties.isEmpty()) {
+        return;
+    }
+
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to get call info in parseRemotePartyId:" << err.info();
+        return;
+    }
+
+    const bool weAreCaller = ci.role == PJSIP_ROLE_UAC;
+    const auto wanted =
+            weAreCaller ? SIPRemotePartyId::Party::Called : SIPRemotePartyId::Party::Calling;
+
+    const SIPRemotePartyId *chosen = &parties.first();
+    for (const auto &candidate : std::as_const(parties)) {
+        if (candidate.party() == wanted) {
+            chosen = &candidate;
+            break;
+        }
+    }
+
+    const QString number = chosen->number();
+    const QString name = chosen->name();
+
+    if (number.isEmpty() && name.isEmpty()) {
+        qCDebug(lcSIPCall) << "Remote-Party-ID is fully restricted (privacy="
+                           << SIPRemotePartyId::privacyToString(chosen->privacy()) << ")";
+        return;
+    }
+
+    const QString identity = number.isEmpty() ? name : chosen->uri();
+    if (identity == m_sipUrl) {
+        return;
+    }
+
+    qCDebug(lcSIPCall).nospace() << "Remote-Party-ID update: " << identity << " (privacy="
+                                 << SIPRemotePartyId::privacyToString(chosen->privacy())
+                                 << ", screened=" << chosen->isScreened() << ")";
+
+    setContactInfo(identity, !weAreCaller);
 }

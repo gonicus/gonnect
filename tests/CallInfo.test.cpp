@@ -17,8 +17,9 @@ void CallInfoTest::testEmpty()
 
 void CallInfoTest::testSecurityValues()
 {
-    QCOMPARE(SIPCallInfo::parse({ "<urn:x-cisco-remotecc:callinfo>;security=Encrypted" }).security(),
-             SIPCallInfo::Security::Encrypted);
+    QCOMPARE(
+            SIPCallInfo::parse({ "<urn:x-cisco-remotecc:callinfo>;security=Encrypted" }).security(),
+            SIPCallInfo::Security::Encrypted);
     QCOMPARE(SIPCallInfo::parse({ "<urn:x-cisco-remotecc:callinfo>;security=Authenticated" })
                      .security(),
              SIPCallInfo::Security::Authenticated);
@@ -49,8 +50,8 @@ void CallInfoTest::testUpperCaseUrn()
 
 void CallInfoTest::testIgnoresOtherParameters()
 {
-    const auto info = SIPCallInfo::parse(
-            { "<urn:x-cisco-remotecc:callinfo>; orientation= to; gci= 1-162120; call-instance= 1" });
+    const auto info = SIPCallInfo::parse({ "<urn:x-cisco-remotecc:callinfo>; orientation= to; gci= "
+                                           "1-162120; call-instance= 1" });
 
     QVERIFY(info.isValid());
     QCOMPARE(info.security(), SIPCallInfo::Security::Unknown);
@@ -59,9 +60,8 @@ void CallInfoTest::testIgnoresOtherParameters()
 
 void CallInfoTest::testIgnoresNonCiscoCallInfo()
 {
-    const auto info =
-            SIPCallInfo::parse({ "<http://www.example.com/photo.jpg>;purpose=icon",
-                                 "<http://wwww.example.com/alice/>;purpose=info" });
+    const auto info = SIPCallInfo::parse({ "<http://www.example.com/photo.jpg>;purpose=icon",
+                                           "<http://wwww.example.com/alice/>;purpose=info" });
 
     QVERIFY(!info.isValid());
     QCOMPARE(info.security(), SIPCallInfo::Security::Unknown);
@@ -70,8 +70,9 @@ void CallInfoTest::testIgnoresNonCiscoCallInfo()
 void CallInfoTest::testCommaSeparatedList()
 {
     // One header line may carry several entries.
-    const auto info = SIPCallInfo::parse({ "<http://www.example.com/photo.jpg>;purpose=icon, "
-                                           "<urn:x-cisco-remotecc:callinfo>; security= Encrypted" });
+    const auto info =
+            SIPCallInfo::parse({ "<http://www.example.com/photo.jpg>;purpose=icon, "
+                                 "<urn:x-cisco-remotecc:callinfo>; security= Encrypted" });
 
     QVERIFY(info.isValid());
     QCOMPARE(info.security(), SIPCallInfo::Security::Encrypted);
@@ -146,7 +147,8 @@ void CallInfoTest::testGci()
 
 void CallInfoTest::testGciAbsent()
 {
-    const auto info = SIPCallInfo::parse({ "<urn:x-cisco-remotecc:callinfo>; security= Encrypted" });
+    const auto info =
+            SIPCallInfo::parse({ "<urn:x-cisco-remotecc:callinfo>; security= Encrypted" });
 
     QVERIFY(info.isValid());
     QVERIFY(info.gci().isEmpty());

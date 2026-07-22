@@ -52,6 +52,7 @@ public:
 
     void parseCallRouting(pjsip_msg *msg);
     void parseCallInfo(const pjsip_msg *msg);
+    void parseRemotePartyId(const pjsip_msg *msg);
     void setInTransfer(bool flag) { m_inTransfer = flag; }
     bool isIntransfer() const { return m_inTransfer; }
 

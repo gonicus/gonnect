@@ -151,6 +151,26 @@ target_link_libraries(callInfoTest
         Qt6::Test
 )
 
+qt_add_executable(remotePartyIdTest
+    RemotePartyId.test.cpp
+    RemotePartyId.test.h
+    ${PROJECT_SOURCE_DIR}/src/sip/SIPRemotePartyId.cpp
+    ${PROJECT_SOURCE_DIR}/src/sip/SIPRemotePartyId.h
+)
+
+add_test(NAME remotePartyIdTest COMMAND remotePartyIdTest)
+
+target_include_directories(remotePartyIdTest
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/src/sip
+)
+target_link_libraries(remotePartyIdTest
+    PRIVATE
+        Qt6::Core
+        Qt6::Test
+)
+
 qt_add_executable(usbTest
     Usb.test.cpp
     Usb.test.h
