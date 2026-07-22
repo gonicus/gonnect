@@ -126,9 +126,9 @@ void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
             qCCritical(lcCardDAVAddressBookFeeder)
                     << "Authentication for" << m_group << "has failed";
             ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_group));
-
             m_isProcessing = false;
         } else {
+            m_isProcessing = true;
             m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
                                            m_config.host, m_config.path, m_config.user,
                                            response.secret, m_config.port);
@@ -438,7 +438,6 @@ void CardDAVAddressBookFeeder::flushCacheImpl()
 
 void CardDAVAddressBookFeeder::process()
 {
-    m_isProcessing = true;
     m_retryCount = m_initialRetryCount;
 
     ReadOnlyConfdSettings settings;
