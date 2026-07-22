@@ -282,6 +282,7 @@ Q_SIGNALS:
     /// it must be the empty string.
     void chatRoomAdded(qsizetype index, IChatRoom *room, QString tag = "");
     void chatRoomRemoved(qsizetype index, IChatRoom *room);
+    void chatRoomCreationCompleted(IChatRoom *, QString tag);
 
     /// Signals that the client has joined the chat room.
     void chatRoomJoined(QString roomId);

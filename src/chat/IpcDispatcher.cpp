@@ -989,11 +989,13 @@ void IpcDispatcher::processResponse(
 
     } else if (rc.hasRoomCreatedEvent()) {
         const auto &roomProto = rc.roomCreatedEvent();
+        const auto tag = QString::number(rc.tag());
         auto roomObj = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomProto.roomId()));
         if (!roomObj) {
-            roomObj = addChatRoom(roomProto, QString::number(rc.tag()));
+            roomObj = addChatRoom(roomProto, tag);
         }
         processRoomUsers(roomProto, roomObj);
+        Q_EMIT chatRoomCreationCompleted(roomObj, tag);
 
     } else if (rc.hasUserResponse()) {
         const auto &user = rc.userResponse();
