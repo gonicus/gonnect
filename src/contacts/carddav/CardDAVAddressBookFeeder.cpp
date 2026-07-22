@@ -93,7 +93,7 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
                         qCCritical(lcCardDAVAddressBookFeeder)
                                 << "Repeatedly failed to access CardDAV source" << m_group;
 
-                        Q_EMIT ErrorBus::instance().error(
+                        ErrorBus::instance().addError(
                                 tr("CardDAV source %1 repeatedly failed").arg(m_group));
 
                         m_isProcessing = false;
