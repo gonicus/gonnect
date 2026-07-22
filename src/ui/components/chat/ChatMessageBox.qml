@@ -8,7 +8,7 @@ import base
 
 Item {
     id: control
-    height: Util.clamp(messageField.contentHeight + messageField.anchors.margins * 2 + buttonBar.height + (editBanner.visible ? editBanner.height : 0),
+    height: Util.clamp(messageField.contentHeight + messageFieldScrollView.anchors.margins * 2 + buttonBar.height + (editBanner.visible ? editBanner.height : 0),
                        100 + (editBanner.visible ? editBanner.height : 0),
                        Math.floor(0.8 * parent.height))
 
