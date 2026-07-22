@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SecretResponse.h"
+
 #include <QObject>
 #include <QTimer>
 #include <QTime>
@@ -27,7 +29,7 @@ public:
     void initFeederConfigs();
     void reloadCalendar();
     void acquireSecret(bool forcePrompt, const QString &configId,
-                       std::function<void(const QString &secret)> callback);
+                       std::function<void(SecretResponse response)> callback);
 
 private:
     explicit DateEventFeederManager(QObject *parent = nullptr);

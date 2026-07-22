@@ -255,7 +255,7 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                     viewHelper.requestPassword(group, name);
                     settings.endGroup();
                 } else {
-                    callback({ QString(), false });
+                    callback({ QString(), true });
                 }
             });
 }

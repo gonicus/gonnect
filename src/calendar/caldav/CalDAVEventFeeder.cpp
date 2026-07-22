@@ -6,6 +6,8 @@
 #include "DateEventManager.h"
 #include "AuthManager.h"
 #include "ReadOnlyConfdSettings.h"
+#include "SecretResponse.h"
+#include "ErrorBus.h"
 
 Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
 
@@ -187,12 +189,18 @@ void CalDAVEventFeeder::getNextItem()
 void CalDAVEventFeeder::process(bool authFailed)
 {
     auto manager = q_check_ptr(qobject_cast<DateEventFeederManager *>(parent()));
-    manager->acquireSecret(authFailed, m_config.source, [this](const QString &password) {
-        m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
-                                       m_config.host, m_config.path, m_config.user, password,
-                                       m_config.port);
+    manager->acquireSecret(authFailed, m_config.source, [this](const SecretResponse response) {
+        if (response.hasError) {
+            qCCritical(lcCalDAVEventFeeder)
+                    << "Authentication for" << m_config.source << "has failed";
+            ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_config.source));
+        } else {
+            m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
+                                           m_config.host, m_config.path, m_config.user,
+                                           response.secret, m_config.port);
 
-        m_webdavParser.listDirectory(&m_webdav, "/");
+            m_webdavParser.listDirectory(&m_webdav, "/");
+        }
     });
 }
 

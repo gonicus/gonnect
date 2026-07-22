@@ -7,6 +7,7 @@
 #include "Credentials.h"
 #include "ViewHelper.h"
 #include "ErrorBus.h"
+#include "SecretResponse.h"
 
 #include <QTimer>
 #include <QLoggingCategory>
@@ -49,7 +50,7 @@ void DateEventFeederManager::reloadCalendar()
 }
 
 void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &configId,
-                                           std::function<void(const QString &)> callback)
+                                           std::function<void(SecretResponse response)> callback)
 {
     ReadOnlyConfdSettings settings;
 
@@ -61,7 +62,7 @@ void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &conf
             [this, forcePrompt, configId, secretKey,
              callback](QKeychain::Error error, const QString &secret, const QString &) {
                 if (error == QKeychain::NoError && !forcePrompt) {
-                    callback(secret);
+                    callback({ secret });
                 } else if (error == QKeychain::Error::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
                     auto conn = connect(
@@ -83,7 +84,7 @@ void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &conf
                                                                     .arg(message));
                                                 }
                                             });
-                                    callback(password);
+                                    callback({ password });
                                 }
                             });
 
@@ -93,6 +94,8 @@ void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &conf
                     settings.beginGroup(configId);
                     viewHelper.requestPassword(configId, settings.value("host", "").toString());
                     settings.endGroup();
+                } else {
+                    callback({ QString(), true });
                 }
             });
 }
