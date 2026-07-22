@@ -955,12 +955,11 @@ void IpcDispatcher::processResponse(
         for (const auto &room : list) {
             const auto &roomId = room.roomId();
             auto roomObj = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomId));
-            const auto roomIdx = m_rooms.indexOf(roomObj);
             handledRoomIds.insert(room.roomId());
 
             if (roomObj) {
                 // Update existing room
-                if (room.hasDisplayName() && roomObj->name() != room.displayName()) {
+                if (room.hasDisplayName() && roomObj->customName() != room.displayName()) {
                     roomObj->setName(room.displayName());
                 }
 
@@ -972,36 +971,7 @@ void IpcDispatcher::processResponse(
             }
 
             // Put users in room
-            Q_CHECK_PTR(roomObj);
-            QHashIterator it(room.userIdList());
-
-            // Setup cache
-            QHash<QString, IChatRoom::UserRoomState> *roomCache =
-                    m_userRoomStateCache.value(roomId, nullptr);
-            if (!roomCache) {
-                roomCache = new QHash<QString, IChatRoom::UserRoomState>;
-                m_userRoomStateCache.insert(roomId, roomCache);
-            }
-
-            while (it.hasNext()) {
-                it.next();
-                const auto &userId = it.key();
-                const auto userRoomState = userRoomStateConv(it.value());
-
-                // Fill information into cache
-                roomCache->insert(userId, userRoomState);
-
-                // Set or request user
-                auto user = m_users.value(userId, nullptr);
-                if (user) {
-                    roomObj->addUser(user, userRoomState);
-                    if (roomObj->isDirectChat()) {
-                        Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
-                    }
-                } else {
-                    requestUser(userId);
-                }
-            }
+            processRoomUsers(room, roomObj);
         }
 
         // Remove obsolete rooms
@@ -1009,6 +979,9 @@ void IpcDispatcher::processResponse(
         while (it.hasNext()) {
             auto room = it.next();
             if (!handledRoomIds.contains(room->id())) {
+                if (auto *cache = m_userRoomStateCache.take(room->id())) {
+                    delete cache;
+                }
                 removeNotificationsForRoom(room);
                 m_roomLookup.remove(room->id());
                 Q_EMIT chatRoomRemoved(indexOf(room), room);
@@ -1018,7 +991,14 @@ void IpcDispatcher::processResponse(
         }
 
     } else if (rc.hasRoomCreatedEvent()) {
-        addChatRoom(rc.roomCreatedEvent(), QString::number(rc.tag()));
+        const auto &roomProto = rc.roomCreatedEvent();
+        const auto tag = rc.tag() ? QString::number(rc.tag()) : QString();
+        auto roomObj = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomProto.roomId()));
+        if (!roomObj) {
+            roomObj = addChatRoom(roomProto, tag);
+        }
+        processRoomUsers(roomProto, roomObj);
+        Q_EMIT chatRoomCreationCompleted(roomObj, tag);
 
     } else if (rc.hasUserResponse()) {
         const auto &user = rc.userResponse();
@@ -1518,14 +1498,7 @@ void IpcDispatcher::processResponse(
 
         // Update user states
         if (changeEvent.hasUserIdListChanged()) {
-
-            // Setup cache
-            QHash<QString, IChatRoom::UserRoomState> *roomCache =
-                    m_userRoomStateCache.value(roomId, nullptr);
-            if (!roomCache) {
-                roomCache = new QHash<QString, IChatRoom::UserRoomState>;
-                m_userRoomStateCache.insert(roomId, roomCache);
-            }
+            auto *roomCache = userRoomStateCache(roomId);
 
             // Set user states
             const auto roomStates = changeEvent.userIdList();
@@ -1561,6 +1534,9 @@ void IpcDispatcher::processResponse(
         while (it.hasNext()) {
             auto room = it.next();
             if (room->id() == roomId) {
+                if (auto *cache = m_userRoomStateCache.take(roomId)) {
+                    delete cache;
+                }
                 const QString roomName = room->name();
                 removeNotificationsForRoom(room);
                 m_roomLookup.remove(room->id());
@@ -1875,6 +1851,53 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
             [this](qsizetype) { updateUnreadNotificationsCount(); });
 
     return roomObj;
+}
+
+void IpcDispatcher::processRoomUsers(const de::gonicus::gonnect::Room &room, IpcChatRoom *roomObj)
+{
+    if (!roomObj) {
+        qCCritical(lcIpcDispatcher) << "Cannot process room users without a roomObj";
+        return;
+    }
+
+    const auto &roomId = room.roomId();
+    const auto roomIdx = indexOf(roomObj);
+    auto *roomCache = userRoomStateCache(roomId);
+
+    QHashIterator it(room.userIdList());
+    while (it.hasNext()) {
+        it.next();
+        const auto &userId = it.key();
+        const auto userRoomState = userRoomStateConv(it.value());
+
+        // Fill information into cache
+        roomCache->insert(userId, userRoomState);
+
+        // Set or request user
+        auto user = m_users.value(userId, nullptr);
+        if (user) {
+            if (roomObj->chatUserById(user->id())) {
+                roomObj->setUserRoomState(user, userRoomState);
+            } else {
+                roomObj->addUser(user, userRoomState);
+                if (roomObj->isDirectChat()) {
+                    Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
+                }
+            }
+        } else {
+            requestUser(userId);
+        }
+    }
+}
+
+QHash<QString, IChatRoom::UserRoomState> *IpcDispatcher::userRoomStateCache(const QString &roomId)
+{
+    auto *cache = m_userRoomStateCache.value(roomId, nullptr);
+    if (!cache) {
+        cache = new QHash<QString, IChatRoom::UserRoomState>;
+        m_userRoomStateCache.insert(roomId, cache);
+    }
+    return cache;
 }
 
 IpcChatRoom *IpcDispatcher::ipcChatRoomById(const QString &roomId) const
