@@ -14,6 +14,7 @@ public:
     explicit IpcChatRoom(const QString &id, const QString &name, QObject *parent = nullptr);
     virtual ~IpcChatRoom();
 
+    QString customName() const { return m_name; }
     void setName(const QString &name);
     void setAvatarPath(const QString &path);
     void setJoinRule(IChatRoom::JoinRule joinRule);

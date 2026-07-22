@@ -959,7 +959,7 @@ void IpcDispatcher::processResponse(
 
             if (roomObj) {
                 // Update existing room
-                if (room.hasDisplayName() && roomObj->name() != room.displayName()) {
+                if (room.hasDisplayName() && roomObj->customName() != room.displayName()) {
                     roomObj->setName(room.displayName());
                 }
 
