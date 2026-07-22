@@ -979,6 +979,9 @@ void IpcDispatcher::processResponse(
         while (it.hasNext()) {
             auto room = it.next();
             if (!handledRoomIds.contains(room->id())) {
+                if (auto *cache = m_userRoomStateCache.take(room->id())) {
+                    delete cache;
+                }
                 removeNotificationsForRoom(room);
                 m_roomLookup.remove(room->id());
                 Q_EMIT chatRoomRemoved(indexOf(room), room);
@@ -1531,6 +1534,9 @@ void IpcDispatcher::processResponse(
         while (it.hasNext()) {
             auto room = it.next();
             if (room->id() == roomId) {
+                if (auto *cache = m_userRoomStateCache.take(roomId)) {
+                    delete cache;
+                }
                 const QString roomName = room->name();
                 removeNotificationsForRoom(room);
                 m_roomLookup.remove(room->id());
