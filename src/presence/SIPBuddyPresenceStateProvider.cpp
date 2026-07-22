@@ -9,7 +9,7 @@ SIPBuddyPresenceStateProvider::SIPBuddyPresenceStateProvider(const QString &sipU
 
     connect(&SIPManager::instance(), &SIPManager::buddyStateChanged, this,
             [this](const QString url, SIPBuddyState::STATUS) {
-                if (m_sipUrl == url) {
+                if (m_sipUrl.compare(url, Qt::CaseInsensitive) == 0) {
                     updateState();
                 }
             });
