@@ -14,7 +14,6 @@
 #include <QLoggingCategory>
 #include <QCryptographicHash>
 #include <QPluginLoader>
-#include <QMutexLocker>
 
 using namespace std::chrono_literals;
 using namespace Qt::Literals::StringLiterals;
@@ -23,7 +22,6 @@ Q_LOGGING_CATEGORY(lcAddressBookManager, "gonnect.app.addressbook")
 
 AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
 {
-
     m_retryTimer.setSingleShot(true);
     m_retryTimer.setInterval(10s);
     m_retryTimer.callOnTimeout(this, [this]() {
@@ -94,23 +92,13 @@ void AddressBookManager::reloadAddressBook()
 
 void AddressBookManager::processAddressBookQueue()
 {
-    bool networkAvailable = true;
-    auto &nh = NetworkHelper::instance();
-
-    if (!m_queueMutex.tryLock()) {
-        if (--m_remainingMutexLockTries > 0) {
-            qCWarning(lcAddressBookManager)
-                    << "Failed to acquire lock for the feeder queue, trying again."
-                    << m_remainingMutexLockTries << "tries left.";
-            QTimer::singleShot(5s, this, &AddressBookManager::processAddressBookQueue);
-        } else {
-            m_remainingMutexLockTries = 10;
-            qCCritical(lcAddressBookManager)
-                    << "Repeatedly failed to acquire lock for the feeder queue - giving up";
-        }
+    if (m_isProcessing) {
         return;
     }
-    m_remainingMutexLockTries = 10;
+    m_isProcessing = true;
+
+    bool networkAvailable = true;
+    auto &nh = NetworkHelper::instance();
 
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {
@@ -168,12 +156,11 @@ void AddressBookManager::processAddressBookQueue()
         }
     }
 
-    m_queueMutex.unlock();
+    m_isProcessing = false;
 }
 
 void AddressBookManager::requeueGroup(const QString &group)
 {
-    QMutexLocker locker(&m_queueMutex);
     if (!m_addressBookQueue.contains(group)) {
         m_addressBookQueue.append(group);
     }

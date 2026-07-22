@@ -4,9 +4,7 @@
 
 #include <QObject>
 #include <QHash>
-#include <QMutex>
 #include <QTimer>
-#include <atomic>
 
 class IAddressBookFeeder;
 
@@ -36,13 +34,13 @@ private:
     explicit AddressBookManager(QObject *parent = nullptr);
 
     QString secret(const QString &group) const;
-    QMutex m_queueMutex;
-    std::atomic<int> m_remainingMutexLockTries = 10;
 
     void processAddressBookQueue();
     void requeueGroup(const QString &group);
     void scheduleReconnect();
+
     QTimer m_retryTimer;
+    bool m_isProcessing = false;
 
     QHash<QString, IAddressBookFeeder *> m_addressBookFeeders;
 

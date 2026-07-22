@@ -11,7 +11,6 @@
 
 #include <QTimer>
 #include <QLoggingCategory>
-#include <QMutexLocker>
 #include <QPluginLoader>
 
 Q_LOGGING_CATEGORY(lcDateEventFeederManager, "gonnect.app.dateevents.feeder.manager")
@@ -127,24 +126,13 @@ void DateEventFeederManager::initFeederConfigs()
 
 void DateEventFeederManager::processQueue()
 {
-    bool networkAvailable = true;
-    auto &networkHelper = NetworkHelper::instance();
-
-    if (!m_queueMutex.tryLock()) {
-
-        if (--m_remainingMutexLockTries > 0) {
-            qCWarning(lcDateEventFeederManager)
-                    << "Failed to acquire lock for the feeder queue, trying again."
-                    << m_remainingMutexLockTries << "tries left.";
-            QTimer::singleShot(5s, this, &DateEventFeederManager::processQueue);
-        } else {
-            m_remainingMutexLockTries = 10;
-            qCCritical(lcDateEventFeederManager)
-                    << "Repeatedly failed to acquire lock for the feeder queue - giving up";
-        }
+    if (m_isProcessing) {
         return;
     }
-    m_remainingMutexLockTries = 10;
+    m_isProcessing = true;
+
+    bool networkAvailable = true;
+    auto &networkHelper = NetworkHelper::instance();
 
     QMutableStringListIterator it(m_feederConfigIds);
     while (it.hasNext()) {
@@ -193,12 +181,11 @@ void DateEventFeederManager::processQueue()
         }
     }
 
-    m_queueMutex.unlock();
+    m_isProcessing = false;
 }
 
 void DateEventFeederManager::requeueConfigId(const QString &configId)
 {
-    QMutexLocker locker(&m_queueMutex);
     if (!m_feederConfigIds.contains(configId)) {
         m_feederConfigIds.append(configId);
     }
