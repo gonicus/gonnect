@@ -27,6 +27,16 @@ DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ paren
         reloadCalendar();
     });
     m_nextDayRefreshTimer.start();
+
+    m_retryTimer.setSingleShot(true);
+    m_retryTimer.setInterval(10s);
+    m_retryTimer.callOnTimeout(this, [this]() {
+        if (m_isReconnectSignalSetup) {
+            m_isReconnectSignalSetup = false;
+            disconnect(m_connectivityConnection);
+            processQueue();
+        }
+    });
 }
 
 void DateEventFeederManager::setTimeData()
@@ -195,7 +205,12 @@ void DateEventFeederManager::setupReconnectSignal()
 {
     if (!m_isReconnectSignalSetup) {
         m_isReconnectSignalSetup = true;
-        connect(
+
+        m_retryTimer.stop();
+        m_retryTimer.start();
+        disconnect(m_connectivityConnection);
+
+        m_connectivityConnection = connect(
                 &NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
                 [this]() {
                     m_isReconnectSignalSetup = false;

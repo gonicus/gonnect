@@ -32,6 +32,7 @@ public:
 private:
     explicit DateEventFeederManager(QObject *parent = nullptr);
 
+    QTimer m_retryTimer;
     bool m_isProcessing = false;
 
     QDateTime m_currentTime;
@@ -48,6 +49,7 @@ private:
     void setupReconnectSignal();
 
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
+    QMetaObject::Connection m_connectivityConnection;
     QHash<QString, IDateEventFeeder *> m_dateEventFeeders;
     QStringList m_feederConfigIds;
     bool m_isReconnectSignalSetup = false;
