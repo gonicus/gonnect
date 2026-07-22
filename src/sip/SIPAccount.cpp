@@ -1,5 +1,6 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <algorithm>
 #include "SIPAccount.h"
 #include "SIPManager.h"
 #include "SIPCallManager.h"
@@ -1217,18 +1218,48 @@ void SIPAccount::ciscoSetup()
                        "X-cisco-sis-5.1.0";
     m_accountConfig.regConfig.headers.push_back(supported);
 
-    // Single crypto line with AES_CM_128_HMAC_SHA1_32
-    pj::SrtpCrypto crypto;
-    crypto.name = "AES_CM_128_HMAC_SHA1_32";
-    crypto.key = "";
-    crypto.flags = 0;
+    // CUCM crypto suites
+    static const std::vector<std::string> ciscoCryptoSuites = {
+        "AEAD_AES_256_GCM",
+        "AEAD_AES_128_GCM",
+        "AES_CM_128_HMAC_SHA1_80",
+        "AES_CM_128_HMAC_SHA1_32",
+    };
+
+    // Check which of them are available in our pjsip build and filter them
+    std::vector<std::string> available;
+    try {
+        available = SIPManager::instance().endpoint().srtpCryptoEnum();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to enumerate SRTP crypto suites:" << err.info();
+    }
+
     m_accountConfig.mediaConfig.srtpOpt.cryptos.clear();
-    m_accountConfig.mediaConfig.srtpOpt.cryptos.push_back(crypto);
+
+    for (const auto &name : ciscoCryptoSuites) {
+        if (std::find(available.begin(), available.end(), name) == available.end()) {
+            qCWarning(lcSIPAccount)
+                    << QString::fromStdString(name) << "is not availabe for SRTP - skipping";
+            continue;
+        }
+
+        pj::SrtpCrypto crypto;
+        crypto.name = name;
+        crypto.key = "";
+        crypto.flags = 0;
+        m_accountConfig.mediaConfig.srtpOpt.cryptos.push_back(crypto);
+    }
+
+    if (m_accountConfig.mediaConfig.srtpOpt.cryptos.empty()) {
+        qCCritical(lcSIPAccount) << "no usable SRTP crypto suite for account" << m_account;
+        ErrorBus::instance().addFatalError(
+                tr("No usable SRTP crypto suite available for account %1").arg(m_account));
+        return;
+    }
 
     // The sRTP to RTP fallback is off until CUCM confirms it for the line in the REGISTER
     // response, see ciscoUpdateSrtpFallback(). Until then we only offer and accept sRTP.
-    if (!m_ciscoDeviceMac.isEmpty()
-        && m_accountConfig.mediaConfig.srtpUse != PJMEDIA_SRTP_DISABLED) {
+    if (m_accountConfig.mediaConfig.srtpUse != PJMEDIA_SRTP_DISABLED) {
         m_accountConfig.mediaConfig.srtpUse = PJMEDIA_SRTP_MANDATORY;
         m_accountConfig.mediaConfig.srtpOpt.optionalOfferSavp = false;
     }
