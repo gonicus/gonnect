@@ -38,7 +38,7 @@ Item {
         }
 
         Component.onCompleted: () => {
-                                   if (control.Window?.active) {
+                                   if (control.Window?.active && control.visible) {
                                        searchField.giveFocus()
                                    }
                                }
@@ -46,7 +46,7 @@ Item {
         Connections {
             target: control.Window
             function onActiveChanged() {
-                if (control.Window.active) {
+                if (control.Window.active && control.visible) {
                     searchField.giveFocus()
                 }
             }
