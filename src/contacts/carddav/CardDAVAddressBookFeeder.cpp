@@ -6,6 +6,7 @@
 #include "AuthManager.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
+#include "SecretResponse.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -120,12 +121,18 @@ void CardDAVAddressBookFeeder::onError(QString error)
 
 void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
 {
-    m_manager->acquireSecret(authFailed, m_group, [this](const QString &password) {
-        m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
-                                       m_config.host, m_config.path, m_config.user, password,
-                                       m_config.port);
+    m_manager->acquireSecret(authFailed, m_group, [this](const SecretResponse response) {
+        if (response.hasError) {
+            qCCritical(lcCardDAVAddressBookFeeder)
+                    << "Authentication for" << m_group << "has failed";
+            ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_group));
+        } else {
+            m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
+                                           m_config.host, m_config.path, m_config.user,
+                                           response.secret, m_config.port);
 
-        m_webdavParser.listDirectory(&m_webdav, "/");
+            m_webdavParser.listDirectory(&m_webdav, "/");
+        }
     });
 }
 

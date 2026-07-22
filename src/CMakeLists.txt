@@ -531,6 +531,7 @@ qt_add_qml_module(gonnect
         MainPageSelection.h
         PluginManager.h
         PluginManager.cpp
+        SecretResponse.h
         SelectionState.h
         SelectionState.cpp
         StateManager.cpp

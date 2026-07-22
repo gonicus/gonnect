@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SecretResponse.h"
+
 #include <QObject>
 #include <QHash>
 #include <QMutex>
@@ -28,7 +30,7 @@ public:
     static QString hashForSettingsGroup(const QString &group);
 
     void acquireSecret(bool forcePrompt, const QString &group,
-                       std::function<void(const QString &secret)> callback);
+                       std::function<void(SecretResponse response)> callback);
 
 private:
     explicit AddressBookManager(QObject *parent = nullptr);

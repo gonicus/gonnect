@@ -200,7 +200,7 @@ void AddressBookManager::scheduleReconnect()
 }
 
 void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
-                                       std::function<void(const QString &secret)> callback)
+                                       std::function<void(SecretResponse)> callback)
 {
     ReadOnlyConfdSettings settings;
 
@@ -212,7 +212,7 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
             [this, forcePrompt, group, secretKey,
              callback](QKeychain::Error error, const QString &secret, const QString &) {
                 if (error == QKeychain::NoError && !forcePrompt) {
-                    callback(secret);
+                    callback({ secret });
                 } else if (error == QKeychain::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
                     auto conn = connect(
@@ -235,7 +235,7 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                                                 }
                                             });
 
-                                    callback(password);
+                                    callback({ password });
                                 }
                             });
 
@@ -255,7 +255,7 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                     viewHelper.requestPassword(group, name);
                     settings.endGroup();
                 } else {
-                    callback(QString());
+                    callback({ QString(), false });
                 }
             });
 }

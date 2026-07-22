@@ -14,7 +14,7 @@
 #include "ErrorBus.h"
 #include "ReadOnlyConfdSettings.h"
 #include "AvatarManager.h"
-#include "AddressBookManager.h"
+#include "SecretResponse.h"
 
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
@@ -110,10 +110,16 @@ void LDAPAddressBookFeeder::process()
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
 
     if (bindMethodStr == "simple" || bindMethodStr == "gssapi") {
-        m_manager->acquireSecret(m_authFailed, m_group, [this](const QString &password) {
-            m_authFailed = false;
+        m_manager->acquireSecret(m_authFailed, m_group, [this](const SecretResponse response) {
+            m_authFailed = response.hasError;
 
-            processImpl(password);
+            if (response.hasError) {
+                qCCritical(lcLDAPAddressBookFeeder)
+                        << "Authentication for" << m_group << "has failed";
+                ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_group));
+            } else {
+                processImpl(response.secret);
+            }
         });
     } else { // "none"
         processImpl("");
