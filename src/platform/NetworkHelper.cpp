@@ -63,6 +63,29 @@ QFuture<QJsonDocument> NetworkHelper::fetchUrlAsJson(const QUrl &url)
     });
 }
 
+int NetworkHelper::getStandardPort(const QUrl &url)
+{
+    if (url.port() >= 0) {
+        return url.port();
+    }
+
+    static const QHash<QString, int> protocolMap = {
+        { QStringLiteral("http"), 80 },    { QStringLiteral("https"), 443 },
+        { QStringLiteral("ldap"), 389 },   { QStringLiteral("ldaps"), 636 },
+        { QStringLiteral("caldav"), 80 },  { QStringLiteral("caldavs"), 443 },
+        { QStringLiteral("carddav"), 80 }, { QStringLiteral("carddavs"), 443 }
+    };
+
+    const QString scheme = url.scheme().toLower();
+    int port = protocolMap.value(scheme, -1);
+
+    if (port < 0) {
+        qCCritical(lcNetwork) << "Cannot map scheme" << scheme << "to port";
+    }
+
+    return port;
+}
+
 NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 {
     if (!QNetworkInformation::loadDefaultBackend()) {
@@ -81,11 +104,14 @@ NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 QFuture<bool> NetworkHelper::isReachable(const QUrl &url)
 {
     return QtConcurrent::run([url]() -> bool {
-        QTcpSocket testSocket;
-        testSocket.connectToHost(url.host(), url.port());
-        testSocket.waitForConnected(1000);
+        int port = getStandardPort(url);
+        if (port < 0) {
+            return false;
+        }
 
-        bool state = testSocket.state() == QTcpSocket::UnconnectedState;
+        QTcpSocket testSocket;
+        testSocket.connectToHost(url.host(), port);
+        const bool state = testSocket.waitForConnected(1000);
         testSocket.close();
 
         if (!state) {

@@ -272,6 +272,17 @@ void IpcChatRoom::setIsFavorite(bool value)
     }
 }
 
+QString IpcChatRoom::name()
+{
+    if (!m_name.isEmpty()) {
+        return m_name;
+    }
+    if (const auto *other = otherUser()) {
+        return other->computedName();
+    }
+    return QString();
+}
+
 QString IpcChatRoom::avatarPath()
 {
     if (!m_avatarPath.isEmpty()) {
@@ -511,6 +522,9 @@ void IpcChatRoom::updateOtherUser()
                 Q_EMIT otherUserChanged();
             });
 
+            connect(other, &ChatUser::displayNameChanged, m_otherUserContext,
+                    [this]() { Q_EMIT nameChanged(name()); });
+
             connect(other, &ChatUser::hasPresenceStateChanged, m_otherUserContext,
                     [this]() { Q_EMIT hasPresenceStateChanged(); });
 
@@ -522,6 +536,7 @@ void IpcChatRoom::updateOtherUser()
         }
 
         Q_EMIT otherUserChanged();
+        Q_EMIT nameChanged(name());
     }
 }
 

@@ -8,7 +8,7 @@ import base
 
 Item {
     id: control
-    height: Util.clamp(messageField.contentHeight + messageField.anchors.margins * 2 + buttonBar.height + (editBanner.visible ? editBanner.height : 0),
+    height: Util.clamp(messageField.contentHeight + messageFieldScrollView.anchors.margins * 2 + buttonBar.height + (editBanner.visible ? editBanner.height : 0),
                        100 + (editBanner.visible ? editBanner.height : 0),
                        Math.floor(0.8 * parent.height))
 
@@ -68,10 +68,10 @@ Item {
             repeat: false
             interval: 2000
             onTriggered: () => {
-                if (internal.hasTypedWhileWaiting) {
-                    internal.executePing()
-                }
-            }
+                             if (internal.hasTypedWhileWaiting) {
+                                 internal.executePing()
+                             }
+                         }
         }
 
         property bool emojiSignalsConnected: false
@@ -133,8 +133,8 @@ Item {
 
             const globalCoord = window.contentItem.mapFromItem(messageField, messageField.cursorRectangle)
             popup.x = globalCoord.x > window.contentItem.width / 2
-                      ? globalCoord.x - popup.width
-                      : globalCoord.x
+                    ? globalCoord.x - popup.width
+                    : globalCoord.x
 
             // Create binding because popup.implicitHeight can change while open
             popup.y = Qt.binding(() => globalCoord.y - popup.implicitHeight - messageField.cursorRectangle.height)
@@ -174,9 +174,9 @@ Item {
         id: userSelectPopup
 
         onAccepted: id => {
-            messageField.replaceCurrentWord(id)
-            userSelectPopup.close()
-        }
+                        messageField.replaceCurrentWord(id)
+                        userSelectPopup.close()
+                    }
     }
 
     Rectangle {
@@ -255,10 +255,10 @@ Item {
             }
 
             onClicked: () => {
-                control.editMessageId = ""
-                messageField.clear()
-                messageField.lastCursorPosition = 0
-            }
+                           control.editMessageId = ""
+                           messageField.clear()
+                           messageField.lastCursorPosition = 0
+                       }
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Cancel edit")
@@ -273,17 +273,15 @@ Item {
         color: Theme.secondaryInactiveTextColor
         visible: messageField.text === ""
         anchors {
-            top: messageField.top
-            left: messageField.left
+            top: messageFieldScrollView.top
+            left: messageFieldScrollView.left
         }
     }
 
-    TextEdit {
-        id: messageField
+    ScrollView {
+        id: messageFieldScrollView
         clip: true
-        color: Theme.primaryTextColor
-        font.pixelSize: 14
-        wrapMode: TextEdit.Wrap
+        padding: 0
         anchors {
             top: editBanner.bottom
             left: parent.left
@@ -292,241 +290,261 @@ Item {
             margins: 10
         }
 
-        property int lastCursorPosition: 0
+        TextEdit {
+            id: messageField
+            color: Theme.primaryTextColor
+            font.pixelSize: 14
+            wrapMode: TextEdit.Wrap
+            width: messageFieldScrollView.availableWidth
+            height: messageField.contentHeight
 
-        onTextEdited: () => {
-            internal.sendIsTyping()
-
-            // Save entered text for later restore
-            if (control.chatRoom && !control.isEditing) {
-                internal.savedInput[control.chatRoom.id] = messageField.text
+            onCursorRectangleChanged: {
+                const view = messageFieldScrollView
+                const cursorBottom = cursorRectangle.y + cursorRectangle.height + 5
+                const viewportBottom = view.contentItem.contentY + view.height
+                if (cursorBottom > viewportBottom) {
+                    view.contentItem.contentY = cursorBottom - view.height + 5
+                } else if (cursorRectangle.y - 5 < view.contentItem.contentY) {
+                    view.contentItem.contentY = Math.max(0, cursorRectangle.y - 5)
+                }
             }
 
-            // Find current word at cursor
-            const bounds = messageField.currentWordBoundings()
-            const currWord = text.substring(bounds[0], bounds[1])
+            property int lastCursorPosition: 0
 
-            // Check whether word is a user mention (started or complete)
-            if (currWord.startsWith("@")) {
-                userSelectPopup.filterText = currWord.substring(1)
+            onTextEdited: () => {
+                              internal.sendIsTyping()
 
-                if (userSelectPopup.count) {
-                    let topMostItem = control
-                    while (topMostItem.parent) {
-                        topMostItem = topMostItem.parent
-                    }
+                              // Save entered text for later restore
+                              if (control.chatRoom && !control.isEditing) {
+                                  internal.savedInput[control.chatRoom.id] = messageField.text
+                              }
 
-                    const cursorCoord = messageField.cursorRectangle
-                    const globalCoord = topMostItem.mapFromItem(messageField, cursorCoord.x, cursorCoord.y)
-                    if (globalCoord.x > topMostItem.width / 2) {
-                        userSelectPopup.x = Qt.binding(() => cursorCoord.x - userSelectPopup.width)
+                              // Find current word at cursor
+                              const bounds = messageField.currentWordBoundings()
+                              const currWord = text.substring(bounds[0], bounds[1])
+
+                              // Check whether word is a user mention (started or complete)
+                              if (currWord.startsWith("@")) {
+                                  userSelectPopup.filterText = currWord.substring(1)
+
+                                  if (userSelectPopup.count) {
+                                      let topMostItem = control
+                                      while (topMostItem.parent) {
+                                          topMostItem = topMostItem.parent
+                                      }
+
+                                      const cursorCoord = messageField.cursorRectangle
+                                      const globalCoord = topMostItem.mapFromItem(messageField, cursorCoord.x, cursorCoord.y)
+                                      if (globalCoord.x > topMostItem.width / 2) {
+                                          userSelectPopup.x = Qt.binding(() => cursorCoord.x - userSelectPopup.width)
+                                      } else {
+                                          userSelectPopup.x = cursorCoord.x
+                                      }
+
+                                      userSelectPopup.y = Qt.binding(() => cursorCoord.y - userSelectPopup.height)
+
+                                      if (!userSelectPopup.opened) {
+                                          userSelectPopup.open()
+                                      }
+                                  } else if (userSelectPopup.opened) {
+                                      userSelectPopup.close()
+                                  }
+
+                                  // Check if emoji popup shall be made
+                              } else if (currWord.startsWith(":") && currWord.length > 2) {
+                                  internal.showEmojiPopup(currWord.substring(1))
+
+                              } else {
+                                  if (userSelectPopup.opened) {
+                                      userSelectPopup.close()
+                                  }
+                                  internal.closeEmojiPopup()
+                              }
+                          }
+
+            Keys.onPressed: (keyEvent) => {
+                                if (!control.enabled) {
+                                    return
+                                }
+
+                                const emojiPopup = ViewHelper.globalFilteredEmojiPickerPopup as Popup
+
+                                if (userSelectPopup.opened) {
+                                    // User mentions
+
+                                    if (keyEvent.key === Qt.Key_Up) {
+                                        keyEvent.accepted = true
+                                        userSelectPopup.decrementIndex()
+                                    } else if (keyEvent.key === Qt.Key_Down) {
+                                        keyEvent.accepted = true
+                                        userSelectPopup.incrementIndex()
+                                    } else if ([Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)) {
+
+                                        // Navigate user mention popup
+                                        if (userSelectPopup.selectedIndex >= 0) {
+                                            // Insert selected entry
+                                            keyEvent.accepted = true
+                                            userSelectPopup.accepted(userSelectPopup.idAt(userSelectPopup.selectedIndex))
+                                        } else if (userSelectPopup.count === 1) {
+                                            // Insert sole entry
+                                            keyEvent.accepted = true
+                                            userSelectPopup.accepted(userSelectPopup.idAt(0))
+                                        } else {
+                                            userSelectPopup.close()
+                                        }
+                                    }
+
+                                } else if (emojiPopup?.opened) {
+                                    // Emoji popup
+
+                                    if (keyEvent.key === Qt.Key_Up) {
+                                        keyEvent.accepted = true
+                                        emojiPopup.decrementIndex()
+                                    } else if (keyEvent.key === Qt.Key_Down) {
+                                        keyEvent.accepted = true
+                                        emojiPopup.incrementIndex()
+                                    } else if ([Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)) {
+
+                                        // Navigate emoji popup
+                                        if (emojiPopup.selectedIndex >= 0) {
+                                            // Insert selected entry
+                                            keyEvent.accepted = true
+                                            emojiPopup.accepted(emojiPopup.emojiAt(emojiPopup.selectedIndex))
+                                        } else if (emojiPopup.count === 1) {
+                                            // Insert sole entry
+                                            keyEvent.accepted = true
+                                            emojiPopup.accepted(emojiPopup.emojiAt(0))
+                                        } else {
+                                            emojiPopup.close()
+                                        }
+                                    }
+
+                                } else if (keyEvent.key === Qt.Key_Up) {
+
+                                    if (messageField.lastCursorPosition === messageField.cursorPosition) {
+                                        // Edit last message
+                                        keyEvent.accepted = true
+
+                                        if (!control.editMessageId) {
+                                            control.editLastMessage()
+                                        }
+                                    } else {
+                                        messageField.lastCursorPosition = messageField.cursorPosition
+                                    }
+
+                                } else if ([Qt.Key_Down, Qt.Key_Left, Qt.Key_Right].includes(keyEvent.key)) {
+                                    messageField.lastCursorPosition = messageField.cursorPosition
+
+                                } else if (keyEvent.key === Qt.Key_Escape && control.editMessageId) {
+                                    control.editMessageId = ""
+                                    messageField.clear()
+                                    messageField.lastCursorPosition = 0
+
+                                } else if (control.hasMessage
+                                           && [Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)
+                                           && !(keyEvent.modifiers & Qt.ShiftModifier)) {
+
+                                    // Send message
+                                    keyEvent.accepted = true
+                                    control.sendMessage()
+
+                                } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
+                                    // Clipboard paste
+
+                                    keyEvent.accepted = true
+                                    if (ClipboardHelper.hasImage()) {
+                                        control.imageFromClipboardReceived()
+                                    } else if (ClipboardHelper.hasText()) {
+                                        keyEvent.accepted = true
+                                        messageField.paste()
+                                    }
+                                }
+                            }
+
+            function insertOrRemove(front : string, back : string) {
+                const mf = messageField
+                const len = mf.text.length
+                const start = mf.selectionStart
+                const end = mf.selectionEnd
+                const selText = mf.selectedText
+                const cursorPos = mf.cursorPosition
+                const frontLen = front.length
+                const backLen = back.length
+
+                if (start === end) {
+                    // No selection
+
+                    if (cursorPos >= frontLen
+                            && len - cursorPos >= backLen
+                            && mf.getText(cursorPos - frontLen, cursorPos) === front
+                            && mf.getText(cursorPos, cursorPos + backLen) === back) {
+
+                        // Remove
+                        mf.remove(cursorPos - frontLen, cursorPos + backLen)
+                        mf.cursorPosition = cursorPos - frontLen
+
                     } else {
-                        userSelectPopup.x = cursorCoord.x
+                        // Insert
+                        mf.insert(cursorPos, front + back)
+                        mf.cursorPosition = cursorPos + frontLen
                     }
 
-                    userSelectPopup.y = Qt.binding(() => cursorCoord.y - userSelectPopup.height)
+                } else {
+                    // Selection active
 
-                    if (!userSelectPopup.opened) {
-                        userSelectPopup.open()
-                    }
-                } else if (userSelectPopup.opened) {
-                    userSelectPopup.close()
-                }
+                    if (start >= frontLen
+                            && len - end >= backLen
+                            && mf.getText(start - frontLen, start) === front
+                            && mf.getText(end, end + backLen) === back) {
 
-            // Check if emoji popup shall be made
-            } else if (currWord.startsWith(":") && currWord.length > 2) {
-                internal.showEmojiPopup(currWord.substring(1))
+                        // Remove
+                        mf.remove(end, end + backLen)
+                        mf.remove(start - frontLen, start)
 
-            } else {
-                if (userSelectPopup.opened) {
-                    userSelectPopup.close()
-                }
-                internal.closeEmojiPopup()
-            }
-        }
-
-        Keys.onPressed: (keyEvent) => {
-            if (!control.enabled) {
-                return
-            }
-
-            const emojiPopup = ViewHelper.globalFilteredEmojiPickerPopup as Popup
-
-            if (userSelectPopup.opened) {
-                // User mentions
-
-                if (keyEvent.key === Qt.Key_Up) {
-                    keyEvent.accepted = true
-                    userSelectPopup.decrementIndex()
-                } else if (keyEvent.key === Qt.Key_Down) {
-                    keyEvent.accepted = true
-                    userSelectPopup.incrementIndex()
-                } else if ([Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)) {
-
-                    // Navigate user mention popup
-                    if (userSelectPopup.selectedIndex >= 0) {
-                        // Insert selected entry
-                        keyEvent.accepted = true
-                        userSelectPopup.accepted(userSelectPopup.idAt(userSelectPopup.selectedIndex))
-                    } else if (userSelectPopup.count === 1) {
-                        // Insert sole entry
-                        keyEvent.accepted = true
-                        userSelectPopup.accepted(userSelectPopup.idAt(0))
                     } else {
-                        userSelectPopup.close()
+                        // Insert: surround selection
+                        mf.remove(start, end)
+                        mf.insert(start, `${front}${selText}${back}`)
+                        mf.select(start + frontLen, start + frontLen + selText.length)
                     }
-                }
-
-            } else if (emojiPopup?.opened) {
-                // Emoji popup
-
-                if (keyEvent.key === Qt.Key_Up) {
-                    keyEvent.accepted = true
-                    emojiPopup.decrementIndex()
-                } else if (keyEvent.key === Qt.Key_Down) {
-                    keyEvent.accepted = true
-                    emojiPopup.incrementIndex()
-                } else if ([Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)) {
-
-                    // Navigate emoji popup
-                    if (emojiPopup.selectedIndex >= 0) {
-                        // Insert selected entry
-                        keyEvent.accepted = true
-                        emojiPopup.accepted(emojiPopup.emojiAt(emojiPopup.selectedIndex))
-                    } else if (emojiPopup.count === 1) {
-                        // Insert sole entry
-                        keyEvent.accepted = true
-                        emojiPopup.accepted(emojiPopup.emojiAt(0))
-                    } else {
-                        emojiPopup.close()
-                    }
-                }
-
-            } else if (keyEvent.key === Qt.Key_Up) {
-
-                if (messageField.lastCursorPosition === messageField.cursorPosition) {
-                    // Edit last message
-                    keyEvent.accepted = true
-
-                    if (!control.editMessageId) {
-                        control.editLastMessage()
-                    }
-                } else {
-                    messageField.lastCursorPosition = messageField.cursorPosition
-                }
-
-            } else if ([Qt.Key_Down, Qt.Key_Left, Qt.Key_Right].includes(keyEvent.key)) {
-                messageField.lastCursorPosition = messageField.cursorPosition
-
-            } else if (keyEvent.key === Qt.Key_Escape && control.editMessageId) {
-                control.editMessageId = ""
-                messageField.clear()
-                messageField.lastCursorPosition = 0
-
-            } else if (control.hasMessage
-                       && [Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)
-                       && !(keyEvent.modifiers & Qt.ShiftModifier)) {
-
-                // Send message
-                keyEvent.accepted = true
-                control.sendMessage()
-
-            } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
-                // Clipboard paste
-
-                keyEvent.accepted = true
-                if (ClipboardHelper.hasImage()) {
-                    control.imageFromClipboardReceived()
-                } else if (ClipboardHelper.hasText()) {
-                    keyEvent.accepted = true
-                    messageField.paste()
                 }
             }
-        }
 
-        function insertOrRemove(front : string, back : string) {
-            const mf = messageField
-            const len = mf.text.length
-            const start = mf.selectionStart
-            const end = mf.selectionEnd
-            const selText = mf.selectedText
-            const cursorPos = mf.cursorPosition
-            const frontLen = front.length
-            const backLen = back.length
+            function insertOrReplace(text : string) {
+                const mf = messageField
+                const start = mf.selectionStart
+                const end = mf.selectionEnd
 
-            if (start === end) {
-                // No selection
-
-                if (cursorPos >= frontLen
-                    && len - cursorPos >= backLen
-                    && mf.getText(cursorPos - frontLen, cursorPos) === front
-                    && mf.getText(cursorPos, cursorPos + backLen) === back) {
-
-                    // Remove
-                    mf.remove(cursorPos - frontLen, cursorPos + backLen)
-                    mf.cursorPosition = cursorPos - frontLen
-
-                } else {
-                    // Insert
-                    mf.insert(cursorPos, front + back)
-                    mf.cursorPosition = cursorPos + frontLen
-                }
-
-            } else {
-                // Selection active
-
-                if (start >= frontLen
-                    && len - end >= backLen
-                    && mf.getText(start - frontLen, start) === front
-                    && mf.getText(end, end + backLen) === back) {
-
-                    // Remove
-                    mf.remove(end, end + backLen)
-                    mf.remove(start - frontLen, start)
-
-                } else {
-                    // Insert: surround selection
+                if (start !== end) {
                     mf.remove(start, end)
-                    mf.insert(start, `${front}${selText}${back}`)
-                    mf.select(start + frontLen, start + frontLen + selText.length)
                 }
-            }
-        }
-
-        function insertOrReplace(text : string) {
-            const mf = messageField
-            const start = mf.selectionStart
-            const end = mf.selectionEnd
-
-            if (start !== end) {
-                mf.remove(start, end)
-            }
-            mf.insert(start, text)
-        }
-
-        function replaceCurrentWord(text : string) {
-            const bounds = messageField.currentWordBoundings()
-            messageField.remove(bounds[0], bounds[1])
-            messageField.insert(bounds[0], text + " ")
-        }
-
-        function currentWordBoundings() {
-            const cPos = messageField.cursorPosition
-            const text = messageField.text
-            const lastIndex = text.length - 1
-            const isSpace = s => /\s/.test(s)
-
-            let start = cPos
-            while (start > 0 && !isSpace(text.charAt(start - 1))) {
-                --start
+                mf.insert(start, text)
             }
 
-            let end = cPos
-            while (end < lastIndex && !isSpace(text.charAt(end))) {
-                ++end
+            function replaceCurrentWord(text : string) {
+                const bounds = messageField.currentWordBoundings()
+                messageField.remove(bounds[0], bounds[1])
+                messageField.insert(bounds[0], text + " ")
             }
 
-            return [start, end]
+            function currentWordBoundings() {
+                const cPos = messageField.cursorPosition
+                const text = messageField.text
+                const lastIndex = text.length - 1
+                const isSpace = s => /\s/.test(s)
+
+                let start = cPos
+                while (start > 0 && !isSpace(text.charAt(start - 1))) {
+                    --start
+                }
+
+                let end = cPos
+                while (end < lastIndex && !isSpace(text.charAt(end))) {
+                    ++end
+                }
+
+                return [start, end]
+            }
         }
     }
 
@@ -546,16 +564,16 @@ Item {
             icon: Icons.smiley
             toolTipText: qsTr("Open emoji picker popup")
             onClicked: () => {
-                const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
-                if (item.visible) {
-                    item.close()
-                } else {
-                    item.emojiPicked.connect(emojiButton.onEmojiSelected)
-                    item.visibleChanged.connect(emojiButton.onEmojiPopupHide)
+                           const item = ViewHelper.globalEmojiPickerPopup as EmojiPickerPopup
+                           if (item.visible) {
+                               item.close()
+                           } else {
+                               item.emojiPicked.connect(emojiButton.onEmojiSelected)
+                               item.visibleChanged.connect(emojiButton.onEmojiPopupHide)
 
-                    item.openAt(buttonBar.mapToItem(emojiButton.Window.window.contentItem, emojiButton.x, emojiButton.y))
-                }
-            }
+                               item.openAt(buttonBar.mapToItem(emojiButton.Window.window.contentItem, emojiButton.x, emojiButton.y))
+                           }
+                       }
 
             function onEmojiSelected(emoji : string) {
                 messageField.insertOrReplace(emoji)
@@ -667,10 +685,10 @@ Item {
                 toolTipText: qsTr("Send message to chat room")
 
                 onClicked: () => {
-                    if (control.enabled && control.hasMessage) {
-                        control.sendMessage()
-                    }
-                }
+                               if (control.enabled && control.hasMessage) {
+                                   control.sendMessage()
+                               }
+                           }
             }
         ]
     }

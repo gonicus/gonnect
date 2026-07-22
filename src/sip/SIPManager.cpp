@@ -387,7 +387,7 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
     QString uri = account->toSipUri(var);
 
     for (SIPBuddy *buddy : std::as_const(buddies)) {
-        if (buddy->uri() == uri) {
+        if (buddy->uri().compare(uri, Qt::CaseInsensitive) == 0) {
             return buddy;
         }
     }
