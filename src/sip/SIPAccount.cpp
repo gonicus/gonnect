@@ -703,13 +703,14 @@ SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
     QString uri = buddy->uri();
     qCInfo(lcSIPAccount) << "subscribing to buddy" << uri;
 
+    m_buddies.push_back(buddy);
     if (buddy->initialize()) {
-        m_buddies.push_back(buddy);
         connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
             qCCritical(lcSIPAccount) << "removing buddy" << uri;
             m_buddies.removeAll(buddy);
         });
     } else {
+        m_buddies.removeAll(buddy);
         buddy->deleteLater();
     }
 
@@ -1070,13 +1071,14 @@ void SIPAccount::reinitBuddies()
 
     for (const auto &uri : std::as_const(uris)) {
         auto buddy = new SIPBuddy(this, uri);
+        m_buddies.push_back(buddy);
         if (buddy->initialize()) {
-            m_buddies.push_back(buddy);
             connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
                 qCCritical(lcSIPAccount) << "removing buddy" << uri;
                 m_buddies.removeAll(buddy);
             });
         } else {
+            m_buddies.removeAll(buddy);
             buddy->deleteLater();
         }
     }
