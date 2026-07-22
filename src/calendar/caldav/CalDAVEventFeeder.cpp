@@ -36,16 +36,21 @@ QUrl CalDAVEventFeeder::networkCheckURL() const
 
 void CalDAVEventFeeder::init()
 {
-    connect(&m_webdavParser, &QWebdavDirParser::finished, this,
-            &CalDAVEventFeeder::onParserFinished);
 
-    connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this, &CalDAVEventFeeder::onError);
-    connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onError);
+    if (!m_areWebDavConnectionsInitialized) {
+        m_areWebDavConnectionsInitialized = true;
+        connect(&m_webdavParser, &QWebdavDirParser::finished, this,
+                &CalDAVEventFeeder::onParserFinished);
 
-    connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
-        m_pendingAuth = true;
-        checkErrorStatus();
-    });
+        connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
+                &CalDAVEventFeeder::onError);
+        connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onError);
+
+        connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
+            m_pendingAuth = true;
+            checkErrorStatus();
+        });
+    }
 
     /*
         As the Kopano CalDAV server doesn't provide 'getetag' and 'getlastmodified' values,

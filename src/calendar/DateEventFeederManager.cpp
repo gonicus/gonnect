@@ -73,29 +73,31 @@ void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &conf
                 if (error == QKeychain::NoError && !forcePrompt) {
                     callback({ secret });
                 } else if (error == QKeychain::Error::EntryNotFound || forcePrompt) {
-                    auto &viewHelper = ViewHelper::instance();
-                    auto conn = connect(
-                            &viewHelper, &ViewHelper::passwordResponded, this,
-                            [secretKey, configId, callback, this](const QString &id,
-                                                                  const QString &password) {
-                                if (id == configId) {
-                                    QObject::disconnect(m_viewHelperConnections.value(configId));
-                                    m_viewHelperConnections.remove(configId);
 
-                                    Credentials::instance().set(
-                                            secretKey + "/secret", password,
-                                            [](QKeychain::Error error, const QString &,
-                                               const QString &message) {
-                                                if (error != QKeychain::NoError) {
-                                                    ErrorBus::instance().error(
-                                                            tr("Failed to persist calendar "
-                                                               "credentials: %1")
-                                                                    .arg(message));
-                                                }
-                                            });
-                                    callback({ password });
-                                }
-                            });
+                    disconnect(m_viewHelperConnections.take(configId));
+
+                    auto &viewHelper = ViewHelper::instance();
+                    auto conn =
+                            connect(&viewHelper, &ViewHelper::passwordResponded, this,
+                                    [secretKey, configId, callback, this](const QString &id,
+                                                                          const QString &password) {
+                                        if (id == configId) {
+                                            disconnect(m_viewHelperConnections.take(configId));
+
+                                            Credentials::instance().set(
+                                                    secretKey + "/secret", password,
+                                                    [](QKeychain::Error error, const QString &,
+                                                       const QString &message) {
+                                                        if (error != QKeychain::NoError) {
+                                                            ErrorBus::instance().error(
+                                                                    tr("Failed to persist calendar "
+                                                                       "credentials: %1")
+                                                                            .arg(message));
+                                                        }
+                                                    });
+                                            callback({ password });
+                                        }
+                                    });
 
                     m_viewHelperConnections.insert(configId, conn);
 

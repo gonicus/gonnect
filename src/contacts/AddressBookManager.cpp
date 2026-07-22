@@ -203,13 +203,15 @@ void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
                     callback({ secret });
                 } else if (error == QKeychain::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
+
+                    disconnect(m_viewHelperConnections.take(group));
+
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,
                             [this, secretKey, group, callback](const QString &id,
                                                                const QString &password) {
                                 if (id == group) {
-                                    QObject::disconnect(m_viewHelperConnections.value(group));
-                                    m_viewHelperConnections.remove(group);
+                                    disconnect(m_viewHelperConnections.take(group));
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
