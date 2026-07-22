@@ -272,6 +272,7 @@ private:
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
                              IChatRoom::JoinRule joinRule, bool isDirect, const QString &tag = "");
     void processRoomUsers(const de::gonicus::gonnect::Room &room, IpcChatRoom *roomObj);
+    QHash<QString, IChatRoom::UserRoomState> *userRoomStateCache(const QString &roomId);
 
     IpcChatRoom *ipcChatRoomById(const QString &roomId) const;
 

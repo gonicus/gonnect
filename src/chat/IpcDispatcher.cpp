@@ -1495,14 +1495,7 @@ void IpcDispatcher::processResponse(
 
         // Update user states
         if (changeEvent.hasUserIdListChanged()) {
-
-            // Setup cache
-            QHash<QString, IChatRoom::UserRoomState> *roomCache =
-                    m_userRoomStateCache.value(roomId, nullptr);
-            if (!roomCache) {
-                roomCache = new QHash<QString, IChatRoom::UserRoomState>;
-                m_userRoomStateCache.insert(roomId, roomCache);
-            }
+            auto *roomCache = userRoomStateCache(roomId);
 
             // Set user states
             const auto roomStates = changeEvent.userIdList();
@@ -1863,17 +1856,9 @@ void IpcDispatcher::processRoomUsers(const de::gonicus::gonnect::Room &room, Ipc
 
     const auto &roomId = room.roomId();
     const auto roomIdx = indexOf(roomObj);
+    auto *roomCache = userRoomStateCache(roomId);
 
     QHashIterator it(room.userIdList());
-
-    // Setup cache
-    QHash<QString, IChatRoom::UserRoomState> *roomCache =
-            m_userRoomStateCache.value(roomId, nullptr);
-    if (!roomCache) {
-        roomCache = new QHash<QString, IChatRoom::UserRoomState>;
-        m_userRoomStateCache.insert(roomId, roomCache);
-    }
-
     while (it.hasNext()) {
         it.next();
         const auto &userId = it.key();
@@ -1893,6 +1878,16 @@ void IpcDispatcher::processRoomUsers(const de::gonicus::gonnect::Room &room, Ipc
             requestUser(userId);
         }
     }
+}
+
+QHash<QString, IChatRoom::UserRoomState> *IpcDispatcher::userRoomStateCache(const QString &roomId)
+{
+    auto *cache = m_userRoomStateCache.value(roomId, nullptr);
+    if (!cache) {
+        cache = new QHash<QString, IChatRoom::UserRoomState>;
+        m_userRoomStateCache.insert(roomId, cache);
+    }
+    return cache;
 }
 
 IpcChatRoom *IpcDispatcher::ipcChatRoomById(const QString &roomId) const
