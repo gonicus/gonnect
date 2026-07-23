@@ -21,6 +21,9 @@ find_package(logfault CONFIG REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 
+find_package(QCoro6 REQUIRED COMPONENTS Core)
+qcoro_enable_coroutines()
+
 if(UNIX)
     include(FindPkgConfig)
     find_package(PkgConfig REQUIRED)
@@ -571,6 +574,8 @@ qt_add_qml_module(gonnect
         sip/SIPCall.cpp
         sip/SIPCallManager.h
         sip/SIPCallManager.cpp
+        sip/SIPSharedLine.h
+        sip/SIPSharedLine.cpp
         sip/SIPRemotePartyId.h
         sip/SIPRemotePartyId.cpp
         sip/SIPEventLoop.h
@@ -939,6 +944,7 @@ target_link_libraries(gonnect
         #hunspell::hunspell
         cmark::cmark
         KF6::SyntaxHighlighting
+        QCoro6::Core
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
         ${CARDDAV_CONTACT_FACTORY}

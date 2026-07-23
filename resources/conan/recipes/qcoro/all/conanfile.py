@@ -8,7 +8,7 @@ class QCoro(ConanFile):
     name = "qcoro"
     description = "The QCoro library provides set of tools to make use of C++20 coroutines with Qt."
     license = "MIT"
-    homepage = "https://github.com/qcoro/qcoro"        
+    homepage = "https://github.com/qcoro/qcoro"
     package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -90,7 +90,11 @@ class QCoro(ConanFile):
         self.cpp_info.components["core"].set_property("cmake_file_name", "QCoro6Core")
         self.cpp_info.components["core"].set_property("cmake_target_name", "QCoro6::Core")
         self.cpp_info.components["core"].libs = ["QCoro6Core"]
-        self.cpp_info.components["core"].includedirs = [os.path.join("include", "qcoro6"), os.path.join("include", "qcoro6", "qcoro")]
+        self.cpp_info.components["core"].includedirs = [
+            os.path.join("include", "qcoro6"),
+            os.path.join("include", "qcoro6", "qcoro"),
+            os.path.join("include", "qcoro6", "QCoro")
+        ]
 
         self.cpp_info.components["dbus"].set_property("cmake_file_name", "QCoro6DBus")
         self.cpp_info.components["dbus"].set_property("cmake_target_name", "QCoro6::DBus")
