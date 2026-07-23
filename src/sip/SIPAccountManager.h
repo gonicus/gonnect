@@ -54,6 +54,7 @@ public:
 Q_SIGNALS:
     void accountsChanged();
     void sipRegisteredChanged(bool status);
+    void registrationTimedOut();
     void voiceMessagesWaitingChanged();
     void authorizationFailed(QString accountId);
     void connectionError(int code, QString message);
