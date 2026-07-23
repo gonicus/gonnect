@@ -311,7 +311,7 @@ Item {
             if (chatRoom && chatProvider) {
                 const latestMsg = control.chatRoom.latestOwnTextMessage()
                 if (latestMsg) {
-                    chatMessageBox.text = latestMsg.content.simpleText
+                    chatMessageBox.text = latestMsg.content.rawText
                     chatMessageBox.editMessageId = latestMsg.eventId
                     // ViewHelper.showEditMessageDialog(chatProvider, chatRoom.id, latestMsg.eventId, latestMsg.message)
                 }

@@ -651,7 +651,7 @@ Popup {
                                                     isReady: contactDelg.buddyStatus === SIPBuddyState.READY
 
                                                     onCallClicked: () => {
-                                                        SIPCallManager.call("account0", numberDelg.number.url, "", identitySelector.currentValue);
+                                                        SIPCallManager.call("account0", numberDelg.number, "", identitySelector.currentValue);
                                                         control.primaryActionTriggered()
                                                     }
                                                     onNotifyWhenAvailableClicked: () => numberDelg.subscribeBuddyStatus()

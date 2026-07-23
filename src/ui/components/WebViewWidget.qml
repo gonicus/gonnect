@@ -90,6 +90,14 @@ BaseWidget {
                     localContentCanAccessFileUrls: true
                 }
 
+                profile {
+                    httpAcceptLanguage: {
+                        const systemLocale = Qt.locale().name.replace("_", "-")
+                        const mainLang = systemLocale.split("-")[0]
+                        return `${systemLocale},${mainLang};q=0.9,en;q=0.8`
+                    }
+                }
+
                 onLoadingChanged: function(loadRequest) {
                     if (loadRequest.status === WebEngineView.LoadFailedStatus) {
                         console.error("Failed to load page:", loadRequest.url,
