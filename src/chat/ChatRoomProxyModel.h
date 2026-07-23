@@ -60,10 +60,12 @@ private:
     ChatRoomProxyModel::SortStrategy m_sortStrategy =
             ChatRoomProxyModel::SortStrategy::Alphabetical;
     QTimer m_sortDebounceTimer;
+    QTimer m_sectionHeaderDebounceTimer;
 
 private Q_SLOTS:
     void onSourceModelChanged();
     void applySort();
+    void refreshSectionHeaders();
 
 Q_SIGNALS:
     void showSectionHeaderChanged();

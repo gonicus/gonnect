@@ -20,14 +20,8 @@ Repeater {
 
     signal roomSelected(string roomId)
 
-    onHasFavoritesChanged: () => internal.sectionHeaderUpdateRequired()
-    onItemAdded: () => internal.sectionHeaderUpdateRequired()
-    onItemRemoved: () => internal.sectionHeaderUpdateRequired()
-
     readonly property QtObject _internal: QtObject {
         id: internal
-
-        signal sectionHeaderUpdateRequired
 
         property ChatRoomListItem selectedListItem
 
