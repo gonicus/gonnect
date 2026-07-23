@@ -51,7 +51,7 @@ QString fixNewLines(const QString &orig)
     static const QRegularExpression multiNewlineRegex(QStringLiteral(R"(\n(?=\n))"));
     str.replace(multiNewlineRegex, QStringLiteral("\n\u2060"));
 
-    static const QRegularExpression singleNewlineRegex(QStringLiteral(R"((?<!\n)\n(?!\n))"));
+    static const QRegularExpression singleNewlineRegex(QStringLiteral(R"((?<!\n)(?<!\\)\n(?!\n))"));
     str.replace(singleNewlineRegex, QStringLiteral("\\\n"));
 
     return str;
