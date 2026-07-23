@@ -9,6 +9,7 @@
 #include "ResponseItem.h"
 #include "SIPCallManager.h"
 #include "SIPCallRoutingHop.h"
+#include "SIPCallInfo.h"
 
 class SIPAccount;
 class CallHistoryItem;
@@ -50,6 +51,8 @@ public:
     bool isIncoming() const { return m_incoming; }
 
     void parseCallRouting(pjsip_msg *msg);
+    void parseCallInfo(const pjsip_msg *msg);
+    void parseRemotePartyId(const pjsip_msg *msg);
     void setInTransfer(bool flag) { m_inTransfer = flag; }
     bool isIntransfer() const { return m_inTransfer; }
 
@@ -83,6 +86,15 @@ public:
     SIPCallManager::SecurityLevel securityLevel() const { return m_securityLevel; }
     bool isSignalingEncrypted() const { return m_signalingEncrypted; }
     bool isMediaEncrypted() const { return m_mediaEncrypted; }
+
+    SIPCallInfo::Security callInfoSecurity() const { return m_callInfoSecurity; }
+    SIPCallInfo::UiState callInfoUiState() const { return m_callInfoUiState; }
+    SIPCallInfo::Priority callInfoPriority() const { return m_callInfoPriority; }
+    bool priorityOverride() const
+    {
+        return isEmergencyCall() || SIPCallInfo::isPriorityOverride(m_callInfoPriority);
+    }
+    QString callInfoGci() const { return m_callInfoGci; }
 
     QList<SIPCallRoutingHop> routingHops() const { return m_callRoutingHops; }
 
@@ -137,6 +149,11 @@ Q_SIGNALS:
     void isMediaEncryptedChanged();
     void hasRttChanged();
 
+    void callInfoSecurityChanged();
+    void callInfoUiStateChanged();
+    void callInfoPriorityChanged();
+    void callInfoGciChanged();
+
     void rttAttention();
     void rttBubbleChanged(QString &text);
     void rttBubbleCommitted(QString &text);
@@ -154,7 +171,13 @@ private:
     void setSecurityLevel(SIPCallManager::SecurityLevel securityLevel);
     void setIsSignalingEncrypted(bool value);
     void setIsMediaEncrypted(bool value);
+    void setCallInfoSecurity(SIPCallInfo::Security value);
+    void setCallInfoUiState(SIPCallInfo::UiState value);
+    void setCallInfoPriority(SIPCallInfo::Priority value);
     void createOngoingCallNotification();
+
+    void addCiscoRemoteCcHeader(pj::CallOpParam &op, const char *feature) const;
+
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
     QStringList routingHopNumbers() const;
@@ -196,9 +219,14 @@ private:
     QString m_postTask;
 
     QString m_currentRttBubble;
+    QString m_callInfoGci;
 
     SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::High;
     SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::High;
+
+    SIPCallInfo::UiState m_callInfoUiState = SIPCallInfo::UiState::None;
+    SIPCallInfo::Security m_callInfoSecurity = SIPCallInfo::Security::Unknown;
+    SIPCallInfo::Priority m_callInfoPriority = SIPCallInfo::Priority::Normal;
 
     QString m_codec;
     quint32 m_clockRate = 0;

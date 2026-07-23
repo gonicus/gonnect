@@ -565,10 +565,14 @@ qt_add_qml_module(gonnect
         sip/SIPBuddy.cpp
         sip/SIPCallRoutingHop.h
         sip/SIPCallRoutingHop.cpp
+        sip/SIPCallInfo.h
+        sip/SIPCallInfo.cpp
         sip/SIPCall.h
         sip/SIPCall.cpp
         sip/SIPCallManager.h
         sip/SIPCallManager.cpp
+        sip/SIPRemotePartyId.h
+        sip/SIPRemotePartyId.cpp
         sip/SIPEventLoop.h
         sip/SIPEventLoop.cpp
         sip/SIPManager.h

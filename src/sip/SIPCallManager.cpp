@@ -136,12 +136,12 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
 {
     pj::CallInfo ci = call->getInfo();
 
-    const bool isEmergency = call->isEmergencyCall();
+    const bool isPriorityOverride = call->priorityOverride();
 
     initBridge();
 
     // Send BUSY_HERE if we're on the phone
-    if (!isEmergency && beBusyOnNextIncomingCall()) {
+    if (!isPriorityOverride && beBusyOnNextIncomingCall()) {
         pj::CallOpParam prm;
         prm.statusCode = PJSIP_SC_BUSY_HERE;
         call->answer(prm);
@@ -266,7 +266,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
                 [ref]() { NotificationManager::instance().remove(ref); });
     }
 
-    if (isEmergency) {
+    if (isPriorityOverride) {
         Q_EMIT ViewHelper::instance().showEmergency(call->account()->id(), call->getId(),
                                                     displayName);
     }

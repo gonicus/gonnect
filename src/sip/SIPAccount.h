@@ -46,6 +46,7 @@ public:
     bool isRegistered() const { return m_isRegistered; }
     bool isInstantMessagingAllowed() const;
     bool isRTTEnabled() const { return m_rttEnabled; }
+    bool isCiscoDevice() const { return !m_ciscoDeviceMac.isEmpty(); }
 
     QString call(const QString &number, const QString &contactId = "",
                  const QString &preferredIdentity = "auto", bool silent = false);
@@ -93,6 +94,9 @@ private:
 
     void generatePreferredIdentityHeader(const QString &var, const QString &preferredIdentity,
                                          pj::CallOpParam &prm);
+    void ciscoSetup();
+    void ciscoUpdateSrtpFallback(const pjsip_msg *msg);
+
     bool hasAllowGrant(const QString &header, const QString &grant) const;
 
     QString addTransport(const QString &uri) const;
@@ -113,6 +117,10 @@ private:
     quint16 m_readVoiceMessages = 0;
     QString m_messageAccount;
     QString m_voiceMailUri;
+
+    QString m_ciscoDeviceMac;
+    unsigned m_ciscoDeviceModel = 588;
+    bool m_ciscoSrtpFallbackEnabled = false;
 
     bool m_isRegistered = false;
     bool m_isInstantMessagingAllowed = false;

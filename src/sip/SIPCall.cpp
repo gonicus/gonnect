@@ -5,6 +5,7 @@
 #include "SIPCall.h"
 #include "SIPCallManager.h"
 #include "SIPAccount.h"
+#include "SIPRemotePartyId.h"
 #include "AudioManager.h"
 #include "AudioPort.h"
 #include "ResponseLoader.h"
@@ -112,6 +113,10 @@ SIPCall::~SIPCall()
     auto &ringToneFactory = RingToneFactory::instance();
     if (m_incoming) {
         ringToneFactory.zipTone()->stop();
+
+        if (m_callInfoUiState == SIPCallInfo::UiState::Ringout) {
+            ringToneFactory.ringingTone()->stop();
+        }
     } else {
         ringToneFactory.ringingTone()->stop();
     }
@@ -237,22 +242,13 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         break;
 
     case PJSIP_INV_STATE_INCOMING:
-        if (!m_isSilent && !m_incoming) {
-            if (!isEmergencyCall()
-                && (GlobalCallState::instance().globalCallState()
-                    & ICallState::State::CallActive)) {
-                addCallState(ICallState::State::KnockingIncoming);
-                ringToneFactory.zipTone()->start();
-            } else {
-                addCallState(ICallState::State::RingingIncoming);
-                ringToneFactory.ringingTone()->start();
-            }
-        }
         break;
 
     case PJSIP_INV_STATE_EARLY:
         if (m_incoming) {
-            if (GlobalCallState::instance().globalCallState() & ICallState::State::CallActive) {
+            if (!priorityOverride()
+                && (GlobalCallState::instance().globalCallState()
+                    & ICallState::State::CallActive)) {
                 addCallState(ICallState::State::KnockingIncoming);
                 ringToneFactory.zipTone()->start();
             } else {
@@ -326,6 +322,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         qCInfo(lcSIPCall).nospace() << "Call state disconnected, reason: " << ci.lastReason << ", "
                                     << EnumTranslation::instance().sipStatusCode(statusCode) << " ("
                                     << statusCode << ")";
+
+        setCallInfoUiState(SIPCallInfo::UiState::None);
 
         ringToneFactory.zipTone()->stop();
         ringToneFactory.ringingTone()->stop();
@@ -413,7 +411,9 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
                     removeCallState(ICallState::State::RingingIncoming
                                     | ICallState::State::KnockingIncoming);
-                    RingToneFactory::instance().ringingTone()->stop();
+                    if (m_callInfoUiState == SIPCallInfo::UiState::None) {
+                        RingToneFactory::instance().ringingTone()->stop();
+                    }
                     RingToneFactory::instance().zipTone()->stop();
 
                     qCInfo(lcSIPCall) << "Found media, index" << i << "of" << ci.media.size();
@@ -589,6 +589,14 @@ pj::AudioMedia *SIPCall::audioMedia() const
 
 void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
 {
+    if (prm.e.body.tsxState.type == PJSIP_EVENT_RX_MSG) {
+        const auto *rxData =
+                static_cast<const pjsip_rx_data *>(prm.e.body.tsxState.src.rdata.pjRxData);
+        const pjsip_msg *msg = rxData ? rxData->msg_info.msg : nullptr;
+        parseCallInfo(msg);
+        parseRemotePartyId(msg);
+    }
+
     const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
 
     if (header.startsWith("UPDATE")) {
@@ -597,6 +605,7 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
         const auto matchResult = regex.match(header);
         if (matchResult.hasMatch()) {
             const QString newIdentity = matchResult.captured("identity");
+
             pj::CallInfo ci;
             try {
                 ci = getInfo();
@@ -604,6 +613,7 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
                 qCWarning(lcSIPCall) << "failed to get call info in onCallTsxState: " << err.info();
                 return;
             }
+
             setContactInfo(newIdentity, ci.role != PJSIP_ROLE_UAC);
             qCDebug(lcSIPCall) << "New call user identity found:" << newIdentity;
         }
@@ -613,6 +623,7 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
 bool SIPCall::hold()
 {
     pj::CallOpParam op(true);
+    addCiscoRemoteCcHeader(op, "hold");
 
     setIsHolding(true);
 
@@ -629,6 +640,7 @@ bool SIPCall::hold()
 bool SIPCall::unhold()
 {
     pj::CallOpParam op(true);
+    addCiscoRemoteCcHeader(op, "resume");
     op.opt.flag = PJSUA_CALL_UNHOLD;
     op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
@@ -1110,4 +1122,180 @@ QStringList SIPCall::routingHopNumbers() const
                                return PhoneNumberUtil::numberFromSipUrl(hop.uri);
                            });
     return hops;
+}
+
+void SIPCall::parseCallInfo(const pjsip_msg *msg)
+{
+    static const pj_str_t callInfoName = { const_cast<char *>("Call-Info"), 9 };
+
+    if (!msg) {
+        return;
+    }
+
+    QStringList callInfoHeaders;
+
+    for (const pjsip_hdr *hdr = msg->hdr.next; hdr != &msg->hdr; hdr = hdr->next) {
+        if (pj_stricmp(&hdr->name, &callInfoName) != 0) {
+            continue;
+        }
+
+        const auto *gs = reinterpret_cast<const pjsip_generic_string_hdr *>(hdr);
+        callInfoHeaders.append(
+                QString::fromUtf8(gs->hvalue.ptr, static_cast<int>(gs->hvalue.slen)));
+    }
+
+    if (callInfoHeaders.isEmpty()) {
+        return;
+    }
+
+    const auto info = SIPCallInfo::parse(callInfoHeaders);
+    if (!info.isValid()) {
+        return;
+    }
+
+    setCallInfoSecurity(info.security());
+    setCallInfoUiState(info.uiState());
+    setCallInfoPriority(info.priority());
+
+    // Don't overwrite with empty gci
+    auto gci = info.gci();
+    if (!gci.isEmpty() && m_callInfoGci != gci) {
+        m_callInfoGci = gci;
+        qCDebug(lcSIPCall) << "call belongs to PBX call group" << m_callInfoGci;
+        Q_EMIT callInfoGciChanged();
+    }
+}
+
+void SIPCall::setCallInfoSecurity(SIPCallInfo::Security value)
+{
+    if (m_callInfoSecurity != value) {
+        qCInfo(lcSIPCall) << "call security received:" << SIPCallInfo::securityToString(value);
+
+        m_callInfoSecurity = value;
+        Q_EMIT callInfoSecurityChanged();
+    }
+}
+
+void SIPCall::setCallInfoPriority(SIPCallInfo::Priority value)
+{
+    if (m_callInfoPriority != value) {
+        qCInfo(lcSIPCall) << "call priority received:" << SIPCallInfo::priorityToString(value);
+
+        m_callInfoPriority = value;
+        Q_EMIT callInfoPriorityChanged();
+    }
+}
+
+void SIPCall::setCallInfoUiState(SIPCallInfo::UiState value)
+{
+    if (m_callInfoUiState != value) {
+        qCInfo(lcSIPCall) << "received ui-state:" << SIPCallInfo::uiStateToString(value);
+
+        const auto previous = m_callInfoUiState;
+        m_callInfoUiState = value;
+
+        if (!m_isSilent) {
+            auto &ringer = RingToneFactory::instance();
+
+            if (previous == SIPCallInfo::UiState::Ringout) {
+                ringer.ringingTone()->stop();
+            } else if (previous == SIPCallInfo::UiState::Busy) {
+                ringer.busyTone()->stop();
+            }
+
+            switch (value) {
+            case SIPCallInfo::UiState::Ringout:
+                ringer.ringingTone()->start();
+                break;
+            case SIPCallInfo::UiState::Busy:
+                ringer.busyTone()->start(5);
+                break;
+            case SIPCallInfo::UiState::None:
+                break;
+            }
+        }
+
+        Q_EMIT callInfoUiStateChanged();
+    }
+}
+
+void SIPCall::addCiscoRemoteCcHeader(pj::CallOpParam &op, const char *feature) const
+{
+    if (!m_account || !m_account->isCiscoDevice()) {
+        return;
+    }
+
+    pj::SipHeader header;
+    header.hName = "Call-Info";
+    header.hValue = std::string("<urn:X-cisco-remotecc:") + feature + ">";
+    op.txOption.headers.push_back(header);
+}
+
+void SIPCall::parseRemotePartyId(const pjsip_msg *msg)
+{
+    static const pj_str_t rpidName = { const_cast<char *>("Remote-Party-ID"), 15 };
+
+    if (!msg) {
+        return;
+    }
+
+    QStringList headers;
+
+    for (const pjsip_hdr *hdr = msg->hdr.next; hdr != &msg->hdr; hdr = hdr->next) {
+        if (pj_stricmp(&hdr->name, &rpidName) != 0) {
+            continue;
+        }
+
+        const auto *gs = reinterpret_cast<const pjsip_generic_string_hdr *>(hdr);
+        headers.append(QString::fromUtf8(gs->hvalue.ptr, static_cast<int>(gs->hvalue.slen)));
+    }
+
+    if (headers.isEmpty()) {
+        return;
+    }
+
+    const auto parties = SIPRemotePartyId::parse(headers);
+    if (parties.isEmpty()) {
+        return;
+    }
+
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to get call info in parseRemotePartyId:" << err.info();
+        return;
+    }
+
+    const bool weAreCaller = ci.role == PJSIP_ROLE_UAC;
+    const auto wanted =
+            weAreCaller ? SIPRemotePartyId::Party::Called : SIPRemotePartyId::Party::Calling;
+
+    const SIPRemotePartyId *chosen = &parties.first();
+    for (const auto &candidate : std::as_const(parties)) {
+        if (candidate.party() == wanted) {
+            chosen = &candidate;
+            break;
+        }
+    }
+
+    const QString number = chosen->number();
+    const QString name = chosen->name();
+
+    if (number.isEmpty() && name.isEmpty()) {
+        qCDebug(lcSIPCall) << "Remote-Party-ID is fully restricted (privacy="
+                           << SIPRemotePartyId::privacyToString(chosen->privacy()) << ")";
+        return;
+    }
+
+    const QString identity = number.isEmpty() ? name : chosen->uri();
+    if (identity == m_sipUrl) {
+        return;
+    }
+
+    qCDebug(lcSIPCall).nospace() << "Remote-Party-ID update: " << identity << " (privacy="
+                                 << SIPRemotePartyId::privacyToString(chosen->privacy())
+                                 << ", screened=" << chosen->isScreened() << ")";
+
+    setContactInfo(identity, !weAreCaller);
 }

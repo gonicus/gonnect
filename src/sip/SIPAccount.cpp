@@ -1,5 +1,6 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <algorithm>
 #include "SIPAccount.h"
 #include "SIPManager.h"
 #include "SIPCallManager.h"
@@ -47,6 +48,16 @@ void SIPAccount::initialize()
         Q_EMIT initialized(false);
         return;
     }
+
+    static const QRegularExpression macRegex("^[0-9A-Fa-f]{12}$");
+    m_ciscoDeviceMac = m_settings.value("ciscoDeviceMac", "").toString();
+    if (!m_ciscoDeviceMac.isEmpty() && !macRegex.match(m_ciscoDeviceMac).hasMatch()) {
+        qCCritical(lcSIPAccount) << "invalid ciscoDeviceMac [12 digits hex]:" << m_ciscoDeviceMac;
+        Q_EMIT initialized(false);
+        return;
+    }
+
+    const bool isCisco = !m_ciscoDeviceMac.isEmpty();
 
     QString net = m_settings.value("network", "auto").toString();
     if (net == "auto") {
@@ -219,7 +230,7 @@ void SIPAccount::initialize()
     m_accountConfig.mediaConfig.lockCodecEnabled = lockCodecEnabled;
 
     // Transport
-    int port = m_settings.value("port", 5061).toInt(&ok);
+    int port = m_settings.value("port", isCisco ? 0 : 5061).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'port':" << port;
         Q_EMIT initialized(false);
@@ -227,7 +238,7 @@ void SIPAccount::initialize()
     }
     m_transportConfig.port = port;
 
-    int portRange = m_settings.value("portRange", 10).toInt(&ok);
+    int portRange = m_settings.value("portRange", isCisco ? 0 : 10).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'portRange':" << portRange;
         Q_EMIT initialized(false);
@@ -347,6 +358,10 @@ void SIPAccount::initialize()
 
     m_accountConfig.mediaConfig.rtcpXrEnabled = m_settings.value("rtcpXrEnabled", false).toBool();
     m_accountConfig.mediaConfig.rtcpMuxEnabled = m_settings.value("rtcpMuxEnabled", false).toBool();
+
+    if (!m_ciscoDeviceMac.isEmpty()) {
+        ciscoSetup();
+    }
 
     m_settings.endGroup();
 
@@ -905,6 +920,7 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
 
     const auto *rxData = static_cast<const pjsip_rx_data *>(iprm.rdata.pjRxData);
     call->parseCallRouting(rxData ? rxData->msg_info.msg : nullptr);
+    call->parseCallInfo(rxData ? rxData->msg_info.msg : nullptr);
 
     try {
         const pj::CallInfo ci = call->getInfo();
@@ -943,6 +959,11 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
     if (prm.code == PJSIP_SC_OK && prm.expiration > 0 && m_afterResume) {
         m_afterResume = false;
         reinitBuddies();
+    }
+
+    if (!m_ciscoDeviceMac.isEmpty() && prm.code == PJSIP_SC_OK && prm.expiration > 0) {
+        const auto *rxData = static_cast<const pjsip_rx_data *>(prm.rdata.pjRxData);
+        ciscoUpdateSrtpFallback(rxData ? rxData->msg_info.msg : nullptr);
     }
 
     if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED
@@ -1166,4 +1187,141 @@ pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const
     }
 
     return pjStatus;
+}
+
+void SIPAccount::ciscoSetup()
+{
+    // Setup based on cisco document OL-25254-01 - sanity check
+    if (m_transportType != TRANSPORT_TYPE::TLS) {
+        qCWarning(lcSIPAccount) << "Cisco setup requires TLS";
+    }
+    if (m_accountConfig.mediaConfig.srtpUse == PJMEDIA_SRTP_DISABLED) {
+        qCWarning(lcSIPAccount) << "Cisco setup requires sRTP";
+    }
+
+    if (m_settings.value("sipOutboundUse", false).toBool()) {
+        qCWarning(lcSIPAccount)
+                << "Cisco setup expects no RFC 5626 outbound - ignoring sipOutboundUse";
+    }
+    m_accountConfig.natConfig.sipOutboundUse = 0;
+
+    // Append header parameters behind the >
+    m_accountConfig.regConfig.contactParams =
+            QString(";+sip.instance=\"<urn:uuid:00000000-0000-0000-0000-%1>\""
+                    ";+u.sip!model.ccm.cisco.com=\"%2\"")
+                    .arg(m_ciscoDeviceMac.toUpper())
+                    .arg(m_ciscoDeviceModel)
+                    .toStdString();
+
+    // Announce support of Call-Info security status (X-cisco-callinfo),
+    // sRTP to RTP fallback (X-cisco-srtp-fallback) and the SIP interface
+    // specification 5.1.0.
+    pj::SipHeader supported;
+    supported.hName = "Supported";
+    supported.hValue = "replaces, norefersub, X-cisco-callinfo, X-cisco-srtp-fallback, "
+                       "X-cisco-sis-5.1.0";
+    m_accountConfig.regConfig.headers.push_back(supported);
+
+    // CUCM crypto suites
+    static const std::vector<std::string> ciscoCryptoSuites = {
+        "AEAD_AES_256_GCM",
+        "AEAD_AES_128_GCM",
+        "AES_CM_128_HMAC_SHA1_80",
+        "AES_CM_128_HMAC_SHA1_32",
+    };
+
+    // Check which of them are available in our pjsip build and filter them
+    std::vector<std::string> available;
+    try {
+        available = SIPManager::instance().endpoint().srtpCryptoEnum();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to enumerate SRTP crypto suites:" << err.info();
+    }
+
+    m_accountConfig.mediaConfig.srtpOpt.cryptos.clear();
+
+    for (const auto &name : ciscoCryptoSuites) {
+        if (std::find(available.begin(), available.end(), name) == available.end()) {
+            qCWarning(lcSIPAccount)
+                    << QString::fromStdString(name) << "is not availabe for SRTP - skipping";
+            continue;
+        }
+
+        pj::SrtpCrypto crypto;
+        crypto.name = name;
+        crypto.key = "";
+        crypto.flags = 0;
+        m_accountConfig.mediaConfig.srtpOpt.cryptos.push_back(crypto);
+    }
+
+    if (m_accountConfig.mediaConfig.srtpOpt.cryptos.empty()) {
+        qCCritical(lcSIPAccount) << "no usable SRTP crypto suite for account" << m_account;
+        ErrorBus::instance().addFatalError(
+                tr("No usable SRTP crypto suite available for account %1").arg(m_account));
+        return;
+    }
+
+    // The sRTP to RTP fallback is off until CUCM confirms it for the line in the REGISTER
+    // response, see ciscoUpdateSrtpFallback(). Until then we only offer and accept sRTP.
+    if (m_accountConfig.mediaConfig.srtpUse != PJMEDIA_SRTP_DISABLED) {
+        m_accountConfig.mediaConfig.srtpUse = PJMEDIA_SRTP_MANDATORY;
+        m_accountConfig.mediaConfig.srtpOpt.optionalOfferSavp = false;
+    }
+
+    qCInfo(lcSIPAccount) << "registering account" << m_account << "as Cisco device model"
+                         << m_ciscoDeviceModel << "with MAC" << m_ciscoDeviceMac.toUpper();
+}
+
+void SIPAccount::ciscoUpdateSrtpFallback(const pjsip_msg *msg)
+{
+    if (m_ciscoDeviceMac.isEmpty()
+        || m_accountConfig.mediaConfig.srtpUse == PJMEDIA_SRTP_DISABLED) {
+        return;
+    }
+
+    static const pj_str_t fallbackTag = { const_cast<char *>("X-cisco-srtp-fallback"), 21 };
+
+    bool advertised = false;
+    if (msg) {
+        const auto *hdr = static_cast<const pjsip_supported_hdr *>(
+                pjsip_msg_find_hdr(msg, PJSIP_H_SUPPORTED, nullptr));
+
+        while (hdr && !advertised) {
+            for (unsigned i = 0; i < hdr->count; ++i) {
+                if (pj_stricmp(&hdr->values[i], &fallbackTag) == 0) {
+                    advertised = true;
+                    break;
+                }
+            }
+
+            hdr = static_cast<const pjsip_supported_hdr *>(
+                    pjsip_msg_find_hdr(msg, PJSIP_H_SUPPORTED, hdr->next));
+        }
+    }
+
+    const bool enabled = advertised && isSignalingEncrypted();
+
+    if (enabled == m_ciscoSrtpFallbackEnabled) {
+        return;
+    }
+
+    if (advertised && !isSignalingEncrypted()) {
+        qCWarning(lcSIPAccount) << "ignoring X-cisco-srtp-fallback on insecure signaling for"
+                                << m_account;
+    }
+
+    m_ciscoSrtpFallbackEnabled = enabled;
+
+    m_accountConfig.mediaConfig.srtpUse = enabled ? PJMEDIA_SRTP_OPTIONAL : PJMEDIA_SRTP_MANDATORY;
+    m_accountConfig.mediaConfig.srtpOpt.optionalOfferSavp = enabled;
+
+    try {
+        modify(m_accountConfig);
+    } catch (const pj::Error &err) {
+        qCCritical(lcSIPAccount) << "failed to apply sRTP fallback state:" << err.info();
+        return;
+    }
+
+    qCInfo(lcSIPAccount) << "Cisco sRTP to RTP fallback" << (enabled ? "enabled" : "disabled")
+                         << "for account" << m_account;
 }
