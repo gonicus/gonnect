@@ -8,6 +8,7 @@
 #include <QImageReader>
 #include <QStandardPaths>
 #include <QLoggingCategory>
+#include <QDateTime>
 
 Q_LOGGING_CATEGORY(lcFileHelper, "gonnect.app.ui.FileHelper")
 
@@ -101,18 +102,43 @@ QString FileHelper::makeLogFilePath(const QString &name) const
             QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     const QString subFolderName = "log";
 
+    // Ensure dir exists
     QDir baseDir(baseDirStr);
     if (!baseDir.mkpath(subFolderName)) {
         qCCritical(lcFileHelper) << "Error, folder" << baseDir.filePath(subFolderName)
                                  << "could not be created";
         return QString();
     }
-
     baseDir.cd(subFolderName);
-    const QString finalFilePath = baseDir.filePath(name + QStringLiteral(".log"));
+
+    removeOldLogs(baseDir, name);
+
+    // Create new file path
+    const auto formattedDate = QDateTime::currentDateTime().toString("yyyy-MM-dd__hh-mm-ss");
+
+    const QString finalFilePath = baseDir.filePath(QString("%1__%2.log").arg(name, formattedDate));
 
     qCInfo(lcFileHelper) << "Created log file path" << finalFilePath;
     return finalFilePath;
+}
+
+void FileHelper::removeOldLogs(const QDir &dir, const QString &prefix) const
+{
+    constexpr qsizetype keepLogCount = 10;
+
+    const QStringList filters = { QString("%1__*.log").arg(prefix) };
+    const auto fileList = dir.entryInfoList(filters, QDir::Files, QDir::Name | QDir::Reversed);
+
+    for (qsizetype i = keepLogCount - 1, l = fileList.size(); i < l; ++i) {
+        const auto &fileInfo = fileList.at(i);
+        QFile file(fileInfo.absoluteFilePath());
+
+        if (file.remove()) {
+            qCInfo(lcFileHelper) << "Removed old log file" << fileInfo.fileName();
+        } else {
+            qCWarning(lcFileHelper) << "Unable to remove old log file" << fileInfo.fileName();
+        }
+    }
 }
 
 qint64 FileHelper::fileSizeFromPath(const QString &path) const
