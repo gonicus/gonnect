@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QDir>
 
 class FileHelper : public QObject
 {
@@ -41,6 +42,9 @@ public:
 
 private:
     explicit FileHelper(QObject *parent = nullptr);
+
+    void removeOldLogs(const QDir &dir, const QString &prefix) const;
+    void normalizeFileName(QString &name) const;
 };
 
 class FileHelperWrapper

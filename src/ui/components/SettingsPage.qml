@@ -371,25 +371,12 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
                         topPadding: 20
+                        text: qsTr('Color scheme')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: themeLabel.text
-
-                        Label {
-                            id: themeLabel
-                            text: qsTr('Color scheme')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -425,6 +412,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: darkModeDelg
                                 text: darkModeDelg.displayName
+                                width: parent?.width ?? 0
 
                                 font.family: darkModeComboBox.font.family
                                 font.weight: darkModeComboBox.font.weight
@@ -571,24 +559,11 @@ Item {
                         margins: 20
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Standard preferred identity')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: preferredIdentityHeader.text
-
-                        Label {
-                            id: preferredIdentityHeader
-                            text: qsTr('Standard preferred identity')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -618,6 +593,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: standardPreferredIdentityDelg
                                 text: standardPreferredIdentityDelg.displayName
+                                width: parent?.width ?? 0
 
                                 font.family: standardPreferredIdentitySelector.font.family
                                 font.weight: standardPreferredIdentitySelector.font.weight
@@ -862,24 +838,11 @@ Item {
                         Accessible.focusable: true
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Input device')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: inputDeviceHeader.text
-
-                        Label {
-                            id: inputDeviceHeader
-                            text: qsTr('Input device')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -901,7 +864,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: inputAudioSelectorDelg
                                 text: inputAudioSelectorDelg.name
-                                width: inputAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: inputAudioSelector.font.family
                                 font.weight: inputAudioSelector.font.weight
@@ -940,24 +903,11 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Output device')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: outputDeviceHeader.text
-
-                        Label {
-                            id: outputDeviceHeader
-                            text: qsTr('Output device')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -979,7 +929,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: outputAudioSelectorDelg
                                 text: outputAudioSelectorDelg.name
-                                width: outputAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: outputAudioSelector.font.family
                                 font.weight: outputAudioSelector.font.weight
@@ -1018,24 +968,11 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Output device for ring tone')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: outputRingDeviceHeader.text
-
-                        Label {
-                            id: outputRingDeviceHeader
-                            text: qsTr('Output device for ring tone')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         ComboBox {
@@ -1057,7 +994,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: outputRingAudioSelectorDelg
                                 text: outputRingAudioSelectorDelg.name
-                                width: outputRingAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: outputRingToneAudioSelector.font.family
                                 font.weight: outputRingToneAudioSelector.font.weight
@@ -1096,24 +1033,11 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Ring tone')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: ringToneHeader.text
-
-                        Label {
-                            id: ringToneHeader
-                            text: qsTr('Ring tone')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         AudioFileSelector {
@@ -1130,25 +1054,11 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Ring tone volume')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: ringToneVolumeHeader.text
-                        Accessible.description: qsTr("Currently set to: ") + ringToneVolumeSlider.labelText
-
-                        Label {
-                            id: ringToneVolumeHeader
-                            text: qsTr('Ring tone volume')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         VolumeSlider {
@@ -1162,26 +1072,11 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Pause between ring tones [s]')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: ringTonePauseHeader.text
-                        Accessible.description: qsTr("Currently set to: ") + ringTonePauseValueLabel.text
-
-                        Label {
-                            id: ringTonePauseHeader
-                            text: qsTr('Pause between ring tones [s]')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         Item {
@@ -1204,7 +1099,6 @@ Item {
                                 }
 
                                 Accessible.role: Accessible.Slider
-                                Accessible.name: qsTr("Adjust %1").arg(ringTonePauseHeader.text)
                                 Accessible.focusable: true
                                 Accessible.onIncreaseAction: () => {
                                     if (ringTonePauseSlider.value < ringTonePauseSlider.to) {
@@ -1235,24 +1129,11 @@ Item {
                     }
 
                     // Notification audio
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Notification tone')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: notificationToneHeader.text
-
-                        Label {
-                            id: notificationToneHeader
-                            text: qsTr('Notification tone')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         AudioFileSelector {
@@ -1269,25 +1150,11 @@ Item {
                         }
                     }
 
-                    Column {
+                    LabeledItem {
+                        text: qsTr('Notification tone volume')
                         anchors {
                             left: parent.left
                             right: parent.right
-                        }
-
-                        Accessible.role: Accessible.Column
-                        Accessible.name: notificationToneVolumeHeader.text
-                        Accessible.description: qsTr("Currently set to: ") + notificationToneVolumeSlider.labelText
-
-                        Label {
-                            id: notificationToneVolumeHeader
-                            text: qsTr('Notification tone volume')
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-
-                            Accessible.ignored: true
                         }
 
                         VolumeSlider {

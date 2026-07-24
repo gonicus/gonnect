@@ -106,12 +106,12 @@ Item {
     Row {
         id: radioButtonRow
         height: singleRoomRadioButton.implicitHeight
-        spacing: 20
+        spacing: Theme.d
         anchors {
-            top: roomNameTextField.bottom
+            top: avatarImg.bottom
             left: parent.left
             right: parent.right
-            margins: 20
+            margins: Theme.d
         }
 
         RadioButton {

@@ -8,6 +8,7 @@
 #include <QImageReader>
 #include <QStandardPaths>
 #include <QLoggingCategory>
+#include <QDateTime>
 
 Q_LOGGING_CATEGORY(lcFileHelper, "gonnect.app.ui.FileHelper")
 
@@ -101,18 +102,64 @@ QString FileHelper::makeLogFilePath(const QString &name) const
             QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     const QString subFolderName = "log";
 
+    // Ensure dir exists
     QDir baseDir(baseDirStr);
     if (!baseDir.mkpath(subFolderName)) {
         qCCritical(lcFileHelper) << "Error, folder" << baseDir.filePath(subFolderName)
                                  << "could not be created";
         return QString();
     }
-
     baseDir.cd(subFolderName);
-    const QString finalFilePath = baseDir.filePath(name + QStringLiteral(".log"));
+
+    QString normalizedName(name);
+    normalizeFileName(normalizedName);
+    removeOldLogs(baseDir, normalizedName);
+
+    // Create new file path
+    const auto formattedDate = QDateTime::currentDateTime().toString("yyyy-MM-dd__hh-mm-ss");
+
+    const QString finalFilePath =
+            baseDir.filePath(QString("%1__%2.log").arg(normalizedName, formattedDate));
 
     qCInfo(lcFileHelper) << "Created log file path" << finalFilePath;
     return finalFilePath;
+}
+
+void FileHelper::removeOldLogs(const QDir &dir, const QString &prefix) const
+{
+    constexpr qsizetype keepLogCount = 10;
+
+    const QStringList filters = { QString("%1__*.log").arg(prefix) };
+    const auto fileList = dir.entryInfoList(filters, QDir::Files, QDir::Name | QDir::Reversed);
+
+    for (qsizetype i = keepLogCount - 1, l = fileList.size(); i < l; ++i) {
+        const auto &fileInfo = fileList.at(i);
+        QFile file(fileInfo.absoluteFilePath());
+
+        if (file.remove()) {
+            qCInfo(lcFileHelper) << "Removed old log file" << fileInfo.fileName();
+        } else {
+            qCWarning(lcFileHelper) << "Unable to remove old log file" << fileInfo.fileName();
+        }
+    }
+}
+
+void FileHelper::normalizeFileName(QString &name) const
+{
+    for (qsizetype i = name.length() - 1; i >= 0; --i) {
+        const auto ch = name.at(i);
+
+        if (ch.isSpace()) {
+            name[i] = '_';
+        } else if (!((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')
+                     || (ch >= '0' && ch <= '9') || ch == '_' || ch == '-' || ch == '.')) {
+            name.remove(i, 1);
+        }
+    }
+
+    while (name.endsWith('.')) {
+        name.chop(1);
+    }
 }
 
 qint64 FileHelper::fileSizeFromPath(const QString &path) const

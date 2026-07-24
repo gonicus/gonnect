@@ -637,27 +637,33 @@ void IpcDispatcher::init()
 
     // Convert and set log level
     ReadOnlyConfdSettings settings;
-    const auto configLogLevel = settings.value("logging/level", 2).toUInt();
     QString argLogLevel("off");
 
-    switch (configLogLevel) {
-    case 1:
-        argLogLevel = "error";
-        break;
-    case 2:
-        argLogLevel = "warn";
-        break;
-    case 3:
-        argLogLevel = "info";
-        break;
-    case 4:
-    case 5:
-    case 6:
+    if (static_cast<Application *>(Application::instance())->isDebugRun()) {
         argLogLevel = "debug";
-        break;
-    }
-    if (configLogLevel >= 7) {
-        argLogLevel = "trace";
+
+    } else {
+        const auto configLogLevel = settings.value("logging/level", 2).toUInt();
+
+        switch (configLogLevel) {
+        case 1:
+            argLogLevel = "error";
+            break;
+        case 2:
+            argLogLevel = "warn";
+            break;
+        case 3:
+            argLogLevel = "info";
+            break;
+        case 4:
+        case 5:
+        case 6:
+            argLogLevel = "debug";
+            break;
+        }
+        if (configLogLevel >= 7) {
+            argLogLevel = "trace";
+        }
     }
 
     args.append({ "--log-level", argLogLevel });

@@ -5,8 +5,11 @@ import base
 
 Item {
     id: control
-    implicitHeight: 40
     implicitWidth: sectionHeaderLabel.implicitWidth
+    height: control.implicitHeight
+    implicitHeight: sectionHeaderLabel.implicitHeight
+                    + sectionHeaderLabel.anchors.topMargin
+                    + sectionHeaderSeparator.anchors.bottomMargin
 
     property alias text: sectionHeaderLabel.text
 
@@ -21,6 +24,8 @@ Item {
             bottom: sectionHeaderSeparator.top
             left: parent.left
             right: parent.right
+            topMargin: Theme.d * 2
+            bottomMargin: Theme.d
         }
     }
 
@@ -32,7 +37,7 @@ Item {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            bottomMargin: 10
+            bottomMargin: Theme.d
         }
     }
 }

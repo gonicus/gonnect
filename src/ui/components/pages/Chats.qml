@@ -407,7 +407,6 @@ Item {
 
             Column {
                 id: roomCol
-                topPadding: 10
                 anchors {
                     left: parent.left
                     right: parent.right
