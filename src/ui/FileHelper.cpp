@@ -111,12 +111,15 @@ QString FileHelper::makeLogFilePath(const QString &name) const
     }
     baseDir.cd(subFolderName);
 
-    removeOldLogs(baseDir, name);
+    QString normalizedName(name);
+    normalizeFileName(normalizedName);
+    removeOldLogs(baseDir, normalizedName);
 
     // Create new file path
     const auto formattedDate = QDateTime::currentDateTime().toString("yyyy-MM-dd__hh-mm-ss");
 
-    const QString finalFilePath = baseDir.filePath(QString("%1__%2.log").arg(name, formattedDate));
+    const QString finalFilePath =
+            baseDir.filePath(QString("%1__%2.log").arg(normalizedName, formattedDate));
 
     qCInfo(lcFileHelper) << "Created log file path" << finalFilePath;
     return finalFilePath;
@@ -138,6 +141,24 @@ void FileHelper::removeOldLogs(const QDir &dir, const QString &prefix) const
         } else {
             qCWarning(lcFileHelper) << "Unable to remove old log file" << fileInfo.fileName();
         }
+    }
+}
+
+void FileHelper::normalizeFileName(QString &name) const
+{
+    for (qsizetype i = name.length() - 1; i >= 0; --i) {
+        const auto ch = name.at(i);
+
+        if (ch.isSpace()) {
+            name[i] = '_';
+        } else if (!((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')
+                     || (ch >= '0' && ch <= '9') || ch == '_' || ch == '-' || ch == '.')) {
+            name.remove(i, 1);
+        }
+    }
+
+    while (name.endsWith('.')) {
+        name.chop(1);
     }
 }
 

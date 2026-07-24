@@ -44,6 +44,7 @@ private:
     explicit FileHelper(QObject *parent = nullptr);
 
     void removeOldLogs(const QDir &dir, const QString &prefix) const;
+    void normalizeFileName(QString &name) const;
 };
 
 class FileHelperWrapper
