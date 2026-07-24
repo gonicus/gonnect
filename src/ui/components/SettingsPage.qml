@@ -412,6 +412,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: darkModeDelg
                                 text: darkModeDelg.displayName
+                                width: parent?.width ?? 0
 
                                 font.family: darkModeComboBox.font.family
                                 font.weight: darkModeComboBox.font.weight
@@ -592,6 +593,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: standardPreferredIdentityDelg
                                 text: standardPreferredIdentityDelg.displayName
+                                width: parent?.width ?? 0
 
                                 font.family: standardPreferredIdentitySelector.font.family
                                 font.weight: standardPreferredIdentitySelector.font.weight
@@ -862,7 +864,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: inputAudioSelectorDelg
                                 text: inputAudioSelectorDelg.name
-                                width: inputAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: inputAudioSelector.font.family
                                 font.weight: inputAudioSelector.font.weight
@@ -927,7 +929,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: outputAudioSelectorDelg
                                 text: outputAudioSelectorDelg.name
-                                width: outputAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: outputAudioSelector.font.family
                                 font.weight: outputAudioSelector.font.weight
@@ -992,7 +994,7 @@ Item {
                             delegate: ItemDelegate {
                                 id: outputRingAudioSelectorDelg
                                 text: outputRingAudioSelectorDelg.name
-                                width: outputRingAudioSelectorDelg.implicitWidth
+                                width: parent?.width ?? 0
 
                                 font.family: outputRingToneAudioSelector.font.family
                                 font.weight: outputRingToneAudioSelector.font.weight
