@@ -96,10 +96,11 @@ class QCoro(ConanFile):
             os.path.join("include", "qcoro6", "QCoro")
         ]
 
-        self.cpp_info.components["dbus"].set_property("cmake_file_name", "QCoro6DBus")
-        self.cpp_info.components["dbus"].set_property("cmake_target_name", "QCoro6::DBus")
-        self.cpp_info.components["dbus"].libs = ["QCoro6DBus"]
-        self.cpp_info.components["dbus"].requires = ["core"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["dbus"].set_property("cmake_file_name", "QCoro6DBus")
+            self.cpp_info.components["dbus"].set_property("cmake_target_name", "QCoro6::DBus")
+            self.cpp_info.components["dbus"].libs = ["QCoro6DBus"]
+            self.cpp_info.components["dbus"].requires = ["core"]
 
         self.cpp_info.components["network"].set_property("cmake_file_name", "QCoro6Network")
         self.cpp_info.components["network"].set_property("cmake_target_name", "QCoro6::Network")
