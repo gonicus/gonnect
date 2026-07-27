@@ -223,6 +223,7 @@ Q_SIGNALS:
     void chatMessageFlagsChanged(qsizetype index, ChatMessage *chatMessage,
                                  ChatMessage::Flags previousFlags);
     void chatMessageReactionsChanged(qsizetype index, ChatMessage *chatMessage);
+    void chatMessageEventIdChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageMentionedUsersChanged(qsizetype index, ChatMessage *chatMessage);
 
     /// Send when chat messages have been cleared (i.e. removed and deleted). All objects have been
