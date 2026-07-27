@@ -9,9 +9,10 @@ Column {
 
     Accessible.role: Accessible.Column
     Accessible.name: itemLabel.text
+    Accessible.description: control.description
 
     property alias text: itemLabel.text
-    property alias description: control.Accessible.description
+    property string description
 
     Label {
         id: itemLabel

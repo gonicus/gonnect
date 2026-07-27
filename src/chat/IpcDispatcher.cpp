@@ -26,6 +26,7 @@
 #include "PlatformSession.h"
 #include "SelectionState.h"
 #include "FileHelper.h"
+#include "Application.h"
 
 #include <QDir>
 #include <QDateTime>

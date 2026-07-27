@@ -132,6 +132,7 @@ void FileHelper::removeOldLogs(const QDir &dir, const QString &prefix) const
     const QStringList filters = { QString("%1__*.log").arg(prefix) };
     const auto fileList = dir.entryInfoList(filters, QDir::Files, QDir::Name | QDir::Reversed);
 
+    // Remove one from keepLogCount; will be the new one
     for (qsizetype i = keepLogCount - 1, l = fileList.size(); i < l; ++i) {
         const auto &fileInfo = fileList.at(i);
         QFile file(fileInfo.absoluteFilePath());
@@ -159,6 +160,10 @@ void FileHelper::normalizeFileName(QString &name) const
 
     while (name.endsWith('.')) {
         name.chop(1);
+    }
+
+    if (name.isEmpty()) {
+        name = "FALLBACK_LOG_NAME";
     }
 }
 

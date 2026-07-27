@@ -182,7 +182,7 @@ Item {
 
     Label {
         id: hintLabel
-        visible: searchResultListView.count === 0
+        visible: chatUserSearchModel.searchPhrase.length === 0
         color: Theme.secondaryTextColor
         font.pixelSize: 16
         anchors.centerIn: searchResultListView
