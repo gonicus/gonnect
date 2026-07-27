@@ -10,10 +10,13 @@ T.Label {
     linkColor: Material.accentColor
 
     ToolTip.text: control.text
-    ToolTip.visible: hoverHandler.hovered
+    ToolTip.visible: hoverHandlerLoader.item?.hovered ?? false
 
-    HoverHandler {
-        id: hoverHandler
-        enabled: control.truncated
+    Loader {
+        id: hoverHandlerLoader
+        active: control.truncated
+        sourceComponent: HoverHandler {
+            parent: control
+        }
     }
 }
