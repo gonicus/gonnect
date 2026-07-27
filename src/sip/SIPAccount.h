@@ -8,6 +8,8 @@
 #include "SIPBuddy.h"
 #include "ReadOnlyConfdSettings.h"
 
+class SIPSharedLine;
+
 struct MwiInfo
 {
     bool messagesWaiting = false;
@@ -58,6 +60,9 @@ public:
     QString toSipUri(const QString &var) const;
     QList<SIPCall *> calls() const { return m_calls; }
     QList<SIPBuddy *> buddies() const { return m_buddies; };
+
+    Q_INVOKABLE QString bargeIntoSharedLine(bool useConferenceBridge = false);
+
     SIPCall *getCallById(const int callId);
 
     QString id() const { return m_account; }
@@ -95,9 +100,12 @@ private:
     void generatePreferredIdentityHeader(const QString &var, const QString &preferredIdentity,
                                          pj::CallOpParam &prm);
     void ciscoSetup();
+    void ciscoSetupSharedLine();
     void ciscoUpdateSrtpFallback(const pjsip_msg *msg);
 
     bool hasAllowGrant(const QString &header, const QString &grant) const;
+
+    SIPSharedLine *sharedLine() const { return m_sharedLine; }
 
     QString addTransport(const QString &uri) const;
 
@@ -121,6 +129,7 @@ private:
     QString m_ciscoDeviceMac;
     unsigned m_ciscoDeviceModel = 588;
     bool m_ciscoSrtpFallbackEnabled = false;
+    bool m_ciscoSharedLineEnabled = false;
 
     bool m_isRegistered = false;
     bool m_isInstantMessagingAllowed = false;
@@ -129,6 +138,8 @@ private:
     bool m_rttEnabled = true;
     bool m_afterResume = false;
     QObject *m_globalStateConnectionContext = nullptr;
+
+    SIPSharedLine *m_sharedLine = nullptr;
 
     QString m_account;
     QString m_domain;

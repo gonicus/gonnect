@@ -16,13 +16,7 @@ class SIPSharedLine : public QObject, public pj::Buddy
     Q_DISABLE_COPY(SIPSharedLine)
 
 public:
-    enum class SubscriptionState {
-        Idle,
-        Pending,
-        Active,
-        NotConfigured,
-        Failed
-    };
+    enum class SubscriptionState { Idle, Pending, Active, NotConfigured, Failed };
     Q_ENUM(SubscriptionState)
 
     explicit SIPSharedLine(SIPAccount *account, const QString &uri);
@@ -30,7 +24,7 @@ public:
 
     bool initialize();
 
-    void onBuddyState() override;
+    void onBuddyState() override { }
     void onBuddyDlgEventState() override;
     void onBuddyEvSubDlgEventState(pj::OnBuddyEvSubStateParam &prm) override;
 

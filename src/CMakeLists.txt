@@ -732,10 +732,9 @@ qt_add_qml_module(gonnect
         helper/FileContentHelper.cpp
         helper/SecretGenerator.h
         helper/SecretGenerator.cpp
-        # helper/SpellCheckHighlighter.h
-        # helper/SpellCheckHighlighter.cpp
         helper/TextFormatHelper.h
         helper/TextFormatHelper.cpp
+        helper/PjSipTools.h
 
         media/AudioManager.h
         media/AudioManager.cpp

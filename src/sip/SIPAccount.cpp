@@ -5,6 +5,7 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPBuddy.h"
+#include "SIPSharedLine.h"
 #include "PreferredIdentity.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
@@ -58,6 +59,12 @@ void SIPAccount::initialize()
     }
 
     const bool isCisco = !m_ciscoDeviceMac.isEmpty();
+
+    m_ciscoSharedLineEnabled = m_settings.value("ciscoSharedLine", false).toBool();
+    if (m_ciscoSharedLineEnabled && !isCisco) {
+        qCWarning(lcSIPAccount) << "ignoring ciscoSharedLine - no ciscoDeviceMac set";
+        m_ciscoSharedLineEnabled = false;
+    }
 
     QString net = m_settings.value("network", "auto").toString();
     if (net == "auto") {
@@ -500,6 +507,10 @@ void SIPAccount::finalizeInitialization()
                         .arg(m_account, QString::fromLocal8Bit(err.info(false))));
         Q_EMIT initialized(false);
         return;
+    }
+
+    if (isCiscoDevice() && m_ciscoSharedLineEnabled) {
+        ciscoSetupSharedLine();
     }
 
     Q_EMIT initialized(true);
@@ -1324,4 +1335,72 @@ void SIPAccount::ciscoUpdateSrtpFallback(const pjsip_msg *msg)
 
     qCInfo(lcSIPAccount) << "Cisco sRTP to RTP fallback" << (enabled ? "enabled" : "disabled")
                          << "for account" << m_account;
+}
+
+void SIPAccount::ciscoSetupSharedLine()
+{
+    if (m_sharedLine) {
+        return;
+    }
+
+    const QString lineUri = QString::fromStdString(m_accountConfig.idUri);
+    if (lineUri.isEmpty()) {
+        return;
+    }
+
+    m_sharedLine = new SIPSharedLine(this, lineUri);
+    if (!m_sharedLine->initialize()) {
+        delete m_sharedLine;
+        m_sharedLine = nullptr;
+    }
+}
+
+QString SIPAccount::bargeIntoSharedLine(bool useConferenceBridge)
+{
+    if (!m_sharedLine || !m_sharedLine->isRemoteInUse()) {
+        qCWarning(lcSIPAccount) << "no remote call on the shared line to barge into";
+        return "";
+    }
+
+    const QString joinValue = m_sharedLine->joinHeaderValue();
+    if (joinValue.isEmpty()) {
+        qCWarning(lcSIPAccount) << "shared line call is missing dialog identifiers - cannot barge";
+        return "";
+    }
+
+    const QString sipUrl = addTransport(QString::fromStdString(m_accountConfig.idUri));
+
+    SIPCall *call = new SIPCall(this, PJSUA_INVALID_ID);
+
+    pj::CallOpParam prm(true);
+    prm.opt.audioCount = 1;
+    prm.opt.videoCount = 0;
+    prm.opt.textCount = 0;
+
+    pj::SipHeader joinHeader;
+    joinHeader.hName = "Join";
+    joinHeader.hValue = joinValue.toStdString();
+    prm.txOption.headers.push_back(joinHeader);
+
+    pj::SipHeader callInfo;
+    callInfo.hName = "Call-Info";
+    callInfo.hValue =
+            useConferenceBridge ? "<urn:X-cisco-remotecc:cbarge>" : "<urn:X-cisco-remotecc:barge>";
+    prm.txOption.headers.push_back(callInfo);
+
+    try {
+        call->call(sipUrl, prm);
+        m_calls.push_back(call);
+
+        qCInfo(lcSIPAccount) << (useConferenceBridge ? "cbarge" : "barge")
+                             << "into shared line call" << joinValue;
+
+        return call->uuid();
+    } catch (pj::Error &err) {
+        qCCritical(lcSIPAccount) << (useConferenceBridge ? "cbarge" : "barge")
+                                 << "into shared line call" << joinValue << "failed";
+        delete call;
+    }
+
+    return "";
 }
