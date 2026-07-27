@@ -669,7 +669,8 @@ void IpcDispatcher::init()
 
     args.append({ "--log-level", argLogLevel });
 
-    const auto logFilePath = FileHelper::instance().makeLogFilePath(plugin->displayName);
+    const QFileInfo binPath(plugin->binPath);
+    const auto logFilePath = FileHelper::instance().makeLogFilePath(binPath.baseName());
     if (logFilePath.isEmpty()) {
         qCWarning(lcIpcDispatcher)
                 << "Unable to create valid log file path - --log-file-path will not be set";
