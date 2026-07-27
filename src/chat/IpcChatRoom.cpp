@@ -200,6 +200,7 @@ void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString 
     if (auto msg = m_messageLookup.take(oldEventId)) {
         msg->setEventId(newEventId);
         m_messageLookup.insert(newEventId, msg);
+        Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
     }
 }
 

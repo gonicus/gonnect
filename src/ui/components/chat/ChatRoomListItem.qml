@@ -42,7 +42,6 @@ Item {
         text: control.sectionHeader
         anchors {
             top: parent.top
-            topMargin: 20
             left: parent.left
             right: parent.right
             leftMargin: 10
