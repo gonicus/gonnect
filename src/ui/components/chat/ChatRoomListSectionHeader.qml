@@ -9,6 +9,8 @@ Item {
     height: control.implicitHeight
     implicitHeight: sectionHeaderLabel.implicitHeight
                     + sectionHeaderLabel.anchors.topMargin
+                    + sectionHeaderLabel.anchors.bottomMargin
+                    + sectionHeaderSeparator.height
                     + sectionHeaderSeparator.anchors.bottomMargin
 
     property alias text: sectionHeaderLabel.text
