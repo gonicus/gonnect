@@ -625,14 +625,14 @@ bool SIPCall::hold()
     pj::CallOpParam op(true);
     addCiscoRemoteCcHeader(op, "hold");
 
-    setIsHolding(true);
-
     try {
         setHold(op);
     } catch (pj::Error &err) {
         qCWarning(lcSIPCall) << "failed to hold call:" << err.info();
         return false;
     }
+
+    setIsHolding(true);
 
     return true;
 }
@@ -644,7 +644,11 @@ bool SIPCall::unhold()
     op.opt.flag = PJSUA_CALL_UNHOLD;
     op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
-    setIsHolding(false);
+    // Cisco OL-25254-01 says that we neet a re-keying for the SRTP transport,
+    // which is done be re-initializing the media
+    if (m_account && m_account->isCiscoDevice()) {
+        op.opt.flag |= PJSUA_CALL_REINIT_MEDIA;
+    }
 
     try {
         reinvite(op);
@@ -653,6 +657,7 @@ bool SIPCall::unhold()
         return false;
     }
 
+    setIsHolding(false);
     return true;
 }
 
