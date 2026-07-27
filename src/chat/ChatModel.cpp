@@ -301,9 +301,11 @@ void ChatModel::onChatRoomChanged()
         });
         connect(m_chatRoom, &IChatRoom::chatMessageEventIdChanged, m_chatRoomContext,
                 [this](qsizetype idx, ChatMessage *) {
-                    const auto modelIndex = createIndex(idx, 0);
-                    Q_EMIT dataChanged(modelIndex, modelIndex,
-                                       { static_cast<int>(Roles::EventId) });
+                    if (idx >= 0) {
+                        const auto modelIndex = createIndex(idx, 0);
+                        Q_EMIT dataChanged(modelIndex, modelIndex,
+                                           { static_cast<int>(Roles::EventId) });
+                    }
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageContentChanged, m_chatRoomContext,
                 [this](qsizetype idx, ChatMessage *msgObj) {

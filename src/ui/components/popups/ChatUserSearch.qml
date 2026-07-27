@@ -182,13 +182,12 @@ Item {
 
     Label {
         id: hintLabel
-        visible: chatUserSearchModel.searchPhrase.length === 0
+        visible: searchResultListView.count === 0
         color: Theme.secondaryTextColor
         font.pixelSize: 16
         anchors.centerIn: searchResultListView
         text: {
-            const l = searchTextField.text.trim().length
-            if (l > 0) {
+            if (chatUserSearchModel.searchPhrase.length > 0) {
                 return qsTr("No users found.")
             }
             return qsTr("Please enter a search phrase...")

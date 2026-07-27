@@ -16,7 +16,6 @@ Column {
 
     Label {
         id: itemLabel
-        text: qsTr('Color scheme')
         anchors {
             left: parent.left
             right: parent.right
