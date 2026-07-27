@@ -11,6 +11,7 @@ Column {
     Accessible.name: itemLabel.text
 
     property alias text: itemLabel.text
+    property alias description: control.Accessible.description
 
     Label {
         id: itemLabel

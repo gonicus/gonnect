@@ -1056,6 +1056,7 @@ Item {
 
                     LabeledItem {
                         text: qsTr('Ring tone volume')
+                        description: qsTr("Currently set to: ") + ringToneVolumeSlider.labelText
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -1074,6 +1075,7 @@ Item {
 
                     LabeledItem {
                         text: qsTr('Pause between ring tones [s]')
+                        description: qsTr("Currently set to: ") + ringTonePauseSlider.labelText
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -1099,6 +1101,7 @@ Item {
                                 }
 
                                 Accessible.role: Accessible.Slider
+                                Accessible.name: qsTr("Adjust pause between ring tones [s]")
                                 Accessible.focusable: true
                                 Accessible.onIncreaseAction: () => {
                                     if (ringTonePauseSlider.value < ringTonePauseSlider.to) {
@@ -1152,6 +1155,7 @@ Item {
 
                     LabeledItem {
                         text: qsTr('Notification tone volume')
+                        description: qsTr("Currently set to: ") + notificationToneVolumeSlider.labelText
                         anchors {
                             left: parent.left
                             right: parent.right
