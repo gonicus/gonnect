@@ -4,7 +4,7 @@ import base
 
 Item {
     id: control
-    height: 30
+    height: buttonLabel.implicitHeight + Theme.d
     anchors {
         left: parent?.left
         right: parent?.right
@@ -49,6 +49,9 @@ Item {
     Label {
         id: buttonLabel
         font.weight: Font.Medium
+        maximumLineCount: 2
+        elide: Label.ElideRight
+        wrapMode: Label.WordWrap
         anchors {
             verticalCenter: parent.verticalCenter
             left: checkIconLabel.right
