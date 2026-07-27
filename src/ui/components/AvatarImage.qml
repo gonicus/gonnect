@@ -31,8 +31,8 @@ Item {
         visible: false
         anchors.fill: parent
         fillMode: Image.PreserveAspectCrop
-        sourceSize.width: control.size
-        sourceSize.height: control.size
+        sourceSize.width: control.size * Screen.devicePixelRatio
+        sourceSize.height: control.size * Screen.devicePixelRatio
         source: control.hasSource
                 ? control.source
                 : (control.initials

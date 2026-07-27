@@ -77,7 +77,7 @@ void SIPManager::initialize()
     // Initial configuration
     pj::EpConfig epConfig;
 
-    auto app = qobject_cast<Application *>(Application::instance());
+    auto app = static_cast<Application *>(Application::instance());
     if (app->isDebugRun()) {
         epConfig.logConfig.level = 6;
     } else {
