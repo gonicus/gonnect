@@ -677,15 +677,28 @@ void IpcDispatcher::init()
     m_ipc.start();
 }
 
-bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 timeoutSeconds)
+bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, bool allowSendIfLoggedOut,
+                                quint32 timeoutSeconds)
 {
     QScopedPointer request(requestContainer);
     if (!request) {
-        qWarning() << "Cannot send a nullptr request - aborting";
+        qCWarning(lcIpcDispatcher) << "Cannot send a nullptr request - aborting";
         return false;
     }
     if (!m_ipc.isRunning()) {
-        qWarning() << "Local socket is not ready - aborting";
+        qCWarning(lcIpcDispatcher) << "Local socket is not ready - aborting";
+        return false;
+    }
+
+    // Respect connection state of ipc subprocess
+    QSet<ConnectionState> disallowedStates = { ConnectionState::NetworkUnavailable,
+                                               ConnectionState::SessionInvalid };
+    if (!allowSendIfLoggedOut) {
+        disallowedStates.insert(ConnectionState::LoggedOut);
+    }
+    if (disallowedStates.contains(m_connectionState)) {
+        qCWarning(lcIpcDispatcher) << "Connection state is" << m_connectionState
+                                   << "- sending request is n/a and will be aborted.";
         return false;
     }
 
@@ -2216,7 +2229,7 @@ void IpcDispatcher::sendInitialInitializationRequest()
     initReq.setPersistentStorageSecret(m_configInfo.persistentStorageSecret);
     initReq.setDeviceDisplayName(m_configInfo.displayName);
     req->setInitializationRequest(initReq);
-    sendRequest(req);
+    sendRequest(req, true);
 }
 
 void IpcDispatcher::onLoggedInChanged()

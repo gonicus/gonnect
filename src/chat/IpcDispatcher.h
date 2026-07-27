@@ -253,6 +253,7 @@ private:
     /// The return value indicates whether the request has successfully been send. It does not
     /// represent a response to the request.
     bool sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
+                     bool allowSendIfLoggedOut = false,
                      quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS);
 
     /// Create a new empty container message. Caller takes ownership of the returned object.
