@@ -60,6 +60,7 @@ void AuthManager::init()
 
     QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::tokenChanged, this,
                      [this](const QString &token) {
+                         m_isRefreshInProgress = false;
                          qCInfo(lcAuthManager)
                                  << "Received new OAuth access token - updating bearer";
                          m_reqFactory.setBearerToken(token.toLatin1());
@@ -95,7 +96,8 @@ void AuthManager::init()
                          if (m_isRefreshInProgress) {
                              m_isRefreshInProgress = false;
                              qCInfo(lcAuthManager) << "Refresh failed - starting browser auth";
-                             startBrowserAuth();
+                             QMetaObject::invokeMethod(this, &AuthManager::startBrowserAuth,
+                                                       Qt::QueuedConnection);
                          }
                      });
 
@@ -187,23 +189,31 @@ void AuthManager::setIsWaitingForAuth(bool value)
 
 void AuthManager::startBrowserAuth()
 {
-    auto replyHandler = new QOAuthHttpServerReplyHandler(this);
+    if (m_authFlow->status() != QAbstractOAuth::Status::NotAuthenticated) {
+        return;
+    }
 
-    QObject::connect(replyHandler, &QOAuthHttpServerReplyHandler::tokenRequestErrorOccurred, this,
-                     [replyHandler](QAbstractOAuth::Error error, const QString &errorString) {
-                         Q_UNUSED(error);
-                         qCCritical(lcAuthManager) << "Error on receiving token:" << errorString;
-                         replyHandler->close();
-                         replyHandler->deleteLater();
+    clearReplyHandler();
+
+    m_replyHandler = new QOAuthHttpServerReplyHandler(this);
+
+    QObject::connect(
+            m_replyHandler, &QOAuthHttpServerReplyHandler::tokenRequestErrorOccurred, this,
+            [this, handler = m_replyHandler](QAbstractOAuth::Error, const QString &errorString) {
+                qCCritical(lcAuthManager) << "Error on receiving token:" << errorString;
+                if (handler == m_replyHandler) {
+                    clearReplyHandler();
+                }
+            });
+
+    QObject::connect(m_replyHandler, &QOAuthHttpServerReplyHandler::tokensReceived, this,
+                     [this, handler = m_replyHandler](const QVariantMap &) {
+                         if (handler == m_replyHandler) {
+                             clearReplyHandler();
+                         }
                      });
 
-    QObject::connect(replyHandler, &QOAuthHttpServerReplyHandler::tokensReceived, this,
-                     [replyHandler](const QVariantMap &) {
-                         replyHandler->close();
-                         replyHandler->deleteLater();
-                     });
-
-    m_authFlow->setReplyHandler(replyHandler);
+    m_authFlow->setReplyHandler(m_replyHandler);
     m_authFlow->grant();
 }
 
@@ -250,6 +260,15 @@ QDateTime AuthManager::tokenExpiry(const QString &token) const
     }
 
     return QDateTime::fromSecsSinceEpoch(expValue.toInt());
+}
+
+void AuthManager::clearReplyHandler()
+{
+    if (m_replyHandler) {
+        m_replyHandler->close();
+        m_replyHandler->deleteLater();
+        m_replyHandler = nullptr;
+    }
 }
 
 void AuthManager::authenticateJitsiRoom(const QString &roomName)

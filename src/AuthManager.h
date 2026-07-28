@@ -6,6 +6,7 @@
 #include <QSslCertificate>
 
 class QOAuth2AuthorizationCodeFlow;
+class QOAuthHttpServerReplyHandler;
 
 class AuthManager : public QObject
 {
@@ -82,6 +83,7 @@ private:
     void setIsWaitingForAuth(bool value);
     void startBrowserAuth();
     QDateTime tokenExpiry(const QString &token) const;
+    void clearReplyHandler();
 
     bool m_isAuthManagerInitialized = false;
     bool m_isJitsiAuthRequired = false;
@@ -91,6 +93,7 @@ private:
     QHash<QString, Token> m_jitsiTokens;
     bool m_isCAsInitialized = false;
     QList<QSslCertificate> m_cas;
+    QOAuthHttpServerReplyHandler *m_replyHandler = nullptr;
 
     QDateTime m_expireDateTime;
     bool m_isRefreshInProgress = false;
