@@ -5,7 +5,6 @@
 #include "NotificationManager.h"
 #include "appversion.h"
 #include "SIPManager.h"
-#include "SIPCallManager.h"
 #include "SystemTrayMenu.h"
 #include "AddressBookManager.h"
 #include "USBDevices.h"
@@ -49,7 +48,13 @@ int Application::s_sigtermFd[2];
 
 Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 {
-    qCCritical(lcApplication) << "Constructing app, version" << getVersion();
+    QString commitId = QString::fromStdString(getCommitHash());
+    if (commitId.isEmpty()) {
+        qCCritical(lcApplication) << "Constructing debug app, version" << getVersion();
+    } else {
+        qCCritical(lcApplication).nospace() << "Constructing app, version " << getVersion() << " [" << commitId << "]";
+    }
+
     connect(this, &Application::aboutToQuit, this, &Application::shutdown);
 
     setApplicationName("GOnnect");
