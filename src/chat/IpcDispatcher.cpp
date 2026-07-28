@@ -298,7 +298,9 @@ void IpcDispatcher::loginWithCredentials(const QString &userId, const QString &s
 
     auto req = createRequest();
     req->setLoginUsernamePasswordRequest(credReq);
-    sendRequest(req, true);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::loginWithSSO(const QString &identityProvider)
@@ -330,7 +332,9 @@ void IpcDispatcher::loginWithSSO(const QString &identityProvider)
     LoginSSORequest ssoLoginReq;
     ssoLoginReq.setIdentityProvider(identityProvider);
     req->setLoginSSORequest(ssoLoginReq);
-    sendRequest(req, true);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
@@ -683,8 +687,7 @@ void IpcDispatcher::init()
     m_ipc.start();
 }
 
-bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, bool allowSendIfLoggedOut,
-                                quint32 timeoutSeconds)
+bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, const SendPolicy policy)
 {
     QScopedPointer request(requestContainer);
     if (!request) {
@@ -698,7 +701,7 @@ bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, bool allowSe
 
     // Respect connection state of ipc subprocess
     QSet<ConnectionState> disallowedStates = { ConnectionState::NetworkUnavailable };
-    if (!allowSendIfLoggedOut) {
+    if (!policy.allowSendIfLoggedOut) {
         disallowedStates.insert(ConnectionState::LoggedOut);
         disallowedStates.insert(ConnectionState::SessionInvalid);
     }
@@ -729,12 +732,12 @@ bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, bool allowSe
     qCInfo(lcIpcDispatcher).noquote() << "Sending request with content" << types.first() << tagDbg;
 
     // Handle tag
-    if (timeoutSeconds && tag > 0) {
+    if (policy.timeoutSeconds && tag > 0) {
 
         auto timer = new QTimer(this);
         timer->setSingleShot(true);
-        timer->setInterval(timeoutSeconds * 1000);
-        timer->callOnTimeout(this, [timer, tag, timeoutSeconds, this]() {
+        timer->setInterval(policy.timeoutSeconds * 1000);
+        timer->callOnTimeout(this, [timer, tag, timeoutSeconds = policy.timeoutSeconds, this]() {
             m_timeoutTimers.remove(tag);
 
             const auto messageId = m_singleMessageTags.take(tag);
@@ -2235,7 +2238,9 @@ void IpcDispatcher::sendInitialInitializationRequest()
     initReq.setPersistentStorageSecret(m_configInfo.persistentStorageSecret);
     initReq.setDeviceDisplayName(m_configInfo.displayName);
     req->setInitializationRequest(initReq);
-    sendRequest(req, true);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::onLoggedInChanged()
