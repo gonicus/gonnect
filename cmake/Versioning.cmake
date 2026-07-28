@@ -19,13 +19,11 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
         set(VERSION "${CMAKE_MATCH_1}")
     endif()
 
-    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-        execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
-                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                    RESULT_VARIABLE GIT_RESULT
-                    OUTPUT_STRIP_TRAILING_WHITESPACE
-                    OUTPUT_VARIABLE GIT_HASH)
-    endif()
+    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                RESULT_VARIABLE GIT_RESULT
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                OUTPUT_VARIABLE GIT_HASH)
 
     set(APP_GIT_HASH ${GIT_HASH})
 endif()
