@@ -52,7 +52,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     if (commitId.isEmpty()) {
         qCCritical(lcApplication) << "Constructing debug app, version" << getVersion();
     } else {
-        qCCritical(lcApplication).nospace() << "Constructing app, version " << getVersion() << " [" << commitId << "]";
+        qCCritical(lcApplication).nospace()
+                << "Constructing app, version " << getVersion() << " [" << commitId << "]";
     }
 
     connect(this, &Application::aboutToQuit, this, &Application::shutdown);
