@@ -298,7 +298,7 @@ void IpcDispatcher::loginWithCredentials(const QString &userId, const QString &s
 
     auto req = createRequest();
     req->setLoginUsernamePasswordRequest(credReq);
-    sendRequest(req);
+    sendRequest(req, true);
 }
 
 void IpcDispatcher::loginWithSSO(const QString &identityProvider)
@@ -330,7 +330,7 @@ void IpcDispatcher::loginWithSSO(const QString &identityProvider)
     LoginSSORequest ssoLoginReq;
     ssoLoginReq.setIdentityProvider(identityProvider);
     req->setLoginSSORequest(ssoLoginReq);
-    sendRequest(req);
+    sendRequest(req, true);
 }
 
 void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
@@ -500,7 +500,11 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
     }
 
     req->setRoomMessagesRequest(msgReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        chatRoom->setIsLoadingMessageHistory(false);
+        m_roomListTags.remove(req->tag());
+    }
 }
 
 void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &messageId)
@@ -528,9 +532,11 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     MessageRequest msgReq;
     msgReq.setRoomId(roomId);
     msgReq.setMessageId(messageId);
-
     req->setMessageRequest(msgReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        m_singleMessageTags.remove(req->tag());
+    }
 }
 
 qsizetype IpcDispatcher::chatRoomsCount()
@@ -691,10 +697,10 @@ bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, bool allowSe
     }
 
     // Respect connection state of ipc subprocess
-    QSet<ConnectionState> disallowedStates = { ConnectionState::NetworkUnavailable,
-                                               ConnectionState::SessionInvalid };
+    QSet<ConnectionState> disallowedStates = { ConnectionState::NetworkUnavailable };
     if (!allowSendIfLoggedOut) {
         disallowedStates.insert(ConnectionState::LoggedOut);
+        disallowedStates.insert(ConnectionState::SessionInvalid);
     }
     if (disallowedStates.contains(m_connectionState)) {
         qCWarning(lcIpcDispatcher) << "Connection state is" << m_connectionState
@@ -2580,9 +2586,12 @@ QString IpcDispatcher::searchChatUser(const QString &searchPhrase)
     searchReq.setQuery(searchPhrase);
     searchReq.setLimit(50);
     req->setUserSearchRequest(searchReq);
-    sendRequest(req);
 
-    return tag;
+    if (sendRequest(req)) {
+        return tag;
+    } else {
+        return QString();
+    }
 }
 
 QList<const ChatUser *> IpcDispatcher::users() const
@@ -2784,7 +2793,10 @@ void IpcDispatcher::requestUser(const QString &userId)
 
     auto req = createRequest();
     req->setUserRequest(userReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        m_requestedUserIds.remove(userId);
+    }
 }
 
 void IpcDispatcher::addReaction(const QString &roomId, const QString &messageId,
