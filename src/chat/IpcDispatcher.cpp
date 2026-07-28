@@ -27,6 +27,7 @@
 #include "SelectionState.h"
 #include "FileHelper.h"
 #include "Application.h"
+#include "TextFormatHelper.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -438,6 +439,21 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
 {
     if (!chatRoomByRoomId(roomId)) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
+        return;
+    }
+
+    // Check file size
+    const QFileInfo fileInfo(QUrl(filePath).toLocalFile());
+    if (!fileInfo.exists()) {
+        qCCritical(lcIpcDispatcher) << "Cannot send file that does not exist:" << filePath;
+        return;
+    }
+    if (m_mediaSizeLimit > 0 && fileInfo.size() > m_mediaSizeLimit) {
+        qCWarning(lcIpcDispatcher) << "File size exceeds limit:" << filePath;
+        ErrorBus::instance().addError(
+                tr("The file %1 exceeds the file size limit of %2 and cannot be sent.")
+                        .arg(originalFileName,
+                             TextFormatHelper::instance().formatFileSize(m_mediaSizeLimit)));
         return;
     }
 
@@ -928,6 +944,16 @@ void IpcDispatcher::processResponse(
         m_supportsSubThreads = resp.subThreads();
         m_supportedMimeTypes = resp.mimeTypes();
         m_hasDeviceVerification = resp.clientVerification();
+
+        // Check size limit (and the value of it)
+        const quint64 mediaSizeLimit = resp.mediaSizeLimit();
+        if (std::in_range<qint64>(mediaSizeLimit)) {
+            m_mediaSizeLimit = static_cast<qint64>(resp.mediaSizeLimit());
+        } else {
+            qCWarning(lcIpcDispatcher)
+                    << "Received file size limit that exceeds our own datatype - using maximum";
+            m_mediaSizeLimit = std::numeric_limits<qint64>::max();
+        }
 
         Q_EMIT capabilitiesInitializedChanged();
 
