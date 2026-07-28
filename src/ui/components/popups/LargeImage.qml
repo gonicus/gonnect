@@ -7,7 +7,7 @@ import base
 
 Item {
     id: control
-    implicitWidth: imageItem.sourceSize.width
+    implicitWidth: Math.max(imageItem.sourceSize.width, buttonRow.implicitWidth + 2 * Theme.d)
     implicitHeight: imageItem.sourceSize.height
 
     property alias source: imageItem.source
