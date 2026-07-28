@@ -700,14 +700,14 @@ bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, const SendPo
     }
 
     // Respect connection state of ipc subprocess
-    QSet<ConnectionState> disallowedStates = { ConnectionState::NetworkUnavailable };
-    if (!policy.allowSendIfLoggedOut) {
-        disallowedStates.insert(ConnectionState::LoggedOut);
-        disallowedStates.insert(ConnectionState::SessionInvalid);
-    }
-    if (disallowedStates.contains(m_connectionState)) {
-        qCWarning(lcIpcDispatcher) << "Connection state is" << m_connectionState
-                                   << "- sending request is n/a and will be aborted.";
+    const bool isDisallowed = (m_connectionState == ConnectionState::NetworkUnavailable)
+            || (!policy.allowSendIfLoggedOut
+                && (m_connectionState == ConnectionState::LoggedOut
+                    || m_connectionState == ConnectionState::SessionInvalid));
+
+    if (isDisallowed) {
+        qCInfo(lcIpcDispatcher) << "Connection state is" << m_connectionState
+                                << "request will not be sent";
         return false;
     }
 
