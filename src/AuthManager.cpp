@@ -189,7 +189,7 @@ void AuthManager::setIsWaitingForAuth(bool value)
 
 void AuthManager::startBrowserAuth()
 {
-    if (m_authFlow->status() != QAbstractOAuth::Status::NotAuthenticated) {
+    if (m_authFlow->status() == QAbstractOAuth::Status::RefreshingToken) {
         return;
     }
 
