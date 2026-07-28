@@ -36,7 +36,7 @@ class IChatProvider : public QObject
     Q_PROPERTY(bool hasFavoriteRooms READ hasFavoriteRooms NOTIFY hasFavoriteRoomsChanged FINAL)
 
 public:
-    static inline constexpr quint32 defaultMessageLimit = 42;
+    static inline constexpr quint32 defaultMessageLimit = 100;
 
     enum class Capability {
         EditMessage = 1 << 0,

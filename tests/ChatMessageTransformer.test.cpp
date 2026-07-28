@@ -116,6 +116,9 @@ void ChatMessageTransformerTest::testFixNewLines()
     // Mixed single and double newlines
     QCOMPARE(T::fixNewLines("A\nB\n\nC"), QStringLiteral("A\\\nB\\\n\u2060\\\nC"));
     QCOMPARE(T::fixNewLines("A\n\nB\nC"), QStringLiteral("A\\\n\u2060\\\nB\\\nC"));
+
+    // Idempotency
+    QCOMPARE(T::fixNewLines("A\\\nB"), "A\\\nB");
 }
 
 QTEST_GUILESS_MAIN(ChatMessageTransformerTest)
