@@ -80,6 +80,7 @@ private:
     void init();
     void storeRefreshToken(const QString &token) const;
     void setIsWaitingForAuth(bool value);
+    void startBrowserAuth();
     QDateTime tokenExpiry(const QString &token) const;
 
     bool m_isAuthManagerInitialized = false;
@@ -92,6 +93,7 @@ private:
     QList<QSslCertificate> m_cas;
 
     QDateTime m_expireDateTime;
+    bool m_isRefreshInProgress = false;
     QOAuth2AuthorizationCodeFlow *m_authFlow = nullptr;
     QObject *m_authWaitingContext = nullptr;
     QNetworkRequestFactory m_reqFactory;

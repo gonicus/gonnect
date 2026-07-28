@@ -88,6 +88,17 @@ void AuthManager::init()
                                  << errorDescription << ", " << uri << ")";
                      });
 
+    QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::requestFailed, this,
+                     [this](const QAbstractOAuth::Error error) {
+                         qCCritical(lcAuthManager) << "OAuth2 request failed:" << error;
+
+                         if (m_isRefreshInProgress) {
+                             m_isRefreshInProgress = false;
+                             qCInfo(lcAuthManager) << "Refresh failed - starting browser auth";
+                             startBrowserAuth();
+                         }
+                     });
+
     QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this,
                      [](const QUrl &url) {
                          qCInfo(lcAuthManager) << "Opening browser for auth:" << url;
@@ -156,11 +167,26 @@ bool AuthManager::ensureOAuthAuthenticated()
 
         if (expirationDate.isValid()
             && QDateTime::currentDateTime() < expirationDate.addSecs(-60)) {
+            m_isRefreshInProgress = true;
             m_authFlow->refreshTokens();
             return false;
         }
     }
 
+    startBrowserAuth();
+    return false;
+}
+
+void AuthManager::setIsWaitingForAuth(bool value)
+{
+    if (m_isWaitingForAuth != value) {
+        m_isWaitingForAuth = value;
+        Q_EMIT isWaitingForAuthChanged();
+    }
+}
+
+void AuthManager::startBrowserAuth()
+{
     auto replyHandler = new QOAuthHttpServerReplyHandler(this);
 
     QObject::connect(replyHandler, &QOAuthHttpServerReplyHandler::tokenRequestErrorOccurred, this,
@@ -179,16 +205,6 @@ bool AuthManager::ensureOAuthAuthenticated()
 
     m_authFlow->setReplyHandler(replyHandler);
     m_authFlow->grant();
-
-    return false;
-}
-
-void AuthManager::setIsWaitingForAuth(bool value)
-{
-    if (m_isWaitingForAuth != value) {
-        m_isWaitingForAuth = value;
-        Q_EMIT isWaitingForAuthChanged();
-    }
 }
 
 QDateTime AuthManager::tokenExpiry(const QString &token) const
