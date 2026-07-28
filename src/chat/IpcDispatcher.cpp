@@ -492,7 +492,9 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
     chatRoom->setIsLoadingMessageHistory(true);
 
     auto req = createRequest();
-    m_roomListTags.insert(req->tag(), chatRoom->id());
+    const auto tag = req->tag();
+    m_roomListTags.insert(tag, chatRoom->id());
+
     RoomMessagesRequest msgReq;
     msgReq.setRoomId(chatRoom->id());
     msgReq.setLimit(n);
@@ -507,7 +509,7 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
 
     if (!sendRequest(req)) {
         chatRoom->setIsLoadingMessageHistory(false);
-        m_roomListTags.remove(req->tag());
+        m_roomListTags.remove(tag);
     }
 }
 
@@ -531,7 +533,8 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     }
 
     auto req = createRequest();
-    m_singleMessageTags.insert(req->tag(), messageId);
+    const auto tag = req->tag();
+    m_singleMessageTags.insert(tag, messageId);
 
     MessageRequest msgReq;
     msgReq.setRoomId(roomId);
@@ -539,7 +542,7 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     req->setMessageRequest(msgReq);
 
     if (!sendRequest(req)) {
-        m_singleMessageTags.remove(req->tag());
+        m_singleMessageTags.remove(tag);
     }
 }
 
