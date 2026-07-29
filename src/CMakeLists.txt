@@ -21,8 +21,8 @@ find_package(logfault CONFIG REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 
-find_package(QCoro6 REQUIRED COMPONENTS Core)
-qcoro_enable_coroutines()
+#find_package(QCoro6 REQUIRED COMPONENTS Core)
+#qcoro_enable_coroutines()
 
 if(UNIX)
     include(FindPkgConfig)
@@ -944,7 +944,7 @@ target_link_libraries(gonnect
         #hunspell::hunspell
         cmark::cmark
         KF6::SyntaxHighlighting
-        QCoro6::Core
+        #QCoro6::Core
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
         ${CARDDAV_CONTACT_FACTORY}
