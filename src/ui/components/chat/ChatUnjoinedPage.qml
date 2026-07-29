@@ -87,20 +87,23 @@ Item {
 
     JoinContainer {
         visible: control.joinState === IChatRoom.UserRoomState.Invited
-        text: qsTr("You have been invited to join this room '%1'?").arg(control.chatRoom.name)
+        text: qsTr("You have been invited to join this room '%1'?").arg(control.chatRoom?.name ?? "")
 
         Label {
             text: qsTr("Invitation message:")
             visible: invitationTextLabel.text !== ""
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Label {
             id: invitationTextLabel
             text: control.chatRoom?.invitationText?.trim() ?? ""
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Label {
             text: qsTr("Do you want to join this chat room?")
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Row {

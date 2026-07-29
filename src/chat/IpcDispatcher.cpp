@@ -1914,6 +1914,11 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     connect(roomObj, &IChatRoom::notificationCountChanged, this,
             [this](qsizetype) { updateUnreadNotificationsCount(); });
 
+    // Send room invitation signal
+    if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited) {
+        Q_EMIT roomInviteReceived(roomObj->id(), roomObj->name(), roomObj->invitationText());
+    }
+
     return roomObj;
 }
 
