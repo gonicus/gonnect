@@ -71,22 +71,30 @@ Item {
         readonly property int widgetRadius: 12
 
         onXChanged: () => {
+            if (!dragControl.active) {
+                return
+            }
+
             // Round value to grid coordinate and clamp min/max values
             const cellWidth = control.gridCellWidth
-            const newVal = Math.round(Util.clamp(Math.round(resizableRect.x / cellWidth) * cellWidth,
-                                                 0,
-                                                 (ViewHelper.numberOfGridCells() - control.widthGrid) * cellWidth))
+            const newVal = Util.clamp(Math.round(resizableRect.x / cellWidth) * cellWidth,
+                                      0,
+                                      (ViewHelper.numberOfGridCells() - control.widthGrid) * cellWidth)
 
             if (newVal !== resizableRect.x) {
                 resizableRect.x = newVal
             }
         }
         onYChanged: () => {
+            if (!dragControl.active) {
+                return
+            }
+
             // Round value to grid coordinate and clamp min/max values
             const cellHeight = control.gridCellHeight
-            const newVal = Math.round(Util.clamp(Math.round(resizableRect.y / cellHeight) * cellHeight,
-                                                 0,
-                                                 (ViewHelper.numberOfGridCells() - control.heightGrid) * cellHeight))
+            const newVal = Util.clamp(Math.round(resizableRect.y / cellHeight) * cellHeight,
+                                      0,
+                                      (ViewHelper.numberOfGridCells() - control.heightGrid) * cellHeight)
 
             if (newVal !== resizableRect.y) {
                 resizableRect.y = newVal
