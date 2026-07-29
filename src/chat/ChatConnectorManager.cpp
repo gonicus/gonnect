@@ -141,11 +141,12 @@ void ChatConnectorManager::processSettingGroup(const QString &group)
 
                 auto &credentials = Credentials::instance();
                 Q_ASSERT(credentials.isInitialized());
+                const QString groupStr = QString("%1/secret").arg(group);
 
                 credentials.get(
-                        QString("%1/secret").arg(group),
-                        [this, group](QKeychain::Error error, const QString &misc,
-                                      const QString &message) {
+                        groupStr,
+                        [this, group, groupStr](QKeychain::Error error, const QString &misc,
+                                                const QString &message) {
                             if (error) {
                                 qCCritical(lcChatConnectorManager)
                                         << QString("Error on retrieving secret for %1: %2")
@@ -165,14 +166,37 @@ void ChatConnectorManager::processSettingGroup(const QString &group)
                                     QMetaObject::Connection conn;
                                     conn = connect(
                                             &viewHelper, &ViewHelper::passwordResponded, this,
-                                            [this, conn, group](const QString id,
-                                                                const QString password) {
+                                            [this, conn, group, groupStr](const QString id,
+                                                                          const QString password) {
                                                 if (id == group) {
                                                     disconnect(conn);
 
                                                     if (auto state = m_groupStates.value(group,
                                                                                          nullptr)) {
                                                         state->config->secret = password;
+
+                                                        Credentials::instance().set(
+                                                                groupStr, password,
+                                                                [group,
+                                                                 groupStr](QKeychain::Error error,
+                                                                           const QString &,
+                                                                           const QString &message) {
+                                                                    if (error) {
+                                                                        qCCritical(
+                                                                                lcChatConnectorManager)
+                                                                                << "Error while "
+                                                                                   "saving"
+                                                                                << groupStr << ":"
+                                                                                << message;
+                                                                        ErrorBus::instance().error(
+                                                                                tr("Failed to save "
+                                                                                   "login secret "
+                                                                                   "for %1: %2")
+                                                                                        .arg(group,
+                                                                                             message));
+                                                                    }
+                                                                });
+
                                                         state->isLoginSecretInitialized = true;
                                                         state->isWaitingForLoginSecretResponse =
                                                                 false;
