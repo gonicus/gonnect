@@ -97,6 +97,7 @@ private:
     QTimer m_registrationCheckTimer;
     int m_networkRecoveryAttempts = 0;
     static constexpr int s_maxNetworkRecoveryAttempts = 6;
+    QSet<QString> m_lastLocalAddresses;
 
     std::unique_ptr<AppSettings> m_settings = nullptr;
 
