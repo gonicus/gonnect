@@ -1024,6 +1024,7 @@ void IpcDispatcher::processResponse(
 
                 roomObj->setJoinRule(joinRuleGrpcToGonnect(room.joinRule()));
                 roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
+                roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
             } else {
                 // Create new room
                 roomObj = addChatRoom(room);
@@ -1895,6 +1896,10 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     if (room.hasAvatarPath()) {
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
+    }
+
+    if (room.hasInvitationText()) {
+        roomObj->setInvitationText(room.invitationText());
     }
 
     m_rooms.append(roomObj);
