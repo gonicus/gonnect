@@ -487,7 +487,20 @@ void SIPManager::handleNetworkChanged()
         return;
     }
 
+    const auto currentAddresses = NetworkHelper::instance().localAddresses();
+
+    // Capture initial network state
+    if (m_lastLocalAddresses.isEmpty()) {
+        m_lastLocalAddresses = currentAddresses;
+        return;
+    }
+
+    if (currentAddresses == m_lastLocalAddresses) {
+        return;
+    }
+
     qCDebug(lcSIPManager) << "network changed - scheduling SIP recovery";
+    m_lastLocalAddresses = currentAddresses;
     m_networkRecoveryAttempts = 0;
     m_registrationCheckTimer.stop();
     m_networkRecoveryTimer.start(1s);
