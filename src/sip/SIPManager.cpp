@@ -1,6 +1,5 @@
 #include <QQmlEngine>
 #include <QQmlContext>
-#include <QLoggingCategory>
 #include <QTimer>
 #include <QRegularExpression>
 
@@ -21,6 +20,7 @@
 
 Q_LOGGING_CATEGORY(lcSIPManager, "gonnect.sip.manager")
 Q_LOGGING_CATEGORY(lcPJSIP, "gonnect.pjsip")
+Q_LOGGING_CATEGORY(lcSIPTRACE, "gonnect.sip.trace")
 
 using std::chrono::seconds;
 using namespace std::chrono_literals;
@@ -30,20 +30,41 @@ void SIPLogWriter::write(const pj::LogEntry &entry)
     // Remove first / last "
     auto msg = QString::fromStdString(entry.msg);
 
-    switch (entry.level) {
+    // If we've TX/RX in this message, split us to multiple log lines
+    static const QRegularExpression sipMatcher(R"re((R|T)X\s)re");
+    const auto sipMatch = sipMatcher.match(msg);
+    if (sipMatch.hasMatch()) {
+        const QStringList lines = msg.split(QRegularExpression("[\r\n]+"));
+        unsigned i = 0;
+
+        for (const QString& line : std::as_const(lines)) {
+            writeImpl(i++ == 0 ? lcPJSIP() : lcSIPTRACE(), entry.level, line);
+        }
+
+    } else {
+        writeImpl(lcPJSIP(), entry.level, msg);
+    }
+}
+
+void SIPLogWriter::writeImpl(const QLoggingCategory& category, int level, const QString& message)
+{
+    const char* categoryName =category.categoryName();
+    QMessageLogger logger(nullptr, 0, nullptr, categoryName);
+
+    switch (level) {
     case 1: // only errors
-        qCWarning(lcPJSIP).noquote() << msg;
+        logger.warning().noquote() << message;
         break;
 
     case 2: // info
     case 3:
-        qCInfo(lcPJSIP).noquote() << msg;
+        logger.info().noquote() << message;
         break;
 
     case 4: // debug
     case 5:
     case 6:
-        qCDebug(lcPJSIP).noquote() << msg;
+        logger.debug().noquote() << message;
         break;
     }
 }
@@ -110,7 +131,8 @@ void SIPManager::initialize()
     log_cfg->writer = m_logWriter.get();
     log_cfg->decor = log_cfg->decor
             & ~(::pj_log_decoration::PJ_LOG_HAS_CR | ::pj_log_decoration::PJ_LOG_HAS_NEWLINE
-                | ::pj_log_decoration::PJ_LOG_HAS_TIME | ::pj_log_decoration::PJ_LOG_HAS_MICRO_SEC);
+                | ::pj_log_decoration::PJ_LOG_HAS_TIME | ::pj_log_decoration::PJ_LOG_HAS_MICRO_SEC
+                | ::pj_log_decoration::PJ_LOG_HAS_SENDER);
 
     try {
         m_ep.libInit(epConfig);

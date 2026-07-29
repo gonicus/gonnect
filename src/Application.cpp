@@ -276,12 +276,15 @@ void Application::initLogging()
 void Application::logQtMessages(QtMsgType type, const QMessageLogContext &context,
                                 const QString &rawMsg)
 {
+    const QString msg =
+        QString("[%1] %2").arg(context.category ? context.category : "default", rawMsg);
+
     switch (type) {
     case QtDebugMsg:
-        LFLOG_DEBUG << rawMsg;
+        LFLOG_DEBUG << msg;
         break;
     case QtInfoMsg:
-        LFLOG_INFO << rawMsg;
+        LFLOG_INFO << msg;
         break;
     case QtWarningMsg: {
         // remove spam messages
@@ -291,14 +294,14 @@ void Application::logQtMessages(QtMsgType type, const QMessageLogContext &contex
             "|Detected anchors on an item that is managed by a layout"
         };
         if (filter.match(rawMsg).hasMatch()) {
-            LFLOG_TRACE << rawMsg;
+            LFLOG_TRACE << msg;
             break;
         }
-        LFLOG_WARN << rawMsg;
+        LFLOG_WARN << msg;
         break;
     }
     case QtCriticalMsg:
-        LFLOG_ERROR << rawMsg;
+        LFLOG_ERROR << msg;
         break;
     case QtFatalMsg:
         LFLOG_ERROR << "[**FATAL**] " << rawMsg;
