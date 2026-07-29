@@ -277,7 +277,7 @@ void Application::logQtMessages(QtMsgType type, const QMessageLogContext &contex
                                 const QString &rawMsg)
 {
     const QString msg =
-        QString("[%1] %2").arg(context.category ? context.category : "default", rawMsg);
+            QString("[%1] %2").arg(context.category ? context.category : "default", rawMsg);
 
     switch (type) {
     case QtDebugMsg:

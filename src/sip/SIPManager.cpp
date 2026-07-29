@@ -37,7 +37,7 @@ void SIPLogWriter::write(const pj::LogEntry &entry)
         const QStringList lines = msg.split(QRegularExpression("[\r\n]+"));
         unsigned i = 0;
 
-        for (const QString& line : std::as_const(lines)) {
+        for (const QString &line : std::as_const(lines)) {
             writeImpl(i++ == 0 ? lcPJSIP() : lcSIPTRACE(), entry.level, line);
         }
 
@@ -46,9 +46,9 @@ void SIPLogWriter::write(const pj::LogEntry &entry)
     }
 }
 
-void SIPLogWriter::writeImpl(const QLoggingCategory& category, int level, const QString& message)
+void SIPLogWriter::writeImpl(const QLoggingCategory &category, int level, const QString &message)
 {
-    const char* categoryName =category.categoryName();
+    const char *categoryName = category.categoryName();
     QMessageLogger logger(nullptr, 0, nullptr, categoryName);
 
     switch (level) {

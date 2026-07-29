@@ -19,7 +19,7 @@ class SIPLogWriter : public pj::LogWriter
 {
 public:
     void write(const pj::LogEntry &entry);
-    void writeImpl(const QLoggingCategory& category, int level, const QString& message);
+    void writeImpl(const QLoggingCategory &category, int level, const QString &message);
 };
 
 class SIPManager : public QObject
