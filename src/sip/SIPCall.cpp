@@ -628,6 +628,10 @@ bool SIPCall::hold()
     pj::CallOpParam op(true);
     addCiscoRemoteCcHeader(op, "hold");
 
+    if (m_account && m_account->isCiscoDevice()) {
+        op.opt.flag |= PJSUA_CALL_REINIT_MEDIA;
+    }
+
     try {
         setHold(op);
     } catch (pj::Error &err) {
@@ -646,6 +650,10 @@ bool SIPCall::unhold()
     addCiscoRemoteCcHeader(op, "resume");
     op.opt.flag = PJSUA_CALL_UNHOLD;
     op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
+
+    if (m_account && m_account->isCiscoDevice()) {
+        op.opt.flag |= PJSUA_CALL_REINIT_MEDIA;
+    }
 
     try {
         reinvite(op);
