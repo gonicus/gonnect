@@ -155,9 +155,7 @@ modules:
       - type: patch
         path: patches/pjproject-cisco-srtp-to-rtp-fallback.patch
       - type: patch
-        path: patches/pjproject-cisco-dlg-transport-pinning.patch
-      - type: patch
-        path: patches/pjproject-cisco-srtp-rekeying.patch
+        path: patches/pjproject-cisco-call.patch
 
   - name: openldap
     config-opts:
