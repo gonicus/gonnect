@@ -311,6 +311,7 @@ private:
     bool m_supportsSubThreads = false;
     bool m_hasFavoriteRooms = false;
     QStringList m_supportedMimeTypes;
+    qint64 m_mediaSizeLimit = 0;
 
     QObject *m_globalPresenceStateContext = nullptr;
     IpcInterface m_ipc;
