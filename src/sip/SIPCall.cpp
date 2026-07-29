@@ -595,6 +595,7 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
         const pjsip_msg *msg = rxData ? rxData->msg_info.msg : nullptr;
         parseCallInfo(msg);
         parseRemotePartyId(msg);
+        bindDialogTransport(rxData);
     }
 
     const auto header = QString::fromStdString(prm.e.body.tsxState.src.rdata.wholeMsg);
@@ -643,12 +644,6 @@ bool SIPCall::unhold()
     addCiscoRemoteCcHeader(op, "resume");
     op.opt.flag = PJSUA_CALL_UNHOLD;
     op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
-
-    // Cisco OL-25254-01 says that we neet a re-keying for the SRTP transport,
-    // which is done be re-initializing the media
-    if (m_account && m_account->isCiscoDevice()) {
-        op.opt.flag |= PJSUA_CALL_REINIT_MEDIA;
-    }
 
     try {
         reinvite(op);
@@ -1303,4 +1298,39 @@ void SIPCall::parseRemotePartyId(const pjsip_msg *msg)
                                  << ", screened=" << chosen->isScreened() << ")";
 
     setContactInfo(identity, !weAreCaller);
+}
+
+void SIPCall::bindDialogTransport(const pjsip_rx_data *rdata)
+{
+    if (!m_account || !m_account->isCiscoDevice() || !rdata || !rdata->tp_info.transport) {
+        return;
+    }
+
+    const int callId = getId();
+    if (callId < 0 || callId >= static_cast<int>(pjsua_var.ua_cfg.max_calls)) {
+        return;
+    }
+
+    pjsua_call *call = &pjsua_var.calls[callId];
+    if (!call->inv || !call->inv->dlg) {
+        return;
+    }
+
+    if (call->inv->dlg->tp_sel.type == PJSIP_TPSELECTOR_TRANSPORT) {
+        return;
+    }
+
+    pjsip_tpselector sel;
+    pj_bzero(&sel, sizeof(sel));
+    sel.type = PJSIP_TPSELECTOR_TRANSPORT;
+    sel.u.transport = rdata->tp_info.transport;
+
+    const pj_status_t status = pjsip_dlg_set_transport(call->inv->dlg, &sel);
+    if (status != PJ_SUCCESS) {
+        qCWarning(lcSIPCall) << "failed to pin dialog to established transport";
+        return;
+    }
+
+    qCInfo(lcSIPCall) << "pinned dialog to established transport"
+                      << rdata->tp_info.transport->obj_name;
 }

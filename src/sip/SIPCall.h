@@ -176,6 +176,8 @@ private:
     void setCallInfoPriority(SIPCallInfo::Priority value);
     void createOngoingCallNotification();
 
+    void bindDialogTransport(const pjsip_rx_data *rdata);
+
     void addCiscoRemoteCcHeader(pj::CallOpParam &op, const char *feature) const;
 
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
