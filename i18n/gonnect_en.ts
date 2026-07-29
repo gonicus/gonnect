@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/CallSideBar.qml" line="206"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="212"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
@@ -15,7 +15,7 @@
 <context>
     <name>Chat</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="206"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="217"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 is typing</numerusform>
@@ -117,7 +117,7 @@
 <context>
     <name>VoiceMailField</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="57"/>
+        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="73"/>
         <source>%n new voice mail(s)</source>
         <translation>
             <numerusform>%n new voice mail</numerusform>
@@ -125,7 +125,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="58"/>
+        <location filename="../src/ui/components/controls/VoiceMailField.qml" line="74"/>
         <source>%n old voice mail(s)</source>
         <translation>
             <numerusform>%n old voice mail</numerusform>
