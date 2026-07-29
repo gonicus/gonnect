@@ -58,18 +58,18 @@ void SIPLogWriter::writeImpl(const QLoggingCategory &category, int level, const 
 
     switch (level) {
     case 1: // only errors
-        logger.warning().noquote() << message;
+        logger.warning(category).noquote() << message;
         break;
 
     case 2: // info
     case 3:
-        logger.info().noquote() << message;
+        logger.info(category).noquote() << message;
         break;
 
     case 4: // debug
     case 5:
     case 6:
-        logger.debug().noquote() << message;
+        logger.debug(category).noquote() << message;
         break;
     }
 }

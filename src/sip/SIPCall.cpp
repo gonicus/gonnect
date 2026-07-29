@@ -263,6 +263,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         break;
 
     case PJSIP_INV_STATE_CONFIRMED:
+        setCallInfoUiState(SIPCallInfo::UiState::None);
+
         if (!m_isSilent) {
             removeCallState(ICallState::State::RingingIncoming
                             | ICallState::State::KnockingIncoming);
@@ -1279,17 +1281,14 @@ void SIPCall::parseRemotePartyId(const pjsip_msg *msg)
         }
     }
 
-    const QString number = chosen->number();
-    const QString name = chosen->name();
-
-    if (number.isEmpty() && name.isEmpty()) {
+    if (chosen->isNumberRestricted()) {
         qCDebug(lcSIPCall) << "Remote-Party-ID is fully restricted (privacy="
                            << SIPRemotePartyId::privacyToString(chosen->privacy()) << ")";
         return;
     }
 
-    const QString identity = number.isEmpty() ? name : chosen->uri();
-    if (identity == m_sipUrl) {
+    const QString identity = chosen->uri();
+    if (identity.isEmpty() || identity == m_sipUrl) {
         return;
     }
 

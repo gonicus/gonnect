@@ -930,8 +930,10 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
     call->setIncoming(true);
 
     const auto *rxData = static_cast<const pjsip_rx_data *>(iprm.rdata.pjRxData);
-    call->parseCallRouting(rxData ? rxData->msg_info.msg : nullptr);
-    call->parseCallInfo(rxData ? rxData->msg_info.msg : nullptr);
+    auto *msg = rxData ? rxData->msg_info.msg : nullptr;
+    call->parseCallRouting(msg);
+    call->parseCallInfo(msg);
+    call->parseRemotePartyId(msg);
 
     try {
         const pj::CallInfo ci = call->getInfo();

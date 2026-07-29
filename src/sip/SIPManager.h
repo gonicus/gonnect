@@ -18,7 +18,7 @@ class SIPEventLoop;
 class SIPLogWriter : public pj::LogWriter
 {
 public:
-    void write(const pj::LogEntry &entry);
+    void write(const pj::LogEntry &entry) override;
     void writeImpl(const QLoggingCategory &category, int level, const QString &message);
 };
 

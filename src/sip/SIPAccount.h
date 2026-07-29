@@ -105,8 +105,6 @@ private:
 
     bool hasAllowGrant(const QString &header, const QString &grant) const;
 
-    SIPSharedLine *sharedLine() const { return m_sharedLine; }
-
     QString addTransport(const QString &uri) const;
 
     MwiInfo parseMwiBody(const QString &body);
