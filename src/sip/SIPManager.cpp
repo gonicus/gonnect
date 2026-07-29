@@ -32,13 +32,18 @@ void SIPLogWriter::write(const pj::LogEntry &entry)
 
     // If we've TX/RX in this message, split us to multiple log lines
     static const QRegularExpression sipMatcher(R"re((R|T)X\s)re");
+    static const QRegularExpression newLineMatcher("[\r\n]+");
     const auto sipMatch = sipMatcher.match(msg);
     if (sipMatch.hasMatch()) {
-        const QStringList lines = msg.split(QRegularExpression("[\r\n]+"));
+        const QStringList lines = msg.split(newLineMatcher);
         unsigned i = 0;
 
         for (const QString &line : std::as_const(lines)) {
-            writeImpl(i++ == 0 ? lcPJSIP() : lcSIPTRACE(), entry.level, line);
+            if (line.contains("--end msg--")) {
+                writeImpl(lcSIPTRACE(), entry.level, "");
+            } else {
+                writeImpl(i++ == 0 ? lcPJSIP() : lcSIPTRACE(), entry.level, line);
+            }
         }
 
     } else {
