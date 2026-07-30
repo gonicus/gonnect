@@ -629,7 +629,7 @@ bool SIPCall::hold()
     addCiscoRemoteCcHeader(op, "hold");
 
     if (m_account && m_account->isCiscoDevice()) {
-        op.opt.flag |= PJSUA_CALL_REINIT_MEDIA;
+        op.options |= PJSUA_CALL_REINIT_MEDIA;
     }
 
     try {

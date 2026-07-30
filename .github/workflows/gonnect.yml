@@ -116,6 +116,7 @@ jobs:
         with:
           lfs: 'true'
           submodules: 'recursive'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Prepare
         uses: ./.github/actions/prepare-linux
@@ -146,6 +147,7 @@ jobs:
         with:
           lfs: 'true'
           submodules: 'recursive'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Prepare
         uses: ./.github/actions/prepare-windows
@@ -258,6 +260,7 @@ jobs:
         with:
           lfs: 'true'
           submodules: 'recursive'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Prepare
         uses: ./.github/actions/prepare-macos
@@ -416,6 +419,7 @@ jobs:
         with:
           lfs: 'true'
           submodules: 'recursive'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Reading GOnnect version
         shell: bash
