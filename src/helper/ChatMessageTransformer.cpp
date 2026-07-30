@@ -54,6 +54,12 @@ QString fixNewLines(const QString &orig)
     static const QRegularExpression singleNewlineRegex(QStringLiteral(R"((?<!\n)(?<!\\)\n(?!\n))"));
     str.replace(singleNewlineRegex, QStringLiteral("\\\n"));
 
+    // Strip trailing new line
+    if (str.endsWith(QStringLiteral("\\\n"))) {
+        str.chop(2);
+        str.append('\n');
+    }
+
     return str;
 }
 
