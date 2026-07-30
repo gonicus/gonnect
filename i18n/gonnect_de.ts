@@ -318,32 +318,32 @@
 <context>
     <name>BaseWidget</name>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="140"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="148"/>
         <source>Drag widget</source>
         <translation>Widget verschieben</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="141"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="149"/>
         <source>Change the position of the widget</source>
         <translation>Die Position des Widgets ändern</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="191"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="199"/>
         <source>Remove widget</source>
         <translation>Widget entfernen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="192"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="200"/>
         <source>Remove the currently selected widget from the dashboard</source>
         <translation>Das aktuell ausgewählte Widget vom Dashboard entfernen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="254"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="262"/>
         <source>Resize widget</source>
         <translation>Widget-Größe ändern</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="255"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="263"/>
         <source>Resize the widget according to the mouse direction</source>
         <translation>Die Größe des Widgets entsprechend der Mausrichtung ändern</translation>
     </message>
@@ -923,43 +923,43 @@
 <context>
     <name>Chat</name>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="54"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="64"/>
         <source>Direct conversation with %1</source>
         <translation>Direktunterhaltung mit %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="55"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="65"/>
         <source>Chat room %1</source>
         <translation>Chat-Raum %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="86"/>
-        <location filename="../src/ui/components/chat/Chat.qml" line="196"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="96"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="206"/>
         <source>Messages are loading...</source>
         <translation>Lade Nachrichten...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="123"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="133"/>
         <source>Edit room...</source>
         <translation>Raum bearbeiten...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="129"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="139"/>
         <source>Invite users...</source>
         <translation>Teilnehmer einladen...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="135"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="145"/>
         <source>Leave room...</source>
         <translation>Raum verlassen...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="139"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="149"/>
         <source>Are you sure you really want to leave this chat?</source>
         <translation>Möchtest Du diesen Chat wirklich verlassen?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="217"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="227"/>
         <source>%1 is/are typing</source>
         <translation>
             <numerusform>%1 schreibt gerade</numerusform>
@@ -1282,26 +1282,36 @@
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="90"/>
-        <source>You have been invited to join this room. Do you want to join it now?</source>
-        <translation>Du wurdest in diesen Raum eingeladen. Möchtest Du ihn jetzt betreten?</translation>
+        <source>You have been invited to join this room &apos;%1&apos;.</source>
+        <translation>Du wurdest in den Chat-Raum &quot;%1&quot; eingeladen.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="98"/>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="93"/>
+        <source>Invitation message:</source>
+        <translation>Einladungs-Nachricht:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="124"/>
+        <source>Do you want to join this chat room?</source>
+        <translation>Möchtest Du diesen Chat-Raum betreten?</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="134"/>
         <source>Decline</source>
         <translation>Abgelehnt</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="107"/>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="143"/>
         <source>Accept</source>
         <translation>Annehmen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="118"/>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="154"/>
         <source>You knocked on the door and are waiting for someone to let you in.</source>
         <translation>Du hast angeklopft und wartest darauf, dass Dich jemand hereinlässt.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="123"/>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="159"/>
         <source>You have been banned from this room and may not enter it again, unless a room administrator re-invites you.</source>
         <translation>Du wurdest von diesem Raum ausgeschlossen und kannst erst wieder eintreten, wenn ein Raum-Adminstrator Dich erneut einläd.</translation>
     </message>
@@ -3033,64 +3043,69 @@
 <context>
     <name>IpcDispatcher</name>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="840"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="458"/>
+        <source>The file %1 exceeds the file size limit of %2 and cannot be sent.</source>
+        <translation>Die Datei %1 ist größer als das erlaubte Limit (%2) und wurde daher nicht gesendet.</translation>
+    </message>
+    <message>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="856"/>
         <source>An IPC error ocurred (%1, %2 (code %3):
 %4</source>
         <translation>IPC-Fehler aufgetreten (%1, %2 (code %3):
 %4</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="845"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="861"/>
         <source>An IPC error ocurred (%1, %2 (code %3)</source>
         <translation>IPC-Fehler aufgetreten (%1, %2 (code %3)</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2083"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2117"/>
         <source>Image sent by %1</source>
         <translation>Von %1 gesendetes Bild</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2085"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2119"/>
         <source>[%1] Image sent by %2</source>
         <translation>[%1] Von %2 gesendetes Bild</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2091"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2125"/>
         <source>Audio file sent by %1</source>
         <translation>Von %1 gesendete Audio-Datei</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2093"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2127"/>
         <source>[%1] Audio file sent by %2</source>
         <translation>[%1] Von %2 gesendete Audio-Datei</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2100"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2134"/>
         <source>Video file sent by %1</source>
         <translation>Von %1 gesendetes Video</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2102"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2136"/>
         <source>[%1] Video file sent by %2</source>
         <translation>[%1] Von %2 gesendetes Video</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2109"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2143"/>
         <source>File sent by %1</source>
         <translation>Von %1 gesendete Datei</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2111"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2145"/>
         <source>[%1] File sent by %2</source>
         <translation>[%1] Von %2 gesendete Datei</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2118"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2152"/>
         <source>Message from %1</source>
         <translation>Nachricht von %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2120"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2154"/>
         <source>[%1] Message from %2</source>
         <translation>[%1] Von %2 gesendete Nachricht</translation>
     </message>

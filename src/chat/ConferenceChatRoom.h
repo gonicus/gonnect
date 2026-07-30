@@ -20,6 +20,7 @@ public:
     virtual QString id() override { return m_id; }
     virtual QString name() override { return m_name; }
     virtual QString avatarPath() override { return ""; }
+    virtual QString invitationText() override { return {}; }
     virtual bool isInitiallyLoaded() const override { return true; }
     virtual void loadMessages() override { }
     virtual qsizetype notificationCount() override;
