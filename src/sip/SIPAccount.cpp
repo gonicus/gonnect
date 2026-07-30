@@ -59,6 +59,9 @@ void SIPAccount::initialize()
     }
 
     const bool isCisco = !m_ciscoDeviceMac.isEmpty();
+    if (isCisco) {
+        m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC2543;
+    }
 
     m_ciscoSharedLineEnabled = m_settings.value("ciscoSharedLine", false).toBool();
     if (m_ciscoSharedLineEnabled && !isCisco) {
