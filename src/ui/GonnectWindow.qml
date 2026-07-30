@@ -323,7 +323,7 @@ BaseWindow {
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
                 topMargin: controlBar.visible ? 5 : 0
-                bottom: bottomBar.visible ? bottomBar.top : parent.bottom
+                bottom: togglerList.visible ? togglerList.top : parent.bottom
                 bottomMargin: Theme.d
             }
 
@@ -385,43 +385,15 @@ BaseWindow {
             }
         }
 
-        Item {
-            id: bottomBar
-            visible: true
-            height: 30
+        TogglerList {
+            id: togglerList
+            visible: togglerList.count > 0
+            clip: true
             anchors {
                 right: parent.right
                 left: mainTabBar.right
                 bottom: parent.bottom
                 bottomMargin: Theme.d / 2 - (Theme.useOwnDecoration ? 0 : 3)  // extra padding for window border
-            }
-
-            TogglerList {
-                id: togglerList
-                visible: togglerList.count > 0
-                clip: true
-                anchors {
-                    left: parent.left
-                    right: rightRow.left
-                    rightMargin: Theme.d * 2
-                    verticalCenter: rightRow.verticalCenter
-                }
-            }
-
-            Row {
-                id: rightRow
-                spacing: 10
-                anchors {
-                    right: parent.right
-                    bottom: parent.bottom
-                    rightMargin: 2 * Theme.d
-                }
-
-                FirstAidButton {
-                    id: firstAidButton
-                    height: 42
-                    z: 100000
-                }
             }
         }
     }
