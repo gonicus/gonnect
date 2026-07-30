@@ -629,7 +629,7 @@ bool SIPCall::hold()
     addCiscoRemoteCcHeader(op, "hold");
 
     if (m_account && m_account->isCiscoDevice()) {
-        op.options |= PJSUA_CALL_REINIT_MEDIA;
+        op.options |= PJSUA_CALL_REKEY_SRTP;
     }
 
     try {
@@ -652,7 +652,7 @@ bool SIPCall::unhold()
     op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
     if (m_account && m_account->isCiscoDevice()) {
-        op.opt.flag |= PJSUA_CALL_REINIT_MEDIA;
+        op.opt.flag |= PJSUA_CALL_REKEY_SRTP;
     }
 
     try {

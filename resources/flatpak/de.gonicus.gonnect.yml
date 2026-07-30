@@ -153,9 +153,7 @@ modules:
       - type: patch
         path: patches/pjsip-pres-crash.patch
       - type: patch
-        path: patches/pjproject-cisco-srtp-to-rtp-fallback.patch
-      - type: patch
-        path: patches/pjproject-cisco-call.patch
+        path: patches/pjproject-cisco-srtp.patch
 
   - name: openldap
     config-opts:
