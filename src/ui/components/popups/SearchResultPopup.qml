@@ -19,6 +19,7 @@ Popup {
     enter: null  // Transitions seem to cause that the popup is not visible sometimes...
     exit: null
     visible: !!control.searchText.length
+    focus: false
 
     LoggingCategory {
         id: category
