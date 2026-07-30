@@ -76,6 +76,13 @@ Item {
 
         property bool emojiSignalsConnected: false
 
+        function send() {
+            internal.typingTimer.stop()
+            internal.lastPingTime = 0
+            internal.hasTypedWhileWaiting = false
+            control.sendMessage()
+        }
+
         function executePing() {
             if (control.chatRoom) {
                 control.chatRoom.sendTypingPing()
@@ -446,7 +453,7 @@ Item {
 
                                     // Send message
                                     keyEvent.accepted = true
-                                    control.sendMessage()
+                                    internal.send()
 
                                 } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
                                     // Clipboard paste
@@ -686,7 +693,7 @@ Item {
 
                 onClicked: () => {
                                if (control.enabled && control.hasMessage) {
-                                   control.sendMessage()
+                                   internal.send()
                                }
                            }
             }

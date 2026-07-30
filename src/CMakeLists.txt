@@ -438,6 +438,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/Menu.qml
         ui/components/popups/OwnAvatarContextMenu.qml
         ui/components/popups/PublicRoomSearch.qml
+        ui/components/popups/Popup.qml
         ui/components/popups/SearchResultPopup.qml
         ui/components/popups/UrlCopyDialog.qml
         ui/components/popups/UserSelect.qml
@@ -868,6 +869,8 @@ qt_add_qml_module(gonnect
         ui/TogglerProxyModel.cpp
         ui/ViewHelper.h
         ui/ViewHelper.cpp
+        ui/WebEngineKeyEventFilter.h
+        ui/WebEngineKeyEventFilter.cpp
 
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp
@@ -906,6 +909,9 @@ qt_add_protobuf(gonnect
 
 if(LINUX)
     set_target_properties(gonnect PROPERTIES LINK_FLAGS_RELEASE -s)
+    target_link_options(gonnect PRIVATE
+        "-Wl,--exclude-libs,libcrypto.a"
+        "-Wl,--exclude-libs,libssl.a")
 endif()
 
 qt_extract_metatypes(gonnect)

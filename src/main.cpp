@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "GlobalInfo.h"
 #include "PersonCoinProvider.h"
+#include "WebEngineKeyEventFilter.h"
 
 #ifdef Q_OS_LINUX
 #  include <QDBusConnection>
@@ -92,6 +93,8 @@ int main(int argc, char *argv[])
     qRegisterProtobufTypes();
 
     app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
+
+    app.installEventFilter(&WebEngineKeyEventFilter::instance());
 
     // Fonts
     const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };

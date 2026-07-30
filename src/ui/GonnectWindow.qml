@@ -232,6 +232,28 @@ BaseWindow {
             }
         }
 
+        Connections {
+            target: WebEngineKeyEventFilter
+
+            function onF11Pressed() {
+                ViewHelper.toggleFullscreen()
+            }
+            function onEscapePressed() {
+                if (control.visibility === Window.FullScreen) {
+                    ViewHelper.toggleFullscreen()
+                }
+            }
+            function onCtrlFPressed() {
+                ViewHelper.activateSearch()
+            }
+            function onCtrlKPressed() {
+                ViewHelper.activateSearch()
+            }
+            function onCtrlShiftMPressed() {
+                GlobalMuteState.toggleMute()
+            }
+        }
+
         Drawer {
             id: topDrawer
             edge: Qt.TopEdge

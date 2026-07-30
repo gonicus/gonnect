@@ -45,6 +45,14 @@ void IpcChatRoom::setAvatarPath(const QString &path)
     }
 }
 
+void IpcChatRoom::setInvitationText(const QString &invitationText)
+{
+    if (m_invitationText != invitationText) {
+        m_invitationText = invitationText;
+        Q_EMIT invitationTextChanged();
+    }
+}
+
 void IpcChatRoom::setJoinRule(JoinRule joinRule)
 {
     if (m_joinRule != joinRule) {

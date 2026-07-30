@@ -6,6 +6,7 @@ import base
 
 Popup {
     id: control
+    focus: false
     implicitWidth: control.maxItemWidth + 20
     implicitHeight: Math.min(400, col.implicitHeight) + 20
 

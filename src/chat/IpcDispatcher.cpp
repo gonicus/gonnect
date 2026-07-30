@@ -385,9 +385,12 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     MessageContentText content;
     content.setContent(text);
-
     msgReq.setText(content);
     msgReq.setMentionedUserIds(mentionedUserIds);
+
+    // Check for "@room" tag
+    msgReq.setRoomMentioned(containsRoomTag(text));
+
     req->setMessageSendRequest(msgReq);
 
     // Create optimistic (pending) message for immediate display
@@ -606,6 +609,7 @@ void IpcDispatcher::requestEditMessage(const QString &roomId, const QString &mes
     MessageContentText msgContent;
     msgContent.setContent(content);
     changeReq.setText(msgContent);
+    changeReq.setRoomMentioned(containsRoomTag(content));
 
     auto req = createRequest();
     req->setMessageChangeRequest(changeReq);
@@ -1024,6 +1028,7 @@ void IpcDispatcher::processResponse(
 
                 roomObj->setJoinRule(joinRuleGrpcToGonnect(room.joinRule()));
                 roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
+                roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
             } else {
                 // Create new room
                 roomObj = addChatRoom(room);
@@ -1897,6 +1902,8 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
     }
 
+    roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
+
     m_rooms.append(roomObj);
     m_roomLookup.insert(room.roomId(), roomObj);
 
@@ -1908,6 +1915,11 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     connect(roomObj, &IChatRoom::notificationCountChanged, this,
             [this](qsizetype) { updateUnreadNotificationsCount(); });
+
+    // Send room invitation signal
+    if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited) {
+        Q_EMIT roomInviteReceived(roomObj->id(), roomObj->name(), roomObj->invitationText());
+    }
 
     return roomObj;
 }
@@ -2215,6 +2227,12 @@ bool IpcDispatcher::shallSendDesktopNotification()
     }
     AppSettings settings;
     return settings.value("generic/jitsiChatAsNotifications", true).toBool();
+}
+
+bool IpcDispatcher::containsRoomTag(const QString &str) const
+{
+    static const QRegularExpression regex(R"((?<=^|\s)@room\b)");
+    return str.contains(regex);
 }
 
 RequestContainer *IpcDispatcher::createRequest(bool withTag)
