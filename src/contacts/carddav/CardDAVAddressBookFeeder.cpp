@@ -62,7 +62,6 @@ void CardDAVAddressBookFeeder::checkErrorStatus()
             this,
             [this]() {
                 // Prepare feeder for re-run
-                resetContacts();
                 if (m_cacheWriteTimer.isActive()) {
                     m_cacheWriteTimer.stop();
                 }
@@ -314,6 +313,7 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
 void CardDAVAddressBookFeeder::onParserFinished()
 {
     m_retryCount = m_initialRetryCount;
+    resetContacts();
 
     const auto list = m_webdavParser.getList();
     for (const auto &item : list) {
