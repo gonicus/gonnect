@@ -6,6 +6,7 @@ import base
 
 Popup {
     id: control
+    focus: false
     implicitWidth: 280
     implicitHeight: Math.min(400, listView.contentHeight) + 20
 
