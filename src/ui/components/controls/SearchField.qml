@@ -50,6 +50,14 @@ Item {
         id: hovHandler
     }
 
+    TapHandler {
+        onTapped: () => {
+                      if (control.enabled && !searchInputField.activeFocus) {
+                          searchInputField.forceActiveFocus()
+                      }
+                  }
+    }
+
     IconLabel {
         id: searchIcon
         icon {

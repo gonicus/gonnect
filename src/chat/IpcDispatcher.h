@@ -302,6 +302,8 @@ private:
 
     bool shallSendDesktopNotification();
 
+    bool containsRoomTag(const QString &str) const;
+
     QRegularExpression m_idConvRegex;
     bool m_useIdConversion = false;
     bool m_isInitialized = false;

@@ -385,9 +385,12 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     MessageContentText content;
     content.setContent(text);
-
     msgReq.setText(content);
     msgReq.setMentionedUserIds(mentionedUserIds);
+
+    // Check for "@room" tag
+    msgReq.setRoomMentioned(containsRoomTag(text));
+
     req->setMessageSendRequest(msgReq);
 
     // Create optimistic (pending) message for immediate display
@@ -606,6 +609,7 @@ void IpcDispatcher::requestEditMessage(const QString &roomId, const QString &mes
     MessageContentText msgContent;
     msgContent.setContent(content);
     changeReq.setText(msgContent);
+    changeReq.setRoomMentioned(containsRoomTag(content));
 
     auto req = createRequest();
     req->setMessageChangeRequest(changeReq);
@@ -2223,6 +2227,12 @@ bool IpcDispatcher::shallSendDesktopNotification()
     }
     AppSettings settings;
     return settings.value("generic/jitsiChatAsNotifications", true).toBool();
+}
+
+bool IpcDispatcher::containsRoomTag(const QString &str) const
+{
+    static const QRegularExpression regex(R"((?<=^|\s)@room\b)");
+    return str.contains(regex);
 }
 
 RequestContainer *IpcDispatcher::createRequest(bool withTag)
