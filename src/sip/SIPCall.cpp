@@ -1237,7 +1237,7 @@ void SIPCall::addCiscoRemoteCcHeader(pj::CallOpParam &op, const char *feature) c
 
     pj::SipHeader header;
     header.hName = "Call-Info";
-    header.hValue = std::string("<urn:X-cisco-remotecc:") + feature + ">";
+    header.hValue = std::string("<urn:x-cisco-remotecc:") + feature + ">";
     op.txOption.headers.push_back(header);
 }
 
