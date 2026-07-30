@@ -861,6 +861,8 @@ qt_add_qml_module(gonnect
         ui/TogglerProxyModel.cpp
         ui/ViewHelper.h
         ui/ViewHelper.cpp
+        ui/WebEngineKeyEventFilter.h
+        ui/WebEngineKeyEventFilter.cpp
 
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp
