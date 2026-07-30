@@ -473,6 +473,68 @@ Item {
                 }
             ]
         }
+
+        Item {
+            id: emergencyTabButton
+            height: 4 * Theme.d
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Emergency tab button")
+            Accessible.description: qsTr("Open emergency call menu")
+            Accessible.focusable: true
+            Accessible.onPressAction: ViewHelper.showFirstAid()
+
+            Rectangle {
+                id: emergencyButtonBackground
+                radius: Theme.d / 2
+                color: Theme.emergencyColor
+                anchors {
+                    fill: parent
+                    leftMargin: Theme.d
+                    rightMargin: Theme.d
+                }
+            }
+
+            Rectangle {
+                id: emergencyButtonHoverBackground
+                visible: emergencyTabButtonHoverHandler.hovered && emergencyTabButton.enabled
+                radius: emergencyButtonBackground.radius
+                color: Qt.tint(emergencyButtonBackground.color, "#26ffffff")
+                anchors.fill: emergencyButtonBackground
+            }
+
+            IconLabel {
+                anchors.centerIn: parent
+                icon {
+                    source: "qrc:/icons/ISO_7010_E004" + ViewHelper.culturalSphereExtension + ".svg"
+                    width: 2 * Theme.d
+                    height: 2 * Theme.d
+                    color: emergencyTabButton.enabled
+                           ? Theme.foregroundWhiteColor
+                           : Theme.secondaryInactiveTextColor
+                }
+
+                Accessible.ignored: true
+            }
+
+            ToolTip.text: qsTr("Open emergency call menu")
+            ToolTip.visible: emergencyTabButtonHoverHandler.hovered
+            ToolTip.delay: Application.styleHints.mousePressAndHoldInterval
+            ToolTip.toolTip.x: emergencyTabButton.x + emergencyTabButton.width
+            ToolTip.toolTip.y: 9
+
+            HoverHandler {
+                id: emergencyTabButtonHoverHandler
+            }
+
+            TapHandler {
+                onTapped: () => ViewHelper.showFirstAid()
+            }
+        }
     }
 
     Menu {
