@@ -1898,9 +1898,7 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
     }
 
-    if (room.hasInvitationText()) {
-        roomObj->setInvitationText(room.invitationText());
-    }
+    roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
 
     m_rooms.append(roomObj);
     m_roomLookup.insert(room.roomId(), roomObj);

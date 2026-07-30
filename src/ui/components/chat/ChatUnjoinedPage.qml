@@ -95,10 +95,29 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        Label {
-            id: invitationTextLabel
-            text: control.chatRoom?.invitationText?.trim() ?? ""
-            anchors.horizontalCenter: parent.horizontalCenter
+        Rectangle {
+            id: invitationTextLabelContainer
+            visible: invitationTextLabel.text !== ""
+            height: invitationTextLabel.height + 2 * 20
+            radius: 8
+            color: Theme.backgroundSecondaryColor
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+
+            Label {
+                id: invitationTextLabel
+                text: control.chatRoom?.invitationText?.trim() ?? ""
+                wrapMode: Text.Wrap
+                font.italic: true
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                    right: parent.right
+                    margins: 20
+                }
+            }
         }
 
         Label {
