@@ -7,6 +7,7 @@
 #include <QJsonDocument>
 #include <QtConcurrent>
 #include <QNetworkAccessManager>
+#include <QNetworkInterface>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QEventLoop>
@@ -189,6 +190,22 @@ QStringList NetworkHelper::nameservers() const
     result.append(parseResolvConf("/etc/resolv.conf"));
     result.append(parseResolvConf("/run/systemd/resolve/resolv.conf"));
     result.removeDuplicates();
+
+    return result;
+}
+
+QSet<QString> NetworkHelper::localAddresses() const
+{
+    QSet<QString> result;
+
+    const auto addresses = QNetworkInterface::allAddresses();
+    for (const QHostAddress &address : std::as_const(addresses)) {
+        if (address.isLoopback() || address.isLinkLocal()) {
+            continue;
+        }
+
+        result.insert(address.toString());
+    }
 
     return result;
 }

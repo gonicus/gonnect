@@ -18,6 +18,14 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
         string(REGEX MATCH "v([0-9a-z.+-]*)" _ ${VERSION})
         set(VERSION "${CMAKE_MATCH_1}")
     endif()
+
+    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                RESULT_VARIABLE GIT_RESULT
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                OUTPUT_VARIABLE GIT_HASH)
+
+    set(APP_GIT_HASH ${GIT_HASH})
 endif()
 
 # Fall back to project version

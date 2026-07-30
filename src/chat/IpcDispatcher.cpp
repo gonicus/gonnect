@@ -27,6 +27,7 @@
 #include "SelectionState.h"
 #include "FileHelper.h"
 #include "Application.h"
+#include "TextFormatHelper.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -299,7 +300,9 @@ void IpcDispatcher::loginWithCredentials(const QString &userId, const QString &s
 
     auto req = createRequest();
     req->setLoginUsernamePasswordRequest(credReq);
-    sendRequest(req);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::loginWithSSO(const QString &identityProvider)
@@ -331,7 +334,9 @@ void IpcDispatcher::loginWithSSO(const QString &identityProvider)
     LoginSSORequest ssoLoginReq;
     ssoLoginReq.setIdentityProvider(identityProvider);
     req->setLoginSSORequest(ssoLoginReq);
-    sendRequest(req);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
@@ -441,6 +446,21 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
         return;
     }
 
+    // Check file size
+    const QFileInfo fileInfo(QUrl(filePath).toLocalFile());
+    if (!fileInfo.exists()) {
+        qCCritical(lcIpcDispatcher) << "Cannot send file that does not exist:" << filePath;
+        return;
+    }
+    if (m_mediaSizeLimit > 0 && fileInfo.size() > m_mediaSizeLimit) {
+        qCWarning(lcIpcDispatcher) << "File size exceeds limit:" << filePath;
+        ErrorBus::instance().addError(
+                tr("The file %1 exceeds the file size limit of %2 and cannot be sent.")
+                        .arg(originalFileName,
+                             TextFormatHelper::instance().formatFileSize(m_mediaSizeLimit)));
+        return;
+    }
+
     auto req = createRequest();
     MessageSendRequest msgReq;
     msgReq.setRoomId(roomId);
@@ -489,7 +509,9 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
     chatRoom->setIsLoadingMessageHistory(true);
 
     auto req = createRequest();
-    m_roomListTags.insert(req->tag(), chatRoom->id());
+    const auto tag = req->tag();
+    m_roomListTags.insert(tag, chatRoom->id());
+
     RoomMessagesRequest msgReq;
     msgReq.setRoomId(chatRoom->id());
     msgReq.setLimit(n);
@@ -501,7 +523,11 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
     }
 
     req->setRoomMessagesRequest(msgReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        chatRoom->setIsLoadingMessageHistory(false);
+        m_roomListTags.remove(tag);
+    }
 }
 
 void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &messageId)
@@ -524,14 +550,17 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     }
 
     auto req = createRequest();
-    m_singleMessageTags.insert(req->tag(), messageId);
+    const auto tag = req->tag();
+    m_singleMessageTags.insert(tag, messageId);
 
     MessageRequest msgReq;
     msgReq.setRoomId(roomId);
     msgReq.setMessageId(messageId);
-
     req->setMessageRequest(msgReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        m_singleMessageTags.remove(tag);
+    }
 }
 
 qsizetype IpcDispatcher::chatRoomsCount()
@@ -685,15 +714,27 @@ void IpcDispatcher::init()
     m_ipc.start();
 }
 
-bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 timeoutSeconds)
+bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, const SendPolicy policy)
 {
     QScopedPointer request(requestContainer);
     if (!request) {
-        qWarning() << "Cannot send a nullptr request - aborting";
+        qCWarning(lcIpcDispatcher) << "Cannot send a nullptr request - aborting";
         return false;
     }
     if (!m_ipc.isRunning()) {
-        qWarning() << "Local socket is not ready - aborting";
+        qCWarning(lcIpcDispatcher) << "Local socket is not ready - aborting";
+        return false;
+    }
+
+    // Respect connection state of ipc subprocess
+    const bool isDisallowed = (m_connectionState == ConnectionState::NetworkUnavailable)
+            || (!policy.allowSendIfLoggedOut
+                && (m_connectionState == ConnectionState::LoggedOut
+                    || m_connectionState == ConnectionState::SessionInvalid));
+
+    if (isDisallowed) {
+        qCInfo(lcIpcDispatcher) << "Connection state is" << m_connectionState
+                                << "request will not be sent";
         return false;
     }
 
@@ -718,12 +759,12 @@ bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 time
     qCInfo(lcIpcDispatcher).noquote() << "Sending request with content" << types.first() << tagDbg;
 
     // Handle tag
-    if (timeoutSeconds && tag > 0) {
+    if (policy.timeoutSeconds && tag > 0) {
 
         auto timer = new QTimer(this);
         timer->setSingleShot(true);
-        timer->setInterval(timeoutSeconds * 1000);
-        timer->callOnTimeout(this, [timer, tag, timeoutSeconds, this]() {
+        timer->setInterval(policy.timeoutSeconds * 1000);
+        timer->callOnTimeout(this, [timer, tag, timeoutSeconds = policy.timeoutSeconds, this]() {
             m_timeoutTimers.remove(tag);
 
             const auto messageId = m_singleMessageTags.take(tag);
@@ -929,6 +970,16 @@ void IpcDispatcher::processResponse(
         m_supportedMimeTypes = resp.mimeTypes();
         m_hasDeviceVerification = resp.clientVerification();
 
+        // Check size limit (and the value of it)
+        const quint64 mediaSizeLimit = resp.mediaSizeLimit();
+        if (std::in_range<qint64>(mediaSizeLimit)) {
+            m_mediaSizeLimit = static_cast<qint64>(resp.mediaSizeLimit());
+        } else {
+            qCWarning(lcIpcDispatcher)
+                    << "Received file size limit that exceeds our own datatype - using maximum";
+            m_mediaSizeLimit = std::numeric_limits<qint64>::max();
+        }
+
         Q_EMIT capabilitiesInitializedChanged();
 
         if (m_connectionState == ConnectionState::LoggedIn) {
@@ -973,6 +1024,7 @@ void IpcDispatcher::processResponse(
 
                 roomObj->setJoinRule(joinRuleGrpcToGonnect(room.joinRule()));
                 roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
+                roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
             } else {
                 // Create new room
                 roomObj = addChatRoom(room);
@@ -1846,6 +1898,8 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
     }
 
+    roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
+
     m_rooms.append(roomObj);
     m_roomLookup.insert(room.roomId(), roomObj);
 
@@ -1857,6 +1911,11 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     connect(roomObj, &IChatRoom::notificationCountChanged, this,
             [this](qsizetype) { updateUnreadNotificationsCount(); });
+
+    // Send room invitation signal
+    if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited) {
+        Q_EMIT roomInviteReceived(roomObj->id(), roomObj->name(), roomObj->invitationText());
+    }
 
     return roomObj;
 }
@@ -2224,7 +2283,9 @@ void IpcDispatcher::sendInitialInitializationRequest()
     initReq.setPersistentStorageSecret(m_configInfo.persistentStorageSecret);
     initReq.setDeviceDisplayName(m_configInfo.displayName);
     req->setInitializationRequest(initReq);
-    sendRequest(req);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::onLoggedInChanged()
@@ -2575,9 +2636,12 @@ QString IpcDispatcher::searchChatUser(const QString &searchPhrase)
     searchReq.setQuery(searchPhrase);
     searchReq.setLimit(50);
     req->setUserSearchRequest(searchReq);
-    sendRequest(req);
 
-    return tag;
+    if (sendRequest(req)) {
+        return tag;
+    } else {
+        return QString();
+    }
 }
 
 QList<const ChatUser *> IpcDispatcher::users() const
@@ -2779,7 +2843,10 @@ void IpcDispatcher::requestUser(const QString &userId)
 
     auto req = createRequest();
     req->setUserRequest(userReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        m_requestedUserIds.remove(userId);
+    }
 }
 
 void IpcDispatcher::addReaction(const QString &roomId, const QString &messageId,

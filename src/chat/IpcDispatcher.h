@@ -246,14 +246,23 @@ private:
     /// has been received.
     void login();
 
+    /// Parameter for sendRequest describing how exactly the sending shall behave.
+    struct SendPolicy
+    {
+        bool allowSendIfLoggedOut = false;
+        quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS;
+
+        SendPolicy() : allowSendIfLoggedOut{ false }, timeoutSeconds{ GONNECT_IPC_TIMEOUT_SECS } { }
+    };
+
     /// Serialize and send a the request. This method takes ownership of the request object and
     /// destroys it after usage. If requestContainer has a tag, an answer to the request must be
-    /// received within timeoutSeconds, or a timeout occurs. If the container has no tag or
-    /// timeoutSeconds is 0, no timeout check is being made.
-    /// The return value indicates whether the request has successfully been send. It does not
-    /// represent a response to the request.
+    /// received within timeoutSeconds, or a timeout occurs (as defined in sendPolicy). If the
+    /// container has no tag or timeoutSeconds is 0, no timeout check is being made. The return
+    /// value indicates whether the request has successfully been send. It does not represent a
+    /// response to the request.
     bool sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
-                     quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS);
+                     const SendPolicy sendPolicy = SendPolicy());
 
     /// Create a new empty container message. Caller takes ownership of the returned object.
     /// If withTag is true, a unique tag is generated. Otherwise it is the zero id for fire and
@@ -302,6 +311,7 @@ private:
     bool m_supportsSubThreads = false;
     bool m_hasFavoriteRooms = false;
     QStringList m_supportedMimeTypes;
+    qint64 m_mediaSizeLimit = 0;
 
     QObject *m_globalPresenceStateContext = nullptr;
     IpcInterface m_ipc;
