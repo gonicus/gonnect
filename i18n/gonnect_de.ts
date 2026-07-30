@@ -902,12 +902,12 @@
 <context>
     <name>CardDAVAddressBookFeeder</name>
     <message>
-        <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="97"/>
+        <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="96"/>
         <source>CardDAV source %1 repeatedly failed</source>
         <translation>CardDAV-Quelle %1 ist wiederholt fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="128"/>
+        <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="127"/>
         <source>Authentication error for %1</source>
         <translation>Authentifizierungsfehler für %1</translation>
     </message>
@@ -2859,9 +2859,8 @@
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
-        <source>All</source>
-        <translation>Alle</translation>
+        <source>All sources</source>
+        <translation>Alle Quellen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
@@ -2887,6 +2886,11 @@
         <location filename="../src/ui/components/HistoryWidget.qml" line="109"/>
         <source>Currently selected call type</source>
         <translation>Aktuell ausgewählter Anruftyp</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
+        <source>All calls</source>
+        <translation>Alle Anrufe</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
