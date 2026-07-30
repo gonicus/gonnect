@@ -19,10 +19,20 @@ Item {
         chatMessageBox.giveFocus()
     }
 
-    onChatRoomChanged: () => {
+    function loadMessages() {
         const room = control.chatRoom
-        if (room && !room.isInitiallyLoaded) {
+        if (room && !room.isInitiallyLoaded && room.ownUserJoinState === IChatRoom.UserRoomState.Joined) {
             room.loadMessages()
+        }
+    }
+
+    onChatRoomChanged: () => control.loadMessages()
+
+    Connections {
+        target: control.chatRoom
+
+        function onOwnUserJoinStateChanged() {
+            control.loadMessages()
         }
     }
 
@@ -340,7 +350,7 @@ Item {
         id: chatUnjoinedPage
         chatProvider: control.chatProvider
         chatRoom: control.chatRoom
-        joinState: control.chatRoom?.ownUserJoinState === IChatRoom.UserRoomState.Unjoined
+        joinState: control.chatRoom?.ownUserJoinState ?? IChatRoom.UserRoomState.Unjoined
         visible: control.chatRoom?.ownUserJoinState !== IChatRoom.UserRoomState.Joined ?? false
         anchors {
             left: parent.left
