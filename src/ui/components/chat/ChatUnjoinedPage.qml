@@ -87,7 +87,7 @@ Item {
 
     JoinContainer {
         visible: control.joinState === IChatRoom.UserRoomState.Invited
-        text: qsTr("You have been invited to join this room '%1'?").arg(control.chatRoom?.name ?? "")
+        text: qsTr("You have been invited to join this room '%1'.").arg(control.chatRoom?.name ?? "")
 
         Label {
             text: qsTr("Invitation message:")
