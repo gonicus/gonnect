@@ -25,6 +25,7 @@ class IChatRoom : public QObject
     Q_PROPERTY(QString id READ id CONSTANT FINAL)
     Q_PROPERTY(QString name READ name NOTIFY nameChanged FINAL)
     Q_PROPERTY(QString avatarPath READ avatarPath NOTIFY avatarPathChanged FINAL)
+    Q_PROPERTY(QString invitationText READ invitationText NOTIFY invitationTextChanged FINAL)
     Q_PROPERTY(bool isInitiallyLoaded READ isInitiallyLoaded NOTIFY isInitiallyLoadedChanged FINAL)
     Q_PROPERTY(bool isDirectChat READ isDirectChat NOTIFY isDirectChatChanged FINAL)
     Q_PROPERTY(bool isFavorite READ isFavorite NOTIFY isFavoriteChanged FINAL)
@@ -73,6 +74,7 @@ public:
     virtual QString id() = 0;
     virtual QString name() = 0;
     virtual QString avatarPath() = 0;
+    virtual QString invitationText() = 0;
     virtual bool isFavorite() = 0;
     virtual IChatRoom::JoinRule joinRule() = 0;
     virtual qsizetype notificationCount() = 0;
@@ -193,6 +195,7 @@ Q_SIGNALS:
     void roomSettingsChanged();
     void nameChanged(QString name);
     void avatarPathChanged();
+    void invitationTextChanged();
     void isFavoriteChanged();
     void notificationCountChanged(qsizetype count);
     void joinRuleChanged();
