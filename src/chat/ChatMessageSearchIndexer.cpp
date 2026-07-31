@@ -75,7 +75,8 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
     const QString ftsRemoveStatement = "DELETE FROM messages_fts WHERE message_uid = ?;";
 
     Statement ftsRemove;
-    if (sqlite3_prepare_v2(m_db, ftsRemoveStatement.toUtf8(), -1, &ftsRemove.statement, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(m_db, ftsRemoveStatement.toUtf8(), -1, &ftsRemove.statement, nullptr)
+        != SQLITE_OK) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
@@ -90,11 +91,12 @@ bool ChatMessageSearchIndexer::addMessage(const Message &message)
     const QByteArray body = m_preprocessor->process(message.body).toUtf8();
 
     Statement ftsInsert;
-    if (sqlite3_prepare_v2(m_db, ftsInsertStatement.toUtf8(), -1, &ftsInsert.statement, nullptr) != SQLITE_OK) {
+    if (sqlite3_prepare_v2(m_db, ftsInsertStatement.toUtf8(), -1, &ftsInsert.statement, nullptr)
+        != SQLITE_OK) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
         return false;
     }
-    sqlite3_bind_text(ftsInsert.statement,1, message_uid.constData(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(ftsInsert.statement, 1, message_uid.constData(), -1, SQLITE_STATIC);
     sqlite3_bind_text(ftsInsert.statement, 2, body.constData(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(ftsInsert.statement) != SQLITE_DONE) {
