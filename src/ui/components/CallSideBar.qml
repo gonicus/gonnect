@@ -38,6 +38,11 @@ Item {
 
     property IConferenceConnector conferenceConnector
 
+    property bool conferenceMode: false
+
+    /// Whether the conference chat is currently used (as opposed to a direct chat, for instance)
+    property bool conferenceChatInUse: false
+
     property AggregatedDirectRoomsOfContact roomsAggregator: null
 
     function useImageFromClipboard() {
@@ -49,11 +54,13 @@ Item {
     onChatAvailableChanged: {
         if (!control.chatAvailable && control.selectedSideBarMode === CallSideBar.Chat) {
             control.selectedSideBarMode = CallSideBar.None
+        } else {
+            internal.updateAutoExtendCollapse()
         }
     }
 
     onSelectedCallItemChanged: () => {
-        if (!control.selectedCallItem) {
+        if (!control.selectedCallItem && !control.conferenceMode) {
             control.selectedSideBarMode = CallSideBar.None
         }
     }
@@ -84,12 +91,16 @@ Item {
         function updateAutoExtendCollapse() {
             const count = callList.count
 
-            if (count > 1 && !control.extended) {
-                control.selectedSideBarMode = userList.count
-                                              ? CallSideBar.SideBarMode.Users
-                                              : CallSideBar.SideBarMode.Caller
-            } else if (count <= 1 && control.extended) {
-                control.selectedSideBarMode = CallSideBar.SideBarMode.None
+            if (control.chatAvailable && !control.extended) {
+                control.selectedSideBarMode = CallSideBar.SideBarMode.Chat
+            } else if (!control.chatAvailable) {
+                if (count > 1 && !control.extended) {
+                    control.selectedSideBarMode = userList.count
+                                                  ? CallSideBar.SideBarMode.Users
+                                                  : CallSideBar.SideBarMode.Caller
+                } else if (count <= 1 && control.extended) {
+                    control.selectedSideBarMode = CallSideBar.SideBarMode.None
+                }
             }
         }
     }
@@ -303,6 +314,13 @@ Item {
             target: control.conferenceConnector
             function onIsInConferenceChanged() {
                 chatSideBar.lastMessageCount = 0
+                if (!control.conferenceConnector.isInConference) {
+                    control.conferenceChatInUse = false
+                }
+                chatSideBar.updateChatRoom()
+            }
+
+            function onNumberOfUsersChanged() {
                 chatSideBar.updateChatRoom()
             }
         }
@@ -319,6 +337,14 @@ Item {
 
         function updateChatRoom() {
             Qt.callLater(() => {
+
+                // Override roomsAggregator chat room if more participants joined
+                if (control.conferenceChatInUse || (control.conferenceConnector && control.conferenceConnector.numberOfUsers > 2)) {
+                    control.conferenceChatInUse = true
+                    chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+                    return
+                }
+
                 const aggr = control.roomsAggregator
                 if (aggr && aggr.bestMatchingChatRoom) {
                     chatSideBar.chatRoom = aggr.bestMatchingChatRoom
