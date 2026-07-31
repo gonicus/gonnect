@@ -3370,11 +3370,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="168"/>
-        <source>SIP registration failed with with status %1: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/Main.qml" line="144"/>
         <source>End all calls</source>
         <translation type="unfinished">پایان دادن به همه تماس‌ها</translation>
@@ -3391,12 +3386,17 @@
         <translation type="unfinished">آیا می‌خواهید این پنجره بسته و همه تماس‌ها پایان یابد؟</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="230"/>
+        <location filename="../src/Main.qml" line="168"/>
+        <source>SIP registration failed with status %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="231"/>
         <source>Error</source>
         <translation type="unfinished">خطا</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="236"/>
+        <location filename="../src/Main.qml" line="237"/>
         <source>Fatal Error</source>
         <translation type="unfinished">خطای مهلک</translation>
     </message>

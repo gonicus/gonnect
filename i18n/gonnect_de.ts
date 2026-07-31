@@ -3374,11 +3374,6 @@
         <translation>SIP-Registrierung fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="168"/>
-        <source>SIP registration failed with with status %1: %2</source>
-        <translation>Die SIP-Registrierung ist mit dem Status %1 fehlgeschlagen: %2</translation>
-    </message>
-    <message>
         <location filename="../src/Main.qml" line="144"/>
         <source>End all calls</source>
         <translation>Alle Anrufe beenden</translation>
@@ -3395,12 +3390,17 @@
         <translation>Möchtest Du das Fenster schliessen und alle aktiven Anrufe beenden?</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="230"/>
+        <location filename="../src/Main.qml" line="168"/>
+        <source>SIP registration failed with status %1: %2</source>
+        <translation>Die SIP-Registrierung ist mit dem Status %1 fehlgeschlagen: %2</translation>
+    </message>
+    <message>
+        <location filename="../src/Main.qml" line="231"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="236"/>
+        <location filename="../src/Main.qml" line="237"/>
         <source>Fatal Error</source>
         <translation>Fataler Fehler</translation>
     </message>

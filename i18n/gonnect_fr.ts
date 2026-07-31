@@ -3391,16 +3391,16 @@
     </message>
     <message>
         <location filename="../src/Main.qml" line="168"/>
-        <source>SIP registration failed with with status %1: %2</source>
+        <source>SIP registration failed with status %1: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="230"/>
+        <location filename="../src/Main.qml" line="231"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../src/Main.qml" line="236"/>
+        <location filename="../src/Main.qml" line="237"/>
         <source>Fatal Error</source>
         <translation>Erreur fatale</translation>
     </message>
