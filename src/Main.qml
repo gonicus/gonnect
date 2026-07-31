@@ -164,8 +164,8 @@ Item {
         }
         function onConnectionError(code : int, message : string) {
             DialogFactory.createInfoDialog({
-                title: qsTr("Registration failed"),
-                text: qsTr("Registration failed with with status %1: %2").arg(code).arg(message)
+                title: qsTr("SIP Registration failed"),
+                text: qsTr("SIP registration failed with with status %1: %2").arg(code).arg(message)
             })
         }
     }
