@@ -49,6 +49,24 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&numStats, &NumberStats::modelReset, this, &HistoryModel::resetModel);
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this, &HistoryModel::resetModel);
+    connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
+            [this]() { m_avatarTrackedContacts.clear(); });
+
+    const auto trackContactAvatar = [this](Contact *contact) {
+        if (m_avatarTrackedContacts.contains(contact)) {
+            return;
+        }
+        m_avatarTrackedContacts.insert(contact);
+        connect(contact, &Contact::avatarChanged, this, [this]() {
+            const auto startIndex = createIndex(0, 0);
+            const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+            Q_EMIT dataChanged(
+                    startIndex, endIndex,
+                    { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+        });
+    };
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this, trackContactAvatar);
+    connect(&AddressBook::instance(), &AddressBook::contactModified, this, trackContactAvatar);
 
     connect(this, &HistoryModel::limitChanged, this, &HistoryModel::resetModel);
 }

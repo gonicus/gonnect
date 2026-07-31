@@ -103,6 +103,8 @@ public:
 
 Q_SIGNALS:
     void chatUsersChanged();
+    void chatUserAdded(ChatUser *user);
+    void chatUserRemoved(ChatUser *user);
 
 #endif
 
@@ -110,6 +112,8 @@ private:
     void init();
     void updateSipStatusSubscriptable();
     bool isNumberValid(const QString &number) const;
+    QString resolveAvatarPath() const;
+    void updateAvatar();
 
     bool m_hasAvatar = false;
     BlockInfo m_blockInfo;
@@ -126,6 +130,7 @@ private:
     QList<PhoneNumber> m_phoneNumbers;
     bool m_sipStatusSubscriptionInitialized = false;
     bool m_sipStatusSubscriptable = false;
+    QString m_resolvedAvatarPath;
 
     /// References to users of a chat plugin.
     QList<ChatUser *> m_chatUsers;

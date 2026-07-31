@@ -65,8 +65,15 @@ public:
 private:
     explicit AddressBook(QObject *parent = nullptr);
 
+#ifndef APP_TESTS
+    void initContactSignals(Contact *contact);
+    void addChatUserMapping(const ChatUser *chatUser, Contact *contact);
+    void removeChatUserMapping(const ChatUser *chatUser);
+#endif
+
     QHash<QString, Contact *> m_contacts;
     QHash<QString, Contact *> m_contactsBySourceId;
+    QHash<const ChatUser *, Contact *> m_contactsByChatUser;
     QList<Contact::ContactSourceInfo> m_contactSourceInfos;
 
     QMutex m_feederMutex;

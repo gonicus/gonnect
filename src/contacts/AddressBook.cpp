@@ -5,6 +5,9 @@
 
 #include <QCryptographicHash>
 #include <QRegularExpression>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcAddressBook, "gonnect.app.contacts.AddressBook")
 
 AddressBook::AddressBook(QObject *parent) : QObject{ parent }
 {
@@ -16,6 +19,49 @@ AddressBook::AddressBook(QObject *parent) : QObject{ parent }
         }
     });
 }
+
+#ifndef APP_TESTS
+void AddressBook::initContactSignals(Contact *contact)
+{
+    if (!contact) {
+        qCCritical(lcAddressBook) << "contact may not be nullptr";
+        return;
+    }
+
+    connect(contact, &Contact::chatUserAdded, this, [this, contact](const ChatUser *chatUser) {
+        Q_CHECK_PTR(chatUser);
+        addChatUserMapping(chatUser, contact);
+    });
+    connect(contact, &Contact::chatUserRemoved, this, [this](const ChatUser *chatUser) {
+        Q_CHECK_PTR(chatUser);
+        removeChatUserMapping(chatUser);
+    });
+}
+
+void AddressBook::addChatUserMapping(const ChatUser *chatUser, Contact *contact)
+{
+    if (!contact) {
+        qCCritical(lcAddressBook) << "contact may not be nullptr";
+        return;
+    }
+    if (!chatUser) {
+        qCCritical(lcAddressBook) << "chatUser may not be nullptr";
+        return;
+    }
+
+    m_contactsByChatUser.insert(chatUser, contact);
+}
+
+void AddressBook::removeChatUserMapping(const ChatUser *chatUser)
+{
+    if (!chatUser) {
+        qCCritical(lcAddressBook) << "chatUser may not be nullptr";
+        return;
+    }
+
+    m_contactsByChatUser.remove(chatUser);
+}
+#endif
 
 void AddressBook::updateSourceInfos(const Contact *contact)
 {
@@ -70,6 +116,7 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
         contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, blockInfo, this);
         m_contacts.insert(hid, contact);
         m_contactsBySourceId.insert(sourceUid, contact);
+        initContactSignals(contact);
     }
 
     contact->setCompany(company);
@@ -97,6 +144,7 @@ void AddressBook::addContact(Contact *contact)
         contact->setParent(this);
         m_contacts.insert(contact->id(), contact);
         m_contactsBySourceId.insert(contact->sourceUid(), contact);
+        initContactSignals(contact);
 
         Q_EMIT contactAdded(contact);
     }
@@ -136,8 +184,14 @@ void AddressBook::removeContact(const QString &sourceUid)
 
     if (contact) {
         const auto contactId = contact->id();
+        disconnect(contact);
         m_contacts.remove(contactId);
         m_contactsBySourceId.remove(contact->sourceUid());
+
+        const auto &chatUsers = contact->chatUsers();
+        for (const auto *chatUser : chatUsers) {
+            removeChatUserMapping(chatUser);
+        }
 
         Q_EMIT contactRemoved(contactId);
     }
@@ -150,6 +204,7 @@ void AddressBook::resetContacts()
     qDeleteAll(m_contacts);
     m_contacts.clear();
     m_contactsBySourceId.clear();
+    m_contactsByChatUser.clear();
     Q_EMIT contactsCleared();
 }
 
@@ -178,6 +233,12 @@ void AddressBook::removeContactsBySource(const QString &source)
 
             const auto contactId = contact->id();
             m_contactsBySourceId.remove(sourceUid);
+
+            const auto &chatUsers = contact->chatUsers();
+            for (const auto *chatUser : chatUsers) {
+                removeChatUserMapping(chatUser);
+            }
+
             it.remove();
             Q_EMIT contactRemoved(contactId);
         }
@@ -279,16 +340,6 @@ Contact *AddressBook::lookupBySourceUid(const QString &sourceUid) const
 #ifndef APP_TESTS
 Contact *AddressBook::lookupByChatUser(const ChatUser *chatUser) const
 {
-    if (!chatUser) {
-        return nullptr;
-    }
-
-    for (Contact *contact : std::as_const(m_contacts)) {
-        if (contact->hasChatUser(chatUser)) {
-            return contact;
-        }
-    }
-
-    return nullptr;
+    return chatUser ? m_contactsByChatUser.value(chatUser) : nullptr;
 }
 #endif

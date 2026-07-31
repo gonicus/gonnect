@@ -27,6 +27,8 @@ FavoritesModel::FavoritesModel(QObject *parent) : QAbstractListModel{ parent }
             &FavoritesModel::scheduleModelUpdate);
     connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
             &FavoritesModel::scheduleModelUpdate);
+    connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
+            [this]() { m_avatarTrackedContacts.clear(); });
     connect(&AddressBook::instance(), &AddressBook::contactAdded, this,
             &FavoritesModel::scheduleModelUpdate);
     connect(&AddressBook::instance(), &AddressBook::contactModified, this,
@@ -163,6 +165,30 @@ void FavoritesModel::updateModel()
 
     endResetModel();
     m_isUpdating = false;
+
+    for (const auto &favEntry : std::as_const(m_favorites)) {
+        auto *contact = favEntry->contact;
+        if (!contact || m_avatarTrackedContacts.contains(contact)) {
+            continue;
+        }
+        m_avatarTrackedContacts.insert(contact);
+
+        connect(contact, &Contact::avatarChanged, this, [this, contact]() {
+            const auto *entry = m_favoriteContactLookup.value(contact);
+            if (!entry) {
+                return;
+            }
+            const auto entryIt = std::ranges::find_if(
+                    m_favorites, [entry](const auto &fav) { return fav.get() == entry; });
+            if (entryIt == m_favorites.end()) {
+                return;
+            }
+            const auto idx = createIndex(std::distance(m_favorites.begin(), entryIt), 0);
+            Q_EMIT dataChanged(
+                    idx, idx,
+                    { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+        });
+    }
 }
 
 void FavoritesModel::sortInnerModel()

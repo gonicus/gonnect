@@ -4,6 +4,7 @@
 #include "IpcDispatcher.h"
 #include "ChatMessageContentText.h"
 #include "ChatMessageContentVideoFile.h"
+#include "AddressBook.h"
 
 #include <QFileInfo>
 #include <QLoggingCategory>
@@ -298,6 +299,9 @@ QString IpcChatRoom::avatarPath()
         return m_avatarPath;
     }
     if (const auto *other = otherUser()) {
+        if (const auto *contact = AddressBook::instance().lookupByChatUser(other)) {
+            return contact->avatarPath();
+        }
         return other->avatarPath();
     }
     return "";
@@ -542,6 +546,11 @@ void IpcChatRoom::updateOtherUser()
 
             connect(other, &ChatUser::avatarPathChanged, m_otherUserContext,
                     [this]() { Q_EMIT avatarPathChanged(); });
+
+            if (const auto *contact = AddressBook::instance().lookupByChatUser(other)) {
+                connect(contact, &Contact::avatarChanged, m_otherUserContext,
+                        [this]() { Q_EMIT avatarPathChanged(); });
+            }
         }
 
         Q_EMIT otherUserChanged();

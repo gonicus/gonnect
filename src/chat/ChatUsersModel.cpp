@@ -1,5 +1,6 @@
 #include "ChatUsersModel.h"
 #include "ChatUser.h"
+#include "AddressBook.h"
 
 ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -16,9 +17,10 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
             m_chatProviderContext = new QObject(this);
 
             connect(m_chatProvider, &IChatProvider::userAdded, m_chatProviderContext,
-                    [this](QString, ChatUser *, qsizetype index) {
+                    [this](QString, ChatUser *user, qsizetype index) {
                         beginInsertRows(QModelIndex(), index, index);
                         endInsertRows();
+                        connectUserAvatarSignals(user);
                     });
 
             connect(m_chatProvider, &IChatProvider::userRemoved, m_chatProviderContext,
@@ -70,8 +72,12 @@ QVariant ChatUsersModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::Id):
         return user->id();
 
-    case static_cast<int>(Roles::AvatarPath):
+    case static_cast<int>(Roles::AvatarPath): {
+        if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
+            return contact->avatarPath();
+        }
         return user->avatarPath();
+    }
 
     case static_cast<int>(Roles::HasPresenceState):
         return user->hasPresenceState();
@@ -82,5 +88,22 @@ QVariant ChatUsersModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::Name):
     default:
         return user->computedName();
+    }
+}
+
+void ChatUsersModel::connectUserAvatarSignals(ChatUser *user)
+{
+    const auto refreshAvatar = [this, user]() {
+        const auto row = m_chatProvider->users().indexOf(user);
+        if (row < 0) {
+            return;
+        }
+        const auto idx = createIndex(row, 0);
+        Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::AvatarPath) });
+    };
+
+    connect(user, &ChatUser::avatarPathChanged, this, refreshAvatar);
+    if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
+        connect(contact, &Contact::avatarChanged, this, refreshAvatar);
     }
 }

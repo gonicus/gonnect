@@ -1,5 +1,6 @@
 #include "ChatUserSearchModel.h"
 #include "ChatUser.h"
+#include "AddressBook.h"
 
 #include <QLoggingCategory>
 
@@ -49,8 +50,12 @@ QVariant ChatUserSearchModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::Id):
         return user->id();
 
-    case static_cast<int>(Roles::AvatarPath):
+    case static_cast<int>(Roles::AvatarPath): {
+        if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
+            return contact->avatarPath();
+        }
         return user->avatarPath();
+    }
 
     case static_cast<int>(Roles::HasPresenceState):
         return user->hasPresenceState();
