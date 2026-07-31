@@ -7,8 +7,8 @@ import base
 Rectangle {
     id: control
     color: Theme.backgroundSecondaryColor
-    height: 44
-    radius: 8
+    height: 4 * Theme.d
+    radius: Theme.d / 2
     anchors {
         top: parent?.top
         left: parent?.left
@@ -142,15 +142,15 @@ Rectangle {
     }
 
     Image {
-        width: 24
-        height: 24
+        width: 2 * Theme.d
+        height: 2 * Theme.d
         source: "qrc:/icons/gonnect.svg"
-        sourceSize.width: 24
-        sourceSize.height: 24
+        sourceSize.width: 2 * Theme.d
+        sourceSize.height: 2 * Theme.d
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: 10
+            leftMargin: Theme.d
         }
     }
 
@@ -193,10 +193,10 @@ Rectangle {
     SearchResultPopup {
         id: resultPopup
         x: control.width / 2 - resultPopup.width / 2
-        y: searchField.height + 12
+        y: searchField.height + Theme.d
         width: control.width * 0.75
         height: control.Window ? control.Window.height * 0.75 : 0
-        topMargin: 12 + searchField.height
+        topMargin: Theme.d + searchField.height
         searchText: searchField.text
 
         onPrimaryActionTriggered: () => {
@@ -207,10 +207,10 @@ Rectangle {
     }
 
     Row {
-        spacing: 10
+        spacing: Theme.d
         anchors {
             right: parent.right
-            rightMargin: 8
+            rightMargin: Theme.d
             verticalCenter: parent.verticalCenter
         }
 

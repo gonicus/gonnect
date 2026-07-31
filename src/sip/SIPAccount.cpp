@@ -533,7 +533,7 @@ long SIPAccount::sendMessage(const QString &recipient, const QString &message,
     SIPBuddy *foundBuddy = nullptr;
 
     for (const auto buddy : std::as_const(m_buddies)) {
-        if (buddy->uri() == sipUrl) {
+        if (buddy->uri().compare(sipUrl, Qt::CaseInsensitive) == 0) {
             foundBuddy = buddy;
         }
     }
@@ -692,23 +692,25 @@ SIPBuddyState::STATUS SIPAccount::buddyStatus(const QString &var)
 
     // Do we have such a buddy already?
     for (auto buddy : std::as_const(m_buddies)) {
-        if (buddy->uri() == sipUrl) {
+        if (buddy->uri().compare(sipUrl, Qt::CaseInsensitive) == 0) {
             return buddy->status();
         }
     }
 
     // We don't have a buddy yet - try to subscribe
+    qCInfo(lcSIPAccount) << "Creating SIPBuddy for" << sipUrl << m_buddies.size();
     auto buddy = new SIPBuddy(this, sipUrl);
     QString uri = buddy->uri();
     qCInfo(lcSIPAccount) << "subscribing to buddy" << uri;
 
+    m_buddies.push_back(buddy);
     if (buddy->initialize()) {
-        m_buddies.push_back(buddy);
         connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
             qCCritical(lcSIPAccount) << "removing buddy" << uri;
             m_buddies.removeAll(buddy);
         });
     } else {
+        m_buddies.removeAll(buddy);
         buddy->deleteLater();
     }
 
@@ -1069,13 +1071,14 @@ void SIPAccount::reinitBuddies()
 
     for (const auto &uri : std::as_const(uris)) {
         auto buddy = new SIPBuddy(this, uri);
+        m_buddies.push_back(buddy);
         if (buddy->initialize()) {
-            m_buddies.push_back(buddy);
             connect(buddy, &SIPBuddy::destroyed, this, [buddy, uri, this]() {
                 qCCritical(lcSIPAccount) << "removing buddy" << uri;
                 m_buddies.removeAll(buddy);
             });
         } else {
+            m_buddies.removeAll(buddy);
             buddy->deleteLater();
         }
     }

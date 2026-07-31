@@ -58,8 +58,8 @@ ChatMessageAttachmentRectangle {
             anchors {
                 left: parent.left
                 right: parent.right
-                leftMargin: 12
-                rightMargin: 12
+                leftMargin: Theme.d
+                rightMargin: Theme.d
                 verticalCenter: parent.verticalCenter
             }
         }

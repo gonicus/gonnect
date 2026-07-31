@@ -14,6 +14,7 @@ class Theme : public QObject
     Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY isDarkModeChanged FINAL)
     Q_PROPERTY(bool useOwnDecoration READ useOwnDecoration NOTIFY useOwnDecorationChanged FINAL)
     Q_PROPERTY(uint fontPixelSize READ fontPixelSize CONSTANT FINAL)
+    Q_PROPERTY(uint d READ d CONSTANT FINAL)
 
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(
@@ -219,6 +220,7 @@ Q_SIGNALS:
 private:
     void setDarkMode(bool value);
     uint fontPixelSize() const { return 13; }
+    uint d() const { return 12; }
 
     ThemeVariant m_themeVariant = ThemeVariant::System;
     bool m_isDarkMode = false;

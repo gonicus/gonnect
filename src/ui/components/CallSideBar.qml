@@ -292,7 +292,9 @@ Item {
         Component.onCompleted: () => chatSideBar.updateChatRoom()
 
         onVisibleChanged: () => {
-            if (!chatSideBar.visible) {
+            if (chatSideBar.visible) {
+                chatSideBar.giveFocus()
+            } else {
                 chatSideBar.lastMessageCount = chatSideBar.chatRoom?.notificationCount ?? 0
             }
         }

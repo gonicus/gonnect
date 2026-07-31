@@ -77,7 +77,7 @@ void SIPManager::initialize()
     // Initial configuration
     pj::EpConfig epConfig;
 
-    auto app = qobject_cast<Application *>(Application::instance());
+    auto app = static_cast<Application *>(Application::instance());
     if (app->isDebugRun()) {
         epConfig.logConfig.level = 6;
     } else {
@@ -387,7 +387,7 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
     QString uri = account->toSipUri(var);
 
     for (SIPBuddy *buddy : std::as_const(buddies)) {
-        if (buddy->uri() == uri) {
+        if (buddy->uri().compare(uri, Qt::CaseInsensitive) == 0) {
             return buddy;
         }
     }
@@ -487,7 +487,20 @@ void SIPManager::handleNetworkChanged()
         return;
     }
 
+    const auto currentAddresses = NetworkHelper::instance().localAddresses();
+
+    // Capture initial network state
+    if (m_lastLocalAddresses.isEmpty()) {
+        m_lastLocalAddresses = currentAddresses;
+        return;
+    }
+
+    if (currentAddresses == m_lastLocalAddresses) {
+        return;
+    }
+
     qCDebug(lcSIPManager) << "network changed - scheduling SIP recovery";
+    m_lastLocalAddresses = currentAddresses;
     m_networkRecoveryAttempts = 0;
     m_registrationCheckTimer.stop();
     m_networkRecoveryTimer.start(1s);

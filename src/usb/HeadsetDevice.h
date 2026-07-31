@@ -113,6 +113,7 @@ private:
 
     bool m_hookSwitch = false;
     bool m_line = false;
+    bool m_busyLine = false;
     bool m_muted = false;
 
     bool m_mutePendingActive = false;

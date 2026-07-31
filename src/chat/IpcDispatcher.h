@@ -171,6 +171,7 @@ public:
     virtual void requestUser(const QString &userId) override;
 
     virtual void requestRemoveMessage(const QString &roomId, const QString &messageId) override;
+    virtual void retrySendMessage(const QString &roomId, const QString &failedMessageId) override;
     virtual void requestEditMessage(const QString &roomId, const QString &messageId,
                                     const QString &newContent) override;
 
@@ -245,12 +246,23 @@ private:
     /// has been received.
     void login();
 
+    /// Parameter for sendRequest describing how exactly the sending shall behave.
+    struct SendPolicy
+    {
+        bool allowSendIfLoggedOut = false;
+        quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS;
+
+        SendPolicy() : allowSendIfLoggedOut{ false }, timeoutSeconds{ GONNECT_IPC_TIMEOUT_SECS } { }
+    };
+
     /// Serialize and send a the request. This method takes ownership of the request object and
     /// destroys it after usage. If requestContainer has a tag, an answer to the request must be
-    /// received within timeoutSeconds, or a timeout occurs. If the container has no tag or
-    /// timeoutSeconds is 0, no timeout check is being made.
-    void sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
-                     quint32 timeoutSeconds = GONNECT_IPC_TIMEOUT_SECS);
+    /// received within timeoutSeconds, or a timeout occurs (as defined in sendPolicy). If the
+    /// container has no tag or timeoutSeconds is 0, no timeout check is being made. The return
+    /// value indicates whether the request has successfully been send. It does not represent a
+    /// response to the request.
+    bool sendRequest(de::gonicus::gonnect::RequestContainer *requestContainer,
+                     const SendPolicy sendPolicy = SendPolicy());
 
     /// Create a new empty container message. Caller takes ownership of the returned object.
     /// If withTag is true, a unique tag is generated. Otherwise it is the zero id for fire and
@@ -261,12 +273,15 @@ private:
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
     bool hasOwnUserMention(const ChatMessage &message) const;
-    ChatMessage *addReceivedChatMessage(const de::gonicus::gonnect::Message &message, bool isUnread,
-                                        bool isIndependent);
+    ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
+                                                   bool isUnread, bool isIndependent,
+                                                   ChatMessage *chatMessage);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
                              IChatRoom::JoinRule joinRule, bool isDirect, const QString &tag = "");
+    void processRoomUsers(const de::gonicus::gonnect::Room &room, IpcChatRoom *roomObj);
+    QHash<QString, IChatRoom::UserRoomState> *userRoomStateCache(const QString &roomId);
 
     IpcChatRoom *ipcChatRoomById(const QString &roomId) const;
 
@@ -287,6 +302,8 @@ private:
 
     bool shallSendDesktopNotification();
 
+    bool containsRoomTag(const QString &str) const;
+
     QRegularExpression m_idConvRegex;
     bool m_useIdConversion = false;
     bool m_isInitialized = false;
@@ -296,6 +313,7 @@ private:
     bool m_supportsSubThreads = false;
     bool m_hasFavoriteRooms = false;
     QStringList m_supportedMimeTypes;
+    qint64 m_mediaSizeLimit = 0;
 
     QObject *m_globalPresenceStateContext = nullptr;
     IpcInterface m_ipc;
@@ -363,6 +381,15 @@ private:
 
     /// Message IDs whose single-message request has failed or timed out. Prevents retry-spam.
     QSet<QString> m_failedMessageIds;
+
+    struct PendingMessageInfo
+    {
+        QString roomId;
+        QString tempEventId;
+    };
+
+    /// Tags of pending (optimistic) messages that have been locally added but not yet confirmed.
+    QHash<quint64, PendingMessageInfo> m_pendingMessages;
 
 Q_SIGNALS:
 

@@ -43,6 +43,11 @@ Item {
                 showChatRoomTimer.roomId = room.id
             }
         }
+        function onChatRoomCreationCompleted(room : IChatRoom, tag : string) {
+            if (tag) {
+                showChatRoomTimer.roomId = room.id
+            }
+        }
 
         function onChatRoomLeft(roomId : string, roomName : string, leaveReason : int, message : string) {
             let reasonStr = ""
@@ -147,9 +152,9 @@ Item {
         visible: false
         anchors {
             fill: parent
-            leftMargin: 24
-            rightMargin: 24
-            bottomMargin: 24
+            leftMargin: Theme.d * 2
+            rightMargin: Theme.d * 2
+            bottomMargin: 6
         }
 
         BusyIndicator {
@@ -157,7 +162,7 @@ Item {
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 bottom: connectingCard.verticalCenter
-                bottomMargin: 24
+                bottomMargin: Theme.d * 2
             }
         }
 
@@ -167,7 +172,7 @@ Item {
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: parent.verticalCenter
-                topMargin: 24
+                topMargin: Theme.d * 2
             }
         }
     }
@@ -177,9 +182,9 @@ Item {
         visible: false
         anchors {
             fill: parent
-            leftMargin: 24
-            rightMargin: 24
-            bottomMargin: 24
+            leftMargin: Theme.d * 2
+            rightMargin: Theme.d * 2
+            bottomMargin: 6
         }
 
         DeviceVerification {
@@ -190,14 +195,14 @@ Item {
 
     Card {
         id: sideBar
-        width: control.width * 1 / 4
+        width: Math.floor(control.width * 1 / 4)
         anchors {
             top: parent.top
             left: parent.left
             bottom: parent.bottom
-            leftMargin: 24
-            rightMargin: 24
-            bottomMargin: 24
+            leftMargin: Theme.d * 2
+            rightMargin: Theme.d * 2
+            bottomMargin: 6
         }
 
         Item {
@@ -342,7 +347,7 @@ Item {
             anchors {
                 top: parent.top
                 right: parent.right
-                rightMargin: 12
+                rightMargin: Theme.d
             }
 
             onClicked: () => roomListMenuComponent.createObject(roomListCardHeadingButton).popup()
@@ -407,7 +412,6 @@ Item {
 
             Column {
                 id: roomCol
-                topPadding: 10
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -510,9 +514,9 @@ Item {
             right: parent.right
             bottom: parent.bottom
             left: sideBar.right
-            leftMargin: 24
-            rightMargin: 24
-            bottomMargin: 24
+            leftMargin: Theme.d * 2
+            rightMargin: Theme.d * 2
+            bottomMargin: Theme.d / 2 + 2
         }
 
         Chat {

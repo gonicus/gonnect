@@ -134,6 +134,7 @@ Item {
                         id: signalingEncryption
                         text: securityLevelColumn.signalEncryptionValue
                         spacing: 4
+                        color: Theme.primaryTextColor
                         icon {
                             source: control.isSignalingEncrypted ? Icons.securityHigh : Icons.securityLow
                             width: 24
@@ -147,6 +148,7 @@ Item {
                         id: mediaEncryption
                         text: securityLevelColumn.mediaEncryptedValue
                         spacing: 4
+                        color: Theme.primaryTextColor
                         icon {
                             source: control.isMediaEncrypted ? Icons.securityHigh : Icons.securityLow
                             width: 24

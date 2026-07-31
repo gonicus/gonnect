@@ -10,6 +10,10 @@ Item {
     property alias chatRoom: chat.chatRoom
     property alias chatProvider: chat.chatProvider
 
+    function giveFocus() {
+        chat.giveFocus()
+    }
+
     Connections {
         target: control.chatProvider
         function onClipboardImageUploaded(imageFilePath, chatRoom) {

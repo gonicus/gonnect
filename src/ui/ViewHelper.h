@@ -58,7 +58,7 @@ public:
 
     bool isDebugRun() const
     {
-        return qobject_cast<Application *>(Application::instance())->isDebugRun();
+        return static_cast<Application *>(Application::instance())->isDebugRun();
     }
     Q_INVOKABLE void downloadDebugInformation() const;
 

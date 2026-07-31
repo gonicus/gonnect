@@ -18,6 +18,10 @@ ChatUserSearchModel::ChatUserSearchModel(QObject *parent) : QAbstractListModel{ 
         }
 
         m_searchId = m_chatProvider->searchChatUser(m_searchPhrase.trimmed());
+
+        if (m_searchId.isEmpty()) {
+            qCWarning(lcChatUserSearchModel) << "id of searchChatUser is not set";
+        }
     });
 }
 

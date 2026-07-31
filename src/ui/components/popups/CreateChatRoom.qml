@@ -19,6 +19,16 @@ Item {
     QtObject {
         id: internal
 
+        readonly property ChatUser directUser: {
+            if (singleRoomRadioButton.checked && proxyModel.selectedUserIds.length === 1) {
+                const userId = proxyModel.selectedUserIds[0]
+                return control.chatProvider.userById(userId)
+            }
+            return null
+        }
+
+        readonly property string directUserName: internal.directUser?.computedName ?? ""
+
         function createRoom() {
             if (createRoomButton.enabled) {
                 if (singleRoomRadioButton.checked) {
@@ -63,6 +73,7 @@ Item {
     RoomAvatar {
         id: avatarImg
         chatProvider: control.chatProvider
+        initials: ViewHelper.initials(roomNameTextField.text.trim() || internal.directUserName) || ' '
         anchors {
             top: parent.top
             left: parent.left
@@ -72,15 +83,13 @@ Item {
 
     TextField {
         id: roomNameTextField
-        placeholderText: qsTr("Room name")
+        placeholderText: internal.directUserName || qsTr("Room name")
         anchors {
             verticalCenter: avatarImg.verticalCenter
             left: avatarImg.right
             right: closeButton.left
             margins: 20
         }
-
-        onTextChanged: () => avatarImg.initials = ViewHelper.initials(roomNameTextField.text.trim())
 
         Timer {
             id: initialFocusTimer
@@ -97,12 +106,12 @@ Item {
     Row {
         id: radioButtonRow
         height: singleRoomRadioButton.implicitHeight
-        spacing: 20
+        spacing: Theme.d
         anchors {
-            top: roomNameTextField.bottom
+            top: avatarImg.bottom
             left: parent.left
             right: parent.right
-            margins: 20
+            margins: Theme.d
         }
 
         RadioButton {

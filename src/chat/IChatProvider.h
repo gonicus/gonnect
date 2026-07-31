@@ -36,7 +36,7 @@ class IChatProvider : public QObject
     Q_PROPERTY(bool hasFavoriteRooms READ hasFavoriteRooms NOTIFY hasFavoriteRoomsChanged FINAL)
 
 public:
-    static inline constexpr quint32 defaultMessageLimit = 42;
+    static inline constexpr quint32 defaultMessageLimit = 100;
 
     enum class Capability {
         EditMessage = 1 << 0,
@@ -145,6 +145,10 @@ public:
     /// Request to delete the message with the given id.
     Q_INVOKABLE virtual void requestRemoveMessage(const QString &roomId,
                                                   const QString &messageId) = 0;
+
+    /// Retry sending a message that has previously failed.
+    Q_INVOKABLE virtual void retrySendMessage(const QString &roomId,
+                                              const QString &failedMessageId) = 0;
 
     /// Request to edit (i.e. change the text content) the message with the given id. This method
     /// should not be called with an empty string - use requestRemoveMessage() instead.
@@ -278,6 +282,7 @@ Q_SIGNALS:
     /// it must be the empty string.
     void chatRoomAdded(qsizetype index, IChatRoom *room, QString tag = "");
     void chatRoomRemoved(qsizetype index, IChatRoom *room);
+    void chatRoomCreationCompleted(IChatRoom *room, QString tag);
 
     /// Signals that the client has joined the chat room.
     void chatRoomJoined(QString roomId);

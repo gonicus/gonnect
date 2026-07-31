@@ -57,11 +57,13 @@ private:
     BlockInfo m_blockInfo;
 
     CardDAVAddressBookFeederConfig m_config;
+    QStringList m_sipStatusSubscriptableAttributes;
 
     int m_retryCount = 0;
     int m_retryInterval = 0;
     int m_initialRetryCount = 0;
 
+    bool m_areWebDavConnectionsInitialized = false;
     bool m_pendingError = false;
     bool m_pendingAuth = false;
 };

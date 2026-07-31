@@ -105,7 +105,7 @@ Item {
             bottom: parent.bottom
             left: parent.left
             right: callListCard.visible ? verticalDragbarDummy.left : parent.right
-            rightMargin: callListCard.visible ? 0 : 24
+            rightMargin: callListCard.visible ? 0 : Theme.d * 2
         }
     }
 
@@ -256,7 +256,7 @@ Item {
                 anchors {
                     fill: callMainCard.parent
 
-                    leftMargin: 24
+                    leftMargin: Theme.d * 2
                     bottomMargin: 15
                 }
 
@@ -820,7 +820,7 @@ Item {
             right: parent.right
             bottom: parent.bottom
 
-            rightMargin: 24
+            rightMargin: Theme.d * 2
             bottomMargin: 15
         }
 

@@ -26,6 +26,8 @@
 #include "PlatformSession.h"
 #include "SelectionState.h"
 #include "FileHelper.h"
+#include "Application.h"
+#include "TextFormatHelper.h"
 
 #include <QDir>
 #include <QDateTime>
@@ -298,7 +300,9 @@ void IpcDispatcher::loginWithCredentials(const QString &userId, const QString &s
 
     auto req = createRequest();
     req->setLoginUsernamePasswordRequest(credReq);
-    sendRequest(req);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::loginWithSSO(const QString &identityProvider)
@@ -330,7 +334,9 @@ void IpcDispatcher::loginWithSSO(const QString &identityProvider)
     LoginSSORequest ssoLoginReq;
     ssoLoginReq.setIdentityProvider(identityProvider);
     req->setLoginSSORequest(ssoLoginReq);
-    sendRequest(req);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
@@ -339,6 +345,12 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     const auto *chatRoom = chatRoomByRoomId(roomId);
     if (!chatRoom) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
+        return;
+    }
+
+    auto ipcRoom = ipcChatRoomById(roomId);
+    if (!ipcRoom) {
+        qCCritical(lcIpcDispatcher) << "Unable to find ipc room for room id" << roomId;
         return;
     }
 
@@ -363,6 +375,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     // Assemble request
     auto req = createRequest();
+
     MessageSendRequest msgReq;
     msgReq.setRoomId(roomId);
 
@@ -372,11 +385,51 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     MessageContentText content;
     content.setContent(text);
-
     msgReq.setText(content);
     msgReq.setMentionedUserIds(mentionedUserIds);
+
+    // Check for "@room" tag
+    msgReq.setRoomMentioned(containsRoomTag(text));
+
     req->setMessageSendRequest(msgReq);
-    sendRequest(req);
+
+    // Create optimistic (pending) message for immediate display
+    const auto tag = req->tag();
+    const auto tempEventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+    using Flag = ChatMessage::Flag;
+
+    ChatMessage *pendingMsg = nullptr;
+
+    QString nickName;
+    if (auto *ownUser = m_users.value(ownUserId(), nullptr)) {
+        nickName = ownUser->displayName();
+    } else if (!m_configInfo.displayName.isEmpty()) {
+        nickName = m_configInfo.displayName;
+    } else {
+        nickName = ownUserId();
+    }
+    auto *pendingContent = new ChatMessageContentText(text);
+    pendingMsg = new ChatMessage(tempEventId, ownUserId(), nickName, pendingContent,
+                                 QDateTime::currentDateTimeUtc(), ipcRoom,
+                                 Flag::OwnMessage | Flag::Markdown | Flag::Pending);
+    if (!relatedMessageId.isEmpty()) {
+        pendingMsg->setRelatedMessageId(relatedMessageId);
+    }
+    ipcRoom->addExistingMessage(pendingMsg, false, false);
+
+    m_pendingMessages.insert(tag, { roomId, tempEventId });
+
+    if (!sendRequest(req)) {
+        m_pendingMessages.remove(tag);
+
+        if (pendingMsg) {
+            auto flags = pendingMsg->flags();
+            flags.setFlag(Flag::Pending, false);
+            flags.setFlag(Flag::Failed, true);
+            ipcRoom->setMessageFlags(tempEventId, flags);
+        }
+    }
 }
 
 void IpcDispatcher::sendTypingPing(const QString &roomId)
@@ -393,6 +446,21 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
 {
     if (!chatRoomByRoomId(roomId)) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
+        return;
+    }
+
+    // Check file size
+    const QFileInfo fileInfo(QUrl(filePath).toLocalFile());
+    if (!fileInfo.exists()) {
+        qCCritical(lcIpcDispatcher) << "Cannot send file that does not exist:" << filePath;
+        return;
+    }
+    if (m_mediaSizeLimit > 0 && fileInfo.size() > m_mediaSizeLimit) {
+        qCWarning(lcIpcDispatcher) << "File size exceeds limit:" << filePath;
+        ErrorBus::instance().addError(
+                tr("The file %1 exceeds the file size limit of %2 and cannot be sent.")
+                        .arg(originalFileName,
+                             TextFormatHelper::instance().formatFileSize(m_mediaSizeLimit)));
         return;
     }
 
@@ -444,7 +512,9 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
     chatRoom->setIsLoadingMessageHistory(true);
 
     auto req = createRequest();
-    m_roomListTags.insert(req->tag(), chatRoom->id());
+    const auto tag = req->tag();
+    m_roomListTags.insert(tag, chatRoom->id());
+
     RoomMessagesRequest msgReq;
     msgReq.setRoomId(chatRoom->id());
     msgReq.setLimit(n);
@@ -456,7 +526,11 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
     }
 
     req->setRoomMessagesRequest(msgReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        chatRoom->setIsLoadingMessageHistory(false);
+        m_roomListTags.remove(tag);
+    }
 }
 
 void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &messageId)
@@ -479,14 +553,17 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     }
 
     auto req = createRequest();
-    m_singleMessageTags.insert(req->tag(), messageId);
+    const auto tag = req->tag();
+    m_singleMessageTags.insert(tag, messageId);
 
     MessageRequest msgReq;
     msgReq.setRoomId(roomId);
     msgReq.setMessageId(messageId);
-
     req->setMessageRequest(msgReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        m_singleMessageTags.remove(tag);
+    }
 }
 
 qsizetype IpcDispatcher::chatRoomsCount()
@@ -532,10 +609,41 @@ void IpcDispatcher::requestEditMessage(const QString &roomId, const QString &mes
     MessageContentText msgContent;
     msgContent.setContent(content);
     changeReq.setText(msgContent);
+    changeReq.setRoomMentioned(containsRoomTag(content));
 
     auto req = createRequest();
     req->setMessageChangeRequest(changeReq);
     sendRequest(req);
+}
+
+void IpcDispatcher::retrySendMessage(const QString &roomId, const QString &failedMessageId)
+{
+    auto room = ipcChatRoomById(roomId);
+    if (!room) {
+        qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId
+                                    << "for retrying message" << failedMessageId;
+        return;
+    }
+
+    auto msg = room->chatMessageById(failedMessageId);
+    if (!msg) {
+        qCCritical(lcIpcDispatcher)
+                << "Unable to find message with id" << failedMessageId << "for retrying";
+        return;
+    }
+
+    auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
+    if (!textContent) {
+        qCCritical(lcIpcDispatcher) << "Retry is only supported for text messages, but message"
+                                    << failedMessageId << "has no text content";
+        return;
+    }
+
+    const auto text = textContent->rawText();
+    const auto relatedMessageId = msg->relatedMessageId();
+
+    room->removeMessage(failedMessageId);
+    sendMessage(roomId, text, relatedMessageId);
 }
 
 void IpcDispatcher::init()
@@ -563,32 +671,39 @@ void IpcDispatcher::init()
 
     // Convert and set log level
     ReadOnlyConfdSettings settings;
-    const auto configLogLevel = settings.value("logging/level", 2).toUInt();
     QString argLogLevel("off");
 
-    switch (configLogLevel) {
-    case 1:
-        argLogLevel = "error";
-        break;
-    case 2:
-        argLogLevel = "warn";
-        break;
-    case 3:
-        argLogLevel = "info";
-        break;
-    case 4:
-    case 5:
-    case 6:
+    if (static_cast<Application *>(Application::instance())->isDebugRun()) {
         argLogLevel = "debug";
-        break;
-    }
-    if (configLogLevel >= 7) {
-        argLogLevel = "trace";
+
+    } else {
+        const auto configLogLevel = settings.value("logging/level", 2).toUInt();
+
+        switch (configLogLevel) {
+        case 1:
+            argLogLevel = "error";
+            break;
+        case 2:
+            argLogLevel = "warn";
+            break;
+        case 3:
+            argLogLevel = "info";
+            break;
+        case 4:
+        case 5:
+        case 6:
+            argLogLevel = "debug";
+            break;
+        }
+        if (configLogLevel >= 7) {
+            argLogLevel = "trace";
+        }
     }
 
     args.append({ "--log-level", argLogLevel });
 
-    const auto logFilePath = FileHelper::instance().makeLogFilePath(plugin->displayName);
+    const QFileInfo binPath(plugin->binPath);
+    const auto logFilePath = FileHelper::instance().makeLogFilePath(binPath.baseName());
     if (logFilePath.isEmpty()) {
         qCWarning(lcIpcDispatcher)
                 << "Unable to create valid log file path - --log-file-path will not be set";
@@ -603,16 +718,28 @@ void IpcDispatcher::init()
     m_ipc.start();
 }
 
-void IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 timeoutSeconds)
+bool IpcDispatcher::sendRequest(RequestContainer *requestContainer, const SendPolicy policy)
 {
     QScopedPointer request(requestContainer);
     if (!request) {
-        qWarning() << "Cannot send a nullptr request - aborting";
-        return;
+        qCWarning(lcIpcDispatcher) << "Cannot send a nullptr request - aborting";
+        return false;
     }
     if (!m_ipc.isRunning()) {
-        qWarning() << "Local socket is not ready - aborting";
-        return;
+        qCWarning(lcIpcDispatcher) << "Local socket is not ready - aborting";
+        return false;
+    }
+
+    // Respect connection state of ipc subprocess
+    const bool isDisallowed = (m_connectionState == ConnectionState::NetworkUnavailable)
+            || (!policy.allowSendIfLoggedOut
+                && (m_connectionState == ConnectionState::LoggedOut
+                    || m_connectionState == ConnectionState::SessionInvalid));
+
+    if (isDisallowed) {
+        qCInfo(lcIpcDispatcher) << "Connection state is" << m_connectionState
+                                << "request will not be sent";
+        return false;
     }
 
     // Check which contents are set
@@ -620,7 +747,7 @@ void IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 time
 
     if (!types.length()) {
         qCCritical(lcIpcDispatcher) << "The request container has no content - sending is aborted";
-        return;
+        return false;
     }
 
     if (types.length() > 1) {
@@ -628,7 +755,7 @@ void IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 time
                                                "content but has %1: %2 - sending is aborted")
                                                .arg(types.length())
                                                .arg(types.join(", "));
-        return;
+        return false;
     }
 
     const auto tag = request->tag();
@@ -636,12 +763,12 @@ void IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 time
     qCInfo(lcIpcDispatcher).noquote() << "Sending request with content" << types.first() << tagDbg;
 
     // Handle tag
-    if (timeoutSeconds && tag > 0) {
+    if (policy.timeoutSeconds && tag > 0) {
 
         auto timer = new QTimer(this);
         timer->setSingleShot(true);
-        timer->setInterval(timeoutSeconds * 1000);
-        timer->callOnTimeout(this, [timer, tag, timeoutSeconds, this]() {
+        timer->setInterval(policy.timeoutSeconds * 1000);
+        timer->callOnTimeout(this, [timer, tag, timeoutSeconds = policy.timeoutSeconds, this]() {
             m_timeoutTimers.remove(tag);
 
             const auto messageId = m_singleMessageTags.take(tag);
@@ -661,6 +788,8 @@ void IpcDispatcher::sendRequest(RequestContainer *requestContainer, quint32 time
 
     // Serialize and send request
     m_ipc.writeData(request->serialize(&m_protoSerializer));
+
+    return true;
 }
 
 void IpcDispatcher::processResponse(
@@ -736,6 +865,19 @@ void IpcDispatcher::processResponse(
             ErrorBus::instance().addError(tr("An IPC error ocurred (%1, %2 (code %3)")
                                                   .arg(m_settingsGroup, codeStr)
                                                   .arg(code));
+        }
+
+        // Mark pending message as failed on error
+        if (const auto pendingInfo = m_pendingMessages.take(tag);
+            !pendingInfo.tempEventId.isEmpty()) {
+            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
+                if (auto chatMsg = room->chatMessageById(pendingInfo.tempEventId)) {
+                    room->setMessageFlags(
+                            pendingInfo.tempEventId,
+                            (chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending))
+                                    | ChatMessage::Flag::Failed);
+                }
+            }
         }
 
     } else if (rc.hasMultipartEnd()) {
@@ -832,6 +974,16 @@ void IpcDispatcher::processResponse(
         m_supportedMimeTypes = resp.mimeTypes();
         m_hasDeviceVerification = resp.clientVerification();
 
+        // Check size limit (and the value of it)
+        const quint64 mediaSizeLimit = resp.mediaSizeLimit();
+        if (std::in_range<qint64>(mediaSizeLimit)) {
+            m_mediaSizeLimit = static_cast<qint64>(resp.mediaSizeLimit());
+        } else {
+            qCWarning(lcIpcDispatcher)
+                    << "Received file size limit that exceeds our own datatype - using maximum";
+            m_mediaSizeLimit = std::numeric_limits<qint64>::max();
+        }
+
         Q_EMIT capabilitiesInitializedChanged();
 
         if (m_connectionState == ConnectionState::LoggedIn) {
@@ -866,53 +1018,24 @@ void IpcDispatcher::processResponse(
         for (const auto &room : list) {
             const auto &roomId = room.roomId();
             auto roomObj = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomId));
-            const auto roomIdx = m_rooms.indexOf(roomObj);
             handledRoomIds.insert(room.roomId());
 
             if (roomObj) {
                 // Update existing room
-                if (room.hasDisplayName() && roomObj->name() != room.displayName()) {
+                if (room.hasDisplayName() && roomObj->customName() != room.displayName()) {
                     roomObj->setName(room.displayName());
                 }
 
                 roomObj->setJoinRule(joinRuleGrpcToGonnect(room.joinRule()));
                 roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
+                roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
             } else {
                 // Create new room
                 roomObj = addChatRoom(room);
             }
 
             // Put users in room
-            Q_CHECK_PTR(roomObj);
-            QHashIterator it(room.userIdList());
-
-            // Setup cache
-            QHash<QString, IChatRoom::UserRoomState> *roomCache =
-                    m_userRoomStateCache.value(roomId, nullptr);
-            if (!roomCache) {
-                roomCache = new QHash<QString, IChatRoom::UserRoomState>;
-                m_userRoomStateCache.insert(roomId, roomCache);
-            }
-
-            while (it.hasNext()) {
-                it.next();
-                const auto &userId = it.key();
-                const auto userRoomState = userRoomStateConv(it.value());
-
-                // Fill information into cache
-                roomCache->insert(userId, userRoomState);
-
-                // Set or request user
-                auto user = m_users.value(userId, nullptr);
-                if (user) {
-                    roomObj->addUser(user, userRoomState);
-                    if (roomObj->isDirectChat()) {
-                        Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
-                    }
-                } else {
-                    requestUser(userId);
-                }
-            }
+            processRoomUsers(room, roomObj);
         }
 
         // Remove obsolete rooms
@@ -920,6 +1043,9 @@ void IpcDispatcher::processResponse(
         while (it.hasNext()) {
             auto room = it.next();
             if (!handledRoomIds.contains(room->id())) {
+                if (auto *cache = m_userRoomStateCache.take(room->id())) {
+                    delete cache;
+                }
                 removeNotificationsForRoom(room);
                 m_roomLookup.remove(room->id());
                 Q_EMIT chatRoomRemoved(indexOf(room), room);
@@ -929,7 +1055,14 @@ void IpcDispatcher::processResponse(
         }
 
     } else if (rc.hasRoomCreatedEvent()) {
-        addChatRoom(rc.roomCreatedEvent(), QString::number(rc.tag()));
+        const auto &roomProto = rc.roomCreatedEvent();
+        const auto tag = rc.tag() ? QString::number(rc.tag()) : QString();
+        auto roomObj = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomProto.roomId()));
+        if (!roomObj) {
+            roomObj = addChatRoom(roomProto, tag);
+        }
+        processRoomUsers(roomProto, roomObj);
+        Q_EMIT chatRoomCreationCompleted(roomObj, tag);
 
     } else if (rc.hasUserResponse()) {
         const auto &user = rc.userResponse();
@@ -1049,14 +1182,39 @@ void IpcDispatcher::processResponse(
 
     } else if (rc.hasMessageSendResponse()) {
 
-        // Obsolete - if exists to prevent fallback crash
+        // Update pending optimistic message with real server event ID
+        if (const auto pendingInfo = m_pendingMessages.take(tag);
+            !pendingInfo.tempEventId.isEmpty()) {
+            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
+                const auto &msgResponse = rc.messageSendResponse();
+                room->updateMessageEventId(pendingInfo.tempEventId, msgResponse.messageId());
+                if (auto chatMsg = room->chatMessageById(msgResponse.messageId())) {
+                    room->setMessageFlags(
+                            msgResponse.messageId(),
+                            chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending));
+                }
+            }
+        }
 
     } else if (rc.hasMessageReceivedEvent()) {
 
+        ChatMessage *chatMessage = nullptr;
+
+        if (const auto pendingInfo = m_pendingMessages.take(tag);
+            !pendingInfo.tempEventId.isEmpty()) {
+
+            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
+                const auto &msg = rc.messageReceivedEvent();
+                room->updateMessageEventId(pendingInfo.tempEventId, msg.messageId());
+
+                chatMessage = room->chatMessageById(msg.messageId());
+            }
+        }
+
         const bool isIndependent = m_singleMessageTags.remove(tag);
         const bool isUnread = !tag;
-        const auto chatMessageObj =
-                addReceivedChatMessage(rc.messageReceivedEvent(), isUnread, isIndependent);
+        const auto chatMessageObj = createOrUpdateReceivedChatMessage(
+                rc.messageReceivedEvent(), isUnread, isIndependent, chatMessage);
         if (isUnread && !isIndependent) {
             makeNotificationNewMessage(chatMessageObj);
         }
@@ -1404,14 +1562,7 @@ void IpcDispatcher::processResponse(
 
         // Update user states
         if (changeEvent.hasUserIdListChanged()) {
-
-            // Setup cache
-            QHash<QString, IChatRoom::UserRoomState> *roomCache =
-                    m_userRoomStateCache.value(roomId, nullptr);
-            if (!roomCache) {
-                roomCache = new QHash<QString, IChatRoom::UserRoomState>;
-                m_userRoomStateCache.insert(roomId, roomCache);
-            }
+            auto *roomCache = userRoomStateCache(roomId);
 
             // Set user states
             const auto roomStates = changeEvent.userIdList();
@@ -1447,6 +1598,9 @@ void IpcDispatcher::processResponse(
         while (it.hasNext()) {
             auto room = it.next();
             if (room->id() == roomId) {
+                if (auto *cache = m_userRoomStateCache.take(roomId)) {
+                    delete cache;
+                }
                 const QString roomName = room->name();
                 removeNotificationsForRoom(room);
                 m_roomLookup.remove(room->id());
@@ -1616,8 +1770,10 @@ bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
     return false;
 }
 
-ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::Message &message,
-                                                   bool isUnread, bool isIndependent)
+ChatMessage *
+IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
+                                                 bool isUnread, bool isIndependent,
+                                                 ChatMessage *chatMessage)
 {
     auto room = ipcChatRoomById(message.roomId());
 
@@ -1626,12 +1782,11 @@ ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::M
         return nullptr;
     }
 
-    if (auto *existing = room->chatMessageById(message.messageId())) {
-        if (!isIndependent && !room->hasMessage(existing)) {
-            room->addExistingMessage(existing, false, false);
-        }
-        return existing;
+    if (!chatMessage) {
+        chatMessage = room->chatMessageById(message.messageId());
     }
+
+    const bool isNew = !room->hasMessage(chatMessage);
 
     ChatMessage::Flags flags = m_configInfo.userId == message.senderId()
             ? ChatMessage::Flag::OwnMessage
@@ -1650,20 +1805,34 @@ ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::M
         flags |= ChatMessage::Flag::Encrypted;
     }
 
-    const auto user = m_users.value(message.senderId(), nullptr);
-    const auto userDisplayName =
-            (user && !user->displayName().isEmpty()) ? user->displayName() : message.senderId();
-
     // Add new message
     const QDateTime dateTime =
             QDateTime::fromMSecsSinceEpoch(message.timestamp(), QTimeZone::utc());
 
     QObject *content = createMessageContent(message);
-    auto newChatMessage = new ChatMessage(message.messageId(), message.senderId(), userDisplayName,
-                                          content, dateTime, room, flags);
+
+    if (chatMessage) {
+        room->updateMessageEventId(chatMessage->eventId(), message.messageId());
+        chatMessage->setTimestamp(dateTime);
+        room->setMessageFlags(chatMessage->eventId(), flags);
+        chatMessage->setContent(content);
+
+        if (!isNew) {
+            auto idx = room->indexOfMessage(chatMessage);
+            Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
+        }
+
+    } else {
+        const auto user = m_users.value(message.senderId(), nullptr);
+        const auto userDisplayName =
+                (user && !user->displayName().isEmpty()) ? user->displayName() : message.senderId();
+
+        chatMessage = new ChatMessage(message.messageId(), message.senderId(), userDisplayName,
+                                      content, dateTime, room, flags);
+    }
 
     if (message.hasRelatedMessageId()) {
-        newChatMessage->setRelatedMessageId(message.relatedMessageId());
+        chatMessage->setRelatedMessageId(message.relatedMessageId());
     }
 
     if (dateTime > room->latestMessageDateTime()) {
@@ -1674,13 +1843,15 @@ ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::M
     const auto mentionedUserIds = message.mentionedUserIds();
     for (const QString &userId : mentionedUserIds) {
         if (auto user = m_users.value(userId, nullptr)) {
-            newChatMessage->addMentionendUser(user);
+            chatMessage->addMentionendUser(user);
         } else {
             qCWarning(lcIpcDispatcher) << "Ignoring unknown mentioned user" << userId;
         }
     }
 
-    room->addExistingMessage(newChatMessage, isUnread, isIndependent);
+    if (isNew) {
+        room->addExistingMessage(chatMessage, isUnread, isIndependent);
+    }
 
     // Reactions
     bool hasReactionAdded = false;
@@ -1698,17 +1869,16 @@ ChatMessage *IpcDispatcher::addReceivedChatMessage(const de::gonicus::gonnect::M
             continue;
         }
 
-        newChatMessage->addReaction(reaction.reaction(), reactor);
+        chatMessage->addReaction(reaction.reaction(), reactor);
         hasReactionAdded = true;
     }
 
     if (hasReactionAdded) {
-        Q_EMIT room->chatMessageReactionsChanged(room->indexOfMessage(newChatMessage),
-                                                 newChatMessage);
-        Q_EMIT reactionChanged(newChatMessage->eventId());
+        Q_EMIT room->chatMessageReactionsChanged(room->indexOfMessage(chatMessage), chatMessage);
+        Q_EMIT reactionChanged(chatMessage->eventId());
     }
 
-    return newChatMessage;
+    return chatMessage;
 }
 
 IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag)
@@ -1732,6 +1902,8 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
     }
 
+    roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
+
     m_rooms.append(roomObj);
     m_roomLookup.insert(room.roomId(), roomObj);
 
@@ -1744,7 +1916,59 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     connect(roomObj, &IChatRoom::notificationCountChanged, this,
             [this](qsizetype) { updateUnreadNotificationsCount(); });
 
+    // Send room invitation signal
+    if (roomObj->ownUserJoinState() == IChatRoom::UserRoomState::Invited) {
+        Q_EMIT roomInviteReceived(roomObj->id(), roomObj->name(), roomObj->invitationText());
+    }
+
     return roomObj;
+}
+
+void IpcDispatcher::processRoomUsers(const de::gonicus::gonnect::Room &room, IpcChatRoom *roomObj)
+{
+    if (!roomObj) {
+        qCCritical(lcIpcDispatcher) << "Cannot process room users without a roomObj";
+        return;
+    }
+
+    const auto &roomId = room.roomId();
+    const auto roomIdx = indexOf(roomObj);
+    auto *roomCache = userRoomStateCache(roomId);
+
+    QHashIterator it(room.userIdList());
+    while (it.hasNext()) {
+        it.next();
+        const auto &userId = it.key();
+        const auto userRoomState = userRoomStateConv(it.value());
+
+        // Fill information into cache
+        roomCache->insert(userId, userRoomState);
+
+        // Set or request user
+        auto user = m_users.value(userId, nullptr);
+        if (user) {
+            if (roomObj->chatUserById(user->id())) {
+                roomObj->setUserRoomState(user, userRoomState);
+            } else {
+                roomObj->addUser(user, userRoomState);
+                if (roomObj->isDirectChat()) {
+                    Q_EMIT chatUserPropertiesChanged(user, roomObj, roomIdx);
+                }
+            }
+        } else {
+            requestUser(userId);
+        }
+    }
+}
+
+QHash<QString, IChatRoom::UserRoomState> *IpcDispatcher::userRoomStateCache(const QString &roomId)
+{
+    auto *cache = m_userRoomStateCache.value(roomId, nullptr);
+    if (!cache) {
+        cache = new QHash<QString, IChatRoom::UserRoomState>;
+        m_userRoomStateCache.insert(roomId, cache);
+    }
+    return cache;
 }
 
 IpcChatRoom *IpcDispatcher::ipcChatRoomById(const QString &roomId) const
@@ -2005,6 +2229,12 @@ bool IpcDispatcher::shallSendDesktopNotification()
     return settings.value("generic/jitsiChatAsNotifications", true).toBool();
 }
 
+bool IpcDispatcher::containsRoomTag(const QString &str) const
+{
+    static const QRegularExpression regex(R"((?<=^|\s)@room\b)");
+    return str.contains(regex);
+}
+
 RequestContainer *IpcDispatcher::createRequest(bool withTag)
 {
     auto container = new RequestContainer;
@@ -2063,7 +2293,9 @@ void IpcDispatcher::sendInitialInitializationRequest()
     initReq.setPersistentStorageSecret(m_configInfo.persistentStorageSecret);
     initReq.setDeviceDisplayName(m_configInfo.displayName);
     req->setInitializationRequest(initReq);
-    sendRequest(req);
+    SendPolicy policy;
+    policy.allowSendIfLoggedOut = true;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::onLoggedInChanged()
@@ -2414,9 +2646,12 @@ QString IpcDispatcher::searchChatUser(const QString &searchPhrase)
     searchReq.setQuery(searchPhrase);
     searchReq.setLimit(50);
     req->setUserSearchRequest(searchReq);
-    sendRequest(req);
 
-    return tag;
+    if (sendRequest(req)) {
+        return tag;
+    } else {
+        return QString();
+    }
 }
 
 QList<const ChatUser *> IpcDispatcher::users() const
@@ -2618,7 +2853,10 @@ void IpcDispatcher::requestUser(const QString &userId)
 
     auto req = createRequest();
     req->setUserRequest(userReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        m_requestedUserIds.remove(userId);
+    }
 }
 
 void IpcDispatcher::addReaction(const QString &roomId, const QString &messageId,

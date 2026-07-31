@@ -78,6 +78,7 @@ private:
 
     QTimer m_idleTimer;
     qreal m_sourceAudioLevel = 0.0;
+    quint64 m_captureFrames = 0;
 
     pj::MediaFormatAudio m_pj_fmt;
 

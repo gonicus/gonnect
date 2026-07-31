@@ -89,19 +89,19 @@ void ChatRoomModel::connectChatRoomSignals(IChatRoom *chatRoom)
     });
     connect(chatRoom, &IChatRoom::isDirectChatChanged, ctx, [this, chatRoom]() {
         emitDataChanged(chatRoom,
-                        { static_cast<int>(Roles::Name), static_cast<int>(Roles::AvatarPath),
+                        { static_cast<int>(Roles::AvatarPath),
                           static_cast<int>(Roles::HasPresenceState),
                           static_cast<int>(Roles::PresenceState) });
     });
     connect(chatRoom, &IChatRoom::chatUsersChanged, ctx, [this, chatRoom]() {
         emitDataChanged(chatRoom,
-                        { static_cast<int>(Roles::Name), static_cast<int>(Roles::AvatarPath),
+                        { static_cast<int>(Roles::AvatarPath),
                           static_cast<int>(Roles::HasPresenceState),
                           static_cast<int>(Roles::PresenceState) });
     });
     connect(chatRoom, &IChatRoom::chatUserRoomStateChanged, ctx, [this, chatRoom]() {
         emitDataChanged(chatRoom,
-                        { static_cast<int>(Roles::Name), static_cast<int>(Roles::AvatarPath),
+                        { static_cast<int>(Roles::AvatarPath),
                           static_cast<int>(Roles::HasPresenceState),
                           static_cast<int>(Roles::PresenceState) });
     });

@@ -14,8 +14,10 @@ public:
     explicit IpcChatRoom(const QString &id, const QString &name, QObject *parent = nullptr);
     virtual ~IpcChatRoom();
 
+    QString customName() const { return m_name; }
     void setName(const QString &name);
     void setAvatarPath(const QString &path);
+    void setInvitationText(const QString &invitationText);
     void setJoinRule(IChatRoom::JoinRule joinRule);
     void setIsDirect(bool value);
     void setUnreadCount(qsizetype count);
@@ -23,8 +25,9 @@ public:
     void setIsFavorite(bool value);
 
     virtual QString id() override { return m_id; };
-    virtual QString name() override { return m_name; };
+    virtual QString name() override;
     virtual QString avatarPath() override;
+    virtual QString invitationText() override { return m_invitationText; }
     virtual bool isFavorite() override { return m_isFavorite; }
     virtual IChatRoom::JoinRule joinRule() override { return m_joinRule; }
     virtual qsizetype notificationCount() override { return m_unreadCount; }
@@ -51,6 +54,9 @@ public:
     qsizetype indexOfMessage(const ChatMessage *message) const;
 
     void removeMessage(const QString &messageId);
+
+    void updateMessageEventId(const QString &oldEventId, const QString &newEventId);
+    void setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags);
 
     virtual bool isDirectChat() override { return m_isDirectChat; }
     virtual bool hasPresenceState() override;
@@ -83,6 +89,7 @@ private:
     QString m_id;
     QString m_name;
     QString m_avatarPath;
+    QString m_invitationText;
     qsizetype m_unreadCount = 0;
     IChatRoom::JoinRule m_joinRule = IChatRoom::JoinRule::Unknown;
     IChatRoom::UserRoomState m_ownUserJoinState = IChatRoom::UserRoomState::Unjoined;

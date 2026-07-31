@@ -45,6 +45,14 @@ void IpcChatRoom::setAvatarPath(const QString &path)
     }
 }
 
+void IpcChatRoom::setInvitationText(const QString &invitationText)
+{
+    if (m_invitationText != invitationText) {
+        m_invitationText = invitationText;
+        Q_EMIT invitationTextChanged();
+    }
+}
+
 void IpcChatRoom::setJoinRule(JoinRule joinRule)
 {
     if (m_joinRule != joinRule) {
@@ -91,13 +99,16 @@ void IpcChatRoom::ensureMessageLoaded(const QString &id)
 
 ChatMessage *IpcChatRoom::latestOwnTextMessage() const
 {
+    using Flag = ChatMessage::Flag;
+
     QListIterator it(m_messages);
     it.toBack();
 
     while (it.hasPrevious()) {
         auto *msg = it.previous();
-        if (qobject_cast<ChatMessageContentText *>(msg->content())
-            && (msg->flags() & ChatMessage::Flag::OwnMessage)) {
+        if ((msg->flags() & Flag::OwnMessage)
+            && qobject_cast<ChatMessageContentText *>(msg->content())
+            && !(msg->flags() & (Flag::Pending | Flag::Failed))) {
             return msg;
         }
     }
@@ -150,14 +161,17 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
                 });
     }
 
+    const auto eventId = message->eventId();
+
     if (isIndependent) {
-        m_messageLookup.insert(message->eventId(), message);
+        m_messageLookup.insert(eventId, message);
         Q_EMIT chatMessageOutOfSequenceReceived(message);
     } else {
+
         for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
             if (m_messages.at(i)->timestamp() < message->timestamp()) {
                 m_messages.insert(i + 1, message);
-                m_messageLookup.insert(message->eventId(), message);
+                m_messageLookup.insert(eventId, message);
                 Q_EMIT chatMessageAdded(i + 1, message);
                 return;
             }
@@ -185,6 +199,26 @@ void IpcChatRoom::removeMessage(const QString &messageId)
             Q_EMIT chatMessageRemoved(i, message);
             delete message;
             return;
+        }
+    }
+}
+
+void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString &newEventId)
+{
+    if (auto msg = m_messageLookup.take(oldEventId)) {
+        msg->setEventId(newEventId);
+        m_messageLookup.insert(newEventId, msg);
+        Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
+    }
+}
+
+void IpcChatRoom::setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags)
+{
+    if (auto msg = m_messageLookup.value(eventId)) {
+        const auto prevFlags = msg->flags();
+        if (prevFlags != newFlags) {
+            msg->setFlags(newFlags);
+            Q_EMIT chatMessageFlagsChanged(indexOfMessage(msg), msg, prevFlags);
         }
     }
 }
@@ -245,6 +279,17 @@ void IpcChatRoom::setIsFavorite(bool value)
         m_isFavorite = value;
         Q_EMIT isFavoriteChanged();
     }
+}
+
+QString IpcChatRoom::name()
+{
+    if (!m_name.isEmpty()) {
+        return m_name;
+    }
+    if (const auto *other = otherUser()) {
+        return other->computedName();
+    }
+    return QString();
 }
 
 QString IpcChatRoom::avatarPath()
@@ -486,6 +531,9 @@ void IpcChatRoom::updateOtherUser()
                 Q_EMIT otherUserChanged();
             });
 
+            connect(other, &ChatUser::displayNameChanged, m_otherUserContext,
+                    [this]() { Q_EMIT nameChanged(name()); });
+
             connect(other, &ChatUser::hasPresenceStateChanged, m_otherUserContext,
                     [this]() { Q_EMIT hasPresenceStateChanged(); });
 
@@ -497,6 +545,7 @@ void IpcChatRoom::updateOtherUser()
         }
 
         Q_EMIT otherUserChanged();
+        Q_EMIT nameChanged(name());
     }
 }
 

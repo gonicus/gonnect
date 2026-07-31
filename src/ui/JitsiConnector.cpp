@@ -461,7 +461,7 @@ api.addListener("errorOccurred", data => {
 })
 
 api.addListener("incomingMessage", data => {
-    const stamp = data.hasOwnProperty("stamp") ? data.stamp : new Date()
+    const stamp = data.stamp ?? new Date()
     jitsiConn.addIncomingMessage(data.from, data.nick, data.message, stamp, data.privateMessage)
 })
 

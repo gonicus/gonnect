@@ -139,6 +139,8 @@ void HeadsetDevice::setIdle()
                                              UsageId::LED_Ring, UsageId::LED_Hold,
                                              UsageId::Telephony_Ringer };
 
+    m_busyLine = false;
+
     QHash<quint8, unsigned> reportVals;
     QList<UsageInfo> usageInfos;
 
@@ -196,6 +198,8 @@ void HeadsetDevice::setBusyLine(bool flag)
         qCInfo(lcHeadset) << "Busy line is not supported by this device";
         return;
     }
+
+    m_busyLine = flag;
 
     const auto &usage = m_hidUsages.value(UsageId::LED_OffHook);
     const unsigned bitValue = 1 << usage.bitPosition;
@@ -354,7 +358,7 @@ unsigned HeadsetDevice::currentFlags(const quint32 reportId) const
 {
     unsigned value = 0;
 
-    if (m_hidUsages.contains(UsageId::LED_OffHook) && (m_line || m_hookSwitch)) {
+    if (m_hidUsages.contains(UsageId::LED_OffHook) && (m_line || m_hookSwitch || m_busyLine)) {
         const auto &u = m_hidUsages.value(UsageId::LED_OffHook);
         if (u.reportId == reportId) {
             value |= 1 << u.bitPosition;

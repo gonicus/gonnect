@@ -38,6 +38,10 @@ Item {
             id: headingLoader
             active: control.showHeading
             sourceComponent: headingComponent
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
         }
 
         Accessible.ignored: true
@@ -48,6 +52,7 @@ Item {
 
         RowLayout {
             id: headingLayout
+            width: parent?.width ?? headingLayout.implicitWidth
 
             Label {
                 id: headingText
@@ -56,6 +61,7 @@ Item {
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor
+                Layout.fillWidth: true
             }
 
             Pane {

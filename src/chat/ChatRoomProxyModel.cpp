@@ -3,18 +3,25 @@
 
 ChatRoomProxyModel::ChatRoomProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
+    m_sortDebounceTimer.setSingleShot(true);
+    m_sortDebounceTimer.setInterval(20);
+    m_sortDebounceTimer.callOnTimeout(this, &QSortFilterProxyModel::invalidate);
+
     connect(this, &QSortFilterProxyModel::sourceModelChanged, this,
             &ChatRoomProxyModel::onSourceModelChanged);
 
     connect(this, &ChatRoomProxyModel::sortStrategyChanged, this, &ChatRoomProxyModel::applySort);
 
-    connect(this, &ChatRoomProxyModel::showSectionHeaderChanged, this, [&]() {
-        const auto rows = rowCount();
-        if (rows > 0) {
-            Q_EMIT dataChanged(index(0, 0), index(rows - 1, 0),
-                               { static_cast<int>(Roles::SectionHeader) });
-        }
-    });
+    m_sectionHeaderDebounceTimer.setSingleShot(true);
+    m_sectionHeaderDebounceTimer.setInterval(5);
+    m_sectionHeaderDebounceTimer.callOnTimeout(this, &ChatRoomProxyModel::refreshSectionHeaders);
+
+    connect(this, &ChatRoomProxyModel::showSectionHeaderChanged, this,
+            [this]() { m_sectionHeaderDebounceTimer.start(); });
+    connect(this, &QAbstractItemModel::rowsInserted, this,
+            [this]() { m_sectionHeaderDebounceTimer.start(); });
+    connect(this, &QAbstractItemModel::rowsRemoved, this,
+            [this]() { m_sectionHeaderDebounceTimer.start(); });
 
     applySort();
     sort(0);
@@ -156,7 +163,7 @@ bool ChatRoomProxyModel::lessThan(const QModelIndex &sourceLeft,
     return leftName.localeAwareCompare(rightName) < 0;
 }
 
-bool ChatRoomProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) const
+bool ChatRoomProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     const auto model = sourceModel();
     if (!model) {
@@ -164,7 +171,7 @@ bool ChatRoomProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &) co
     }
 
     using Roles = ChatRoomModel::Roles;
-    const auto idx = createIndex(sourceRow, 0);
+    const auto idx = model->index(sourceRow, 0, sourceParent);
 
     const auto ownJoinState = qvariant_cast<IChatRoom::UserRoomState>(
             model->data(idx, static_cast<int>(Roles::OwnJoinState)));
@@ -204,8 +211,7 @@ void ChatRoomProxyModel::onSourceModelChanged()
                 connect(model, &QAbstractListModel::dataChanged, this,
                         [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
                             if (roles.isEmpty()) {
-                                invalidate();
-                                sort(0);
+                                m_sortDebounceTimer.start();
                                 return;
                             }
 
@@ -223,12 +229,11 @@ void ChatRoomProxyModel::onSourceModelChanged()
                                     });
 
                             if (isSortRole) {
-                                invalidate();
-                                sort(0);
+                                m_sortDebounceTimer.start();
                             }
                         });
     }
-    sort(0);
+    m_sortDebounceTimer.start();
 }
 
 void ChatRoomProxyModel::applySort()
@@ -242,5 +247,14 @@ void ChatRoomProxyModel::applySort()
     case SortStrategy::LatestActivity:
         setSortRole(static_cast<int>(Roles::LatestMessageDate));
         break;
+    }
+}
+
+void ChatRoomProxyModel::refreshSectionHeaders()
+{
+    const auto rows = rowCount();
+    if (rows > 0) {
+        Q_EMIT dataChanged(index(0, 0), index(rows - 1, 0),
+                           { static_cast<int>(Roles::SectionHeader) });
     }
 }

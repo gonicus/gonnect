@@ -96,7 +96,7 @@ Item {
         id: snapGrid
         anchors {
             fill: parent
-            leftMargin: 24
+            leftMargin: Theme.d * 2
             bottomMargin: -16
         }
 

@@ -14,6 +14,7 @@ Item {
     readonly property alias count: listView.count
 
     signal respondTo(string messageId)
+    signal retryMessage(string messageId)
 
     onChatRoomChanged: () => {
         internal.autoScrollBottom = true
@@ -61,6 +62,7 @@ Item {
             required property int index
 
             onRespondTo: messageId => control.respondTo(messageId)
+            onRetryMessage: messageId => control.retryMessage(messageId)
         }
 
         onMovementStarted: () => {

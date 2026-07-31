@@ -56,7 +56,7 @@ Rectangle {
     property bool interactive: true
     property bool showHoldButton: true
     property alias showHangupButton: hangupButton.visible
-    property int padding: 12
+    property int padding: Theme.d
 
     signal clicked
 

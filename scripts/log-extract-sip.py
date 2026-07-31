@@ -35,17 +35,23 @@ JOURNAL_RE = re.compile(
 
 # Embedded timestamp: HH:MM:SS.fff (always present in pjsua log lines)
 TS_RE = re.compile(
-    r"(\d{2}:\d{2}:\d{2})"      # time
+    r"(\d{1,2}:\d{2}:\d{2})"      # time
     r"\.(\d+)"                    # fractional seconds
 )
 
 # pjsua log-line header
-LOG_LINE_RE = re.compile(
+SIP_START_LOG_LINE_RE = re.compile(
     r".*?pjsua_core\.c\s+"
     r"\.{0,12}(TX|RX)\s+"
     r"\d+\s+bytes\s+"
     r"(?:Request\s+msg|Response\s+msg)\s+"
     r".+:\s*$"
+)
+
+LOG_LINE_RE = re.compile(
+    r"(\d{1,2}:\d{2}:\d{2})"      # time
+    r"\.(\d+)\s"                    # fractional seconds
+    r"gonnect\."
 )
 
 # Full date + time at the start of a log line
@@ -182,15 +188,8 @@ def extract_sip_messages(log_path: str) -> list[tuple[str, int, int, str, str, i
             line = raw_line.rstrip("\r\n")
             line = _clean_line(line)
 
-            if LOG_LINE_RE.match(line):
-                in_message = True
-                current_lines = []
-                current_direction, current_peer_ip, current_peer_port = _parse_dir_ip(line)
-                current_ts_sec, current_ts_usec = _parse_ts(line)
-                continue
-
             if in_message:
-                if line.strip() == END_MARKER:
+                if line.strip() == END_MARKER or LOG_LINE_RE.match(line):
                     in_message = False
 
                     via_ip, via_port = _parse_via_host(current_lines)
@@ -215,6 +214,15 @@ def extract_sip_messages(log_path: str) -> list[tuple[str, int, int, str, str, i
                     current_lines = []
                 else:
                     current_lines.append(line)
+
+            if SIP_START_LOG_LINE_RE.match(line):
+                in_message = True
+                current_lines = []
+                current_direction, current_peer_ip, current_peer_port = _parse_dir_ip(line)
+                current_ts_sec, current_ts_usec = _parse_ts(line)
+                continue
+
+
 
     return results
 

@@ -41,6 +41,8 @@ Item {
     required property int userState
     required property string affectedUserName
 
+    property color textColor: Theme.primaryTextColor
+
     readonly property alias messageLabel: messageLabel
 
     signal openDirectChatRequested(string userId)
@@ -53,6 +55,7 @@ Item {
         id: messageLabel
         visible: control.content instanceof ChatMessageContentText && control.content.isSimpleText
         text: control.content instanceof ChatMessageContentText ? control.content.simpleText : ""
+        color: control.textColor
         wrapMode: Label.Wrap
         textFormat: Text.MarkdownText
         readOnly: true

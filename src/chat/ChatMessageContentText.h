@@ -10,6 +10,7 @@ class ChatMessageContentText : public QObject
     QML_ELEMENT
     QML_UNCREATABLE("")
 
+    Q_PROPERTY(QString rawText READ rawText NOTIFY contentChanged FINAL)
     Q_PROPERTY(bool isSimpleText READ isSimpleText NOTIFY contentChanged FINAL)
     Q_PROPERTY(QString simpleText READ simpleText NOTIFY contentChanged FINAL)
     Q_PROPERTY(QList<ChatMessageContentPart *> contentParts READ contentParts NOTIFY contentChanged
@@ -21,8 +22,8 @@ public:
     bool isSimpleText() const;
     QString simpleText() const;
 
+    QString rawText() const { return m_rawText; }
     QList<ChatMessageContentPart *> contentParts() const { return m_parts; }
-    QString rawText() const;
 
     void setText(const QString &text);
 

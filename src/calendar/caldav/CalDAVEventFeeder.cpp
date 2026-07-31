@@ -6,6 +6,8 @@
 #include "DateEventManager.h"
 #include "AuthManager.h"
 #include "ReadOnlyConfdSettings.h"
+#include "SecretResponse.h"
+#include "ErrorBus.h"
 
 Q_LOGGING_CATEGORY(lcCalDAVEventFeeder, "gonnect.app.dateevents.feeder.caldav")
 
@@ -34,27 +36,32 @@ QUrl CalDAVEventFeeder::networkCheckURL() const
 
 void CalDAVEventFeeder::init()
 {
-    connect(&m_webdavParser, &QWebdavDirParser::finished, this,
-            &CalDAVEventFeeder::onParserFinished);
 
-    connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this, &CalDAVEventFeeder::onError);
-    connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onError);
+    if (!m_areWebDavConnectionsInitialized) {
+        m_areWebDavConnectionsInitialized = true;
+        connect(&m_webdavParser, &QWebdavDirParser::finished, this,
+                &CalDAVEventFeeder::onParserFinished);
 
-    connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
-        m_pendingAuth = true;
-        checkErrorStatus();
-    });
+        connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
+                &CalDAVEventFeeder::onError);
+        connect(&m_webdav, &QWebdav::errorChanged, this, &CalDAVEventFeeder::onError);
 
-    /*
-        As the Kopano CalDAV server doesn't provide 'getetag' and 'getlastmodified' values,
-        it's impossible to actively poll for changes. Thus, we're simply re-launching the
-        process() loop, at least until there's a better solution.
+        connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
+            m_pendingAuth = true;
+            checkErrorStatus();
+        });
 
-        Kopano saves every VEVENT wrapped in a VCALENDAR entry in separate '.ics' files in
-        '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
-    */
-    m_calendarRefreshTimer.setInterval(m_config.interval);
-    connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
+        /*
+            As the Kopano CalDAV server doesn't provide 'getetag' and 'getlastmodified' values,
+            it's impossible to actively poll for changes. Thus, we're simply re-launching the
+            process() loop, at least until there's a better solution.
+
+            Kopano saves every VEVENT wrapped in a VCALENDAR entry in separate '.ics' files in
+            '/caldav/<USER>/Kalender'. A full calendar is generated on the fly once requested.
+        */
+        m_calendarRefreshTimer.setInterval(m_config.interval);
+        connect(&m_calendarRefreshTimer, &QTimer::timeout, this, [this]() { process(); });
+    }
 
     m_calendarRefreshTimer.start();
 
@@ -187,12 +194,18 @@ void CalDAVEventFeeder::getNextItem()
 void CalDAVEventFeeder::process(bool authFailed)
 {
     auto manager = q_check_ptr(qobject_cast<DateEventFeederManager *>(parent()));
-    manager->acquireSecret(authFailed, m_config.source, [this](const QString &password) {
-        m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
-                                       m_config.host, m_config.path, m_config.user, password,
-                                       m_config.port);
+    manager->acquireSecret(authFailed, m_config.source, [this](const SecretResponse response) {
+        if (response.hasError) {
+            qCCritical(lcCalDAVEventFeeder)
+                    << "Authentication for" << m_config.source << "has failed";
+            ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_config.source));
+        } else {
+            m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
+                                           m_config.host, m_config.path, m_config.user,
+                                           response.secret, m_config.port);
 
-        m_webdavParser.listDirectory(&m_webdav, "/");
+            m_webdavParser.listDirectory(&m_webdav, "/");
+        }
     });
 }
 

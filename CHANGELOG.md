@@ -1,3 +1,16 @@
+# [2.4.0](https://github.com/gonicus/gonnect/compare/v2.3.2...v2.4.0) (2026-07-07)
+
+
+### Bug Fixes
+
+* async xfer ([#551](https://github.com/gonicus/gonnect/issues/551)) ([f25cc6a](https://github.com/gonicus/gonnect/commit/f25cc6a6957c0a9c808fd013e93e2efcf511fe00))
+* use LDAP paged results ([#547](https://github.com/gonicus/gonnect/issues/547)) ([f37b94d](https://github.com/gonicus/gonnect/commit/f37b94db2d6ef9f7d90b329eacd03519a93cbfb6))
+
+
+### Features
+
+* **carddav:** strip base numbers ([#561](https://github.com/gonicus/gonnect/issues/561)) ([bb3c806](https://github.com/gonicus/gonnect/commit/bb3c806e3a8e38d308dd87acaf30f5f269ab449a))
+
 ## [2.3.2](https://github.com/gonicus/gonnect/compare/v2.3.1...v2.3.2) (2026-07-01)
 
 

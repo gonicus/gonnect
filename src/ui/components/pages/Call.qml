@@ -95,7 +95,7 @@ Item {
             bottom: parent.bottom
             right: verticalDragbarDummy.left
 
-            leftMargin: 24
+            leftMargin: Theme.d * 2
             bottomMargin: 8
         }
 
@@ -133,7 +133,7 @@ Item {
 
                 topMargin: (control.isRttEnabled || (callRoutingGrid.visible && callRoutingRep.count))
                            ? 30
-                           : Math.max(24, 24 + callMainCard.height / 2 - 254)
+                           : Math.max(Theme.d * 2, Theme.d * 2 + callMainCard.height / 2 - 254)
                 bottomMargin: 15
             }
 

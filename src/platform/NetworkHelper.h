@@ -3,6 +3,7 @@
 #include <QNetworkInformation>
 #include <QFuture>
 #include <QJsonDocument>
+#include <QSet>
 
 class NetworkHelper : public QObject
 {
@@ -12,6 +13,7 @@ class NetworkHelper : public QObject
 public:
     static QFuture<QString> fetchUrlAsString(const QUrl &url);
     static QFuture<QJsonDocument> fetchUrlAsJson(const QUrl &url);
+    static int getStandardPort(const QUrl &url);
 
     explicit NetworkHelper(QObject *parent = nullptr);
 
@@ -21,6 +23,7 @@ public:
     virtual QFuture<bool> isReachable(const QUrl &url);
 
     virtual QStringList nameservers() const;
+    virtual QSet<QString> localAddresses() const;
 
     ~NetworkHelper() = default;
 

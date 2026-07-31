@@ -423,7 +423,7 @@ QString ViewHelper::preprocessSearchText(const QString &in) const
 
 bool ViewHelper::isPhoneNumber(const QString &number) const
 {
-    static const QRegularExpression numberRegEx(R"(^[+#*0-9 ()/-]+$)");
+    static const QRegularExpression numberRegEx(R"(^[+#*0-9 ()/-]+(,[+#*0-9A-D ()/-]*)*$)");
     return numberRegEx.match(number).hasMatch();
 }
 
