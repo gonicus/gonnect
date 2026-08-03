@@ -14,6 +14,7 @@ Item {
 
         property Button authButton
         property bool shareFullScreen
+        property bool chatAutoOpened
     }
 
     LoggingCategory {
@@ -45,6 +46,7 @@ Item {
     ]
 
     function startConference(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
+        internal.chatAutoOpened = false
         upgradeRoomsAggregator.setWrappedContact(contact)
 
         confConn.setCallHistoryItem(callHistoryItem)
@@ -839,7 +841,12 @@ Item {
             }
 
             function maybeAutoOpenChat() {
-                if (confConn.isInConference && (upgradeRoomsAggregator.bestMatchingChatRoom && callSideBar.conferenceChatInUse)) {
+                if (internal.chatAutoOpened || !confConn.isInConference) {
+                    return
+                }
+
+                if (upgradeRoomsAggregator.bestMatchingChatRoom && !callSideBar.conferenceChatInUse) {
+                    internal.chatAutoOpened = true
                     callSideBar.selectedSideBarMode = CallSideBar.Chat
                 }
             }
@@ -850,11 +857,19 @@ Item {
                     if (confConn.isInConference) {
                         callSideBar.maybeAutoOpenChat()
                     } else {
+                        internal.chatAutoOpened = false
                         callSideBar.selectedSideBarMode = CallSideBar.None
                     }
                 }
 
                 function onNumberOfUsersChanged() {
+                    callSideBar.maybeAutoOpenChat()
+                }
+            }
+
+            Connections {
+                target: callSideBar
+                function onConferenceChatInUseChanged() {
                     callSideBar.maybeAutoOpenChat()
                 }
             }

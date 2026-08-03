@@ -54,8 +54,6 @@ Item {
     onChatAvailableChanged: {
         if (!control.chatAvailable && control.selectedSideBarMode === CallSideBar.Chat) {
             control.selectedSideBarMode = CallSideBar.None
-        } else {
-            internal.updateAutoExtendCollapse()
         }
     }
 
@@ -91,16 +89,12 @@ Item {
         function updateAutoExtendCollapse() {
             const count = callList.count
 
-            if (control.chatAvailable && !control.extended) {
-                control.selectedSideBarMode = CallSideBar.SideBarMode.Chat
-            } else if (!control.chatAvailable) {
-                if (count > 1 && !control.extended) {
-                    control.selectedSideBarMode = userList.count
-                                                  ? CallSideBar.SideBarMode.Users
-                                                  : CallSideBar.SideBarMode.Caller
-                } else if (count <= 1 && control.extended) {
-                    control.selectedSideBarMode = CallSideBar.SideBarMode.None
-                }
+            if (count > 1 && !control.extended) {
+                control.selectedSideBarMode = userList.count
+                                              ? CallSideBar.SideBarMode.Users
+                                              : CallSideBar.SideBarMode.Caller
+            } else if (count <= 1 && control.extended) {
+                control.selectedSideBarMode = CallSideBar.SideBarMode.None
             }
         }
     }
