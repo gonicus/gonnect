@@ -48,6 +48,7 @@ void AggregatedDirectRoomsOfContact::setChatRooms(const QList<IChatRoom *> chatR
 void AggregatedDirectRoomsOfContact::onContactChanged()
 {
     if (m_contactContext) {
+        m_contactContext->disconnect();
         m_contactContext->deleteLater();
         m_contactContext = nullptr;
     }
