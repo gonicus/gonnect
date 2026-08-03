@@ -2859,9 +2859,8 @@
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
-        <source>All</source>
-        <translation>Alle</translation>
+        <source>All sources</source>
+        <translation>Alle Quellen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
@@ -2887,6 +2886,11 @@
         <location filename="../src/ui/components/HistoryWidget.qml" line="109"/>
         <source>Currently selected call type</source>
         <translation>Aktuell ausgewählter Anruftyp</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
+        <source>All calls</source>
+        <translation>Alle Anrufe</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
