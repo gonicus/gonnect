@@ -74,6 +74,7 @@ private:
 
     IChatRoom *m_chatRoom = nullptr;
     QObject *m_chatRoomContext = nullptr;
+    QSet<ChatUser *> m_avatarSignaledUsers;
     uint m_realMessagesCount = 0;
 
 Q_SIGNALS:

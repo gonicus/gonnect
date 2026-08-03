@@ -255,6 +255,11 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
 
 void ChatModel::connectUserAvatarSignals(ChatUser *user)
 {
+    if (m_avatarSignaledUsers.contains(user)) {
+        return;
+    }
+    m_avatarSignaledUsers.insert(user);
+
     const auto refreshAvatar = [this, user]() {
         if (!m_chatRoom) {
             return;
@@ -268,6 +273,8 @@ void ChatModel::connectUserAvatarSignals(ChatUser *user)
         }
     };
 
+    connect(user, &QObject::destroyed, m_chatRoomContext,
+            [this, user]() { m_avatarSignaledUsers.remove(user); });
     connect(user, &ChatUser::avatarPathChanged, m_chatRoomContext, refreshAvatar);
     if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
         connect(contact, &Contact::avatarChanged, m_chatRoomContext, refreshAvatar);
@@ -281,6 +288,7 @@ void ChatModel::onChatRoomChanged()
     if (m_chatRoomContext) {
         m_chatRoomContext->deleteLater();
         m_chatRoomContext = nullptr;
+        m_avatarSignaledUsers.clear();
     }
 
     if (m_chatRoom) {

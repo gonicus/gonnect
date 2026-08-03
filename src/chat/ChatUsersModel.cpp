@@ -11,6 +11,7 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
         if (m_chatProviderContext) {
             m_chatProviderContext->deleteLater();
             m_chatProviderContext = nullptr;
+            m_avatarSignaledUsers.clear();
         }
 
         if (m_chatProvider) {
@@ -24,8 +25,9 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
                     });
 
             connect(m_chatProvider, &IChatProvider::userRemoved, m_chatProviderContext,
-                    [this](QString, ChatUser *, qsizetype index) {
+                    [this](QString, ChatUser *chatUser, qsizetype index) {
                         beginRemoveRows(QModelIndex(), index, index);
+                        m_avatarSignaledUsers.remove(chatUser);
                         endRemoveRows();
                     });
 
@@ -38,6 +40,14 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
                                              static_cast<int>(Roles::HasPresenceState),
                                              static_cast<int>(Roles::PresenceState) });
                     });
+
+            for (qsizetype i = 0, l = m_chatProvider->chatRoomsCount(); i < l; ++i) {
+                const auto room = m_chatProvider->chatRoomByIndex(i);
+                const auto &users = room->chatUsers();
+                for (auto *user : users) {
+                    connectUserAvatarSignals(user);
+                }
+            }
         }
 
         endResetModel();
@@ -93,6 +103,11 @@ QVariant ChatUsersModel::data(const QModelIndex &index, int role) const
 
 void ChatUsersModel::connectUserAvatarSignals(ChatUser *user)
 {
+    if (m_avatarSignaledUsers.contains(user)) {
+        return;
+    }
+    m_avatarSignaledUsers.insert(user);
+
     const auto refreshAvatar = [this, user]() {
         const auto row = m_chatProvider->users().indexOf(user);
         if (row < 0) {
@@ -102,8 +117,8 @@ void ChatUsersModel::connectUserAvatarSignals(ChatUser *user)
         Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::AvatarPath) });
     };
 
-    connect(user, &ChatUser::avatarPathChanged, this, refreshAvatar);
+    connect(user, &ChatUser::avatarPathChanged, m_chatProviderContext, refreshAvatar);
     if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
-        connect(contact, &Contact::avatarChanged, this, refreshAvatar);
+        connect(contact, &Contact::avatarChanged, m_chatProviderContext, refreshAvatar);
     }
 }

@@ -24,6 +24,7 @@ private:
 
     IChatProvider *m_chatProvider = nullptr;
     QObject *m_chatProviderContext = nullptr;
+    QSet<ChatUser *> m_avatarSignaledUsers;
 
 Q_SIGNALS:
     void chatProviderChanged();

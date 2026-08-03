@@ -188,7 +188,7 @@ void AddressBook::removeContact(const QString &sourceUid)
 
     if (contact) {
         const auto contactId = contact->id();
-        disconnect(contact);
+        contact->disconnect(this);
         m_contacts.remove(contactId);
         m_contactsBySourceId.remove(contact->sourceUid());
 
