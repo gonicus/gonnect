@@ -46,7 +46,7 @@ private:
     QString m_searchPhrase;
     QString m_searchTag;
     QString m_nextBatchToken;
-    quint32 m_limit = 5;
+    quint32 m_limit = 20;
     IChatProvider *m_chatProvider = nullptr;
     QObject *m_chatProviderContext = nullptr;
     QList<QSharedPointer<PublicChatRoom>> m_publicRooms;
