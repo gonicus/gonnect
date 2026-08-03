@@ -21,10 +21,7 @@ Item {
             interval: 200
 
             onTriggered: () => {
-                const phrase = searchTextField.text.trim()
-                if (phrase.length >= 3) {
-                    chatRoomSearchModel.searchPhrase = phrase
-                }
+                chatRoomSearchModel.searchPhrase = searchTextField.text.trim()
             }
         }
 
@@ -115,6 +112,13 @@ Item {
         model: ChatRoomSearchModel {
             id: chatRoomSearchModel
         }
+
+        onAtYEndChanged: () => {
+                             if (searchResultListView.atYEnd && !chatRoomSearchModel.isLoading && chatRoomSearchModel.canLoadMore) {
+                                 chatRoomSearchModel.loadNext()
+                             }
+                         }
+
         delegate: Item {
             id: delg
 
@@ -182,6 +186,35 @@ Item {
             TapHandler {
                 onTapped: () => internal.selectRoom()
             }
+        }
+    }
+
+    Row {
+        id: busyIndicatorContainer
+        visible: searchResultListView.count > 0 && chatRoomSearchModel.isLoading
+        height: Theme.d
+        spacing: Theme.d
+        anchors {
+            bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
+            leftMargin: Theme.d * 2
+            rightMargin: Theme.d * 2
+        }
+
+        BusyIndicator {
+            id: busyIndicator
+            width: Theme.d
+            height: busyIndicator.width
+            running: busyIndicatorContainer.visible
+            padding: 0
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Label {
+            text: qsTr("Loading more results...")
+            elide: Label.ElideRight
+            color: Theme.secondaryTextColor
+            anchors.verticalCenter: parent.verticalCenter
         }
     }
 
