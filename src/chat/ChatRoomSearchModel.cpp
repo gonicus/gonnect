@@ -94,7 +94,7 @@ void ChatRoomSearchModel::onChatProviderChanged()
                     if (m_isLoadingNext) {
                         m_isLoadingNext = false;
                         const auto l = m_publicRooms.length();
-                        beginInsertRows(QModelIndex(), l, l + roomList.length());
+                        beginInsertRows(QModelIndex(), l, l + roomList.length() - 1);
                         m_publicRooms += roomList;
                         endInsertRows();
                     } else {
