@@ -116,7 +116,6 @@ configure_file(
 
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
-add_subdirectory(external/sqlite)
 
 
 if(BUILD_TESTING)

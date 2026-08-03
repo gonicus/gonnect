@@ -17,15 +17,12 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml)
 
 find_package(logfault CONFIG REQUIRED)
+find_package(sqlcipher REQUIRED)
 #find_package(hunspell REQUIRED)
+find_package(SnowballStem REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
-
-# FTS5 Testing
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
-find_path(STEMMER_INCLUDE_DIR libstemmer.h)
-find_library(STEMMER_LIBRARY stemmer)
-
 
 if(UNIX)
     include(FindPkgConfig)
@@ -955,8 +952,9 @@ target_link_libraries(gonnect
         ${PLATFORM_LIBRARIES}
         qt6keychain
         hid-rp
-        sqlite
         #hunspell::hunspell
+        SnowballStem::libstemmer
+        sqlcipher::sqlcipher
         cmark::cmark
         KF6::SyntaxHighlighting
         ICU::uc
@@ -972,7 +970,6 @@ target_link_libraries(gonnect
         ${LDAP_ADDRESSBOOK_FACTORY}
         ${MSGRAPH_ADDRESSBOOK_FACTORY}
         ${MSGRAPH_CALENDAR_FACTORY}
-        ${STEMMER_LIBRARY}
 )
 
 qt_import_plugins(gonnect INCLUDE
@@ -1007,7 +1004,6 @@ target_include_directories(gonnect
     rtt
     ${logfault_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${STEMMER_INCLUDE_DIR}
 )
 
 target_compile_definitions(gonnect

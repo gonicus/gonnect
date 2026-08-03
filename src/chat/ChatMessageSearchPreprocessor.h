@@ -4,11 +4,10 @@
 #include <QDateTime>
 #include <QMutexLocker>
 
-#include <libstemmer.h>
-
 #include <unicode/parseerr.h>
 #include <unicode/translit.h>
 #include <unicode/unistr.h>
+#include <libstemmer.h>
 
 class ChatMessageSearchPreprocessor : public QObject
 {
