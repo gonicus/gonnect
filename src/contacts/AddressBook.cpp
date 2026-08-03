@@ -116,7 +116,9 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
         contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, blockInfo, this);
         m_contacts.insert(hid, contact);
         m_contactsBySourceId.insert(sourceUid, contact);
+#ifndef APP_TESTS
         initContactSignals(contact);
+#endif
     }
 
     contact->setCompany(company);
@@ -144,7 +146,9 @@ void AddressBook::addContact(Contact *contact)
         contact->setParent(this);
         m_contacts.insert(contact->id(), contact);
         m_contactsBySourceId.insert(contact->sourceUid(), contact);
+#ifndef APP_TESTS
         initContactSignals(contact);
+#endif
 
         Q_EMIT contactAdded(contact);
     }
@@ -188,10 +192,12 @@ void AddressBook::removeContact(const QString &sourceUid)
         m_contacts.remove(contactId);
         m_contactsBySourceId.remove(contact->sourceUid());
 
+#ifndef APP_TESTS
         const auto &chatUsers = contact->chatUsers();
         for (const auto *chatUser : chatUsers) {
             removeChatUserMapping(chatUser);
         }
+#endif
 
         Q_EMIT contactRemoved(contactId);
     }
@@ -234,10 +240,12 @@ void AddressBook::removeContactsBySource(const QString &source)
             const auto contactId = contact->id();
             m_contactsBySourceId.remove(sourceUid);
 
+#ifndef APP_TESTS
             const auto &chatUsers = contact->chatUsers();
             for (const auto *chatUser : chatUsers) {
                 removeChatUserMapping(chatUser);
             }
+#endif
 
             it.remove();
             Q_EMIT contactRemoved(contactId);

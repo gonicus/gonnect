@@ -1,9 +1,9 @@
 #include "Contact.h"
 #include "FuzzyCompare.h"
-#include "IChatProvider.h"
 #include "PhoneNumberUtil.h"
 
 #ifndef APP_TESTS
+#include "IChatProvider.h"
 #  include "ChatUserPresenceStateProvider.h"
 #  include "AvatarManager.h"
 #  include "ChatUser.h"
@@ -439,7 +439,9 @@ void Contact::setHasAvatar(bool hasAvatar)
 {
     if (m_hasAvatar != hasAvatar) {
         m_hasAvatar = hasAvatar;
+#ifndef APP_TESTS
         updateAvatar();
+#endif
     }
 }
 
