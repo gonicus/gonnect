@@ -2855,9 +2855,8 @@
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
-        <source>All</source>
-        <translation type="unfinished">همه</translation>
+        <source>All sources</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
@@ -2883,6 +2882,11 @@
         <location filename="../src/ui/components/HistoryWidget.qml" line="109"/>
         <source>Currently selected call type</source>
         <translation type="unfinished">نوع تماس انتخاب‌شده</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
+        <source>All calls</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
