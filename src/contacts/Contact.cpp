@@ -3,13 +3,13 @@
 #include "PhoneNumberUtil.h"
 
 #ifndef APP_TESTS
-#include "IChatProvider.h"
+#  include "IChatProvider.h"
 #  include "ChatUserPresenceStateProvider.h"
 #  include "AvatarManager.h"
 #  include "ChatUser.h"
-#  include "ReadOnlyConfdSettings.h"
 #  include "SIPBuddyPresenceStateProvider.h"
 #  include "SIPManager.h"
+#  include "AvatarPrioHelper.h"
 #endif
 #include <QFileInfo>
 #include <QMetaEnum>
@@ -334,16 +334,14 @@ bool Contact::isNumberValid(const QString &number) const
 #ifndef APP_TESTS
 QString Contact::resolveAvatarPath() const
 {
-    ReadOnlyConfdSettings settings;
+    auto &prioManager = AvatarPrioHelper::instance();
     QString bestPath;
     unsigned bestPrio = 0;
 
     // AvatarManager avatars
     const auto localPath = AvatarManager::instance().avatarPathFor(m_id);
     if (!localPath.isEmpty()) {
-        const auto prio =
-                settings.value(QString("%1/avatarPrio").arg(m_contactSourceInfo.configId), 50)
-                        .toUInt();
+        const auto prio = prioManager.prioFor(m_contactSourceInfo.configId);
         if (prio > 0) {
             bestPath = localPath;
             bestPrio = prio;
@@ -359,9 +357,7 @@ QString Contact::resolveAvatarPath() const
             continue;
         }
 
-        const auto prio =
-                settings.value(QString("%1/avatarPrio").arg(user->chatProvider()->id()), 50)
-                        .toUInt();
+        const auto prio = prioManager.prioFor(user->chatProvider()->id());
         if (prio > bestPrio) {
             bestPath = path;
             bestPrio = prio;
