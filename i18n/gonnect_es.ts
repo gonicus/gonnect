@@ -902,12 +902,12 @@
 <context>
     <name>CardDAVAddressBookFeeder</name>
     <message>
-        <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="97"/>
+        <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="96"/>
         <source>CardDAV source %1 repeatedly failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="128"/>
+        <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="127"/>
         <source>Authentication error for %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1000,100 +1000,100 @@
 <context>
     <name>ChatMessageBox</name>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="221"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="228"/>
         <source>Edit last message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="264"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="271"/>
         <source>Cancel edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="265"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="272"/>
         <source>Discard the current message edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="272"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="279"/>
         <source>Enter message...</source>
         <translation type="unfinished">Escribe un mensaje...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="565"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="572"/>
         <source>Open emoji picker popup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="597"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="704"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="604"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="711"/>
         <source>Bold</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="604"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="709"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="611"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="716"/>
         <source>Italic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="611"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="714"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="618"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="721"/>
         <source>Strikethrough</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="618"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="625"/>
         <source>Inline preformatted/code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="625"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="632"/>
         <source>Block preformatted/code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="633"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="640"/>
         <source>Text format options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="645"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="652"/>
         <source>Add hyperlink</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="657"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="664"/>
         <source>Select and upload image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="664"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="671"/>
         <source>Select and upload file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="685"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="692"/>
         <source>Send message to chat room</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="719"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="726"/>
         <source>Inline code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="724"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="731"/>
         <source>Code block</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="732"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="739"/>
         <source>Type message</source>
         <translation>Escribir mensaje</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="733"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="740"/>
         <source>Enter the chat text message</source>
         <translation>Introducir el mensaje de texto del chat</translation>
     </message>
@@ -2708,7 +2708,7 @@
 <context>
     <name>GonnectWindow</name>
     <message>
-        <location filename="../src/ui/GonnectWindow.qml" line="355"/>
+        <location filename="../src/ui/GonnectWindow.qml" line="377"/>
         <source>Home</source>
         <translation>Inicio</translation>
     </message>
@@ -2859,9 +2859,8 @@
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
-        <source>All</source>
-        <translation>Todos/ todas</translation>
+        <source>All sources</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
@@ -2887,6 +2886,11 @@
         <location filename="../src/ui/components/HistoryWidget.qml" line="109"/>
         <source>Currently selected call type</source>
         <translation>Tipo de llamada seleccionado actualmente</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
+        <source>All calls</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
@@ -3043,69 +3047,69 @@
 <context>
     <name>IpcDispatcher</name>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="458"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="461"/>
         <source>The file %1 exceeds the file size limit of %2 and cannot be sent.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="856"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="860"/>
         <source>An IPC error ocurred (%1, %2 (code %3):
 %4</source>
         <translation type="unfinished">Se ha producido un error de IPC (%1, %2 (código %3):
 %4</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="861"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="865"/>
         <source>An IPC error ocurred (%1, %2 (code %3)</source>
         <translation type="unfinished">Se ha producido un error de IPC (%1, %2 (código %3)</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2117"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2121"/>
         <source>Image sent by %1</source>
         <translation type="unfinished">Imagen enviada por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2119"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2123"/>
         <source>[%1] Image sent by %2</source>
         <translation type="unfinished">[%1] Imagen enviada por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2125"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2129"/>
         <source>Audio file sent by %1</source>
         <translation type="unfinished">Archivo de audio enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2127"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2131"/>
         <source>[%1] Audio file sent by %2</source>
         <translation type="unfinished">[%1] Archivo de audio enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2134"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2138"/>
         <source>Video file sent by %1</source>
         <translation type="unfinished">Vídeo enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2136"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2140"/>
         <source>[%1] Video file sent by %2</source>
         <translation type="unfinished">[%1] Vídeo enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2143"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2147"/>
         <source>File sent by %1</source>
         <translation type="unfinished">Archivo enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2145"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2149"/>
         <source>[%1] File sent by %2</source>
         <translation type="unfinished">[%1] Archivo enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2152"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2156"/>
         <source>Message from %1</source>
         <translation type="unfinished">Mensaje de %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2154"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2158"/>
         <source>[%1] Message from %2</source>
         <translation type="unfinished">[%1] Mensaje de %2</translation>
     </message>
@@ -3386,13 +3390,13 @@
     </message>
     <message>
         <location filename="../src/Main.qml" line="167"/>
-        <source>Registration failed</source>
-        <translation>El registro ha fallado</translation>
+        <source>SIP Registration failed</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="168"/>
-        <source>Registration failed with with status %1: %2</source>
-        <translation>El registro ha fallado con el estado %1: %2</translation>
+        <source>SIP registration failed with status %1: %2</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="231"/>
@@ -5312,12 +5316,12 @@
 <context>
     <name>SearchField</name>
     <message>
-        <location filename="../src/ui/components/controls/SearchField.qml" line="69"/>
+        <location filename="../src/ui/components/controls/SearchField.qml" line="77"/>
         <source>Search for contacts or room names...</source>
         <translation>Buscar contactos o nombres de sala...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/SearchField.qml" line="114"/>
+        <location filename="../src/ui/components/controls/SearchField.qml" line="122"/>
         <source>Clear search field</source>
         <translation>Limpiar campo de búsqueda</translation>
     </message>
@@ -5369,78 +5373,78 @@
 <context>
     <name>SearchResultPopup</name>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="122"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="123"/>
         <source>Search filter and identity selection</source>
         <translation>Filtro de búsqueda y selección de identidad</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="123"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="124"/>
         <source>Select search filter to be applied, as well as the outgoing identity</source>
         <translation>Seleccionar el filtro de búsqueda a aplicar, así como la identidad saliente</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="136"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="137"/>
         <source>Outgoing identity</source>
         <translation>Identidad saliente</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="185"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="186"/>
         <source>Search results</source>
         <translation>Resultados de búsqueda</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="186"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="187"/>
         <source>All search results will be listed here in their respective categories</source>
         <translation>Aquí se listarán todos los resultados de búsqueda en sus respectivas categorías</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="245"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="246"/>
         <source>Direct dial</source>
         <translation>Marcación directa</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="256"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="257"/>
         <source>Call &quot;%1&quot;</source>
         <translation>Llamar a &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="281"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="282"/>
         <source>Open room &quot;%1&quot;</source>
         <translation>Abrir sala &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="282"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="283"/>
         <source>Jitsi Meet</source>
         <translation type="unfinished">Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="309"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="310"/>
         <source>Create chat room &quot;%1&quot;</source>
         <translation type="unfinished">Crear sala de chat &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="331"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="332"/>
         <source>in %1</source>
         <extracomment>Search submenu item under &quot;Create chatroom xyz&quot;; %1 will be replaced with chat provider&apos;s display name</extracomment>
         <translation type="unfinished">en %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="355"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="356"/>
         <source>Chat rooms</source>
         <translation type="unfinished">Salas de chat</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="376"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="377"/>
         <source>Chat</source>
         <translation type="unfinished">Chat</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="403"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="404"/>
         <source>History</source>
         <translation>Historia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="534"/>
+        <location filename="../src/ui/components/popups/SearchResultPopup.qml" line="535"/>
         <source>Contacts</source>
         <translation>Contactos</translation>
     </message>

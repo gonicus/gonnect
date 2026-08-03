@@ -110,6 +110,7 @@ BaseWindow {
                 ListElement { iconId: "userGroupNew" }
                 ListElement { iconId: "callStart" }
                 ListElement { iconId: "dialogMessages" }
+                ListElement { iconId: "emojiFoodSymbolic" }
             }
 
             Accessible.role: Accessible.ComboBox
