@@ -13,7 +13,8 @@ class ChatRoomSearchModel : public QAbstractListModel
 
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged FINAL)
     Q_PROPERTY(bool canLoadMore READ canLoadMore NOTIFY canLoadMoreChanged FINAL)
-    Q_PROPERTY(QString searchPhrase MEMBER m_searchPhrase NOTIFY searchPhraseChanged FINAL)
+    Q_PROPERTY(QString searchPhrase READ searchPhrase WRITE setSearchPhrase NOTIFY
+                       searchPhraseChanged FINAL)
     Q_PROPERTY(quint32 limit MEMBER m_limit NOTIFY limitChanged FINAL)
     Q_PROPERTY(IChatProvider *chatProvider MEMBER m_chatProvider NOTIFY chatProviderChanged FINAL)
 
@@ -25,6 +26,9 @@ public:
     virtual QHash<int, QByteArray> roleNames() const override;
     virtual int rowCount(const QModelIndex &parent) const override;
     virtual QVariant data(const QModelIndex &index, int role) const override;
+
+    QString searchPhrase() const { return m_searchPhrase; }
+    void setSearchPhrase(const QString &phrase);
 
     bool isLoading() const { return m_isLoading; }
     bool canLoadMore() const { return m_canLoadMore; }

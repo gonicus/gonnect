@@ -53,6 +53,15 @@ QVariant ChatRoomSearchModel::data(const QModelIndex &index, int role) const
     }
 }
 
+void ChatRoomSearchModel::setSearchPhrase(const QString &phrase)
+{
+    const auto newPhrase = phrase.trimmed();
+    if (m_searchPhrase != newPhrase) {
+        m_searchPhrase = newPhrase;
+        Q_EMIT searchPhraseChanged();
+    }
+}
+
 void ChatRoomSearchModel::loadNext()
 {
     if (!m_chatProvider) {
@@ -85,9 +94,10 @@ void ChatRoomSearchModel::onChatProviderChanged()
         connect(m_chatProvider, &IChatProvider::publicRoomSearchResult, m_chatProviderContext,
                 [this](QString searchId, QList<QSharedPointer<PublicChatRoom>> roomList,
                        QString nextBatchToken) {
-                    if (m_searchTag == searchId) {
-                        m_searchTag.clear();
+                    if (m_searchTag != searchId) {
+                        return;
                     }
+                    m_searchTag.clear();
                     m_nextBatchToken = nextBatchToken;
                     setCanLoadMore(!m_nextBatchToken.isEmpty());
 
@@ -112,17 +122,15 @@ void ChatRoomSearchModel::onChatProviderChanged()
 
 void ChatRoomSearchModel::updateModel()
 {
-    const auto searchPhrase = m_searchPhrase.trimmed();
-
     setCanLoadMore(false);
     m_searchTag = QString();
     m_nextBatchToken = QString();
     m_isLoadingNext = false;
 
-    if (m_chatProvider && (m_limit > 0 || !searchPhrase.isEmpty())) {
+    if (m_chatProvider && (m_limit > 0 || !m_searchPhrase.isEmpty())) {
         setIsLoading(true);
         m_searchTag =
-                m_chatProvider->searchPublicRoomRequest(searchPhrase, m_nextBatchToken, m_limit);
+                m_chatProvider->searchPublicRoomRequest(m_searchPhrase, m_nextBatchToken, m_limit);
     }
 }
 
