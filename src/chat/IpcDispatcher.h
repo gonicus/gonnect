@@ -326,7 +326,6 @@ private:
     ConnectionState m_connectionState = ConnectionState::LoggedOut;
     QList<IpcChatRoom *> m_rooms;
     QHash<QString, IpcChatRoom *> m_roomLookup;
-    QString m_nextPublicRoomListResponseToken;
     QHash<IChatRoom *, QList<Notification *> *> m_chatNotifications;
     QTimer m_unreadUpdateTimer;
 
