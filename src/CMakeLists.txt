@@ -17,9 +17,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml)
 
 find_package(logfault CONFIG REQUIRED)
-find_package(sqlcipher REQUIRED)
 #find_package(hunspell REQUIRED)
-find_package(SnowballStem REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
@@ -37,10 +35,24 @@ if(UNIX)
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI)
 
+    if(FLATPAK)
+        list(APPEND PLATFORM_LIBRARIES
+            sqlcipher
+            stemmer)
+    else()
+        find_package(sqlcipher REQUIRED)
+        find_package(SnowballStem REQUIRED)
+        list(APPEND PLATFORM_LIBRARIES
+            sqlcipher::sqlcipher
+            SnowballStem::libstemmer)
+    endif()
+
     add_definitions(${PJSIP_STATIC_CFLAGS})
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
     link_directories(${PJSIP_STATIC_LIBRARY_DIRS})
 else()
+    find_package(SnowballStem REQUIRED)
+    find_package(sqlcipher REQUIRED)
     find_package(pjproject REQUIRED)
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
@@ -48,6 +60,8 @@ else()
     find_package(QHotkey REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
+        SnowballStem::libstemmer
+        sqlcipher::sqlcipher
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
@@ -953,8 +967,6 @@ target_link_libraries(gonnect
         qt6keychain
         hid-rp
         #hunspell::hunspell
-        SnowballStem::libstemmer
-        sqlcipher::sqlcipher
         cmark::cmark
         KF6::SyntaxHighlighting
         ICU::uc
@@ -1008,6 +1020,7 @@ target_include_directories(gonnect
 
 target_compile_definitions(gonnect
    PRIVATE
+    SQLITE_HAS_CODEC
     QT_DISABLE_DEPRECATED_BEFORE=0x060900
     QT_NO_KEYWORDS)
 
