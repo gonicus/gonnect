@@ -119,7 +119,7 @@ QVariantMap buildEntries(const QStringList &files)
 #ifdef Q_OS_LINUX
     const auto groupList = getUserGroups();
 #else
-    const auto groupList = getUserGroups();
+    const auto groupList = QStringList();
 #endif
 
     QVariantMap resolved;
