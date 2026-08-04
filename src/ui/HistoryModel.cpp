@@ -19,22 +19,34 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
     });
 
     connect(&AvatarManager::instance(), &AvatarManager::avatarsLoaded, this, [this]() {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
     connect(&AvatarManager::instance(), &AvatarManager::avatarAdded, this, [this](QString) {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
     connect(&AvatarManager::instance(), &AvatarManager::avatarRemoved, this, [this](QString) {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
@@ -58,8 +70,13 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
         }
         m_avatarTrackedContacts.insert(contact);
         connect(contact, &Contact::avatarChanged, this, [this]() {
+            const auto count = rowCount(QModelIndex());
+            if (count <= 0) {
+                return;
+            }
+
             const auto startIndex = createIndex(0, 0);
-            const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+            const auto endIndex = createIndex(count - 1, 0);
             Q_EMIT dataChanged(
                     startIndex, endIndex,
                     { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
