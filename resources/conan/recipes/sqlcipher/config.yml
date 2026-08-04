@@ -1,5 +1,7 @@
 versions:
-  "4.16.0":
+  "4.17.0":
     folder: all
-  "4.6.1":
-    folder: all
+updater:
+  source: anitya
+  id: 11213
+  url-pattern: https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v${version}.tar.gz

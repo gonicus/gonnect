@@ -1,12 +1,7 @@
-Rename the output files to libsqlcipher instead of libsqlite3.
-This is needed to avoid conflicts with the official SQLite library when both are installed on the same system.
-Custom patch provided by the Conan Center Index.
-
-diff --git a/main.mk b/main.mk
-index 46c03a5..16649d0 100644
---- a/main.mk
-+++ b/main.mk
-@@ -1111,7 +1111,7 @@ T.link.tcl = $(T.tcl.env.source); $(T.link)
+diff -Naur a/main.mk b/main.mk
+--- a/main.mk	2026-07-02 20:53:55.000000000 +0200
++++ b/main.mk	2026-08-04 12:33:04.580964765 +0200
+@@ -1111,7 +1111,7 @@
  # of the static library ($(libsqlite3.LIB)) is constant on all tested
  # platforms.
  #
@@ -15,16 +10,16 @@ index 46c03a5..16649d0 100644
  #
  # libsqlite3.DLL => the DLL library
  #
-@@ -1127,7 +1127,7 @@ libsqlite3.out.implib ?=
+@@ -1127,7 +1127,7 @@
  #
  # libsqlite3.LIB => the static library
  #
 -libsqlite3.LIB = libsqlite3$(T.lib)
 +libsqlite3.LIB = libsqlcipher$(T.lib)
-
+ 
  #
  # libsqlite3.DLL.install-rules => the suffix of the symoblic name of
-@@ -1611,12 +1611,12 @@ install-dll-darwin: $(install-dir.lib) $(libsqlite3.DLL)
+@@ -1611,12 +1611,12 @@
  	$(INSTALL) $(libsqlite3.DLL) "$(install-dir.lib)"
  	@echo "Setting up $(libsqlite3.DLL) version symlinks..."; \
  	cd "$(install-dir.lib)" || exit $$?; \
@@ -38,10 +33,10 @@ index 46c03a5..16649d0 100644
 -	ls -la $$dllname $(libsqlite3.DLL) libsqlite3.0$(T.dll)
 +	ln -s $$dllname libsqlcipher.0$(T.dll) || exit $$?; \
 +	ls -la $$dllname $(libsqlite3.DLL) libsqlcipher.0$(T.dll)
-
+ 
  install-dll-1: install-dll-$(libsqlite3.DLL.install-rules)
  install-dll-0 install-dll-:
-@@ -2506,7 +2506,7 @@ tidy:
+@@ -2501,7 +2501,7 @@
  	rm -f lemon$(B.exe) sqlite*.tar.gz
  	rm -f mkkeywordhash$(B.exe) mksourceid$(B.exe)
  	rm -f parse.* fts5parse.*
