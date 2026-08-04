@@ -11,7 +11,6 @@
 #  include "SIPManager.h"
 #  include "AvatarPrioHelper.h"
 #endif
-#include <QFileInfo>
 #include <QMetaEnum>
 
 Contact::Contact(const QString &id, const QString &dn, const QString &sourceUid,
@@ -64,7 +63,6 @@ Contact::Contact(const Contact &other) : QObject{ other.parent() }
     m_lastModified = other.m_lastModified;
     m_sipStatusSubscriptable = other.m_sipStatusSubscriptable;
     m_hasAvatar = other.m_hasAvatar;
-    m_resolvedAvatarPath = other.m_resolvedAvatarPath;
 
     init();
 }
@@ -83,7 +81,6 @@ Contact &Contact::operator=(const Contact &other)
     m_lastModified = other.m_lastModified;
     m_sipStatusSubscriptable = other.m_sipStatusSubscriptable;
     m_hasAvatar = other.m_hasAvatar;
-    m_resolvedAvatarPath = other.m_resolvedAvatarPath;
 
     init();
     return *this;
@@ -353,14 +350,16 @@ QString Contact::resolveAvatarPath() const
         const auto &avatarPath = user->avatarPath();
         const QString path =
                 avatarPath.startsWith(QStringLiteral("file://")) ? avatarPath.mid(7) : avatarPath;
-        if (path.isEmpty() || !QFileInfo::exists(path)) {
+        if (path.isEmpty()) {
             continue;
         }
 
-        const auto prio = prioManager.prioFor(user->chatProvider()->id());
-        if (prio > bestPrio) {
-            bestPath = path;
-            bestPrio = prio;
+        if (const auto *provider = user->chatProvider()) {
+            const auto prio = prioManager.prioFor(provider->id());
+            if (prio > bestPrio) {
+                bestPath = path;
+                bestPrio = prio;
+            }
         }
     }
 
