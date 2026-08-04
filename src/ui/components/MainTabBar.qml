@@ -489,7 +489,7 @@ Item {
                 SelectionState.selectedPage = {
                     id: SelectionState.emergencyPageId(),
                     type: MainPageSelection.PageType.Emergency,
-                    attachedData: null
+                    attachedData: undefined
                 }
             }
 
