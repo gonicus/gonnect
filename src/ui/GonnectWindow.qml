@@ -113,10 +113,10 @@ BaseWindow {
         }
     }
 
-    function openMeeting(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
+    function openMeeting(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
         control.showPage(SelectionState.conferencePageId(),
                                    MainPageSelection.PageType.Conference)
-        conferencePage.startConference(meetingId, displayName, startFlags, callHistoryItem)
+        conferencePage.startConference(meetingId, displayName, startFlags, callHistoryItem, contact)
     }
 
     function updateCallInForeground() {
