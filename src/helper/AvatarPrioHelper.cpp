@@ -57,8 +57,8 @@ void AvatarPrioHelper::updatePriosFromConfig()
         qCInfo(lcAvatarPrioHelper) << "Avatar priority for" << id << "is" << prio;
     }
 
+    QWriteLocker locker(&m_priosLock);
     if (m_prios != prios) {
-        QWriteLocker locker(&m_priosLock);
         m_prios = prios;
     }
 }
