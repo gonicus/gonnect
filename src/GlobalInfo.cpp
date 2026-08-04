@@ -74,6 +74,19 @@ bool GlobalInfo::isWorkaroundActive(const WorkaroundId id)
     return value;
 }
 
+bool GlobalInfo::shallShowEmergencyButton()
+{
+    static bool isConfigInitialized = false;
+    if (!isConfigInitialized) {
+        isConfigInitialized = true;
+
+        ReadOnlyConfdSettings settings;
+        m_shallShowEmergencyButton = settings.value("generic/showEmergencyButton", true).toBool();
+    }
+
+    return m_shallShowEmergencyButton;
+}
+
 void GlobalInfo::initEmergencyContacts()
 {
     if (m_hasEmergencyNumbersInitialized) {
