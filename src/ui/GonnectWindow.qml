@@ -346,7 +346,7 @@ BaseWindow {
                 top: controlBar.visible ? controlBar.bottom : parent.top
                 topMargin: controlBar.visible ? 5 : (Theme.useOwnDecoration ? control.windowHeaderHeight : 0)
                 bottom: togglerList.visible ? togglerList.top : parent.bottom
-                bottomMargin: Theme.d
+                bottomMargin: togglerList.visible ? Theme.d/2 : Theme.d
             }
 
             function getPage(pageId : string) : Item {
@@ -419,9 +419,10 @@ BaseWindow {
             id: togglerList
             visible: togglerList.count > 0
             clip: true
+            width: Math.min(togglerList.contentWidth + togglerList.leftMargin + togglerList.rightMargin,
+                            parent.width - (mainTabBar.x + mainTabBar.width))
             anchors {
                 right: parent.right
-                left: mainTabBar.right
                 bottom: parent.bottom
                 bottomMargin: Theme.d / 2 - (Theme.useOwnDecoration ? 0 : 3)  // extra padding for window border
             }
