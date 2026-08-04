@@ -93,10 +93,10 @@ bool IMHandler::process(const QString &contentType, const QString &message)
 }
 
 void IMHandler::openMeeting(const QString &meetingId, const QString &displayName, bool hangup,
-                            QPointer<CallHistoryItem> callHistoryItem)
+                            QPointer<CallHistoryItem> callHistoryItem, QPointer<Contact> contact)
 {
     // For whatever reason this needs to be decoupled to make QDesktopServices work
-    QTimer::singleShot(0, this, [this, hangup, meetingId, callHistoryItem, displayName]() {
+    QTimer::singleShot(0, this, [this, hangup, meetingId, callHistoryItem, displayName, contact]() {
         if (hangup) {
             // Defer the SIP teardown until the conference is actually joined
             m_pendingHangupMeetingId = meetingId;
@@ -114,7 +114,7 @@ void IMHandler::openMeeting(const QString &meetingId, const QString &displayName
             QTimer::singleShot(10s, this, [this]() { migrationHangup(); });
         }
 
-        ViewHelper::instance().requestMeeting(meetingId, callHistoryItem, displayName);
+        ViewHelper::instance().requestMeeting(meetingId, callHistoryItem, displayName, contact);
     });
 }
 
@@ -133,7 +133,7 @@ void IMHandler::migrationHangup()
 }
 
 bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistoryItem,
-                               const QString &displayName)
+                               const QString &displayName, QPointer<Contact> contact)
 {
     if (!m_capabilities.contains("jitsi")) {
         return false;
@@ -159,7 +159,7 @@ bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistor
         return false;
     }
 
-    openMeeting(meetingId, displayName, hangup, callHistoryItem);
+    openMeeting(meetingId, displayName, hangup, callHistoryItem, contact);
 
     return true;
 }
@@ -201,15 +201,18 @@ bool IMHandler::sendCapabilities()
 bool IMHandler::triggerCapability(const QString &capability,
                                   QPointer<CallHistoryItem> callHistoryItem)
 {
+    auto contactPtr = m_call ? m_call->remoteContactInfo().contact : QPointer<Contact>();
     if (capability == "jitsi:hangup") {
-        return requestMeeting(true, callHistoryItem, tr("Ad hoc conference"));
+        return requestMeeting(true, callHistoryItem, tr("Ad hoc conference"), contactPtr);
     } else if (capability == "jitsi") {
-        return requestMeeting(false, callHistoryItem, tr("Ad hoc conference"));
+        return requestMeeting(false, callHistoryItem, tr("Ad hoc conference"), contactPtr);
     } else if (capability == "jitsi:openMeeting") {
-        openMeeting(m_jistiRequestedMeetingId, tr("Ad hoc conference"), false, callHistoryItem);
+        openMeeting(m_jistiRequestedMeetingId, tr("Ad hoc conference"), false, callHistoryItem,
+                    contactPtr);
         return true;
     } else if (capability == "jitsi:openMeeting:hangup") {
-        openMeeting(m_jistiRequestedMeetingId, tr("Ad hoc conference"), true, callHistoryItem);
+        openMeeting(m_jistiRequestedMeetingId, tr("Ad hoc conference"), true, callHistoryItem,
+                    contactPtr);
         return true;
     }
 
