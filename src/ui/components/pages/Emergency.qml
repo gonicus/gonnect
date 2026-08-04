@@ -10,6 +10,18 @@ Item {
     implicitWidth: 800
     implicitHeight: 500
 
+    function close() {
+        if (control.StackView.view) {
+            control.StackView.view.popCurrentItem(StackView.Immediate)
+        } else {
+            SelectionState.selectedPage = {
+                id: SelectionState.homePageId(),
+                type: MainPageSelection.PageType.Base,
+                attachedData: null
+            }
+        }
+    }
+
     Flickable {
         anchors.fill: parent
         clip: true
@@ -23,7 +35,8 @@ Item {
 
         Shortcut {
             sequence: "Esc"
-            onActivated: control.StackView.view.popCurrentItem(StackView.Immediate)
+            enabled: control.visible
+            onActivated: control.close()
         }
 
         ColumnLayout {
@@ -61,7 +74,7 @@ Item {
                     onClicked: () => {
                         SIPCallManager.endAllCalls()
                         SIPCallManager.call(delg.number)
-                        control.StackView.view.popCurrentItem(StackView.Immediate)
+                        control.close()
                     }
 
                     required property string number
@@ -85,9 +98,7 @@ Item {
                 Layout.preferredWidth: control.implicitWidth / 2
                 Layout.alignment: Qt.AlignHCenter
 
-                onClicked: {
-                    control.StackView.view.popCurrentItem(StackView.Immediate)
-                }
+                onClicked: control.close()
 
                 Accessible.role: Accessible.Button
                 Accessible.name: firstAidExit.text
@@ -107,6 +118,6 @@ Item {
             right: parent.right
         }
 
-        onClicked: () => control.StackView.view.popCurrentItem(StackView.Immediate)
+        onClicked: () => control.close()
     }
 }

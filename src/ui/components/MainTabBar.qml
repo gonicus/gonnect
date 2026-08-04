@@ -483,11 +483,21 @@ Item {
                 right: parent.right
             }
 
+            readonly property bool isSelected: SelectionState.selectedPage.id === SelectionState.emergencyPageId()
+
+            function switchPage() {
+                SelectionState.selectedPage = {
+                    id: SelectionState.emergencyPageId(),
+                    type: MainPageSelection.PageType.Emergency,
+                    attachedData: null
+                }
+            }
+
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Emergency tab button")
-            Accessible.description: qsTr("Open emergency call menu")
+            Accessible.description: qsTr("Show the emergency call page")
             Accessible.focusable: true
-            Accessible.onPressAction: ViewHelper.showFirstAid()
+            Accessible.onPressAction: () => emergencyTabButton.switchPage()
 
             Rectangle {
                 id: emergencyButtonBackground
@@ -497,7 +507,8 @@ Item {
 
             Rectangle {
                 id: emergencyButtonHoverBackground
-                visible: emergencyTabButtonHoverHandler.hovered && emergencyTabButton.enabled
+                visible: (emergencyTabButtonHoverHandler.hovered || emergencyTabButton.isSelected)
+                         && emergencyTabButton.enabled
                 radius: emergencyButtonBackground.radius
                 color: Qt.tint(emergencyButtonBackground.color, "#26ffffff")
                 anchors.fill: emergencyButtonBackground
@@ -517,7 +528,7 @@ Item {
                 Accessible.ignored: true
             }
 
-            ToolTip.text: qsTr("Open emergency call menu")
+            ToolTip.text: qsTr("Show the emergency call page")
             ToolTip.visible: emergencyTabButtonHoverHandler.hovered
             ToolTip.delay: Application.styleHints.mousePressAndHoldInterval
             ToolTip.toolTip.x: emergencyTabButton.x + emergencyTabButton.width
@@ -528,7 +539,7 @@ Item {
             }
 
             TapHandler {
-                onTapped: () => ViewHelper.showFirstAid()
+                onTapped: () => emergencyTabButton.switchPage()
             }
         }
     }

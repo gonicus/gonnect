@@ -198,7 +198,7 @@ Q_SIGNALS:
     void showShortcuts();
     void showAbout();
     void showDialPad();
-    void showFirstAid();
+    void showEmergency();
     void showQuitConfirm();
     void showChatRoom(IChatProvider *provider, QString roomId);
     void showCreateRoomDialog(IChatProvider *provider, QStringList invitedUserIds,

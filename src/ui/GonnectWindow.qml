@@ -361,6 +361,8 @@ BaseWindow {
                         return conferencePage
                     case SelectionState.settingsPageId():
                         return settingsPage
+                    case SelectionState.emergencyPageId():
+                        return emergencyPage
                     default:
                         return pageStack.pages[pageId]
                 }
@@ -402,6 +404,12 @@ BaseWindow {
 
             SettingsPage {
                 id: settingsPage
+                visible: false
+                anchors.fill: parent
+            }
+
+            Emergency {
+                id: emergencyPage
                 visible: false
                 anchors.fill: parent
             }
@@ -456,8 +464,8 @@ BaseWindow {
             const item = drawerStackView.push("qrc:/qt/qml/base/ui/components/controls/DtmfDialer.qml")
             item.dialed.connect(button => console.log(category, "TODO: DIAL", button))
         }
-        function onShowFirstAid() {
-            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FirstAid.qml")
+        function onShowEmergency() {
+            control.showPage(SelectionState.emergencyPageId(), MainPageSelection.PageType.Emergency)
         }
         function onShowChatUserSearchDialog(chatProvider : IChatProvider) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/ChatUserSearch.qml", { chatProvider })
