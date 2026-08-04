@@ -477,6 +477,7 @@ Item {
 
         Item {
             id: emergencyTabButton
+            visible: GlobalInfo.hasEmergencyNumbers
             height: emergencyTabButton.width
             anchors {
                 left: parent.left
