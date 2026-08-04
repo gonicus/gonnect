@@ -134,6 +134,7 @@ Item {
                         id: signalingEncryption
                         text: securityLevelColumn.signalEncryptionValue
                         spacing: 4
+                        color: Theme.primaryTextColor
                         icon {
                             source: control.isSignalingEncrypted ? Icons.securityHigh : Icons.securityLow
                             width: 24
@@ -147,6 +148,7 @@ Item {
                         id: mediaEncryption
                         text: securityLevelColumn.mediaEncryptedValue
                         spacing: 4
+                        color: Theme.primaryTextColor
                         icon {
                             source: control.isMediaEncrypted ? Icons.securityHigh : Icons.securityLow
                             width: 24
@@ -574,10 +576,16 @@ Item {
 
         BarButton {
             id: audioInputDeviceButton
+
+            readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
+
             text: qsTr("Micro")
             iconPath: AudioManager.isAudioCaptureMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
-            enabled: control.areInCallButtonsEnabled
+            enabled: control.areInCallButtonsEnabled && !audioInputDeviceButton.micMuteLocked
             showDropdownButton: true
+            tooltipText: audioInputDeviceButton.micMuteLocked
+                ? qsTr("Microphone mute locked by headset")
+                : ""
             onClicked: () => GlobalMuteState.toggleMute()
             onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
 

@@ -1,0 +1,6 @@
+StoreLogo.png filter=lfs diff=lfs merge=lfs -text
+Wide310x150Logo.png filter=lfs diff=lfs merge=lfs -text
+Square150x150Logo.png filter=lfs diff=lfs merge=lfs -text
+Square44x44Logo.png filter=lfs diff=lfs merge=lfs -text
+Square44x44Logo.targetsize-16.png filter=lfs diff=lfs merge=lfs -text
+Square44x44Logo.targetsize-32.png filter=lfs diff=lfs merge=lfs -text

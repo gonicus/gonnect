@@ -4,16 +4,18 @@
 #include <SIPAudioDevice.h>
 #include <pjmedia/port.h>
 #include "AudioPort.h"
+#include "AudioProcessor.h"
 Q_LOGGING_CATEGORY(lcAudioPort, "gonnect.sip.audio")
 
 #define NORMAL_AUDIO_LEVEL 1.6f
 #define SILENCE_BUFFER_MS 1000
+#define SILENCE_PREFILL_MS 1000
 
 using namespace std::chrono_literals;
 
 AudioPort::AudioPort(QAudioDevice device) : m_device(device)
 {
-    m_idleTimer.setInterval(1s);
+    m_idleTimer.setInterval(10s);
     connect(&m_idleTimer, &QTimer::timeout, this, &AudioPort::stopIO);
 
     connect(this, &AudioPort::startIdleTimer, this,
@@ -36,7 +38,7 @@ bool AudioPort::initialize()
 
     if (m_device.mode() == QAudioDevice::Mode::Input) {
         try {
-            adjustTxLevel(NORMAL_AUDIO_LEVEL);
+            adjustTxLevel(activeTxLevel());
         } catch (pj::Error &err) {
             qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
         }
@@ -45,12 +47,34 @@ bool AudioPort::initialize()
     return true;
 }
 
+float AudioPort::activeTxLevel() const
+{
+    // Fixed level or AGC?
+    if (m_audioProcessor && m_audioProcessor->hasGainControl()) {
+        return 1.0f;
+    }
+    return NORMAL_AUDIO_LEVEL;
+}
+
+void AudioPort::setAudioProcessor(AudioProcessor *audioProcessor)
+{
+    m_audioProcessor = audioProcessor;
+
+    if (audioProcessor && m_device.mode() == QAudioDevice::Mode::Input && !m_isMuted) {
+        try {
+            adjustTxLevel(activeTxLevel());
+        } catch (pj::Error &err) {
+            qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
+        }
+    }
+}
+
 void AudioPort::setMuted(bool value)
 {
     if (m_isMuted != value) {
         if (m_device.mode() == QAudioDevice::Mode::Input) {
             try {
-                adjustTxLevel(value ? 0.0f : NORMAL_AUDIO_LEVEL);
+                adjustTxLevel(value ? 0.0f : activeTxLevel());
             } catch (pj::Error &err) {
                 qCCritical(lcAudioPort) << "failed to adjust tx level: " << err.info();
             }
@@ -98,16 +122,16 @@ bool AudioPort::initFmt()
 
 void AudioPort::updateAudioLevel(const char *data, qint64 size)
 {
-    qreal max = 0;
+    qreal max = 0.0;
     const qint64 numSamples = size / sizeof(qint16);
 
-    static constexpr qreal positiveRange = std::numeric_limits<qint16>().max();
+    static constexpr qreal positiveRange = std::numeric_limits<qint16>::max();
 
     for (int i = 0; i < numSamples; ++i) { // i is index of sample
-        const auto word = static_cast<qint16>(*data);
-        const qreal realValue = static_cast<qreal>(word) / positiveRange * 100.0;
+        const qint16 sample = qFromLittleEndian<qint16>(data);
+        const qreal level = qAbs(static_cast<qreal>(sample)) / positiveRange;
 
-        max = std::max(max, realValue);
+        max = std::max(max, level);
         data += sizeof(qint16);
     }
 
@@ -166,7 +190,14 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
             // Write silence to allow USB headsets to switch audio mode without
             // ugly crackling noise.
             QByteArray silence(byteCount, 0);
-            m_io->write(silence);
+            const qint64 written = m_io->write(silence);
+
+            qCDebug(lcAudioPort).nospace()
+                    << "silence write: " << written << " of " << byteCount << " bytes ("
+                    << milliseconds << "ms @ " << fmt.clockRate << "Hz/" << fmt.channelCount
+                    << "ch/" << fmt.bitsPerSample
+                    << "bit), sink bufferSize=" << m_sink->bufferSize()
+                    << ", bytesFree=" << m_sink->bytesFree();
         }
     }
 }
@@ -174,6 +205,11 @@ void AudioPort::writeSilenceMS(unsigned milliseconds)
 void AudioPort::startSinkIO()
 {
     m_idleTimer.stop();
+
+    if (m_isDraining && !m_sink.isNull()) {
+        m_isDraining = false;
+        return;
+    }
 
     if (!m_sink.isNull()) {
         stopSinkIO();
@@ -190,7 +226,7 @@ void AudioPort::startSinkIO()
     m_sink = new QAudioSink(m_device, m_audioFormat);
     m_io = m_sink->start();
 
-    writeSilenceMS(SILENCE_BUFFER_MS);
+    writeSilenceMS(SILENCE_PREFILL_MS);
 
     Q_EMIT audioSinkChanged();
 }
@@ -198,17 +234,25 @@ void AudioPort::startSinkIO()
 void AudioPort::stopSinkIO()
 {
     m_idleTimer.stop();
-
-    if (m_sink) {
-        writeSilenceMS(SILENCE_BUFFER_MS);
-
-        m_sink->stop();
-        m_sink->deleteLater();
-        m_sink = nullptr;
-        m_io = nullptr;
+    if (m_sink.isNull() || m_isDraining) {
+        return;
     }
 
-    Q_EMIT audioSinkChanged();
+    writeSilenceMS(SILENCE_BUFFER_MS);
+
+    m_isDraining = true;
+    QTimer::singleShot(SILENCE_BUFFER_MS, this, [this]() {
+        m_isDraining = false;
+
+        if (m_sink) {
+            m_sink->stop();
+            m_sink->deleteLater();
+            m_sink = nullptr;
+            m_io = nullptr;
+        }
+
+        Q_EMIT audioSinkChanged();
+    });
 }
 
 void AudioPort::startSourceIO()
@@ -274,12 +318,32 @@ void AudioPort::onFrameRequested(pj::MediaFrame &frame)
         return;
     }
 
+    if (m_isWarmingUp) {
+        m_isWarmingUp = false;
+        QObject::disconnect(m_warmUpDrain);
+    }
+
     auto bytes = m_io->read(frame.size);
+
+    if (++m_captureFrames % 50 == 0 && !m_source.isNull()) {
+        const auto queued = m_source->bytesAvailable();
+        qCDebug(lcAudioPort).nospace()
+                << "capture: read " << bytes.size() << " of " << frame.size
+                << " bytes, source bufferSize=" << m_source->bufferSize() << ", queued=" << queued
+                << " bytes (" << (m_audioFormat.durationForBytes(queued) / 1000)
+                << "ms), processor=" << (m_audioProcessor ? "on" : "off");
+    }
 
     if (!m_isMuted) {
         frame.buf = std::vector<unsigned char>(bytes.constBegin(), bytes.constEnd());
         frame.type = PJMEDIA_FRAME_TYPE_AUDIO;
-        updateAudioLevel(bytes, bytes.size());
+
+        // Optionally apply AGC/ANC/AEC
+        if (m_audioProcessor) {
+            m_audioProcessor->capture(frame.buf.data(), static_cast<unsigned>(frame.buf.size()));
+        }
+
+        updateAudioLevel(reinterpret_cast<const char *>(frame.buf.data()), frame.buf.size());
     } else {
         setSourceAudioLevel(0);
     }
@@ -304,8 +368,55 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
         return;
     }
 
+    m_isWarmingUp = false;
+
+    // Register the frame about to be played as the echo reference.
+    if (m_audioProcessor) {
+        m_audioProcessor->playback(frame.buf.data(), static_cast<unsigned>(frame.size));
+    }
+
     m_io->write(reinterpret_cast<char *>(frame.buf.data()), frame.size);
 
     // Auto destroy sink after timeout
     Q_EMIT startIdleTimer();
+}
+
+void AudioPort::acquire()
+{
+    if (m_device.mode() == QAudioDevice::Mode::Input) {
+        if (m_source.isNull()) {
+            startSourceIO();
+        }
+    } else {
+        if (m_sink.isNull()) {
+            startSinkIO();
+        }
+    }
+
+    m_isWarmingUp = true;
+
+    if (m_device.mode() == QAudioDevice::Mode::Input && !m_io.isNull()) {
+        QObject::disconnect(m_warmUpDrain);
+
+        m_warmUpDrain = connect(m_io.data(), &QIODevice::readyRead, this, [this]() {
+            if (m_isWarmingUp && !m_io.isNull()) {
+                m_io->readAll();
+            }
+        });
+    }
+}
+
+void AudioPort::release()
+{
+    if (!m_isWarmingUp) {
+        return;
+    }
+
+    m_isWarmingUp = false;
+
+    QObject::disconnect(m_warmUpDrain);
+
+    if (!m_idleTimer.isActive()) {
+        stopIO();
+    }
 }

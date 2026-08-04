@@ -24,6 +24,6 @@ protected:
 
     QColor m_previousColor;
 
-    bool m_state = false;
+    bool m_state = true;
     bool m_blinkState = false;
 };

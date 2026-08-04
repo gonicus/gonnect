@@ -42,7 +42,13 @@ private:
                         QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
                         const QString &displayName = "");
 
+    void migrationHangup();
+
     SIPCall *m_call = nullptr;
+
+    QString m_pendingHangupMeetingId;
+    QMetaObject::Connection m_meetingEstablishedConn;
+    bool m_migrationHangupDone = false;
 
     QStringList m_capabilities;
     QStringList m_ownCapabilities;

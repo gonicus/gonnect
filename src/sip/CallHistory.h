@@ -23,7 +23,7 @@ public:
     CallHistoryItem *addHistoryItem(CallHistoryItem *item);
     CallHistoryItem *addHistoryItem(CallHistoryItem::Types type, const QString &account,
                                     const QString &remoteUrl, const QString &contactId = "",
-                                    bool isSipSubscriptable = false);
+                                    bool isSipSubscriptable = false, const QStringList &hops = {});
     QList<CallHistoryItem *> historyItems() const { return m_historyItems; };
     qsizetype indexOfItem(const CallHistoryItem *item) const;
 

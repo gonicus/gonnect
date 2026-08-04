@@ -63,7 +63,11 @@ class GlobalInfoWrapper
     QML_SINGLETON
 
 public:
-    static GlobalInfo *create(QQmlEngine *, QJSEngine *) { return &GlobalInfo::instance(); }
+    static GlobalInfo *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&GlobalInfo::instance(), QQmlEngine::CppOwnership);
+        return &GlobalInfo::instance();
+    }
 
 private:
     GlobalInfoWrapper() = default;

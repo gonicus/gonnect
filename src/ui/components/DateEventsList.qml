@@ -213,6 +213,8 @@ ListView {
             id: dateEventContextMenuComponent
 
             Menu {
+                id: dateEventMenu
+                onClosed: () => dateEventMenu.destroy()
                 Action {
                     id: joinAction
                     text: delg.isJitsiMeeting ? qsTr('Join') : qsTr('Open')
@@ -246,9 +248,9 @@ ListView {
 
                     function copyLink() {
                         if (delg.isJitsiMeeting) {
-                            ViewHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
+                            ClipboardHelper.copyToClipboard(`${GlobalInfo.jitsiUrl()}/${delg.roomName}`)
                         } else {
-                            ViewHelper.copyToClipboard(delg.link)
+                            ClipboardHelper.copyToClipboard(delg.link)
                         }
                     }
                 }

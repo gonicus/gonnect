@@ -139,6 +139,8 @@ void HeadsetDevice::setIdle()
                                              UsageId::LED_Ring, UsageId::LED_Hold,
                                              UsageId::Telephony_Ringer };
 
+    m_busyLine = false;
+
     QHash<quint8, unsigned> reportVals;
     QList<UsageInfo> usageInfos;
 
@@ -197,6 +199,8 @@ void HeadsetDevice::setBusyLine(bool flag)
         return;
     }
 
+    m_busyLine = flag;
+
     const auto &usage = m_hidUsages.value(UsageId::LED_OffHook);
     const unsigned bitValue = 1 << usage.bitPosition;
     unsigned value = currentFlags(usage.reportId);
@@ -225,6 +229,16 @@ void HeadsetDevice::setMute(bool flag)
     }
 
     m_muted = flag;
+    writeMuteToDevice(flag, true);
+}
+
+void HeadsetDevice::writeMuteToDevice(bool flag, bool armLockWindow)
+{
+    if (armLockWindow) {
+        m_mutePendingActive = true;
+        m_mutePendingValue = flag;
+        m_mutePendingTimer.restart();
+    }
 
     if (m_displaySupported && m_teamsUsageMapping.contains(UsageId::Teams_IconsControl)) {
         unsigned char buf[3];
@@ -253,6 +267,23 @@ void HeadsetDevice::setMute(bool flag)
                           << usage;
         send(usage.reportId, value);
     }
+}
+
+void HeadsetDevice::probeMuteLock()
+{
+    if (!m_hidUsages.contains(UsageId::LED_Mute)) {
+        return;
+    }
+
+    if (m_appSettings.value("generic/disableMutePropagation", false).toBool()) {
+        return;
+    }
+
+    qCInfo(lcHeadset) << "Probing headset for mute-lock";
+    m_muteBurstCount = 0;
+    m_muteBurstTimer.invalidate();
+    m_muted = false;
+    writeMuteToDevice(false, true);
 }
 
 void HeadsetDevice::setRing(bool flag)
@@ -327,7 +358,7 @@ unsigned HeadsetDevice::currentFlags(const quint32 reportId) const
 {
     unsigned value = 0;
 
-    if (m_hidUsages.contains(UsageId::LED_OffHook) && (m_line || m_hookSwitch)) {
+    if (m_hidUsages.contains(UsageId::LED_OffHook) && (m_line || m_hookSwitch || m_busyLine)) {
         const auto &u = m_hidUsages.value(UsageId::LED_OffHook);
         if (u.reportId == reportId) {
             value |= 1 << u.bitPosition;
@@ -365,9 +396,15 @@ void HeadsetDevice::setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMappi
 void HeadsetDevice::processEvents()
 {
     unsigned char data[64];
-    std::ranges::fill(data, 0);
 
-    if (auto len = hid_read_timeout(m_device, data, sizeof(data), 10)) {
+    while (true) {
+        std::ranges::fill(data, 0);
+
+        auto len = hid_read_timeout(m_device, data, sizeof(data), 10);
+        if (len <= 0) {
+            break;
+        }
+
         quint8 reportId = data[0];
 
         if (len >= 2 && m_inputReportIds.contains(reportId)) {
@@ -403,12 +440,61 @@ void HeadsetDevice::processEvents()
                 if (m_hidUsages.contains(UsageId::Telephony_PhoneMute)) {
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_PhoneMute);
                     if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
-                        m_muted = !m_muted;
+                        const bool inWindow = m_mutePendingActive
+                                && m_mutePendingTimer.elapsed() < muteLockWindowMs();
 
-                        qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
-                        setMute(m_muted);
+                        if (inWindow) {
+                            m_mutePendingActive = false;
 
-                        Q_EMIT mute();
+                            if (!m_mutePendingValue) {
+                                if (!m_muteLocked || !m_muted) {
+                                    m_muteLocked = true;
+                                    m_muted = true;
+                                    qCInfo(lcHeadset)
+                                            << "  Mute-lock detected - device refused unmute";
+                                    writeMuteToDevice(true, false);
+                                    Q_EMIT muteLockChanged(true, true);
+                                }
+
+                                m_muteBurstCount = muteBurstThreshold();
+                                m_muteBurstTimer.restart();
+                            } else {
+                                qCDebug(lcHeadset)
+                                        << "  Ignored mute echo within Mute-lock detection window";
+                            }
+                        } else {
+                            if (m_muteBurstTimer.isValid()
+                                && m_muteBurstTimer.elapsed() < muteBurstWindowMs()) {
+                                m_muteBurstCount++;
+                            } else {
+                                m_muteBurstCount = 1;
+                            }
+                            m_muteBurstTimer.restart();
+
+                            if (m_muteLocked && m_muteBurstCount >= muteBurstThreshold()) {
+                                if (!m_muted) {
+                                    m_muted = true;
+                                    qCInfo(lcHeadset) << "  Mute flap collapsed to muted (burst of"
+                                                      << m_muteBurstCount << "toggles)";
+                                    writeMuteToDevice(true, false);
+                                    Q_EMIT muteLockChanged(true, true);
+                                }
+                            } else {
+                                const bool wasLocked = m_muteLocked;
+                                m_muted = !m_muted;
+                                m_muteLocked = false;
+
+                                qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
+                                writeMuteToDevice(m_muted, false);
+
+                                Q_EMIT mute();
+
+                                if (wasLocked) {
+                                    qCInfo(lcHeadset) << "  Mute-lock released";
+                                    Q_EMIT muteLockChanged(false, m_muted);
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -661,6 +747,21 @@ void HeadsetDevice::sendASP(quint8 cmd)
             qCWarning(lcHeadset) << "failed to write ASP notification to headset device";
         }
     }
+}
+
+int HeadsetDevice::muteLockWindowMs() const
+{
+    return m_appSettings.value("generic/muteLockProbeWindowMs", 700).toInt();
+}
+
+int HeadsetDevice::muteBurstWindowMs() const
+{
+    return m_appSettings.value("generic/muteBurstWindowMs", 1000).toInt();
+}
+
+int HeadsetDevice::muteBurstThreshold() const
+{
+    return m_appSettings.value("generic/muteBurstThreshold", 2).toInt();
 }
 
 UsageInfo::UsageInfo(qsizetype bitPosition, quint32 size, quint8 reportId)

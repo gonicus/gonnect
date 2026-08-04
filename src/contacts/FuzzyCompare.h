@@ -10,7 +10,7 @@ class FuzzyCompare
 public:
     FuzzyCompare() = delete;
 
-    static quint8 levenshteinDistance(const QString &a, const QString &b);
+    static int levenshteinDistance(const QString &a, const QString &b);
     static qreal jaroWinklerDistance(const QString &a, const QString &b);
 
     template <typename T>

@@ -127,6 +127,7 @@ void Theme::updateColorPalette()
     m_backgroundInitials = QColor(214, 212, 233);
     m_shadowColor = QColor(0, 0, 0, 32);
     m_redColor = QColor(224, 27, 36);
+    m_yellowColor = QColor(217, 176, 114);
     m_emergencyColor = QColor(0, 136, 85);
     m_greenColor = QColor(36, 181, 27);
     m_darkGreenColor = QColor(128, 128, 0);
@@ -166,13 +167,4 @@ void Theme::setDarkMode(bool value)
         m_isDarkMode = value;
         Q_EMIT isDarkModeChanged();
     }
-}
-
-QString Theme::toCamelCase(const QString &str) const
-{
-    QStringList parts = str.split(QChar('_'));
-    for (int i = 1; i < parts.size(); ++i) {
-        parts[i].replace(0, 1, parts[i][0].toUpper());
-    }
-    return parts.join("");
 }

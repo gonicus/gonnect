@@ -215,7 +215,7 @@ bool PhoneNumberUtil::isEmergencyCallUrl(const QString &sipUrl)
 
 QString PhoneNumberUtil::bareURI(const QString &sipUrl)
 {
-    static const QRegularExpression bareSipRegex("^(.*<)?(sips?:[^@]*@[^>]*)(>.*)?$",
+    static const QRegularExpression bareSipRegex("^(.*<)?(sips?:[^>]*)(>.*)?$",
                                                  QRegularExpression::CaseInsensitiveOption);
 
     const auto matchResult = bareSipRegex.match(sipUrl);

@@ -17,6 +17,7 @@ Rectangle {
     required property int callId
     required property string accountId
     required property string phoneNumber
+    required property Contact contact
     required property string contactName
     required property string city
     required property string country
@@ -55,7 +56,7 @@ Rectangle {
     property bool interactive: true
     property bool showHoldButton: true
     property alias showHangupButton: hangupButton.visible
-    property int padding: 12
+    property int padding: Theme.d
 
     signal clicked
 

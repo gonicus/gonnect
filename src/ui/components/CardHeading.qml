@@ -7,8 +7,11 @@ import base
 
 Item {
     id: control
+    implicitWidth: control.leftPadding + headingLoader.implicitWidth + control.rightPadding
     height: 46
 
+    property int leftPadding: 0
+    property int rightPadding: 0
     property string text: ""
     property bool showHeading: true
     property bool showDivider: false
@@ -21,9 +24,11 @@ Item {
         id: headingLoaderWrapper
         anchors {
             verticalCenter: parent.verticalCenter
+            verticalCenterOffset: -1
             left: parent.left
-            leftMargin: 20
-            rightMargin: 20
+            right: parent.right
+            leftMargin: 20 + control.leftPadding
+            rightMargin: 20 + control.rightPadding
         }
 
         implicitWidth: headingLoader.item ? headingLoader.item.implicitWidth : 0
@@ -33,6 +38,10 @@ Item {
             id: headingLoader
             active: control.showHeading
             sourceComponent: headingComponent
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
         }
 
         Accessible.ignored: true
@@ -43,6 +52,7 @@ Item {
 
         RowLayout {
             id: headingLayout
+            width: parent?.width ?? headingLayout.implicitWidth
 
             Label {
                 id: headingText
@@ -51,6 +61,7 @@ Item {
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 color: Theme.secondaryTextColor
+                Layout.fillWidth: true
             }
 
             Pane {

@@ -54,7 +54,7 @@ Item {
         model: CallsProxyModel {
             hideIncomingSecondaryCallOnBusy: true
 
-            CallsModel { }
+            CallsModel { id: callsModel }
         }
         anchors {
             top: parent.top
@@ -79,7 +79,9 @@ Item {
 
             onClicked: () => control.selectedItem = callDelegate
 
-            Component.onCompleted: () => control.selectedItem = callDelegate
+            Component.onCompleted: () => {
+                control.selectedItem = callDelegate
+            }
         }
     }
 

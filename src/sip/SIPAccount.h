@@ -84,6 +84,10 @@ public:
 
     ~SIPAccount();
 
+private Q_SLOTS:
+    void updatePresenceStateForwarding();
+    void forwardPresenceState();
+
 private:
     void finalizeInitialization();
 
@@ -97,6 +101,8 @@ private:
     void parseMessageCount(const QString &value, quint16 &newMessages, quint16 &oldMessages);
 
     void reinitBuddies();
+
+    pj::PresenceStatus createPresenceStatusFromGlobal() const;
 
     QList<SIPCall *> m_calls;
     QList<SIPBuddy *> m_buddies;
@@ -114,10 +120,11 @@ private:
     bool m_useInstantMessagingWithoutCheck = true;
     bool m_rttEnabled = true;
     bool m_afterResume = false;
+    QObject *m_globalStateConnectionContext = nullptr;
 
     QString m_account;
     QString m_domain;
-    QByteArray m_optionsRequestUuid;
+    intptr_t m_optionsRequestId = 0;
     pj::AccountConfig m_accountConfig;
     pj::TransportConfig m_transportConfig;
 

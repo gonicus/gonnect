@@ -11,6 +11,7 @@ Item {
     implicitHeight: 30
 
     property alias text: searchInputField.text
+    property alias placeHolderText: placeholderLabel.text
 
     function giveFocus() {
         searchInputField.forceActiveFocus()
@@ -21,7 +22,7 @@ Item {
 
     states: [
         State {
-            when: !control.activeFocus && searchInputField.text.trim() === ""
+            when: searchInputField.text.trim() === ""
             PropertyChanges {
                 placeholderLabel.visible: true
             }
@@ -39,8 +40,22 @@ Item {
         color: Theme.backgroundSecondaryColor
         radius: 6
         border.width: 1
-        border.color: Theme.borderColor
+        border.color: control.enabled && (searchInputField.activeFocus || hovHandler.hovered)
+                      ? control.Material.primaryTextColor
+                      : control.Material.hintTextColor
         anchors.fill: parent
+    }
+
+    HoverHandler {
+        id: hovHandler
+    }
+
+    TapHandler {
+        onTapped: () => {
+                      if (control.enabled && !searchInputField.activeFocus) {
+                          searchInputField.forceActiveFocus()
+                      }
+                  }
     }
 
     IconLabel {
@@ -77,6 +92,8 @@ Item {
         id: searchInputField
         font.pixelSize: 14
         color: Theme.primaryTextColor
+        focus: true
+        focusPolicy: Qt.TabFocus
         anchors {
             verticalCenter: parent.verticalCenter
             left: searchIcon.right

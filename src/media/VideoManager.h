@@ -60,7 +60,11 @@ class VideoManagerWrapper
     QML_SINGLETON
 
 public:
-    static VideoManager *create(QQmlEngine *, QJSEngine *) { return &VideoManager::instance(); }
+    static VideoManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&VideoManager::instance(), QQmlEngine::CppOwnership);
+        return &VideoManager::instance();
+    }
 
 private:
     VideoManagerWrapper() = default;

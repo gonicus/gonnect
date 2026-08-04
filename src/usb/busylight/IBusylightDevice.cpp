@@ -36,6 +36,7 @@ bool IBusylightDevice::open()
     if (device) {
         m_device = device;
         switchOff();
+        switchStreamlight(false);
     } else {
         qCCritical(lcBusylightDevice) << "Error: cannot open Luxafor Flag busylight device";
     }

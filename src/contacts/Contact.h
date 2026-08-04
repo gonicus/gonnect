@@ -4,8 +4,10 @@
 #include <QDebug>
 #include <QDateTime>
 #include <qqmlregistration.h>
-
 #include "BlockInfo.h"
+#include "PresenceStateAggregator.h"
+
+class ChatUser;
 
 class Contact : public QObject
 {
@@ -90,6 +92,20 @@ public:
 
     qreal matchesSearch(const QString &searchString) const;
 
+#ifndef APP_TESTS
+    bool hasChatUser(const ChatUser *user) const;
+    void addChatUser(ChatUser *user);
+    void removeChatUser(ChatUser *user);
+    const QList<ChatUser *> &chatUsers() const { return m_chatUsers; }
+
+    [[nodiscard("Caller must take ownership")]] PresenceStateAggregator *
+    createPresenceStateObject() const;
+
+Q_SIGNALS:
+    void chatUsersChanged();
+
+#endif
+
 private:
     void init();
     void updateSipStatusSubscriptable();
@@ -106,8 +122,13 @@ private:
     QString m_mail;
     QDateTime m_lastModified;
     QStringList m_splittedName;
+    QString m_fullNameLower;
     QList<PhoneNumber> m_phoneNumbers;
-    bool m_sipStatusSubscriptable;
+    bool m_sipStatusSubscriptionInitialized = false;
+    bool m_sipStatusSubscriptable = false;
+
+    /// References to users of a chat plugin.
+    QList<ChatUser *> m_chatUsers;
 
 Q_SIGNALS:
     void avatarChanged();

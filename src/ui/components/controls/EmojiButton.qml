@@ -47,7 +47,9 @@ Item {
     }
 
     TapHandler {
-        onSingleTapped: control.clicked()
+        gesturePolicy: TapHandler.WithinBounds
+        grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+        onSingleTapped: () => control.clicked()
     }
 
     ToolTip.visible: groupButtonHoverHandler.hovered && !!control.tooltipText

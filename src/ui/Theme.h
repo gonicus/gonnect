@@ -13,6 +13,8 @@ class Theme : public QObject
             Theme::ThemeVariant themeVariant MEMBER m_themeVariant NOTIFY themeVariantChanged FINAL)
     Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY isDarkModeChanged FINAL)
     Q_PROPERTY(bool useOwnDecoration READ useOwnDecoration NOTIFY useOwnDecorationChanged FINAL)
+    Q_PROPERTY(uint fontPixelSize READ fontPixelSize CONSTANT FINAL)
+    Q_PROPERTY(uint d READ d CONSTANT FINAL)
 
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(
@@ -52,6 +54,7 @@ class Theme : public QObject
     Q_PROPERTY(
             QColor activeIndicatorColor READ activeIndicatorColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor greenColor READ greenColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(QColor yellowColor READ yellowColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor darkGreenColor READ darkGreenColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor paneColor READ paneColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor highContrastColor READ highContrastColor NOTIFY colorPaletteChanged FINAL)
@@ -136,6 +139,7 @@ public:
     QColor backgroundInitials() const { return m_backgroundInitials; }
     QColor shadowColor() const { return m_shadowColor; }
     QColor redColor() const { return m_redColor; }
+    QColor yellowColor() const { return m_yellowColor; }
     QColor emergencyColor() const { return m_emergencyColor; }
     QColor activeIndicatorColor() const { return m_activeIndicatorColor; }
     QColor greenColor() const { return m_greenColor; }
@@ -215,7 +219,8 @@ Q_SIGNALS:
 
 private:
     void setDarkMode(bool value);
-    QString toCamelCase(const QString &str) const;
+    uint fontPixelSize() const { return 13; }
+    uint d() const { return 12; }
 
     ThemeVariant m_themeVariant = ThemeVariant::System;
     bool m_isDarkMode = false;
@@ -245,6 +250,7 @@ private:
     QColor m_backgroundInitials;
     QColor m_shadowColor;
     QColor m_redColor;
+    QColor m_yellowColor;
     QColor m_emergencyColor;
     QColor m_greenColor;
     QColor m_darkGreenColor;
@@ -291,7 +297,11 @@ class ThemeWrapper
     QML_SINGLETON
 
 public:
-    static Theme *create(QQmlEngine *, QJSEngine *) { return &Theme::instance(); }
+    static Theme *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&Theme::instance(), QQmlEngine::CppOwnership);
+        return &Theme::instance();
+    }
 
 private:
     ThemeWrapper() = default;

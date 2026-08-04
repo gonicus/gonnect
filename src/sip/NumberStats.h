@@ -16,7 +16,7 @@ class NumberStats : public QObject
     QML_UNCREATABLE("")
 
 public:
-    enum class ContactType { PhoneNumber, JitsiMeetUrl };
+    enum class ContactType { PhoneNumber, JitsiMeetUrl, ChatRoomId };
     Q_ENUM(ContactType)
 
     virtual ~NumberStats();

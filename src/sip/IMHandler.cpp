@@ -8,9 +8,10 @@
 
 #include "SIPCall.h"
 #include "SIPAccount.h"
-#include "UserInfo.h"
 #include "IMHandler.h"
 #include "ViewHelper.h"
+
+using namespace std::chrono_literals;
 
 Q_LOGGING_CATEGORY(lcIMHandler, "gonnect.sip.im")
 
@@ -96,12 +97,39 @@ void IMHandler::openMeeting(const QString &meetingId, const QString &displayName
 {
     // For whatever reason this needs to be decoupled to make QDesktopServices work
     QTimer::singleShot(0, this, [this, hangup, meetingId, callHistoryItem, displayName]() {
-        ViewHelper::instance().requestMeeting(meetingId, callHistoryItem, displayName);
-
         if (hangup) {
-            QTimer::singleShot(200, this, [this]() { m_call->account()->hangup(m_call->getId()); });
+            // Defer the SIP teardown until the conference is actually joined
+            m_pendingHangupMeetingId = meetingId;
+            m_migrationHangupDone = false;
+
+            m_meetingEstablishedConn =
+                    connect(&ViewHelper::instance(), &ViewHelper::meetingEstablished, this,
+                            [this](const QString &roomName) {
+                                if (roomName == m_pendingHangupMeetingId) {
+                                    migrationHangup();
+                                }
+                            });
+
+            // Establish fallback hangup timer
+            QTimer::singleShot(10s, this, [this]() { migrationHangup(); });
         }
+
+        ViewHelper::instance().requestMeeting(meetingId, callHistoryItem, displayName);
     });
+}
+
+void IMHandler::migrationHangup()
+{
+    if (m_migrationHangupDone) {
+        return;
+    }
+    m_migrationHangupDone = true;
+
+    disconnect(m_meetingEstablishedConn);
+
+    if (m_call) {
+        m_call->account()->hangup(m_call->getId());
+    }
 }
 
 bool IMHandler::requestMeeting(bool hangup, QPointer<CallHistoryItem> callHistoryItem,
