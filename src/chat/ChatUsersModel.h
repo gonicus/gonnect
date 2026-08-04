@@ -21,6 +21,7 @@ public:
 
 private:
     void connectUserAvatarSignals(ChatUser *user);
+    void refreshAvatarPath(ChatUser *user);
 
     IChatProvider *m_chatProvider = nullptr;
     QObject *m_chatProviderContext = nullptr;

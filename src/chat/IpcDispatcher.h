@@ -358,6 +358,10 @@ private:
     /// ownership over the contact objects themselves.
     QHash<QString, Contact *> m_userContacts;
 
+    /// Map of converted chat user ids to the chat users themselves. Used to match contacts that
+    /// are added to the address book after the chat users have been received.
+    QHash<QString, ChatUser *> m_userByConvId;
+
     /// Hash map of tags (≠ 0) of requests to QTimer objects that will trigger a timeout error.
     /// After receiving a response with a tag, the timer will be destroyed and removed from this
     /// map.

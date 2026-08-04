@@ -28,7 +28,7 @@ void AddressBook::initContactSignals(Contact *contact)
         return;
     }
 
-    connect(contact, &Contact::chatUserAdded, this, [this, contact](const ChatUser *chatUser) {
+    connect(contact, &Contact::chatUserAdded, this, [this, contact](ChatUser *chatUser) {
         Q_CHECK_PTR(chatUser);
         addChatUserMapping(chatUser, contact);
     });
@@ -38,7 +38,7 @@ void AddressBook::initContactSignals(Contact *contact)
     });
 }
 
-void AddressBook::addChatUserMapping(const ChatUser *chatUser, Contact *contact)
+void AddressBook::addChatUserMapping(ChatUser *chatUser, Contact *contact)
 {
     if (!contact) {
         qCCritical(lcAddressBook) << "contact may not be nullptr";
@@ -50,6 +50,7 @@ void AddressBook::addChatUserMapping(const ChatUser *chatUser, Contact *contact)
     }
 
     m_contactsByChatUser.insert(chatUser, contact);
+    Q_EMIT chatUserMappingAdded(chatUser, contact);
 }
 
 void AddressBook::removeChatUserMapping(const ChatUser *chatUser)

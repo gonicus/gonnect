@@ -67,7 +67,7 @@ private:
 
 #ifndef APP_TESTS
     void initContactSignals(Contact *contact);
-    void addChatUserMapping(const ChatUser *chatUser, Contact *contact);
+    void addChatUserMapping(ChatUser *chatUser, Contact *contact);
     void removeChatUserMapping(const ChatUser *chatUser);
 #endif
 
@@ -88,4 +88,8 @@ Q_SIGNALS:
     void contactsCleared();
     void contactsReady();
     void contactSourceInfosChanged();
+
+#ifndef APP_TESTS
+    void chatUserMappingAdded(ChatUser *chatUser, Contact *contact);
+#endif
 };

@@ -17,6 +17,9 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
         if (m_chatProvider) {
             m_chatProviderContext = new QObject(this);
 
+            connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded,
+                    m_chatProviderContext, [this](ChatUser *user) { refreshAvatarPath(user); });
+
             connect(m_chatProvider, &IChatProvider::userAdded, m_chatProviderContext,
                     [this](QString, ChatUser *user, qsizetype index) {
                         beginInsertRows(QModelIndex(), index, index);
@@ -108,17 +111,16 @@ void ChatUsersModel::connectUserAvatarSignals(ChatUser *user)
     }
     m_avatarSignaledUsers.insert(user);
 
-    const auto refreshAvatar = [this, user]() {
-        const auto row = m_chatProvider->users().indexOf(user);
-        if (row < 0) {
-            return;
-        }
-        const auto idx = createIndex(row, 0);
-        Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::AvatarPath) });
-    };
+    connect(user, &ChatUser::avatarPathChanged, m_chatProviderContext,
+            [this, user]() { refreshAvatarPath(user); });
+}
 
-    connect(user, &ChatUser::avatarPathChanged, m_chatProviderContext, refreshAvatar);
-    if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
-        connect(contact, &Contact::avatarChanged, m_chatProviderContext, refreshAvatar);
+void ChatUsersModel::refreshAvatarPath(ChatUser *user)
+{
+    const auto row = m_chatProvider->users().indexOf(user);
+    if (row < 0) {
+        return;
     }
+    const auto idx = createIndex(row, 0);
+    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::AvatarPath) });
 }

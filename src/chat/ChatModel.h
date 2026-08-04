@@ -67,6 +67,7 @@ private:
 
     QVariant rawData(const ChatMessage *item, int role) const;
     void connectUserAvatarSignals(ChatUser *user);
+    void refreshAvatarPath(ChatUser *user);
     ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
     void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
     static QList<int> nextItemContentRoles();

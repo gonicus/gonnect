@@ -260,24 +260,23 @@ void ChatModel::connectUserAvatarSignals(ChatUser *user)
     }
     m_avatarSignaledUsers.insert(user);
 
-    const auto refreshAvatar = [this, user]() {
-        if (!m_chatRoom) {
-            return;
-        }
-        const auto messages = m_chatRoom->chatMessages();
-        for (qsizetype i = 0; i < messages.size(); ++i) {
-            if (messages.at(i)->fromId() == user->id()) {
-                const auto modelIndex = createIndex(i, 0);
-                Q_EMIT dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::AvatarPath) });
-            }
-        }
-    };
-
     connect(user, &QObject::destroyed, m_chatRoomContext,
             [this, user]() { m_avatarSignaledUsers.remove(user); });
-    connect(user, &ChatUser::avatarPathChanged, m_chatRoomContext, refreshAvatar);
-    if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
-        connect(contact, &Contact::avatarChanged, m_chatRoomContext, refreshAvatar);
+    connect(user, &ChatUser::avatarPathChanged, m_chatRoomContext,
+            [this, user]() { refreshAvatarPath(user); });
+}
+
+void ChatModel::refreshAvatarPath(ChatUser *user)
+{
+    if (!m_chatRoom) {
+        return;
+    }
+    const auto messages = m_chatRoom->chatMessages();
+    for (qsizetype i = 0; i < messages.size(); ++i) {
+        if (messages.at(i)->fromId() == user->id()) {
+            const auto modelIndex = createIndex(i, 0);
+            Q_EMIT dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::AvatarPath) });
+        }
     }
 }
 
@@ -293,6 +292,8 @@ void ChatModel::onChatRoomChanged()
 
     if (m_chatRoom) {
         m_chatRoomContext = new QObject(this);
+        connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded, m_chatRoomContext,
+                [this](ChatUser *user) { refreshAvatarPath(user); });
         connect(m_chatRoom, &IChatRoom::chatMessageAdded, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
                     beginInsertRows(QModelIndex(), index, index);

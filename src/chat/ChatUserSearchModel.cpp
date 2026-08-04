@@ -75,9 +75,13 @@ void ChatUserSearchModel::onChatProviderChanged()
         m_chatProviderContext->deleteLater();
         m_chatProviderContext = nullptr;
     }
+    m_avatarSignaledUsers.clear();
 
     if (m_chatProvider) {
         m_chatProviderContext = new QObject(this);
+        connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded, m_chatProviderContext,
+                [this](ChatUser *user) { refreshAvatarPath(user); });
+
         connect(m_chatProvider, &IChatProvider::userRemoved, m_chatProviderContext,
                 [this](QString, ChatUser *user, qsizetype) {
                     const auto idx = m_model.indexOf(user);
@@ -105,5 +109,30 @@ void ChatUserSearchModel::updateModel(const QList<ChatUser *> &userList)
         beginResetModel();
         m_model = userList;
         endResetModel();
+
+        for (auto *user : userList) {
+            connectUserAvatarSignals(user);
+        }
     }
+}
+
+void ChatUserSearchModel::connectUserAvatarSignals(ChatUser *user)
+{
+    if (m_avatarSignaledUsers.contains(user)) {
+        return;
+    }
+    m_avatarSignaledUsers.insert(user);
+
+    connect(user, &ChatUser::avatarPathChanged, m_chatProviderContext,
+            [this, user]() { refreshAvatarPath(user); });
+}
+
+void ChatUserSearchModel::refreshAvatarPath(ChatUser *user)
+{
+    const auto row = m_model.indexOf(user);
+    if (row < 0) {
+        return;
+    }
+    const auto idx = createIndex(row, 0);
+    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::AvatarPath) });
 }

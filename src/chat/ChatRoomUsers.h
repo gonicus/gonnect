@@ -21,7 +21,12 @@ protected:
     virtual QVariant data(const QModelIndex &index, int role) const override;
 
 private:
+    void connectUserAvatarSignals(ChatUser *user);
+    void refreshAvatarPath(ChatUser *user);
+
     IChatRoom *m_chatRoom = nullptr;
+    QObject *m_chatRoomContext = nullptr;
+    QSet<ChatUser *> m_avatarSignaledUsers;
 
 Q_SIGNALS:
     void chatRoomChanged();

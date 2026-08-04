@@ -260,6 +260,22 @@ IpcDispatcher::IpcDispatcher(const QString &settingsGroup, const IpcConfig &conf
     connect(this, &IChatProvider::chatRoomRemoved, this,
             &IpcDispatcher::updateUnreadNotificationsCount);
 
+    // Link chat users to contacts that appear in the address book after the chat users have
+    // already been received.
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this, [this](Contact *contact) {
+        if (auto *user = m_userByConvId.value(contact->mail(), nullptr)) {
+            if (m_userContacts.value(user->id()) != contact) {
+                contact->addChatUser(user);
+                m_userContacts.insert(user->id(), contact);
+            }
+        }
+    });
+
+    // The address book re-inserts all contacts after a reset, but the references in this map
+    // have become invalid in the meantime.
+    connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
+            [this]() { m_userContacts.clear(); });
+
     updateConnected();
 }
 
@@ -1103,6 +1119,7 @@ void IpcDispatcher::processResponse(
             }
 
             if (!conv.isEmpty()) {
+                m_userByConvId.insert(conv, p);
                 auto contact = addrBook.lookupByEmail(conv);
                 if (contact) {
                     contact->addChatUser(p);
