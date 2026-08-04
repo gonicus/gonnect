@@ -33,8 +33,9 @@ void ChatMessageSearchIndexer::acquireSecret()
 {
     const QPointer<ChatMessageSearchIndexer> guard(this);
 
-    Credentials::instance().get("generic/application",
-        [this, guard](QKeychain::Error error, const QString &secret, const QString &message) {
+    Credentials::instance().get(
+            "generic/application",
+            [this, guard](QKeychain::Error error, const QString &secret, const QString &message) {
                 if (!guard) {
                     return;
                 }
@@ -60,7 +61,8 @@ void ChatMessageSearchIndexer::createSecret()
     const QPointer<ChatMessageSearchIndexer> guard(this);
     const QString secret = SecretGenerator::generateSecret(32);
 
-    Credentials::instance().set("generic/application", secret,
+    Credentials::instance().set(
+            "generic/application", secret,
             [this, guard, secret](QKeychain::Error error, const QString &, const QString &message) {
                 if (!guard) {
                     return;

@@ -20,9 +20,9 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
         return;
     }
 
-    connect(m_indexer, &ChatMessageSearchIndexer::initialized, this, [this](){
-        connect(&ChatConnectorManager::instance(), &ChatConnectorManager::chatConnectorsChanged, this,
-                &ChatMessageSearchProvider::updateChatProviders);
+    connect(m_indexer, &ChatMessageSearchIndexer::initialized, this, [this]() {
+        connect(&ChatConnectorManager::instance(), &ChatConnectorManager::chatConnectorsChanged,
+                this, &ChatMessageSearchProvider::updateChatProviders);
 
         updateChatProviders();
     });
