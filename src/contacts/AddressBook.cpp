@@ -249,6 +249,7 @@ void AddressBook::removeContactsBySource(const QString &source)
             }
 
             const auto contactId = contact->id();
+            contact->disconnect(this);
             m_contactsBySourceId.remove(sourceUid);
 
 #ifndef APP_TESTS
