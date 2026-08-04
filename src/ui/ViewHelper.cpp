@@ -435,13 +435,14 @@ bool ViewHelper::isValidJitsiRoomName(const QString &name) const
 }
 
 void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryItem> callHistoryItem,
-                                const QString &displayName)
+                                const QString &displayName, QPointer<Contact> contact)
 {
     qCInfo(lcViewHelper).nospace().noquote()
             << "Requesting meeting for " << roomName << " (" << displayName
             << ") with flags:" << m_nextMeetingStartFlags;
 
-    Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
+    Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem,
+                                contact);
     setProperty("nextMeetingStartFlags",
                 QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
 }

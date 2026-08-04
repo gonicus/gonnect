@@ -77,11 +77,11 @@ Item {
             }
         }
 
-        function onOpenMeetingRequested(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
+        function onOpenMeetingRequested(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
             gonnectWindow.ensureVisible()
 
             Qt.callLater(() => {
-                gonnectWindow.openMeeting(meetingId, displayName, startFlags, callHistoryItem)
+                gonnectWindow.openMeeting(meetingId, displayName, startFlags, callHistoryItem, contact)
             })
         }
 
