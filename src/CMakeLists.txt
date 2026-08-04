@@ -930,7 +930,9 @@ if(LINUX)
     set_target_properties(gonnect PROPERTIES LINK_FLAGS_RELEASE -s)
     target_link_options(gonnect PRIVATE
         "-Wl,--exclude-libs,libcrypto.a"
-        "-Wl,--exclude-libs,libssl.a")
+        "-Wl,--exclude-libs,libssl.a"
+        "-Wl,--exclude-libs,libldap.a"
+        "-Wl,--exclude-libs,liblber.a")
 endif()
 
 qt_extract_metatypes(gonnect)

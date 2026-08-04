@@ -16,12 +16,16 @@ ChatMessageSearchProvider::ChatMessageSearchProvider(QObject *parent) : QObject{
     }
 
     m_indexer = new ChatMessageSearchIndexer(this);
-    if (!m_indexer || !m_indexer->isInitialized()) {
+    if (!m_indexer) {
         return;
     }
 
-    connect(&ChatConnectorManager::instance(), &ChatConnectorManager::chatConnectorsChanged, this,
-            &ChatMessageSearchProvider::updateChatProviders);
+    connect(m_indexer, &ChatMessageSearchIndexer::initialized, this, [this](){
+        connect(&ChatConnectorManager::instance(), &ChatConnectorManager::chatConnectorsChanged, this,
+                &ChatMessageSearchProvider::updateChatProviders);
+
+        updateChatProviders();
+    });
 
     connect(this, &ChatMessageSearchProvider::searchPhraseChanged, this, [this]() {
         if (m_model->rowCount() > 0) {

@@ -1,7 +1,11 @@
+#include <QDir>
+#include <QPointer>
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QStandardPaths>
 
-#include "ReadOnlyConfdSettings.h"
+#include "Credentials.h"
+#include "SecretGenerator.h"
 #include "ChatMessageSearchIndexer.h"
 
 // INFO: Uses SQLCipher amalgamation (AES-256 + FTS5): https://github.com/sqlcipher/sqlcipher
@@ -16,7 +20,68 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
         return;
     }
 
-    if (!openDB()) {
+    auto &credentials = Credentials::instance();
+    if (credentials.isInitialized()) {
+        acquireSecret();
+    } else {
+        connect(&credentials, &Credentials::initializedChanged, this,
+                &ChatMessageSearchIndexer::acquireSecret, Qt::SingleShotConnection);
+    }
+}
+
+void ChatMessageSearchIndexer::acquireSecret()
+{
+    const QPointer<ChatMessageSearchIndexer> guard(this);
+
+    Credentials::instance().get("generic/application",
+        [this, guard](QKeychain::Error error, const QString &secret, const QString &message) {
+                if (!guard) {
+                    return;
+                }
+
+                if (error != QKeychain::NoError) {
+                    m_error = message;
+                    qCCritical(lcChatMessageSearchIndexer).noquote()
+                            << "Cannot read the application secret:" << message;
+                    return;
+                }
+
+                if (!secret.isEmpty()) {
+                    setupDB(secret);
+                    return;
+                }
+
+                createSecret();
+            });
+}
+
+void ChatMessageSearchIndexer::createSecret()
+{
+    const QPointer<ChatMessageSearchIndexer> guard(this);
+    const QString secret = SecretGenerator::generateSecret(32);
+
+    Credentials::instance().set("generic/application", secret,
+            [this, guard, secret](QKeychain::Error error, const QString &, const QString &message) {
+                if (!guard) {
+                    return;
+                }
+
+                if (error != QKeychain::NoError) {
+                    m_error = message;
+                    qCCritical(lcChatMessageSearchIndexer).noquote()
+                            << "Cannot store the application secret:" << message;
+                    return;
+                }
+
+                setupDB(secret);
+            });
+}
+
+void ChatMessageSearchIndexer::setupDB(const QString &secret)
+{
+    if (!openDB(secret.toUtf8())) {
+        qCCritical(lcChatMessageSearchIndexer).noquote()
+                << "Cannot open the message search index:" << m_error;
         return;
     }
 
@@ -29,6 +94,7 @@ ChatMessageSearchIndexer::ChatMessageSearchIndexer(QObject *parent) : QObject{ p
     }
 
     m_isInitialized = true;
+    Q_EMIT initialized();
 }
 
 ChatMessageSearchIndexer::~ChatMessageSearchIndexer()
@@ -336,13 +402,21 @@ bool ChatMessageSearchIndexer::optimize()
     }
 }
 
-bool ChatMessageSearchIndexer::openDB()
+bool ChatMessageSearchIndexer::openDB(const QByteArray &secret)
 {
-    // TODO: Use proper settings names, wallet, etc.
-    ReadOnlyConfdSettings settings;
-    const QByteArray path = settings.value("generic/chatSearchCachePath", "").toString().toUtf8();
-    const QByteArray password =
-            settings.value("generic/chatSearchCachePassword", "").toString().toUtf8();
+    if (secret.isEmpty()) {
+        m_error = QStringLiteral("No secret key available - no search index available");
+        return false;
+    }
+
+    const QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    if (cacheDir.isEmpty() || !QDir().mkpath(cacheDir)) {
+        m_error = QStringLiteral("Cannot create cache directory '%1'").arg(cacheDir);
+        qCCritical(lcChatMessageSearchIndexer).noquote() << m_error;
+        return false;
+    }
+
+    const QByteArray path = QDir(cacheDir).absoluteFilePath("chat-search-index.db").toUtf8();
 
     int status = sqlite3_open(path, &m_db);
     if (status != SQLITE_OK) {
@@ -353,7 +427,7 @@ bool ChatMessageSearchIndexer::openDB()
         return false;
     }
 
-    status = sqlite3_key(m_db, password, password.size());
+    status = sqlite3_key(m_db, secret, secret.size());
     if (status != SQLITE_OK) {
         m_error = QString::fromUtf8(sqlite3_errmsg(m_db));
 
