@@ -868,13 +868,6 @@ Item {
             }
 
             Connections {
-                target: callSideBar
-                function onConferenceChatInUseChanged() {
-                    callSideBar.maybeAutoOpenChat()
-                }
-            }
-
-            Connections {
                 target: ViewHelper
                 function onShowConferenceChat() {
                     if (callSideBar.chatAvailable) {

@@ -48,16 +48,17 @@ void AggregatedDirectRoomsOfContact::setChatRooms(const QList<IChatRoom *> chatR
 void AggregatedDirectRoomsOfContact::onContactChanged()
 {
     if (m_contactContext) {
-        m_contactContext->disconnect();
         m_contactContext->deleteLater();
         m_contactContext = nullptr;
     }
 
     if (m_contact) {
         m_contactContext = new QObject(this);
-        connect(m_contact, &QObject::destroyed, m_contactContext, [this](QObject *) {
-            m_contact = nullptr;
-            Q_EMIT contactChanged();
+        connect(m_contact, &QObject::destroyed, m_contactContext, [this](QObject *obj) {
+            if (m_contact == obj) {
+                m_contact = nullptr;
+                Q_EMIT contactChanged();
+            }
         });
         connect(m_contact, &Contact::chatUsersChanged, m_contactContext,
                 [this]() { updateChatRooms(); });

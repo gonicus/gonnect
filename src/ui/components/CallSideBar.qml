@@ -333,7 +333,8 @@ Item {
             Qt.callLater(() => {
 
                 // Override roomsAggregator chat room if more participants joined
-                if (control.conferenceChatInUse || (control.conferenceConnector && control.conferenceConnector.numberOfUsers > 2)) {
+                if (control.conferenceConnector && (control.conferenceChatInUse
+                                                    || (control.conferenceConnector && control.conferenceConnector.numberOfUsers > 2))) {
                     control.conferenceChatInUse = true
                     chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
                     return
