@@ -1,5 +1,6 @@
 #include "ChatRoomUsers.h"
 #include "AddressBook.h"
+#include "AvatarPrioHelper.h"
 
 ChatRoomUsers::ChatRoomUsers(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -16,6 +17,14 @@ ChatRoomUsers::ChatRoomUsers(QObject *parent) : QAbstractListModel{ parent }
             m_chatRoomContext = new QObject(this);
             connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded, m_chatRoomContext,
                     [this](ChatUser *user) { refreshAvatarPath(user); });
+            connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged,
+                    m_chatRoomContext, [this]() {
+                        const auto rows = rowCount(QModelIndex());
+                        if (rows > 0) {
+                            Q_EMIT dataChanged(createIndex(0, 0), createIndex(rows - 1, 0),
+                                               { static_cast<int>(Roles::AvatarPath) });
+                        }
+                    });
 
             const auto users = std::as_const(m_chatRoom->chatUsers());
             for (auto *user : users) {

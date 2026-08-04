@@ -96,6 +96,7 @@ public:
     bool hasChatUser(const ChatUser *user) const;
     void addChatUser(ChatUser *user);
     void removeChatUser(ChatUser *user);
+    void updateAvatar();
     const QList<ChatUser *> &chatUsers() const { return m_chatUsers; }
 
     [[nodiscard("Caller must take ownership")]] PresenceStateAggregator *
@@ -113,7 +114,6 @@ private:
     void updateSipStatusSubscriptable();
     bool isNumberValid(const QString &number) const;
     QString resolveAvatarPath() const;
-    void updateAvatar();
 
     bool m_hasAvatar = false;
     BlockInfo m_blockInfo;

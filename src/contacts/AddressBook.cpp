@@ -1,4 +1,5 @@
 #include "AddressBook.h"
+#include "AvatarPrioHelper.h"
 #include "Contact.h"
 #include "FuzzyCompare.h"
 #include "PhoneNumberUtil.h"
@@ -18,6 +19,15 @@ AddressBook::AddressBook(QObject *parent) : QObject{ parent }
             Q_EMIT contactSourceInfosChanged();
         }
     });
+
+#ifndef APP_TESTS
+    connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged, this, [this]() {
+        QMutexLocker lock(&m_feederMutex);
+        for (auto *contact : std::as_const(m_contacts)) {
+            contact->updateAvatar();
+        }
+    });
+#endif
 }
 
 #ifndef APP_TESTS

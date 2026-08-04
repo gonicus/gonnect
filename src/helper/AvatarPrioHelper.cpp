@@ -14,8 +14,12 @@ uint AvatarPrioHelper::prioFor(const QString &configId) const
     QReadLocker locker(&m_priosLock);
 
     if (!m_prios.contains(configId)) {
-        qCWarning(lcAvatarPrioHelper)
-                << "Unknown config id" << configId << "returning default value" << DEFAULT_PRIO;
+        QMutexLocker warnedLocker(&m_warnedConfigIdsLock);
+        if (!m_warnedConfigIds.contains(configId)) {
+            m_warnedConfigIds.insert(configId);
+            qCWarning(lcAvatarPrioHelper)
+                    << "Unknown config id" << configId << "returning default value" << DEFAULT_PRIO;
+        }
         return DEFAULT_PRIO;
     }
 
@@ -57,8 +61,16 @@ void AvatarPrioHelper::updatePriosFromConfig()
         qCInfo(lcAvatarPrioHelper) << "Avatar priority for" << id << "is" << prio;
     }
 
-    QWriteLocker locker(&m_priosLock);
-    if (m_prios != prios) {
-        m_prios = prios;
+    bool changed = false;
+    {
+        QWriteLocker locker(&m_priosLock);
+        if (m_prios != prios) {
+            m_prios = prios;
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        Q_EMIT priosChanged();
     }
 }

@@ -1,6 +1,7 @@
 #include "ChatUserSearchModel.h"
 #include "ChatUser.h"
 #include "AddressBook.h"
+#include "AvatarPrioHelper.h"
 
 #include <QLoggingCategory>
 
@@ -81,6 +82,14 @@ void ChatUserSearchModel::onChatProviderChanged()
         m_chatProviderContext = new QObject(this);
         connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded, m_chatProviderContext,
                 [this](ChatUser *user) { refreshAvatarPath(user); });
+        connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged,
+                m_chatProviderContext, [this]() {
+                    const auto rows = rowCount(QModelIndex());
+                    if (rows > 0) {
+                        Q_EMIT dataChanged(createIndex(0, 0), createIndex(rows - 1, 0),
+                                           { static_cast<int>(Roles::AvatarPath) });
+                    }
+                });
 
         connect(m_chatProvider, &IChatProvider::userRemoved, m_chatProviderContext,
                 [this](QString, ChatUser *user, qsizetype) {
