@@ -450,7 +450,7 @@ Item {
 
     Column {
         id: bottomMenuCol
-        bottomPadding: Theme.d
+        bottomPadding: emergencyTabButton.visible ? 0 : Theme.d
         spacing: Theme.d
         anchors {
             left: parent.left
@@ -477,7 +477,7 @@ Item {
 
         Item {
             id: emergencyTabButton
-            height: 4 * Theme.d
+            height: emergencyTabButton.width
             anchors {
                 left: parent.left
                 right: parent.right
@@ -491,13 +491,8 @@ Item {
 
             Rectangle {
                 id: emergencyButtonBackground
-                radius: Theme.d / 2
                 color: Theme.emergencyColor
-                anchors {
-                    fill: parent
-                    leftMargin: Theme.d
-                    rightMargin: Theme.d
-                }
+                anchors.fill: parent
             }
 
             Rectangle {
