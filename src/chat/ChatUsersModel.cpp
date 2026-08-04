@@ -53,12 +53,9 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
                                              static_cast<int>(Roles::PresenceState) });
                     });
 
-            for (qsizetype i = 0, l = m_chatProvider->chatRoomsCount(); i < l; ++i) {
-                const auto room = m_chatProvider->chatRoomByIndex(i);
-                const auto &users = room->chatUsers();
-                for (auto *user : users) {
-                    connectUserAvatarSignals(user);
-                }
+            const auto users = m_chatProvider->users();
+            for (auto *user : users) {
+                connectUserAvatarSignals(user);
             }
         }
 
@@ -113,7 +110,7 @@ QVariant ChatUsersModel::data(const QModelIndex &index, int role) const
     }
 }
 
-void ChatUsersModel::connectUserAvatarSignals(ChatUser *user)
+void ChatUsersModel::connectUserAvatarSignals(const ChatUser *user)
 {
     if (m_avatarSignaledUsers.contains(user)) {
         return;
@@ -124,7 +121,7 @@ void ChatUsersModel::connectUserAvatarSignals(ChatUser *user)
             [this, user]() { refreshAvatarPath(user); });
 }
 
-void ChatUsersModel::refreshAvatarPath(ChatUser *user)
+void ChatUsersModel::refreshAvatarPath(const ChatUser *user)
 {
     const auto row = m_chatProvider->users().indexOf(user);
     if (row < 0) {

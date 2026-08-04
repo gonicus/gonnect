@@ -20,12 +20,12 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const override;
 
 private:
-    void connectUserAvatarSignals(ChatUser *user);
-    void refreshAvatarPath(ChatUser *user);
+    void connectUserAvatarSignals(const ChatUser *user);
+    void refreshAvatarPath(const ChatUser *user);
 
     IChatProvider *m_chatProvider = nullptr;
     QObject *m_chatProviderContext = nullptr;
-    QSet<ChatUser *> m_avatarSignaledUsers;
+    QSet<const ChatUser *> m_avatarSignaledUsers;
 
 Q_SIGNALS:
     void chatProviderChanged();
