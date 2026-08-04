@@ -197,8 +197,6 @@ Item {
         anchors {
             bottom: parent.bottom
             horizontalCenter: parent.horizontalCenter
-            leftMargin: Theme.d * 2
-            rightMargin: Theme.d * 2
         }
 
         BusyIndicator {
@@ -225,11 +223,10 @@ Item {
         font.pixelSize: 16
         anchors.centerIn: searchResultListView
         text: {
-            const l = searchTextField.text.trim().length
-            if (l > 0 && l < 3) {
-                return qsTr("Please enter at least three characters...")
+            if (chatRoomSearchModel.isLoading) {
+                return qsTr("Searching...")
             }
-            if (l > 0) {
+            if (searchTextField.text.trim().length) {
                 return qsTr("No chat rooms found.")
             }
             return qsTr("Please enter a search phrase...")

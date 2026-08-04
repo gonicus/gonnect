@@ -11,6 +11,7 @@ ChatRoomSearchModel::ChatRoomSearchModel(QObject *parent) : QAbstractListModel{ 
             &ChatRoomSearchModel::onChatProviderChanged);
     connect(this, &ChatRoomSearchModel::searchPhraseChanged, this,
             &ChatRoomSearchModel::updateModel);
+    connect(this, &ChatRoomSearchModel::limitChanged, this, &ChatRoomSearchModel::updateModel);
     updateModel();
 }
 
@@ -103,10 +104,12 @@ void ChatRoomSearchModel::onChatProviderChanged()
 
                     if (m_isLoadingNext) {
                         m_isLoadingNext = false;
-                        const auto l = m_publicRooms.length();
-                        beginInsertRows(QModelIndex(), l, l + roomList.length() - 1);
-                        m_publicRooms += roomList;
-                        endInsertRows();
+                        if (!roomList.isEmpty()) {
+                            const auto l = m_publicRooms.length();
+                            beginInsertRows(QModelIndex(), l, l + roomList.length() - 1);
+                            m_publicRooms += roomList;
+                            endInsertRows();
+                        }
                     } else {
                         beginResetModel();
                         m_publicRooms = roomList;
@@ -129,8 +132,9 @@ void ChatRoomSearchModel::updateModel()
 
     if (m_chatProvider && (m_limit > 0 || !m_searchPhrase.isEmpty())) {
         setIsLoading(true);
-        m_searchTag =
-                m_chatProvider->searchPublicRoomRequest(m_searchPhrase, m_nextBatchToken, m_limit);
+        m_searchTag = m_chatProvider->searchPublicRoomRequest(m_searchPhrase, QString(), m_limit);
+    } else {
+        setIsLoading(false);
     }
 }
 
