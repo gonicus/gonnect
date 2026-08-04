@@ -1,5 +1,4 @@
 #include "AddressBook.h"
-#include "AvatarPrioHelper.h"
 #include "Contact.h"
 #include "FuzzyCompare.h"
 #include "PhoneNumberUtil.h"
@@ -7,6 +6,10 @@
 #include <QCryptographicHash>
 #include <QRegularExpression>
 #include <QLoggingCategory>
+
+#ifndef APP_TESTS
+#  include "AvatarPrioHelper.h"
+#endif
 
 Q_LOGGING_CATEGORY(lcAddressBook, "gonnect.app.contacts.AddressBook")
 
