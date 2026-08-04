@@ -435,6 +435,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/Menu.qml
         ui/components/popups/OwnAvatarContextMenu.qml
         ui/components/popups/PublicRoomSearch.qml
+        ui/components/popups/Popup.qml
         ui/components/popups/SearchResultPopup.qml
         ui/components/popups/UrlCopyDialog.qml
         ui/components/popups/UserSelect.qml
@@ -860,6 +861,8 @@ qt_add_qml_module(gonnect
         ui/TogglerProxyModel.cpp
         ui/ViewHelper.h
         ui/ViewHelper.cpp
+        ui/WebEngineKeyEventFilter.h
+        ui/WebEngineKeyEventFilter.cpp
 
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp

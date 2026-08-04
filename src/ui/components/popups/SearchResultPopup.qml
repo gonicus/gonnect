@@ -19,6 +19,7 @@ Popup {
     enter: null  // Transitions seem to cause that the popup is not visible sometimes...
     exit: null
     visible: !!control.searchText.length
+    focus: false
 
     LoggingCategory {
         id: category
@@ -687,6 +688,8 @@ Popup {
                                                 if (chatRoomId) {
                                                     console.log(`Request showing chat room ${chatRoomId} of ${chatSourceDelg.modelData.provider?.displayName}`)
                                                     ViewHelper.showChatRoom(chatSourceDelg.modelData.provider, chatRoomId)
+                                                } else {
+                                                    ViewHelper.showCreateRoomDialog(chatSourceDelg.modelData.provider, [ chatSourceDelg.modelData.id ])
                                                 }
 
                                                 control.primaryActionTriggered()
