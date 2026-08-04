@@ -14,6 +14,7 @@ BaseWindow {
     minimumHeight: 600
     title: "GOnnect"
     resizable: true
+    windowHeaderOverlapsContent: true
 
     LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
@@ -29,7 +30,6 @@ BaseWindow {
     windowHeaderComponent: Component {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
-            mainBarColor: mainTabBar.backgroundColor
 
             showSearch: !SM.uiEditMode
 
@@ -344,7 +344,7 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
-                topMargin: controlBar.visible ? 5 : 0
+                topMargin: controlBar.visible ? 5 : (Theme.useOwnDecoration ? control.windowHeaderHeight : 0)
                 bottom: togglerList.visible ? togglerList.top : parent.bottom
                 bottomMargin: Theme.d
             }
