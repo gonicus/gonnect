@@ -14,6 +14,7 @@ Item {
 
         property Button authButton
         property bool shareFullScreen
+        property bool chatAutoOpened
     }
 
     LoggingCategory {
@@ -44,7 +45,10 @@ Item {
         }
     ]
 
-    function startConference(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
+    function startConference(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
+        internal.chatAutoOpened = false
+        upgradeRoomsAggregator.setWrappedContact(contact)
+
         confConn.setCallHistoryItem(callHistoryItem)
 
         if (!AuthManager.isJitsiAuthRequired || AuthManager.isJitsiRoomAuthenticated(meetingId)) {
@@ -827,16 +831,39 @@ Item {
         CallSideBar {
             id: callSideBar
             anchors.fill: parent
-            chatAvailable: confConn.hasCapability(IConferenceConnector.Capability.ChatInCall)
+            conferenceMode: true
+            chatAvailable: confConn.hasCapability(IConferenceConnector.Capability.ChatInCall) || upgradeRoomsAggregator.chatRooms.length > 0
             personsAvailable: confConn.hasCapability(IConferenceConnector.Capability.UserRoles)
             conferenceConnector: confConn
+            roomsAggregator: AggregatedDirectRoomsOfContact {
+                id: upgradeRoomsAggregator
+                onBestMatchingChatRoomChanged: () => callSideBar.maybeAutoOpenChat()
+            }
+
+            function maybeAutoOpenChat() {
+                if (internal.chatAutoOpened || !confConn.isInConference) {
+                    return
+                }
+
+                if (upgradeRoomsAggregator.bestMatchingChatRoom && !callSideBar.conferenceChatInUse) {
+                    internal.chatAutoOpened = true
+                    callSideBar.selectedSideBarMode = CallSideBar.Chat
+                }
+            }
 
             Connections {
                 target: confConn
                 function onIsInConferenceChanged() {
-                    if (!confConn.isInConference) {
+                    if (confConn.isInConference) {
+                        callSideBar.maybeAutoOpenChat()
+                    } else {
+                        internal.chatAutoOpened = false
                         callSideBar.selectedSideBarMode = CallSideBar.None
                     }
+                }
+
+                function onNumberOfUsersChanged() {
+                    callSideBar.maybeAutoOpenChat()
                 }
             }
 
