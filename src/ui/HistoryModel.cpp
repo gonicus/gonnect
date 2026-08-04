@@ -69,6 +69,8 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
             return;
         }
         m_avatarTrackedContacts.insert(contact);
+        connect(contact, &QObject::destroyed, this,
+                [this, contact]() { m_avatarTrackedContacts.remove(contact); });
         connect(contact, &Contact::avatarChanged, this, [this]() {
             const auto count = rowCount(QModelIndex());
             if (count <= 0) {

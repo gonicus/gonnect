@@ -172,7 +172,8 @@ void FavoritesModel::updateModel()
             continue;
         }
         m_avatarTrackedContacts.insert(contact);
-
+        connect(contact, &QObject::destroyed, this,
+                [this, contact]() { m_avatarTrackedContacts.remove(contact); });
         connect(contact, &Contact::avatarChanged, this, [this, contact]() {
             const auto *entry = m_favoriteContactLookup.value(contact);
             if (!entry) {
