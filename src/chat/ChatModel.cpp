@@ -4,6 +4,8 @@
 #include "IChatProvider.h"
 #include "ChatMessageContentUserStateChange.h"
 #include "IpcChatRoom.h"
+#include "AddressBook.h"
+#include "AvatarPrioHelper.h"
 
 #include <QLoggingCategory>
 
@@ -163,6 +165,9 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
 
     case static_cast<int>(Roles::AvatarPath): {
         if (const auto user = m_chatRoom->chatUserById(item->fromId())) {
+            if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
+                return contact->avatarPath();
+            }
             return user->avatarPath();
         }
         return QString();
@@ -249,6 +254,33 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
     return QVariant();
 }
 
+void ChatModel::connectUserAvatarSignals(ChatUser *user)
+{
+    if (m_avatarSignaledUsers.contains(user)) {
+        return;
+    }
+    m_avatarSignaledUsers.insert(user);
+
+    connect(user, &QObject::destroyed, m_chatRoomContext,
+            [this, user]() { m_avatarSignaledUsers.remove(user); });
+    connect(user, &ChatUser::avatarPathChanged, m_chatRoomContext,
+            [this, user]() { refreshAvatarPath(user); });
+}
+
+void ChatModel::refreshAvatarPath(ChatUser *user)
+{
+    if (!m_chatRoom) {
+        return;
+    }
+    const auto messages = m_chatRoom->chatMessages();
+    for (qsizetype i = 0; i < messages.size(); ++i) {
+        if (messages.at(i)->fromId() == user->id()) {
+            const auto modelIndex = createIndex(i, 0);
+            Q_EMIT dataChanged(modelIndex, modelIndex, { static_cast<int>(Roles::AvatarPath) });
+        }
+    }
+}
+
 void ChatModel::onChatRoomChanged()
 {
     beginResetModel();
@@ -256,10 +288,23 @@ void ChatModel::onChatRoomChanged()
     if (m_chatRoomContext) {
         m_chatRoomContext->deleteLater();
         m_chatRoomContext = nullptr;
+        m_avatarSignaledUsers.clear();
     }
 
     if (m_chatRoom) {
         m_chatRoomContext = new QObject(this);
+        connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded, m_chatRoomContext,
+                [this](ChatUser *user) { refreshAvatarPath(user); });
+        connect(&AddressBook::instance(), &AddressBook::chatUserAvatarChanged, m_chatRoomContext,
+                [this](ChatUser *user) { refreshAvatarPath(user); });
+        connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged, m_chatRoomContext,
+                [this]() {
+                    const auto rows = rowCount(QModelIndex());
+                    if (rows > 0) {
+                        Q_EMIT dataChanged(createIndex(0, 0), createIndex(rows - 1, 0),
+                                           { static_cast<int>(Roles::AvatarPath) });
+                    }
+                });
         connect(m_chatRoom, &IChatRoom::chatMessageAdded, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
                     beginInsertRows(QModelIndex(), index, index);
@@ -357,6 +402,17 @@ void ChatModel::onChatRoomChanged()
                     Q_EMIT dataChanged(modelIndex, modelIndex,
                                        { static_cast<int>(Roles::Reactions) });
                 });
+
+        const auto users = std::as_const(m_chatRoom->chatUsers());
+        for (auto *user : users) {
+            connectUserAvatarSignals(user);
+        }
+        connect(m_chatRoom, &IChatRoom::chatUsersChanged, m_chatRoomContext, [this]() {
+            const auto users = std::as_const(m_chatRoom->chatUsers());
+            for (auto *user : users) {
+                connectUserAvatarSignals(user);
+            }
+        });
     }
 
     endResetModel();
