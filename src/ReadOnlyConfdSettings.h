@@ -15,6 +15,4 @@ public:
 
 private:
     void readConfd();
-
-    QString replacePlaceholders(const QString &value) const;
 };
