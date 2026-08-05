@@ -100,8 +100,8 @@ Item {
             bottomMargin: -16
         }
 
-        readonly property real cellWidth: snapGrid.width / ViewHelper.numberOfGridCells()
-        readonly property real cellHeight: snapGrid.height / ViewHelper.numberOfGridCells()
+        readonly property int cellWidth: Math.floor(snapGrid.width / ViewHelper.numberOfGridCells())
+        readonly property int cellHeight: Math.floor(snapGrid.height / ViewHelper.numberOfGridCells())
 
         Accessible.role: Accessible.Canvas
         Accessible.name: qsTr("Base dashboard page grid")
