@@ -323,6 +323,11 @@ Window {
         contentItem: Item {
             id: outerContainer
 
+            layer.enabled: control.useOwnDecoration && !control.isMaximized
+            layer.effect: OpacityMask {
+                maskSource: bgRect
+            }
+
             Loader {
                 id: windowHeaderLoader
                 active: control.useOwnDecoration
