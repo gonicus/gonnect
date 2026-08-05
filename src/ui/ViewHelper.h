@@ -131,7 +131,8 @@ public:
     Q_INVOKABLE void
     requestMeeting(const QString &roomName,
                    QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
-                   const QString &displayName = "");
+                   const QString &displayName = "",
+                   QPointer<Contact> contact = QPointer<Contact>());
 
     Q_INVOKABLE void requestExternalAppointment(const QString &link);
 
@@ -221,7 +222,7 @@ Q_SIGNALS:
 
     void openMeetingRequested(QString meetingId, QString displayName,
                               IConferenceConnector::StartFlags startFlags,
-                              QPointer<CallHistoryItem> callHistoryItem);
+                              QPointer<CallHistoryItem> callHistoryItem, QPointer<Contact> contact);
 
     void meetingEstablished(QString roomName);
 
