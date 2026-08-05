@@ -66,6 +66,8 @@ private:
     static int toNormalRole(const int role);
 
     QVariant rawData(const ChatMessage *item, int role) const;
+    void connectUserAvatarSignals(ChatUser *user);
+    void refreshAvatarPath(ChatUser *user);
     ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
     void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
     static QList<int> nextItemContentRoles();
@@ -73,6 +75,7 @@ private:
 
     IChatRoom *m_chatRoom = nullptr;
     QObject *m_chatRoomContext = nullptr;
+    QSet<ChatUser *> m_avatarSignaledUsers;
     uint m_realMessagesCount = 0;
 
 Q_SIGNALS:

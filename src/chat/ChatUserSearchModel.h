@@ -30,6 +30,8 @@ private Q_SLOTS:
 
 private:
     void updateModel(const QList<ChatUser *> &userList);
+    void connectUserAvatarSignals(ChatUser *user);
+    void refreshAvatarPath(ChatUser *user);
 
     QString m_searchPhrase;
     IChatProvider *m_chatProvider = nullptr;
@@ -37,6 +39,7 @@ private:
     QString m_searchId;
 
     QList<ChatUser *> m_model;
+    QSet<ChatUser *> m_avatarSignaledUsers;
 
 Q_SIGNALS:
     void searchPhraseChanged();

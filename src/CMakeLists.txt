@@ -716,6 +716,8 @@ qt_add_qml_module(gonnect
         helper/AggregatedDirectRoomsOfContact.cpp
         helper/AudioHelper.h
         helper/AudioHelper.cpp
+        helper/AvatarPrioHelper.h
+        helper/AvatarPrioHelper.cpp
         helper/ChatMessageTransformer.h
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
@@ -989,7 +991,7 @@ target_include_directories(gonnect
 
 target_compile_definitions(gonnect
    PRIVATE
-    QT_DISABLE_DEPRECATED_BEFORE=0x060900
+    QT_DISABLE_DEPRECATED_BEFORE=0x060B00
     QT_NO_KEYWORDS)
 
 # Add hid-rp header only stuff as "isystem" so that we have a chance
