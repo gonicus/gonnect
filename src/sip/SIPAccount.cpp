@@ -60,7 +60,16 @@ void SIPAccount::initialize()
 
     const bool isCisco = !m_ciscoDeviceMac.isEmpty();
     if (isCisco) {
-        m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC2543;
+        const QString holdType = m_settings.value("ciscoHoldType", "rfc3264").toString().toLower();
+        if (holdType == "rfc2543") {
+            m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC2543;
+        } else if (holdType == "rfc3264") {
+            m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC3264;
+        } else {
+            qCWarning(lcSIPAccount)
+                    << "invalid ciscoHoldType" << holdType << "- using rfc3264 (sendonly)";
+            m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC3264;
+        }
         registerCiscoSupportedCapability();
     }
 
@@ -1374,12 +1383,12 @@ void SIPAccount::registerCiscoSupportedCapability()
     }
 
     static const pj_str_t tags[] = {
-                                     { const_cast<char *>("X-cisco-callinfo"), 16 },
-                                     { const_cast<char *>("X-cisco-srtp-fallback"), 21 },
-                                     { const_cast<char *>("X-cisco-sis-5.1.0"), 17 },
-                                     };
-    pjsip_endpt_add_capability(endpt, nullptr, PJSIP_H_SUPPORTED, nullptr,
-                               PJ_ARRAY_SIZE(tags), tags);
+        { const_cast<char *>("X-cisco-callinfo"), 16 },
+        { const_cast<char *>("X-cisco-srtp-fallback"), 21 },
+        { const_cast<char *>("X-cisco-sis-5.1.0"), 17 },
+    };
+    pjsip_endpt_add_capability(endpt, nullptr, PJSIP_H_SUPPORTED, nullptr, PJ_ARRAY_SIZE(tags),
+                               tags);
     registered = true;
 }
 
