@@ -35,7 +35,7 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
             return;
         }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(count, 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
@@ -46,7 +46,7 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
             return;
         }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(count, 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });

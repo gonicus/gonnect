@@ -63,6 +63,7 @@ Contact::Contact(const Contact &other) : QObject{ other.parent() }
     m_lastModified = other.m_lastModified;
     m_sipStatusSubscriptable = other.m_sipStatusSubscriptable;
     m_hasAvatar = other.m_hasAvatar;
+    m_resolvedAvatarPath = other.m_resolvedAvatarPath;
 
     init();
 }
