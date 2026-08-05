@@ -1461,10 +1461,7 @@ void IpcDispatcher::processResponse(
     } else if (rc.hasPublicRoomListResponse()) {
 
         auto listResp = rc.publicRoomListResponse();
-        if (listResp.hasNextBatch()) {
-            m_nextPublicRoomListResponseToken = listResp.nextBatch();
-        }
-
+        const QString nextBatchToken = listResp.hasNextBatch() ? listResp.nextBatch() : QString();
         const auto &rooms = listResp.roomList();
 
         QList<QSharedPointer<PublicChatRoom>> publicRooms;
@@ -1497,8 +1494,7 @@ void IpcDispatcher::processResponse(
             publicRooms.append(p);
         }
 
-        Q_EMIT publicRoomSearchResult(QString::number(tag), publicRooms,
-                                      m_nextPublicRoomListResponseToken);
+        Q_EMIT publicRoomSearchResult(QString::number(tag), publicRooms, nextBatchToken);
 
     } else if (rc.hasRoomChangeEvent()) {
         const auto changeEvent = rc.roomChangeEvent();
