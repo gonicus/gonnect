@@ -25,8 +25,8 @@ AddressBook::AddressBook(QObject *parent) : QObject{ parent }
 
 #ifndef APP_TESTS
     connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged, this, [this]() {
-        QMutexLocker lock(&m_feederMutex);
-        for (auto *contact : std::as_const(m_contacts)) {
+        const auto contacts = m_contacts.values();
+        for (auto *contact : std::as_const(contacts)) {
             contact->updateAvatar();
         }
     });
@@ -48,6 +48,12 @@ void AddressBook::initContactSignals(Contact *contact)
     connect(contact, &Contact::chatUserRemoved, this, [this](const ChatUser *chatUser) {
         Q_CHECK_PTR(chatUser);
         removeChatUserMapping(chatUser);
+    });
+    connect(contact, &Contact::avatarChanged, this, [this, contact]() {
+        const auto chatUsers = contact->chatUsers();
+        for (auto *chatUser : std::as_const(chatUsers)) {
+            Q_EMIT chatUserAvatarChanged(chatUser);
+        }
     });
 }
 

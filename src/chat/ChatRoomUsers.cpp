@@ -17,6 +17,8 @@ ChatRoomUsers::ChatRoomUsers(QObject *parent) : QAbstractListModel{ parent }
             m_chatRoomContext = new QObject(this);
             connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded, m_chatRoomContext,
                     [this](ChatUser *user) { refreshAvatarPath(user); });
+            connect(&AddressBook::instance(), &AddressBook::chatUserAvatarChanged,
+                    m_chatRoomContext, [this](ChatUser *user) { refreshAvatarPath(user); });
             connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged,
                     m_chatRoomContext, [this]() {
                         const auto rows = rowCount(QModelIndex());

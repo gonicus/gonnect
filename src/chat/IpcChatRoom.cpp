@@ -547,10 +547,19 @@ void IpcChatRoom::updateOtherUser()
             connect(other, &ChatUser::avatarPathChanged, m_otherUserContext,
                     [this]() { Q_EMIT avatarPathChanged(); });
 
-            if (const auto *contact = AddressBook::instance().lookupByChatUser(other)) {
-                connect(contact, &Contact::avatarChanged, m_otherUserContext,
-                        [this]() { Q_EMIT avatarPathChanged(); });
-            }
+            connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded,
+                    m_otherUserContext, [this](ChatUser *chatUser) {
+                        if (chatUser == m_otherUser) {
+                            Q_EMIT avatarPathChanged();
+                        }
+                    });
+
+            connect(&AddressBook::instance(), &AddressBook::chatUserAvatarChanged,
+                    m_otherUserContext, [this](ChatUser *chatUser) {
+                        if (chatUser == m_otherUser) {
+                            Q_EMIT avatarPathChanged();
+                        }
+                    });
         }
 
         Q_EMIT otherUserChanged();

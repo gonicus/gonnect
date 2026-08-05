@@ -91,5 +91,6 @@ Q_SIGNALS:
 
 #ifndef APP_TESTS
     void chatUserMappingAdded(ChatUser *chatUser, Contact *contact);
+    void chatUserAvatarChanged(ChatUser *chatUser);
 #endif
 };

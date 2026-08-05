@@ -20,6 +20,8 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
 
             connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded,
                     m_chatProviderContext, [this](ChatUser *user) { refreshAvatarPath(user); });
+            connect(&AddressBook::instance(), &AddressBook::chatUserAvatarChanged,
+                    m_chatProviderContext, [this](ChatUser *user) { refreshAvatarPath(user); });
             connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged,
                     m_chatProviderContext, [this]() {
                         const auto rows = rowCount(QModelIndex());
