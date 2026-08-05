@@ -992,7 +992,7 @@ target_include_directories(gonnect
 
 target_compile_definitions(gonnect
    PRIVATE
-    QT_DISABLE_DEPRECATED_BEFORE=0x060900
+    QT_DISABLE_DEPRECATED_BEFORE=0x060B00
     QT_NO_KEYWORDS)
 
 # Add hid-rp header only stuff as "isystem" so that we have a chance
