@@ -61,8 +61,8 @@ Item {
     // Basic widget
     Rectangle {
         id: resizableRect
-        x: control.xGrid * control.gridCellWidth
-        y: control.yGrid * control.gridCellHeight
+        x: Math.floor(control.xGrid * control.gridCellWidth)
+        y: Math.floor(control.yGrid * control.gridCellHeight)
         width: control.widthGrid * control.gridCellWidth - 24
         height: control.heightGrid * control.gridCellHeight - 24
         radius: resizableRect.widgetRadius
