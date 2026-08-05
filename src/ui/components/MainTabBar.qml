@@ -169,6 +169,7 @@ Item {
     Rectangle {
         id: filler
         anchors.fill: parent
+        topLeftRadius: Theme.d / 2
         color: control.Window.window?.active ? Theme.backgroundHeader : Theme.backgroundHeaderInactive
     }
 
@@ -449,7 +450,7 @@ Item {
 
     Column {
         id: bottomMenuCol
-        bottomPadding: Theme.d
+        bottomPadding: emergencyTabButton.visible ? 0 : Theme.d
         spacing: Theme.d
         anchors {
             left: parent.left
@@ -472,6 +473,71 @@ Item {
                     attachedData: null
                 }
             ]
+        }
+
+        Item {
+            id: emergencyTabButton
+            visible: GlobalInfo.shallShowEmergencyButton && GlobalInfo.hasEmergencyNumbers
+            height: emergencyTabButton.width
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+
+            readonly property bool isSelected: SelectionState.selectedPage.id === SelectionState.emergencyPageId()
+
+            function switchPage() {
+                SelectionState.selectedPage = {
+                    id: SelectionState.emergencyPageId(),
+                    type: MainPageSelection.PageType.Emergency,
+                    attachedData: undefined
+                }
+            }
+
+            Accessible.name: qsTr("Emergency call")
+            Accessible.description: qsTr("Show the emergency call page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => emergencyTabButton.switchPage()
+
+            Rectangle {
+                id: emergencyButtonBackground
+                color: Theme.emergencyColor
+                anchors.fill: parent
+            }
+
+            Rectangle {
+                id: emergencyButtonHoverBackground
+                visible: emergencyTabButtonHoverHandler.hovered || emergencyTabButton.isSelected
+                radius: emergencyButtonBackground.radius
+                color: Qt.tint(emergencyButtonBackground.color, "#26ffffff")
+                anchors.fill: emergencyButtonBackground
+            }
+
+            IconLabel {
+                anchors.centerIn: parent
+                icon {
+                    source: "qrc:/icons/ISO_7010_E004" + ViewHelper.culturalSphereExtension + ".svg"
+                    width: 2 * Theme.d
+                    height: 2 * Theme.d
+                    color: Theme.foregroundWhiteColor
+                }
+
+                Accessible.ignored: true
+            }
+
+            ToolTip.text: qsTr("Show the emergency call page")
+            ToolTip.visible: emergencyTabButtonHoverHandler.hovered
+            ToolTip.delay: Application.styleHints.mousePressAndHoldInterval
+            ToolTip.toolTip.x: emergencyTabButton.x + emergencyTabButton.width
+            ToolTip.toolTip.y: 9
+
+            HoverHandler {
+                id: emergencyTabButtonHoverHandler
+            }
+
+            TapHandler {
+                onTapped: () => emergencyTabButton.switchPage()
+            }
         }
     }
 

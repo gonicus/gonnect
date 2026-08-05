@@ -14,6 +14,7 @@ BaseWindow {
     minimumHeight: 600
     title: "GOnnect"
     resizable: true
+    windowHeaderOverlapsContent: true
 
     LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
@@ -29,7 +30,6 @@ BaseWindow {
     windowHeaderComponent: Component {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
-            mainBarColor: mainTabBar.backgroundColor
 
             showSearch: !SM.uiEditMode
 
@@ -344,9 +344,9 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
-                topMargin: controlBar.visible ? 5 : 0
-                bottom: bottomBar.visible ? bottomBar.top : parent.bottom
-                bottomMargin: Theme.d
+                topMargin: controlBar.visible ? 5 : (Theme.useOwnDecoration ? control.windowHeaderHeight : 0)
+                bottom: togglerList.visible ? togglerList.top : parent.bottom
+                bottomMargin: togglerList.visible ? Theme.d/2 : Theme.d
             }
 
             function getPage(pageId : string) : Item {
@@ -361,6 +361,8 @@ BaseWindow {
                         return conferencePage
                     case SelectionState.settingsPageId():
                         return settingsPage
+                    case SelectionState.emergencyPageId():
+                        return emergencyPage
                     default:
                         return pageStack.pages[pageId]
                 }
@@ -405,45 +407,24 @@ BaseWindow {
                 visible: false
                 anchors.fill: parent
             }
+
+            Emergency {
+                id: emergencyPage
+                visible: false
+                anchors.fill: parent
+            }
         }
 
-        Item {
-            id: bottomBar
-            visible: true
-            height: 30
+        TogglerList {
+            id: togglerList
+            visible: togglerList.count > 0
+            clip: true
+            width: Math.min(togglerList.contentWidth + togglerList.leftMargin + togglerList.rightMargin,
+                            parent.width - mainTabBar.width)
             anchors {
                 right: parent.right
-                left: mainTabBar.right
                 bottom: parent.bottom
                 bottomMargin: Theme.d / 2 - (Theme.useOwnDecoration ? 0 : 3)  // extra padding for window border
-            }
-
-            TogglerList {
-                id: togglerList
-                visible: togglerList.count > 0
-                clip: true
-                anchors {
-                    left: parent.left
-                    right: rightRow.left
-                    rightMargin: Theme.d * 2
-                    verticalCenter: rightRow.verticalCenter
-                }
-            }
-
-            Row {
-                id: rightRow
-                spacing: 10
-                anchors {
-                    right: parent.right
-                    bottom: parent.bottom
-                    rightMargin: 2 * Theme.d
-                }
-
-                FirstAidButton {
-                    id: firstAidButton
-                    height: 42
-                    z: 100000
-                }
             }
         }
     }
@@ -483,9 +464,6 @@ BaseWindow {
         function onShowDialPad() {
             const item = drawerStackView.push("qrc:/qt/qml/base/ui/components/controls/DtmfDialer.qml")
             item.dialed.connect(button => console.log(category, "TODO: DIAL", button))
-        }
-        function onShowFirstAid() {
-            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FirstAid.qml")
         }
         function onShowChatUserSearchDialog(chatProvider : IChatProvider) {
             drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/ChatUserSearch.qml", { chatProvider })

@@ -12,6 +12,7 @@ ListView {
     rightMargin: 2 * Theme.d
     spacing: Theme.d
     orientation: ListView.Horizontal
+    flickableDirection: Flickable.AutoFlickIfNeeded
     model: TogglerProxyModel {
         displayFilter: Toggler.STATUS
         TogglerModel {}
