@@ -47,6 +47,11 @@ Item {
 
     property alias root: resizableRect
 
+    readonly property int pixelX: Math.round(control.xGrid * control.gridCellWidth)
+    readonly property int pixelY: Math.round(control.yGrid * control.gridCellHeight)
+    readonly property int pixelWidth: Math.round((control.xGrid + control.widthGrid) * control.gridCellWidth) - control.pixelX
+    readonly property int pixelHeight: Math.round((control.yGrid + control.heightGrid) * control.gridCellHeight) - control.pixelY
+
     onXGridChanged: () => control.page?.writer.save()
     onYGridChanged: () => control.page?.writer.save()
     onWidthGridChanged: () => control.page?.writer.save()
@@ -61,10 +66,10 @@ Item {
     // Basic widget
     Rectangle {
         id: resizableRect
-        x: Math.floor(control.xGrid * control.gridCellWidth)
-        y: Math.floor(control.yGrid * control.gridCellHeight)
-        width: control.widthGrid * control.gridCellWidth - 24
-        height: control.heightGrid * control.gridCellHeight - 24
+        x: control.pixelX
+        y: control.pixelY
+        width: control.pixelWidth - 24
+        height: control.pixelHeight - 24
         radius: resizableRect.widgetRadius
         color: Theme.backgroundColor
 
@@ -77,9 +82,10 @@ Item {
 
             // Round value to grid coordinate and clamp min/max values
             const cellWidth = control.gridCellWidth
-            const newVal = Util.clamp(Math.round(resizableRect.x / cellWidth) * cellWidth,
-                                      0,
-                                      (ViewHelper.numberOfGridCells() - control.widthGrid) * cellWidth)
+            const gridX = Util.clamp(Math.round(resizableRect.x / cellWidth),
+                                     0,
+                                     ViewHelper.numberOfGridCells() - control.widthGrid)
+            const newVal = Math.round(gridX * cellWidth)
 
             if (newVal !== resizableRect.x) {
                 resizableRect.x = newVal
@@ -92,9 +98,10 @@ Item {
 
             // Round value to grid coordinate and clamp min/max values
             const cellHeight = control.gridCellHeight
-            const newVal = Util.clamp(Math.round(resizableRect.y / cellHeight) * cellHeight,
-                                      0,
-                                      (ViewHelper.numberOfGridCells() - control.heightGrid) * cellHeight)
+            const gridY = Util.clamp(Math.round(resizableRect.y / cellHeight),
+                                     0,
+                                     ViewHelper.numberOfGridCells() - control.heightGrid)
+            const newVal = Math.round(gridY * cellHeight)
 
             if (newVal !== resizableRect.y) {
                 resizableRect.y = newVal
@@ -168,8 +175,8 @@ Item {
                             control.xGrid = Math.round(resizableRect.x / control.gridCellWidth)
                             control.yGrid = Math.round(resizableRect.y / control.gridCellHeight)
 
-                            resizableRect.x = Qt.binding(() => control.xGrid * control.gridCellWidth)
-                            resizableRect.y = Qt.binding(() => control.yGrid * control.gridCellHeight)
+                            resizableRect.x = Qt.binding(() => control.pixelX)
+                            resizableRect.y = Qt.binding(() => control.pixelY)
                         }
                     }
                 }
