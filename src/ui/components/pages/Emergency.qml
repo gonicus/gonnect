@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls.Material
 import base
 
@@ -35,15 +34,21 @@ Card {
         Column {
             id: options
             spacing: 20
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
 
             Label {
                 id: firstAidHeader
                 text: qsTr("Emergency Call")
                 font.pixelSize: 32
                 wrapMode: Label.Wrap
-                anchors.horizontalCenter: parent.horizontalCenter
-
+                horizontalAlignment: Label.AlignHCenter
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
                 Accessible.ignored: true
             }
 
@@ -51,7 +56,11 @@ Card {
                 id: firstAidDescription
                 text: qsTr("Clicking one of these buttons will end all current calls and start an emergency call.")
                 wrapMode: Label.Wrap
-                anchors.horizontalCenter: parent.horizontalCenter
+                horizontalAlignment: Label.AlignHCenter
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
 
                 Accessible.ignored: true
             }
@@ -68,7 +77,6 @@ Card {
                     onClicked: () => {
                         SIPCallManager.endAllCalls()
                         SIPCallManager.call(delg.number)
-                        control.close()
                     }
 
                     required property string number

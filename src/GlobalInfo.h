@@ -47,6 +47,7 @@ private:
     bool m_isJitsiUrlInitialized = false;
     bool m_isTeamsUrlInitialized = false;
     bool m_shallShowEmergencyButton = false;
+    bool m_shallShowEmergencyButtonInitialized = false;
 
     QHash<WorkaroundId, bool> m_workaroundActiveCache;
 

@@ -76,9 +76,8 @@ bool GlobalInfo::isWorkaroundActive(const WorkaroundId id)
 
 bool GlobalInfo::shallShowEmergencyButton()
 {
-    static bool isConfigInitialized = false;
-    if (!isConfigInitialized) {
-        isConfigInitialized = true;
+    if (!m_shallShowEmergencyButtonInitialized) {
+        m_shallShowEmergencyButtonInitialized = true;
 
         ReadOnlyConfdSettings settings;
         m_shallShowEmergencyButton = settings.value("generic/showEmergencyButton", true).toBool();

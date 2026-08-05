@@ -420,7 +420,7 @@ BaseWindow {
             visible: togglerList.count > 0
             clip: true
             width: Math.min(togglerList.contentWidth + togglerList.leftMargin + togglerList.rightMargin,
-                            parent.width - (mainTabBar.x + mainTabBar.width))
+                            parent.width - mainTabBar.width)
             anchors {
                 right: parent.right
                 bottom: parent.bottom

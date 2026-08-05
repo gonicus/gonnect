@@ -494,8 +494,7 @@ Item {
                 }
             }
 
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Emergency tab button")
+            Accessible.name: qsTr("Emergency call")
             Accessible.description: qsTr("Show the emergency call page")
             Accessible.focusable: true
             Accessible.onPressAction: () => emergencyTabButton.switchPage()
@@ -508,8 +507,7 @@ Item {
 
             Rectangle {
                 id: emergencyButtonHoverBackground
-                visible: (emergencyTabButtonHoverHandler.hovered || emergencyTabButton.isSelected)
-                         && emergencyTabButton.enabled
+                visible: emergencyTabButtonHoverHandler.hovered || emergencyTabButton.isSelected
                 radius: emergencyButtonBackground.radius
                 color: Qt.tint(emergencyButtonBackground.color, "#26ffffff")
                 anchors.fill: emergencyButtonBackground
@@ -521,9 +519,7 @@ Item {
                     source: "qrc:/icons/ISO_7010_E004" + ViewHelper.culturalSphereExtension + ".svg"
                     width: 2 * Theme.d
                     height: 2 * Theme.d
-                    color: emergencyTabButton.enabled
-                           ? Theme.foregroundWhiteColor
-                           : Theme.secondaryInactiveTextColor
+                    color: Theme.foregroundWhiteColor
                 }
 
                 Accessible.ignored: true
