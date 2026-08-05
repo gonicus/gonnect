@@ -19,22 +19,34 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
     });
 
     connect(&AvatarManager::instance(), &AvatarManager::avatarsLoaded, this, [this]() {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
     connect(&AvatarManager::instance(), &AvatarManager::avatarAdded, this, [this](QString) {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
     connect(&AvatarManager::instance(), &AvatarManager::avatarRemoved, this, [this](QString) {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
@@ -49,6 +61,31 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&numStats, &NumberStats::modelReset, this, &HistoryModel::resetModel);
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this, &HistoryModel::resetModel);
+    connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
+            [this]() { m_avatarTrackedContacts.clear(); });
+
+    const auto trackContactAvatar = [this](Contact *contact) {
+        if (m_avatarTrackedContacts.contains(contact)) {
+            return;
+        }
+        m_avatarTrackedContacts.insert(contact);
+        connect(contact, &QObject::destroyed, this,
+                [this, contact]() { m_avatarTrackedContacts.remove(contact); });
+        connect(contact, &Contact::avatarChanged, this, [this]() {
+            const auto count = rowCount(QModelIndex());
+            if (count <= 0) {
+                return;
+            }
+
+            const auto startIndex = createIndex(0, 0);
+            const auto endIndex = createIndex(count - 1, 0);
+            Q_EMIT dataChanged(
+                    startIndex, endIndex,
+                    { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+        });
+    };
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this, trackContactAvatar);
+    connect(&AddressBook::instance(), &AddressBook::contactModified, this, trackContactAvatar);
 
     connect(this, &HistoryModel::limitChanged, this, &HistoryModel::resetModel);
 }

@@ -19,7 +19,6 @@
 #include "ViewHelper.h"
 #include "Notification.h"
 #include "NotificationManager.h"
-#include "AvatarManager.h"
 #include "GlobalCallState.h"
 #include "ErrorBus.h"
 
@@ -918,8 +917,7 @@ void SIPCall::createOngoingCallNotification()
     auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, false,
                               this);
 
-    auto &am = AvatarManager::instance();
-    QString avatar = c ? am.avatarPathFor(c->id()) : "";
+    QString avatar = c ? c->avatarPath() : "";
 
     if (avatar.isEmpty()) {
         n->setIcon("call-incoming-symbolic");
