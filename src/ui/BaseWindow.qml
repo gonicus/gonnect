@@ -18,6 +18,9 @@ Window {
     property bool useOwnDecoration: Theme.useOwnDecoration
     property bool showMinimizeButton: true
     property bool showMaximizeButton: true
+    property bool windowHeaderOverlapsContent: false
+
+    readonly property int windowHeaderHeight: 4 * Theme.d + 6
 
     property int windowHeaderPadding: control.useOwnDecoration
                                       ? windowHeaderLoader.height + 2 * control.shadowMargin
@@ -320,10 +323,16 @@ Window {
         contentItem: Item {
             id: outerContainer
 
+            layer.enabled: control.useOwnDecoration && !control.isMaximized
+            layer.effect: OpacityMask {
+                maskSource: bgRect
+            }
+
             Loader {
                 id: windowHeaderLoader
                 active: control.useOwnDecoration
-                height: 4 * Theme.d + 6
+                z: control.windowHeaderOverlapsContent ? 1 : 0
+                height: control.windowHeaderHeight
                 anchors {
                     top: parent.top
                     left: parent.left
@@ -356,7 +365,9 @@ Window {
                 id: innerContainer
                 clip: true
                 anchors {
-                    top: control.useOwnDecoration ? windowHeaderLoader.bottom : parent.top
+                    top: control.windowHeaderOverlapsContent
+                         ? parent.top
+                         : (control.useOwnDecoration ? windowHeaderLoader.bottom : parent.top)
                     bottom: parent.bottom
                     left: parent.left
                     right: parent.right
