@@ -168,14 +168,13 @@ void SIPCall::parseCallRouting(pjsip_msg *msg)
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
 {
-    pj::CallOpParam tmpPrm = prm;
-    addCiscoSupportedHeader(tmpPrm);
-
-    if (!m_account || !m_account->isRTTEnabled()) {
+    if (m_account && m_account->isRTTEnabled()) {
+        makeCall(dst_uri.toStdString(), prm);
+    } else {
+        pj::CallOpParam tmpPrm = prm;
         tmpPrm.opt.textCount = 0;
+        makeCall(dst_uri.toStdString(), tmpPrm);
     }
-
-    makeCall(dst_uri.toStdString(), tmpPrm);
 }
 
 void SIPCall::onCallState(pj::OnCallStateParam &prm)
@@ -627,7 +626,6 @@ bool SIPCall::hold()
 {
     pj::CallOpParam op(true);
     addCiscoRemoteCcHeader(op, "hold");
-    addCiscoSupportedHeader(op);
 
     try {
         setHold(op);
@@ -645,7 +643,6 @@ bool SIPCall::unhold()
 {
     pj::CallOpParam op(true);
     addCiscoRemoteCcHeader(op, "resume");
-    addCiscoSupportedHeader(op);
     op.opt.flag = PJSUA_CALL_UNHOLD;
     op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
@@ -1232,18 +1229,6 @@ void SIPCall::addCiscoRemoteCcHeader(pj::CallOpParam &op, const char *feature) c
     pj::SipHeader header;
     header.hName = "Call-Info";
     header.hValue = std::string("<urn:X-cisco-remotecc:") + feature + ">";
-    op.txOption.headers.push_back(header);
-}
-
-void SIPCall::addCiscoSupportedHeader(pj::CallOpParam &op) const
-{
-    if (!m_account || !m_account->isCiscoDevice()) {
-        return;
-    }
-
-    pj::SipHeader header;
-    header.hName = "Supported";
-    header.hValue = "X-cisco-callinfo, X-cisco-srtp-fallback, X-cisco-sis-5.1.0";
     op.txOption.headers.push_back(header);
 }
 

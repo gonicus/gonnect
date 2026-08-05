@@ -61,6 +61,7 @@ void SIPAccount::initialize()
     const bool isCisco = !m_ciscoDeviceMac.isEmpty();
     if (isCisco) {
         m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC2543;
+        registerCiscoSupportedCapability();
     }
 
     m_ciscoSharedLineEnabled = m_settings.value("ciscoSharedLine", false).toBool();
@@ -1358,6 +1359,28 @@ void SIPAccount::ciscoSetupSharedLine()
         delete m_sharedLine;
         m_sharedLine = nullptr;
     }
+}
+
+void SIPAccount::registerCiscoSupportedCapability()
+{
+    static bool registered = false;
+    if (registered) {
+        return;
+    }
+
+    pjsip_endpoint *endpt = pjsua_get_pjsip_endpt();
+    if (!endpt) {
+        return;
+    }
+
+    static const pj_str_t tags[] = {
+                                     { const_cast<char *>("X-cisco-callinfo"), 16 },
+                                     { const_cast<char *>("X-cisco-srtp-fallback"), 21 },
+                                     { const_cast<char *>("X-cisco-sis-5.1.0"), 17 },
+                                     };
+    pjsip_endpt_add_capability(endpt, nullptr, PJSIP_H_SUPPORTED, nullptr,
+                               PJ_ARRAY_SIZE(tags), tags);
+    registered = true;
 }
 
 QString SIPAccount::bargeIntoSharedLine(bool useConferenceBridge)

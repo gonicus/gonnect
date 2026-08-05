@@ -102,6 +102,7 @@ private:
     void ciscoSetup();
     void ciscoSetupSharedLine();
     void ciscoUpdateSrtpFallback(const pjsip_msg *msg);
+    void registerCiscoSupportedCapability();
 
     bool hasAllowGrant(const QString &header, const QString &grant) const;
 

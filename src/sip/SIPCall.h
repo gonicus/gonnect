@@ -179,7 +179,6 @@ private:
     void bindDialogTransport(const pjsip_rx_data *rdata);
 
     void addCiscoRemoteCcHeader(pj::CallOpParam &op, const char *feature) const;
-    void addCiscoSupportedHeader(pj::CallOpParam &op) const;
 
     float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
                        double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
