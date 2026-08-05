@@ -376,7 +376,6 @@ qt_add_qml_module(gonnect
         ui/components/controls/FavIcon.qml
         ui/components/controls/FavoriteListItemBig.qml
         ui/components/controls/FileDropArea.qml
-        ui/components/controls/FirstAidButton.qml
         ui/components/controls/HeaderIconButton.qml
         ui/components/controls/HideableMenuItem.qml
         ui/components/controls/JoinRuleComboBox.qml
@@ -409,6 +408,7 @@ qt_add_qml_module(gonnect
         ui/components/pages/Call.qml
         ui/components/pages/Chats.qml
         ui/components/pages/Conference.qml
+        ui/components/pages/Emergency.qml
         # Dynamic UI
         ui/components/pages/BasePage.qml
 
@@ -423,7 +423,6 @@ qt_add_qml_module(gonnect
         ui/components/popups/EmojiPickerPopup.qml
         ui/components/popups/FileSelectionOverview.qml
         ui/components/popups/FilteredEmojis.qml
-        ui/components/popups/FirstAid.qml
         ui/components/popups/HistoryListContextMenu.qml
         ui/components/popups/ImageSendPreview.qml
         ui/components/popups/InviteChatRoom.qml

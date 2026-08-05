@@ -171,7 +171,7 @@ Item {
                     : (chatMessageBox.visible
                        ? chatMessageBox.top
                        : parent.bottom)
-            bottomMargin: 20
+            bottomMargin: 2
             leftMargin: 10
             rightMargin: 10
         }
