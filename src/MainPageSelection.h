@@ -17,7 +17,7 @@ struct MainPageSelection
     Q_PROPERTY(QObject *attachedData MEMBER attachedData)
 
 public:
-    enum class PageType { Base, Call, Chats, Conference, Settings };
+    enum class PageType { Base, Call, Chats, Conference, Settings, Emergency };
     Q_ENUM(PageType)
 
     bool operator==(const MainPageSelection &) const = default;
