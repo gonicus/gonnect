@@ -8,10 +8,12 @@ Rectangle {
     id: control
     color: Theme.backgroundSecondaryColor
     height: 4 * Theme.d
-    radius: Theme.d / 2
+    radius: 0
+    topRightRadius: Theme.d / 2
     anchors {
         top: parent?.top
         left: parent?.left
+        leftMargin: control.mainBarWidth
         right: parent?.right
     }
 
@@ -21,7 +23,6 @@ Rectangle {
     readonly property bool active: control.Window.window?.active ?? false
 
     required property int mainBarWidth
-    required property color mainBarColor
 
     required property bool showSearch
 
@@ -35,70 +36,6 @@ Rectangle {
         searchField.giveFocus()
     }
 
-    Rectangle {
-        id: mimicRect
-        visible: false
-        width: 96
-        radius: parent.radius
-        color: control.Window.window?.active ? Theme.backgroundHeader : Theme.backgroundHeaderInactive
-        anchors {
-            top: parent.top
-            left: parent.left
-            bottom: parent.bottom
-        }
-
-        Accessible.ignored: true
-
-        Rectangle {
-            color: mimicRect.color
-            width: mimicRect.radius
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: parent.right
-            }
-
-            Accessible.ignored: true
-        }
-
-        Rectangle {
-            color: mimicRect.color
-            width: mimicRect.radius
-            height: mimicRect.radius
-            anchors {
-                bottom: parent.bottom
-                left: parent.left
-            }
-
-            Accessible.ignored: true
-        }
-
-        Rectangle {
-            color: Theme.borderColor
-            width: 1
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: parent.right
-            }
-
-            Accessible.ignored: true
-        }
-    }
-
-    // This rectangle makes the bottom rounded corners of rect straight
-    Rectangle {
-        height: control.radius
-        color: control.color
-        anchors {
-            left: control.left
-            right: control.right
-            bottom: control.bottom
-        }
-
-        Accessible.ignored: true
-    }
-
     DragHandler {
         id: systemDragHandler
         target: null
@@ -109,49 +46,8 @@ Rectangle {
         }
     }
 
-    Rectangle {
-        id: tabBarSimulator
-        width: control.mainBarWidth
-        topLeftRadius: control.radius
-        anchors {
-            top: parent.top
-            left: parent.left
-            bottom: parent.bottom
-        }
-
-        color: control.mainBarColor
-
-        Accessible.ignored: true
-
-        Rectangle {
-            id: border
-            color: Theme.borderColor
-            width: 1
-            anchors {
-                right: parent.right
-                top: parent.top
-                bottom: parent.bottom
-            }
-
-            Accessible.ignored: true
-        }
-    }
-
     TapHandler {
         onDoubleTapped: () => control.toggleMaximized()
-    }
-
-    Image {
-        width: 2 * Theme.d
-        height: 2 * Theme.d
-        source: "qrc:/icons/gonnect.svg"
-        sourceSize.width: 2 * Theme.d
-        sourceSize.height: 2 * Theme.d
-        anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.left
-            leftMargin: Theme.d
-        }
     }
 
     EditModeOptions {

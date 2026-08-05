@@ -1,42 +1,54 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls.Material
 import base
 
-Item {
+Card {
     id: control
-    implicitWidth: 800
-    implicitHeight: 500
+    anchors {
+        fill: parent
+        leftMargin: Theme.d * 2
+        rightMargin: Theme.d * 2
+        topMargin: Theme.d
+        bottomMargin: Theme.d
+    }
 
     Flickable {
-        anchors.fill: parent
+        id: flickable
         clip: true
         flickableDirection: Flickable.AutoFlickIfNeeded
         contentHeight: options.implicitHeight
+        height: Math.min(control.height, flickable.contentHeight)
         ScrollBar.vertical: ScrollBar { width: 10 }
+        anchors {
+            left: parent.left
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+        }
 
         Accessible.role: Accessible.ButtonMenu
         Accessible.name: firstAidHeader.text
         Accessible.description: firstAidDescription.text
 
-        Shortcut {
-            sequence: "Esc"
-            onActivated: control.StackView.view.popCurrentItem(StackView.Immediate)
-        }
-
-        ColumnLayout {
+        Column {
             id: options
             spacing: 20
-            anchors.fill: parent
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
 
             Label {
                 id: firstAidHeader
                 text: qsTr("Emergency Call")
                 font.pixelSize: 32
                 wrapMode: Label.Wrap
-
+                horizontalAlignment: Label.AlignHCenter
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
                 Accessible.ignored: true
             }
 
@@ -44,6 +56,11 @@ Item {
                 id: firstAidDescription
                 text: qsTr("Clicking one of these buttons will end all current calls and start an emergency call.")
                 wrapMode: Label.Wrap
+                horizontalAlignment: Label.AlignHCenter
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
 
                 Accessible.ignored: true
             }
@@ -55,13 +72,11 @@ Item {
                     text: delg.displayName
                     highlighted: true
                     Material.accent: Theme.redColor
-                    Layout.preferredWidth: control.implicitWidth / 2
-                    Layout.alignment: Qt.AlignHCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
 
                     onClicked: () => {
                         SIPCallManager.endAllCalls()
                         SIPCallManager.call(delg.number)
-                        control.StackView.view.popCurrentItem(StackView.Immediate)
                     }
 
                     required property string number
@@ -74,39 +89,6 @@ Item {
                     Accessible.onPressAction: () => delg.click()
                 }
             }
-
-            Item {
-                Layout.preferredHeight: 20
-            }
-
-            Button {
-                id: firstAidExit
-                text: qsTr("Close")
-                Layout.preferredWidth: control.implicitWidth / 2
-                Layout.alignment: Qt.AlignHCenter
-
-                onClicked: {
-                    control.StackView.view.popCurrentItem(StackView.Immediate)
-                }
-
-                Accessible.role: Accessible.Button
-                Accessible.name: firstAidExit.text
-                Accessible.description: qsTr("Exit the emergency call menu without initiating any action")
-                Accessible.focusable: true
-                Accessible.onPressAction: () => firstAidExit.click()
-            }
         }
-    }
-
-    HeaderIconButton {
-        id: closeButton
-        iconSource: Icons.mobileCloseApp
-        accessiblePurpose: qsTr("Close emergency call menu")
-        anchors {
-            top: parent.top
-            right: parent.right
-        }
-
-        onClicked: () => control.StackView.view.popCurrentItem(StackView.Immediate)
     }
 }
