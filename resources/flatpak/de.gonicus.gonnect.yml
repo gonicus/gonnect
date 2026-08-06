@@ -318,8 +318,41 @@ modules:
       - type: patch
         path: patches/ecm-downgrade.patch
 
+  - name: sqlcipher
+    buildsystem: autotools
+    config-opts:
+      - "--with-tempstore=always"
+      - "--enable-fts5"
+      - "--disable-tcl"
+      - "--disable-shared"
+    build-options:
+      cflags: "-DSQLITE_HAS_CODEC -fvisibility=hidden -DSQLITE_EXTRA_INIT=sqlcipher_extra_init -DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown"
+      ldflags: "-lcrypto"
+    post-install:
+      - install -d /app/include/sqlcipher
+      - mv /app/include/sqlite3.h /app/include/sqlite3ext.h /app/include/sqlcipher/
+      - mv /app/lib/libsqlite3.a /app/lib/libsqlcipher.a
+      - rm -f /app/lib/pkgconfig/sqlite3.pc /app/bin/sqlite3
+    sources:
+      - type: archive
+        url: https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.16.0.tar.gz
+        sha256: d687bf981199ac019c6c87b11f92a5900aec777855e7ba5b30e5e1192933ce8a
+
+  - name: libstemmer
+    buildsystem: simple
+    build-commands:
+      - make CC=cc libstemmer.a
+      - install -Dm644 include/libstemmer.h /app/include/libstemmer.h
+      - install -Dm644 libstemmer.a /app/lib/libstemmer.a
+    sources:
+      - type: git
+        url: https://github.com/snowballstem/snowball.git
+        tag: v3.1.1
+
   - name: gonnect
     buildsystem: cmake-ninja
+    build-options:                                                
+      cxxflags: "-I/app/include/sqlcipher"
     config-opts:
       - -DCMAKE_MODULE_PATH=/app/lib/${FLATPAK_ARCH}-linux-gnu/cmake/Qt6
       - -DCMAKE_LIBRARY_PATH=/usr/lib
