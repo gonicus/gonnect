@@ -64,8 +64,11 @@ void FlatpakNetworkHelper::updateNetworkState()
         return;
     }
 
-    if (connected != m_connectivity) {
-        m_connectivity = connected;
+    const bool statusChanged = connected != m_connectivity;
+    m_connectivity = connected;
+
+    // Also emit signal if connected has not changed which happens e.g. WIFI -> LAN
+    if (statusChanged || connected) {
         Q_EMIT connectivityChanged();
         qCDebug(lcNetwork) << "network available changed to" << connected;
     }
