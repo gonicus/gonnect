@@ -3,8 +3,10 @@
 #include <QAbstractListModel>
 #include <QObject>
 #include <QQmlEngine>
+#include <QSet>
 
 struct NumberStat;
+class Contact;
 
 class HistoryModel : public QAbstractListModel
 {
@@ -49,6 +51,7 @@ private Q_SLOTS:
 
 private:
     int m_limit = -1;
+    QSet<Contact *> m_avatarTrackedContacts;
 
 Q_SIGNALS:
     void limitChanged();
