@@ -70,6 +70,9 @@ void SIPAccount::initialize()
                     << "invalid ciscoHoldType" << holdType << "- using rfc3264 (sendonly)";
             m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC3264;
         }
+
+        m_ciscoRemoteCcHoldEnabled = m_settings.value("ciscoRemoteCcHold", true).toBool();
+
         registerCiscoSupportedCapability();
     }
 

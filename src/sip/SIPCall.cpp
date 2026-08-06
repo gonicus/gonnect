@@ -1222,7 +1222,7 @@ void SIPCall::setCallInfoUiState(SIPCallInfo::UiState value)
 
 void SIPCall::addCiscoRemoteCcHeader(pj::CallOpParam &op, const char *feature) const
 {
-    if (!m_account || !m_account->isCiscoDevice()) {
+    if (!m_account || !m_account->isCiscoDevice() || !m_account->isCiscoRemoteCcHoldEnabled()) {
         return;
     }
 

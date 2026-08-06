@@ -49,6 +49,7 @@ public:
     bool isInstantMessagingAllowed() const;
     bool isRTTEnabled() const { return m_rttEnabled; }
     bool isCiscoDevice() const { return !m_ciscoDeviceMac.isEmpty(); }
+    bool isCiscoRemoteCcHoldEnabled() const { return m_ciscoRemoteCcHoldEnabled; }
 
     QString call(const QString &number, const QString &contactId = "",
                  const QString &preferredIdentity = "auto", bool silent = false);
@@ -129,6 +130,7 @@ private:
     unsigned m_ciscoDeviceModel = 588;
     bool m_ciscoSrtpFallbackEnabled = false;
     bool m_ciscoSharedLineEnabled = false;
+    bool m_ciscoRemoteCcHoldEnabled = true;
 
     bool m_isRegistered = false;
     bool m_isInstantMessagingAllowed = false;
