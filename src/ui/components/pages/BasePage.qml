@@ -8,10 +8,19 @@ import base
 Item {
     id: control
 
+    signal layoutChanged()
+
     required property string pageId
     required property string name
     required property string iconId
     required property var tabButton
+
+    WindowPixelRatio {
+        id: pixelRatio
+        window: control.Window.window
+    }
+
+    readonly property real devicePixelRatio: pixelRatio.ratio
 
     readonly property alias grid: snapGrid
     readonly property alias gridWidth: snapGrid.width
@@ -100,8 +109,8 @@ Item {
             bottomMargin: -16
         }
 
-        readonly property int cellWidth: Math.floor(snapGrid.width / ViewHelper.numberOfGridCells())
-        readonly property int cellHeight: Math.floor(snapGrid.height / ViewHelper.numberOfGridCells())
+        readonly property real cellWidth: snapGrid.width / ViewHelper.numberOfGridCells()
+        readonly property real cellHeight: snapGrid.height / ViewHelper.numberOfGridCells()
 
         Accessible.role: Accessible.Canvas
         Accessible.name: qsTr("Base dashboard page grid")
