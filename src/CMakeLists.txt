@@ -864,6 +864,8 @@ qt_add_qml_module(gonnect
         ui/ViewHelper.cpp
         ui/WebEngineKeyEventFilter.h
         ui/WebEngineKeyEventFilter.cpp
+        ui/WindowPixelRatio.h
+        ui/WindowPixelRatio.cpp
 
         usb/IHeadsetDevice.h
         usb/HeadsetDevice.cpp
