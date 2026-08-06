@@ -194,42 +194,55 @@ BaseWindow {
     }
 
     Item {
+        id: shortcutContainer
         anchors.fill: parent
 
-        Keys.onPressed: keyEvent => {
-            if (keyEvent.key === Qt.Key_F11 || (keyEvent.key === Qt.Key_Escape && control.visibility === Window.FullScreen)) {
-
-                // Toggle fullscreen
-                keyEvent.accepted = true
-                ViewHelper.toggleFullscreen()
-
-            } else if ([Qt.Key_F, Qt.Key_K].includes(keyEvent.key) && (keyEvent.modifiers & Qt.ControlModifier)) {
-
-                // Focus search field
-                keyEvent.accepted = true
-                ViewHelper.activateSearch()
-
-            } else if (keyEvent.key === Qt.Key_V && (keyEvent.modifiers & Qt.ControlModifier)) {
-
-                // Paste clipboard image content, if applicable
-                if (!ClipboardHelper.hasImage()) {
-                    return
+        function hasPopupFocus() {
+            let item = control.activeFocusItem
+            while (item) {
+                if (item === control.Overlay.overlay) {
+                    return true
                 }
-
-                const page = control.getPage(SelectionState.selectedPage.id)
-                if (page && page.hasOwnProperty("useImageFromClipboard") && typeof page["useImageFromClipboard"] === "function") {
-                    keyEvent.accepted = true
-                    page.useImageFromClipboard()
-                }
-
-            } else if (keyEvent.key === Qt.Key_M
-                       && (keyEvent.modifiers & Qt.ControlModifier)
-                       && (keyEvent.modifiers & Qt.ShiftModifier)) {
-
-                // Toggle Mute
-                keyEvent.accepted = true
-                GlobalMuteState.toggleMute()
+                item = item.parent
             }
+            return false
+        }
+
+        Shortcut {
+            sequences: ["Ctrl+F", "Ctrl+K"]
+            enabled: !SM.uiEditMode
+            onActivated: () => {
+                             if (!shortcutContainer.hasPopupFocus()) {
+                                 ViewHelper.activateSearch()
+                             }
+                         }
+        }
+        Shortcut {
+            sequence: "Escape"
+            enabled: control.visibility === Window.FullScreen
+            onActivated: () => ViewHelper.toggleFullscreen()
+        }
+        Shortcut {
+            sequence: "F11"
+            onActivated: () => ViewHelper.toggleFullscreen()
+        }
+        Shortcut {
+            sequence: "Ctrl+Shift+M"
+            onActivated: () => GlobalMuteState.toggleMute()
+        }
+        Shortcut {
+            sequence: "Ctrl+V"
+            onActivated: () => {
+                             // Paste clipboard image content, if applicable
+                             if (!ClipboardHelper.hasImage()) {
+                                 return
+                             }
+
+                             const page = control.getPage(SelectionState.selectedPage.id)
+                             if (page && page.hasOwnProperty("useImageFromClipboard") && typeof page["useImageFromClipboard"] === "function") {
+                                 page.useImageFromClipboard()
+                             }
+                         }
         }
 
         Connections {
