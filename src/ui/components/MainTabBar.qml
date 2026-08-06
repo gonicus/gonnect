@@ -169,7 +169,7 @@ Item {
     Rectangle {
         id: filler
         anchors.fill: parent
-        topLeftRadius: Theme.d / 2
+        topLeftRadius: Theme.useOwnDecoration ? Theme.d / 2 : 0
         color: control.Window.window?.active ? Theme.backgroundHeader : Theme.backgroundHeaderInactive
     }
 
