@@ -31,6 +31,10 @@ NumberStats::NumberStats(QObject *parent) : QObject{ parent }
             [this]() { m_debounceAddressBookUpdateTimer.start(); });
     connect(&AddressBook::instance(), &AddressBook::contactModified, this,
             [this]() { m_debounceAddressBookUpdateTimer.start(); });
+    connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
+            [this]() { m_debounceAddressBookUpdateTimer.start(); });
+    connect(&AddressBook::instance(), &AddressBook::contactRemoved, this,
+            [this](QString) { m_debounceAddressBookUpdateTimer.start(); });
 
     initialRead();
     readNumberOfCalls();
@@ -67,6 +71,11 @@ void NumberStats::initialRead()
                 item->isFavorite = query.value("isFavorite").toBool();
                 item->contactType =
                         static_cast<NumberStats::ContactType>(query.value("type").toUInt());
+
+                if (item->contactType == NumberStats::ContactType::PhoneNumber) {
+                    item->phoneNumber = PhoneNumberUtil::normalizeNumber(item->phoneNumber);
+                }
+
                 item->contact = AddressBook::instance().lookupByNumber(item->phoneNumber);
 
                 m_statItemsLookup.insert(item->phoneNumber, item);
@@ -106,8 +115,9 @@ void NumberStats::readNumberOfCalls()
                     << "Error on executing SQL query:" << query.lastError().text();
         } else {
             while (query.next()) {
-                const auto phoneNumber = PhoneNumberUtil::cleanPhoneNumber(
-                        PhoneNumberUtil::numberFromSipUrl(query.value("remoteUrl").toString()));
+                const auto phoneNumber = PhoneNumberUtil::normalizeNumber(
+                        PhoneNumberUtil::cleanPhoneNumber(PhoneNumberUtil::numberFromSipUrl(
+                                query.value("remoteUrl").toString())));
 
                 if (!phoneNumber.isEmpty()) {
                     const auto count = query.value("numberOfCalls").toUInt();
@@ -134,6 +144,7 @@ NumberStats::~NumberStats()
 
 void NumberStats::incrementCallCount(const QString &phoneNumber)
 {
+    const auto normalizedPhoneNumber = PhoneNumberUtil::normalizeNumber(phoneNumber);
     auto db = QSqlDatabase::database();
 
     if (!db.open()) {
@@ -142,8 +153,8 @@ void NumberStats::incrementCallCount(const QString &phoneNumber)
     } else {
         qCInfo(lcNumberStats) << "Successfully opened history database";
 
-        if (ensureFlaggedNumberExists(phoneNumber)) {
-            auto *countObj = m_callCountLookup.value(phoneNumber, nullptr);
+        if (ensureFlaggedNumberExists(normalizedPhoneNumber)) {
+            auto *countObj = m_callCountLookup.value(normalizedPhoneNumber, nullptr);
             if (countObj) {
                 countObj->count++;
 
@@ -153,7 +164,7 @@ void NumberStats::incrementCallCount(const QString &phoneNumber)
                                       return left->count > right->count;
                                   });
             } else {
-                countObj = createAndAddCountObject(phoneNumber, 1);
+                countObj = createAndAddCountObject(normalizedPhoneNumber, 1);
             }
 
             Q_EMIT countChanged(m_callCounts.indexOf(countObj));
@@ -215,22 +226,26 @@ QStringList NumberStats::mostCalled(quint8 limit, bool includeFavorites) const
 
 bool NumberStats::isFavorite(const QString &phoneNumber) const
 {
-    return m_favoriteLookup.contains(phoneNumber);
+    return m_favoriteLookup.contains(PhoneNumberUtil::normalizeNumber(phoneNumber));
 }
 
 void NumberStats::toggleFavorite(const QString &phoneNumber,
                                  const NumberStats::ContactType contactType)
 {
-    ensureFlaggedNumberExists(phoneNumber, contactType);
+    const auto normalizedNumber = contactType == NumberStats::ContactType::PhoneNumber
+            ? PhoneNumberUtil::normalizeNumber(phoneNumber)
+            : phoneNumber;
 
-    auto item = m_statItemsLookup.value(phoneNumber);
+    ensureFlaggedNumberExists(normalizedNumber, contactType);
+
+    auto item = m_statItemsLookup.value(normalizedNumber);
     if (item->isFavorite) {
         item->isFavorite = false;
-        m_favoriteLookup.remove(phoneNumber);
+        m_favoriteLookup.remove(normalizedNumber);
         Q_EMIT favoriteRemoved(item);
     } else {
         item->isFavorite = true;
-        m_favoriteLookup.insert(phoneNumber, item);
+        m_favoriteLookup.insert(normalizedNumber, item);
         Q_EMIT favoriteAdded(item);
     }
 
@@ -245,12 +260,12 @@ void NumberStats::toggleFavorite(const QString &phoneNumber,
         QSqlQuery query(db);
 
         // Update DB entry
-        qCInfo(lcNumberStats) << "Updating favorite flag for number" << phoneNumber
+        qCInfo(lcNumberStats) << "Updating favorite flag for number" << normalizedNumber
                               << "in database";
         query.prepare(
                 "UPDATE contactflags SET isFavorite = :favValue WHERE phoneNumber = :phoneNumber;");
         query.bindValue(":favValue", item->isFavorite ? 1 : 0);
-        query.bindValue(":phoneNumber", phoneNumber);
+        query.bindValue(":phoneNumber", normalizedNumber);
 
         if (!query.exec()) {
             qCCritical(lcNumberStats)
@@ -261,7 +276,7 @@ void NumberStats::toggleFavorite(const QString &phoneNumber,
 
 const NumberStat *NumberStats::numberStat(const QString &phoneNumber) const
 {
-    return m_statItemsLookup.value(phoneNumber, nullptr);
+    return m_statItemsLookup.value(PhoneNumberUtil::normalizeNumber(phoneNumber), nullptr);
 }
 
 bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,
