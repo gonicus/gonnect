@@ -271,7 +271,8 @@ NumberStats::~NumberStats()
 
 void NumberStats::incrementCallCount(const QString &phoneNumber)
 {
-    const auto normalizedPhoneNumber = PhoneNumberUtil::normalizeNumber(phoneNumber);
+    const auto normalizedPhoneNumber =
+            PhoneNumberUtil::normalizeNumber(PhoneNumberUtil::cleanPhoneNumber(phoneNumber));
     auto db = QSqlDatabase::database();
 
     if (!db.open()) {
@@ -363,7 +364,10 @@ void NumberStats::toggleFavorite(const QString &phoneNumber,
             ? PhoneNumberUtil::normalizeNumber(phoneNumber)
             : phoneNumber;
 
-    ensureFlaggedNumberExists(normalizedNumber, contactType);
+    if (!ensureFlaggedNumberExists(normalizedNumber, contactType)) {
+        qCCritical(lcNumberStats) << "Cannot ensure number in database - aborting";
+        return;
+    }
 
     auto item = m_statItemsLookup.value(normalizedNumber);
     if (item->isFavorite) {
