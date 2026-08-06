@@ -20,17 +20,56 @@ Window {
     property bool showMaximizeButton: true
     property bool windowHeaderOverlapsContent: false
 
-    readonly property int windowHeaderHeight: 4 * Theme.d + 6
+    WindowPixelRatio {
+        id: pixelRatio
+        window: control
+    }
 
-    property int windowHeaderPadding: control.useOwnDecoration
-                                      ? windowHeaderLoader.height + 2 * control.shadowMargin
-                                      : 0
+    readonly property real devicePixelRatio: pixelRatio.ratio
+
+    function snapToPixelGrid(value : real) : real {
+        return Util.snapToPixelGrid(value, pixelRatio.quantum)
+    }
+
+    function snapWindowSize() {
+        if (pixelRatio.quantum <= 1 || control.isMaximized) {
+            return
+        }
+
+        const quantum = pixelRatio.quantum
+        const width = Math.round(control.width / quantum) * quantum
+        const height = Math.round(control.height / quantum) * quantum
+
+        if (width !== control.width) {
+            control.width = width
+        }
+        if (height !== control.height) {
+            control.height = height
+        }
+    }
+
+    onWidthChanged: () => control.snapWindowSize()
+    onHeightChanged: () => control.snapWindowSize()
+
+    Connections {
+        target: pixelRatio
+        function onRatioChanged() {
+            control.snapWindowSize()
+        }
+    }
+
+    readonly property real windowHeaderHeight: control.snapToPixelGrid(4 * Theme.d + 6)
+
+    property real windowHeaderPadding: control.useOwnDecoration
+                                       ? windowHeaderLoader.height + 2 * control.shadowMargin
+                                       : 0
+
 
     default property alias content: innerContainer.children
 
     readonly property bool isMaximized: [ Window.Maximized, Window.FullScreen ].includes(control.visibility)
 
-    readonly property int shadowMargin: 11
+    readonly property int shadowMargin: control.snapToPixelGrid(11)
 
     function focusSearchBox() {
         if (typeof windowHeaderLoader.item?.focusSearchBox === "function") {

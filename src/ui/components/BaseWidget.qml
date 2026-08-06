@@ -47,10 +47,22 @@ Item {
 
     property alias root: resizableRect
 
-    readonly property int pixelX: Math.round(control.xGrid * control.gridCellWidth)
-    readonly property int pixelY: Math.round(control.yGrid * control.gridCellHeight)
-    readonly property int pixelWidth: Math.round((control.xGrid + control.widthGrid) * control.gridCellWidth) - control.pixelX
-    readonly property int pixelHeight: Math.round((control.yGrid + control.heightGrid) * control.gridCellHeight) - control.pixelY
+    readonly property real devicePixelRatio: control.page?.devicePixelRatio ?? 1
+
+    function snapToDevicePixel(value : real) : real {
+        return Util.snapToDevicePixel(value, control.devicePixelRatio)
+    }
+
+    readonly property real pixelX: control.snapToDevicePixel(control.xGrid * control.gridCellWidth)
+    readonly property real pixelY: control.snapToDevicePixel(control.yGrid * control.gridCellHeight)
+    readonly property real pixelWidth: control.snapToDevicePixel(
+                                            (control.xGrid + control.widthGrid) * control.gridCellWidth
+                                            ) - control.pixelX
+    readonly property real pixelHeight: control.snapToDevicePixel(
+                                            (control.yGrid + control.heightGrid) * control.gridCellHeight
+                                            ) - control.pixelY
+
+    readonly property real widgetGap: control.snapToDevicePixel(24)
 
     onXGridChanged: () => control.page?.writer.save()
     onYGridChanged: () => control.page?.writer.save()
@@ -68,8 +80,8 @@ Item {
         id: resizableRect
         x: control.pixelX
         y: control.pixelY
-        width: control.pixelWidth - 24
-        height: control.pixelHeight - 24
+        width: control.pixelWidth - control.widgetGap
+        height: control.pixelHeight - control.widgetGap
         radius: resizableRect.widgetRadius
         color: Theme.backgroundColor
 
@@ -85,7 +97,7 @@ Item {
             const gridX = Util.clamp(Math.round(resizableRect.x / cellWidth),
                                      0,
                                      ViewHelper.numberOfGridCells() - control.widthGrid)
-            const newVal = Math.round(gridX * cellWidth)
+            const newVal = control.snapToDevicePixel(gridX * cellWidth)
 
             if (newVal !== resizableRect.x) {
                 resizableRect.x = newVal
@@ -101,7 +113,7 @@ Item {
             const gridY = Util.clamp(Math.round(resizableRect.y / cellHeight),
                                      0,
                                      ViewHelper.numberOfGridCells() - control.heightGrid)
-            const newVal = Math.round(gridY * cellHeight)
+            const newVal = control.snapToDevicePixel(gridY * cellHeight)
 
             if (newVal !== resizableRect.y) {
                 resizableRect.y = newVal
