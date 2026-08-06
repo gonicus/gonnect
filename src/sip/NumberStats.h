@@ -46,6 +46,7 @@ private:
     explicit NumberStats(QObject *parent = nullptr);
     void initialRead();
     void readNumberOfCalls();
+    void migratePhoneNumberFormatting();
 
     /**
      * @brief ensureFlaggedNumberExists creates a new entry in flagged table in database, if it does

@@ -53,6 +53,8 @@ void NumberStats::initialRead()
     } else {
         qCInfo(lcNumberStats) << "Successfully opened database";
 
+        migratePhoneNumberFormatting();
+
         // Read history
         qCInfo(lcNumberStats) << "Collecting phone number flags and stats from database";
 
@@ -132,6 +134,131 @@ void NumberStats::readNumberOfCalls()
             }
         }
     }
+}
+
+void NumberStats::migratePhoneNumberFormatting()
+{
+
+    struct FlaggedNumber
+    {
+        QString phoneNumber;
+        bool isFavorite = false;
+        bool isBlocked = false;
+    };
+
+    auto db = QSqlDatabase::database();
+
+    QSqlQuery query(db);
+    query.prepare("SELECT phoneNumber, isFavorite, isBlocked FROM contactflags WHERE "
+                  "type = :phoneNumberType");
+    query.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
+
+    if (!query.exec()) {
+        qCCritical(lcNumberStats) << "Error on executing migrate select SQL query:"
+                                  << query.lastError().text();
+        return;
+    }
+
+    QList<FlaggedNumber> flaggedNumbers;
+    while (query.next()) {
+        FlaggedNumber entry;
+        entry.phoneNumber = query.value("phoneNumber").toString();
+        entry.isFavorite = query.value("isFavorite").toBool();
+        entry.isBlocked = query.value("isBlocked").toBool();
+        flaggedNumbers.append(entry);
+    }
+
+    const bool hasLegacyEntries =
+            std::ranges::any_of(flaggedNumbers, [](const FlaggedNumber &entry) -> bool {
+                return entry.phoneNumber != PhoneNumberUtil::normalizeNumber(entry.phoneNumber);
+            });
+
+    if (!hasLegacyEntries) {
+        return;
+    }
+
+    if (!db.transaction()) {
+        qCCritical(lcNumberStats) << "Unable to start transaction:" << db.lastError().text();
+        return;
+    }
+
+    quint32 migratedEntriesCount = 0;
+
+    for (const auto &entry : std::as_const(flaggedNumbers)) {
+        const auto normalizedNumber = PhoneNumberUtil::normalizeNumber(entry.phoneNumber);
+
+        if (normalizedNumber == entry.phoneNumber) {
+            continue;
+        }
+
+        QSqlQuery existsQuery(db);
+        existsQuery.prepare("SELECT 1 FROM contactflags WHERE phoneNumber = :phoneNumber;");
+        existsQuery.bindValue(":phoneNumber", normalizedNumber);
+
+        if (!existsQuery.exec()) {
+            qCCritical(lcNumberStats)
+                    << "Error on executing exist SQL query:" << existsQuery.lastError().text();
+            db.rollback();
+            return;
+        }
+
+        if (!existsQuery.next()) {
+            // Entry with normalized number does not exist - update existing one
+
+            QSqlQuery updateQuery(db);
+            updateQuery.prepare("UPDATE contactflags SET phoneNumber = :normalizedNumber WHERE "
+                                "phoneNumber = :phoneNumber");
+            updateQuery.bindValue(":normalizedNumber", normalizedNumber);
+            updateQuery.bindValue(":phoneNumber", entry.phoneNumber);
+
+            if (!updateQuery.exec()) {
+                qCCritical(lcNumberStats) << "Error on executing SQL migration update query:"
+                                          << updateQuery.lastError().text();
+                db.rollback();
+                return;
+            }
+
+        } else {
+            // Entry with normalized number already exists - merge both
+
+            QSqlQuery mergeQuery(db);
+            mergeQuery.prepare("UPDATE contactflags SET isFavorite = MAX(isFavorite, :isFavorite), "
+                               "isBlocked = MAX(isBlocked, :isBlocked) WHERE phoneNumber = "
+                               ":normalizedNumber;");
+            mergeQuery.bindValue(":isFavorite", entry.isFavorite ? 1 : 0);
+            mergeQuery.bindValue(":isBlocked", entry.isBlocked ? 1 : 0);
+            mergeQuery.bindValue(":normalizedNumber", normalizedNumber);
+
+            if (!mergeQuery.exec()) {
+                qCCritical(lcNumberStats)
+                        << "Error on executing merge SQL query:" << mergeQuery.lastError().text();
+                db.rollback();
+                return;
+            }
+
+            // Delete now obsolete row
+            QSqlQuery deleteQuery(db);
+            deleteQuery.prepare("DELETE FROM contactflags WHERE phoneNumber = :phoneNumber;");
+            deleteQuery.bindValue(":phoneNumber", entry.phoneNumber);
+
+            if (!deleteQuery.exec()) {
+                qCCritical(lcNumberStats)
+                        << "Error on executing delete SQL query:" << deleteQuery.lastError().text();
+                db.rollback();
+                return;
+            }
+        }
+
+        ++migratedEntriesCount;
+    }
+
+    if (!db.commit()) {
+        qCCritical(lcNumberStats) << "Unable to commit transaction:" << db.lastError().text();
+        db.rollback();
+        return;
+    }
+
+    qCInfo(lcNumberStats) << "Migrated" << migratedEntriesCount << "phone number entries";
 }
 
 NumberStats::~NumberStats()
