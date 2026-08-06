@@ -56,8 +56,17 @@ QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
 QString PhoneNumberUtil::normalizeNumber(const QString &number)
 {
     QString result(number);
+    static QString nationalPrefix;
+    static QString regionalPrefix;
 
-    ReadOnlyConfdSettings settings;
+    static bool isInitialized = false;
+    if (!isInitialized) {
+        isInitialized = true;
+
+        static ReadOnlyConfdSettings settings;
+        nationalPrefix = settings.value("generic/nationalPrefix").toString();
+        regionalPrefix = settings.value("generic/regionalPrefix").toString();
+    }
 
     static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
                                                    QRegularExpression::CaseInsensitiveOption);
@@ -67,13 +76,11 @@ QString PhoneNumberUtil::normalizeNumber(const QString &number)
     result.replace(international, "+\\1");
 
     static const QRegularExpression national("^00(.*)$");
-    QString nationalPrefix = settings.value("generic/nationalPrefix").toString();
     if (!nationalPrefix.isEmpty()) {
         result.replace(national, nationalPrefix + "\\1");
     }
 
     static const QRegularExpression regional("^0(.*)$");
-    QString regionalPrefix = settings.value("generic/regionalPrefix").toString();
     if (!regionalPrefix.isEmpty()) {
         result.replace(regional, regionalPrefix + "\\1");
     }
