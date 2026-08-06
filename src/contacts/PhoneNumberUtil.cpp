@@ -56,6 +56,7 @@ QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
 QString PhoneNumberUtil::normalizeNumber(const QString &number)
 {
     QString result(number);
+
     static QString nationalPrefix;
     static QString regionalPrefix;
 
