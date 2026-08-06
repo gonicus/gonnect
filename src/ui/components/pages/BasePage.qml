@@ -8,6 +8,8 @@ import base
 Item {
     id: control
 
+    signal layoutChanged()
+
     required property string pageId
     required property string name
     required property string iconId
