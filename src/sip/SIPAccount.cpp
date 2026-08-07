@@ -1,9 +1,11 @@
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <algorithm>
 #include "SIPAccount.h"
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPBuddy.h"
+#include "SIPSharedLine.h"
 #include "PreferredIdentity.h"
 #include "PhoneNumberUtil.h"
 #include "ErrorBus.h"
@@ -46,6 +48,38 @@ void SIPAccount::initialize()
         qCCritical(lcSIPAccount) << "invalid transport [tcp, udp, tls]:" << transport;
         Q_EMIT initialized(false);
         return;
+    }
+
+    static const QRegularExpression macRegex("^[0-9A-Fa-f]{12}$");
+    m_ciscoDeviceMac = m_settings.value("ciscoDeviceMac", "").toString();
+    if (!m_ciscoDeviceMac.isEmpty() && !macRegex.match(m_ciscoDeviceMac).hasMatch()) {
+        qCCritical(lcSIPAccount) << "invalid ciscoDeviceMac [12 digits hex]:" << m_ciscoDeviceMac;
+        Q_EMIT initialized(false);
+        return;
+    }
+
+    const bool isCisco = !m_ciscoDeviceMac.isEmpty();
+    if (isCisco) {
+        const QString holdType = m_settings.value("ciscoHoldType", "rfc3264").toString().toLower();
+        if (holdType == "rfc2543") {
+            m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC2543;
+        } else if (holdType == "rfc3264") {
+            m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC3264;
+        } else {
+            qCWarning(lcSIPAccount)
+                    << "invalid ciscoHoldType" << holdType << "- using rfc3264 (sendonly)";
+            m_accountConfig.callConfig.holdType = PJSUA_CALL_HOLD_TYPE_RFC3264;
+        }
+
+        m_ciscoRemoteCcHoldEnabled = m_settings.value("ciscoRemoteCcHold", true).toBool();
+
+        registerCiscoSupportedCapability();
+    }
+
+    m_ciscoSharedLineEnabled = m_settings.value("ciscoSharedLine", false).toBool();
+    if (m_ciscoSharedLineEnabled && !isCisco) {
+        qCWarning(lcSIPAccount) << "ignoring ciscoSharedLine - no ciscoDeviceMac set";
+        m_ciscoSharedLineEnabled = false;
     }
 
     QString net = m_settings.value("network", "auto").toString();
@@ -219,7 +253,7 @@ void SIPAccount::initialize()
     m_accountConfig.mediaConfig.lockCodecEnabled = lockCodecEnabled;
 
     // Transport
-    int port = m_settings.value("port", 5061).toInt(&ok);
+    int port = m_settings.value("port", isCisco ? 0 : 5061).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'port':" << port;
         Q_EMIT initialized(false);
@@ -227,7 +261,7 @@ void SIPAccount::initialize()
     }
     m_transportConfig.port = port;
 
-    int portRange = m_settings.value("portRange", 10).toInt(&ok);
+    int portRange = m_settings.value("portRange", isCisco ? 0 : 10).toInt(&ok);
     if (!ok) {
         qCCritical(lcSIPAccount) << "invalid value for 'portRange':" << portRange;
         Q_EMIT initialized(false);
@@ -347,6 +381,10 @@ void SIPAccount::initialize()
 
     m_accountConfig.mediaConfig.rtcpXrEnabled = m_settings.value("rtcpXrEnabled", false).toBool();
     m_accountConfig.mediaConfig.rtcpMuxEnabled = m_settings.value("rtcpMuxEnabled", false).toBool();
+
+    if (!m_ciscoDeviceMac.isEmpty()) {
+        ciscoSetup();
+    }
 
     m_settings.endGroup();
 
@@ -485,6 +523,10 @@ void SIPAccount::finalizeInitialization()
                         .arg(m_account, QString::fromLocal8Bit(err.info(false))));
         Q_EMIT initialized(false);
         return;
+    }
+
+    if (isCiscoDevice() && m_ciscoSharedLineEnabled) {
+        ciscoSetupSharedLine();
     }
 
     Q_EMIT initialized(true);
@@ -904,7 +946,10 @@ void SIPAccount::onIncomingCall(pj::OnIncomingCallParam &iprm)
     call->setIncoming(true);
 
     const auto *rxData = static_cast<const pjsip_rx_data *>(iprm.rdata.pjRxData);
-    call->parseCallRouting(rxData ? rxData->msg_info.msg : nullptr);
+    auto *msg = rxData ? rxData->msg_info.msg : nullptr;
+    call->parseCallRouting(msg);
+    call->parseCallInfo(msg);
+    call->parseRemotePartyId(msg);
 
     try {
         const pj::CallInfo ci = call->getInfo();
@@ -943,6 +988,11 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
     if (prm.code == PJSIP_SC_OK && prm.expiration > 0 && m_afterResume) {
         m_afterResume = false;
         reinitBuddies();
+    }
+
+    if (!m_ciscoDeviceMac.isEmpty() && prm.code == PJSIP_SC_OK && prm.expiration > 0) {
+        const auto *rxData = static_cast<const pjsip_rx_data *>(prm.rdata.pjRxData);
+        ciscoUpdateSrtpFallback(rxData ? rxData->msg_info.msg : nullptr);
     }
 
     if (prm.code == PJSIP_SC_UNAUTHORIZED || prm.code == PJSIP_SC_PROXY_AUTHENTICATION_REQUIRED
@@ -1166,4 +1216,231 @@ pj::PresenceStatus SIPAccount::createPresenceStatusFromGlobal() const
     }
 
     return pjStatus;
+}
+
+void SIPAccount::ciscoSetup()
+{
+    // Setup based on cisco document OL-25254-01 - sanity check
+    if (m_transportType != TRANSPORT_TYPE::TLS) {
+        qCWarning(lcSIPAccount) << "Cisco setup requires TLS";
+    }
+    if (m_accountConfig.mediaConfig.srtpUse == PJMEDIA_SRTP_DISABLED) {
+        qCWarning(lcSIPAccount) << "Cisco setup requires sRTP";
+    }
+
+    if (m_settings.value("sipOutboundUse", false).toBool()) {
+        qCWarning(lcSIPAccount)
+                << "Cisco setup expects no RFC 5626 outbound - ignoring sipOutboundUse";
+    }
+    m_accountConfig.natConfig.sipOutboundUse = 0;
+
+    // Append header parameters behind the >
+    m_accountConfig.regConfig.contactParams =
+            QString(";+sip.instance=\"<urn:uuid:00000000-0000-0000-0000-%1>\""
+                    ";+u.sip!model.ccm.cisco.com=\"%2\"")
+                    .arg(m_ciscoDeviceMac.toUpper())
+                    .arg(m_ciscoDeviceModel)
+                    .toStdString();
+
+    // Announce support of Call-Info security status (X-cisco-callinfo),
+    // sRTP to RTP fallback (X-cisco-srtp-fallback) and the SIP interface
+    // specification 5.1.0.
+    pj::SipHeader supported;
+    supported.hName = "Supported";
+    supported.hValue = "replaces, norefersub, X-cisco-callinfo, X-cisco-srtp-fallback, "
+                       "X-cisco-sis-5.1.0";
+    m_accountConfig.regConfig.headers.push_back(supported);
+
+    // CUCM crypto suites
+    static const std::vector<std::string> ciscoCryptoSuites = {
+        "AEAD_AES_256_GCM",
+        "AEAD_AES_128_GCM",
+        "AES_CM_128_HMAC_SHA1_80",
+        "AES_CM_128_HMAC_SHA1_32",
+    };
+
+    // Check which of them are available in our pjsip build and filter them
+    std::vector<std::string> available;
+    try {
+        available = SIPManager::instance().endpoint().srtpCryptoEnum();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPAccount) << "failed to enumerate SRTP crypto suites:" << err.info();
+    }
+
+    m_accountConfig.mediaConfig.srtpOpt.cryptos.clear();
+
+    for (const auto &name : ciscoCryptoSuites) {
+        if (std::find(available.begin(), available.end(), name) == available.end()) {
+            qCWarning(lcSIPAccount)
+                    << QString::fromStdString(name) << "is not availabe for SRTP - skipping";
+            continue;
+        }
+
+        pj::SrtpCrypto crypto;
+        crypto.name = name;
+        crypto.key = "";
+        crypto.flags = 0;
+        m_accountConfig.mediaConfig.srtpOpt.cryptos.push_back(crypto);
+    }
+
+    if (m_accountConfig.mediaConfig.srtpOpt.cryptos.empty()) {
+        qCCritical(lcSIPAccount) << "no usable SRTP crypto suite for account" << m_account;
+        ErrorBus::instance().addFatalError(
+                tr("No usable SRTP crypto suite available for account %1").arg(m_account));
+        return;
+    }
+
+    // The sRTP to RTP fallback is off until CUCM confirms it for the line in the REGISTER
+    // response, see ciscoUpdateSrtpFallback(). Until then we only offer and accept sRTP.
+    if (m_accountConfig.mediaConfig.srtpUse != PJMEDIA_SRTP_DISABLED) {
+        m_accountConfig.mediaConfig.srtpUse = PJMEDIA_SRTP_MANDATORY;
+        m_accountConfig.mediaConfig.srtpOpt.optionalOfferSavp = false;
+    }
+
+    qCInfo(lcSIPAccount) << "registering account" << m_account << "as Cisco device model"
+                         << m_ciscoDeviceModel << "with MAC" << m_ciscoDeviceMac.toUpper();
+}
+
+void SIPAccount::ciscoUpdateSrtpFallback(const pjsip_msg *msg)
+{
+    if (m_ciscoDeviceMac.isEmpty()
+        || m_accountConfig.mediaConfig.srtpUse == PJMEDIA_SRTP_DISABLED) {
+        return;
+    }
+
+    static const pj_str_t fallbackTag = { const_cast<char *>("X-cisco-srtp-fallback"), 21 };
+
+    bool advertised = false;
+    if (msg) {
+        const auto *hdr = static_cast<const pjsip_supported_hdr *>(
+                pjsip_msg_find_hdr(msg, PJSIP_H_SUPPORTED, nullptr));
+
+        while (hdr && !advertised) {
+            for (unsigned i = 0; i < hdr->count; ++i) {
+                if (pj_stricmp(&hdr->values[i], &fallbackTag) == 0) {
+                    advertised = true;
+                    break;
+                }
+            }
+
+            hdr = static_cast<const pjsip_supported_hdr *>(
+                    pjsip_msg_find_hdr(msg, PJSIP_H_SUPPORTED, hdr->next));
+        }
+    }
+
+    const bool enabled = advertised && isSignalingEncrypted();
+
+    if (enabled == m_ciscoSrtpFallbackEnabled) {
+        return;
+    }
+
+    if (advertised && !isSignalingEncrypted()) {
+        qCWarning(lcSIPAccount) << "ignoring X-cisco-srtp-fallback on insecure signaling for"
+                                << m_account;
+    }
+
+    m_ciscoSrtpFallbackEnabled = enabled;
+
+    m_accountConfig.mediaConfig.srtpUse = enabled ? PJMEDIA_SRTP_OPTIONAL : PJMEDIA_SRTP_MANDATORY;
+    m_accountConfig.mediaConfig.srtpOpt.optionalOfferSavp = enabled;
+
+    try {
+        modify(m_accountConfig);
+    } catch (const pj::Error &err) {
+        qCCritical(lcSIPAccount) << "failed to apply sRTP fallback state:" << err.info();
+        return;
+    }
+
+    qCInfo(lcSIPAccount) << "Cisco sRTP to RTP fallback" << (enabled ? "enabled" : "disabled")
+                         << "for account" << m_account;
+}
+
+void SIPAccount::ciscoSetupSharedLine()
+{
+    if (m_sharedLine) {
+        return;
+    }
+
+    const QString lineUri = QString::fromStdString(m_accountConfig.idUri);
+    if (lineUri.isEmpty()) {
+        return;
+    }
+
+    m_sharedLine = new SIPSharedLine(this, lineUri);
+    if (!m_sharedLine->initialize()) {
+        delete m_sharedLine;
+        m_sharedLine = nullptr;
+    }
+}
+
+void SIPAccount::registerCiscoSupportedCapability()
+{
+    static bool registered = false;
+    if (registered) {
+        return;
+    }
+
+    pjsip_endpoint *endpt = pjsua_get_pjsip_endpt();
+    if (!endpt) {
+        return;
+    }
+
+    static const pj_str_t tags[] = {
+        { const_cast<char *>("X-cisco-callinfo"), 16 },
+        { const_cast<char *>("X-cisco-srtp-fallback"), 21 },
+        { const_cast<char *>("X-cisco-sis-5.1.0"), 17 },
+    };
+    pjsip_endpt_add_capability(endpt, nullptr, PJSIP_H_SUPPORTED, nullptr, PJ_ARRAY_SIZE(tags),
+                               tags);
+    registered = true;
+}
+
+QString SIPAccount::bargeIntoSharedLine(bool useConferenceBridge)
+{
+    if (!m_sharedLine || !m_sharedLine->isRemoteInUse()) {
+        qCWarning(lcSIPAccount) << "no remote call on the shared line to barge into";
+        return "";
+    }
+
+    const QString joinValue = m_sharedLine->joinHeaderValue();
+    if (joinValue.isEmpty()) {
+        qCWarning(lcSIPAccount) << "shared line call is missing dialog identifiers - cannot barge";
+        return "";
+    }
+
+    const QString sipUrl = addTransport(QString::fromStdString(m_accountConfig.idUri));
+
+    SIPCall *call = new SIPCall(this, PJSUA_INVALID_ID);
+
+    pj::CallOpParam prm(true);
+    prm.opt.audioCount = 1;
+    prm.opt.videoCount = 0;
+    prm.opt.textCount = 0;
+
+    pj::SipHeader joinHeader;
+    joinHeader.hName = "Join";
+    joinHeader.hValue = joinValue.toStdString();
+    prm.txOption.headers.push_back(joinHeader);
+
+    pj::SipHeader callInfo;
+    callInfo.hName = "Call-Info";
+    callInfo.hValue =
+            useConferenceBridge ? "<urn:X-cisco-remotecc:cbarge>" : "<urn:X-cisco-remotecc:barge>";
+    prm.txOption.headers.push_back(callInfo);
+
+    try {
+        call->call(sipUrl, prm);
+        m_calls.push_back(call);
+
+        qCInfo(lcSIPAccount) << (useConferenceBridge ? "cbarge" : "barge")
+                             << "into shared line call" << joinValue;
+
+        return call->uuid();
+    } catch (pj::Error &err) {
+        qCCritical(lcSIPAccount) << (useConferenceBridge ? "cbarge" : "barge")
+                                 << "into shared line call" << joinValue << "failed";
+        delete call;
+    }
+
+    return "";
 }
