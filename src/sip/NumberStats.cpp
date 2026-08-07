@@ -137,15 +137,37 @@ void NumberStats::readNumberOfCalls()
 
 void NumberStats::migratePhoneNumberFormatting()
 {
+    if (m_isMigrationDone) {
+        return;
+    }
+    m_isMigrationDone = true;
 
+    auto db = QSqlDatabase::database();
+
+    // Check whether migration is required
+    QSqlQuery neededQuery(db);
+    bool isCanonical = false;
+
+    if (neededQuery.prepare("SELECT value FROM appinfo WHERE key = 'canonical_contacts';")
+        && neededQuery.exec()) {
+        if (neededQuery.next()) {
+            isCanonical = neededQuery.value(0).toBool();
+        }
+    }
+
+    qCritical() << "====>" << isCanonical;
+
+    if (isCanonical) {
+        return;
+    }
+
+    // Migrate
     struct FlaggedNumber
     {
         QString phoneNumber;
         bool isFavorite = false;
         bool isBlocked = false;
     };
-
-    auto db = QSqlDatabase::database();
 
     QSqlQuery query(db);
     query.prepare("SELECT phoneNumber, isFavorite, isBlocked FROM contactflags WHERE "
@@ -167,17 +189,32 @@ void NumberStats::migratePhoneNumberFormatting()
         flaggedNumbers.append(entry);
     }
 
+    if (!db.transaction()) {
+        qCCritical(lcNumberStats) << "Unable to start transaction:" << db.lastError().text();
+        return;
+    }
+
     const bool hasLegacyEntries =
             std::ranges::any_of(flaggedNumbers, [](const FlaggedNumber &entry) -> bool {
                 return entry.phoneNumber != PhoneNumberUtil::canonicalNumber(entry.phoneNumber);
             });
 
-    if (!hasLegacyEntries) {
+    // Set flag to prevent unnecessary future runs
+    QSqlQuery updateCanonicalQuery(db);
+    updateCanonicalQuery.prepare(
+            "INSERT INTO appinfo (key, value) VALUES ('canonical_contacts', 1);");
+    if (!updateCanonicalQuery.exec()) {
+        qCCritical(lcNumberStats) << "Unable to update canonical_contacts flag:"
+                                  << db.lastError().text();
+        db.rollback();
         return;
     }
 
-    if (!db.transaction()) {
-        qCCritical(lcNumberStats) << "Unable to start transaction:" << db.lastError().text();
+    if (!hasLegacyEntries) {
+        if (!db.commit()) {
+            qCCritical(lcNumberStats) << "Unable to commit transaction:" << db.lastError().text();
+            db.rollback();
+        }
         return;
     }
 

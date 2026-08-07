@@ -67,6 +67,7 @@ private:
     QList<PhoneNumberCallCount *> m_callCounts;
     QHash<QString, PhoneNumberCallCount *> m_callCountLookup;
     QTimer m_debounceAddressBookUpdateTimer;
+    bool m_isMigrationDone = false;
 
 Q_SIGNALS:
     void countChanged(qsizetype index);
