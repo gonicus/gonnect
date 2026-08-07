@@ -156,7 +156,7 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
         return;
     }
 
-    const auto baseNumber = PhoneNumberUtil::cleanPhoneNumber(m_config.baseNumber);
+    const auto baseNumber = PhoneNumberUtil::canonicalNumber(m_config.baseNumber);
     auto stripBaseNumber = [&baseNumber](QString num) {
         if (num.startsWith(baseNumber)) {
             num = num.sliced(baseNumber.size());
@@ -213,7 +213,7 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
                 auto phoneNumber = QString::fromStdString(prop.getValue());
                 phoneNumber = PhoneNumberUtil::isSipUri(phoneNumber)
                         ? phoneNumber
-                        : PhoneNumberUtil::cleanPhoneNumber(phoneNumber);
+                        : PhoneNumberUtil::canonicalNumber(phoneNumber);
                 phoneNumber = stripBaseNumber(phoneNumber);
 
                 phoneNumbers.append({ Contact::NumberType::Unknown, phoneNumber, subscriptable });
