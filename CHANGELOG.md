@@ -1,3 +1,19 @@
+# [2.5.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.2...v2.5.0-beta.3) (2026-08-07)
+
+
+### Bug Fixes
+
+* adjust widget scaling ([#635](https://github.com/gonicus/gonnect/issues/635)) ([668924d](https://github.com/gonicus/gonnect/commit/668924df6fe71928c8c3020c49239ff6f7b52d49))
+* trigger network change when from connected to connected ([#637](https://github.com/gonicus/gonnect/issues/637)) ([9abca39](https://github.com/gonicus/gonnect/commit/9abca395196ff281469dd69c1b64a506ffe18031))
+* **ui:** fixed blurry items due to sub-pixel placement ([#634](https://github.com/gonicus/gonnect/issues/634)) ([913c813](https://github.com/gonicus/gonnect/commit/913c813e93c5c7de44612a5f3ccf4b3efb2bdcff))
+* use Shortcut to prevent focus issues ([#638](https://github.com/gonicus/gonnect/issues/638)) ([e569cfb](https://github.com/gonicus/gonnect/commit/e569cfb1c0569e1a4c8088766fd0295623eb0aa4))
+
+
+### Features
+
+* show direct chat after jitsi upgrade ([#627](https://github.com/gonicus/gonnect/issues/627)) ([afa39db](https://github.com/gonicus/gonnect/commit/afa39dba4733dd53bb2a2bd240c28f9edc70225a))
+* unified avatars from ldap and chat ([#628](https://github.com/gonicus/gonnect/issues/628)) ([c8da541](https://github.com/gonicus/gonnect/commit/c8da5418dfbd008016d5343924890f8e7dcbf142))
+
 # [2.5.0-beta.2](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.1...v2.5.0-beta.2) (2026-08-04)
 
 
