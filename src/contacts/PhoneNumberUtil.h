@@ -42,6 +42,7 @@ public:
 
     ContactInfo contactInfoBySipUrl(const QString &sipUrl);
 
+    static QString canonicalNumber(const QString &number);
     static QString cleanPhoneNumber(const QString &number);
     static QString normalizeNumber(const QString &number);
     static QString clearInternationalChars(const QString &str);

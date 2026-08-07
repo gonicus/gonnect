@@ -75,7 +75,7 @@ void NumberStats::initialRead()
                         static_cast<NumberStats::ContactType>(query.value("type").toUInt());
 
                 if (item->contactType == NumberStats::ContactType::PhoneNumber) {
-                    item->phoneNumber = PhoneNumberUtil::normalizeNumber(item->phoneNumber);
+                    item->phoneNumber = PhoneNumberUtil::canonicalNumber(item->phoneNumber);
                 }
 
                 item->contact = AddressBook::instance().lookupByNumber(item->phoneNumber);
@@ -117,9 +117,8 @@ void NumberStats::readNumberOfCalls()
                     << "Error on executing SQL query:" << query.lastError().text();
         } else {
             while (query.next()) {
-                const auto phoneNumber = PhoneNumberUtil::normalizeNumber(
-                        PhoneNumberUtil::cleanPhoneNumber(PhoneNumberUtil::numberFromSipUrl(
-                                query.value("remoteUrl").toString())));
+                const auto phoneNumber = PhoneNumberUtil::canonicalNumber(
+                        PhoneNumberUtil::numberFromSipUrl(query.value("remoteUrl").toString()));
 
                 if (!phoneNumber.isEmpty()) {
                     const auto count = query.value("numberOfCalls").toUInt();
@@ -170,7 +169,7 @@ void NumberStats::migratePhoneNumberFormatting()
 
     const bool hasLegacyEntries =
             std::ranges::any_of(flaggedNumbers, [](const FlaggedNumber &entry) -> bool {
-                return entry.phoneNumber != PhoneNumberUtil::normalizeNumber(entry.phoneNumber);
+                return entry.phoneNumber != PhoneNumberUtil::canonicalNumber(entry.phoneNumber);
             });
 
     if (!hasLegacyEntries) {
@@ -185,7 +184,7 @@ void NumberStats::migratePhoneNumberFormatting()
     quint32 migratedEntriesCount = 0;
 
     for (const auto &entry : std::as_const(flaggedNumbers)) {
-        const auto normalizedNumber = PhoneNumberUtil::normalizeNumber(entry.phoneNumber);
+        const auto normalizedNumber = PhoneNumberUtil::canonicalNumber(entry.phoneNumber);
 
         if (normalizedNumber == entry.phoneNumber) {
             continue;
@@ -271,8 +270,13 @@ NumberStats::~NumberStats()
 
 void NumberStats::incrementCallCount(const QString &phoneNumber)
 {
-    const auto normalizedPhoneNumber =
-            PhoneNumberUtil::normalizeNumber(PhoneNumberUtil::cleanPhoneNumber(phoneNumber));
+    const auto normalizedPhoneNumber = PhoneNumberUtil::canonicalNumber(phoneNumber);
+
+    if (normalizedPhoneNumber.isEmpty()) {
+        qCWarning(lcNumberStats) << "Aborting incrementCallCount because empty phoneNumber string";
+        return;
+    }
+
     auto db = QSqlDatabase::database();
 
     if (!db.open()) {
@@ -354,14 +358,14 @@ QStringList NumberStats::mostCalled(quint8 limit, bool includeFavorites) const
 
 bool NumberStats::isFavorite(const QString &phoneNumber) const
 {
-    return m_favoriteLookup.contains(PhoneNumberUtil::normalizeNumber(phoneNumber));
+    return m_favoriteLookup.contains(PhoneNumberUtil::canonicalNumber(phoneNumber));
 }
 
 void NumberStats::toggleFavorite(const QString &phoneNumber,
                                  const NumberStats::ContactType contactType)
 {
     const auto normalizedNumber = contactType == NumberStats::ContactType::PhoneNumber
-            ? PhoneNumberUtil::normalizeNumber(phoneNumber)
+            ? PhoneNumberUtil::canonicalNumber(phoneNumber)
             : phoneNumber;
 
     if (!ensureFlaggedNumberExists(normalizedNumber, contactType)) {
@@ -407,7 +411,7 @@ void NumberStats::toggleFavorite(const QString &phoneNumber,
 
 const NumberStat *NumberStats::numberStat(const QString &phoneNumber) const
 {
-    return m_statItemsLookup.value(PhoneNumberUtil::normalizeNumber(phoneNumber), nullptr);
+    return m_statItemsLookup.value(PhoneNumberUtil::canonicalNumber(phoneNumber), nullptr);
 }
 
 bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,

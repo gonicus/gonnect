@@ -162,6 +162,11 @@ ContactInfo PhoneNumberUtil::contactInfoBySipUrl(const QString &sipUrl)
     return info;
 }
 
+QString PhoneNumberUtil::canonicalNumber(const QString &number)
+{
+    return normalizeNumber(cleanPhoneNumber(number));
+}
+
 bool PhoneNumberUtil::isSipUri(const QString &str)
 {
     static const QRegularExpression sipNumberRegex("^.*sips?:[0-9a-zA-Z_+*#%-]+@.*$",
