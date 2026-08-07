@@ -21,6 +21,10 @@ NumberStats::NumberStats(QObject *parent) : QObject{ parent }
     m_debounceAddressBookUpdateTimer.setSingleShot(true);
     m_debounceAddressBookUpdateTimer.setInterval(5ms);
     m_debounceAddressBookUpdateTimer.callOnTimeout(this, [this]() {
+        m_callCountLookup.clear();
+        qDeleteAll(m_callCounts);
+        m_callCounts.clear();
+
         initialRead();
         readNumberOfCalls();
     });
@@ -155,8 +159,6 @@ void NumberStats::migratePhoneNumberFormatting()
         }
     }
 
-    qCritical() << "====>" << isCanonical;
-
     if (isCanonical) {
         return;
     }
@@ -228,8 +230,10 @@ void NumberStats::migratePhoneNumberFormatting()
         }
 
         QSqlQuery existsQuery(db);
-        existsQuery.prepare("SELECT 1 FROM contactflags WHERE phoneNumber = :phoneNumber;");
+        existsQuery.prepare("SELECT 1 FROM contactflags WHERE phoneNumber = :phoneNumber AND type "
+                            "= :phoneNumberType;");
         existsQuery.bindValue(":phoneNumber", normalizedNumber);
+        existsQuery.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
 
         if (!existsQuery.exec()) {
             qCCritical(lcNumberStats)
@@ -243,9 +247,10 @@ void NumberStats::migratePhoneNumberFormatting()
 
             QSqlQuery updateQuery(db);
             updateQuery.prepare("UPDATE contactflags SET phoneNumber = :normalizedNumber WHERE "
-                                "phoneNumber = :phoneNumber");
+                                "phoneNumber = :phoneNumber AND type = :phoneNumberType");
             updateQuery.bindValue(":normalizedNumber", normalizedNumber);
             updateQuery.bindValue(":phoneNumber", entry.phoneNumber);
+            updateQuery.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
 
             if (!updateQuery.exec()) {
                 qCCritical(lcNumberStats) << "Error on executing SQL migration update query:"
@@ -260,10 +265,11 @@ void NumberStats::migratePhoneNumberFormatting()
             QSqlQuery mergeQuery(db);
             mergeQuery.prepare("UPDATE contactflags SET isFavorite = MAX(isFavorite, :isFavorite), "
                                "isBlocked = MAX(isBlocked, :isBlocked) WHERE phoneNumber = "
-                               ":normalizedNumber;");
+                               ":normalizedNumber AND type = :phoneNumberType;");
             mergeQuery.bindValue(":isFavorite", entry.isFavorite ? 1 : 0);
             mergeQuery.bindValue(":isBlocked", entry.isBlocked ? 1 : 0);
             mergeQuery.bindValue(":normalizedNumber", normalizedNumber);
+            mergeQuery.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
 
             if (!mergeQuery.exec()) {
                 qCCritical(lcNumberStats)
@@ -274,8 +280,10 @@ void NumberStats::migratePhoneNumberFormatting()
 
             // Delete now obsolete row
             QSqlQuery deleteQuery(db);
-            deleteQuery.prepare("DELETE FROM contactflags WHERE phoneNumber = :phoneNumber;");
+            deleteQuery.prepare("DELETE FROM contactflags WHERE phoneNumber = :phoneNumber AND "
+                                "type = :phoneNumberType;");
             deleteQuery.bindValue(":phoneNumber", entry.phoneNumber);
+            deleteQuery.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
 
             if (!deleteQuery.exec()) {
                 qCCritical(lcNumberStats)
