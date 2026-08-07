@@ -12,7 +12,6 @@
 #include "DtmfGenerator.h"
 #include "EnumTranslation.h"
 #include "ViewHelper.h"
-#include "AvatarManager.h"
 #include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "AddressBook.h"
@@ -228,8 +227,7 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
             n->addButton(tr("Reject"), "reject", "call.decline", {});
         }
 
-        auto &am = AvatarManager::instance();
-        QString avatar = c ? am.avatarPathFor(c->id()) : "";
+        QString avatar = c ? c->avatarPath() : "";
 
         if (avatar.isEmpty()) {
             n->setIcon("call-incoming-symbolic");
@@ -825,8 +823,7 @@ void SIPCallManager::addCall(SIPCall *call)
             auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal,
                                       false, this);
 
-            auto &am = AvatarManager::instance();
-            QString avatar = c ? am.avatarPathFor(c->id()) : "";
+            QString avatar = c ? c->avatarPath() : "";
 
             if (avatar.isEmpty()) {
                 n->setIcon("call-missed-symbolic");

@@ -8,7 +8,6 @@
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "PhoneNumberUtil.h"
-#include "AvatarManager.h"
 #include "PlatformSession.h"
 
 Q_LOGGING_CATEGORY(lcSIPBuddy, "gonnect.sip.buddy")
@@ -119,8 +118,7 @@ void SIPBuddy::notifyOnceWhenBuddyAvailable()
     auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, true,
                               this);
 
-    auto &am = AvatarManager::instance();
-    QString avatar = c ? am.avatarPathFor(c->id()) : "";
+    QString avatar = c ? c->avatarPath() : "";
 
     if (avatar.isEmpty()) {
         n->setIcon("help-about-symbolic");

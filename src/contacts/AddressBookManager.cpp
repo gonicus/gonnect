@@ -81,6 +81,8 @@ void AddressBookManager::initAddressBookConfigs()
             }
         }
     }
+
+    Q_EMIT configsLoaded();
 }
 
 void AddressBookManager::reloadAddressBook()

@@ -1,5 +1,7 @@
 #include "ChatUsersModel.h"
 #include "ChatUser.h"
+#include "AddressBook.h"
+#include "AvatarPrioHelper.h"
 
 ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -10,20 +12,36 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
         if (m_chatProviderContext) {
             m_chatProviderContext->deleteLater();
             m_chatProviderContext = nullptr;
+            m_avatarSignaledUsers.clear();
         }
 
         if (m_chatProvider) {
             m_chatProviderContext = new QObject(this);
 
+            connect(&AddressBook::instance(), &AddressBook::chatUserMappingAdded,
+                    m_chatProviderContext, [this](ChatUser *user) { refreshAvatarPath(user); });
+            connect(&AddressBook::instance(), &AddressBook::chatUserAvatarChanged,
+                    m_chatProviderContext, [this](ChatUser *user) { refreshAvatarPath(user); });
+            connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged,
+                    m_chatProviderContext, [this]() {
+                        const auto rows = rowCount(QModelIndex());
+                        if (rows > 0) {
+                            Q_EMIT dataChanged(createIndex(0, 0), createIndex(rows - 1, 0),
+                                               { static_cast<int>(Roles::AvatarPath) });
+                        }
+                    });
+
             connect(m_chatProvider, &IChatProvider::userAdded, m_chatProviderContext,
-                    [this](QString, ChatUser *, qsizetype index) {
+                    [this](QString, ChatUser *user, qsizetype index) {
                         beginInsertRows(QModelIndex(), index, index);
                         endInsertRows();
+                        connectUserAvatarSignals(user);
                     });
 
             connect(m_chatProvider, &IChatProvider::userRemoved, m_chatProviderContext,
-                    [this](QString, ChatUser *, qsizetype index) {
+                    [this](QString, ChatUser *chatUser, qsizetype index) {
                         beginRemoveRows(QModelIndex(), index, index);
+                        m_avatarSignaledUsers.remove(chatUser);
                         endRemoveRows();
                     });
 
@@ -36,6 +54,11 @@ ChatUsersModel::ChatUsersModel(QObject *parent) : QAbstractListModel{ parent }
                                              static_cast<int>(Roles::HasPresenceState),
                                              static_cast<int>(Roles::PresenceState) });
                     });
+
+            const auto users = m_chatProvider->users();
+            for (auto *user : users) {
+                connectUserAvatarSignals(user);
+            }
         }
 
         endResetModel();
@@ -70,8 +93,12 @@ QVariant ChatUsersModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::Id):
         return user->id();
 
-    case static_cast<int>(Roles::AvatarPath):
+    case static_cast<int>(Roles::AvatarPath): {
+        if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
+            return contact->avatarPath();
+        }
         return user->avatarPath();
+    }
 
     case static_cast<int>(Roles::HasPresenceState):
         return user->hasPresenceState();
@@ -83,4 +110,25 @@ QVariant ChatUsersModel::data(const QModelIndex &index, int role) const
     default:
         return user->computedName();
     }
+}
+
+void ChatUsersModel::connectUserAvatarSignals(const ChatUser *user)
+{
+    if (m_avatarSignaledUsers.contains(user)) {
+        return;
+    }
+    m_avatarSignaledUsers.insert(user);
+
+    connect(user, &ChatUser::avatarPathChanged, m_chatProviderContext,
+            [this, user]() { refreshAvatarPath(user); });
+}
+
+void ChatUsersModel::refreshAvatarPath(const ChatUser *user)
+{
+    const auto row = m_chatProvider->users().indexOf(user);
+    if (row < 0) {
+        return;
+    }
+    const auto idx = createIndex(row, 0);
+    Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::AvatarPath) });
 }
