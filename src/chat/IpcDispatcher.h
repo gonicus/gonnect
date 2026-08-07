@@ -305,6 +305,7 @@ private:
     bool containsRoomTag(const QString &str) const;
 
     QRegularExpression m_idConvRegex;
+    bool m_wasInitializationRequestSuccessful = false;
     bool m_useIdConversion = false;
     bool m_isInitialized = false;
     bool m_areCapabilitesInitialized = false;
@@ -327,7 +328,9 @@ private:
     QList<IpcChatRoom *> m_rooms;
     QHash<QString, IpcChatRoom *> m_roomLookup;
     QHash<IChatRoom *, QList<Notification *> *> m_chatNotifications;
+    uint m_initializationRetryCount = 10;
     QTimer m_unreadUpdateTimer;
+    QTimer m_reconnectTimer;
 
     bool m_hasDeviceVerification = false;
     bool m_isDeviceVerified = false;
