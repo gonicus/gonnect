@@ -1,6 +1,6 @@
 diff -Naur a/CMakeLists.txt b/CMakeLists.txt
---- a/CMakeLists.txt	1970-01-01 01:00:00
-+++ b/CMakeLists.txt	2026-02-01 23:27:15
+--- a/CMakeLists.txt	1970-01-01 01:00:00.000000000 +0100
++++ b/CMakeLists.txt	2026-08-07 08:28:55.749547209 +0200
 @@ -0,0 +1,212 @@
 +cmake_minimum_required(VERSION 3.18.0)
 +project(libopenldap C)
@@ -215,9 +215,9 @@ diff -Naur a/CMakeLists.txt b/CMakeLists.txt
 +    FILE_SET HEADERS_GENERATED
 +)
 diff -Naur a/include/ac/socket.h b/include/ac/socket.h
---- a/include/ac/socket.h	2026-01-29 23:21:21
-+++ b/include/ac/socket.h	2026-02-01 23:27:15
-@@ -222,6 +222,7 @@
+--- a/include/ac/socket.h	2026-08-06 19:17:48.000000000 +0200
++++ b/include/ac/socket.h	2026-08-07 08:28:55.749988839 +0200
+@@ -226,6 +226,7 @@
  #	define LDAP_PF_LOCAL_SENDMSG 1
  #endif
  
@@ -225,7 +225,7 @@ diff -Naur a/include/ac/socket.h b/include/ac/socket.h
  #ifdef HAVE_GETPEEREID
  #define	LUTIL_GETPEEREID( s, uid, gid, bv )	getpeereid( s, uid, gid )
  #elif defined(LDAP_PF_LOCAL_SENDMSG)
-@@ -232,6 +233,8 @@
+@@ -236,6 +237,8 @@
  LDAP_LUTIL_F( int ) lutil_getpeereid( int s, uid_t *, gid_t * );
  #define	LUTIL_GETPEEREID( s, uid, gid, bv )	lutil_getpeereid( s, uid, gid )
  #endif
@@ -235,8 +235,8 @@ diff -Naur a/include/ac/socket.h b/include/ac/socket.h
  typedef union Sockaddr {
  	struct sockaddr sa_addr;
 diff -Naur a/include/lber_types.h.win b/include/lber_types.h.win
---- a/include/lber_types.h.win	1970-01-01 01:00:00
-+++ b/include/lber_types.h.win	2026-02-01 23:27:15
+--- a/include/lber_types.h.win	1970-01-01 01:00:00.000000000 +0100
++++ b/include/lber_types.h.win	2026-08-07 08:28:55.750396734 +0200
 @@ -0,0 +1,64 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -303,8 +303,8 @@ diff -Naur a/include/lber_types.h.win b/include/lber_types.h.win
 +
 +#endif /* _LBER_TYPES_H */
 diff -Naur a/include/ldap_config.h.win b/include/ldap_config.h.win
---- a/include/ldap_config.h.win	1970-01-01 01:00:00
-+++ b/include/ldap_config.h.win	2026-02-01 23:27:15
+--- a/include/ldap_config.h.win	1970-01-01 01:00:00.000000000 +0100
++++ b/include/ldap_config.h.win	2026-08-07 08:28:55.750594355 +0200
 @@ -0,0 +1,73 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -380,8 +380,8 @@ diff -Naur a/include/ldap_config.h.win b/include/ldap_config.h.win
 +
 +#endif /* _LDAP_CONFIG_H */
 diff -Naur a/include/ldap_features.h.win b/include/ldap_features.h.win
---- a/include/ldap_features.h.win	1970-01-01 01:00:00
-+++ b/include/ldap_features.h.win	2026-02-01 23:27:15
+--- a/include/ldap_features.h.win	1970-01-01 01:00:00.000000000 +0100
++++ b/include/ldap_features.h.win	2026-08-07 08:28:55.750804600 +0200
 @@ -0,0 +1,55 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -439,8 +439,8 @@ diff -Naur a/include/ldap_features.h.win b/include/ldap_features.h.win
 +
 +#endif /* LDAP_FEATURES */
 diff -Naur a/include/portable.h.win b/include/portable.h.win
---- a/include/portable.h.win	1970-01-01 01:00:00
-+++ b/include/portable.h.win	2026-02-01 23:27:15
+--- a/include/portable.h.win	1970-01-01 01:00:00.000000000 +0100
++++ b/include/portable.h.win	2026-08-07 08:28:55.751018442 +0200
 @@ -0,0 +1,123 @@
 +/* include/portable.hin.  Generated from configure.ac by autoheader.  */
 +
@@ -566,8 +566,8 @@ diff -Naur a/include/portable.h.win b/include/portable.h.win
 +/* end of portable.h.post */
 +
 diff -Naur a/libraries/liblber/sockbuf.c b/libraries/liblber/sockbuf.c
---- a/libraries/liblber/sockbuf.c	2026-01-29 23:21:21
-+++ b/libraries/liblber/sockbuf.c	2026-02-01 23:27:15
+--- a/libraries/liblber/sockbuf.c	2026-08-06 19:17:48.000000000 +0200
++++ b/libraries/liblber/sockbuf.c	2026-08-07 08:28:55.751512970 +0200
 @@ -339,7 +339,10 @@
  int
  ber_pvt_socket_set_nonblock( ber_socket_t sd, int nb )
