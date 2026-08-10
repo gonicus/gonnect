@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "HeadsetDevice.h"
 #include "GlobalInfo.h"
+#include "AudioManager.h"
 
 Q_LOGGING_CATEGORY(lcHeadset, "gonnect.usb.headset")
 
@@ -288,6 +289,10 @@ void HeadsetDevice::probeMuteLock()
 
 void HeadsetDevice::setRing(bool flag)
 {
+    if (!AudioManager::instance().externalRinger()) {
+        return;
+    }
+
     if (!m_hidUsages.contains(UsageId::LED_Ring)
         && !m_hidUsages.contains(UsageId::Telephony_Ringer)) {
         qCInfo(lcHeadset) << "Ringing is not supported by this device";
