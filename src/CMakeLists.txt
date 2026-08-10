@@ -349,6 +349,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/ChatMessageListItemContent.qml
         ui/components/chat/ChatMessageListItemRelatedContent.qml
         ui/components/chat/ChatUserPresenceStatusIndicator.qml
+        ui/components/chat/ChatRoomContextMenu.qml
         ui/components/chat/ChatRoomList.qml
         ui/components/chat/ChatRoomListItem.qml
         ui/components/chat/ChatRoomListSectionHeader.qml
