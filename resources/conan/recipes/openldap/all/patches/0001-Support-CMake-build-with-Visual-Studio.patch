@@ -1,7 +1,7 @@
 diff -Naur a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt	1970-01-01 01:00:00.000000000 +0100
-+++ b/CMakeLists.txt	2026-08-07 08:28:55.749547209 +0200
-@@ -0,0 +1,212 @@
++++ b/CMakeLists.txt	2026-08-10 08:41:07.764187794 +0200
+@@ -0,0 +1,227 @@
 +cmake_minimum_required(VERSION 3.18.0)
 +project(libopenldap C)
 +
@@ -25,6 +25,21 @@ diff -Naur a/CMakeLists.txt b/CMakeLists.txt
 +configure_file(
 +    include/ldap_config.h.win
 +    include/ldap_config.h
++)
++
++# 2.7.0 moved LDAP_CONNECTIONLESS / LDAP_DEPRECATED / LDAP_R_COMPILE out of
++# ldap-int.h into these two generated headers. They contain no autoconf
++# substitutions, so the shipped templates can be copied verbatim.
++configure_file(
++    include/liblber-config.hin
++    include/liblber-config.h
++    COPYONLY
++)
++
++configure_file(
++    include/libldap-config.hin
++    include/libldap-config.h
++    COPYONLY
 +)
 +
 +set(LBER_SOURCES 
@@ -215,8 +230,8 @@ diff -Naur a/CMakeLists.txt b/CMakeLists.txt
 +    FILE_SET HEADERS_GENERATED
 +)
 diff -Naur a/include/ac/socket.h b/include/ac/socket.h
---- a/include/ac/socket.h	2026-08-06 19:17:48.000000000 +0200
-+++ b/include/ac/socket.h	2026-08-07 08:28:55.749988839 +0200
+--- a/include/ac/socket.h	2026-08-10 08:38:44.452295766 +0200
++++ b/include/ac/socket.h	2026-08-10 08:38:44.703563132 +0200
 @@ -226,6 +226,7 @@
  #	define LDAP_PF_LOCAL_SENDMSG 1
  #endif
@@ -236,7 +251,7 @@ diff -Naur a/include/ac/socket.h b/include/ac/socket.h
  	struct sockaddr sa_addr;
 diff -Naur a/include/lber_types.h.win b/include/lber_types.h.win
 --- a/include/lber_types.h.win	1970-01-01 01:00:00.000000000 +0100
-+++ b/include/lber_types.h.win	2026-08-07 08:28:55.750396734 +0200
++++ b/include/lber_types.h.win	2026-08-10 08:38:44.703823421 +0200
 @@ -0,0 +1,64 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -304,7 +319,7 @@ diff -Naur a/include/lber_types.h.win b/include/lber_types.h.win
 +#endif /* _LBER_TYPES_H */
 diff -Naur a/include/ldap_config.h.win b/include/ldap_config.h.win
 --- a/include/ldap_config.h.win	1970-01-01 01:00:00.000000000 +0100
-+++ b/include/ldap_config.h.win	2026-08-07 08:28:55.750594355 +0200
++++ b/include/ldap_config.h.win	2026-08-10 08:38:44.703894605 +0200
 @@ -0,0 +1,73 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -381,7 +396,7 @@ diff -Naur a/include/ldap_config.h.win b/include/ldap_config.h.win
 +#endif /* _LDAP_CONFIG_H */
 diff -Naur a/include/ldap_features.h.win b/include/ldap_features.h.win
 --- a/include/ldap_features.h.win	1970-01-01 01:00:00.000000000 +0100
-+++ b/include/ldap_features.h.win	2026-08-07 08:28:55.750804600 +0200
++++ b/include/ldap_features.h.win	2026-08-10 08:38:44.703954998 +0200
 @@ -0,0 +1,55 @@
 +/* $OpenLDAP$ */
 +/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
@@ -440,7 +455,7 @@ diff -Naur a/include/ldap_features.h.win b/include/ldap_features.h.win
 +#endif /* LDAP_FEATURES */
 diff -Naur a/include/portable.h.win b/include/portable.h.win
 --- a/include/portable.h.win	1970-01-01 01:00:00.000000000 +0100
-+++ b/include/portable.h.win	2026-08-07 08:28:55.751018442 +0200
++++ b/include/portable.h.win	2026-08-10 08:38:44.704027735 +0200
 @@ -0,0 +1,123 @@
 +/* include/portable.hin.  Generated from configure.ac by autoheader.  */
 +
@@ -566,8 +581,8 @@ diff -Naur a/include/portable.h.win b/include/portable.h.win
 +/* end of portable.h.post */
 +
 diff -Naur a/libraries/liblber/sockbuf.c b/libraries/liblber/sockbuf.c
---- a/libraries/liblber/sockbuf.c	2026-08-06 19:17:48.000000000 +0200
-+++ b/libraries/liblber/sockbuf.c	2026-08-07 08:28:55.751512970 +0200
+--- a/libraries/liblber/sockbuf.c	2026-08-10 08:38:44.460555716 +0200
++++ b/libraries/liblber/sockbuf.c	2026-08-10 08:38:44.704128013 +0200
 @@ -339,7 +339,10 @@
  int
  ber_pvt_socket_set_nonblock( ber_socket_t sd, int nb )
@@ -580,3 +595,50 @@ diff -Naur a/libraries/liblber/sockbuf.c b/libraries/liblber/sockbuf.c
  	int flags = fcntl( sd, F_GETFL);
  	if( nb ) {
  		flags |= O_NONBLOCK;
+diff -Naur a/libraries/libldap/tls_o.c b/libraries/libldap/tls_o.c
+--- a/libraries/libldap/tls_o.c	2026-08-10 08:38:44.456138987 +0200
++++ b/libraries/libldap/tls_o.c	2026-08-10 08:43:08.660819539 +0200
+@@ -543,7 +543,7 @@
+ 
+ 				while ((info = OSSL_STORE_load( sctx ))) {
+ 					switch (OSSL_STORE_INFO_get_type( info )) {
+-					case OSSL_STORE_INFO_CERT:
++					case OSSL_STORE_INFO_CERT: {
+ 						X509 *cert = OSSL_STORE_INFO_get0_CERT( info );
+ 						X509_STORE *store = SSL_CTX_get_cert_store( ctx );
+ 						if ( !X509_STORE_add_cert( store, cert ) ) {
+@@ -565,6 +565,7 @@
+ 							}
+ 						}
+ 						break;
++					}
+ 					default:
+ 						/* ignore other types */
+ 						break;
+@@ -753,7 +754,7 @@
+ 						return -1;
+ 					}
+ 					break;
+-				case OSSL_STORE_INFO_CERT:
++				case OSSL_STORE_INFO_CERT: {
+ 					X509 *cert = OSSL_STORE_INFO_get0_CERT(info);
+ 					int is_ca = X509_check_ca( cert );
+ 					if ( !is_ca && !SSL_CTX_use_certificate( ctx, cert )) {
+@@ -773,7 +774,8 @@
+ 						return -1;
+ 					}
+ 					break;
+-				case OSSL_STORE_INFO_CRL:
++				}
++				case OSSL_STORE_INFO_CRL: {
+ 					X509_STORE *x509_s = SSL_CTX_get_cert_store( ctx );
+ 					if ( !X509_STORE_add_crl( x509_s,
+ 							OSSL_STORE_INFO_get0_CRL(info) )) {
+@@ -785,6 +787,7 @@
+ 						return -1;
+ 					}
+ 					break;
++				}
+ 				default:
+ 					/* ignore other types */
+ 					break;
