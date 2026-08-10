@@ -153,7 +153,7 @@ QDateTime Contact::lastModified() const
 void Contact::addPhoneNumber(const Contact::NumberType type, const QString &phoneNumber,
                              bool isSipStatusSubscriptable)
 {
-    const auto clean = PhoneNumberUtil::cleanPhoneNumber(phoneNumber);
+    const auto clean = PhoneNumberUtil::canonicalNumber(phoneNumber);
 
     if (isNumberValid(clean)
         && !m_phoneNumbers.contains({ type, clean, isSipStatusSubscriptable })) {

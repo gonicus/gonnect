@@ -231,6 +231,10 @@ IpcDispatcher::IpcDispatcher(const QString &settingsGroup, const IpcConfig &conf
     m_unreadUpdateTimer.setInterval(200);
     m_unreadUpdateTimer.callOnTimeout(this, &IpcDispatcher::updateUnreadNotificationsCountImpl);
 
+    m_reconnectTimer.setSingleShot(true);
+    m_reconnectTimer.setInterval(5s);
+    m_reconnectTimer.callOnTimeout(this, [this]() { sendInitialInitializationRequest(); });
+
     // Setup id conversion
     if (!configInfo.idConvRegexpString.isEmpty() && !configInfo.idConvReplacementString.isEmpty()) {
         m_idConvRegex.setPattern(configInfo.idConvRegexpString);
@@ -863,6 +867,24 @@ void IpcDispatcher::processResponse(
             // received. The error shall not produce an error message visible to the user, thus it
             // is ignored here.
             return;
+        } else if (!m_wasInitializationRequestSuccessful
+                   && err.type() == Error::ErrorType::Network) {
+            if (m_initializationRetryCount > 0) {
+                --m_initializationRetryCount;
+
+                qCWarning(lcIpcDispatcher) << "IPC network error on" << m_settingsGroup << "-"
+                                           << m_initializationRetryCount << "retries left";
+
+                m_reconnectTimer.start();
+            } else {
+                qCCritical(lcIpcDispatcher)
+                        << "IPC network error on" << m_settingsGroup << "- retries exhausted";
+                ErrorBus::instance().addError(
+                        tr("The IPC client of %1 repeatedly reported network errors.")
+                                .arg(m_settingsGroup));
+            }
+
+            return;
         }
 
         qCCritical(lcIpcDispatcher)
@@ -909,6 +931,7 @@ void IpcDispatcher::processResponse(
         }
 
     } else if (rc.hasStatusUpdate()) {
+        m_wasInitializationRequestSuccessful = true;
         const auto resp = rc.statusUpdate();
         m_connectionState = static_cast<ConnectionState>(static_cast<int>(resp.code()));
         Q_EMIT connectionStateChanged();
