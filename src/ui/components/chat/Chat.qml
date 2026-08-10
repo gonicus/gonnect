@@ -119,40 +119,29 @@ Item {
             right: parent.right
         }
 
-        onClicked: () => chatRoomMenuComponent.createObject(messageListCardHeadingButton).popup()
+        onClicked: () => {
+                       chatRoomMenuComponent.createObject(messageListCardHeadingButton, {
+                                                              toggleFavoriteVisible: false,
+                                                              editRoomVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEdit),
+                                                              inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite)
+                                                          }).popup()
+                   }
     }
 
     Component {
         id: chatRoomMenuComponent
 
-        Menu {
-            id: chatRoomMenu
-            onClosed: () => chatRoomMenu.destroy()
-
-            HideableMenuItem {
-                text: qsTr("Edit room...")
-                icon.source: Icons.editor
-                visible: !!(control.chatRoom?.permissions & IChatRoom.Permission.CanEdit)
-                onTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, control.chatRoom.id)
-            }
-            HideableMenuItem {
-                text: qsTr("Invite users...")
-                icon.source: Icons.listAdd
-                visible: !!(control.chatRoom?.permissions & IChatRoom.Permission.CanInvite)
-                onTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, control.chatRoom.id)
-            }
-            HideableMenuItem {
-                text: qsTr("Leave room...")
-                icon.source: Icons.dialogCancel
-                onTriggered: () => {
-                    const item = DialogFactory.createConfirmDialog({
-                                     text: qsTr("Are you sure you really want to leave this chat?")
-                                 })
-                    const roomId = control.chatRoom.id
-                    const chatProvider = control.chatProvider
-                    item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
-                }
-            }
+        ChatRoomContextMenu {
+            onEditRoomTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, control.chatRoom.id)
+            onInviteUsersTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, control.chatRoom.id)
+            onLeaveRoomTriggered: () => {
+                                      const item = DialogFactory.createConfirmDialog({
+                                                       text: qsTr("Are you sure you really want to leave this chat?")
+                                                   })
+                                      const roomId = control.chatRoom.id
+                                      const chatProvider = control.chatProvider
+                                      item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
+                                  }
         }
     }
 
