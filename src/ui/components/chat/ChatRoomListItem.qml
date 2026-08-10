@@ -157,7 +157,10 @@ Item {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onTapped: (_, mouseButton) => {
                 if (mouseButton === Qt.RightButton) {
-                    contextMenuComponent.createObject(control).popup()
+                    contextMenuComponent.createObject(control, {
+                                                          editRoomVisible: !!(Number(control.permissions ?? 0) & IChatRoom.Permission.CanEdit),
+                                                          inviteUsersVisible: !!(Number(control.permissions ?? 0) & IChatRoom.Permission.CanInvite)
+                                                      }).popup()
                 } else {
                     control.clicked()
                 }
@@ -174,35 +177,13 @@ Item {
     Component {
         id: contextMenuComponent
 
-        Menu {
+        ChatRoomContextMenu {
             id: contextMenu
-            onClosed: () => contextMenu.destroy()
 
-            Action {
-                text: qsTr("Toggle favorite")
-                icon.source: Icons.folderFavorites
-                onTriggered: () => control.favoriteToggled()
-            }
-
-            Action {
-                text: qsTr("Leave room...")
-                icon.source: Icons.dialogCancel
-                onTriggered: () => control.leaveRoomTriggered()
-            }
-
-            Action {
-                text: qsTr("Edit room...")
-                icon.source: Icons.editor
-                enabled: !!(control.permissions & IChatRoom.Permission.CanEdit)
-                onTriggered: () => control.editRoomTriggered()
-            }
-
-            Action {
-                text: qsTr("Invite users...")
-                icon.source: Icons.listAdd
-                enabled: !!(control.permissions & IChatRoom.Permission.CanInvite)
-                onTriggered: () => control.inviteUsersTriggered()
-            }
+            onFavoriteToggled: () => control.favoriteToggled()
+            onLeaveRoomTriggered: () => control.leaveRoomTriggered()
+            onEditRoomTriggered: () => control.editRoomTriggered()
+            onInviteUsersTriggered: () => control.inviteUsersTriggered()
         }
     }
 }
