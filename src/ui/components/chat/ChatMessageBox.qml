@@ -92,6 +92,21 @@ Item {
             }
         }
 
+        function ensureCursorVisible() {
+            const flickable = messageFieldScrollView.contentItem
+            const viewportHeight = messageFieldScrollView.height
+            const maxContentY = Math.max(0, flickable.contentHeight - viewportHeight)
+            const scrollMargin = 10
+            const cursorTop = messageField.cursorRectangle.y
+            const cursorBottom = cursorTop + messageField.cursorRectangle.height
+
+            if (cursorBottom + scrollMargin > flickable.contentY + viewportHeight) {
+                flickable.contentY = Util.clamp(cursorBottom + scrollMargin - viewportHeight, 0, maxContentY)
+            } else if (cursorTop - scrollMargin < flickable.contentY) {
+                flickable.contentY = Util.clamp(cursorTop - scrollMargin, 0, maxContentY)
+            }
+        }
+
         function sendIsTyping() {
             if (!control.chatRoom) {
                 return
@@ -289,6 +304,8 @@ Item {
         id: messageFieldScrollView
         clip: true
         padding: 0
+        contentWidth: messageFieldScrollView.availableWidth
+        contentHeight: messageField.contentHeight
         anchors {
             top: editBanner.bottom
             left: parent.left
@@ -305,16 +322,7 @@ Item {
             width: messageFieldScrollView.availableWidth
             height: messageField.contentHeight
 
-            onCursorRectangleChanged: {
-                const view = messageFieldScrollView
-                const cursorBottom = cursorRectangle.y + cursorRectangle.height + 5
-                const viewportBottom = view.contentItem.contentY + view.height
-                if (cursorBottom > viewportBottom) {
-                    view.contentItem.contentY = cursorBottom - view.height + 5
-                } else if (cursorRectangle.y - 5 < view.contentItem.contentY) {
-                    view.contentItem.contentY = Math.max(0, cursorRectangle.y - 5)
-                }
-            }
+            onCursorRectangleChanged: internal.ensureCursorVisible()
 
             property int lastCursorPosition: 0
 
@@ -552,6 +560,20 @@ Item {
 
                 return [start, end]
             }
+        }
+
+        MouseArea {
+            anchors.fill: messageField
+            acceptedButtons: Qt.NoButton
+
+            onWheel: (wheel) => {
+                         const flickable = messageFieldScrollView.contentItem
+                         const maxY = Math.max(0, flickable.contentHeight - messageFieldScrollView.height)
+                         if (maxY > 0) {
+                             flickable.contentY = Util.clamp(flickable.contentY - (wheel.pixelDelta.y || wheel.angleDelta.y), 0, maxY)
+                             wheel.accepted = true
+                         }
+                     }
         }
     }
 
