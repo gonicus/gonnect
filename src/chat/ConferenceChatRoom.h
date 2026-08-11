@@ -30,7 +30,8 @@ public:
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
     virtual ChatMessage *chatMessageById(const QString &id) const override;
     virtual ChatMessage *latestOwnTextMessage() const override { return nullptr; }
-    virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
+    virtual void sendMessage(const QString &message, const QString &relatedMessageId = QString(),
+                             const QString &threadId = QString()) override;
     virtual void sendFile(const QString &filePath) override { Q_UNUSED(filePath) }
     virtual void sendTypingPing() override { }
     virtual bool isDirectChat() override { return false; }

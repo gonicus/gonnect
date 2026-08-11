@@ -117,9 +117,10 @@ ChatMessage *IpcChatRoom::latestOwnTextMessage() const
     return nullptr;
 }
 
-void IpcChatRoom::sendMessage(const QString &message, const QString &relatedMessageId)
+void IpcChatRoom::sendMessage(const QString &message, const QString &relatedMessageId,
+                              const QString &threadId)
 {
-    ipcDispatcher()->sendMessage(id(), message, relatedMessageId);
+    ipcDispatcher()->sendMessage(id(), message, relatedMessageId, threadId);
 }
 
 void IpcChatRoom::sendFile(const QString &filePath)

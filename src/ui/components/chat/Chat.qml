@@ -60,9 +60,11 @@ Item {
                       ? parent.width - titleLoadingIndicatorRow.x
                       : parent.width - favCardHeadingButton.x
         text: control.showTitleBar && control.chatRoom
-              ? (control.chatRoom.isDirectChat
-                 ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
-                 : qsTr("Chat room %1").arg(control.chatRoom.name))
+              ? (chatMessageList.isThreadMode
+                 ? qsTr('Subthread (in "%1")').arg(control.chatRoom.name)
+                 : (control.chatRoom.isDirectChat
+                    ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
+                    : qsTr("Chat room %1").arg(control.chatRoom.name)))
               : ""
         anchors {
             top: parent.top
@@ -101,7 +103,7 @@ Item {
 
     FavIcon {
         id: favCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
+        visible: control.showTitleBar && messageListCardHeading.visible && !chatMessageList.isThreadMode
         isFavorite: control.chatRoom?.isFavorite ?? false
         anchors {
             verticalCenter: messageListCardHeading.verticalCenter
@@ -113,7 +115,7 @@ Item {
 
     CardHeadingMoreMenuButton {
         id: messageListCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
+        visible: control.showTitleBar && messageListCardHeading.visible && !chatMessageList.isThreadMode
         anchors {
             top: parent.top
             right: parent.right
@@ -126,6 +128,18 @@ Item {
                                                               inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite)
                                                           }).popup()
                    }
+    }
+
+    CardHeadingMoreMenuButton {
+        id: closeSubthreadCardHeadingButton
+        visible: control.showTitleBar && messageListCardHeading.visible && chatMessageList.isThreadMode
+        iconSource: Icons.mobileCloseApp
+        anchors {
+            top: parent.top
+            right: parent.right
+        }
+
+        onClicked: () => chatMessageList.threadId = ""
     }
 
     Component {
@@ -326,7 +340,8 @@ Item {
                 } else {
                     // Send new message
                     control.chatRoom.sendMessage(chatMessageBox.text,
-                                                         relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "")
+                                                 relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "",
+                                                 chatMessageList.threadId)
                 }
 
                 relatedMsg.chatMessage = null

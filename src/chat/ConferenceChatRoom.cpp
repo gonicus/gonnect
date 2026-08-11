@@ -22,7 +22,8 @@ qsizetype ConferenceChatRoom::notificationCount()
     return 0; // TODO
 }
 
-void ConferenceChatRoom::sendMessage(const QString &message, const QString &)
+void ConferenceChatRoom::sendMessage(const QString &message, const QString &,
+                                     const QString &threadId)
 {
     auto confConn = qobject_cast<IConferenceConnector *>(parent());
     const QString ownName = confConn ? confConn->ownDisplayName() : "";
@@ -30,7 +31,7 @@ void ConferenceChatRoom::sendMessage(const QString &message, const QString &)
     auto textContent = new ChatMessageContentText(message);
     auto chatMessageObject =
             new ChatMessage("", "", ownName, textContent, QDateTime::currentDateTime(), this,
-                            ChatMessage::Flag::OwnMessage);
+                            ChatMessage::Flag::OwnMessage, threadId);
     addMessage(chatMessageObject);
     Q_EMIT sendMessageRequested(message);
 }

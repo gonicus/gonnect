@@ -104,7 +104,8 @@ public:
 
     /// Send a message in this room.
     Q_INVOKABLE virtual void sendMessage(const QString &message,
-                                         const QString &relatedMessageId = "") = 0;
+                                         const QString &relatedMessageId = QString(),
+                                         const QString &threadId = QString()) = 0;
 
     /// Given a local file url, send a message with this file as an attachment.
     Q_INVOKABLE virtual void sendFile(const QString &filePath) = 0;

@@ -41,7 +41,8 @@ public:
     virtual ChatMessage *chatMessageById(const QString &id) const override;
     void ensureMessageLoaded(const QString &id);
     virtual ChatMessage *latestOwnTextMessage() const override;
-    virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
+    virtual void sendMessage(const QString &message, const QString &relatedMessageId = QString(),
+                             const QString &threadId = QString()) override;
     virtual void sendFile(const QString &filePath) override;
     virtual void sendTypingPing() override;
 

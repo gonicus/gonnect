@@ -22,6 +22,7 @@ Item {
     required property string eventId
     required property string roomId
     required property string fromId
+    required property string threadId
     required property date timestamp
     required property string nickName
     required property string avatarPath
@@ -53,6 +54,7 @@ Item {
 
     signal respondTo(string messageId)
     signal retryMessage(string eventId)
+    signal openThread(string threadId)
 
     states: [
         State {
@@ -456,6 +458,13 @@ Item {
                 text: qsTr("Reply...")
                 icon.source: Icons.mailReplyCustom
                 onTriggered: () => control.respondTo(control.eventId)
+            }
+
+            HideableMenuItem {
+                visible: control.threadId !== ''
+                text: qsTr("Open thread...")
+                icon.source: Icons.dialogMessages
+                onTriggered: () => control.openThread(control.threadId)
             }
         }
     }

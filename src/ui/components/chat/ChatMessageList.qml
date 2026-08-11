@@ -9,9 +9,11 @@ Item {
 
     property alias chatRoom: chatModel.chatRoom
     property IChatProvider chatProvider
+    property alias threadId: chatProxyModel.threadId
 
     readonly property alias isScrolledDown: listView.atYEnd
     readonly property alias count: listView.count
+    readonly property bool isThreadMode: chatProxyModel.threadId !== ""
 
     signal respondTo(string messageId)
     signal retryMessage(string messageId)
@@ -42,6 +44,8 @@ Item {
         verticalLayoutDirection: ListView.BottomToTop
         anchors.fill: parent
         model: ChatProxyModel {
+            id: chatProxyModel
+
             ChatModel {
                 id: chatModel
             }
@@ -63,6 +67,7 @@ Item {
 
             onRespondTo: messageId => control.respondTo(messageId)
             onRetryMessage: messageId => control.retryMessage(messageId)
+            onOpenThread: threadId => chatProxyModel.threadId = threadId
         }
 
         onMovementStarted: () => {
