@@ -826,8 +826,12 @@ Item {
 
                     CheckBox {
                         id: externalRingerCheckbox
+
+                        readonly property HeadsetDeviceProxy headsetProxy: ViewHelper.headsetDeviceProxy()
+
                         text: qsTr('Prefer USB headset ring sound if available')
-                        enabled: headsetCheckBox.checked
+                              + (headsetProxy.hasDeviceConfigurableRinger ? " (" + qsTr("managed by device") + ")" : "")
+                        enabled: headsetCheckBox.checked && !headsetProxy.hasDeviceConfigurableRinger
                         anchors {
                             left: parent.left
                             right: parent.right
