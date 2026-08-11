@@ -49,6 +49,18 @@ HeadsetDevice::~HeadsetDevice()
     close();
 }
 
+unsigned HeadsetDevice::reportToUnsigned(const unsigned char *data, int len) const
+{
+    unsigned value = 0;
+
+    // Convert payload to little endian unsigned value. Skip report ID.
+    for (int i = 1; i < len && i <= 4; ++i) {
+        value |= static_cast<unsigned>(data[i]) << ((i - 1) * 8);
+    }
+
+    return value;
+}
+
 bool HeadsetDevice::open()
 {
     if (!useHeadset()) {
@@ -154,7 +166,7 @@ void HeadsetDevice::setIdle()
             const auto &usage = m_hidUsages.value(usageId);
             usageInfos.append(usage);
             reportVals.insert(usage.reportId,
-                              reportVals.value(usage.reportId, 0) | (0 << usage.bitPosition));
+                              reportVals.value(usage.reportId, 0) | (0u << usage.bitPosition));
         }
     }
 
@@ -207,7 +219,7 @@ void HeadsetDevice::setBusyLine(bool flag)
     m_busyLine = flag;
 
     const auto &usage = m_hidUsages.value(UsageId::LED_OffHook);
-    const unsigned bitValue = 1 << usage.bitPosition;
+    const unsigned bitValue = 1u << usage.bitPosition;
     unsigned value = currentFlags(usage.reportId);
 
     if (flag) {
@@ -259,7 +271,7 @@ void HeadsetDevice::writeMuteToDevice(bool flag, bool armLockWindow)
         }
     } else {
         const auto &usage = m_hidUsages.value(UsageId::LED_Mute);
-        const unsigned bitValue = 1 << usage.bitPosition;
+        const unsigned bitValue = 1u << usage.bitPosition;
         unsigned value = currentFlags(usage.reportId);
 
         if (flag) {
@@ -304,7 +316,7 @@ void HeadsetDevice::setRing(bool flag)
     if (m_hidUsages.contains(UsageId::LED_Ring)) {
         const auto &usage = m_hidUsages.value(UsageId::LED_Ring);
         unsigned value = currentFlags(usage.reportId);
-        const unsigned v = 1 << usage.bitPosition;
+        const unsigned v = 1u << usage.bitPosition;
 
         if (flag) {
             value |= v;
@@ -321,7 +333,7 @@ void HeadsetDevice::setRing(bool flag)
     if (m_hidUsages.contains(UsageId::Telephony_Ringer)) {
         const auto &usage = m_hidUsages.value(UsageId::Telephony_Ringer);
         unsigned value = currentFlags(usage.reportId);
-        const unsigned v = 1 << usage.bitPosition;
+        const unsigned v = 1u << usage.bitPosition;
 
         const bool audible = flag && AudioManager::instance().externalRinger();
 
@@ -346,7 +358,7 @@ void HeadsetDevice::setHold(bool flag)
     }
 
     const auto &usageHold = m_hidUsages.value(UsageId::LED_Hold);
-    const unsigned holdValue = 1 << usageHold.bitPosition;
+    const unsigned holdValue = 1u << usageHold.bitPosition;
     unsigned value = currentFlags(usageHold.reportId);
 
     if (flag) {
@@ -368,25 +380,25 @@ unsigned HeadsetDevice::currentFlags(const quint32 reportId) const
     if (m_hidUsages.contains(UsageId::LED_OffHook) && (m_line || m_hookSwitch || m_busyLine)) {
         const auto &u = m_hidUsages.value(UsageId::LED_OffHook);
         if (u.reportId == reportId) {
-            value |= 1 << u.bitPosition;
+            value |= 1u << u.bitPosition;
         }
     }
     if (m_hidUsages.contains(UsageId::LED_Mute) && m_muted) {
         const auto &u = m_hidUsages.value(UsageId::LED_Mute);
         if (u.reportId == reportId) {
-            value |= 1 << u.bitPosition;
+            value |= 1u << u.bitPosition;
         }
     }
     if (m_hidUsages.contains(UsageId::LED_Ring) && m_ringing) {
         const auto &u = m_hidUsages.value(UsageId::LED_Ring);
         if (u.reportId == reportId) {
-            value |= 1 << u.bitPosition;
+            value |= 1u << u.bitPosition;
         }
     }
     if (m_hidUsages.contains(UsageId::LED_Hold) && m_hold) {
         const auto &u = m_hidUsages.value(UsageId::LED_Hold);
         if (u.reportId == reportId) {
-            value |= 1 << u.bitPosition;
+            value |= 1u << u.bitPosition;
         }
     }
 
@@ -415,7 +427,7 @@ void HeadsetDevice::processEvents()
         quint8 reportId = data[0];
 
         if (len >= 2 && m_inputReportIds.contains(reportId)) {
-            unsigned value = data[1];
+            unsigned value = reportToUnsigned(data, len);
             qCInfo(lcHeadset).noquote().nospace()
                     << "Found relevant report with report id 0x" << QString::number(reportId, 16);
 
@@ -429,11 +441,11 @@ void HeadsetDevice::processEvents()
                 } else {
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_HookSwitch);
                     if (usage.reportId == reportId) {
-                        bool _hookSwitch = value & (1 << usage.bitPosition);
+                        bool _hookSwitch = value & (1u << usage.bitPosition);
                         if (m_hookSwitch != _hookSwitch) {
                             m_hookSwitch = _hookSwitch;
-                            Q_EMIT hookSwitch();
                             qCDebug(lcHeadset) << "  Hook switch changed to" << m_hookSwitch;
+                            QTimer::singleShot(0, this, [this]() { Q_EMIT hookSwitch(); });
                         }
                     }
                 }
@@ -446,7 +458,7 @@ void HeadsetDevice::processEvents()
             } else {
                 if (m_hidUsages.contains(UsageId::Telephony_PhoneMute)) {
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_PhoneMute);
-                    if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
+                    if (usage.reportId == reportId && (value & (1u << usage.bitPosition))) {
                         const bool inWindow = m_mutePendingActive
                                 && m_mutePendingTimer.elapsed() < muteLockWindowMs();
 
@@ -509,7 +521,7 @@ void HeadsetDevice::processEvents()
                 if (m_hidUsages.contains(UsageId::Telephony_LineBusyTone)) {
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_LineBusyTone);
                     if (usage.reportId == reportId) {
-                        bool _line = value & (1 << usage.bitPosition);
+                        bool _line = value & (1u << usage.bitPosition);
                         if (m_line != _line) {
                             m_line = _line;
                             Q_EMIT busyLine();
@@ -522,7 +534,7 @@ void HeadsetDevice::processEvents()
             // Flashing
             if (m_hidUsages.contains(UsageId::Telephony_Flash)) {
                 const auto &usage = m_hidUsages.value(UsageId::Telephony_Flash);
-                if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
+                if (usage.reportId == reportId && (value & (1u << usage.bitPosition))) {
                     m_flash = !m_flash;
                     Q_EMIT flash();
                     qCDebug(lcHeadset) << "  Flashing changed to" << m_flash;
@@ -532,7 +544,7 @@ void HeadsetDevice::processEvents()
             // Programmable button event - fired on secondary call to quit incoming call
             if (m_hidUsages.contains(UsageId::Telephony_ProgrammableButton)) {
                 const auto &usage = m_hidUsages.value(UsageId::Telephony_ProgrammableButton);
-                if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
+                if (usage.reportId == reportId && (value & (1u << usage.bitPosition))) {
                     Q_EMIT programmableButton();
                     qCDebug(lcHeadset) << "  Programmable button pressed";
                 }

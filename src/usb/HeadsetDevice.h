@@ -77,6 +77,8 @@ Q_SIGNALS:
     void muteLockChanged(bool locked, bool muted);
 
 private:
+    unsigned reportToUnsigned(const unsigned char *data, int len) const;
+
     bool displayFieldSupported(ReportDescriptorEnums::TeamsDisplayFieldSupport field);
     void setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport field,
                          const QString &text);
