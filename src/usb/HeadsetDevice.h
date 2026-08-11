@@ -66,6 +66,11 @@ public:
     void setUsageInfos(const QHash<UsageId, UsageInfo> &infos);
     void setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMapping);
 
+    bool hasDeviceConfigurableRinger() const
+    {
+        return m_teamsUsageMapping.contains(UsageId::Teams_DisplayControl);
+    }
+
     ~HeadsetDevice();
 
 Q_SIGNALS:
