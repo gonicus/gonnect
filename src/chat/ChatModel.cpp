@@ -22,6 +22,7 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::EventId), "eventId" },
         { static_cast<int>(Roles::RoomId), "roomId" },
         { static_cast<int>(Roles::FromId), "fromId" },
+        { static_cast<int>(Roles::ThreadId), "threadId" },
         { static_cast<int>(Roles::NickName), "nickName" },
         { static_cast<int>(Roles::AvatarPath), "avatarPath" },
         { static_cast<int>(Roles::UserState), "userState" },
@@ -156,6 +157,9 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
 
     case static_cast<int>(Roles::FromId):
         return item->fromId();
+
+    case static_cast<int>(Roles::ThreadId):
+        return item->threadId();
 
     case static_cast<int>(Roles::NickName):
         return item->nickName();

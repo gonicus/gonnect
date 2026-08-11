@@ -360,7 +360,7 @@ void IpcDispatcher::loginWithSSO(const QString &identityProvider)
 }
 
 void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
-                                const QString &relatedMessageId)
+                                const QString &relatedMessageId, const QString &threadId)
 {
     const auto *chatRoom = chatRoomByRoomId(roomId);
     if (!chatRoom) {
@@ -408,6 +408,10 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     msgReq.setText(content);
     msgReq.setMentionedUserIds(mentionedUserIds);
 
+    if (!threadId.isEmpty()) {
+        msgReq.setThreadId(threadId);
+    }
+
     // Check for "@room" tag
     msgReq.setRoomMentioned(containsRoomTag(text));
 
@@ -432,7 +436,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     auto *pendingContent = new ChatMessageContentText(text);
     pendingMsg = new ChatMessage(tempEventId, ownUserId(), nickName, pendingContent,
                                  QDateTime::currentDateTimeUtc(), ipcRoom,
-                                 Flag::OwnMessage | Flag::Markdown | Flag::Pending);
+                                 Flag::OwnMessage | Flag::Markdown | Flag::Pending, threadId);
     if (!relatedMessageId.isEmpty()) {
         pendingMsg->setRelatedMessageId(relatedMessageId);
     }
@@ -1863,8 +1867,13 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         const auto userDisplayName =
                 (user && !user->displayName().isEmpty()) ? user->displayName() : message.senderId();
 
+        QString threadId;
+        if (message.hasThreadId()) {
+            threadId = message.threadId();
+        }
+
         chatMessage = new ChatMessage(message.messageId(), message.senderId(), userDisplayName,
-                                      content, dateTime, room, flags);
+                                      content, dateTime, room, flags, threadId);
     }
 
     if (message.hasRelatedMessageId()) {

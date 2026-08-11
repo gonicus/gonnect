@@ -118,7 +118,8 @@ public:
 
     /// Send a text message in the specified room.
     void sendMessage(const QString &roomId, const QString &text,
-                     const QString &relatedMessageId = "");
+                     const QString &relatedMessageId = QString(),
+                     const QString &threadId = QString());
 
     void sendTypingPing(const QString &roomId);
 

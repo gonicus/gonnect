@@ -18,6 +18,7 @@ public:
         EventId = Qt::UserRole + 1,
         RoomId,
         FromId,
+        ThreadId,
         AvatarPath,
         Timestamp,
         NickName,
