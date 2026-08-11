@@ -293,10 +293,6 @@ void HeadsetDevice::probeMuteLock()
 
 void HeadsetDevice::setRing(bool flag)
 {
-    if (!AudioManager::instance().externalRinger()) {
-        return;
-    }
-
     if (!m_hidUsages.contains(UsageId::LED_Ring)
         && !m_hidUsages.contains(UsageId::Telephony_Ringer)) {
         qCInfo(lcHeadset) << "Ringing is not supported by this device";
@@ -327,13 +323,15 @@ void HeadsetDevice::setRing(bool flag)
         unsigned value = currentFlags(usage.reportId);
         const unsigned v = 1 << usage.bitPosition;
 
-        if (flag) {
+        const bool audible = flag && AudioManager::instance().externalRinger();
+
+        if (audible) {
             value |= v;
         } else {
             value &= ~v;
         }
 
-        qCInfo(lcHeadset) << "Sending 'ring' state with value" << flag
+        qCInfo(lcHeadset) << "Sending 'ring' state with value" << audible
                           << "to headset (Telephony_Ringer) with usage" << usage;
 
         send(usage.reportId, value);
