@@ -170,8 +170,8 @@ modules:
       - /share/man
     sources:
       - type: archive
-        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.13.tgz
-        sha256: d693b49517a42efb85a1a364a310aed16a53d428d1b46c0d31ef3fba78fcb656
+        url: https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.7.0.tgz
+        sha256: 9e86f37da375aa948a1b478dd76fe87b02090e47c21facae19223588e3407922
         x-checker-data:
           type: anitya
           stable-only: true

@@ -234,6 +234,9 @@ QString JitsiConnector::jitsiJavascriptInternal()
     const auto defaultName = tr("Unnamed user");
     auto &authManager = AuthManager::instance();
 
+    AppSettings settings;
+    const bool persistedTileView = settings.value("jitsi/tileView", false).toBool();
+
     return QString(R"""(
 const options = {
     roomName: '%5',
@@ -403,6 +406,8 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
 api.addListener("videoConferenceJoined", data => {
     jitsiConn.setJitsiId(api._myUserID)
 
+    api.executeCommand("setTileView", %8)
+
     api.getRoomsInfo().then(data => {
         for (const room of data.rooms) {
             if (room.isMainRoom) {
@@ -478,7 +483,8 @@ api.addListener("passwordRequired", data => {
                  m_roomName, // %5
                  defaultName // %6
                  )
-            .arg(!m_startWithVideo); // %7
+            .arg(!m_startWithVideo) // %7
+            .arg(persistedTileView); // %8
 }
 
 void JitsiConnector::toggleMute()
@@ -1428,6 +1434,8 @@ void JitsiConnector::setTileView(bool showTileView)
 {
     if (m_isTileView != showTileView) {
         setLargeVideoUser(nullptr);
+        AppSettings settings;
+        settings.setValue("jitsi/tileView", showTileView);
         Q_EMIT executeToggleTileViewCommand();
     }
 }

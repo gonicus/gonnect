@@ -1,3 +1,7 @@
+#ifdef WIN32
+#  include <winsock2.h>
+#endif
+
 #include <QDebug>
 #include <QMutexLocker>
 #include <QLoggingCategory>
@@ -6,6 +10,7 @@
 #include <algorithm>
 #include "HeadsetDevice.h"
 #include "GlobalInfo.h"
+#include "AudioManager.h"
 
 Q_LOGGING_CATEGORY(lcHeadset, "gonnect.usb.headset")
 
@@ -318,13 +323,15 @@ void HeadsetDevice::setRing(bool flag)
         unsigned value = currentFlags(usage.reportId);
         const unsigned v = 1 << usage.bitPosition;
 
-        if (flag) {
+        const bool audible = flag && AudioManager::instance().externalRinger();
+
+        if (audible) {
             value |= v;
         } else {
             value &= ~v;
         }
 
-        qCInfo(lcHeadset) << "Sending 'ring' state with value" << flag
+        qCInfo(lcHeadset) << "Sending 'ring' state with value" << audible
                           << "to headset (Telephony_Ringer) with usage" << usage;
 
         send(usage.reportId, value);

@@ -316,7 +316,7 @@ QString SIPCallManager::call(const QString &number, bool silent)
     if (!accounts.isEmpty()) {
         const auto phoneNumber = PhoneNumberUtil::isSipUri(number)
                 ? number
-                : PhoneNumberUtil::cleanPhoneNumber(number);
+                : PhoneNumberUtil::canonicalNumber(number);
         return call(accounts.first()->id(), phoneNumber, "", "", silent);
     }
 
