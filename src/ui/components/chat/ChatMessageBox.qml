@@ -83,6 +83,18 @@ Item {
             control.sendMessage()
         }
 
+        function exitEditMode() {
+            control.editMessageId = ""
+            messageField.lastCursorPosition = 0
+
+            if (control.chatRoom && internal.savedInput[control.chatRoom.id] !== undefined) {
+                messageField.text = internal.savedInput[control.chatRoom.id]
+                messageField.forceActiveFocus()
+            } else {
+                messageField.clear()
+            }
+        }
+
         function executePing() {
             if (control.chatRoom) {
                 control.chatRoom.sendTypingPing()
@@ -276,11 +288,7 @@ Item {
                 rightMargin: 5
             }
 
-            onClicked: () => {
-                           control.editMessageId = ""
-                           messageField.clear()
-                           messageField.lastCursorPosition = 0
-                       }
+            onClicked: () => internal.exitEditMode()
 
             Accessible.role: Accessible.Button
             Accessible.name: qsTr("Cancel edit")
@@ -451,9 +459,7 @@ Item {
                                     messageField.lastCursorPosition = messageField.cursorPosition
 
                                 } else if (keyEvent.key === Qt.Key_Escape && control.editMessageId) {
-                                    control.editMessageId = ""
-                                    messageField.clear()
-                                    messageField.lastCursorPosition = 0
+                                    internal.exitEditMode()
 
                                 } else if (control.hasMessage
                                            && [Qt.Key_Enter, Qt.Key_Return].includes(keyEvent.key)
