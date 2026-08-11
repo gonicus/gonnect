@@ -46,6 +46,7 @@ public:
     bool getMuteLocked() const { return m_muteLocked; }
 
     void probeMuteLock();
+    void applyInputState(quint8 reportId, unsigned value);
 
     QString path() const { return m_path; }
 
@@ -136,5 +137,6 @@ private:
     bool m_ringing = false;
     bool m_isOpen = false;
 
+    bool m_hasInputBaseline = false;
     bool m_displaySupported = false;
 };

@@ -126,7 +126,27 @@ void HeadsetDevice::close()
     }
 
     m_isOpen = false;
+    m_hasInputBaseline = false;
 }
+
+void HeadsetDevice::applyInputState(quint8 reportId, unsigned value)
+{
+    // Extract and persist hook switch input state
+    if (m_hidUsages.contains(UsageId::Telephony_HookSwitch)) {
+        const auto &usage = m_hidUsages.value(UsageId::Telephony_HookSwitch);
+        if (usage.reportId == reportId) {
+            m_hookSwitch = value & (1u << usage.bitPosition);
+        }
+    }
+
+    // Extract and persist line input state
+    if (m_hidUsages.contains(UsageId::Telephony_LineBusyTone)) {
+        const auto &usage = m_hidUsages.value(UsageId::Telephony_LineBusyTone);
+        if (usage.reportId == reportId) {
+            m_line = value & (1u << usage.bitPosition);
+        }
+    }
+ }
 
 void HeadsetDevice::send(quint8 reportId, unsigned data)
 {
@@ -432,6 +452,14 @@ void HeadsetDevice::processEvents()
                     << "Found relevant report with report id 0x" << QString::number(reportId, 16);
 
             qCDebug(lcHeadset) << "Received report data" << QString::asprintf("0x%08X", value);
+
+            // If we've no input baseline for hook switch / line yet, sample it now
+            if (!m_hasInputBaseline) {
+                applyInputState(reportId, value);
+                m_hasInputBaseline = true;
+                qCInfo(lcHeadset) << "Input baseline taken from first report - hook switch"
+                                  << m_hookSwitch << "line busy tone" << m_line;
+            }
 
             // Hook switch
             if (m_hidUsages.contains(UsageId::Telephony_HookSwitch)) {
