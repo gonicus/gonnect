@@ -1576,6 +1576,11 @@ void IpcDispatcher::processResponse(
             room->setAvatarPath(makeDataRootPath(changeEvent.avatarPath()));
         }
 
+        // Pinnes messages
+        if (changeEvent.hasPinnedMessagesChanged()) {
+            room->setPinnedMessageIds(changeEvent.pinnedMessages());
+        }
+
         // Update typing users
         if (changeEvent.hasTypingUserIdListChanged()) {
             const auto &typingUserIds = changeEvent.typingUserIdList();
@@ -1928,6 +1933,7 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     roomObj->setIsDirect(room.isDirect());
     roomObj->setIsFavorite(room.isFavorite());
     roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
+    roomObj->setPinnedMessageIds(room.pinnedMessages());
 
     if (room.hasLatestMessageTimestamp()) {
         roomObj->setLatestMessageDateTime(

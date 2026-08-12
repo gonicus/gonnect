@@ -38,7 +38,11 @@ public:
 
     virtual void resetUnreadCount() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
+    virtual QList<ChatMessage *> pinnedChatMessages() const override { return m_pinnedMessages; }
+    virtual qsizetype pinnedChatMessageCount() const override { return m_pinnedMessages.size(); }
+    virtual ChatMessage *pinnedChatMessageByIndex(qsizetype index) const override;
     virtual ChatMessage *chatMessageById(const QString &id) const override;
+    virtual qsizetype indexOfPinnedChatMessage(ChatMessage *message) const override;
     void ensureMessageLoaded(const QString &id);
     virtual ChatMessage *latestOwnTextMessage() const override;
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
@@ -54,6 +58,8 @@ public:
     qsizetype indexOfMessage(const ChatMessage *message) const;
 
     void removeMessage(const QString &messageId);
+
+    void setPinnedMessageIds(const QStringList &messageIds);
 
     void updateMessageEventId(const QString &oldEventId, const QString &newEventId);
     void setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags);
@@ -85,6 +91,7 @@ private Q_SLOTS:
 
 private:
     IpcDispatcher *ipcDispatcher() const;
+    void updatePinnedMessages();
 
     QString m_id;
     QString m_name;
@@ -107,4 +114,6 @@ private:
 
     QHash<QString, ChatMessage *> m_messageLookup;
     QList<ChatMessage *> m_messages;
+    QList<ChatMessage *> m_pinnedMessages;
+    QList<QString> m_pinnedMessageIds;
 };

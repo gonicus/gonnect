@@ -96,6 +96,12 @@ public:
     /// List of chat messages of this room, sorted by timestamp ascending
     virtual QList<ChatMessage *> chatMessages() const = 0;
 
+    /// List of pinned chat messages of this room, sorted by timestamp ascending
+    virtual QList<ChatMessage *> pinnedChatMessages() const = 0;
+    virtual qsizetype pinnedChatMessageCount() const = 0;
+    virtual ChatMessage *pinnedChatMessageByIndex(qsizetype index) const = 0;
+    virtual qsizetype indexOfPinnedChatMessage(ChatMessage *message) const = 0;
+
     /// Retrieve a specific message by its id or nullptr, if not found.
     Q_INVOKABLE virtual ChatMessage *chatMessageById(const QString &id) const = 0;
 
@@ -232,6 +238,8 @@ Q_SIGNALS:
     /// Send when chat messages have been cleared (i.e. removed and deleted). All objects have been
     /// destroyed at this moment.
     void chatMessagesReset();
+
+    void pinnedMessagesChanged();
 
     /// Meta signal for both chatUserAdded and chatUserRemoved, i.e. send whenever one
     /// of the other two is emitted.

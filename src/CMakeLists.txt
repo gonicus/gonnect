@@ -358,6 +358,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/DeviceVerification.qml
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
+        ui/components/chat/PinnedChatMessagesList.qml
 
         ui/components/controls/AudioFileSelector.qml
         ui/components/controls/AudioLevelButton.qml
@@ -674,6 +675,8 @@ qt_add_qml_module(gonnect
         chat/CrossSigningSecret.h
         chat/CrossSigningSymbol.h
         chat/NotificationSetting.h
+        chat/PinnedChatMessages.h
+        chat/PinnedChatMessages.cpp
         chat/PublicChatRoom.h
 
         conference/ConferenceUser.h

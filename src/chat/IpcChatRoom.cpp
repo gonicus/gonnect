@@ -78,6 +78,15 @@ void IpcChatRoom::resetUnreadCount()
     }
 }
 
+ChatMessage *IpcChatRoom::pinnedChatMessageByIndex(qsizetype index) const
+{
+    if (index < 0 || index >= m_pinnedMessages.size()) {
+        qCWarning(lcIpcChatRoom) << "Invalid list index:" << index;
+        return nullptr;
+    }
+    return m_pinnedMessages.at(index);
+}
+
 ChatMessage *IpcChatRoom::chatMessageById(const QString &id) const
 {
     if (id.isEmpty()) {
@@ -85,6 +94,16 @@ ChatMessage *IpcChatRoom::chatMessageById(const QString &id) const
     }
 
     return m_messageLookup.value(id, nullptr);
+}
+
+qsizetype IpcChatRoom::indexOfPinnedChatMessage(ChatMessage *message) const
+{
+    if (!message) {
+        qCWarning(lcIpcChatRoom) << "Cannot give index of nullptr";
+        return -1;
+    }
+
+    return m_pinnedMessages.indexOf(message);
 }
 
 void IpcChatRoom::ensureMessageLoaded(const QString &id)
@@ -166,6 +185,7 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
 
     if (isIndependent) {
         m_messageLookup.insert(eventId, message);
+        updatePinnedMessages();
         Q_EMIT chatMessageOutOfSequenceReceived(message);
     } else {
 
@@ -180,6 +200,7 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
 
         m_messages.prepend(message);
         m_messageLookup.insert(message->eventId(), message);
+        updatePinnedMessages();
         Q_EMIT chatMessageAdded(0, message);
     }
 }
@@ -196,11 +217,20 @@ void IpcChatRoom::removeMessage(const QString &messageId)
     for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
         if (m_messages.at(i)->eventId() == messageId) {
             auto message = m_messages.at(i);
+            m_pinnedMessages.removeOne(message);
             m_messages.removeAt(i);
             Q_EMIT chatMessageRemoved(i, message);
             delete message;
             return;
         }
+    }
+}
+
+void IpcChatRoom::setPinnedMessageIds(const QStringList &messageIds)
+{
+    if (m_pinnedMessageIds != messageIds) {
+        m_pinnedMessageIds = messageIds;
+        updatePinnedMessages();
     }
 }
 
@@ -579,4 +609,25 @@ void IpcChatRoom::updateOwnUserJoinState(qsizetype, ChatUser *user, UserRoomStat
 IpcDispatcher *IpcChatRoom::ipcDispatcher() const
 {
     return q_check_ptr(qobject_cast<IpcDispatcher *>(parent()));
+}
+
+void IpcChatRoom::updatePinnedMessages()
+{
+    QList<ChatMessage *> messages;
+    messages.reserve(m_pinnedMessageIds.size());
+
+    for (const auto &id : std::as_const(m_pinnedMessageIds)) {
+        if (auto *chatMessage = chatMessageById(id)) {
+            messages.append(chatMessage);
+        }
+    }
+
+    std::ranges::sort(messages, [](const ChatMessage *a, const ChatMessage *b) -> bool {
+        return a->timestamp() < b->timestamp();
+    });
+
+    if (m_pinnedMessages != messages) {
+        m_pinnedMessages = messages;
+        Q_EMIT pinnedMessagesChanged();
+    }
 }
