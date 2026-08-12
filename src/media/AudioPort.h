@@ -40,7 +40,7 @@ public:
 
     qreal sourceLevel() const { return m_sourceAudioLevel; }
 
-    void writeSilenceMS(unsigned milliseconds);
+    void padSilence();
 
 Q_SIGNALS:
     void startIdleTimer();
@@ -63,6 +63,9 @@ private:
 
     void updateAudioLevel(const char *data, qint64 size);
     void setSourceAudioLevel(qreal level);
+
+    void writeSilenceMS(unsigned milliseconds);
+    bool isSilence(const void *data, unsigned size) const;
 
     AudioProcessor *m_audioProcessor = nullptr;
 
