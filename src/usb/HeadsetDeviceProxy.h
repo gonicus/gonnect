@@ -16,6 +16,7 @@ class HeadsetDeviceProxy : public IHeadsetDevice
     Q_OBJECT
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
     Q_PROPERTY(bool muteLocked READ muteLocked NOTIFY muteLockedChanged)
+    Q_PROPERTY(bool hasDeviceConfigurableRinger READ hasDeviceConfigurableRinger NOTIFY nameChanged)
 
 public:
     explicit HeadsetDeviceProxy(QObject *parent = nullptr);
@@ -50,6 +51,7 @@ public:
 
     bool available() const { return !!m_device; }
     bool muteLocked() const { return m_muteLocked; }
+    bool hasDeviceConfigurableRinger() const;
     void setMute(bool flag);
 
     ~HeadsetDeviceProxy();

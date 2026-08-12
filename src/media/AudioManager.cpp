@@ -281,9 +281,17 @@ void AudioManager::setRingDeviceId(const QString &id)
     qCCritical(lcAudioManager) << "unable to set ring device: unknown ID" << id;
 }
 
+bool AudioManager::externalRinger() const
+{
+    // Use settings object because the settings page will not use "setExternalRinger".
+    return m_settings
+            .value(QString("audio%1/preferExternalRinger").arg(m_currentAudioProfile), false)
+            .toBool();
+}
+
 void AudioManager::setExternalRinger(bool flag)
 {
-    if (m_externalRinger != flag) {
+    if (externalRinger() != flag) {
         m_settings.setValue(QString("audio%1/preferExternalRinger").arg(m_currentAudioProfile),
                             flag);
         qCInfo(lcAudioManager) << "set external ringer to" << flag;
@@ -323,8 +331,6 @@ void AudioManager::doProfileElection()
             playbackHash = m_settings.value(QString("%1/playback").arg(group)).toString();
             captureHash = m_settings.value(QString("%1/capture").arg(group)).toString();
             ringHash = m_settings.value(QString("%1/ringing").arg(group)).toString();
-            m_externalRinger =
-                    m_settings.value(QString("%1/preferExternalRinger").arg(group), false).toBool();
 
             // Check if all audio hashes are available for this profile
             if (isDeviceAvailable(playbackHash) && isDeviceAvailable(captureHash)

@@ -433,7 +433,7 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     }
 
                     if (auto *port = dynamic_cast<AudioPort *>(&speaker_media)) {
-                        port->writeSilenceMS(120);
+                        port->padSilence();
                     }
 
                     try {
