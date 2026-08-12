@@ -233,10 +233,9 @@ void AudioPort::padSilence()
     const qint64 missing = target - queued;
 
     if (missing <= 0) {
-        qCDebug(lcAudioPort).nospace()
-        << "silence pad: nothing written, buffer already holds "
-        << (m_audioFormat.durationForBytes(queued) / 1000) << "ms of "
-        << SILENCE_TARGET_FILL_MS << "ms target";
+        qCDebug(lcAudioPort).nospace() << "silence pad: nothing written, buffer already holds "
+                                       << (m_audioFormat.durationForBytes(queued) / 1000)
+                                       << "ms of " << SILENCE_TARGET_FILL_MS << "ms target";
         return;
     }
 
@@ -428,10 +427,10 @@ void AudioPort::onFrameReceived(pj::MediaFrame &frame)
         && isSilence(frame.buf.data(), static_cast<unsigned>(frame.size))) {
 
         qCDebug(lcAudioPort).nospace()
-        << "playback: dropped a silent frame to drain "
-        << (m_audioFormat.durationForBytes(m_sink->bufferSize() - m_sink->bytesFree())
-            / 1000)
-        << "ms down to the " << SILENCE_TARGET_FILL_MS << "ms target";
+                << "playback: dropped a silent frame to drain "
+                << (m_audioFormat.durationForBytes(m_sink->bufferSize() - m_sink->bytesFree())
+                    / 1000)
+                << "ms down to the " << SILENCE_TARGET_FILL_MS << "ms target";
 
         Q_EMIT startIdleTimer();
         return;

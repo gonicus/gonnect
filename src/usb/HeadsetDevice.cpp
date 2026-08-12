@@ -146,7 +146,7 @@ void HeadsetDevice::applyInputState(quint8 reportId, unsigned value)
             m_line = value & (1u << usage.bitPosition);
         }
     }
- }
+}
 
 void HeadsetDevice::send(quint8 reportId, unsigned data)
 {
