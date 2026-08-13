@@ -48,6 +48,7 @@ public:
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
     virtual void sendFile(const QString &filePath) override;
     virtual void sendTypingPing() override;
+    virtual void togglePin(const QString &messageId) override;
 
     /// Add an already existing message to the room; does not send a new message. Takes ownership of
     /// the object.

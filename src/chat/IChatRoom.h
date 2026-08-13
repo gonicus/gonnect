@@ -62,7 +62,8 @@ public:
         CanEdit = 1 << 0,
         CanInvite = 1 << 1,
         CanKick = 1 << 2,
-        CanBan = 1 << 3
+        CanBan = 1 << 3,
+        CanPinMessages = 1 << 4,
     };
     Q_ENUM(Permission)
     Q_DECLARE_FLAGS(Permissions, Permission)
@@ -124,6 +125,9 @@ public:
 
     /// Start the loading of next batch of messages.
     Q_INVOKABLE virtual void loadMessages() = 0;
+
+    /// Toggle whether the message is pinned in this room or not.
+    Q_INVOKABLE virtual void togglePin(const QString &messageId) = 0;
 
     /// Whether this room is a direct chat between two users or a room with several ones.
     virtual bool isDirectChat() = 0;

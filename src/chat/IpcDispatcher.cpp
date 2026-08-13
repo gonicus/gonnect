@@ -307,7 +307,8 @@ IChatProvider::Capabilities IpcDispatcher::capabilities() const
             | CAP::Reactions
             | CAP::UploadFile
             | CAP::UploadMedia
-            | CAP::Markdown;
+            | CAP::Markdown
+            | CAP::PinMessage;
     return s_capabilties;
     // clang-format on
 }
@@ -584,6 +585,18 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     if (!sendRequest(req)) {
         m_singleMessageTags.remove(tag);
     }
+}
+
+void IpcDispatcher::pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin)
+{
+    RoomPinRequest pinRequest;
+    pinRequest.setRoomId(roomId);
+    pinRequest.setMessageId(messageId);
+    pinRequest.setPinned(pin);
+
+    auto req = createRequest();
+    req->setRoomPinRequest(pinRequest);
+    sendRequest(req);
 }
 
 qsizetype IpcDispatcher::chatRoomsCount()
@@ -2556,6 +2569,9 @@ IpcDispatcher::roomPermissionsGrpcToGonnect(const de::gonicus::gonnect::RoomPerm
     }
     if (permissions.canBan()) {
         p |= IChatRoom::Permission::CanBan;
+    }
+    if (permissions.canPinMessages()) {
+        p |= IChatRoom::Permission::CanPinMessages;
     }
 
     return p;

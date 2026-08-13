@@ -1,17 +1,20 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Controls.impl
 import base
 
 Item {
     id: control
     clip: true
-    implicitWidth: pinnedListView.contenctWidth
+    implicitWidth: pinnedListView.contentWidth
     implicitHeight: pinnedListView.contentHeight
 
     property alias chatRoom: pinnedModel.chatRoom
+
     readonly property alias count: pinnedListView.count
+    readonly property bool isPinAllowed: control.chatRoom && !!(control.chatRoom.permissions & IChatRoom.Permission.CanPinMessages)
 
     Rectangle {
         anchors.fill: parent
@@ -38,8 +41,15 @@ Item {
             }
 
             required property int index
+            required property string eventId
             required property QtObject content
             readonly property int padding: 2 * Theme.d
+
+            Rectangle {
+                anchors.fill: parent
+                visible: delgHoverHandler.hovered
+                color: Theme.backgroundOffsetHoveredColor
+            }
 
             Rectangle {
                 id: bottomBorder
@@ -79,6 +89,37 @@ Item {
                     right: parent.right
                     top: parent.top
                     margins: delg.padding
+                }
+            }
+
+            HoverHandler {
+                id: delgHoverHandler
+                enabled: control.isPinAllowed
+            }
+
+            TapHandler {
+                gesturePolicy: TapHandler.WithinBounds
+                grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+                acceptedButtons: Qt.RightButton
+                onTapped: () => {
+                              if (delg.enabled && control.isPinAllowed) {
+                                  contextMenuComponent.createObject(delg).popup()
+                              }
+                          }
+            }
+
+            Component {
+                id: contextMenuComponent
+
+                Menu {
+                    id: contextMenu
+                    onClosed: () => contextMenu.destroy()
+
+                    MenuItem {
+                        icon.source: Icons.windowPin
+                        text: qsTr("Unpin")
+                        onTriggered: () => control.chatRoom.togglePin(delg.eventId)
+                    }
                 }
             }
         }

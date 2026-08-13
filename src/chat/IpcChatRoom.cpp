@@ -165,6 +165,16 @@ void IpcChatRoom::sendTypingPing()
     }
 }
 
+void IpcChatRoom::togglePin(const QString &messageId)
+{
+    if (auto *dispatcher = ipcDispatcher()) {
+        const bool isCurrentlyPinned = m_pinnedMessageIds.contains(messageId);
+        dispatcher->pinOrUnpinMessage(id(), messageId, !isCurrentlyPinned);
+    } else {
+        qCCritical(lcIpcChatRoom) << "IpcChatRoom has no IpcDispatcher as parent";
+    }
+}
+
 void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent)
 {
     Q_CHECK_PTR(message);

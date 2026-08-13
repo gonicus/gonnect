@@ -37,6 +37,7 @@ public:
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
     virtual void sendFile(const QString &filePath) override { Q_UNUSED(filePath) }
     virtual void sendTypingPing() override { }
+    virtual void togglePin(const QString &) override { };
     virtual bool isDirectChat() override { return false; }
     virtual bool isFavorite() override { return false; }
     virtual bool hasPresenceState() override { return false; }
