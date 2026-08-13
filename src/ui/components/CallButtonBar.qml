@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
 import QtQuick.Controls.impl
 import QtQuick.Controls.Material
@@ -24,6 +25,7 @@ Item {
     readonly property bool isFinished: control.callItem?.isFinished ?? false
     readonly property bool isIncoming: control.callItem?.isIncoming ?? false
     readonly property bool hasCapabilityJitsi: control.callItem?.hasCapabilityJitsi ?? false
+    readonly property int callDelay: control.callItem?.callDelay ?? -1
 
     readonly property int qualityLevel: control.callItem?.qualityLevel ?? SIPCallManager.QualityLevel.Low
     readonly property int securityLevel: control.callItem?.securityLevel ?? SIPCallManager.SecurityLevel.Low
@@ -463,6 +465,17 @@ Item {
                     popup.close()
                 }
             }
+        }
+    }
+
+    Label {
+        id: dtmfDebugLabel
+        visible: control.callDelay > 0
+        color: Theme.secondaryTextColor
+        text: "⚠  " + control.callDelay + " ms"
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: callQualityIcon.right
         }
     }
 
