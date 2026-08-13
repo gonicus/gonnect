@@ -46,6 +46,7 @@ public:
         UploadMedia = 1 << 4,
         UploadFile = 1 << 5,
         Markdown = 1 << 6,
+        PinMessage = 1 << 7,
     };
     Q_ENUM(Capability)
     Q_DECLARE_FLAGS(Capabilities, Capability)

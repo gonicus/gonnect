@@ -307,7 +307,8 @@ IChatProvider::Capabilities IpcDispatcher::capabilities() const
             | CAP::Reactions
             | CAP::UploadFile
             | CAP::UploadMedia
-            | CAP::Markdown;
+            | CAP::Markdown
+            | CAP::PinMessage;
     return s_capabilties;
     // clang-format on
 }
@@ -584,6 +585,18 @@ void IpcDispatcher::loadSingleMessage(const QString &roomId, const QString &mess
     if (!sendRequest(req)) {
         m_singleMessageTags.remove(tag);
     }
+}
+
+void IpcDispatcher::pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin)
+{
+    RoomPinRequest pinRequest;
+    pinRequest.setRoomId(roomId);
+    pinRequest.setMessageId(messageId);
+    pinRequest.setPinned(pin);
+
+    auto req = createRequest();
+    req->setRoomPinRequest(pinRequest);
+    sendRequest(req);
 }
 
 qsizetype IpcDispatcher::chatRoomsCount()
@@ -1280,13 +1293,6 @@ void IpcDispatcher::processResponse(
 
         const auto previousFlags = message->flags();
 
-        const bool hasIsPinnedChanged = changeEvent.hasIsPinned()
-                && (static_cast<bool>(message->flags() & ChatMessage::Flag::Pinned)
-                    != changeEvent.isPinned());
-        if (hasIsPinnedChanged) {
-            message->setFlags(message->flags() ^ ChatMessage::Flag::Pinned);
-        }
-
         const bool hasIsEncryptedChanged = changeEvent.hasIsEncrypted()
                 && (static_cast<bool>(message->flags() & ChatMessage::Flag::Encrypted)
                     != changeEvent.isEncrypted());
@@ -1386,7 +1392,7 @@ void IpcDispatcher::processResponse(
             }
         }
 
-        if (hasIsEncryptedChanged || hasIsPinnedChanged) {
+        if (hasIsEncryptedChanged) {
             Q_EMIT room->chatMessageFlagsChanged(index, message, previousFlags);
         }
         if (hasContentChanged) {
@@ -1574,6 +1580,11 @@ void IpcDispatcher::processResponse(
         // Avatar
         if (changeEvent.hasAvatarPath()) {
             room->setAvatarPath(makeDataRootPath(changeEvent.avatarPath()));
+        }
+
+        // Pinnes messages
+        if (changeEvent.hasPinnedMessagesChanged()) {
+            room->setPinnedMessageIds(changeEvent.pinnedMessages());
         }
 
         // Update typing users
@@ -1834,9 +1845,6 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         isUnread = false;
     }
 
-    if (message.isPinned()) {
-        flags |= ChatMessage::Flag::Pinned;
-    }
     if (message.isEncrypted()) {
         flags |= ChatMessage::Flag::Encrypted;
     }
@@ -1847,22 +1855,29 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
 
     QObject *content = createMessageContent(message);
 
-    if (chatMessage) {
+    if (chatMessage && !isNew) {
         room->updateMessageEventId(chatMessage->eventId(), message.messageId());
         chatMessage->setTimestamp(dateTime);
         room->setMessageFlags(chatMessage->eventId(), flags);
-        chatMessage->setContent(content);
 
-        if (!isNew) {
-            auto idx = room->indexOfMessage(chatMessage);
-            Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
+        if (content) {
+            chatMessage->setContent(content);
         }
 
+        auto idx = room->indexOfMessage(chatMessage);
+        Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
+
     } else {
+        if (chatMessage) {
+            // This can happen when an independently loaded message is now replaced by one that is
+            // loaded via the regular timeline.
+            // In this case, the old "temporary" object becomes obsolete.
+            chatMessage->deleteLater();
+        }
+
         const auto user = m_users.value(message.senderId(), nullptr);
         const auto userDisplayName =
                 (user && !user->displayName().isEmpty()) ? user->displayName() : message.senderId();
-
         chatMessage = new ChatMessage(message.messageId(), message.senderId(), userDisplayName,
                                       content, dateTime, room, flags);
     }
@@ -1928,6 +1943,7 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     roomObj->setIsDirect(room.isDirect());
     roomObj->setIsFavorite(room.isFavorite());
     roomObj->setRoomSettings(roomSettingsProtoToIpc(room.roomSettings()));
+    roomObj->setPinnedMessageIds(room.pinnedMessages());
 
     if (room.hasLatestMessageTimestamp()) {
         roomObj->setLatestMessageDateTime(
@@ -2550,6 +2566,9 @@ IpcDispatcher::roomPermissionsGrpcToGonnect(const de::gonicus::gonnect::RoomPerm
     }
     if (permissions.canBan()) {
         p |= IChatRoom::Permission::CanBan;
+    }
+    if (permissions.canPinMessages()) {
+        p |= IChatRoom::Permission::CanPinMessages;
     }
 
     return p;
