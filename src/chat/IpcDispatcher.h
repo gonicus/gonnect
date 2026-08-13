@@ -139,6 +139,9 @@ public:
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
 
+    /// Pin or unpin a message inside the room.
+    void pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin);
+
     // IChatProvider interface
     virtual qsizetype chatRoomsCount() override;
     virtual IChatRoom *chatRoomByIndex(qsizetype index) override;
