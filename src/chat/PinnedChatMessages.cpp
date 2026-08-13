@@ -19,8 +19,11 @@ QHash<int, QByteArray> PinnedChatMessages::roleNames() const
     };
 }
 
-int PinnedChatMessages::rowCount(const QModelIndex &) const
+int PinnedChatMessages::rowCount(const QModelIndex &parent) const
 {
+    if (parent.isValid()) {
+        return 0;
+    }
     return m_chatRoom ? m_chatRoom->pinnedChatMessageCount() : 0;
 }
 
@@ -81,9 +84,8 @@ void PinnedChatMessages::onChatRoomUpdated()
                     Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Content) });
                 });
         connect(m_chatRoom, &QObject::destroyed, m_chatRoomContext, [this](QObject *obj) {
-            auto *destroyedRoom = qobject_cast<IChatRoom *>(obj);
-            if (destroyedRoom && m_chatRoom == destroyedRoom) {
-                setProperty("chatRoom", QVariant::fromValue(nullptr));
+            if (obj == static_cast<QObject *>(m_chatRoom)) {
+                setProperty("chatRoom", QVariant::fromValue<IChatRoom *>(nullptr));
             }
         });
     }

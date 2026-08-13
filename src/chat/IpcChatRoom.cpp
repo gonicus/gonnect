@@ -108,11 +108,12 @@ qsizetype IpcChatRoom::indexOfPinnedChatMessage(ChatMessage *message) const
 
 void IpcChatRoom::ensureMessageLoaded(const QString &id)
 {
-    if (id.isEmpty() || m_messageLookup.contains(id)) {
+    if (id.isEmpty() || m_messageLookup.contains(id) || m_loadRequestedMessageIds.contains(id)) {
         return;
     }
 
     if (auto *dispatcher = ipcDispatcher()) {
+        m_loadRequestedMessageIds.insert(id);
         dispatcher->loadSingleMessage(m_id, id);
     }
 }
@@ -192,17 +193,19 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
     }
 
     const auto eventId = message->eventId();
+    m_loadRequestedMessageIds.remove(eventId);
 
     if (isIndependent) {
         m_messageLookup.insert(eventId, message);
         updatePinnedMessages();
         Q_EMIT chatMessageOutOfSequenceReceived(message);
-    } else {
 
+    } else {
         for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
             if (m_messages.at(i)->timestamp() < message->timestamp()) {
                 m_messages.insert(i + 1, message);
                 m_messageLookup.insert(eventId, message);
+                updatePinnedMessages();
                 Q_EMIT chatMessageAdded(i + 1, message);
                 return;
             }
@@ -227,7 +230,10 @@ void IpcChatRoom::removeMessage(const QString &messageId)
     for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
         if (m_messages.at(i)->eventId() == messageId) {
             auto message = m_messages.at(i);
-            m_pinnedMessages.removeOne(message);
+            m_pinnedMessageIds.removeOne(messageId);
+            if (m_pinnedMessages.removeOne(message)) {
+                Q_EMIT pinnedMessagesChanged();
+            }
             m_messages.removeAt(i);
             Q_EMIT chatMessageRemoved(i, message);
             delete message;
@@ -528,6 +534,13 @@ const QList<ChatUser *> &IpcChatRoom::typingUsers() const
 
 void IpcChatRoom::clear()
 {
+    m_pinnedMessageIds.clear();
+    m_loadRequestedMessageIds.clear();
+    if (!m_pinnedMessages.isEmpty()) {
+        m_pinnedMessages.clear();
+        Q_EMIT pinnedMessagesChanged();
+    }
+
     m_messageLookup.clear();
     qDeleteAll(m_messages);
     m_messages.clear();
@@ -629,6 +642,8 @@ void IpcChatRoom::updatePinnedMessages()
     for (const auto &id : std::as_const(m_pinnedMessageIds)) {
         if (auto *chatMessage = chatMessageById(id)) {
             messages.append(chatMessage);
+        } else {
+            ensureMessageLoaded(id);
         }
     }
 

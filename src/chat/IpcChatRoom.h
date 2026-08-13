@@ -117,4 +117,5 @@ private:
     QList<ChatMessage *> m_messages;
     QList<ChatMessage *> m_pinnedMessages;
     QList<QString> m_pinnedMessageIds;
+    QSet<QString> m_loadRequestedMessageIds;
 };

@@ -14,7 +14,7 @@ Item {
     property alias chatRoom: pinnedModel.chatRoom
 
     readonly property alias count: pinnedListView.count
-    readonly property bool isPinAllowed: control.chatRoom && !!(control.chatRoom.permissions & IChatRoom.Permission.CanPinMessages)
+    readonly property bool isPinAllowed: control.chatRoom && !!(Number(control.chatRoom.permissions) & IChatRoom.Permission.CanPinMessages)
 
     Rectangle {
         anchors.fill: parent
