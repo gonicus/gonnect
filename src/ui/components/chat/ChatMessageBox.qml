@@ -55,6 +55,10 @@ Item {
         messageField.lastCursorPosition = 0
     }
 
+    function positionCursorAtEnd() {
+        messageField.cursorPosition = messageField.text.length
+    }
+
     QtObject {
         id: internal
 
@@ -90,6 +94,7 @@ Item {
             if (control.chatRoom && internal.savedInput[control.chatRoom.id] !== undefined) {
                 messageField.text = internal.savedInput[control.chatRoom.id]
                 messageField.forceActiveFocus()
+                control.positionCursorAtEnd()
             } else {
                 messageField.clear()
             }
