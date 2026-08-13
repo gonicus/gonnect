@@ -9,6 +9,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QPromise>
+#include <QTimer>
 
 #include "IDateEventFeeder.h"
 
@@ -20,19 +21,29 @@ public:
     explicit EDSEventFeeder(QObject *parent = nullptr, const QString &source = "",
                             const QDateTime &currentTime = QDateTime(),
                             const QDateTime &timeRangeStart = QDateTime(),
-                            const QDateTime &timeRangeEnd = QDateTime());
+                            const QDateTime &timeRangeEnd = QDateTime(), const int retryCount = 0,
+                            const int retryInterval = 0);
     ~EDSEventFeeder();
 
-    virtual void init() override;
-    virtual QUrl networkCheckURL() const override { return QUrl(); };
+    void init() override;
+    QUrl networkCheckURL() const override { return QUrl(); };
 
     void process();
 
+Q_SIGNALS:
+    void feederFailed();
+
 private:
-    QDateTime createDateTimeFromTimeType(const ICalTime *datetime);
+    QDateTime createDateTimeFromTimeType(ICalTime *datetime);
 
     static void onEcalClientConnected(GObject *source_object, GAsyncResult *result,
                                       gpointer user_data);
+
+    void disconnectCalendarSignals();
+
+    void connectViewCompleteSignal(ECalClientView *view);
+
+    static void onViewComplete(ECalClientView *view, GError *error, gpointer user_data);
 
     void connectCalendarSignals(ECalClientView *view);
 
@@ -51,20 +62,30 @@ private:
 
     void processEvents(QString clientName, QString clientUid, GSList *components);
 
+    void resetCalendar();
+    void resetFeeder();
+
     QString m_source;
     QDateTime m_currentTime;
     QDateTime m_timeRangeStart;
     QDateTime m_timeRangeEnd;
 
-    ESourceRegistry *m_registry = nullptr;
-    GList *m_sources = nullptr;
-    gchar *m_searchExpr = nullptr;
+    ESourceRegistry *m_registry = NULL;
+    GList *m_sources = NULL;
+    gchar *m_searchExpr = NULL;
     QList<ECalClient *> m_clients;
     QList<ECalClientView *> m_clientViews;
 
+    GCancellable *m_cancellable = NULL;
+
     int m_sourceCount = 0;
     std::atomic<int> m_clientCount = 0;
+    QFuture<void> m_chainFuture;
+    QTimer m_sourceTimeout;
     QPromise<void> *m_sourcePromise = nullptr;
     QFuture<void> m_sourceFuture;
     QFutureWatcher<void> *m_futureWatcher = nullptr;
+
+    int m_retryCount = 0;
+    int m_retryInterval = 0;
 };

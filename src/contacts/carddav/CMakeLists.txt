@@ -7,13 +7,16 @@ if(ENABLE_DAV)
     
       CardDAVAddressBookFactory.cpp
       CardDAVAddressBookFactory.h
+
       CardDAVAddressBookFeeder.cpp
       CardDAVAddressBookFeeder.h
+      CardDAVAddressBookFeederConfig.h
     )
     
     target_include_directories(CardDAVAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/presence
         ${PROJECT_SOURCE_DIR}/src/dbus/portal
         ${PROJECT_SOURCE_DIR}/src/ui
         ${PROJECT_SOURCE_DIR}/src/sip
@@ -30,5 +33,5 @@ if(ENABLE_DAV)
       Qt6::Xml
       vCard)
 
-    set(CARDDAV_ADDRESSBOOK_FACTORY CardDAVAddressBookFactory PARENT_SCOPE)
+    set(CARDDAV_CONTACT_FACTORY CardDAVAddressBookFactory PARENT_SCOPE)
 endif()

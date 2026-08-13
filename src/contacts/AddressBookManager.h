@@ -1,8 +1,10 @@
 #pragma once
 
+#include "SecretResponse.h"
+
 #include <QObject>
 #include <QHash>
-#include <QMutex>
+#include <QTimer>
 
 class IAddressBookFeeder;
 
@@ -22,22 +24,33 @@ public:
 
     void initAddressBookConfigs();
     void reloadAddressBook();
+    QStringList addressBookConfigs() const { return m_addressBookConfigs; }
 
     static QString hashForSettingsGroup(const QString &group);
 
-    void acquireSecret(const QString &group, std::function<void(const QString &secret)> callback);
+    void acquireSecret(bool forcePrompt, const QString &group,
+                       std::function<void(SecretResponse response)> callback);
 
 private:
     explicit AddressBookManager(QObject *parent = nullptr);
 
     QString secret(const QString &group) const;
-    QMutex m_queueMutex;
 
     void processAddressBookQueue();
+    void requeueGroup(const QString &group);
+    void scheduleReconnect();
+
+    QTimer m_retryTimer;
+    bool m_isProcessing = false;
 
     QHash<QString, IAddressBookFeeder *> m_addressBookFeeders;
 
     QStringList m_addressBookConfigs;
     QStringList m_addressBookQueue;
+    bool m_reconnectScheduled = false;
     QHash<QString, QMetaObject::Connection> m_viewHelperConnections;
+    QMetaObject::Connection m_connectivityConnection;
+
+Q_SIGNALS:
+    void configsLoaded();
 };

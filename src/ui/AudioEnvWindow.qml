@@ -30,7 +30,12 @@ BaseWindow {
                 rightMargin: 20
             }
 
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Audio environment error")
+            Accessible.description: audioDeviceError.text
+
             Label {
+                id: audioDeviceError
                 text: qsTr("No fitting audio environment could be found. Please select the desired audio devices.")
                 font.pixelSize: 16
                 wrapMode: Label.Wrap
@@ -38,6 +43,8 @@ BaseWindow {
                     left: parent.left
                     right: parent.right
                 }
+
+                Accessible.ignored: true
             }
 
             Column {
@@ -46,12 +53,19 @@ BaseWindow {
                     right: parent.right
                 }
 
+                Accessible.role: Accessible.Column
+                Accessible.name: qsTr("Input device selection header")
+                Accessible.description: qsTr("Header for the input device selection below")
+
                 Label {
+                    id: inputAudioLabel
                     text: qsTr('Input device')
                     anchors {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.ignored: true
                 }
 
                 ComboBox {
@@ -64,6 +78,28 @@ BaseWindow {
                         right: parent.right
                     }
                     model: AudioManager.devices.filter(device => device.isInput)
+
+                    Accessible.role: Accessible.ComboBox
+                    Accessible.name: qsTr("Input device selection box")
+                    Accessible.description: qsTr("Select the input device that should be used")
+
+                    delegate: ItemDelegate {
+                        id: inputAudioSelectorDelg
+                        width: parent.width
+                        text: inputAudioSelectorDelg.name
+
+                        font.family: inputAudioSelector.font.family
+                        font.weight: inputAudioSelector.font.weight
+                        font.pointSize: inputAudioSelector.font.pointSize
+
+                        Accessible.role: Accessible.ListItem
+                        Accessible.name: inputAudioSelectorDelg.name
+                        Accessible.description: qsTr("Currently selected input device")
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => inputAudioSelector.setSelectedAudioDevice()
+
+                        required property string name
+                    }
 
                     function updateSelectedAudioDeviceFromModel() {
                         const deviceId = AudioManager.captureDeviceId
@@ -78,7 +114,11 @@ BaseWindow {
                         inputAudioSelector.currentIndex = 0
                     }
 
-                    onActivated: () => AudioManager.captureDeviceId = inputAudioSelector.currentValue
+                    function setSelectedAudioDevice() {
+                        AudioManager.captureDeviceId = inputAudioSelector.currentValue
+                    }
+
+                    onActivated: () => inputAudioSelector.setSelectedAudioDevice()
 
                     Component.onCompleted: () => inputAudioSelector.updateSelectedAudioDeviceFromModel()
 
@@ -95,12 +135,18 @@ BaseWindow {
                     right: parent.right
                 }
 
+                Accessible.role: Accessible.Column
+                Accessible.name: qsTr("Output device selection header")
+                Accessible.description: qsTr("Header for the output device selection below")
+
                 Label {
                     text: qsTr('Output device')
                     anchors {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.ignored: true
                 }
 
                 ComboBox {
@@ -113,6 +159,28 @@ BaseWindow {
                         right: parent.right
                     }
                     model: AudioManager.devices.filter(device => device.isOutput)
+
+                    Accessible.role: Accessible.ComboBox
+                    Accessible.name: qsTr("Output device selection box")
+                    Accessible.description: qsTr("Select the output device that should be used")
+
+                    delegate: ItemDelegate {
+                        id: outputAudioSelectorDelg
+                        width: parent.width
+                        text: outputAudioSelectorDelg.name
+
+                        font.family: outputAudioSelector.font.family
+                        font.weight: outputAudioSelector.font.weight
+                        font.pointSize: outputAudioSelector.font.pointSize
+
+                        Accessible.role: Accessible.ListItem
+                        Accessible.name: outputAudioSelectorDelg.name
+                        Accessible.description: qsTr("Currently selected output device")
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => outputAudioSelector.setSelectedAudioDevice()
+
+                        required property string name
+                    }
 
                     function updateSelectedAudioDeviceFromModel() {
                         const deviceId = AudioManager.playbackDeviceId
@@ -127,7 +195,11 @@ BaseWindow {
                         outputAudioSelector.currentIndex = 0
                     }
 
-                    onActivated: () => AudioManager.playbackDeviceId = outputAudioSelector.currentValue
+                    function setSelectedAudioDevice() {
+                        AudioManager.playbackDeviceId = outputAudioSelector.currentValue
+                    }
+
+                    onActivated: () => outputAudioSelector.setSelectedAudioDevice()
 
                     Component.onCompleted: () => outputAudioSelector.updateSelectedAudioDeviceFromModel()
 
@@ -144,12 +216,19 @@ BaseWindow {
                     right: parent.right
                 }
 
+                Accessible.role: Accessible.Column
+                Accessible.name: qsTr("Ring tone output device")
+                Accessible.description: outputRingToneAudioLabel.text
+
                 Label {
+                    id: outputRingToneAudioLabel
                     text: qsTr('Output device for ring tone')
                     anchors {
                         left: parent.left
                         right: parent.right
                     }
+
+                    Accessible.ignored: true
                 }
 
                 ComboBox {
@@ -163,6 +242,27 @@ BaseWindow {
                     }
                     model: AudioManager.devices.filter(device => device.isOutput)
 
+                    Accessible.role: Accessible.ComboBox
+                    Accessible.name: qsTr("Ring tone output device selection box")
+                    Accessible.description: qsTr("Select the output device that should be used for playing the ring tone")
+
+                    delegate: ItemDelegate {
+                        id: outputRingToneAudioSelectorDelg
+                        width: parent.width
+                        text: outputRingToneAudioSelectorDelg.name
+
+                        font.family: outputRingToneAudioSelector.font.family
+                        font.weight: outputRingToneAudioSelector.font.weight
+                        font.pointSize: outputRingToneAudioSelector.font.pointSize
+
+                        Accessible.role: Accessible.ListItem
+                        Accessible.name: outputRingToneAudioSelectorDelg.name
+                        Accessible.description: qsTr("Currently selected ring tone output device")
+                        Accessible.focusable: true
+                        Accessible.onPressAction: () => outputRingToneAudioSelectorDelg.setSelectedAudioDevice()
+
+                        required property string name
+                    }
 
                     function updateSelectedAudioDeviceFromModel() {
                         const deviceId = AudioManager.ringDeviceId
@@ -177,7 +277,11 @@ BaseWindow {
                         outputRingToneAudioSelector.currentIndex = 0
                     }
 
-                    onActivated: () => AudioManager.ringDeviceId = outputRingToneAudioSelector.currentValue
+                    function setSelectedAudioDevice() {
+                        AudioManager.ringDeviceId = outputRingToneAudioSelector.currentValue
+                    }
+
+                    onActivated: () => outputRingToneAudioSelectorDelg.setSelectedAudioDevice()
 
                     Component.onCompleted: () => outputRingToneAudioSelector.updateSelectedAudioDeviceFromModel()
 
@@ -201,7 +305,14 @@ BaseWindow {
                 right: parent.right
                 rightMargin: 10
             }
+
             onClicked: () => control.close()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Close audio environment selection")
+            Accessible.description: qsTr("Confirmation button to leave the audio environment selection window")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => saveButton.click()
         }
     }
 }

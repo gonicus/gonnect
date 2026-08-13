@@ -8,6 +8,16 @@
 #include "SIPBuddy.h"
 #include "ReadOnlyConfdSettings.h"
 
+struct MwiInfo
+{
+    bool messagesWaiting = false;
+    QString messageAccount;
+
+    // We're only interested in ordinary voice info w/o urgency
+    quint16 voiceNew = 0;
+    quint16 voiceOld = 0;
+};
+
 class SIPAccount : public QObject, public pj::Account
 {
     Q_OBJECT
@@ -23,15 +33,21 @@ public:
     Q_ENUM(TRANSPORT_NET)
 
     void initialize();
+    bool activateTransports();
+    void deactivateTransports();
 
-    virtual void onIncomingCall(pj::OnIncomingCallParam &prm) override;
-    virtual void onRegState(pj::OnRegStateParam &prm) override;
-    virtual void onSendRequest(pj::OnSendRequestParam &prm) override;
-    virtual void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
-    virtual void onInstantMessage(pj::OnInstantMessageParam &prm) override;
+    void onIncomingCall(pj::OnIncomingCallParam &prm) override;
+    void onRegState(pj::OnRegStateParam &prm) override;
+    void onSendRequest(pj::OnSendRequestParam &prm) override;
+    void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
+    void onInstantMessage(pj::OnInstantMessageParam &prm) override;
+    void onMwiInfo(pj::OnMwiInfoParam &prm) override;
 
     bool isRegistered() const { return m_isRegistered; }
+    quint64 registrationCount() const { return m_registrationCount; }
+
     bool isInstantMessagingAllowed() const;
+    bool isRTTEnabled() const { return m_rttEnabled; }
 
     QString call(const QString &number, const QString &contactId = "",
                  const QString &preferredIdentity = "auto", bool silent = false);
@@ -49,6 +65,14 @@ public:
     QString domain() const { return m_domain; }
     uint retryInterval() const;
 
+    QString voiceMessageAccount() const { return m_messageAccount; }
+    bool messagesWaiting() const { return m_messagesWaiting; }
+    quint16 newVoiceMessages() const { return m_newVoiceMessages; }
+    quint16 oldVoiceMessages() const { return m_readVoiceMessages; }
+    bool callVoiceBox();
+
+    void setAfterResume() { m_afterResume = true; }
+
     long sendMessage(const QString &recipient, const QString &message,
                      const QString &mimeType = "text/plain");
 
@@ -56,9 +80,15 @@ public:
 
     void setCredentials(const QString &password);
 
+    bool isSignalingEncrypted();
+
     static intptr_t runningMessageIndex;
 
     ~SIPAccount();
+
+private Q_SLOTS:
+    void updatePresenceStateForwarding();
+    void forwardPresenceState();
 
 private:
     void finalizeInitialization();
@@ -67,18 +97,37 @@ private:
                                          pj::CallOpParam &prm);
     bool hasAllowGrant(const QString &header, const QString &grant) const;
 
-    QString addTransport(const QString &uri);
+    QString addTransport(const QString &uri) const;
+
+    MwiInfo parseMwiBody(const QString &body);
+    void parseMessageCount(const QString &value, quint16 &newMessages, quint16 &oldMessages);
+
+    void reinitBuddies();
+
+    pj::PresenceStatus createPresenceStatusFromGlobal() const;
 
     QList<SIPCall *> m_calls;
     QList<SIPBuddy *> m_buddies;
+    QList<pjsua_transport_id> m_transportIds;
+
+    bool m_messagesWaiting = false;
+    quint16 m_newVoiceMessages = 0;
+    quint16 m_readVoiceMessages = 0;
+    QString m_messageAccount;
+    QString m_voiceMailUri;
+
     bool m_isRegistered = false;
+    quint64 m_registrationCount = 0;
     bool m_isInstantMessagingAllowed = false;
     bool m_shallNegotiateCapabilities = true;
     bool m_useInstantMessagingWithoutCheck = true;
+    bool m_rttEnabled = true;
+    bool m_afterResume = false;
+    QObject *m_globalStateConnectionContext = nullptr;
 
     QString m_account;
     QString m_domain;
-    QByteArray m_optionsRequestUuid;
+    intptr_t m_optionsRequestId = 0;
     pj::AccountConfig m_accountConfig;
     pj::TransportConfig m_transportConfig;
 
@@ -90,6 +139,8 @@ private:
 Q_SIGNALS:
     void initialized(bool success);
     void isRegisteredChanged();
+    void voiceMessagesWaitingChanged();
     void authorizationFailed();
+    void connectionError(int code, QString message);
     void messageReceived(const QString &sender, const QString &message, const QString &mimeType);
 };

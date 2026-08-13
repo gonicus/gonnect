@@ -17,8 +17,18 @@ QString GlobalInfo::jitsiUrl()
         ReadOnlyConfdSettings settings;
         settings.beginGroup("jitsi");
         m_jitsiUrl = settings.value("url", "").toString();
+        m_jitsiMuc = settings.value("muc", "").toString();
     }
     return m_jitsiUrl;
+}
+
+QString GlobalInfo::jitsiMuc()
+{
+    if (!m_isJitsiUrlInitialized) {
+        jitsiUrl();
+    }
+
+    return m_jitsiMuc;
 }
 
 QString GlobalInfo::teamsUrl()
@@ -62,6 +72,18 @@ bool GlobalInfo::isWorkaroundActive(const WorkaroundId id)
     }
     m_workaroundActiveCache.insert(id, value);
     return value;
+}
+
+bool GlobalInfo::shallShowEmergencyButton()
+{
+    if (!m_shallShowEmergencyButtonInitialized) {
+        m_shallShowEmergencyButtonInitialized = true;
+
+        ReadOnlyConfdSettings settings;
+        m_shallShowEmergencyButton = settings.value("generic/showEmergencyButton", true).toBool();
+    }
+
+    return m_shallShowEmergencyButton;
 }
 
 void GlobalInfo::initEmergencyContacts()

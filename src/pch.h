@@ -109,7 +109,6 @@
 #include <QtCore/QStringList>
 #include <QtCore/QtPlugin>
 #include <QtCore/QVariant>
-#include <QtCrypto>
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QtDBus>
 #include <QThread>

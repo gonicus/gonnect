@@ -33,19 +33,32 @@ Item {
     /// Whether the chat is available at all (default: false)
     property alias chatAvailable: chatButton.visible
 
-    /// Whether the list of persons/participants is available at all (default: true)
+    /// Whether the list of persons/users is available at all (default: true)
     property alias personsAvailable: personCountButton.visible
 
     property IConferenceConnector conferenceConnector
 
+    property bool conferenceMode: false
+
+    /// Whether the conference chat is currently used (as opposed to a direct chat, for instance)
+    property bool conferenceChatInUse: false
+
+    property AggregatedDirectRoomsOfContact roomsAggregator: null
+
+    function useImageFromClipboard() {
+        if (chatSideBar.visible && chatSideBar.chatProvider && chatSideBar.chatRoom) {
+            chatSideBar.chatProvider.uploadImageFromClipboard(chatSideBar.chatRoom.id)
+        }
+    }
+
     onChatAvailableChanged: {
         if (!control.chatAvailable && control.selectedSideBarMode === CallSideBar.Chat) {
-            control.selectedSideBarMode === CallSideBar.None
+            control.selectedSideBarMode = CallSideBar.None
         }
     }
 
     onSelectedCallItemChanged: () => {
-        if (!control.selectedCallItem) {
+        if (!control.selectedCallItem && !control.conferenceMode) {
             control.selectedSideBarMode = CallSideBar.None
         }
     }
@@ -55,7 +68,7 @@ Item {
         Caller,
         Chat,
         AdditionalInfo,
-        Participants
+        Users
     }
 
     readonly property alias selectedCallItem: callList.selectedItem
@@ -68,8 +81,8 @@ Item {
             function onCountChanged() { internal.updateAutoExtendCollapse() }
         }
 
-        readonly property Connections participantListConnections: Connections {
-            target: participantList
+        readonly property Connections userListConnections: Connections {
+            target: userList
             function onCountChanged() { internal.updateAutoExtendCollapse() }
         }
 
@@ -77,8 +90,8 @@ Item {
             const count = callList.count
 
             if (count > 1 && !control.extended) {
-                control.selectedSideBarMode = participantList.count
-                                              ? CallSideBar.SideBarMode.Participants
+                control.selectedSideBarMode = userList.count
+                                              ? CallSideBar.SideBarMode.Users
                                               : CallSideBar.SideBarMode.Caller
             } else if (count <= 1 && control.extended) {
                 control.selectedSideBarMode = CallSideBar.SideBarMode.None
@@ -111,9 +124,9 @@ Item {
                 }
             },
             State {
-                when: control.selectedSideBarMode === CallSideBar.Participants
+                when: control.selectedSideBarMode === CallSideBar.Users
                 PropertyChanges {
-                    participantList.visible: true
+                    userList.visible: true
                     personCountButton.highlighted: true
                 }
             }
@@ -183,9 +196,9 @@ Item {
                               : parent.right)
             anchors.rightMargin: 5
             iconPath: Icons.dialogMessages
-            visible: false
+            visible: !!(control.roomsAggregator?.chatRooms.length)
             text: qsTr("Chat")
-            showIndicatorBadge: !chatSideBar.visible && chatSideBar.lastMessageCount < chatSideBar.messageCount
+            showIndicatorBadge: !chatSideBar.visible && chatSideBar.lastMessageCount < (chatSideBar.chatRoom?.notificationCount ?? 0)
             onClicked: () => {
                 if (control.selectedSideBarMode === CallSideBar.Chat) {
                     control.selectedSideBarMode = CallSideBar.None
@@ -200,13 +213,13 @@ Item {
             anchors.right: additionalInfoButton.visible ? additionalInfoButton.left : parent.right
             anchors.rightMargin: 5
             iconPath: Icons.avatarDefault
-            iconText: callList.count + participantList.count
-            text: qsTr("Person(s)", "", callList.count + participantList.count)
+            iconText: callList.count + userList.count
+            text: qsTr("Person(s)", "", callList.count + userList.count)
             onClicked: () => {
-                if (control.selectedSideBarMode === CallSideBar.Caller || control.selectedSideBarMode === CallSideBar.Participants) {
+                if (control.selectedSideBarMode === CallSideBar.Caller || control.selectedSideBarMode === CallSideBar.Users) {
                     control.selectedSideBarMode = CallSideBar.None
-                } else if (participantList.count) {
-                    control.selectedSideBarMode = CallSideBar.Participants
+                } else if (userList.count) {
+                    control.selectedSideBarMode = CallSideBar.Users
                 } else {
                     control.selectedSideBarMode = CallSideBar.Caller
                 }
@@ -255,9 +268,8 @@ Item {
         }
     }
 
-
-    ParticipantsList {
-        id: participantList
+    UsersList {
+        id: userList
         conferenceConnector: control.conferenceConnector
         clip: true
         visible: false
@@ -272,7 +284,7 @@ Item {
     ChatSideBar {
         id: chatSideBar
         visible: false
-        chatRoom: control.conferenceConnector?.chatRoom() ?? null
+        chatProvider: control.roomsAggregator?.providerOfRoom(chatSideBar.chatRoom) ?? null
         anchors {
             top: headerBar.bottom
             bottom: parent.bottom
@@ -282,9 +294,13 @@ Item {
 
         property int lastMessageCount: 0
 
+        Component.onCompleted: () => chatSideBar.updateChatRoom()
+
         onVisibleChanged: () => {
-            if (!chatSideBar.visible) {
-                chatSideBar.lastMessageCount = chatSideBar.messageCount
+            if (chatSideBar.visible) {
+                chatSideBar.giveFocus()
+            } else {
+                chatSideBar.lastMessageCount = chatSideBar.chatRoom?.notificationCount ?? 0
             }
         }
 
@@ -292,7 +308,49 @@ Item {
             target: control.conferenceConnector
             function onIsInConferenceChanged() {
                 chatSideBar.lastMessageCount = 0
+                if (!control.conferenceConnector.isInConference) {
+                    control.conferenceChatInUse = false
+                }
+                chatSideBar.updateChatRoom()
             }
+
+            function onNumberOfUsersChanged() {
+                chatSideBar.updateChatRoom()
+            }
+        }
+
+        Connections {
+            target: control
+            function onRoomsAggregatorChanged() { chatSideBar.updateChatRoom() }
+        }
+
+        Connections {
+            target: control.roomsAggregator
+            function onBestMatchingChatRoomChanged() { chatSideBar.updateChatRoom() }
+        }
+
+        function updateChatRoom() {
+            Qt.callLater(() => {
+
+                // Override roomsAggregator chat room if more participants joined
+                if (control.conferenceConnector && (control.conferenceChatInUse
+                                                    || (control.conferenceConnector && control.conferenceConnector.numberOfUsers > 2))) {
+                    control.conferenceChatInUse = true
+                    chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+                    return
+                }
+
+                const aggr = control.roomsAggregator
+                if (aggr && aggr.bestMatchingChatRoom) {
+                    chatSideBar.chatRoom = aggr.bestMatchingChatRoom
+                    return
+                }
+                if (control.conferenceConnector) {
+                    chatSideBar.chatRoom = control.conferenceConnector.chatRoom()
+                    return
+                }
+                chatSideBar.chatRoom = null
+            })
         }
     }
 

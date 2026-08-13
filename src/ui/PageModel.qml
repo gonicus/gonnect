@@ -6,7 +6,15 @@ import base
 Item {
     id: control
 
-    property var model: []
+    readonly property int notifications: internal.model.reduce((sum, el) => sum + el.notifications, 0)
+
+    readonly property alias model: internal.model
+
+    QtObject {
+        id: internal
+
+        property list<var> model: []
+    }
 
     signal modelUpdated()
 
@@ -19,16 +27,17 @@ Item {
     }
 
     function add(page: Item) {
-        model.push(page)
+        if (!internal.model.includes(page)) {
+            internal.model = internal.model.concat([page])
 
-        control.modelUpdated()
+            control.modelUpdated()
+        }
     }
 
     function remove(page: Item) {
-        const index = model.indexOf(page)
+        if (internal.model.includes(page)) {
+            internal.model = internal.model.filter(item => item !== page)
 
-        if (index !== -1) {
-            model.splice(index, 1)
             UISettings.removeUISetting(page.pageId, "")
             control.modelUpdated()
         }

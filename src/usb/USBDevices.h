@@ -7,9 +7,7 @@
 #include <libusb.h>
 #include <QObject>
 #include <QTimer>
-
-class HeadsetDevice;
-class HeadsetDeviceProxy;
+#include "HeadsetDeviceProxy.h"
 
 class USBDevices : public QObject
 {
@@ -27,6 +25,9 @@ public:
 
         return *_instance;
     }
+
+    enum USBDeviceType { Headset, Busylight };
+    Q_ENUM(USBDeviceType)
 
     void initialize();
     void shutdown();

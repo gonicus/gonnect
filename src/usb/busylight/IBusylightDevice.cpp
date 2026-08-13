@@ -10,9 +10,14 @@ IBusylightDevice::IBusylightDevice(const hid_device_info &deviceInfo, QObject *p
     m_path = deviceInfo.path;
 
     m_blinkTimer.setInterval(750);
+    m_blinkTimer.setSingleShot(true);
     m_blinkTimer.callOnTimeout(this, [this]() {
         m_isOn = !m_isOn;
         send(m_isOn);
+
+        if (m_isRunning) {
+            m_blinkTimer.start();
+        }
     });
 }
 
@@ -31,6 +36,7 @@ bool IBusylightDevice::open()
     if (device) {
         m_device = device;
         switchOff();
+        switchStreamlight(false);
     } else {
         qCCritical(lcBusylightDevice) << "Error: cannot open Luxafor Flag busylight device";
     }
@@ -64,12 +70,14 @@ void IBusylightDevice::switchOff()
 void IBusylightDevice::startBlinking(QColor color)
 {
     m_color = color;
+    m_isRunning = true;
     m_blinkTimer.start();
 }
 
 void IBusylightDevice::stopBlinking()
 {
     if (m_blinkTimer.isActive()) {
+        m_isRunning = false;
         m_blinkTimer.stop();
         switchOff();
     }

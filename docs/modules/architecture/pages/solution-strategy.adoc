@@ -1,0 +1,204 @@
+= Solution Strategy
+
+== Overall Architecture
+
+GOnnect follows a layered architecture pattern with clear separation of concerns:
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Layered Architecture
+
+rectangle "Presentation Layer (QML)" as Presentation {
+  rectangle "Main Window" as MainWindow
+  rectangle "Call Window" as CallWindow
+  rectangle "Settings Window" as SettingsWindow
+  rectangle "Search Window" as SearchWindow
+}
+
+rectangle "Application Layer (C++)" as Application {
+  rectangle "Application" as App
+  rectangle "StateManager" as StateMgr
+  rectangle "UISettings" as UISettings
+  rectangle "ErrorBus" as ErrorBus
+}
+
+rectangle "Business Logic Layer (C++)" as Business {
+  rectangle "SIP Module" as SIP
+  rectangle "Contacts Module" as Contacts
+  rectangle "Calendar Module" as Calendar
+  rectangle "Media Module" as Media
+}
+
+rectangle "Infrastructure Layer (C++/External)" as Infrastructure {
+  rectangle "PJSIP" as PJSIP
+  rectangle "Qt Multimedia" as QtMedia
+  rectangle "Keychain" as Keychain
+  rectangle "D-Bus" as DBus
+}
+
+Presentation --> Application : QML Context
+Application --> Business : C++ Backend
+Business --> Infrastructure : External Libraries
+@enduml
+....
+
+== Design Patterns
+
+=== Singleton Pattern
+
+Used for global managers that should have exactly one instance:
+
+* `SIPManager` - SIP stack management
+* `StateManager` - Global application state
+* `AddressBookManager` - Contact source management
+* `UISettings` - UI configuration
+
+=== Factory Pattern
+
+Used for creating contact and calendar sources:
+
+* `IAddressBookFactory` - Contact source factory
+* `IDateEventFeederFactory` - Calendar source factory
+
+=== Observer Pattern
+
+Qt's signal/slot mechanism for event notification:
+
+* `ErrorBus` - Error event broadcasting
+* `StateManager` - State change notifications
+* `SIPManager` - Buddy state changes
+
+=== MVC Pattern
+
+For QML data models:
+
+* `CallsModel` - Call list model
+* `HistoryModel` - Call history model
+* `ContactModel` - Contact list model
+
+== Technology Decisions
+
+=== Why Qt/QML?
+
+* Cross-platform GUI framework
+* Declarative UI with QML
+* Strong C++ backend integration
+* Rich ecosystem of Qt modules
+* Active community and long-term support
+
+=== Why PJSIP?
+
+* Mature SIP stack (15+ years)
+* Feature-complete implementation
+* C++ wrapper (PJSUA2) available
+* Active development and maintenance
+* Industry-standard compliance
+
+=== Why CMake + Conan?
+
+* Modern build system with presets
+* Cross-platform compatibility
+* Conan for dependency management
+* Better dependency versioning than Qt's qmake
+
+== Module Responsibilities
+
+=== SIP Module
+
+|===
+| Component | Responsibility
+
+| SIPManager | Central SIP stack management, account handling
+| SIPCall | Individual call state and media handling
+| SIPCallManager | Call lifecycle management
+| SIPBuddy | Contact buddy state tracking
+| SIPAccount | Account configuration and credentials
+|===
+
+=== Contacts Module
+
+|===
+| Component | Responsibility
+
+| AddressBookManager | Contact source orchestration
+| Contact | Contact data model
+| ContactModel | QML contact list model
+| AvatarManager | Contact avatar handling
+|===
+
+=== Calendar Module
+
+|===
+| Component | Responsibility
+
+| DateEventFeederManager | Calendar source orchestration
+| DateEvent | Calendar event data model
+| DateEventsModel | QML calendar events model
+|===
+
+=== Media Module
+
+|===
+| Component | Responsibility
+
+| AudioManager | Audio device and stream management
+| VideoManager | Video device and stream management
+| AudioPort | Audio port routing
+|===
+
+== Component Interaction
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Component Interaction
+
+package "UI Layer" as UI {
+  component "GonnectWindow" as GW
+  component "CallWindow" as CW
+  component "SettingsWindow" as SW
+}
+
+package "Application Layer" as Applayer {
+  component "Application" as App
+  component "StateManager" as SM
+  component "UISettings" as UIS
+}
+
+package "Business Layer" as Biz {
+  component "SIPManager" as SIPM
+  component "SIPCallManager" as SCM
+  component "AddressBookManager" as ABM
+  component "DateEventFeederManager" as DEM
+}
+
+package "Infrastructure" as Infra {
+  component "PJSIP" as PJS
+  component "Keychain" as KC
+  component "D-Bus" as DBUS
+}
+
+GW --> App : QML Context
+CW --> App : QML Context
+SW --> App : QML Context
+
+App --> SM : Singleton
+App --> SIPM : Singleton
+App --> ABM : Singleton
+App --> DEM : Singleton
+
+SM --> DBUS : Activation
+SIPM --> PJS : SIP Stack
+SIPM --> KC : Credentials
+ABM --> PJS : Buddy State
+@enduml
+....

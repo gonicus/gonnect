@@ -3,6 +3,7 @@
 #include "DateEventManager.h"
 #include "DateEvent.h"
 #include "NotificationManager.h"
+#include "PlatformSession.h"
 #include "ViewHelper.h"
 
 #include <QRegularExpression>
@@ -24,6 +25,14 @@ QList<QPair<QDateTime, QDateTime>> DateEventManager::createDaysFromRange(const Q
                                                                          const QDateTime end)
 {
     QList<QPair<QDateTime, QDateTime>> days;
+
+    // INFO: Events can have a duration of 0 (start == end)
+    // And since one could manually edit an ICS/iCal file and, for some reason,
+    // set an end time < start time, we'll check for that as well
+    if (end <= start) {
+        days.append(qMakePair(start, start));
+        return days;
+    }
 
     QDateTime currentStart = start;
     while (currentStart < end) {
@@ -81,8 +90,13 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
             // Multi-day events will share the same base ID with a counter added to it
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);
@@ -141,8 +155,13 @@ void DateEventManager::modifyDateEvent(const QString &id, const QString &source,
         for (int i = 0; i < days.count(); i++) {
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);
@@ -185,8 +204,13 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
         for (int i = 0; i < days.count(); i++) {
             dateEventIds.append(QString("%1-%2").arg(id).arg(i));
         }
-    } else {
+    } else if (days.count() == 1) {
         dateEventIds.append(id);
+    }
+
+    if (days.count() != dateEventIds.count()) {
+        qCWarning(lcDateEventManager) << "DateEvent will be ignored due to an invalid duration";
+        return;
     }
 
     QMutexLocker lock(&m_feederMutex);
@@ -195,7 +219,6 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
         qsizetype index = 0;
         QMutableListIterator it(m_dateEvents);
         while (it.hasNext()) {
-            index++;
             const auto item = it.next();
             if (item && item->id() == dateEventId) {
                 const auto eventHash = item->getHash();
@@ -210,6 +233,7 @@ void DateEventManager::removeDateEvent(const QString &id, const QDateTime &start
 
                 Q_EMIT dateEventRemoved(index);
             }
+            index++;
         }
     }
 }
@@ -237,19 +261,17 @@ void DateEventManager::resetDateEvents()
 
 void DateEventManager::removeDateEventsBySource(const QString &source)
 {
-    qsizetype i = 0;
     QMutexLocker lock(&m_feederMutex);
     QMutableListIterator it(m_dateEvents);
     while (it.hasNext()) {
-        i++;
         const auto item = it.next();
         if (item && item->source() == source) {
             item->deleteLater();
             it.remove();
-
-            Q_EMIT dateEventRemoved(i);
         }
     }
+
+    Q_EMIT dateEventsCleared();
 }
 
 bool DateEventManager::isAddedDateEvent(const QString &id)
@@ -366,13 +388,14 @@ void DateEventManager::onTimerTimeout()
             const auto isJitsiMeeting = dateEvent->isJitsiMeeting();
             const auto isOtherLink = dateEvent->isOtherLink();
 
-            if (!m_alreadyNotifiedDates.contains(eventHash)
+            if (!PlatformSession::instance().isScreenShareActive()
+                && !m_alreadyNotifiedDates.contains(eventHash)
                 && !m_notificationIds.contains(eventHash) && start.date() == today
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
                 QString message = isJitsiMeeting ? tr("Conference starting soon")
                                                  : tr("Appointment starting soon");
-                auto notification =
-                        new Notification(message, summary, Notification::Priority::high, &notMan);
+                auto notification = new Notification(message, summary, Notification::Priority::high,
+                                                     true, &notMan);
 
                 notification->setIcon(":/icons/gonnect.svg");
                 if (isJitsiMeeting) {

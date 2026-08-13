@@ -8,17 +8,19 @@ DtmfGenerator::DtmfGenerator(QObject *parent)
     : QObject{ parent }, m_mediaSink(AudioManager::instance().getPlaybackDevMedia())
 {
 
-    m_toneGen.createToneGenerator();
-    m_toneGen.startTransmit(m_mediaSink);
+    try {
+        m_toneGen.createToneGenerator();
+        m_toneGen.startTransmit(m_mediaSink);
+    } catch (const pj::Error &err) {
+        qCCritical(lcDtmfGenerator) << "failed to initialize DTMF tone generator:" << err.info();
+    }
 }
 
 void DtmfGenerator::playDtmf(const QChar &key)
 {
     const auto lower = key.toLower();
-    const static QSet<QChar> allowedChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
-                                              '9', '0', '#', '*', 'a', 'b', 'c', 'd' };
 
-    if (!allowedChars.contains(lower)) {
+    if (!isValid(lower)) {
         qCWarning(lcDtmfGenerator) << "Ignoring unknown DTMF char" << lower;
         return;
     }
@@ -28,5 +30,16 @@ void DtmfGenerator::playDtmf(const QChar &key)
     digitDesc.on_msec = PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT;
     digitDesc.off_msec = 0;
 
-    m_toneGen.playDigits({ digitDesc });
+    try {
+        m_toneGen.playDigits({ digitDesc });
+    } catch (const pj::Error &err) {
+        qCWarning(lcDtmfGenerator) << "failed to play DTMF tone" << lower << ":" << err.info();
+    }
+}
+
+bool DtmfGenerator::isValid(const QChar &key)
+{
+    const static QSet<QChar> allowedChars = { '0', '1', '2', '3', '4', '5', '6', '7',
+                                              '8', '9', '#', '*', 'a', 'b', 'c', 'd' };
+    return allowedChars.contains(key.toLower());
 }

@@ -7,7 +7,7 @@ import base
 
 Item {
     id: control
-    implicitWidth: 54 + 2 * 8
+    implicitWidth: 4 * Theme.d + 2 * Theme.d
     implicitHeight: topMenuCol.implicitHeight
 
     LoggingCategory {
@@ -16,16 +16,13 @@ Item {
         defaultLogLevel: LoggingCategory.Warning
     }
 
-    property string selectedPageId: ""
-    property int selectedPageType: -1
-    property var attachedData: null
-
     property var mainWindow
 
     property int dynamicPageCount: 0
     property int dynamicPageLimit: 5
 
     property bool hasActiveCall
+    property bool hasActiveUnfinishedCall
     property bool hasActiveConference
 
     property alias backgroundColor: filler.color
@@ -52,8 +49,8 @@ Item {
             SM.uiHasActiveEditDialog = true
 
             item.accepted.connect((name, iconId) => {
-                                      control.createTab(id, GonnectWindow.PageType.Base, iconId, name)
-                                      control.mainWindow.createPage(id, iconId, name)
+                                      const tab = control.createTab(id, MainPageSelection.PageType.Base, iconId, name)
+                                      control.mainWindow.createPage(id, name, iconId, tab)
                                   })
             item.show()
         }
@@ -79,13 +76,9 @@ Item {
                                       page.name = name
 
                                       // Update tab button
-                                      const tabList = control.getTabList()
-                                      for (const tab of tabList) {
-                                          if (tab.pageId === id) {
-                                              tab.iconSource = Icons[iconId]
-                                              tab.labelText = name
-                                              break
-                                          }
+                                      if (page.tabButton) {
+                                          page.tabButton.iconSource = Icons[iconId]
+                                          page.tabButton.labelText = name
                                       }
                                   })
             item.prefill(page.iconId, page.name)
@@ -93,7 +86,7 @@ Item {
         }
     }
 
-    function createTab(id : string, type : int, iconId : string, name : string) {
+    function createTab(id : string, type : int, iconId : string, name : string) : variant {
         const iconPath = Icons[iconId]
         const tabButton = tabDelegate.createObject(topMenuCol,
                                                  {
@@ -103,21 +96,27 @@ Item {
                                                      labelText: name,
                                                      disabledTooltipText: "",
                                                      isEnabled: true,
-                                                     showRedDot: false,
+                                                     showActiveBorder: false,
                                                      attachedData: null
                                                  })
         if (tabButton === null) {
             console.error(category, "could not create tab button component")
-            return
+            return tabButton
         }
 
         control.dynamicPageCount += 1
+        return tabButton
+    }
+
+    function getTabById(id : string) : variant {
+        return [...topMenuCol.children].find((button) => button.pageId === id);
     }
 
     function getTabList() {
         let tabOrder = []
 
         tabOrder.push(...topMenuCol.children)
+
         return tabOrder.filter((button) => button.pageId)
     }
 
@@ -138,38 +137,39 @@ Item {
     }
 
     function sortTabList() {
-        let tabList = UISettings.getUISetting("generic", "tabBarOrder", "").split(",")
-        if (!tabList.length > 0) {
+        const savedSetting = UISettings.getUISetting("generic", "tabBarOrder", "");
+        const savedIds = savedSetting ? savedSetting.split(",") : [];
+        if (savedSetting === "" || savedIds.length === 0) {
             return
         }
 
-        let tabOrder = []
-        let newOrder = []
+        const tabOrder = [...topMenuCol.children].filter((button) => button.pageId)
+        const existingIds = tabOrder.map((button) => button.pageId)
+        const validIds = savedIds.filter((id) => existingIds.includes(id))
+        const remaining = [...tabOrder]
+        const newOrder = []
 
-        tabOrder.push(...topMenuCol.children)
+        for (const id of validIds) {
+            const idx = remaining.findIndex((button) => button.pageId === id)
+            if (idx >= 0) {
+                newOrder.push(...remaining.splice(idx, 1))
+            }
+        }
+        newOrder.push(...remaining)
 
-        tabList.forEach((tabId) => {
-            tabOrder.forEach((button) => {
-                if (button.pageId && button.pageId === tabId) {
-                    newOrder.push(button)
-                }
-            })
-        })
-
-        newOrder.forEach((button) => {
+        for (const button of newOrder) {
             button.parent = null
             button.visible = false
 
             button.parent = topMenuCol
             button.visible = true
-        })
-
-        control.saveTabList()
+        }
     }
 
     Rectangle {
         id: filler
         anchors.fill: parent
+        topLeftRadius: Theme.useOwnDecoration ? Theme.d / 2 : 0
         color: control.Window.window?.active ? Theme.backgroundHeader : Theme.backgroundHeaderInactive
     }
 
@@ -178,7 +178,7 @@ Item {
 
         Item {
             id: delg
-            height: 54
+            height: 4 * Theme.d
             enabled: true
             anchors {
                 left: parent?.left
@@ -188,24 +188,44 @@ Item {
             required property string pageId
             required property int pageType
             required property bool isEnabled
-            required property bool showRedDot
+            required property bool showActiveBorder
             required property string labelText
             required property string disabledTooltipText
             required property string iconSource
             required property var attachedData
 
-            readonly property bool isSelected: control.selectedPageId === delg.pageId
+            property int notifications: (delg.attachedData && delg.attachedData instanceof IChatProvider)
+                                        ? delg.attachedData.unreadNotificationsCount
+                                        : 0
+            property bool showNotificationBubble: delg.notifications > 0
+
+            readonly property bool isSelected: SelectionState.selectedPage.id === delg.pageId
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Selected tab")
+            Accessible.description: qsTr("The currently selected tab")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => delg.switchTab()
+
+            function switchTab() {
+                if (delg.isEnabled) {
+                    SelectionState.selectedPage = {
+                        id: delg.pageId,
+                        type: delg.pageType,
+                        attachedData: delg.attachedData ? (delg.attachedData as QtObject) : undefined
+                    }
+                }
+            }
 
             Rectangle {
                 id: hoverBackground
-                visible: delg.isSelected
-                         || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
-                radius: 4
+                visible: delg.isSelected || (delgHoverHandler.hovered && (delg.isEnabled || SM.uiEditMode))
+                radius: Theme.d / 2
                 color: Theme.backgroundSecondaryColor
                 anchors {
                     fill: parent
-                    leftMargin: 8
-                    rightMargin: 8
+                    leftMargin: Theme.d
+                    rightMargin: Theme.d
                 }
 
                 // Options
@@ -220,14 +240,21 @@ Item {
                     anchors.margins: 2
                     z: 1
 
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Selected tab options")
+                    Accessible.description: qsTr("The settings of the currently selected tab")
+                    Accessible.focusable: true
+
                     IconLabel {
-                        id: removeIcon
+                        id: optionIcon
                         anchors.centerIn: parent
                         icon {
                             source: Icons.goDown
                             width: parent.width
                             height: parent.height
                         }
+
+                        Accessible.ignored: true
                     }
 
                     MouseArea {
@@ -242,8 +269,40 @@ Item {
                             optionMenu.selectedTabButton = delg
                             optionMenu.open()
                         }
+
+                        Accessible.ignored: true
                     }
                 }
+            }
+
+            Rectangle {
+                id: activeBg
+                radius: Theme.d / 2
+                color: Theme.activeIndicatorColor
+                anchors.fill: hoverBackground
+                visible: delg.showActiveBorder
+
+                SequentialAnimation {
+                    running: activeBg.visible
+                    loops: Animation.Infinite
+
+                    NumberAnimation {
+                        target: activeBg
+                        property: "opacity"
+                        from: 1.0
+                        to: 0.0
+                        duration: 2000
+                    }
+                    NumberAnimation {
+                        target: activeBg
+                        property: "opacity"
+                        from: 0.0
+                        to: 1.0
+                        duration: 2000
+                    }
+                }
+
+                Accessible.ignored: true
             }
 
             IconLabel {
@@ -251,37 +310,55 @@ Item {
                 anchors.centerIn: parent
                 icon {
                     source: delg.iconSource
-                    width: 32
-                    height: 32
+                    width: 3 * Theme.d
+                    height: 3 * Theme.d
                     color: delg.isEnabled
                     ? Theme.primaryTextColor
                     : Theme.secondaryInactiveTextColor
                 }
+
+                Accessible.ignored: true
             }
 
             Rectangle {
-                id: redDotBackground
-                visible: redDot.visible
+                id: notificationBubbleBackground
+                visible: notificationBubble.visible
                 color: hoverBackground.visible ? hoverBackground.color : filler.color
-                anchors.centerIn: redDot
-                width: redDot.width + 4
-                height: redDotBackground.width
-                radius: redDotBackground.width / 2
+                anchors.centerIn: notificationBubble
+                width: notificationBubble.width + 4
+                height: notificationBubbleBackground.width
+                radius: notificationBubbleBackground.width / 2
+
+                Accessible.ignored: true
             }
 
             Rectangle {
-                id: redDot
-                visible: delg.showRedDot
+                id: notificationBubble
+                visible: delg.showNotificationBubble
                 color: Theme.redColor
-                width: 6
-                height: redDot.width
-                radius: redDot.width / 2
+                width: delg.notifications > notificationBubble.maxNotifications
+                       ? 24 : 16
+                height: 16
+                radius: notificationBubble.height / 2
                 anchors {
-                    verticalCenter: delgIcon.top
+                    verticalCenter: delgIcon.bottom
                     horizontalCenter: delgIcon.right
-                    verticalCenterOffset: +5
+                    verticalCenterOffset: -5
                     horizontalCenterOffset: -5
                 }
+
+                property int maxNotifications: 99
+
+                Label {
+                    id: notificationBubbleCount
+                    color: Theme.foregroundWhiteColor
+                    font.pixelSize: 12
+                    text: delg.notifications > notificationBubble.maxNotifications
+                          ? "99+" : delg.notifications.toString()
+                    anchors.centerIn: parent
+            }
+
+                Accessible.ignored: true
             }
 
             ToolTip.text: delg.isEnabled ? delg.labelText : delg.disabledTooltipText
@@ -295,21 +372,68 @@ Item {
             }
 
             TapHandler {
-                onTapped: () => {
-                    if (delg.isEnabled) {
-                        control.selectedPageId = delg.pageId
-                        control.selectedPageType = delg.pageType
-                        control.attachedData = delg.attachedData
-                    }
-                }
+                id: delgTapHandler
+                onTapped: () => delg.switchTab()
             }
         }
     }
 
+    property var tabMenuModel: {
+        const baseModel = [
+            {
+                pageId: SelectionState.homePageId(),
+                pageType: MainPageSelection.PageType.Base,
+                iconSource: Icons.userHome,
+                labelText: qsTr("Home"),
+                disabledTooltipText: qsTr("Home"),
+                isEnabled: true,
+                showActiveBorder: false,
+                attachedData: null
+            }, {
+                pageId: SelectionState.conferencePageId(),
+                pageType: MainPageSelection.PageType.Conference,
+                iconSource: Icons.userGroupNew,
+                labelText: qsTr("Conference"),
+                disabledTooltipText: qsTr("No active conference"),
+                isEnabled: control.hasActiveConference,
+                showActiveBorder: control.hasActiveConference && SelectionState.selectedPage.id !== SelectionState.conferencePageId(),
+                attachedData: null
+            }, {
+                pageId: SelectionState.callPageId(),
+                pageType: MainPageSelection.PageType.Call,
+                iconSource: Icons.callStart,
+                labelText: qsTr("Call"),
+                disabledTooltipText: qsTr("No active call"),
+                isEnabled: control.hasActiveCall,
+                showActiveBorder: control.hasActiveUnfinishedCall && SelectionState.selectedPage.id !== SelectionState.callPageId(),
+                attachedData: null
+            }
+        ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== MainPageSelection.PageType.Conference)
+
+        if (ChatConnectorManager.isChatAvailable) {
+            for (const conn of ChatConnectorManager.chatConnectors) {
+                baseModel.push({
+                                   pageId: SelectionState.chatsPageId(),
+                                   pageType: MainPageSelection.PageType.Chats,
+                                   iconSource: Icons.dialogMessages,
+                                   labelText: conn.displayName,
+                                   disabledTooltipText: qsTr("Chat not available"),
+                                   isEnabled: conn.isConnected,
+                                   showRedDot: false,
+                                   attachedData: conn
+                               })
+            }
+        }
+
+        return baseModel
+    }
+
+    onTabMenuModelChanged: Qt.callLater(control.sortTabList)
+
     Column {
         id: topMenuCol
-        topPadding: 20
-        spacing: 10
+        topPadding: Theme.d
+        spacing: Theme.d
         anchors {
             left: parent.left
             right: parent.right
@@ -318,40 +442,7 @@ Item {
         Repeater {
             id: menuRepeater
             delegate: tabDelegate
-            model: {
-                const baseModel = [
-                    {
-                        pageId: control.mainWindow.homePageId,
-                        pageType: GonnectWindow.PageType.Base,
-                        iconSource: Icons.userHome,
-                        labelText: qsTr("Home"),
-                        disabledTooltipText: qsTr("Home"),
-                        isEnabled: true,
-                        showRedDot: false,
-                        attachedData: null
-                    }, {
-                        pageId: control.mainWindow.conferencePageId,
-                        pageType: GonnectWindow.PageType.Conference,
-                        iconSource: Icons.userGroupNew,
-                        labelText: qsTr("Conference"),
-                        disabledTooltipText: qsTr("No active conference"),
-                        isEnabled: control.hasActiveConference,
-                        showRedDot: false,
-                        attachedData: null
-                    }, {
-                        pageId: control.mainWindow.callPageId,
-                        pageType: GonnectWindow.PageType.Call,
-                        iconSource: Icons.callStart,
-                        labelText: qsTr("Call"),
-                        disabledTooltipText: qsTr("No active call"),
-                        isEnabled: control.hasActiveCall,
-                        showRedDot: false,
-                        attachedData: null
-                    }
-                ].filter(item => ViewHelper.isJitsiAvailable || item.pageType !== GonnectWindow.PageType.Conference)
-
-                return baseModel
-            }
+            model: control.tabMenuModel
         }
 
         Component.onCompleted: () => mainWindow.loadPages()
@@ -359,8 +450,8 @@ Item {
 
     Column {
         id: bottomMenuCol
-        bottomPadding: 20
-        spacing: 10
+        bottomPadding: emergencyTabButton.visible ? 0 : Theme.d
+        spacing: Theme.d
         anchors {
             left: parent.left
             right: parent.right
@@ -372,16 +463,81 @@ Item {
             delegate: tabDelegate
             model: [
                 {
-                    pageId: control.mainWindow.settingsPageId,
-                    pageType: GonnectWindow.PageType.Settings,
+                    pageId: SelectionState.settingsPageId(),
+                    pageType: MainPageSelection.PageType.Settings,
                     iconSource: Icons.settingsConfigure,
                     labelText: qsTr("Settings"),
                     disabledTooltipText: qsTr("Settings"),
                     isEnabled: true,
-                    showRedDot: false,
+                    showActiveBorder: false,
                     attachedData: null
                 }
             ]
+        }
+
+        Item {
+            id: emergencyTabButton
+            visible: GlobalInfo.shallShowEmergencyButton && GlobalInfo.hasEmergencyNumbers
+            height: emergencyTabButton.width
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+
+            readonly property bool isSelected: SelectionState.selectedPage.id === SelectionState.emergencyPageId()
+
+            function switchPage() {
+                SelectionState.selectedPage = {
+                    id: SelectionState.emergencyPageId(),
+                    type: MainPageSelection.PageType.Emergency,
+                    attachedData: undefined
+                }
+            }
+
+            Accessible.name: qsTr("Emergency call")
+            Accessible.description: qsTr("Show the emergency call page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => emergencyTabButton.switchPage()
+
+            Rectangle {
+                id: emergencyButtonBackground
+                color: Theme.emergencyColor
+                anchors.fill: parent
+            }
+
+            Rectangle {
+                id: emergencyButtonHoverBackground
+                visible: emergencyTabButtonHoverHandler.hovered || emergencyTabButton.isSelected
+                radius: emergencyButtonBackground.radius
+                color: Qt.tint(emergencyButtonBackground.color, "#26ffffff")
+                anchors.fill: emergencyButtonBackground
+            }
+
+            IconLabel {
+                anchors.centerIn: parent
+                icon {
+                    source: "qrc:/icons/ISO_7010_E004" + ViewHelper.culturalSphereExtension + ".svg"
+                    width: 2 * Theme.d
+                    height: 2 * Theme.d
+                    color: Theme.foregroundWhiteColor
+                }
+
+                Accessible.ignored: true
+            }
+
+            ToolTip.text: qsTr("Show the emergency call page")
+            ToolTip.visible: emergencyTabButtonHoverHandler.hovered
+            ToolTip.delay: Application.styleHints.mousePressAndHoldInterval
+            ToolTip.toolTip.x: emergencyTabButton.x + emergencyTabButton.width
+            ToolTip.toolTip.y: 9
+
+            HoverHandler {
+                id: emergencyTabButtonHoverHandler
+            }
+
+            TapHandler {
+                onTapped: () => emergencyTabButton.switchPage()
+            }
         }
     }
 
@@ -414,7 +570,7 @@ Item {
                 const index = control.getTabList().findIndex(button => button.pageId === selButton.pageId)
                 if (index >= 0) {
                     menuInternal.isFirst = index === 0
-                    menuInternal.isLast = index === topMenuCol.children.length - 2
+                    menuInternal.isLast = index === control.getTabList().length - 1
                 } else {
                     menuInternal.isFirst = false
                     menuInternal.isLast = false
@@ -423,11 +579,20 @@ Item {
         }
 
         Action {
+            id: moveUpAction
             text: qsTr("Move up")
             icon.source: Icons.arrowUp
             enabled: !menuInternal.isFirst
 
-            onTriggered: {
+            onTriggered: () => moveUpAction.moveTabUp()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Move tab up")
+            Accessible.description: qsTr("Moves the currently selected tab up by one")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => moveUpAction.moveTabUp()
+
+            function moveTabUp() {
                 if (optionMenu.selectedTabButton !== null) {
                     const newOrder = control.getTabList()
                     const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
@@ -452,11 +617,20 @@ Item {
         }
 
         Action {
+            id: moveDownAction
             text: qsTr("Move down")
             icon.source: Icons.arrowDown
             enabled: !menuInternal.isLast
 
-            onTriggered: {
+            onTriggered: () => moveDownAction.moveTabDown()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Move tab down")
+            Accessible.description: qsTr("Moves the currently selected tab down by one")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => moveDownAction.moveTabDown()
+
+            function moveTabDown() {
                 if (optionMenu.selectedTabButton !== null) {
                     const newOrder = control.getTabList()
                     const index = newOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
@@ -481,35 +655,50 @@ Item {
         }
 
         Action {
+            id: editPageAction
             text: qsTr("Edit")
             icon.source: Icons.editor
-            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
-                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+            enabled: optionMenu.selectedTabButton?.pageType === MainPageSelection.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== SelectionState.homePageId()
             onTriggered: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Edit page")
+            Accessible.description: qsTr("Edit the currently selected dashboard page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => control.openPageEditDialog(optionMenu.selectedTabButton.pageId, false)
         }
 
         Action {
+            id: deletePageAction
             text: qsTr("Delete")
             icon.source: Icons.editDelete
-            enabled: optionMenu.selectedTabButton?.pageType === GonnectWindow.PageType.Base
-                     && optionMenu.selectedTabButton?.pageId !== control.mainWindow.homePageId
+            enabled: optionMenu.selectedTabButton?.pageType === MainPageSelection.PageType.Base
+                     && optionMenu.selectedTabButton?.pageId !== SelectionState.homePageId()
 
-            onTriggered: {
-                if (optionMenu.selectedTabButton !== null) {
+            onTriggered: () => deletePageAction.deletePage()
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Delete page")
+            Accessible.description: qsTr("Delete the currently selected dashboard page")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => deletePageAction.deletePage()
+
+            function deletePage() {
+                if (optionMenu.selectedTabButton !== null && SelectionState.selectedPage.id === optionMenu.selectedTabButton.pageId) {
                     let curIndex
-                    let newIndex
+                    let newIndex = -1
                     let tabOrder = control.getTabList().filter((button) => button.isEnabled)
 
-                    if (optionMenu.selectedTabButton.isSelected) {
-                        // If the actively selected button is deleted, move up/down
-                        curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
-                        if (curIndex > 0) {
-                            newIndex = curIndex - 1
-                        } else if (curIndex < tabOrder.length - 1) {
-                            newIndex = curIndex + 1
-                        }
+                    curIndex = tabOrder.findIndex(button => button.pageId === optionMenu.selectedTabButton.pageId)
+                    if (curIndex > 0) {
+                        newIndex = curIndex - 1
+                    } else if (curIndex < tabOrder.length - 1) {
+                        newIndex = curIndex + 1
+                    }
 
-                        mainWindow.updateTabSelection(tabOrder[newIndex].pageId,
+                    if (newIndex >= 0) {
+                        mainWindow.showPage(tabOrder[newIndex].pageId,
                                                       tabOrder[newIndex].pageType)
                     }
 

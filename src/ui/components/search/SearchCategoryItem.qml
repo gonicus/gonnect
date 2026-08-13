@@ -1,9 +1,10 @@
 import QtQuick
+import QtQuick.Controls.impl
 import base
 
 Item {
     id: control
-    height: 30
+    height: buttonLabel.implicitHeight + Theme.d
     anchors {
         left: parent?.left
         right: parent?.right
@@ -12,19 +13,13 @@ Item {
     signal clicked
 
     property alias name: buttonLabel.text
-    property alias highlighted: highlightedBackground.visible
+    property bool highlighted
 
-    Rectangle {
-        id: highlightedBackground
-        anchors.fill: parent
-        visible: false
-        color: Theme.backgroundSecondaryColor
-        radius: 5
-        border {
-            width: 1
-            color: Theme.borderColor
-        }
-    }
+    Accessible.role: Accessible.ColumnHeader
+    Accessible.name: qsTr("Search result category filter %1").arg(control.name)
+    Accessible.description: qsTr("Filter for the individual search result items by category")
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.selectCategory()
 
     Rectangle {
         id: hoveredBackground
@@ -36,18 +31,36 @@ Item {
             width: 1
             color: Theme.secondaryTextColor
         }
+
+        Accessible.ignored: true
+    }
+
+    IconLabel {
+        id: checkIconLabel
+        width: 16
+        icon.source: control.highlighted ? Icons.dataSuccess : Icons.dataError
+        anchors {
+            left: parent.left
+            leftMargin: Theme.d
+            verticalCenter: parent.verticalCenter
+        }
     }
 
     Label {
         id: buttonLabel
         font.weight: Font.Medium
+        maximumLineCount: 2
+        elide: Label.ElideRight
+        wrapMode: Label.WordWrap
         anchors {
             verticalCenter: parent.verticalCenter
-            left: parent.left
+            left: checkIconLabel.right
             right: parent.right
-            leftMargin: 12
-            rightMargin: 12
+            leftMargin: 6
+            rightMargin: Theme.d
         }
+
+        Accessible.ignored: true
     }
 
     HoverHandler {
@@ -55,10 +68,12 @@ Item {
     }
 
     TapHandler {
-        onTapped: () => {
-                      if (control.enabled) {
-                          control.clicked()
-                      }
-                  }
+        onTapped: () => control.selectCategory()
+    }
+
+    function selectCategory() {
+        if (control.enabled) {
+            control.clicked()
+        }
     }
 }

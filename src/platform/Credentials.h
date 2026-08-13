@@ -1,9 +1,11 @@
 #pragma once
 
 #include <QObject>
+#include <QQueue>
 #include <qt6keychain/keychain.h>
 
-typedef std::function<void(bool error, const QString &misc)> CredentialsResponse;
+typedef std::function<void(QKeychain::Error error, const QString &secret, const QString &message)>
+        CredentialsResponse;
 
 class Credentials : public QObject
 {
@@ -39,8 +41,14 @@ private:
 
     void setIsInitialized(bool value);
 
+    void enqueueJob(const QString &key, std::function<void()> fn);
+    void runNextJob();
+
     QList<QKeychain::ReadPasswordJob *> m_readCredentialJobs;
     QList<QKeychain::WritePasswordJob *> m_writeCredentialJobs;
+
+    QQueue<std::function<void()>> m_jobQueue;
+    bool m_jobRunning = false;
 
     bool m_initialized = false;
     bool m_isSecretPortalInitialized = false;

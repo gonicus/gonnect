@@ -18,6 +18,7 @@ public:
 
     QStringList configurations() const override;
 
-    IAddressBookFeeder *createFeeder(const QString &id,
+    IAddressBookFeeder *createFeeder(const QString &id, const int retryCount,
+                                     const int retryInterval,
                                      AddressBookManager *parent = nullptr) const override;
 };

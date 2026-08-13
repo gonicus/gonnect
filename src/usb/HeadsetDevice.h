@@ -2,6 +2,7 @@
 #include <hidapi.h>
 #include <QObject>
 #include <QTimer>
+#include <QElapsedTimer>
 #include "AppSettings.h"
 #include "IHeadsetDevice.h"
 #include "ReportDescriptorStructs.h"
@@ -42,6 +43,12 @@ public:
 
     void setMute(bool flag);
     bool getMute() const { return m_muted; }
+    bool getMuteLocked() const { return m_muteLocked; }
+
+    void probeMuteLock();
+    void applyInputState(quint8 reportId, unsigned value);
+
+    QString path() const { return m_path; }
 
     void setIdle();
 
@@ -60,9 +67,19 @@ public:
     void setUsageInfos(const QHash<UsageId, UsageInfo> &infos);
     void setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMapping);
 
+    bool hasDeviceConfigurableRinger() const
+    {
+        return m_teamsUsageMapping.contains(UsageId::Teams_DisplayControl);
+    }
+
     ~HeadsetDevice();
 
+Q_SIGNALS:
+    void muteLockChanged(bool locked, bool muted);
+
 private:
+    unsigned reportToUnsigned(const unsigned char *data, int len) const;
+
     bool displayFieldSupported(ReportDescriptorEnums::TeamsDisplayFieldSupport field);
     void setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupport field,
                          const QString &text);
@@ -72,6 +89,11 @@ private:
     void processEvents();
     unsigned currentFlags(const quint32 reportId) const;
     bool useHeadset() { return m_appSettings.value("generic/useHeadset", true).toBool(); }
+
+    void writeMuteToDevice(bool flag, bool armLockWindow);
+    int muteLockWindowMs() const;
+    int muteBurstWindowMs() const;
+    int muteBurstThreshold() const;
 
     QStringList makeChunks(const QString &text, qsizetype chunkSize);
 
@@ -99,12 +121,22 @@ private:
 
     bool m_hookSwitch = false;
     bool m_line = false;
+    bool m_busyLine = false;
     bool m_muted = false;
+
+    bool m_mutePendingActive = false;
+    bool m_mutePendingValue = false;
+    QElapsedTimer m_mutePendingTimer;
+    bool m_muteLocked = false;
+
+    int m_muteBurstCount = 0;
+    QElapsedTimer m_muteBurstTimer;
+
     bool m_flash = false;
     bool m_hold = false;
     bool m_ringing = false;
     bool m_isOpen = false;
 
-    bool m_ignoreNextMuteUpdate = false;
+    bool m_hasInputBaseline = false;
     bool m_displaySupported = false;
 };

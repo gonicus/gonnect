@@ -1,5 +1,6 @@
 #include <QLoggingCategory>
 #include <pwd.h>
+#include <unistd.h>
 #include "LinuxUserInfo.h"
 #include "UserInfo.h"
 

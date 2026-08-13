@@ -13,7 +13,14 @@ Item {
     property int iconSize: 14
     property alias active: hoverHandler.enabled
 
+    property string accessiblePurpose
+
     signal clicked
+
+    Accessible.role: Accessible.Button
+    Accessible.name: control.accessiblePurpose
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.clicked()
 
     Rectangle {
         visible: hoverHandler.hovered
@@ -22,6 +29,8 @@ Item {
         color: Theme.backgroundHeaderIconHovered
         border.width: 1
         border.color: Theme.borderHeaderIconHovered
+
+        Accessible.ignored: true
     }
 
     IconLabel {
@@ -34,11 +43,14 @@ Item {
             height: control.iconSize
             color: control.active ? Theme.foregroundHeaderIcons : Theme.foregroundHeaderIconsInactive
         }
+
+        Accessible.ignored: true
     }
 
     HoverHandler {
         id: hoverHandler
     }
+
     TapHandler {
         enabled: control.enabled
         onTapped: () => control.clicked()

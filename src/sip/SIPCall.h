@@ -3,15 +3,18 @@
 #include <QPointer>
 #include <QTimer>
 #include <QDateTime>
+#include <QTimer>
 #include <pjsua2.hpp>
 
 #include "ICallState.h"
 #include "ResponseItem.h"
+#include "SIPCallManager.h"
+#include "SIPCallRoutingHop.h"
 
 class SIPAccount;
 class CallHistoryItem;
 class IMHandler;
-class HeadsetDeviceProxy;
+class Sniffer;
 
 class SIPCall : public ICallState, public pj::Call
 {
@@ -21,16 +24,18 @@ class SIPCall : public ICallState, public pj::Call
 public:
     explicit SIPCall(SIPAccount *account, int callId = PJSUA_INVALID_ID,
                      const QString &contactId = "", bool silent = false);
-    virtual ~SIPCall();
+    ~SIPCall();
 
-    virtual void onCallState(pj::OnCallStateParam &prm) override;
-    virtual void onCallTransferRequest(pj::OnCallTransferRequestParam &prm) override;
-    virtual void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm) override;
-    virtual void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
-    virtual void onInstantMessage(pj::OnInstantMessageParam &prm) override;
-    virtual void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
-    virtual void onDtmfDigit(pj::OnDtmfDigitParam &prm) override;
-    virtual void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
+    void onCallState(pj::OnCallStateParam &prm) override;
+    void onCallTransferRequest(pj::OnCallTransferRequestParam &prm) override;
+    void onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm) override;
+    void onCallTransferStatus(pj::OnCallTransferStatusParam &prm) override;
+    void onCallMediaState(pj::OnCallMediaStateParam &prm) override;
+    void onInstantMessage(pj::OnInstantMessageParam &prm) override;
+    void onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm) override;
+    void onDtmfDigit(pj::OnDtmfDigitParam &prm) override;
+    void onCallTsxState(pj::OnCallTsxStateParam &prm) override;
+    void onCallRxText(pj::OnCallRxTextParam &prm) override;
 
     SIPAccount *account() const { return m_account; };
     pj::AudioMedia *audioMedia() const;
@@ -46,7 +51,12 @@ public:
     void setIncoming(bool flag) { m_incoming = flag; }
     bool isIncoming() const { return m_incoming; }
 
+    void parseCallRouting(pjsip_msg *msg);
+    void setInTransfer(bool flag) { m_inTransfer = flag; }
+    bool isIntransfer() const { return m_inTransfer; }
+
     void call(const QString &dst_uri, const pj::CallOpParam &prm);
+    void setPostDialDtmf(const QString &dtmf) { m_postTask = dtmf; }
 
     void addMetadata(const QString &data);
     bool hasMetadata() const { return m_hasMetadata; }
@@ -67,6 +77,7 @@ public:
     void accept();
     void reject();
 
+    bool isInProgress() const { return m_isInProgress; }
     bool isEstablished() const { return m_isEstablished; }
     /// The time when the call was established (i.e. answered); invalid QDateTime if not established
     QDateTime establishedTime() const { return m_establishedTime; }
@@ -75,15 +86,53 @@ public:
 
     bool earlyCallState() const { return m_earlyCallState; }
 
-    virtual ContactInfo remoteContactInfo() const override { return m_contactInfo; }
+    ContactInfo remoteContactInfo() const override { return m_contactInfo; }
+
+    SIPCallManager::QualityLevel qualityLevel() const { return m_qualityLevel; }
+    SIPCallManager::SecurityLevel securityLevel() const { return m_securityLevel; }
+    bool isSignalingEncrypted() const { return m_signalingEncrypted; }
+    bool isMediaEncrypted() const { return m_mediaEncrypted; }
+
+    QList<SIPCallRoutingHop> routingHops() const { return m_callRoutingHops; }
+
+    /// \name SIP call quality information
+    ///@{
+
+    QString codec() const { return m_codec; }
+    quint32 codecClockRate() const { return m_clockRate; }
+
+    double txMos() const { return m_mosTx; }
+    double txLossRate() const { return m_lossRateTx; }
+    double txJitter() const { return m_jitterTx; }
+    double txEffectiveDelay() const { return m_effDelayTx; }
+
+    double rxMos() const { return m_mosRx; }
+    double rxLossRate() const { return m_lossRateRx; }
+    double rxJitter() const { return m_jitterRx; }
+    double rxEffectiveDelay() const { return m_effDelayRx; }
+
+    bool hasRtt() const { return m_hasRtt; }
+
+    void rttSend(const QString &text);
+    void rttSendLineSeperator();
+    void rttSendCRLF();
+    void rttSendBackspace();
+    void rttSendBell();
+
+Q_SIGNALS:
+    void callQualityInfoChanged();
+
+    ///@}
 
 protected:
-    virtual void toggleHoldImpl() override;
+    void toggleHoldImpl() override;
 
 Q_SIGNALS:
     void missed();
     void ringing();
     void establishedChanged();
+    void transferSucceeded();
+    void transferFailed(int statusCode, QString reason);
     void earlyCallStateChanged();
     void isHoldingChanged();
     void isBlockedChanged();
@@ -91,17 +140,39 @@ Q_SIGNALS:
     void contactChanged();
     void metadataChanged();
     void callDelayChanged();
+    void rtcpStatsChanged();
+    void qualityLevelChanged();
+    void securityLevelChanged();
+    void isSignalingEncryptedChanged();
+    void isMediaEncryptedChanged();
+    void hasRttChanged();
+
+    void rttAttention();
+    void rttBubbleChanged(QString &text);
+    void rttBubbleCommitted(QString &text);
 
 private Q_SLOTS:
     void updateIsBlocked();
     void updateMutedState();
+    void updateRtcpStats();
 
 private:
     void setIsHolding(bool value);
     void setIsBlocked(bool value);
     void setContactInfo(const QString &sipUrl, bool isIncoming = true);
+    void setQualityLevel(SIPCallManager::QualityLevel qualityLevel);
+    void setSecurityLevel(SIPCallManager::SecurityLevel securityLevel);
+    void setIsSignalingEncrypted(bool value);
+    void setIsMediaEncrypted(bool value);
     void createOngoingCallNotification();
+    float calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
+                       double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss);
+    QStringList routingHopNumbers() const;
 
+    QList<SIPCallRoutingHop> m_callRoutingHops;
+
+    QTimer m_statsTimer;
+    QTimer m_rttTimeoutTimer;
     ContactInfo m_contactInfo;
     SIPAccount *m_account = nullptr;
     QPointer<CallHistoryItem> m_historyItem;
@@ -115,10 +186,12 @@ private:
     int m_callDelayCounter = 0;
     int m_callDelay = -1;
 
-    pj::AudioMedia *m_aud_med = NULL;
+    pj::AudioMedia *m_aud_med = nullptr;
     IMHandler *m_imHandler = nullptr;
+    Sniffer *m_sniffer = nullptr;
 
     bool m_incoming = false;
+    bool m_inTransfer = false;
     bool m_isEstablished = false;
     bool m_wasEstablished = false;
     bool m_managerNotified = false;
@@ -130,9 +203,47 @@ private:
     bool m_hasMetadata = false;
     bool m_hasAccepted = false;
     bool m_hasRejected = false;
+    bool m_hasRtt = false;
+    bool m_isInProgress = false;
 
     QString m_sipUrl;
     QString m_contactId;
     QString m_notificationRef;
     QString m_postTask;
+
+    QString m_currentRttBubble;
+
+    SIPCallManager::QualityLevel m_qualityLevel = SIPCallManager::QualityLevel::High;
+    SIPCallManager::SecurityLevel m_securityLevel = SIPCallManager::SecurityLevel::High;
+
+    QString m_codec;
+    quint32 m_clockRate = 0;
+    quint32 m_lastLossRx = 0;
+    quint32 m_lastPktRx = 0;
+    quint32 m_lastLossTx = 0;
+    quint32 m_lastPktTx = 0;
+
+    int m_lastRttSequence = -1;
+
+    double m_mosRx = 0;
+    double m_mosTx = 0;
+    double m_lossTx = 0;
+    double m_lossRx = 0;
+    double m_jitterTx = 0;
+    double m_jitterRx = 0;
+    double m_effDelayTx = 0;
+    double m_effDelayRx = 0;
+    double m_mosTxLq = 0;
+    double m_mosRxLq = 0;
+    double m_mosTxCq = 0;
+    double m_mosRxCq = 0;
+    double m_jitterBufferTxDelay = 0;
+    double m_jitterBufferRxDelay = 0;
+
+    double m_rtt = 0;
+    double m_lossRateTx = 0;
+    double m_lossRateRx = 0;
+
+    bool m_signalingEncrypted = false;
+    bool m_mediaEncrypted = false;
 };

@@ -3,3 +3,7 @@
 std::string getVersion() {
     return "@VERSION@";
 }
+
+std::string getCommitHash() {
+    return "@APP_GIT_HASH@";
+}

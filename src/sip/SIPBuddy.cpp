@@ -8,7 +8,7 @@
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "PhoneNumberUtil.h"
-#include "AvatarManager.h"
+#include "PlatformSession.h"
 
 Q_LOGGING_CATEGORY(lcSIPBuddy, "gonnect.sip.buddy")
 
@@ -41,7 +41,13 @@ SIPBuddy::~SIPBuddy() { }
 
 void SIPBuddy::onBuddyState()
 {
-    pj::BuddyInfo bi = getInfo();
+    pj::BuddyInfo bi;
+    try {
+        bi = getInfo();
+    } catch (pj::Error &err) {
+        qCWarning(lcSIPBuddy) << "failed to get buddy info in onBuddyState:" << err.info(false);
+        return;
+    }
 
     SIPBuddyState::STATUS status = SIPBuddyState::STATUS::UNKNOWN;
     QString statusText = QString::fromStdString(bi.presStatus.statusText);
@@ -82,6 +88,10 @@ void SIPBuddy::subscribeToBuddyStatus()
 
 void SIPBuddy::notifyOnceWhenBuddyAvailable()
 {
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return;
+    }
+
     // Create notification text
     const auto contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(m_uri);
     const Contact *c = contactInfo.contact;
@@ -105,10 +115,10 @@ void SIPBuddy::notifyOnceWhenBuddyAvailable()
     }
 
     // Create notification object
-    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, this);
+    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, true,
+                              this);
 
-    auto &am = AvatarManager::instance();
-    QString avatar = c ? am.avatarPathFor(c->id()) : "";
+    QString avatar = c ? c->avatarPath() : "";
 
     if (avatar.isEmpty()) {
         n->setIcon("help-about-symbolic");

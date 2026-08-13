@@ -8,6 +8,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QPromise>
+#include <QTimer>
 
 #include "IAddressBookFeeder.h"
 #include "BlockInfo.h"
@@ -19,10 +20,14 @@ class EDSAddressBookFeeder : public QObject, public IAddressBookFeeder
     Q_OBJECT
 
 public:
-    explicit EDSAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
+    explicit EDSAddressBookFeeder(const QString &group, const int retryCount,
+                                  const int retryInterval, AddressBookManager *parent = nullptr);
     ~EDSAddressBookFeeder();
 
     void process() override;
+
+Q_SIGNALS:
+    void feederFailed();
 
 private:
     QString getField(EContact *contact, EContactField id);
@@ -35,6 +40,12 @@ private:
 
     static void onEbookClientConnected(GObject *source_object, GAsyncResult *result,
                                        gpointer user_data);
+
+    void disconnectContactSignals();
+
+    void connectViewCompleteSignal(EBookClientView *view);
+
+    static void onViewComplete(EBookClientView *view, GError *error, gpointer user_data);
 
     void connectContactSignals(EBookClientView *view);
 
@@ -53,18 +64,28 @@ private:
 
     void processContacts(QString clientInfo, GSList *contacts);
 
+    void resetContacts();
+    void resetFeeder();
+
     QString m_group;
     BlockInfo m_blockInfo;
 
-    ESourceRegistry *m_registry = nullptr;
-    GList *m_sources = nullptr;
-    gchar *m_searchExpr = nullptr;
+    ESourceRegistry *m_registry = NULL;
+    GList *m_sources = NULL;
+    gchar *m_searchExpr = NULL;
     QList<EBookClient *> m_clients;
     QList<EBookClientView *> m_clientViews;
 
+    GCancellable *m_cancellable = NULL;
+
     int m_sourceCount = 0;
     std::atomic<int> m_clientCount = 0;
+    QFuture<void> m_chainFuture;
+    QTimer m_sourceTimeout;
     QPromise<void> *m_sourcePromise = nullptr;
     QFuture<void> m_sourceFuture;
     QFutureWatcher<void> *m_futureWatcher = nullptr;
+
+    int m_retryCount = 0;
+    int m_retryInterval = 0;
 };

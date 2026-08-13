@@ -2,11 +2,13 @@
 #include <QRegularExpression>
 #include <QUrl>
 #include <qurlquery.h>
+#include <QStringBuilder>
 
 #include "SIPCall.h"
 #include "SIPCallManager.h"
 #include "SIPAccount.h"
 #include "AudioManager.h"
+#include "AudioPort.h"
 #include "ResponseLoader.h"
 #include "RingToneFactory.h"
 #include "RingTone.h"
@@ -19,14 +21,18 @@
 #include "ViewHelper.h"
 #include "Notification.h"
 #include "NotificationManager.h"
-#include "AvatarManager.h"
 #include "GlobalCallState.h"
+#include "ErrorBus.h"
 
-#include "pjsua-lib/pjsua.h"
+#include <pjsua-lib/pjsua.h>
+#include <pjsua-lib/pjsua_internal.h>
 
 Q_LOGGING_CATEGORY(lcSIPCall, "gonnect.sip.call")
 
 using namespace std::chrono_literals;
+
+const QChar UnicodeBel(0x0007);
+const QChar UnicodeBackspace(0x0008);
 
 SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool silent)
     : ICallState(account),
@@ -48,12 +54,16 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
     // This can only be done here for incoming calls, because an outgoing call has its infos not set
     // yet. But incoming calls must be treated here to check whether the contact/number is blocked
     if (callId >= 0) {
-        const pj::CallInfo ci = getInfo();
-        const auto remoteUri = QString::fromStdString(ci.remoteUri);
+        try {
+            const pj::CallInfo ci = getInfo();
+            const auto remoteUri = QString::fromStdString(ci.remoteUri);
 
-        if (!m_isSilent && !m_historyItem) {
-            setContactInfo(remoteUri, ci.role != PJSIP_ROLE_UAC);
-            updateIsBlocked();
+            if (!m_isSilent && !m_historyItem) {
+                setContactInfo(remoteUri, ci.role != PJSIP_ROLE_UAC);
+                updateIsBlocked();
+            }
+        } catch (const pj::Error &err) {
+            qCWarning(lcSIPCall) << "failed to get call info in constructor: " << err.info();
         }
     }
 
@@ -75,6 +85,7 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
         }
     }
 
+    // Call delay
     m_callDelayCycleTimer.setInterval(10s);
     connect(&m_callDelayCycleTimer, &QTimer::timeout, this, [this]() {
         QString digit = QString("%1").arg((m_callDelayCounter % 9) + 1);
@@ -89,10 +100,28 @@ SIPCall::SIPCall(SIPAccount *account, int callId, const QString &contactId, bool
             m_callDelayCycleTimer.start();
         }
     });
+
+    AudioManager::instance().acquireDevice();
+
+    // Setup rtt timeout
+    m_rttTimeoutTimer.setSingleShot(true);
+    m_rttTimeoutTimer.setInterval(6s);
+    connect(&m_rttTimeoutTimer, &QTimer::timeout, this, [this]() {
+        if (!m_currentRttBubble.isEmpty()) {
+            Q_EMIT rttBubbleCommitted(m_currentRttBubble);
+            m_currentRttBubble = "";
+        }
+    });
+
+    // Setup stats updater
+    m_statsTimer.setInterval(5s);
+    connect(&m_statsTimer, &QTimer::timeout, this, &SIPCall::updateRtcpStats);
 }
 
 SIPCall::~SIPCall()
 {
+    AudioManager::instance().releaseDevice();
+
     if (m_isEmergencyCall) {
         Q_EMIT ViewHelper::instance().hideEmergency();
     }
@@ -113,15 +142,52 @@ SIPCall::~SIPCall()
 
     SIPCallManager::instance().removeCall(this);
     Q_EMIT GlobalCallState::instance().callEnded(false);
-    GlobalCallState::instance().unholdOtherCall();
+
+    // Prevent unhold in the same event loop tick to prevent confused pjsip segfault
+    QTimer::singleShot(0, &GlobalCallState::instance(),
+                       []() { GlobalCallState::instance().unholdOtherCall(); });
+}
+
+void SIPCall::parseCallRouting(pjsip_msg *msg)
+{
+    static const pj_str_t historyInfoName = { const_cast<char *>("History-Info"), 12 };
+    static const pj_str_t diversionName = { const_cast<char *>("Diversion"), 9 };
+
+    QStringList historyInfoHeaders;
+    QStringList diversionHeaders;
+
+    if (msg) {
+        for (const pjsip_hdr *hdr = msg->hdr.next; hdr != &msg->hdr; hdr = hdr->next) {
+            const bool isHistoryInfo = pj_stricmp(&hdr->name, &historyInfoName) == 0;
+            const bool isDiversion = !isHistoryInfo && pj_stricmp(&hdr->name, &diversionName) == 0;
+            if (!isHistoryInfo && !isDiversion) {
+                continue;
+            }
+
+            const auto *gs = reinterpret_cast<const pjsip_generic_string_hdr *>(hdr);
+            const auto value = QString::fromUtf8(gs->hvalue.ptr, static_cast<int>(gs->hvalue.slen));
+
+            (isHistoryInfo ? historyInfoHeaders : diversionHeaders).append(value);
+        }
+    }
+
+    m_callRoutingHops = SIPCallRoutingHop::parse(historyInfoHeaders, diversionHeaders);
+
+    if (m_historyItem) {
+        m_historyItem->setHops(routingHopNumbers());
+    }
 }
 
 void SIPCall::call(const QString &dst_uri, const pj::CallOpParam &prm)
 {
-    // Extract "," DTMF string and store them for later playback
-    m_postTask = dst_uri.section(',', 1, -1, QString::SectionIncludeLeadingSep);
+    if (m_account && m_account->isRTTEnabled()) {
+        makeCall(dst_uri.toStdString(), prm);
+    } else {
+        pj::CallOpParam tmpPrm = prm;
+        tmpPrm.opt.textCount = 0;
 
-    makeCall(dst_uri.toStdString(), prm);
+        makeCall(dst_uri.toStdString(), tmpPrm);
+    }
 }
 
 void SIPCall::onCallState(pj::OnCallStateParam &prm)
@@ -133,7 +199,18 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         m_managerNotified = true;
     }
 
-    const pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "onCallState: call info unavailable, treating as disconnected:"
+                             << QString::fromStdString(err.info(false));
+        m_statsTimer.stop();
+        m_account->removeCall(this);
+        m_isEstablished = false;
+        m_earlyCallState = false;
+        return;
+    }
     const auto remoteUri = QString::fromStdString(ci.remoteUri);
 
     if (!m_isSilent && !m_historyItem) {
@@ -147,8 +224,17 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     qCInfo(lcSIPCall).nospace() << "Call State: " << ci.stateText << " (" << remoteUri << ")"
                                 << " last status code: "
                                 << EnumTranslation::instance().sipStatusCode(statusCode) << " ("
-                                << statusCode << ") "
-                                << " last reason " << ci.lastReason << " contactId " << m_contactId;
+                                << statusCode << ") " << " last reason " << ci.lastReason
+                                << " contactId " << m_contactId;
+
+    if (statusCode == PJSIP_SC_RINGING) {
+        if (!m_isSilent && !m_incoming) {
+            ringToneFactory.ringingTone()->start();
+            removeCallState(ICallState::State::InProgress);
+            addCallState(ICallState::State::RingingOutgoing);
+            m_isInProgress = false;
+        }
+    }
 
     switch (ci.state) {
     case PJSIP_INV_STATE_NULL:
@@ -162,8 +248,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
     case PJSIP_INV_STATE_CONNECTING:
     case PJSIP_INV_STATE_CALLING:
         if (!m_isSilent && !m_incoming) {
-            ringToneFactory.ringingTone()->start();
-            addCallState(ICallState::State::RingingOutgoing);
+            m_isInProgress = true;
+            addCallState(ICallState::State::InProgress);
         }
         break;
 
@@ -202,10 +288,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
             removeCallState(ICallState::State::RingingIncoming
                             | ICallState::State::KnockingIncoming);
             removeCallState(ICallState::State::RingingOutgoing);
+            removeCallState(ICallState::State::InProgress);
             addCallState(ICallState::State::CallActive | ICallState::State::AudioActive);
-
-            ringToneFactory.ringingTone()->stop();
-            ringToneFactory.zipTone()->stop();
 
             m_isEstablished = true;
             m_wasEstablished = true;
@@ -234,6 +318,9 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
                     hold();
                 }
             });
+
+            m_statsTimer.start();
+            updateRtcpStats();
         }
 
         // Send DTMF post tasks if present
@@ -247,6 +334,8 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         break;
 
     case PJSIP_INV_STATE_DISCONNECTED:
+        m_statsTimer.stop();
+
         if (!m_isEstablished && m_incoming) {
             Q_EMIT missed();
         }
@@ -258,13 +347,15 @@ void SIPCall::onCallState(pj::OnCallStateParam &prm)
         ringToneFactory.zipTone()->stop();
         ringToneFactory.ringingTone()->stop();
 
-        if (!m_isSilent) {
+        if (!m_isSilent
+            && !(GlobalCallState::instance().globalCallState() & ICallState::State::Migrating)) {
             setCallState(ICallState::State::Idle | (callState() & ICallState::State::Migrating));
 
-            if (m_isEstablished) {
+            if (m_inTransfer) {
+                // Don't play any tones when in transfer
+            } else if (m_isEstablished) {
                 ringToneFactory.endTone()->start();
-            }
-            if (!m_incoming) {
+            } else if (!m_incoming) {
                 if (statusCode == PJSIP_SC_BUSY_HERE) {
                     ringToneFactory.busyTone()->start(5);
                 } else if (static_cast<int>(statusCode) >= 400
@@ -302,7 +393,14 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
 
     auto &audManager = AudioManager::instance();
 
-    pj::CallInfo ci = getInfo();
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "onCallMediaState: call info unavailable, session terminated:"
+                             << QString::fromStdString(err.info(false));
+        return;
+    }
     pj::AudioMedia aud_med;
 
     pj::AudioMedia &speaker_media = audManager.getPlaybackDevMedia();
@@ -311,6 +409,14 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
     for (unsigned i = 0; i < ci.media.size(); ++i) {
 
         const auto &mediaInfo = ci.media[i];
+
+        if (mediaInfo.type == PJMEDIA_TYPE_TEXT && mediaInfo.status == PJSUA_CALL_MEDIA_ACTIVE) {
+
+            m_hasRtt = true;
+            Q_EMIT hasRttChanged();
+
+            continue;
+        }
 
         if (mediaInfo.type == PJMEDIA_TYPE_AUDIO) {
 
@@ -332,17 +438,54 @@ void SIPCall::onCallMediaState(pj::OnCallMediaStateParam &prm)
                     RingToneFactory::instance().zipTone()->stop();
 
                     qCInfo(lcSIPCall) << "Found media, index" << i << "of" << ci.media.size();
-                    aud_med = getAudioMedia(i);
-                    mic_media.startTransmit(aud_med);
-                    aud_med.startTransmit(speaker_media);
+                    try {
+                        aud_med = getAudioMedia(i);
+                    } catch (const pj::Error &err) {
+                        qCCritical(lcSIPCall) << "failed to get audio media: " << err.info();
+                        continue;
+                    }
 
-                    auto sniffer = new Sniffer(this);
-                    sniffer->initialize();
-                    aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*sniffer));
-                    connect(sniffer, &Sniffer::audioLevelChanged, this, [this, sniffer]() {
-                        Q_EMIT SIPCallManager::instance().audioLevelChanged(this,
-                                                                            sniffer->audioLevel());
-                    });
+                    try {
+                        mic_media.startTransmit(aud_med);
+                    } catch (pj::Error &err) {
+                        qCCritical(lcSIPCall)
+                                << "failed to start mic media transmission: " << err.info();
+                        ErrorBus::instance().addFatalError(
+                                tr("Failed to initialize microphone audio"));
+                    }
+
+                    if (auto *port = dynamic_cast<AudioPort *>(&speaker_media)) {
+                        port->padSilence();
+                    }
+
+                    try {
+                        aud_med.startTransmit(speaker_media);
+                    } catch (pj::Error &err) {
+                        qCCritical(lcSIPCall)
+                                << "failed to start aud media transmission: " << err.info();
+                        ErrorBus::instance().addFatalError(tr("Failed to initialize call audio"));
+                    }
+
+                    if (!m_sniffer) {
+                        m_sniffer = new Sniffer(this);
+                        m_sniffer->initialize();
+
+                        try {
+                            aud_med.startTransmit(dynamic_cast<pj::AudioMediaPort &>(*m_sniffer));
+                        } catch (pj::Error &err) {
+                            qCCritical(lcSIPCall)
+                                    << "failed to start audio level transmission: " << err.info();
+                        }
+
+                        connect(m_sniffer, &Sniffer::audioLevelChanged, this, [this]() {
+                            Q_EMIT SIPCallManager::instance().audioLevelChanged(
+                                    this, m_sniffer->audioLevel());
+                        });
+                    }
+
+                    if (SIPCallManager::instance().isConferenceMode()) {
+                        SIPCallManager::instance().updateConferenceBridge();
+                    }
                 }
 
                 break;
@@ -358,6 +501,83 @@ void SIPCall::onInstantMessage(pj::OnInstantMessageParam &prm)
 {
     m_imHandler->process(QString::fromStdString(prm.contentType),
                          QString::fromStdString(prm.msgBody));
+}
+
+void SIPCall::onCallRxText(pj::OnCallRxTextParam &prm)
+{
+    QString oldRttBubble = m_currentRttBubble;
+
+    if (!prm.text.empty()) {
+        auto text = QString::fromStdString(prm.text);
+
+        for (const auto &ch : std::as_const(text)) {
+
+            // Handle backspace
+            if (ch == UnicodeBackspace) {
+                if (!m_currentRttBubble.isEmpty()) {
+                    m_currentRttBubble.removeLast();
+                }
+            }
+
+            // Handle BEL
+            else if (ch == UnicodeBel) {
+                Q_EMIT rttAttention();
+            }
+
+            // Handle line feed
+            else if (!m_currentRttBubble.isEmpty()
+                     && (ch == QChar::CarriageReturn || ch == QChar::LineFeed
+                         || ch == QChar::LineSeparator)) {
+                Q_EMIT rttBubbleCommitted(m_currentRttBubble);
+                m_currentRttBubble = "";
+            }
+
+            // Best of the rest
+            else {
+                m_currentRttBubble += ch;
+            }
+        }
+
+        m_rttTimeoutTimer.start();
+    }
+
+    // Detect if we're missing a sequence
+    if (m_lastRttSequence >= 0 && prm.seq > m_lastRttSequence + 1) {
+        quint16 lostSequences = prm.seq - m_lastRttSequence - 1;
+        m_currentRttBubble += QString("�").repeated(lostSequences);
+    }
+    m_lastRttSequence = prm.seq;
+
+    if (oldRttBubble != m_currentRttBubble) {
+        Q_EMIT rttBubbleChanged(m_currentRttBubble);
+    }
+}
+
+void SIPCall::rttSend(const QString &text)
+{
+    pj::CallSendTextParam prm;
+    prm.text = text.toStdString();
+    sendText(prm);
+}
+
+void SIPCall::rttSendLineSeperator()
+{
+    rttSend(QString(QChar::LineFeed));
+}
+
+void SIPCall::rttSendCRLF()
+{
+    rttSend(QChar::CarriageReturn % QChar::LineFeed);
+}
+
+void SIPCall::rttSendBackspace()
+{
+    rttSend(UnicodeBackspace);
+}
+
+void SIPCall::rttSendBell()
+{
+    rttSend(UnicodeBel);
 }
 
 void SIPCall::onInstantMessageStatus(pj::OnInstantMessageStatusParam &prm)
@@ -385,9 +605,15 @@ void SIPCall::onCallTsxState(pj::OnCallTsxStateParam &prm)
         const auto matchResult = regex.match(header);
         if (matchResult.hasMatch()) {
             const QString newIdentity = matchResult.captured("identity");
-            const pj::CallInfo ci = getInfo();
+            pj::CallInfo ci;
+            try {
+                ci = getInfo();
+            } catch (const pj::Error &err) {
+                qCWarning(lcSIPCall) << "failed to get call info in onCallTsxState: " << err.info();
+                return;
+            }
             setContactInfo(newIdentity, ci.role != PJSIP_ROLE_UAC);
-            qCDebug(lcSIPCall) << "New call participant identity found:" << newIdentity;
+            qCDebug(lcSIPCall) << "New call user identity found:" << newIdentity;
         }
     }
 }
@@ -424,6 +650,7 @@ bool SIPCall::unhold()
 {
     pj::CallOpParam op(true);
     op.opt.flag = PJSUA_CALL_UNHOLD;
+    op.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
 
     setIsHolding(false);
 
@@ -455,7 +682,10 @@ void SIPCall::accept()
     }
 
     m_hasAccepted = true;
-    pj::CallOpParam prm;
+
+    pj::CallOpParam prm(true);
+    prm.opt.textCount = m_account && m_account->isRTTEnabled() ? 1 : 0;
+
     prm.statusCode = PJSIP_SC_OK;
     answer(prm);
 }
@@ -540,11 +770,47 @@ void SIPCall::setContactInfo(const QString &sipUrl, bool isIncoming)
             historyType |= Type::Outgoing;
         }
 
-        m_historyItem = CallHistory::instance().addHistoryItem(historyType, m_account->id(), sipUrl,
-                                                               m_contactId,
-                                                               m_contactInfo.isSipSubscriptable);
+        m_historyItem = CallHistory::instance().addHistoryItem(
+                historyType, m_account->id(), sipUrl, m_contactId, m_contactInfo.isSipSubscriptable,
+                routingHopNumbers());
 
         Q_EMIT contactChanged();
+    }
+}
+
+void SIPCall::setQualityLevel(SIPCallManager::QualityLevel qualityLevel)
+{
+    if (m_qualityLevel != qualityLevel) {
+        m_qualityLevel = qualityLevel;
+        Q_EMIT qualityLevelChanged();
+        Q_EMIT SIPCallManager::instance().qualityLevelChanged(this, qualityLevel);
+    }
+}
+
+void SIPCall::setSecurityLevel(SIPCallManager::SecurityLevel securityLevel)
+{
+    if (m_securityLevel != securityLevel) {
+        m_securityLevel = securityLevel;
+        Q_EMIT securityLevelChanged();
+        Q_EMIT SIPCallManager::instance().securityLevelChanged(this, securityLevel);
+    }
+}
+
+void SIPCall::setIsSignalingEncrypted(bool value)
+{
+    if (m_signalingEncrypted != value) {
+        m_signalingEncrypted = value;
+        Q_EMIT isSignalingEncryptedChanged();
+        Q_EMIT SIPCallManager::instance().isSignalingEncryptedChanged(this, value);
+    }
+}
+
+void SIPCall::setIsMediaEncrypted(bool value)
+{
+    if (m_mediaEncrypted != value) {
+        m_mediaEncrypted = value;
+        Q_EMIT isMediaEncryptedChanged();
+        Q_EMIT SIPCallManager::instance().isMediaEncryptedChanged(this, value);
     }
 }
 
@@ -609,9 +875,43 @@ void SIPCall::onCallReplaceRequest(pj::OnCallReplaceRequestParam &prm)
     // TODO: account calls[]?
 }
 
+void SIPCall::onCallTransferStatus(pj::OnCallTransferStatusParam &prm)
+{
+    const int code = prm.statusCode;
+    const QString reason = QString::fromStdString(prm.reason);
+
+    if (code < 200) {
+        prm.cont = true;
+        return;
+    }
+
+    QPointer<SIPCall> self(this);
+    QTimer::singleShot(0, m_account, [self, code, reason]() {
+        if (!self) {
+            return;
+        }
+        if (code / 100 == 2) {
+            Q_EMIT self->transferSucceeded();
+        } else {
+            Q_EMIT self->transferFailed(code, reason);
+        }
+    });
+}
+
 void SIPCall::createOngoingCallNotification()
 {
-    pj::CallInfo ci = getInfo();
+    if (PlatformSession::instance().isScreenShareActive()) {
+        return;
+    }
+
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPCall) << "failed to get call info in createOngoingCallNotification: "
+                             << err.info();
+        return;
+    }
 
     // Create notification text
     const auto contactInfo =
@@ -635,10 +935,10 @@ void SIPCall::createOngoingCallNotification()
         bodyParts.append(countries.join(", "));
     }
 
-    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, this);
+    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, false,
+                              this);
 
-    auto &am = AvatarManager::instance();
-    QString avatar = c ? am.avatarPathFor(c->id()) : "";
+    QString avatar = c ? c->avatarPath() : "";
 
     if (avatar.isEmpty()) {
         n->setIcon("call-incoming-symbolic");
@@ -666,6 +966,10 @@ void SIPCall::createOngoingCallNotification()
 void SIPCall::addMetadata(const QString &data)
 {
     ResponseLoader loader(data);
+
+    qDeleteAll(m_metadata);
+    m_metadata.clear();
+
     m_metadata = loader.loadResponse();
     if (!m_metadata.empty()) {
         m_hasMetadata = true;
@@ -719,4 +1023,157 @@ void SIPCall::setCallDelayRx(qint64 timestamp, QString digit)
     }
 
     Q_EMIT callDelayChanged();
+}
+
+void SIPCall::updateRtcpStats()
+{
+    pj::CallInfo ci;
+    try {
+        ci = getInfo();
+    } catch (pj::Error &err) {
+        return;
+    }
+
+    for (unsigned i = 0; i < ci.media.size(); ++i) {
+        if (ci.media[i].type == PJMEDIA_TYPE_AUDIO) {
+            pj::StreamStat st;
+            pj::StreamInfo si;
+
+            try {
+                st = getStreamStat(i);
+                si = getStreamInfo(i);
+            } catch (pj::Error &err) {
+                continue;
+            }
+
+            // Update basic information
+            if (m_codec != si.codecName) {
+                m_codec = QString::fromStdString(si.codecName);
+                m_clockRate = si.codecClockRate;
+                setIsMediaEncrypted(si.proto & PJMEDIA_TP_PROFILE_SRTP);
+                setIsSignalingEncrypted(m_account->isSignalingEncrypted());
+            }
+
+            m_mosTx = calculateMos(st.rtcp.txStat, st.rtcp.rttUsec.last, m_jitterTx, m_effDelayTx,
+                                   m_lastLossTx, m_lastPktTx);
+            m_mosRx = calculateMos(st.rtcp.rxStat, st.rtcp.rttUsec.last, m_jitterRx, m_effDelayRx,
+                                   m_lastLossRx, m_lastPktRx);
+
+            // Go for RTCP XR information - if available
+            pjsua_call_info pj_ci;
+            pjsua_call_get_info(getId(), &pj_ci);
+
+            pjsua_call *call = &pjsua_var.calls[getId()];
+            pjsua_call_media *call_med = &call->media[i];
+
+            qCDebug(lcSIPCall) << "---- Call quality info for media #" << i << "----";
+
+#if defined(PJMEDIA_HAS_RTCP_XR) && (PJMEDIA_HAS_RTCP_XR != 0)
+            pjmedia_rtcp_xr_stat xr_stat;
+            if (pjmedia_stream_get_stat_xr(call_med->strm.a.stream, &xr_stat) == PJ_SUCCESS
+                && xr_stat.tx.voip_mtc.mos_lq != 127) {
+
+                m_mosTxLq = xr_stat.tx.voip_mtc.mos_lq;
+                m_mosRxLq = xr_stat.rx.voip_mtc.mos_lq;
+                m_mosTxCq = xr_stat.tx.voip_mtc.mos_cq;
+                m_mosRxCq = xr_stat.rx.voip_mtc.mos_cq;
+                m_jitterBufferTxDelay = double(xr_stat.tx.voip_mtc.jb_nom) / 1000.0;
+                m_jitterBufferRxDelay = double(xr_stat.rx.voip_mtc.jb_nom) / 1000.0;
+
+                m_rtt = double(xr_stat.rtt.last) / 1000.0;
+                m_lossRateTx = xr_stat.tx.voip_mtc.loss_rate;
+                m_lossRateRx = xr_stat.rx.voip_mtc.loss_rate;
+
+                qCDebug(lcSIPCall)
+                        << "- RTCP-XR TX -> mosLQ:" << m_mosTxLq << "mosCQ:" << m_mosTxCq
+                        << "jitter:" << m_jitterBufferTxDelay << "loss rate:" << m_lossRateTx;
+                qCDebug(lcSIPCall)
+                        << "- RTCP-XR RX -> mosLQ:" << m_mosRxLq << "mosCQ:" << m_mosRxCq
+                        << "jitter:" << m_jitterBufferRxDelay << "loss rate:" << m_lossRateRx;
+                qCDebug(lcSIPCall) << "- RTCP-XR RTT" << m_rtt;
+            }
+#endif
+
+            qCDebug(lcSIPCall) << "- RTCP TX -> mos:" << m_mosTx << "loss:" << (100 * m_lossTx)
+                               << "jitter:" << m_jitterTx << "effective delay:" << m_effDelayTx;
+            qCDebug(lcSIPCall) << "- RTCP RX -> mos:" << m_mosRx << "loss:" << (100 * m_lossRx)
+                               << "jitter:" << m_jitterRx << "effective delay:" << m_effDelayRx;
+
+            double mos = std::min(m_mosTx, m_mosRx);
+            if (mos >= 4.0) {
+                setQualityLevel(SIPCallManager::QualityLevel::High);
+            } else if (mos < 4.0 && mos >= 3.5) {
+                setQualityLevel(SIPCallManager::QualityLevel::Medium);
+            } else {
+                setQualityLevel(SIPCallManager::QualityLevel::Low);
+            }
+
+            if (m_mediaEncrypted && m_signalingEncrypted) {
+                setSecurityLevel(SIPCallManager::SecurityLevel::High);
+            } else if (m_mediaEncrypted || m_signalingEncrypted) {
+                setSecurityLevel(SIPCallManager::SecurityLevel::Medium);
+            } else {
+                setSecurityLevel(SIPCallManager::SecurityLevel::Low);
+            }
+
+            Q_EMIT callQualityInfoChanged();
+            Q_EMIT SIPCallManager::instance().callQualityInfoChanged(this);
+            Q_EMIT rtcpStatsChanged();
+
+            // Look at first audio stream, only
+            break;
+        }
+    }
+}
+
+float SIPCall::calculateMos(const pj::RtcpStreamStat &stat, int rttLast, double &jitter,
+                            double &effectiveDelay, quint32 &lastPkt, quint32 &lastLoss)
+{
+    double loss = 0.0;
+
+    if (stat.pkt != lastPkt) {
+        loss = 100.0 * (double)(stat.loss - lastLoss) / (double)(stat.pkt - lastPkt);
+    }
+
+    jitter = stat.jitterUsec.mean / 1000.0;
+    double rtt = rttLast / 1000.0;
+
+    lastLoss = stat.loss;
+    lastPkt = stat.pkt;
+
+    effectiveDelay = rtt / 2.0 + (jitter * 2.0) + 10.0;
+
+    // R-factor base value
+    double R = 93.2;
+
+    // Remove delay
+    if (effectiveDelay > 160.0) {
+        R -= (effectiveDelay - 120.0) / 10.0;
+    } else {
+        R -= effectiveDelay / 40.0;
+    }
+
+    // Remove loss
+    R -= loss;
+
+    // Adjust to mos scale
+    if (R < 0) {
+        return 1.0f;
+    }
+    if (R > 100) {
+        return 4.5f;
+    }
+
+    return 1.0f + (0.035f * R) + (0.000007f * R * (R - 60.0f) * (100.0f - R));
+}
+
+QStringList SIPCall::routingHopNumbers() const
+{
+    QStringList hops;
+    hops.reserve(m_callRoutingHops.size());
+    std::ranges::transform(std::as_const(m_callRoutingHops), std::back_inserter(hops),
+                           [](const SIPCallRoutingHop &hop) -> QString {
+                               return PhoneNumberUtil::numberFromSipUrl(hop.uri);
+                           });
+    return hops;
 }

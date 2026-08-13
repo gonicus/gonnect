@@ -22,25 +22,32 @@ command -v npx >/dev/null 2>&1 || show_error 2 "npx command is missing!"
 # help shows the usage information.
 function help {
     cat <<HELP
-Usage: prepare_new_version.sh <new version> [<commits as Base64 encoded JSON>] [options]
+Usage: prepare_new_version.sh <new version> [<filename with commits as Base64 encoded JSON>] [options]
 
 <new version> is a string that conforms to the rules of semantic versioning. E.g.: 1.2.3
-<commits as Base64 encoded JSON> contains the commits as Base64 encoded JSON object.
+<filename with commits as Base64 encoded JSON> contains the filename with commits as Base64 encoded JSON object.
 
 Options:
-    -h  --help  Show this help
+    -F  --no-flatpak  Do not update the flatpak version manifest
+    -h  --help        Show this help
 HELP
 }
 
 # Parsing command line
 VERSION=
 COMMITS=
+IS_BETA=NO
+UPDATE_FLATPAK=${UPDATE_FLATPAK:-YES}
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -h|--help)
             help
             return 0
+            ;;
+        -F|--no-flatpak)
+            UPDATE_FLATPAK=NO
+            shift
             ;;
         *)
             if [ -z "$VERSION" ]; then
@@ -63,6 +70,10 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
+if [[ "$VERSION" == *beta* ]]; then
+    IS_BETA=YES
+fi
+
 ###########
 # Functions
 
@@ -77,8 +88,15 @@ function update_cmakelists {
         show_error 1 "CMakeLists.txt not found!"
     fi
 
-    # inline update the version number using sed
-    sed -i -r -e "s/^(project.*VERSION\s)\S*/\1$1/g" "$CMAKELISTS_FILE"
+    if [[ "$IS_BETA" == YES ]]; then
+        # inline update just the 4th version digit by the beta number using sed
+        BETA_VER=$(echo "$VERSION" | rev | cut -d. -f1 | rev)
+        sed -i -r -e "s/^(project.*VERSION\s[0-9]+\.[0-9]+\.[0-9]+)\S*/\1.$BETA_VER/g" "$CMAKELISTS_FILE"    
+    else
+        # inline update the version number using sed
+        sed -i -r -e "s/^(project.*VERSION\s)\S*/\1$VERSION/g" "$CMAKELISTS_FILE"
+    fi
+
 }
 
 # update_antora_module sets the given version in the Antora module description docs/antora.yml
@@ -126,6 +144,11 @@ function update_flatpak {
     MANIFEST="$SCRIPT_DIR/../resources/flatpak/de.gonicus.gonnect.releases.xml"
     local CURRENT_DATE
     CURRENT_DATE=$(date +%Y-%m-%d)
+
+    # Remove all beta entries on release
+    if [[ "$IS_BETA" != YES ]]; then
+        xmlstarlet edit --inplace --delete '/releases/release[@version[contains(.,"beta")]]' "$MANIFEST"
+    fi
 
     # check, if at least one release already exists
     local LAST_VERSION
@@ -177,13 +200,23 @@ echo "Preparing new version \"$VERSION\""
 echo "Updating CMakeLists"
 update_cmakelists "$VERSION"
 
-NOTES=
-if [ -n "$COMMITS" ]; then
-    echo "Creating release notes for Flatpak metainfo"
-    create_release_notes "$COMMITS"
+# Don't create release notes, if we are building a beta-version
+if [[ "$IS_BETA" == YES ]]; then
+    COMMITS=
 fi
-echo "Updating Flatpak metainfo"
-update_flatpak "$VERSION" "$NOTES"
+
+if [[ "$UPDATE_FLATPAK" == "YES" ]]; then
+    NOTES=
+    if [ -n "$COMMITS" ]; then
+        echo "Creating release notes for Flatpak metainfo"
+        COMMIT_MSGS=$(cat "$COMMITS")
+        create_release_notes "$COMMIT_MSGS"
+    fi
+    echo "Updating Flatpak metainfo"
+    update_flatpak "$VERSION" "$NOTES"
+else
+    echo "Skipping Flatpak metainfo"
+fi
 
 echo "Updating Antora module"
 update_antora_module "$VERSION"

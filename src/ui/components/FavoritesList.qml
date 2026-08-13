@@ -10,10 +10,19 @@ ListView {
     clip: true
     model: FavoritesProxyModel {
         showJitsi: ViewHelper.isJitsiAvailable
+        showChatRooms: ChatConnectorManager.isChatAvailable
 
         FavoritesModel {}
     }
-    delegate: FavoriteListItemSmall {}
+
+    delegate: FavoriteListItemBig {
+        isCompactMode: control.width < 300
+    }
+
+    Accessible.role: Accessible.List
+    Accessible.name: qsTr("Favorites")
+    Accessible.description: qsTr("List of all contacts that have been marked as favorites")
+
     header: Rectangle {
         id: headerItem
         radius: 4
@@ -24,7 +33,11 @@ ListView {
             right: parent?.right
         }
 
+        Accessible.role: Accessible.Heading
+        Accessible.name: favLabel.text
+
         Label {
+            id: favLabel
             text: qsTr("Favorites")
             elide: Label.ElideRight
             anchors {
@@ -33,6 +46,8 @@ ListView {
                 verticalCenter: parent.verticalCenter
                 margins: 10
             }
+
+            Accessible.ignored: true
         }
     }
 }

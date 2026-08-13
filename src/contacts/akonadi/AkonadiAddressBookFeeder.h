@@ -12,9 +12,11 @@ class AkonadiAddressBookFeeder : public QObject, public IAddressBookFeeder
     Q_OBJECT
 
 public:
-    explicit AkonadiAddressBookFeeder(const QString &group, AddressBookManager *parent = nullptr);
+    explicit AkonadiAddressBookFeeder(const QString &group, const int retryCount,
+                                      const int retryInterval,
+                                      AddressBookManager *parent = nullptr);
 
-    virtual void process() override;
+    void process() override;
     ~AkonadiAddressBookFeeder();
 
 private Q_SLOTS:

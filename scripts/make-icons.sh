@@ -25,4 +25,10 @@ iconutil -c icns gonnect.iconset
 mv gonnect.icns "$ARTWORK_DIR"
 rm -rf gonnect.iconset
 
+magick -background none "$ARTWORK_DIR/gonnect.svg" -density 1200 -resize 50x50 $BASE_DIR/resources/windows/msix/Assets/StoreLogo.png && echo -n "."
+magick -background none "$ARTWORK_DIR/gonnect.svg" -density 1200 -resize 44x44 $BASE_DIR/resources/windows/msix/Assets/Square44x44Logo.png && echo -n "."
+magick -background none "$ARTWORK_DIR/gonnect.svg" -density 1200 -resize 16x16 $BASE_DIR/resources/windows/msix/Assets/Square44x44Logo.targetsize-16.png && echo -n "."
+magick -background none "$ARTWORK_DIR/gonnect.svg" -density 1200 -resize 32x32 $BASE_DIR/resources/windows/msix/Assets/Square44x44Logo.targetsize-32.png && echo -n "."
+magick -background none "$ARTWORK_DIR/gonnect.svg" -density 1200 -resize 150x150 $BASE_DIR/resources/windows/msix/Assets/Square150x150Logo.png && echo -n "."
+
 echo "OK"

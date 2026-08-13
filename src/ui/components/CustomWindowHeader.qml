@@ -7,11 +7,13 @@ import base
 Rectangle {
     id: control
     color: Theme.backgroundSecondaryColor
-    height: 44
-    radius: 8
+    height: 4 * Theme.d
+    radius: 0
+    topRightRadius: Theme.d / 2
     anchors {
         top: parent?.top
         left: parent?.left
+        leftMargin: control.mainBarWidth
         right: parent?.right
     }
 
@@ -21,69 +23,17 @@ Rectangle {
     readonly property bool active: control.Window.window?.active ?? false
 
     required property int mainBarWidth
-    required property color mainBarColor
 
     required property bool showSearch
 
     required property var tabRoot
     required property var pageRoot
 
+    Accessible.role: Accessible.Heading
+    Accessible.name: qsTr("GOnnect window header")
+
     function focusSearchBox() {
         searchField.giveFocus()
-    }
-
-    Rectangle {
-        id: mimicRect
-        visible: false
-        width: 96
-        radius: parent.radius
-        color: control.Window.window?.active ? Theme.backgroundHeader : Theme.backgroundHeaderInactive
-        anchors {
-            top: parent.top
-            left: parent.left
-            bottom: parent.bottom
-        }
-
-        Rectangle {
-            color: mimicRect.color
-            width: mimicRect.radius
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: parent.right
-            }
-        }
-
-        Rectangle {
-            color: mimicRect.color
-            width: mimicRect.radius
-            height: mimicRect.radius
-            anchors {
-                bottom: parent.bottom
-                left: parent.left
-            }
-        }
-
-        Rectangle {
-            color: Theme.borderColor
-            width: 1
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: parent.right
-            }
-        }
-    }
-
-    // This rectangle makes the bottom rounded corners of rect straight
-    Rectangle {
-        height: control.radius
-        color: control.color
-        anchors {
-            left: control.left
-            right: control.right
-            bottom: control.bottom
-        }
     }
 
     DragHandler {
@@ -96,45 +46,8 @@ Rectangle {
         }
     }
 
-    Rectangle {
-        id: tabBarSimulator
-        width: control.mainBarWidth
-        topLeftRadius: control.radius
-        anchors {
-            top: parent.top
-            left: parent.left
-            bottom: parent.bottom
-        }
-
-        color: control.mainBarColor
-
-        Rectangle {
-            id: border
-            color: Theme.borderColor
-            width: 1
-            anchors {
-                right: parent.right
-                top: parent.top
-                bottom: parent.bottom
-            }
-        }
-    }
-
     TapHandler {
         onDoubleTapped: () => control.toggleMaximized()
-    }
-
-    Image {
-        width: 24
-        height: 24
-        source: "qrc:/icons/gonnect.svg"
-        sourceSize.width: 24
-        sourceSize.height: 24
-        anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.left
-            leftMargin: 10
-        }
     }
 
     EditModeOptions {
@@ -176,10 +89,10 @@ Rectangle {
     SearchResultPopup {
         id: resultPopup
         x: control.width / 2 - resultPopup.width / 2
-        y: searchField.height + 12
+        y: searchField.height + Theme.d
         width: control.width * 0.75
         height: control.Window ? control.Window.height * 0.75 : 0
-        topMargin: 12 + searchField.height
+        topMargin: Theme.d + searchField.height
         searchText: searchField.text
 
         onPrimaryActionTriggered: () => {
@@ -190,16 +103,17 @@ Rectangle {
     }
 
     Row {
-        spacing: 10
+        spacing: Theme.d
         anchors {
             right: parent.right
-            rightMargin: 8
+            rightMargin: Theme.d
             verticalCenter: parent.verticalCenter
         }
 
         HeaderIconButton {
             id: burgerMenuButton
             iconSource: Icons.applicationMenu
+            accessiblePurpose: qsTr("App menu")
             active: control.active
             iconSize: 16
             anchors.verticalCenter: parent.verticalCenter
@@ -217,30 +131,43 @@ Rectangle {
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
-            showBuddyStatus: ViewHelper.currentUser?.hasBuddyState ?? false
-            buddyStatus: SIPBuddyState.UNKNOWN
-
-            Component.onCompleted: () => {
-                avatarImage.updateBuddyStatus()
-            }
-
-            function updateBuddyStatus() {
-                avatarImage.buddyStatus = ViewHelper.currentUser?.hasBuddyState
-                        ? SIPManager.buddyStatus(ViewHelper.currentUser.subscriptableNumber)
-                        : SIPBuddyState.UNKNOWN
-            }
+            showPresenceStatus: !avatarImage.isUnregistered
+            presenceStatus: GlobalStateAggregator.presenceState
+            isUnregistered: true
 
             Connections {
-                target: SIPManager
-                enabled: ViewHelper.currentUser?.hasBuddyState ?? false
-                function onBuddyStateChanged(url : string, status : int) {
-                    avatarImage.updateBuddyStatus()
+                target: SIPAccountManager
+                function onSipRegisteredChanged(status : bool) {
+                    if (status) {
+                        avatarImage.isUnregistered = false
+                    } else {
+                        avatarImage.isUnregistered = true
+                    }
+                }
+            }
+
+            TapHandler {
+                gesturePolicy: TapHandler.WithinBounds
+                grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+                exclusiveSignals: TapHandler.SingleTap
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onTapped: () => {
+                    ownAvatarContextMenuComponent.createObject(avatarImage).popup()
+                }
+            }
+
+            Component {
+                id: ownAvatarContextMenuComponent
+
+                OwnAvatarContextMenu {
+                    id: avatarContextMenu
                 }
             }
         }
 
         HeaderIconButton {
             iconSource: Icons.mobileCloseApp
+            accessiblePurpose: qsTr("Close GOnnect window")
             active: control.active
             iconSize: 10
             anchors.verticalCenter: parent.verticalCenter

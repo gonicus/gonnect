@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
@@ -47,6 +49,12 @@ public:
     void initialize();
     void shutdown();
 
+    void handleNetworkChanged();
+    void suspend();
+    void resume();
+
+    void setPreferredCodecs();
+
     void getPlaybackDevices();
 
     void setDefaultPreferredIdentity(const QString &value);
@@ -67,6 +75,8 @@ public:
 
     Q_INVOKABLE SIPBuddy *getBuddy(const QString &var);
 
+    QString toSipUri(const QString &var) const;
+
 Q_SIGNALS:
     void preferredIdentitiesChanged();
     void defaultPreferredIdentityChanged();
@@ -77,19 +87,34 @@ private:
     SIPManager(QObject *parent = nullptr);
 
     void updatePreferredIdentities();
+    void recoverFromNetworkChange();
+    void checkRecovery();
+
+    void configureDnsResolver();
+    void resetDnsResolver();
 
     QList<PreferredIdentity *> m_preferredIdentities;
     QList<PreferredIdentity *> m_enrolledPreferredIdentities;
     QString m_defaultPreferredIdentity;
 
+    QTimer m_networkRecoveryTimer;
+    QTimer m_registrationCheckTimer;
+    int m_networkRecoveryAttempts = 0;
+    static constexpr int s_maxNetworkRecoveryAttempts = 6;
+    QSet<QString> m_lastLocalAddresses;
+    QHash<QString, quint64> m_recoveryCounts;
+
     std::unique_ptr<AppSettings> m_settings = nullptr;
 
     SIPMediaConfig *m_mediaConfig = nullptr;
     SIPUserAgentConfig *m_uaConfig = nullptr;
-    SIPLogWriter *m_logWriter = nullptr;
+    std::unique_ptr<SIPLogWriter> m_logWriter;
     SIPEventLoop *m_ev = nullptr;
 
     pj::Endpoint m_ep;
+
+    bool m_suspended = false;
+    bool m_initialized = false;
 
     QSet<QString> m_buddyStateQueue;
 };
@@ -102,7 +127,11 @@ class SIPManagerWrapper
     QML_SINGLETON
 
 public:
-    static SIPManager *create(QQmlEngine *, QJSEngine *) { return &SIPManager::instance(); }
+    static SIPManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&SIPManager::instance(), QQmlEngine::CppOwnership);
+        return &SIPManager::instance();
+    }
 
 private:
     SIPManagerWrapper() = default;

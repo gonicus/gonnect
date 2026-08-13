@@ -1,11 +1,21 @@
 #include "GlobalMuteState.h"
-#include "GlobalCallState.h"
 
 GlobalMuteState::GlobalMuteState(QObject *parent) : QObject{ parent } { }
 
 void GlobalMuteState::toggleMute(const QString &tag)
 {
     m_isMuted = !m_isMuted;
+    Q_EMIT isMutedChangedWithTag(m_isMuted, tag);
+    Q_EMIT isMutedChanged();
+}
+
+void GlobalMuteState::setMuted(bool muted, const QString &tag)
+{
+    if (m_isMuted == muted) {
+        return;
+    }
+
+    m_isMuted = muted;
     Q_EMIT isMutedChangedWithTag(m_isMuted, tag);
     Q_EMIT isMutedChanged();
 }

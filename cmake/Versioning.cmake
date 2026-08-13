@@ -15,14 +15,38 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 
     # If there's a version - take it
     if(NOT VERSION STREQUAL "")
-        string(REGEX MATCH "(v[0-9a-z.+-]*)" _ ${VERSION})
+        string(REGEX MATCH "v([0-9a-z.+-]*)" _ ${VERSION})
         set(VERSION "${CMAKE_MATCH_1}")
     endif()
+
+    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                RESULT_VARIABLE GIT_RESULT
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                OUTPUT_VARIABLE GIT_HASH)
+
+    set(APP_GIT_HASH ${GIT_HASH})
 endif()
 
 # Fall back to project version
 if(VERSION STREQUAL "")
     set(VERSION ${GOnnect_VERSION})
+endif()
+
+# MSIX requires a version number with four parts
+if(WIN32)
+    string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" _ ${VERSION})
+    if(CMAKE_MATCH_1)
+        set(MSIX_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}.0")
+    else()
+        set(MSIX_VERSION "0.0.0.0")
+    endif()
+
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/resources/windows/msix/AppxManifest.xml.in
+        ${PROJECT_BINARY_DIR}/AppxManifest.xml
+        @ONLY
+    )
 endif()
 
 message("Setting GOnnect build version to ${VERSION}")

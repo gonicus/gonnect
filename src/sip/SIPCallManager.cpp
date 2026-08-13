@@ -4,7 +4,6 @@
 #include "SIPManager.h"
 #include "SIPCallManager.h"
 #include "SIPAccountManager.h"
-#include "ExternalMediaManager.h"
 #include "Notification.h"
 #include "NotificationManager.h"
 #include "RingToneFactory.h"
@@ -12,14 +11,16 @@
 #include "PhoneNumberUtil.h"
 #include "DtmfGenerator.h"
 #include "EnumTranslation.h"
-#include "StateManager.h"
 #include "ViewHelper.h"
-#include "AvatarManager.h"
 #include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "AddressBook.h"
 #include "GlobalCallState.h"
 #include "Application.h"
+#include "PlatformSession.h"
+#include "SelectionState.h"
+#include "CallRoutingHelper.h"
+#include "CallRoutingHopInfo.h"
 
 Q_LOGGING_CATEGORY(lcSIPCallManager, "gonnect.sip.callmanager")
 
@@ -33,7 +34,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
     m_dtmfTimer.setInterval(PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT + 10);
     m_dtmfTimer.callOnTimeout(this, &SIPCallManager::dispatchDtmfBuffer);
 
-    // End confernence mode if one participant hangs up
+    // End confernence mode if one user hangs up
     connect(this, &SIPCallManager::establishedCallsCountChanged, this, [this]() {
         if (m_isConferenceMode && m_establishedCallsCount < 2) {
             m_isConferenceMode = false;
@@ -75,31 +76,25 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
             return;
         }
 
-        // Were're busy with one call and there's one incoming -> end call active call and pick
-        // incoming one
+        // Were're busy with two calls - distinguish between "active + incoming"
+        // and "active + hold".
         if (!dev->getHookSwitch() && callsCount == 2) {
             SIPCall *_activeCall = nullptr;
             SIPCall *_incomingCall = nullptr;
 
             for (auto call : std::as_const(m_calls)) {
-                if (_activeCall && _incomingCall) {
-                    break;
-                }
-
-                if (call->isEstablished() && call->isActive()) {
+                if (call->isEstablished() && call->isActive() && !call->isHolding()) {
                     _activeCall = call;
-                    continue;
-                }
-
-                if (!call->isEstablished() && call->isIncoming()) {
+                } else if (!call->isEstablished() && call->isIncoming()) {
                     _incomingCall = call;
-                    continue;
                 }
             }
 
             if (_activeCall && _incomingCall) {
                 endCall(_activeCall);
                 _incomingCall->accept();
+            } else if (_activeCall) {
+                endCall(_activeCall);
             }
 
             return;
@@ -125,7 +120,7 @@ SIPCallManager::SIPCallManager(QObject *parent) : QObject(parent)
 
     connect(dev, &HeadsetDeviceProxy::dial, this, [this](const QString &number) {
         if (m_calls.count() == 0) {
-            qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+            static_cast<Application *>(Application::instance())->rootWindow()->show();
             call(number);
         }
     });
@@ -178,77 +173,96 @@ void SIPCallManager::onIncomingCall(SIPCall *call)
     }
 
     QString title;
+    Notification *n = nullptr;
 
-    if (numberType == Contact::NumberType::Unknown) {
-        title = tr("%1 is calling").arg(displayName);
-    } else {
-        title = tr("%1 (%2) is calling")
-                        .arg(displayName, EnumTranslation::instance().numberType(numberType));
+    if (!PlatformSession::instance().isScreenShareActive()) {
+        if (numberType == Contact::NumberType::Unknown) {
+            title = tr("%1 is calling").arg(displayName);
+        } else {
+            title = tr("%1 (%2) is calling")
+                            .arg(displayName, EnumTranslation::instance().numberType(numberType));
+        }
+
+        if (c && !c->company().isEmpty()) {
+            bodyParts.append(c->company());
+        }
+
+        auto countries = contactInfo.countries;
+        if (!contactInfo.city.isEmpty()) {
+            countries.push_front(contactInfo.city);
+        }
+        if (countries.size()) {
+            bodyParts.append(countries.join(", "));
+        }
+
+        const auto hops = CallRoutingHelper::routingHopsForCall(*call);
+        if (!hops.isEmpty()) {
+            QStringList hopParts;
+            hopParts.reserve(hops.size());
+
+            for (const auto &hop : hops) {
+                const auto contactName = hop.contactName();
+                hopParts.append(!contactName.isEmpty()
+                                        ? QString("%1 (%2)").arg(contactName, hop.phoneNumber)
+                                        : hop.phoneNumber);
+            }
+            bodyParts.append(tr("Via: %1").arg(hopParts.join(" → ")));
+        }
+
+        // Create notification object
+        if (call->isBlocked()) {
+            qCInfo(lcSIPCallManager) << "Incoming call from" << displayName
+                                     << contactInfo.phoneNumber << "has been blocked";
+            return;
+        }
+
+        n = new Notification(title, bodyParts.join(", "), Notification::Priority::urgent, false,
+                             call);
+
+        if (m_settings.value("generic/inverseAcceptReject", false).toBool()) {
+            n->addButton(tr("Reject"), "reject", "call.decline", {});
+            n->addButton(tr("Accept"), "accept", "call.accept", {});
+        } else {
+            n->addButton(tr("Accept"), "accept", "call.accept", {});
+            n->addButton(tr("Reject"), "reject", "call.decline", {});
+        }
+
+        QString avatar = c ? c->avatarPath() : "";
+
+        if (avatar.isEmpty()) {
+            n->setIcon("call-incoming-symbolic");
+        } else {
+            n->setIcon(avatar);
+            n->setRoundedIcon(true);
+            n->setEmblem("call-incoming");
+        }
+        n->setDefaultAction("show");
+        n->setCategory("call.incoming");
+        n->setDisplayHint(Notification::tray | Notification::hideContentOnLockScreen);
     }
-
-    if (c && !c->company().isEmpty()) {
-        bodyParts.append(c->company());
-    }
-
-    auto countries = contactInfo.countries;
-    if (!contactInfo.city.isEmpty()) {
-        countries.push_front(contactInfo.city);
-    }
-    if (countries.size()) {
-        bodyParts.append(countries.join(", "));
-    }
-
-    // Create notification object
-    if (call->isBlocked()) {
-        qCInfo(lcSIPCallManager) << "Incoming call from" << displayName << contactInfo.phoneNumber
-                                 << "has been blocked";
-        return;
-    }
-
-    auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::urgent, call);
-
-    if (m_settings.value("generic/inverseAcceptReject", false).toBool()) {
-        n->addButton(tr("Reject"), "reject", "call.decline", {});
-        n->addButton(tr("Accept"), "accept", "call.accept", {});
-    } else {
-        n->addButton(tr("Accept"), "accept", "call.accept", {});
-        n->addButton(tr("Reject"), "reject", "call.decline", {});
-    }
-
-    auto &am = AvatarManager::instance();
-    QString avatar = c ? am.avatarPathFor(c->id()) : "";
-
-    if (avatar.isEmpty()) {
-        n->setIcon("call-incoming-symbolic");
-    } else {
-        n->setIcon(avatar);
-        n->setRoundedIcon(true);
-        n->setEmblem("call-incoming");
-    }
-    n->setDefaultAction("show");
-    n->setCategory("call.incoming");
-    n->setDisplayHint(Notification::tray | Notification::hideContentOnLockScreen);
 
     pj::CallOpParam prm;
     prm.statusCode = PJSIP_SC_RINGING;
     call->answer(prm);
 
-    connect(n, &Notification::actionInvoked, call, [this, call](QString action, QVariantList) {
-        if (action == "accept") {
-            acceptCall(call);
-        } else if (action == "reject") {
-            rejectCall(call);
-        } else {
-            Q_EMIT showCallWindow();
-        }
-    });
+    if (n) {
+        connect(n, &Notification::actionInvoked, call, [this, call](QString action, QVariantList) {
+            if (action == "accept") {
+                acceptCall(call);
+            } else if (action == "reject") {
+                rejectCall(call);
+            } else {
+                Q_EMIT showCallWindow();
+            }
+        });
 
-    QString ref = NotificationManager::instance().add(n);
-    call->setNotificationRef(ref);
-    connect(call, &SIPCall::destroyed, this,
-            [ref]() { NotificationManager::instance().remove(ref); });
-    connect(call, &SIPCall::establishedChanged, this,
-            [ref]() { NotificationManager::instance().remove(ref); });
+        QString ref = NotificationManager::instance().add(n);
+        call->setNotificationRef(ref);
+        connect(call, &SIPCall::destroyed, this,
+                [ref]() { NotificationManager::instance().remove(ref); });
+        connect(call, &SIPCall::establishedChanged, this,
+                [ref]() { NotificationManager::instance().remove(ref); });
+    }
 
     if (isEmergency) {
         Q_EMIT ViewHelper::instance().showEmergency(call->account()->id(), call->getId(),
@@ -302,7 +316,7 @@ QString SIPCallManager::call(const QString &number, bool silent)
     if (!accounts.isEmpty()) {
         const auto phoneNumber = PhoneNumberUtil::isSipUri(number)
                 ? number
-                : PhoneNumberUtil::cleanPhoneNumber(number);
+                : PhoneNumberUtil::canonicalNumber(number);
         return call(accounts.first()->id(), phoneNumber, "", "", silent);
     }
 
@@ -314,7 +328,13 @@ void SIPCallManager::initBridge()
 {
     if (!m_bridgeConfigured) {
         auto &audDevManager = SIPManager::instance().endpoint().audDevManager();
-        audDevManager.setNullDev();
+        try {
+            audDevManager.setNullDev();
+        } catch (const pj::Error &err) {
+            qCCritical(lcSIPCallManager)
+                    << "failed to set null audio device:" << QString::fromStdString(err.info());
+            return;
+        }
 
         m_bridgeConfigured = true;
     }
@@ -328,11 +348,12 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
 
     // Check if there is already a call for that target number
     for (auto call : std::as_const(m_calls)) {
-        auto callRemoteNumber = PhoneNumberUtil::numberFromSipUrl(
-                QString::fromStdString(call->getInfo().remoteUri));
+        const auto remoteUri = call->sipUrl();
+        auto callRemoteNumber = PhoneNumberUtil::numberFromSipUrl(remoteUri);
+
         if (number == callRemoteNumber) {
-            qCInfo(lcSIPCallManager) << "skipping additional call to already connected URI"
-                                     << call->getInfo().remoteUri;
+            qCInfo(lcSIPCallManager)
+                    << "skipping additional call to already connected URI" << remoteUri;
             return "";
         }
     }
@@ -355,6 +376,7 @@ QString SIPCallManager::call(const QString &accountId, const QString &number,
 QStringList SIPCallManager::callIds() const
 {
     QStringList res;
+    res.reserve(m_calls.size());
 
     for (auto call : std::as_const(m_calls)) {
         res.push_back(call->uuid());
@@ -386,11 +408,10 @@ void SIPCallManager::addMetadata(const QString &id, const QString &data)
     }
 }
 
-void SIPCallManager::holdOtherCalls(const SIPCall *call)
+void SIPCallManager::holdOtherCalls(SIPCall *call)
 {
-    auto &globalCallState = GlobalCallState::instance();
-    globalCallState.setProperty("callInForeground", QVariant::fromValue(call));
-    globalCallState.holdAllCalls(call);
+    SelectionState::instance().setCallInForeground(qobject_cast<ICallState *>(call));
+    GlobalCallState::instance().holdAllCalls(call);
 }
 
 void SIPCallManager::holdAllCalls() const
@@ -540,12 +561,76 @@ void SIPCallManager::transferCall(const QString &fromAccountId, int fromCallId,
     auto toCall = findCall(toAccountId, toCallId);
     if (!toCall) {
         qCCritical(lcSIPCallManager)
-                << "Cannot find call" << toAccountId << "in account" << toCallId;
+                << "Cannot find call" << toCallId << "in account" << toAccountId;
         return;
     }
 
-    toCall->xferReplaces(*fromCall, pj::CallOpParam());
-    endCall(toCall);
+    QPointer<SIPCall> fromPtr(fromCall);
+    QPointer<SIPCall> toPtr(toCall);
+
+    fromCall->setInTransfer(true);
+    toCall->setInTransfer(true);
+
+    auto *guard = new QObject(this);
+
+    connect(toCall, &SIPCall::transferSucceeded, guard, [guard, fromPtr, toPtr]() {
+        if (toPtr) {
+            toPtr->account()->hangup(toPtr->getId());
+        }
+        if (fromPtr) {
+            fromPtr->account()->hangup(fromPtr->getId());
+        }
+        guard->deleteLater();
+    });
+
+    connect(toCall, &SIPCall::transferFailed, guard,
+            [guard, fromPtr, toPtr](int code, const QString &reason) {
+                qCCritical(lcSIPCallManager) << "Call transfer failed:" << code << reason;
+
+                if (fromPtr) {
+                    fromPtr->setInTransfer(false);
+                }
+                if (toPtr) {
+                    toPtr->setInTransfer(false);
+                }
+
+                if (toPtr && toPtr->isHolding()) {
+                    toPtr->unhold();
+                }
+                guard->deleteLater();
+            });
+
+    // Fallback: transfer finished if one leg is teared down
+    connect(toCall, &QObject::destroyed, guard, [guard]() { guard->deleteLater(); });
+    connect(fromCall, &QObject::destroyed, guard, [guard]() { guard->deleteLater(); });
+
+    // Timeout if no final NOTIFY received
+    QTimer::singleShot(30s, guard, [guard, fromPtr, toPtr]() {
+        qCWarning(lcSIPCallManager) << "Call transfer timed out without final NOTIFY";
+
+        if (fromPtr) {
+            fromPtr->setInTransfer(false);
+        }
+        if (toPtr) {
+            toPtr->setInTransfer(false);
+        }
+
+        if (toPtr && toPtr->isHolding()) {
+            toPtr->unhold();
+        }
+        guard->deleteLater();
+    });
+
+    // Actual transfer
+    try {
+        toCall->xferReplaces(*fromCall, pj::CallOpParam());
+    } catch (const pj::Error &err) {
+        qCCritical(lcSIPCallManager)
+                << "xferReplaces failed:" << QString::fromStdString(err.info());
+        fromPtr->setInTransfer(false);
+        toPtr->setInTransfer(false);
+        guard->deleteLater();
+    }
 }
 
 SIPCall *SIPCallManager::findCall(const QString &accountId, int callId) const
@@ -562,7 +647,7 @@ SIPCall *SIPCallManager::findCall(const QString &remoteUri) const
 {
     if (!remoteUri.isEmpty()) {
         for (auto call : std::as_const(m_calls)) {
-            if (QString::fromStdString(call->getInfo().remoteUri) == remoteUri) {
+            if (call->sipUrl() == remoteUri) {
                 return call;
             }
         }
@@ -609,27 +694,7 @@ void SIPCallManager::startConference()
         unholdAllCalls();
 
         QTimer::singleShot(100, this, [this]() {
-            pj::AudioMedia *audioMedia1 = q_check_ptr(m_calls.at(0)->audioMedia());
-            pj::AudioMedia *audioMedia2 = q_check_ptr(m_calls.at(1)->audioMedia());
-
-            try {
-                audioMedia1->startTransmit(*audioMedia2);
-            } catch (pj::Error err) {
-                qCCritical(lcSIPCallManager) << "Error transmitting audioMedia1 to audioMedia2:\n"
-                                             << "  status:" << err.status << "\n"
-                                             << "  reason:" << err.reason << "\n"
-                                             << "  file and line:" << err.srcFile << err.srcLine;
-            }
-            try {
-                audioMedia2->startTransmit(*audioMedia1);
-            } catch (pj::Error err) {
-                qCCritical(lcSIPCallManager)
-                        << "Error transmitting audioMedia2 to audioMedia1:\n"
-                        << "  status:" << err.status << "\n"
-                        << "  reason:" << err.reason << "\n"
-                        << "  file and line:" << err.srcFile << err.srcLine << "\n";
-            }
-
+            updateConferenceBridge();
             GlobalCallState::instance().setIsPhoneConference(true);
             Q_EMIT isConferenceModeChanged();
         });
@@ -647,6 +712,36 @@ void SIPCallManager::endConference()
         Q_EMIT isConferenceModeChanged();
     } else {
         qCWarning(lcSIPCallManager) << "Not in conference mode";
+    }
+}
+
+void SIPCallManager::updateConferenceBridge()
+{
+    if (!m_isConferenceMode && m_calls.count() != 2) {
+        return;
+    }
+
+    pj::AudioMedia *audioMedia1 = m_calls.at(0)->audioMedia();
+    pj::AudioMedia *audioMedia2 = m_calls.at(1)->audioMedia();
+
+    if (audioMedia1 && audioMedia2) {
+        try {
+            audioMedia1->startTransmit(*audioMedia2);
+        } catch (pj::Error err) {
+            qCCritical(lcSIPCallManager) << "Error transmitting audioMedia1 to audioMedia2:\n"
+                                         << "  status:" << err.status << "\n"
+                                         << "  reason:" << err.reason << "\n"
+                                         << "  file and line:" << err.srcFile << err.srcLine;
+        }
+        try {
+            audioMedia2->startTransmit(*audioMedia1);
+        } catch (pj::Error err) {
+            qCCritical(lcSIPCallManager)
+                    << "Error transmitting audioMedia2 to audioMedia1:\n"
+                    << "  status:" << err.status << "\n"
+                    << "  reason:" << err.reason << "\n"
+                    << "  file and line:" << err.srcFile << err.srcLine << "\n";
+        }
     }
 }
 
@@ -706,9 +801,10 @@ void SIPCallManager::addCall(SIPCall *call)
         const Contact *c = contactInfo.contact;
         QStringList bodyParts;
 
+        const QString name =
+                PhoneNumberUtil::instance().nameFromSipUrl(QString::fromStdString(ci.remoteUri));
         const QString title =
-                tr("Missed call from %1")
-                        .arg((c && !c->name().isEmpty()) ? c->name() : contactInfo.phoneNumber);
+                tr("Missed call from %1").arg((c && !c->name().isEmpty()) ? c->name() : name);
         const QString number = contactInfo.phoneNumber;
 
         if (c && !c->company().isEmpty()) {
@@ -725,34 +821,35 @@ void SIPCallManager::addCall(SIPCall *call)
 
         QPointer<SIPAccount> account = call->account();
 
-        auto n =
-                new Notification(title, bodyParts.join("\n"), Notification::Priority::normal, this);
+        if (!PlatformSession::instance().isScreenShareActive()) {
+            auto n = new Notification(title, bodyParts.join("\n"), Notification::Priority::normal,
+                                      false, this);
 
-        auto &am = AvatarManager::instance();
-        QString avatar = c ? am.avatarPathFor(c->id()) : "";
+            QString avatar = c ? c->avatarPath() : "";
 
-        if (avatar.isEmpty()) {
-            n->setIcon("call-missed-symbolic");
-        } else {
-            n->setIcon(avatar);
-            n->setRoundedIcon(true);
-            n->setEmblem("call-missed");
+            if (avatar.isEmpty()) {
+                n->setIcon("call-missed-symbolic");
+            } else {
+                n->setIcon(avatar);
+                n->setRoundedIcon(true);
+                n->setEmblem("call-missed");
+            }
+
+            n->setDisplayHint(Notification::tray | Notification::hideContentOnLockScreen);
+            n->setCategory("call.unanswered");
+            n->addButton(tr("Call back"), "call", "call.accept", {});
+
+            QString ref = NotificationManager::instance().add(n);
+
+            connect(n, &Notification::actionInvoked, this,
+                    [c, number, account, ref](QString, QVariantList) {
+                        if (account) {
+                            account->call(number, c ? c->id() : "");
+                        }
+
+                        NotificationManager::instance().remove(ref);
+                    });
         }
-
-        n->setDisplayHint(Notification::tray | Notification::hideContentOnLockScreen);
-        n->setCategory("call.unanswered");
-        n->addButton(tr("Call back"), "call", "call.accept", {});
-
-        QString ref = NotificationManager::instance().add(n);
-
-        connect(n, &Notification::actionInvoked, this,
-                [c, number, account, ref](QString, QVariantList) {
-                    if (account) {
-                        account->call(number, c ? c->id() : "");
-                    }
-
-                    NotificationManager::instance().remove(ref);
-                });
     });
 
     Q_EMIT callAdded(call->account()->id(), call->getId());
@@ -768,7 +865,25 @@ void SIPCallManager::removeCall(SIPCall *call)
 
     // Automatically unhold last remaining call
     if (oldCount > 1 && m_calls.size() == 1 && m_calls.at(0)->isHolding()) {
-        m_calls.at(0)->unhold();
+        auto *remainingCall = m_calls.at(0);
+
+        // Make sure that unhold will be called in the next event loop iteration, because pjsip
+        // might still be doing stuff in this one which can cause a segfault.
+        // And the call might be in termination, hence the info.state check.
+        QTimer::singleShot(0, remainingCall, [remainingCall]() {
+            if (remainingCall->isHolding()) {
+                try {
+                    pj::CallInfo info = remainingCall->getInfo();
+
+                    if (info.state == PJSIP_INV_STATE_CONFIRMED) {
+                        remainingCall->toggleHold();
+                    }
+                } catch (pj::Error &) {
+                    // This means the call is terminated or currently in termination. That is fine,
+                    // but ignore the error.
+                }
+            }
+        });
     }
 
     updateCallCount();
@@ -913,8 +1028,20 @@ void SIPCallManager::dispatchDtmfBuffer()
                             m_dtmfGen = new DtmfGenerator(this);
                         }
 
-                        m_dtmfGen->playDtmf(val.front());
-                        call->dialDtmf(val.first(1).toStdString());
+                        const QChar digit = val.front();
+                        if (DtmfGenerator::isValid(digit)) {
+                            m_dtmfGen->playDtmf(digit);
+                            try {
+                                call->dialDtmf(val.first(1).toStdString());
+                            } catch (const pj::Error &err) {
+                                qCWarning(lcSIPCallManager)
+                                        << "error sending DTMF char" << digit << ":"
+                                        << QString::fromStdString(err.info());
+                            }
+
+                        } else {
+                            qCWarning(lcSIPCallManager) << "skipping invalid DTMF char" << digit;
+                        }
 
                         m_dtmfTimer.setInterval(PJSUA_CALL_SEND_DTMF_DURATION_DEFAULT + 10);
                     }

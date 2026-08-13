@@ -9,8 +9,8 @@ import base
 Popup {
     id: control
     transformOrigin: Item.Top
-    topMargin: 12
-    bottomMargin: 12
+    topMargin: Theme.d
+    bottomMargin: Theme.d
     verticalPadding: 8
     topPadding: 0
     bottomPadding: 0
@@ -19,6 +19,7 @@ Popup {
     enter: null  // Transitions seem to cause that the popup is not visible sometimes...
     exit: null
     visible: !!control.searchText.length
+    focus: false
 
     LoggingCategory {
         id: category
@@ -35,8 +36,25 @@ Popup {
     signal returnFocus
 
     readonly property int colWidth: flickableContainer.width / 3
+    readonly property string immediateSearchPhrase: ViewHelper.preprocessSearchText(control.searchText)
 
-    onSearchTextChanged: () => Qt.callLater(keyNavigator.keyDown)
+    Timer {
+        id: searchDebounceTimer
+        interval: 200
+        onTriggered: () => {
+                         searchListModel.searchPhrase = control.immediateSearchPhrase
+                         Qt.callLater(keyNavigator.keyDown)
+                     }
+    }
+
+    onSearchTextChanged: () => {
+                             if (control.immediateSearchPhrase === "") {
+                                 searchDebounceTimer.stop()
+                                 searchListModel.searchPhrase = ""
+                             } else {
+                                 searchDebounceTimer.start()
+                             }
+                         }
 
     function initialKeyDown() { keyNavigator.keyDown() }
     function initialKeyUp() { keyNavigator.keyUp() }
@@ -65,15 +83,26 @@ Popup {
 
     SearchListModel {
         id: searchListModel
-        searchPhrase: ViewHelper.preprocessSearchText(control.searchText)
     }
 
     contentItem: Item {
         id: popupContainer
         focus: true
 
-        Keys.onLeftPressed: () => keyNavigator.keyLeft()
-        Keys.onRightPressed: () => keyNavigator.keyRight()
+        Keys.onLeftPressed: () => {
+            if (LayoutMirroring.enabled) {
+                keyNavigator.keyRight()
+            } else {
+                keyNavigator.keyLeft()
+            }
+        }
+        Keys.onRightPressed: () => {
+            if (LayoutMirroring.enabled) {
+                keyNavigator.keyLeft()
+            } else {
+                keyNavigator.keyRight()
+            }
+        }
         Keys.onDownPressed: () => keyNavigator.keyDown()
         Keys.onUpPressed: () => keyNavigator.keyUp()
         Keys.onEnterPressed: () => control.triggerPrimaryAction()
@@ -87,8 +116,12 @@ Popup {
                 top: parent.top
                 left: parent.left
                 bottom: parent.bottom
-                margins: 12
+                margins: Theme.d
             }
+
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Search filter and identity selection")
+            Accessible.description: qsTr("Select search filter to be applied, as well as the outgoing identity")
 
             SearchCategoryList {
                 id: searchCategories
@@ -100,6 +133,7 @@ Popup {
             }
 
             Label {
+                id: identityLabel
                 text: qsTr("Outgoing identity")
                 font.weight: Font.Medium
                 anchors {
@@ -108,6 +142,9 @@ Popup {
                     bottom: identitySelector.top
                     bottomMargin: 5
                 }
+
+                Accessible.role: Accessible.StaticText
+                Accessible.name: identityLabel.text
             }
 
             IdentitySelector {
@@ -129,8 +166,10 @@ Popup {
                 top: parent.top
                 bottom: parent.bottom
                 left: filterBar.right
-                leftMargin: 12
+                leftMargin: Theme.d
             }
+
+            Accessible.ignored: true
         }
 
         Item {
@@ -140,13 +179,21 @@ Popup {
                 right: parent.right
                 bottom: parent.bottom
                 left: verticalSeparatorLine.right
-                margins: 12
+                margins: Theme.d
             }
+
+            Accessible.role: Accessible.Column
+            Accessible.name: qsTr("Search results")
+            Accessible.description: qsTr("All search results will be listed here in their respective categories")
 
             KeyNavigator {
                 id: keyNavigator
 
-                onVerticallyOutOfBounds: () => control.returnFocus()
+                onVerticallyOutOfBounds: () => {
+                    if (control.visible) {
+                        control.returnFocus()
+                    }
+                }
 
                 readonly property Connections resetConnection: Connections {
                     target: control
@@ -179,19 +226,19 @@ Popup {
                     bottom: parent.bottom
                     left: parent.left
                     right: parent.right
-                    topMargin: 12
-                    bottomMargin: 12
+                    topMargin: Theme.d
+                    bottomMargin: Theme.d
                 }
 
                 ScrollBar.vertical: ScrollBar { width: 5 }
 
                 Column {
                     id: flickableContainer
-                    spacing: 24
+                    spacing: Theme.d * 2
                     anchors {
                         left: parent.left
                         right: parent.right
-                        margins: 12
+                        margins: Theme.d
                     }
 
                     SearchResultCategory {
@@ -207,7 +254,7 @@ Popup {
 
                         SearchResultItem {
                             id: callDirectItem
-                            mainText: qsTr('Call "%1"').arg(searchListModel.searchPhrase)
+                            mainText: qsTr('Call "%1"').arg(control.immediateSearchPhrase)
                             width: control.colWidth
                             visible: callDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === callDirectItem
@@ -219,20 +266,21 @@ Popup {
                                 }
                             }
 
-                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(searchListModel.searchPhrase)
+                            readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(control.immediateSearchPhrase)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(callDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                SIPCallManager.call("account0", searchListModel.searchPhrase, "", identitySelector.currentValue)
+                                SIPCallManager.call("account0", control.immediateSearchPhrase, "", identitySelector.currentValue)
                                 control.primaryActionTriggered()
                             }
                         }
 
                         SearchResultItem {
                             id: roomDirectItem
-                            mainText: qsTr('Open room "%1"').arg(searchListModel.searchPhrase)
+                            mainText: qsTr('Open room "%1"').arg(control.immediateSearchPhrase)
+                            secondaryText: qsTr('Jitsi Meet')
                             width: control.colWidth
                             visible: roomDirectItem.shallBeVisible
                             highlighted: keyNavigator.selectedItem === roomDirectItem
@@ -246,14 +294,107 @@ Popup {
 
                             readonly property bool shallBeVisible: ViewHelper.isJitsiAvailable
                                                                    && !ViewHelper.isActiveVideoCall
-                                                                   && ViewHelper.isValidJitsiRoomName(searchListModel.searchPhrase)
+                                                                   && ViewHelper.isValidJitsiRoomName(control.immediateSearchPhrase)
 
                             onManuallyHovered: () => {
                                 keyNavigator.setExternallySelected(roomDirectItem)
                             }
                             onTriggerPrimaryAction: () => {
-                                ViewHelper.requestMeeting(searchListModel.searchPhrase)
+                                ViewHelper.requestMeeting(control.immediateSearchPhrase)
                                 control.primaryActionTriggered()
+                            }
+                        }
+
+                        SearchResultItem {
+                            id: createChatRoomItem
+                            mainText: qsTr('Create chat room "%1"').arg(control.immediateSearchPhrase)
+                            width: control.colWidth
+                            visible: ChatConnectorManager.isChatAvailable
+                            canBeHighlighted: false
+                            mainRowLeftInsetLoader.sourceComponent: IconLabel {
+                                color: Theme.primaryTextColor
+                                icon {
+                                    color: Theme.primaryTextColor
+                                    source: Icons.userGroupNew
+                                }
+                            }
+
+                            Repeater {
+                                id: phoneNumberRepeater
+                                model: ChatConnectorManager.chatConnectors
+                                delegate: SearchResultNumberItem {
+                                    id: chatProviderDelg
+                                    enabled: chatProviderDelg.modelData?.isConnected ?? false
+                                    isChat: true
+                                    isFavorable: false
+                                    highlighted: keyNavigator.selectedSubItem === chatProviderDelg
+                                    //: Search submenu item under "Create chatroom xyz"; %1 will be replaced with chat provider's display name
+                                    number: qsTr("in %1").arg(chatProviderDelg.modelData?.displayName ?? "")
+                                    anchors {
+                                        left: parent?.left
+                                        right: parent?.right
+                                    }
+
+                                    required property IChatProvider modelData
+
+                                    onManuallyHovered: () => {
+                                        keyNavigator.setExternallySelected(createChatRoomItem, chatProviderDelg)
+                                    }
+                                    onTriggerPrimaryAction: () => {
+                                        ViewHelper.showCreateRoomDialog(chatProviderDelg.modelData,
+                                                                        [],
+                                                                        control.immediateSearchPhrase)
+                                        control.primaryActionTriggered()
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    SearchResultCategory {
+                        id: chatRoomResultList
+                        headerText: qsTr('Chat rooms')
+                        visible: (searchCategories.selectedCategories & SearchCategoryList.Category.RoomsAndTeams)
+                                 && chatRoomSearchRepeater.count > 0
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+
+                        Component.onCompleted: () => keyNavigator.addContainer(chatRoomResultList, 1)
+
+                        Repeater {
+                            id: chatRoomSearchRepeater
+                            model: AllChatProvidersRoomSearchProxyModel {
+                                filterText: searchListModel.searchPhrase
+
+                                AllChatProvidersRoomProxyModel {}
+                            }
+                            delegate: SearchResultItem {
+                                id: chatRoomDelg
+                                width: control.colWidth
+                                mainText: chatRoomDelg.name
+                                secondaryText: chatRoomDelg.chatProvider?.displayName ?? qsTr("Chat")
+                                highlighted: keyNavigator.selectedItem === chatRoomDelg
+                                mainRowLeftInsetLoader.sourceComponent: IconLabel {
+                                    color: Theme.primaryTextColor
+                                    icon {
+                                        color: Theme.primaryTextColor
+                                        source: Icons.dialogMessages
+                                    }
+                                }
+
+                                required property string roomId
+                                required property string name
+                                required property IChatProvider chatProvider
+
+                                onManuallyHovered: () => {
+                                    keyNavigator.setExternallySelected(chatRoomDelg)
+                                }
+                                onTriggerPrimaryAction: () => {
+                                    ViewHelper.showChatRoom(chatRoomDelg.chatProvider, chatRoomDelg.roomId)
+                                    control.primaryActionTriggered()
+                                }
                             }
                         }
                     }
@@ -261,13 +402,14 @@ Popup {
                     SearchResultCategory {
                         id: historyResultList
                         headerText: qsTr('History')
-                        visible: historySearchRepeater.count > 0
+                        visible: (searchCategories.selectedCategories & SearchCategoryList.Category.History)
+                                 && historySearchRepeater.count > 0
                         anchors {
                             left: parent.left
                             right: parent.right
                         }
 
-                        Component.onCompleted: () => keyNavigator.addContainer(historyResultList, 1)
+                        Component.onCompleted: () => keyNavigator.addContainer(historyResultList, 2)
 
                         Repeater {
                             id: historySearchRepeater
@@ -379,7 +521,14 @@ Popup {
                     }
 
                     Repeater {
-                        model: ContactSourceInfoModel {}
+                        id: contactReapeater
+
+                        readonly property ContactSourceInfoModel contactSourceInfoModel: ContactSourceInfoModel {}
+
+                        model: (searchCategories.selectedCategories & SearchCategoryList.Category.Contacts)
+                               ? contactReapeater.contactSourceInfoModel
+                               : null
+
                         delegate: SearchResultCategory {
                             id: contactsSourceDelegate
                             visible: searchResultRepeater.count > 0
@@ -420,6 +569,7 @@ Popup {
                                     required property var numbers
                                     required property int numbersCount
                                     required property int numbersIndexOffset
+                                    required property var chatSources
 
                                     readonly property bool isDummyContact: contactDelg.name === ""
 
@@ -450,8 +600,9 @@ Popup {
                                             id: avatarImage
                                             initials: ViewHelper.initials(contactDelg.name)
                                             source: contactDelg.hasAvatar ? ("file://" + contactDelg.avatarPath) : ""
-                                            showBuddyStatus: contactDelg.subscriptableNumber !== ""
-                                            buddyStatus: contactDelg.buddyStatus
+                                            showPresenceStatus: contactDelg.subscriptableNumber !== ""
+                                            presenceStatus: contactDelg.buddyStatus
+                                            indicatorComponent: Component { BuddyStatusIndicator {} }
                                         }
                                     }
 
@@ -501,11 +652,47 @@ Popup {
                                                     isReady: contactDelg.buddyStatus === SIPBuddyState.READY
 
                                                     onCallClicked: () => {
-                                                        SIPCallManager.call("account0", numberDelg.number.url, "", identitySelector.currentValue);
+                                                        SIPCallManager.call("account0", numberDelg.number, "", identitySelector.currentValue);
                                                         control.primaryActionTriggered()
                                                     }
                                                     onNotifyWhenAvailableClicked: () => numberDelg.subscribeBuddyStatus()
                                                 }
+                                            }
+                                        }
+                                    }
+
+                                    Repeater {
+                                        id: chatSourceRepeater
+                                        model: contactDelg.chatSources
+                                        delegate: SearchResultNumberItem {
+                                            id: chatSourceDelg
+                                            highlighted: keyNavigator.selectedSubItem === chatSourceDelg
+                                            isChat: true
+                                            isSipStatusSubscriptable: false
+                                            isFavorite: false
+                                            type: Contact.NumberType.Mobile
+                                            contactId: chatSourceDelg.modelData.id
+                                            number: chatSourceDelg.modelData.providerDisplayName
+                                            anchors {
+                                                left: parent?.left
+                                                right: parent?.right
+                                            }
+
+                                            required property var modelData
+
+                                            onManuallyHovered: () => {
+                                                keyNavigator.setExternallySelected(contactDelg, chatSourceDelg)
+                                            }
+                                            onTriggerPrimaryAction: () => {
+                                                const chatRoomId = chatSourceDelg.modelData.provider.chatRoomIdForUser(chatSourceDelg.modelData.id)
+                                                if (chatRoomId) {
+                                                    console.log(`Request showing chat room ${chatRoomId} of ${chatSourceDelg.modelData.provider?.displayName}`)
+                                                    ViewHelper.showChatRoom(chatSourceDelg.modelData.provider, chatRoomId)
+                                                } else {
+                                                    ViewHelper.showCreateRoomDialog(chatSourceDelg.modelData.provider, [ chatSourceDelg.modelData.id ])
+                                                }
+
+                                                control.primaryActionTriggered()
                                             }
                                         }
                                     }

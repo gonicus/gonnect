@@ -27,12 +27,13 @@ public:
     explicit AkonadiEventFeeder(QObject *parent = nullptr, const QString &source = "",
                                 const QDateTime &currentTime = QDateTime(),
                                 const QDateTime &timeRangeStart = QDateTime(),
-                                const QDateTime &timeRangeEnd = QDateTime());
+                                const QDateTime &timeRangeEnd = QDateTime(),
+                                const int retryCount = 0, const int retryInterval = 0);
 
     ~AkonadiEventFeeder();
 
-    virtual void init() override;
-    virtual QUrl networkCheckURL() const override { return QUrl(); };
+    void init() override;
+    QUrl networkCheckURL() const override { return QUrl(); };
 
     void process();
 

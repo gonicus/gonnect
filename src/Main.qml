@@ -17,6 +17,8 @@ Item {
     }
 
     Component.onCompleted: () => {
+        qsTr("QT_LAYOUT_DIRECTION", "QGuiApplication");
+
         DialogFactory.rootItem = baseItem
 
         if (settings.showMainWindowOnStart) {
@@ -25,9 +27,9 @@ Item {
 
         if (!ViewHelper.isSystrayAvailable() && settings.showTrayDialog) {
             const item = DialogFactory.createInfoDialog({
-                title: qsTr("No system tray available"),
-                                                        text: qsTr("GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.")
-            })
+                                                            title: qsTr("No system tray available"),
+                                                            text: qsTr("GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.")
+                                                        })
             item.accepted.connect(() => settings.showTrayDialog = false)
         }
 
@@ -45,14 +47,15 @@ Item {
 
         property EmergencyCallIncomingWindow emergencyWindow: null
         property var passwordDialogs: ({})
+        property var oauthLoginDialogs: ({})
 
         function onActivateSearch() {
             gonnectWindow.ensureVisible()
             gonnectWindow.focusSearchBox()
         }
         function onShowSettings() {
-            gonnectWindow.updateTabSelection(gonnectWindow.settingsPageId,
-                                             GonnectWindow.PageType.Settings)
+            gonnectWindow.showPage(SelectionState.settingsPageId(),
+                                             MainPageSelection.PageType.Settings)
             gonnectWindow.ensureVisible()
         }
         function onShowShortcuts() { shortcutsWindowComponent.createObject(baseItem).show() }
@@ -74,11 +77,11 @@ Item {
             }
         }
 
-        function onOpenMeetingRequested(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
+        function onOpenMeetingRequested(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
             gonnectWindow.ensureVisible()
 
             Qt.callLater(() => {
-                gonnectWindow.openMeeting(meetingId, displayName, startFlags, callHistoryItem)
+                gonnectWindow.openMeeting(meetingId, displayName, startFlags, callHistoryItem, contact)
             })
         }
 
@@ -93,6 +96,32 @@ Item {
                 dialog.Component.destruction.connect(() => delete viewHelperConnections.passwordDialogs[id])
             } else {
                 existingDialogs[id].show()
+                existingDialogs[id].raise()
+            }
+        }
+
+        function onOauthLoginRequested(id : string, reason : string) {
+            const existingDialogs = viewHelperConnections.oauthLoginDialogs
+
+            if (!existingDialogs[id]) {
+                const dialog = DialogFactory.createDialog("OauthLoginDialog.qml", { text: reason })
+                dialog.onStartOauthLogin.connect(() => ViewHelper.respondStartOauthLogin(id))
+                dialog.onCloseDialog.connect(() => ViewHelper.respondOauthLoginClosed(id))
+
+                viewHelperConnections.oauthLoginDialogs[id] = dialog
+                dialog.Component.destruction.connect(() => delete viewHelperConnections.oauthLoginDialogs[id])
+            } else {
+                existingDialogs[id].show()
+                existingDialogs[id].raise()
+            }
+        }
+
+        function onOauthLoginStatus(id : string, status : string, canRetry : bool) {
+            const dialog = viewHelperConnections.oauthLoginDialogs[id]
+            if (dialog) {
+                dialog.setStatus(status, canRetry)
+                dialog.show()
+                dialog.raise()
             }
         }
 
@@ -126,10 +155,18 @@ Item {
     }
 
     Connections {
+        id: sipAccountManagerConnections
         target: SIPAccountManager
+        ignoreUnknownSignals: true
         function onAuthorizationFailed(accountId : string) {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for the SIP account:") })
             dialog.onPasswordAccepted.connect(pw => SIPAccountManager.setAccountCredentials(accountId, pw))
+        }
+        function onConnectionError(code : int, message : string) {
+            DialogFactory.createInfoDialog({
+                title: qsTr("SIP Registration failed"),
+                text: qsTr("SIP registration failed with status %1: %2").arg(code).arg(message)
+            })
         }
     }
 
@@ -192,13 +229,13 @@ Item {
         function onError(msg : string) {
             DialogFactory.createInfoDialog({
                 title: qsTr("Error"),
-                                           text: msg
+                text: msg
             })
         }
         function onFatalError(msg : string) {
             const item = DialogFactory.createInfoDialog({
                 title: qsTr("Fatal Error"),
-                                                        text: msg
+                text: msg
             })
             item.accepted.connect(() => Qt.quit())
         }

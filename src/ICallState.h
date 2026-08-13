@@ -24,7 +24,8 @@ public:
         OnHold = 1 << 5,
         SharingScreen = 1 << 6,
         Migrating = 1 << 7,
-        KnockingIncoming = 1 << 8
+        KnockingIncoming = 1 << 8,
+        InProgress = 1 << 9,
     };
     Q_ENUM(State)
     Q_DECLARE_FLAGS(States, State)

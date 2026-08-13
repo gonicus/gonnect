@@ -41,7 +41,7 @@ private:
     void RetrieveSecret(PortalResponse callback);
 
     QByteArray m_instanceSecret;
-    QByteArray m_iva;
+    QByteArray m_iv;
 
     int m_fds[2];
 

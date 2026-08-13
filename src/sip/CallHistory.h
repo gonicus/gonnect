@@ -23,7 +23,7 @@ public:
     CallHistoryItem *addHistoryItem(CallHistoryItem *item);
     CallHistoryItem *addHistoryItem(CallHistoryItem::Types type, const QString &account,
                                     const QString &remoteUrl, const QString &contactId = "",
-                                    bool isSipSubscriptable = false);
+                                    bool isSipSubscriptable = false, const QStringList &hops = {});
     QList<CallHistoryItem *> historyItems() const { return m_historyItems; };
     qsizetype indexOfItem(const CallHistoryItem *item) const;
 
@@ -38,6 +38,7 @@ private:
     explicit CallHistory(QObject *parent = nullptr);
     qsizetype insertItemAtCorrectPosition(CallHistoryItem *item);
     void ensureDatabaseVersion();
+    void removeOldHistory();
 
     QList<CallHistoryItem *> m_historyItems;
     QString m_databasePath;

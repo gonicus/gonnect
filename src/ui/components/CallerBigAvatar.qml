@@ -15,20 +15,30 @@ Item {
 
     property bool isIncoming
     property bool isEstablished
+    property bool isInProgress
     property bool isIncomingAudioLevel
+
+    Accessible.role: Accessible.Heading
+    Accessible.name: qsTr("Caller name")
+    Accessible.description: control.isIncoming ? (control.name + isCallingLabel.text) : (callingLabel + control.name)
 
     Rectangle {
         id: volumeMeterBg
-        anchors.centerIn: avatarImage
         width: 1.15 * avatarImage.size
         height: volumeMeterBg.width
         radius: volumeMeterBg.width / 2
         color: Theme.backgroundOffsetHoveredColor
         opacity: control.isIncomingAudioLevel ? 1.0  : 0.0
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: avatarImage.verticalCenter
+        }
 
         Behavior on opacity {
             NumberAnimation { duration: 300 }
         }
+
+        Accessible.ignored: true
     }
 
     AvatarImage {
@@ -46,11 +56,14 @@ Item {
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: avatarImage.bottom
-            topMargin: 50
+            topMargin: 25
         }
+
+        Accessible.ignored: true
     }
 
     Label {
+        id: isCallingLabel
         font.pixelSize: 22
         text: qsTr("is calling...")
         color: Theme.secondaryTextColor
@@ -58,20 +71,24 @@ Item {
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: otherName.bottom
-            topMargin: 30
+            topMargin: 15
         }
+
+        Accessible.ignored: true
     }
 
     Label {
         id: callingLabel
         font.pixelSize: 22
-        text: qsTr("Calling...")
+        text: control.isInProgress ? qsTr("In progress...") :  qsTr("Calling...")
         color: Theme.secondaryTextColor
         visible: !control.isIncoming && !control.isEstablished
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: otherName.bottom
-            topMargin: 30
+            topMargin: 15
         }
+
+        Accessible.ignored: true
     }
 }

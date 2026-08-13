@@ -6,7 +6,6 @@
 
 struct CalDAVEventFeederConfig
 {
-    QString settingsGroupId;
     QString source;
     QString host;
     QString path;
@@ -17,4 +16,6 @@ struct CalDAVEventFeederConfig
     QDateTime currentTime;
     QDateTime timeRangeStart;
     QDateTime timeRangeEnd;
+    int retryCount;
+    int retryInterval;
 };

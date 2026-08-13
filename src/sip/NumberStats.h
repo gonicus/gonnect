@@ -6,6 +6,7 @@
 #include <qqmlintegration.h>
 
 struct NumberStat;
+struct PhoneNumberCallCount;
 
 class NumberStats : public QObject
 {
@@ -15,7 +16,7 @@ class NumberStats : public QObject
     QML_UNCREATABLE("")
 
 public:
-    enum class ContactType { PhoneNumber, JitsiMeetUrl };
+    enum class ContactType { PhoneNumber, JitsiMeetUrl, ChatRoomId };
     Q_ENUM(ContactType)
 
     virtual ~NumberStats();
@@ -36,20 +37,16 @@ public:
 
     QStringList mostCalled(quint8 limit, bool includeFavorites = true) const;
 
-    bool isFavorite(const QString &phoneNumber) const
-    {
-        return m_favoriteLookup.contains(phoneNumber);
-    }
+    bool isFavorite(const QString &phoneNumber) const;
     void toggleFavorite(const QString &phoneNumber, const NumberStats::ContactType contactType);
 
-    const NumberStat *numberStat(const QString &phoneNumber) const
-    {
-        return m_statItemsLookup.value(phoneNumber, nullptr);
-    }
+    const NumberStat *numberStat(const QString &phoneNumber) const;
 
 private:
     explicit NumberStats(QObject *parent = nullptr);
     void initialRead();
+    void readNumberOfCalls();
+    void migratePhoneNumberFormatting();
 
     /**
      * @brief ensureFlaggedNumberExists creates a new entry in flagged table in database, if it does
@@ -62,10 +59,15 @@ private:
             const QString &phoneNumber,
             const NumberStats::ContactType contactType = NumberStats::ContactType::PhoneNumber);
 
+    PhoneNumberCallCount *createAndAddCountObject(const QString &phoneNumber, quint32 count);
+
     QHash<QString, NumberStat *> m_statItemsLookup;
     QHash<QString, NumberStat *> m_favoriteLookup;
     QList<NumberStat *> m_statItems;
+    QList<PhoneNumberCallCount *> m_callCounts;
+    QHash<QString, PhoneNumberCallCount *> m_callCountLookup;
     QTimer m_debounceAddressBookUpdateTimer;
+    bool m_isMigrationDone = false;
 
 Q_SIGNALS:
     void countChanged(qsizetype index);

@@ -10,7 +10,12 @@
 #include "SIPMediaConfig.h"
 #include "SIPUserAgentConfig.h"
 #include "SIPAccountManager.h"
+#include "NetworkHelper.h"
 #include "AudioManager.h"
+
+#include <pjsua-lib/pjsua.h>
+#include <pjsip/sip_endpoint.h>
+#include <pjlib-util/resolver.h>
 #include "VideoManager.h"
 #include "TogglerManager.h"
 
@@ -53,6 +58,16 @@ void SIPManager::initialize()
     qCDebug(lcSIPManager) << "initializing";
     pj_log_set_level(0);
 
+    ReadOnlyConfdSettings globalSettings;
+    if (globalSettings.value("sip/compactHeader", false).toBool()) {
+        qCDebug(lcSIPManager) << "enabling compact headers";
+        pjsip_cfg()->endpt.use_compact_form = PJ_TRUE;
+    }
+    if (globalSettings.value("sip/noTcpSwitch", false).toBool()) {
+        qCDebug(lcSIPManager) << "disabling TCP switch";
+        pjsip_cfg()->endpt.disable_tcp_switch = PJ_TRUE;
+    }
+
     try {
         m_ep.libCreate();
     } catch (pj::Error &err) {
@@ -62,11 +77,12 @@ void SIPManager::initialize()
     // Initial configuration
     pj::EpConfig epConfig;
 
-    auto app = qobject_cast<Application *>(Application::instance());
+    auto app = static_cast<Application *>(Application::instance());
     if (app->isDebugRun()) {
         epConfig.logConfig.level = 6;
     } else {
-        epConfig.logConfig.level = m_settings->value("logging/level", 1).toUInt();
+        ReadOnlyConfdSettings settings;
+        epConfig.logConfig.level = settings.value("logging/level", 1).toUInt();
     }
 
     if (epConfig.logConfig.level >= 4) {
@@ -79,6 +95,8 @@ void SIPManager::initialize()
                                                         "*.critical=true"));
     }
 
+    epConfig.uaConfig.mwiUnsolicitedEnabled = true;
+
     m_mediaConfig = new SIPMediaConfig(this);
     m_mediaConfig->applyConfig(epConfig);
 
@@ -86,10 +104,10 @@ void SIPManager::initialize()
     m_uaConfig->applyConfig(epConfig);
 
     // Setup log writer
-    m_logWriter = new SIPLogWriter();
+    m_logWriter = std::make_unique<SIPLogWriter>();
 
     pj::LogConfig *log_cfg = &epConfig.logConfig;
-    log_cfg->writer = m_logWriter;
+    log_cfg->writer = m_logWriter.get();
     log_cfg->decor = log_cfg->decor
             & ~(::pj_log_decoration::PJ_LOG_HAS_CR | ::pj_log_decoration::PJ_LOG_HAS_NEWLINE
                 | ::pj_log_decoration::PJ_LOG_HAS_TIME | ::pj_log_decoration::PJ_LOG_HAS_MICRO_SEC);
@@ -100,7 +118,16 @@ void SIPManager::initialize()
         qCFatal(lcSIPManager) << "failed to initialize SIP library: " << err.info();
     }
 
-    m_ep.libStart();
+    // Set codec preference
+    setPreferredCodecs();
+
+    try {
+        m_ep.libStart();
+    } catch (pj::Error &err) {
+        qCFatal(lcSIPManager) << "failed to start SIP library: " << err.info();
+    }
+
+    configureDnsResolver();
 
     // Load Accounts + Transports
     auto &sam = SIPAccountManager::instance();
@@ -127,6 +154,96 @@ void SIPManager::initialize()
 
     if (!isConfigured()) {
         Q_EMIT notConfigured();
+    }
+
+    // Install network recovery timer
+    m_networkRecoveryTimer.setSingleShot(true);
+    m_networkRecoveryTimer.setInterval(1s);
+    connect(&m_networkRecoveryTimer, &QTimer::timeout, this, &SIPManager::recoverFromNetworkChange);
+
+    // Configure registration recovery watchdog
+    m_registrationCheckTimer.setSingleShot(true);
+    connect(&m_registrationCheckTimer, &QTimer::timeout, this, &SIPManager::checkRecovery);
+
+    m_initialized = true;
+}
+
+void SIPManager::setPreferredCodecs()
+{
+    const QList<int> codecPriorities = { PJMEDIA_CODEC_PRIO_HIGHEST, PJMEDIA_CODEC_PRIO_NEXT_HIGHER,
+                                         PJMEDIA_CODEC_PRIO_NORMAL, PJMEDIA_CODEC_PRIO_LOWEST };
+
+    ReadOnlyConfdSettings globalSettings;
+    const QList<QString> preferredCodecs =
+            globalSettings.value("sip/preferredCodecs", "").toStringList();
+    if (preferredCodecs.empty()) {
+        return;
+    }
+
+    // Check if there's valid codecs in our preference list
+    QStringList registeredCodecs;
+    try {
+        const auto &codecs = m_ep.codecEnum2();
+        for (const auto &c : std::as_const(codecs)) {
+            registeredCodecs << QString::fromStdString(c.codecId);
+        }
+    } catch (const pj::Error &err) {
+        qCWarning(lcSIPManager)
+                << "failed to enumerate codecs - skipping preferred codec selection:"
+                << QString::fromStdString(err.info());
+        return;
+    }
+
+    QList<std::pair<QString, int>> resolvedCodecs;
+    for (int i = 0; i < preferredCodecs.count(); i++) {
+        const QString &preferredCodec = preferredCodecs.at(i);
+        const int priority = codecPriorities.at(qMin(i, codecPriorities.count() - 1));
+        const QString prefix = preferredCodec + "/";
+
+        if (preferredCodec.isEmpty()) {
+            continue;
+        }
+
+        bool matched = false;
+        for (const QString &registered : std::as_const(registeredCodecs)) {
+            if (registered.compare(preferredCodec, Qt::CaseInsensitive) == 0
+                || registered.startsWith(prefix, Qt::CaseInsensitive)) {
+                resolvedCodecs.append({ registered, priority });
+                matched = true;
+            }
+        }
+
+        if (!matched) {
+            qCWarning(lcSIPManager) << "ignoring unknown preferred codec" << preferredCodec
+                                    << "- not among registered codecs" << registeredCodecs;
+        }
+    }
+
+    if (resolvedCodecs.empty()) {
+        qCWarning(lcSIPManager)
+                << "no valid preferred codec found - skipping preferred codec selection";
+        return;
+    }
+
+    // Disable all codecs
+    for (const QString &registered : std::as_const(registeredCodecs)) {
+        try {
+            m_ep.codecSetPriority(registered.toStdString(), PJMEDIA_CODEC_PRIO_DISABLED);
+        } catch (const pj::Error &err) {
+            qCWarning(lcSIPManager) << "failed to disable codec" << registered << ":"
+                                    << QString::fromStdString(err.info());
+        }
+    }
+
+    // Only enable/use config codecs
+    for (const auto &[codecId, priority] : std::as_const(resolvedCodecs)) {
+        try {
+            m_ep.codecSetPriority(codecId.toStdString(), priority);
+            qCDebug(lcSIPManager) << "using codec" << codecId << ", with priority" << priority;
+        } catch (const pj::Error &err) {
+            qCWarning(lcSIPManager) << "failed to enable codec" << codecId << ":"
+                                    << QString::fromStdString(err.info());
+        }
     }
 }
 
@@ -270,7 +387,7 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
     QString uri = account->toSipUri(var);
 
     for (SIPBuddy *buddy : std::as_const(buddies)) {
-        if (buddy->uri() == uri) {
+        if (buddy->uri().compare(uri, Qt::CaseInsensitive) == 0) {
             return buddy;
         }
     }
@@ -279,11 +396,281 @@ SIPBuddy *SIPManager::getBuddy(const QString &var)
     return nullptr;
 }
 
+QString SIPManager::toSipUri(const QString &var) const
+{
+    const auto accounts = SIPAccountManager::instance().accounts();
+    if (!accounts.count()) {
+        qCDebug(lcSIPManager) << "could not retrieve accounts";
+        return "";
+    }
+
+    // There is only one account as of now
+    const SIPAccount *account = accounts.first();
+    return account->toSipUri(var);
+}
+
+void SIPManager::suspend()
+{
+    qCDebug(lcSIPManager) << "suspending SIP";
+    m_suspended = true;
+
+    pj::CallOpParam prm;
+    prm.statusCode = PJSIP_SC_SERVICE_UNAVAILABLE;
+
+    // Hang up all calls
+    auto calls = SIPCallManager::instance().calls();
+    for (auto call : std::as_const(calls)) {
+        call->hangup(prm);
+    }
+
+    // Unregister account(s)
+    auto accounts = SIPAccountManager::instance().accounts();
+    for (auto account : std::as_const(accounts)) {
+        account->deactivateTransports();
+    }
+
+    // Shutdown transports
+    pj::IpChangeParam param;
+    param.shutdownTransport = true;
+    param.restartListener = false;
+    try {
+        pj::Endpoint::instance().handleIpChange(param);
+    } catch (pj::Error &err) {
+        qCCritical(lcSIPManager) << "error handling IP change:"
+                                 << QString::fromLocal8Bit(err.info(false));
+    }
+}
+
+void SIPManager::resume()
+{
+    if (!m_suspended) {
+        return;
+    }
+
+    m_suspended = false;
+
+    // Since resume may be called in more network changed cases, only
+    // do this when we have no active calls going.
+    if (!SIPCallManager::instance().hasActiveCalls()) {
+        qCDebug(lcSIPManager) << "resuming SIP";
+
+        // Activate transports again
+        auto accounts = SIPAccountManager::instance().accounts();
+        for (auto account : std::as_const(accounts)) {
+            account->setAfterResume();
+            account->setRegistration(false);
+            account->activateTransports();
+        }
+
+        try {
+            pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
+        } catch (pj::Error &err) {
+            qCCritical(lcSIPManager)
+                    << "error handling IP change:" << QString::fromLocal8Bit(err.info(false));
+        }
+
+        // Re-activate account registration
+        for (auto account : std::as_const(accounts)) {
+            account->setRegistration(true);
+        }
+    }
+}
+
+void SIPManager::handleNetworkChanged()
+{
+    if (!m_initialized) {
+        return;
+    }
+
+    if (m_suspended) {
+        resume();
+        return;
+    }
+
+    const auto currentAddresses = NetworkHelper::instance().localAddresses();
+
+    // Capture initial network state
+    if (m_lastLocalAddresses.isEmpty()) {
+        m_lastLocalAddresses = currentAddresses;
+        return;
+    }
+
+    if (currentAddresses == m_lastLocalAddresses) {
+        return;
+    }
+
+    qCDebug(lcSIPManager) << "network changed - scheduling SIP recovery";
+    m_lastLocalAddresses = currentAddresses;
+    m_networkRecoveryAttempts = 0;
+    m_registrationCheckTimer.stop();
+    m_networkRecoveryTimer.start(1s);
+}
+
+void SIPManager::recoverFromNetworkChange()
+{
+    if (!m_initialized || m_suspended) {
+        return;
+    }
+
+    m_registrationCheckTimer.stop();
+
+    qCDebug(lcSIPManager) << "network settled - recovering SIP (attempt"
+                          << (m_networkRecoveryAttempts + 1) << "of" << s_maxNetworkRecoveryAttempts
+                          << ")";
+
+    auto accounts = SIPAccountManager::instance().accounts();
+
+    m_recoveryCounts.clear();
+
+    for (auto account : std::as_const(accounts)) {
+        m_recoveryCounts.insert(account->id(), account->registrationCount());
+        account->setAfterResume();
+    }
+
+    resetDnsResolver();
+
+    try {
+        pj::Endpoint::instance().handleIpChange(pj::IpChangeParam());
+    } catch (pj::Error &err) {
+        if (++m_networkRecoveryAttempts < s_maxNetworkRecoveryAttempts) {
+            const auto delay = std::min(seconds(1 << m_networkRecoveryAttempts), 8s);
+            qCWarning(lcSIPManager).nospace()
+                    << "IP change handling failed, retrying in " << delay.count()
+                    << "s: " << QString::fromLocal8Bit(err.info(false));
+            m_networkRecoveryTimer.start(delay);
+        } else {
+            qCCritical(lcSIPManager) << "giving up SIP recovery after" << m_networkRecoveryAttempts
+                                     << "attempts:" << QString::fromLocal8Bit(err.info(false));
+        }
+        return;
+    }
+
+    // Check if registration worked - if DNS worked, but the route to the SIP
+    // server was not yet established, we're running into a case where pijsip
+    // never tries to register again.
+    m_registrationCheckTimer.start(20s);
+}
+
+void SIPManager::checkRecovery()
+{
+    if (!m_initialized || m_suspended) {
+        return;
+    }
+
+    const auto accounts = SIPAccountManager::instance().accounts();
+
+    if (accounts.isEmpty()) {
+        m_networkRecoveryAttempts = 0;
+        m_recoveryCounts.clear();
+        return;
+    }
+
+    bool allRegistered = true;
+    for (auto account : std::as_const(accounts)) {
+        const auto previousCount = m_recoveryCounts.value(account->id(), 0);
+
+        if (!account->isRegistered() || account->registrationCount() <= previousCount) {
+            allRegistered = false;
+            break;
+        }
+    }
+
+    if (allRegistered) {
+        qCDebug(lcSIPManager) << "SIP recovered successfully";
+        m_networkRecoveryAttempts = 0;
+        m_recoveryCounts.clear();
+        return;
+    }
+
+    if (++m_networkRecoveryAttempts < s_maxNetworkRecoveryAttempts) {
+        const auto delay = std::min(seconds(1 << m_networkRecoveryAttempts), 8s);
+        qCWarning(lcSIPManager).nospace()
+                << "SIP recovery did not register - retrying in " << delay.count() << "seconds";
+        m_networkRecoveryTimer.start(delay);
+    } else {
+        qCCritical(lcSIPManager) << "giving up SIP recovery after" << m_networkRecoveryAttempts
+                                 << "attempts";
+    }
+}
+
+void SIPManager::configureDnsResolver()
+{
+    // Disable pjsip's DNS response cache - the OS already has a cache
+    pjsip_endpoint *endpt = pjsua_get_pjsip_endpt();
+    if (!endpt) {
+        return;
+    }
+    pj_dns_resolver *resolver = pjsip_endpt_get_resolver(endpt);
+    if (!resolver) {
+        return;
+    }
+
+    pj_dns_settings settings;
+    pj_dns_resolver_get_settings(resolver, &settings);
+    settings.cache_max_ttl = 0;
+    const pj_status_t status = pj_dns_resolver_set_settings(resolver, &settings);
+    if (status != PJ_SUCCESS) {
+        char errbuf[PJ_ERR_MSG_SIZE];
+        pj_strerror(status, errbuf, sizeof(errbuf));
+        qCWarning(lcSIPManager) << "failed to disable DNS resolver cache:" << errbuf;
+    }
+}
+
+void SIPManager::resetDnsResolver()
+{
+    pjsip_endpoint *endpt = pjsua_get_pjsip_endpt();
+    if (!endpt) {
+        return;
+    }
+
+    pj_dns_resolver *resolver = pjsip_endpt_get_resolver(endpt);
+    if (!resolver) {
+        // No DNS resolver configured
+        return;
+    }
+
+    ReadOnlyConfdSettings settings;
+    const QStringList nameservers =
+            settings.value("ua/nameservers", NetworkHelper::instance().nameservers())
+                    .toStringList();
+
+    std::vector<std::string> storage;
+    storage.reserve(nameservers.size());
+    for (const auto &ns : nameservers) {
+        if (!ns.isEmpty()) {
+            storage.push_back(ns.toStdString());
+        }
+    }
+
+    if (storage.empty()) {
+        return;
+    }
+
+    std::vector<pj_str_t> servers;
+    servers.reserve(storage.size());
+    for (auto &s : storage) {
+        servers.push_back(pj_str(const_cast<char *>(s.c_str())));
+    }
+
+    const pj_status_t status = pj_dns_resolver_set_ns(
+            resolver, static_cast<unsigned>(servers.size()), servers.data(), nullptr);
+    if (status != PJ_SUCCESS) {
+        char errbuf[PJ_ERR_MSG_SIZE];
+        pj_strerror(status, errbuf, sizeof(errbuf));
+        qCWarning(lcSIPManager) << "failed to reset DNS resolver nameservers:" << errbuf;
+    }
+}
+
 void SIPManager::shutdown()
 {
     qCDebug(lcSIPManager) << "shutting down";
 
     m_ep.hangupAllCalls();
+
+    // Release ownership of the log writer to pjsua2, which will delete it
+    // during libDestroy(). Without this, libDestroy() logs internally and
+    // calls into the already-deleted writer, or double-deletes it.
+    m_logWriter.release();
 
     try {
         delete m_ev;

@@ -22,7 +22,7 @@ public:
     bool isFirstInstance() const;
     void sendArguments() const;
 
-    void setRootWindow(QQuickWindow *win) { m_rootWindow = win; }
+    void setRootWindow(QQuickWindow *win);
     QQuickWindow *rootWindow() const { return m_rootWindow; }
 
     // Unix signal handlers
@@ -43,6 +43,7 @@ public Q_SLOTS:
     void handleSigTerm();
 #endif
 
+    void initialize();
     void shutdown();
 
 private:
@@ -50,7 +51,6 @@ private:
                               const QString &rawMsg);
 
     void initLogging();
-    void initialize();
     void initializeSIP();
     void installTranslations();
 

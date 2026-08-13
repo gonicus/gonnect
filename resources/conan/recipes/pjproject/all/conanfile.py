@@ -31,6 +31,8 @@ class PjSIPConan(ConanFile):
         "fPIC": [True, False],
         "with_uuid": [True, False],
         "with_opus": [True, False],
+        "with_amr": [True, False],
+        "with_webrtc_aec3": [True, False],
         "with_samplerate": [True, False],
         "with_ext_sound": [True, False],
         "with_video": [True, False],
@@ -42,6 +44,8 @@ class PjSIPConan(ConanFile):
         "fPIC": True,
         "with_uuid": True,
         "with_opus": True,
+        "with_amr": True,
+        "with_webrtc_aec3": True,
         "with_samplerate": False,
         "with_ext_sound": True,
         "with_video": False,
@@ -60,7 +64,11 @@ class PjSIPConan(ConanFile):
         if self.options.with_samplerate:
             self.requires("libsamplerate/0.2.2")
         if self.options.with_opus:
-            self.requires("opus/1.5.2")
+            self.requires("opus/1.6.1")
+        if self.options.with_amr:
+            self.requires("opencore-amr/0.1.6")
+            if self.settings.os != "Windows":
+                self.requires("vo-amrwbenc/0.1.3")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,12 +108,20 @@ class PjSIPConan(ConanFile):
 #            tc.configure_args.append("--enable-shared")
         if not self.options.with_uuid:
             tc.configure_args.append("--disable-uuid")
+        if not self.options.with_amr:
+            tc.configure_args.append("--disable-opencore-amr")
+        else:
+            tc.configure_args.append("--with-opencore-amr=%s" % self.dependencies["opencore-amr"].package_folder)
+            if self.settings.os != "Windows":
+                tc.configure_args.append("--with-opencore-amrwbenc=%s" % self.dependencies["vo-amrwbenc"].package_folder)
         if not self.options.with_opus:
             tc.configure_args.append("--disable-opus")
         else:
             tc.configure_args.append("--with-opus=%s" % self.dependencies["opus"].package_folder)
         if self.options.with_samplerate:
             tc.configure_args.append("--enable-libsamplerate")
+        if self.options.with_webrtc_aec3:
+            tc.configure_args.append("--enable-libwebrtc-aec3")
         if not self.options.with_video:
             tc.configure_args.append("--disable-video")
         if not self.options.with_floatingpoint:
@@ -113,8 +129,6 @@ class PjSIPConan(ConanFile):
         if self.options.with_ext_sound:
             tc.configure_args.append("--enable-ext-sound")
         if self.settings.os == "Macos":
-            tc.extra_cflags.append("-DPJ_HAS_SSL_SOCK=1")
-            tc.extra_cflags.append("-DPJ_SSL_SOCK_IMP=PJ_SSL_SOCK_IMP_APPLE")
             tc.extra_ldflags.append("-Wl,-framework,Security")
             tc.extra_ldflags.append("-Wl,-framework,Network")
         else:
@@ -124,7 +138,6 @@ class PjSIPConan(ConanFile):
             tc.configure_args.append("bash_cv_wcwidth_broken=yes")
 
         tc.configure_args.append("--disable-install-examples")
-        tc.extra_cflags.append("-DPJ_HAS_IPV6=1")
 
         tc.generate()
 
@@ -139,17 +152,30 @@ class PjSIPConan(ConanFile):
                         search,
                         search + '\r\n<Import Project="../../conan/conan_openssl.props"/>')
 
+    def makeSiteConfig(self):
+        shutil.copy(os.path.join(self.build_folder, 'pjlib/include/pj/config_site_sample.h'),
+                    os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'))
+        with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
+            file.write('\n\n#define PJ_HAS_IPV6 1\n')
+            file.write('\n\n#define PJMEDIA_HAS_RTCP_XR 1\n')
+            file.write('\n\n#define PJMEDIA_HAS_DTMF_FLASH 0\n')
+            file.write('\n\n#define PJSIP_MAX_PKT_LEN 8192\n')
+            file.write('\n\n#define PJMEDIA_RTP_PT_TELEPHONE_EVENTS 101\n')
+            file.write('\n\n#define PJSIP_TCP_KEEP_ALIVE_INTERVAL 30\n')
+
+            if self.settings.os == "Macos":
+                file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
+                file.write('\n\n#define PJ_SSL_SOCK_IMP PJ_SSL_SOCK_IMP_APPLE\n')
+
+            if self.settings.os == "Windows":
+                file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
+                file.write('\n\n#define PJMEDIA_AUDIO_DEV_HAS_WMME 0\n')
 
     def buildWindows(self):
         if self.options.shared:
             raise ConanInvalidConfiguration("Shared libraries not supported for Windows")
 
         self.injectConanPropsFile()
-
-        shutil.copy(os.path.join(self.build_folder, 'pjlib/include/pj/config_site_sample.h'),
-                    os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'))
-        with open(os.path.join(self.build_folder, 'pjlib/include/pj/config_site.h'), 'a') as file:
-            file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
 
         path = os.path.join(self.build_folder, "pjproject-vs14.sln")
 
@@ -175,6 +201,8 @@ class PjSIPConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         shutil.copytree(self.source_folder, self.build_folder, dirs_exist_ok=True)
+
+        self.makeSiteConfig()
 
         if self.settings.os == "Windows":
             self.buildWindows()
@@ -210,15 +238,15 @@ class PjSIPConan(ConanFile):
 
         else:
             if self.options.get_safe("endianness") == "big":
-                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=1', '-DPJ_IS_LITTLE_ENDIAN=0', '-DPJMEDIA_HAS_RTCP_XR=1']
             else:
-                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1', '-DPJMEDIA_STREAM_ENABLE_XR=1']
+                self.cpp_info.cxxflags = ['-DPJ_AUTOCONF=1', '-DPJ_IS_BIG_ENDIAN=0', '-DPJ_IS_LITTLE_ENDIAN=1', '-DPJMEDIA_HAS_RTCP_XR=1']
 
             libs = []
             installed_libs = collect_libs(self)
             installed_libs.sort(key=len)
 
-            lib_basenames = ["pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "ilbccodec", "srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "pjnath", "pjlib-util", "pj"]
+            lib_basenames = ["pjsua2", "pjsua", "pjsip-ua", "pjsip-simple", "pjsip", "pjmedia-codec", "pjmedia-videodev", "pjmedia-audiodev", "pjmedia", "ilbccodec", "srtp", "resample", "gsmcodec", "speex", "bccodec", "g7221codec", "webrtc", "webrtc-aec3", "pjnath", "pjlib-util", "pj"]
 
             for basename in lib_basenames:
                 for installed in installed_libs:

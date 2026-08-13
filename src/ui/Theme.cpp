@@ -4,7 +4,6 @@
 
 #include <QLoggingCategory>
 #include <QRegularExpression>
-#include <private/qzipreader_p.h>
 
 Q_LOGGING_CATEGORY(lcTheme, "gonnect.app.theme")
 
@@ -112,6 +111,10 @@ void Theme::updateColorPalette()
     m_borderHeaderIconHovered = QColor(206, 201, 196);
     m_highlightColor = QColor(30, 57, 143, 76);
     m_paneColor = QColor(246, 245, 244);
+    m_rttBubbleSelf = QColor(45, 92, 229);
+    m_rttTextSelf = QColor(233, 233, 233);
+    m_rttBubbleOther = QColor(233, 233, 233);
+    m_rttTextOther = QColor(0, 0, 0);
     m_highContrastColor = QColor(0, 0, 0);
     m_backgroundColor = QColor(255, 255, 255);
     m_backgroundSecondaryColor = QColor(250, 250, 250);
@@ -124,8 +127,11 @@ void Theme::updateColorPalette()
     m_backgroundInitials = QColor(214, 212, 233);
     m_shadowColor = QColor(0, 0, 0, 32);
     m_redColor = QColor(224, 27, 36);
+    m_yellowColor = QColor(217, 176, 114);
+    m_emergencyColor = QColor(0, 136, 85);
     m_greenColor = QColor(36, 181, 27);
     m_darkGreenColor = QColor(128, 128, 0);
+    m_activeIndicatorColor = QColor(255, 102, 0);
 
     // Dark mode overrides
     if (m_isDarkMode) {
@@ -146,6 +152,10 @@ void Theme::updateColorPalette()
         m_accentColor = QColor(255, 255, 255, 120);
         m_highlightColor = QColor(15, 83, 158, 36);
         m_paneColor = QColor(45, 45, 45);
+        m_rttBubbleSelf = QColor(50, 96, 230);
+        m_rttTextSelf = QColor(255, 255, 255);
+        m_rttBubbleOther = QColor(44, 44, 46);
+        m_rttTextOther = QColor(255, 255, 255);
     }
 
     Q_EMIT colorPaletteChanged();
@@ -157,13 +167,4 @@ void Theme::setDarkMode(bool value)
         m_isDarkMode = value;
         Q_EMIT isDarkModeChanged();
     }
-}
-
-QString Theme::toCamelCase(const QString &str) const
-{
-    QStringList parts = str.split(QChar('_'));
-    for (int i = 1; i < parts.size(); ++i) {
-        parts[i].replace(0, 1, parts[i][0].toUpper());
-    }
-    return parts.join("");
 }

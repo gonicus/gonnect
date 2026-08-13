@@ -42,12 +42,16 @@ public:
 
     ContactInfo contactInfoBySipUrl(const QString &sipUrl);
 
+    static QString canonicalNumber(const QString &number);
     static QString cleanPhoneNumber(const QString &number);
+    static QString normalizeNumber(const QString &number);
     static QString clearInternationalChars(const QString &str);
     static bool isSipUri(const QString &str);
     static QString numberFromSipUrl(const QString &sipUrl);
+    static QString nameFromSipUrl(const QString &sipUrl);
     static bool isEmergencyCallUrl(const QString &sipUrl);
     static bool isNumberAnonymous(const QString &sipUrl);
+    static QString bareURI(const QString &sipUrl);
 
 private:
     PhoneNumberUtil();

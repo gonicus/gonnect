@@ -21,8 +21,9 @@ QStringList EDSAddressBookFactory::configurations() const
     return { groupName };
 }
 
-IAddressBookFeeder *EDSAddressBookFactory::createFeeder(const QString &id,
+IAddressBookFeeder *EDSAddressBookFactory::createFeeder(const QString &id, const int retryCount,
+                                                        const int retryInterval,
                                                         AddressBookManager *parent) const
 {
-    return new EDSAddressBookFeeder(id, parent);
+    return new EDSAddressBookFeeder(id, retryCount, retryInterval, parent);
 }

@@ -1,0 +1,3 @@
+#pragma once
+
+inline constexpr const char* MS_APPLICATION_IDENTIFIER = "@MS_APPLICATION_IDENTIFIER@";

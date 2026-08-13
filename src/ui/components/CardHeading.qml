@@ -1,28 +1,82 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Controls.Material
 import base
 
 Item {
     id: control
-    implicitWidth: lbl.implicitWidth + lbl.anchors.leftMargin + lbl.anchors.rightMargin
+    implicitWidth: control.leftPadding + headingLoader.implicitWidth + control.rightPadding
     height: 46
 
-    property alias text: lbl.text
+    property int leftPadding: 0
+    property int rightPadding: 0
+    property string text: ""
+    property bool showHeading: true
+    property bool showDivider: false
+    property alias headingMargin: headingLoaderWrapper.implicitWidth
 
-    Label {
-        id: lbl
-        font.pixelSize: 16
-        font.weight: Font.Medium
-        elide: Text.ElideRight
-        color: Theme.secondaryTextColor
+    Accessible.role: Accessible.Heading
+    Accessible.name: control.text
+
+    Item {
+        id: headingLoaderWrapper
         anchors {
             verticalCenter: parent.verticalCenter
+            verticalCenterOffset: -1
             left: parent.left
             right: parent.right
-            leftMargin: 20
-            rightMargin: 20
+            leftMargin: 20 + control.leftPadding
+            rightMargin: 20 + control.rightPadding
+        }
+
+        implicitWidth: headingLoader.item ? headingLoader.item.implicitWidth : 0
+        implicitHeight: headingLoader.item ? headingLoader.item.implicitHeight : 0
+
+        Loader {
+            id: headingLoader
+            active: control.showHeading
+            sourceComponent: headingComponent
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+        }
+
+        Accessible.ignored: true
+    }
+
+    Component {
+        id: headingComponent
+
+        RowLayout {
+            id: headingLayout
+            width: parent?.width ?? headingLayout.implicitWidth
+
+            Label {
+                id: headingText
+                text: control.text
+                font.pixelSize: 16
+                font.weight: Font.Medium
+                elide: Text.ElideRight
+                color: Theme.secondaryTextColor
+                Layout.fillWidth: true
+            }
+
+            Pane {
+                padding: 15
+                background: Rectangle {
+                    id: headingSeparator
+                    visible: control.showDivider
+                    height: 30
+                    width: 1
+                    color: Theme.borderColor
+                    anchors.centerIn: parent
+                }
+            }
+
+            Accessible.ignored: true
         }
     }
 
@@ -34,5 +88,7 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
+
+        Accessible.ignored: true
     }
 }

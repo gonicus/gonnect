@@ -22,6 +22,9 @@ Item {
         color: Theme.secondaryTextColor
         font.pixelSize: 18
         text: "🕓  " + qsTr("No past calls")
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: qsTr("No past calls")
     }
 
     ListView {
@@ -30,6 +33,10 @@ Item {
         topMargin: 20
         visible: control.hasPastCalls
         anchors.fill: parent
+
+        Accessible.role: Accessible.List
+        Accessible.name: qsTr("History")
+        Accessible.description: qsTr("Searchable list of past calls and meetings")
 
         ScrollBar.vertical: ScrollBar {
             id: verticalScrollBar
@@ -62,9 +69,14 @@ Item {
             required property date section
 
             Label {
+                id: sectionLabel
                 text: sectionDelg.section.toLocaleDateString(Qt.locale(), "dddd, dd. MMMM yyyy")
                 anchors.centerIn: parent
             }
+
+            Accessible.role: Accessible.StaticText
+            Accessible.name: qsTr("History item section")
+            Accessible.description: qsTr("Header for the currently selected day: %1").arg(sectionLabel.text)
         }
 
         delegate: Item {
@@ -97,6 +109,7 @@ Item {
             required property bool hasBuddyState
             required property bool hasAvatar
             required property string avatarPath
+            required property list<string> hops
 
             property int buddyStatus: SIPBuddyState.UNKNOWN
             readonly property bool isReady: delg.buddyStatus === SIPBuddyState.READY
@@ -109,6 +122,11 @@ Item {
             }
 
             Component.onCompleted: () => delg.updateBuddyStatus()
+
+            Accessible.role: Accessible.ListItem
+            Accessible.name: qsTr("History item")
+            Accessible.description: qsTr("Selected history item %1 - company %2, location %3, number %4, time %5, duration %6").arg(delg.contactName).arg(delg.company ?? "-").arg(delg.location ?? "-").arg(delg.remotePhoneNumber).arg(timeTextLabel.text).arg(durationTextLabel.text)
+            Accessible.focusable: true
 
             Connections {
                 target: SIPManager
@@ -139,10 +157,11 @@ Item {
                     initials: ViewHelper.initials(delg.contactName)
                     source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
                     visible: delg.hasAvatar || delg.name !== ""
-                    showBuddyStatus: delg.hasBuddyState || delg.isBlocked
-                    buddyStatus: delg.buddyStatus
+                    showPresenceStatus: delg.hasBuddyState || delg.isBlocked
+                    presenceStatus: delg.buddyStatus
                     isBlocked: delg.isBlocked
                     size: 40
+                    indicatorComponent: Component { BuddyStatusIndicator {} }
 
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
@@ -180,6 +199,8 @@ Item {
                                 }
                             }
                         ]
+
+                        Accessible.ignored: true
                     }
 
                     Label {
@@ -193,6 +214,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.ignored: true
                     }
                 }
 
@@ -206,7 +229,9 @@ Item {
                     Label {
                         id: phoneNumberLabel
                         elide: Label.ElideRight
-                        text: delg.remotePhoneNumber
+                        text: delg.remotePhoneNumber + (delg.hops.length > 0
+                                                        ? qsTr(", via %1").arg(delg.hops.join(" → "))
+                                                        : "")
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -225,6 +250,8 @@ Item {
                                 }
                             }
                         ]
+
+                        Accessible.ignored: true
                     }
 
                     Label {
@@ -238,6 +265,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
+
+                        Accessible.ignored: true
                     }
                 }
 
@@ -271,12 +300,14 @@ Item {
                             }
                         }
                     }
+
+                    Accessible.ignored: true
                 }
 
                 Item {
                     id: timesContainer
                     implicitHeight: timeLabel.implicitHeight
-                    Layout.preferredWidth: 70
+                    Layout.preferredWidth: 60
                     Layout.rightMargin: 10
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
@@ -301,16 +332,20 @@ Item {
                             }
                         ]
 
-                        Label {
+                        IconLabel {
                             id: timeIconLabel
-                            width: 15
-                            text: "🕓"
-                            horizontalAlignment: Label.AlignHCenter
+                            icon {
+                                source: Icons.acceptTimeEvent
+                                width: 18
+                                height: 18
+                            }
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
                                 verticalCenterOffset: 2
                             }
+
+                            Accessible.ignored: true
                         }
 
                         Label {
@@ -320,6 +355,8 @@ Item {
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
                     }
 
@@ -333,14 +370,18 @@ Item {
                             top: parent.verticalCenter
                         }
 
-                        Label {
-                            text: "⌛"
-                            width: timeIconLabel.width
-                            horizontalAlignment: Label.AlignHCenter
+                        IconLabel {
+                            icon {
+                                source: Icons.chronometer
+                                width: 18
+                                height: 18
+                            }
                             anchors {
                                 left: parent.left
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
 
                         Label {
@@ -350,6 +391,8 @@ Item {
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
                             }
+
+                            Accessible.ignored: true
                         }
                     }
                 }

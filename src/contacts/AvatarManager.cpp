@@ -64,12 +64,18 @@ void AvatarManager::updateContacts()
     Q_EMIT avatarsLoaded();
 }
 
-QList<const Contact *> AvatarManager::initialLoad()
+QList<const Contact *> AvatarManager::initialLoad(bool *isFirstRun)
 {
     QList<const Contact *> dirtyContacts;
     QDir avatarDir(m_avatarImageDirPath);
 
-    if (!avatarDir.isEmpty()) {
+    // Empty avatar directory means "initial run" - load everything
+    const bool firstRun = avatarDir.isEmpty();
+    if (isFirstRun) {
+        *isFirstRun = firstRun;
+    }
+
+    if (!firstRun) {
         // Do not load avatars from LDAP, but read existing avatars from directory
         auto &addressBook = AddressBook::instance();
         const auto dbTimes = readIdsFromDb();

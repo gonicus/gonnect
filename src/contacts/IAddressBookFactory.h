@@ -13,7 +13,8 @@ public:
     virtual QString name() const = 0;
 
     virtual QStringList configurations() const = 0;
-    virtual IAddressBookFeeder *createFeeder(const QString &id,
+    virtual IAddressBookFeeder *createFeeder(const QString &id, const int retryCount,
+                                             const int retryInterval,
                                              AddressBookManager *parent = nullptr) const = 0;
 
     virtual ~IAddressBookFactory() = default;

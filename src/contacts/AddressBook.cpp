@@ -5,6 +5,13 @@
 
 #include <QCryptographicHash>
 #include <QRegularExpression>
+#include <QLoggingCategory>
+
+#ifndef APP_TESTS
+#  include "AvatarPrioHelper.h"
+#endif
+
+Q_LOGGING_CATEGORY(lcAddressBook, "gonnect.app.contacts.AddressBook")
 
 AddressBook::AddressBook(QObject *parent) : QObject{ parent }
 {
@@ -15,7 +22,66 @@ AddressBook::AddressBook(QObject *parent) : QObject{ parent }
             Q_EMIT contactSourceInfosChanged();
         }
     });
+
+#ifndef APP_TESTS
+    connect(&AvatarPrioHelper::instance(), &AvatarPrioHelper::priosChanged, this, [this]() {
+        const auto contacts = m_contacts.values();
+        for (auto *contact : std::as_const(contacts)) {
+            contact->updateAvatar();
+        }
+    });
+#endif
 }
+
+#ifndef APP_TESTS
+void AddressBook::initContactSignals(Contact *contact)
+{
+    if (!contact) {
+        qCCritical(lcAddressBook) << "contact may not be nullptr";
+        return;
+    }
+
+    connect(contact, &Contact::chatUserAdded, this, [this, contact](ChatUser *chatUser) {
+        Q_CHECK_PTR(chatUser);
+        addChatUserMapping(chatUser, contact);
+    });
+    connect(contact, &Contact::chatUserRemoved, this, [this](const ChatUser *chatUser) {
+        Q_CHECK_PTR(chatUser);
+        removeChatUserMapping(chatUser);
+    });
+    connect(contact, &Contact::avatarChanged, this, [this, contact]() {
+        const auto chatUsers = contact->chatUsers();
+        for (auto *chatUser : std::as_const(chatUsers)) {
+            Q_EMIT chatUserAvatarChanged(chatUser);
+        }
+    });
+}
+
+void AddressBook::addChatUserMapping(ChatUser *chatUser, Contact *contact)
+{
+    if (!contact) {
+        qCCritical(lcAddressBook) << "contact may not be nullptr";
+        return;
+    }
+    if (!chatUser) {
+        qCCritical(lcAddressBook) << "chatUser may not be nullptr";
+        return;
+    }
+
+    m_contactsByChatUser.insert(chatUser, contact);
+    Q_EMIT chatUserMappingAdded(chatUser, contact);
+}
+
+void AddressBook::removeChatUserMapping(const ChatUser *chatUser)
+{
+    if (!chatUser) {
+        qCCritical(lcAddressBook) << "chatUser may not be nullptr";
+        return;
+    }
+
+    m_contactsByChatUser.remove(chatUser);
+}
+#endif
 
 void AddressBook::updateSourceInfos(const Contact *contact)
 {
@@ -70,6 +136,9 @@ Contact *AddressBook::addContact(const QString &dn, const QString &sourceUid,
         contact = new Contact(hid, dn, sourceUid, contactSourceInfo, name, blockInfo, this);
         m_contacts.insert(hid, contact);
         m_contactsBySourceId.insert(sourceUid, contact);
+#ifndef APP_TESTS
+        initContactSignals(contact);
+#endif
     }
 
     contact->setCompany(company);
@@ -97,6 +166,9 @@ void AddressBook::addContact(Contact *contact)
         contact->setParent(this);
         m_contacts.insert(contact->id(), contact);
         m_contactsBySourceId.insert(contact->sourceUid(), contact);
+#ifndef APP_TESTS
+        initContactSignals(contact);
+#endif
 
         Q_EMIT contactAdded(contact);
     }
@@ -135,10 +207,70 @@ void AddressBook::removeContact(const QString &sourceUid)
     QMutexLocker lock(&m_feederMutex);
 
     if (contact) {
-        m_contacts.remove(contact->id());
+        const auto contactId = contact->id();
+        contact->disconnect(this);
+        m_contacts.remove(contactId);
         m_contactsBySourceId.remove(contact->sourceUid());
 
-        Q_EMIT contactRemoved(sourceUid);
+#ifndef APP_TESTS
+        const auto &chatUsers = contact->chatUsers();
+        for (const auto *chatUser : chatUsers) {
+            removeChatUserMapping(chatUser);
+        }
+#endif
+
+        Q_EMIT contactRemoved(contactId);
+    }
+}
+
+void AddressBook::resetContacts()
+{
+    QMutexLocker lock(&m_feederMutex);
+
+    qDeleteAll(m_contacts);
+    m_contacts.clear();
+    m_contactsBySourceId.clear();
+    m_contactsByChatUser.clear();
+    Q_EMIT contactsCleared();
+}
+
+void AddressBook::removeContactsBySource(const QString &source)
+{
+    QMutexLocker lock(&m_feederMutex);
+
+    QString sourceUid;
+    bool sourceInfoCleared = false;
+
+    QMutableHashIterator it(m_contacts);
+    while (it.hasNext()) {
+        it.next();
+
+        const auto contact = it.value();
+        if (contact->contactSourceInfo().configId == source) {
+            sourceUid = contact->sourceUid();
+
+            // Remove the ContactSourceInfo of the contact source
+            if (!sourceInfoCleared) {
+                m_contactSourceInfos.removeAll(contact->contactSourceInfo());
+                sourceInfoCleared = true;
+
+                Q_EMIT contactSourceInfosChanged();
+            }
+
+            const auto contactId = contact->id();
+            contact->disconnect(this);
+            m_contactsBySourceId.remove(sourceUid);
+
+#ifndef APP_TESTS
+            const auto &chatUsers = contact->chatUsers();
+            for (const auto *chatUser : chatUsers) {
+                removeChatUserMapping(chatUser);
+            }
+#endif
+
+            it.remove();
+            Q_EMIT contactRemoved(contactId);
+        }
     }
 }
 
@@ -214,6 +346,16 @@ Contact *AddressBook::lookupByNumber(const QString &number) const
     return result;
 }
 
+Contact *AddressBook::lookupByEmail(const QString &emailAddr) const
+{
+    for (auto contact : std::as_const(m_contacts)) {
+        if (contact->mail() == emailAddr) {
+            return contact;
+        }
+    }
+    return nullptr;
+}
+
 Contact *AddressBook::lookupByContactId(const QString &contactId) const
 {
     return m_contacts.value(contactId, nullptr);
@@ -224,11 +366,9 @@ Contact *AddressBook::lookupBySourceUid(const QString &sourceUid) const
     return m_contactsBySourceId.value(sourceUid, nullptr);
 }
 
-void AddressBook::clear()
+#ifndef APP_TESTS
+Contact *AddressBook::lookupByChatUser(const ChatUser *chatUser) const
 {
-    QMutexLocker lock(&m_feederMutex);
-
-    qDeleteAll(m_contacts);
-    m_contacts.clear();
-    Q_EMIT contactsCleared();
+    return chatUser ? m_contactsByChatUser.value(chatUser) : nullptr;
 }
+#endif

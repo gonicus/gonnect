@@ -6,12 +6,14 @@
 #include "NumberStats.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Ringer.h"
+#include "Pinger.h"
 #include "AuthManager.h"
 #include "GlobalCallState.h"
 #include "USBDevices.h"
 #include "HeadsetDeviceProxy.h"
 #include "SystemTrayMenu.h"
 #include "SIPCallManager.h"
+#include "SIPCall.h"
 #include "GlobalCallState.h"
 #include "DateEventManager.h"
 #include "DateEvent.h"
@@ -19,12 +21,10 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
-#include <QMediaFormat>
 #include <QFileDialog>
 #include <QSystemTrayIcon>
 #include <QRegularExpression>
 #include <QUuid>
-#include <QMimeType>
 #include <QLoggingCategory>
 
 using namespace std::chrono_literals;
@@ -39,6 +39,10 @@ ViewHelper::ViewHelper(QObject *parent) : QObject{ parent }
     m_ringerTimer.setSingleShot(true);
     m_ringerTimer.setInterval(3s);
     m_ringerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayRingTone);
+
+    m_pingerTimer.setSingleShot(true);
+    m_pingerTimer.setInterval(3s);
+    m_pingerTimer.callOnTimeout(this, &ViewHelper::stopTestPlayNotificationTone);
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this,
             &ViewHelper::updateCurrentUser);
@@ -161,13 +165,6 @@ int ViewHelper::secondsDelta(const QDateTime &start, const QDateTime &end) const
     return start.secsTo(end);
 }
 
-void ViewHelper::copyToClipboard(const QString &str) const
-{
-    auto clipboard = QApplication::clipboard();
-    clipboard->setText(str, QClipboard::Clipboard);
-    clipboard->setText(str, QClipboard::Selection);
-}
-
 void ViewHelper::reloadAddressBook() const
 {
     AddressBookManager::instance().reloadAddressBook();
@@ -196,38 +193,6 @@ QString ViewHelper::currentUserName() const
     return name;
 }
 
-QStringList ViewHelper::audioFileSelectors() const
-{
-    QStringList result;
-    QStringList allSuffixes;
-    const auto formats = QMediaFormat().supportedFileFormats(QMediaFormat::Decode);
-
-    for (const auto format : formats) {
-        QMediaFormat mediaFormat(format);
-
-        const auto mimeType = mediaFormat.mimeType();
-        if (mimeType.isValid()) {
-            const QString filter = QMediaFormat::fileFormatDescription(format);
-            const auto suffixes = mimeType.suffixes();
-
-            QStringList globs;
-            globs.reserve(suffixes.length());
-
-            for (const auto &suffix : suffixes) {
-                globs.append(QString("*.%1").arg(suffix));
-            }
-            allSuffixes.append(globs);
-            result.append(QString("%1 (%2)").arg(filter, globs.join(QChar(' '))));
-        }
-    }
-
-    std::sort(result.begin(), result.end());
-
-    result.push_front(tr("Audio Files (%1)").arg(allSuffixes.join(QChar(' '))));
-
-    return result;
-}
-
 void ViewHelper::toggleFavorite(const QString &phoneNumber,
                                 const NumberStats::ContactType contactType) const
 {
@@ -236,7 +201,7 @@ void ViewHelper::toggleFavorite(const QString &phoneNumber,
 
 QString ViewHelper::initials(const QString &name) const
 {
-    const auto splitted = name.split(QChar(' '));
+    const auto splitted = name.simplified().split(QChar(' '));
     if (name.length() == 0 || splitted.length() == 0) {
         return "";
     } else if (splitted.length() == 1) {
@@ -244,6 +209,20 @@ QString ViewHelper::initials(const QString &name) const
     }
 
     return QString("%1%2").arg(name.at(0), splitted.at(splitted.length() - 1).at(0)).toUpper();
+}
+
+void ViewHelper::testPlayRingTone(qreal volume)
+{
+    stopTestPlayRingTone();
+
+    m_ringer = new Ringer(this);
+    m_ringer->start(volume);
+    m_ringerTimer.start();
+
+    if (!m_isPlayingRingTone) {
+        m_isPlayingRingTone = true;
+        Q_EMIT isPlayingRingToneChanged();
+    }
 }
 
 void ViewHelper::stopTestPlayRingTone()
@@ -256,6 +235,38 @@ void ViewHelper::stopTestPlayRingTone()
 
         m_isPlayingRingTone = false;
         Q_EMIT isPlayingRingToneChanged();
+    }
+}
+
+void ViewHelper::testPlayNotificationTone(qreal volume)
+{
+    stopTestPlayNotificationTone();
+
+    if (!m_isPlayingNotificationTone) {
+        m_isPlayingNotificationTone = true;
+        Q_EMIT isPlayingNotificationToneChanged();
+    }
+
+    m_pinger = new Pinger(this);
+    connect(m_pinger, &Pinger::stopped, this, [this]() { stopTestPlayNotificationTone(); });
+    m_pingerTimer.start();
+    m_pinger->ping(volume);
+}
+
+void ViewHelper::stopTestPlayNotificationTone()
+{
+    if (m_isPlayingNotificationTone) {
+        m_pingerTimer.stop();
+
+        if (m_pinger) {
+            auto *pinger = m_pinger;
+            m_pinger = nullptr;
+            pinger->stop();
+            pinger->deleteLater();
+        }
+
+        m_isPlayingNotificationTone = false;
+        Q_EMIT isPlayingNotificationToneChanged();
     }
 }
 
@@ -288,6 +299,12 @@ void ViewHelper::updateIsActiveVideoCall()
     }
 }
 
+QString ViewHelper::culturalSphereExtension() const
+{
+    auto sphere = tr("QT_CULTURAL_SPHERE", "QGuiApplication");
+    return sphere == "QT_CULTURAL_SPHERE" ? "" : sphere;
+}
+
 void ViewHelper::quitApplicationNoConfirm() const
 {
     Application::instance()->quit();
@@ -300,7 +317,7 @@ void ViewHelper::resetTrayIcon() const
 
 bool ViewHelper::isUnsupportedPlatform() const
 {
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_WINDOWS)
     return false;
 #endif
     return true;
@@ -323,20 +340,6 @@ void ViewHelper::quitApplication()
     }
 }
 
-void ViewHelper::testPlayRingTone(qreal volume)
-{
-    stopTestPlayRingTone();
-
-    m_ringer = new Ringer(this);
-    m_ringer->start(volume);
-    m_ringerTimer.start();
-
-    if (!m_isPlayingRingTone) {
-        m_isPlayingRingTone = true;
-        Q_EMIT isPlayingRingToneChanged();
-    }
-}
-
 HeadsetDeviceProxy *ViewHelper::headsetDeviceProxy() const
 {
     return USBDevices::instance().getHeadsetDeviceProxy();
@@ -352,9 +355,34 @@ void ViewHelper::respondPassword(const QString &id, const QString password)
     Q_EMIT passwordResponded(id, password);
 }
 
+void ViewHelper::requestOauthLogin(const QString &id, const QString &reason)
+{
+    Q_EMIT oauthLoginRequested(id, reason);
+}
+
+void ViewHelper::respondStartOauthLogin(const QString &id)
+{
+    Q_EMIT oauthLoginStartResponded(id);
+}
+
+void ViewHelper::showOauthLoginStatus(const QString &id, const QString &status, bool canRetry)
+{
+    Q_EMIT oauthLoginStatus(id, status, canRetry);
+}
+
+void ViewHelper::respondOauthLoginClosed(const QString &id)
+{
+    Q_EMIT oauthLoginCloseResponded(id);
+}
+
 void ViewHelper::respondRecoveryKey(const QString &id, const QString &key)
 {
     Q_EMIT recoveryKeyResponded(id, key);
+}
+
+void ViewHelper::requestUrlCopyDialog(const QUrl &url, const QString &text)
+{
+    Q_EMIT urlCopyDialogRequested(url, text);
 }
 
 void ViewHelper::requestRecoveryKey(const QString &id, const QString &displayName)
@@ -395,7 +423,7 @@ QString ViewHelper::preprocessSearchText(const QString &in) const
 
 bool ViewHelper::isPhoneNumber(const QString &number) const
 {
-    static const QRegularExpression numberRegEx(R"(^[+#*0-9 ()/-]+$)");
+    static const QRegularExpression numberRegEx(R"(^[+#*0-9 ()/-]+(,[+#*0-9A-D ()/-]*)*$)");
     return numberRegEx.match(number).hasMatch();
 }
 
@@ -407,13 +435,14 @@ bool ViewHelper::isValidJitsiRoomName(const QString &name) const
 }
 
 void ViewHelper::requestMeeting(const QString &roomName, QPointer<CallHistoryItem> callHistoryItem,
-                                const QString &displayName)
+                                const QString &displayName, QPointer<Contact> contact)
 {
     qCInfo(lcViewHelper).nospace().noquote()
             << "Requesting meeting for " << roomName << " (" << displayName
             << ") with flags:" << m_nextMeetingStartFlags;
 
-    Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem);
+    Q_EMIT openMeetingRequested(roomName, displayName, m_nextMeetingStartFlags, callHistoryItem,
+                                contact);
     setProperty("nextMeetingStartFlags",
                 QVariant::fromValue(IConferenceConnector::StartFlag::AudioActive));
 }
@@ -425,12 +454,6 @@ void ViewHelper::requestExternalAppointment(const QString &link)
     if (!QDesktopServices::openUrl(link)) {
         qCWarning(lcViewHelper) << "Opening" << link << "failed";
     }
-}
-
-void ViewHelper::setCallInForegroundByIds(const QString &accountId, int callId)
-{
-    GlobalCallState::instance().setCallInForeground(
-            SIPCallManager::instance().findCall(accountId, callId));
 }
 
 bool ViewHelper::hasNonSilentCall() const
@@ -474,4 +497,24 @@ void ViewHelper::toggleFullscreen()
 uint ViewHelper::numberOfGridCells() const
 {
     return 50;
+}
+
+QString ViewHelper::stripLinkTags(const QString &link) const
+{
+    static const QRegularExpression re(R"(<a[^>]*>(.*)<\/a>)");
+    auto s = link;
+    return s.replace(re, "\\1");
+}
+
+bool ViewHelper::isShortEmojiString(const QString &str) const
+{
+    const auto trimmed = str.trimmed();
+
+    if (trimmed.size() > 50) { // Bigger size as emojis can be much more than a single unicode char
+        return false;
+    }
+
+    static const QRegularExpression re(
+            R"(^(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)(?:\s*(?:\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)){0,2}$)");
+    return re.match(trimmed).hasMatch();
 }

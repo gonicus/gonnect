@@ -5,6 +5,7 @@
 #include <ldap.h>
 #include <QDebug>
 #include <QLoggingCategory>
+#include <QSet>
 #include <QThread>
 
 #include "LDAPAddressBookFeeder.h"
@@ -13,12 +14,13 @@
 #include "ErrorBus.h"
 #include "ReadOnlyConfdSettings.h"
 #include "AvatarManager.h"
-#include "AddressBookManager.h"
+#include "SecretResponse.h"
 
 Q_LOGGING_CATEGORY(lcLDAPAddressBookFeeder, "gonnect.app.feeder.LDAPAddressBookFeeder")
 
-LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, AddressBookManager *parent)
-    : QObject(parent), m_group(group)
+LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, const int retryCount,
+                                             const int retryInterval, AddressBookManager *parent)
+    : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
 {
     m_manager = qobject_cast<AddressBookManager *>(parent);
 
@@ -40,19 +42,60 @@ void LDAPAddressBookFeeder::init(const LDAPInitializer::Config &ldapConfig,
                                  QStringList sipStatusSubscriptableAttributes,
                                  const QString &baseNumber)
 {
-
     m_ldapConfig = ldapConfig;
     m_baseNumber = baseNumber;
     m_sipStatusSubscriptableAttributes = sipStatusSubscriptableAttributes;
 }
 
+void LDAPAddressBookFeeder::resetFeeder()
+{
+    m_isProcessing = false;
+    m_ldapConfig = {};
+
+    if (m_ldap) {
+        LDAPInitializer::freeLDAPHandle(m_ldap);
+        m_ldap = nullptr;
+    }
+
+    m_baseNumber = "";
+    m_sipStatusSubscriptableAttributes.clear();
+    m_blockInfo = {};
+    m_attrs = {};
+}
+
 void LDAPAddressBookFeeder::process()
 {
-    ReadOnlyConfdSettings settings;
+    connect(
+            this, &LDAPAddressBookFeeder::feederFailed, this,
+            [this]() {
+                // Prepare feeder for re-run
+                resetFeeder();
+                AddressBook::instance().removeContactsBySource(m_group);
 
+                if (m_authFailed) {
+                    // Previous run failed due to auth, we'll prompt the user again immediately
+                    qCCritical(lcLDAPAddressBookFeeder)
+                            << "Failed to process LDAP sources - invalid password";
+
+                    process();
+                } else {
+                    // Some other error has occurred, wait and try again
+                    if (m_retryCount > 0) {
+                        m_retryCount--;
+
+                        qCCritical(lcLDAPAddressBookFeeder)
+                                << "Failed to process LDAP sources - trying later";
+
+                        QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
+                    }
+                }
+            },
+            Qt::SingleShotConnection);
+
+    ReadOnlyConfdSettings settings;
     settings.beginGroup(m_group);
 
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {
@@ -67,9 +110,17 @@ void LDAPAddressBookFeeder::process()
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
 
     if (bindMethodStr == "simple" || bindMethodStr == "gssapi") {
-        m_manager->acquireSecret(m_group,
-                                 [this](const QString &password) { processImpl(password); });
+        m_manager->acquireSecret(m_authFailed, m_group, [this](const SecretResponse response) {
+            m_authFailed = response.hasError;
 
+            if (response.hasError) {
+                qCCritical(lcLDAPAddressBookFeeder)
+                        << "Authentication for" << m_group << "has failed";
+                ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_group));
+            } else {
+                processImpl(response.secret);
+            }
+        });
     } else { // "none"
         processImpl("");
     }
@@ -82,8 +133,8 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     QString url = settings.value(m_group + "/url", "").toString();
 
     settings.beginGroup(m_group);
-    const auto scriptableAttributes =
-            settings.value("sipStatusSubscriptableAttributes", "").toString();
+    const auto subscribableAttributes =
+            settings.value("sipStatusSubscriptableAttributes", "").toStringList();
 
     const auto bindMethodStr = settings.value("bindMethod", "none").toString();
     LDAPInitializer::BindMethod bindMethod;
@@ -97,6 +148,7 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     if (s_bindMethods.contains(bindMethodStr)) {
         bindMethod = s_bindMethods.value(bindMethodStr);
     } else {
+        // INFO: This would point towards a config issue - not going to retry automatically
         qCCritical(lcLDAPAddressBookFeeder).nospace()
                 << "Unknown LDAP bind method '" << bindMethodStr
                 << "' - initialization of LDAP account will be aborted.";
@@ -116,18 +168,21 @@ void LDAPAddressBookFeeder::processImpl(const QString &password)
     ldapConfig.saslAuthcid = settings.value("authcid", "").toString();
     ldapConfig.saslAuthzid = settings.value("authzid", "").toString();
 
-    init(ldapConfig,
-         scriptableAttributes.isEmpty() ? QStringList() : scriptableAttributes.split(QChar(',')),
-         settings.value("baseNumber", "").toString());
+    m_attrs.name = settings.value("attrName", "cn").toByteArray();
+    m_attrs.uid = settings.value("attrUid", "uid").toByteArray();
+    m_attrs.company = settings.value("attrCompany", "o").toByteArray();
+    m_attrs.email = settings.value("attrEmail", "mail").toByteArray();
+    m_attrs.commercial = settings.value("attrCommercial", "telephoneNumber").toByteArray();
+    m_attrs.mobile = settings.value("attrMobile", "mobile").toByteArray();
+    m_attrs.home = settings.value("attrHome", "homePhone").toByteArray();
+    m_attrs.avatar = settings.value("attrAvatar", "jpegPhoto").toByteArray();
+    m_pageSize = settings.value("pageSize", 500).toInt();
+
+    init(ldapConfig, subscribableAttributes, settings.value("baseNumber", "").toString());
+
+    m_isProcessing = true;
 
     feedAddressBook();
-
-    const auto dirtyContacts = AvatarManager::instance().initialLoad();
-    if (dirtyContacts.isEmpty()) {
-        loadAllAvatars(m_ldapConfig);
-    } else {
-        loadAvatars(dirtyContacts);
-    }
 
     settings.endGroup();
 }
@@ -143,57 +198,154 @@ void LDAPAddressBookFeeder::clearCStringlist(char **attrs) const
     free(attrs);
 }
 
+char **LDAPAddressBookFeeder::toCStringList(const QList<QByteArray> &values) const
+{
+    size_t i = 0;
+    char **arr = (char **)malloc((values.size() + 1) * sizeof(char *));
+
+    for (const QByteArray &value : std::as_const(values)) {
+        const size_t sz = value.size() + 1;
+        char *p = (char *)malloc(sz);
+        strncpy(p, value.constData(), sz);
+        arr[i++] = p;
+    }
+
+    arr[i] = nullptr;
+
+    return arr;
+}
+
+bool LDAPAddressBookFeeder::pagedSearch(
+        LDAP *ldap, const LDAPInitializer::Config &ldapConfig, char **attrs,
+        const std::function<void(LDAP *, LDAPMessage *)> &onEntry) const
+{
+    const QByteArray base = ldapConfig.ldapBase.toLocal8Bit();
+    const QByteArray filter = ldapConfig.ldapFilter.toUtf8();
+    const ber_int_t pageSize = m_pageSize > 0 ? m_pageSize : 500;
+
+    struct berval cookie = { 0, nullptr };
+    int totalEntries = 0;
+    bool ok = true;
+
+    while (true) {
+        LDAPControl *pageControl = nullptr;
+
+        // Create page control with isCritical=0 to have it working independently of an
+        // LDAP server supporting it or not.
+        int rc = ldap_create_page_control(ldap, pageSize, &cookie, 0, &pageControl);
+        if (rc != LDAP_SUCCESS) {
+            qCCritical(lcLDAPAddressBookFeeder)
+                    << "Could not create paged results control:" << ldap_err2string(rc);
+            ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(rc)));
+            ok = false;
+            break;
+        }
+
+        LDAPControl *serverControls[2] = { pageControl, nullptr };
+        LDAPMessage *result = nullptr;
+
+        rc = ldap_search_ext_s(ldap, base.constData(), LDAP_SCOPE_SUBTREE, filter.constData(),
+                               attrs, 0, serverControls, nullptr, nullptr, LDAP_NO_LIMIT, &result);
+
+        ldap_control_free(pageControl);
+
+        if (rc != LDAP_SUCCESS && rc != LDAP_SIZELIMIT_EXCEEDED && rc != LDAP_ADMINLIMIT_EXCEEDED) {
+            qCCritical(lcLDAPAddressBookFeeder)
+                    << "paged search request failed:" << ldap_err2string(rc);
+            ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(rc)));
+            if (result) {
+                ldap_msgfree(result);
+            }
+            ok = false;
+            break;
+        }
+
+        for (LDAPMessage *entry = ldap_first_entry(ldap, result); entry != nullptr;
+             entry = ldap_next_entry(ldap, entry)) {
+            onEntry(ldap, entry);
+            ++totalEntries;
+        }
+
+        LDAPControl **returnedControls = nullptr;
+        const int parseRc = ldap_parse_result(ldap, result, nullptr, nullptr, nullptr, nullptr,
+                                              &returnedControls, 0);
+        ldap_msgfree(result);
+
+        if (parseRc != LDAP_SUCCESS) {
+            qCCritical(lcLDAPAddressBookFeeder)
+                    << "failed to parse paged search result:" << ldap_err2string(parseRc);
+            ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(parseRc)));
+            if (returnedControls) {
+                ldap_controls_free(returnedControls);
+            }
+            ok = false;
+            break;
+        }
+
+        if (cookie.bv_val) {
+            ber_memfree(cookie.bv_val);
+            cookie.bv_val = nullptr;
+            cookie.bv_len = 0;
+        }
+
+        // Check for more pages
+        bool morePages = false;
+        if (returnedControls) {
+            if (LDAPControl *pageResponse =
+                        ldap_control_find(LDAP_CONTROL_PAGEDRESULTS, returnedControls, nullptr)) {
+                ber_int_t estimatedTotal = 0;
+                ldap_parse_pageresponse_control(ldap, pageResponse, &estimatedTotal, &cookie);
+                morePages = cookie.bv_val != nullptr && cookie.bv_len > 0;
+            }
+            ldap_controls_free(returnedControls);
+        }
+
+        if (!morePages) {
+            break;
+        }
+    }
+
+    if (cookie.bv_val) {
+        ber_memfree(cookie.bv_val);
+    }
+
+    qCInfo(lcLDAPAddressBookFeeder) << totalEntries << "search entries retrieved";
+    return ok;
+}
+
 void LDAPAddressBookFeeder::feedAddressBook()
 {
-    QStringList attributes = { "uid",    "cn",        "o",    "telephoneNumber",
-                               "mobile", "homePhone", "mail", "modifyTimestamp" };
     int result = 0;
-    size_t i = 0;
-    char **attrs = (char **)malloc((attributes.count() + 1) * sizeof(char *));
-    for (auto &attr : std::as_const(attributes)) {
-        size_t sz = attr.size() + 1;
-        char *p = (char *)malloc(sz);
-        strncpy(p, attr.toLocal8Bit().toStdString().c_str(), sz);
-        attrs[i++] = p;
-    }
-    attrs[i] = NULL;
 
-    m_ldap = LDAPInitializer::initialize(m_ldapConfig);
+    m_ldap = LDAPInitializer::initialize(m_ldapConfig, result);
     if (!m_ldap) {
-        qCCritical(lcLDAPAddressBookFeeder) << "Could not get LDAP connection - aborting";
-        ErrorBus::instance().addError(tr("Failed to initialize LDAP connection"));
-        clearCStringlist(attrs);
-        return;
-    }
-
-    timeval timeout;
-    timeout.tv_sec = 3;
-    timeout.tv_usec = 0;
-
-    result = ldap_search_ext(m_ldap, m_ldapConfig.ldapBase.toLocal8Bit().data(), LDAP_SCOPE_SUBTREE,
-                             m_ldapConfig.ldapFilter.toStdString().c_str(), attrs, false, NULL,
-                             NULL, &timeout, 0, &m_ldapSearchMessageId);
-
-    clearCStringlist(attrs);
-
-    if (result == LDAP_SUCCESS) {
-        startContactQuery();
-
-    } else {
         qCCritical(lcLDAPAddressBookFeeder)
-                << "Error on search request: " << ldap_err2string(result);
-        ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(result)));
+                << "Could not get LDAP connection:" << ldap_err2string(result);
+        ErrorBus::instance().addError(
+                tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
+
+        if (result == LDAP_INVALID_CREDENTIALS) {
+            m_authFailed = true;
+        }
+        Q_EMIT feederFailed();
         return;
     }
+
+    startContactQuery();
 }
 
 void LDAPAddressBookFeeder::loadAvatars(const QList<const Contact *> &contacts)
 {
+    if (m_attrs.name.isEmpty() || m_attrs.avatar.isEmpty()) {
+        return;
+    }
+
+    const auto nameAttr = QString::fromLatin1(m_attrs.name);
     QStringList filterList;
     filterList.reserve(contacts.size());
 
     for (const Contact *contact : contacts) {
-        filterList.append(QString("(cn=%1)").arg(contact->name()));
+        filterList.append(QString("(%1=%2)").arg(nameAttr, contact->name()));
     }
 
     LDAPInitializer::Config newConfig(m_ldapConfig);
@@ -205,297 +357,222 @@ void LDAPAddressBookFeeder::loadAvatars(const QList<const Contact *> &contacts)
 
 void LDAPAddressBookFeeder::loadAllAvatars(const LDAPInitializer::Config &ldapConfig)
 {
-    QThread::create([this, ldapConfig]() {
-        char *a = nullptr;
-        char *dnTemp = nullptr;
-        BerElement *ber = nullptr;
-        struct berval **vals;
-        char *matchedMsg = nullptr;
-        char *errorMsg = nullptr;
-        int numEntries = 0, numRefs = 0, result = 0, msgType = 0, parseResultCode = 0;
-        LDAP *ldap = nullptr;
-        LDAPMessage *msg = nullptr;
+    const QByteArray avatarAttr = m_attrs.avatar;
+    m_isProcessing = true;
 
-        QStringList attributes = { "cn", "jpegPhoto", "modifyTimestamp" };
-
-        size_t i = 0;
-        char **attrs = (char **)malloc((attributes.count() + 1) * sizeof(char *));
-        for (auto &attr : std::as_const(attributes)) {
-            size_t sz = attr.size() + 1;
-            char *p = (char *)malloc(sz);
-            strncpy(p, attr.toLocal8Bit().toStdString().c_str(), sz);
-            attrs[i++] = p;
+    QThread::create([this, ldapConfig, avatarAttr]() {
+        QList<QByteArray> attributes = { QByteArrayLiteral("modifyTimestamp") };
+        if (!avatarAttr.isEmpty()) {
+            attributes.append(avatarAttr);
         }
-        attrs[i] = NULL;
 
-        QString dn;
-        QDateTime modifyTimestamp;
-        QByteArray jpegPhoto;
-        int count = 0;
+        char **attrs = toCStringList(attributes);
 
         qCInfo(lcLDAPAddressBookFeeder) << "Connecting to LDAP service" << ldapConfig.ldapUrl;
 
-        ldap = LDAPInitializer::initialize(ldapConfig);
+        int result = 0;
+        LDAP *ldap = LDAPInitializer::initialize(ldapConfig, result);
         if (!ldap) {
             qCCritical(lcLDAPAddressBookFeeder)
                     << "Could not initialize LDAP handle from uri:" << ldap_err2string(result);
             ErrorBus::instance().addError(
                     tr("Failed to initialize LDAP connection: %1").arg(ldap_err2string(result)));
             clearCStringlist(attrs);
+            m_isProcessing = false;
+
+            if (result == LDAP_INVALID_CREDENTIALS) {
+                m_authFailed = true;
+            }
+            Q_EMIT feederFailed();
             return;
         }
 
-        result = ldap_search_ext_s(ldap, ldapConfig.ldapBase.toLocal8Bit().data(),
-                                   LDAP_SCOPE_SUBTREE, ldapConfig.ldapFilter.toStdString().c_str(),
-                                   attrs, false, NULL, NULL, NULL, LDAP_NO_LIMIT, &msg);
+        const bool ok = pagedSearch(ldap, ldapConfig, attrs,
+                                    [this, &avatarAttr](LDAP *ld, LDAPMessage *entry) {
+                                        parseAvatarEntry(ld, entry, avatarAttr);
+                                    });
 
         clearCStringlist(attrs);
-
-        if (result != LDAP_SUCCESS) {
-            qCCritical(lcLDAPAddressBookFeeder)
-                    << "Error on search request: " << ldap_err2string(result);
-            ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(result)));
-            return;
-        }
-
-        numEntries = ldap_count_entries(ldap, msg);
-        numRefs = ldap_count_references(ldap, msg);
-
-        qCInfo(lcLDAPAddressBookFeeder)
-                << "Retrieved" << numEntries << "entries and" << numRefs << "refs";
-
-        for (msg = ldap_first_message(ldap, msg); msg != NULL; msg = ldap_next_message(ldap, msg)) {
-
-            msgType = ldap_msgtype(msg);
-
-            switch (msgType) {
-            case LDAP_RES_SEARCH_ENTRY: {
-                dn = "";
-                modifyTimestamp = QDateTime();
-                jpegPhoto = "";
-
-                // Iterate over attributes
-                for (a = ldap_first_attribute(ldap, msg, &ber); a != NULL;
-                     a = ldap_next_attribute(ldap, msg, ber)) {
-
-                    // Get DN
-                    if ((dnTemp = ldap_get_dn(ldap, msg)) != NULL) {
-                        dn = dnTemp;
-                        ldap_memfree(dnTemp);
-                    }
-
-                    // Iterate over values
-                    if ((vals = ldap_get_values_len(ldap, msg, a)) != NULL) {
-
-                        char *val = (**vals).bv_val;
-
-                        if (strcmp(a, "jpegPhoto") == 0) {
-                            for (uint i = 0; i < (**vals).bv_len; ++i) {
-                                jpegPhoto.append(*val);
-                                val += sizeof(char);
-                            }
-                        } else if (strcmp(a, "modifyTimestamp") == 0) {
-                            modifyTimestamp = QDateTime::fromString(val, "yyyyMMddhhmmsst");
-                        }
-
-                        ldap_value_free_len(vals);
-                    }
-
-                    ldap_memfree(a);
-                }
-
-                if (!jpegPhoto.isEmpty()) {
-                    const auto contactId = AddressBook::instance().hashifyCn(dn);
-                    Q_EMIT newExternalImageAdded(contactId, jpegPhoto, modifyTimestamp,
-                                                 QPrivateSignal());
-
-                    ++count;
-                }
-
-                a = nullptr;
-
-                ber_free(ber, 0);
-                ber = nullptr;
-
-                break;
-            }
-
-            case LDAP_RES_SEARCH_RESULT: {
-                parseResultCode = ldap_parse_result(ldap, msg, &result, &matchedMsg, &errorMsg,
-                                                    NULL, NULL, 1);
-                if (parseResultCode != LDAP_SUCCESS) {
-                    qCCritical(lcLDAPAddressBookFeeder)
-                            << "LDAP parse error:" << ldap_err2string(parseResultCode);
-                    ErrorBus::instance().addError(
-                            tr("Parse error: %1").arg(ldap_err2string(parseResultCode)));
-                    return;
-                }
-                break;
-            }
-
-            default:
-                qCCritical(lcLDAPAddressBookFeeder) << "Unknown message type:" << msgType;
-                return;
-            }
-        }
-
-        qCInfo(lcLDAPAddressBookFeeder) << "Loaded" << count << "avatars";
-
         LDAPInitializer::freeLDAPHandle(ldap);
+        m_isProcessing = false;
+
+        if (!ok) {
+            Q_EMIT feederFailed();
+        }
     })->start();
 }
 
 QUrl LDAPAddressBookFeeder::networkCheckURL() const
 {
     ReadOnlyConfdSettings settings;
-
-    QString url = settings.value(m_group + "/url", "").toString();
-    return QUrl(url);
+    return QUrl(settings.value(m_group + "/url", "").toString());
 }
 
 void LDAPAddressBookFeeder::startContactQuery()
 {
     QThread::create([this]() {
-        timeval timeout;
-        timeout.tv_sec = 3;
-        timeout.tv_usec = 0;
-
-        LDAPMessage *msg = nullptr;
-
-        const int ldapResult = ldap_result(m_ldap, m_ldapSearchMessageId, true, &timeout, &msg);
-
-        if (ldapResult > 0) { // Success
-            processResult(msg);
-        } else if (ldapResult == 0) { // Timeout
-            qCCritical(lcLDAPAddressBookFeeder)
-                    << "Timeout on search request: " << ldap_err2string(ldapResult);
-            ErrorBus::instance().addError(tr("LDAP timeout: %1").arg(ldap_err2string(ldapResult)));
-        } else { // Error
-            qCCritical(lcLDAPAddressBookFeeder)
-                    << "Error on search request: " << ldap_err2string(ldapResult);
-            ErrorBus::instance().addError(tr("LDAP error: %1").arg(ldap_err2string(ldapResult)));
+        QSet<QByteArray> requested = { QByteArrayLiteral("modifyTimestamp") };
+        for (const QByteArray *role :
+             { &m_attrs.name, &m_attrs.uid, &m_attrs.company, &m_attrs.email, &m_attrs.commercial,
+               &m_attrs.mobile, &m_attrs.home }) {
+            if (!role->isEmpty()) {
+                requested.insert(*role);
+            }
         }
+        char **attrs = toCStringList(QList<QByteArray>(requested.cbegin(), requested.cend()));
+
+        const bool ok =
+                pagedSearch(m_ldap, m_ldapConfig, attrs,
+                            [this](LDAP *ld, LDAPMessage *entry) { parseContactEntry(ld, entry); });
+
+        clearCStringlist(attrs);
+        LDAPInitializer::freeLDAPHandle(m_ldap);
+        m_ldap = nullptr;
+
+        if (!ok) {
+            Q_EMIT feederFailed();
+            return;
+        }
+
+        QMetaObject::invokeMethod(
+                this, []() { Q_EMIT AddressBook::instance().contactsReady(); },
+                Qt::QueuedConnection);
+
+        QMetaObject::invokeMethod(
+                this, [this]() { loadAvatarsForContacts(); }, Qt::QueuedConnection);
     })->start();
 }
 
-void LDAPAddressBookFeeder::processResult(LDAPMessage *ldapMessage)
+void LDAPAddressBookFeeder::parseContactEntry(LDAP *ldap, LDAPMessage *entry)
 {
-    char *a = nullptr;
-    char *dnTemp = nullptr;
-    BerElement *ber = nullptr;
-    struct berval **vals;
-    char *matchedMsg = nullptr;
-    char *errorMsg = nullptr;
-    int numEntries = 0, numRefs = 0, result = 0, msgType = 0, parseResultCode = 0;
-    LDAPMessage *msg = ldapMessage;
-    QString dn, cn, sourceUid, company, number, mail, modifyTimestamp;
+    auto stripBaseNumber = [this](QString num) {
+        if (num.startsWith(m_baseNumber)) {
+            num = num.sliced(m_baseNumber.size());
+        }
+        return num;
+    };
+
+    QString dn, cn, sourceUid, company, mail, modifyTimestamp;
     QList<Contact::PhoneNumber> phoneNumbers;
 
-    numEntries = ldap_count_entries(m_ldap, msg);
-    numRefs = ldap_count_references(m_ldap, msg);
-
-    qCInfo(lcLDAPAddressBookFeeder)
-            << "Retrieved" << numEntries << "entries and" << numRefs << "refs";
-
-    for (msg = ldap_first_message(m_ldap, msg); msg != NULL; msg = ldap_next_message(m_ldap, msg)) {
-        msgType = ldap_msgtype(msg);
-
-        switch (msgType) {
-        case LDAP_RES_SEARCH_ENTRY: {
-            dn = "";
-            cn = "";
-            company = "";
-            number = "";
-            mail = "";
-            modifyTimestamp = "";
-            phoneNumbers.clear();
-
-            // Iterate over attributes
-            for (a = ldap_first_attribute(m_ldap, msg, &ber); a != NULL;
-                 a = ldap_next_attribute(m_ldap, msg, ber)) {
-
-                // Get DN
-                if ((dnTemp = ldap_get_dn(m_ldap, msg)) != NULL) {
-                    dn = dnTemp;
-                    ldap_memfree(dnTemp);
-                }
-
-                // Iterate over values
-                if ((vals = ldap_get_values_len(m_ldap, msg, a)) != NULL) {
-
-                    const auto val = (**vals).bv_val;
-
-                    if (strcmp(a, "cn") == 0) {
-                        cn = val;
-                    } else if (strcmp(a, "o") == 0) {
-                        company = val;
-                    } else if (strcmp(a, "uid") == 0) {
-                        sourceUid = val;
-                    } else if (strcmp(a, "mail") == 0) {
-                        mail = val;
-                    } else if (strcmp(a, "modifyTimestamp") == 0) {
-                        modifyTimestamp = val;
-                    } else if (strcmp(a, "telephoneNumber") == 0) {
-                        number = val;
-                        if (number.startsWith(m_baseNumber)) {
-                            number = number.sliced(QString(m_baseNumber).size());
-                        }
-                        phoneNumbers.append(
-                                { Contact::NumberType::Commercial, number,
-                                  m_sipStatusSubscriptableAttributes.contains("telephoneNumber") });
-                    } else if (strcmp(a, "mobile") == 0) {
-                        number = val;
-                        if (number.startsWith(m_baseNumber)) {
-                            number = number.sliced(QString(m_baseNumber).size());
-                        }
-                        phoneNumbers.append(
-                                { Contact::NumberType::Mobile, number,
-                                  m_sipStatusSubscriptableAttributes.contains("mobile") });
-                    } else if (strcmp(a, "homePhone") == 0) {
-                        number = val;
-                        if (number.startsWith(m_baseNumber)) {
-                            number = number.sliced(QString(m_baseNumber).size());
-                        }
-                        phoneNumbers.append(
-                                { Contact::NumberType::Home, number,
-                                  m_sipStatusSubscriptableAttributes.contains("homePhone") });
-                    }
-
-                    ldap_value_free_len(vals);
-                }
-            }
-
-            Q_EMIT newContactReady(dn, sourceUid, { m_priority, m_displayName }, cn, company, mail,
-                                   QDateTime::fromString(modifyTimestamp, "yyyyMMddhhmmsst"),
-                                   phoneNumbers, QPrivateSignal());
-
-            a = nullptr;
-
-            ber_free(ber, 0);
-            ber = nullptr;
-
-            break;
-        }
-
-        case LDAP_RES_SEARCH_RESULT: {
-            parseResultCode =
-                    ldap_parse_result(m_ldap, msg, &result, &matchedMsg, &errorMsg, NULL, NULL, 1);
-            if (parseResultCode != LDAP_SUCCESS) {
-                qCCritical(lcLDAPAddressBookFeeder)
-                        << "LDAP parse error:" << ldap_err2string(parseResultCode);
-                ErrorBus::instance().addError(
-                        tr("Parse error: %1").arg(ldap_err2string(parseResultCode)));
-                return;
-            }
-            break;
-        }
-
-        default:
-            qCCritical(lcLDAPAddressBookFeeder) << "Unknown message type:" << msgType;
-            return;
-        }
+    if (char *dnTemp = ldap_get_dn(ldap, entry)) {
+        dn = dnTemp;
+        ldap_memfree(dnTemp);
     }
 
-    LDAPInitializer::freeLDAPHandle(m_ldap);
-    m_ldap = nullptr;
+    BerElement *ber = nullptr;
+    for (char *a = ldap_first_attribute(ldap, entry, &ber); a != nullptr;
+         a = ldap_next_attribute(ldap, entry, ber)) {
+
+        if (struct berval **vals = ldap_get_values_len(ldap, entry, a)) {
+            const auto val = (**vals).bv_val;
+
+            auto matches = [a](const QByteArray &name) {
+                return !name.isEmpty() && qstricmp(a, name.constData()) == 0;
+            };
+
+            if (matches(m_attrs.name)) {
+                cn = val;
+            }
+            if (matches(m_attrs.company)) {
+                company = val;
+            }
+            if (matches(m_attrs.uid)) {
+                sourceUid = val;
+            }
+            if (matches(m_attrs.email)) {
+                mail = val;
+            }
+            if (qstricmp(a, "modifyTimestamp") == 0) {
+                modifyTimestamp = val;
+            }
+            if (matches(m_attrs.commercial)) {
+                phoneNumbers.append({ Contact::NumberType::Commercial, stripBaseNumber(val),
+                                      m_sipStatusSubscriptableAttributes.contains(
+                                              QString::fromLatin1(m_attrs.commercial)) });
+            }
+            if (matches(m_attrs.mobile)) {
+                phoneNumbers.append({ Contact::NumberType::Mobile, stripBaseNumber(val),
+                                      m_sipStatusSubscriptableAttributes.contains(
+                                              QString::fromLatin1(m_attrs.mobile)) });
+            }
+            if (matches(m_attrs.home)) {
+                phoneNumbers.append({ Contact::NumberType::Home, stripBaseNumber(val),
+                                      m_sipStatusSubscriptableAttributes.contains(
+                                              QString::fromLatin1(m_attrs.home)) });
+            }
+
+            ldap_value_free_len(vals);
+        }
+
+        ldap_memfree(a);
+    }
+
+    if (ber) {
+        ber_free(ber, 0);
+    }
+
+    Q_EMIT newContactReady(dn, sourceUid, { m_priority, m_displayName, m_group }, cn, company, mail,
+                           QDateTime::fromString(modifyTimestamp, "yyyyMMddhhmmsst"), phoneNumbers,
+                           QPrivateSignal());
+}
+
+void LDAPAddressBookFeeder::parseAvatarEntry(LDAP *ldap, LDAPMessage *entry,
+                                             const QByteArray &avatarAttr)
+{
+    QString dn;
+    QDateTime modifyTimestamp;
+    QByteArray jpegPhoto;
+
+    if (char *dnTemp = ldap_get_dn(ldap, entry)) {
+        dn = dnTemp;
+        ldap_memfree(dnTemp);
+    }
+
+    BerElement *ber = nullptr;
+    for (char *a = ldap_first_attribute(ldap, entry, &ber); a != nullptr;
+         a = ldap_next_attribute(ldap, entry, ber)) {
+
+        if (struct berval **vals = ldap_get_values_len(ldap, entry, a)) {
+            if (!avatarAttr.isEmpty() && qstricmp(a, avatarAttr.constData()) == 0) {
+                jpegPhoto = QByteArray((**vals).bv_val, static_cast<qsizetype>((**vals).bv_len));
+            } else if (qstricmp(a, "modifyTimestamp") == 0) {
+                modifyTimestamp = QDateTime::fromString(QString::fromUtf8((**vals).bv_val),
+                                                        "yyyyMMddhhmmsst");
+            }
+
+            ldap_value_free_len(vals);
+        }
+
+        ldap_memfree(a);
+    }
+
+    if (ber) {
+        ber_free(ber, 0);
+    }
+
+    if (!jpegPhoto.isEmpty()) {
+        const auto contactId = AddressBook::instance().hashifyCn(dn);
+        Q_EMIT newExternalImageAdded(contactId, jpegPhoto, modifyTimestamp, QPrivateSignal());
+    }
+}
+
+void LDAPAddressBookFeeder::loadAvatarsForContacts()
+{
+    // Not configured - mark us as ready
+    if (m_attrs.name.isEmpty() || m_attrs.avatar.isEmpty()) {
+        m_isProcessing = false;
+        return;
+    }
+
+    bool firstRun = false;
+    const auto dirtyContacts = AvatarManager::instance().initialLoad(&firstRun);
+
+    if (firstRun) {
+        loadAllAvatars(m_ldapConfig);
+    } else if (!dirtyContacts.isEmpty()) {
+        loadAvatars(dirtyContacts);
+    } else {
+        m_isProcessing = false;
+    }
 }

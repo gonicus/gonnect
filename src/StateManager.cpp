@@ -14,12 +14,14 @@
 #include "CallHistory.h"
 #include "GlobalCallState.h"
 #include "ExternalMediaManager.h"
+#include "NetworkHelper.h"
+#include "ViewHelper.h"
 
 Q_LOGGING_CATEGORY(lcStateHandling, "gonnect.state")
 
 StateManager::StateManager(QObject *parent) : QObject(parent)
 {
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(MULTI_INSTANCE)
     m_activationAdapter = new DBusActivationAdapter(this);
     m_apiEndpoint = new GOnnectDBusAPI(this);
 
@@ -29,20 +31,6 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
                 con.registerObject(FLATPAK_APP_PATH, this) && con.registerService(FLATPAK_APP_ID);
     }
 #endif
-
-    m_inhibitHelper = &InhibitHelper::instance();
-    connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
-            &StateManager::sessionStateChanged);
-
-    auto &cm = SIPCallManager::instance();
-    connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
-        if (SIPCallManager::instance().activeCalls() == 0) {
-            m_inhibitHelper->release();
-        }
-    });
-
-    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
-            &StateManager::updateInhibitState);
 }
 
 bool StateManager::globalShortcutsSupported() const
@@ -66,6 +54,12 @@ QVariantMap StateManager::globalShortcuts() const
 
 void StateManager::initialize()
 {
+    m_inhibitHelper = &InhibitHelper::instance();
+    connect(m_inhibitHelper, &InhibitHelper::stateChanged, this,
+            &StateManager::sessionStateChanged);
+
+    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
+            &StateManager::updateInhibitState);
     auto &globalShortcuts = GlobalShortcuts::instance();
 
     QList<Shortcut> shortcuts = {
@@ -90,7 +84,9 @@ void StateManager::initialize()
     connect(&globalShortcuts, &GlobalShortcuts::activated, this, [](const QString &action) {
         auto &cm = SIPCallManager::instance();
         if (action == "dial") {
-            qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+            static_cast<Application *>(Application::instance())->rootWindow()->show();
+            static_cast<Application *>(Application::instance())->rootWindow()->raise();
+            Q_EMIT ViewHelper::instance().activateSearch();
         } else if (action == "hangup") {
             cm.endAllCalls();
         } else if (action == "redial") {
@@ -98,6 +94,21 @@ void StateManager::initialize()
             SIPCallManager::instance().call(ci.sipUrl);
         } else if (action == "toggle-hold") {
             cm.toggleHold();
+        }
+    });
+    connect(&NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this, []() {
+        if (NetworkHelper::instance().hasConnectivity()) {
+            SIPManager::instance().handleNetworkChanged();
+        }
+    });
+}
+
+void StateManager::initializeSip()
+{
+    auto &cm = SIPCallManager::instance();
+    connect(&cm, &SIPCallManager::activeCallsChanged, this, [this]() {
+        if (SIPCallManager::instance().activeCalls() == 0) {
+            m_inhibitHelper->release();
         }
     });
 }
@@ -152,6 +163,8 @@ void StateManager::sessionStateChanged(bool, InhibitHelper::InhibitState state)
                             | InhibitHelper::InhibitFlag::SUSPEND
                             | InhibitHelper::InhibitFlag::USER_SWITCH,
                     QObject::tr("There are %n active call(s).", "calls", activeCalls));
+        } else if (state == InhibitHelper::InhibitState::ENDING) {
+            SIPManager::instance().suspend();
         }
     }
 }
@@ -178,7 +191,7 @@ void StateManager::sendArguments(const QStringList &args)
 
 void StateManager::Activate(const QVariantMap &)
 {
-    qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+    static_cast<Application *>(Application::instance())->rootWindow()->show();
 }
 
 void StateManager::ActivateAction(const QString &action_name, const QVariantList &parameter,
@@ -192,7 +205,7 @@ void StateManager::ActivateAction(const QString &action_name, const QVariantList
             QString value = v.toString();
 
             if (value == "--show") {
-                qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+                static_cast<Application *>(Application::instance())->rootWindow()->show();
             } else if (value == "--hangup") {
                 SIPCallManager::instance().endAllCalls();
             } else {
@@ -201,7 +214,7 @@ void StateManager::ActivateAction(const QString &action_name, const QVariantList
             }
         }
     } else if (action_name == "Show") {
-        qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+        static_cast<Application *>(Application::instance())->rootWindow()->show();
     } else if (action_name == "Hangup") {
         SIPCallManager::instance().endAllCalls();
     } else if (action_name == "refreshIdentities") {
@@ -255,6 +268,6 @@ void StateManager::Open(const QStringList &args, const QVariantMap &)
         }
         ActivateAction("invoke", vArgs, {});
     } else {
-        qobject_cast<Application *>(Application::instance())->rootWindow()->show();
+        static_cast<Application *>(Application::instance())->rootWindow()->show();
     }
 }

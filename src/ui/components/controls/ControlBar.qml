@@ -56,10 +56,10 @@ Item {
     SearchResultPopup {
         id: resultPopup
         x: control.width / 2 - resultPopup.width / 2
-        y: searchField.height + 12
+        y: searchField.height + Theme.d
         width: control.width * 0.75
         height: control.Window ? control.Window.height * 0.75 : 0
-        topMargin: 12 + searchField.height
+        topMargin: Theme.d + searchField.height
         searchText: searchField.text
 
         onPrimaryActionTriggered: () => {
@@ -70,16 +70,17 @@ Item {
     }
 
     Row {
-        spacing: 10
+        spacing: Theme.d
         anchors {
             right: parent.right
-            rightMargin: 20
+            rightMargin: Theme.d * 2
             verticalCenter: parent.verticalCenter
         }
 
         HeaderIconButton {
             id: burgerMenuButton
             iconSource: Icons.applicationMenu
+            accessiblePurpose: qsTr("App menu")
             active: control.Window.active
             iconSize: 16
             anchors.verticalCenter: parent.verticalCenter
@@ -97,24 +98,39 @@ Item {
             size: 28
             initials: ViewHelper.initials(ViewHelper.currentUserName)
             source: ViewHelper.currentUser?.hasAvatar ? ("file://" + ViewHelper.currentUser.avatarPath) : ""
-            showBuddyStatus: ViewHelper.currentUser?.hasBuddyState ?? false
-            buddyStatus: SIPBuddyState.UNKNOWN
-
-            Component.onCompleted: () => {
-                avatarImage.updateBuddyStatus()
-            }
-
-            function updateBuddyStatus() {
-                avatarImage.buddyStatus = ViewHelper.currentUser?.hasBuddyState
-                        ? SIPManager.buddyStatus(ViewHelper.currentUser.subscriptableNumber)
-                        : SIPBuddyState.UNKNOWN
-            }
+            showPresenceStatus: !avatarImage.isUnregistered
+            presenceStatus: GlobalStateAggregator.presenceState
+            isUnregistered: true
 
             Connections {
-                target: SIPManager
-                enabled: ViewHelper.currentUser?.hasBuddyState ?? false
-                function onBuddyStateChanged(url : string, status : int) {
-                    avatarImage.updateBuddyStatus()
+                target: SIPAccountManager
+                function onSipRegisteredChanged(status : bool) {
+                    if (status) {
+                        avatarImage.isUnregistered = false
+                    } else {
+                        avatarImage.isUnregistered = true
+                    }
+                }
+            }
+
+
+            TapHandler {
+                gesturePolicy: TapHandler.WithinBounds
+                grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+                exclusiveSignals: TapHandler.SingleTap
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onTapped: () => {
+                    ownAvatarContextMenuComponent.createObject(avatarImage).popup()
+                }
+            }
+
+            Component {
+                id: ownAvatarContextMenuComponent
+
+                OwnAvatarContextMenu {
+                    id: avatarContextMenu
+                    onClosed: () => avatarContextMenu.destroy()
+                    x: -avatarContextMenu.implicitWidth
                 }
             }
         }

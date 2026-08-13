@@ -1,5 +1,7 @@
 #include "CallHistory.h"
 #include "ErrorBus.h"
+#include "ReadOnlyConfdSettings.h"
+#include "Ticker.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -37,7 +39,10 @@ CallHistory::CallHistory(QObject *parent) : QObject{ parent }
     auto db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(m_databasePath);
 
+    connect(&Ticker::instance(), &Ticker::newDay, this, &CallHistory::removeOldHistory);
+
     ensureDatabaseVersion();
+    removeOldHistory();
     readFromDatabase();
 }
 
@@ -175,6 +180,40 @@ void CallHistory::ensureDatabaseVersion()
     }
 }
 
+void CallHistory::removeOldHistory()
+{
+    ReadOnlyConfdSettings settings;
+    bool ok = false;
+    const auto days = settings.value("generic/keepHistoryDays", 90).toUInt(&ok);
+
+    if (!ok) {
+        qCCritical(lcCallHistory)
+                << "Unable to parse settings value generic/keepHistoryDays as number";
+        return;
+    }
+
+    auto db = QSqlDatabase::database();
+
+    if (!db.open()) {
+        qCCritical(lcCallHistory) << "Unable to open call history database:"
+                                  << db.lastError().text();
+    } else {
+        qCInfo(lcCallHistory)
+                << "Successfully opened history database to remove old history entries";
+
+        QSqlQuery query(db);
+        query.prepare(QString("DELETE FROM history WHERE time <= unixepoch('now', '-%1 days');")
+                              .arg(days));
+
+        if (query.exec()) {
+            qInfo() << query.numRowsAffected() << "old history entries deleted";
+        } else {
+            qCCritical(lcCallHistory)
+                    << "Error on executing SQL query:" << query.lastError().text();
+        }
+    }
+}
+
 void CallHistory::writeToDatabase(CallHistoryItem &item)
 {
     auto db = QSqlDatabase::database();
@@ -189,15 +228,17 @@ void CallHistory::writeToDatabase(CallHistoryItem &item)
 
         if (item.dataBaseId() < 0) {
             qCInfo(lcCallHistory) << "Writing new history item to database";
-            query.prepare("INSERT INTO history (time, remoteUrl, account, type, durationSeconds, "
-                          "contactId, isSipSubscriptable) VALUES (:time, :remoteUrl, :account, "
-                          ":type, :durationSeconds, :contactId, :isSipSubscriptable);");
+            query.prepare(
+                    "INSERT INTO history (time, remoteUrl, account, type, durationSeconds, "
+                    "contactId, isSipSubscriptable, hops) VALUES (:time, :remoteUrl, :account, "
+                    ":type, :durationSeconds, :contactId, :isSipSubscriptable, :hops);");
         } else {
             qCInfo(lcCallHistory) << "Updating new history item with id" << item.dataBaseId()
                                   << "in database";
             query.prepare("UPDATE history SET time = :time, remoteUrl = :remoteUrl, account = "
                           ":account, type = :type, durationSeconds = :durationSeconds, contactId = "
-                          ":contactId, isSipSubscriptable = :isSipSubscriptable WHERE id = :id;");
+                          ":contactId, isSipSubscriptable = :isSipSubscriptable, hops = :hops "
+                          "WHERE id = :id;");
             query.bindValue(":id", item.dataBaseId());
         }
 
@@ -208,6 +249,7 @@ void CallHistory::writeToDatabase(CallHistoryItem &item)
         query.bindValue(":durationSeconds", item.durationSeconds());
         query.bindValue(":contactId", item.contactId());
         query.bindValue(":isSipSubscriptable", item.isSipSubscriptable());
+        query.bindValue(":hops", item.hops().join(';'));
 
         if (!query.exec()) {
             qCCritical(lcCallHistory)
@@ -252,7 +294,8 @@ void CallHistory::readFromDatabase()
                         query.value("remoteUrl").toString(), query.value("account").toString(),
                         query.value("contactId").toString(),
                         query.value("isSipSubscriptable").toBool(), query.value("id").toLongLong(),
-                        query.value("durationSeconds").toUInt(), type, this);
+                        query.value("durationSeconds").toUInt(), type,
+                        query.value("hops").toString().split(';', Qt::SkipEmptyParts), this);
 
                 m_historyItems.push_back(item);
             }
@@ -289,10 +332,11 @@ CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem *item)
 
 CallHistoryItem *CallHistory::addHistoryItem(CallHistoryItem::Types type, const QString &account,
                                              const QString &remoteUrl, const QString &contactId,
-                                             bool isSipSubscriptable)
+                                             bool isSipSubscriptable, const QStringList &hops)
 {
 
-    auto item = new CallHistoryItem(remoteUrl, account, contactId, isSipSubscriptable, type, this);
+    auto item = new CallHistoryItem(remoteUrl, account, contactId, isSipSubscriptable, type, hops,
+                                    this);
     const auto index = insertItemAtCorrectPosition(item);
     Q_EMIT itemAdded(index, item);
     return item;

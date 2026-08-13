@@ -3,6 +3,10 @@
 #include "AddressBookManager.h"
 #include "AvatarManager.h"
 #include "ReadOnlyConfdSettings.h"
+#include "AuthManager.h"
+#include "PhoneNumberUtil.h"
+#include "ErrorBus.h"
+#include "SecretResponse.h"
 
 #include <QRegularExpression>
 #include <QLoggingCategory>
@@ -18,35 +22,119 @@ Q_LOGGING_CATEGORY(lcCardDAVAddressBookFeeder, "gonnect.app.feeder.CardDAVAddres
 
 using namespace std::chrono_literals;
 
-CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, AddressBookManager *parent)
-    : QObject(parent), m_group(group)
+CardDAVAddressBookFeeder::CardDAVAddressBookFeeder(const QString &group, const int retryCount,
+                                                   const int retryInterval,
+                                                   AddressBookManager *parent)
+    : QObject(parent),
+      m_group(group),
+      m_retryCount(retryCount),
+      m_retryInterval(retryInterval),
+      m_initialRetryCount(retryCount)
 {
     m_manager = qobject_cast<AddressBookManager *>(parent);
 }
 
-void CardDAVAddressBookFeeder::init(const size_t settingsHash, const QString &host,
-                                    const QString &path, const QString &user,
-                                    const QString &password, int port, bool useSSL)
+void CardDAVAddressBookFeeder::init()
 {
-    m_settingsHash = settingsHash;
     m_cacheWriteTimer.setSingleShot(true);
     m_cacheWriteTimer.setInterval(3s);
-    m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCachImpl);
+    m_cacheWriteTimer.callOnTimeout(this, &CardDAVAddressBookFeeder::flushCacheImpl);
 
-    loadCachedData(settingsHash);
+    ReadOnlyConfdSettings settings;
+    m_webdav.setVerifyCa(settings.value("generic/verifyServer", true).toBool());
+    m_webdav.addSslCa(AuthManager::instance().sslCAs());
 
-    m_webdav.setConnectionSettings(useSSL ? QWebdav::HTTPS : QWebdav::HTTP, host, path, user,
-                                   password, port);
-    connect(&m_webdavParser, &QWebdavDirParser::finished, this,
-            &CardDAVAddressBookFeeder::onParserFinished);
-    connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
-            &CardDAVAddressBookFeeder::onError);
-    connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
+    loadCachedData(m_settingsHash);
+
+    if (!m_areWebDavConnectionsInitialized) {
+        m_areWebDavConnectionsInitialized = true;
+        connect(&m_webdavParser, &QWebdavDirParser::finished, this,
+                &CardDAVAddressBookFeeder::onParserFinished);
+
+        connect(&m_webdavParser, &QWebdavDirParser::errorChanged, this,
+                &CardDAVAddressBookFeeder::onError);
+        connect(&m_webdav, &QWebdav::errorChanged, this, &CardDAVAddressBookFeeder::onError);
+
+        connect(&m_webdav, &QWebdav::authenticationRequired, this, [this]() {
+            m_pendingAuth = true;
+            checkErrorStatus();
+        });
+    }
 }
 
-void CardDAVAddressBookFeeder::feedAddressBook()
+void CardDAVAddressBookFeeder::checkErrorStatus()
 {
-    m_webdavParser.listDirectory(&m_webdav, "/");
+    QMetaObject::invokeMethod(
+            this,
+            [this]() {
+                // Prepare feeder for re-run
+                if (m_cacheWriteTimer.isActive()) {
+                    m_cacheWriteTimer.stop();
+                }
+
+                if (m_pendingAuth && m_pendingError) {
+                    // Previous run failed due to auth, we'll prompt the user again immediately
+                    qCWarning(lcCardDAVAddressBookFeeder)
+                            << "Failed to process CardDAV sources - invalid password";
+
+                    feedAddressBook(true);
+                } else if (m_pendingError) {
+                    // Some other error has occurred, wait and try again
+                    if (m_retryCount > 0) {
+                        m_retryCount--;
+
+                        qCWarning(lcCardDAVAddressBookFeeder) << "Failed to process CardDAV sources"
+                                                              << m_group << "- trying later";
+
+                        QTimer::singleShot(m_retryInterval, this,
+                                           [this]() { feedAddressBook(true); });
+                    } else {
+                        qCCritical(lcCardDAVAddressBookFeeder)
+                                << "Repeatedly failed to access CardDAV source" << m_group;
+
+                        ErrorBus::instance().addError(
+                                tr("CardDAV source %1 repeatedly failed").arg(m_group));
+
+                        m_isProcessing = false;
+                    }
+                }
+
+                m_pendingAuth = false;
+                m_pendingError = false;
+            },
+            Qt::QueuedConnection);
+}
+
+void CardDAVAddressBookFeeder::resetContacts()
+{
+    AddressBook::instance().removeContactsBySource(m_group);
+}
+
+void CardDAVAddressBookFeeder::onError(QString error)
+{
+    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
+
+    m_pendingError = true;
+    checkErrorStatus();
+}
+
+void CardDAVAddressBookFeeder::feedAddressBook(bool authFailed)
+{
+    m_manager->acquireSecret(authFailed, m_group, [this](const SecretResponse response) {
+        if (response.hasError) {
+            qCCritical(lcCardDAVAddressBookFeeder)
+                    << "Authentication for" << m_group << "has failed";
+            ErrorBus::instance().addError(tr("Authentication error for %1").arg(m_group));
+            m_isProcessing = false;
+        } else {
+            m_isProcessing = true;
+            m_webdav.setConnectionSettings(m_config.useSSL ? QWebdav::HTTPS : QWebdav::HTTP,
+                                           m_config.host, m_config.path, m_config.user,
+                                           response.secret, m_config.port);
+
+            m_webdavParser.listDirectory(&m_webdav, "/");
+        }
+    });
 }
 
 void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid,
@@ -67,6 +155,14 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
                 << "- ignoring";
         return;
     }
+
+    const auto baseNumber = PhoneNumberUtil::canonicalNumber(m_config.baseNumber);
+    auto stripBaseNumber = [&baseNumber](QString num) {
+        if (num.startsWith(baseNumber)) {
+            num = num.sliced(baseNumber.size());
+        }
+        return num;
+    };
 
     // Process vcard
     std::istringstream stringStream(data.toStdString());
@@ -95,8 +191,33 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
             } else if (propName == "EMAIL") {
                 email = QString::fromStdString(prop.getValue());
             } else if (propName == "TEL") {
-                phoneNumbers.append({ Contact::NumberType::Unknown,
-                                      QString::fromStdString(prop.getValue()), false });
+                bool subscriptable = false;
+                auto propParams = prop.params();
+                for (const auto &param : propParams) {
+                    if (param.first == "TYPE") {
+                        const auto types = QString::fromStdString(param.second)
+                                                   .split(QChar(','), Qt::SkipEmptyParts);
+                        for (const auto &type : types) {
+                            if (m_sipStatusSubscriptableAttributes.contains(
+                                        type.trimmed().toLower())) {
+                                subscriptable = true;
+                                break;
+                            }
+                        }
+                        if (subscriptable) {
+                            break;
+                        }
+                    }
+                }
+
+                auto phoneNumber = QString::fromStdString(prop.getValue());
+                phoneNumber = PhoneNumberUtil::isSipUri(phoneNumber)
+                        ? phoneNumber
+                        : PhoneNumberUtil::canonicalNumber(phoneNumber);
+                phoneNumber = stripBaseNumber(phoneNumber);
+
+                phoneNumbers.append({ Contact::NumberType::Unknown, phoneNumber, subscriptable });
+
             } else if (propName == "PHOTO") {
 
                 auto propParams = prop.params();
@@ -121,8 +242,8 @@ void CardDAVAddressBookFeeder::processVcard(QByteArray data, const QString &uuid
 
         if (!uuid.isEmpty() && !name.isEmpty() && !phoneNumbers.isEmpty()) {
             Contact *contact = AddressBook::instance().addContact(
-                    uuid, remoteUid, { m_priority, m_displayName }, name, org, email, modifiedDate,
-                    phoneNumbers, m_blockInfo);
+                    uuid, remoteUid, { m_priority, m_displayName, m_group }, name, org, email,
+                    modifiedDate, phoneNumbers, m_blockInfo);
             m_cachedContacts.insert(uuid, contact);
 
             processPhotoProperty(contact->id(), photoData, modifiedDate);
@@ -157,18 +278,29 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
 
     QDataStream in(&cacheFile);
 
-    quint16 magic;
-    quint8 version;
-    qsizetype numberOfContacts;
+    quint16 magic = 0;
+    quint8 version = 0;
 
     in >> magic;
     in >> version;
+
+    if (in.status() != QDataStream::Ok || magic != CARDDAV_MAGIC || version != CARDDAV_VERSION) {
+        qCInfo(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
+                                           << "is invalid and will therefore be removed.";
+        cacheFile.close();
+        cacheFile.remove();
+        return;
+    }
+
+    qsizetype numberOfContacts = 0;
     in >> m_ignoredIds;
     in >> numberOfContacts;
 
-    if (magic != CARDDAV_MAGIC || version != CARDDAV_VERSION) {
-        qCInfo(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
-                                           << "in invalid and will therefore be removed.";
+    if (in.status() != QDataStream::Ok || numberOfContacts < 0 || numberOfContacts > 1000000) {
+        qCWarning(lcCardDAVAddressBookFeeder) << "CardDAV cache file at" << filePath
+                                              << "is corrupted and will therefore be removed.";
+        m_ignoredIds.clear();
+        cacheFile.close();
         cacheFile.remove();
         return;
     }
@@ -178,6 +310,20 @@ void CardDAVAddressBookFeeder::loadCachedData(const size_t hash)
         Contact *contact = new Contact(this);
         in >> key;
         in >> *contact;
+
+        if (in.status() != QDataStream::Ok) {
+            delete contact;
+            qCWarning(lcCardDAVAddressBookFeeder)
+                    << "CardDAV cache file at" << filePath
+                    << "is truncated or corrupted - aborting cache load.";
+            qDeleteAll(m_cachedContacts);
+            m_cachedContacts.clear();
+            m_ignoredIds.clear();
+            cacheFile.close();
+            cacheFile.remove();
+            return;
+        }
+
         m_cachedContacts.insert(key, contact);
     }
 
@@ -211,13 +357,11 @@ void CardDAVAddressBookFeeder::processPhotoProperty(const QString &id, const QBy
     }
 }
 
-void CardDAVAddressBookFeeder::onError(QString error) const
-{
-    qCCritical(lcCardDAVAddressBookFeeder) << "Error:" << error;
-}
-
 void CardDAVAddressBookFeeder::onParserFinished()
 {
+    m_retryCount = m_initialRetryCount;
+    resetContacts();
+
     const auto list = m_webdavParser.getList();
     for (const auto &item : list) {
         const auto cacheId = item.name();
@@ -225,9 +369,9 @@ void CardDAVAddressBookFeeder::onParserFinished()
 
         if (m_ignoredIds.contains(cacheId) && m_ignoredIds.value(cacheId) >= modifiedDate) {
             continue;
-        } else if (Contact *cashedContact = m_cachedContacts.value(cacheId, nullptr)) {
-            if (cashedContact->lastModified() >= modifiedDate) {
-                AddressBook::instance().addContact(cashedContact);
+        } else if (Contact *cachedContact = m_cachedContacts.value(cacheId, nullptr)) {
+            if (cachedContact->lastModified() >= modifiedDate) {
+                AddressBook::instance().addContact(cachedContact);
                 continue;
             }
         }
@@ -239,6 +383,14 @@ void CardDAVAddressBookFeeder::onParserFinished()
                     if (!reply) {
                         return;
                     }
+
+                    if (reply->error() != QNetworkReply::NoError) {
+                        qCDebug(lcCardDAVAddressBookFeeder)
+                                << "WebDAV reply error:" << reply->error();
+                        reply->deleteLater();
+                        return;
+                    }
+
                     QByteArray data = reply->readAll();
                     reply->deleteLater();
 
@@ -250,9 +402,11 @@ void CardDAVAddressBookFeeder::onParserFinished()
                 },
                 Qt::ConnectionType::SingleShotConnection);
     }
+
+    m_isProcessing = false;
 }
 
-void CardDAVAddressBookFeeder::flushCachImpl()
+void CardDAVAddressBookFeeder::flushCacheImpl()
 {
     const auto filePath = cacheFilePath(m_settingsHash, true);
     QFile cacheFile(filePath);
@@ -284,11 +438,8 @@ void CardDAVAddressBookFeeder::flushCachImpl()
 
 void CardDAVAddressBookFeeder::process()
 {
-    m_manager->acquireSecret(m_group, [this](const QString &password) { processImpl(password); });
-}
+    m_retryCount = m_initialRetryCount;
 
-void CardDAVAddressBookFeeder::processImpl(const QString &password)
-{
     ReadOnlyConfdSettings settings;
     settings.beginGroup(m_group);
 
@@ -297,7 +448,7 @@ void CardDAVAddressBookFeeder::processImpl(const QString &password)
     for (const auto &key : keys) {
         settingsHash.insert(key, settings.value(key, "").toString());
     }
-    const auto controlHash = qHash(settingsHash);
+    m_settingsHash = qHash(settingsHash);
 
     const bool useSSL = settings.value("useSSL", false).toBool();
 
@@ -305,7 +456,7 @@ void CardDAVAddressBookFeeder::processImpl(const QString &password)
     m_blockInfo.responseCode =
             settings.value("blockSipCode", GONNECT_DEFAULT_BLOCK_SIP_CODE).toUInt();
 
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
     bool ok = true;
     m_priority = settings.value("prio", 0).toUInt(&ok);
     if (!ok) {
@@ -313,18 +464,58 @@ void CardDAVAddressBookFeeder::processImpl(const QString &password)
         m_priority = 0;
     }
 
-    init(controlHash, settings.value("host", "").toString(), settings.value("path", "").toString(),
-         settings.value("user", "").toString(), password,
-         settings.value("port", useSSL ? 443 : 80).toInt(), useSSL);
+    const auto subScriptableAttributes =
+            settings.value("sipStatusSubscriptableAttributes", "").toStringList();
+    m_sipStatusSubscriptableAttributes =
+            subScriptableAttributes.isEmpty() ? QStringList() : subScriptableAttributes;
+
+    // Unpack list in single string
+    if (m_sipStatusSubscriptableAttributes.size() == 1
+        && m_sipStatusSubscriptableAttributes.at(0).contains(',')) {
+        m_sipStatusSubscriptableAttributes =
+                m_sipStatusSubscriptableAttributes.at(0).split(',', Qt::SkipEmptyParts);
+    }
+
+    qCDebug(lcCardDAVAddressBookFeeder) << "Read subscribable attributes from config for" << m_group
+                                        << ":" << m_sipStatusSubscriptableAttributes;
+
+    for (QString &attr : m_sipStatusSubscriptableAttributes) {
+        attr = std::move(attr).toLower().trimmed();
+    }
+
+    m_config = { settings.value("baseNumber", "").toString(),
+                 settings.value("host", "").toString(),
+                 settings.value("path", "").toString(),
+                 settings.value("user", "").toString(),
+                 settings.value("port", useSSL ? 443 : 80).toInt(),
+                 useSSL };
+
+    init();
     feedAddressBook();
 
     settings.endGroup();
-}
+};
 
 QUrl CardDAVAddressBookFeeder::networkCheckURL() const
 {
+    ReadOnlyConfdSettings settings;
+    settings.beginGroup(m_group);
+    const bool useSSL = settings.value("useSSL", false).toBool();
+    const QString host = settings.value("host", "").toString();
+    const QString path = settings.value("path", "").toString();
+    const int port = settings.value("port", useSSL ? 443 : 80).toInt();
+    settings.endGroup();
 
-    return QUrl();
+    if (host.isEmpty()) {
+        return QUrl();
+    }
+
+    QUrl url;
+    url.setScheme(useSSL ? "https" : "http");
+    url.setHost(host);
+    url.setPort(port);
+    url.setPath(path);
+    return url;
 }
 
 #undef CARDDAV_MAGIC

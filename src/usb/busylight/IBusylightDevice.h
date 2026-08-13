@@ -19,14 +19,17 @@ public:
     explicit IBusylightDevice(const hid_device_info &deviceInfo, QObject *parent = nullptr);
     virtual ~IBusylightDevice();
 
+    virtual void switchStreamlight(bool on) { Q_UNUSED(on); };
+
     bool open();
     void close();
 
     void switchOn(QColor color);
     void switchOff();
-    virtual void switchStreamlight(bool on) { Q_UNUSED(on); };
     void startBlinking(QColor color);
     void stopBlinking();
+
+    QString path() const { return m_path; }
 
 protected:
     virtual void send(bool on) = 0;
@@ -37,4 +40,5 @@ private:
     QTimer m_blinkTimer;
     QString m_path;
     bool m_isOn = false;
+    bool m_isRunning = false;
 };

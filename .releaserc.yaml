@@ -1,22 +1,20 @@
 branches: 
   - name: release
     channel: flathub
-  - name: freeze/**
-    channel: gonihub
+  - name: freeze/next
+    channel: beta
     prerelease: beta
   - name: hotfix/**
-    channel: gonihub
+    channel: beta
     prerelease: "${name.split('/').slice(0, 2).join('-').toLowerCase()}"
 plugins:
   - "@semantic-release/commit-analyzer"
   - "@semantic-release/release-notes-generator"
   - "@semantic-release/github"
-  - 
-    - "@semantic-release/exec"
-    - prepareCmd: ./scripts/prepare-new-version.sh ${nextRelease.version} '${Buffer.from(JSON.stringify(commits)).toString('base64')}'
+  - - "@semantic-release/exec"
+    - prepareCmd: ./scripts/prepare-new-version.sh ${nextRelease.version}
   - "@semantic-release/changelog"
-  - 
-    - "@semantic-release/git"
+  - - "@semantic-release/git"
     - assets:
       - CMakeLists.txt
       - CHANGELOG.md

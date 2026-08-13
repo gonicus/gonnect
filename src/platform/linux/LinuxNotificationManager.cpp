@@ -1,6 +1,7 @@
 #include <libnotify/notify.h>
 #include <QApplication>
 #include "LinuxNotificationManager.h"
+#include "Pinger.h"
 
 NotificationManager &NotificationManager::instance()
 {
@@ -14,6 +15,10 @@ NotificationManager &NotificationManager::instance()
 LinuxNotificationManager::LinuxNotificationManager() : NotificationManager()
 {
     notify_init(qAppName().toStdString().c_str());
+
+    if (GList *caps = notify_get_server_caps()) {
+        g_list_free_full(caps, g_free);
+    }
 }
 
 void LinuxNotificationManager::handleAction(QString id, QString action, QVariantList parameters)
@@ -40,10 +45,9 @@ QString LinuxNotificationManager::add(Notification *notification)
                                         notification->iconName().toStdString().c_str());
     } else {
         QByteArray iconData = notification->iconData();
-
         internalNotification = notify_notification_new(notification->title().toStdString().c_str(),
                                                        notification->body().toStdString().c_str(),
-                                                       iconData.isEmpty() ? "dummy" : nullptr);
+                                                       iconData.isEmpty() ? NULL : "dummy");
 
         if (!iconData.isEmpty()) {
             GdkPixbufLoader *loader = gdk_pixbuf_loader_new();
@@ -96,6 +100,18 @@ QString LinuxNotificationManager::add(Notification *notification)
     notify_notification_set_category(internalNotification,
                                      notification->category().toStdString().c_str());
 
+    // Default action
+    if (!notification->defaultAction().isEmpty()) {
+        notify_notification_add_action(
+                internalNotification, "default", "default",
+                [](NotifyNotification *notification, char *, gpointer user_data) {
+                    Notification *en = (Notification *)user_data;
+                    Q_EMIT en->actionInvoked(en->defaultAction(), en->defaultActionParameters());
+                    notify_notification_close(notification, NULL);
+                },
+                (gpointer)notification, NULL);
+    }
+
     // Assemble actions
     QList<QVariantMap> buttonDescriptions = notification->buttonDescriptions();
     for (auto &bd : std::as_const(buttonDescriptions)) {
@@ -119,6 +135,13 @@ QString LinuxNotificationManager::add(Notification *notification)
     notify_notification_show(internalNotification, NULL);
     m_notifications.insert(id, notification);
     m_internalNotifications.insert(id, internalNotification);
+
+    // Ping sound
+    if (notification->playPing()) {
+        auto *pinger = new Pinger(this);
+        connect(pinger, &Pinger::stopped, this, [pinger]() { pinger->deleteLater(); });
+        pinger->ping();
+    }
 
     return notification->id();
 }

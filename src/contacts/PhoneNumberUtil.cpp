@@ -45,10 +45,46 @@ bool ContactInfo::operator!=(const ContactInfo &other)
 
 QString PhoneNumberUtil::cleanPhoneNumber(const QString &number)
 {
-    QString result(number);
+    QString result(QUrl::fromPercentEncoding(number.toLocal8Bit()));
 
     static const QRegularExpression stripRegEx("[^0-9#+*]");
     result.replace(stripRegEx, "");
+
+    return result;
+}
+
+QString PhoneNumberUtil::normalizeNumber(const QString &number)
+{
+    QString result(number);
+
+    static QString nationalPrefix;
+    static QString regionalPrefix;
+
+    static bool isInitialized = false;
+    if (!isInitialized) {
+        isInitialized = true;
+
+        static ReadOnlyConfdSettings settings;
+        nationalPrefix = settings.value("generic/nationalPrefix").toString();
+        regionalPrefix = settings.value("generic/regionalPrefix").toString();
+    }
+
+    static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
+                                                   QRegularExpression::CaseInsensitiveOption);
+    result.replace(sipNumberRegex, "\\1");
+
+    static const QRegularExpression international("^000(.*)$");
+    result.replace(international, "+\\1");
+
+    static const QRegularExpression national("^00(.*)$");
+    if (!nationalPrefix.isEmpty()) {
+        result.replace(national, nationalPrefix + "\\1");
+    }
+
+    static const QRegularExpression regional("^0(.*)$");
+    if (!regionalPrefix.isEmpty()) {
+        result.replace(regional, regionalPrefix + "\\1");
+    }
 
     return result;
 }
@@ -73,32 +109,15 @@ QDebug operator<<(QDebug debug, const ContactInfo &contactInfo)
 
 ContactInfo PhoneNumberUtil::contactInfoBySipUrl(const QString &sipUrl)
 {
-
     if (m_contactInfoCache.contains(sipUrl)) {
         return m_contactInfoCache.value(sipUrl);
     }
 
-    ReadOnlyConfdSettings settings;
-
     // Extract phone number from sip url
     auto phoneNumber = sipUrl;
-    static const QRegularExpression sipNumberRegex("^.*sips?:(.*)@.*$",
-                                                   QRegularExpression::CaseInsensitiveOption);
-    phoneNumber.replace(sipNumberRegex, "\\1");
 
-    static const QRegularExpression international("^000(.*)$");
-    phoneNumber.replace(international, "+\\1");
-
-    static const QRegularExpression national("^00(.*)$");
-    QString nationalPrefix = settings.value("generic/nationalPrefix").toString();
-    if (!nationalPrefix.isEmpty()) {
-        phoneNumber.replace(national, nationalPrefix + "\\1");
-    }
-
-    static const QRegularExpression regional("^0(.*)$");
-    QString regionalPrefix = settings.value("generic/regionalPrefix").toString();
-    if (!regionalPrefix.isEmpty()) {
-        phoneNumber.replace(regional, regionalPrefix + "\\1");
+    if (isSipUri(sipUrl)) {
+        phoneNumber = normalizeNumber(phoneNumber);
     }
 
     ContactInfo info;
@@ -143,6 +162,11 @@ ContactInfo PhoneNumberUtil::contactInfoBySipUrl(const QString &sipUrl)
     return info;
 }
 
+QString PhoneNumberUtil::canonicalNumber(const QString &number)
+{
+    return normalizeNumber(cleanPhoneNumber(number));
+}
+
 bool PhoneNumberUtil::isSipUri(const QString &str)
 {
     static const QRegularExpression sipNumberRegex("^.*sips?:[0-9a-zA-Z_+*#%-]+@.*$",
@@ -160,6 +184,23 @@ QString PhoneNumberUtil::numberFromSipUrl(const QString &sipUrl)
         return matchResult.captured(1);
     }
     return "";
+}
+
+QString PhoneNumberUtil::nameFromSipUrl(const QString &sipUrl)
+{
+    static const QRegularExpression sipNameRegex(
+            R"(^["]?(?<pre>[^"<]*)["]?.*sips?:(?<post>.*)@.*$)",
+            QRegularExpression::CaseInsensitiveOption);
+
+    const auto matchResult = sipNameRegex.match(sipUrl);
+    if (matchResult.hasMatch()) {
+        const auto pre = matchResult.captured("pre");
+        if (!pre.isEmpty()) {
+            return pre;
+        }
+        return matchResult.captured("post");
+    }
+    return numberFromSipUrl(sipUrl);
 }
 
 bool PhoneNumberUtil::isEmergencyCallUrl(const QString &sipUrl)
@@ -191,6 +232,19 @@ bool PhoneNumberUtil::isEmergencyCallUrl(const QString &sipUrl)
         return regex.match(sipUrl).hasMatch();
     }
     return false;
+}
+
+QString PhoneNumberUtil::bareURI(const QString &sipUrl)
+{
+    static const QRegularExpression bareSipRegex("^(.*<)?(sips?:[^>]*)(>.*)?$",
+                                                 QRegularExpression::CaseInsensitiveOption);
+
+    const auto matchResult = bareSipRegex.match(sipUrl);
+    if (matchResult.hasMatch()) {
+        return matchResult.captured(2);
+    }
+
+    return "";
 }
 
 bool PhoneNumberUtil::isNumberAnonymous(const QString &sipUrl)

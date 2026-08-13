@@ -3,8 +3,10 @@
 #include <QAbstractListModel>
 #include <QObject>
 #include <QQmlEngine>
+#include <QSet>
 
 struct NumberStat;
+class Contact;
 
 class HistoryModel : public QAbstractListModel
 {
@@ -33,14 +35,15 @@ public:
         IsFavorite,
         IsBlocked,
         Type,
-        HasBuddyState
+        HasBuddyState,
+        Hops
     };
 
     explicit HistoryModel(QObject *parent = nullptr);
 
-    virtual int rowCount(const QModelIndex &parent) const override;
-    virtual QVariant data(const QModelIndex &index, int role) const override;
-    virtual QHash<int, QByteArray> roleNames() const override;
+    int rowCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
 private Q_SLOTS:
     void handleFavoriteToggle(const NumberStat *item);
@@ -48,6 +51,7 @@ private Q_SLOTS:
 
 private:
     int m_limit = -1;
+    QSet<Contact *> m_avatarTrackedContacts;
 
 Q_SIGNALS:
     void limitChanged();

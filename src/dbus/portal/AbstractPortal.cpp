@@ -114,7 +114,7 @@ QString AbstractPortal::parentId() const
     auto unixServices = dynamic_cast<QGenericUnixServices *>(
             QGuiApplicationPrivate::platformIntegration()->services());
 #endif
-    auto rootWindow = qobject_cast<Application *>(qGuiApp)->rootWindow();
+    auto rootWindow = static_cast<Application *>(qGuiApp)->rootWindow();
     if (rootWindow && unixServices) {
         parentId = unixServices->portalWindowIdentifier(rootWindow);
     }

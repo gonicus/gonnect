@@ -38,7 +38,7 @@ public:
      * @return Pointer to an ldap handle (must be freed with freeLDAPHandle after use) or a nullptr
      * if something did not work
      */
-    [[nodiscard]] static LDAP *initialize(const Config &config);
+    [[nodiscard]] static LDAP *initialize(const Config &config, int &status);
 
     /*!
      * \brief freeLDAPHandle Destroys and frees an LDAP handle

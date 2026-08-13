@@ -1,6 +1,7 @@
 #include "AuthManager.h"
 #include "ReadOnlyConfdSettings.h"
 #include "Credentials.h"
+#include "ErrorBus.h"
 
 #include <QtNetworkAuth/QtNetworkAuth>
 #include <QLoggingCategory>
@@ -24,6 +25,11 @@ void AuthManager::init()
     m_isAuthManagerInitialized = true;
 
     ReadOnlyConfdSettings settings;
+
+    if (!settings.childGroups().contains("jitsi")) {
+        return;
+    }
+
     settings.beginGroup("jitsi");
 
     // Use this when other auth types for Jitsi Meet are implemented
@@ -33,11 +39,15 @@ void AuthManager::init()
         return;
     }
 
-    QSslConfiguration sslConfig;
-    sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    settings.endGroup();
+    QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+    if (!settings.value("generic/verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
     sslConfig.addCaCertificates(sslCAs());
     m_reqFactory.setSslConfiguration(sslConfig);
 
+    settings.beginGroup("jitsi");
     m_reqFactory.setBaseUrl(settings.value("baseUrl", "").toUrl());
 
     m_authFlow = new QOAuth2AuthorizationCodeFlow(this);
@@ -50,6 +60,7 @@ void AuthManager::init()
 
     QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::tokenChanged, this,
                      [this](const QString &token) {
+                         m_isRefreshInProgress = false;
                          qCInfo(lcAuthManager)
                                  << "Received new OAuth access token - updating bearer";
                          m_reqFactory.setBearerToken(token.toLatin1());
@@ -78,6 +89,18 @@ void AuthManager::init()
                                  << errorDescription << ", " << uri << ")";
                      });
 
+    QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::requestFailed, this,
+                     [this](const QAbstractOAuth::Error error) {
+                         qCCritical(lcAuthManager) << "OAuth2 request failed:" << error;
+
+                         if (m_isRefreshInProgress) {
+                             m_isRefreshInProgress = false;
+                             qCInfo(lcAuthManager) << "Refresh failed - starting browser auth";
+                             QMetaObject::invokeMethod(this, &AuthManager::startBrowserAuth,
+                                                       Qt::QueuedConnection);
+                         }
+                     });
+
     QObject::connect(m_authFlow, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this,
                      [](const QUrl &url) {
                          qCInfo(lcAuthManager) << "Opening browser for auth:" << url;
@@ -86,28 +109,27 @@ void AuthManager::init()
                      });
 
     Credentials::instance().get(
-            "jitsi/refreshToken", [this, sslConfig](bool error, const QString &data) {
-                if (error) {
-                    qCCritical(lcAuthManager) << "failed to set credentials:" << data;
-                    return;
+            "jitsi/refreshToken",
+            [this, sslConfig](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError) {
+                    if (!secret.isEmpty()) {
+                        m_authFlow->setRefreshToken(secret);
+                    }
+
+                    ReadOnlyConfdSettings settings;
+                    settings.beginGroup("jitsi");
+
+                    m_authFlow->setAutoRefresh(true);
+                    m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
+                    m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
+                    m_authFlow->setClientIdentifier(
+                            settings.value("clientIdentifier", "").toString());
+                    m_authFlow->setSslConfiguration(sslConfig);
+
+                    settings.endGroup();
+
+                    Q_EMIT isAuthManagerInitializedChanged();
                 }
-
-                if (!data.isEmpty()) {
-                    m_authFlow->setRefreshToken(data);
-                }
-
-                ReadOnlyConfdSettings settings;
-                settings.beginGroup("jitsi");
-
-                m_authFlow->setAutoRefresh(true);
-                m_authFlow->setAuthorizationUrl(settings.value("authorizationUrl", "").toUrl());
-                m_authFlow->setTokenUrl(settings.value("tokenUrl", "").toUrl());
-                m_authFlow->setClientIdentifier(settings.value("clientIdentifier", "").toString());
-                m_authFlow->setSslConfiguration(sslConfig);
-
-                settings.endGroup();
-
-                Q_EMIT isAuthManagerInitializedChanged();
             });
 }
 
@@ -117,11 +139,14 @@ void AuthManager::storeRefreshToken(const QString &token) const
         return;
     }
 
-    Credentials::instance().set("jitsi/refreshToken", token, [](bool error, const QString &data) {
-        if (error) {
-            qCCritical(lcAuthManager) << "failed to set credentials:" << data;
-        }
-    });
+    Credentials::instance().set(
+            "jitsi/refreshToken", token,
+            [](QKeychain::Error error, const QString &, const QString &message) {
+                if (error != QKeychain::NoError) {
+                    ErrorBus::instance().error(
+                            tr("Failed to persist jitsi refresh token: %1").arg(message));
+                }
+            });
 }
 
 bool AuthManager::isOAuthAuthenticated() const
@@ -144,30 +169,13 @@ bool AuthManager::ensureOAuthAuthenticated()
 
         if (expirationDate.isValid()
             && QDateTime::currentDateTime() < expirationDate.addSecs(-60)) {
+            m_isRefreshInProgress = true;
             m_authFlow->refreshTokens();
             return false;
         }
     }
 
-    auto replyHandler = new QOAuthHttpServerReplyHandler(this);
-
-    QObject::connect(replyHandler, &QOAuthHttpServerReplyHandler::tokenRequestErrorOccurred, this,
-                     [replyHandler](QAbstractOAuth::Error error, const QString &errorString) {
-                         Q_UNUSED(error);
-                         qCCritical(lcAuthManager) << "Error on receiving token:" << errorString;
-                         replyHandler->close();
-                         replyHandler->deleteLater();
-                     });
-
-    QObject::connect(replyHandler, &QOAuthHttpServerReplyHandler::tokensReceived, this,
-                     [replyHandler](const QVariantMap &) {
-                         replyHandler->close();
-                         replyHandler->deleteLater();
-                     });
-
-    m_authFlow->setReplyHandler(replyHandler);
-    m_authFlow->grant();
-
+    startBrowserAuth();
     return false;
 }
 
@@ -177,6 +185,36 @@ void AuthManager::setIsWaitingForAuth(bool value)
         m_isWaitingForAuth = value;
         Q_EMIT isWaitingForAuthChanged();
     }
+}
+
+void AuthManager::startBrowserAuth()
+{
+    if (m_authFlow->status() == QAbstractOAuth::Status::RefreshingToken) {
+        return;
+    }
+
+    clearReplyHandler();
+
+    m_replyHandler = new QOAuthHttpServerReplyHandler(this);
+
+    QObject::connect(
+            m_replyHandler, &QOAuthHttpServerReplyHandler::tokenRequestErrorOccurred, this,
+            [this, handler = m_replyHandler](QAbstractOAuth::Error, const QString &errorString) {
+                qCCritical(lcAuthManager) << "Error on receiving token:" << errorString;
+                if (handler == m_replyHandler) {
+                    clearReplyHandler();
+                }
+            });
+
+    QObject::connect(m_replyHandler, &QOAuthHttpServerReplyHandler::tokensReceived, this,
+                     [this, handler = m_replyHandler](const QVariantMap &) {
+                         if (handler == m_replyHandler) {
+                             clearReplyHandler();
+                         }
+                     });
+
+    m_authFlow->setReplyHandler(m_replyHandler);
+    m_authFlow->grant();
 }
 
 QDateTime AuthManager::tokenExpiry(const QString &token) const
@@ -222,6 +260,15 @@ QDateTime AuthManager::tokenExpiry(const QString &token) const
     }
 
     return QDateTime::fromSecsSinceEpoch(expValue.toInt());
+}
+
+void AuthManager::clearReplyHandler()
+{
+    if (m_replyHandler) {
+        m_replyHandler->close();
+        m_replyHandler->deleteLater();
+        m_replyHandler = nullptr;
+    }
 }
 
 void AuthManager::authenticateJitsiRoom(const QString &roomName)
@@ -360,8 +407,12 @@ void AuthManager::authenticateJitsiImpl(const QString &roomName)
 
     auto request = m_reqFactory.createRequest(QUrlQuery(QString("room=%1").arg(roomName)));
 
-    QSslConfiguration sslConfig;
-    sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+
+    ReadOnlyConfdSettings settings;
+    if (!settings.value("generic/verifyServer", true).toBool()) {
+        sslConfig.setPeerVerifyMode(QSslSocket::PeerVerifyMode::VerifyNone);
+    }
     sslConfig.addCaCertificates(sslCAs());
     request.setSslConfiguration(sslConfig);
 

@@ -1,12 +1,14 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QTimer>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
 
 #include "AppSettings.h"
-#include "SIPCall.h"
 
+class SIPCall;
 class DtmfGenerator;
 
 class SIPCallManager : public QObject
@@ -19,6 +21,12 @@ class SIPCallManager : public QObject
     Q_DISABLE_COPY(SIPCallManager)
 
 public:
+    enum class QualityLevel { Low, Medium, High };
+    Q_ENUM(QualityLevel)
+
+    enum class SecurityLevel { Low, Medium, High };
+    Q_ENUM(SecurityLevel)
+
     Q_REQUIRED_RESULT static SIPCallManager &instance()
     {
         static SIPCallManager *_instance = nullptr;
@@ -42,7 +50,7 @@ public:
 
     bool isEarlyCallState() const { return m_earlyCallState; }
 
-    unsigned missedCalls() const { return m_missedCalls; }
+    Q_INVOKABLE unsigned missedCalls() const { return m_missedCalls; }
 
     QStringList callIds() const;
     Q_INVOKABLE QString call(const QString &number, bool silent = false);
@@ -53,7 +61,7 @@ public:
     Q_INVOKABLE void endCall(SIPCall *call);
     Q_INVOKABLE void endCall(QString id);
     Q_INVOKABLE void endAllCalls();
-    void holdOtherCalls(const SIPCall *call);
+    void holdOtherCalls(SIPCall *call);
     void holdAllCalls() const;
     void unholdAllCalls() const;
     Q_INVOKABLE void toggleHoldCall(const QString &accountId, const int callId);
@@ -98,6 +106,8 @@ public:
     void removeCall(SIPCall *call);
     void updateCallCount();
 
+    void updateConferenceBridge();
+
     QList<SIPCall *> calls() const { return m_calls; }
 
     ~SIPCallManager() = default;
@@ -119,6 +129,11 @@ Q_SIGNALS:
     void callDelayChanged(SIPCall *call);
     void capabilitiesChanged(SIPCall *call);
     void audioLevelChanged(SIPCall *call, qreal level);
+    void qualityLevelChanged(SIPCall *call, SIPCallManager::QualityLevel qualityLevel);
+    void securityLevelChanged(SIPCall *call, SIPCallManager::SecurityLevel securityLevel);
+    void isSignalingEncryptedChanged(SIPCall *call, bool isEncrypted);
+    void isMediaEncryptedChanged(SIPCall *call, bool isEncrypted);
+    void callQualityInfoChanged(SIPCall *call);
     void showCallWindow();
     void blocksChanged();
     void isBlockedChanged(SIPCall *call);
@@ -163,7 +178,11 @@ class SIPCallManagerWrapper
     QML_SINGLETON
 
 public:
-    static SIPCallManager *create(QQmlEngine *, QJSEngine *) { return &SIPCallManager::instance(); }
+    static SIPCallManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&SIPCallManager::instance(), QQmlEngine::CppOwnership);
+        return &SIPCallManager::instance();
+    }
 
 private:
     SIPCallManagerWrapper() = default;

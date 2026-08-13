@@ -4,8 +4,88 @@
 #include <QUrl>
 #include <QHostAddress>
 #include <QTcpSocket>
+#include <QJsonDocument>
+#include <QtConcurrent>
+#include <QNetworkAccessManager>
+#include <QNetworkInterface>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
 
 Q_LOGGING_CATEGORY(lcNetwork, "gonnect.network")
+
+QFuture<QString> NetworkHelper::fetchUrlAsString(const QUrl &url)
+{
+    return QtConcurrent::run([url]() -> QString {
+        QNetworkAccessManager manager;
+        QNetworkRequest request(url);
+        QNetworkReply *reply = manager.get(request);
+
+        QEventLoop loop;
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        loop.exec();
+
+        QString result;
+        if (reply->error() == QNetworkReply::NoError) {
+            result = reply->readAll();
+        } else {
+            qCCritical(lcNetwork) << "Error while fetching" << url << ":" << reply->errorString();
+        }
+
+        reply->deleteLater();
+        return result;
+    });
+}
+
+QFuture<QJsonDocument> NetworkHelper::fetchUrlAsJson(const QUrl &url)
+{
+    return QtConcurrent::run([url]() -> QJsonDocument {
+        QNetworkAccessManager manager;
+        QNetworkRequest request(url);
+        QNetworkReply *reply = manager.get(request);
+
+        QEventLoop loop;
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        loop.exec();
+
+        QJsonDocument result;
+        if (reply->error() == QNetworkReply::NoError) {
+            QJsonParseError parseError;
+            result = QJsonDocument::fromJson(reply->readAll(), &parseError);
+            if (result.isNull()) {
+                qCCritical(lcNetwork) << "Error while parsing url:" << parseError.errorString();
+            }
+        } else {
+            qCCritical(lcNetwork) << "Error while fetching" << url << ":" << reply->errorString();
+        }
+
+        reply->deleteLater();
+        return result;
+    });
+}
+
+int NetworkHelper::getStandardPort(const QUrl &url)
+{
+    if (url.port() >= 0) {
+        return url.port();
+    }
+
+    static const QHash<QString, int> protocolMap = {
+        { QStringLiteral("http"), 80 },    { QStringLiteral("https"), 443 },
+        { QStringLiteral("ldap"), 389 },   { QStringLiteral("ldaps"), 636 },
+        { QStringLiteral("caldav"), 80 },  { QStringLiteral("caldavs"), 443 },
+        { QStringLiteral("carddav"), 80 }, { QStringLiteral("carddavs"), 443 }
+    };
+
+    const QString scheme = url.scheme().toLower();
+    int port = protocolMap.value(scheme, -1);
+
+    if (port < 0) {
+        qCCritical(lcNetwork) << "Cannot map scheme" << scheme << "to port";
+    }
+
+    return port;
+}
 
 NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
 {
@@ -22,20 +102,25 @@ NetworkHelper::NetworkHelper(QObject *parent) : QObject(parent)
     onReachabilityChanged(netInfo->reachability());
 }
 
-bool NetworkHelper::isReachable(const QUrl &url)
+QFuture<bool> NetworkHelper::isReachable(const QUrl &url)
 {
-    QTcpSocket testSocket;
-    testSocket.connectToHost(url.host(), url.port());
-    testSocket.waitForConnected(1000);
+    return QtConcurrent::run([url]() -> bool {
+        int port = getStandardPort(url);
+        if (port < 0) {
+            return false;
+        }
 
-    bool state = testSocket.state() == QTcpSocket::UnconnectedState;
-    testSocket.close();
+        QTcpSocket testSocket;
+        testSocket.connectToHost(url.host(), port);
+        const bool state = testSocket.waitForConnected(1000);
+        testSocket.close();
 
-    if (!state) {
-        qCWarning(lcNetwork) << url << "is not reachable";
-    }
+        if (!state) {
+            qCWarning(lcNetwork) << url << "is not reachable";
+        }
 
-    return state;
+        return state;
+    });
 }
 
 void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reachability)
@@ -63,8 +148,10 @@ void NetworkHelper::onReachabilityChanged(QNetworkInformation::Reachability reac
         break;
     }
 
-    if (m_connectivity != connected) {
-        m_connectivity = connected;
+    const bool changed = (m_connectivity != connected);
+    m_connectivity = connected;
+
+    if (changed || connected) {
         Q_EMIT connectivityChanged();
     }
 }
@@ -103,6 +190,22 @@ QStringList NetworkHelper::nameservers() const
     result.append(parseResolvConf("/etc/resolv.conf"));
     result.append(parseResolvConf("/run/systemd/resolve/resolv.conf"));
     result.removeDuplicates();
+
+    return result;
+}
+
+QSet<QString> NetworkHelper::localAddresses() const
+{
+    QSet<QString> result;
+
+    const auto addresses = QNetworkInterface::allAddresses();
+    for (const QHostAddress &address : std::as_const(addresses)) {
+        if (address.isLoopback() || address.isLinkLocal()) {
+            continue;
+        }
+
+        result.insert(address.toString());
+    }
 
     return result;
 }

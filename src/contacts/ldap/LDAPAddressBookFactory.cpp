@@ -26,8 +26,9 @@ QStringList LDAPAddressBookFactory::configurations() const
     return res;
 }
 
-IAddressBookFeeder *LDAPAddressBookFactory::createFeeder(const QString &id,
+IAddressBookFeeder *LDAPAddressBookFactory::createFeeder(const QString &id, const int retryCount,
+                                                         const int retryInterval,
                                                          AddressBookManager *parent) const
 {
-    return new LDAPAddressBookFeeder(id, parent);
+    return new LDAPAddressBookFeeder(id, retryCount, retryInterval, parent);
 }

@@ -1,0 +1,306 @@
+= Runtime View
+
+== Application Startup Flow
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "main.cpp" as Main
+participant "Application" as App
+participant "StateManager" as SM
+participant "SIPManager" as SIPM
+participant "AddressBookManager" as ABM
+participant "DateEventFeederManager" as DEM
+participant "Credentials" as Creds
+participant "UISettings" as UIS
+participant "SystemTrayMenu" as STM
+participant "BackgroundManager" as BG
+
+User -> Main : Launch application
+Main -> App : Construct Application
+App -> SM : Initialize state
+SM --> App : State ready
+App -> UIS : Load settings
+UIS --> App : Settings loaded
+App -> ABM : Initialize address books
+App -> DEM : Initialize calendar feeders
+App -> STM : Create tray menu
+App -> Creds : Initialize credentials
+Creds --> App : Credentials loaded
+App -> BG : Request autostart
+BG --> App : Autostart configured
+App -> SIPM : Initialize SIP (after creds)
+SIPM --> App : SIP ready
+App --> Main : Application ready
+Main --> User : UI displayed
+@enduml
+....
+
+== SIP Initialization Sequence
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "SIPManager" as SIPM
+participant "SIPEventLoop" as SEL
+participant "SIPMediaConfig" as SMC
+participant "SIPUserAgentConfig" as SUAC
+participant "SIPAccountManager" as SAM
+participant "PJSIP" as PJSIP
+
+SIPM -> SEL : Create event loop
+SIPM -> SMC : Create media config
+SIPM -> SUAC : Create UA config
+SIPM -> SAM : Create account manager
+SAM -> PJSIP : Create endpoint
+PJSIP --> SAM : Endpoint created
+SAM --> SIPM : Accounts ready
+SIPM -> SEL : Start event loop
+SEL --> SIPM : Event loop running
+@enduml
+....
+
+== Call State Machine
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam stateStyle mode
+
+title SIPCall State Machine
+
+state "Idle" as Idle
+state "Dialing" as Dialing
+state "Ringing" as Ringing
+state "EarlyMedia" as EarlyMedia
+state "Established" as Established
+state "Hold" as Hold
+state "Terminating" as Terminating
+state "Terminated" as Terminated
+
+Idle --> Dialing : INVITE sent
+Dialing --> Ringing : 180/183 received
+Dialing --> Idle : Cancel/Timeout
+Ringing --> EarlyMedia : 183/200 OK
+Ringing --> Terminated : Reject
+EarlyMedia --> Established : ACK sent
+EarlyMedia --> Terminated : BYE sent
+Established --> Hold : Hold requested
+Established --> Terminating : BYE sent
+Hold --> Established : Unhold requested
+Hold --> Terminating : BYE sent
+Terminating --> Terminated : 200 OK
+@enduml
+....
+
+== Contact Synchronization Flow
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "Application" as App
+participant "AddressBookManager" as ABM
+participant "ContactSource1" as CS1
+participant "ContactSource2" as CS2
+participant "ContactSource3" as CS3
+participant "ContactModel" as CM
+participant "AvatarManager" as AM
+
+App -> ABM : Initialize
+ABM -> CS1 : Start loading
+ABM -> CS2 : Start loading
+ABM -> CS3 : Start loading
+CS1 --> ABM : Contacts batch 1
+CS2 --> ABM : Contacts batch 1
+CS3 --> ABM : Contacts batch 1
+CS1 --> ABM : Contacts batch 2
+CS2 --> ABM : Contacts batch 2
+CS3 --> ABM : Contacts batch 2
+ABM -> CM : Update model
+CM --> ABM : Acknowledged
+ABM --> App : Ready
+App --> User : Contact search available
+AM -> CS1 : Request avatar
+AM -> CS2 : Request avatar
+CS1 --> AM : Avatar data
+CS2 --> AM : Avatar data
+AM --> CM : Update avatars
+@enduml
+....
+
+== Buddy State Update Flow
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "PJSIP" as PJSIP
+participant "SIPManager" as SIPM
+participant "SIPBuddy" as SB
+participant "ContactModel" as CM
+participant "UI" as UI
+
+PJSIP --> SB : NOTIFY: presence state
+SB -> SIPM : State changed
+SIPM --> CM : Emit buddyStateChanged
+CM --> UI : Update buddy icon
+UI --> SB : Acknowledged
+@enduml
+....
+
+== Call Quality Monitoring
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+participant "SIPCall" as SC
+participant "PJSIP" as PJSIP
+participant "SIPCallManager" as SCM
+participant "UI" as UI
+
+SC -> PJSIP : Get RTCP stats
+PJSIP --> SC : RTCP statistics
+SC -> SC : Calculate MOS
+SC -> SCM : Notify quality
+SCM --> UI : Update quality display
+SC -> PJSIP : Get jitter buffer stats
+PJSIP --> SC : Jitter buffer info
+SC -> SC : Update metrics
+SC --> SCM : Quality info changed
+@enduml
+....
+
+== Emergency Call Flow
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "UI" as UI
+participant "StateManager" as SM
+participant "SIPCallManager" as SCM
+participant "SIPCall" as SC
+participant "PJSIP" as PJSIP
+
+User -> UI : Click emergency button
+UI -> SM : Request emergency call
+SM --> UI : Authorization granted
+UI -> SCM : Create emergency call
+SCM -> SC : Initialize call
+SC -> SC : Mark as emergency
+SC -> PJSIP : Send INVITE
+PJSIP --> SC : 100 Trying
+SC --> SCM : State changed
+SCM --> UI : Call in progress
+PJSIP --> SC : 180 Ringing
+SC --> SCM : State changed
+SCM --> UI : Update UI
+PJSIP --> SC : 200 OK
+SC --> SCM : Call established
+SCM --> UI : Update UI
+@enduml
+....
+
+== Configuration Save/Load Cycle
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "SettingsWindow" as SW
+participant "AppSettings" as AS
+participant "Keychain" as KC
+participant "SIPManager" as SIPM
+participant "UISettings" as UIS
+
+User -> SW : Modify settings
+SW -> AS : Save settings
+AS --> SW : Saved
+SW -> KC : Save credentials
+KC --> SW : Encrypted
+SW -> SIPM : Apply SIP settings
+SIPM --> SW : Settings applied
+SW -> UIS : Apply UI settings
+UIS --> SW : UI updated
+@enduml
+....
+
+== System Tray Menu Activation
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "User" as User
+participant "SystemTray" as ST
+participant "SystemTrayMenu" as STM
+participant "Application" as App
+participant "StateManager" as SM
+
+User -> ST : Click tray icon
+ST --> STM : Show menu
+STM --> App : Request window
+App --> STM : Window reference
+STM --> SM : Get call state
+SM --> STM : Current state
+STM --> User : Menu displayed
+User -> STM : Select action
+STM --> App : Execute action
+App --> STM : Action completed
+@enduml
+....
+
+== D-Bus Activation
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam participantStyle rectangle
+
+actor "External Process" as Ext
+participant "D-Bus" as DBUS
+participant "StateManager" as SM
+participant "Application" as App
+
+Ext -> DBUS : Activate signal
+DBUS --> SM : Activate called
+SM -> App : Bring to front
+App --> SM : Window shown
+SM --> Ext : Activation complete
+@enduml
+....

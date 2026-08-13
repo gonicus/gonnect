@@ -1,24 +1,25 @@
 #include "ReportDescriptorEnums.h"
 #include <QMetaEnum>
+#include <utility>
 
 QString ReportDescriptorEnums::toString(const UsageId id)
 {
-    return QMetaEnum::fromType<UsageId>().valueToKey(static_cast<int>(id));
+    return QMetaEnum::fromType<UsageId>().valueToKey(std::to_underlying(id));
 }
 
 QString ReportDescriptorEnums::toString(const TeamsDisplayFieldSupport id)
 {
-    return QMetaEnum::fromType<TeamsDisplayFieldSupport>().valueToKey(static_cast<int>(id));
+    return QMetaEnum::fromType<TeamsDisplayFieldSupport>().valueToKey(std::to_underlying(id));
 }
 
 QString ReportDescriptorEnums::toString(const TeamsScreenSelect id)
 {
-    return QMetaEnum::fromType<TeamsScreenSelect>().valueToKey(static_cast<int>(id));
+    return QMetaEnum::fromType<TeamsScreenSelect>().valueToKey(std::to_underlying(id));
 }
 
 QString ReportDescriptorEnums::toString(const TeamsPresenceIcon id)
 {
-    return QMetaEnum::fromType<TeamsPresenceIcon>().valueToKey(static_cast<int>(id));
+    return QMetaEnum::fromType<TeamsPresenceIcon>().valueToKey(std::to_underlying(id));
 }
 
 ReportDescriptorEnums::UsageId ReportDescriptorEnums::intToUsageId(const quint32 id)
@@ -35,5 +36,5 @@ ReportDescriptorEnums::UsageId ReportDescriptorEnums::intToUsageId(const quint32
 
 QString ReportDescriptorEnums::toString(const UsageType id)
 {
-    return QMetaEnum::fromType<UsageType>().valueToKey(static_cast<int>(id));
+    return QMetaEnum::fromType<UsageType>().valueToKey(std::to_underlying(id));
 }

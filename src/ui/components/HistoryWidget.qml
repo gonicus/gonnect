@@ -10,6 +10,10 @@ BaseWidget {
     minCellWidth: 20
     minCellHeight: 15
 
+    notifications: voiceMailField.totalVoicemailCount + control.missedCallsCount
+
+    property int missedCallsCount: SIPCallManager.missedCalls
+
     Rectangle {
         id: historyWidget
         parent: control.root
@@ -19,12 +23,26 @@ BaseWidget {
         CardHeading {
             id: historyHeading
             text: qsTr("History")
+            showDivider: historyHeading.voicemailVisible
+            showHeading: historyWidget.width > 650 || historyHeading.showDivider === false
             anchors {
                 left: parent.left
                 right: parent.right
             }
 
             property alias searchVisible: historySearchField.visible
+            property alias voicemailVisible: voiceMailField.hasVoicemail
+
+            VoiceMailField {
+                id: voiceMailField
+                visible: !historyHeading.searchVisible && historyHeading.voicemailVisible
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: 20 + historyHeading.headingMargin
+                    rightMargin: 20
+                }
+            }
 
             SearchField {
                 id: historySearchField
@@ -51,6 +69,7 @@ BaseWidget {
                 height: 30
                 font.pixelSize: 13
                 padding: 0
+                rightPadding: 10
                 valueRole: "value"
                 textRole: "label"
                 anchors {
@@ -62,7 +81,7 @@ BaseWidget {
                 model: [
                     {
                         value: HistoryProxyModel.MediumFilter.ALL,
-                        label: qsTr('All')
+                        label: qsTr('All sources')
                     }, {
                         value: HistoryProxyModel.MediumFilter.SIPCALL,
                         label: qsTr('SIP')
@@ -71,6 +90,27 @@ BaseWidget {
                         label: qsTr('Jitsi Meet')
                     }
                 ]
+
+                Accessible.role: Accessible.ComboBox
+                Accessible.name: qsTr("History call type picker")
+                Accessible.description: qsTr("Select the call type to filter by")
+
+                delegate: ItemDelegate {
+                    id: historyFilterMediumSelectorDelg
+                    width: historyFilterMediumSelector.width
+                    text: historyFilterMediumSelectorDelg.label
+
+                    font.family: historyFilterMediumSelector.font.family
+                    font.weight: historyFilterMediumSelector.font.weight
+                    font.pointSize: historyFilterMediumSelector.font.pointSize
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: historyFilterMediumSelectorDelg.label
+                    Accessible.description: qsTr("Currently selected call type")
+                    Accessible.focusable: true
+
+                    required property string label
+                }
             }
 
             ComboBox {
@@ -78,6 +118,7 @@ BaseWidget {
                 height: 30
                 font.pixelSize: 13
                 padding: 0
+                rightPadding: 10
                 valueRole: "value"
                 textRole: "label"
                 anchors {
@@ -89,7 +130,7 @@ BaseWidget {
                 model: [
                     {
                         value: HistoryProxyModel.TypeFilter.ALL,
-                        label: qsTr('All')
+                        label: qsTr('All calls')
                     }, {
                         value: HistoryProxyModel.TypeFilter.INCOMING,
                         label: qsTr('Incoming')
@@ -101,11 +142,33 @@ BaseWidget {
                         label: qsTr('Missed')
                     }
                 ]
+
+                Accessible.role: Accessible.ComboBox
+                Accessible.name: qsTr("History call origin picker")
+                Accessible.description: qsTr("Select the call origin to filter by")
+
+                delegate: ItemDelegate {
+                    id: historyFilterTypeSelectorDelg
+                    width: historyFilterTypeSelector.width
+                    text: historyFilterTypeSelectorDelg.label
+
+                    font.family: historyFilterTypeSelector.font.family
+                    font.weight: historyFilterTypeSelector.font.weight
+                    font.pointSize: historyFilterTypeSelector.font.pointSize
+
+                    Accessible.role: Accessible.ListItem
+                    Accessible.name: historyFilterTypeSelectorDelg.label
+                    Accessible.description: qsTr("Currently selected call origin")
+                    Accessible.focusable: true
+
+                    required property string label
+                }
             }
 
             HeaderIconButton {
                 id: showHistorySearchButton
                 iconSource: historyHeading.searchVisible ? Icons.mobileCloseApp : Icons.systemSearch
+                accessiblePurpose: historyHeading.searchVisible ? qsTr("Hide history search") : qsTr("Show history search")
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right

@@ -13,13 +13,20 @@ Rectangle {
 
     property bool highlighted
 
-    required property int type
-    required property string number
-    required property bool isSipStatusSubscriptable
-    required property bool isFavorite
-    required property string contactId
+    property int type
+    property string number
+    property bool isSipStatusSubscriptable
+    property bool isFavorite
+    property string contactId
+    property alias isFavorable: favIcon.visible
+
+    property bool isChat: false
 
     readonly property string typeIcon: {
+        if (control.isChat) {
+            return Icons.dialogMessages
+        }
+
         switch (control.type) {
             case Contact.NumberType.Commercial:
             return Icons.actor
@@ -28,7 +35,7 @@ Rectangle {
             case Contact.NumberType.Home:
             return Icons.goHome
             default:
-            return ''
+            return Icons.callStart
         }
     }
 
@@ -45,6 +52,12 @@ Rectangle {
     signal triggerSecondaryAction
 
     Component.onCompleted: () => control.updateBuddyStatus()
+
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Phone number")
+    Accessible.description: control.isFavorite ? qsTr("Selected favorite number %1").arg(control.number) : qsTr("Selected phone number %1").arg(control.number)
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.triggerPrimaryAction()
 
     Connections {
         target: SIPManager
@@ -64,6 +77,8 @@ Rectangle {
             leftMargin: 17
             verticalCenter: parent.verticalCenter
         }
+
+        Accessible.ignored: true
     }
 
     BuddyStatusIndicator {
@@ -87,6 +102,8 @@ Rectangle {
             right: favIcon.left
             rightMargin: 1
         }
+
+        Accessible.ignored: true
     }
 
     FavIcon {

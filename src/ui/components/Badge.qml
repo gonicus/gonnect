@@ -9,6 +9,9 @@ Item {
     property alias color: lbl.color
     property alias text: lbl.text
 
+    Accessible.role: Accessible.Indicator
+    Accessible.name: control.text
+
     Rectangle {
         anchors.fill: parent
         color: 'transparent'
@@ -16,6 +19,8 @@ Item {
         radius: 4
         border.width: 1
         border.color: control.color
+
+        Accessible.ignored: true
     }
 
     Label {
@@ -23,5 +28,7 @@ Item {
         anchors.centerIn: parent
         font.capitalization: Font.AllUppercase
         font.pixelSize: 9
+
+        Accessible.ignored: true
     }
 }

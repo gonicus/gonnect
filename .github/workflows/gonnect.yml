@@ -2,11 +2,38 @@ name: GOnnect Build
 
 on:
   workflow_dispatch:  # can be manually dispatched under GitHub's "Actions" tab
+    inputs:
+      run_build:
+        description: Run build job
+        type: boolean
+      run_build_windows:
+        description: Run build-windows job
+        type: boolean
+      run_build_macos:
+        description: Run build-macos job
+        type: boolean
+      run_format:
+        description: Run format job
+        type: boolean
+      run_clang:
+        description: Run clang job
+        type: boolean
+      run_clazy:
+        description: Run clazy job
+        type: boolean
+      run_flatpak:
+        description: Run flatpak job
+        type: boolean
+      run_tests:
+        description: Run tests job
+        type: boolean
   # Run the build only, if the branch is release or main or a PR with release or main as target is used
   push:
     branches:
       - release
       - main
+    tags:
+      - 'v*'
   # Use the release/main branch workflow/actions definitions rather the definitions in the pull_request
   pull_request:
     branches:
@@ -25,17 +52,67 @@ env:
 permissions:
   contents: read
   pull-requests: read
+  id-token: write
 
 jobs:
+  # Detect changes to allow selecting the jobs to run.
+  # If the workflow is triggered manually, the selection comes from the inputs there.
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      # Job selection comes from inputs, if started manually. No need to use detected changes.
+      src: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.src }}
+      build: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.build }}
+      flatpak: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.flatpak }}
+      tests: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.tests }}
+      resources: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources }}
+      resources-windows: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-windows }}
+      resources-macos: ${{ github.event_name != 'workflow_dispatch' && steps.filter.outputs.resources-macos }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Get changes
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**'
+              - 'external/**'
+            build:
+              - '**/CMakeLists.txt'
+              - '**/conanfile.py'
+              - '**/conanfile.txt'
+              - '**/CMakePresets.json'
+            flatpak:
+              - 'resources/flatpak/**'
+              - 'CMakeLists.txt'
+            tests:
+              - 'tests/**'
+            resources:
+              - 'resources/artwork/**'
+              - 'resources/emojis/**'
+              - 'resources/font/**'
+              - 'resources/sounds/**'
+              - 'resources/templates/**'
+              - 'migrate/**'
+              - 'i18n/**/*.ts'
+            resources-windows:
+              - 'resources/windows/**'
+            resources-macos:
+              - 'resources/macos/**'
+
   build:
     runs-on: ubuntu-24.04
     name: "Build GOnnect (Linux)"
+    needs: changes
+    if: ${{ inputs.run_build || needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
     env:
       CC: clang
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -52,18 +129,20 @@ jobs:
         run: cmake --build --preset conan-release --parallel $(nproc --all)
 
       - name: Upload Test artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: gonnect-tests
           path: build/Release/tests/contactsTest
           retention-days: 1
 
   build-windows:
-    runs-on: windows-2025
+    runs-on: windows-2025-vs2026
     name: "Build GOnnect (Windows)"
+    needs: changes
+    if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-windows == 'true' }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -73,29 +152,109 @@ jobs:
 
       - name: Configure CMake
         shell: cmd
-        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON
+        run: cmake --preset conan-default -DENABLE_MSGRAPH=ON -DMS_APPLICATION_IDENTIFIER=${{ secrets.AZURE_CLIENT_ID }}
         env:
           NSIS_USE_FAST_COMPRESSION: "1"
 
-      - name: Build
+      - name: Build application
         run: cmake --build --preset conan-release
 
-      - name: Package
-        run: cd build && cpack ${{github.workspace}}
-
-      - name: Save installer
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - name: Azure Login via OIDC
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3
         with:
-          name: windows-installer.zip
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign application
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+        with:
+          endpoint: https://weu.codesigning.azure.net/
+          signing-account-name: GONICUS-signing
+          certificate-profile-name: gonicus-profile
+          files: ${{ github.workspace }}/build/Release/GOnnect.exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Build MSIX layout
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        shell: powershell
+        run: |
+          $workspace = "${{ github.workspace }}"
+          New-Item -ItemType Directory -Path "$workspace/msix-layout" -Force
+      
+          Copy-Item "$workspace/build/Release/gonnect.exe" "$workspace/msix-layout/gonnect.exe"
+      
+          $windeployqt = "$env:QT_ROOT_DIR\bin\windeployqt.exe"
+          & $windeployqt `
+            --qmldir "$workspace/src" `
+            --plugindir "$workspace/msix-layout/plugins" `
+            --no-translations `
+            --release `
+            "$workspace/msix-layout/gonnect.exe"
+      
+          Copy-Item "$workspace/build/AppxManifest.xml" "$workspace/msix-layout/AppxManifest.xml"
+          Copy-Item -Recurse "resources/windows/msix/Assets" "$workspace/msix-layout/Assets"
+
+      - name: Pack MSIX
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        shell: powershell
+        run: |
+          $makeappx = Get-ChildItem `
+            -Path "C:\Program Files (x86)\Windows Kits\10\bin" `
+            -Recurse -Filter "makeappx.exe" |
+            Sort-Object FullName | Select-Object -Last 1
+          & $makeappx.FullName pack /d msix-layout /p build/GOnnect.msix /nv
+
+      - name: Sign MSIX release artifact
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+        with:
+          endpoint: https://weu.codesigning.azure.net/
+          signing-account-name: GONICUS-signing
+          certificate-profile-name: gonicus-profile
+          files: ${{ github.workspace }}/build/GOnnect.msix
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Save MSIX
+        if: |
+          startsWith(github.ref, 'refs/tags/v') ||
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/release'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: windows-msix
           compression-level: 0
-          path: build/GOnnect*.exe
+          path: build/GOnnect*.msix
 
   build-macos:
     runs-on: macos-26
     name: "Build GOnnect (MacOS)"
+    needs: changes
+    if: ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-macos == 'true' }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -113,7 +272,7 @@ jobs:
         run: cd build/Release && cpack ${{github.workspace}}
 
       - name: Save installer
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: mac-installer.dmg
           compression-level: 0
@@ -122,24 +281,28 @@ jobs:
   format:
     runs-on: ubuntu-24.04
     name: "Code Formatting"
+    needs: changes
+    if: ${{ inputs.run_format || needs.changes.outputs.src == 'true' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Run clang-format style check for C/C++/Protobuf programs.
-        uses: jidicula/clang-format-action@6cd220de46c89139a0365edae93eee8eb30ca8fe # v4.16.0
+        uses: jidicula/clang-format-action@654a770daa28443dd111d133e4083e21c1075674 # v4.18.0
         with:
-          clang-format-version: '19'
+          clang-format-version: '21'
           check-path: 'src'
           exclude-regex: '^src/platform/windows/EventLog.h$' # generated file
 
   clang:
     runs-on: ubuntu-24.04
     name: "Static Code Analyzer"
+    needs: changes
+    if: ${{ inputs.run_clang || needs.changes.outputs.src == 'true' }}
     env:
       CC: clang
       CXX: clang++
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -157,7 +320,7 @@ jobs:
           scripts/static-clang-analyzer.sh
 
       - name: Save Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: clang-report
           path: /tmp/build.log
@@ -166,6 +329,8 @@ jobs:
     runs-on: ubuntu-24.04
     container: fedora:43
     name: "Qt Semantics"
+    needs: changes
+    if: ${{ inputs.run_clazy || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
 
     steps:
       - name: Install dependencies
@@ -175,10 +340,10 @@ jobs:
           xcb-util-cursor-devel xcb-util-keysyms-devel xcb-util-renderutil-devel libusb1-devel hidapi-devel \
           xorg-x11-drv-libinput xorg-x11-server-Xorg libxkbcommon-x11 libX11-devel mesa-libGL-devel libXinerama-devel \
           libxslt-devel libxslt pulseaudio-libs-devel libuuid-devel openldap-devel libolm-devel libsecret-devel evolution-data-server-devel folks-devel glib2-devel \
-          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA \
-          pip python3-devel nodejs
+          libical-devel perl-lib perl-FindBin perl-Time-Piece perl-IPC-Cmd perl-Digest-SHA protobuf-c-devel protobuf-devel grpc-devel protobuf-compiler \
+          pip python3-devel nodejs pipewire-devel llvm-ar
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -207,7 +372,7 @@ jobs:
           conan profile detect || true
 
       - name: Restore cached Conan packages
-        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-conan-packages
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
@@ -219,10 +384,10 @@ jobs:
         run: |
           conan config install resources/conan
           conan export-dependencies .
-          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja
+          conan install . --build=missing -ctools.cmake.cmaketoolchain:generator=Ninja -s compiler.cppstd=20
 
       - name: Cached Conan packages
-        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: always() && steps.cache-conan-packages.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.conan-info.outputs.conan-home }}/p
@@ -241,11 +406,13 @@ jobs:
   flatpak:
     name: "Flatpak"
     runs-on: ubuntu-24.04
+    needs: changes
+    if: ${{ inputs.run_flatpak || needs.changes.outputs.flatpak == 'true' || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' }}
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.10
       options: --privileged
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'true'
           submodules: 'recursive'
@@ -256,7 +423,7 @@ jobs:
         run: |
           echo "gonnect_version=$(grep -oP 'GOnnect VERSION ([0-9.]+)' CMakeLists.txt | awk '{ print $3 }')" >> $GITHUB_OUTPUT
 
-      - uses: flatpak/flatpak-github-actions/flatpak-builder@92ae9851ad316786193b1fd3f40c4b51eb5cb101 # v6.6
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@401fe28a8384095fc1531b9d320b292f0ee45adb # v6.7
         with:
           bundle: gonnect
           build-bundle: 'true'
@@ -267,10 +434,11 @@ jobs:
   tests:
     runs-on: ubuntu-24.04
     name: "Unit Tests"
-    needs: build
+    needs: [changes, build]
+    if: ${{ (inputs.run_tests || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && needs.build.result == 'success' }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Prepare
         uses: ./.github/actions/prepare-linux
@@ -279,7 +447,7 @@ jobs:
           conan: false
 
       - name: Download Test artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: gonnect-tests
 
@@ -290,6 +458,20 @@ jobs:
           LD_LIBRARY_PATH=${QT_ROOT_DIR}/lib ./contactsTest
 
       - name: Cleanup
-        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
+        uses: geekyeggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
         with:
           name: gonnect-tests
+
+  ci-status:
+    needs: [changes, build, build-windows, build-macos, format, clang, clazy, flatpak, tests]
+    if: always() # Ensure this runs even if upstream jobs were skipped
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify pipeline status
+        run: |
+          # Contains evaluates to true if any job failed or was cancelled
+          if ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}; then
+            echo "Pipeline failed."
+            exit 1
+          fi
+          echo "Pipeline passed!"

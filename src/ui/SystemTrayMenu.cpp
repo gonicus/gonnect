@@ -1,4 +1,7 @@
 #include "SystemTrayMenu.h"
+#include "GlobalCallState.h"
+#include "GlobalStateAggregator.h"
+#include "IConferenceConnector.h"
 #include "NumberStat.h"
 #include "ViewHelper.h"
 #include "NumberStats.h"
@@ -11,12 +14,19 @@
 #include "Toggler.h"
 #include "Application.h"
 #include "ThemeManager.h"
+#include "EnumTranslation.h"
+
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcSystemTrayMenu, "gonnect.app.SystemTray")
 
 using namespace std::chrono_literals;
 
 SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
 {
     initMenu();
+    updateOwnStatus();
+    updateConferences();
     updateCalls();
     updateFavorites();
     updateMostCalled();
@@ -24,7 +34,6 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
 
     m_trayIcon = new QSystemTrayIcon(this);
     m_trayIcon->setContextMenu(m_trayIconMenu);
-    m_trayIcon->show();
 
     connect(m_trayIcon, &QSystemTrayIcon::activated, this,
             [](QSystemTrayIcon::ActivationReason reason) {
@@ -40,8 +49,15 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
 
     updateMenu();
 
-    m_ringTimer.setInterval(750ms);
+    m_ringTimer.setInterval(800ms);
     connect(&m_ringTimer, &QTimer::timeout, this, &SystemTrayMenu::ringTimerCallback);
+
+    m_trayIconUpdateTimer.setSingleShot(true);
+    m_trayIconUpdateTimer.setInterval(250ms);
+    connect(&m_trayIconUpdateTimer, &QTimer::timeout, this, &SystemTrayMenu::applyTrayIcon);
+
+    connect(&GlobalStateAggregator::instance(), &GlobalStateAggregator::presenceStateChanged, this,
+            &SystemTrayMenu::updateOwnStatus);
 
     auto numStats = &NumberStats::instance();
     connect(numStats, &NumberStats::favoriteAdded, this, &SystemTrayMenu::updateFavorites);
@@ -56,6 +72,8 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateBuddyState);
     connect(&SIPAccountManager::instance(), &SIPAccountManager::sipRegisteredChanged, this,
             &SystemTrayMenu::updateMenu);
+    connect(&SIPAccountManager::instance(), &SIPAccountManager::sipRegisteredChanged, this,
+            &SystemTrayMenu::resetTrayIcon);
     connect(&SIPCallManager::instance(), &SIPCallManager::activeCallsChanged, this,
             &SystemTrayMenu::updateCalls);
     connect(&SIPCallManager::instance(), &SIPCallManager::establishedCallsCountChanged, this,
@@ -72,8 +90,11 @@ SystemTrayMenu::SystemTrayMenu(QObject *parent) : QObject{ parent }
             &SystemTrayMenu::updateTogglers);
     connect(&TogglerManager::instance(), &TogglerManager::togglerBusyChanged, this,
             &SystemTrayMenu::updateTogglers);
+    connect(&GlobalCallState::instance(), &GlobalCallState::globalCallStateChanged, this,
+            &SystemTrayMenu::updateConferences);
 
     resetTrayIcon();
+    applyTrayIcon();
 }
 
 SystemTrayMenu::~SystemTrayMenu()
@@ -83,16 +104,97 @@ SystemTrayMenu::~SystemTrayMenu()
 
 void SystemTrayMenu::updateMenu()
 {
-
     const auto sipReg = SIPAccountManager::instance().sipRegistered();
     m_settingsWindowAction->setVisible(sipReg);
-    m_mainWindowAction->setText(sipReg ? tr("Dial...") : tr("Not registered..."));
-    m_mainWindowAction->setIcon(sipReg ? QIcon::fromTheme("call-start-symbolic")
-                                       : QIcon::fromTheme("view-refresh-symbolic"));
+    m_mainWindowAction->setText(tr("Open..."));
 
+    updateConferences();
     updateCalls();
     updateFavorites();
     updateMostCalled();
+}
+
+void SystemTrayMenu::updateOwnStatus()
+{
+    using State = PresenceState::State;
+
+    const auto &enumTr = EnumTranslation::instance();
+
+    const auto state = GlobalStateAggregator::instance().presenceState();
+    const auto label = enumTr.presenceState(state);
+    const auto actionText = QString("%1 %2").arg(charFor(state), label);
+
+    // Create menu
+    if (!m_presenceMenu) {
+        m_presenceMenu = new QMenu(m_trayIconMenu);
+
+        // States to select for setting
+        static const QList<State> menuStates = { State::Busy, State::Away, State::Available };
+        for (const auto menuState : menuStates) {
+            auto action = new QAction(
+                    QString("%1 %2").arg(charFor(menuState), enumTr.presenceState(menuState)),
+                    m_presenceMenu);
+            m_presenceMenu->addAction(action);
+            m_stateActions.insert(menuState, action);
+
+            connect(action, &QAction::triggered, this, [menuState]() {
+                qCInfo(lcSystemTrayMenu)
+                        << "Changing global presence state via systray to" << menuState;
+                GlobalStateAggregator::instance().setPresenceState(menuState);
+            });
+        }
+
+        // Status text
+        m_presenceMenu->addSeparator();
+        auto action = new QAction(tr("Set status text..."), m_presenceMenu);
+        m_presenceMenu->addAction(action);
+
+        connect(action, &QAction::triggered, this, []() {
+            auto &viewHelper = ViewHelper::instance();
+            Q_EMIT viewHelper.activateSearch();
+            Q_EMIT viewHelper.showStatusTextEditDialog();
+        });
+
+        m_trayIconMenu->insertMenu(m_ownStatusSeparator, m_presenceMenu);
+    }
+
+    // Update visibility of state selector
+    QHashIterator it(m_stateActions);
+    while (it.hasNext()) {
+        it.next();
+        it.value()->setVisible(it.key() != state);
+    }
+
+    // Update presence state
+    m_presenceMenu->menuAction()->setText(actionText);
+}
+
+void SystemTrayMenu::updateConferences()
+{
+    for (QAction *action : std::as_const(m_activeConferencesActions)) {
+        m_trayIconMenu->removeAction(action);
+    }
+    m_activeConferencesActions.clear();
+
+    const auto globalCallStateObject = GlobalCallState::instance().globalCallStateObjects();
+
+    for (const auto globalCallObj : globalCallStateObject) {
+        auto conferenceObj = qobject_cast<IConferenceConnector *>(globalCallObj);
+        if (conferenceObj && (conferenceObj->callState() & ICallState::State::CallActive)) {
+
+            auto action =
+                    new QAction(QIcon::fromTheme("call-stop-symbolic"),
+                                tr("Leave conference '%1'").arg(conferenceObj->conferenceName()),
+                                m_trayIconMenu);
+            m_trayIconMenu->insertAction(m_activeConferencesSeparator, action);
+            m_activeConferencesActions.append(action);
+
+            connect(action, &QAction::triggered, this,
+                    [conferenceObj]() { conferenceObj->leaveConference(); });
+        }
+    }
+
+    m_activeConferencesSeparator->setVisible(m_activeConferencesActions.size());
 }
 
 void SystemTrayMenu::initMenu()
@@ -101,10 +203,12 @@ void SystemTrayMenu::initMenu()
 
     QAction *action = nullptr;
     m_mainWindowAction = action =
-            m_trayIconMenu->addAction(QIcon::fromTheme("call-start-symbolic"), tr("Dial..."));
+            m_trayIconMenu->addAction(QIcon::fromTheme("go-home"), tr("Open..."));
     connect(action, &QAction::triggered, &ViewHelper::instance(), &ViewHelper::activateSearch);
 
     m_trayIconMenu->addSeparator();
+    m_ownStatusSeparator = m_trayIconMenu->addSeparator();
+    m_activeConferencesSeparator = m_trayIconMenu->addSeparator();
     m_activeCallsSeparator = m_trayIconMenu->addSeparator();
     m_favoritesSeparator = m_trayIconMenu->addSeparator();
     m_mostCalledSeparator = m_trayIconMenu->addSeparator();
@@ -201,7 +305,7 @@ void SystemTrayMenu::updateCalls()
     // Current calls
     m_hasEstablishedCalls = false;
     for (const auto call : activeCalls) {
-        const auto remoteUri = QString::fromStdString(call->getInfo().remoteUri);
+        const auto remoteUri = call->sipUrl();
         activeUris.insert(remoteUri);
 
         SystemTrayMenu::CallEntry *entry = findCallEntry(remoteUri);
@@ -220,18 +324,20 @@ void SystemTrayMenu::updateCalls()
 
     // Find finished calls
     for (auto &callEntry : m_callEntries) {
-        if (!activeUris.contains(callEntry.remoteUri)) {
+        QString remoteUri = callEntry.remoteUri;
+
+        if (!activeUris.contains(remoteUri)) {
             callEntry.isFinished = true;
 
             if (m_callEntries.size()) {
-                QTimer::singleShot(GONNECT_CALL_VISIBLE_AFTER_END, this, [this, &callEntry]() {
+                QTimer::singleShot(GONNECT_CALL_VISIBLE_AFTER_END, this, [this, remoteUri]() {
                     bool changed = false;
 
                     QMutableListIterator it(m_callEntries);
                     while (it.hasNext()) {
                         it.next();
 
-                        if (it.value().remoteUri == callEntry.remoteUri) {
+                        if (it.value().remoteUri == remoteUri) {
                             it.remove();
                             changed = true;
                         }
@@ -369,9 +475,14 @@ void SystemTrayMenu::updateMostCalled()
         m_mostCalledActions.reserve(mostCalled.size());
 
         for (const auto &number : mostCalled) {
-            const auto &numStat = *(NumberStats::instance().numberStat(number));
-            auto action = new QAction(QIcon::fromTheme(contactIcon(numStat)), contactText(numStat),
-                                      m_trayIconMenu);
+            const auto numStat = NumberStats::instance().numberStat(number);
+            QAction *action = nullptr;
+            if (numStat) {
+                action = new QAction(QIcon::fromTheme(contactIcon(*numStat)), contactText(*numStat),
+                                     m_trayIconMenu);
+            } else {
+                action = new QAction(QString("⚫  %2").arg(number), m_trayIconMenu);
+            }
             m_trayIconMenu->insertAction(m_mostCalledSeparator, action);
             m_mostCalledActions.insert(number, action);
             connect(action, &QAction::triggered, this,
@@ -414,13 +525,39 @@ void SystemTrayMenu::updateTogglers()
 
 void SystemTrayMenu::updateBuddyState(const QString uri, SIPBuddyState::STATUS)
 {
-    const auto number = PhoneNumberUtil::numberFromSipUrl(uri);
+    // Empty URI leads to a complete update
+    if (uri.isEmpty()) {
+        QHashIterator favoriteIterator(m_favoriteActions);
+        while (favoriteIterator.hasNext()) {
+            favoriteIterator.next();
 
-    if (auto action = m_favoriteActions.value(number, nullptr)) {
-        action->setText(contactText(*(NumberStats::instance().numberStat(number))));
-    }
-    if (auto action = m_mostCalledActions.value(number, nullptr)) {
-        action->setText(contactText(*(NumberStats::instance().numberStat(number))));
+            if (const auto *stat = NumberStats::instance().numberStat(favoriteIterator.key())) {
+                favoriteIterator.value()->setText(contactText(*stat));
+            }
+        }
+
+        QHashIterator mostCalledIterator(m_mostCalledActions);
+        while (mostCalledIterator.hasNext()) {
+            mostCalledIterator.next();
+
+            if (const auto *stat = NumberStats::instance().numberStat(mostCalledIterator.key())) {
+                mostCalledIterator.value()->setText(contactText(*stat));
+            }
+        }
+    } else {
+        const auto number = PhoneNumberUtil::numberFromSipUrl(uri);
+        const auto *stat = NumberStats::instance().numberStat(number);
+        if (!stat) {
+            return;
+        }
+
+        if (auto action = m_favoriteActions.value(number, nullptr)) {
+            action->setText(contactText(*stat));
+        }
+
+        if (auto action = m_mostCalledActions.value(number, nullptr)) {
+            action->setText(contactText(*stat));
+        }
     }
 }
 
@@ -436,36 +573,86 @@ void SystemTrayMenu::setRinging(bool flag)
 
 void SystemTrayMenu::ringTimerCallback()
 {
-    QString noteDot = m_missedCallsCount ? "_note" : "";
-
-    m_ringingState = !m_ringingState;
-
     if (m_ringingState) {
-        m_trayIcon->setIcon(QIcon(":/icons/gonnect_ring" + noteDot + ".svg"));
+        const QString noteDot = m_notificationCount ? "_note" : "";
+        requestTrayIcon(":/icons/gonnect_ring" + noteDot + ".svg");
     } else {
         resetTrayIcon();
     }
+
+    m_ringingState = !m_ringingState;
 }
 
 void SystemTrayMenu::resetTrayIcon()
 {
     const bool darkIconDefault =
             ThemeManager::instance().trayColorScheme() == ThemeManager::ColorScheme::DARK;
-    QString noteDot = m_missedCallsCount ? "_note" : "";
+    QString noteDot = m_notificationCount ? "_note" : "";
 
-    if (m_hasEstablishedCalls) {
-        m_trayIcon->setIcon(QIcon(":/icons/gonnect_line" + noteDot + ".svg"));
+    QString iconPath;
+    const auto sipReg = SIPAccountManager::instance().sipRegistered();
+    if (sipReg) {
+        if (m_hasEstablishedCalls) {
+            iconPath = ":/icons/gonnect_line" + noteDot + ".svg";
+        } else {
+            if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
+                iconPath = ":/icons/gonnect_dark" + noteDot + ".svg";
+            } else {
+                iconPath = ":/icons/gonnect_light" + noteDot + ".svg";
+            }
+        }
     } else {
         if (m_settings.value("generic/trayIconDark", darkIconDefault).toBool()) {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_dark" + noteDot + ".svg"));
+            iconPath = ":/icons/gonnect_noreg_dark.svg";
         } else {
-            m_trayIcon->setIcon(QIcon(":/icons/gonnect_light" + noteDot + ".svg"));
+            iconPath = ":/icons/gonnect_noreg_light.svg";
         }
     }
+
+    requestTrayIcon(iconPath);
+}
+
+void SystemTrayMenu::requestTrayIcon(const QString &iconPath)
+{
+    m_desiredTrayIconPath = iconPath;
+    if (!m_trayIconUpdateTimer.isActive()) {
+        m_trayIconUpdateTimer.start();
+    }
+}
+
+void SystemTrayMenu::applyTrayIcon()
+{
+    if (m_desiredTrayIconPath != m_lastTrayIconPath) {
+        m_trayIcon->setIcon(QIcon(m_desiredTrayIconPath));
+        m_lastTrayIconPath = m_desiredTrayIconPath;
+    }
+
+    m_trayIcon->setVisible(true);
+}
+
+QString SystemTrayMenu::charFor(const PresenceState::State state) const
+{
+    using State = PresenceState::State;
+
+    switch (state) {
+    case State::Unknown:
+    case State::Offline:
+        return "⚫";
+    case State::Away:
+        return "🟡";
+    case State::Busy:
+        return "🔴";
+    case State::Available:
+    case State::Ringing:
+        return "🟢";
+    }
+
+    qCWarning(lcSystemTrayMenu) << "Unknown PresenceState::State enum value:" << state;
+    return "";
 }
 
 void SystemTrayMenu::setBadgeNumber(unsigned number)
 {
-    m_missedCallsCount = number;
+    m_notificationCount = number;
     resetTrayIcon();
 }

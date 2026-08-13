@@ -80,6 +80,7 @@ void ContactSerializer::loadAddressBook(AddressBook &addressBook)
             QString name;
             unsigned prio;
             QString displayName;
+            QString configId;
             QString company;
             QString mail;
             QDateTime lastModified;
@@ -92,6 +93,7 @@ void ContactSerializer::loadAddressBook(AddressBook &addressBook)
             in >> sourceUid;
             in >> prio;
             in >> displayName;
+            in >> configId;
             in >> name;
             in >> company;
             in >> mail;
@@ -101,8 +103,8 @@ void ContactSerializer::loadAddressBook(AddressBook &addressBook)
             in >> blockInfo;
 
             Contact *contact =
-                    new Contact(id, dn, sourceUid, { prio, displayName }, name, company, mail,
-                                lastModified, phoneNumbers, blockInfo, &addressBook);
+                    new Contact(id, dn, sourceUid, { prio, displayName, configId }, name, company,
+                                mail, lastModified, phoneNumbers, blockInfo, &addressBook);
             addressBook.addContact(contact);
         }
 

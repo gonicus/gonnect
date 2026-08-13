@@ -23,6 +23,9 @@ BaseDialog {
             bottom: okButton.top
             margins: 20
         }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: contentLabel.text
     }
 
     Button {
@@ -40,5 +43,10 @@ BaseDialog {
             control.accepted()
             control.close()
         }
+
+        Accessible.role: Accessible.Button
+        Accessible.name: okButton.text
+        Accessible.focusable: true
+        Accessible.onPressAction: () => okButton.click()
     }
 }

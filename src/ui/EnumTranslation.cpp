@@ -1,5 +1,7 @@
 #include "EnumTranslation.h"
+#include "Theme.h"
 #include <QLoggingCategory>
+#include <QColor>
 
 Q_LOGGING_CATEGORY(lcEnumTranslation, "gonnect.app.EnumTranslation")
 
@@ -213,4 +215,103 @@ QString EnumTranslation::callType(const CallHistoryItem::Type callType) const
 
     qCWarning(lcEnumTranslation) << "Unknown call type:" << callType;
     return tr("Unknown");
+}
+
+QString
+EnumTranslation::crossSigningMethod(const CrossSigningSecret::CrossSigningMethod method) const
+{
+    switch (method) {
+
+    case CrossSigningSecret::CrossSigningMethod::SasString:
+        return tr("SAS string");
+    case CrossSigningSecret::CrossSigningMethod::SasSymbol:
+        return tr("SAS symbol");
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown cross-signing method:" << method;
+    return tr("Unknown");
+}
+
+QString EnumTranslation::chatRoomSortStrategy(const ChatRoomProxyModel::SortStrategy strategy) const
+{
+    switch (strategy) {
+
+    case ChatRoomProxyModel::SortStrategy::Alphabetical:
+        return tr("Alphabetical");
+    case ChatRoomProxyModel::SortStrategy::LatestActivity:
+        return tr("Latest activity");
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown enum value for chat room SortStrategy:" << strategy;
+    return tr("Unknown");
+}
+
+QString EnumTranslation::userStateChange(const ChatMessageContentUserStateChange::State state,
+                                         const QString &name) const
+{
+    switch (state) {
+
+    case ChatMessageContentUserStateChange::State::Unknown:
+        return tr("Unknown state for %1").arg(name);
+    case ChatMessageContentUserStateChange::State::Joined:
+        return tr("%1 has joined").arg(name);
+    case ChatMessageContentUserStateChange::State::Left:
+        return tr("%1 has left").arg(name);
+    case ChatMessageContentUserStateChange::State::Invited:
+        return tr("%1 has been invited").arg(name);
+    case ChatMessageContentUserStateChange::State::Knocked:
+        return tr("%1 has knocked").arg(name);
+    case ChatMessageContentUserStateChange::State::Banned:
+        return tr("%1 has been banned").arg(name);
+    case ChatMessageContentUserStateChange::State::Unbanned:
+        return tr("%1 has been unbanned").arg(name);
+    case ChatMessageContentUserStateChange::State::Kicked:
+        return tr("%1 has been kicked").arg(name);
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown enum value for user state change" << state;
+    return tr("Unknown state for %1").arg(name);
+}
+
+QString EnumTranslation::presenceState(const PresenceState::State state) const
+{
+    switch (state) {
+
+    case PresenceState::State::Unknown:
+        return tr("Unknown");
+    case PresenceState::State::Offline:
+        return tr("Offline");
+    case PresenceState::State::Away:
+        return tr("Away");
+    case PresenceState::State::Busy:
+        return tr("Do not disturb");
+    case PresenceState::State::Available:
+        return tr("Available");
+    case PresenceState::State::Ringing:
+        return tr("Ringing");
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown enum value for presence state" << state;
+    return tr("Unknown");
+}
+
+QColor EnumTranslation::presenceStateColor(const PresenceState::State state) const
+{
+    switch (state) {
+
+    case PresenceState::State::Unknown:
+        return QColor("transparent");
+    case PresenceState::State::Offline:
+        return Theme::instance().borderColor();
+    case PresenceState::State::Away:
+        return Theme::instance().yellowColor();
+    case PresenceState::State::Busy:
+        return Theme::instance().redColor();
+    case PresenceState::State::Available:
+    case PresenceState::State::Ringing:
+        return Theme::instance().greenColor();
+    }
+
+    qCWarning(lcEnumTranslation) << "Unknown enum value for presence state" << state;
+    return QColor("transparent");
 }

@@ -6,6 +6,7 @@
 #include "ViewHelper.h"
 #include "NetworkHelper.h"
 #include "Credentials.h"
+#include "ErrorBus.h"
 
 #include <QTimer>
 #include <QUrl>
@@ -19,7 +20,18 @@ using namespace Qt::Literals::StringLiterals;
 
 Q_LOGGING_CATEGORY(lcAddressBookManager, "gonnect.app.addressbook")
 
-AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent } { }
+AddressBookManager::AddressBookManager(QObject *parent) : QObject{ parent }
+{
+    m_retryTimer.setSingleShot(true);
+    m_retryTimer.setInterval(10s);
+    m_retryTimer.callOnTimeout(this, [this]() {
+        if (m_reconnectScheduled) {
+            m_reconnectScheduled = false;
+            disconnect(m_connectivityConnection);
+            processAddressBookQueue();
+        }
+    });
+}
 
 QString AddressBookManager::secret(const QString &group) const
 {
@@ -50,6 +62,8 @@ QString AddressBookManager::hashForSettingsGroup(const QString &group)
 void AddressBookManager::initAddressBookConfigs()
 {
     ReadOnlyConfdSettings settings;
+    int retryCount = settings.value("generic/feederPluginRetryCount", 5).toInt();
+    int retryInterval = settings.value("generic/feederPluginRetryInterval", 10000).toInt();
 
     const QObjectList &staticPlugins = QPluginLoader::staticInstances();
 
@@ -61,83 +75,122 @@ void AddressBookManager::initAddressBookConfigs()
                     << "active configurations for address book plugin" << addrPlugin->name();
 
             for (auto &cfg : std::as_const(configs)) {
-                m_addressBookFeeders.insert(cfg, addrPlugin->createFeeder(cfg, this));
+                m_addressBookFeeders.insert(
+                        cfg, addrPlugin->createFeeder(cfg, retryCount, retryInterval, this));
                 m_addressBookConfigs.push_back(cfg);
             }
         }
     }
+
+    Q_EMIT configsLoaded();
 }
 
 void AddressBookManager::reloadAddressBook()
 {
-    AddressBook::instance().clear();
+    AddressBook::instance().resetContacts();
     m_addressBookQueue = m_addressBookConfigs;
     processAddressBookQueue();
 }
 
 void AddressBookManager::processAddressBookQueue()
 {
-    bool changed = false;
-    bool networkAvailable = true;
-    auto &nh = NetworkHelper::instance();
-
-    if (!m_queueMutex.tryLock()) {
-        QTimer::singleShot(100, this, &AddressBookManager::processAddressBookQueue);
+    if (m_isProcessing) {
         return;
     }
+    m_isProcessing = true;
+
+    bool networkAvailable = true;
+    auto &nh = NetworkHelper::instance();
 
     QMutableStringListIterator it(m_addressBookQueue);
     while (it.hasNext()) {
         QString group = it.next();
 
         if (auto feeder = m_addressBookFeeders.value(group, nullptr)) {
+            if (feeder->isProcessing()) {
+                // A currently active feeder must not be invoked again to prevent double runs and
+                // threading issues.
+                continue;
+            }
 
             // If the plugin requires network access, check the connectivity with
             // the network helper / portal. If we've no connectivity, trigger on
             // connectivityChanged signal to recheck again.
             QUrl checkURL = feeder->networkCheckURL();
-            if (!checkURL.isEmpty()) {
+
+            if (checkURL.isEmpty()) {
+                feeder->process();
+            } else {
                 if (!networkAvailable) {
                     continue;
                 }
 
+                if (!checkURL.isValid()) {
+                    qCCritical(lcAddressBookManager) << "URL is invalid:" << checkURL;
+
+                    continue;
+                }
+
                 if (!nh.hasConnectivity()) {
-                    qCWarning(lcAddressBookManager) << "no connectivity state yet - trying later";
+                    qCWarning(lcAddressBookManager) << "No connectivity state yet - trying later";
 
                     networkAvailable = false;
-                    connect(
-                            &nh, &NetworkHelper::connectivityChanged, this,
-                            [this]() { processAddressBookQueue(); },
-                            Qt::ConnectionType::SingleShotConnection);
-
+                    scheduleReconnect();
                     continue;
                 }
 
-                if (!nh.isReachable(checkURL)) {
-                    qCWarning(lcAddressBookManager) << checkURL << "is not reachable";
-                    connect(
-                            &nh, &NetworkHelper::connectivityChanged, this,
-                            [this]() { processAddressBookQueue(); },
-                            Qt::ConnectionType::SingleShotConnection);
-                    continue;
-                }
+                nh.isReachable(checkURL).then(
+                        this, [this, feeder, group, checkURL](bool isReachable) {
+                            if (isReachable) {
+                                feeder->process();
+                                Q_EMIT AddressBook::instance().contactsReady();
+                            } else {
+                                qCWarning(lcAddressBookManager)
+                                        << "Feeder URL" << checkURL << "is not reachable";
+
+                                requeueGroup(group);
+                                scheduleReconnect();
+                            }
+                        });
             }
 
-            feeder->process();
             it.remove();
-            changed = true;
         }
     }
 
-    if (changed) {
-        Q_EMIT AddressBook::instance().contactsReady();
-    }
-
-    m_queueMutex.unlock();
+    m_isProcessing = false;
 }
 
-void AddressBookManager::acquireSecret(const QString &group,
-                                       std::function<void(const QString &secret)> callback)
+void AddressBookManager::requeueGroup(const QString &group)
+{
+    if (!m_addressBookQueue.contains(group)) {
+        m_addressBookQueue.append(group);
+    }
+}
+
+void AddressBookManager::scheduleReconnect()
+{
+    if (m_reconnectScheduled) {
+        return;
+    }
+
+    m_reconnectScheduled = true;
+    m_retryTimer.stop();
+    m_retryTimer.start();
+
+    disconnect(m_connectivityConnection);
+    m_connectivityConnection = connect(
+            &NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
+            [this]() {
+                m_reconnectScheduled = false;
+                m_retryTimer.stop();
+                processAddressBookQueue();
+            },
+            Qt::ConnectionType::SingleShotConnection);
+}
+
+void AddressBookManager::acquireSecret(bool forcePrompt, const QString &group,
+                                       std::function<void(SecretResponse)> callback)
 {
     ReadOnlyConfdSettings settings;
 
@@ -146,33 +199,35 @@ void AddressBookManager::acquireSecret(const QString &group,
 
     Credentials::instance().get(
             secretKey + "/secret",
-            [this, group, secretKey, callback](bool error, const QString &secret) {
-                if (error) {
-                    qCWarning(lcAddressBookManager) << "failed to retrieve secret:" << secret;
-                    return;
-                }
-
-                if (secret.isEmpty()) {
+            [this, forcePrompt, group, secretKey,
+             callback](QKeychain::Error error, const QString &secret, const QString &) {
+                if (error == QKeychain::NoError && !forcePrompt) {
+                    callback({ secret });
+                } else if (error == QKeychain::EntryNotFound || forcePrompt) {
                     auto &viewHelper = ViewHelper::instance();
+
+                    disconnect(m_viewHelperConnections.take(group));
 
                     auto conn = connect(
                             &viewHelper, &ViewHelper::passwordResponded, this,
-                            [secretKey, group, callback, this](const QString &id,
+                            [this, secretKey, group, callback](const QString &id,
                                                                const QString &password) {
                                 if (id == group) {
-                                    QObject::disconnect(m_viewHelperConnections.value(group));
-                                    m_viewHelperConnections.remove(group);
+                                    disconnect(m_viewHelperConnections.take(group));
 
                                     Credentials::instance().set(
                                             secretKey + "/secret", password,
-                                            [secretKey](bool error, const QString &data) {
-                                                if (error) {
-                                                    qCCritical(lcAddressBookManager)
-                                                            << "failed to set credentials:" << data;
+                                            [secretKey](QKeychain::Error error, const QString &,
+                                                        const QString &message) {
+                                                if (error != QKeychain::NoError) {
+                                                    ErrorBus::instance().error(
+                                                            tr("Failed to persist address book "
+                                                               "credentials: %1")
+                                                                    .arg(message));
                                                 }
                                             });
 
-                                    callback(password);
+                                    callback({ password });
                                 }
                             });
 
@@ -180,11 +235,19 @@ void AddressBookManager::acquireSecret(const QString &group,
 
                     ReadOnlyConfdSettings settings;
                     settings.beginGroup(group);
-                    viewHelper.requestPassword(group, settings.value("host", "").toString());
-                    settings.beginGroup(group);
 
+                    auto name = settings.value("host", "").toString();
+                    if (name.isEmpty()) {
+                        name = settings.value("url", "").toString();
+                    }
+                    if (name.isEmpty()) {
+                        name = group;
+                    }
+
+                    viewHelper.requestPassword(group, name);
+                    settings.endGroup();
                 } else {
-                    callback(secret);
+                    callback({ QString(), true });
                 }
             });
 }

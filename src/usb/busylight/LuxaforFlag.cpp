@@ -31,5 +31,7 @@ void LuxaforFlag::send(bool on)
     buf[6] = 0x00; // Pad
     buf[7] = 0x00; // Pad
 
-    hid_write(m_device, buf, sizeof(buf));
+    if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+        qCWarning(lcLuxaforFlag) << "failed to write to Luxafor Flag device";
+    }
 }

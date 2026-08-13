@@ -13,55 +13,31 @@ using namespace std::chrono_literals;
 
 Q_LOGGING_CATEGORY(lcEDSAddressBookFeeder, "gonnect.app.feeder.EDSAddressBookFeeder")
 
-EDSAddressBookFeeder::EDSAddressBookFeeder(const QString &group, AddressBookManager *parent)
-    : QObject(parent), m_group(group)
+EDSAddressBookFeeder::EDSAddressBookFeeder(const QString &group, const int retryCount,
+                                           const int retryInterval, AddressBookManager *parent)
+    : QObject(parent), m_group(group), m_retryCount(retryCount), m_retryInterval(retryInterval)
 {
 }
 
 EDSAddressBookFeeder::~EDSAddressBookFeeder()
 {
-    if (m_registry) {
-        g_object_unref(m_registry);
-    }
-    if (m_sources) {
-        g_list_free_full(m_sources, g_object_unref);
-    }
-    if (m_searchExpr) {
-        g_free(m_searchExpr);
-    }
-
-    for (auto client : std::as_const(m_clients)) {
-        g_object_unref(client);
-        client = nullptr;
-    }
-
-    for (auto clientView : std::as_const(m_clientViews)) {
-        g_object_unref(clientView);
-        clientView = nullptr;
-    }
-
-    if (m_sourcePromise) {
-        delete m_sourcePromise;
-        m_sourcePromise = nullptr;
-    }
-
-    if (m_futureWatcher) {
-        m_futureWatcher->deleteLater();
-        m_futureWatcher = nullptr;
-    }
+    resetFeeder();
 }
 
 void EDSAddressBookFeeder::init()
 {
-    GError *error = nullptr;
+    m_cancellable = g_cancellable_new();
+
+    GError *error = NULL;
 
     // Create a source registry
-    m_registry = e_source_registry_new_sync(nullptr, &error);
+    m_registry = e_source_registry_new_sync(m_cancellable, &error);
     if (!m_registry) {
         if (error) {
             qCDebug(lcEDSAddressBookFeeder) << "Can't create registry:" << error->message;
-            g_error_free(error);
-            error = nullptr;
+            g_clear_error(&error);
+
+            Q_EMIT feederFailed();
         }
         return;
     }
@@ -77,14 +53,14 @@ void EDSAddressBookFeeder::init()
     // Prepare the search query
     EBookQuery *query = e_book_query_any_field_contains("");
     m_searchExpr = e_book_query_to_string(query);
-    e_book_query_unref(query);
+    g_clear_pointer(&query, e_book_query_unref);
 
     // Clients and signals
     m_sourcePromise = new QPromise<void>();
     m_sourceFuture = m_sourcePromise->future();
     m_futureWatcher = new QFutureWatcher<void>();
 
-    for (GList *iter = m_sources; iter != nullptr; iter = g_list_next(iter)) {
+    for (GList *iter = m_sources; iter != NULL; iter = g_list_next(iter)) {
         ESource *source = E_SOURCE(iter->data);
 
         QString sourceInfo =
@@ -92,35 +68,117 @@ void EDSAddressBookFeeder::init()
 
         qCDebug(lcEDSAddressBookFeeder) << "Connecting to source" << sourceInfo;
 
-        e_book_client_connect(source, 5, nullptr, onEbookClientConnected, this);
+        e_book_client_connect(source, -1, m_cancellable, onEbookClientConnected, this);
     }
 
     m_sourcePromise->start();
 
-    QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished).then([this]() {
-        if (m_sourceFuture.isFinished()) {
-            feedAddressBook();
+    m_chainFuture = QtFuture::connect(m_futureWatcher, &QFutureWatcher<void>::finished)
+                            .then(this, [this]() {
+                                if (!m_chainFuture.isCanceled() && m_sourceFuture.isFinished()) {
+                                    feedAddressBook();
+                                }
+                            });
+
+    m_sourceTimeout.setSingleShot(true);
+    m_sourceTimeout.setInterval(5s);
+    connect(&m_sourceTimeout, &QTimer::timeout, this, [this]() {
+        if (m_futureWatcher && !m_futureWatcher->isFinished()) {
+            Q_EMIT feederFailed();
         }
     });
-
-    QTimer::singleShot(5s, this, [this]() {
-        if (!m_futureWatcher->isFinished()) {
-            qCDebug(lcEDSAddressBookFeeder) << "Failed to process EDS sources";
-
-            m_sourceFuture.cancel();
-            m_futureWatcher->cancel();
-        }
-    });
+    m_sourceTimeout.start();
 
     m_futureWatcher->setFuture(m_sourceFuture);
 }
 
+void EDSAddressBookFeeder::resetContacts()
+{
+    AddressBook::instance().removeContactsBySource(m_group);
+}
+
+void EDSAddressBookFeeder::resetFeeder()
+{
+    m_sourceCount = 0;
+    m_clientCount = 0;
+
+    if (m_sourceTimeout.isActive()) {
+        m_sourceTimeout.stop();
+    }
+
+    g_clear_object(&m_registry);
+    if (m_sources) {
+        g_clear_list(&m_sources, g_object_unref);
+    }
+    g_clear_pointer(&m_searchExpr, g_free);
+
+    // Cancel all active EDS async methods
+    g_cancellable_cancel(m_cancellable);
+    g_clear_object(&m_cancellable);
+
+    for (auto client : std::as_const(m_clients)) {
+        g_clear_object(&client);
+    }
+    m_clients.clear();
+
+    // Disconnect all EDS signal handlers
+    disconnectContactSignals();
+    for (auto clientView : std::as_const(m_clientViews)) {
+        g_clear_object(&clientView);
+    }
+    m_clientViews.clear();
+
+    // Future/Promise
+    if (m_chainFuture.isRunning()) {
+        m_chainFuture.cancel();
+    }
+    m_chainFuture = QFuture<void>();
+
+    if (m_futureWatcher) {
+        m_futureWatcher->cancel();
+
+        m_futureWatcher->deleteLater();
+        m_futureWatcher = nullptr;
+    }
+
+    if (m_sourceFuture.isRunning()) {
+        m_sourceFuture.cancel();
+    }
+    m_sourceFuture = QFuture<void>();
+
+    if (m_sourcePromise) {
+        m_sourcePromise->finish();
+
+        delete m_sourcePromise;
+        m_sourcePromise = nullptr;
+    }
+}
+
 void EDSAddressBookFeeder::process()
 {
+    connect(
+            this, &EDSAddressBookFeeder::feederFailed, this,
+            [this]() {
+                // Prepare feeder for re-run
+                resetContacts();
+                resetFeeder();
+
+                if (m_retryCount > 0) {
+                    m_retryCount--;
+
+                    qCWarning(lcEDSAddressBookFeeder)
+                            << "Failed to process EDS sources - trying later";
+
+                    // Retry
+                    QTimer::singleShot(m_retryInterval, this, [this]() { process(); });
+                }
+            },
+            Qt::SingleShotConnection);
+
     ReadOnlyConfdSettings settings;
 
     settings.beginGroup(m_group);
-    m_displayName = settings.value("displayName", "").toString();
+    m_displayName = settings.value("displayName", m_group).toString();
 
     m_blockInfo.isBlocking = settings.value("block", false).toBool();
     m_blockInfo.responseCode =
@@ -166,7 +224,7 @@ QStringList EDSAddressBookFeeder::getList(EContact *contact, EContactField id)
 
     if (contact) {
         GList *items = static_cast<GList *>(e_contact_get(contact, id));
-        for (GList *item = items; item != nullptr; item = g_list_next(item)) {
+        for (GList *item = items; item != NULL; item = g_list_next(item)) {
             const gchar *result = static_cast<const gchar *>(item->data);
             if (result) {
                 results.append(QString::fromUtf8(result));
@@ -181,6 +239,39 @@ QStringList EDSAddressBookFeeder::getList(EContact *contact, EContactField id)
     return results;
 }
 
+void EDSAddressBookFeeder::connectViewCompleteSignal(EBookClientView *view)
+{
+    g_signal_connect(view, "complete", G_CALLBACK(onViewComplete), this);
+}
+
+void EDSAddressBookFeeder::onViewComplete(EBookClientView *view, GError *error, gpointer user_data)
+{
+    /*
+        INFO: The "complete" signal is only needed on first startup to wait for the initial
+        stream of all objects to the view, we'll disconnect it here.
+        Otherwise, future view updates would cause duplicate signal connections.
+    */
+    guint signalId = g_signal_lookup("complete", G_OBJECT_TYPE(view));
+    g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_ID, signalId, 0, NULL, NULL, NULL);
+
+    EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
+
+    if (error) {
+        qCCritical(lcEDSAddressBookFeeder)
+                << "Failed to wait for view completion, unable to subscribe "
+                   "to live contact updates:"
+                << error->message;
+        if (feeder) {
+            Q_EMIT feeder->feederFailed();
+        }
+        return;
+    }
+
+    if (feeder) {
+        feeder->connectContactSignals(view);
+    }
+}
+
 void EDSAddressBookFeeder::connectContactSignals(EBookClientView *view)
 {
     // INFO: g_signal_connect(): The last argument is an instance of the EDS class (gpointer
@@ -188,6 +279,14 @@ void EDSAddressBookFeeder::connectContactSignals(EBookClientView *view)
     g_signal_connect(view, "objects-added", G_CALLBACK(onContactsAdded), this);
     g_signal_connect(view, "objects-modified", G_CALLBACK(onContactsModified), this);
     g_signal_connect(view, "objects-removed", G_CALLBACK(onContactsRemoved), this);
+}
+
+void EDSAddressBookFeeder::disconnectContactSignals()
+{
+    for (auto view : std::as_const(m_clientViews)) {
+        // Match all signals with the same gpointer user_data
+        g_signal_handlers_disconnect_matched(view, G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, this);
+    }
 }
 
 void EDSAddressBookFeeder::onContactsAdded(EBookClientView *view, GSList *contacts,
@@ -227,7 +326,7 @@ void EDSAddressBookFeeder::processContactsAdded(GSList *contacts)
 {
     auto &addressbook = AddressBook::instance();
 
-    for (GSList *item = contacts; item != nullptr; item = g_slist_next(item)) {
+    for (GSList *item = contacts; item != NULL; item = g_slist_next(item)) {
         if (EContact *eContact = E_CONTACT(item->data)) {
             QDateTime changed =
                     QDateTime::fromString(getField(eContact, E_CONTACT_REV), Qt::ISODate);
@@ -249,7 +348,7 @@ void EDSAddressBookFeeder::processContactsAdded(GSList *contacts)
 
             Contact *contact = addressbook.addContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
-                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
+                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName, m_group },
                     getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers, m_blockInfo);
 
@@ -262,7 +361,7 @@ void EDSAddressBookFeeder::processContactsModified(GSList *contacts)
 {
     auto &addressbook = AddressBook::instance();
 
-    for (GSList *item = contacts; item != nullptr; item = g_slist_next(item)) {
+    for (GSList *item = contacts; item != NULL; item = g_slist_next(item)) {
         if (EContact *eContact = E_CONTACT(item->data)) {
             QDateTime changed =
                     QDateTime::fromString(getField(eContact, E_CONTACT_REV), Qt::ISODate);
@@ -299,7 +398,7 @@ void EDSAddressBookFeeder::processContactsRemoved(GSList *uids)
 {
     auto &addressbook = AddressBook::instance();
 
-    for (GSList *item = uids; item != nullptr; item = g_slist_next(item)) {
+    for (GSList *item = uids; item != NULL; item = g_slist_next(item)) {
         const gchar *uid = static_cast<const gchar *>(item->data);
         if (uid) {
             // Do not keep images of deleted contacts
@@ -316,8 +415,8 @@ void EDSAddressBookFeeder::onEbookClientConnected(GObject *source_object, GAsync
 {
     Q_UNUSED(source_object)
 
-    GError *error = nullptr;
-    EBookClient *client = nullptr;
+    GError *error = NULL;
+    EBookClient *client = NULL;
 
     EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
     if (feeder) {
@@ -325,21 +424,22 @@ void EDSAddressBookFeeder::onEbookClientConnected(GObject *source_object, GAsync
         if (error) {
             qCDebug(lcEDSAddressBookFeeder)
                     << "Can't retrieve finished client connection:" << error->message;
-            g_error_free(error);
-            error = nullptr;
+            g_clear_error(&error);
+            Q_EMIT feeder->feederFailed();
             return;
         }
 
-        e_book_client_get_view(client, feeder->m_searchExpr, nullptr, onViewCreated, feeder);
+        e_book_client_get_view(client, feeder->m_searchExpr, feeder->m_cancellable, onViewCreated,
+                               feeder);
     }
 }
 
 void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *result,
                                          gpointer user_data)
 {
-    GError *error = nullptr;
+    GError *error = NULL;
     EBookClient *client = E_BOOK_CLIENT(source_object);
-    EBookClientView *view = nullptr;
+    EBookClientView *view = NULL;
     EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
 
     if (feeder && client) {
@@ -347,18 +447,19 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
             if (error) {
                 qCCritical(lcEDSAddressBookFeeder)
                         << "Can't retrieve finished view:" << error->message;
-                g_error_free(error);
-                error = nullptr;
+                g_clear_error(&error);
+
+                Q_EMIT feeder->feederFailed();
             }
             return;
         }
 
-        feeder->connectContactSignals(view);
+        feeder->connectViewCompleteSignal(view);
         e_book_client_view_start(view, &error);
         if (error) {
             qCCritical(lcEDSAddressBookFeeder) << "Can't start view:" << error->message;
-            g_error_free(error);
-            error = nullptr;
+            g_clear_error(&error);
+            Q_EMIT feeder->feederFailed();
             return;
         }
         feeder->m_clientViews.append(view);
@@ -374,8 +475,8 @@ void EDSAddressBookFeeder::onViewCreated(GObject *source_object, GAsyncResult *r
 void EDSAddressBookFeeder::onClientContactsRequested(GObject *source_object, GAsyncResult *result,
                                                      gpointer user_data)
 {
-    GError *error = nullptr;
-    GSList *contacts = nullptr;
+    GError *error = NULL;
+    GSList *contacts = NULL;
 
     EDSAddressBookFeeder *feeder = static_cast<EDSAddressBookFeeder *>(user_data);
     if (feeder) {
@@ -383,8 +484,9 @@ void EDSAddressBookFeeder::onClientContactsRequested(GObject *source_object, GAs
                                                &error)) {
             if (error) {
                 qCCritical(lcEDSAddressBookFeeder) << "Can't retrieve contacts:" << error->message;
-                g_error_free(error);
-                error = nullptr;
+                g_clear_error(&error);
+
+                Q_EMIT feeder->feederFailed();
             }
             return;
         }
@@ -404,7 +506,7 @@ void EDSAddressBookFeeder::processContacts(QString clientInfo, GSList *contacts)
     unsigned contactCount = 0;
     auto &addressbook = AddressBook::instance();
 
-    for (GSList *item = contacts; item != nullptr; item = g_slist_next(item)) {
+    for (GSList *item = contacts; item != NULL; item = g_slist_next(item)) {
         if (EContact *eContact = E_CONTACT(item->data)) {
             QDateTime changed =
                     QDateTime::fromString(getField(eContact, E_CONTACT_REV), Qt::ISODate);
@@ -426,7 +528,7 @@ void EDSAddressBookFeeder::processContacts(QString clientInfo, GSList *contacts)
 
             Contact *contact = addressbook.addContact(
                     getField(eContact, E_CONTACT_FULL_NAME) + getField(eContact, E_CONTACT_ORG),
-                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName },
+                    getField(eContact, E_CONTACT_UID), { m_priority, m_displayName, m_group },
                     getField(eContact, E_CONTACT_FULL_NAME), getField(eContact, E_CONTACT_ORG),
                     getField(eContact, E_CONTACT_EMAIL_1), changed, phoneNumbers, m_blockInfo);
 
@@ -436,8 +538,7 @@ void EDSAddressBookFeeder::processContacts(QString clientInfo, GSList *contacts)
         }
     }
 
-    g_slist_free_full(contacts, g_object_unref);
-    contacts = nullptr;
+    g_clear_slist(&contacts, g_object_unref);
 
     qCInfo(lcEDSAddressBookFeeder)
             << "Loaded" << contactCount << "contact(s) of source" << clientInfo;
@@ -470,11 +571,12 @@ void EDSAddressBookFeeder::addAvatar(QString id, EContact *contact, QDateTime ch
                 if (!image.isNull()) {
                     QByteArray avatar;
                     QBuffer buffer(&avatar);
-                    buffer.open(QIODevice::WriteOnly);
-                    // INFO: EDS stores contact photos as PNG ("*.image-2Fpng")
-                    image.save(&buffer, "PNG");
-                    if (avatar.size()) {
-                        AvatarManager::instance().addExternalImage(id, avatar, changed);
+                    if (buffer.open(QIODevice::WriteOnly)) {
+                        // INFO: EDS stores contact photos as PNG ("*.image-2Fpng")
+                        image.save(&buffer, "PNG");
+                        if (avatar.size()) {
+                            AvatarManager::instance().addExternalImage(id, avatar, changed);
+                        }
                     }
                 }
             }
@@ -493,6 +595,7 @@ void EDSAddressBookFeeder::addAvatar(QString id, EContact *contact, QDateTime ch
 void EDSAddressBookFeeder::feedAddressBook()
 {
     for (auto client : std::as_const(m_clients)) {
-        e_book_client_get_contacts(client, m_searchExpr, nullptr, onClientContactsRequested, this);
+        e_book_client_get_contacts(client, m_searchExpr, m_cancellable, onClientContactsRequested,
+                                   this);
     }
 }

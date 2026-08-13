@@ -1,0 +1,360 @@
+= Building Block View
+
+== High-Level Architecture
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect High-Level Architecture
+
+package "Main Application" as Main {
+  component "Application" as App
+  component "StateManager" as SM
+  component "ErrorBus" as EB
+}
+
+package "UI Layer" as UI {
+  component "GonnectWindow" as GW
+  component "CallWindow" as CW
+  component "HistoryWindow" as HW
+  component "SearchWindow" as SW
+  component "SettingsWindow" as SettW
+}
+
+package "SIP Module" as SIP {
+  component "SIPManager" as SIPM
+  component "SIPCallManager" as SCM
+  component "SIPCall" as SC
+  component "SIPAccount" as SA
+  component "SIPBuddy" as SB
+  component "PreferredIdentity" as PI
+}
+
+package "Contacts Module" as Contacts {
+  component "AddressBookManager" as ABM
+  component "Contact" as C
+  component "ContactModel" as CM
+  component "AvatarManager" as AM
+  component "ContactSourceInfoModel" as CSIM
+}
+
+package "Calendar Module" as Calendar {
+  component "DateEventFeederManager" as DEM
+  component "DateEvent" as DE
+  component "DateEventsModel" as DM
+}
+
+package "Media Module" as Media {
+  component "AudioManager" as AuM
+  component "VideoManager" as VM
+  component "AudioPort" as AP
+}
+
+package "Platform" as Platform {
+  component "SystemTrayMenu" as STM
+  component "NotificationManager" as NM
+  component "Credentials" as Creds
+}
+
+package "Contact Sources" as Sources {
+  component "LDAP Feeder" as LDAP
+  component "CardDAV Feeder" as CD
+  component "Akonadi Feeder" as AK
+  component "EDS Feeder" as EDS
+  component "CSV Feeder" as CSV
+}
+
+package "Calendar Sources" as CalSources {
+  component "CalDAV Feeder" as CDV
+  component "Akonadi Calendar" as AKC
+  component "EDS Calendar" as EDSV
+}
+
+App --> UI : QML Context
+App --> SIP : SIP Management
+App --> Contacts : Contact Management
+App --> Calendar : Calendar Management
+App --> Media : Media Management
+App --> Platform : Platform Services
+
+SIPM --> SA : Account management
+SIPM --> SB : Buddy tracking
+SCM --> SC : Call management
+SC --> SIP : PJSIP integration
+
+ABM --> Sources : Contact sources
+ABM --> CM : Model updates
+AM --> C : Avatar loading
+
+DEM --> CalSources : Calendar sources
+DEM --> DM : Model updates
+
+AuM --> Media : Audio devices
+VM --> Media : Video devices
+AP --> AuM : Port routing
+
+STM --> Platform : System tray
+NM --> Platform : Notifications
+Creds --> Platform : Keychain
+@enduml
+....
+
+== SIP Module Architecture
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect SIP Module
+
+package "SIP Core" as Core {
+  component "SIPManager" as SIPM
+  component "SIPEventLoop" as SEL
+  component "SIPMediaConfig" as SMC
+  component "SIPUserAgentConfig" as SUAC
+}
+
+package "Account Management" as Acc {
+  component "SIPAccountManager" as SAM
+  component "SIPAccount" as SA
+  component "PreferredIdentity" as PI
+  component "PreferredIdentityValidator" as PIV
+}
+
+package "Call Management" as CallM {
+  component "SIPCallManager" as SCM
+  component "SIPCall" as SC
+  component "ICallState" as ICS
+}
+
+package "Buddy Management" as Buddy {
+  component "SIPBuddy" as SB
+  component "SIPBuddyState" as SBS
+}
+
+package "Utilities" as Utils {
+  component "RingToneFactory" as RTF
+  component "RingTone" as RT
+  component "Ringer" as R
+  component "DtmfGenerator" as DTGF
+  component "TogglerManager" as TM
+  component "Toggler" as T
+}
+
+SIPM --> SEL : Event loop
+SIPM --> SMC : Media config
+SIPM --> SUAC : UA config
+SIPM --> SAM : Account manager
+
+SAM --> SA : Account instances
+SAM --> PI : Identity management
+SA --> PIV : Validation
+
+SCM --> SC : Call instances
+SC --> ICS : State interface
+
+RTF --> RT : Ring tone creation
+R --> RT : Ring playback
+TM --> T : Toggler instances
+DTGF --> SC : DTMF generation
+@enduml
+....
+
+== Contacts Module Architecture
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Contacts Module
+
+package "Core" as Core {
+  component "AddressBookManager" as ABM
+  component "Contact" as C
+  component "ContactModel" as CM
+  component "AvatarManager" as AM
+}
+
+package "Abstract Interfaces" as Abstract {
+  interface "IAddressBookFactory" as IABF
+  interface "IAddressBookFeeder" as IABFdr
+}
+
+package "LDAP Source" as LDAP {
+  component "LDAP Feeder" as LDAPF
+  component "LDAP Factory" as LDAPFact
+}
+
+package "CardDAV Source" as CD {
+  component "CardDAV Feeder" as CDF
+  component "CardDAV Factory" as CDFact
+}
+
+package "Akonadi Source" as AK {
+  component "Akonadi Feeder" as AKF
+  component "Akonadi Factory" as AKFact
+}
+
+package "EDS Source" as EDS {
+  component "EDS Feeder" as EDSF
+  component "EDS Factory" as EDSFact
+}
+
+package "CSV Source" as CSV {
+  component "CSV Feeder" as CSVF
+  component "CSV Factory" as CSVFact
+}
+
+package "Utilities" as Utils {
+  component "ContactSerializer" as CS
+  component "FuzzyCompare" as FC
+  component "PhoneNumberUtil" as PU
+  component "PhoneCodeLookup" as PCL
+  component "EmergencyContact" as EC
+  component "BlockInfo" as BI
+}
+
+ABM --> IABF : Factory interface
+ABM --> IABFdr : Feeder interface
+
+IABF --> LDAPFact : LDAP factory
+IABF --> CDFact : CardDAV factory
+IABF --> AKFact : Akonadi factory
+IABF --> EDSFact : EDS factory
+IABF --> CSVFact : CSV factory
+
+LDAPF --> IABFdr : Implements feeder
+CDF --> IABFdr : Implements feeder
+AKF --> IABFdr : Implements feeder
+EDSF --> IABFdr : Implements feeder
+CSVF --> IABFdr : Implements feeder
+
+ABM --> CM : Model updates
+ABM --> AM : Avatar requests
+AM --> C : Avatar loading
+
+CS --> C : Serialization
+FC --> C : Comparison
+PU --> C : Phone validation
+PCL --> C : Phone codes
+EC --> C : Emergency contacts
+BI --> C : Block info
+@enduml
+....
+
+== Calendar Module Architecture
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Calendar Module
+
+package "Core" as Core {
+  component "DateEventFeederManager" as DEM
+  component "DateEventManager" as DM
+  component "DateEvent" as DE
+  component "DateEventsModel" as DEMod
+}
+
+package "Abstract Interfaces" as Abstract {
+  interface "IDateEventFeederFactory" as IDEFF
+  interface "IDateEventFeeder" as IDEFFdr
+}
+
+package "CalDAV Source" as CDV {
+  component "CalDAV Feeder" as CDVF
+  component "CalDAV Factory" as CDVFct
+}
+
+package "Akonadi Source" as AK {
+  component "Akonadi Feeder" as AKF
+  component "Akonadi Factory" as AKFct
+}
+
+package "EDS Source" as EDS {
+  component "EDS Feeder" as EDSF
+  component "EDS Factory" as EDSFct
+}
+
+package "Utilities" as Utils {
+  component "RandomRoomNameGenerator" as RNG
+  component "EmojiResolver" as ER
+  component "EmojiModel" as EM
+}
+
+DEM --> IDEFF : Factory interface
+DEM --> IDEFFdr : Feeder interface
+
+IDEFF --> CDVFct : CalDAV factory
+IDEFF --> AKFct : Akonadi factory
+IDEFF --> EDSFct : EDS factory
+
+CDVF --> IDEFFdr : Implements feeder
+AKF --> IDEFFdr : Implements feeder
+EDSF --> IDEFFdr : Implements feeder
+
+DEM --> DEMod : Model updates
+DEM --> DE : Event instances
+
+RNG --> DE : Room name generation
+ER --> DE : Emoji resolution
+EM --> DE : Emoji model
+@enduml
+....
+
+== Media Module Architecture
+
+[plantuml]
+....
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle uml2
+skinparam shadowing false
+
+title GOnnect Media Module
+
+package "Audio" as Audio {
+  component "AudioManager" as AuM
+  component "SIPAudioDevice" as SAD
+  component "AudioPort" as AP
+}
+
+package "Video" as Video {
+  component "VideoManager" as VM
+  component "SIPVideoDevice" as SVD
+}
+
+package "Call Media" as CallMedia {
+  component "Sniffer" as Snif
+  component "HeadsetDeviceProxy" as HDP
+}
+
+package "Utilities" as Utils {
+  component "RingToneFactory" as RTF
+  component "RingTone" as RT
+}
+
+AuM --> SAD : Audio devices
+AuM --> AP : Port routing
+VM --> SVD : Video devices
+
+Snif --> Audio : Media sniffing
+HDP --> Audio : Headset proxy
+
+RTF --> RT : Ring tone creation
+@enduml
+....

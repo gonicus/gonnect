@@ -219,12 +219,10 @@ QtObject {
                 }
             }
         }
-
     }
 
     readonly property QtObject _internalObject: QtObject {
         id: internal
-
 
         property Item selectedItem: null
         property Item selectedSubItem: null
@@ -254,7 +252,6 @@ QtObject {
         }
 
         function getPositionOf(item : variant) : variant {
-
             let realRow = 0
             const resultContainers = internal.containerCache()
 

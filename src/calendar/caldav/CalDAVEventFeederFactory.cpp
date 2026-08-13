@@ -31,16 +31,16 @@ QStringList CalDAVEventFeederFactory::configurations() const
 
 IDateEventFeeder *CalDAVEventFeederFactory::createFeeder(
         const QString &settingsGroup, const QDateTime &currentTime, const QDateTime &timeRangeStart,
-        const QDateTime &timeRangeEnd, DateEventFeederManager *feederManager) const
+        const QDateTime &timeRangeEnd, const int retryCount, const int retryInterval,
+        DateEventFeederManager *feederManager) const
 {
     ReadOnlyConfdSettings settings;
     settings.beginGroup(settingsGroup);
 
     return new CalDAVEventFeeder(
             feederManager,
-            { settingsGroup, name(), settings.value("host").toString(),
-              settings.value("path").toString(), settings.value("user").toString(),
-              settings.value("port", 0).toInt(), settings.value("useSSL", true).toBool(),
-              settings.value("interval", 300000).toInt(), currentTime, timeRangeStart,
-              timeRangeEnd });
+            { settingsGroup, settings.value("host").toString(), settings.value("path").toString(),
+              settings.value("user").toString(), settings.value("port", 0).toInt(),
+              settings.value("useSSL", true).toBool(), settings.value("interval", 300000).toInt(),
+              currentTime, timeRangeStart, timeRangeEnd, retryCount, retryInterval });
 }

@@ -1,8 +1,11 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
+#include <QtProtobuf>
 #include "Application.h"
 #include "GlobalInfo.h"
+#include "PersonCoinProvider.h"
+#include "WebEngineKeyEventFilter.h"
 
 #ifdef Q_OS_LINUX
 #  include <QDBusConnection>
@@ -41,11 +44,10 @@ static int setup_unix_signal_handlers()
 
 int main(int argc, char *argv[])
 {
-    qSetMessagePattern(
-            "\033[32m%{time h:mm:ss.zzz}%{if-category}\033[32m %{category}:%{endif} "
-            "%{if-debug}\033[34m%{function}%{endif}%{if-warning}\033[31m%{backtrace "
-            "depth=3}%{endif}%{if-critical}\033[31m%{backtrace "
-            "depth=3}%{endif}%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
+    qSetMessagePattern("\033[32m%{time h:mm:ss.zzz}%{if-category}\033[32m %{category}:%{endif} "
+                       "%{if-debug}\033[34m%{function}%{endif}%{if-warning}\033[31m%{endif}"
+                       "%{if-critical}\033[31m%{endif}"
+                       "%{if-fatal}\033[31m%{backtrace depth=3}%{endif}\033[0m %{message}");
     setup_unix_signal_handlers();
 
     QtWebEngineQuick::initialize();
@@ -60,18 +62,23 @@ int main(int argc, char *argv[])
 
     // Assemble the Qt web engine flags
     QStringList chromiumFlags;
+    auto webenginePresetEnv = qgetenv("GONNECT_QTWEBENGINE_CHROMIUM_FLAGS");
+    if (webenginePresetEnv.isEmpty()) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 10, 0)
-    chromiumFlags.push_back("--use-fake-ui-for-media-stream");
+        chromiumFlags.push_back("--use-fake-ui-for-media-stream");
 #endif
-    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
-        chromiumFlags.push_back("--disable-gpu");
-    }
-    if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
-        chromiumFlags.push_back("--disable-renderer-accessibility");
-    }
+        if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_002)) {
+            chromiumFlags.push_back("--disable-gpu");
+        }
+        if (GlobalInfo::instance().isWorkaroundActive(GlobalInfo::WorkaroundId::GOW_003)) {
+            chromiumFlags.push_back("--disable-renderer-accessibility");
+        }
 
-    if (chromiumFlags.size() > 0) {
-        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
+        if (chromiumFlags.size() > 0) {
+            qputenv("QTWEBENGINE_CHROMIUM_FLAGS", chromiumFlags.join(" ").toStdString().c_str());
+        }
+    } else {
+        qputenv("QTWEBENGINE_CHROMIUM_FLAGS", webenginePresetEnv);
     }
 
     int exitCode = 0;
@@ -83,7 +90,11 @@ int main(int argc, char *argv[])
         return 2;
     }
 
+    qRegisterProtobufTypes();
+
     app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
+
+    app.installEventFilter(&WebEngineKeyEventFilter::instance());
 
     // Fonts
     const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
@@ -111,15 +122,24 @@ int main(int argc, char *argv[])
     QObject::connect(
             &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
             []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+
+    engine.addImageProvider(QLatin1String("personcoin"), new PersonCoinProvider);
     engine.loadFromModule("base", "Main");
 
     const auto &objs = engine.rootObjects();
+    if (objs.isEmpty()) {
+        qFatal() << "no QML windows registered";
+    }
+
     const auto &itemObjs = objs.first();
 
     QQuickWindow *mainWindow = itemObjs->findChild<QQuickWindow *>("gonnectWindow");
     if (mainWindow) {
         app.setRootWindow(mainWindow);
     }
+
+    // Take care for running "initialize" after exec() is called
+    QTimer::singleShot(0, &app, &Application::initialize);
 
     exitCode = app.exec();
     if (exitCode == RESTART_CODE) {

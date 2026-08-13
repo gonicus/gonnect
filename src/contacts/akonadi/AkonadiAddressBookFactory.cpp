@@ -23,7 +23,9 @@ QStringList AkonadiAddressBookFactory::configurations() const
 }
 
 IAddressBookFeeder *AkonadiAddressBookFactory::createFeeder(const QString &group,
+                                                            const int retryCount,
+                                                            const int retryInterval,
                                                             AddressBookManager *parent) const
 {
-    return new AkonadiAddressBookFeeder(group, parent);
+    return new AkonadiAddressBookFeeder(group, retryCount, retryInterval, parent);
 }

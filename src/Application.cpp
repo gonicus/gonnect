@@ -5,7 +5,6 @@
 #include "NotificationManager.h"
 #include "appversion.h"
 #include "SIPManager.h"
-#include "SIPCallManager.h"
 #include "SystemTrayMenu.h"
 #include "AddressBookManager.h"
 #include "USBDevices.h"
@@ -20,7 +19,6 @@
 #include <QQmlContext>
 #include <QDesktopServices>
 #include <QtWebEngineQuick>
-#include <iostream>
 
 #ifdef Q_OS_MACOS
 #  define LOGFAULT_WITH_OS_LOG
@@ -29,6 +27,7 @@
 
 #ifdef Q_OS_WINDOWS
 #  include "windows/WindowsEventLogHandler.h"
+#  include "windows/WindowsInhibitHelper.h"
 #endif
 
 #ifdef Q_OS_LINUX
@@ -49,7 +48,14 @@ int Application::s_sigtermFd[2];
 
 Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 {
-    qCCritical(lcApplication) << "Constructing app, version" << getVersion();
+    QString commitId = QString::fromStdString(getCommitHash());
+    if (commitId.isEmpty()) {
+        qCCritical(lcApplication) << "Constructing debug app, version" << getVersion();
+    } else {
+        qCCritical(lcApplication).nospace()
+                << "Constructing app, version " << getVersion() << " [" << commitId << "]";
+    }
+
     connect(this, &Application::aboutToQuit, this, &Application::shutdown);
 
     setApplicationName("GOnnect");
@@ -61,19 +67,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setApplicationVersion(QString::fromStdString(getVersion()));
 
     installTranslations();
-
     initLogging();
-
-    AddressBookManager::instance().initAddressBookConfigs();
-    DateEventFeederManager::instance().initFeederConfigs();
-
     setQuitOnLastWindowClosed(false);
-
-    USBDevices::instance().initialize();
-
-    StateManager::instance().setParent(this);
-    SearchProvider::instance().setParent(this);
-    UISettings::instance().setParent(this);
 
 #ifdef Q_OS_LINUX
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, s_sighupFd)) {
@@ -90,8 +85,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     connect(m_termNotifier, SIGNAL(activated(QSocketDescriptor)), this, SLOT(handleSigTerm()));
 #endif
 
-    // Take care for running "initialize" after exec() is called
-    QTimer::singleShot(0, this, &Application::initialize);
+#ifdef Q_OS_WINDOWS
+    QObject::connect(this, &QGuiApplication::commitDataRequest,
+                     [](QSessionManager &manager) { manager.cancel(); });
+#endif
+
+    StateManager::instance().initialize();
 }
 
 void Application::installTranslations()
@@ -111,12 +110,30 @@ void Application::installTranslations()
     }
 }
 
+void Application::setRootWindow(QQuickWindow *win)
+{
+    if (!m_rootWindow) {
+#ifdef Q_OS_WINDOWS
+        auto wFilter = new WindowsEventFilter();
+        installNativeEventFilter(wFilter);
+#endif
+        m_rootWindow = win;
+    }
+}
+
 void Application::initialize()
 {
-    StateManager::instance().initialize();
+    StateManager::instance().initializeSip();
+
+    AddressBookManager::instance().initAddressBookConfigs();
+    DateEventFeederManager::instance().initFeederConfigs();
+    USBDevices::instance().initialize();
+    StateManager::instance().setParent(this);
+    SearchProvider::instance().setParent(this);
+    UISettings::instance().setParent(this);
 
     AddressBookManager::instance().reloadAddressBook();
-    DateEventFeederManager::instance().reload();
+    DateEventFeederManager::instance().reloadCalendar();
     SystemTrayMenu::instance(); // Ensure singleton is created
 
     AppSettings settings;
@@ -133,13 +150,6 @@ void Application::initializeSIP()
 {
     auto &sm = SIPManager::instance();
     sm.initialize();
-
-    auto &cm = SIPCallManager::instance();
-    connect(&cm, &SIPCallManager::missedCallsChanged, this, [this]() {
-        auto count = SIPCallManager::instance().missedCalls();
-        setBadgeNumber(count);
-        SystemTrayMenu::instance().setBadgeNumber(count);
-    });
 
     m_initialized = true;
 }

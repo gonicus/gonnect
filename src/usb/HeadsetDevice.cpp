@@ -1,10 +1,16 @@
+#ifdef WIN32
+#  include <winsock2.h>
+#endif
+
 #include <QDebug>
 #include <QMutexLocker>
 #include <QLoggingCategory>
 #include <QDateTime>
 #include <libusb.h>
+#include <algorithm>
 #include "HeadsetDevice.h"
 #include "GlobalInfo.h"
+#include "AudioManager.h"
 
 Q_LOGGING_CATEGORY(lcHeadset, "gonnect.usb.headset")
 
@@ -43,6 +49,18 @@ HeadsetDevice::~HeadsetDevice()
     close();
 }
 
+unsigned HeadsetDevice::reportToUnsigned(const unsigned char *data, int len) const
+{
+    unsigned value = 0;
+
+    // Convert payload to little endian unsigned value. Skip report ID.
+    for (int i = 1; i < len && i <= 4; ++i) {
+        value |= static_cast<unsigned>(data[i]) << ((i - 1) * 8);
+    }
+
+    return value;
+}
+
 bool HeadsetDevice::open()
 {
     if (!useHeadset()) {
@@ -62,7 +80,7 @@ bool HeadsetDevice::open()
         // Read Teams info if available
         if (m_teamsUsageMapping.contains(UsageId::Teams_VendorExtension)) {
             unsigned char buf[256];
-            memset(buf, 0, sizeof(buf));
+            std::ranges::fill(buf, 0);
 
             // Read vendor extension from device
             buf[0] = m_teamsUsageMapping[UsageId::Teams_VendorExtension];
@@ -76,7 +94,7 @@ bool HeadsetDevice::open()
             // If we've display support, read the display configuration from device
             if (m_displaySupported
                 && m_teamsUsageMapping.contains(UsageId::Teams_DisplayAttributes)) {
-                memset(buf, 0, sizeof(buf));
+                std::ranges::fill(buf, 0);
                 buf[0] = m_teamsUsageMapping[UsageId::Teams_DisplayAttributes];
                 auto res = hid_get_feature_report(device, buf, sizeof(buf));
                 if (res >= 5) {
@@ -108,6 +126,26 @@ void HeadsetDevice::close()
     }
 
     m_isOpen = false;
+    m_hasInputBaseline = false;
+}
+
+void HeadsetDevice::applyInputState(quint8 reportId, unsigned value)
+{
+    // Extract and persist hook switch input state
+    if (m_hidUsages.contains(UsageId::Telephony_HookSwitch)) {
+        const auto &usage = m_hidUsages.value(UsageId::Telephony_HookSwitch);
+        if (usage.reportId == reportId) {
+            m_hookSwitch = value & (1u << usage.bitPosition);
+        }
+    }
+
+    // Extract and persist line input state
+    if (m_hidUsages.contains(UsageId::Telephony_LineBusyTone)) {
+        const auto &usage = m_hidUsages.value(UsageId::Telephony_LineBusyTone);
+        if (usage.reportId == reportId) {
+            m_line = value & (1u << usage.bitPosition);
+        }
+    }
 }
 
 void HeadsetDevice::send(quint8 reportId, unsigned data)
@@ -127,7 +165,9 @@ void HeadsetDevice::send(quint8 reportId, unsigned data)
     qCDebug(lcHeadset) << "Sending report" << QString::asprintf("0x%02X", reportId) << "with data"
                        << QString::asprintf("0x%08X", data);
 
-    hid_write(m_device, buf, sizeof(buf));
+    if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+        qCWarning(lcHeadset) << "failed to write to headset device";
+    }
 }
 
 void HeadsetDevice::setIdle()
@@ -135,6 +175,8 @@ void HeadsetDevice::setIdle()
     static const QList<UsageId> usageIds = { UsageId::LED_OffHook, UsageId::LED_Mute,
                                              UsageId::LED_Ring, UsageId::LED_Hold,
                                              UsageId::Telephony_Ringer };
+
+    m_busyLine = false;
 
     QHash<quint8, unsigned> reportVals;
     QList<UsageInfo> usageInfos;
@@ -144,7 +186,7 @@ void HeadsetDevice::setIdle()
             const auto &usage = m_hidUsages.value(usageId);
             usageInfos.append(usage);
             reportVals.insert(usage.reportId,
-                              reportVals.value(usage.reportId, 0) | (0 << usage.bitPosition));
+                              reportVals.value(usage.reportId, 0) | (0u << usage.bitPosition));
         }
     }
 
@@ -194,8 +236,10 @@ void HeadsetDevice::setBusyLine(bool flag)
         return;
     }
 
+    m_busyLine = flag;
+
     const auto &usage = m_hidUsages.value(UsageId::LED_OffHook);
-    const unsigned bitValue = 1 << usage.bitPosition;
+    const unsigned bitValue = 1u << usage.bitPosition;
     unsigned value = currentFlags(usage.reportId);
 
     if (flag) {
@@ -221,13 +265,17 @@ void HeadsetDevice::setMute(bool flag)
         return;
     }
 
-    if (m_ignoreNextMuteUpdate) {
-        m_ignoreNextMuteUpdate = false;
-        qCDebug(lcHeadset).noquote().nospace() << "Ignoring setMute(" << flag << ") call";
-        return;
-    }
-
     m_muted = flag;
+    writeMuteToDevice(flag, true);
+}
+
+void HeadsetDevice::writeMuteToDevice(bool flag, bool armLockWindow)
+{
+    if (armLockWindow) {
+        m_mutePendingActive = true;
+        m_mutePendingValue = flag;
+        m_mutePendingTimer.restart();
+    }
 
     if (m_displaySupported && m_teamsUsageMapping.contains(UsageId::Teams_IconsControl)) {
         unsigned char buf[3];
@@ -238,10 +286,12 @@ void HeadsetDevice::setMute(bool flag)
         qCInfo(lcHeadset) << "Sending 'mute' state with value" << flag
                           << "to headset with display specification usage"
                           << UsageId::Teams_IconsControl;
-        hid_write(m_device, buf, sizeof(buf));
+        if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+            qCWarning(lcHeadset) << "failed to write mute state to headset device";
+        }
     } else {
         const auto &usage = m_hidUsages.value(UsageId::LED_Mute);
-        const unsigned bitValue = 1 << usage.bitPosition;
+        const unsigned bitValue = 1u << usage.bitPosition;
         unsigned value = currentFlags(usage.reportId);
 
         if (flag) {
@@ -254,6 +304,23 @@ void HeadsetDevice::setMute(bool flag)
                           << usage;
         send(usage.reportId, value);
     }
+}
+
+void HeadsetDevice::probeMuteLock()
+{
+    if (!m_hidUsages.contains(UsageId::LED_Mute)) {
+        return;
+    }
+
+    if (m_appSettings.value("generic/disableMutePropagation", false).toBool()) {
+        return;
+    }
+
+    qCInfo(lcHeadset) << "Probing headset for mute-lock";
+    m_muteBurstCount = 0;
+    m_muteBurstTimer.invalidate();
+    m_muted = false;
+    writeMuteToDevice(false, true);
 }
 
 void HeadsetDevice::setRing(bool flag)
@@ -269,7 +336,7 @@ void HeadsetDevice::setRing(bool flag)
     if (m_hidUsages.contains(UsageId::LED_Ring)) {
         const auto &usage = m_hidUsages.value(UsageId::LED_Ring);
         unsigned value = currentFlags(usage.reportId);
-        const unsigned v = 1 << usage.bitPosition;
+        const unsigned v = 1u << usage.bitPosition;
 
         if (flag) {
             value |= v;
@@ -286,15 +353,17 @@ void HeadsetDevice::setRing(bool flag)
     if (m_hidUsages.contains(UsageId::Telephony_Ringer)) {
         const auto &usage = m_hidUsages.value(UsageId::Telephony_Ringer);
         unsigned value = currentFlags(usage.reportId);
-        const unsigned v = 1 << usage.bitPosition;
+        const unsigned v = 1u << usage.bitPosition;
 
-        if (flag) {
+        const bool audible = flag && AudioManager::instance().externalRinger();
+
+        if (audible) {
             value |= v;
         } else {
             value &= ~v;
         }
 
-        qCInfo(lcHeadset) << "Sending 'ring' state with value" << flag
+        qCInfo(lcHeadset) << "Sending 'ring' state with value" << audible
                           << "to headset (Telephony_Ringer) with usage" << usage;
 
         send(usage.reportId, value);
@@ -309,7 +378,7 @@ void HeadsetDevice::setHold(bool flag)
     }
 
     const auto &usageHold = m_hidUsages.value(UsageId::LED_Hold);
-    const unsigned holdValue = 1 << usageHold.bitPosition;
+    const unsigned holdValue = 1u << usageHold.bitPosition;
     unsigned value = currentFlags(usageHold.reportId);
 
     if (flag) {
@@ -328,28 +397,28 @@ unsigned HeadsetDevice::currentFlags(const quint32 reportId) const
 {
     unsigned value = 0;
 
-    if (m_hidUsages.contains(UsageId::LED_OffHook) && (m_line || m_hookSwitch)) {
+    if (m_hidUsages.contains(UsageId::LED_OffHook) && (m_line || m_hookSwitch || m_busyLine)) {
         const auto &u = m_hidUsages.value(UsageId::LED_OffHook);
         if (u.reportId == reportId) {
-            value |= 1 << u.bitPosition;
+            value |= 1u << u.bitPosition;
         }
     }
     if (m_hidUsages.contains(UsageId::LED_Mute) && m_muted) {
         const auto &u = m_hidUsages.value(UsageId::LED_Mute);
         if (u.reportId == reportId) {
-            value |= 1 << u.bitPosition;
+            value |= 1u << u.bitPosition;
         }
     }
     if (m_hidUsages.contains(UsageId::LED_Ring) && m_ringing) {
         const auto &u = m_hidUsages.value(UsageId::LED_Ring);
         if (u.reportId == reportId) {
-            value |= 1 << u.bitPosition;
+            value |= 1u << u.bitPosition;
         }
     }
     if (m_hidUsages.contains(UsageId::LED_Hold) && m_hold) {
         const auto &u = m_hidUsages.value(UsageId::LED_Hold);
         if (u.reportId == reportId) {
-            value |= 1 << u.bitPosition;
+            value |= 1u << u.bitPosition;
         }
     }
 
@@ -366,17 +435,31 @@ void HeadsetDevice::setTeamsUsageMapping(QHash<UsageId, quint16> teamsUsageMappi
 void HeadsetDevice::processEvents()
 {
     unsigned char data[64];
-    memset(data, 0, sizeof(data));
 
-    if (auto len = hid_read_timeout(m_device, data, sizeof(data), 10)) {
+    while (true) {
+        std::ranges::fill(data, 0);
+
+        auto len = hid_read_timeout(m_device, data, sizeof(data), 10);
+        if (len <= 0) {
+            break;
+        }
+
         quint8 reportId = data[0];
 
         if (len >= 2 && m_inputReportIds.contains(reportId)) {
-            unsigned value = data[1];
+            unsigned value = reportToUnsigned(data, len);
             qCInfo(lcHeadset).noquote().nospace()
                     << "Found relevant report with report id 0x" << QString::number(reportId, 16);
 
             qCDebug(lcHeadset) << "Received report data" << QString::asprintf("0x%08X", value);
+
+            // If we've no input baseline for hook switch / line yet, sample it now
+            if (!m_hasInputBaseline) {
+                applyInputState(reportId, value);
+                m_hasInputBaseline = true;
+                qCInfo(lcHeadset) << "Input baseline taken from first report - hook switch"
+                                  << m_hookSwitch << "line busy tone" << m_line;
+            }
 
             // Hook switch
             if (m_hidUsages.contains(UsageId::Telephony_HookSwitch)) {
@@ -386,11 +469,11 @@ void HeadsetDevice::processEvents()
                 } else {
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_HookSwitch);
                     if (usage.reportId == reportId) {
-                        bool _hookSwitch = value & (1 << usage.bitPosition);
+                        bool _hookSwitch = value & (1u << usage.bitPosition);
                         if (m_hookSwitch != _hookSwitch) {
                             m_hookSwitch = _hookSwitch;
-                            Q_EMIT hookSwitch();
                             qCDebug(lcHeadset) << "  Hook switch changed to" << m_hookSwitch;
+                            QTimer::singleShot(0, this, [this]() { Q_EMIT hookSwitch(); });
                         }
                     }
                 }
@@ -403,12 +486,62 @@ void HeadsetDevice::processEvents()
             } else {
                 if (m_hidUsages.contains(UsageId::Telephony_PhoneMute)) {
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_PhoneMute);
-                    if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
-                        m_muted = !m_muted;
-                        Q_EMIT mute();
+                    if (usage.reportId == reportId && (value & (1u << usage.bitPosition))) {
+                        const bool inWindow = m_mutePendingActive
+                                && m_mutePendingTimer.elapsed() < muteLockWindowMs();
 
-                        qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
-                        setMute(m_muted);
+                        if (inWindow) {
+                            m_mutePendingActive = false;
+
+                            if (!m_mutePendingValue) {
+                                if (!m_muteLocked || !m_muted) {
+                                    m_muteLocked = true;
+                                    m_muted = true;
+                                    qCInfo(lcHeadset)
+                                            << "  Mute-lock detected - device refused unmute";
+                                    writeMuteToDevice(true, false);
+                                    Q_EMIT muteLockChanged(true, true);
+                                }
+
+                                m_muteBurstCount = muteBurstThreshold();
+                                m_muteBurstTimer.restart();
+                            } else {
+                                qCDebug(lcHeadset)
+                                        << "  Ignored mute echo within Mute-lock detection window";
+                            }
+                        } else {
+                            if (m_muteBurstTimer.isValid()
+                                && m_muteBurstTimer.elapsed() < muteBurstWindowMs()) {
+                                m_muteBurstCount++;
+                            } else {
+                                m_muteBurstCount = 1;
+                            }
+                            m_muteBurstTimer.restart();
+
+                            if (m_muteLocked && m_muteBurstCount >= muteBurstThreshold()) {
+                                if (!m_muted) {
+                                    m_muted = true;
+                                    qCInfo(lcHeadset) << "  Mute flap collapsed to muted (burst of"
+                                                      << m_muteBurstCount << "toggles)";
+                                    writeMuteToDevice(true, false);
+                                    Q_EMIT muteLockChanged(true, true);
+                                }
+                            } else {
+                                const bool wasLocked = m_muteLocked;
+                                m_muted = !m_muted;
+                                m_muteLocked = false;
+
+                                qCDebug(lcHeadset) << "  Muted changed to" << m_muted;
+                                writeMuteToDevice(m_muted, false);
+
+                                Q_EMIT mute();
+
+                                if (wasLocked) {
+                                    qCInfo(lcHeadset) << "  Mute-lock released";
+                                    Q_EMIT muteLockChanged(false, m_muted);
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -416,7 +549,7 @@ void HeadsetDevice::processEvents()
                 if (m_hidUsages.contains(UsageId::Telephony_LineBusyTone)) {
                     const auto &usage = m_hidUsages.value(UsageId::Telephony_LineBusyTone);
                     if (usage.reportId == reportId) {
-                        bool _line = value & (1 << usage.bitPosition);
+                        bool _line = value & (1u << usage.bitPosition);
                         if (m_line != _line) {
                             m_line = _line;
                             Q_EMIT busyLine();
@@ -429,7 +562,7 @@ void HeadsetDevice::processEvents()
             // Flashing
             if (m_hidUsages.contains(UsageId::Telephony_Flash)) {
                 const auto &usage = m_hidUsages.value(UsageId::Telephony_Flash);
-                if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
+                if (usage.reportId == reportId && (value & (1u << usage.bitPosition))) {
                     m_flash = !m_flash;
                     Q_EMIT flash();
                     qCDebug(lcHeadset) << "  Flashing changed to" << m_flash;
@@ -439,7 +572,7 @@ void HeadsetDevice::processEvents()
             // Programmable button event - fired on secondary call to quit incoming call
             if (m_hidUsages.contains(UsageId::Telephony_ProgrammableButton)) {
                 const auto &usage = m_hidUsages.value(UsageId::Telephony_ProgrammableButton);
-                if (usage.reportId == reportId && (value & (1 << usage.bitPosition))) {
+                if (usage.reportId == reportId && (value & (1u << usage.bitPosition))) {
                     Q_EMIT programmableButton();
                     qCDebug(lcHeadset) << "  Programmable button pressed";
                 }
@@ -513,11 +646,13 @@ void HeadsetDevice::setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupp
         buf[0] = m_teamsUsageMapping[UsageId::Teams_CharacterAttributes];
         buf[1] = (quint8)field;
         buf[2] = text.length() ? 0x80 : 0;
-        hid_write(m_device, buf, 3);
+        if (hid_write(m_device, buf, 3) < 0) {
+            qCWarning(lcHeadset) << "failed to write display field header to headset device";
+        }
 
         auto chunks = makeChunks(text, 8);
         for (auto i = 0; i < chunks.length(); i++) {
-            memset(buf, 0, sizeof(buf));
+            std::ranges::fill(buf, 0);
             buf[0] = m_teamsUsageMapping[UsageId::Teams_CharacterReport];
             buf[1] = i == chunks.length() - 1 ? 0x80 : 0;
 
@@ -531,7 +666,9 @@ void HeadsetDevice::setDisplayField(ReportDescriptorEnums::TeamsDisplayFieldSupp
                 buf[dataIndex++] = ch >> 8;
             }
 
-            hid_write(m_device, buf, sizeof(buf));
+            if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+                qCWarning(lcHeadset) << "failed to write display field chunk to headset device";
+            }
         }
     }
 }
@@ -615,7 +752,9 @@ void HeadsetDevice::selectScreen(ReportDescriptorEnums::TeamsScreenSelect screen
         buf[0] = m_teamsUsageMapping[UsageId::Teams_DisplayControl];
         buf[1] = (((quint8)screen & 0b1111) << 3) + (backlight ? 4 : 0) + (clear ? 2 : 0)
                 + 1; // 1 for enable
-        hid_write(m_device, buf, sizeof(buf));
+        if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+            qCWarning(lcHeadset) << "failed to write screen selection to headset device";
+        }
     }
 }
 
@@ -633,7 +772,9 @@ void HeadsetDevice::setPresenceIcon(ReportDescriptorEnums::TeamsPresenceIcon ico
         buf[0] = m_teamsUsageMapping[UsageId::Teams_IconsControl];
         buf[1] = (quint8)m_presenceIcon & 0b1111;
         buf[2] = 0;
-        hid_write(m_device, buf, sizeof(buf));
+        if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+            qCWarning(lcHeadset) << "failed to write presence icon to headset device";
+        }
     }
 }
 
@@ -646,11 +787,28 @@ void HeadsetDevice::sendASP(quint8 cmd)
 
     if (m_teamsUsageMapping.contains(UsageId::Teams_ASPNotification)) {
         unsigned char buf[64];
-        memset(buf, 0, sizeof(buf));
+        std::ranges::fill(buf, 0);
         buf[0] = m_teamsUsageMapping[UsageId::Teams_ASPNotification];
         buf[1] = cmd; // 0x00, 0x10 and 0x40 have been captured
-        hid_write(m_device, buf, sizeof(buf));
+        if (hid_write(m_device, buf, sizeof(buf)) < 0) {
+            qCWarning(lcHeadset) << "failed to write ASP notification to headset device";
+        }
     }
+}
+
+int HeadsetDevice::muteLockWindowMs() const
+{
+    return m_appSettings.value("generic/muteLockProbeWindowMs", 700).toInt();
+}
+
+int HeadsetDevice::muteBurstWindowMs() const
+{
+    return m_appSettings.value("generic/muteBurstWindowMs", 1000).toInt();
+}
+
+int HeadsetDevice::muteBurstThreshold() const
+{
+    return m_appSettings.value("generic/muteBurstThreshold", 2).toInt();
 }
 
 UsageInfo::UsageInfo(qsizetype bitPosition, quint32 size, quint8 reportId)
