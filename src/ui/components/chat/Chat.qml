@@ -15,6 +15,14 @@ Item {
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
+    readonly property real headerRightLimitX: titleLoadingIndicatorRow.visible
+            ? titleLoadingIndicatorRow.x
+            : (favCardHeadingButton.visible
+               ? favCardHeadingButton.x
+               : (messageListCardHeadingButton.visible
+                  ? messageListCardHeadingButton.x
+                  : parent.width))
+
     function giveFocus() {
         chatMessageBox.giveFocus()
     }
@@ -56,9 +64,9 @@ Item {
         id: messageListCardHeading
         visible: titleLoadingIndicatorRow.visible || (control.showTitleBar && !!control.chatRoom)
         leftPadding: avatarImage.x + avatarImage.width - 10
-        rightPadding: titleLoadingIndicatorRow.visible
-                      ? parent.width - titleLoadingIndicatorRow.x
-                      : parent.width - favCardHeadingButton.x
+        rightPadding: callContactButton.visible
+                      ? parent.width - (control.headerRightLimitX - callContactButton.implicitWidth - Theme.d * 2) - 20
+                      : parent.width - control.headerRightLimitX - 20
         text: control.showTitleBar && control.chatRoom
               ? (control.chatRoom.isDirectChat
                  ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
@@ -69,6 +77,28 @@ Item {
             left: parent.left
             right: parent.right
         }
+    }
+
+    Button {
+        id: callContactButton
+        icon.source: Icons.callStart
+        text: qsTr("Call")
+        width: callContactButton.implicitWidth
+        leftPadding: Theme.d / 2
+        rightPadding: Theme.d
+        spacing: Theme.d / 2
+        icon.width: Theme.d * 2
+        icon.height: Theme.d * 2
+        topInset: Theme.d * 0.68
+        bottomInset: Theme.d * 0.68
+        x: Math.min(messageListCardHeading.textEndX + Theme.d,
+                    control.headerRightLimitX - callContactButton.width - Theme.d)
+        anchors {
+            top: messageListCardHeading.top
+            bottom: messageListCardHeading.bottom
+        }
+
+        onClicked: () => console.error("===> TODO")
     }
 
     Row {
