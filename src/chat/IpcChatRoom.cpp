@@ -11,8 +11,8 @@
 
 Q_LOGGING_CATEGORY(lcIpcChatRoom, "gonnect.app.chat.IpcChatRoom")
 
-IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, QObject *parent)
-    : IChatRoom{ parent }, m_id{ id }, m_name{ name }
+IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, IChatProvider *chatProvider)
+    : IChatRoom{ chatProvider, chatProvider }, m_id{ id }, m_name{ name }
 {
     connect(this, &IpcChatRoom::chatUsersChanged, this, &IpcChatRoom::updateIsDirectChat);
     connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::avatarPathChanged);

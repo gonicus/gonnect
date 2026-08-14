@@ -8,6 +8,7 @@ Menu {
     id: control
 
     signal callClicked
+    signal chatClicked
     signal callAsClicked(string id)
     signal notifyWhenAvailableClicked
     signal blockTemporarilyClicked
@@ -20,6 +21,7 @@ Menu {
     property bool isReady
     property bool isBlocked
     property bool isSipSubscriptable
+    property bool isOpenChatAvailable
 
     onClosed: () => control.destroy()
 
@@ -33,6 +35,19 @@ Menu {
         Accessible.name: callAction.text
         Accessible.focusable: true
         Accessible.onPressAction: () => control.callClicked()
+    }
+
+    HideableMenuItem {
+        id: chatAction
+        text: qsTr('Chat')
+        icon.source: Icons.dialogMessages
+        visible: control.isOpenChatAvailable
+        onTriggered: () => control.chatClicked()
+
+        Accessible.role: Accessible.Button
+        Accessible.name: chatAction.text
+        Accessible.focusable: true
+        Accessible.onPressAction: () => control.chatClicked()
     }
 
     HideableMenuItem {
