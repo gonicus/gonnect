@@ -293,8 +293,12 @@ Item {
         radius: 6
         anchors {
             fill: messageContentItem
-            leftMargin: (control.content instanceof ChatMessageContentText) ? -4 : 0
-            margins: (control.content instanceof ChatMessageContentImage) ? -4 : 0
+            leftMargin: ((control.content instanceof ChatMessageContentText) || (control.content instanceof ChatMessageContentRemoved))
+                        ? -4
+                        : 0
+            margins: (control.content instanceof ChatMessageContentImage)
+                     ? -4
+                     : 0
         }
     }
 

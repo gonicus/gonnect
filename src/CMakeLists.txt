@@ -646,6 +646,8 @@ qt_add_qml_module(gonnect
         chat/ChatMessageContentVideoFile.cpp
         chat/ChatMessageContentPart.h
         chat/ChatMessageContentPart.cpp
+        chat/ChatMessageContentRemoved.h
+        chat/ChatMessageContentRemoved.cpp
         chat/ChatMessageReaction.h
         chat/ChatMessageReaction.cpp
         chat/ChatModel.h
