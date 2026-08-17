@@ -44,6 +44,7 @@ class IChatRoom : public QObject
     Q_PROPERTY(IChatRoom::Permissions permissions READ permissions NOTIFY permissionsChanged FINAL)
     Q_PROPERTY(QDateTime latestMessageDateTime READ latestMessageDateTime NOTIFY
                        latestMessageDateTimeChanged FINAL)
+    Q_PROPERTY(ChatUser *otherUser READ otherUser NOTIFY otherUserChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> chatUsers READ chatUsers NOTIFY chatUsersChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> typingUsers READ typingUsers NOTIFY typingUsersChanged FINAL)
     Q_PROPERTY(qsizetype chatUserCount READ chatUserCount NOTIFY chatUsersChanged FINAL)

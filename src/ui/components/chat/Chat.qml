@@ -15,6 +15,10 @@ Item {
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
+    readonly property Contact soleOtherContact: control.chatRoom && control.chatRoom.isDirectChat
+                                                ? ContactHelper.lookupByChatUser(control.chatRoom.otherUser)
+                                                : null
+
     readonly property real headerRightLimitX: titleLoadingIndicatorRow.visible
             ? titleLoadingIndicatorRow.x
             : (favCardHeadingButton.visible
@@ -97,8 +101,80 @@ Item {
             top: messageListCardHeading.top
             bottom: messageListCardHeading.bottom
         }
+        visible: control.showTitleBar && control.soleOtherContact
 
-        onClicked: () => console.error("===> TODO")
+        onClicked: () => {
+                       const soleNumber = control.numbersModel.soleNumber()
+                       if (soleNumber !== "") {
+                           SIPCallManager.call(soleNumber)
+                       } else {
+                           const item = phoneNumbersMenuComponent.createObject(callContactButton, { contact: control.soleOtherContact })
+                           if (!item) {
+                               console.error("Error on creating phone numbers menu")
+                           }
+                           item.popup()
+                           item.updateWidth()
+                       }
+                   }
+    }
+
+    readonly property PhoneNumbersModel numbersModel: PhoneNumbersModel {
+        contact: control.soleOtherContact
+    }
+
+    Component {
+        id: phoneNumbersMenuComponent
+
+        Menu {
+            id: phoneNumberMenu
+            onClosed: () => phoneNumberMenu.destroy()
+
+            required property Contact contact
+
+            function updateWidth() {
+                let w = 0
+                for (let i = 0, l = phoneNumberMenu.count; i < l; ++i) {
+                    const item = phoneNumberMenu.itemAt(i)
+                    w = Math.max(w, item.contentItem.implicitWidth + item.padding * 2)
+                }
+                phoneNumberMenu.width = w
+            }
+
+            Instantiator {
+                model: control.numbersModel
+                delegate: MenuItem {
+                    id: menuDelg
+                    text: PhoneNumberUtil.tooltipText(menuDelg.addr, phoneNumberMenu.contact?.computedName ?? "")
+                    icon.source: PhoneNumberUtil.iconSource(menuDelg.addr)
+
+                    required property string number
+                    required property int type
+
+                    readonly property var addr: ({
+                                                     addr: menuDelg.number,
+                                                     numberType: menuDelg.type,
+                                                     contactType: NumberStats.ContactType.PhoneNumber
+                                                 })
+
+                    Accessible.role: Accessible.Button
+                    Accessible.name: qsTr("Call contact button")
+                    Accessible.description: qsTr("Selected number %1").arg(menuDelg.number)
+                    Accessible.focusable: true
+                    Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(menuDelg.addr)
+
+                    onTriggered: () => SIPCallManager.call(menuDelg.number)
+                }
+
+                onObjectAdded: (index, object) => {
+                                   phoneNumberMenu.insertItem(index, object)
+                                   phoneNumberMenu.updateWidth()
+                               }
+                onObjectRemoved: (index, object) => {
+                                     phoneNumberMenu.removeItem(object)
+                                     phoneNumberMenu.updateWidth()
+                                 }
+            }
+        }
     }
 
     Row {
