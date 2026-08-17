@@ -36,6 +36,8 @@ concept MessageDeliverer = requires(T obj) {
     {
         obj.membershipChange()
     } -> std::convertible_to<const de::gonicus::gonnect::MessageContentMembershipChange &>;
+    { obj.hasRemoved() } -> std::same_as<bool>;
+    { obj.removed() } -> std::convertible_to<const de::gonicus::gonnect::MessageContentRemoved &>;
 };
 
 class IpcDispatcher : public IChatProvider

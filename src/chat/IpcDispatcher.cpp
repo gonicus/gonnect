@@ -1340,8 +1340,14 @@ void IpcDispatcher::processResponse(
         } else {
             // Content exists - update
 
-            if (const auto messageStateContent =
-                        qobject_cast<ChatMessageContentUserStateChange *>(content)) {
+            if (changeEvent.hasRemoved() && !qobject_cast<ChatMessageContentRemoved *>(content)) {
+                // The message has been removed - replace the existing content
+                content = createMessageContent(changeEvent);
+                message->setContent(content);
+                hasContentChanged = true;
+
+            } else if (const auto messageStateContent =
+                               qobject_cast<ChatMessageContentUserStateChange *>(content)) {
                 const auto convChange =
                         userStateGrpcToGonnect(changeEvent.membershipChange().change());
                 if (changeEvent.hasMembershipChange()
@@ -2584,6 +2590,12 @@ QObject *IpcDispatcher::createMessageContent(const T &message) const
         content = new ChatMessageContentUserStateChange(
                 userStateGrpcToGonnect(message.membershipChange().change()),
                 message.membershipChange().affectedUserId());
+    } else if (message.hasRemoved()) {
+        auto *removedContent = new ChatMessageContentRemoved;
+        if (message.removed().hasReason()) {
+            removedContent->setReason(message.removed().reason());
+        }
+        content = removedContent;
     } else if (fileType == FileType::Image) {
         content = new ChatMessageContentImage(makeDataRootPath(message.file().filePath()));
     } else if (message.hasText()) {
