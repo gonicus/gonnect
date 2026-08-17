@@ -615,11 +615,15 @@ IChatRoom *IpcDispatcher::chatRoomByIndex(qsizetype index)
     return m_rooms.at(index);
 }
 
-void IpcDispatcher::requestRemoveMessage(const QString &roomId, const QString &messageId)
+void IpcDispatcher::requestRemoveMessage(const QString &roomId, const QString &messageId,
+                                         const QString &reason)
 {
     MessageRemoveRequest removeReq;
     removeReq.setRoomId(roomId);
     removeReq.setMessageId(messageId);
+    if (!reason.isEmpty()) {
+        removeReq.setReason(reason);
+    }
 
     auto req = createRequest();
     req->setMessageRemoveRequest(removeReq);

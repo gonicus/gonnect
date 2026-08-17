@@ -435,17 +435,18 @@ Item {
                 icon.source: Icons.editDelete
                 visible: !control.isFailed && !control.isRemoved && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
                 onTriggered: () => {
-                    const item = DialogFactory.createConfirmDialog({
+                    const item = DialogFactory.createConfirmDialogWithText({
                         title: qsTr("Remove message"),
-                        text: qsTr("Do you really want to remove this message?")
+                        text: qsTr("Do you really want to remove this message?"),
+                        inputLabel: qsTr("Reason (optional, why you removed the message)")
                     })
 
                     const roomId = control.roomId
                     const eventId = control.eventId
                     const chatProvider = control.chatProvider
 
-                    item.accepted.connect(() => {
-                        chatProvider.requestRemoveMessage(roomId, eventId)
+                    item.acceptedWithText.connect(text => {
+                        chatProvider.requestRemoveMessage(roomId, eventId, text)
                     })
                 }
             }
