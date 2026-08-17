@@ -58,7 +58,7 @@ Item {
             if (control.isRemoved) {
                 const reason = control.content.reason
                 if (reason !== "") {
-                    return qsTr("Message has been removed. Reason: ").arg(reason)
+                    return qsTr("Message has been removed. Reason: %1").arg(reason)
                 } else {
                     return qsTr("Message has been removed.")
                 }
