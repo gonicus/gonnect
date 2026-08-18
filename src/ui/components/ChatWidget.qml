@@ -13,11 +13,13 @@ BaseWidget {
     property IChatProvider chatProvider
     property IChatRoom chatRoom
 
-    notifications: control.chatRoom?.notificationCount ?? 0
+    // Unread counts are already aggregated via ChatConnectorManager.unreadNotificationsCount,
+    // so reporting them here would double count them in the global badge.
+    notifications: 0
 
     onAdditionalSettingsLoaded: () => control.resolveRoom()
 
-    readonly property bool hasRoomConfig: control.config.get("room") !== ""
+    property bool hasRoomConfig: false
 
     function providerById(providerId : string) : IChatProvider {
         for (const provider of ChatConnectorManager.chatConnectors) {
@@ -33,6 +35,8 @@ BaseWidget {
     function resolveRoom() {
         const roomConfig = control.config.get("room").toString()
         const separatorIndex = roomConfig.indexOf("|")
+
+        control.hasRoomConfig = separatorIndex >= 0
         if (separatorIndex < 0) {
             control.chatProvider = null
             control.chatRoom = null
