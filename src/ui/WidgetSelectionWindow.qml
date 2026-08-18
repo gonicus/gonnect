@@ -74,7 +74,8 @@ BaseWindow {
             widgetEntries.append({
                 name: qsTr("Chat"),
                 description: qsTr("A chat room for direct conversations and group chats"),
-                type: CommonWidgets.Type.Chat
+                type: CommonWidgets.Type.Chat,
+                iconName: "dialogMessages"
             })
             control.chatEntryAvailable = true
         }
@@ -84,7 +85,8 @@ BaseWindow {
         widgetEntries.append({
             name: qsTr("Activities"),
             description: qsTr("Recent calls, meetings and chat messages"),
-            type: CommonWidgets.Type.Activities
+            type: CommonWidgets.Type.Activities,
+            iconName: "notifications"
         })
     }
 
@@ -135,21 +137,25 @@ BaseWindow {
                         name: qsTr("Date Events")
                         description: qsTr("List of upcoming appointments")
                         type: CommonWidgets.Type.DateEvents
+                        iconName: "acceptTimeEvent"
                     }
                     ListElement {
                         name: qsTr("Favorites")
                         description: qsTr("Quick dial for your favorite contacts and conferences")
                         type: CommonWidgets.Type.Favorites
+                        iconName: "folderFavorites"
                     }
                     ListElement {
                         name: qsTr("History")
                         description: qsTr("Searchable call and conference history")
                         type: CommonWidgets.Type.History
+                        iconName: "chronometer"
                     }
                     ListElement {
                         name: qsTr("Web View")
                         description: qsTr("A web-based content display")
                         type: CommonWidgets.Type.WebView
+                        iconName: "openLink"
                     }
                 }
 
@@ -172,17 +178,18 @@ BaseWindow {
 
                     required property string name
                     required property string description
+                    required property string iconName
 
                     contentItem: RowLayout {
                         spacing: 10
 
                         IconLabel {
                             id: widgetSelecionPreview
-                            Layout.preferredWidth: 96
-                            Layout.preferredHeight: 96
+                            Layout.preferredWidth: 48
+                            Layout.preferredHeight: 48
 
                             icon {
-                                source: Icons.userHome
+                                source: Icons[widgetDelg.iconName]
                                 width: widgetSelecionPreview.width
                                 height: widgetSelecionPreview.height
                             }
@@ -205,16 +212,16 @@ BaseWindow {
                 contentItem: RowLayout {
                     spacing: 10
 
-                    IconLabel {
-                        id: widgetChoicePreview
-                        Layout.preferredWidth: 96
-                        Layout.preferredHeight: 96
+IconLabel {
+                            id: widgetChoicePreview
+                            Layout.preferredWidth: 48
+                            Layout.preferredHeight: 48
 
-                        icon {
-                            source: Icons.userHome
-                            width: widgetChoicePreview.width
-                            height: widgetChoicePreview.height
-                        }
+                            icon {
+                                source: Icons[widgetEntries.get(widgetSelection.currentIndex).iconName]
+                                width: widgetChoicePreview.width
+                                height: widgetChoicePreview.height
+                            }
 
                         Accessible.ignored: true
                     }
