@@ -12,13 +12,15 @@ Item {
     property alias history: compHistory
     property alias webview: compWebview
     property alias chat: compChat
+    property alias activities: compActivities
 
     enum Type {
         DateEvents,
         Favorites,
         History,
         WebView,
-        Chat
+        Chat,
+        Activities
     }
 
     Component {
@@ -63,6 +65,15 @@ Item {
         ChatWidget {
             id: widgetChat
             type: CommonWidgets.Type.Chat
+        }
+    }
+
+    Component {
+        id: compActivities
+
+        ActivitiesWidget {
+            id: widgetActivities
+            type: CommonWidgets.Type.Activities
         }
     }
 }

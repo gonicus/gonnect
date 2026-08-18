@@ -73,13 +73,25 @@ BaseWindow {
         if (ChatConnectorManager.isChatAvailable && !control.chatEntryAvailable) {
             widgetEntries.append({
                 name: qsTr("Chat"),
-                description: qsTr("A chat room for direct conversations and group chats")
+                description: qsTr("A chat room for direct conversations and group chats"),
+                type: CommonWidgets.Type.Chat
             })
             control.chatEntryAvailable = true
         }
     }
 
-    Component.onCompleted: () => control.ensureChatEntry()
+    function ensureActivitiesEntry() {
+        widgetEntries.append({
+            name: qsTr("Activities"),
+            description: qsTr("Recent calls, meetings and chat messages"),
+            type: CommonWidgets.Type.Activities
+        })
+    }
+
+    Component.onCompleted: {
+        control.ensureChatEntry()
+        control.ensureActivitiesEntry()
+    }
 
     Flickable {
         id: widgetFlickable
@@ -122,18 +134,22 @@ BaseWindow {
                     ListElement {
                         name: qsTr("Date Events")
                         description: qsTr("List of upcoming appointments")
+                        type: CommonWidgets.Type.DateEvents
                     }
                     ListElement {
                         name: qsTr("Favorites")
                         description: qsTr("Quick dial for your favorite contacts and conferences")
+                        type: CommonWidgets.Type.Favorites
                     }
                     ListElement {
                         name: qsTr("History")
                         description: qsTr("Searchable call and conference history")
+                        type: CommonWidgets.Type.History
                     }
                     ListElement {
                         name: qsTr("Web View")
                         description: qsTr("A web-based content display")
+                        type: CommonWidgets.Type.WebView
                     }
                 }
 
@@ -214,12 +230,13 @@ BaseWindow {
                 }
 
                 onCurrentIndexChanged: {
-                    control.selection = currentIndex
+                    const entry = widgetEntries.get(currentIndex)
+                    control.selection = entry ? entry.type : -1
 
                     widgetSettingsModel.clear()
                     widgetSettings.roomSelected = false
 
-                    switch (currentIndex) {
+                    switch (control.selection) {
                         case CommonWidgets.Type.WebView:
                             const newSettings = [
                                 { name: qsTr("Title"), setting: "headerTitle", checkable: 0 },
@@ -598,6 +615,9 @@ BaseWindow {
                                 break
                             case CommonWidgets.Type.Chat:
                                 widget = widgets.chat.createObject(control.widgetRoot.grid, widgetProperties)
+                                break
+                            case CommonWidgets.Type.Activities:
+                                widget = widgets.activities.createObject(control.widgetRoot.grid, widgetProperties)
                                 break
                             default:
                                 widget = null
