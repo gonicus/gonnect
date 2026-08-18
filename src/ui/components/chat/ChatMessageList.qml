@@ -58,6 +58,7 @@ Item {
         delegate: ChatMessageListItem {
             id: delg
             chatProvider: control.chatProvider
+            roomPermissions: control.chatRoom?.permissions ?? 0
             anchors {
                 left: parent?.left
                 right: parent?.right
@@ -68,6 +69,7 @@ Item {
             onRespondTo: messageId => control.respondTo(messageId)
             onRetryMessage: messageId => control.retryMessage(messageId)
             onOpenThread: threadId => chatProxyModel.threadId = threadId
+            onTogglePin: () => control.chatRoom?.togglePin(delg.eventId)
         }
 
         onMovementStarted: () => {

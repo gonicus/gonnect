@@ -51,10 +51,12 @@ Item {
     property string clickedLink
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
+    property int roomPermissions
 
     signal respondTo(string messageId)
     signal retryMessage(string eventId)
     signal openThread(string threadId)
+    signal togglePin
 
     states: [
         State {
@@ -465,6 +467,17 @@ Item {
                 text: qsTr("Open thread...")
                 icon.source: Icons.dialogMessages
                 onTriggered: () => control.openThread(control.threadId)
+            }
+
+            HideableMenuItem {
+                text: qsTr("Toggle pin")
+                icon.source: Icons.windowPin
+                visible: !control.isFailed
+                         && !control.isPending
+                         && !!(control.capabilities & IChatProvider.Capability.PinMessage)
+                         && !!((control.roomPermissions ?? 0) & IChatRoom.Permission.CanPinMessages)
+
+                onTriggered: () => control.togglePin()
             }
         }
     }

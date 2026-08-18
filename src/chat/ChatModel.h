@@ -31,7 +31,6 @@ public:
         IsOwnMessage,
         IsSystemMessage,
         IsEncrypted,
-        IsPinned,
         IsPending,
         IsFailed,
         IsSameUserAsPrevious,

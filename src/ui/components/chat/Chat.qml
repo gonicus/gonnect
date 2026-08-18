@@ -159,6 +159,19 @@ Item {
         }
     }
 
+    PinnedChatMessagesList {
+        id: pinnedChatMessageList
+        chatRoom: control.chatRoom
+        visible: pinnedChatMessageList.count > 0
+        height: Math.min(pinnedChatMessageList.implicitHeight, Math.floor(parent.height * 0.15))
+        z: chatMessageList.z + 1
+        anchors {
+            top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
+            left: parent.left
+            right: parent.right
+        }
+    }
+
     ChatMessageList {
         id: chatMessageList
         chatProvider: control.chatProvider
@@ -168,7 +181,11 @@ Item {
         anchors {
             left: parent.left
             right: parent.right
-            top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
+            top: pinnedChatMessageList.visible
+                 ? pinnedChatMessageList.bottom
+                 : (messageListCardHeading.visible
+                    ? messageListCardHeading.bottom
+                    : parent.top)
             bottom: typingUsersList.visible
                     ? typingUsersList.top
                     : (chatMessageBox.visible
@@ -326,7 +343,7 @@ Item {
                 if (latestMsg) {
                     chatMessageBox.text = latestMsg.content.rawText
                     chatMessageBox.editMessageId = latestMsg.eventId
-                    // ViewHelper.showEditMessageDialog(chatProvider, chatRoom.id, latestMsg.eventId, latestMsg.message)
+                    chatMessageBox.positionCursorAtEnd()
                 }
             }
         }

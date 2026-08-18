@@ -28,12 +28,17 @@ public:
     virtual IChatRoom::JoinRule joinRule() override;
     virtual IChatRoom::Permissions permissions() override;
     virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
+    virtual QList<ChatMessage *> pinnedChatMessages() const override { return {}; }
+    virtual qsizetype pinnedChatMessageCount() const override { return 0; }
+    virtual ChatMessage *pinnedChatMessageByIndex(qsizetype) const override { return nullptr; }
+    virtual qsizetype indexOfPinnedChatMessage(ChatMessage *) const override { return -1; }
     virtual ChatMessage *chatMessageById(const QString &id) const override;
     virtual ChatMessage *latestOwnTextMessage() const override { return nullptr; }
     virtual void sendMessage(const QString &message, const QString &relatedMessageId = QString(),
                              const QString &threadId = QString()) override;
     virtual void sendFile(const QString &filePath) override { Q_UNUSED(filePath) }
     virtual void sendTypingPing() override { }
+    virtual void togglePin(const QString &) override { };
     virtual bool isDirectChat() override { return false; }
     virtual bool isFavorite() override { return false; }
     virtual bool hasPresenceState() override { return false; }
