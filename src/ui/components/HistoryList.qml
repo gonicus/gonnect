@@ -405,6 +405,14 @@ Item {
                 }
             }
 
+            function removeEntry() {
+                const id = delg.id
+                const item = DialogFactory.createConfirmDialog({
+                                 text: qsTr("Are you sure you really want to remove this entry?")
+                             })
+                item.accepted.connect(() => historyModel.removeEntry(id))
+            }
+
             Component {
                 id: historyListContextMenuComponent
 
@@ -421,6 +429,7 @@ Item {
                     onCallAsClicked: (identityId) => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId, identityId)
                     onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
                     onBlockTemporarilyClicked: () => SIPCallManager.toggleTemporaryBlock(delg.contactId, delg.remotePhoneNumber)
+                    onRemoveItem: () => delg.removeEntry()
                 }
             }
 
@@ -433,6 +442,7 @@ Item {
                     roomName: delg.remotePhoneNumber
                     width: 230
                     onCallClicked: () => ViewHelper.requestMeeting(delg.remoteUrl)
+                    onRemoveItem: () => delg.removeEntry()
                 }
             }
 
