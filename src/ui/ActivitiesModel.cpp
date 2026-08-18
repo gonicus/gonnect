@@ -59,15 +59,18 @@ ActivitiesModel::ActivitiesModel(QObject *parent) : QAbstractListModel{ parent }
             &ActivitiesModel::subscribeToProviders);
     subscribeToProviders();
 
-    connect(&AvatarManager::instance(), &AvatarManager::avatarsLoaded, this,
-            [this]() { refreshCallRoles({ static_cast<int>(Roles::HasAvatar),
-                                           static_cast<int>(Roles::AvatarPath) }); });
-    connect(&AvatarManager::instance(), &AvatarManager::avatarAdded, this,
-            [this](QString) { refreshCallRoles({ static_cast<int>(Roles::HasAvatar),
-                                                 static_cast<int>(Roles::AvatarPath) }); });
-    connect(&AvatarManager::instance(), &AvatarManager::avatarRemoved, this,
-            [this](QString) { refreshCallRoles({ static_cast<int>(Roles::HasAvatar),
-                                                 static_cast<int>(Roles::AvatarPath) }); });
+    connect(&AvatarManager::instance(), &AvatarManager::avatarsLoaded, this, [this]() {
+        refreshCallRoles(
+                { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+    });
+    connect(&AvatarManager::instance(), &AvatarManager::avatarAdded, this, [this](QString) {
+        refreshCallRoles(
+                { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+    });
+    connect(&AvatarManager::instance(), &AvatarManager::avatarRemoved, this, [this](QString) {
+        refreshCallRoles(
+                { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+    });
 
     connect(&SIPCallManager::instance(), &SIPCallManager::blocksChanged, this,
             [this]() { refreshCallRoles({ static_cast<int>(Roles::IsBlocked) }); });
@@ -92,9 +95,10 @@ ActivitiesModel::ActivitiesModel(QObject *parent) : QAbstractListModel{ parent }
         m_avatarTrackedContacts.insert(contact);
         connect(contact, &QObject::destroyed, this,
                 [this, contact]() { m_avatarTrackedContacts.remove(contact); });
-        connect(contact, &Contact::avatarChanged, this,
-                [this]() { refreshCallRoles({ static_cast<int>(Roles::HasAvatar),
-                                              static_cast<int>(Roles::AvatarPath) }); });
+        connect(contact, &Contact::avatarChanged, this, [this]() {
+            refreshCallRoles(
+                    { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+        });
     };
     connect(&AddressBook::instance(), &AddressBook::contactAdded, this, trackContactAvatar);
     connect(&AddressBook::instance(), &AddressBook::contactModified, this, trackContactAvatar);
@@ -155,7 +159,8 @@ QVariant ActivitiesModel::data(const QModelIndex &index, int role) const
             return QVariant();
         }
 
-        ContactInfo contactInfo = PhoneNumberUtil::instance().contactInfoBySipUrl(item->remoteUrl());
+        ContactInfo contactInfo =
+                PhoneNumberUtil::instance().contactInfoBySipUrl(item->remoteUrl());
 
         switch (role) {
         case static_cast<int>(Roles::Id):
@@ -360,9 +365,7 @@ void ActivitiesModel::subscribeToProviders()
     const auto providers = ChatConnectorManager::instance().chatConnectors();
     for (auto *provider : providers) {
         connect(provider, &IChatProvider::chatRoomAdded, this,
-                [this](qsizetype, IChatRoom *room, const QString &) {
-                    subscribeToRoom(room);
-                });
+                [this](qsizetype, IChatRoom *room, const QString &) { subscribeToRoom(room); });
 
         const auto roomCount = provider->chatRoomsCount();
         for (qsizetype i = 0; i < roomCount; ++i) {
@@ -378,8 +381,7 @@ void ActivitiesModel::subscribeToRoom(IChatRoom *room)
     }
     m_subscribedRooms.insert(room);
 
-    connect(room, &QObject::destroyed, this,
-            [this, room]() { m_subscribedRooms.remove(room); });
+    connect(room, &QObject::destroyed, this, [this, room]() { m_subscribedRooms.remove(room); });
     connect(room, &IChatRoom::chatMessageAdded, this,
             [this](qsizetype, ChatMessage *message) { handleChatMessageAdded(message); });
     connect(room, &IChatRoom::chatMessageOutOfSequenceReceived, this,

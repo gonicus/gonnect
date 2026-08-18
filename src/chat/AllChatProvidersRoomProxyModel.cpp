@@ -27,14 +27,13 @@ void AllChatProvidersRoomProxyModel::populate()
               });
 
     const auto currModels = sourceModels();
-    const bool sameProviders = currModels.length() == providers.length()
-                               && std::equal(currModels.begin(), currModels.end(), providers.begin(),
-                                             [](const QAbstractItemModel *model,
-                                                const IChatProvider *provider) -> bool {
-                                                 return model->property("chatProvider")
-                                                                .value<IChatProvider *>()
-                                                        == provider;
-                                             });
+    const bool sameProviders =
+            currModels.length() == providers.length()
+            && std::equal(
+                    currModels.begin(), currModels.end(), providers.begin(),
+                    [](const QAbstractItemModel *model, const IChatProvider *provider) -> bool {
+                        return model->property("chatProvider").value<IChatProvider *>() == provider;
+                    });
 
     if (sameProviders) {
         return;
