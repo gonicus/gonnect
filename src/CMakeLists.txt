@@ -405,6 +405,7 @@ qt_add_qml_module(gonnect
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
         ui/components/WebViewWidget.qml
+        ui/components/ChatWidget.qml
         ui/components/AdditionalSettings.qml
 
         ui/components/pages/Call.qml

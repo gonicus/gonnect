@@ -152,6 +152,9 @@ Item {
             case CommonWidgets.Type.WebView:
                 widget = widgets.webview.createObject(page.grid, widgetProperties)
                 break
+            case CommonWidgets.Type.Chat:
+                widget = widgets.chat.createObject(page.grid, widgetProperties)
+                break
             default:
                 console.error(category, `widget type ${widgetType} unknown`)
         }

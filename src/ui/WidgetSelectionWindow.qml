@@ -54,11 +54,32 @@ BaseWindow {
         }
     }
 
+    readonly property Connections chatConnectorConnections: Connections {
+        target: ChatConnectorManager
+        function onIsChatAvailableChanged() {
+            control.ensureChatEntry()
+        }
+    }
+
     CommonWidgets {
         id: widgets
     }
 
     property int selection: -1
+
+    property bool chatEntryAvailable: false
+
+    function ensureChatEntry() {
+        if (ChatConnectorManager.isChatAvailable && !control.chatEntryAvailable) {
+            widgetEntries.append({
+                name: qsTr("Chat"),
+                description: qsTr("A chat room for direct conversations and group chats")
+            })
+            control.chatEntryAvailable = true
+        }
+    }
+
+    Component.onCompleted: () => control.ensureChatEntry()
 
     Flickable {
         id: widgetFlickable
@@ -97,6 +118,7 @@ BaseWindow {
 
                 model: ListModel {
                     id: widgetEntries
+
                     ListElement {
                         name: qsTr("Date Events")
                         description: qsTr("List of upcoming appointments")
@@ -195,6 +217,7 @@ BaseWindow {
                     control.selection = currentIndex
 
                     widgetSettingsModel.clear()
+                    widgetSettings.roomSelected = false
 
                     switch (currentIndex) {
                         case CommonWidgets.Type.WebView:
@@ -207,6 +230,14 @@ BaseWindow {
 
                             newSettings.forEach(item => widgetSettingsModel.append(item))
                             break
+                        case CommonWidgets.Type.Chat: {
+                            const chatSettings = [
+                                { name: qsTr("Chat room"), setting: "room", checkable: 0, roomPicker: 1 }
+                            ]
+
+                            chatSettings.forEach(item => widgetSettingsModel.append(item))
+                            break
+                        }
                     }
                 }
             }
@@ -220,6 +251,8 @@ BaseWindow {
                 Layout.bottomMargin: 20
 
                 signal settingsFinished
+
+                property bool roomSelected: false
 
                 ListModel {
                     id: widgetSettingsModel
@@ -280,6 +313,193 @@ BaseWindow {
                             }
                         }
 
+                        Component {
+                            id: delgRoomPickerComp
+
+                            ColumnLayout {
+                                id: roomPickerContainer
+                                spacing: 10
+
+                                QtObject {
+                                    id: roomPickerInternal
+
+                                    property string selectedRoomId: ""
+                                    property string roomSearchFilterText: ""
+
+                                    readonly property Timer searchDebouncer: Timer {
+                                        id: roomSearchDebounceTimer
+                                        interval: 200
+
+                                        onTriggered: () => {
+                                            roomPickerInternal.roomSearchFilterText = roomSearchField.text.trim()
+                                        }
+                                    }
+                                }
+
+                                TextField {
+                                    id: roomSearchField
+                                    placeholderText: qsTr("Search for chat rooms...")
+                                    Layout.fillWidth: true
+
+                                    onTextEdited: () => roomPickerInternal.searchDebouncer.start()
+
+                                    Accessible.role: Accessible.EditableText
+                                    Accessible.name: qsTr("Chat room search input")
+                                    Accessible.description: qsTr("Search input to filter the chat rooms for the widget")
+                                    Accessible.focusable: true
+                                }
+
+                                Item {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 200
+
+                                    ListView {
+                                        id: roomListView
+                                        clip: true
+                                        anchors.fill: parent
+
+                                        model: ChatRoomProxyModel {
+                                            sourceModel: AllChatProvidersRoomProxyModel {}
+                                            sortStrategy: ChatRoomProxyModel.SortStrategy.Alphabetical
+                                            showSectionHeader: false
+                                            filterText: roomPickerInternal.roomSearchFilterText
+                                        }
+
+                                        ScrollBar.vertical: ScrollBar {
+                                            policy: ScrollBar.AsNeeded
+                                            width: 10
+                                        }
+
+                                        delegate: RadioButton {
+                                            id: delgRoomItem
+                                            height: 48
+
+                                            required property string roomId
+                                            required property string name
+                                            required property string avatarPath
+                                            required property IChatProvider chatProvider
+
+                                            anchors {
+                                                left: parent?.left
+                                                right: parent?.right
+                                            }
+
+                                            // The radio buttons are not interactive: their checked state is
+                                            // fully driven by selectedRoomId so that clicking a row can never
+                                            // uncheck itself or break the binding.
+                                            checkable: false
+                                            checked: roomPickerInternal.selectedRoomId === delgRoomItem.roomId
+
+                                            // The template positions its default indicator centered when the
+                                            // content item is empty, so the indicator is suppressed and drawn
+                                            // as a left-aligned child instead.
+                                            indicator: Item {}
+
+                                            background: Rectangle {
+                                                color: delgRoomItem.checked
+                                                       ? Theme.backgroundOffsetHoveredColor
+                                                       : (delgRoomItem.hovered
+                                                          ? Theme.backgroundOffsetColor
+                                                          : "transparent")
+                                                radius: 4
+
+                                                Accessible.ignored: true
+                                            }
+
+                                            Rectangle {
+                                                width: 18
+                                                height: 18
+                                                radius: width / 2
+                                                color: "transparent"
+                                                border.width: 2
+                                                border.color: delgRoomItem.checked
+                                                             ? Theme.accentColor
+                                                             : Theme.backgroundOffsetColor
+                                                anchors {
+                                                    left: parent.left
+                                                    leftMargin: 12
+                                                    verticalCenter: parent.verticalCenter
+                                                }
+
+                                                Rectangle {
+                                                    visible: delgRoomItem.checked
+                                                    width: 10
+                                                    height: 10
+                                                    radius: width / 2
+                                                    color: Theme.accentColor
+                                                    anchors.centerIn: parent
+                                                }
+
+                                                Accessible.ignored: true
+                                            }
+
+                                            // The row content is added as a plain child and centered via anchors on
+                                            // the control itself.
+                                            RowLayout {
+                                                spacing: Theme.d
+                                                anchors {
+                                                    left: parent.left
+                                                    leftMargin: Theme.d * 3.5
+                                                    right: parent.right
+                                                    rightMargin: Theme.d
+                                                    verticalCenter: parent.verticalCenter
+                                                }
+
+                                                AvatarImage {
+                                                    size: Theme.d * 3
+                                                    source: delgRoomItem.avatarPath
+                                                    initials: ViewHelper.initials(delgRoomItem.name)
+
+                                                    Accessible.ignored: true
+                                                }
+
+                                                Label {
+                                                    text: delgRoomItem.name
+                                                    elide: Label.ElideRight
+                                                    Layout.fillWidth: true
+
+                                                    Accessible.role: Accessible.StaticText
+                                                    Accessible.name: delgRoomItem.name
+                                                }
+
+                                                Label {
+                                                    text: delgRoomItem.chatProvider?.displayName ?? ""
+                                                    color: Theme.secondaryTextColor
+                                                    font.pixelSize: 12
+
+                                                    Accessible.ignored: true
+                                                }
+                                            }
+
+                                            onClicked: () => {
+                                                roomPickerInternal.selectedRoomId = delgRoomItem.roomId
+                                                widgetSettingsDelegate.value = `${delgRoomItem.chatProvider.id}|${delgRoomItem.roomId}`
+                                                widgetSettings.roomSelected = true
+                                            }
+
+                                            Accessible.role: Accessible.RadioButton
+                                            Accessible.name: qsTr("Select chat room %1").arg(delgRoomItem.name)
+                                            Accessible.focusable: true
+                                        }
+                                    }
+
+                                    Label {
+                                        id: roomPickerEmptyHint
+                                        visible: roomListView.count === 0
+                                        color: Theme.secondaryTextColor
+                                        wrapMode: Label.Wrap
+                                        anchors.centerIn: parent
+                                        text: roomSearchField.text.trim().length
+                                              ? qsTr("No chat rooms found.")
+                                              : qsTr("No chat rooms available yet")
+
+                                        Accessible.role: Accessible.StaticText
+                                        Accessible.name: roomPickerEmptyHint.text
+                                    }
+                                }
+                            }
+                        }
+
                         Label {
                             id: delgLabel
                             text: widgetSettingsModel.count > 0
@@ -292,14 +512,19 @@ BaseWindow {
 
                         Loader {
                             id: delgLoader
-                            Layout.fillWidth: !delgLoader.isCheckable
-                            sourceComponent: delgLoader.isCheckable
-                                             ? delgCheckComp
-                                             : delgInputComp
+                            Layout.fillWidth: !delgLoader.isCheckable || delgLoader.isRoomPicker
+                            sourceComponent: delgLoader.isRoomPicker
+                                             ? delgRoomPickerComp
+                                             : (delgLoader.isCheckable
+                                                ? delgCheckComp
+                                                : delgInputComp)
 
                             property bool isCheckable: widgetSettingsModel.count > 0
                                                        ? widgetSettingsModel.get(widgetSettingsDelegate.index).checkable
                                                        : false
+                            property bool isRoomPicker: widgetSettingsModel.count > 0
+                                                        ? widgetSettingsModel.get(widgetSettingsDelegate.index).roomPicker === 1
+                                                        : false
                         }
                     }
                 }
@@ -330,6 +555,7 @@ BaseWindow {
                     id: widgetConfirm
                     icon.source: Icons.listAdd
                     text: qsTr("Add")
+                    enabled: control.selection !== CommonWidgets.Type.Chat || widgetSettings.roomSelected
 
                     onClicked: () => widgetConfirm.createWidget()
 
@@ -370,6 +596,9 @@ BaseWindow {
                             case CommonWidgets.Type.WebView:
                                 widget = widgets.webview.createObject(control.widgetRoot.grid, widgetProperties)
                                 break
+                            case CommonWidgets.Type.Chat:
+                                widget = widgets.chat.createObject(control.widgetRoot.grid, widgetProperties)
+                                break
                             default:
                                 widget = null
                                 console.error(category, `widget type ${selection} unknown`)
@@ -385,7 +614,7 @@ BaseWindow {
                                 for (let i = 0; i < additionalSettings; i++) {
                                     const key = widgetSettingsModel.get(i).setting
                                     const value = widgetSettingsInput.itemAt(i).value
-                                    if (key) {
+                                    if (key && value) {
                                         widget.config.set(key, value)
                                     }
                                 }
