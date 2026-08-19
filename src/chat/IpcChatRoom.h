@@ -95,6 +95,10 @@ private:
     IpcDispatcher *ipcDispatcher() const;
     void updatePinnedMessages();
 
+    void registerThreadChild(const QString &childEventId, const QString &threadId);
+    void unregisterThreadChild(const QString &childEventId, const QString &threadId);
+    void recalculateThreadRootFlag(const QString &eventId);
+
     QString m_id;
     QString m_name;
     QString m_avatarPath;
@@ -119,4 +123,5 @@ private:
     QList<ChatMessage *> m_pinnedMessages;
     QList<QString> m_pinnedMessageIds;
     QSet<QString> m_loadRequestedMessageIds;
+    QHash<QString, QSet<QString>> m_threadChildren;
 };

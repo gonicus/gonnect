@@ -31,9 +31,7 @@ Item {
     required property var reactions
     required property QtObject content
 
-    required property bool isOwnMessage
-    required property bool isPending
-    required property bool isFailed
+    required property int flags
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
@@ -45,6 +43,11 @@ Item {
     required property bool relatedMessageIsStateUpdate
     required property int relatedMessageUserState
     required property string relatedMessageAffectedUserId
+
+    readonly property bool isOwnMessage: !!(control.flags & ChatMessage.Flag.OwnMessage)
+    readonly property bool isPending: !!(control.flags & ChatMessage.Flag.Pending)
+    readonly property bool isFailed: !!(control.flags & ChatMessage.Flag.Failed)
+    readonly property bool isThreadRoot: !!(control.flags & ChatMessage.Flag.ThreadRoot)
 
     property IChatProvider chatProvider
 
@@ -495,8 +498,11 @@ Item {
 
         ReactionButton {
             id: threadBadge
+            visible: control.isThreadRoot
+            emoji: "💬"
             text: qsTr("Thread")
             highlighted: true
+            onClicked: () => control.openThread(control.eventId)
         }
 
         Repeater {

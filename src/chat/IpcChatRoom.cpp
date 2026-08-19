@@ -196,6 +196,10 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
     const auto eventId = message->eventId();
     m_loadRequestedMessageIds.remove(eventId);
 
+    if (!message->threadId().isEmpty()) {
+        registerThreadChild(eventId, message->threadId());
+    }
+
     if (isIndependent) {
         m_messageLookup.insert(eventId, message);
         updatePinnedMessages();
@@ -208,6 +212,7 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
                 m_messageLookup.insert(eventId, message);
                 updatePinnedMessages();
                 Q_EMIT chatMessageAdded(i + 1, message);
+                recalculateThreadRootFlag(eventId);
                 return;
             }
         }
@@ -217,6 +222,8 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
         updatePinnedMessages();
         Q_EMIT chatMessageAdded(0, message);
     }
+
+    recalculateThreadRootFlag(eventId);
 }
 
 qsizetype IpcChatRoom::indexOfMessage(const ChatMessage *message) const
@@ -241,6 +248,19 @@ void IpcChatRoom::removeMessage(const QString &messageId)
             return;
         }
     }
+
+    m_threadChildren.remove(messageId);
+
+    for (auto it = m_threadChildren.begin(); it != m_threadChildren.end();) {
+        if (it->remove(messageId)) {
+            recalculateThreadRootFlag(it.key());
+        }
+        if (it->isEmpty()) {
+            it = m_threadChildren.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void IpcChatRoom::setPinnedMessageIds(const QStringList &messageIds)
@@ -257,6 +277,18 @@ void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString 
         msg->setEventId(newEventId);
         m_messageLookup.insert(newEventId, msg);
         Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
+
+        if (m_threadChildren.remove(oldEventId)) {
+            m_threadChildren[newEventId].insert(newEventId);
+        }
+
+        for (auto it = m_threadChildren.begin(); it != m_threadChildren.end(); ++it) {
+            if (it->remove(oldEventId)) {
+                it->insert(newEventId);
+            }
+        }
+
+        recalculateThreadRootFlag(newEventId);
     }
 }
 
@@ -535,6 +567,7 @@ const QList<ChatUser *> &IpcChatRoom::typingUsers() const
 
 void IpcChatRoom::clear()
 {
+    m_threadChildren.clear();
     m_pinnedMessageIds.clear();
     m_loadRequestedMessageIds.clear();
     if (!m_pinnedMessages.isEmpty()) {
@@ -656,4 +689,55 @@ void IpcChatRoom::updatePinnedMessages()
         m_pinnedMessages = messages;
         Q_EMIT pinnedMessagesChanged();
     }
+}
+
+void IpcChatRoom::registerThreadChild(const QString &childEventId, const QString &threadId)
+{
+    if (childEventId.isEmpty() || threadId.isEmpty()) {
+        return;
+    }
+
+    m_threadChildren[threadId].insert(childEventId);
+    recalculateThreadRootFlag(threadId);
+}
+
+void IpcChatRoom::unregisterThreadChild(const QString &childEventId, const QString &threadId)
+{
+    if (childEventId.isEmpty() || threadId.isEmpty()) {
+        return;
+    }
+
+    auto it = m_threadChildren.find(threadId);
+    if (it != m_threadChildren.end()) {
+        it->remove(childEventId);
+        if (it->isEmpty()) {
+            m_threadChildren.erase(it);
+        }
+    }
+
+    recalculateThreadRootFlag(threadId);
+}
+
+void IpcChatRoom::recalculateThreadRootFlag(const QString &eventId)
+{
+    auto *message = m_messageLookup.value(eventId, nullptr);
+    if (!message) {
+        return;
+    }
+
+    using Flag = ChatMessage::Flag;
+
+    const bool shouldBeRoot = m_threadChildren.contains(eventId);
+    const bool isRoot = message->flags() & Flag::ThreadRoot;
+
+    if (shouldBeRoot == isRoot) {
+        return;
+    }
+
+    const auto prevFlags = message->flags();
+    auto newFlags = message->flags();
+    newFlags.setFlag(Flag::ThreadRoot, shouldBeRoot);
+    message->setFlags(newFlags);
+
+    Q_EMIT chatMessageFlagsChanged(indexOfMessage(message), message, prevFlags);
 }
