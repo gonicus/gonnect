@@ -359,6 +359,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
         ui/components/chat/PinnedChatMessagesList.qml
+        ui/components/chat/ReactionButton.qml
 
         ui/components/controls/AudioFileSelector.qml
         ui/components/controls/AudioLevelButton.qml
