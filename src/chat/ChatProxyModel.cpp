@@ -4,8 +4,8 @@
 ChatProxyModel::ChatProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
     connect(this, &ChatProxyModel::threadIdChanged, this, [this]() {
-        beginFilterChange();
-        endFilterChange();
+        beginResetModel();
+        endResetModel();
     });
 
     sort(0);

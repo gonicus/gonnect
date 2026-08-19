@@ -52,6 +52,7 @@ Item {
     property IChatProvider chatProvider
 
     property string clickedLink
+    property bool isThreadMode
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
@@ -498,11 +499,11 @@ Item {
 
         ReactionButton {
             id: threadBadge
-            visible: control.isThreadRoot
+            visible: !control.isThreadMode && (control.isThreadRoot || control.threadId !== "")
             emoji: "💬"
             text: qsTr("Thread")
             highlighted: true
-            onClicked: () => control.openThread(control.eventId)
+            onClicked: () => control.openThread(control.isThreadRoot ? control.eventId : control.threadId)
         }
 
         Repeater {

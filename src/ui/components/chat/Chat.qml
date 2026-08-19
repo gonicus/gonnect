@@ -12,8 +12,8 @@ Item {
 
     property bool showTitleBar: true
     readonly property alias isScrolledDown: chatMessageList.isScrolledDown
-
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
+    readonly property alias isThreadMode: chatMessageList.isThreadMode
 
     function giveFocus() {
         chatMessageBox.giveFocus()

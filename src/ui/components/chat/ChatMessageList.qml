@@ -59,6 +59,7 @@ Item {
             id: delg
             chatProvider: control.chatProvider
             roomPermissions: control.chatRoom?.permissions ?? 0
+            isThreadMode: control.isThreadMode
             anchors {
                 left: parent?.left
                 right: parent?.right
