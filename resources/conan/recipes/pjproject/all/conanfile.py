@@ -163,6 +163,10 @@ class PjSIPConan(ConanFile):
             file.write('\n\n#define PJMEDIA_RTP_PT_TELEPHONE_EVENTS 101\n')
             file.write('\n\n#define PJSIP_TCP_KEEP_ALIVE_INTERVAL 30\n')
 
+            if self.settings.os == "Linux":
+                file.write('\n\n#define PJMEDIA_SRTP_HAS_AES_GCM_256 1\n')
+                file.write('\n\n#define PJMEDIA_SRTP_HAS_AES_GCM_128 1\n')
+
             if self.settings.os == "Macos":
                 file.write('\n\n#define PJ_HAS_SSL_SOCK 1\n')
                 file.write('\n\n#define PJ_SSL_SOCK_IMP PJ_SSL_SOCK_IMP_APPLE\n')
