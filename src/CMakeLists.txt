@@ -398,6 +398,7 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
+        ui/components/dialogs/ConfirmDialogWithText.qml
         ui/components/dialogs/InfoDialog.qml
         ui/components/dialogs/OauthLoginDialog.qml
         # Dynamic UI
@@ -648,6 +649,8 @@ qt_add_qml_module(gonnect
         chat/ChatMessageContentVideoFile.cpp
         chat/ChatMessageContentPart.h
         chat/ChatMessageContentPart.cpp
+        chat/ChatMessageContentRemoved.h
+        chat/ChatMessageContentRemoved.cpp
         chat/ChatMessageReaction.h
         chat/ChatMessageReaction.cpp
         chat/ChatModel.h
