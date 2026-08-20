@@ -1,6 +1,7 @@
 #include "AggregatedDirectRoomsOfContact.h"
 #include "ChatConnectorManager.h"
 #include "FuzzyCompare.h"
+#include "AddressBook.h"
 
 AggregatedDirectRoomsOfContact::AggregatedDirectRoomsOfContact(QObject *parent) : QObject{ parent }
 {
@@ -35,6 +36,16 @@ IChatProvider *AggregatedDirectRoomsOfContact::providerOfRoom(IChatRoom *chatRoo
         }
     }
     return nullptr;
+}
+
+void AggregatedDirectRoomsOfContact::setContactById(const QString &contactId)
+{
+    Contact *contact = nullptr;
+    if (!contactId.isEmpty()) {
+        contact = AddressBook::instance().lookupByContactId(contactId);
+    }
+
+    setProperty("contact", QVariant::fromValue<Contact *>(contact));
 }
 
 void AggregatedDirectRoomsOfContact::setChatRooms(const QList<IChatRoom *> chatRooms)

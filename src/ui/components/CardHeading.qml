@@ -17,6 +17,10 @@ Item {
     property bool showDivider: false
     property alias headingMargin: headingLoaderWrapper.implicitWidth
 
+    readonly property real textEndX: headingLoader.item
+            ? headingLoaderWrapper.x + headingLoader.item.headingTextEndX
+            : 0
+
     Accessible.role: Accessible.Heading
     Accessible.name: control.text
 
@@ -54,6 +58,8 @@ Item {
             id: headingLayout
             width: parent?.width ?? headingLayout.implicitWidth
 
+            readonly property real headingTextEndX: headingText.x + Math.min(headingText.width, headingText.implicitWidth)
+
             Label {
                 id: headingText
                 text: control.text
@@ -65,10 +71,9 @@ Item {
             }
 
             Pane {
+                visible: control.showDivider
                 padding: 15
                 background: Rectangle {
-                    id: headingSeparator
-                    visible: control.showDivider
                     height: 30
                     width: 1
                     color: Theme.borderColor
