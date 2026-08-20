@@ -8,6 +8,8 @@
 #include "NotificationSetting.h"
 #include "ChatMessage.h"
 
+class IChatProvider;
+
 struct RoomSettings
 {
     NotificationSetting::Setting notificationSetting = NotificationSetting::Setting::None;
@@ -42,6 +44,7 @@ class IChatRoom : public QObject
     Q_PROPERTY(IChatRoom::Permissions permissions READ permissions NOTIFY permissionsChanged FINAL)
     Q_PROPERTY(QDateTime latestMessageDateTime READ latestMessageDateTime NOTIFY
                        latestMessageDateTimeChanged FINAL)
+    Q_PROPERTY(ChatUser *otherUser READ otherUser NOTIFY otherUserChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> chatUsers READ chatUsers NOTIFY chatUsersChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> typingUsers READ typingUsers NOTIFY typingUsersChanged FINAL)
     Q_PROPERTY(qsizetype chatUserCount READ chatUserCount NOTIFY chatUsersChanged FINAL)
@@ -69,8 +72,10 @@ public:
     Q_DECLARE_FLAGS(Permissions, Permission)
     Q_FLAG(Permissions)
 
-    explicit IChatRoom(QObject *parent = nullptr);
+    explicit IChatRoom(IChatProvider *chatProvider = nullptr, QObject *parent = nullptr);
     virtual ~IChatRoom() { }
+
+    Q_INVOKABLE IChatProvider *chatProvider() const { return m_chatProvider; }
 
     virtual QString id() = 0;
     virtual QString name() = 0;
@@ -197,6 +202,7 @@ public:
     virtual void clear() = 0;
 
 private:
+    IChatProvider *m_chatProvider = nullptr;
     RoomSettings m_roomSettings;
     QDateTime m_latestMessageDateTime;
     bool m_isLoadingMessageHistory = false;
