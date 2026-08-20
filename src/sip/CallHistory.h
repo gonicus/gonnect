@@ -27,6 +27,9 @@ public:
     QList<CallHistoryItem *> historyItems() const { return m_historyItems; };
     qsizetype indexOfItem(const CallHistoryItem *item) const;
 
+    void removeHistoryItem(qint64 id);
+    void removeHistoryItem(CallHistoryItem *item);
+
     void writeToDatabase(CallHistoryItem &item);
     void readFromDatabase();
 
@@ -39,12 +42,14 @@ private:
     qsizetype insertItemAtCorrectPosition(CallHistoryItem *item);
     void ensureDatabaseVersion();
     void removeOldHistory();
+    bool removeItemFromDatabase(qint64 dataBaseId);
 
     QList<CallHistoryItem *> m_historyItems;
     QString m_databasePath;
 
 Q_SIGNALS:
     void itemAdded(qsizetype index, CallHistoryItem *item);
+    void itemRemoved(qsizetype index, CallHistoryItem *item);
     void dataChanged(qsizetype index, CallHistoryItem *item);
 };
 
