@@ -45,5 +45,10 @@ bool ChatProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourcePa
     }
 
     const auto threadId = model->data(sourceIndex, static_cast<int>(Roles::ThreadId)).toString();
-    return m_threadId == threadId;
+    if (m_threadId == threadId) {
+        return true;
+    }
+
+    const auto eventId = model->data(sourceIndex, static_cast<int>(Roles::EventId)).toString();
+    return m_threadId == eventId;
 }
