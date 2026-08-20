@@ -184,6 +184,7 @@ add_subdirectory(calendar/msgraph)
 find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
+set_source_files_properties(ui/scripts/phoneNumberUtil.js PROPERTIES QT_QML_SOURCE_TYPENAME PhoneNumberUtil)
 
 configure_file(MSOAuthManagerConfig.h.in MSOAuthManagerConfig.h)
 
@@ -487,6 +488,7 @@ qt_add_qml_module(gonnect
         # Dynamic UI
         ui/components/EditModeOptions.qml
 
+        ui/scripts/phoneNumberUtil.js
         ui/scripts/util.js
 
         ui/AboutWindow.qml
@@ -726,6 +728,8 @@ qt_add_qml_module(gonnect
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
         helper/CodeHighlighter.cpp
+        helper/ContactHelper.h
+        helper/ContactHelper.cpp
         helper/FileContentHelper.h
         helper/FileContentHelper.cpp
         helper/SecretGenerator.h
@@ -846,6 +850,8 @@ qt_add_qml_module(gonnect
         ui/UsersModel.cpp
         ui/PersonCoinProvider.h
         ui/PersonCoinProvider.cpp
+        ui/PhoneNumbersModel.h
+        ui/PhoneNumbersModel.cpp
         ui/SearchListModel.h
         ui/SearchListModel.cpp
         ui/SearchListProxyModel.h

@@ -11,7 +11,8 @@ class IpcChatRoom : public IChatRoom
     Q_OBJECT
 
 public:
-    explicit IpcChatRoom(const QString &id, const QString &name, QObject *parent = nullptr);
+    explicit IpcChatRoom(const QString &id, const QString &name,
+                         IChatProvider *chatProvider = nullptr);
     virtual ~IpcChatRoom();
 
     QString customName() const { return m_name; }

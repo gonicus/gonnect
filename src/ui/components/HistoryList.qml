@@ -121,7 +121,11 @@ Item {
                 delg.buddyStatus = delg.hasBuddyState ? SIPManager.buddyStatus(delg.remoteUrl) : SIPBuddyState.UNKNOWN
             }
 
-            Component.onCompleted: () => delg.updateBuddyStatus()
+            Component.onCompleted: () => {
+                                       delg.updateBuddyStatus()
+                                       aggregatedRooms.updateContactId()
+                                   }
+            onContactIdChanged: () => aggregatedRooms.updateContactId()
 
             Accessible.role: Accessible.ListItem
             Accessible.name: qsTr("History item")
@@ -133,6 +137,14 @@ Item {
                 enabled: delg.hasBuddyState
                 function onBuddyStateChanged(url : string, status : int) {
                     delg.updateBuddyStatus()
+                }
+            }
+
+            AggregatedDirectRoomsOfContact {
+                id: aggregatedRooms
+
+                function updateContactId() {
+                    aggregatedRooms.setContactById(delg.contactId)
                 }
             }
 
@@ -424,11 +436,22 @@ Item {
                     isBlocked: delg.isBlocked
                     isSipSubscriptable: delg.hasBuddyState
                     isReady: delg.isReady
-                    width: 230
+                    isOpenChatAvailable: !!aggregatedRooms.bestMatchingChatRoom
+
                     onCallClicked: () => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
                     onCallAsClicked: (identityId) => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId, identityId)
                     onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
                     onBlockTemporarilyClicked: () => SIPCallManager.toggleTemporaryBlock(delg.contactId, delg.remotePhoneNumber)
+                    onChatClicked: () => {
+                                       const room = aggregatedRooms.bestMatchingChatRoom
+                                       if (!room) {
+                                           return
+                                       }
+                                       const provider = room.chatProvider()
+                                       if (provider) {
+                                           ViewHelper.showChatRoom(provider, room.id)
+                                       }
+                                   }
                     onRemoveItem: () => delg.removeEntry()
                 }
             }
