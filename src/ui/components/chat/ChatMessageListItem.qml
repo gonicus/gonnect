@@ -518,6 +518,7 @@ Item {
                 required property int count
                 required property string reaction
                 required property bool isOwnReaction
+                required property list<ChatUser> users
 
                 onClicked: () => {
                                if (rDelg.isOwnReaction) {

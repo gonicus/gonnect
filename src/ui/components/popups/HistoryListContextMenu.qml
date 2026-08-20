@@ -11,6 +11,7 @@ Menu {
     signal callAsClicked(string id)
     signal notifyWhenAvailableClicked
     signal blockTemporarilyClicked
+    signal removeItem
 
     property bool favoriteAvailable: true
 
@@ -79,5 +80,16 @@ Menu {
         Accessible.name: blockAction.text
         Accessible.focusable: true
         Accessible.onPressAction: () => control.blockTemporarilyClicked()
+    }
+
+    Action {
+        id: removeAction
+        text: qsTr("Remove")
+        onTriggered: () => control.removeItem()
+
+        Accessible.role: Accessible.Button
+        Accessible.name: removeAction.text
+        Accessible.focusable: true
+        Accessible.onPressAction: () => control.removeItem()
     }
 }
