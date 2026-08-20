@@ -495,6 +495,7 @@ Item {
                 required property int count
                 required property string reaction
                 required property bool isOwnReaction
+                required property list<ChatUser> users
 
                 Rectangle {
                     id: reactionBg
@@ -539,6 +540,9 @@ Item {
                         verticalCenter: parent.verticalCenter
                     }
                 }
+
+                ToolTip.text: reactionDelg.users.map(user => user.computedName).join(", ")
+                ToolTip.visible: reactionDelgHoverHandler.hovered
 
                 HoverHandler {
                     id: reactionDelgHoverHandler
