@@ -74,8 +74,8 @@ void CallHistoryItem::flushToDatabase()
 QDebug operator<<(QDebug debug, const CallHistoryItem &historyItem)
 {
     QDebugStateSaver saver(debug);
-    debug.nospace() << "CallHistoryItem (" << historyItem.time()
-                    << ", account: " << historyItem.account()
+    debug.nospace() << "CallHistoryItem (id: " << historyItem.dataBaseId()
+                    << ", time: " << historyItem.time() << ", account: " << historyItem.account()
                     << ", contactId: " << historyItem.contactId()
                     << ", remote: " << historyItem.remoteUrl()
                     << ", duration: " << historyItem.durationSeconds() << " seconds"
