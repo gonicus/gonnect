@@ -12,8 +12,8 @@ ListView {
     clip: true
 
     Accessible.role: Accessible.List
-    Accessible.name: qsTr("Date events")
-    Accessible.description: qsTr("List of all the currently active and upcoming date events")
+    Accessible.name: qsTr("Events")
+    Accessible.description: qsTr("List of all the currently active and upcoming calendar events")
 
     model: DateEventsModel {}
     section.property: "date"
@@ -30,7 +30,7 @@ ListView {
         required property date section
 
         Accessible.role: Accessible.StaticText
-        Accessible.name: qsTr("Date event section")
+        Accessible.name: qsTr("Event section")
         Accessible.description: qsTr("Header for %1").arg(sectionHeader.text)
         Accessible.focusable: true
 
@@ -110,8 +110,8 @@ ListView {
         }
 
         Accessible.role: Accessible.ListItem
-        Accessible.name: qsTr("Date event")
-        Accessible.description: qsTr("Currently selected date event: %1, starting time %2, remaining time %3").arg(summaryLabel.text).arg(timeLabel.text).arg(remainingMinutesLabel.text)
+        Accessible.name: qsTr("Event")
+        Accessible.description: qsTr("Currently selected calendar event: %1, starting time %2, remaining time %3").arg(summaryLabel.text).arg(timeLabel.text).arg(remainingMinutesLabel.text)
         Accessible.focusable: true
 
         Connections {
