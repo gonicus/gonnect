@@ -22,6 +22,7 @@ Item {
     required property string eventId
     required property string roomId
     required property string fromId
+    required property string threadId
     required property date timestamp
     required property string nickName
     required property string avatarPath
@@ -30,9 +31,7 @@ Item {
     required property var reactions
     required property QtObject content
 
-    required property bool isOwnMessage
-    required property bool isPending
-    required property bool isFailed
+    required property int flags
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
@@ -45,15 +44,22 @@ Item {
     required property int relatedMessageUserState
     required property string relatedMessageAffectedUserId
 
+    readonly property bool isOwnMessage: !!(control.flags & ChatMessage.Flag.OwnMessage)
+    readonly property bool isPending: !!(control.flags & ChatMessage.Flag.Pending)
+    readonly property bool isFailed: !!(control.flags & ChatMessage.Flag.Failed)
+    readonly property bool isThreadRoot: !!(control.flags & ChatMessage.Flag.ThreadRoot)
+
     property IChatProvider chatProvider
 
     property string clickedLink
+    property bool isThreadMode
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
 
     signal respondTo(string messageId)
     signal retryMessage(string eventId)
+    signal openThread(string threadId)
     signal togglePin
 
     states: [
@@ -461,6 +467,13 @@ Item {
             }
 
             HideableMenuItem {
+                visible: control.threadId !== ''
+                text: qsTr("Open thread...")
+                icon.source: Icons.dialogMessages
+                onTriggered: () => control.openThread(control.threadId)
+            }
+
+            HideableMenuItem {
                 text: qsTr("Toggle pin")
                 icon.source: Icons.windowPin
                 visible: !control.isFailed
@@ -475,7 +488,7 @@ Item {
 
     Flow {
         id: reactionsContainer
-        visible: reactionRepeater.count > 0
+        visible: threadBadge.visible || reactionRepeater.count > 0
         spacing: 6
         anchors {
             left: nameLabel.left
@@ -484,84 +497,40 @@ Item {
             topMargin: Theme.d
         }
 
+        ReactionButton {
+            id: threadBadge
+            visible: !control.isThreadMode && (control.isThreadRoot || control.threadId !== "")
+            emoji: "💬"
+            text: qsTr("Thread")
+            highlighted: true
+            onClicked: () => control.openThread(control.isThreadRoot ? control.eventId : control.threadId)
+        }
+
         Repeater {
             id: reactionRepeater
             model: control.reactions
-            delegate: Item {
-                id: reactionDelg
-                implicitHeight: 24
-                implicitWidth: reactionCountLabel.x + reactionCountLabel.implicitWidth + 6
+            delegate: ReactionButton {
+                id: rDelg
+                emoji: rDelg.reaction
+                text: rDelg.count
+                highlighted: rDelg.isOwnReaction
 
                 required property int count
                 required property string reaction
                 required property bool isOwnReaction
                 required property list<ChatUser> users
 
-                Rectangle {
-                    id: reactionBg
-                    radius: 6
-                    anchors.fill: parent
-                    color: reactionDelg.isOwnReaction
-                           ? Theme.backgroundOffsetColor
-                           : (reactionDelgHoverHandler.hovered
-                              ? Theme.backgroundOffsetHoveredColor
-                              : Theme.backgroundSecondaryColor)
-                    border {
-                        width: 1
-                        color: reactionDelg.isOwnReaction
-                               ? Theme.highlightColor
-                               : (reactionDelgHoverHandler.hovered
-                                  ? Theme.borderHeaderIconHovered
-                                  : Theme.borderColor)
-                    }
-                }
-
-                Label {
-                    id: reactionLabel
-                    text: reactionDelg.reaction
-                    font {
-                        family: "Noto Color Emoji"
-                        pixelSize: 14
-                    }
-                    anchors {
-                        left: parent.left
-                        leftMargin: 4
-                        verticalCenter: parent.verticalCenter
-                        verticalCenterOffset: 1
-                    }
-                }
-
-                Label {
-                    id: reactionCountLabel
-                    text: reactionDelg.count
-                    anchors {
-                        left: reactionLabel.right
-                        leftMargin: 4
-                        verticalCenter: parent.verticalCenter
-                    }
-                }
-
-                ToolTip.text: reactionDelg.users.map(user => user.computedName).join(", ")
-                ToolTip.visible: reactionDelgHoverHandler.hovered
-
-                HoverHandler {
-                    id: reactionDelgHoverHandler
-                    cursorShape: Qt.PointingHandCursor
-                }
-
-                TapHandler {
-                    onTapped: () => {
-                        if (reactionDelg.isOwnReaction) {
-                            control.chatProvider.retractReaction(control.roomId,
-                                                                 control.eventId,
-                                                                 reactionDelg.reaction)
-                        } else {
-                            control.chatProvider.addReaction(control.roomId,
-                                                             control.eventId,
-                                                             reactionDelg.reaction)
-                        }
-                    }
-                }
+                onClicked: () => {
+                               if (rDelg.isOwnReaction) {
+                                   control.chatProvider.retractReaction(control.roomId,
+                                                                        control.eventId,
+                                                                        rDelg.reaction)
+                               } else {
+                                   control.chatProvider.addReaction(control.roomId,
+                                                                    control.eventId,
+                                                                    rDelg.reaction)
+                               }
+                           }
             }
         }
 

@@ -33,8 +33,6 @@ class IChatRoom : public QObject
     Q_PROPERTY(bool isFavorite READ isFavorite NOTIFY isFavoriteChanged FINAL)
     Q_PROPERTY(bool isLoadingMessageHistory READ isLoadingMessageHistory NOTIFY
                        isLoadingMessageHistoryChanged FINAL)
-    Q_PROPERTY(
-            bool isCompletelyLoaded READ isCompletelyLoaded NOTIFY isCompletelyLoadedChanged FINAL)
     Q_PROPERTY(bool hasPresenceState READ hasPresenceState NOTIFY hasPresenceStateChanged FINAL)
     Q_PROPERTY(ChatUser::PresenceState presenceState READ presenceState NOTIFY presenceStateChanged
                        FINAL)
@@ -90,8 +88,8 @@ public:
     bool isLoadingMessageHistory() const { return m_isLoadingMessageHistory; }
     void setIsLoadingMessageHistory(bool value);
 
-    bool isCompletelyLoaded() const { return m_isCompletelyLoaded; }
-    void setIsCompletelyLoaded(bool value);
+    Q_INVOKABLE virtual bool isCompletelyLoaded(const QString &threadId = QString()) const = 0;
+    virtual void setIsCompletelyLoaded(bool value, const QString &threadId = QString()) = 0;
 
     QDateTime latestMessageDateTime() const { return m_latestMessageDateTime; };
     void setLatestMessageDateTime(const QDateTime &dateTime);
@@ -116,7 +114,8 @@ public:
 
     /// Send a message in this room.
     Q_INVOKABLE virtual void sendMessage(const QString &message,
-                                         const QString &relatedMessageId = "") = 0;
+                                         const QString &relatedMessageId = QString(),
+                                         const QString &threadId = QString()) = 0;
 
     /// Given a local file url, send a message with this file as an attachment.
     Q_INVOKABLE virtual void sendFile(const QString &filePath) = 0;
@@ -129,7 +128,7 @@ public:
     virtual bool isInitiallyLoaded() const = 0;
 
     /// Start the loading of next batch of messages.
-    Q_INVOKABLE virtual void loadMessages() = 0;
+    Q_INVOKABLE virtual void loadMessages(const QString &threadId = QString()) = 0;
 
     /// Toggle whether the message is pinned in this room or not.
     Q_INVOKABLE virtual void togglePin(const QString &messageId) = 0;
@@ -205,7 +204,6 @@ private:
     RoomSettings m_roomSettings;
     QDateTime m_latestMessageDateTime;
     bool m_isLoadingMessageHistory = false;
-    bool m_isCompletelyLoaded = false;
 
 Q_SIGNALS:
     void roomSettingsChanged();
@@ -221,7 +219,7 @@ Q_SIGNALS:
     void presenceStateChanged();
     void permissionsChanged();
     void isInitiallyLoadedChanged();
-    void isCompletelyLoadedChanged();
+    void isCompletelyLoadedChanged(QString threadId);
     void latestMessageDateTimeChanged();
     void ownUserJoinStateChanged();
     void otherUserChanged();

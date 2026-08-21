@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IChatRoom.h"
+#include "ChatMessageContainer.h"
 #include <QHash>
 
 class ChatUser;
@@ -13,7 +14,6 @@ class IpcChatRoom : public IChatRoom
 public:
     explicit IpcChatRoom(const QString &id, const QString &name,
                          IChatProvider *chatProvider = nullptr);
-    virtual ~IpcChatRoom();
 
     QString customName() const { return m_name; }
     void setName(const QString &name);
@@ -31,14 +31,14 @@ public:
     virtual QString invitationText() override { return m_invitationText; }
     virtual bool isFavorite() override { return m_isFavorite; }
     virtual IChatRoom::JoinRule joinRule() override { return m_joinRule; }
-    virtual qsizetype notificationCount() override { return m_unreadCount; }
+    virtual qsizetype notificationCount() override { return m_mainMessageContainer.unreadCount(); }
     virtual IChatRoom::Permissions permissions() override { return m_permissions; }
 
     virtual bool isInitiallyLoaded() const override { return m_isInitiallyLoaded; }
-    virtual void loadMessages() override;
+    virtual void loadMessages(const QString &threadId = QString()) override;
 
     virtual void resetUnreadCount() override;
-    virtual QList<ChatMessage *> chatMessages() const override { return m_messages; }
+    virtual QList<ChatMessage *> chatMessages() const override;
     virtual QList<ChatMessage *> pinnedChatMessages() const override { return m_pinnedMessages; }
     virtual qsizetype pinnedChatMessageCount() const override { return m_pinnedMessages.size(); }
     virtual ChatMessage *pinnedChatMessageByIndex(qsizetype index) const override;
@@ -46,17 +46,21 @@ public:
     virtual qsizetype indexOfPinnedChatMessage(ChatMessage *message) const override;
     void ensureMessageLoaded(const QString &id);
     virtual ChatMessage *latestOwnTextMessage() const override;
-    virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
+    virtual void sendMessage(const QString &message, const QString &relatedMessageId = QString(),
+                             const QString &threadId = QString()) override;
     virtual void sendFile(const QString &filePath) override;
     virtual void sendTypingPing() override;
     virtual void togglePin(const QString &messageId) override;
+    virtual bool isCompletelyLoaded(const QString &threadId = QString()) const override;
+    virtual void setIsCompletelyLoaded(bool value, const QString &threaId = QString()) override;
 
     /// Add an already existing message to the room; does not send a new message. Takes ownership of
     /// the object.
-    void addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent);
+    void addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent,
+                            const QString &threadId = QString());
 
-    bool hasMessage(const QString &messageId) const { return m_messageLookup.contains(messageId); }
-    bool hasMessage(const ChatMessage *message) const { return m_messages.contains(message); }
+    bool hasMessage(const QString &messageId) const;
+    bool hasMessage(const ChatMessage *message) const;
     qsizetype indexOfMessage(const ChatMessage *message) const;
 
     void removeMessage(const QString &messageId);
@@ -95,17 +99,21 @@ private:
     IpcDispatcher *ipcDispatcher() const;
     void updatePinnedMessages();
 
+    void registerThreadChild(const QString &childEventId, const QString &threadId);
+    void unregisterThreadChild(const QString &childEventId, const QString &threadId);
+    void recalculateThreadRootFlag(const QString &eventId);
+
     QString m_id;
     QString m_name;
     QString m_avatarPath;
     QString m_invitationText;
-    qsizetype m_unreadCount = 0;
     IChatRoom::JoinRule m_joinRule = IChatRoom::JoinRule::Unknown;
     IChatRoom::UserRoomState m_ownUserJoinState = IChatRoom::UserRoomState::Unjoined;
     IChatRoom::Permissions m_permissions;
     bool m_isFavorite = false;
     bool m_isDirectChat = true;
     bool m_isInitiallyLoaded = false;
+    bool m_isCompletelyLoaded = false;
 
     QList<ChatUser *> m_chatUsers;
     QHash<ChatUser *, UserRoomState> m_userRoomStates;
@@ -114,9 +122,11 @@ private:
     ChatUser *m_otherUser = nullptr;
     QObject *m_otherUserContext = nullptr;
 
-    QHash<QString, ChatMessage *> m_messageLookup;
-    QList<ChatMessage *> m_messages;
+    ChatMessageContainer m_mainMessageContainer;
+    QHash<QString, ChatMessageContainer *> m_threadMessageContainers;
+    QHash<QString, bool> m_threadCompletelyLoaded;
     QList<ChatMessage *> m_pinnedMessages;
     QList<QString> m_pinnedMessageIds;
     QSet<QString> m_loadRequestedMessageIds;
+    QHash<QString, QSet<QString>> m_threadChildren;
 };
