@@ -103,7 +103,7 @@ Item {
                        && !internal.isCompletelyLoaded) {
 
                 // Load next batch from history
-                control.chatRoom.loadMessages()
+                control.chatRoom.loadMessages(control.threadId)
             }
         }
     }
