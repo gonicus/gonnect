@@ -862,8 +862,7 @@ Item {
                             model: AudioManager.devices.filter(device => device.isInput)
 
                             Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Input device selection")
-                            Accessible.description: qsTr("Select the input device to be used")
+                            Accessible.name: qsTr("Audio input device")
 
                             delegate: ItemDelegate {
                                 id: inputAudioSelectorDelg
@@ -876,7 +875,7 @@ Item {
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: inputAudioSelectorDelg.name
-                                Accessible.description: qsTr("Currently selected input option")
+                                Accessible.description: qsTr("Currently selected audio input device")
                                 Accessible.focusable: true
 
                                 required property string name
@@ -927,8 +926,7 @@ Item {
                             model: AudioManager.devices.filter(device => device.isOutput)
 
                             Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Output device selection")
-                            Accessible.description: qsTr("Select the output device to be used")
+                            Accessible.name: qsTr("Audio output device")
 
                             delegate: ItemDelegate {
                                 id: outputAudioSelectorDelg
@@ -941,7 +939,7 @@ Item {
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: outputAudioSelectorDelg.name
-                                Accessible.description: qsTr("Currently selected output option")
+                                Accessible.description: qsTr("Currently selected audio output device")
                                 Accessible.focusable: true
 
                                 required property string name
@@ -992,8 +990,7 @@ Item {
                             model: AudioManager.devices.filter(device => device.isOutput)
 
                             Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Prefererred identity selection")
-                            Accessible.description: qsTr("Select the preferred identity")
+                            Accessible.name: qsTr("Auido output device for ring tone")
 
                             delegate: ItemDelegate {
                                 id: outputRingAudioSelectorDelg

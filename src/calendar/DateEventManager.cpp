@@ -393,7 +393,7 @@ void DateEventManager::onTimerTimeout()
                 && !m_notificationIds.contains(eventHash) && start.date() == today
                 && start.time() > now && now.secsTo(start.time()) < 2 * 60) {
                 QString message = isJitsiMeeting ? tr("Conference starting soon")
-                                                 : tr("Appointment starting soon");
+                                                 : tr("Event starting soon");
                 auto notification = new Notification(message, summary, Notification::Priority::high,
                                                      true, &notMan);
 
