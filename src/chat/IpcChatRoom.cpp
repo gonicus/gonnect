@@ -3,7 +3,6 @@
 #include "ChatUser.h"
 #include "IpcDispatcher.h"
 #include "ChatMessageContentText.h"
-#include "ChatMessageContentVideoFile.h"
 #include "AddressBook.h"
 
 #include <QFileInfo>
@@ -12,8 +11,22 @@
 Q_LOGGING_CATEGORY(lcIpcChatRoom, "gonnect.app.chat.IpcChatRoom")
 
 IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, IChatProvider *chatProvider)
-    : IChatRoom{ chatProvider, chatProvider }, m_id{ id }, m_name{ name }
+    : IChatRoom{ chatProvider, chatProvider },
+      m_id{ id },
+      m_name{ name },
+      m_mainMessageContainer{ this }
 {
+    connect(&m_mainMessageContainer, &ChatMessageContainer::chatMessageAdded, this,
+            &IpcChatRoom::chatMessageAdded);
+    connect(&m_mainMessageContainer, &ChatMessageContainer::chatMessageOutOfSequenceReceived, this,
+            &IpcChatRoom::chatMessageOutOfSequenceReceived);
+    connect(&m_mainMessageContainer, &ChatMessageContainer::chatMessageRemoved, this,
+            &IpcChatRoom::chatMessageRemoved);
+    connect(&m_mainMessageContainer, &ChatMessageContainer::chatMessageContentChanged, this,
+            &IpcChatRoom::chatMessageContentChanged);
+    connect(&m_mainMessageContainer, &ChatMessageContainer::unreadCountChanged, this,
+            [this]() { Q_EMIT notificationCountChanged(m_mainMessageContainer.unreadCount()); });
+
     connect(this, &IpcChatRoom::chatUsersChanged, this, &IpcChatRoom::updateIsDirectChat);
     connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::avatarPathChanged);
     connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::hasPresenceState);
@@ -22,12 +35,6 @@ IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, IChatProvider *
             &IpcChatRoom::updateOwnUserJoinState);
 
     updateIsDirectChat();
-}
-
-IpcChatRoom::~IpcChatRoom()
-{
-    qDeleteAll(m_messageLookup);
-    m_messageLookup.clear();
 }
 
 void IpcChatRoom::setName(const QString &name)
@@ -72,10 +79,15 @@ void IpcChatRoom::setIsDirect(bool value)
 
 void IpcChatRoom::resetUnreadCount()
 {
-    if (m_unreadCount) {
+    if (m_mainMessageContainer.unreadCount()) {
         ipcDispatcher()->markAsRead(id());
         setUnreadCount(0);
     }
+}
+
+QList<ChatMessage *> IpcChatRoom::chatMessages() const
+{
+    return m_mainMessageContainer.chatMessages();
 }
 
 ChatMessage *IpcChatRoom::pinnedChatMessageByIndex(qsizetype index) const
@@ -93,7 +105,7 @@ ChatMessage *IpcChatRoom::chatMessageById(const QString &id) const
         return nullptr;
     }
 
-    return m_messageLookup.value(id, nullptr);
+    return m_mainMessageContainer.messageById(id);
 }
 
 qsizetype IpcChatRoom::indexOfPinnedChatMessage(ChatMessage *message) const
@@ -108,7 +120,8 @@ qsizetype IpcChatRoom::indexOfPinnedChatMessage(ChatMessage *message) const
 
 void IpcChatRoom::ensureMessageLoaded(const QString &id)
 {
-    if (id.isEmpty() || m_messageLookup.contains(id) || m_loadRequestedMessageIds.contains(id)) {
+    if (id.isEmpty() || m_mainMessageContainer.contains(id)
+        || m_loadRequestedMessageIds.contains(id)) {
         return;
     }
 
@@ -122,11 +135,9 @@ ChatMessage *IpcChatRoom::latestOwnTextMessage() const
 {
     using Flag = ChatMessage::Flag;
 
-    QListIterator it(m_messages);
-    it.toBack();
+    for (qsizetype i = m_mainMessageContainer.count() - 1; i >= 0; --i) {
+        auto *msg = m_mainMessageContainer.at(i);
 
-    while (it.hasPrevious()) {
-        auto *msg = it.previous();
         if ((msg->flags() & Flag::OwnMessage)
             && qobject_cast<ChatMessageContentText *>(msg->content())
             && !(msg->flags() & (Flag::Pending | Flag::Failed))) {
@@ -181,18 +192,6 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
 {
     Q_CHECK_PTR(message);
 
-    if (isUnread) {
-        setUnreadCount(notificationCount() + 1);
-    }
-
-    if (auto *content = qobject_cast<ChatMessageContentVideoFile *>(message->content())) {
-        // Since the thumbnail path is available later, it must produce a signal
-        connect(content, &ChatMessageContentVideoFile::thumbnailFilePathChanged, this,
-                [this, message]() {
-                    Q_EMIT chatMessageContentChanged(indexOfMessage(message), message);
-                });
-    }
-
     const auto eventId = message->eventId();
     m_loadRequestedMessageIds.remove(eventId);
 
@@ -200,53 +199,23 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
         registerThreadChild(eventId, message->threadId());
     }
 
-    if (isIndependent) {
-        m_messageLookup.insert(eventId, message);
-        updatePinnedMessages();
-        Q_EMIT chatMessageOutOfSequenceReceived(message);
+    m_mainMessageContainer.addMessage(message, isUnread, isIndependent);
 
-    } else {
-        for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
-            if (m_messages.at(i)->timestamp() < message->timestamp()) {
-                m_messages.insert(i + 1, message);
-                m_messageLookup.insert(eventId, message);
-                updatePinnedMessages();
-                Q_EMIT chatMessageAdded(i + 1, message);
-                recalculateThreadRootFlag(eventId);
-                return;
-            }
-        }
-
-        m_messages.prepend(message);
-        m_messageLookup.insert(message->eventId(), message);
-        updatePinnedMessages();
-        Q_EMIT chatMessageAdded(0, message);
-    }
-
+    updatePinnedMessages();
     recalculateThreadRootFlag(eventId);
 }
 
 qsizetype IpcChatRoom::indexOfMessage(const ChatMessage *message) const
 {
-    return m_messages.indexOf(message);
+    return m_mainMessageContainer.indexOf(message);
 }
 
 void IpcChatRoom::removeMessage(const QString &messageId)
 {
-    m_messageLookup.remove(messageId);
-
-    for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
-        if (m_messages.at(i)->eventId() == messageId) {
-            auto message = m_messages.at(i);
-            m_pinnedMessageIds.removeOne(messageId);
-            if (m_pinnedMessages.removeOne(message)) {
-                Q_EMIT pinnedMessagesChanged();
-            }
-            m_messages.removeAt(i);
-            Q_EMIT chatMessageRemoved(i, message);
-            delete message;
-            return;
-        }
+    m_pinnedMessageIds.removeOne(messageId);
+    if (const auto *message = m_mainMessageContainer.removeMessage(messageId);
+        message && m_pinnedMessages.removeOne(message)) {
+        Q_EMIT pinnedMessagesChanged();
     }
 
     m_threadChildren.remove(messageId);
@@ -273,9 +242,7 @@ void IpcChatRoom::setPinnedMessageIds(const QStringList &messageIds)
 
 void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString &newEventId)
 {
-    if (auto msg = m_messageLookup.take(oldEventId)) {
-        msg->setEventId(newEventId);
-        m_messageLookup.insert(newEventId, msg);
+    if (auto msg = m_mainMessageContainer.updateMessageEventId(oldEventId, newEventId)) {
         Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
 
         if (m_threadChildren.remove(oldEventId)) {
@@ -294,7 +261,7 @@ void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString 
 
 void IpcChatRoom::setMessageFlags(const QString &eventId, ChatMessage::Flags newFlags)
 {
-    if (auto msg = m_messageLookup.value(eventId)) {
+    if (auto msg = m_mainMessageContainer.messageById(eventId)) {
         const auto prevFlags = msg->flags();
         if (prevFlags != newFlags) {
             msg->setFlags(newFlags);
@@ -339,10 +306,7 @@ ChatUser *IpcChatRoom::otherUser() const
 
 void IpcChatRoom::setUnreadCount(qsizetype count)
 {
-    if (m_unreadCount != count) {
-        m_unreadCount = count;
-        Q_EMIT notificationCountChanged(count);
-    }
+    m_mainMessageContainer.setUnreadCount(count);
 }
 
 void IpcChatRoom::setPermissions(Permissions permissions)
@@ -575,9 +539,7 @@ void IpcChatRoom::clear()
         Q_EMIT pinnedMessagesChanged();
     }
 
-    m_messageLookup.clear();
-    qDeleteAll(m_messages);
-    m_messages.clear();
+    m_mainMessageContainer.clear();
 
     Q_EMIT chatMessagesReset();
 }
@@ -720,7 +682,7 @@ void IpcChatRoom::unregisterThreadChild(const QString &childEventId, const QStri
 
 void IpcChatRoom::recalculateThreadRootFlag(const QString &eventId)
 {
-    auto *message = m_messageLookup.value(eventId, nullptr);
+    auto *message = m_mainMessageContainer.messageById(eventId);
     if (!message) {
         return;
     }

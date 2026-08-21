@@ -636,6 +636,8 @@ qt_add_qml_module(gonnect
         chat/ChatConnectorManager.cpp
         chat/ChatMessage.h
         chat/ChatMessage.cpp
+        chat/ChatMessageContainer.h
+        chat/ChatMessageContainer.cpp
         chat/ChatMessageContentAudioFile.h
         chat/ChatMessageContentImage.h
         chat/ChatMessageContentImage.cpp
