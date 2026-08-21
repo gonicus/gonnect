@@ -990,7 +990,7 @@ Item {
                             model: AudioManager.devices.filter(device => device.isOutput)
 
                             Accessible.role: Accessible.ComboBox
-                            Accessible.name: qsTr("Auido output device for ring tone")
+                            Accessible.name: qsTr("Audio output device for ring tone")
 
                             delegate: ItemDelegate {
                                 id: outputRingAudioSelectorDelg
