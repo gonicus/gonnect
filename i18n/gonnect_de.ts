@@ -121,77 +121,77 @@
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="57"/>
         <source>Input device selection header</source>
-        <translation>Überschrift für die Eingangsgeräte-Auswahl</translation>
+        <translation>Überschrift für die Eingabegeräte-Auswahl</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="58"/>
         <source>Header for the input device selection below</source>
-        <translation>Überschrift für die nachfolgende Eingangsgeräte-Auswahl</translation>
+        <translation>Überschrift für die nachfolgende Eingabegeräte-Auswahl</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="62"/>
         <source>Input device</source>
-        <translation>Eingangsgerät</translation>
+        <translation>Eingabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="83"/>
         <source>Input device selection box</source>
-        <translation>Auswahlfeld für das Eingangsgerät</translation>
+        <translation>Auswahlfeld für das Eingabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="84"/>
         <source>Select the input device that should be used</source>
-        <translation>Das zu verwendende Eingangsgerät auswählen</translation>
+        <translation>Das zu verwendende Eingabegerät auswählen</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="97"/>
         <source>Currently selected input device</source>
-        <translation>Aktuell ausgewähltes Eingangsgerät</translation>
+        <translation>Aktuell ausgewähltes Eingabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="139"/>
         <source>Output device selection header</source>
-        <translation>Überschrift für die Auswahl der Ausgangsgeräte</translation>
+        <translation>Überschrift für die Auswahl der Ausgabegeräte</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="140"/>
         <source>Header for the output device selection below</source>
-        <translation>Überschrift für die nachfolgende Ausgangsgeräte-Auswahl</translation>
+        <translation>Überschrift für die nachfolgende Ausgabegeräte-Auswahl</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="143"/>
         <source>Output device</source>
-        <translation>Ausgangsgerät</translation>
+        <translation>Ausgabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="164"/>
         <source>Output device selection box</source>
-        <translation>Auswahlfeld für das Ausgangsgerät</translation>
+        <translation>Auswahlfeld für das Ausgabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="165"/>
         <source>Select the output device that should be used</source>
-        <translation>Das zu verwendende Ausgangsgerät auswählen</translation>
+        <translation>Das zu verwendende Ausgabegerät auswählen</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="178"/>
         <source>Currently selected output device</source>
-        <translation>Aktuell ausgewähltes Ausgangsgerät</translation>
+        <translation>Aktuell ausgewähltes Ausgabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="220"/>
         <source>Ring tone output device</source>
-        <translation>Ausgangsgerät für Klingeltöne</translation>
+        <translation>Ausgabegerät für Klingeltöne</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="225"/>
         <source>Output device for ring tone</source>
-        <translation>Ausgangsgerät für Klingeltöne</translation>
+        <translation>Ausgabegerät für Klingeltöne</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="246"/>
         <source>Ring tone output device selection box</source>
-        <translation>Auswahlfeld für das Klingelton-Ausgangsgerät</translation>
+        <translation>Auswahlfeld für das Klingelton-Ausgabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="247"/>
@@ -711,7 +711,7 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="602"/>
         <source>Set the mute state of the current input device</source>
-        <translation>Den Stummschaltungszustand des aktuellen Eingangsgeräts ändern</translation>
+        <translation>Den Stummschaltungszustand des aktuellen Eingabegeräts ändern</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="609"/>
@@ -726,7 +726,7 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="626"/>
         <source>Change the current output devices</source>
-        <translation>Die aktuellen Ausgangsgeräte ändern</translation>
+        <translation>Die aktuellen Ausgabegeräte ändern</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="650"/>
@@ -807,7 +807,7 @@
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="403"/>
         <source>Database error: cannot remove history row</source>
-        <translation type="unfinished"></translation>
+        <translation>Datenbankfehler: Der Verlaufseintrag konnte nicht gelöscht werden</translation>
     </message>
 </context>
 <context>
@@ -940,17 +940,17 @@
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="89"/>
         <source>Call</source>
-        <translation type="unfinished"></translation>
+        <translation>Anrufen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="160"/>
         <source>Call contact button</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakt anrufen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="161"/>
         <source>Selected number %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausgewählte Nummer %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="202"/>
@@ -1181,7 +1181,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="464"/>
         <source>Toggle pin</source>
-        <translation type="unfinished"></translation>
+        <translation>Anheften umschalten</translation>
     </message>
 </context>
 <context>
@@ -1197,22 +1197,22 @@
     <message>
         <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="21"/>
         <source>Toggle favorite</source>
-        <translation type="unfinished">Favorit umschalten</translation>
+        <translation>Favorit umschalten</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="28"/>
         <source>Edit room...</source>
-        <translation type="unfinished">Raum bearbeiten...</translation>
+        <translation>Raum bearbeiten...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="35"/>
         <source>Invite users...</source>
-        <translation type="unfinished">Teilnehmer einladen...</translation>
+        <translation>Teilnehmer einladen...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="41"/>
         <source>Leave room...</source>
-        <translation type="unfinished">Raum verlassen...</translation>
+        <translation>Raum verlassen...</translation>
     </message>
 </context>
 <context>
@@ -1820,7 +1820,7 @@
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="396"/>
         <source>Event starting soon</source>
-        <translation type="unfinished"></translation>
+        <translation>Termin beginnt bald</translation>
     </message>
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="402"/>
@@ -1864,27 +1864,27 @@
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="15"/>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation>Termine</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="16"/>
         <source>List of all the currently active and upcoming calendar events</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste aller aktuell stattfindenden und kommenden Termine</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="33"/>
         <source>Event section</source>
-        <translation type="unfinished"></translation>
+        <translation>Terminbereich</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="113"/>
         <source>Event</source>
-        <translation type="unfinished"></translation>
+        <translation>Termin</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="114"/>
         <source>Currently selected calendar event: %1, starting time %2, remaining time %3</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausgewählter Termin: %1, Startzeit: %2, verbleibende Zeit: %3</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="168"/>
@@ -1953,22 +1953,22 @@
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="27"/>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation>Termine</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="53"/>
         <source>Loading events...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lade Termine...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="54"/>
         <source>No upcoming events</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine anstehenden Termine</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="64"/>
         <source>Event widget status</source>
-        <translation type="unfinished"></translation>
+        <translation>Status des Terminwidgets</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="65"/>
@@ -2030,22 +2030,22 @@
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="347"/>
         <source>Confirm that the code or emojis match in both sessions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestätige, dass der Code bzw. die Symbole in beiden Sitzungen überein stimmen:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="426"/>
         <source>Cancel, they do not match</source>
-        <translation type="unfinished"></translation>
+        <translation>Abbrechen, sie stimmen nicht überein</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="435"/>
         <source>Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestätigen</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="436"/>
         <source>Confirm, they match</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestätigen, sie stimmen überein</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="452"/>
@@ -2171,17 +2171,17 @@
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="44"/>
         <source>Emergency call</source>
-        <translation type="unfinished">Notruf</translation>
+        <translation>Notruf</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="57"/>
         <source>Clicking one of these buttons will end all current calls and start an emergency call.</source>
-        <translation type="unfinished">Das Verwenden einer dieser Schaltflächen beendet alle aktiven Anrufe und löst einen Notruf aus.</translation>
+        <translation>Das Verwenden einer dieser Schaltflächen beendet alle aktiven Anrufe und löst einen Notruf aus.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="87"/>
         <source>Tap to call emergency contact: %1 (%2)</source>
-        <translation type="unfinished">Tippen, um Notfallkontakt anzurufen: %1 (%2)</translation>
+        <translation>Tippen, um Notfallkontakt anzurufen: %1 (%2)</translation>
     </message>
 </context>
 <context>
@@ -2189,7 +2189,7 @@
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="15"/>
         <source>Emergency call</source>
-        <translation type="unfinished">Notruf</translation>
+        <translation>Notruf</translation>
     </message>
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="31"/>
@@ -2458,12 +2458,12 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="257"/>
         <source>%1 has joined the chat</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 ist dem Chat beigetreten</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="259"/>
         <source>%1 has left the chat</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 hat den Chat verlassen</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="261"/>
@@ -2771,7 +2771,7 @@
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="423"/>
         <source>Are you sure you really want to remove this entry?</source>
-        <translation type="unfinished"></translation>
+        <translation>Möchtest du diesen Eintrag wirklich löschen?</translation>
     </message>
 </context>
 <context>
@@ -2784,7 +2784,7 @@
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="43"/>
         <source>Chat</source>
-        <translation type="unfinished">Chat</translation>
+        <translation>Chat</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="56"/>
@@ -2819,7 +2819,7 @@
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="107"/>
         <source>Remove</source>
-        <translation type="unfinished">Entfernen</translation>
+        <translation>Entfernen</translation>
     </message>
 </context>
 <context>
@@ -3003,7 +3003,7 @@
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="84"/>
         <source>Do you want to join this chat room?</source>
-        <translation>Möchtest Du diesen Chat-Raum betreten?</translation>
+        <translation>Möchtest Du diesem Chat-Raum beitreten?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="98"/>
@@ -3013,7 +3013,7 @@
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="111"/>
         <source>Join</source>
-        <translation type="unfinished">Teilnehmen</translation>
+        <translation>Beitreten</translation>
     </message>
 </context>
 <context>
@@ -3026,7 +3026,7 @@
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="896"/>
         <source>The IPC client of %1 repeatedly reported network errors.</source>
-        <translation type="unfinished"></translation>
+        <translation>Der IPC-Client von %1 meldete wiederholt Netzwerkfehler.</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="911"/>
@@ -3155,7 +3155,7 @@
     <message>
         <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="54"/>
         <source>Remove</source>
-        <translation type="unfinished">Entfernen</translation>
+        <translation>Entfernen</translation>
     </message>
 </context>
 <context>
@@ -3422,13 +3422,13 @@
     <message>
         <location filename="../src/ui/components/MainTabBar.qml" line="497"/>
         <source>Emergency call</source>
-        <translation type="unfinished">Notruf</translation>
+        <translation>Notruf</translation>
     </message>
     <message>
         <location filename="../src/ui/components/MainTabBar.qml" line="498"/>
         <location filename="../src/ui/components/MainTabBar.qml" line="528"/>
         <source>Show the emergency call page</source>
-        <translation type="unfinished"></translation>
+        <translation>Zeige die Notruf-Seite</translation>
     </message>
     <message>
         <location filename="../src/ui/components/MainTabBar.qml" line="583"/>
@@ -3677,7 +3677,7 @@
     <message>
         <location filename="../src/ui/components/chat/PinnedChatMessagesList.qml" line="120"/>
         <source>Unpin</source>
-        <translation type="unfinished"></translation>
+        <translation>Lösen</translation>
     </message>
 </context>
 <context>
@@ -3749,12 +3749,12 @@
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="212"/>
         <source>Loading more results...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lade weitere Ergebnisse...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="227"/>
         <source>Searching...</source>
-        <translation type="unfinished"></translation>
+        <translation>Suche...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="230"/>
@@ -5650,17 +5650,17 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="833"/>
         <source>managed by device</source>
-        <translation type="unfinished"></translation>
+        <translation>von Gerät verwaltet</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="846"/>
         <source>Input device</source>
-        <translation>Eingangsgerät</translation>
+        <translation>Eingabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="910"/>
         <source>Output device</source>
-        <translation>Ausgangsgerät</translation>
+        <translation>Ausgabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="974"/>
@@ -5722,27 +5722,27 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="865"/>
         <source>Audio input device</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio-Eingabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="878"/>
         <source>Currently selected audio input device</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktuell ausgewähltes Audio-Eingabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="929"/>
         <source>Audio output device</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio-Ausgabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="942"/>
         <source>Currently selected audio output device</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktuell ausgewähltes Audio-Ausgabegerät</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="993"/>
         <source>Audio output device for ring tone</source>
-        <translation type="unfinished"></translation>
+        <translation>Audio-Ausgabegerät für den Klingelton</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1078"/>
@@ -6454,12 +6454,12 @@
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="101"/>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation>Termine</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="102"/>
         <source>List of upcoming calendar events</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste der bevorstehenden Termine</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="202"/>
@@ -6550,32 +6550,32 @@
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="30"/>
         <source>Jitsi Meet (room &apos;%1&apos;)</source>
-        <translation type="unfinished">Jitsi Meet (Raum &quot;%1&quot;)</translation>
+        <translation>Jitsi Meet (Raum &quot;%1&quot;)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="33"/>
         <source>Chat with %1</source>
-        <translation type="unfinished">Chat mit %1</translation>
+        <translation>Chat mit %1</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="38"/>
         <source>Phone (Commercial, %1)</source>
-        <translation type="unfinished">Telefon (geschäftlich, %1)</translation>
+        <translation>Telefon (geschäftlich, %1)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="41"/>
         <source>Phone (Mobile, %1)</source>
-        <translation type="unfinished">Telefon (mobil, %1)</translation>
+        <translation>Telefon (mobil, %1)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="44"/>
         <source>Phone (Home, %1)</source>
-        <translation type="unfinished">Telefon (privat, %1)</translation>
+        <translation>Telefon (privat, %1)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="47"/>
         <source>Phone (%1)</source>
-        <translation type="unfinished">Telefon (%1)</translation>
+        <translation>Telefon (%1)</translation>
     </message>
 </context>
 </TS>
