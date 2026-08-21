@@ -188,7 +188,30 @@ void IpcChatRoom::togglePin(const QString &messageId)
     }
 }
 
-void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent)
+bool IpcChatRoom::isCompletelyLoaded(const QString &threadId) const
+{
+    if (threadId.isEmpty()) {
+        return m_isCompletelyLoaded;
+    }
+    return m_threadCompletelyLoaded[threadId];
+}
+
+void IpcChatRoom::setIsCompletelyLoaded(bool value, const QString &threadId)
+{
+    if (threadId.isEmpty()) {
+        if (m_isCompletelyLoaded != value) {
+            m_isCompletelyLoaded = value;
+            Q_EMIT isCompletelyLoadedChanged(QString());
+        }
+    } else if (!m_threadCompletelyLoaded.contains(threadId)
+               || m_threadCompletelyLoaded[threadId] != value) {
+        m_threadCompletelyLoaded[threadId] = value;
+        Q_EMIT isCompletelyLoadedChanged(threadId);
+    }
+}
+
+void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent,
+                                     const QString &threadId)
 {
     Q_CHECK_PTR(message);
 
@@ -199,10 +222,28 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
         registerThreadChild(eventId, message->threadId());
     }
 
-    m_mainMessageContainer.addMessage(message, isUnread, isIndependent);
+    if (threadId.isEmpty()) {
+        m_mainMessageContainer.addMessage(message, isUnread, isIndependent);
+        updatePinnedMessages();
 
-    updatePinnedMessages();
+    } else {
+        if (!m_threadMessageContainers.contains(threadId)) {
+            m_threadMessageContainers.insert(threadId, new ChatMessageContainer(this));
+        }
+        m_threadMessageContainers[threadId]->addMessage(message, isUnread, isIndependent);
+    }
+
     recalculateThreadRootFlag(eventId);
+}
+
+bool IpcChatRoom::hasMessage(const QString &messageId) const
+{
+    return m_mainMessageContainer.contains(messageId);
+}
+
+bool IpcChatRoom::hasMessage(const ChatMessage *message) const
+{
+    return m_mainMessageContainer.contains(message);
 }
 
 qsizetype IpcChatRoom::indexOfMessage(const ChatMessage *message) const
@@ -350,15 +391,15 @@ QString IpcChatRoom::avatarPath()
     return "";
 }
 
-void IpcChatRoom::loadMessages()
+void IpcChatRoom::loadMessages(const QString &threadId)
 {
-    if (isLoadingMessageHistory() || isCompletelyLoaded()) {
+    if (isLoadingMessageHistory() || isCompletelyLoaded(threadId)) {
         return;
     }
 
-    ipcDispatcher()->loadMessages(this);
+    ipcDispatcher()->loadMessages(this, IChatProvider::defaultMessageLimit, threadId);
 
-    if (!m_isInitiallyLoaded) {
+    if (threadId.isEmpty() && !m_isInitiallyLoaded) {
         m_isInitiallyLoaded = true;
         Q_EMIT IChatRoom::isInitiallyLoadedChanged();
     }

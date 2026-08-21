@@ -31,20 +31,20 @@ Item {
         chatMessageBox.giveFocus()
     }
 
-    function loadMessages() {
+    function loadMessages(threadId : string) {
         const room = control.chatRoom
         if (room && !room.isInitiallyLoaded && room.ownUserJoinState === IChatRoom.UserRoomState.Joined) {
-            room.loadMessages()
+            room.loadMessages(threadId)
         }
     }
 
-    onChatRoomChanged: () => control.loadMessages()
+    onChatRoomChanged: () => control.loadMessages(chatMessageList.threadId)
 
     Connections {
         target: control.chatRoom
 
         function onOwnUserJoinStateChanged() {
-            control.loadMessages()
+            control.loadMessages(chatMessageList.threadId)
         }
     }
 
@@ -311,6 +311,8 @@ Item {
                                 control.chatProvider.retrySendMessage(control.chatRoom.id, messageId)
                             }
                         }
+
+        onThreadIdChanged: () => control.loadMessages(chatMessageList.threadId)
     }
 
     Item {

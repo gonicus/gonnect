@@ -134,8 +134,8 @@ public:
     /// Mark the given room as read such there are no unread notifications or messages afterwards.
     void markAsRead(const QString &roomId);
 
-    virtual void loadMessages(IChatRoom *chatRoom,
-                              quint32 n = IChatProvider::defaultMessageLimit) override;
+    virtual void loadMessages(IChatRoom *chatRoom, quint32 n = IChatProvider::defaultMessageLimit,
+                              const QString &threadId = QString()) override;
 
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
@@ -279,7 +279,8 @@ private:
     bool hasOwnUserMention(const ChatMessage &message) const;
     ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
                                                    bool isUnread, bool isIndependent,
-                                                   ChatMessage *chatMessage);
+                                                   ChatMessage *chatMessage,
+                                                   const QString &threadId);
 
     IpcChatRoom *addChatRoom(const de::gonicus::gonnect::Room &room, const QString &tag = "");
     IpcChatRoom *addChatRoom(const QString &roomId, const QString &name, qsizetype unreadCount,
@@ -377,9 +378,15 @@ private:
     /// request timeouts.
     QTimer m_verificationTimeoutTimer;
 
+    struct RoomTagInfo
+    {
+        QString roomId;
+        QString threadId;
+    };
+
     /// Map of ipc tag to room id of RoomMessagesRequest objects that have not received an answer
     /// yet.
-    QHash<quint64, QString> m_roomListTags;
+    QHash<quint64, RoomTagInfo> m_roomListTags;
 
     /// Map of chat messages that have been requested indvidually (i.e. not in bulk) and have not
     /// received an answer yet. Key is the request tag, value the message id.

@@ -177,8 +177,9 @@ public:
     Q_INVOKABLE virtual void uploadImageFromClipboard(const QString &roomId) = 0;
 
     /// Load n more messages in the given room.
-    virtual void loadMessages(IChatRoom *chatRoom,
-                              quint32 n = IChatProvider::defaultMessageLimit) = 0;
+    /// If the optional threadId is set, only messages of that thread must be loaded.
+    virtual void loadMessages(IChatRoom *chatRoom, quint32 n = IChatProvider::defaultMessageLimit,
+                              const QString &threadId = QString()) = 0;
 
     /*! \name Device Verification
      *

@@ -36,6 +36,22 @@ Item {
         id: internal
 
         property bool autoScrollBottom: true
+        property bool isCompletelyLoaded: false
+
+        readonly property Connections controlConnections: Connections {
+            target: control
+            function onThreadIdChanged() { internal.updateIsCompletelyLoaded() }
+            function onChatRoomChanged() { internal.updateIsCompletelyLoaded() }
+        }
+
+        readonly property Connections chatRoomConnections: Connections {
+            target: control.chatRoom
+            function onIsCompletelyLoadedChanged() { internal.updateIsCompletelyLoaded() }
+        }
+
+        function updateIsCompletelyLoaded() {
+            internal.isCompletelyLoaded = control.chatRoom?.isCompletelyLoaded(control.threadId) ?? false
+        }
     }
 
     ListView {
@@ -84,7 +100,7 @@ Item {
                        && control.chatRoom
                        && control.chatRoom.isInitiallyLoaded
                        && !control.chatRoom.isLoadingMessageHistory
-                       && !control.chatRoom.isCompletelyLoaded) {
+                       && !internal.isCompletelyLoaded) {
 
                 // Load next batch from history
                 control.chatRoom.loadMessages()
