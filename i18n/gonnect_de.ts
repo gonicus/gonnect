@@ -1326,7 +1326,7 @@
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="191"/>
         <source>No users found.</source>
-        <translation>Keine Benutzer gefunden</translation>
+        <translation>Keine Benutzer gefunden.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="193"/>
@@ -6346,8 +6346,8 @@
         <location filename="../src/ui/components/controls/VoiceMailField.qml" line="74"/>
         <source>%n old voice mail(s)</source>
         <translation>
-            <numerusform>%n neue Nachricht</numerusform>
-            <numerusform>%n neue Nachrichten</numerusform>
+            <numerusform>%n alte Nachricht</numerusform>
+            <numerusform>%n alte Nachrichten</numerusform>
         </translation>
     </message>
 </context>
