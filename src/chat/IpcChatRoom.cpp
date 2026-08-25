@@ -368,6 +368,13 @@ void IpcChatRoom::loadMessages()
     }
 }
 
+void IpcChatRoom::emitJoinedCountIfNeeded(qsizetype previousJoinedCount)
+{
+    if (joinedChatUserCount() != previousJoinedCount) {
+        Q_EMIT joinedChatUserCountChanged();
+    }
+}
+
 void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
 {
     if (!user) {
@@ -418,9 +425,7 @@ void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
         Q_EMIT lastMessageReadChanged();
     }
 
-    if (joinedChatUserCount() != previousJoinedCount) {
-        Q_EMIT joinedChatUserCountChanged();
-    }
+    emitJoinedCountIfNeeded(previousJoinedCount);
 
     updateOtherUser();
 }
@@ -448,9 +453,7 @@ void IpcChatRoom::removeUser(ChatUser *user)
         if (hadReadMarker) {
             Q_EMIT lastMessageReadChanged();
         }
-        if (joinedChatUserCount() != previousJoinedCount) {
-            Q_EMIT joinedChatUserCountChanged();
-        }
+        emitJoinedCountIfNeeded(previousJoinedCount);
         updateOtherUser();
     } else {
         qCCritical(lcIpcChatRoom) << "The user" << *user << "is supposed to be removed from room"
@@ -475,9 +478,7 @@ void IpcChatRoom::setUserRoomState(ChatUser *user, UserRoomState state)
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(m_chatUsers.indexOf(user), user, state);
 
-    if (joinedChatUserCount() != previousJoinedCount) {
-        Q_EMIT joinedChatUserCountChanged();
-    }
+    emitJoinedCountIfNeeded(previousJoinedCount);
 }
 
 void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
@@ -496,9 +497,7 @@ void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(index, user, state);
 
-    if (joinedChatUserCount() != previousJoinedCount) {
-        Q_EMIT joinedChatUserCountChanged();
-    }
+    emitJoinedCountIfNeeded(previousJoinedCount);
 }
 
 ChatUser *IpcChatRoom::chatUserById(const QString &userId) const
@@ -589,7 +588,9 @@ QList<ChatUser *> IpcChatRoom::lastMessageRead(const QString &messageId) const
     for (auto it = m_lastReadTimestamps.constBegin(); it != m_lastReadTimestamps.constEnd(); ++it) {
         if (it.value() >= messageTimestamp) {
             if (auto *user = m_chatUserLookup.value(it.key(), nullptr)) {
-                l.append(user);
+                if (m_userRoomStates.value(user) == UserRoomState::Joined) {
+                    l.append(user);
+                }
             }
         }
     }

@@ -82,6 +82,7 @@ private:
     QSet<ChatUser *> m_avatarSignaledUsers;
     uint m_realMessagesCount = 0;
     QList<QList<ChatUser *>> m_readUsersCache;
+    QList<bool> m_isSameReadMarkerCache;
 
 Q_SIGNALS:
     void chatRoomChanged();

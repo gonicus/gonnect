@@ -143,13 +143,8 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
     }
 
     if (role == static_cast<int>(Roles::IsSameReadMarkerAsPrevious)) {
-        if (index.row() > 0 && index.row() < m_readUsersCache.size()) {
-            const auto &a = m_readUsersCache.at(index.row());
-            const auto &b = m_readUsersCache.at(index.row() - 1);
-            if (a.size() != b.size()) {
-                return false;
-            }
-            return QSet<ChatUser *>(a.begin(), a.end()) == QSet<ChatUser *>(b.begin(), b.end());
+        if (index.row() > 0 && index.row() < m_isSameReadMarkerCache.size()) {
+            return m_isSameReadMarkerCache.at(index.row());
         }
         return false;
     }
@@ -315,6 +310,7 @@ void ChatModel::refreshAvatarPath(ChatUser *user)
 void ChatModel::rebuildReadUsersCache()
 {
     m_readUsersCache.clear();
+    m_isSameReadMarkerCache.clear();
 
     if (!m_chatRoom) {
         return;
@@ -323,6 +319,7 @@ void ChatModel::rebuildReadUsersCache()
     const auto &messages = m_chatRoom->chatMessages();
     const auto rows = messages.size();
     m_readUsersCache.resize(rows);
+    m_isSameReadMarkerCache.resize(rows);
 
     auto chatProvider = qobject_cast<IChatProvider *>(m_chatRoom->parent());
     const auto ownUserId = chatProvider ? chatProvider->ownUserId() : QString();
@@ -335,9 +332,7 @@ void ChatModel::rebuildReadUsersCache()
 
     for (qsizetype i = rows - 1; i >= 0; --i) {
         for (auto *user : m_chatRoom->lastMessageRead(messages.at(i)->eventId())) {
-            if (m_chatRoom->chatUserRoomState(user) == IChatRoom::UserRoomState::Joined) {
-                readers.insert(user);
-            }
+            readers.insert(user);
         }
 
         const auto isLastRow = i == rows - 1;
@@ -359,6 +354,22 @@ void ChatModel::rebuildReadUsersCache()
             if (user->id() != ownUserId) {
                 row.append(user);
             }
+        }
+    }
+
+    // Build the dedup cache: a row is "same as previous" when both caches are identical.
+    for (qsizetype i = 0; i < rows; ++i) {
+        if (i == 0) {
+            m_isSameReadMarkerCache[i] = false;
+            continue;
+        }
+        const auto &a = m_readUsersCache.at(i);
+        const auto &b = m_readUsersCache.at(i - 1);
+        if (a.size() != b.size()) {
+            m_isSameReadMarkerCache[i] = false;
+        } else {
+            m_isSameReadMarkerCache[i] =
+                    QSet<ChatUser *>(a.begin(), a.end()) == QSet<ChatUser *>(b.begin(), b.end());
         }
     }
 }
@@ -406,8 +417,8 @@ void ChatModel::onChatRoomChanged()
         connect(m_chatRoom, &IChatRoom::chatMessageAdded, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
                     beginInsertRows(QModelIndex(), index, index);
-                    rebuildReadUsersCache();
                     endInsertRows();
+                    rebuildReadUsersCache();
                     updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
                     updateRealMessagesCount();
 

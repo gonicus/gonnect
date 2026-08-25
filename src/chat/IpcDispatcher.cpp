@@ -1600,7 +1600,7 @@ void IpcDispatcher::processResponse(
         }
 
         // Read marker
-        {
+        if (!changeEvent.readMarker().isEmpty()) {
             const auto &readMarker = changeEvent.readMarker();
             QHash<QString, QDateTime> bulk;
             bulk.reserve(readMarker.size());
@@ -1972,7 +1972,7 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     }
 
     // Read markers
-    {
+    if (!room.readMarker().isEmpty()) {
         const auto &readMarker = room.readMarker();
         QHash<QString, QDateTime> bulk;
         bulk.reserve(readMarker.size());

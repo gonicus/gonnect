@@ -396,7 +396,10 @@ Item {
 
     ReadMarker {
         id: readMarker
-        visible: control.isFirst || (readMarker.percentageRead < 99 && !control.isSameReadMarkerAsPrevious)
+        visible: control.readUsers.length > 0
+                 && (control.isFirst
+                     || (readMarker.percentageRead < readMarker.thresholdHigh
+                         && !control.isSameReadMarkerAsPrevious))
         readUsers: control.readUsers
         allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
         anchors {

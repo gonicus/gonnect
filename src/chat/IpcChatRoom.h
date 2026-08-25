@@ -98,6 +98,7 @@ private Q_SLOTS:
 private:
     IpcDispatcher *ipcDispatcher() const;
     void updatePinnedMessages();
+    void emitJoinedCountIfNeeded(qsizetype previousJoinedCount);
 
     QString m_id;
     QString m_name;
