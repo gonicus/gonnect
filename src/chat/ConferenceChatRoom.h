@@ -45,6 +45,7 @@ public:
     virtual IChatRoom::UserRoomState ownUserJoinState() const override;
     virtual ChatUser *otherUser() const override { return nullptr; }
     virtual qsizetype chatUserCount() const override { return 0; }
+    virtual qsizetype joinedChatUserCount() const override { return 0; }
     virtual void addUser(ChatUser *user, UserRoomState state) override;
     virtual void removeUser(ChatUser *user) override;
     virtual void setUserRoomState(ChatUser *user, UserRoomState state) override;
@@ -53,6 +54,8 @@ public:
     virtual const QList<ChatUser *> &chatUsers() const override;
     virtual ConferenceChatRoom::UserRoomState chatUserRoomState(ChatUser *user) const override;
     virtual const QList<ChatUser *> &typingUsers() const override;
+    virtual QList<ChatUser *> lastMessageRead(const QString &messageId) const override;
+    virtual void setLastMessageRead(const QString &, const QString &) override { }
     virtual bool isUserMemberOfRoom(const QString &userId) const override;
     virtual bool isUserInvitable(ChatUser *user) const override;
     virtual void clear() override;

@@ -207,6 +207,10 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
                 m_messageLookup.insert(eventId, message);
                 updatePinnedMessages();
                 Q_EMIT chatMessageAdded(i + 1, message);
+
+                if (m_lastReadUsers.contains(eventId)) {
+                    Q_EMIT lastMessageReadChanged(indexOfMessage(message), message);
+                }
                 return;
             }
         }
@@ -215,6 +219,10 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
         m_messageLookup.insert(message->eventId(), message);
         updatePinnedMessages();
         Q_EMIT chatMessageAdded(0, message);
+    }
+
+    if (m_lastReadUsers.contains(eventId)) {
+        Q_EMIT lastMessageReadChanged(indexOfMessage(message), message);
     }
 }
 
@@ -255,6 +263,17 @@ void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString 
     if (auto msg = m_messageLookup.take(oldEventId)) {
         msg->setEventId(newEventId);
         m_messageLookup.insert(newEventId, msg);
+
+        if (const auto users = m_lastReadUsers.take(oldEventId); !users.isEmpty()) {
+            m_lastReadUsers.insert(newEventId, users);
+            for (const auto &uid : users) {
+                if (m_lastReadMessage.value(uid) == oldEventId) {
+                    m_lastReadMessage.insert(uid, newEventId);
+                }
+            }
+            Q_EMIT lastMessageReadChanged(indexOfMessage(msg), msg);
+        }
+
         Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
     }
 }
@@ -410,6 +429,16 @@ void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
     Q_EMIT chatUserAdded(idx, user, state);
     Q_EMIT chatUsersChanged();
     Q_EMIT chatUserRoomStateChanged(idx, user, state);
+
+    if (const auto &messageId = m_lastReadMessage.value(user->id(), QString());
+        !messageId.isEmpty()) {
+        if (auto *message = m_messageLookup.value(messageId, nullptr)) {
+            if (const auto index = m_messages.indexOf(message); index >= 0) {
+                Q_EMIT lastMessageReadChanged(index, message);
+            }
+        }
+    }
+
     updateOtherUser();
 }
 
@@ -488,6 +517,17 @@ void IpcChatRoom::setTypingUsers(const QList<ChatUser *> &users)
     Q_EMIT typingUsersChanged();
 }
 
+qsizetype IpcChatRoom::joinedChatUserCount() const
+{
+    qsizetype count = 0;
+    for (auto *user : m_chatUsers) {
+        if (m_userRoomStates.value(user) == UserRoomState::Joined) {
+            ++count;
+        }
+    }
+    return count;
+}
+
 IChatRoom::UserRoomState IpcChatRoom::chatUserRoomState(ChatUser *user) const
 {
     if (!user) {
@@ -532,10 +572,69 @@ const QList<ChatUser *> &IpcChatRoom::typingUsers() const
     return m_typingUsers;
 }
 
+QList<ChatUser *> IpcChatRoom::lastMessageRead(const QString &messageId) const
+{
+    QList<ChatUser *> l;
+    if (messageId.isEmpty() || !m_lastReadUsers.contains(messageId)) {
+        return l;
+    }
+
+    // Fill list with real objects
+    const auto &userIds = m_lastReadUsers[messageId];
+    l.reserve(userIds.size());
+
+    for (const auto &userId : userIds) {
+        if (auto *user = m_chatUserLookup.value(userId, nullptr)) {
+            l.append(user);
+        } else {
+            qCWarning(lcIpcChatRoom) << "Cannot resolve user" << userId << "of read marker"
+                                     << messageId << "in room" << m_id;
+        }
+    }
+
+    return l;
+}
+
+void IpcChatRoom::setLastMessageRead(const QString &userId, const QString &messageId)
+{
+    if (userId.isEmpty() || messageId.isEmpty()) {
+        qCWarning(lcIpcChatRoom) << "Both userId and messageId must not be empty";
+        return;
+    }
+
+    // Remove old entry
+    const auto &oldMessageId = m_lastReadMessage.value(userId, QString());
+    if (!oldMessageId.isEmpty()) {
+        auto it = m_lastReadUsers.find(oldMessageId);
+        if (it != m_lastReadUsers.end()) {
+            it->remove(userId);
+            if (it->isEmpty()) {
+                m_lastReadUsers.erase(it);
+            }
+
+            if (auto *oldMessage = m_messageLookup.value(oldMessageId, nullptr)) {
+                Q_EMIT lastMessageReadChanged(m_messages.indexOf(oldMessage), oldMessage);
+            }
+        }
+    }
+
+    // Insert new entry
+    m_lastReadMessage.insert(userId, messageId);
+    m_lastReadUsers[messageId].insert(userId);
+
+    // Message might not exist yet - especially on initial loading
+    if (auto *message = m_messageLookup.value(messageId, nullptr)) {
+        Q_EMIT lastMessageReadChanged(m_messages.indexOf(message), message);
+    }
+}
+
 void IpcChatRoom::clear()
 {
     m_pinnedMessageIds.clear();
     m_loadRequestedMessageIds.clear();
+    m_lastReadMessage.clear();
+    m_lastReadUsers.clear();
+
     if (!m_pinnedMessages.isEmpty()) {
         m_pinnedMessages.clear();
         Q_EMIT pinnedMessagesChanged();

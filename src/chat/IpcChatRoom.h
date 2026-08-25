@@ -72,6 +72,7 @@ public:
     virtual IChatRoom::UserRoomState ownUserJoinState() const override;
     virtual ChatUser *otherUser() const override;
     virtual qsizetype chatUserCount() const override { return m_chatUsers.length(); }
+    virtual qsizetype joinedChatUserCount() const override;
     virtual void addUser(ChatUser *user, UserRoomState state) override;
     virtual void removeUser(ChatUser *user) override;
     virtual void setUserRoomState(ChatUser *user, UserRoomState state) override;
@@ -82,6 +83,8 @@ public:
     virtual const QList<ChatUser *> &chatUsers() const override;
     virtual UserRoomState chatUserRoomState(ChatUser *user) const override;
     virtual const QList<ChatUser *> &typingUsers() const override;
+    virtual QList<ChatUser *> lastMessageRead(const QString &messageId) const override;
+    virtual void setLastMessageRead(const QString &userId, const QString &messageId) override;
     virtual void clear() override;
 
     void setTypingUsers(const QList<ChatUser *> &users);
@@ -119,4 +122,10 @@ private:
     QList<ChatMessage *> m_pinnedMessages;
     QList<QString> m_pinnedMessageIds;
     QSet<QString> m_loadRequestedMessageIds;
+
+    /// Map of userId -> messageId of the last message each user has read.
+    QHash<QString, QString> m_lastReadMessage;
+    /// Reverse map to m_lastReadMessage of messageId -> set of userIds of all users that have read
+    /// this message as the last one.
+    QHash<QString, QSet<QString>> m_lastReadUsers;
 };

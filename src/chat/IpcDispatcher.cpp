@@ -1582,9 +1582,17 @@ void IpcDispatcher::processResponse(
             room->setAvatarPath(makeDataRootPath(changeEvent.avatarPath()));
         }
 
-        // Pinnes messages
+        // Pinned messages
         if (changeEvent.hasPinnedMessagesChanged()) {
             room->setPinnedMessageIds(changeEvent.pinnedMessages());
+        }
+
+        // Read marker
+        const auto &readMarker = changeEvent.readMarker();
+        QHashIterator it(readMarker);
+        while (it.hasNext()) {
+            it.next();
+            room->setLastMessageRead(it.key(), it.value());
         }
 
         // Update typing users
@@ -1952,6 +1960,14 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
 
     if (room.hasAvatarPath()) {
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
+    }
+
+    // Read markers
+    const auto &readMarker = room.readMarker();
+    QHashIterator it(readMarker);
+    while (it.hasNext()) {
+        it.next();
+        roomObj->setLastMessageRead(it.key(), it.value());
     }
 
     roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");

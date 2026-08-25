@@ -29,6 +29,7 @@ Item {
     required property string affectedUserId
     required property var reactions
     required property QtObject content
+    required property var readUsers
 
     required property bool isOwnMessage
     required property bool isPending
@@ -37,6 +38,7 @@ Item {
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
     required property bool isSameDayAsPrevious
+    required property bool isSameReadMarkerAsPrevious
 
     required property bool hasRelatedMessage
     required property string relatedMessageNickName
@@ -46,8 +48,10 @@ Item {
     required property string relatedMessageAffectedUserId
 
     property IChatProvider chatProvider
+    property IChatRoom chatRoom
 
     property string clickedLink
+    property bool isFirst
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
@@ -324,7 +328,11 @@ Item {
         anchors {
             top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
             left: nameLabel.left
-            right: retryButton.visible ? retryButton.left : timestampLabel.left
+            right: retryButton.visible
+                   ? retryButton.left
+                   : (readMarker.visible
+                      ? readMarker.left
+                      : timestampLabel.left)
             rightMargin: 10
         }
     }
@@ -368,7 +376,7 @@ Item {
         rightPadding: 0
 
         anchors {
-            right: timestampLabel.left
+            right: readMarker.visible ? readMarker.left : timestampLabel.left
             rightMargin: 10
             bottom: messageContentItem.bottom
         }
@@ -378,6 +386,18 @@ Item {
                            control.retryMessage(control.eventId)
                        }
                    }
+    }
+
+    ReadMarker {
+        id: readMarker
+        visible: control.isFirst || (readMarker.percentageRead < 99 && !control.isSameReadMarkerAsPrevious)
+        readUsers: control.readUsers
+        allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
+        anchors {
+            right: timestampLabel.left
+            rightMargin: 10
+            bottom: messageContentItem.bottom
+        }
     }
 
     Component {

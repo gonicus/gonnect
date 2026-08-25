@@ -25,6 +25,7 @@ public:
         AffectedUserId,
         Content,
         Reactions,
+        ReadUsers,
 
         IsPrivateMessage,
         IsOwnMessage,
@@ -35,6 +36,7 @@ public:
         IsSameUserAsPrevious,
         IsSameMinuteAsPrevious,
         IsSameDayAsPrevious,
+        IsSameReadMarkerAsPrevious,
         IsStateUpdate,
 
         HasRelatedMessage,
@@ -64,9 +66,12 @@ private:
     static Roles toNormalRole(const Roles role);
     static int toNormalRole(const int role);
 
-    QVariant rawData(const ChatMessage *item, int role) const;
+    QVariant rawData(const ChatMessage *item, qsizetype row, int role) const;
     void connectUserAvatarSignals(ChatUser *user);
     void refreshAvatarPath(ChatUser *user);
+    ChatMessage *latestOwnMessage() const;
+    void refreshReadUsers();
+    void rebuildReadUsersCache();
     ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
     void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
     static QList<int> nextItemContentRoles();
@@ -76,6 +81,7 @@ private:
     QObject *m_chatRoomContext = nullptr;
     QSet<ChatUser *> m_avatarSignaledUsers;
     uint m_realMessagesCount = 0;
+    QList<QList<ChatUser *>> m_readUsersCache;
 
 Q_SIGNALS:
     void chatRoomChanged();

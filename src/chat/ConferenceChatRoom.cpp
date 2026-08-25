@@ -137,6 +137,11 @@ const QList<ChatUser *> &ConferenceChatRoom::typingUsers() const
     return *s_dummyList;
 }
 
+QList<ChatUser *> ConferenceChatRoom::lastMessageRead(const QString &) const
+{
+    return *s_dummyList;
+}
+
 bool ConferenceChatRoom::isUserMemberOfRoom(const QString &userId) const
 {
     // TODO
