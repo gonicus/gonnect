@@ -135,15 +135,23 @@ Item {
                 highlighted: true
                 icon.source: Icons.dialogCancel
                 Material.accent: Theme.redColor
+
+                Accessible.role: Accessible.Button
+                Accessible.name: text
+
                 onClicked: () => control.chatProvider.respondToInvitation(control.chatRoom.id, false)
             }
 
             Button {
                 id: acceptButton
-                text: qsTr("Accept")
+                text: qsTr("Join")
                 highlighted: true
                 icon.source: Icons.objectSelectSymbolic
                 Material.accent: Theme.greenColor
+
+                Accessible.role: Accessible.Button
+                Accessible.name: text
+
                 onClicked: () => control.chatProvider.respondToInvitation(control.chatRoom.id, true)
             }
         }
