@@ -1600,12 +1600,16 @@ void IpcDispatcher::processResponse(
         }
 
         // Read marker
-        const auto &readMarker = changeEvent.readMarker();
-        QHashIterator it(readMarker);
-        while (it.hasNext()) {
-            it.next();
-            room->setLastMessageRead(it.key(),
-                                     QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
+        {
+            const auto &readMarker = changeEvent.readMarker();
+            QHash<QString, QDateTime> bulk;
+            bulk.reserve(readMarker.size());
+            QHashIterator it(readMarker);
+            while (it.hasNext()) {
+                it.next();
+                bulk.insert(it.key(), QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
+            }
+            room->setLastMessageReads(bulk);
         }
 
         // Update typing users
@@ -1968,12 +1972,16 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     }
 
     // Read markers
-    const auto &readMarker = room.readMarker();
-    QHashIterator it(readMarker);
-    while (it.hasNext()) {
-        it.next();
-        roomObj->setLastMessageRead(it.key(),
-                                    QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
+    {
+        const auto &readMarker = room.readMarker();
+        QHash<QString, QDateTime> bulk;
+        bulk.reserve(readMarker.size());
+        QHashIterator it(readMarker);
+        while (it.hasNext()) {
+            it.next();
+            bulk.insert(it.key(), QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
+        }
+        roomObj->setLastMessageReads(bulk);
     }
 
     roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");

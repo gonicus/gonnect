@@ -56,6 +56,7 @@ public:
     virtual const QList<ChatUser *> &typingUsers() const override;
     virtual QList<ChatUser *> lastMessageRead(const QString &messageId) const override;
     virtual void setLastMessageRead(const QString &, const QDateTime &) override { }
+    virtual void setLastMessageReads(const QHash<QString, QDateTime> &) override { }
     virtual bool isUserMemberOfRoom(const QString &userId) const override;
     virtual bool isUserInvitable(ChatUser *user) const override;
     virtual void clear() override;

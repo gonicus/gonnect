@@ -46,7 +46,7 @@ Item {
         id: readMarkerHoverHandler
     }
 
-    ToolTip.visible: readMarkerHoverHandler.hovered
+    ToolTip.visible: readMarkerHoverHandler.hovered && control.readUsers.length > 0
     ToolTip.text: qsTr("%1 of %2 have read this message:\n%3")
                     .arg(control.readUsers.length)
                     .arg(Math.max(control.allUsersCount - 1, 1))

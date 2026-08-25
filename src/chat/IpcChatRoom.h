@@ -85,6 +85,7 @@ public:
     virtual const QList<ChatUser *> &typingUsers() const override;
     virtual QList<ChatUser *> lastMessageRead(const QString &messageId) const override;
     virtual void setLastMessageRead(const QString &userId, const QDateTime &readTimestamp) override;
+    virtual void setLastMessageReads(const QHash<QString, QDateTime> &reads) override;
     virtual void clear() override;
 
     void setTypingUsers(const QList<ChatUser *> &users);

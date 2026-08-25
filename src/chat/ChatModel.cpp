@@ -106,6 +106,9 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
         if (relatedIndex >= 0) {
             return rawData(messages.at(relatedIndex), relatedIndex, normalizedRole);
         }
+        if (relatedIndex < 0) {
+            return QVariant();
+        }
         return rawData(relatedMessage, relatedIndex, normalizedRole);
     }
 
@@ -144,8 +147,12 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
 
     if (role == static_cast<int>(Roles::IsSameReadMarkerAsPrevious)) {
         if (index.row() > 0) {
-            return m_readUsersCache.at(index.row()).size()
-                    == m_readUsersCache.at(index.row() - 1).size();
+            const auto &a = m_readUsersCache.at(index.row());
+            const auto &b = m_readUsersCache.at(index.row() - 1);
+            if (a.size() != b.size()) {
+                return false;
+            }
+            return QSet<ChatUser *>(a.begin(), a.end()) == QSet<ChatUser *>(b.begin(), b.end());
         }
         return false;
     }
@@ -355,8 +362,14 @@ void ChatModel::rebuildReadUsersCache()
         }
 
         const auto isLastRow = i == rows - 1;
-        const bool everyoneHasRead =
-                !isLastRow && allUsersCount > 0 && readers.size() * 100 >= 99 * allUsersCount;
+        qsizetype othersRead = 0;
+        for (auto *u : readers) {
+            if (u->id() != ownUserId) {
+                ++othersRead;
+            }
+        }
+        const qsizetype othersTotal = std::max(allUsersCount - 1, (qsizetype)1);
+        const bool everyoneHasRead = !isLastRow && othersRead * 100 >= 99 * othersTotal;
 
         if (everyoneHasRead) {
             continue;

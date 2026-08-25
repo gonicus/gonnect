@@ -432,11 +432,15 @@ void IpcChatRoom::removeUser(ChatUser *user)
         m_chatUsers.removeAt(idx);
         m_chatUserLookup.remove(user->id());
         m_userRoomStates.remove(user);
+        const bool hadReadMarker = m_lastReadTimestamps.remove(user->id()) > 0;
 
         user->disconnect(this);
 
         Q_EMIT chatUserRemoved(idx, user);
         Q_EMIT chatUsersChanged();
+        if (hadReadMarker) {
+            Q_EMIT lastMessageReadChanged();
+        }
         updateOtherUser();
     } else {
         qCCritical(lcIpcChatRoom) << "The user" << *user << "is supposed to be removed from room"
@@ -584,11 +588,37 @@ void IpcChatRoom::setLastMessageRead(const QString &userId, const QDateTime &rea
     Q_EMIT lastMessageReadChanged();
 }
 
+void IpcChatRoom::setLastMessageReads(const QHash<QString, QDateTime> &reads)
+{
+    if (reads.isEmpty()) {
+        return;
+    }
+
+    bool hasValid = false;
+    for (auto it = reads.constBegin(); it != reads.constEnd(); ++it) {
+        if (it.key().isEmpty() || !it.value().isValid()) {
+            qCWarning(lcIpcChatRoom)
+                    << "Both userId and readTimestamp must be valid - ignoring" << it.key();
+            continue;
+        }
+        m_lastReadTimestamps.insert(it.key(), it.value());
+        hasValid = true;
+    }
+
+    if (hasValid) {
+        Q_EMIT lastMessageReadChanged();
+    }
+}
+
 void IpcChatRoom::clear()
 {
     m_pinnedMessageIds.clear();
     m_loadRequestedMessageIds.clear();
+    const bool hadReadMarkers = !m_lastReadTimestamps.isEmpty();
     m_lastReadTimestamps.clear();
+    if (hadReadMarkers) {
+        Q_EMIT lastMessageReadChanged();
+    }
 
     if (!m_pinnedMessages.isEmpty()) {
         m_pinnedMessages.clear();

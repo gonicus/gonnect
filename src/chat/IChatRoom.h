@@ -207,6 +207,10 @@ public:
     /// Set the timestamp up to which the user has read messages.
     virtual void setLastMessageRead(const QString &userId, const QDateTime &readTimestamp) = 0;
 
+    /// Set multiple read markers at once. Implementations must emit lastMessageReadChanged()
+    /// exactly once.
+    virtual void setLastMessageReads(const QHash<QString, QDateTime> &reads) = 0;
+
     /// Remove all messages. Must invoke chatMessagesReset() afterwards.
     virtual void clear() = 0;
 
