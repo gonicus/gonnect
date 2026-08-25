@@ -507,7 +507,7 @@ void ChatModel::onChatRoomChanged()
                                        { static_cast<int>(Roles::Reactions) });
                 });
         connect(m_chatRoom, &IChatRoom::lastMessageReadChanged, m_chatRoomContext,
-                [this](qsizetype, ChatMessage *) { refreshReadUsers(); });
+                [this]() { refreshReadUsers(); });
 
         const auto users = std::as_const(m_chatRoom->chatUsers());
         for (auto *user : users) {

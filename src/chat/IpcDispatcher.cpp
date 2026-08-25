@@ -1592,7 +1592,8 @@ void IpcDispatcher::processResponse(
         QHashIterator it(readMarker);
         while (it.hasNext()) {
             it.next();
-            room->setLastMessageRead(it.key(), it.value());
+            room->setLastMessageRead(it.key(),
+                                     QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
         }
 
         // Update typing users
@@ -1967,7 +1968,8 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
     QHashIterator it(readMarker);
     while (it.hasNext()) {
         it.next();
-        roomObj->setLastMessageRead(it.key(), it.value());
+        roomObj->setLastMessageRead(it.key(),
+                                    QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
     }
 
     roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");

@@ -204,8 +204,8 @@ public:
     /// List of users for which the given message is the last one they have read.
     virtual QList<ChatUser *> lastMessageRead(const QString &messageId) const = 0;
 
-    /// Set that the given message is the last one that the user has read.
-    virtual void setLastMessageRead(const QString &userId, const QString &messageId) = 0;
+    /// Set the timestamp up to which the user has read messages.
+    virtual void setLastMessageRead(const QString &userId, const QDateTime &readTimestamp) = 0;
 
     /// Remove all messages. Must invoke chatMessagesReset() afterwards.
     virtual void clear() = 0;
@@ -235,7 +235,7 @@ Q_SIGNALS:
     void latestMessageDateTimeChanged();
     void ownUserJoinStateChanged();
     void otherUserChanged();
-    void lastMessageReadChanged(qsizetype index, ChatMessage *message);
+    void lastMessageReadChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.
