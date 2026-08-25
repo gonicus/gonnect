@@ -1171,7 +1171,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="441"/>
         <source>Reason (optional, why you removed the message)</source>
-        <translation type="unfinished"></translation>
+        <translation>Grund (optional, warum die Nachricht entfernt wurde)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="455"/>
@@ -1194,12 +1194,12 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="61"/>
         <source>Message has been removed. Reason: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Nachricht wurde gelöscht. Grund: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="63"/>
         <source>Message has been removed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Nachricht wurde gelöscht.</translation>
     </message>
 </context>
 <context>
