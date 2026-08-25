@@ -98,8 +98,8 @@ BaseWindow {
                 model: ListModel {
                     id: widgetEntries
                     ListElement {
-                        name: qsTr("Date Events")
-                        description: qsTr("List of upcoming appointments")
+                        name: qsTr("Events")
+                        description: qsTr("List of upcoming calendar events")
                     }
                     ListElement {
                         name: qsTr("Favorites")

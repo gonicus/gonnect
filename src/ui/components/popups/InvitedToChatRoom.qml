@@ -100,15 +100,21 @@ Item {
                 highlighted: true
                 Material.accent: Theme.redColor
 
+                Accessible.role: Accessible.Button
+                Accessible.name: text
+
                 onClicked: () => internal.answer(false)
             }
 
             Button {
                 id: acceptButton
-                text: qsTr("Accept")
+                text: qsTr("Join")
                 icon.source: Icons.objectSelectSymbolic
                 highlighted: true
                 Material.accent: Theme.greenColor
+
+                Accessible.role: Accessible.Button
+                Accessible.name: text
 
                 onClicked: () => internal.answer(true)
             }
