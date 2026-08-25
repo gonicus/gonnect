@@ -12,7 +12,7 @@ Item {
             return 0
         } else if (control.isStateUpdate) {
             return stateLabel.implicitWidth
-        } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
+        } else if (control.isRemoved || (control.isText && control.content.isSimpleText)) {
             return messageLabel.implicitWidth
         } else if (control.content instanceof ChatMessageContentImage) {
             return messageImage.sourceSize.width
@@ -26,7 +26,7 @@ Item {
             return 0
         } else if (control.isStateUpdate) {
             return stateLabel.implicitHeight
-        } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
+        } else if (control.isRemoved || (control.isText && control.content.isSimpleText)) {
             return messageLabel.implicitHeight
         } else if (control.content instanceof ChatMessageContentImage) {
             return messageImage.height
@@ -44,22 +44,37 @@ Item {
     property color textColor: Theme.primaryTextColor
 
     readonly property alias messageLabel: messageLabel
+    readonly property bool isText: (control.content instanceof ChatMessageContentText)
+    readonly property bool isRemoved: (control.content instanceof ChatMessageContentRemoved)
+    readonly property bool isShortEmojiOnly: control.isText && ViewHelper.isShortEmojiString(control.content.simpleText)
 
     signal openDirectChatRequested(string userId)
-
-    readonly property bool isShortEmojiOnly: control.content instanceof ChatMessageContentText
-                                             && ViewHelper.isShortEmojiString(control.content.simpleText)
 
     // Text
     TextEdit {
         id: messageLabel
-        visible: control.content instanceof ChatMessageContentText && control.content.isSimpleText
-        text: control.content instanceof ChatMessageContentText ? control.content.simpleText : ""
+        visible: control.isRemoved || (control.isText && control.content.isSimpleText)
+        text: {
+            if (control.isRemoved) {
+                const reason = control.content.reason
+                if (reason !== "") {
+                    return qsTr("Message has been removed. Reason: %1").arg(reason)
+                } else {
+                    return qsTr("Message has been removed.")
+                }
+            } else if (control.isText) {
+                return control.content.simpleText
+            }
+            return ""
+        }
         color: control.textColor
         wrapMode: Label.Wrap
         textFormat: Text.MarkdownText
         readOnly: true
-        font.pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
+        font {
+            pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
+            italic: control.isRemoved
+        }
         anchors {
             top: parent.top
             left: parent.left
