@@ -392,6 +392,8 @@ void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
         idx = std::max(static_cast<qsizetype>(0), m_chatUsers.length());
     }
 
+    const auto previousJoinedCount = joinedChatUserCount();
+
     connect(user, &ChatUser::destroyed, this, [this](QObject *obj) {
         if (auto user = qobject_cast<ChatUser *>(obj)) {
             removeUser(user);
@@ -416,6 +418,10 @@ void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
         Q_EMIT lastMessageReadChanged();
     }
 
+    if (joinedChatUserCount() != previousJoinedCount) {
+        Q_EMIT joinedChatUserCountChanged();
+    }
+
     updateOtherUser();
 }
 
@@ -429,6 +435,7 @@ void IpcChatRoom::removeUser(ChatUser *user)
     const auto idx = m_chatUsers.indexOf(user);
 
     if (idx >= 0) {
+        const auto previousJoinedCount = joinedChatUserCount();
         m_chatUsers.removeAt(idx);
         m_chatUserLookup.remove(user->id());
         m_userRoomStates.remove(user);
@@ -440,6 +447,9 @@ void IpcChatRoom::removeUser(ChatUser *user)
         Q_EMIT chatUsersChanged();
         if (hadReadMarker) {
             Q_EMIT lastMessageReadChanged();
+        }
+        if (joinedChatUserCount() != previousJoinedCount) {
+            Q_EMIT joinedChatUserCountChanged();
         }
         updateOtherUser();
     } else {
@@ -461,8 +471,13 @@ void IpcChatRoom::setUserRoomState(ChatUser *user, UserRoomState state)
         return;
     }
 
+    const auto previousJoinedCount = joinedChatUserCount();
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(m_chatUsers.indexOf(user), user, state);
+
+    if (joinedChatUserCount() != previousJoinedCount) {
+        Q_EMIT joinedChatUserCountChanged();
+    }
 }
 
 void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
@@ -477,8 +492,13 @@ void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
 
     auto user = q_check_ptr(m_chatUsers.at(index));
 
+    const auto previousJoinedCount = joinedChatUserCount();
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(index, user, state);
+
+    if (joinedChatUserCount() != previousJoinedCount) {
+        Q_EMIT joinedChatUserCountChanged();
+    }
 }
 
 ChatUser *IpcChatRoom::chatUserById(const QString &userId) const

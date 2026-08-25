@@ -48,7 +48,8 @@ class IChatRoom : public QObject
     Q_PROPERTY(QList<ChatUser *> chatUsers READ chatUsers NOTIFY chatUsersChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> typingUsers READ typingUsers NOTIFY typingUsersChanged FINAL)
     Q_PROPERTY(qsizetype chatUserCount READ chatUserCount NOTIFY chatUsersChanged FINAL)
-    Q_PROPERTY(qsizetype joinedChatUserCount READ joinedChatUserCount NOTIFY chatUsersChanged FINAL)
+    Q_PROPERTY(qsizetype joinedChatUserCount READ joinedChatUserCount NOTIFY
+                       joinedChatUserCountChanged FINAL)
     Q_PROPERTY(qsizetype notificationCount READ notificationCount NOTIFY notificationCountChanged
                        FINAL)
 
@@ -239,6 +240,7 @@ Q_SIGNALS:
     void latestMessageDateTimeChanged();
     void ownUserJoinStateChanged();
     void otherUserChanged();
+    void joinedChatUserCountChanged();
     void lastMessageReadChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by

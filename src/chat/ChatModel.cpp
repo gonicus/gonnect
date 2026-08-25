@@ -106,10 +106,7 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
         if (relatedIndex >= 0) {
             return rawData(messages.at(relatedIndex), relatedIndex, normalizedRole);
         }
-        if (relatedIndex < 0) {
-            return QVariant();
-        }
-        return rawData(relatedMessage, relatedIndex, normalizedRole);
+        return QVariant();
     }
 
     const auto item = m_chatRoom->chatMessages().at(index.row());
@@ -146,7 +143,7 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
     }
 
     if (role == static_cast<int>(Roles::IsSameReadMarkerAsPrevious)) {
-        if (index.row() > 0) {
+        if (index.row() > 0 && index.row() < m_readUsersCache.size()) {
             const auto &a = m_readUsersCache.at(index.row());
             const auto &b = m_readUsersCache.at(index.row() - 1);
             if (a.size() != b.size()) {
@@ -219,7 +216,7 @@ QVariant ChatModel::rawData(const ChatMessage *item, qsizetype row, int role) co
     }
 
     case static_cast<int>(Roles::ReadUsers): {
-        if (!m_chatRoom) {
+        if (!m_chatRoom || row < 0 || row >= m_readUsersCache.size()) {
             return QVariant();
         }
 
@@ -315,24 +312,6 @@ void ChatModel::refreshAvatarPath(ChatUser *user)
     }
 }
 
-ChatMessage *ChatModel::latestOwnMessage() const
-{
-    if (!m_chatRoom) {
-        return nullptr;
-    }
-
-    const auto &messages = m_chatRoom->chatMessages();
-    for (auto it = messages.crbegin(); it != messages.crend(); ++it) {
-        const auto flags = (*it)->flags();
-        if ((flags & ChatMessage::Flag::OwnMessage)
-            && !(flags & (ChatMessage::Flag::Pending | ChatMessage::Flag::Failed))) {
-            return *it;
-        }
-    }
-
-    return nullptr;
-}
-
 void ChatModel::rebuildReadUsersCache()
 {
     m_readUsersCache.clear();
@@ -387,7 +366,11 @@ void ChatModel::rebuildReadUsersCache()
 void ChatModel::refreshReadUsers()
 {
     rebuildReadUsersCache();
+    emitReadUsersChanged();
+}
 
+void ChatModel::emitReadUsersChanged()
+{
     const auto rows = rowCount(QModelIndex());
     if (rows > 0) {
         Q_EMIT dataChanged(createIndex(0, 0), createIndex(rows - 1, 0),
@@ -423,6 +406,7 @@ void ChatModel::onChatRoomChanged()
         connect(m_chatRoom, &IChatRoom::chatMessageAdded, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
                     beginInsertRows(QModelIndex(), index, index);
+                    rebuildReadUsersCache();
                     endInsertRows();
                     updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
                     updateRealMessagesCount();
@@ -433,7 +417,7 @@ void ChatModel::onChatRoomChanged()
                         Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
                     }
 
-                    refreshReadUsers();
+                    emitReadUsersChanged();
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
@@ -520,6 +504,8 @@ void ChatModel::onChatRoomChanged()
                                        { static_cast<int>(Roles::Reactions) });
                 });
         connect(m_chatRoom, &IChatRoom::lastMessageReadChanged, m_chatRoomContext,
+                [this]() { refreshReadUsers(); });
+        connect(m_chatRoom, &IChatRoom::chatUserRoomStateChanged, m_chatRoomContext,
                 [this]() { refreshReadUsers(); });
 
         const auto users = std::as_const(m_chatRoom->chatUsers());

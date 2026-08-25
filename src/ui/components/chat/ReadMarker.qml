@@ -21,8 +21,8 @@ Item {
         width: control.implicitWidth
         height: control.implicitHeight
         icon {
-            width: (control.implicitWidth * ScreenInfo.devicePixelRatio) | 0
-            height: (control.implicitHeight * ScreenInfo.devicePixelRatio) | 0
+            width: Math.round(control.implicitWidth * Screen.devicePixelRatio)
+            height: Math.round(control.implicitHeight * Screen.devicePixelRatio)
             source: {
                 const percentage = control.percentageRead
                 if (percentage < 1) {
