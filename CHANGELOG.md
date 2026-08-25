@@ -1,3 +1,23 @@
+# [2.5.0-beta.4](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.3...v2.5.0-beta.4) (2026-08-25)
+
+
+### Bug Fixes
+
+* disable setting external ringer ([#643](https://github.com/gonicus/gonnect/issues/643)) ([1eaecb0](https://github.com/gonicus/gonnect/commit/1eaecb0069c66736f431f14ecc4173959d572acd))
+* **i18n:** fix Weblate quality issues ([#662](https://github.com/gonicus/gonnect/issues/662)) ([2be63ff](https://github.com/gonicus/gonnect/commit/2be63ff1703279529da9f3c32f06951140cec270))
+* initial hook workaround ([#649](https://github.com/gonicus/gonnect/issues/649)) ([15af3ad](https://github.com/gonicus/gonnect/commit/15af3addd8f6212fcfa6ba4c1a5c3e41a36d2e0d))
+* normalize phone numbers for history and favs the same way ([#636](https://github.com/gonicus/gonnect/issues/636)) ([43925d8](https://github.com/gonicus/gonnect/commit/43925d820239f2cb3ba81d9ae47c86c879b73aaa))
+* restore unsent message after editing another one ([#644](https://github.com/gonicus/gonnect/issues/644)) ([e638b42](https://github.com/gonicus/gonnect/commit/e638b42786242e3ceceb6c01efa3e2ff304d9c8f))
+
+
+### Features
+
+* history rows can now be removed ([#657](https://github.com/gonicus/gonnect/issues/657)) ([f01c2d6](https://github.com/gonicus/gonnect/commit/f01c2d67a951f8fc6ec65a065e0d9319231d2d4e))
+* pinned messages ([#650](https://github.com/gonicus/gonnect/issues/650)) ([c7890a4](https://github.com/gonicus/gonnect/commit/c7890a4fc161e5abe9fc7ca9715fe31abac10437))
+* show removed messages as such instead disappearing ([#653](https://github.com/gonicus/gonnect/issues/653)) ([560cc87](https://github.com/gonicus/gonnect/commit/560cc87567e23f1cd4f5a9512a239b596e0600d2))
+* uc chat call interlinks ([#655](https://github.com/gonicus/gonnect/issues/655)) ([827cc39](https://github.com/gonicus/gonnect/commit/827cc397a4bab9190ac5ee3b49cd1fc89509a318))
+* **ui:** show user names of reactions in tooltip ([#656](https://github.com/gonicus/gonnect/issues/656)) ([b8d18f4](https://github.com/gonicus/gonnect/commit/b8d18f495ce4c6c32d10c15b2e9d45834aecfd7b))
+
 # [2.5.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.2...v2.5.0-beta.3) (2026-08-07)
 
 
