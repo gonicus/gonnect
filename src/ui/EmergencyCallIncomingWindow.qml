@@ -12,7 +12,7 @@ BaseWindow {
     height: 400
     visible: true
     resizable: false
-    title: qsTr("Emergency Call")
+    title: qsTr("Emergency call")
 
     minimumWidth: control.width
     minimumHeight: control.height
