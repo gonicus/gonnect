@@ -1124,63 +1124,81 @@
 <context>
     <name>ChatMessageListItem</name>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="105"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="107"/>
         <source>Chat message</source>
         <translation>Mensaje de chat</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="107"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="109"/>
         <source>Selected chat message - from %1, at %2: %3</source>
         <translation>Mensaje de chat seleccionado - de %1, a las %2: %3</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="356"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="362"/>
         <source>Retry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="391"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="397"/>
         <source>Add reaction...</source>
         <translation type="unfinished">Añadir reacción...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="404"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="410"/>
         <source>Copy to clipboard</source>
         <translation type="unfinished">Copiar al portapapeles</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="419"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="425"/>
         <source>Copy link to clipboard</source>
         <translation type="unfinished">Copiar enlace al portapapeles</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="428"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="434"/>
         <source>Remove message...</source>
         <translation type="unfinished">Eliminar mensaje...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="433"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="439"/>
         <source>Remove message</source>
         <translation type="unfinished">Eliminar mensaje</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="434"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="440"/>
         <source>Do you really want to remove this message?</source>
         <translation type="unfinished">¿Seguro que quieres eliminar este mensaje?</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="448"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="441"/>
+        <source>Reason (optional, why you removed the message)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="455"/>
         <source>Edit message...</source>
         <translation type="unfinished">Editar mensaje...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="458"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="465"/>
         <source>Reply...</source>
         <translation type="unfinished">Responder...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="464"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="471"/>
         <source>Toggle pin</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ChatMessageListItemContent</name>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="61"/>
+        <source>Message has been removed. Reason: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="63"/>
+        <source>Message has been removed.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1738,7 +1756,7 @@
         <translation type="unfinished">Buscar usuario...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="263"/>
+        <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="265"/>
         <source>Create</source>
         <translation type="unfinished">Crear</translation>
     </message>
@@ -2965,7 +2983,7 @@
 <context>
     <name>InfoDialog</name>
     <message>
-        <location filename="../src/ui/components/dialogs/InfoDialog.qml" line="33"/>
+        <location filename="../src/ui/components/dialogs/InfoDialog.qml" line="37"/>
         <source>Ok</source>
         <translation>Ok</translation>
     </message>
@@ -3019,74 +3037,74 @@
 <context>
     <name>IpcDispatcher</name>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="482"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="483"/>
         <source>The file %1 exceeds the file size limit of %2 and cannot be sent.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="896"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="901"/>
         <source>The IPC client of %1 repeatedly reported network errors.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="911"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="916"/>
         <source>An IPC error ocurred (%1, %2 (code %3):
 %4</source>
         <translation type="unfinished">Se ha producido un error de IPC (%1, %2 (código %3):
 %4</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="916"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="921"/>
         <source>An IPC error ocurred (%1, %2 (code %3)</source>
         <translation type="unfinished">Se ha producido un error de IPC (%1, %2 (código %3)</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2173"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2177"/>
         <source>Image sent by %1</source>
         <translation type="unfinished">Imagen enviada por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2175"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2179"/>
         <source>[%1] Image sent by %2</source>
         <translation type="unfinished">[%1] Imagen enviada por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2181"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2185"/>
         <source>Audio file sent by %1</source>
         <translation type="unfinished">Archivo de audio enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2183"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2187"/>
         <source>[%1] Audio file sent by %2</source>
         <translation type="unfinished">[%1] Archivo de audio enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2190"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2194"/>
         <source>Video file sent by %1</source>
         <translation type="unfinished">Vídeo enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2192"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2196"/>
         <source>[%1] Video file sent by %2</source>
         <translation type="unfinished">[%1] Vídeo enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2199"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2203"/>
         <source>File sent by %1</source>
         <translation type="unfinished">Archivo enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2201"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2205"/>
         <source>[%1] File sent by %2</source>
         <translation type="unfinished">[%1] Archivo enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2208"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
         <source>Message from %1</source>
         <translation type="unfinished">Mensaje de %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2210"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2214"/>
         <source>[%1] Message from %2</source>
         <translation type="unfinished">[%1] Mensaje de %2</translation>
     </message>
