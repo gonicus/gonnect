@@ -57,6 +57,8 @@ Item {
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
 
+    readonly property bool isRemoved: control.content instanceof ChatMessageContentRemoved
+
     signal respondTo(string messageId)
     signal retryMessage(string eventId)
     signal openThread(string threadId)
@@ -299,8 +301,12 @@ Item {
         radius: 6
         anchors {
             fill: messageContentItem
-            leftMargin: (control.content instanceof ChatMessageContentText) ? -4 : 0
-            margins: (control.content instanceof ChatMessageContentImage) ? -4 : 0
+            leftMargin: ((control.content instanceof ChatMessageContentText) || (control.content instanceof ChatMessageContentRemoved))
+                        ? -4
+                        : 0
+            margins: (control.content instanceof ChatMessageContentImage)
+                     ? -4
+                     : 0
         }
     }
 
@@ -395,7 +401,7 @@ Item {
 
             HideableMenuItem {
                 text: qsTr("Add reaction...")
-                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.Reactions)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && !!(control.capabilities & IChatProvider.Capability.Reactions)
                 icon.source: Icons.smileyAdd
                 onTriggered: () => {
                     const menuItem = chatMessageContextMenu.itemAt(0)
@@ -409,7 +415,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Copy to clipboard")
                 icon.source: Icons.editCopy
-                enabled: control.content instanceof ChatMessageContentText || control.content instanceof ChatMessageContentImage
+                visible: !control.isRemoved && (control.content instanceof ChatMessageContentText || control.content instanceof ChatMessageContentImage)
                 onTriggered: () => {
                     if (control.content instanceof ChatMessageContentImage) {
                         ClipboardHelper.copyImageToClipboard(control.content?.imagePath)
@@ -424,7 +430,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Copy link to clipboard")
                 icon.source: Icons.editCopy
-                enabled: !!control.clickedLink
+                visible: !!control.clickedLink && !control.isRemoved
                 onTriggered: () => {
                     ClipboardHelper.copyToClipboard(control.clickedLink)
                 }
@@ -433,19 +439,20 @@ Item {
             HideableMenuItem {
                 text: qsTr("Remove message...")
                 icon.source: Icons.editDelete
-                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
                 onTriggered: () => {
-                    const item = DialogFactory.createConfirmDialog({
+                    const item = DialogFactory.createConfirmDialogWithText({
                         title: qsTr("Remove message"),
-                        text: qsTr("Do you really want to remove this message?")
+                        text: qsTr("Do you really want to remove this message?"),
+                        inputLabel: qsTr("Reason (optional, why you removed the message)")
                     })
 
                     const roomId = control.roomId
                     const eventId = control.eventId
                     const chatProvider = control.chatProvider
 
-                    item.accepted.connect(() => {
-                        chatProvider.requestRemoveMessage(roomId, eventId)
+                    item.acceptedWithText.connect(text => {
+                        chatProvider.requestRemoveMessage(roomId, eventId, text)
                     })
                 }
             }
@@ -453,7 +460,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Edit message...")
                 icon.source: Icons.editor
-                visible: !control.isFailed && !control.isPending && control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
                 onTriggered: () => {
                     ViewHelper.showEditMessageDialog(control.chatProvider, control.roomId, control.eventId, control.content?.simpleText ?? "")
                 }
@@ -477,6 +484,7 @@ Item {
                 text: qsTr("Toggle pin")
                 icon.source: Icons.windowPin
                 visible: !control.isFailed
+                         && !control.isRemoved
                          && !control.isPending
                          && !!(control.capabilities & IChatProvider.Capability.PinMessage)
                          && !!((control.roomPermissions ?? 0) & IChatRoom.Permission.CanPinMessages)
@@ -511,6 +519,7 @@ Item {
             model: control.reactions
             delegate: ReactionButton {
                 id: rDelg
+                enabled: !control.isRemoved
                 emoji: rDelg.reaction
                 text: rDelg.count
                 highlighted: rDelg.isOwnReaction
@@ -536,6 +545,7 @@ Item {
 
         AddReactionButton {
             id: addReactionButton
+            visible: !control.isRemoved
 
             onClicked: () => {
                 internal.openEmojiPicker(reactionsContainer.mapToItem(addReactionButton.Window.window.contentItem,
