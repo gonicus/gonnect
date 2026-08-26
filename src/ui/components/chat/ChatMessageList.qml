@@ -54,7 +54,9 @@ Item {
         delegate: ChatMessageListItem {
             id: delg
             chatProvider: control.chatProvider
+            chatRoom: control.chatRoom
             roomPermissions: control.chatRoom?.permissions ?? 0
+            isFirst: delg.index === 0
             anchors {
                 left: parent?.left
                 right: parent?.right
