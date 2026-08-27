@@ -327,7 +327,7 @@ jobs:
 
   clazy:
     runs-on: ubuntu-24.04
-    container: fedora:43
+    container: fedora:46
     name: "Qt Semantics"
     needs: changes
     if: ${{ inputs.run_clazy || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
