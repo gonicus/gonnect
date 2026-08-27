@@ -258,14 +258,12 @@ void IpcChatRoom::removeMessage(const QString &messageId)
 
     m_threadChildren.remove(messageId);
 
-    for (auto it = m_threadChildren.begin(); it != m_threadChildren.end();) {
-        if (it->remove(messageId)) {
-            recalculateThreadRootFlag(it.key());
-        }
-        if (it->isEmpty()) {
-            it = m_threadChildren.erase(it);
-        } else {
-            ++it;
+    QHashIterator it(m_threadChildren);
+    while (it.hasNext()) {
+        it.next();
+
+        if (it.value().contains(messageId)) {
+            unregisterThreadChild(messageId, it.key());
         }
     }
 }
