@@ -52,12 +52,11 @@ public:
     virtual void sendTypingPing() override;
     virtual void togglePin(const QString &messageId) override;
     virtual bool isCompletelyLoaded(const QString &threadId = QString()) const override;
-    virtual void setIsCompletelyLoaded(bool value, const QString &threaId = QString()) override;
+    virtual void setIsCompletelyLoaded(bool value, const QString &threadId = QString()) override;
 
     /// Add an already existing message to the room; does not send a new message. Takes ownership of
     /// the object.
-    void addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent,
-                            const QString &threadId = QString());
+    void addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent);
 
     bool hasMessage(const QString &messageId) const;
     bool hasMessage(const ChatMessage *message) const;
@@ -123,7 +122,6 @@ private:
     QObject *m_otherUserContext = nullptr;
 
     ChatMessageContainer m_mainMessageContainer;
-    QHash<QString, ChatMessageContainer *> m_threadMessageContainers;
     QHash<QString, bool> m_threadCompletelyLoaded;
     QList<ChatMessage *> m_pinnedMessages;
     QList<QString> m_pinnedMessageIds;

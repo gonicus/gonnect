@@ -31,7 +31,7 @@ public:
 
     /// Add a message to the container. Does not send the message. Takes ownership of the object.
     void addMessage(ChatMessage *message, bool isUnread, bool isIndependent);
-    ChatMessage *removeMessage(const QString &messageId);
+    bool removeMessage(const QString &messageId);
     ChatMessage *updateMessageEventId(const QString &oldEventId, const QString &newEventId);
 
 private:

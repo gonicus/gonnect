@@ -81,9 +81,8 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
     // Find row of related message
     const auto normalizedRole = toNormalRole(role);
     if (normalizedRole != role) {
-        const auto &messages = m_chatRoom->chatMessages();
-        const auto item = messages.at(index.row());
 
+        const auto item = m_chatRoom->chatMessages().at(index.row());
         if (item->relatedMessageId().isEmpty()) {
             return QVariant();
         }
@@ -95,10 +94,6 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
         const auto relatedMessage = m_chatRoom->chatMessageById(item->relatedMessageId());
         if (!relatedMessage) {
             return QVariant();
-        }
-        const auto relatedIndex = messages.indexOf(relatedMessage);
-        if (relatedIndex >= 0) {
-            return rawData(messages.at(relatedIndex), normalizedRole);
         }
         return rawData(relatedMessage, normalizedRole);
     }
@@ -439,13 +434,9 @@ void ChatModel::updateRelatedMessages(const QString &originalMessageId, const QL
     }
 
     const auto messages = m_chatRoom->chatMessages();
-    const qsizetype l = messages.length();
-
-    for (qsizetype i = 0; i < l; ++i) {
-        const auto chatMsg = messages.at(i);
-        if (chatMsg->relatedMessageId() == originalMessageId) {
-            const auto modelIndex = createIndex(i, 0);
-            Q_EMIT dataChanged(modelIndex, modelIndex, roles);
+    for (qsizetype i = 0; i < messages.length(); ++i) {
+        if (messages.at(i)->relatedMessageId() == originalMessageId) {
+            Q_EMIT dataChanged(createIndex(i, 0), createIndex(i, 0), roles);
         }
     }
 }

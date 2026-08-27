@@ -210,10 +210,8 @@ void IpcChatRoom::setIsCompletelyLoaded(bool value, const QString &threadId)
     }
 }
 
-void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent,
-                                     const QString &threadId)
+void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent)
 {
-    Q_UNUSED(threadId)
     Q_CHECK_PTR(message);
 
     const auto eventId = message->eventId();
@@ -247,9 +245,15 @@ qsizetype IpcChatRoom::indexOfMessage(const ChatMessage *message) const
 void IpcChatRoom::removeMessage(const QString &messageId)
 {
     m_pinnedMessageIds.removeOne(messageId);
-    if (const auto *message = m_mainMessageContainer.removeMessage(messageId);
-        message && m_pinnedMessages.removeOne(message)) {
-        Q_EMIT pinnedMessagesChanged();
+    if (m_mainMessageContainer.removeMessage(messageId)) {
+        const auto it =
+                std::ranges::find_if(m_pinnedMessages, [messageId](const ChatMessage *message) {
+                    return message->eventId() == messageId;
+                });
+        if (it != m_pinnedMessages.end()) {
+            m_pinnedMessages.erase(it);
+            Q_EMIT pinnedMessagesChanged();
+        }
     }
 
     m_threadChildren.remove(messageId);
@@ -279,9 +283,8 @@ void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString 
     if (auto msg = m_mainMessageContainer.updateMessageEventId(oldEventId, newEventId)) {
         Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
 
-        if (m_threadChildren.remove(oldEventId)) {
-            m_threadChildren[newEventId].insert(newEventId);
-        }
+        const auto value = m_threadChildren.take(oldEventId);
+        m_threadChildren.insert(newEventId, value);
 
         for (auto it = m_threadChildren.begin(); it != m_threadChildren.end(); ++it) {
             if (it->remove(oldEventId)) {
@@ -573,8 +576,6 @@ void IpcChatRoom::clear()
         Q_EMIT pinnedMessagesChanged();
     }
 
-    qDeleteAll(m_threadMessageContainers);
-    m_threadMessageContainers.clear();
     m_threadCompletelyLoaded.clear();
 
     m_mainMessageContainer.clear();

@@ -77,9 +77,12 @@ void ChatMessageContainer::addMessage(ChatMessage *message, bool isUnread, bool 
 
     if (auto *content = qobject_cast<ChatMessageContentVideoFile *>(message->content())) {
         // Thumbnail path is usually set later
-        connect(content, &ChatMessageContentVideoFile::thumbnailFilePathChanged, this,
+        connect(content, &ChatMessageContentVideoFile::thumbnailFilePathChanged, message,
                 [this, message]() {
-                    Q_EMIT chatMessageContentChanged(m_messages.indexOf(message), message);
+                    const auto index = m_messages.indexOf(message);
+                    if (index >= 0) {
+                        Q_EMIT chatMessageContentChanged(index, message);
+                    }
                 });
     }
 
@@ -93,21 +96,18 @@ void ChatMessageContainer::addMessage(ChatMessage *message, bool isUnread, bool 
     } else {
 
         // Find correct place in the chronological timeline
-        for (qsizetype i = m_messages.length() - 1; i >= 0; --i) {
-            if (m_messages.at(i)->timestamp() < message->timestamp()) {
-                m_messages.insert(i + 1, message);
-                Q_EMIT chatMessageAdded(i + 1, message);
-                return;
-            }
-        }
+        auto it = std::ranges::upper_bound(
+                m_messages, message, [](const auto &newMsg, const auto &existingMsg) {
+                    return newMsg->timestamp() < existingMsg->timestamp();
+                });
 
-        // Fallback
-        m_messages.prepend(message);
-        Q_EMIT chatMessageAdded(0, message);
+        const qsizetype index = std::distance(m_messages.begin(), it);
+        m_messages.insert(index, message);
+        Q_EMIT chatMessageAdded(index, message);
     }
 }
 
-ChatMessage *ChatMessageContainer::removeMessage(const QString &messageId)
+bool ChatMessageContainer::removeMessage(const QString &messageId)
 {
     // Remove message from lists and maps
     if (auto *message = m_messageLookup.take(messageId)) {
@@ -117,10 +117,10 @@ ChatMessage *ChatMessageContainer::removeMessage(const QString &messageId)
             Q_EMIT chatMessageRemoved(index, message);
         }
         message->deleteLater();
-        return message;
+        return true;
     }
 
-    return nullptr;
+    return false;
 }
 
 ChatMessage *ChatMessageContainer::updateMessageEventId(const QString &oldEventId,

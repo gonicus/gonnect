@@ -442,7 +442,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     if (!relatedMessageId.isEmpty()) {
         pendingMsg->setRelatedMessageId(relatedMessageId);
     }
-    ipcRoom->addExistingMessage(pendingMsg, false, false, threadId);
+    ipcRoom->addExistingMessage(pendingMsg, false, false);
 
     m_pendingMessages.insert(tag, { roomId, tempEventId });
 
@@ -699,9 +699,10 @@ void IpcDispatcher::retrySendMessage(const QString &roomId, const QString &faile
 
     const auto text = textContent->rawText();
     const auto relatedMessageId = msg->relatedMessageId();
+    const auto threadId = msg->threadId();
 
     room->removeMessage(failedMessageId);
-    sendMessage(roomId, text, relatedMessageId);
+    sendMessage(roomId, text, relatedMessageId, threadId);
 }
 
 void IpcDispatcher::init()
@@ -1289,16 +1290,10 @@ void IpcDispatcher::processResponse(
             }
         }
 
-        QString threadId;
-        if (m_roomListTags.contains(tag)) {
-            const auto &roomTagInfo = m_roomListTags.value(tag);
-            threadId = roomTagInfo.threadId;
-        }
-
         const bool isIndependent = m_singleMessageTags.remove(tag);
         const bool isUnread = !tag;
         const auto chatMessageObj = createOrUpdateReceivedChatMessage(
-                rc.messageReceivedEvent(), isUnread, isIndependent, chatMessage, threadId);
+                rc.messageReceivedEvent(), isUnread, isIndependent, chatMessage);
         if (isUnread && !isIndependent) {
             makeNotificationNewMessage(chatMessageObj);
         }
@@ -1850,7 +1845,7 @@ bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
 ChatMessage *
 IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
                                                  bool isUnread, bool isIndependent,
-                                                 ChatMessage *chatMessage, const QString &threadId)
+                                                 ChatMessage *chatMessage)
 {
     auto room = ipcChatRoomById(message.roomId());
 
@@ -1937,7 +1932,7 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
     }
 
     if (isNew) {
-        room->addExistingMessage(chatMessage, isUnread, isIndependent, threadId);
+        room->addExistingMessage(chatMessage, isUnread, isIndependent);
     }
 
     // Reactions
