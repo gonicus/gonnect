@@ -293,8 +293,8 @@ void ChatModel::onChatRoomChanged()
                                            { static_cast<int>(Roles::AvatarPath) });
                     }
                 });
-        connect(m_chatRoom, &IChatRoom::chatMessageAdded, m_chatRoomContext,
-                [this](qsizetype index, ChatMessage *msgObj) {
+        connect(m_chatRoom, QOverload<qsizetype, ChatMessage *>::of(&IChatRoom::chatMessageAdded),
+                m_chatRoomContext, [this](qsizetype index, ChatMessage *msgObj) {
                     beginInsertRows(QModelIndex(), index, index);
                     endInsertRows();
                     updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
@@ -306,8 +306,8 @@ void ChatModel::onChatRoomChanged()
                         Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
                     }
                 });
-        connect(m_chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
-                [this](qsizetype index, ChatMessage *msgObj) {
+        connect(m_chatRoom, QOverload<qsizetype, ChatMessage *>::of(&IChatRoom::chatMessageRemoved),
+                m_chatRoomContext, [this](qsizetype index, ChatMessage *msgObj) {
                     beginRemoveRows(QModelIndex(), index, index);
                     endRemoveRows();
                     updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
@@ -332,29 +332,36 @@ void ChatModel::onChatRoomChanged()
             endResetModel();
             updateRealMessagesCount();
         });
-        connect(m_chatRoom, &IChatRoom::chatMessageEventIdChanged, m_chatRoomContext,
-                [this](qsizetype idx, ChatMessage *) {
+        connect(m_chatRoom,
+                QOverload<qsizetype, ChatMessage *>::of(&IChatRoom::chatMessageEventIdChanged),
+                m_chatRoomContext, [this](qsizetype idx, ChatMessage *) {
                     if (idx >= 0) {
                         const auto modelIndex = createIndex(idx, 0);
                         Q_EMIT dataChanged(modelIndex, modelIndex,
                                            { static_cast<int>(Roles::EventId) });
                     }
                 });
-        connect(m_chatRoom, &IChatRoom::chatMessageContentChanged, m_chatRoomContext,
-                [this](qsizetype idx, ChatMessage *msgObj) {
+        connect(m_chatRoom,
+                QOverload<qsizetype, ChatMessage *>::of(&IChatRoom::chatMessageContentChanged),
+                m_chatRoomContext, [this](qsizetype idx, ChatMessage *msgObj) {
                     const auto modelIndex = createIndex(idx, 0);
                     Q_EMIT dataChanged(modelIndex, modelIndex,
                                        { static_cast<int>(Roles::Content) });
 
                     updateRelatedMessages(msgObj->eventId(), relatedContentRoles(*msgObj));
                 });
-        connect(m_chatRoom, &IChatRoom::chatMessageMentionedUsersChanged, m_chatRoomContext,
-                [this](qsizetype idx, ChatMessage *) {
+        connect(m_chatRoom,
+                QOverload<qsizetype, ChatMessage *>::of(
+                        &IChatRoom::chatMessageMentionedUsersChanged),
+                m_chatRoomContext, [this](qsizetype idx, ChatMessage *) {
                     const auto modelIndex = createIndex(idx, 0);
                     Q_EMIT dataChanged(modelIndex, modelIndex,
                                        { static_cast<int>(Roles::MentionedUserNames) });
                 });
-        connect(m_chatRoom, &IChatRoom::chatMessageFlagsChanged, m_chatRoomContext,
+        connect(m_chatRoom,
+                QOverload<qsizetype, ChatMessage *, ChatMessage::Flags>::of(
+                        &IChatRoom::chatMessageFlagsChanged),
+                m_chatRoomContext,
                 [this](qsizetype idx, ChatMessage *chatMessage, ChatMessage::Flags previousFlags) {
                     if (!chatMessage) {
                         qCCritical(lcChatModel)
@@ -373,8 +380,9 @@ void ChatModel::onChatRoomChanged()
                     const auto modelIndex = createIndex(idx, 0);
                     Q_EMIT dataChanged(modelIndex, modelIndex, affectedRoles);
                 });
-        connect(m_chatRoom, &IChatRoom::chatMessageReactionsChanged, m_chatRoomContext,
-                [this](qsizetype idx, ChatMessage *) {
+        connect(m_chatRoom,
+                QOverload<qsizetype, ChatMessage *>::of(&IChatRoom::chatMessageReactionsChanged),
+                m_chatRoomContext, [this](qsizetype idx, ChatMessage *) {
                     const auto modelIndex = createIndex(idx, 0);
                     Q_EMIT dataChanged(modelIndex, modelIndex,
                                        { static_cast<int>(Roles::Reactions) });

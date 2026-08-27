@@ -33,7 +33,14 @@ Item {
 
     function loadMessages(threadId : string) {
         const room = control.chatRoom
-        if (room && !room.isInitiallyLoaded && room.ownUserJoinState === IChatRoom.UserRoomState.Joined) {
+        if (!room || room.ownUserJoinState !== IChatRoom.UserRoomState.Joined) {
+            return
+        }
+        if (threadId.length > 0) {
+            if (!room.isCompletelyLoaded(threadId)) {
+                room.loadMessages(threadId)
+            }
+        } else if (!room.isInitiallyLoaded) {
             room.loadMessages(threadId)
         }
     }

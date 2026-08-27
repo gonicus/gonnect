@@ -193,7 +193,7 @@ bool IpcChatRoom::isCompletelyLoaded(const QString &threadId) const
     if (threadId.isEmpty()) {
         return m_isCompletelyLoaded;
     }
-    return m_threadCompletelyLoaded[threadId];
+    return m_threadCompletelyLoaded.value(threadId, false);
 }
 
 void IpcChatRoom::setIsCompletelyLoaded(bool value, const QString &threadId)
@@ -213,6 +213,7 @@ void IpcChatRoom::setIsCompletelyLoaded(bool value, const QString &threadId)
 void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool isIndependent,
                                      const QString &threadId)
 {
+    Q_UNUSED(threadId)
     Q_CHECK_PTR(message);
 
     const auto eventId = message->eventId();
@@ -222,16 +223,8 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
         registerThreadChild(eventId, message->threadId());
     }
 
-    if (threadId.isEmpty()) {
-        m_mainMessageContainer.addMessage(message, isUnread, isIndependent);
-        updatePinnedMessages();
-
-    } else {
-        if (!m_threadMessageContainers.contains(threadId)) {
-            m_threadMessageContainers.insert(threadId, new ChatMessageContainer(this));
-        }
-        m_threadMessageContainers[threadId]->addMessage(message, isUnread, isIndependent);
-    }
+    m_mainMessageContainer.addMessage(message, isUnread, isIndependent);
+    updatePinnedMessages();
 
     recalculateThreadRootFlag(eventId);
 }
@@ -399,9 +392,9 @@ void IpcChatRoom::loadMessages(const QString &threadId)
 
     ipcDispatcher()->loadMessages(this, IChatProvider::defaultMessageLimit, threadId);
 
-    if (threadId.isEmpty() && !m_isInitiallyLoaded) {
+    if (!m_isInitiallyLoaded) {
         m_isInitiallyLoaded = true;
-        Q_EMIT IChatRoom::isInitiallyLoadedChanged();
+        Q_EMIT isInitiallyLoadedChanged();
     }
 }
 
@@ -579,6 +572,10 @@ void IpcChatRoom::clear()
         m_pinnedMessages.clear();
         Q_EMIT pinnedMessagesChanged();
     }
+
+    qDeleteAll(m_threadMessageContainers);
+    m_threadMessageContainers.clear();
+    m_threadCompletelyLoaded.clear();
 
     m_mainMessageContainer.clear();
 

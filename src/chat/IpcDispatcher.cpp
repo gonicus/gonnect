@@ -555,7 +555,16 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &
 
     const auto &existingMessages = chatRoom->chatMessages();
     if (!existingMessages.isEmpty()) {
-        msgReq.setFromMessageId(existingMessages.first()->eventId());
+        if (threadId.isEmpty()) {
+            msgReq.setFromMessageId(existingMessages.first()->eventId());
+        } else {
+            for (auto *msg : existingMessages) {
+                if (msg->threadId() == threadId || msg->eventId() == threadId) {
+                    msgReq.setFromMessageId(msg->eventId());
+                    break;
+                }
+            }
+        }
     }
 
     req->setRoomMessagesRequest(msgReq);
@@ -954,7 +963,7 @@ void IpcDispatcher::processResponse(
             if (auto room = m_roomLookup.value(tagInfo.roomId, nullptr)) {
                 room->setIsLoadingMessageHistory(false);
                 if (!count) {
-                    room->setIsCompletelyLoaded(true);
+                    room->setIsCompletelyLoaded(true, tagInfo.threadId);
                 }
             }
         }

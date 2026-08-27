@@ -85,7 +85,7 @@ Item {
 
             onRespondTo: messageId => control.respondTo(messageId)
             onRetryMessage: messageId => control.retryMessage(messageId)
-            onOpenThread: threadId => chatProxyModel.threadId = threadId
+            onOpenThread: threadId => control.threadId = threadId
             onTogglePin: () => control.chatRoom?.togglePin(delg.eventId)
         }
 
