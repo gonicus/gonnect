@@ -510,12 +510,13 @@ QString ViewHelper::stripLinkTags(const QString &link) const
     return s.replace(re, "\\1");
 }
 
-static const QString emojiUnit = QStringLiteral(
-        R"(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic})*))");
+static constexpr char emojiUnit[] =
+        R"(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic})*))";
 
 bool ViewHelper::isSingleEmoji(const QString &str) const
 {
-    static const QRegularExpression re("^" + emojiUnit + "$");
+    static const QRegularExpression re(QStringLiteral("^") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("$"));
     return re.match(str).hasMatch();
 }
 
@@ -527,13 +528,16 @@ bool ViewHelper::isShortEmojiString(const QString &str) const
         return false;
     }
 
-    static const QRegularExpression re("^" + emojiUnit + "(?:\\s*" + emojiUnit + "){0,2}$");
+    static const QRegularExpression re(QStringLiteral("^") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("(?:\\s*") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("){0,2}$"));
     return re.match(trimmed).hasMatch();
 }
 
 QString ViewHelper::leadingEmoji(const QString &str) const
 {
-    static const QRegularExpression re("^\\s*(" + emojiUnit + ")");
+    static const QRegularExpression re(QStringLiteral("^\\s*(") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral(")"));
     auto m = re.match(str);
     return m.hasMatch() ? m.captured(1) : QString();
 }
