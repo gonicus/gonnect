@@ -341,9 +341,15 @@ Item {
 
     TapHandler {
         acceptedButtons: Qt.RightButton
-        onTapped: (eventPoint) => {
+        gesturePolicy: TapHandler.WithinBounds
+        grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+        onTapped: (eventPoint, button) => {
+            if (button !== Qt.RightButton) {
+                return
+            }
+
             eventPoint.accepted = true
-            const p = eventPoint.pressPosition
+            const p = eventPoint.position
             const item = control.childAt(p.x, p.y)
             if (item === messageContentItem) {
                 const q = messageContentItem.messageLabel.mapFromItem(control, p)
@@ -352,8 +358,14 @@ Item {
                 control.clickedLink = ""
             }
 
-            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
-            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
+            const overlay = control.Window.window ? control.Window.window.contentItem : control
+            const menu = chatRoomMenuComponent.createObject(overlay)
+
+            console.debug(category, "Creating popup menu for ChatMessageListItem:", menu)
+
+            menu.popup()
+
+            console.debug(category, "Opened at:", menu.x, menu.y, "visible:", menu.visible)
         }
     }
 
