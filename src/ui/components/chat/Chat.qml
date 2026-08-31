@@ -38,7 +38,10 @@ Item {
         }
     }
 
-    onChatRoomChanged: () => control.loadMessages()
+    onChatRoomChanged: () => {
+                           relatedMsg.chatMessage = null
+                           control.loadMessages()
+                       }
 
     Connections {
         target: control.chatRoom
