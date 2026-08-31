@@ -43,7 +43,7 @@ Item {
 
                 Label {
                     id: label
-                    text: qsTr("<b>%1</b> wants to join the conference. Shall that be allowed?").arg(delg.modelData.name)
+                    text: qsTr("%1 wants to join the conference. Can they join?").arg("<b>" + delg.modelData.name + "</b>")
                     wrapMode: Text.Wrap
                     textFormat: Label.StyledText
                     anchors {
