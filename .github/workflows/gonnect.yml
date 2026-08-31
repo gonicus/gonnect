@@ -164,7 +164,7 @@ jobs:
           startsWith(github.ref, 'refs/tags/v') ||
           github.ref == 'refs/heads/main' ||
           github.ref == 'refs/heads/release'
-        uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -423,7 +423,7 @@ jobs:
         run: |
           echo "gonnect_version=$(grep -oP 'GOnnect VERSION ([0-9.]+)' CMakeLists.txt | awk '{ print $3 }')" >> $GITHUB_OUTPUT
 
-      - uses: flatpak/flatpak-github-actions/flatpak-builder@401fe28a8384095fc1531b9d320b292f0ee45adb # v6.7
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # v6.8
         with:
           bundle: gonnect
           build-bundle: 'true'
