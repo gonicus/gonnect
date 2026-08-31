@@ -187,6 +187,7 @@ add_subdirectory(calendar/msgraph)
 find_package(Qt6Keychain REQUIRED)
 
 set_source_files_properties(ui/scripts/util.js PROPERTIES QT_QML_SOURCE_TYPENAME Util)
+set_source_files_properties(ui/scripts/phoneNumberUtil.js PROPERTIES QT_QML_SOURCE_TYPENAME PhoneNumberUtil)
 
 configure_file(MSOAuthManagerConfig.h.in MSOAuthManagerConfig.h)
 
@@ -361,6 +362,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/DeviceVerification.qml
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
+        ui/components/chat/PinnedChatMessagesList.qml
 
         ui/components/controls/AudioFileSelector.qml
         ui/components/controls/AudioLevelButton.qml
@@ -399,6 +401,7 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/CredentialsDialog.qml
         ui/components/dialogs/BaseDialog.qml
         ui/components/dialogs/ConfirmDialog.qml
+        ui/components/dialogs/ConfirmDialogWithText.qml
         ui/components/dialogs/InfoDialog.qml
         ui/components/dialogs/OauthLoginDialog.qml
         # Dynamic UI
@@ -433,6 +436,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/InvitedToChatRoom.qml
         ui/components/popups/JitsiHistoryListContextMenu.qml
         ui/components/popups/KnockChatRoom.qml
+        ui/components/popups/KnockedParticipant.qml
         ui/components/popups/LargeImage.qml
         ui/components/popups/LargeVideo.qml
         ui/components/popups/Menu.qml
@@ -489,6 +493,7 @@ qt_add_qml_module(gonnect
         # Dynamic UI
         ui/components/EditModeOptions.qml
 
+        ui/scripts/phoneNumberUtil.js
         ui/scripts/util.js
 
         ui/AboutWindow.qml
@@ -654,6 +659,8 @@ qt_add_qml_module(gonnect
         chat/ChatMessageContentVideoFile.cpp
         chat/ChatMessageContentPart.h
         chat/ChatMessageContentPart.cpp
+        chat/ChatMessageContentRemoved.h
+        chat/ChatMessageContentRemoved.cpp
         chat/ChatMessageReaction.h
         chat/ChatMessageReaction.cpp
         chat/ChatModel.h
@@ -683,6 +690,8 @@ qt_add_qml_module(gonnect
         chat/CrossSigningSecret.h
         chat/CrossSigningSymbol.h
         chat/NotificationSetting.h
+        chat/PinnedChatMessages.h
+        chat/PinnedChatMessages.cpp
         chat/PublicChatRoom.h
 
         conference/ConferenceUser.h
@@ -732,6 +741,8 @@ qt_add_qml_module(gonnect
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
         helper/CodeHighlighter.cpp
+        helper/ContactHelper.h
+        helper/ContactHelper.cpp
         helper/FileContentHelper.h
         helper/FileContentHelper.cpp
         helper/SecretGenerator.h
@@ -851,6 +862,8 @@ qt_add_qml_module(gonnect
         ui/UsersModel.cpp
         ui/PersonCoinProvider.h
         ui/PersonCoinProvider.cpp
+        ui/PhoneNumbersModel.h
+        ui/PhoneNumbersModel.cpp
         ui/SearchListModel.h
         ui/SearchListModel.cpp
         ui/SearchListProxyModel.h

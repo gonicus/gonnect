@@ -4,7 +4,7 @@
 <context>
     <name>CallSideBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/CallSideBar.qml" line="212"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="217"/>
         <source>Person(s)</source>
         <translation>
             <numerusform>Person</numerusform>
@@ -15,7 +15,7 @@
 <context>
     <name>Chat</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="227"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="339"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 is typing</numerusform>
@@ -26,7 +26,7 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="150"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="154"/>
         <source>%n minutes left</source>
         <translation>
             <numerusform>%n minute left</numerusform>
@@ -48,7 +48,7 @@
 <context>
     <name>PublicRoomSearch</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="160"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="164"/>
         <source>%n member(s), topic: %1</source>
         <translation>
             <numerusform>%n member, topic: %1</numerusform>
@@ -56,7 +56,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="161"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="165"/>
         <source>%n member(s)</source>
         <translation>
             <numerusform>%n member</numerusform>

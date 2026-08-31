@@ -36,6 +36,8 @@ concept MessageDeliverer = requires(T obj) {
     {
         obj.membershipChange()
     } -> std::convertible_to<const de::gonicus::gonnect::MessageContentMembershipChange &>;
+    { obj.hasRemoved() } -> std::same_as<bool>;
+    { obj.removed() } -> std::convertible_to<const de::gonicus::gonnect::MessageContentRemoved &>;
 };
 
 class IpcDispatcher : public IChatProvider
@@ -139,6 +141,9 @@ public:
     /// Load a single messe. It will be available in lookup, but not in the indexed message list.
     void loadSingleMessage(const QString &roomId, const QString &messageId);
 
+    /// Pin or unpin a message inside the room.
+    void pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin);
+
     // IChatProvider interface
     virtual qsizetype chatRoomsCount() override;
     virtual IChatRoom *chatRoomByIndex(qsizetype index) override;
@@ -170,7 +175,8 @@ public:
     virtual void requestRoomLeave(const QString &roomId) override;
     virtual void requestUser(const QString &userId) override;
 
-    virtual void requestRemoveMessage(const QString &roomId, const QString &messageId) override;
+    virtual void requestRemoveMessage(const QString &roomId, const QString &messageId,
+                                      const QString &reason = QString()) override;
     virtual void retrySendMessage(const QString &roomId, const QString &failedMessageId) override;
     virtual void requestEditMessage(const QString &roomId, const QString &messageId,
                                     const QString &newContent) override;

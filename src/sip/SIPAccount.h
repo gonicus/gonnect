@@ -46,6 +46,8 @@ public:
     void onMwiInfo(pj::OnMwiInfoParam &prm) override;
 
     bool isRegistered() const { return m_isRegistered; }
+    quint64 registrationCount() const { return m_registrationCount; }
+
     bool isInstantMessagingAllowed() const;
     bool isRTTEnabled() const { return m_rttEnabled; }
     bool isCiscoDevice() const { return !m_ciscoDeviceMac.isEmpty(); }
@@ -133,6 +135,7 @@ private:
     bool m_ciscoRemoteCcHoldEnabled = true;
 
     bool m_isRegistered = false;
+    quint64 m_registrationCount = 0;
     bool m_isInstantMessagingAllowed = false;
     bool m_shallNegotiateCapabilities = true;
     bool m_useInstantMessagingWithoutCheck = true;

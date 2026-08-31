@@ -104,6 +104,7 @@ private:
     int m_networkRecoveryAttempts = 0;
     static constexpr int s_maxNetworkRecoveryAttempts = 6;
     QSet<QString> m_lastLocalAddresses;
+    QHash<QString, quint64> m_recoveryCounts;
 
     std::unique_ptr<AppSettings> m_settings = nullptr;
 

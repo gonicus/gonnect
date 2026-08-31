@@ -41,7 +41,7 @@ Card {
 
             Label {
                 id: firstAidHeader
-                text: qsTr("Emergency Call")
+                text: qsTr("Emergency call")
                 font.pixelSize: 32
                 wrapMode: Label.Wrap
                 horizontalAlignment: Label.AlignHCenter

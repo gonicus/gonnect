@@ -56,7 +56,7 @@ void RingTone::start()
 
     // Bridge gap between previous audio source (mostly the call)
     if (auto *port = dynamic_cast<AudioPort *>(&m_mediaSink)) {
-        port->writeSilenceMS(120);
+        port->padSilence();
     }
 
     try {

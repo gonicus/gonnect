@@ -977,6 +977,11 @@ void SIPAccount::onRegState(pj::OnRegStateParam &prm)
             << "Account " << m_account
             << (ai.regIsActive ? " registered: (code=" : " unregister: (code=") << prm.code << ")";
 
+    // Increase registration count only for fresh registrations
+    if (ai.regIsActive && prm.code == PJSIP_SC_OK && prm.expiration > 0) {
+        ++m_registrationCount;
+    }
+
     if (m_isRegistered != ai.regIsActive) {
         m_isRegistered = ai.regIsActive;
 
