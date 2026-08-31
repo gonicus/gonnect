@@ -3873,7 +3873,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="25"/>
         <source>Aland Islands</source>
-        <translation>Aland-Inseln</translation>
+        <translation>Åland-Inseln</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="26"/>
@@ -3928,7 +3928,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="36"/>
         <source>Saint Barthelemy</source>
-        <translation>Sankt Bartholomäus</translation>
+        <translation>St. Barthélemy</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="37"/>
@@ -3993,7 +3993,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="49"/>
         <source>Democratic Republic of the Congo</source>
-        <translation>Demokratische Republik Kongo</translation>
+        <translation>Kongo-Kinshasa</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="50"/>
@@ -4003,7 +4003,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="51"/>
         <source>Republic of the Congo</source>
-        <translation>Republik Kongo</translation>
+        <translation>Kongo-Brazzaville</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="52"/>
@@ -4013,7 +4013,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="53"/>
         <source>Ivory Coast</source>
-        <translation>Elfenbeinküste</translation>
+        <translation>Côte d’Ivoire</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="54"/>
@@ -4268,7 +4268,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="104"/>
         <source>Heard Island and McDonald Islands</source>
-        <translation>Heard und McDonaldinseln</translation>
+        <translation>Heard- und McDonald-Inseln</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="105"/>
@@ -4528,7 +4528,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="156"/>
         <source>Macao</source>
-        <translation>Macau</translation>
+        <translation>Sonderverwaltungsregion Macau</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="157"/>
@@ -4688,12 +4688,12 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="188"/>
         <source>Saint Pierre and Miquelon</source>
-        <translation>Saint-Pierre und Miquelon</translation>
+        <translation>St. Pierre und Miquelon</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="189"/>
         <source>Pitcairn</source>
-        <translation>Pitcairn</translation>
+        <translation>Pitcairninseln</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="190"/>
@@ -4703,7 +4703,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="191"/>
         <source>Palestinian Territory</source>
-        <translation>Palästinensisches Gebiet</translation>
+        <translation>Palästinensische Autonomiegebiete</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="192"/>
@@ -4888,7 +4888,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="228"/>
         <source>East Timor</source>
-        <translation>Osttimor</translation>
+        <translation>Timor-Leste</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="229"/>
@@ -4963,7 +4963,7 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="243"/>
         <source>Vatican</source>
-        <translation>Vatikan</translation>
+        <translation>Vatikanstadt</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="244"/>
