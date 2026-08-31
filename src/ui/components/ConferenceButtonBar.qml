@@ -29,6 +29,7 @@ Item {
     signal openSetPasswordDialog
     signal openVideoQualityDialog
     signal openDialInInfoDialog(numbers : variant, code : string)
+    signal openKnockedParticipantDialog(id : string, name : string)
     signal hangup
     signal finishForAll
 
@@ -72,6 +73,9 @@ Item {
             target: control.iConferenceConnector
             function onDialInfoReceived(numbersMap : object, code : string) {
                 control.openDialInInfoDialog(numbersMap, code)
+            }
+            function onParticipantKnocked(id : string, name : string) {
+                control.openKnockedParticipantDialog(id, name)
             }
         }
     }
