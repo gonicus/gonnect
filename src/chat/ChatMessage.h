@@ -32,10 +32,9 @@ public:
         SystemMessage = 1 << 1,
         OwnMessage = 1 << 2,
         Markdown = 1 << 3,
-        Pinned = 1 << 4,
-        Encrypted = 1 << 5,
-        Pending = 1 << 6,
-        Failed = 1 << 7,
+        Encrypted = 1 << 4,
+        Pending = 1 << 5,
+        Failed = 1 << 6,
     };
     Q_ENUM(Flag)
     Q_DECLARE_FLAGS(Flags, Flag)

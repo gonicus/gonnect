@@ -194,6 +194,8 @@ Item {
             }
         }
 
+        ScrollBar.vertical: ScrollBar { width: Theme.d / 2 }
+
         anchors {
             left: parent.left
             right: parent.right

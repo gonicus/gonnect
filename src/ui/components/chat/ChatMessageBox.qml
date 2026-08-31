@@ -55,6 +55,10 @@ Item {
         messageField.lastCursorPosition = 0
     }
 
+    function positionCursorAtEnd() {
+        messageField.cursorPosition = messageField.text.length
+    }
+
     QtObject {
         id: internal
 
@@ -90,6 +94,7 @@ Item {
             if (control.chatRoom && internal.savedInput[control.chatRoom.id] !== undefined) {
                 messageField.text = internal.savedInput[control.chatRoom.id]
                 messageField.forceActiveFocus()
+                control.positionCursorAtEnd()
             } else {
                 messageField.clear()
             }
@@ -566,6 +571,46 @@ Item {
 
                 return [start, end]
             }
+
+            function toggleQuote() {
+                const mf = messageField
+                const fullText = mf.text
+                let start = mf.selectionStart
+                let end = mf.selectionEnd
+                const hasSelection = (start !== end)
+
+                let targetStart = fullText.lastIndexOf('\n', start - 1) + 1
+                let effectiveEnd = hasSelection ? Math.max(end - 1, 0) : end
+                let targetEnd = fullText.indexOf('\n', effectiveEnd)
+                if (targetEnd === -1) {
+                    targetEnd = fullText.length
+                }
+
+                const textToProcess = fullText.substring(targetStart, targetEnd)
+                const lines = textToProcess.split('\n')
+                const quoteRegex = /^(\s*> ?)/
+
+                const isFullyQuoted = lines.every(line => line.trim() === "" || quoteRegex.test(line))
+
+                const transformedLines = lines.map(line => {
+                    if (isFullyQuoted) {
+                        return line.replace(/^(\s*)> ?/, "$1")
+                    } else {
+                        return line.trim() === "" ? ">" : "> " + line
+                    }
+                })
+
+                const resultText = transformedLines.join('\n')
+
+                mf.remove(targetStart, targetEnd)
+                mf.insert(targetStart, resultText)
+
+                if (hasSelection) {
+                    mf.select(targetStart, targetStart + resultText.length)
+                } else {
+                    mf.cursorPosition = targetStart + resultText.length
+                }
+            }
         }
 
         MouseArea {
@@ -591,7 +636,7 @@ Item {
             bottom: parent.bottom
         }
 
-        readonly property bool groupedFormatOptions: buttonBar.width < 370
+        readonly property bool groupedFormatOptions: buttonBar.width < 500
 
 
         BottomButtonBarButton {
@@ -656,10 +701,24 @@ Item {
         }
         BottomButtonBarButton {
             id: codeBlockButton
-            icon: Icons.addSubtitle
-            toolTipText: qsTr("Block preformatted/code")
+            icon: Icons.codeBlock
+            toolTipText: qsTr("Code block")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
-            onClicked: () => messageField.insertOrRemove("\n> ", "")
+            onClicked: () => messageField.insertOrRemove("```\n", "\n```")
+        }
+        BottomButtonBarButton {
+            id: preButton
+            icon: Icons.formatTextDirectionLtr
+            toolTipText: qsTr("Preformatted")
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
+            onClicked: () => messageField.insertOrRemove("<pre>", "</pre>")
+        }
+        BottomButtonBarButton {
+            id: quoteButton
+            icon: Icons.formatTextBlockquote
+            toolTipText: qsTr("Quote")
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
+            onClicked: () => messageField.toggleQuote()
         }
 
         BottomButtonBarButton {
@@ -757,8 +816,18 @@ Item {
             }
             MenuItem {
                 text: qsTr("Code block")
-                icon.source: Icons.overflowMenu
-                onTriggered: () => messageField.insertOrRemove("\n> ", "")
+                icon.source: Icons.codeBlock
+                onTriggered: () => messageField.insertOrRemove("```\n", "\n```")
+            }
+            MenuItem {
+                text: qsTr("Preformatted")
+                icon.source: Icons.formatTextDirectionLtr
+                onTriggered: () => messageField.insertOrRemove("<pre>", "</pre>")
+            }
+            MenuItem {
+                text: qsTr("Quote")
+                icon.source: Icons.formatTextBlockquote
+                onTriggered: () => messageField.toggleQuote()
             }
         }
     }
