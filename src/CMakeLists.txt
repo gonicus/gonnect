@@ -433,6 +433,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/InvitedToChatRoom.qml
         ui/components/popups/JitsiHistoryListContextMenu.qml
         ui/components/popups/KnockChatRoom.qml
+        ui/components/popups/KnockedParticipant.qml
         ui/components/popups/LargeImage.qml
         ui/components/popups/LargeVideo.qml
         ui/components/popups/Menu.qml
