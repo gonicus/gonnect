@@ -6,12 +6,12 @@
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="12"/>
         <source>About</source>
-        <translation type="unfinished">О программе</translation>
+        <translation>О программе</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="35"/>
         <source>GOnnect headline</source>
-        <translation type="unfinished">Заголовок GOnnect</translation>
+        <translation>Заголовок GOnnect</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="72"/>
