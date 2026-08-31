@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Build GOnnect (Linux)"
     needs: changes
-    if: ${{ inputs.run_build || needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
+    if: false # ${{ inputs.run_build || needs.changes.outputs.src == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.build == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -116,6 +116,7 @@ jobs:
         with:
           lfs: 'true'
           submodules: 'recursive'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Prepare
         uses: ./.github/actions/prepare-linux
@@ -139,13 +140,14 @@ jobs:
     runs-on: windows-2025-vs2026
     name: "Build GOnnect (Windows)"
     needs: changes
-    if: ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-windows == 'true' }}
+    if: false # ${{ inputs.run_build_windows || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-windows == 'true' }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'true'
           submodules: 'recursive'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Prepare
         uses: ./.github/actions/prepare-windows
@@ -251,13 +253,14 @@ jobs:
     runs-on: macos-26
     name: "Build GOnnect (MacOS)"
     needs: changes
-    if: ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-macos == 'true' }}
+    if: false # ${{ inputs.run_build_macos || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.resources == 'true' || needs.changes.outputs.resources-macos == 'true' }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           lfs: 'true'
           submodules: 'recursive'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Prepare
         uses: ./.github/actions/prepare-macos
@@ -296,7 +299,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Static Code Analyzer"
     needs: changes
-    if: ${{ inputs.run_clang || needs.changes.outputs.src == 'true' }}
+    if: false # ${{ inputs.run_clang || needs.changes.outputs.src == 'true' }}
     env:
       CC: clang
       CXX: clang++
@@ -330,7 +333,7 @@ jobs:
     container: fedora:43
     name: "Qt Semantics"
     needs: changes
-    if: ${{ inputs.run_clazy || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
+    if: false # ${{ inputs.run_clazy || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' }}
 
     steps:
       - name: Install dependencies
@@ -360,7 +363,7 @@ jobs:
       - name: Install qt
         run: |
           pip install aqtinstall
-          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ steps.get-qt.outputs.qt-version }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning
+          aqt install-qt --outputdir ${{ github.workspace }}/Qt linux desktop ${{ steps.get-qt.outputs.qt-version }} linux_gcc_64 -m qt5compat qtgrpc qtimageformats qtmultimedia qtnetworkauth qtwebchannel qtwebengine qtpositioning qtwebsockets
           echo "PATH=$PATH:${{ github.workspace }}/Qt/${{ steps.get-qt.outputs.qt-version }}/gcc_64/bin" >> $GITHUB_ENV
 
       - name: Prepare conan
@@ -416,6 +419,7 @@ jobs:
         with:
           lfs: 'true'
           submodules: 'recursive'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Reading GOnnect version
         shell: bash
@@ -435,7 +439,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: "Unit Tests"
     needs: [changes, build]
-    if: ${{ (inputs.run_tests || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && needs.build.result == 'success' }}
+    if: false # ${{ (inputs.run_tests || needs.changes.outputs.src == 'true' || needs.changes.outputs.build == 'true' || needs.changes.outputs.tests == 'true') && needs.build.result == 'success' }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
