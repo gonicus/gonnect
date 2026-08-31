@@ -343,7 +343,7 @@ Item {
         acceptedButtons: Qt.RightButton
         onTapped: (eventPoint) => {
             eventPoint.accepted = true
-            const p = eventPoint.pressPosition
+            const p = eventPoint.position
             const item = control.childAt(p.x, p.y)
             if (item === messageContentItem) {
                 const q = messageContentItem.messageLabel.mapFromItem(control, p)
@@ -352,8 +352,7 @@ Item {
                 control.clickedLink = ""
             }
 
-            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
-            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
+            chatRoomMenuComponent.createObject(control).popup()
         }
     }
 
