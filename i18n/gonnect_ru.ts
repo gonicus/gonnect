@@ -16,22 +16,22 @@
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="72"/>
         <source>GOnnect version</source>
-        <translation type="unfinished">Версия GOnnect</translation>
+        <translation>Версия GOnnect</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="77"/>
         <source>Version: v%1</source>
-        <translation type="unfinished">Версия: v%1</translation>
+        <translation>Версия: v%1</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="92"/>
         <source>Copy to clipboard</source>
-        <translation type="unfinished">Копировать в буфер обмена</translation>
+        <translation>Скопировать</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="93"/>
         <source>Copy the currently used version number of GOnnect to the clipboard</source>
-        <translation type="unfinished">Скопируйте номер текущей версии GOnnect в буфер обмена</translation>
+        <translation>Скопировать номер текущей версии GOnnect</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="116"/>
@@ -39,32 +39,32 @@
         <location filename="../src/ui/AboutWindow.qml" line="137"/>
         <location filename="../src/ui/AboutWindow.qml" line="154"/>
         <source>Homepage</source>
-        <translation type="unfinished">Домашняя страница</translation>
+        <translation>Домашняя страница</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="121"/>
         <source>Visit the project homepage</source>
-        <translation type="unfinished">Посетить домашнюю страницу проекта</translation>
+        <translation>Посетить домашнюю страницу проекта</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="133"/>
         <source>Bug Tracker</source>
-        <translation type="unfinished">Трекер ошибок</translation>
+        <translation>Отчёты об ошибках</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="138"/>
         <source>Visit the project bug tracker</source>
-        <translation type="unfinished">Посетить трекер ошибок проекта</translation>
+        <translation>Открыть раздел отчётов об ошибках проекта</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="150"/>
         <source>Documentation</source>
-        <translation type="unfinished">Документация</translation>
+        <translation>Документация</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="155"/>
         <source>Visit the online project documentation</source>
-        <translation type="unfinished">Посетить онлайн-документацию проекта</translation>
+        <translation>Посетить онлайн-документацию проекта</translation>
     </message>
 </context>
 <context>
@@ -72,17 +72,17 @@
     <message>
         <location filename="../src/ui/components/AdditionalInfo.qml" line="42"/>
         <source>Additional caller related information</source>
-        <translation type="unfinished">Дополнительная информация об абоненте</translation>
+        <translation>Дополнительная информация об абоненте</translation>
     </message>
     <message>
         <location filename="../src/ui/components/AdditionalInfo.qml" line="43"/>
         <source>List of informational items regarding the caller, such as open support tickets</source>
-        <translation type="unfinished">Список информации об абоненте, например открытые тикеты поддержки</translation>
+        <translation>Информация об абоненте, например открытые обращения в службу поддержки</translation>
     </message>
     <message>
         <location filename="../src/ui/components/AdditionalInfo.qml" line="54"/>
         <source>Expandable response section</source>
-        <translation type="unfinished">Раскрываемый раздел ответа</translation>
+        <translation>Раскрываемый блок ответа</translation>
     </message>
 </context>
 <context>
@@ -90,7 +90,7 @@
     <message>
         <location filename="../src/contacts/AddressBookManager.cpp" line="224"/>
         <source>Failed to persist address book credentials: %1</source>
-        <translation type="unfinished">Не удалось сохранить учетные данные адресной книги: %1</translation>
+        <translation>Не удалось сохранить учетные данные адресной книги: %1</translation>
     </message>
 </context>
 <context>
@@ -98,7 +98,7 @@
     <message>
         <location filename="../src/ui/components/popups/AudioDeviceMenu.qml" line="30"/>
         <source>Default</source>
-        <translation type="unfinished">По умолчанию</translation>
+        <translation>По умолчанию</translation>
     </message>
 </context>
 <context>
@@ -106,117 +106,117 @@
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="11"/>
         <source>Unknown audio environment</source>
-        <translation type="unfinished">Неизвестная аудиосреда</translation>
+        <translation>Неизвестная аудиоокружение</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="34"/>
         <source>Audio environment error</source>
-        <translation type="unfinished">Ошибка аудиосреды</translation>
+        <translation>Ошибка аудиоокружения</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="39"/>
         <source>No fitting audio environment could be found. Please select the desired audio devices.</source>
-        <translation type="unfinished">Подходящая аудиосреда не найдена. Выберите нужные аудиоустройства.</translation>
+        <translation>Подходящая аудиооконфигурация не найдена. Выберите нужные аудиоустройства.</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="57"/>
         <source>Input device selection header</source>
-        <translation type="unfinished">Заголовок выбора устройства ввода</translation>
+        <translation>Заголовок выбора устройства ввода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="58"/>
         <source>Header for the input device selection below</source>
-        <translation type="unfinished">Заголовок для выбора устройства ввода ниже</translation>
+        <translation>Заголовок для выбора устройства ввода ниже</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="62"/>
         <source>Input device</source>
-        <translation type="unfinished">Устройство ввода</translation>
+        <translation>Устройство ввода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="83"/>
         <source>Input device selection box</source>
-        <translation type="unfinished">Поле выбора устройства ввода</translation>
+        <translation>Поле выбора устройства ввода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="84"/>
         <source>Select the input device that should be used</source>
-        <translation type="unfinished">Выбрать устройство ввода</translation>
+        <translation>Выбрать устройство ввода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="97"/>
         <source>Currently selected input device</source>
-        <translation type="unfinished">Текущее устройство ввода</translation>
+        <translation>Текущее устройство ввода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="139"/>
         <source>Output device selection header</source>
-        <translation type="unfinished">Заголовок выбора устройства вывода</translation>
+        <translation>Заголовок выбора устройства вывода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="140"/>
         <source>Header for the output device selection below</source>
-        <translation type="unfinished">Заголовок для выбора устройства вывода ниже</translation>
+        <translation>Заголовок для выбора устройства вывода ниже</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="143"/>
         <source>Output device</source>
-        <translation type="unfinished">Устройство вывода</translation>
+        <translation>Устройство вывода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="164"/>
         <source>Output device selection box</source>
-        <translation type="unfinished">Поле выбора устройства вывода</translation>
+        <translation>Поле выбора устройства вывода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="165"/>
         <source>Select the output device that should be used</source>
-        <translation type="unfinished">Выбрать устройство вывода</translation>
+        <translation>Выбрать устройство вывода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="178"/>
         <source>Currently selected output device</source>
-        <translation type="unfinished">Текущее устройство вывода</translation>
+        <translation>Текущее устройство вывода</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="220"/>
         <source>Ring tone output device</source>
-        <translation type="unfinished">Устройство вывода мелодии звонка</translation>
+        <translation>Устройство для вывода мелодии звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="225"/>
         <source>Output device for ring tone</source>
-        <translation type="unfinished">Устройство вывода для мелодии звонка</translation>
+        <translation>Устройство вывода для мелодии звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="246"/>
         <source>Ring tone output device selection box</source>
-        <translation type="unfinished">Поле выбора устройства вывода мелодии</translation>
+        <translation>Поле выбора устройства вывода мелодии</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="247"/>
         <source>Select the output device that should be used for playing the ring tone</source>
-        <translation type="unfinished">Выбрать устройство для воспроизведения мелодии звонка</translation>
+        <translation>Выбрать устройство для воспроизведения мелодии звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="260"/>
         <source>Currently selected ring tone output device</source>
-        <translation type="unfinished">Текущее устройство вывода мелодии</translation>
+        <translation>Текущее устройство вывода мелодии звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="298"/>
         <source>Ok</source>
-        <translation type="unfinished">ОК</translation>
+        <translation>ОК</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="312"/>
         <source>Close audio environment selection</source>
-        <translation type="unfinished">Закрыть выбор аудиосреды</translation>
+        <translation>Закрыть выбор аудиосреды</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="313"/>
         <source>Confirmation button to leave the audio environment selection window</source>
-        <translation type="unfinished">Кнопка подтверждения для выхода из окна выбора аудиосреды</translation>
+        <translation>Кнопка подтверждения для выхода из окна выбора аудиосреды</translation>
     </message>
 </context>
 <context>
@@ -224,27 +224,27 @@
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="25"/>
         <source>Default</source>
-        <translation type="unfinished">По умолчанию</translation>
+        <translation>По умолчанию</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="98"/>
         <source>Reset tone</source>
-        <translation type="unfinished">Сбросить звук</translation>
+        <translation>Сбросить звук</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="99"/>
         <source>Reset the tone to its default option</source>
-        <translation type="unfinished">Сбросить звук к значению по умолчанию</translation>
+        <translation>Сбросить звук к значению по умолчанию</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="116"/>
         <source>Pick sound file</source>
-        <translation type="unfinished">Выбрать звуковой файл</translation>
+        <translation>Выбрать звуковой файл</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="117"/>
         <source>Select the sound file you want to use</source>
-        <translation type="unfinished">Выберите звуковой файл, который хотите использовать</translation>
+        <translation>Выберите звуковой файл, который хотите использовать</translation>
     </message>
 </context>
 <context>
@@ -252,7 +252,7 @@
     <message>
         <location filename="../src/ui/components/controls/AudioLevelButton.qml" line="28"/>
         <source>Change volume</source>
-        <translation type="unfinished">Изменить громкость</translation>
+        <translation>Изменить громкость</translation>
     </message>
 </context>
 <context>
@@ -260,12 +260,12 @@
     <message>
         <location filename="../src/media/AudioManager.cpp" line="129"/>
         <source>Default input</source>
-        <translation type="unfinished">Вход по умолчанию</translation>
+        <translation>Вход по умолчанию</translation>
     </message>
     <message>
         <location filename="../src/media/AudioManager.cpp" line="130"/>
         <source>Default output</source>
-        <translation type="unfinished">Выход по умолчанию</translation>
+        <translation>Выход по умолчанию</translation>
     </message>
 </context>
 <context>
@@ -273,12 +273,12 @@
     <message>
         <location filename="../src/ui/components/controls/AudioPlayer.qml" line="77"/>
         <source>%1:%2 (%3)</source>
-        <translation type="unfinished">%1:%2 (%3)</translation>
+        <translation>%1:%2 (%3)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioPlayer.qml" line="136"/>
         <source>%1:%2</source>
-        <translation type="unfinished">%1:%2</translation>
+        <translation>%1:%2</translation>
     </message>
 </context>
 <context>
@@ -286,7 +286,7 @@
     <message>
         <location filename="../src/AuthManager.cpp" line="147"/>
         <source>Failed to persist jitsi refresh token: %1</source>
-        <translation type="unfinished">Не удалось сохранить токен обновления Jitsi: %1</translation>
+        <translation>Не удалось сохранить токен обновления Jitsi: %1</translation>
     </message>
 </context>
 <context>
@@ -294,7 +294,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/BaseDialog.qml" line="11"/>
         <source>Dialog</source>
-        <translation type="unfinished">Диалог</translation>
+        <translation>Диалог</translation>
     </message>
 </context>
 <context>
@@ -302,17 +302,17 @@
     <message>
         <location filename="../src/ui/components/pages/BasePage.qml" line="116"/>
         <source>Base dashboard page grid</source>
-        <translation type="unfinished">Базовая сетка страницы панели управления</translation>
+        <translation>Базовая сетка страницы панели управления</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/BasePage.qml" line="117"/>
         <source>Canvas for editable dashboard pages</source>
-        <translation type="unfinished">Холст для редактируемых страниц панели управления</translation>
+        <translation>Область редактирования страниц панели управления</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/BasePage.qml" line="122"/>
         <source>Add widgets</source>
-        <translation type="unfinished">Добавить виджеты</translation>
+        <translation>Добавить виджеты</translation>
     </message>
 </context>
 <context>
@@ -320,32 +320,32 @@
     <message>
         <location filename="../src/ui/components/BaseWidget.qml" line="248"/>
         <source>Drag widget</source>
-        <translation type="unfinished">Перетащить виджет</translation>
+        <translation>Перетащить виджет</translation>
     </message>
     <message>
         <location filename="../src/ui/components/BaseWidget.qml" line="249"/>
         <source>Change the position of the widget</source>
-        <translation type="unfinished">Изменить положение виджета</translation>
+        <translation>Изменить положение виджета</translation>
     </message>
     <message>
         <location filename="../src/ui/components/BaseWidget.qml" line="299"/>
         <source>Remove widget</source>
-        <translation type="unfinished">Удалить виджет</translation>
+        <translation>Удалить виджет</translation>
     </message>
     <message>
         <location filename="../src/ui/components/BaseWidget.qml" line="300"/>
         <source>Remove the currently selected widget from the dashboard</source>
-        <translation type="unfinished">Удалить выбранный виджет с панели управления</translation>
+        <translation>Удалить выбранный виджет с панели управления</translation>
     </message>
     <message>
         <location filename="../src/ui/components/BaseWidget.qml" line="364"/>
         <source>Resize widget</source>
-        <translation type="unfinished">Изменить размер виджета</translation>
+        <translation>Изменить размер виджета</translation>
     </message>
     <message>
         <location filename="../src/ui/components/BaseWidget.qml" line="365"/>
         <source>Resize the widget according to the mouse direction</source>
-        <translation type="unfinished">Изменить размер виджета по направлению мыши</translation>
+        <translation>Изменить размер виджета в направлении движения мыши</translation>
     </message>
 </context>
 <context>
@@ -360,47 +360,47 @@
         <location filename="../src/ui/BaseWindow.qml" line="313"/>
         <location filename="../src/ui/BaseWindow.qml" line="343"/>
         <source>Drag border</source>
-        <translation type="unfinished">Граница перетаскивания</translation>
+        <translation>Граница для перетаскивания</translation>
     </message>
     <message>
         <location filename="../src/ui/BaseWindow.qml" line="139"/>
         <source>Top left drag border for window resize operations</source>
-        <translation type="unfinished">Граница перетаскивания вверху слева</translation>
+        <translation>Верхняя левая граница для изменения размера окна</translation>
     </message>
     <message>
         <location filename="../src/ui/BaseWindow.qml" line="170"/>
         <source>Top drag border for window resize operations</source>
-        <translation type="unfinished">Верхняя граница изменения размера окна</translation>
+        <translation>Верхняя граница для изменения размера окна</translation>
     </message>
     <message>
         <location filename="../src/ui/BaseWindow.qml" line="198"/>
         <source>Top right border for window resize operations</source>
-        <translation type="unfinished">Граница вверху справа</translation>
+        <translation>Верхняя правая граница для изменения размера окна</translation>
     </message>
     <message>
         <location filename="../src/ui/BaseWindow.qml" line="228"/>
         <source>Right drag border for window resize operations</source>
-        <translation type="unfinished">Правая граница изменения размера окна</translation>
+        <translation>Правая граница для изменения размера окна</translation>
     </message>
     <message>
         <location filename="../src/ui/BaseWindow.qml" line="256"/>
         <source>Bottom right drag border for window resize operations</source>
-        <translation type="unfinished">Граница внизу справа</translation>
+        <translation>Нижняя правая граница для изменения размера окна</translation>
     </message>
     <message>
         <location filename="../src/ui/BaseWindow.qml" line="286"/>
         <source>Bottom drag border for window resize operations</source>
-        <translation type="unfinished">Нижняя граница изменения размера окна</translation>
+        <translation>Нижняя граница для изменения размера окна</translation>
     </message>
     <message>
         <location filename="../src/ui/BaseWindow.qml" line="314"/>
         <source>Bottom left drag border for window resize operations</source>
-        <translation type="unfinished">Граница внизу слева</translation>
+        <translation>Нижняя левая граница для изменения размера окна</translation>
     </message>
     <message>
         <location filename="../src/ui/BaseWindow.qml" line="344"/>
         <source>Left drag border for window resize operations</source>
-        <translation type="unfinished">Левая граница изменения размера окна</translation>
+        <translation>Левая граница для изменения размера окна</translation>
     </message>
 </context>
 <context>
@@ -408,7 +408,7 @@
     <message>
         <location filename="../src/ui/components/BottomStatusBar.qml" line="15"/>
         <source>Status bar</source>
-        <translation type="unfinished">Строка состояния</translation>
+        <translation>Строка состояния</translation>
     </message>
 </context>
 <context>
@@ -416,27 +416,27 @@
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="18"/>
         <source>Toggle fullscreen</source>
-        <translation type="unfinished">Полноэкранный режим</translation>
+        <translation>Полноэкранный режим</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="30"/>
         <source>Shortcuts...</source>
-        <translation type="unfinished">Горячие клавиши...</translation>
+        <translation>Горячие клавиши...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="42"/>
         <source>Customize UI</source>
-        <translation type="unfinished">Настроить интерфейс</translation>
+        <translation>Настроить интерфейс</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="55"/>
         <source>About...</source>
-        <translation type="unfinished">О программе...</translation>
+        <translation>О программе...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/BurgerMenu.qml" line="67"/>
         <source>Quit</source>
-        <translation type="unfinished">Выход</translation>
+        <translation>Выход</translation>
     </message>
 </context>
 <context>
@@ -444,7 +444,7 @@
     <message>
         <location filename="../src/calendar/caldav/CalDAVEventFeeder.cpp" line="201"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished">Ошибка аутентификации для %1</translation>
+        <translation>Ошибка аутентификации для %1</translation>
     </message>
 </context>
 <context>
@@ -452,12 +452,12 @@
     <message>
         <location filename="../src/ui/components/pages/Call.qml" line="284"/>
         <source>Conference</source>
-        <translation type="unfinished">Конференция</translation>
+        <translation>Конференция</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Call.qml" line="361"/>
         <source>Drag bar</source>
-        <translation type="unfinished">Панель перетаскивания</translation>
+        <translation>Панель перетаскивания</translation>
     </message>
 </context>
 <context>
@@ -465,73 +465,73 @@
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="445"/>
         <source>%1@%2 kHz</source>
-        <translation type="unfinished">%1@%2 кГц</translation>
+        <translation>%1@%2 кГц</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="223"/>
         <source>Transmit</source>
-        <translation type="unfinished">Передача</translation>
+        <translation>Передача</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="109"/>
         <source>Call security level</source>
-        <translation type="unfinished">Уровень безопасности звонка</translation>
+        <translation>Уровень безопасности звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="110"/>
         <source>Security level of the ongoing call</source>
-        <translation type="unfinished">Уровень безопасности текущего звонка</translation>
+        <translation>Уровень безопасности текущего звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="123"/>
         <source>Call security details</source>
-        <translation type="unfinished">Сведения о безопасности звонка</translation>
+        <translation>Сведения о безопасности звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="124"/>
         <source>Detailed call security status: %1 / %2</source>
-        <translation type="unfinished">Подробный статус безопасности: %1 / %2</translation>
+        <translation>Подробный статус безопасности: %1 / %2</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="127"/>
         <source>signaling encrypted</source>
-        <translation type="unfinished">сигнализация зашифрована</translation>
+        <translation>Сигнализация зашифрована</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="128"/>
         <source>signaling unencrypted</source>
-        <translation type="unfinished">сигнализация не зашифрована</translation>
+        <translation>Сигнализация не зашифрована</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="130"/>
         <source>media encrypted</source>
-        <translation type="unfinished">медиа зашифровано</translation>
+        <translation>Медиа зашифровано</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="131"/>
         <source>media unencrypted</source>
-        <translation type="unfinished">медиа не зашифровано</translation>
+        <translation>Медиа не зашифровано</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="198"/>
         <source>Call quality</source>
-        <translation type="unfinished">Качество звонка</translation>
+        <translation>Качество звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="199"/>
         <source>Quality of the ongoing call</source>
-        <translation type="unfinished">Качество текущего звонка</translation>
+        <translation>Качество текущего звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="219"/>
         <source>Transmission statistics</source>
-        <translation type="unfinished">Статистика передачи</translation>
+        <translation>Статистика передачи</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="220"/>
         <location filename="../src/ui/components/CallButtonBar.qml" line="327"/>
         <source>Call quality metrics</source>
-        <translation type="unfinished">Метрики качества звонка</translation>
+        <translation>Показатели качества звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="236"/>
@@ -543,200 +543,200 @@
         <location filename="../src/ui/components/CallButtonBar.qml" line="249"/>
         <location filename="../src/ui/components/CallButtonBar.qml" line="356"/>
         <source>Mean opinion score</source>
-        <translation type="unfinished">Средняя оценка качества (MOS)</translation>
+        <translation>Средняя оценка качества (MOS)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="250"/>
         <source>Numerical metric assessing transmission-side voice call quality: %1</source>
-        <translation type="unfinished">Числовая метрика качества голосовой связи на стороне передачи: %1</translation>
+        <translation>Числовой показатель качества голосовой связи при передаче: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="256"/>
         <location filename="../src/ui/components/CallButtonBar.qml" line="363"/>
         <source>Packet loss</source>
-        <translation type="unfinished">Потеря пакетов</translation>
+        <translation>Потеря пакетов</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="270"/>
         <source>%1% of packets lost in transmission</source>
-        <translation type="unfinished">%1% пакетов потеряно при передаче</translation>
+        <translation>%1% пакетов потеряно при передаче</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="276"/>
         <location filename="../src/ui/components/CallButtonBar.qml" line="383"/>
         <source>Jitter</source>
-        <translation type="unfinished">Джиттер</translation>
+        <translation>Джиттер</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="290"/>
         <source>Amount of transmission side jitter: %1</source>
-        <translation type="unfinished">Джиттер на стороне передачи: %1</translation>
+        <translation>Джиттер на стороне передачи: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="296"/>
         <location filename="../src/ui/components/CallButtonBar.qml" line="403"/>
         <source>Effective delay</source>
-        <translation type="unfinished">Эффективная задержка</translation>
+        <translation>Эффективная задержка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="310"/>
         <source>Effective transmission side call delay: %1</source>
-        <translation type="unfinished">Эффективная задержка на стороне передачи: %1</translation>
+        <translation>Эффективная задержка при передаче: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="326"/>
         <source>Receiver statistics</source>
-        <translation type="unfinished">Статистика приёма</translation>
+        <translation>Статистика приёма</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="330"/>
         <source>Receive</source>
-        <translation type="unfinished">Приём</translation>
+        <translation>Приём</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="357"/>
         <source>Numerical metric assessing receiver-side voice/video call quality: %1</source>
-        <translation type="unfinished">Числовая метрика качества на стороне приёма: %1</translation>
+        <translation>Числовой показатель качества голосовой и видеосвязи на стороне приёма: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="377"/>
         <source>%1% of packets lost in receival</source>
-        <translation type="unfinished">%1% пакетов потеряно при приёме</translation>
+        <translation>%1% пакетов потеряно при приёме</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="397"/>
         <source>Amount of receiver side jitter: %1</source>
-        <translation type="unfinished">Джиттер на стороне приёма: %1</translation>
+        <translation>Джиттер на стороне приёма: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="417"/>
         <source>Effective receiver side call delay: %1</source>
-        <translation type="unfinished">Эффективная задержка на стороне приёма: %1</translation>
+        <translation>Эффективная задержка звонка на стороне приёма: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="439"/>
         <source>Codec</source>
-        <translation type="unfinished">Кодек</translation>
+        <translation>Кодек</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="452"/>
         <source>Audio codec</source>
-        <translation type="unfinished">Аудиокодек</translation>
+        <translation>Аудиокодек</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="453"/>
         <source>The currently used audio codec and frequency: %1</source>
-        <translation type="unfinished">Текущий аудиокодек и частота: %1</translation>
+        <translation>Текущий аудиокодек и частота: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="501"/>
         <source>Elapsed call time</source>
-        <translation type="unfinished">Прошедшее время звонка</translation>
+        <translation>Продолжительность звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="502"/>
         <source>The duration in seconds the call has been active for: %1</source>
-        <translation type="unfinished">Продолжительность звонка в секундах: %1</translation>
+        <translation>Продолжительность звонка в секундах: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="517"/>
         <source>Screen</source>
-        <translation type="unfinished">Экран</translation>
+        <translation>Экран</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="527"/>
         <source>Screensharing control</source>
-        <translation type="unfinished">Управление демонстрацией экрана</translation>
+        <translation>Управление демонстрацией экрана</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="528"/>
         <source>Start sharing your screen</source>
-        <translation type="unfinished">Начать демонстрацию экрана</translation>
+        <translation>Начать демонстрацию экрана</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="535"/>
         <source>Camera</source>
-        <translation type="unfinished">Камера</translation>
+        <translation>Камера</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="545"/>
         <source>Camera control</source>
-        <translation type="unfinished">Управление камерой</translation>
+        <translation>Управление камерой</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="546"/>
         <source>Enable your camera</source>
-        <translation type="unfinished">Включить камеру</translation>
+        <translation>Включить камеру</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="553"/>
         <source>Resume</source>
-        <translation type="unfinished">Продолжить</translation>
+        <translation>Продолжить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="553"/>
         <source>Hold</source>
-        <translation type="unfinished">Удержание</translation>
+        <translation>Удержание</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="560"/>
         <source>Resume call</source>
-        <translation type="unfinished">Продолжить звонок</translation>
+        <translation>Продолжить звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="560"/>
         <source>Hold call</source>
-        <translation type="unfinished">Удержать звонок</translation>
+        <translation>Удержать звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="561"/>
         <source>Update the call hold state</source>
-        <translation type="unfinished">Обновить состояние удержания</translation>
+        <translation>Обновить состояние удержания звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="582"/>
         <source>Micro</source>
-        <translation type="unfinished">Микрофон</translation>
+        <translation>Микрофон</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="587"/>
         <source>Microphone mute locked by headset</source>
-        <translation type="unfinished">Отключение микрофона заблокировано гарнитурой</translation>
+        <translation>Отключение микрофона заблокировано на гарнитуре</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="601"/>
         <source>Input control</source>
-        <translation type="unfinished">Управление входом</translation>
+        <translation>Управление входом</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="602"/>
         <source>Set the mute state of the current input device</source>
-        <translation type="unfinished">Установить режим отключения звука устройства ввода</translation>
+        <translation>Изменить состояние отключения звука текущего устройства ввода</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="609"/>
         <source>Output</source>
-        <translation type="unfinished">Выход</translation>
+        <translation>Выход</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="625"/>
         <source>Output control</source>
-        <translation type="unfinished">Управление выходом</translation>
+        <translation>Управление выходом</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="626"/>
         <source>Change the current output devices</source>
-        <translation type="unfinished">Изменить текущие устройства вывода</translation>
+        <translation>Изменить текущие устройства вывода</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="650"/>
         <source>Accept call</source>
-        <translation type="unfinished">Принять звонок</translation>
+        <translation>Принять звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="674"/>
         <source>Hangup call</source>
-        <translation type="unfinished">Завершить звонок</translation>
+        <translation>Завершить звонок</translation>
     </message>
 </context>
 <context>
@@ -744,47 +744,47 @@
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="122"/>
         <source>SIP call status code</source>
-        <translation type="unfinished">Код состояния SIP-звонка</translation>
+        <translation>Код состояния SIP-звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="123"/>
         <source>The current status code of the call: %1</source>
-        <translation type="unfinished">Текущий код состояния звонка: %1</translation>
+        <translation>Текущий код состояния звонка: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="184"/>
         <source>Jitsi Meet</source>
-        <translation type="unfinished">Jitsi Meet</translation>
+        <translation>Jitsi Meet</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="200"/>
         <source>Switch to a Jitsi Meet session</source>
-        <translation type="unfinished">Перейти к сеансу Jitsi Meet</translation>
+        <translation>Переключиться на сеанс Jitsi Meet</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="207"/>
         <source>Unhold</source>
-        <translation type="unfinished">Снять с удержания</translation>
+        <translation>Снять с удержания</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="207"/>
         <source>Hold</source>
-        <translation type="unfinished">Удержание</translation>
+        <translation>Удержание</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="226"/>
         <source>Toggle the hold state to %1</source>
-        <translation type="unfinished">Переключить удержание на %1</translation>
+        <translation>Переключить удержание на %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="248"/>
         <source>Accept call</source>
-        <translation type="unfinished">Принять звонок</translation>
+        <translation>Принять звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallDetails.qml" line="274"/>
         <source>Hangup call</source>
-        <translation type="unfinished">Завершить звонок</translation>
+        <translation>Завершить звонок</translation>
     </message>
 </context>
 <context>
@@ -792,22 +792,22 @@
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="32"/>
         <source>Failed to create directory %1 to store the call history database.</source>
-        <translation type="unfinished">Не удалось создать каталог %1 для базы данных истории звонков.</translation>
+        <translation>Не удалось создать каталог %1 для базы данных истории звонков.</translation>
     </message>
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="82"/>
         <source>Failed to open call history database: %1</source>
-        <translation type="unfinished">Не удалось открыть базу данных истории звонков: %1</translation>
+        <translation>Не удалось открыть базу данных истории звонков: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="107"/>
         <source>Call history database is inconsistent. Please remove %1 and restart the App to re-initialize the database.</source>
-        <translation type="unfinished">База данных истории звонков несовместима. Удалите %1 и перезапустите приложение.</translation>
+        <translation>База данных истории звонков несовместима. Удалите %1 и перезапустите приложение.</translation>
     </message>
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="403"/>
         <source>Database error: cannot remove history row</source>
-        <translation type="unfinished">Ошибка базы данных: не удалось удалить запись истории</translation>
+        <translation>Ошибка базы данных: не удалось удалить запись истории</translation>
     </message>
 </context>
 <context>
@@ -815,22 +815,22 @@
     <message>
         <location filename="../src/ui/components/CallItem.qml" line="64"/>
         <source>Call</source>
-        <translation type="unfinished">Звонок</translation>
+        <translation>Звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallItem.qml" line="65"/>
         <source>Selected call %1 - contact %2, company %3, location %4/%5, number %6</source>
-        <translation type="unfinished">Выбранный звонок %1 — контакт %2, компания %3, место %4/%5, номер %6</translation>
+        <translation>Выбранный звонок %1 — контакт %2, компания %3, место %4/%5, номер %6</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallItem.qml" line="178"/>
         <source>Hangup button</source>
-        <translation type="unfinished">Кнопка завершения</translation>
+        <translation>Кнопка завершения</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallItem.qml" line="179"/>
         <source>Pressing this will end the call</source>
-        <translation type="unfinished">Нажатие завершит звонок</translation>
+        <translation>Нажмите, чтобы завершить звонок</translation>
     </message>
 </context>
 <context>
@@ -838,18 +838,18 @@
     <message>
         <location filename="../src/ui/components/CallList.qml" line="36"/>
         <source>Drag callers onto each other to transfer call</source>
-        <translation type="unfinished">Перетащите абонентов друг на друга для переадресации</translation>
+        <translation>Перетащите абонентов друг на друга для переадресации</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallList.qml" line="67"/>
         <source>List of active calls</source>
-        <translation type="unfinished">Список активных звонков</translation>
+        <translation>Список активных звонков</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallList.qml" line="99"/>
         <location filename="../src/ui/components/CallList.qml" line="119"/>
         <source>Create conference</source>
-        <translation type="unfinished">Создать конференцию</translation>
+        <translation>Создать конференцию</translation>
     </message>
 </context>
 <context>
@@ -857,21 +857,21 @@
     <message>
         <location filename="../src/ui/components/CallSideBar.qml" line="200"/>
         <source>Chat</source>
-        <translation type="unfinished">Чат</translation>
+        <translation>Чат</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/CallSideBar.qml" line="217"/>
         <source>Person(s)</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n участник</numerusform>
             <numerusform>%n участника</numerusform>
-            <numerusform>%n участники</numerusform>
+            <numerusform>%n участников</numerusform>
         </translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallSideBar.qml" line="235"/>
         <source>Info</source>
-        <translation type="unfinished">Сведения</translation>
+        <translation>Информация</translation>
     </message>
 </context>
 <context>
@@ -879,22 +879,22 @@
     <message>
         <location filename="../src/ui/components/CallerBigAvatar.qml" line="22"/>
         <source>Caller name</source>
-        <translation type="unfinished">Имя звонящего</translation>
+        <translation>Имя звонящего</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallerBigAvatar.qml" line="68"/>
         <source>is calling...</source>
-        <translation type="unfinished">звонит...</translation>
+        <translation>звонит...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallerBigAvatar.qml" line="83"/>
         <source>Calling...</source>
-        <translation type="unfinished">Вызов...</translation>
+        <translation>Вызов...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallerBigAvatar.qml" line="83"/>
         <source>In progress...</source>
-        <translation type="unfinished">Установка соединения...</translation>
+        <translation>Установка соединения...</translation>
     </message>
 </context>
 <context>
@@ -902,7 +902,7 @@
     <message>
         <location filename="../src/ui/CallsModel.cpp" line="416"/>
         <source>unknown number</source>
-        <translation type="unfinished">неизвестный номер</translation>
+        <translation>неизвестный номер</translation>
     </message>
 </context>
 <context>
@@ -910,12 +910,12 @@
     <message>
         <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="96"/>
         <source>CardDAV source %1 repeatedly failed</source>
-        <translation type="unfinished">Источник CardDAV %1 неоднократно завершался с ошибкой</translation>
+        <translation>При работе с источником CardDAV %1 неоднократно возникала ошибка</translation>
     </message>
     <message>
         <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="127"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished">Ошибка аутентификации для %1</translation>
+        <translation>Ошибка аутентификации для %1</translation>
     </message>
 </context>
 <context>
@@ -923,7 +923,7 @@
     <message>
         <location filename="../src/ui/components/CardList.qml" line="18"/>
         <source>List of configurable options</source>
-        <translation type="unfinished">Список настраиваемых параметров</translation>
+        <translation>Список настраиваемых параметров</translation>
     </message>
 </context>
 <context>
@@ -931,17 +931,17 @@
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="76"/>
         <source>Direct conversation with %1</source>
-        <translation type="unfinished">Личная беседа с %1</translation>
+        <translation>Прямой разговор с %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="77"/>
         <source>Chat room %1</source>
-        <translation type="unfinished">Чат-комната %1</translation>
+        <translation>Чат-комната %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="89"/>
         <source>Call</source>
-        <translation type="unfinished">Звонок</translation>
+        <translation>Звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="160"/>
@@ -1317,7 +1317,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="90"/>
         <source>You have been invited to join this room &apos;%1&apos;.</source>
-        <translation type="unfinished">Вас пригласили в чат-комнату '%1'.</translation>
+        <translation type="unfinished">Вас пригласили в чат-комнату &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="93"/>
@@ -6599,7 +6599,7 @@
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="30"/>
         <source>Jitsi Meet (room &apos;%1&apos;)</source>
-        <translation type="unfinished">Jitsi Meet (комната '%1')</translation>
+        <translation type="unfinished">Jitsi Meet (комната &apos;%1&apos;)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="33"/>
