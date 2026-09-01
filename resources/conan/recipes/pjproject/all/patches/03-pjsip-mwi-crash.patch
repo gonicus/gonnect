@@ -1,0 +1,80 @@
+diff --git a/pjsip/src/pjsua-lib/pjsua_pres.c b/pjsip/src/pjsua-lib/pjsua_pres.c
+--- a/pjsip/src/pjsua-lib/pjsua_pres.c
++++ b/pjsip/src/pjsua-lib/pjsua_pres.c
+@@ -2399,6 +2399,7 @@
+     pj_str_t contact;
+     pjsip_tx_data *tdata;
+     pjsip_tpselector tp_sel;
++    pjsip_dialog *dlg;
+     pj_status_t status = PJ_SUCCESS;
+ 
+     PJ_ASSERT_RETURN(acc_id>=0 && acc_id<(int)PJ_ARRAY_SIZE(pjsua_var.acc)
+@@ -2433,14 +2434,16 @@
+         /* Update MWI subscription */
+         pj_assert(acc->mwi_dlg);
+         pjsip_dlg_inc_lock(acc->mwi_dlg);
+-        
++
++        dlg = acc->mwi_dlg;
++
+         status = pjsip_mwi_initiate(acc->mwi_sub, acc->cfg.mwi_expires, &tdata);
+         if (status == PJ_SUCCESS) {
+             pjsua_process_msg_data(tdata, NULL);
+             status = pjsip_pres_send_request(acc->mwi_sub, tdata);
+         }
+ 
+-        pjsip_dlg_dec_lock(acc->mwi_dlg);
++        pjsip_dlg_dec_lock(dlg);
+         return status;
+     }
+ 
+@@ -2478,6 +2485,7 @@
+      * fails the dialog will be destroyed prematurely.
+      */
+     pjsip_dlg_inc_lock(acc->mwi_dlg);
++    dlg = acc->mwi_dlg;
+ 
+     if (acc->cfg.allow_via_rewrite && acc->via_addr.host.slen > 0) {
+         pjsip_dlg_set_via_sent_by(acc->mwi_dlg, &acc->via_addr, acc->via_tp);
+@@ -2504,7 +2512,7 @@
+                                   PJSIP_EVSUB_NO_EVENT_ID, &acc->mwi_sub);
+     if (status != PJ_SUCCESS) {
+         pjsua_perror(THIS_FILE, "Error creating MWI subscription", status);
+-        pjsip_dlg_dec_lock(acc->mwi_dlg);
++        pjsip_dlg_dec_lock(dlg);
+         goto on_return;
+     }
+ 
+@@ -2540,8 +2548,9 @@
+ 
+     status = pjsip_mwi_initiate(acc->mwi_sub, acc->cfg.mwi_expires, &tdata);
+     if (status != PJ_SUCCESS) {
+-        pjsip_dlg_dec_lock(acc->mwi_dlg);
+-        pjsip_pres_terminate(acc->mwi_sub, PJ_FALSE);
++        pjsip_dlg_dec_lock(dlg);
++        if (acc->mwi_sub)
++            pjsip_pres_terminate(acc->mwi_sub, PJ_FALSE);
+         acc->mwi_sub = NULL;
+         acc->mwi_dlg = NULL;
+         pjsua_perror(THIS_FILE, "Unable to create initial MWI SUBSCRIBE", 
+@@ -2553,8 +2562,9 @@
+ 
+     status = pjsip_pres_send_request(acc->mwi_sub, tdata);
+     if (status != PJ_SUCCESS) {
+-        pjsip_dlg_dec_lock(acc->mwi_dlg);
+-        pjsip_pres_terminate(acc->mwi_sub, PJ_FALSE);
++        pjsip_dlg_dec_lock(dlg);
++        if (acc->mwi_sub)
++            pjsip_pres_terminate(acc->mwi_sub, PJ_FALSE);
+         acc->mwi_sub = NULL;
+         acc->mwi_dlg = NULL;
+         pjsua_perror(THIS_FILE, "Unable to send initial MWI SUBSCRIBE", 
+@@ -2562,7 +2572,7 @@
+         goto on_return;
+     }
+ 
+-    pjsip_dlg_dec_lock(acc->mwi_dlg);
++    pjsip_dlg_dec_lock(dlg);
+ 
+ on_return:
+     if (tmp_pool) pj_pool_release(tmp_pool);

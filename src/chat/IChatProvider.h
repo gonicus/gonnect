@@ -144,8 +144,8 @@ public:
     Q_INVOKABLE virtual void requestUser(const QString &userId) = 0;
 
     /// Request to delete the message with the given id.
-    Q_INVOKABLE virtual void requestRemoveMessage(const QString &roomId,
-                                                  const QString &messageId) = 0;
+    Q_INVOKABLE virtual void requestRemoveMessage(const QString &roomId, const QString &messageId,
+                                                  const QString &reason = QString()) = 0;
 
     /// Retry sending a message that has previously failed.
     Q_INVOKABLE virtual void retrySendMessage(const QString &roomId,

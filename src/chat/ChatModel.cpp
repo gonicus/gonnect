@@ -188,6 +188,14 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
             m.insert("reaction", reaction->reaction());
             m.insert("count", reaction->count());
             m.insert("isOwnReaction", ownUserId.isEmpty() ? false : reaction->isUser(ownUserId));
+
+            const auto &users = reaction->users();
+            QVariantList usersVariant;
+            usersVariant.reserve(users.size());
+            std::ranges::transform(users, std::back_inserter(usersVariant),
+                                   [](QObject *obj) { return QVariant::fromValue(obj); });
+            m.insert("users", usersVariant);
+
             l.append(m);
         }
         return l;

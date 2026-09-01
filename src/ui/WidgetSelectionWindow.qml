@@ -135,7 +135,7 @@ BaseWindow {
 
                     ListElement {
                         name: qsTr("Date Events")
-                        description: qsTr("List of upcoming appointments")
+                        description: qsTr("List of upcoming calendar events")
                         type: CommonWidgets.Type.DateEvents
                         iconName: "acceptTimeEvent"
                     }

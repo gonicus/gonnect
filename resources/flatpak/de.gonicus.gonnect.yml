@@ -152,6 +152,8 @@ modules:
         path: patches/pjproject-site-config.patch
       - type: patch
         path: patches/pjsip-pres-crash.patch
+      - type: patch
+        path: patches/pjsip-mwi-crash.patch
 
   - name: openldap
     config-opts:
