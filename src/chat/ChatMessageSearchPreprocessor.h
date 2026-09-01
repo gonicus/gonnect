@@ -1,0 +1,33 @@
+#pragma once
+
+#include <QObject>
+#include <QDateTime>
+#include <QMutexLocker>
+
+#include <unicode/parseerr.h>
+#include <unicode/translit.h>
+#include <unicode/unistr.h>
+#include <libstemmer.h>
+
+class ChatMessageSearchPreprocessor : public QObject
+{
+    Q_OBJECT
+
+public:
+    ChatMessageSearchPreprocessor(QObject *parent = nullptr);
+    ~ChatMessageSearchPreprocessor();
+
+    QString process(const QString &text);
+
+    bool isInitialized() const { return m_isInitialized; }
+
+private:
+    bool m_isInitialized = false;
+
+    icu::Transliterator *m_transliterator = nullptr;
+
+    sb_stemmer *m_stemmerDe = NULL;
+    sb_stemmer *m_stemmerEn = NULL;
+
+    QMutex m_preprocessorMutex;
+};
