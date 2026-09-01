@@ -206,7 +206,7 @@
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="298"/>
         <source>Ok</source>
-        <translation>ОК</translation>
+        <translation>Ок</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="312"/>
@@ -946,28 +946,28 @@
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="160"/>
         <source>Call contact button</source>
-        <translation type="unfinished">Кнопка вызова контакта</translation>
+        <translation>Кнопка вызова контакта</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="161"/>
         <source>Selected number %1</source>
-        <translation type="unfinished">Выбранный номер %1</translation>
+        <translation>Выбранный номер %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="202"/>
         <location filename="../src/ui/components/chat/Chat.qml" line="318"/>
         <source>Messages are loading...</source>
-        <translation type="unfinished">Загрузка сообщений...</translation>
+        <translation>Загрузка сообщений...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/Chat.qml" line="245"/>
         <source>Are you sure you really want to leave this chat?</source>
-        <translation type="unfinished">Вы действительно хотите покинуть этот чат?</translation>
+        <translation>Вы действительно хотите покинуть этот чат?</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/chat/Chat.qml" line="339"/>
         <source>%1 is/are typing</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%1 печатает</numerusform>
             <numerusform>%1 печатают</numerusform>
             <numerusform>%1 печатают</numerusform>
@@ -979,29 +979,29 @@
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="48"/>
         <source>Failed to persist chat recovery code: %1</source>
-        <translation type="unfinished">Не удалось сохранить код восстановления чата: %1</translation>
+        <translation>Не удалось сохранить код восстановления чата: %1</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="154"/>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="235"/>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="285"/>
         <source>Failed to receive secret for %1: %2</source>
-        <translation type="unfinished">Не удалось получить секрет для %1: %2</translation>
+        <translation>Не удалось получить секрет для %1: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="192"/>
         <source>Failed to save login secret for %1: %2</source>
-        <translation type="unfinished">Не удалось сохранить секрет входа для %1: %2</translation>
+        <translation>Не удалось сохранить секрет входа для %1: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="255"/>
         <source>Failed to save secret for %1: %2</source>
-        <translation type="unfinished">Не удалось сохранить секрет для %1: %2</translation>
+        <translation>Не удалось сохранить секрет для %1: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="307"/>
         <source>Failed to store persistent storage secret for %1: %2</source>
-        <translation type="unfinished">Не удалось сохранить секрет постоянного хранилища для %1: %2</translation>
+        <translation>Не удалось сохранить секрет постоянного хранилища для %1: %2</translation>
     </message>
 </context>
 <context>
@@ -1009,100 +1009,100 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="260"/>
         <source>Edit last message</source>
-        <translation type="unfinished">Редактировать последнее сообщение</translation>
+        <translation>Редактировать последнее сообщение</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="299"/>
         <source>Cancel edit</source>
-        <translation type="unfinished">Отменить редактирование</translation>
+        <translation>Отменить редактирование</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="300"/>
         <source>Discard the current message edit</source>
-        <translation type="unfinished">Отменить текущее редактирование сообщения</translation>
+        <translation>Отменить текущее редактирование сообщения</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="307"/>
         <source>Enter message...</source>
-        <translation type="unfinished">Введите сообщение...</translation>
+        <translation>Введите сообщение...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="605"/>
         <source>Open emoji picker popup</source>
-        <translation type="unfinished">Открыть панель эмодзи</translation>
+        <translation>Открыть панель эмодзи</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="637"/>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="744"/>
         <source>Bold</source>
-        <translation type="unfinished">Полужирный</translation>
+        <translation>Полужирный</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="644"/>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="749"/>
         <source>Italic</source>
-        <translation type="unfinished">Курсив</translation>
+        <translation>Курсив</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="651"/>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="754"/>
         <source>Strikethrough</source>
-        <translation type="unfinished">Зачёркнутый</translation>
+        <translation>Зачёркнутый</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="658"/>
         <source>Inline preformatted/code</source>
-        <translation type="unfinished">Преформатированный текст/код (встроенный)</translation>
+        <translation>Преформатированный текст/код (встроенный)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="665"/>
         <source>Block preformatted/code</source>
-        <translation type="unfinished">Преформатированный текст/код (блок)</translation>
+        <translation>Преформатированный текст/код (блок)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="673"/>
         <source>Text format options</source>
-        <translation type="unfinished">Параметры форматирования текста</translation>
+        <translation>Параметры форматирования текста</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="685"/>
         <source>Add hyperlink</source>
-        <translation type="unfinished">Добавить ссылку</translation>
+        <translation>Добавить ссылку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="697"/>
         <source>Select and upload image</source>
-        <translation type="unfinished">Выбрать и загрузить изображение</translation>
+        <translation>Выбрать и загрузить изображение</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="704"/>
         <source>Select and upload file</source>
-        <translation type="unfinished">Выбрать и загрузить файл</translation>
+        <translation>Выбрать и загрузить файл</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="725"/>
         <source>Send message to chat room</source>
-        <translation type="unfinished">Отправить сообщение в чат-комнату</translation>
+        <translation>Отправить сообщение в чат-комнату</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="759"/>
         <source>Inline code</source>
-        <translation type="unfinished">Встроенный код</translation>
+        <translation>Встроенный код</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="764"/>
         <source>Code block</source>
-        <translation type="unfinished">Блок кода</translation>
+        <translation>Блок кода</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="772"/>
         <source>Type message</source>
-        <translation type="unfinished">Введите сообщение</translation>
+        <translation>Введите сообщение</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="773"/>
         <source>Enter the chat text message</source>
-        <translation type="unfinished">Введите текстовое сообщение чата</translation>
+        <translation>Введите сообщение</translation>
     </message>
 </context>
 <context>
@@ -1110,17 +1110,17 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageList.qml" line="51"/>
         <source>Chat message list</source>
-        <translation type="unfinished">Список сообщений чата</translation>
+        <translation>Список сообщений</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageList.qml" line="52"/>
         <source>List of all chat messages of the current chat room</source>
-        <translation type="unfinished">Список всех сообщений текущей комнаты чата</translation>
+        <translation>Список всех сообщений текущей комнаты чата</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageList.qml" line="100"/>
         <source>Auto scroll down</source>
-        <translation type="unfinished">Автопрокрутка вниз</translation>
+        <translation>Автопрокрутка вниз</translation>
     </message>
 </context>
 <context>
@@ -1128,67 +1128,67 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="107"/>
         <source>Chat message</source>
-        <translation type="unfinished">Сообщение чата</translation>
+        <translation>Сообщение чата</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="109"/>
         <source>Selected chat message - from %1, at %2: %3</source>
-        <translation type="unfinished">Выбранное сообщение — от %1, в %2: %3</translation>
+        <translation>Выбранное сообщение — от %1, в %2: %3</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="361"/>
         <source>Retry</source>
-        <translation type="unfinished">Повторить</translation>
+        <translation>Повторить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="396"/>
         <source>Add reaction...</source>
-        <translation type="unfinished">Добавить реакцию...</translation>
+        <translation>Добавить реакцию...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="409"/>
         <source>Copy to clipboard</source>
-        <translation type="unfinished">Копировать в буфер обмена</translation>
+        <translation>Скопировать</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="424"/>
         <source>Copy link to clipboard</source>
-        <translation type="unfinished">Скопировать ссылку в буфер обмена</translation>
+        <translation>Скопировать ссылку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="433"/>
         <source>Remove message...</source>
-        <translation type="unfinished">Удалить сообщение...</translation>
+        <translation>Удалить сообщение...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="438"/>
         <source>Remove message</source>
-        <translation type="unfinished">Удалить сообщение</translation>
+        <translation>Удалить сообщение</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="439"/>
         <source>Do you really want to remove this message?</source>
-        <translation type="unfinished">Вы действительно хотите удалить это сообщение?</translation>
+        <translation>Вы действительно хотите удалить это сообщение?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="440"/>
         <source>Reason (optional, why you removed the message)</source>
-        <translation type="unfinished">Причина (необязательно, почему вы удалили сообщение)</translation>
+        <translation>Причина (необязательно; почему вы удалили сообщение)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="454"/>
         <source>Edit message...</source>
-        <translation type="unfinished">Редактировать сообщение...</translation>
+        <translation>Редактировать сообщение...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="464"/>
         <source>Reply...</source>
-        <translation type="unfinished">Ответить...</translation>
+        <translation>Ответить...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="470"/>
         <source>Toggle pin</source>
-        <translation type="unfinished">Закрепить или открепить</translation>
+        <translation>Закрепить или открепить</translation>
     </message>
 </context>
 <context>
@@ -1196,12 +1196,12 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="61"/>
         <source>Message has been removed. Reason: %1</source>
-        <translation type="unfinished">Сообщение было удалено. Причина: %1</translation>
+        <translation>Сообщение было удалено. Причина: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="63"/>
         <source>Message has been removed.</source>
-        <translation type="unfinished">Сообщение было удалено.</translation>
+        <translation>Сообщение было удалено.</translation>
     </message>
 </context>
 <context>
@@ -1209,7 +1209,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemRelatedContent.qml" line="45"/>
         <source>Answer to message from %1</source>
-        <translation type="unfinished">Ответить на сообщение от %1</translation>
+        <translation>Ответить на сообщение от %1</translation>
     </message>
 </context>
 <context>
@@ -1217,22 +1217,22 @@
     <message>
         <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="21"/>
         <source>Toggle favorite</source>
-        <translation type="unfinished">Переключить избранное</translation>
+        <translation>Добавить/удалить из избранного</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="28"/>
         <source>Edit room...</source>
-        <translation type="unfinished">Редактировать комнату...</translation>
+        <translation>Редактировать комнату...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="35"/>
         <source>Invite users...</source>
-        <translation type="unfinished">Пригласить пользователей...</translation>
+        <translation>Пригласить пользователей...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="41"/>
         <source>Leave room...</source>
-        <translation type="unfinished">Покинуть комнату...</translation>
+        <translation>Покинуть комнату...</translation>
     </message>
 </context>
 <context>
@@ -1240,17 +1240,17 @@
     <message>
         <location filename="../src/ui/components/chat/ChatRoomList.qml" line="67"/>
         <source>Chat room list</source>
-        <translation type="unfinished">Список комнат чата</translation>
+        <translation>Список комнат чата</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomList.qml" line="68"/>
         <source>List of all chat rooms</source>
-        <translation type="unfinished">Список всех комнат чата</translation>
+        <translation>Список всех комнат чата</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomList.qml" line="93"/>
         <source>Are you sure you really want to leave this chat?</source>
-        <translation type="unfinished">Вы действительно хотите покинуть этот чат?</translation>
+        <translation>Вы действительно хотите покинуть этот чат?</translation>
     </message>
 </context>
 <context>
@@ -1258,12 +1258,12 @@
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="25"/>
         <source>Chat room</source>
-        <translation type="unfinished">Комната чата</translation>
+        <translation>Комната чата</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="26"/>
         <source>Selected chat room %1: %2 unread messages</source>
-        <translation type="unfinished">Выбранная комната %1: непрочитанных %2</translation>
+        <translation>Выбранная комната %1: непрочитанных %2</translation>
     </message>
 </context>
 <context>
@@ -1271,14 +1271,14 @@
     <message>
         <location filename="../src/chat/ChatRoomProxyModel.cpp" line="60"/>
         <source>Favorites</source>
-        <translation type="unfinished">Избранное</translation>
+        <translation>Избранное</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatRoomProxyModel.cpp" line="62"/>
         <location filename="../src/chat/ChatRoomProxyModel.cpp" line="71"/>
         <location filename="../src/chat/ChatRoomProxyModel.cpp" line="77"/>
         <source>Others</source>
-        <translation type="unfinished">Прочие</translation>
+        <translation>Прочие</translation>
     </message>
 </context>
 <context>
@@ -1286,63 +1286,63 @@
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="45"/>
         <source>Select a room in the list or via search to open it.</source>
-        <translation type="unfinished">Выберите комнату в списке или с помощью поиска, чтобы открыть её.</translation>
+        <translation>Выберите комнату в списке или с помощью поиска, чтобы открыть её.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="50"/>
         <source>You are currently not a member of this room.</source>
-        <translation type="unfinished">В настоящее время вы не являетесь участником этой комнаты.</translation>
+        <translation>В настоящее время вы не являетесь участником этой комнаты.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="53"/>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="147"/>
         <source>Join</source>
-        <translation type="unfinished">Присоединиться</translation>
+        <translation>Присоединиться</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="61"/>
         <source>Optional message for the user that receives the knock:</source>
-        <translation type="unfinished">Необязательное сообщение для пользователя, получающего запрос на вход:</translation>
+        <translation>Необязательное сообщение для пользователя, получающего запрос на подключение:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="74"/>
         <source>Knock</source>
-        <translation type="unfinished">Постучаться</translation>
+        <translation>Постучаться</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="82"/>
         <source>You can only join this room by being invited.</source>
-        <translation type="unfinished">Вы можете войти в эту комнату только по приглашению.</translation>
+        <translation>Вы можете войти в эту комнату только по приглашению.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="90"/>
         <source>You have been invited to join this room &apos;%1&apos;.</source>
-        <translation type="unfinished">Вас пригласили в чат-комнату &apos;%1&apos;.</translation>
+        <translation>Вас пригласили в чат-комнату &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="93"/>
         <source>Invitation message:</source>
-        <translation type="unfinished">Текст приглашения:</translation>
+        <translation>Текст приглашения:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="124"/>
         <source>Do you want to join this chat room?</source>
-        <translation type="unfinished">Вы хотите присоединиться к этой чат-комнате?</translation>
+        <translation>Вы хотите присоединиться к этой чат-комнате?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="134"/>
         <source>Decline</source>
-        <translation type="unfinished">Отклонено</translation>
+        <translation>Отклонено</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="162"/>
         <source>You knocked on the door and are waiting for someone to let you in.</source>
-        <translation type="unfinished">Вы постучались в дверь и ждёте, пока кто-нибудь вас впустит.</translation>
+        <translation>Вы постучались и ждёте, пока кто-нибудь вас впустит.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="167"/>
         <source>You have been banned from this room and may not enter it again, unless a room administrator re-invites you.</source>
-        <translation type="unfinished">Вы были заблокированы в этой комнате и не сможете снова войти в неё, пока администратор комнаты не пригласит вас повторно.</translation>
+        <translation>Вы были заблокированы в этой комнате и не сможете снова войти в неё, пока администратор комнаты не пригласит вас повторно.</translation>
     </message>
 </context>
 <context>
@@ -1350,17 +1350,17 @@
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="80"/>
         <source>Search for users...</source>
-        <translation type="unfinished">Поиск пользователей...</translation>
+        <translation>Поиск пользователей...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="191"/>
         <source>No users found.</source>
-        <translation type="unfinished">Пользователи не найдены.</translation>
+        <translation>Пользователи не найдены.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="193"/>
         <source>Please enter a search phrase...</source>
-        <translation type="unfinished">Введите поисковый запрос...</translation>
+        <translation>Введите поисковый запрос...</translation>
     </message>
 </context>
 <context>
@@ -1368,62 +1368,62 @@
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="57"/>
         <source>You have left room &apos;%1&apos; for an unknown reason.</source>
-        <translation type="unfinished">Вы покинули комнату &apos;%1&apos; по неизвестной причине.</translation>
+        <translation>Вы покинули комнату &apos;%1&apos; по неизвестной причине.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="60"/>
         <source>You have successfully left room &apos;%1&apos;.</source>
-        <translation type="unfinished">Вы успешно покинули комнату &apos;%1&apos;.</translation>
+        <translation>Вы успешно покинули комнату &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="63"/>
         <source>You have been kicked out room &apos;%1&apos;.</source>
-        <translation type="unfinished">Вас исключили из комнаты &apos;%1&apos;.</translation>
+        <translation>Вас исключили из комнаты &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="66"/>
         <source>You have been banned from &apos;%1&apos;.</source>
-        <translation type="unfinished">Вы были заблокированы в &apos;%1&apos;.</translation>
+        <translation>Вы были заблокированы в &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="75"/>
         <source>Message from the causing user:</source>
-        <translation type="unfinished">Сообщение от пользователя, вызвавшего действие:</translation>
+        <translation>Сообщение от пользователя, вызвавшего действие:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="170"/>
         <source>Connecting...</source>
-        <translation type="unfinished">Подключение...</translation>
+        <translation>Подключение...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="311"/>
         <source>Show favorites on top</source>
-        <translation type="unfinished">Показывать избранное сверху</translation>
+        <translation>Показывать избранное сверху</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="327"/>
         <source>Show unread chats on top</source>
-        <translation type="unfinished">Показывать непрочитанные чаты сверху</translation>
+        <translation>Показывать непрочитанные чаты сверху</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="363"/>
         <source>Search user...</source>
-        <translation type="unfinished">Поиск пользователя...</translation>
+        <translation>Поиск пользователя...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="368"/>
         <source>Search public room...</source>
-        <translation type="unfinished">Поиск публичной комнаты...</translation>
+        <translation>Поиск публичной комнаты...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="373"/>
         <source>Create room...</source>
-        <translation type="unfinished">Создать комнату...</translation>
+        <translation>Создать комнату...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Chats.qml" line="417"/>
         <source>Unread</source>
-        <translation type="unfinished">Непрочитано</translation>
+        <translation>Непрочитано</translation>
     </message>
 </context>
 <context>
@@ -1431,7 +1431,7 @@
     <message>
         <location filename="../src/ui/components/controls/ClipboardButton.qml" line="16"/>
         <source>Copy to clipboard: %1</source>
-        <translation type="unfinished">Скопировать в буфер: %1</translation>
+        <translation>Скопировать: %1</translation>
     </message>
 </context>
 <context>
@@ -1440,137 +1440,137 @@
         <location filename="../src/ui/components/pages/Conference.qml" line="134"/>
         <location filename="../src/ui/components/pages/Conference.qml" line="201"/>
         <source>Set room name</source>
-        <translation type="unfinished">Задать имя комнаты</translation>
+        <translation>Задать имя комнаты</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="137"/>
         <location filename="../src/ui/components/pages/Conference.qml" line="204"/>
         <source>Room name:</source>
-        <translation type="unfinished">Имя комнаты:</translation>
+        <translation>Имя комнаты:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="149"/>
         <location filename="../src/ui/components/pages/Conference.qml" line="216"/>
         <source>Enter the room name</source>
-        <translation type="unfinished">Введите имя комнаты</translation>
+        <translation>Введите имя комнаты</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="156"/>
         <source>Authenticate</source>
-        <translation type="unfinished">Аутентифицировать</translation>
+        <translation>Аутентифицировать</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="247"/>
         <source>Please authenticate in the opened browser window...</source>
-        <translation type="unfinished">Выполните аутентификацию в открытом окне браузера...</translation>
+        <translation>Выполните аутентификацию в открытом окне браузера...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="439"/>
         <source>This conference is protected by a password. Please enter it to join the room.</source>
-        <translation type="unfinished">Конференция защищена паролем. Введите пароль для входа.</translation>
+        <translation>Конференция защищена паролем. Введите пароль для входа.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="452"/>
         <location filename="../src/ui/components/pages/Conference.qml" line="643"/>
         <source>Password</source>
-        <translation type="unfinished">Пароль</translation>
+        <translation>Пароль</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="464"/>
         <location filename="../src/ui/components/pages/Conference.qml" line="653"/>
         <source>Enter the password</source>
-        <translation type="unfinished">Введите пароль</translation>
+        <translation>Введите пароль</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="470"/>
         <source>Remember password</source>
-        <translation type="unfinished">Запомнить пароль</translation>
+        <translation>Запомнить пароль</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="487"/>
         <location filename="../src/ui/components/pages/Conference.qml" line="702"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отмена</translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="499"/>
         <source>Join Room</source>
-        <translation type="unfinished">Войти в комнату</translation>
+        <translation>Войти в комнату</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="560"/>
         <source>Password required</source>
-        <translation type="unfinished">Требуется пароль</translation>
+        <translation>Требуется пароль</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="594"/>
         <source>Enter a password to protect this conference room. Other users must enter it before taking part in the session.</source>
-        <translation type="unfinished">Введите пароль для защиты этой конференц-комнаты. Другие пользователи должны будут ввести его перед участием в сеансе.</translation>
+        <translation>Введите пароль для защиты этой конференции. Другие пользователи должны будут ввести его перед участием в сеансе.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="608"/>
         <source>This password has been set for the conference room and must be entered by users before taking part in the session.</source>
-        <translation type="unfinished">Этот пароль установлен для конференц-комнаты, и пользователи должны ввести его перед участием в сеансе.</translation>
+        <translation>Этот пароль установлен для конференции, и пользователи должны ввести его перед участием в сеансе.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="622"/>
         <source>The room password has been set by someone else.</source>
-        <translation type="unfinished">Пароль комнаты установлен другим участником.</translation>
+        <translation>Пароль комнаты установлен другим участником.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="687"/>
         <source>Show password</source>
-        <translation type="unfinished">Показать пароль</translation>
+        <translation>Показать пароль</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="715"/>
         <source>Remove</source>
-        <translation type="unfinished">Удалить</translation>
+        <translation>Удалить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="726"/>
         <source>Save</source>
-        <translation type="unfinished">Сохранить</translation>
+        <translation>Сохранить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="760"/>
         <source>Video quality</source>
-        <translation type="unfinished">Качество видео</translation>
+        <translation>Качество видео</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="776"/>
         <source>Change the video quality of this meeting</source>
-        <translation type="unfinished">Изменить качество видео встречи</translation>
+        <translation>Изменить качество видео встречи</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="782"/>
         <source>No video (audio only)</source>
-        <translation type="unfinished">Без видео (только аудио)</translation>
+        <translation>Без видео (только аудио)</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="787"/>
         <source>Lowest quality</source>
-        <translation type="unfinished">Наименьшее качество</translation>
+        <translation>Наименьшее качество</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="792"/>
         <source>Standard quality</source>
-        <translation type="unfinished">Стандартное качество</translation>
+        <translation>Стандартное качество</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="797"/>
         <source>Highest quality</source>
-        <translation type="unfinished">Наилучшее качество</translation>
+        <translation>Наилучшее качество</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="803"/>
         <source>Close</source>
-        <translation type="unfinished">Закрыть</translation>
+        <translation>Закрыть</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Conference.qml" line="836"/>
         <source>Drag bar</source>
-        <translation type="unfinished">Панель перетаскивания</translation>
+        <translation>Панель перетаскивания</translation>
     </message>
 </context>
 <context>
@@ -1578,7 +1578,7 @@
     <message numerus="yes">
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="154"/>
         <source>%n minutes left</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>осталась %n минута</numerusform>
             <numerusform>Осталось %n минуты</numerusform>
             <numerusform>Осталось %n минут</numerusform>
@@ -1587,127 +1587,127 @@
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="104"/>
         <source>Conference room</source>
-        <translation type="unfinished">Комната конференции</translation>
+        <translation>Конференц-зал</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="199"/>
         <source>Share</source>
-        <translation type="unfinished">Поделиться</translation>
+        <translation>Поделиться</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="213"/>
         <source>Copy room name</source>
-        <translation type="unfinished">Скопировать имя комнаты</translation>
+        <translation>Скопировать имя комнаты</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="217"/>
         <source>Copy room link</source>
-        <translation type="unfinished">Скопировать ссылку на комнату</translation>
+        <translation>Скопировать ссылку на комнату</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="221"/>
         <source>Open in browser</source>
-        <translation type="unfinished">Открыть в браузере</translation>
+        <translation>Открыть в браузере</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="225"/>
         <source>Show phone number</source>
-        <translation type="unfinished">Показать номер телефона</translation>
+        <translation>Показать номер телефона</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="241"/>
         <source>Raise</source>
-        <translation type="unfinished">Поднять руку</translation>
+        <translation>Поднять руку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="250"/>
         <source>Resume</source>
-        <translation type="unfinished">Продолжить</translation>
+        <translation>Продолжить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="250"/>
         <source>Hold</source>
-        <translation type="unfinished">Удержание</translation>
+        <translation>Удержание</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="259"/>
         <source>View</source>
-        <translation type="unfinished">Вид</translation>
+        <translation>Вид</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="268"/>
         <source>Screen</source>
-        <translation type="unfinished">Экран</translation>
+        <translation>Экран</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="286"/>
         <source>Share window</source>
-        <translation type="unfinished">Поделиться окном</translation>
+        <translation>Поделиться окном</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="291"/>
         <source>Share screen</source>
-        <translation type="unfinished">Поделиться экраном</translation>
+        <translation>Поделиться экраном</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="301"/>
         <source>Camera</source>
-        <translation type="unfinished">Камера</translation>
+        <translation>Камера</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="338"/>
         <source>Output</source>
-        <translation type="unfinished">Выход</translation>
+        <translation>Выход</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="356"/>
         <source>More</source>
-        <translation type="unfinished">Ещё</translation>
+        <translation>Ещё</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="368"/>
         <source>Noise supression</source>
-        <translation type="unfinished">Шумоподавление</translation>
+        <translation>Шумоподавление</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="374"/>
         <source>Toggle subtitles</source>
-        <translation type="unfinished">Включить/выключить субтитры</translation>
+        <translation>Включить/выключить субтитры</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="381"/>
         <source>Toggle whiteboard</source>
-        <translation type="unfinished">Включить/выключить доску</translation>
+        <translation>Включить/выключить доску</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="387"/>
         <source>Video quality...</source>
-        <translation type="unfinished">Качество видео...</translation>
+        <translation>Качество видео...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="396"/>
         <source>Set room password...</source>
-        <translation type="unfinished">Установить пароль комнаты...</translation>
+        <translation>Установить пароль комнаты...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="403"/>
         <source>Mute everyone</source>
-        <translation type="unfinished">Выключить звук у всех</translation>
+        <translation>Выключить звук у всех</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="459"/>
         <source>Leave conference</source>
-        <translation type="unfinished">Покинуть конференцию</translation>
+        <translation>Покинуть конференцию</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="467"/>
         <source>End conference for all</source>
-        <translation type="unfinished">Завершить конференцию для всех</translation>
+        <translation>Завершить конференцию для всех</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ConferenceButtonBar.qml" line="319"/>
         <source>Micro</source>
-        <translation type="unfinished">Микрофон</translation>
+        <translation>Микрофон</translation>
     </message>
 </context>
 <context>
@@ -1715,7 +1715,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/ConfirmDialog.qml" line="15"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отмена</translation>
+        <translation>Отмена</translation>
     </message>
 </context>
 <context>
@@ -1723,7 +1723,7 @@
     <message>
         <location filename="../src/ui/components/controls/ControlBar.qml" line="83"/>
         <source>App menu</source>
-        <translation type="unfinished">Меню приложения</translation>
+        <translation>Меню приложения</translation>
     </message>
 </context>
 <context>
@@ -1731,37 +1731,37 @@
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="86"/>
         <source>Room name</source>
-        <translation type="unfinished">Название комнаты</translation>
+        <translation>Название комнаты</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="119"/>
         <source>Direct chat</source>
-        <translation type="unfinished">Личный чат</translation>
+        <translation>Личный чат</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="127"/>
         <source>Group chat</source>
-        <translation type="unfinished">Групповой чат</translation>
+        <translation>Групповой чат</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="144"/>
         <source>Join rule:</source>
-        <translation type="unfinished">Правило входа:</translation>
+        <translation>Правило подключения:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="165"/>
         <source>These users will be invited to the chat:</source>
-        <translation type="unfinished">Эти пользователи будут приглашены в чат:</translation>
+        <translation>Эти пользователи будут приглашены в чат:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="176"/>
         <source>Search user...</source>
-        <translation type="unfinished">Поиск пользователя...</translation>
+        <translation>Поиск пользователя...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="265"/>
         <source>Create</source>
-        <translation type="unfinished">Создать</translation>
+        <translation>Создать</translation>
     </message>
 </context>
 <context>
@@ -1769,12 +1769,12 @@
     <message>
         <location filename="../src/platform/Credentials.cpp" line="116"/>
         <source>Storing credentials for %1 failed: %2</source>
-        <translation type="unfinished">Не удалось сохранить данные для входа для %1: %2</translation>
+        <translation>Не удалось сохранить данные для входа для %1: %2</translation>
     </message>
     <message>
         <location filename="../src/platform/Credentials.cpp" line="198"/>
         <source>reading credentials for %1 failed: %2</source>
-        <translation type="unfinished">Не удалось прочитать данные для входа для %1: %2</translation>
+        <translation>Не удалось прочитать данные для входа для %1: %2</translation>
     </message>
 </context>
 <context>
@@ -1782,27 +1782,27 @@
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="10"/>
         <source>Authentication failed</source>
-        <translation type="unfinished">Ошибка аутентификации</translation>
+        <translation>Ошибка аутентификации</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="18"/>
         <source>Please enter the password:</source>
-        <translation type="unfinished">Введите пароль:</translation>
+        <translation>Введите пароль:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="34"/>
         <source>Password</source>
-        <translation type="unfinished">Пароль</translation>
+        <translation>Пароль</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="47"/>
         <source>Enter the password</source>
-        <translation type="unfinished">Введите пароль</translation>
+        <translation>Введите пароль</translation>
     </message>
     <message>
         <location filename="../src/ui/components/dialogs/CredentialsDialog.qml" line="53"/>
         <source>Ok</source>
-        <translation type="unfinished">ОК</translation>
+        <translation>Ок</translation>
     </message>
 </context>
 <context>
@@ -1810,17 +1810,17 @@
     <message>
         <location filename="../src/ui/components/CustomWindowHeader.qml" line="33"/>
         <source>GOnnect window header</source>
-        <translation type="unfinished">Заголовок окна GOnnect</translation>
+        <translation>Заголовок окна GOnnect</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CustomWindowHeader.qml" line="116"/>
         <source>App menu</source>
-        <translation type="unfinished">Меню приложения</translation>
+        <translation>Меню приложения</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CustomWindowHeader.qml" line="170"/>
         <source>Close GOnnect window</source>
-        <translation type="unfinished">Закрыть окно GOnnect</translation>
+        <translation>Закрыть окно GOnnect</translation>
     </message>
 </context>
 <context>
@@ -1828,7 +1828,7 @@
     <message>
         <location filename="../src/calendar/DateEventFeederManager.cpp" line="93"/>
         <source>Failed to persist calendar credentials: %1</source>
-        <translation type="unfinished">Не удалось сохранить учетные данные календаря: %1</translation>
+        <translation>Не удалось сохранить учетные данные календаря: %1</translation>
     </message>
 </context>
 <context>
@@ -1836,22 +1836,22 @@
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="396"/>
         <source>Conference starting soon</source>
-        <translation type="unfinished">Конференция скоро начнётся</translation>
+        <translation>Конференция скоро начнётся</translation>
     </message>
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="396"/>
         <source>Event starting soon</source>
-        <translation type="unfinished">Событие скоро начнётся</translation>
+        <translation>Событие скоро начнётся</translation>
     </message>
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="402"/>
         <source>Join</source>
-        <translation type="unfinished">Присоединиться</translation>
+        <translation>Присоединиться</translation>
     </message>
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="404"/>
         <source>Open</source>
-        <translation type="unfinished">Открыть</translation>
+        <translation>Открыть</translation>
     </message>
 </context>
 <context>
@@ -1859,114 +1859,114 @@
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="34"/>
         <source>Header for %1</source>
-        <translation type="unfinished">Заголовок для %1</translation>
+        <translation>Заголовок для %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="42"/>
         <source>Today - %1</source>
-        <translation type="unfinished">Сегодня — %1</translation>
+        <translation>Сегодня — %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="42"/>
         <location filename="../src/ui/components/DateEventsList.qml" line="45"/>
         <source>yyyy/MM/dd</source>
-        <translation type="unfinished">dd.MM.yyyy</translation>
+        <translation>dd.MM.yyyy</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="45"/>
         <source>Tomorrow - %1</source>
-        <translation type="unfinished">Завтра — %1</translation>
+        <translation>Завтра — %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="47"/>
         <source>dddd - yyyy/MM/dd</source>
-        <translation type="unfinished">dddd - dd.MM.yyyy</translation>
+        <translation>dddd - dd.MM.yyyy</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="15"/>
         <source>Events</source>
-        <translation type="unfinished">События</translation>
+        <translation>События</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="16"/>
         <source>List of all the currently active and upcoming calendar events</source>
-        <translation type="unfinished">Список всех текущих и предстоящих событий календаря</translation>
+        <translation>Список всех текущих и предстоящих событий календаря</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="33"/>
         <source>Event section</source>
-        <translation type="unfinished">Раздел событий</translation>
+        <translation>Раздел событий</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="113"/>
         <source>Event</source>
-        <translation type="unfinished">Событие</translation>
+        <translation>Событие</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="114"/>
         <source>Currently selected calendar event: %1, starting time %2, remaining time %3</source>
-        <translation type="unfinished">Выбранное событие: %1, время начала %2, оставшееся время %3</translation>
+        <translation>Выбранное событие: %1, время начала %2, оставшееся время %3</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="168"/>
         <location filename="../src/ui/components/DateEventsList.qml" line="181"/>
         <source>hh:mm</source>
-        <translation type="unfinished">hh:mm</translation>
+        <translation>hh:mm</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="168"/>
         <source>All day</source>
-        <translation type="unfinished">Весь день</translation>
+        <translation>Весь день</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="181"/>
         <source>till %1</source>
-        <translation type="unfinished">до %1</translation>
+        <translation>до %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="182"/>
         <source>in %1</source>
-        <translation type="unfinished">через %1</translation>
+        <translation>через %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="220"/>
         <source>Join</source>
-        <translation type="unfinished">Присоединиться</translation>
+        <translation>Присоединиться</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="220"/>
         <source>Open</source>
-        <translation type="unfinished">Открыть</translation>
+        <translation>Открыть</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="224"/>
         <source>Join meeting</source>
-        <translation type="unfinished">Присоединиться к встрече</translation>
+        <translation>Присоединиться к встрече</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="225"/>
         <source>Join the meeting associated with the currently selected event</source>
-        <translation type="unfinished">Присоединиться к встрече выбранного события</translation>
+        <translation>Присоединиться к встрече выбранного события</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="240"/>
         <source>Copy room link</source>
-        <translation type="unfinished">Скопировать ссылку на комнату</translation>
+        <translation>Скопировать ссылку на комнату</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="240"/>
         <source>Copy link</source>
-        <translation type="unfinished">Скопировать ссылку</translation>
+        <translation>Скопировать ссылку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="244"/>
         <source>Copy meeting link</source>
-        <translation type="unfinished">Скопировать ссылку на встречу</translation>
+        <translation>Скопировать ссылку на встречу</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="245"/>
         <source>Copy the meeting link associated with the currently selected event</source>
-        <translation type="unfinished">Скопировать ссылку на встречу выбранного события</translation>
+        <translation>Скопировать ссылку на встречу выбранного события</translation>
     </message>
 </context>
 <context>
@@ -1974,27 +1974,27 @@
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="27"/>
         <source>Events</source>
-        <translation type="unfinished">События</translation>
+        <translation>События</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="53"/>
         <source>Loading events...</source>
-        <translation type="unfinished">Загрузка событий...</translation>
+        <translation>Загрузка событий...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="54"/>
         <source>No upcoming events</source>
-        <translation type="unfinished">Нет предстоящих событий</translation>
+        <translation>Нет предстоящих событий</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="64"/>
         <source>Event widget status</source>
-        <translation type="unfinished">Состояние виджета событий</translation>
+        <translation>Состояние виджета событий</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="65"/>
         <source>Displays the current status of the widget: %1</source>
-        <translation type="unfinished">Отображает текущий статус виджета: %1</translation>
+        <translation>Отображает текущий статус виджета: %1</translation>
     </message>
 </context>
 <context>
@@ -2002,28 +2002,28 @@
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="128"/>
         <source>Waiting for chat provider...</source>
-        <translation type="unfinished">Ожидание поставщика чата...</translation>
+        <translation>Ожидание провайдера чата...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="150"/>
         <source>Your device is currently not verified. Please choose one of the following methods to verify it.</source>
-        <translation type="unfinished">Ваше устройство в настоящее время не верифицировано. Выберите один из следующих методов для его верификации.</translation>
+        <translation>Ваше устройство в настоящее время не верифицировано. Выберите один из следующих методов для его верификации.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="163"/>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="248"/>
         <source>Recovery key</source>
-        <translation type="unfinished">Ключ восстановления</translation>
+        <translation>Ключ восстановления</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="171"/>
         <source>Cross signing</source>
-        <translation type="unfinished">Перекрёстная подпись</translation>
+        <translation>Перекрёстная подпись</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="197"/>
         <source>Waiting for response...</source>
-        <translation type="unfinished">Ожидание ответа...</translation>
+        <translation>Ожидание ответа...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="207"/>
@@ -2031,47 +2031,47 @@
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="321"/>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="425"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отмена</translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="236"/>
         <source>Please enter your recovery key:</source>
-        <translation type="unfinished">Введите ваш ключ восстановления:</translation>
+        <translation>Введите ваш ключ восстановления:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="259"/>
         <source>Verify</source>
-        <translation type="unfinished">Проверить</translation>
+        <translation>Проверить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="295"/>
         <source>Please choose one of the following cross-signing methods:</source>
-        <translation type="unfinished">Выберите один из следующих методов перекрёстной подписи:</translation>
+        <translation>Выберите один из следующих методов перекрёстной подписи:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="347"/>
         <source>Confirm that the code or emojis match in both sessions:</source>
-        <translation type="unfinished">Подтвердите, что код или эмодзи совпадают в обеих сессиях:</translation>
+        <translation>Подтвердите, что код или эмодзи совпадают в обеих сессиях:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="426"/>
         <source>Cancel, they do not match</source>
-        <translation type="unfinished">Отмена, они не совпадают</translation>
+        <translation>Отмена - они не совпадают</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="435"/>
         <source>Confirm</source>
-        <translation type="unfinished">Подтвердить</translation>
+        <translation>Подтвердить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="436"/>
         <source>Confirm, they match</source>
-        <translation type="unfinished">Подтвердить, они совпадают</translation>
+        <translation>Подтвердить - они совпадают</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="452"/>
         <source>Your device has successfully been verified!</source>
-        <translation type="unfinished">Ваше устройство успешно верифицировано!</translation>
+        <translation>Ваше устройство успешно верифицировано!</translation>
     </message>
 </context>
 <context>
@@ -2079,12 +2079,12 @@
     <message>
         <location filename="../src/ui/components/popups/DialInInfo.qml" line="29"/>
         <source>Call one of the phone numbers below and use this code for authentication:</source>
-        <translation type="unfinished">Позвоните по одному из номеров ниже и используйте этот код для аутентификации:</translation>
+        <translation>Позвоните по одному из номеров ниже и используйте этот код для аутентификации:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/DialInInfo.qml" line="121"/>
         <source>Close</source>
-        <translation type="unfinished">Закрыть</translation>
+        <translation>Закрыть</translation>
     </message>
 </context>
 <context>
@@ -2092,12 +2092,12 @@
     <message>
         <location filename="../src/ui/components/controls/DtmfDialer.qml" line="16"/>
         <source>Number pad</source>
-        <translation type="unfinished">Набор номера</translation>
+        <translation>Набор номера</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/DtmfDialer.qml" line="26"/>
         <source>Character %1</source>
-        <translation type="unfinished">Символ %1</translation>
+        <translation>Символ %1</translation>
     </message>
 </context>
 <context>
@@ -2105,17 +2105,17 @@
     <message>
         <location filename="../src/ui/components/popups/EditChatMessage.qml" line="60"/>
         <source>Edit text message</source>
-        <translation type="unfinished">Редактировать текстовое сообщение</translation>
+        <translation>Редактировать текстовое сообщение</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatMessage.qml" line="113"/>
         <source>Save</source>
-        <translation type="unfinished">Сохранить</translation>
+        <translation>Сохранить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatMessage.qml" line="113"/>
         <source>Remove</source>
-        <translation type="unfinished">Удалить</translation>
+        <translation>Удалить</translation>
     </message>
 </context>
 <context>
@@ -2123,17 +2123,17 @@
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="79"/>
         <source>Room name</source>
-        <translation type="unfinished">Название комнаты</translation>
+        <translation>Название комнаты</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="114"/>
         <source>Join rule:</source>
-        <translation type="unfinished">Правило входа:</translation>
+        <translation>Правило входа:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditChatRoom.qml" line="133"/>
         <source>Save</source>
-        <translation type="unfinished">Сохранить</translation>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
@@ -2141,32 +2141,32 @@
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="24"/>
         <source>Add page</source>
-        <translation type="unfinished">Добавить страницу</translation>
+        <translation>Добавить страницу</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="30"/>
         <source>Add a new dashboard page</source>
-        <translation type="unfinished">Добавить новую страницу панели</translation>
+        <translation>Добавить новую страницу панели</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="39"/>
         <source>Add widget</source>
-        <translation type="unfinished">Добавить виджет</translation>
+        <translation>Добавить виджет</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="50"/>
         <source>Add a new widget to the current dashboard page</source>
-        <translation type="unfinished">Добавить новый виджет на текущую страницу</translation>
+        <translation>Добавить новый виджет на текущую страницу</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="61"/>
         <source>Finished</source>
-        <translation type="unfinished">Готово</translation>
+        <translation>Готово</translation>
     </message>
     <message>
         <location filename="../src/ui/components/EditModeOptions.qml" line="66"/>
         <source>Finish and save all dashboard and widget changes</source>
-        <translation type="unfinished">Завершить и сохранить все изменения</translation>
+        <translation>Завершить и сохранить все изменения</translation>
     </message>
 </context>
 <context>
@@ -2174,17 +2174,17 @@
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="48"/>
         <source>Your status message...</source>
-        <translation type="unfinished">Ваше сообщение статуса...</translation>
+        <translation>Ваш статус...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="79"/>
         <source>Set</source>
-        <translation type="unfinished">Установить</translation>
+        <translation>Установить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/EditStatusText.qml" line="79"/>
         <source>Remove</source>
-        <translation type="unfinished">Удалить</translation>
+        <translation>Удалить</translation>
     </message>
 </context>
 <context>
@@ -2192,17 +2192,17 @@
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="44"/>
         <source>Emergency call</source>
-        <translation type="unfinished">Экстренный вызов</translation>
+        <translation>Экстренный вызов</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="57"/>
         <source>Clicking one of these buttons will end all current calls and start an emergency call.</source>
-        <translation type="unfinished">Нажатие кнопки завершит все текущие звонки и инициирует экстренный вызов.</translation>
+        <translation>Нажатие кнопки завершит все текущие звонки и инициирует экстренный вызов.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/pages/Emergency.qml" line="87"/>
         <source>Tap to call emergency contact: %1 (%2)</source>
-        <translation type="unfinished">Нажмите, чтобы позвонить на экстренный контакт: %1 (%2)</translation>
+        <translation>Нажмите, чтобы позвонить на экстренный контакт: %1 (%2)</translation>
     </message>
 </context>
 <context>
@@ -2210,22 +2210,22 @@
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="15"/>
         <source>Emergency call</source>
-        <translation type="unfinished">Экстренный вызов</translation>
+        <translation>Экстренный вызов</translation>
     </message>
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="31"/>
         <source>Incoming emergency call from %1</source>
-        <translation type="unfinished">Входящий экстренный вызов от %1</translation>
+        <translation>Входящий экстренный вызов от %1</translation>
     </message>
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="107"/>
         <source>Answering the call will automatically terminate all other ongoing calls.</source>
-        <translation type="unfinished">Ответ автоматически завершит все остальные активные звонки.</translation>
+        <translation>Ответ автоматически завершит все остальные активные звонки.</translation>
     </message>
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="126"/>
         <source>Answer</source>
-        <translation type="unfinished">Ответить</translation>
+        <translation>Ответить</translation>
     </message>
 </context>
 <context>
@@ -2233,12 +2233,12 @@
     <message>
         <location filename="../src/ui/components/controls/EmojiButton.qml" line="18"/>
         <source>Emoji</source>
-        <translation type="unfinished">Эмодзи</translation>
+        <translation>Эмодзи</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/EmojiButton.qml" line="19"/>
         <source>Selected Emoji: %1</source>
-        <translation type="unfinished">Выбранное эмодзи: %1</translation>
+        <translation>Выбранное эмодзи: %1</translation>
     </message>
 </context>
 <context>
@@ -2246,17 +2246,17 @@
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="34"/>
         <source>Search for emoji...</source>
-        <translation type="unfinished">Поиск эмодзи...</translation>
+        <translation>Поиск эмодзи...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="76"/>
         <source>Switch Emoji category</source>
-        <translation type="unfinished">Сменить категорию эмодзи</translation>
+        <translation>Сменить категорию эмодзи</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/EmojiPicker.qml" line="124"/>
         <source>Select Emoji</source>
-        <translation type="unfinished">Выбрать эмодзи</translation>
+        <translation>Выбрать эмодзи</translation>
     </message>
 </context>
 <context>
@@ -2264,64 +2264,64 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="16"/>
         <source>Trying</source>
-        <translation type="unfinished">Попытка</translation>
+        <translation>Попытка</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="18"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="291"/>
         <source>Ringing</source>
-        <translation type="unfinished">Вызов</translation>
+        <translation>Вызов</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="20"/>
         <source>Call being forwarded</source>
-        <translation type="unfinished">Звонок переадресован</translation>
+        <translation>Звонок переадресован</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="22"/>
         <source>Queued</source>
-        <translation type="unfinished">В очереди</translation>
+        <translation>В очереди</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="24"/>
         <source>Progress</source>
-        <translation type="unfinished">В процессе</translation>
+        <translation>В процессе</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="28"/>
         <source>Ok</source>
-        <translation type="unfinished">ОК</translation>
+        <translation>Ок</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="30"/>
         <source>Accepted</source>
-        <translation type="unfinished">Принято</translation>
+        <translation>Принято</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="46"/>
         <source>Unauthorized</source>
-        <translation type="unfinished">Не авторизован</translation>
+        <translation>Не авторизован</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="50"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="168"/>
         <source>Rejected</source>
-        <translation type="unfinished">Отклонено</translation>
+        <translation>Отклонено</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="52"/>
         <source>Not found</source>
-        <translation type="unfinished">Не найдено</translation>
+        <translation>Не найдено</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="58"/>
         <source>Proxy authentication required</source>
-        <translation type="unfinished">Требуется аутентификация прокси</translation>
+        <translation>Требуется аутентификация прокси</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="60"/>
         <source>Request timeout</source>
-        <translation type="unfinished">Время запроса истекло</translation>
+        <translation>Время запроса истекло</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="112"/>
@@ -2331,72 +2331,72 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="122"/>
         <source>Ambiguous</source>
-        <translation type="unfinished">Неоднозначно</translation>
+        <translation>Неоднозначно</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="124"/>
         <source>Busy here</source>
-        <translation type="unfinished">Занято</translation>
+        <translation>Занято</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="126"/>
         <source>Request terminated</source>
-        <translation type="unfinished">Запрос завершён</translation>
+        <translation>Запрос завершён</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="128"/>
         <source>Not acceptable here</source>
-        <translation type="unfinished">Неприемлемо</translation>
+        <translation>Неприемлемо</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="140"/>
         <source>Internal server error</source>
-        <translation type="unfinished">Внутренняя ошибка сервера</translation>
+        <translation>Внутренняя ошибка сервера</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="142"/>
         <source>Not implemented</source>
-        <translation type="unfinished">Не реализовано</translation>
+        <translation>Не реализовано</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="144"/>
         <source>Bad gateway</source>
-        <translation type="unfinished">Неверный шлюз</translation>
+        <translation>Неверный шлюз</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="146"/>
         <source>Service unavailable</source>
-        <translation type="unfinished">Сервис недоступен</translation>
+        <translation>Сервис недоступен</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="148"/>
         <source>Server timeout</source>
-        <translation type="unfinished">Тайм-аут сервера</translation>
+        <translation>Время ожидания сервера истекло</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="158"/>
         <source>Busy everywhere</source>
-        <translation type="unfinished">Занято везде</translation>
+        <translation>Занято везде</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="160"/>
         <source>Decline</source>
-        <translation type="unfinished">Отклонено</translation>
+        <translation>Отклонено</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="162"/>
         <source>Does not exist anywhere</source>
-        <translation type="unfinished">Не существует нигде</translation>
+        <translation>Нигде не существует</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="164"/>
         <source>Not acceptable anywhere</source>
-        <translation type="unfinished">Нигде неприемлемо</translation>
+        <translation>Нигде неприемлемо</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="166"/>
         <source>Unwanted</source>
-        <translation type="unfinished">Нежелательный</translation>
+        <translation>Отклонено</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="174"/>
@@ -2408,128 +2408,128 @@
         <location filename="../src/ui/EnumTranslation.cpp" line="281"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="295"/>
         <source>Unknown</source>
-        <translation type="unfinished">Неизвестно</translation>
+        <translation>Неизвестно</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="189"/>
         <source>Commercial</source>
-        <translation type="unfinished">Рабочий</translation>
+        <translation>Рабочий</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="191"/>
         <source>Home</source>
-        <translation type="unfinished">Домашний</translation>
+        <translation>Домашний</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="193"/>
         <source>Mobile</source>
-        <translation type="unfinished">Мобильный</translation>
+        <translation>Мобильный</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="205"/>
         <source>Incoming</source>
-        <translation type="unfinished">Входящий</translation>
+        <translation>Входящий</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="207"/>
         <source>Outgoing</source>
-        <translation type="unfinished">Исходящий</translation>
+        <translation>Исходящий</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="209"/>
         <source>Blocked</source>
-        <translation type="unfinished">Заблокирован</translation>
+        <translation>Заблокирован</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="211"/>
         <source>SIP</source>
-        <translation type="unfinished">SIP</translation>
+        <translation>SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="213"/>
         <source>Jitsi Meet</source>
-        <translation type="unfinished">Jitsi Meet</translation>
+        <translation>Jitsi Meet</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="226"/>
         <source>SAS string</source>
-        <translation type="unfinished">Строка SAS</translation>
+        <translation>Строка SAS</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="228"/>
         <source>SAS symbol</source>
-        <translation type="unfinished">Символ SAS</translation>
+        <translation>Символ SAS</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="240"/>
         <source>Alphabetical</source>
-        <translation type="unfinished">По алфавиту</translation>
+        <translation>По алфавиту</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="242"/>
         <source>Latest activity</source>
-        <translation type="unfinished">Последняя активность</translation>
+        <translation>Последняя активность</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="255"/>
         <location filename="../src/ui/EnumTranslation.cpp" line="273"/>
         <source>Unknown state for %1</source>
-        <translation type="unfinished">Неизвестный статус для %1</translation>
+        <translation>Неизвестный статус для %1</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="257"/>
         <source>%1 has joined the chat</source>
-        <translation type="unfinished">%1 присоединился к чату</translation>
+        <translation>%1 присоединился к чату</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="259"/>
         <source>%1 has left the chat</source>
-        <translation type="unfinished">%1 покинул чат</translation>
+        <translation>%1 покинул чат</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="261"/>
         <source>%1 has been invited</source>
-        <translation type="unfinished">%1 приглашён</translation>
+        <translation>%1 приглашён</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="263"/>
         <source>%1 has knocked</source>
-        <translation type="unfinished">%1 постучался</translation>
+        <translation>%1 постучался</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="265"/>
         <source>%1 has been banned</source>
-        <translation type="unfinished">%1 заблокирован</translation>
+        <translation>%1 заблокирован</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="267"/>
         <source>%1 has been unbanned</source>
-        <translation type="unfinished">%1 разблокирован</translation>
+        <translation>%1 разблокирован</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="269"/>
         <source>%1 has been kicked</source>
-        <translation type="unfinished">%1 исключён</translation>
+        <translation>%1 исключён</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="283"/>
         <source>Offline</source>
-        <translation type="unfinished">Не в сети</translation>
+        <translation>Не в сети</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="285"/>
         <source>Away</source>
-        <translation type="unfinished">Отошёл</translation>
+        <translation>Отошёл</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="287"/>
         <source>Do not disturb</source>
-        <translation type="unfinished">Не беспокоить</translation>
+        <translation>Не беспокоить</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="289"/>
         <source>Available</source>
-        <translation type="unfinished">Доступен</translation>
+        <translation>Доступен</translation>
     </message>
 </context>
 <context>
@@ -2537,12 +2537,12 @@
     <message>
         <location filename="../src/ui/components/controls/FavIcon.qml" line="18"/>
         <source>Set favorite</source>
-        <translation type="unfinished">Добавить в избранное</translation>
+        <translation>Добавить в избранное</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavIcon.qml" line="18"/>
         <source>Unset favorite</source>
-        <translation type="unfinished">Удалить из избранного</translation>
+        <translation>Удалить из избранного</translation>
     </message>
 </context>
 <context>
@@ -2550,29 +2550,29 @@
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="27"/>
         <source>Favorite contact</source>
-        <translation type="unfinished">Избранный контакт</translation>
+        <translation>Избранный контакт</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="28"/>
         <source>Selected favorite %1</source>
-        <translation type="unfinished">Выбранный элемент избранного %1</translation>
+        <translation>Выбранный элемент избранного %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="222"/>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="257"/>
         <source>Favorite phone, chat or meeting button</source>
-        <translation type="unfinished">Кнопка избранного для звонка, чата или встречи</translation>
+        <translation>Кнопка избранного для звонка, чата или встречи</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="223"/>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="258"/>
         <source>Selected address %1</source>
-        <translation type="unfinished">Выбранный адрес %1</translation>
+        <translation>Выбранный адрес %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="359"/>
         <source>Remove favorite</source>
-        <translation type="unfinished">Удалить из избранного</translation>
+        <translation>Удалить из избранного</translation>
     </message>
 </context>
 <context>
@@ -2581,12 +2581,12 @@
         <location filename="../src/ui/components/FavoritesList.qml" line="23"/>
         <location filename="../src/ui/components/FavoritesList.qml" line="41"/>
         <source>Favorites</source>
-        <translation type="unfinished">Избранное</translation>
+        <translation>Избранное</translation>
     </message>
     <message>
         <location filename="../src/ui/components/FavoritesList.qml" line="24"/>
         <source>List of all contacts that have been marked as favorites</source>
-        <translation type="unfinished">Список всех контактов, отмеченных как избранные</translation>
+        <translation>Список всех контактов, отмеченных как избранные</translation>
     </message>
 </context>
 <context>
@@ -2594,7 +2594,7 @@
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="23"/>
         <source>Favorites</source>
-        <translation type="unfinished">Избранное</translation>
+        <translation>Избранное</translation>
     </message>
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="50"/>
@@ -2607,7 +2607,7 @@
     <message>
         <location filename="../src/ui/components/chat/FileAttachment.qml" line="26"/>
         <source>File</source>
-        <translation type="unfinished">Файл</translation>
+        <translation>Файл</translation>
     </message>
 </context>
 <context>
@@ -2615,28 +2615,28 @@
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="68"/>
         <source>Send attachment</source>
-        <translation type="unfinished">Отправить вложение</translation>
+        <translation>Отправить вложение</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="113"/>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="136"/>
         <source>Not a file</source>
-        <translation type="unfinished">Это не файл</translation>
+        <translation>Это не файл</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="120"/>
         <source>No valid files</source>
-        <translation type="unfinished">Нет допустимых файлов</translation>
+        <translation>Нет допустимых файлов</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="128"/>
         <source>Disallowed type</source>
-        <translation type="unfinished">Недопустимый тип</translation>
+        <translation>Недопустимый тип</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="132"/>
         <source>File not readable</source>
-        <translation type="unfinished">Файл не читается</translation>
+        <translation>Невозможно протичать файл</translation>
     </message>
 </context>
 <context>
@@ -2644,22 +2644,22 @@
     <message>
         <location filename="../src/ui/FileHelper.cpp" line="24"/>
         <source>Image Files (%1)</source>
-        <translation type="unfinished">Файлы изображений (%1)</translation>
+        <translation>Файлы изображений (%1)</translation>
     </message>
     <message>
         <location filename="../src/ui/FileHelper.cpp" line="61"/>
         <source>Audio Files</source>
-        <translation type="unfinished">Аудиофайлы</translation>
+        <translation>Аудиофайлы</translation>
     </message>
     <message>
         <location filename="../src/ui/FileHelper.cpp" line="63"/>
         <source>Media Files</source>
-        <translation type="unfinished">Медиафайлы</translation>
+        <translation>Медиафайлы</translation>
     </message>
     <message>
         <location filename="../src/ui/FileHelper.cpp" line="66"/>
         <source>%1 (%2)</source>
-        <translation type="unfinished">%1 (%2)</translation>
+        <translation>%1 (%2)</translation>
     </message>
 </context>
 <context>
@@ -2667,7 +2667,7 @@
     <message numerus="yes">
         <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="32"/>
         <source>Shall the following file(s) be sent? (%1)</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>Отправить следующий файл? (%1)</numerusform>
             <numerusform>Отправить следующие файлы? (%1)</numerusform>
             <numerusform>Отправить следующие файлы? (%1)</numerusform>
@@ -2676,12 +2676,12 @@
     <message>
         <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="120"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отмена</translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="127"/>
         <source>Ok</source>
-        <translation type="unfinished">ОК</translation>
+        <translation>Ок</translation>
     </message>
 </context>
 <context>
@@ -2689,7 +2689,7 @@
     <message>
         <location filename="../src/ui/GonnectWindow.qml" line="392"/>
         <source>Home</source>
-        <translation type="unfinished">Домашний</translation>
+        <translation>Домашний</translation>
     </message>
 </context>
 <context>
@@ -2697,7 +2697,7 @@
     <message>
         <location filename="../src/usb/HeadsetDevice.cpp" line="702"/>
         <source>MMM dd</source>
-        <translation type="unfinished">dd MMM</translation>
+        <translation>dd MMM</translation>
     </message>
 </context>
 <context>
@@ -2706,40 +2706,40 @@
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="118"/>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="198"/>
         <source>Ringing</source>
-        <translation type="unfinished">Вызов</translation>
+        <translation>Вызов</translation>
     </message>
     <message>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="138"/>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="203"/>
         <source>Calling</source>
-        <translation type="unfinished">Вызов</translation>
+        <translation>Вызов</translation>
     </message>
     <message>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="81"/>
         <source>Call active</source>
-        <translation type="unfinished">Звонок активен</translation>
+        <translation>Звонок активен</translation>
     </message>
     <message>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="127"/>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="199"/>
         <source>Call waiting</source>
-        <translation type="unfinished">Звонок ожидает</translation>
+        <translation>Ожидающий звонок</translation>
     </message>
     <message>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="150"/>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="194"/>
         <source>On Hold</source>
-        <translation type="unfinished">На удержании</translation>
+        <translation>На удержании</translation>
     </message>
     <message>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="46"/>
         <source>Call ended</source>
-        <translation type="unfinished">Звонок завершён</translation>
+        <translation>Звонок завершён</translation>
     </message>
     <message>
         <location filename="../src/usb/HeadsetDeviceProxy.cpp" line="228"/>
         <source>Phone conference</source>
-        <translation type="unfinished">Телефонная конференция</translation>
+        <translation>Телефонная конференция</translation>
     </message>
 </context>
 <context>
@@ -2748,52 +2748,52 @@
         <location filename="../src/ui/components/HistoryList.qml" line="24"/>
         <location filename="../src/ui/components/HistoryList.qml" line="27"/>
         <source>No past calls</source>
-        <translation type="unfinished">Нет прошлых звонков</translation>
+        <translation>Нет прошлых звонков</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="38"/>
         <source>History</source>
-        <translation type="unfinished">История</translation>
+        <translation>История</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="39"/>
         <source>Searchable list of past calls and meetings</source>
-        <translation type="unfinished">Список прошлых звонков и встреч</translation>
+        <translation>Список прошлых звонков и встреч</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="78"/>
         <source>History item section</source>
-        <translation type="unfinished">Раздел элемента истории</translation>
+        <translation>Раздел элемента истории</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="79"/>
         <source>Header for the currently selected day: %1</source>
-        <translation type="unfinished">Заголовок выбранного дня: %1</translation>
+        <translation>Заголовок выбранного дня: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="131"/>
         <source>History item</source>
-        <translation type="unfinished">Элемент истории</translation>
+        <translation>Элемент истории</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="132"/>
         <source>Selected history item %1 - company %2, location %3, number %4, time %5, duration %6</source>
-        <translation type="unfinished">Выбранный элемент %1 — компания %2, место %3, номер %4, время %5, длительность %6</translation>
+        <translation>Выбранный элемент %1 — компания %2, место %3, номер %4, время %5, длительность %6</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="245"/>
         <source>, via %1</source>
-        <translation type="unfinished">, через %1</translation>
+        <translation>, через %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="365"/>
         <source>hh:mm</source>
-        <translation type="unfinished">hh:mm</translation>
+        <translation>hh:mm</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="423"/>
         <source>Are you sure you really want to remove this entry?</source>
-        <translation type="unfinished">Вы действительно хотите удалить эту запись?</translation>
+        <translation>Вы действительно хотите удалить эту запись?</translation>
     </message>
 </context>
 <context>
@@ -2801,47 +2801,47 @@
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="31"/>
         <source>Call</source>
-        <translation type="unfinished">Звонок</translation>
+        <translation>Звонок</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="43"/>
         <source>Chat</source>
-        <translation type="unfinished">Чат</translation>
+        <translation>Чат</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="56"/>
         <source>Copy number</source>
-        <translation type="unfinished">Скопировать номер</translation>
+        <translation>Скопировать номер</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="68"/>
         <source>Remove favorite</source>
-        <translation type="unfinished">Удалить из избранного</translation>
+        <translation>Удалить из избранного</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="68"/>
         <source>Add favorite</source>
-        <translation type="unfinished">Добавить в избранное</translation>
+        <translation>Добавить в избранное</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="81"/>
         <source>Remind when available</source>
-        <translation type="unfinished">Напомнить при доступности</translation>
+        <translation>Напомнить при доступности</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="94"/>
         <source>Unblock</source>
-        <translation type="unfinished">Разблокировать</translation>
+        <translation>Разблокировать</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="94"/>
         <source>Block for 8 hours</source>
-        <translation type="unfinished">Заблокировать на 8 часов</translation>
+        <translation>Заблокировать на 8 часов</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="107"/>
         <source>Remove</source>
-        <translation type="unfinished">Удалить</translation>
+        <translation>Удалить</translation>
     </message>
 </context>
 <context>
@@ -2849,82 +2849,82 @@
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="25"/>
         <source>History</source>
-        <translation type="unfinished">История</translation>
+        <translation>История</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
         <source>All sources</source>
-        <translation type="unfinished">Все источники</translation>
+        <translation>Все источники</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
         <source>SIP</source>
-        <translation type="unfinished">SIP</translation>
+        <translation>SIP</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="90"/>
         <source>Jitsi Meet</source>
-        <translation type="unfinished">Jitsi Meet</translation>
+        <translation>Jitsi Meet</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="95"/>
         <source>History call type picker</source>
-        <translation type="unfinished">Выбор типа звонка в истории</translation>
+        <translation>Выбор типа звонка в истории</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="96"/>
         <source>Select the call type to filter by</source>
-        <translation type="unfinished">Выбрать тип звонка для фильтрации</translation>
+        <translation>Выбрать тип звонка для фильтрации</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="109"/>
         <source>Currently selected call type</source>
-        <translation type="unfinished">Текущий тип звонка</translation>
+        <translation>Текущий тип звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
         <source>All calls</source>
-        <translation type="unfinished">Все звонки</translation>
+        <translation>Все звонки</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
         <source>Incoming</source>
-        <translation type="unfinished">Входящий</translation>
+        <translation>Входящий</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="139"/>
         <source>Outgoing</source>
-        <translation type="unfinished">Исходящий</translation>
+        <translation>Исходящий</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="142"/>
         <source>Missed</source>
-        <translation type="unfinished">Пропущенные</translation>
+        <translation>Пропущенные</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="147"/>
         <source>History call origin picker</source>
-        <translation type="unfinished">Выбор направления звонка в истории</translation>
+        <translation>Выбор направления звонка в истории</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="148"/>
         <source>Select the call origin to filter by</source>
-        <translation type="unfinished">Выбрать направление звонка для фильтрации</translation>
+        <translation>Выбрать направление звонка для фильтрации</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="161"/>
         <source>Currently selected call origin</source>
-        <translation type="unfinished">Текущее направление звонка</translation>
+        <translation>Текущее направление звонка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="171"/>
         <source>Hide history search</source>
-        <translation type="unfinished">Скрыть поиск в истории</translation>
+        <translation>Скрыть поиск в истории</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="171"/>
         <source>Show history search</source>
-        <translation type="unfinished">Показать поиск в истории</translation>
+        <translation>Показать поиск в истории</translation>
     </message>
 </context>
 <context>
@@ -2935,7 +2935,7 @@
         <location filename="../src/sip/IMHandler.cpp" line="210"/>
         <location filename="../src/sip/IMHandler.cpp" line="214"/>
         <source>Ad hoc conference</source>
-        <translation type="unfinished">Спонтанная конференция</translation>
+        <translation>Спонтанная конференция</translation>
     </message>
 </context>
 <context>
@@ -2943,22 +2943,22 @@
     <message>
         <location filename="../src/ui/components/search/IdentitySelector.qml" line="15"/>
         <source>Default</source>
-        <translation type="unfinished">По умолчанию</translation>
+        <translation>По умолчанию</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/IdentitySelector.qml" line="18"/>
         <source>Auto</source>
-        <translation type="unfinished">Авто</translation>
+        <translation>Авто</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/IdentitySelector.qml" line="34"/>
         <source>Identity selection</source>
-        <translation type="unfinished">Выбор идентификатора</translation>
+        <translation>Выбор идентификатора</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/IdentitySelector.qml" line="35"/>
         <source>Select the preferred identity to be used in calls</source>
-        <translation type="unfinished">Выбрать предпочтительный идентификатор для звонков</translation>
+        <translation>Выбрать предпочтительный идентификатор для звонков</translation>
     </message>
     <message>
         <location filename="../src/ui/components/search/IdentitySelector.qml" line="48"/>
