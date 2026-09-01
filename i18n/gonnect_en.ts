@@ -26,7 +26,7 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="150"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="154"/>
         <source>%n minutes left</source>
         <translation>
             <numerusform>%n minute left</numerusform>
@@ -40,8 +40,8 @@
         <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="32"/>
         <source>Shall the following file(s) be sent? (%1)</source>
         <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+            <numerusform>Shall the following file be sent? (%1)</numerusform>
+            <numerusform>Shall the following files be sent? (%1)</numerusform>
         </translation>
     </message>
 </context>

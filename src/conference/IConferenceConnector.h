@@ -161,6 +161,8 @@ public:
     Q_INVOKABLE virtual void muteAll() = 0;
     Q_INVOKABLE virtual void showVirtualBackgroundDialog() = 0;
 
+    Q_INVOKABLE virtual void answerKnockingParticipant(const QString &id, bool approved) = 0;
+
 Q_SIGNALS:
     void isInitializedChanged();
     void isInConferenceChanged();
@@ -192,4 +194,6 @@ Q_SIGNALS:
     void numberOfUsersChanged();
     void largeVideoUserChanged();
     void dialInfoReceived(QVariantMap numbers, QString code);
+    void participantKnocked(QString id, QString name);
+    void knockAnswered(QString id);
 };
