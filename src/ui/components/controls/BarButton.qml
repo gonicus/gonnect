@@ -19,16 +19,27 @@ Item {
     property alias iconText: buttonIcon.text
     property alias iconPath: buttonIcon.icon.source
     property alias iconColor: buttonIcon.icon.color
+    property color toggledColor: Theme.orangeColor
     property bool highlighted: false
+    property bool toggled: false
     property alias showDropdownButton: dropDownIconContainer.visible
     property alias showIndicatorBadge: indicatorBadge.visible
     property string tooltipText: ""
 
     states: [
-        State {
+
+        State {  // Highlighted
             when: control.highlighted
             PropertyChanges {
                 buttonLabel.color: Theme.primaryTextColor
+                buttonLabel.font.weight: Font.Medium
+            }
+        },
+
+        State {  // Hovered and toggled
+            when: control.enabled && buttonHoverHandler.hovered && control.toggled
+            PropertyChanges {
+                buttonLabel.color: Qt.lighter(control.toggledColor, 1.2)
                 buttonLabel.font.weight: Font.Medium
             }
         },
@@ -36,6 +47,12 @@ Item {
             when: control.enabled && buttonHoverHandler.hovered
             PropertyChanges {
                 buttonLabel.color: Theme.primaryTextColor
+            }
+        },
+        State {  // Light highlight
+            when: control.enabled && control.toggled
+            PropertyChanges {
+                buttonLabel.color: control.toggledColor
             }
         }
     ]
