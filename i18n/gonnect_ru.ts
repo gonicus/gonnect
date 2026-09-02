@@ -537,7 +537,7 @@
         <location filename="../src/ui/components/CallButtonBar.qml" line="236"/>
         <location filename="../src/ui/components/CallButtonBar.qml" line="343"/>
         <source>MOS</source>
-        <translation type="unfinished">MOS</translation>
+        <translation>MOS</translation>
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="249"/>
@@ -2326,7 +2326,7 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="112"/>
         <source>Temporarily unavailable</source>
-        <translation type="unfinished">Временно недоступно</translation>
+        <translation>Временно недоступно</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="122"/>
@@ -2599,7 +2599,7 @@
     <message>
         <location filename="../src/ui/components/FavoritesWidget.qml" line="50"/>
         <source>No favorites to display</source>
-        <translation type="unfinished">Нет избранных контактов</translation>
+        <translation>Нет избранных контактов</translation>
     </message>
 </context>
 <context>
@@ -2963,7 +2963,7 @@
     <message>
         <location filename="../src/ui/components/search/IdentitySelector.qml" line="48"/>
         <source>Currently selected identity</source>
-        <translation type="unfinished">Текущий идентификатор</translation>
+        <translation>Текущий идентификатор</translation>
     </message>
 </context>
 <context>
@@ -2971,17 +2971,17 @@
     <message>
         <location filename="../src/ui/components/popups/ImageSendPreview.qml" line="57"/>
         <source>Do you want to send this image in chat room &apos;%1&apos;?</source>
-        <translation type="unfinished">Отправить это изображение в чат-комнату &apos;%1&apos;?</translation>
+        <translation>Отправить это изображение в чат-комнату &apos;%1&apos;?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ImageSendPreview.qml" line="71"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отмена</translation>
+        <translation>Отмена</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ImageSendPreview.qml" line="78"/>
         <source>Send</source>
-        <translation type="unfinished">Отправить</translation>
+        <translation>Отправить</translation>
     </message>
 </context>
 <context>
@@ -2989,7 +2989,7 @@
     <message>
         <location filename="../src/ui/components/dialogs/InfoDialog.qml" line="37"/>
         <source>Ok</source>
-        <translation type="unfinished">ОК</translation>
+        <translation>Ок</translation>
     </message>
 </context>
 <context>
@@ -2997,17 +2997,17 @@
     <message>
         <location filename="../src/ui/components/popups/InviteChatRoom.qml" line="46"/>
         <source>Select the users that shall be invited to chat room &quot;%1&quot;. Those who already are users are excluded from the list.</source>
-        <translation type="unfinished">Выберите пользователей, которых нужно пригласить в чат-комнату &quot;%1&quot;. Те, кто уже является её участником, исключены из списка.</translation>
+        <translation>Выберите пользователей, которых нужно пригласить в чат-комнату &quot;%1&quot;. Пользователи, уже являющиеся её участниками, исключены из списка.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InviteChatRoom.qml" line="57"/>
         <source>Search user...</source>
-        <translation type="unfinished">Поиск пользователя...</translation>
+        <translation>Поиск пользователя...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InviteChatRoom.qml" line="178"/>
         <source>Invite</source>
-        <translation type="unfinished">Пригласить</translation>
+        <translation>Пригласить</translation>
     </message>
 </context>
 <context>
@@ -3015,27 +3015,27 @@
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="40"/>
         <source>You have been invited to the chat room &quot;%1&quot;.</source>
-        <translation type="unfinished">Вас пригласили в чат-комнату &quot;%1&quot;.</translation>
+        <translation>Вас пригласили в чат-комнату &quot;%1&quot;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="49"/>
         <source>Invitation message:</source>
-        <translation type="unfinished">Текст приглашения:</translation>
+        <translation>Текст приглашения:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="84"/>
         <source>Do you want to join this chat room?</source>
-        <translation type="unfinished">Вы хотите присоединиться к этой чат-комнате?</translation>
+        <translation>Вы хотите присоединиться к этой чат-комнате?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="98"/>
         <source>Decline</source>
-        <translation type="unfinished">Отклонено</translation>
+        <translation>Отклонено</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="111"/>
         <source>Join</source>
-        <translation type="unfinished">Присоединиться</translation>
+        <translation>Присоединиться</translation>
     </message>
 </context>
 <context>
@@ -3043,74 +3043,74 @@
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="483"/>
         <source>The file %1 exceeds the file size limit of %2 and cannot be sent.</source>
-        <translation type="unfinished">Файл %1 превышает ограничение размера %2 и не может быть отправлен.</translation>
+        <translation>Файл %1 превышает допустимый раздел %2 и не может быть отправлен.</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="901"/>
         <source>The IPC client of %1 repeatedly reported network errors.</source>
-        <translation type="unfinished">IPC-клиент %1 неоднократно сообщал о сетевых ошибках.</translation>
+        <translation>IPC-клиент %1 неоднократно сообщал о сетевых ошибках.</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="916"/>
         <source>An IPC error ocurred (%1, %2 (code %3):
 %4</source>
-        <translation type="unfinished">Произошла ошибка IPC (%1, %2 (код %3):
+        <translation>Произошла ошибка IPC (%1, %2 (код %3):
 %4</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="921"/>
         <source>An IPC error ocurred (%1, %2 (code %3)</source>
-        <translation type="unfinished">Произошла ошибка IPC (%1, %2 (код %3)</translation>
+        <translation>Произошла ошибка IPC (%1, %2 (код %3)</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2177"/>
         <source>Image sent by %1</source>
-        <translation type="unfinished">Изображение отправлено %1</translation>
+        <translation>Изображение отправлено %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2179"/>
         <source>[%1] Image sent by %2</source>
-        <translation type="unfinished">[%1] Изображение отправлено %2</translation>
+        <translation>[%1] Изображение отправлено %2</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2185"/>
         <source>Audio file sent by %1</source>
-        <translation type="unfinished">Аудиофайл отправлен %1</translation>
+        <translation>Аудиофайл отправлен %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2187"/>
         <source>[%1] Audio file sent by %2</source>
-        <translation type="unfinished">[%1] Аудиофайл отправлен %2</translation>
+        <translation>[%1] Аудиофайл отправлен %2</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2194"/>
         <source>Video file sent by %1</source>
-        <translation type="unfinished">Видео отправлено %1</translation>
+        <translation>Видео отправлено %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2196"/>
         <source>[%1] Video file sent by %2</source>
-        <translation type="unfinished">[%1] Видео отправлено %2</translation>
+        <translation>[%1] Видео отправлено %2</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2203"/>
         <source>File sent by %1</source>
-        <translation type="unfinished">Файл отправлен %1</translation>
+        <translation>Файл отправлен %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2205"/>
         <source>[%1] File sent by %2</source>
-        <translation type="unfinished">[%1] Файл отправлен %2</translation>
+        <translation>[%1] Файл отправлен %2</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
         <source>Message from %1</source>
-        <translation type="unfinished">Сообщение от %1</translation>
+        <translation>Сообщение от %1</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="2214"/>
         <source>[%1] Message from %2</source>
-        <translation type="unfinished">[%1] Сообщение от %2</translation>
+        <translation>[%1] Сообщение от %2</translation>
     </message>
 </context>
 <context>
@@ -3118,38 +3118,38 @@
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="190"/>
         <source>New chat message</source>
-        <translation type="unfinished">Новое сообщение</translation>
+        <translation>Новое сообщение</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="1314"/>
         <source>Active conference</source>
-        <translation type="unfinished">Активная конференция</translation>
+        <translation>Активная конференция</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="1319"/>
         <source>Hang up</source>
-        <translation type="unfinished">Завершить</translation>
+        <translation>Завершить</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="828"/>
         <source>%1 has joined the conference</source>
-        <translation type="unfinished">%1 присоединился к конференции</translation>
+        <translation>%1 присоединился к конференции</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="234"/>
         <source>Unnamed user</source>
-        <translation type="unfinished">Безымянный пользователь</translation>
+        <translation>Безымянный пользователь</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="638"/>
         <location filename="../src/ui/JitsiConnector.cpp" line="1363"/>
         <source>Failed to persist room password: %1</source>
-        <translation type="unfinished">Не удалось сохранить пароль комнаты: %1</translation>
+        <translation>Не удалось сохранить пароль комнаты: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/JitsiConnector.cpp" line="842"/>
         <source>%1 has left the conference</source>
-        <translation type="unfinished">%1 покинул конференцию</translation>
+        <translation>%1 покинул конференцию</translation>
     </message>
 </context>
 <context>
@@ -3157,27 +3157,27 @@
     <message>
         <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="20"/>
         <source>Start conference</source>
-        <translation type="unfinished">Начать конференцию</translation>
+        <translation>Начать конференцию</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="32"/>
         <source>Remove favorite</source>
-        <translation type="unfinished">Удалить из избранного</translation>
+        <translation>Удалить из избранного</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="32"/>
         <source>Add favorite</source>
-        <translation type="unfinished">Добавить в избранное</translation>
+        <translation>Добавить в избранное</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="43"/>
         <source>Copy room name</source>
-        <translation type="unfinished">Скопировать имя комнаты</translation>
+        <translation>Скопировать имя комнаты</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="54"/>
         <source>Remove</source>
-        <translation type="unfinished">Удалить</translation>
+        <translation>Удалить</translation>
     </message>
 </context>
 <context>
@@ -3185,17 +3185,17 @@
     <message>
         <location filename="../src/ui/components/controls/JoinRuleComboBox.qml" line="15"/>
         <source>Invite</source>
-        <translation type="unfinished">Пригласить</translation>
+        <translation>Пригласить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/JoinRuleComboBox.qml" line="19"/>
         <source>Knock</source>
-        <translation type="unfinished">Постучаться</translation>
+        <translation>Постучаться</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/JoinRuleComboBox.qml" line="23"/>
         <source>Public</source>
-        <translation type="unfinished">Публичный</translation>
+        <translation>Публичный</translation>
     </message>
 </context>
 <context>
@@ -3203,17 +3203,17 @@
     <message>
         <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="42"/>
         <source>The room cannot be joined directly, but you can issue a request to become a member of it. Any user eligible to accept the request will be informed about it - with a message you can optionally enter below.</source>
-        <translation type="unfinished">В эту комнату нельзя войти напрямую, но вы можете отправить запрос на вступление в неё. Любой пользователь, имеющий право принять запрос, будет уведомлён о нём — с сообщением, которое вы можете при желании ввести ниже.</translation>
+        <translation>В эту комнату нельзя войти напрямую, но вы можете отправить запрос на вступление в неё. Любой пользователь, имеющий право принять этот запрос, будет уведомлён о нём — при желании, вы можете добавить сообщение ниже.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="53"/>
         <source>Optional message</source>
-        <translation type="unfinished">Необязательное сообщение</translation>
+        <translation>Необязательное сообщение</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="74"/>
         <source>Request</source>
-        <translation type="unfinished">Запросить</translation>
+        <translation>Запросить</translation>
     </message>
 </context>
 <context>
@@ -3221,17 +3221,17 @@
     <message>
         <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="46"/>
         <source>%1 wants to join the conference. Can they join?</source>
-        <translation type="unfinished">%1 хочет присоединиться к конференции. Разрешить?</translation>
+        <translation>%1 хочет присоединиться к конференции. Разрешить?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="58"/>
         <source>No</source>
-        <translation type="unfinished">Нет</translation>
+        <translation>Нет</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="69"/>
         <source>Yes</source>
-        <translation type="unfinished">Да</translation>
+        <translation>Да</translation>
     </message>
 </context>
 <context>
@@ -3239,20 +3239,20 @@
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="119"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished">Ошибка аутентификации для %1</translation>
+        <translation>Ошибка аутентификации для %1</translation>
     </message>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="239"/>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="255"/>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="277"/>
         <source>LDAP error: %1</source>
-        <translation type="unfinished">Ошибка LDAP: %1</translation>
+        <translation>Ошибка LDAP: %1</translation>
     </message>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="325"/>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="379"/>
         <source>Failed to initialize LDAP connection: %1</source>
-        <translation type="unfinished">Ошибка инициализации LDAP: %1</translation>
+        <translation>Ошибка инициализации LDAP: %1</translation>
     </message>
 </context>
 <context>
@@ -3260,17 +3260,17 @@
     <message>
         <location filename="../src/ui/components/popups/LargeImage.qml" line="54"/>
         <source>Copy to clipboard</source>
-        <translation type="unfinished">Копировать в буфер обмена</translation>
+        <translation>Копировать в буфер обмена</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/LargeImage.qml" line="62"/>
         <source>Save</source>
-        <translation type="unfinished">Сохранить</translation>
+        <translation>Сохранить</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/LargeImage.qml" line="77"/>
         <source>Untitled</source>
-        <translation type="unfinished">Без названия</translation>
+        <translation>Без названия</translation>
     </message>
 </context>
 <context>
@@ -3278,7 +3278,7 @@
     <message>
         <location filename="../src/platform/linux/LinuxDesktopSearchProvider.cpp" line="180"/>
         <source>Call</source>
-        <translation type="unfinished">Звонок</translation>
+        <translation>Звонок</translation>
     </message>
 </context>
 <context>
@@ -3286,50 +3286,50 @@
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="105"/>
         <source>Login successful</source>
-        <translation type="unfinished">Вход выполнен успешно</translation>
+        <translation>Вход выполнен успешно</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="148"/>
         <source>Login to the Microsoft account has been received by GOnnect. GOnnect will continue the authorization process now. You can close this page now.</source>
         <extracomment>This is text is displayed in the web browser after the user successfully logged in to the microsoft account.</extracomment>
-        <translation type="unfinished">GOnnect получил данные входа в учётную запись Microsoft. Теперь GOnnect продолжит процесс авторизации. Вы можете закрыть эту страницу.</translation>
+        <translation>GOnnect получил данные авторизации для учётной записи Microsoft. Теперь GOnnect продолжит процесс авторизации. Вы можете закрыть эту страницу.</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="188"/>
         <source>Login failed: %1
 %2</source>
-        <translation type="unfinished">Ошибка входа: %1
+        <translation>Ошибка входа: %1
 %2</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="205"/>
         <source>Login failed: no token received</source>
-        <translation type="unfinished">Ошибка входа: токен не получен</translation>
+        <translation>Ошибка входа: токен не получен</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="208"/>
         <source>Login failed: server configuration error</source>
-        <translation type="unfinished">Ошибка входа: ошибка конфигурации сервера</translation>
+        <translation>Ошибка входа: ошибка конфигурации сервера</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="211"/>
         <source>Login failed: configuration error</source>
-        <translation type="unfinished">Ошибка входа: ошибка конфигурации</translation>
+        <translation>Ошибка входа: ошибка конфигурации</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="214"/>
         <source>Login failed: token expired</source>
-        <translation type="unfinished">Ошибка входа: срок действия токена истёк</translation>
+        <translation>Ошибка входа: срок действия токена истёк</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="217"/>
         <source>Login failed: unknown error</source>
-        <translation type="unfinished">Ошибка входа: неизвестная ошибка</translation>
+        <translation>Ошибка входа: неизвестная ошибка</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="70"/>
         <source>Failed to clear refresh token for Microsoft login: %1</source>
-        <translation type="unfinished">Не удалось удалить токен обновления для входа Microsoft: %1</translation>
+        <translation>Не удалось удалить токен обновления для входа Microsoft: %1</translation>
     </message>
     <message>
         <location filename="../src/MSOAuthManager.cpp" line="166"/>
