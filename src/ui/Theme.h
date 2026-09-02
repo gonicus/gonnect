@@ -28,7 +28,7 @@ class Theme : public QObject
     Q_PROPERTY(QColor inactiveTextColor READ inactiveTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor secondaryInactiveTextColor READ secondaryInactiveTextColor NOTIFY
                        colorPaletteChanged FINAL)
-    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY accentColorChanged FINAL)
     Q_PROPERTY(QColor borderColor READ borderColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor borderHeaderIconHovered READ borderHeaderIconHovered NOTIFY
                        colorPaletteChanged FINAL)
@@ -181,6 +181,7 @@ public:
 
 private Q_SLOTS:
     void updateColorPalette();
+    void updateAccentColor();
     void onThemeVariantChanged();
 
 Q_SIGNALS:
@@ -188,6 +189,7 @@ Q_SIGNALS:
     void isDarkModeChanged();
     void colorPaletteChanged();
     void useOwnDecorationChanged();
+    void accentColorChanged();
 
     void buttonBackgroundHoverChanged();
     void frameChanged();

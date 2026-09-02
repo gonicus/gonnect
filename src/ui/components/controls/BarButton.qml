@@ -19,7 +19,7 @@ Item {
     property alias iconText: buttonIcon.text
     property alias iconPath: buttonIcon.icon.source
     property alias iconColor: buttonIcon.icon.color
-    property color toggledColor: Theme.orangeColor
+    property color toggledColor: Theme.accentColor
     property bool highlighted: false
     property bool toggled: false
     property alias showDropdownButton: dropDownIconContainer.visible
