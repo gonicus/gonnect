@@ -268,7 +268,7 @@ Item {
                 visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
                 enabled: !control.isOnHold
                 toggled: control.isVideoMuted
-                text: qsTr("Video")
+                text: qsTr("Video off")
                 iconPath: Icons.cameraOff
                 onClicked: () => control.setVideoMuted(!control.isVideoMuted)
             }
@@ -314,6 +314,13 @@ Item {
                         onTriggered: () => control.setScreenShare(true, true)
                     }
                 }
+            }
+
+            Rectangle {
+                height: 32
+                width: 1
+                color: Theme.borderColor
+                anchors.verticalCenter: parent.verticalCenter
             }
 
             BarButton {
@@ -439,13 +446,6 @@ Item {
             top: parent.top
             bottom: parent.bottom
             right: parent.right
-        }
-
-        Rectangle {
-            height: 32
-            width: 1
-            color: Theme.borderColor
-            anchors.verticalCenter: parent.verticalCenter
         }
 
         Button {
