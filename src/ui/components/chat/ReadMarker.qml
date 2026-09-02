@@ -15,11 +15,6 @@ Item {
     property int allUsersCount
 
     readonly property int readUsersCount: control.readUsers?.length ?? 0
-    readonly property real percentageRead: control.readUsersCount / Math.max(control.allUsersCount - 1, 1) * 100
-    readonly property int thresholdLow: 1
-    readonly property int thresholdMid1: 33
-    readonly property int thresholdMid2: 66
-    readonly property int thresholdHigh: 99
 
     IconLabel {
         anchors.centerIn: parent
@@ -29,20 +24,13 @@ Item {
             width: Math.round(control.implicitWidth * Screen.devicePixelRatio)
             height: Math.round(control.implicitHeight * Screen.devicePixelRatio)
             source: {
-                const pct = control.percentageRead
-                if (pct < control.thresholdLow) {
-                    return Icons.taskProcess0
+                if (control.readUsersCount === control.allUsersCount - 1) {
+                    return Icons.readmarkDoubleFilled
                 }
-                if (pct < control.thresholdMid1) {
-                    return Icons.taskProcess1
+                if (control.readUsersCount > 0) {
+                    return Icons.readmarkDoubleInline
                 }
-                if (pct < control.thresholdMid2) {
-                    return Icons.taskProcess2
-                }
-                if (pct < control.thresholdHigh) {
-                    return Icons.taskProcess3
-                }
-                return Icons.taskProcess4
+                return Icons.readmarkSingleInline
             }
         }
     }
