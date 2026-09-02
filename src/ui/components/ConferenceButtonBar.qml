@@ -268,7 +268,7 @@ Item {
                 visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
                 enabled: !control.isOnHold
                 toggled: control.isVideoMuted
-                text: qsTr("Video mute")
+                text: qsTr("Video")
                 iconPath: Icons.cameraOff
                 onClicked: () => control.setVideoMuted(!control.isVideoMuted)
             }
