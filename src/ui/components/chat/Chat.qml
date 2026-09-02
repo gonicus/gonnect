@@ -38,7 +38,10 @@ Item {
         }
     }
 
-    onChatRoomChanged: () => control.loadMessages()
+    onChatRoomChanged: () => {
+                           relatedMsg.chatMessage = null
+                           control.loadMessages()
+                       }
 
     Connections {
         target: control.chatRoom
@@ -101,7 +104,7 @@ Item {
             top: messageListCardHeading.top
             bottom: messageListCardHeading.bottom
         }
-        visible: control.showTitleBar && control.soleOtherContact
+        visible: false // control.showTitleBar && control.soleOtherContact
 
         onClicked: () => {
                        const soleNumber = control.numbersModel.soleNumber()

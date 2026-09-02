@@ -255,6 +255,39 @@ Item {
         id: jitsiViewComponent
 
         Item {
+            id: jitsiViewItem
+
+            property var pendingKnocks: []
+
+            function enqueueKnock(id, name) {
+                if (jitsiViewItem.pendingKnocks.some(e => e.id === id)) {
+                    return
+                }
+                jitsiViewItem.pendingKnocks = [...jitsiViewItem.pendingKnocks, { id, name, }]
+
+                if (ViewHelper.topDrawer.loader.sourceComponent !== knockedParticipantComponent) {
+                    ViewHelper.topDrawer.loader.sourceComponent = knockedParticipantComponent
+                }
+            }
+
+            function dequeueKnock(id) {
+                const rest = jitsiViewItem.pendingKnocks.filter(e => e.id !== id)
+                if (rest.length !== jitsiViewItem.pendingKnocks.length) {
+                    jitsiViewItem.pendingKnocks = rest
+
+                    if (rest.length === 0) {
+                        ViewHelper.topDrawer.loader.sourceComponent = undefined
+                    }
+                }
+            }
+
+            readonly property Connections confConnConnections: Connections {
+                target: confConn
+                function onKnockAnswered(id : string) {
+                    jitsiViewItem.dequeueKnock(id)
+                }
+            }
+
             Card {
                 id: callMainCard
                 anchors {
@@ -300,6 +333,8 @@ Item {
                         ViewHelper.topDrawer.loader.item.numbers = numbers
                         ViewHelper.topDrawer.loader.item.code = code
                     }
+                    onOpenKnockedParticipantDialog: (id, name) => jitsiViewItem.enqueueKnock(id, name)
+
                     onHangup: () => confConn.leaveConference()
                     onFinishForAll: () => confConn.terminateConference()
                 }
@@ -481,6 +516,17 @@ Item {
                     id: dialInInfoComponent
 
                     DialInInfo {}
+                }
+
+                Component {
+                    id: knockedParticipantComponent
+
+                    KnockedParticipant {
+                        id: knockedParticipantDialog
+                        knockModel: jitsiViewItem.pendingKnocks
+                        onAccepted: id => confConn.answerKnockingParticipant(id, true)
+                        onRejected: id => confConn.answerKnockingParticipant(id, false)
+                    }
                 }
 
                 Component {
