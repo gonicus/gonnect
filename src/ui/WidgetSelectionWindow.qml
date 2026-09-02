@@ -212,16 +212,15 @@ BaseWindow {
                 contentItem: RowLayout {
                     spacing: 10
 
-IconLabel {
-                            id: widgetChoicePreview
-                            Layout.preferredWidth: 48
-                            Layout.preferredHeight: 48
-
-                            icon {
-                                source: Icons[widgetEntries.get(widgetSelection.currentIndex).iconName]
-                                width: widgetChoicePreview.width
-                                height: widgetChoicePreview.height
-                            }
+                    IconLabel {
+                        id: widgetChoicePreview
+                        Layout.preferredWidth: 48
+                        Layout.preferredHeight: 48
+                        icon {
+                            source: Icons[widgetEntries.get(widgetSelection.currentIndex).iconName]
+                            width: widgetChoicePreview.width
+                            height: widgetChoicePreview.height
+                        }
 
                         Accessible.ignored: true
                     }

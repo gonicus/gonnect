@@ -52,6 +52,7 @@ Menu {
     Action {
         id: removeAction
         text: qsTr("Remove")
+        icon.source: Icons.userTrash
         onTriggered: () => control.removeItem()
 
         Accessible.role: Accessible.Button

@@ -11,6 +11,7 @@
 #include "ChatMessageContentImage.h"
 #include "ChatMessageContentText.h"
 #include "ChatMessageContentVideoFile.h"
+#include "ChatMessageContentRemoved.h"
 #include "ChatUser.h"
 #include "IChatProvider.h"
 #include "IChatRoom.h"
@@ -18,8 +19,6 @@
 #include "NumberStats.h"
 #include "PhoneNumberUtil.h"
 #include "SIPCallManager.h"
-
-namespace {
 
 QString chatMessagePreview(const ChatMessage *message)
 {
@@ -40,11 +39,12 @@ QString chatMessagePreview(const ChatMessage *message)
     if (qobject_cast<ChatMessageContentFile *>(content)) {
         return ActivitiesModel::tr("[File]");
     }
+    if (qobject_cast<ChatMessageContentRemoved *>(content)) {
+        return ActivitiesModel::tr("[Removed]");
+    }
 
     return ActivitiesModel::tr("[Message]");
 }
-
-} // namespace
 
 ActivitiesModel::ActivitiesModel(QObject *parent) : QAbstractListModel{ parent }
 {
@@ -53,6 +53,7 @@ ActivitiesModel::ActivitiesModel(QObject *parent) : QAbstractListModel{ parent }
     auto &history = CallHistory::instance();
     connect(&history, &CallHistory::itemAdded, this, &ActivitiesModel::handleCallItemAdded);
     connect(&history, &CallHistory::dataChanged, this, &ActivitiesModel::handleCallItemChanged);
+    connect(&history, &CallHistory::itemRemoved, this, &ActivitiesModel::handleCallItemRemoved);
 
     auto &manager = ChatConnectorManager::instance();
     connect(&manager, &ChatConnectorManager::chatConnectorsChanged, this,
@@ -79,6 +80,8 @@ ActivitiesModel::ActivitiesModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&numStats, &NumberStats::favoriteAdded, this,
             [this]() { refreshCallRoles({ static_cast<int>(Roles::IsFavorite) }); });
     connect(&numStats, &NumberStats::favoriteRemoved, this,
+            [this]() { refreshCallRoles({ static_cast<int>(Roles::IsFavorite) }); });
+    connect(&numStats, &NumberStats::modelReset, this,
             [this]() { refreshCallRoles({ static_cast<int>(Roles::IsFavorite) }); });
 
     connect(this, &ActivitiesModel::limitChanged, this, &ActivitiesModel::trimToLimit);
@@ -176,10 +179,10 @@ QVariant ActivitiesModel::data(const QModelIndex &index, int role) const
             return static_cast<int>(entry.kind);
 
         case static_cast<int>(Roles::IsSIPCall):
-            return entry.kind == Kind::SIPCall;
+            return static_cast<bool>(item->type() & CallHistoryItem::Type::SIPCall);
 
         case static_cast<int>(Roles::IsJitsiMeetCall):
-            return entry.kind == Kind::JitsiMeetCall;
+            return static_cast<bool>(item->type() & CallHistoryItem::Type::JitsiMeetCall);
 
         case static_cast<int>(Roles::IsChatMessage):
             return false;
@@ -258,20 +261,21 @@ QVariant ActivitiesModel::data(const QModelIndex &index, int role) const
 
         case static_cast<int>(Roles::Hops): {
             const auto &hops = item->hops();
-
             if (hops.isEmpty()) {
-                return hops;
+                return QStringList();
             }
 
             QStringList l;
             l.reserve(hops.size());
             const auto &addressBook = AddressBook::instance();
             for (const auto &hop : hops) {
-                const Contact *contact = addressBook.lookupByNumber(hop);
-                if (contact && !contact->name().isEmpty()) {
-                    l.append(QString("%1 (%2)").arg(contact->name(), hop));
-                } else {
-                    l.append(hop);
+                if (!hop.isEmpty()) {
+                    const Contact *contact = addressBook.lookupByNumber(hop);
+                    if (contact && !contact->name().isEmpty()) {
+                        l.append(QString("%1 (%2)").arg(contact->name(), hop));
+                    } else {
+                        l.append(hop);
+                    }
                 }
             }
 
@@ -283,8 +287,10 @@ QVariant ActivitiesModel::data(const QModelIndex &index, int role) const
 
         case static_cast<int>(Roles::ChatProviderId):
         case static_cast<int>(Roles::ChatRoomId):
+            return QString();
+
         case static_cast<int>(Roles::IsOwnMessage):
-            return QVariant();
+            return false;
 
         default:
             return QVariant();
@@ -339,6 +345,9 @@ QVariant ActivitiesModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::IsOwnMessage):
         return entry.isOwnMessage;
 
+    case static_cast<int>(Roles::Hops):
+        return QStringList();
+
     default:
         return QVariant();
     }
@@ -346,14 +355,14 @@ QVariant ActivitiesModel::data(const QModelIndex &index, int role) const
 
 void ActivitiesModel::populateCallHistory()
 {
-    // The call history is already sorted by time descending, so the entries can be taken over
-    // in order.
     const auto items = CallHistory::instance().historyItems();
-    m_entries.reserve(items.size());
-    for (const auto item : items) {
+    const qsizetype n = m_limit >= 0 ? std::min<qsizetype>(m_limit, items.size()) : items.size();
+    m_entries.reserve(n);
+
+    for (qsizetype i = 0; i < n; ++i) {
+        const auto item = items.at(i);
         Entry entry;
-        entry.kind = item->type() & CallHistoryItem::Type::JitsiMeetCall ? Kind::JitsiMeetCall
-                                                                         : Kind::SIPCall;
+        entry.kind = Kind::SIPCall;
         entry.time = item->time();
         entry.callItem = item;
         m_entries.push_back(entry);
@@ -364,6 +373,11 @@ void ActivitiesModel::subscribeToProviders()
 {
     const auto providers = ChatConnectorManager::instance().chatConnectors();
     for (auto *provider : providers) {
+        if (m_subscribedProviders.contains(provider)) {
+            continue;
+        }
+        connect(provider, &QObject::destroyed, this,
+                [this, provider]() { m_subscribedProviders.remove(provider); });
         connect(provider, &IChatProvider::chatRoomAdded, this,
                 [this](qsizetype, IChatRoom *room, const QString &) { subscribeToRoom(room); });
 
@@ -384,8 +398,9 @@ void ActivitiesModel::subscribeToRoom(IChatRoom *room)
     connect(room, &QObject::destroyed, this, [this, room]() { m_subscribedRooms.remove(room); });
     connect(room, &IChatRoom::chatMessageAdded, this,
             [this](qsizetype, ChatMessage *message) { handleChatMessageAdded(message); });
-    connect(room, &IChatRoom::chatMessageOutOfSequenceReceived, this,
-            [this](ChatMessage *message) { handleChatMessageAdded(message); });
+    connect(room, &IChatRoom::chatMessageContentChanged, this,
+            &ActivitiesModel::handleChatMessageContentChanged);
+    connect(room, &IChatRoom::chatMessageRemoved, this, &ActivitiesModel::handleChatMessageRemoved);
 }
 
 void ActivitiesModel::handleCallItemAdded(qsizetype index, CallHistoryItem *item)
@@ -393,8 +408,7 @@ void ActivitiesModel::handleCallItemAdded(qsizetype index, CallHistoryItem *item
     Q_UNUSED(index)
 
     Entry entry;
-    entry.kind = item->type() & CallHistoryItem::Type::JitsiMeetCall ? Kind::JitsiMeetCall
-                                                                     : Kind::SIPCall;
+    entry.kind = Kind::SIPCall;
     entry.time = item->time();
     entry.callItem = item;
     insertEntry(entry);
@@ -412,6 +426,19 @@ void ActivitiesModel::handleCallItemChanged(qsizetype index, CallHistoryItem *it
     }
 }
 
+void ActivitiesModel::handleCallItemRemoved(qsizetype index, CallHistoryItem *item)
+{
+    Q_UNUSED(index)
+    for (qsizetype i = 0; i < m_entries.size(); ++i) {
+        if (m_entries.at(i).callItem == item) {
+            beginRemoveRows(QModelIndex(), i, i);
+            m_entries.removeAt(i);
+            endRemoveRows();
+            return;
+        }
+    }
+}
+
 void ActivitiesModel::handleChatMessageAdded(ChatMessage *message)
 {
     if (!message || message->isStateUpdate()
@@ -422,7 +449,7 @@ void ActivitiesModel::handleChatMessageAdded(ChatMessage *message)
     // Only messages that arrive while GOnnect is running shall be recorded. Messages that have
     // been fetched into a room on demand (i.e. its older history) must not end up here.
     if (const auto room = message->chatRoom()) {
-        if (room->isLoadingMessageHistory()) {
+        if (room->isLoadingMessageHistory() || !room->chatMessages().contains(message)) {
             return;
         }
     }
@@ -432,13 +459,14 @@ void ActivitiesModel::handleChatMessageAdded(ChatMessage *message)
     entry.time = message->timestamp();
     entry.isOwnMessage = static_cast<bool>(message->flags() & ChatMessage::Flag::OwnMessage);
     entry.senderName = message->nickName();
+    entry.chatMessageId = message->eventId();
     entry.messageText = chatMessagePreview(message);
 
     if (const auto room = message->chatRoom()) {
         entry.chatRoomId = room->id();
         entry.roomName = room->name();
 
-        if (const auto provider = qobject_cast<IChatProvider *>(room->parent())) {
+        if (const auto provider = room->chatProvider()) {
             entry.chatProviderId = provider->id();
         }
 
@@ -454,6 +482,36 @@ void ActivitiesModel::handleChatMessageAdded(ChatMessage *message)
     }
 
     insertEntry(entry);
+}
+
+void ActivitiesModel::handleChatMessageContentChanged(qsizetype, ChatMessage *item)
+{
+    if (!item) {
+        return;
+    }
+    for (qsizetype i = 0; i < m_entries.size(); ++i) {
+        if (m_entries[i].chatMessageId == item->eventId()) {
+            m_entries[i].messageText = chatMessagePreview(item);
+            const auto idx = createIndex(i, 0);
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Text) });
+            return;
+        }
+    }
+}
+
+void ActivitiesModel::handleChatMessageRemoved(qsizetype, ChatMessage *item)
+{
+    if (!item) {
+        return;
+    }
+    for (qsizetype i = 0; i < m_entries.size(); ++i) {
+        if (m_entries[i].chatMessageId == item->eventId()) {
+            m_entries[i].messageText = tr("[Removed]");
+            const auto idx = createIndex(i, 0);
+            Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Text) });
+            return;
+        }
+    }
 }
 
 void ActivitiesModel::insertEntry(Entry entry)
@@ -477,20 +535,25 @@ void ActivitiesModel::insertEntry(Entry entry)
 
 void ActivitiesModel::trimToLimit()
 {
-    // Drop the oldest entries if the limit has been reached.
-    while (m_limit >= 0 && m_entries.size() > m_limit) {
-        const auto lastIndex = m_entries.size() - 1;
-        beginRemoveRows(QModelIndex(), lastIndex, lastIndex);
-        m_entries.removeAt(lastIndex);
+    if (m_limit >= 0 && m_entries.size() > m_limit) {
+        const auto first = m_limit;
+        const auto last = m_entries.size() - 1;
+        beginRemoveRows(QModelIndex(), first, last);
+        m_entries.remove(first, last - first + 1);
         endRemoveRows();
     }
 }
 
 void ActivitiesModel::refreshCallRoles(const QList<int> &roles)
 {
-    for (qsizetype i = 0; i < m_entries.size(); ++i) {
-        if (m_entries.at(i).kind != Kind::ChatMessage) {
-            Q_EMIT dataChanged(createIndex(i, 0), createIndex(i, 0), roles);
-        }
+    const auto count = rowCount(QModelIndex());
+    if (count <= 0) {
+        return;
     }
+    Q_EMIT dataChanged(createIndex(0, 0), createIndex(count - 1, 0), roles);
+}
+
+void ActivitiesModel::removeEntry(qint64 id) const
+{
+    CallHistory::instance().removeHistoryItem(id);
 }

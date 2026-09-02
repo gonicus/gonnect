@@ -76,7 +76,7 @@ Item {
 
         delegate: Item {
             id: delg
-            enabled: ViewHelper.isJitsiAvailable || !delg.isJitsiMeetCall
+            enabled: ViewHelper.isJitsiAvailable || !delg.isJitsiMeetCall || delg.isSIPCall
             height: 50
             anchors {
                 left: parent?.left
@@ -86,6 +86,7 @@ Item {
                 rightMargin: control.listMargin
             }
 
+            required property int id
             required property bool isSIPCall
             required property bool isJitsiMeetCall
             required property bool isChatMessage
@@ -131,6 +132,14 @@ Item {
                         return
                     }
                 }
+            }
+
+            function removeEntry() {
+                const id = delg.id
+                const item = DialogFactory.createConfirmDialog({
+                                 text: qsTr("Are you sure you really want to remove this entry?")
+                             })
+                item.accepted.connect(() => activitiesModel.removeEntry(id))
             }
 
             Component.onCompleted: () => delg.updateBuddyStatus()
@@ -244,6 +253,7 @@ Item {
                         text: delg.text + (delg.hops.length > 0
                                            ? qsTr(", via %1").arg(delg.hops.join(" → "))
                                            : "")
+                        }
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -435,6 +445,7 @@ Item {
                     onCallAsClicked: (identityId) => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId, identityId)
                     onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
                     onBlockTemporarilyClicked: () => SIPCallManager.toggleTemporaryBlock(delg.contactId, delg.remotePhoneNumber)
+                    onRemoveItem: () => delg.removeEntry()
                 }
             }
 
@@ -446,6 +457,7 @@ Item {
                     roomName: delg.remotePhoneNumber
                     width: 230
                     onCallClicked: () => ViewHelper.requestMeeting(delg.remoteUrl)
+                    onRemoveItem: () => delg.removeEntry()
                 }
             }
 

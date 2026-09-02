@@ -1,16 +1,16 @@
 #pragma once
 
+#include <QObject>
 #include <QAbstractListModel>
 #include <QDateTime>
 #include <QQmlEngine>
 #include <QSet>
-#include <QString>
-#include <QVector>
 
 class CallHistoryItem;
 class ChatMessage;
 class Contact;
 class IChatRoom;
+class IChatProvider;
 
 class ActivitiesModel : public QAbstractListModel
 {
@@ -59,6 +59,8 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    Q_INVOKABLE void removeEntry(qint64 id) const;
+
 private:
     struct Entry
     {
@@ -75,6 +77,7 @@ private:
         QString chatRoomId;
         QString roomName;
         QString senderName;
+        QString chatMessageId;
         QString messageText;
         QString avatarPath;
         bool isOwnMessage = false;
@@ -85,14 +88,18 @@ private:
     void subscribeToRoom(IChatRoom *room);
     void handleCallItemAdded(qsizetype index, CallHistoryItem *item);
     void handleCallItemChanged(qsizetype index, CallHistoryItem *item);
+    void handleCallItemRemoved(qsizetype index, CallHistoryItem *item);
     void handleChatMessageAdded(ChatMessage *message);
+    void handleChatMessageContentChanged(qsizetype index, ChatMessage *item);
+    void handleChatMessageRemoved(qsizetype index, ChatMessage *item);
     void insertEntry(Entry entry);
     void trimToLimit();
     void refreshCallRoles(const QList<int> &roles);
 
-    QVector<Entry> m_entries;
+    QList<Entry> m_entries;
     QSet<Contact *> m_avatarTrackedContacts;
     QSet<IChatRoom *> m_subscribedRooms;
+    QSet<IChatProvider *> m_subscribedProviders;
     int m_limit = -1;
 
 Q_SIGNALS:

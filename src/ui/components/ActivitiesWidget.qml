@@ -31,7 +31,6 @@ BaseWidget {
 
         ActivitiesList {
             id: activitiesList
-            height: parent.height
             clip: true
             limit: 100
             anchors {
