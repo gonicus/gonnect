@@ -253,7 +253,6 @@ Item {
                         text: delg.text + (delg.hops.length > 0
                                            ? qsTr(", via %1").arg(delg.hops.join(" → "))
                                            : "")
-                        }
                         anchors {
                             left: parent.left
                             right: parent.right
