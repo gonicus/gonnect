@@ -40,8 +40,7 @@ Item {
     }
 
     ToolTip.visible: readMarkerHoverHandler.hovered && control.readUsersCount > 0
-    ToolTip.text: qsTr("%1 of %2 have read this message:\n%3")
-                    .arg(control.readUsersCount)
+    ToolTip.text: qsTr("%n of %2 have read this message:\n%3", "", control.readUsersCount)
                     .arg(Math.max(control.allUsersCount - 1, 1))
                     .arg((control.readUsers ?? []).map(u => u.computedName).join(', '))
 }

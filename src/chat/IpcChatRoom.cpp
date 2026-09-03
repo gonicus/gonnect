@@ -569,7 +569,7 @@ void IpcChatRoom::setReadTimestamp(const QHash<QString, QDateTime> &reads)
 {
     bool hasChanged = false;
 
-    for (const auto [userId, newTime] : reads.asKeyValueRange()) {
+    for (const auto &[userId, newTime] : reads.asKeyValueRange()) {
         const auto oldTime = m_readMarkers.value(userId);
         if (!oldTime.isValid() || oldTime < newTime) {
             m_readMarkers.insert(userId, newTime);

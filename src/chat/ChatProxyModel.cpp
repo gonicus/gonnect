@@ -41,7 +41,7 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
 
         // Find next newer own message
         for (qsizetype i = index.row() - 1; i >= 0; --i) {
-            if (messageAt(i)) {
+            if (onwMessageAt(i)) {
                 return false;
             }
         }
@@ -65,7 +65,7 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
         const auto currReadUsers = readUsersFor(chatRoom, currMsg);
 
         for (qsizetype i = index.row() - 1; i >= 0; --i) {
-            if (auto *message = messageAt(i);
+            if (auto *message = onwMessageAt(i);
                 message && currReadUsers == readUsersFor(chatRoom, message)) {
                 return result;
             }
@@ -83,7 +83,7 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
     }
 }
 
-ChatMessage *ChatProxyModel::messageAt(qsizetype proxyIndex) const
+ChatMessage *ChatProxyModel::onwMessageAt(qsizetype proxyIndex) const
 {
     const QModelIndex prevSource = mapToSource(this->index(proxyIndex, 0));
     if (!isValidOwnMessage(prevSource)) {
@@ -110,7 +110,7 @@ QList<ChatUser *> ChatProxyModel::readUsersFor(const IChatRoom *chatRoom,
     }
 
     std::ranges::sort(users, [](const ChatUser *left, const ChatUser *right) -> bool {
-        return left->displayName().localeAwareCompare(right->displayName()) < 0;
+        return left->computedName().localeAwareCompare(right->computedName()) < 0;
     });
 
     return users;
@@ -206,6 +206,12 @@ void ChatProxyModel::onChatRoomChanged()
         connect(chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
                 [this]() { invalidateProxyRoles(); });
         connect(chatRoom, &IChatRoom::readMarkersChanged, m_chatRoomContext,
+                [this]() { invalidateProxyRoles(); });
+        connect(chatRoom, &IChatRoom::chatMessageFlagsChanged, m_chatRoomContext,
+                [this]() { invalidateProxyRoles(); });
+        connect(chatRoom, &IChatRoom::chatUsersChanged, m_chatRoomContext,
+                [this]() { invalidateProxyRoles(); });
+        connect(chatRoom, &IChatRoom::chatUserRoomStateChanged, m_chatRoomContext,
                 [this]() { invalidateProxyRoles(); });
     }
 }

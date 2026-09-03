@@ -51,7 +51,6 @@ Item {
     property IChatRoom chatRoom
 
     property string clickedLink
-    property bool isFirst
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
