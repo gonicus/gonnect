@@ -362,7 +362,7 @@ void IpcDispatcher::loginWithSSO(const QString &identityProvider)
 }
 
 void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
-                                const QString &relatedMessageId)
+                                const QString &relatedMessageId, const QString &threadId)
 {
     const auto *chatRoom = chatRoomByRoomId(roomId);
     if (!chatRoom) {
@@ -410,6 +410,10 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     msgReq.setText(content);
     msgReq.setMentionedUserIds(mentionedUserIds);
 
+    if (!threadId.isEmpty()) {
+        msgReq.setThreadId(threadId);
+    }
+
     // Check for "@room" tag
     msgReq.setRoomMentioned(containsRoomTag(text));
 
@@ -434,7 +438,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
     auto *pendingContent = new ChatMessageContentText(text);
     pendingMsg = new ChatMessage(tempEventId, ownUserId(), nickName, pendingContent,
                                  QDateTime::currentDateTimeUtc(), ipcRoom,
-                                 Flag::OwnMessage | Flag::Markdown | Flag::Pending);
+                                 Flag::OwnMessage | Flag::Markdown | Flag::Pending, threadId);
     if (!relatedMessageId.isEmpty()) {
         pendingMsg->setRelatedMessageId(relatedMessageId);
     }
@@ -523,7 +527,7 @@ void IpcDispatcher::markAsRead(const QString &roomId)
     sendRequest(req);
 }
 
-void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
+void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n, const QString &threadId)
 {
     Q_CHECK_PTR(chatRoom);
 
@@ -535,16 +539,32 @@ void IpcDispatcher::loadMessages(IChatRoom *chatRoom, quint32 n)
 
     auto req = createRequest();
     const auto tag = req->tag();
-    m_roomListTags.insert(tag, chatRoom->id());
+    RoomTagInfo tagInfo;
+    tagInfo.roomId = chatRoom->id();
+    tagInfo.threadId = threadId;
+    m_roomListTags.insert(tag, std::move(tagInfo));
 
     RoomMessagesRequest msgReq;
     msgReq.setRoomId(chatRoom->id());
     msgReq.setLimit(n);
     msgReq.setOrder(MessagesOrderGadget::MessagesOrder::Backward);
 
+    if (!threadId.isEmpty()) {
+        msgReq.setThreadId(threadId);
+    }
+
     const auto &existingMessages = chatRoom->chatMessages();
     if (!existingMessages.isEmpty()) {
-        msgReq.setFromMessageId(existingMessages.first()->eventId());
+        if (threadId.isEmpty()) {
+            msgReq.setFromMessageId(existingMessages.first()->eventId());
+        } else {
+            for (auto *msg : existingMessages) {
+                if (msg->threadId() == threadId || msg->eventId() == threadId) {
+                    msgReq.setFromMessageId(msg->eventId());
+                    break;
+                }
+            }
+        }
     }
 
     req->setRoomMessagesRequest(msgReq);
@@ -679,9 +699,10 @@ void IpcDispatcher::retrySendMessage(const QString &roomId, const QString &faile
 
     const auto text = textContent->rawText();
     const auto relatedMessageId = msg->relatedMessageId();
+    const auto threadId = msg->threadId();
 
     room->removeMessage(failedMessageId);
-    sendMessage(roomId, text, relatedMessageId);
+    sendMessage(roomId, text, relatedMessageId, threadId);
 }
 
 void IpcDispatcher::init()
@@ -938,12 +959,12 @@ void IpcDispatcher::processResponse(
 
     } else if (rc.hasMultipartEnd()) {
         const auto count = m_multipartCount.take(tag);
-        const auto roomId = m_roomListTags.take(tag);
-        if (!roomId.isEmpty()) {
-            if (auto room = m_roomLookup.value(roomId, nullptr)) {
+        const auto tagInfo = m_roomListTags.take(tag);
+        if (!tagInfo.roomId.isEmpty()) {
+            if (auto room = m_roomLookup.value(tagInfo.roomId, nullptr)) {
                 room->setIsLoadingMessageHistory(false);
                 if (!count) {
-                    room->setIsCompletelyLoaded(true);
+                    room->setIsCompletelyLoaded(true, tagInfo.threadId);
                 }
             }
         }
@@ -1882,8 +1903,14 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         const auto user = m_users.value(message.senderId(), nullptr);
         const auto userDisplayName =
                 (user && !user->displayName().isEmpty()) ? user->displayName() : message.senderId();
+
+        QString messageThreadId;
+        if (message.hasThreadId()) {
+            messageThreadId = message.threadId();
+        }
+
         chatMessage = new ChatMessage(message.messageId(), message.senderId(), userDisplayName,
-                                      content, dateTime, room, flags);
+                                      content, dateTime, room, flags, messageThreadId);
     }
 
     if (message.hasRelatedMessageId()) {

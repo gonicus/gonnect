@@ -3,6 +3,11 @@
 
 ChatProxyModel::ChatProxyModel(QObject *parent) : QSortFilterProxyModel{ parent }
 {
+    connect(this, &ChatProxyModel::threadIdChanged, this, [this]() {
+        beginResetModel();
+        endResetModel();
+    });
+
     sort(0);
 }
 
@@ -20,4 +25,30 @@ bool ChatProxyModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &
             model->data(sourceRight, static_cast<int>(Roles::Timestamp)).toDateTime();
 
     return leftTime > rightTime;
+}
+
+bool ChatProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    const auto model = sourceModel();
+    if (!model) {
+        return false;
+    }
+
+    if (m_threadId.isEmpty()) {
+        return true;
+    }
+
+    using Roles = ChatModel::Roles;
+    const auto sourceIndex = model->index(sourceRow, 0, sourceParent);
+    if (!sourceIndex.isValid()) {
+        return false;
+    }
+
+    const auto threadId = model->data(sourceIndex, static_cast<int>(Roles::ThreadId)).toString();
+    if (m_threadId == threadId) {
+        return true;
+    }
+
+    const auto eventId = model->data(sourceIndex, static_cast<int>(Roles::EventId)).toString();
+    return m_threadId == eventId;
 }

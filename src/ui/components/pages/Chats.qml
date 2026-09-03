@@ -504,6 +504,7 @@ Item {
 
     Card {
         id: chatMainCard
+        highlighted: chat.isThreadMode
         anchors {
             top: parent.top
             right: parent.right

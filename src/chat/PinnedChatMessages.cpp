@@ -68,8 +68,9 @@ void PinnedChatMessages::onChatRoomUpdated()
             beginResetModel();
             endResetModel();
         });
-        connect(m_chatRoom, &IChatRoom::chatMessageContentChanged, m_chatRoomContext,
-                [this](qsizetype, ChatMessage *chatMessage) {
+        connect(m_chatRoom,
+                QOverload<qsizetype, ChatMessage *>::of(&IChatRoom::chatMessageContentChanged),
+                m_chatRoomContext, [this](qsizetype, ChatMessage *chatMessage) {
                     if (!chatMessage || !m_chatRoom) {
                         return;
                     }

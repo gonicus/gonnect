@@ -12,8 +12,8 @@ Item {
 
     property bool showTitleBar: true
     readonly property alias isScrolledDown: chatMessageList.isScrolledDown
-
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
+    readonly property alias isThreadMode: chatMessageList.isThreadMode
 
     readonly property Contact soleOtherContact: control.chatRoom && control.chatRoom.isDirectChat
                                                 ? ContactHelper.lookupByChatUser(control.chatRoom.otherUser)
@@ -31,23 +31,30 @@ Item {
         chatMessageBox.giveFocus()
     }
 
-    function loadMessages() {
+    function loadMessages(threadId : string) {
         const room = control.chatRoom
-        if (room && !room.isInitiallyLoaded && room.ownUserJoinState === IChatRoom.UserRoomState.Joined) {
-            room.loadMessages()
+        if (!room || room.ownUserJoinState !== IChatRoom.UserRoomState.Joined) {
+            return
+        }
+        if (threadId.length > 0) {
+            if (!room.isCompletelyLoaded(threadId)) {
+                room.loadMessages(threadId)
+            }
+        } else if (!room.isInitiallyLoaded) {
+            room.loadMessages(threadId)
         }
     }
 
     onChatRoomChanged: () => {
                            relatedMsg.chatMessage = null
-                           control.loadMessages()
+                           control.loadMessages(chatMessageList.threadId)
                        }
 
     Connections {
         target: control.chatRoom
 
         function onOwnUserJoinStateChanged() {
-            control.loadMessages()
+            control.loadMessages(chatMessageList.threadId)
         }
     }
 
@@ -75,9 +82,11 @@ Item {
                       ? parent.width - (control.headerRightLimitX - callContactButton.implicitWidth - Theme.d * 2) - 20
                       : parent.width - control.headerRightLimitX - 20
         text: control.showTitleBar && control.chatRoom
-              ? (control.chatRoom.isDirectChat
-                 ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
-                 : qsTr("Chat room %1").arg(control.chatRoom.name))
+              ? (chatMessageList.isThreadMode
+                 ? qsTr('Subthread (in "%1")').arg(control.chatRoom.name)
+                 : (control.chatRoom.isDirectChat
+                    ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
+                    : qsTr("Chat room %1").arg(control.chatRoom.name)))
               : ""
         anchors {
             top: parent.top
@@ -210,7 +219,7 @@ Item {
 
     FavIcon {
         id: favCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
+        visible: control.showTitleBar && messageListCardHeading.visible && !chatMessageList.isThreadMode
         isFavorite: control.chatRoom?.isFavorite ?? false
         anchors {
             verticalCenter: messageListCardHeading.verticalCenter
@@ -222,7 +231,7 @@ Item {
 
     CardHeadingMoreMenuButton {
         id: messageListCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
+        visible: control.showTitleBar && messageListCardHeading.visible && !chatMessageList.isThreadMode
         anchors {
             top: parent.top
             right: parent.right
@@ -235,6 +244,18 @@ Item {
                                                               inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite)
                                                           }).popup()
                    }
+    }
+
+    CardHeadingMoreMenuButton {
+        id: closeSubthreadCardHeadingButton
+        visible: control.showTitleBar && messageListCardHeading.visible && chatMessageList.isThreadMode
+        iconSource: Icons.mobileCloseApp
+        anchors {
+            top: parent.top
+            right: parent.right
+        }
+
+        onClicked: () => chatMessageList.threadId = ""
     }
 
     Component {
@@ -300,6 +321,8 @@ Item {
                                 control.chatProvider.retrySendMessage(control.chatRoom.id, messageId)
                             }
                         }
+
+        onThreadIdChanged: () => control.loadMessages(chatMessageList.threadId)
     }
 
     Item {
@@ -452,7 +475,8 @@ Item {
                 } else {
                     // Send new message
                     control.chatRoom.sendMessage(chatMessageBox.text,
-                                                         relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "")
+                                                 relatedMsg.chatMessage ? relatedMsg.chatMessage.eventId : "",
+                                                 chatMessageList.threadId)
                 }
 
                 relatedMsg.chatMessage = null
