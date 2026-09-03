@@ -41,7 +41,7 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
 
         // Find next newer own message
         for (qsizetype i = index.row() - 1; i >= 0; --i) {
-            if (onwMessageAt(i)) {
+            if (ownMessageAt(i)) {
                 return false;
             }
         }
@@ -65,7 +65,7 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
         const auto currReadUsers = readUsersFor(chatRoom, currMsg);
 
         for (qsizetype i = index.row() - 1; i >= 0; --i) {
-            if (auto *message = onwMessageAt(i);
+            if (auto *message = ownMessageAt(i);
                 message && currReadUsers == readUsersFor(chatRoom, message)) {
                 return result;
             }
@@ -83,7 +83,7 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
     }
 }
 
-ChatMessage *ChatProxyModel::onwMessageAt(qsizetype proxyIndex) const
+ChatMessage *ChatProxyModel::ownMessageAt(qsizetype proxyIndex) const
 {
     const QModelIndex prevSource = mapToSource(this->index(proxyIndex, 0));
     if (!isValidOwnMessage(prevSource)) {
