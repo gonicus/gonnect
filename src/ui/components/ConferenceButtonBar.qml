@@ -29,6 +29,7 @@ Item {
     signal openSetPasswordDialog
     signal openVideoQualityDialog
     signal openDialInInfoDialog(numbers : variant, code : string)
+    signal openKnockedParticipantDialog(id : string, name : string)
     signal hangup
     signal finishForAll
 
@@ -72,6 +73,9 @@ Item {
             target: control.iConferenceConnector
             function onDialInfoReceived(numbersMap : object, code : string) {
                 control.openDialInInfoDialog(numbersMap, code)
+            }
+            function onParticipantKnocked(id : string, name : string) {
+                control.openKnockedParticipantDialog(id, name)
             }
         }
     }
@@ -236,16 +240,37 @@ Item {
                 enabled: !control.isOnHold
                 text: qsTr("Raise")
                 iconPath: Icons.transformBrowse
-                iconText: control.isHandRaised ? "!" : ""
+                toggled: control.isHandRaised
                 onClicked: () => control.setRaiseHand(!control.isHandRaised)
             }
 
             BarButton {
                 id: holdButton
                 visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Holdable)
-                text: control.isOnHold ? qsTr("Resume") : qsTr("Hold")
-                iconPath: control.isOnHold ? Icons.mediaPlaybackStart : Icons.mediaPlaybackPause
+                toggled: control.isOnHold
+                text: qsTr("Hold")
+                iconPath: Icons.mediaPlaybackPause
                 onClicked: () => control.setOnHold(!control.isOnHold)
+            }
+
+            BarButton {
+                id: muteButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.AudioMute)
+                enabled: !control.isOnHold
+                toggled: control.isMuted
+                text: qsTr("Mute")
+                iconPath: Icons.microphoneSensitivityMuted
+                onClicked: () =>  control.setAudioMuted(!control.isMuted)
+            }
+
+            BarButton {
+                id: cameraMuteButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
+                enabled: !control.isOnHold
+                toggled: control.isVideoMuted
+                text: qsTr("Video off")
+                iconPath: Icons.cameraOff
+                onClicked: () => control.setVideoMuted(!control.isVideoMuted)
             }
 
             BarButton {
@@ -262,7 +287,8 @@ Item {
                 visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.ScreenShare)
                 enabled: !control.isOnHold
                 text: qsTr("Screen")
-                iconPath: control.isSharingScreen ? Icons.mediaPlaybackStopped : Icons.inputTouchscreen
+                toggled: control.isSharingScreen
+                iconPath: Icons.inputTouchscreen
                 onClicked: () => {
                     if (control.isSharingScreen) {
                         control.setScreenShare(false, false)
@@ -290,14 +316,21 @@ Item {
                 }
             }
 
+            Rectangle {
+                height: 32
+                width: 1
+                color: Theme.borderColor
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
             BarButton {
                 id: videoDeviceButton
                 visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
                 enabled: !control.isOnHold
                 text: qsTr("Camera")
-                iconPath: control.isVideoMuted ? Icons.cameraOff : Icons.cameraOn
+                iconPath: Icons.cameraOn
                 showDropdownButton: true
-                onClicked: () => control.setVideoMuted(!control.isVideoMuted)
+                onClicked: () => videoDeviceMenu.popup(videoDeviceButton, -videoDeviceMenu.width + videoDeviceButton.width, videoDeviceButton.height)
                 onDropDownClicked: () => videoDeviceMenu.popup(videoDeviceButton, -videoDeviceMenu.width + videoDeviceButton.width, videoDeviceButton.height)
 
                 VideoDeviceMenu {
@@ -313,9 +346,9 @@ Item {
                 visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.AudioMute)
                 enabled: !control.isOnHold
                 text: qsTr("Micro")
-                iconPath: control.isMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
+                iconPath: Icons.audioInputMicrophone
                 showDropdownButton: true
-                onClicked: () => control.setAudioMuted(!control.isMuted)
+                onClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
                 onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
 
 
@@ -413,13 +446,6 @@ Item {
             top: parent.top
             bottom: parent.bottom
             right: parent.right
-        }
-
-        Rectangle {
-            height: 32
-            width: 1
-            color: Theme.borderColor
-            anchors.verticalCenter: parent.verticalCenter
         }
 
         Button {
