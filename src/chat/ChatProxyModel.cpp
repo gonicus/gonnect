@@ -39,11 +39,6 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
             return false;
         }
 
-        const auto *chatRoom = model->chatRoom();
-        const auto messages = chatRoom->chatMessages();
-        const auto *currMsg = messages.at(sourceIndex.row());
-        const auto currReadUsers = readUsersFor(chatRoom, currMsg);
-
         // Find next newer own message
         for (qsizetype i = index.row() - 1; i >= 0; --i) {
             if (messageAt(i)) {
