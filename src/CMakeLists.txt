@@ -403,10 +403,12 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/OauthLoginDialog.qml
         # Dynamic UI
         ui/components/BaseWidget.qml
+        ui/components/ActivitiesWidget.qml
         ui/components/DateEventsWidget.qml
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
         ui/components/WebViewWidget.qml
+        ui/components/ChatWidget.qml
         ui/components/AdditionalSettings.qml
 
         ui/components/pages/Call.qml
@@ -475,6 +477,7 @@ qt_add_qml_module(gonnect
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
         ui/components/CustomWindowHeader.qml
+        ui/components/ActivitiesList.qml
         ui/components/DateEventsList.qml
         ui/components/FavoritesList.qml
         ui/components/HistoryList.qml
@@ -832,6 +835,8 @@ qt_add_qml_module(gonnect
         ui/HistoryContactSearchModel.cpp
         ui/HistoryContactSearchProxyModel.h
         ui/HistoryContactSearchProxyModel.cpp
+        ui/ActivitiesModel.h
+        ui/ActivitiesModel.cpp
         ui/HistoryModel.h
         ui/HistoryModel.cpp
         ui/HistoryProxyModel.h
