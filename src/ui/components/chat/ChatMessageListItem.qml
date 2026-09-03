@@ -38,6 +38,7 @@ Item {
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
     required property bool isSameDayAsPrevious
+    required property bool isLatestOwnMessage
 
     required property bool hasRelatedMessage
     required property string relatedMessageNickName
@@ -394,10 +395,13 @@ Item {
 
     ReadMarker {
         id: readMarker
-        visible: (control.readUsers?.length ?? 0) > 0
-                 && (control.isFirst || control.chatRoom?.isDirectChat)
         readUsers: control.readUsers
         allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
+        visible: control.isOwnMessage
+                 && !control.isPending
+                 && !control.isFailed
+                 && (control.isLatestOwnMessage
+                     || ((control.readUsers?.length ?? 0) > 0))
         anchors {
             right: timestampLabel.left
             rightMargin: 10

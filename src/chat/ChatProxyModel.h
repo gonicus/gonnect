@@ -16,7 +16,10 @@ class ChatProxyModel : public QSortFilterProxyModel
     Q_CLASSINFO("DefaultProperty", "sourceModel")
 
 public:
-    enum class Roles { ReadUsers = static_cast<int>(ChatModel::Roles::LastRole) };
+    enum class Roles {
+        ReadUsers = static_cast<int>(ChatModel::Roles::LastRole),
+        IsLatestOwnMessage
+    };
 
     explicit ChatProxyModel(QObject *parent = nullptr);
 
@@ -32,8 +35,11 @@ private:
     QObject *m_chatRoomContext = nullptr;
 
     QList<ChatUser *> readUsersFor(const IChatRoom *chatRoom, const ChatMessage *message) const;
+    bool isValidOwnMessage(const QModelIndex &index) const;
+    ChatMessage *messageAt(qsizetype proxyIndex) const;
 
 private Q_SLOTS:
     void onSourceModelChanged();
     void onChatRoomChanged();
+    void invalidateProxyRoles();
 };

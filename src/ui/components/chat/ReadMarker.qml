@@ -18,11 +18,11 @@ Item {
 
     IconLabel {
         anchors.centerIn: parent
-        width: control.implicitWidth
-        height: control.implicitHeight
+        width: 1.5 * Theme.d
+        height: 1.5 * Theme.d
         icon {
-            width: Math.round(control.implicitWidth * Screen.devicePixelRatio)
-            height: Math.round(control.implicitHeight * Screen.devicePixelRatio)
+            width: Math.round(1.5 * Theme.d * Screen.devicePixelRatio)
+            height: Math.round(1.5 * Theme.d * Screen.devicePixelRatio)
             source: {
                 if (control.readUsersCount === control.allUsersCount - 1) {
                     return Icons.readmarkDoubleFilled

@@ -17,6 +17,7 @@ QHash<int, QByteArray> ChatProxyModel::roleNames() const
         roles = model->roleNames();
     }
     roles[static_cast<int>(Roles::ReadUsers)] = "readUsers";
+    roles[static_cast<int>(Roles::IsLatestOwnMessage)] = "isLatestOwnMessage";
     return roles;
 }
 
@@ -32,52 +33,71 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
+    case static_cast<int>(Roles::IsLatestOwnMessage): {
+        const QModelIndex sourceIndex = mapToSource(index);
+        if (!isValidOwnMessage(sourceIndex)) {
+            return false;
+        }
+
+        const auto *chatRoom = model->chatRoom();
+        const auto messages = chatRoom->chatMessages();
+        const auto *currMsg = messages.at(sourceIndex.row());
+        const auto currReadUsers = readUsersFor(chatRoom, currMsg);
+
+        // Find next newer own message
+        for (qsizetype i = index.row() - 1; i >= 0; --i) {
+            if (messageAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
     case static_cast<int>(Roles::ReadUsers): {
+
+        // readUsers shall be shown/returned if this is the latest own message or if it is an own
+        // message and readUsers are different from the previous own message.
 
         QVariantList result;
 
-        const auto *chatRoom = model->chatRoom();
-        if (!chatRoom) {
-            return result;
-        }
-
         const QModelIndex sourceIndex = mapToSource(index);
-        if (!sourceIndex.isValid()) {
+        if (!isValidOwnMessage(sourceIndex)) {
             return result;
         }
 
+        const auto *chatRoom = q_check_ptr(model->chatRoom());
         const auto messages = chatRoom->chatMessages();
-        if (messages.isEmpty()) {
-            return result;
-        }
+        const auto *currMsg = q_check_ptr(messages.at(sourceIndex.row()));
+        const auto currReadUsers = readUsersFor(chatRoom, currMsg);
 
-        // Get read users of the previous row. Only produce result if it differs (UI optimization).
-        const auto currReadUsers = readUsersFor(chatRoom, messages.at(sourceIndex.row()));
-
-        const auto row = index.row();
-        if (row > 0) {
-            const QModelIndex prevIndex = mapToSource(this->index(row - 1, index.column()));
-            if (!prevIndex.isValid()) {
-                return result;
-            }
-
-            const auto prevReadUsers = readUsersFor(chatRoom, messages.at(prevIndex.row()));
-            if (currReadUsers == prevReadUsers) {
+        for (qsizetype i = index.row() - 1; i >= 0; --i) {
+            if (auto *message = messageAt(i);
+                message && currReadUsers == readUsersFor(chatRoom, message)) {
                 return result;
             }
         }
 
+        // Build result list
         result.reserve(currReadUsers.size());
-
         std::ranges::transform(currReadUsers, std::back_inserter(result),
                                [](ChatUser *user) { return QVariant::fromValue(user); });
-
         return result;
     }
 
     default:
         return QSortFilterProxyModel::data(index, role);
     }
+}
+
+ChatMessage *ChatProxyModel::messageAt(qsizetype proxyIndex) const
+{
+    const QModelIndex prevSource = mapToSource(this->index(proxyIndex, 0));
+    if (!isValidOwnMessage(prevSource)) {
+        return nullptr;
+    }
+    return q_check_ptr(qobject_cast<ChatModel *>(sourceModel()))
+            ->chatRoom()
+            ->chatMessages()
+            .at(prevSource.row());
 }
 
 QList<ChatUser *> ChatProxyModel::readUsersFor(const IChatRoom *chatRoom,
@@ -99,6 +119,43 @@ QList<ChatUser *> ChatProxyModel::readUsersFor(const IChatRoom *chatRoom,
     });
 
     return users;
+}
+
+bool ChatProxyModel::isValidOwnMessage(const QModelIndex &index) const
+{
+    if (!index.isValid()) {
+        return false;
+    }
+
+    const auto *model = qobject_cast<ChatModel *>(sourceModel());
+    if (!model) {
+        return false;
+    }
+
+    const auto *chatRoom = model->chatRoom();
+    if (!chatRoom) {
+        return false;
+    }
+
+    const auto &messages = chatRoom->chatMessages();
+    if (messages.isEmpty()) {
+        return false;
+    }
+
+    const auto row = index.row();
+    if (row < 0 || row >= messages.size()) {
+        return false;
+    }
+
+    const auto *currMsg = messages.at(row);
+    if (!(currMsg->flags() & ChatMessage::Flag::OwnMessage)) {
+        return false;
+    }
+    if (currMsg->flags() & (ChatMessage::Flag::Pending | ChatMessage::Flag::Failed)) {
+        return false;
+    }
+
+    return true;
 }
 
 bool ChatProxyModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const
@@ -149,12 +206,21 @@ void ChatProxyModel::onChatRoomChanged()
     if (auto *chatRoom = model->chatRoom()) {
         m_chatRoomContext = new QObject(this);
 
-        connect(chatRoom, &IChatRoom::readMarkersChanged, m_chatRoomContext, [this]() {
-            const auto rows = rowCount(QModelIndex());
-            if (rows > 0) {
-                Q_EMIT dataChanged(index(0, 0), index(rows - 1, 0),
-                                   { static_cast<int>(Roles::ReadUsers) });
-            }
-        });
+        connect(chatRoom, &IChatRoom::chatMessageAdded, m_chatRoomContext,
+                [this]() { invalidateProxyRoles(); });
+        connect(chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
+                [this]() { invalidateProxyRoles(); });
+        connect(chatRoom, &IChatRoom::readMarkersChanged, m_chatRoomContext,
+                [this]() { invalidateProxyRoles(); });
+    }
+}
+
+void ChatProxyModel::invalidateProxyRoles()
+{
+    const auto rows = rowCount(QModelIndex());
+    if (rows > 0) {
+        Q_EMIT dataChanged(index(0, 0), index(rows - 1, 0),
+                           { static_cast<int>(Roles::ReadUsers),
+                             static_cast<int>(Roles::IsLatestOwnMessage) });
     }
 }
