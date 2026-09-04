@@ -1,0 +1,4 @@
+sources:
+  "6.26.0":
+    url: "https://download.kde.org/stable/frameworks/6.26/syntax-highlighting-6.26.0.tar.xz"
+    sha256: "a4e86d167cd5f3c4318584119451f891551c24cd4a0ff1f7ef95e2476a39c5ac"

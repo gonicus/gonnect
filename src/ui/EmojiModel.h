@@ -12,9 +12,10 @@ class EmojiModel : public QAbstractListModel
 public:
     explicit EmojiModel(QObject *parent = nullptr);
 
-    enum class Roles { Hexcode = Qt::UserRole + 1, Emoji, Label, Group };
+    enum class Roles { Hexcode = Qt::UserRole + 1, Emoji, Label, Group, Tags };
 
     QHash<int, QByteArray> roleNames() const override;
     int rowCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
+    Q_INVOKABLE int groupAt(int row) const;
 };

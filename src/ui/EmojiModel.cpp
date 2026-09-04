@@ -14,6 +14,7 @@ QHash<int, QByteArray> EmojiModel::roleNames() const
         { static_cast<int>(Roles::Emoji), "emoji" },
         { static_cast<int>(Roles::Label), "label" },
         { static_cast<int>(Roles::Group), "group" },
+        { static_cast<int>(Roles::Tags), "tags" },
     };
 }
 
@@ -40,8 +41,16 @@ QVariant EmojiModel::data(const QModelIndex &index, int role) const
         return emojiInfo->emoji;
     case static_cast<int>(Roles::Group):
         return emojiInfo->group;
+    case static_cast<int>(Roles::Tags):
+        return emojiInfo->tags;
     case static_cast<int>(Roles::Label):
     default:
         return emojiInfo->label;
     }
+}
+
+int EmojiModel::groupAt(int row) const
+{
+    const auto emojiInfo = EmojiResolver::instance().ordered().at(row);
+    return emojiInfo ? emojiInfo->group : -1;
 }

@@ -19,5 +19,5 @@ bool ChatProxyModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &
     const auto rightTime =
             model->data(sourceRight, static_cast<int>(Roles::Timestamp)).toDateTime();
 
-    return leftTime < rightTime;
+    return leftTime > rightTime;
 }

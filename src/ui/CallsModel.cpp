@@ -227,6 +227,7 @@ QHash<int, QByteArray> CallsModel::roleNames() const
         { static_cast<int>(Roles::RemoteUri), "remoteUri" },
         { static_cast<int>(Roles::PhoneNumber), "phoneNumber" },
         { static_cast<int>(Roles::IsIncoming), "isIncoming" },
+        { static_cast<int>(Roles::Contact), "contact" },
         { static_cast<int>(Roles::ContactName), "contactName" },
         { static_cast<int>(Roles::City), "city" },
         { static_cast<int>(Roles::Country), "country" },
@@ -414,6 +415,9 @@ QVariant CallsModel::data(const QModelIndex &index, int role) const
     case static_cast<int>(Roles::PhoneNumber):
         return callInfo->contactInfo.isAnonymous ? tr("unknown number")
                                                  : callInfo->contactInfo.phoneNumber;
+
+    case static_cast<int>(Roles::Contact):
+        return QVariant::fromValue(callInfo->contactInfo.contact.data());
 
     case static_cast<int>(Roles::ContactName):
         return !callInfo->contactInfo.displayName.isEmpty() ? callInfo->contactInfo.displayName

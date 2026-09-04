@@ -16,15 +16,38 @@ class ChatModel : public QAbstractListModel
 public:
     enum class Roles {
         EventId = Qt::UserRole + 1,
+        RoomId,
         FromId,
+        AvatarPath,
         Timestamp,
         NickName,
-        Message,
-        ImageUrl,
+        UserState,
+        AffectedUserId,
+        Content,
+        Reactions,
+
         IsPrivateMessage,
         IsOwnMessage,
-        IsSystemMessage
+        IsSystemMessage,
+        IsEncrypted,
+        IsPending,
+        IsFailed,
+        IsSameUserAsPrevious,
+        IsSameMinuteAsPrevious,
+        IsSameDayAsPrevious,
+        IsStateUpdate,
+
+        HasRelatedMessage,
+        RelatedMessageNickName,
+        RelatedMessageIsStateUpdate,
+        RelatedMessageUserState,
+        RelatedMessageAffectedUserId,
+        RelatedMessageContent,
+
+        MentionedUserNames
     };
+    Q_ENUM(Roles)
+
     explicit ChatModel(QObject *parent = nullptr);
 
     QHash<int, QByteArray> roleNames() const override;
@@ -38,10 +61,20 @@ private Q_SLOTS:
     void updateRealMessagesCount();
 
 private:
-    QString addLinkTags(const QString &orig) const;
+    static Roles toNormalRole(const Roles role);
+    static int toNormalRole(const int role);
+
+    QVariant rawData(const ChatMessage *item, int role) const;
+    void connectUserAvatarSignals(ChatUser *user);
+    void refreshAvatarPath(ChatUser *user);
+    ChatMessage *relatedMessage(ChatMessage *originalMessage) const;
+    void updateRelatedMessages(const QString &originalMessageId, const QList<int> &roles);
+    static QList<int> nextItemContentRoles();
+    QList<int> relatedContentRoles(const ChatMessage &messageObject) const;
 
     IChatRoom *m_chatRoom = nullptr;
     QObject *m_chatRoomContext = nullptr;
+    QSet<ChatUser *> m_avatarSignaledUsers;
     uint m_realMessagesCount = 0;
 
 Q_SIGNALS:

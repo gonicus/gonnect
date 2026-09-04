@@ -81,7 +81,7 @@ BaseWidget {
                 model: [
                     {
                         value: HistoryProxyModel.MediumFilter.ALL,
-                        label: qsTr('All')
+                        label: qsTr('All sources')
                     }, {
                         value: HistoryProxyModel.MediumFilter.SIPCALL,
                         label: qsTr('SIP')
@@ -130,7 +130,7 @@ BaseWidget {
                 model: [
                     {
                         value: HistoryProxyModel.TypeFilter.ALL,
-                        label: qsTr('All')
+                        label: qsTr('All calls')
                     }, {
                         value: HistoryProxyModel.TypeFilter.INCOMING,
                         label: qsTr('Incoming')

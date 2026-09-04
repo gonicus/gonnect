@@ -3,7 +3,13 @@
 #include "PhoneNumberUtil.h"
 
 #ifndef APP_TESTS
+#  include "IChatProvider.h"
+#  include "ChatUserPresenceStateProvider.h"
 #  include "AvatarManager.h"
+#  include "ChatUser.h"
+#  include "SIPBuddyPresenceStateProvider.h"
+#  include "SIPManager.h"
+#  include "AvatarPrioHelper.h"
 #endif
 #include <QMetaEnum>
 
@@ -57,6 +63,8 @@ Contact::Contact(const Contact &other) : QObject{ other.parent() }
     m_lastModified = other.m_lastModified;
     m_sipStatusSubscriptable = other.m_sipStatusSubscriptable;
     m_hasAvatar = other.m_hasAvatar;
+    m_resolvedAvatarPath = other.m_resolvedAvatarPath;
+
     init();
 }
 
@@ -74,6 +82,7 @@ Contact &Contact::operator=(const Contact &other)
     m_lastModified = other.m_lastModified;
     m_sipStatusSubscriptable = other.m_sipStatusSubscriptable;
     m_hasAvatar = other.m_hasAvatar;
+
     init();
     return *this;
 }
@@ -120,17 +129,20 @@ QString Contact::mail() const
 
 bool Contact::hasAvatar() const
 {
+#ifndef APP_TESTS
+    return !m_resolvedAvatarPath.isEmpty();
+#else
     return m_hasAvatar;
+#endif
 }
 
 QString Contact::avatarPath() const
 {
 #ifndef APP_TESTS
-    if (m_hasAvatar) {
-        return AvatarManager::instance().avatarPathFor(m_id);
-    }
-#endif
+    return m_resolvedAvatarPath;
+#else
     return "";
+#endif
 }
 
 QDateTime Contact::lastModified() const
@@ -141,7 +153,7 @@ QDateTime Contact::lastModified() const
 void Contact::addPhoneNumber(const Contact::NumberType type, const QString &phoneNumber,
                              bool isSipStatusSubscriptable)
 {
-    const auto clean = PhoneNumberUtil::cleanPhoneNumber(phoneNumber);
+    const auto clean = PhoneNumberUtil::canonicalNumber(phoneNumber);
 
     if (isNumberValid(clean)
         && !m_phoneNumbers.contains({ type, clean, isSipStatusSubscriptable })) {
@@ -191,16 +203,15 @@ qreal Contact::matchesSearch(const QString &searchString) const
     }
 
     // Full name
-    const auto fullName = m_splittedName.join(' ');
-    if (searchString.compare(fullName, Qt::CaseSensitivity::CaseInsensitive) == 0) {
+    if (searchString.compare(m_fullNameLower, Qt::CaseSensitivity::CaseInsensitive) == 0) {
         return 1;
     }
 
-    if (fullName.startsWith(searchString, Qt::CaseSensitivity::CaseInsensitive)) {
+    if (m_fullNameLower.startsWith(searchString, Qt::CaseSensitivity::CaseInsensitive)) {
         return 0.98;
     }
 
-    const qreal dist = FuzzyCompare::jaroWinklerDistance(fullName, searchString);
+    const qreal dist = FuzzyCompare::jaroWinklerDistance(m_fullNameLower, searchString);
     maxDist = std::max(dist, maxDist);
     if (maxDist == 1.0) {
         return maxDist;
@@ -226,9 +237,78 @@ qreal Contact::matchesSearch(const QString &searchString) const
     return maxDist;
 }
 
+#ifndef APP_TESTS
+bool Contact::hasChatUser(const ChatUser *user) const
+{
+    if (!user) {
+        return false;
+    }
+
+    for (const ChatUser *chatUser : std::as_const(m_chatUsers)) {
+        if (chatUser == user) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Contact::addChatUser(ChatUser *user)
+{
+    if (!m_chatUsers.contains(user)) {
+        m_chatUsers.append(user);
+
+        QObject::connect(user, &QObject::destroyed, this, [this](QObject *obj) {
+            if (auto user = qobject_cast<ChatUser *>(obj)) {
+                removeChatUser(user);
+            }
+        });
+
+        QObject::connect(user, &ChatUser::avatarPathChanged, this, [this]() { updateAvatar(); });
+        updateAvatar();
+
+        Q_EMIT chatUserAdded(user);
+        Q_EMIT chatUsersChanged();
+    }
+}
+
+void Contact::removeChatUser(ChatUser *user)
+{
+    if (m_chatUsers.removeOne(user)) {
+        user->disconnect(this);
+        updateAvatar();
+        Q_EMIT chatUserRemoved(user);
+        Q_EMIT chatUsersChanged();
+    }
+}
+
+PresenceStateAggregator *Contact::createPresenceStateObject() const
+{
+    auto *presenceObj = new PresenceStateAggregator;
+
+    // SIP buddies
+    auto &sipManager = SIPManager::instance();
+    if (m_sipStatusSubscriptable) {
+        for (const auto &phoneNumber : std::as_const(m_phoneNumbers)) {
+            if (phoneNumber.isSipSubscriptable) {
+                presenceObj->registerStateProvider(
+                        new SIPBuddyPresenceStateProvider(sipManager.toSipUri(phoneNumber.number)));
+            }
+        }
+    }
+
+    // Chat users
+    for (auto *chatUser : std::as_const(m_chatUsers)) {
+        presenceObj->registerStateProvider(new ChatUserPresenceStateProvider(chatUser));
+    }
+
+    return presenceObj;
+}
+#endif
+
 void Contact::init()
 {
     m_splittedName = PhoneNumberUtil::clearInternationalChars(m_name).toLower().split(' ');
+    m_fullNameLower = m_splittedName.join(' ');
 
     updateSipStatusSubscriptable();
 }
@@ -249,7 +329,55 @@ bool Contact::isNumberValid(const QString &number) const
     return !number.isEmpty();
 }
 
-QList<Contact::PhoneNumber> Contact::phoneNumbers() const
+#ifndef APP_TESTS
+QString Contact::resolveAvatarPath() const
+{
+    auto &prioManager = AvatarPrioHelper::instance();
+    QString bestPath;
+    unsigned bestPrio = 0;
+
+    // AvatarManager avatars
+    const auto localPath = AvatarManager::instance().avatarPathFor(m_id);
+    if (!localPath.isEmpty()) {
+        const auto prio = prioManager.prioFor(m_contactSourceInfo.configId);
+        if (prio > 0) {
+            bestPath = localPath;
+            bestPrio = prio;
+        }
+    }
+
+    // Chat users
+    for (const auto *user : std::as_const(m_chatUsers)) {
+        const auto &avatarPath = user->avatarPath();
+        const QString path =
+                avatarPath.startsWith(QStringLiteral("file://")) ? avatarPath.mid(7) : avatarPath;
+        if (path.isEmpty()) {
+            continue;
+        }
+
+        if (const auto *provider = user->chatProvider()) {
+            const auto prio = prioManager.prioFor(provider->id());
+            if (prio > bestPrio) {
+                bestPath = path;
+                bestPrio = prio;
+            }
+        }
+    }
+
+    return bestPath;
+}
+
+void Contact::updateAvatar()
+{
+    const auto newPath = resolveAvatarPath();
+    if (m_resolvedAvatarPath != newPath) {
+        m_resolvedAvatarPath = newPath;
+        Q_EMIT avatarChanged();
+    }
+}
+#endif
+
+const QList<Contact::PhoneNumber> &Contact::phoneNumbers() const
 {
     return m_phoneNumbers;
 }
@@ -307,7 +435,9 @@ void Contact::setHasAvatar(bool hasAvatar)
 {
     if (m_hasAvatar != hasAvatar) {
         m_hasAvatar = hasAvatar;
-        Q_EMIT avatarChanged();
+#ifndef APP_TESTS
+        updateAvatar();
+#endif
     }
 }
 

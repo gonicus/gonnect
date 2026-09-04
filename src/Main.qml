@@ -27,9 +27,9 @@ Item {
 
         if (!ViewHelper.isSystrayAvailable() && settings.showTrayDialog) {
             const item = DialogFactory.createInfoDialog({
-                title: qsTr("No system tray available"),
-                                                        text: qsTr("GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.")
-            })
+                                                            title: qsTr("No system tray available"),
+                                                            text: qsTr("GOnnect provides quick access to functionality by providing a system tray. Your desktop environment does not provide one.")
+                                                        })
             item.accepted.connect(() => settings.showTrayDialog = false)
         }
 
@@ -54,8 +54,8 @@ Item {
             gonnectWindow.focusSearchBox()
         }
         function onShowSettings() {
-            gonnectWindow.updateTabSelection(gonnectWindow.settingsPageId,
-                                             GonnectWindow.PageType.Settings)
+            gonnectWindow.showPage(SelectionState.settingsPageId(),
+                                             MainPageSelection.PageType.Settings)
             gonnectWindow.ensureVisible()
         }
         function onShowShortcuts() { shortcutsWindowComponent.createObject(baseItem).show() }
@@ -77,11 +77,11 @@ Item {
             }
         }
 
-        function onOpenMeetingRequested(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
+        function onOpenMeetingRequested(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
             gonnectWindow.ensureVisible()
 
             Qt.callLater(() => {
-                gonnectWindow.openMeeting(meetingId, displayName, startFlags, callHistoryItem)
+                gonnectWindow.openMeeting(meetingId, displayName, startFlags, callHistoryItem, contact)
             })
         }
 
@@ -157,15 +157,15 @@ Item {
     Connections {
         id: sipAccountManagerConnections
         target: SIPAccountManager
-
+        ignoreUnknownSignals: true
         function onAuthorizationFailed(accountId : string) {
             const dialog = DialogFactory.createDialog("CredentialsDialog.qml", { text: qsTr("Please enter the password for the SIP account:") })
             dialog.onPasswordAccepted.connect(pw => SIPAccountManager.setAccountCredentials(accountId, pw))
         }
         function onConnectionError(code : int, message : string) {
             DialogFactory.createInfoDialog({
-                title: qsTr("Registration failed"),
-                text: qsTr("Registration failed with with status %1: %2").arg(code).arg(message)
+                title: qsTr("SIP Registration failed"),
+                text: qsTr("SIP registration failed with status %1: %2").arg(code).arg(message)
             })
         }
     }

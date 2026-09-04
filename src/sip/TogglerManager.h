@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QtQml/qqml.h>
 #include <QtQml/qqmlregistration.h>
@@ -52,7 +54,11 @@ class TogglerManagerWrapper
     QML_SINGLETON
 
 public:
-    static TogglerManager *create(QQmlEngine *, QJSEngine *) { return &TogglerManager::instance(); }
+    static TogglerManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&TogglerManager::instance(), QQmlEngine::CppOwnership);
+        return &TogglerManager::instance();
+    }
 
 private:
     TogglerManagerWrapper() = default;

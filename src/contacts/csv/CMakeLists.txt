@@ -11,6 +11,7 @@ if(ENABLE_CSV)
     target_include_directories(CSVAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/presence
         ${PROJECT_SOURCE_DIR}/src/ui
         ${PROJECT_SOURCE_DIR}/src/sip
         ${PROJECT_SOURCE_DIR}/src

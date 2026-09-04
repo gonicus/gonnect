@@ -4,8 +4,10 @@
 #include <QDebug>
 #include <QDateTime>
 #include <qqmlregistration.h>
-
 #include "BlockInfo.h"
+#include "PresenceStateAggregator.h"
+
+class ChatUser;
 
 class Contact : public QObject
 {
@@ -69,7 +71,7 @@ public:
     bool hasAvatar() const;
     QString avatarPath() const;
     QDateTime lastModified() const;
-    QList<Contact::PhoneNumber> phoneNumbers() const;
+    const QList<Contact::PhoneNumber> &phoneNumbers() const;
     bool sipStatusSubscriptable() const;
     QString subscriptableNumber() const;
 
@@ -90,10 +92,28 @@ public:
 
     qreal matchesSearch(const QString &searchString) const;
 
+#ifndef APP_TESTS
+    bool hasChatUser(const ChatUser *user) const;
+    void addChatUser(ChatUser *user);
+    void removeChatUser(ChatUser *user);
+    void updateAvatar();
+    const QList<ChatUser *> &chatUsers() const { return m_chatUsers; }
+
+    [[nodiscard("Caller must take ownership")]] PresenceStateAggregator *
+    createPresenceStateObject() const;
+
+Q_SIGNALS:
+    void chatUsersChanged();
+    void chatUserAdded(ChatUser *user);
+    void chatUserRemoved(ChatUser *user);
+
+#endif
+
 private:
     void init();
     void updateSipStatusSubscriptable();
     bool isNumberValid(const QString &number) const;
+    QString resolveAvatarPath() const;
 
     bool m_hasAvatar = false;
     BlockInfo m_blockInfo;
@@ -106,8 +126,14 @@ private:
     QString m_mail;
     QDateTime m_lastModified;
     QStringList m_splittedName;
+    QString m_fullNameLower;
     QList<PhoneNumber> m_phoneNumbers;
-    bool m_sipStatusSubscriptable;
+    bool m_sipStatusSubscriptionInitialized = false;
+    bool m_sipStatusSubscriptable = false;
+    QString m_resolvedAvatarPath;
+
+    /// References to users of a chat plugin.
+    QList<ChatUser *> m_chatUsers;
 
 Q_SIGNALS:
     void avatarChanged();

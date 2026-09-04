@@ -11,7 +11,14 @@
 HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
 {
     const auto &history = CallHistory::instance();
-    connect(&history, &CallHistory::itemAdded, this, &HistoryModel::resetModel);
+    connect(&history, &CallHistory::itemAdded, this, [this](qsizetype index, CallHistoryItem *) {
+        beginInsertRows(QModelIndex(), index, index);
+        endInsertRows();
+    });
+    connect(&history, &CallHistory::itemRemoved, this, [this](qsizetype index, CallHistoryItem *) {
+        beginRemoveRows(QModelIndex(), index, index);
+        endRemoveRows();
+    });
 
     connect(&history, &CallHistory::dataChanged, this, [this](qsizetype index, CallHistoryItem *) {
         auto idx = createIndex(index, 0);
@@ -19,22 +26,34 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
     });
 
     connect(&AvatarManager::instance(), &AvatarManager::avatarsLoaded, this, [this]() {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
     connect(&AvatarManager::instance(), &AvatarManager::avatarAdded, this, [this](QString) {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
     });
     connect(&AvatarManager::instance(), &AvatarManager::avatarRemoved, this, [this](QString) {
+        const auto count = rowCount(QModelIndex());
+        if (count <= 0) {
+            return;
+        }
         const auto startIndex = createIndex(0, 0);
-        const auto endIndex = createIndex(rowCount(QModelIndex()), 0);
+        const auto endIndex = createIndex(count - 1, 0);
         Q_EMIT dataChanged(
                 startIndex, endIndex,
                 { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
@@ -49,6 +68,31 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&numStats, &NumberStats::modelReset, this, &HistoryModel::resetModel);
 
     connect(&AddressBook::instance(), &AddressBook::contactsReady, this, &HistoryModel::resetModel);
+    connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
+            [this]() { m_avatarTrackedContacts.clear(); });
+
+    const auto trackContactAvatar = [this](Contact *contact) {
+        if (m_avatarTrackedContacts.contains(contact)) {
+            return;
+        }
+        m_avatarTrackedContacts.insert(contact);
+        connect(contact, &QObject::destroyed, this,
+                [this, contact]() { m_avatarTrackedContacts.remove(contact); });
+        connect(contact, &Contact::avatarChanged, this, [this]() {
+            const auto count = rowCount(QModelIndex());
+            if (count <= 0) {
+                return;
+            }
+
+            const auto startIndex = createIndex(0, 0);
+            const auto endIndex = createIndex(count - 1, 0);
+            Q_EMIT dataChanged(
+                    startIndex, endIndex,
+                    { static_cast<int>(Roles::HasAvatar), static_cast<int>(Roles::AvatarPath) });
+        });
+    };
+    connect(&AddressBook::instance(), &AddressBook::contactAdded, this, trackContactAvatar);
+    connect(&AddressBook::instance(), &AddressBook::contactModified, this, trackContactAvatar);
 
     connect(this, &HistoryModel::limitChanged, this, &HistoryModel::resetModel);
 }
@@ -75,7 +119,13 @@ QHash<int, QByteArray> HistoryModel::roleNames() const
         { static_cast<int>(Roles::IsBlocked), "isBlocked" },
         { static_cast<int>(Roles::Type), "type" },
         { static_cast<int>(Roles::HasBuddyState), "hasBuddyState" },
+        { static_cast<int>(Roles::Hops), "hops" },
     };
+}
+
+void HistoryModel::removeEntry(qint64 id)
+{
+    CallHistory::instance().removeHistoryItem(id);
 }
 
 void HistoryModel::handleFavoriteToggle(const NumberStat *item)
@@ -199,6 +249,28 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::HasBuddyState):
         return item->isSipSubscriptable();
+
+    case static_cast<int>(Roles::Hops): {
+        const auto &hops = item->hops();
+
+        if (hops.isEmpty()) {
+            return hops;
+        }
+
+        QStringList l;
+        l.reserve(hops.size());
+        const auto &addressBook = AddressBook::instance();
+        for (const auto &hop : hops) {
+            const Contact *contact = addressBook.lookupByNumber(hop);
+            if (contact && !contact->name().isEmpty()) {
+                l.append(QString("%1 (%2)").arg(contact->name(), hop));
+            } else {
+                l.append(hop);
+            }
+        }
+
+        return l;
+    }
 
     default:
         return QVariant();
