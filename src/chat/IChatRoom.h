@@ -238,6 +238,10 @@ Q_SIGNALS:
     /// right after sending the message.
     void chatMessageRemoved(qsizetype index, ChatMessage *chatMessage);
 
+    /// Send when a message has moved inside the chatMessages() list (i.e. when its timestamp has
+    /// changed).
+    void chatMessageMoved(qsizetype oldIndex, qsizetype newIndex, ChatMessage *chatMessage);
+
     void chatMessageContentChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageFlagsChanged(qsizetype index, ChatMessage *chatMessage,
                                  ChatMessage::Flags previousFlags);
