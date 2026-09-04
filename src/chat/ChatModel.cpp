@@ -322,6 +322,22 @@ void ChatModel::onChatRoomChanged()
                         Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
                     }
                 });
+        connect(m_chatRoom, &IChatRoom::chatMessageMoved, m_chatRoomContext,
+                [this](qsizetype oldIndex, qsizetype newIndex, ChatMessage *) {
+                    const auto dummyIndex = QModelIndex();
+                    beginMoveRows(dummyIndex, oldIndex, oldIndex, dummyIndex,
+                                  newIndex > oldIndex ? newIndex + 1 : newIndex);
+                    endMoveRows();
+
+                    // IsSameusersAsPrevious update
+                    const qsizetype low = std::min(oldIndex, newIndex);
+                    const qsizetype high = std::max(oldIndex, newIndex) + 1;
+                    const qsizetype rows = rowCount(dummyIndex);
+                    if (low < rows) {
+                        Q_EMIT dataChanged(createIndex(low, 0),
+                                           createIndex(std::min<qsizetype>(high, rows - 1), 0));
+                    }
+                });
         connect(m_chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
                     beginRemoveRows(QModelIndex(), index, index);

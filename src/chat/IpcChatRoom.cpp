@@ -656,3 +656,31 @@ void IpcChatRoom::updatePinnedMessages()
         Q_EMIT pinnedMessagesChanged();
     }
 }
+
+void IpcChatRoom::resortMessage(ChatMessage *message)
+{
+    const auto oldIndex = indexOfMessage(message);
+    if (oldIndex < 0) {
+        return;
+    }
+
+    // Find correct target index
+    const auto it = std::ranges::upper_bound(m_messages, message,
+                                             [](const ChatMessage *left, const ChatMessage *right) {
+                                                 return left->timestamp() < right->timestamp();
+                                             });
+
+    qsizetype newIndex = std::distance(m_messages.begin(), it);
+    if (newIndex > oldIndex) {
+        // Think of element to not be in the list, although it is
+        --newIndex;
+    }
+
+    // Move row semantic
+    if (newIndex == oldIndex) {
+        return;
+    }
+
+    m_messages.move(oldIndex, newIndex);
+    Q_EMIT chatMessageMoved(oldIndex, newIndex, message);
+}
