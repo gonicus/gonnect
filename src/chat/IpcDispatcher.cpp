@@ -1028,6 +1028,7 @@ void IpcDispatcher::processResponse(
         m_supportsDirectRooms = resp.directRooms();
         m_supportsGroupRooms = resp.groupRooms();
         m_supportsSubThreads = resp.subThreads();
+        m_suportsUserPresence = resp.userPresence();
         m_supportedMimeTypes = resp.mimeTypes();
         m_hasDeviceVerification = resp.clientVerification();
 
@@ -2382,37 +2383,46 @@ void IpcDispatcher::onLoggedInChanged()
 
 void IpcDispatcher::forwardOwnPresenceState()
 {
-
-    if (isConnected()) {
-        UserStatus statusReq;
-        auto &glob = GlobalStateAggregator::instance();
-
-        if (!glob.statusText().isEmpty()) {
-            statusReq.setStatusMessage(glob.statusText());
-        }
-
-        switch (glob.presenceState()) {
-
-        case PresenceState::State::Unknown:
-        case PresenceState::State::Offline:
-            statusReq.setState(PresenceStateGadget::PresenceState::Offline);
-            break;
-
-        case PresenceState::State::Away:
-        case PresenceState::State::Busy:
-            statusReq.setState(PresenceStateGadget::PresenceState::Away);
-            break;
-
-        case PresenceState::State::Available:
-        case PresenceState::State::Ringing:
-            statusReq.setState(PresenceStateGadget::PresenceState::Online);
-            break;
-        }
-
-        auto req = createRequest();
-        req->setUserStatusSetOwnRequest(statusReq);
-        sendRequest(req);
+    if (!m_suportsUserPresence || !isConnected()) {
+        return;
     }
+
+    UserStatus statusReq;
+    auto &glob = GlobalStateAggregator::instance();
+
+    if (glob.statusText().isEmpty()) {
+        statusReq.setStatusMessage(QStringLiteral(""));
+    } else {
+        statusReq.setStatusMessage(glob.statusText());
+    }
+
+    switch (glob.presenceState()) {
+
+    case PresenceState::State::Unknown:
+    case PresenceState::State::Offline:
+        statusReq.setState(PresenceStateGadget::PresenceState::Offline);
+        break;
+
+    case PresenceState::State::Away:
+    case PresenceState::State::Busy:
+        statusReq.setState(PresenceStateGadget::PresenceState::Away);
+        break;
+
+    case PresenceState::State::Available:
+    case PresenceState::State::Ringing:
+        statusReq.setState(PresenceStateGadget::PresenceState::Online);
+        break;
+    }
+
+    auto req = createRequest(false);
+    req->setUserStatusSetOwnRequest(statusReq);
+
+    qCInfo(lcIpcDispatcher) << "Sending IPC request to set presence status" << statusReq.state()
+                            << "with status text" << statusReq.statusMessage();
+
+    SendPolicy policy;
+    policy.timeoutSeconds = 0;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::updateUnreadNotificationsCount()

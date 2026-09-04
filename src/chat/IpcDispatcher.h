@@ -318,6 +318,7 @@ private:
     bool m_supportsDirectRooms = false;
     bool m_supportsGroupRooms = false;
     bool m_supportsSubThreads = false;
+    bool m_suportsUserPresence = false;
     bool m_hasFavoriteRooms = false;
     QStringList m_supportedMimeTypes;
     qint64 m_mediaSizeLimit = 0;
