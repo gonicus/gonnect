@@ -1594,10 +1594,13 @@ void IpcDispatcher::processResponse(
             room->setAvatarPath(makeDataRootPath(changeEvent.avatarPath()));
         }
 
-        // Pinnes messages
+        // Pinned messages
         if (changeEvent.hasPinnedMessagesChanged()) {
             room->setPinnedMessageIds(changeEvent.pinnedMessages());
         }
+
+        // Read marker
+        processReadMarkers(room, changeEvent.readMarker());
 
         // Update typing users
         if (changeEvent.hasTypingUserIdListChanged()) {
@@ -1958,6 +1961,9 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
     }
 
+    // Read markers
+    processReadMarkers(roomObj, room.readMarker());
+
     roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
 
     m_rooms.append(roomObj);
@@ -2292,6 +2298,33 @@ bool IpcDispatcher::containsRoomTag(const QString &str) const
 {
     static const QRegularExpression regex(R"((?<=^|\s)@room\b)");
     return str.contains(regex);
+}
+
+void IpcDispatcher::processReadMarkers(IpcChatRoom *chatRoom,
+                                       const de::gonicus::gonnect::Room::ReadMarkerEntry &entries)
+{
+    if (!chatRoom) {
+        qCWarning(lcIpcDispatcher) << "Cannot process readmarkers for nullptr room";
+        return;
+    }
+    if (entries.isEmpty()) {
+        return;
+    }
+
+    QHash<QString, QDateTime> bulk;
+    bulk.reserve(entries.size());
+
+    const auto ownUserId = this->ownUserId();
+
+    QHashIterator it(entries);
+    while (it.hasNext()) {
+        it.next();
+        if (it.key() == ownUserId) {
+            continue;
+        }
+        bulk.insert(it.key(), QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
+    }
+    chatRoom->setReadTimestamp(bulk);
 }
 
 RequestContainer *IpcDispatcher::createRequest(bool withTag)

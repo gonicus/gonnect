@@ -16,6 +16,14 @@ ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
     connect(this, &ChatModel::chatRoomChanged, this, &ChatModel::onChatRoomChanged);
 }
 
+void ChatModel::setChatRoom(IChatRoom *room)
+{
+    if (m_chatRoom != room) {
+        m_chatRoom = room;
+        Q_EMIT chatRoomChanged();
+    }
+}
+
 QHash<int, QByteArray> ChatModel::roleNames() const
 {
     return {
@@ -403,7 +411,6 @@ void ChatModel::onChatRoomChanged()
                     Q_EMIT dataChanged(modelIndex, modelIndex,
                                        { static_cast<int>(Roles::Reactions) });
                 });
-
         const auto users = std::as_const(m_chatRoom->chatUsers());
         for (auto *user : users) {
             connectUserAvatarSignals(user);

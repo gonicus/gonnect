@@ -82,7 +82,6 @@ public:
 
     /// List of users that have been mentioned in the message.
     QSet<ChatUser *> mentionedUsers() const;
-
     void addMentionendUser(ChatUser *user);
     void addMentionendUsers(const QSet<ChatUser *> users);
     void removeMentionendUser(ChatUser *user);
