@@ -2391,7 +2391,7 @@ void IpcDispatcher::forwardOwnPresenceState()
     auto &glob = GlobalStateAggregator::instance();
 
     if (glob.statusText().isEmpty()) {
-        statusReq.setStatusMessage(QStringLiteral(""));
+        statusReq.setStatusMessage(QString());
     } else {
         statusReq.setStatusMessage(glob.statusText());
     }
