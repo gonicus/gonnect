@@ -404,7 +404,7 @@ Item {
         anchors {
             right: timestampLabel.left
             rightMargin: 10
-            bottom: messageContentItem.bottom
+            verticalCenter: timestampLabel.verticalCenter
         }
     }
 
