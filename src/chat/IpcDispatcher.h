@@ -310,6 +310,9 @@ private:
 
     bool containsRoomTag(const QString &str) const;
 
+    void processReadMarkers(IpcChatRoom *chatRoom,
+                            const de::gonicus::gonnect::Room::ReadMarkerEntry &entries);
+
     QRegularExpression m_idConvRegex;
     bool m_wasInitializationRequestSuccessful = false;
     bool m_useIdConversion = false;
