@@ -7,7 +7,7 @@ import base
 
 Rectangle {
     id: control
-    implicitHeight: numberDelgLabel.height
+    implicitHeight: secondaryLabel.visible ? secondaryLabel.y + secondaryLabel.height : numberDelgLabel.height
     radius: 2
     color: control.highlighted ? Theme.highlightColor : 'transparent'
 
@@ -21,6 +21,8 @@ Rectangle {
     property alias isFavorable: favIcon.visible
 
     property bool isChat: false
+    property alias secondaryText: secondaryLabel.text
+    property string customIconSource: ""
 
     readonly property string typeIcon: {
         if (control.isChat) {
@@ -71,7 +73,7 @@ Rectangle {
         id: typeDelgLabel
         visible: !control.isSipStatusSubscriptable
         width: 16
-        icon.source: control.typeIcon
+        icon.source: control.customIconSource || control.typeIcon
         anchors {
             left: parent.left
             leftMargin: 17
@@ -104,6 +106,23 @@ Rectangle {
         }
 
         Accessible.ignored: true
+    }
+
+    Label {
+        id: secondaryLabel
+        visible: control.secondaryText !== ''
+        elide: Label.ElideRight
+        font.pixelSize: numberDelgLabel.font.pixelSize - 2
+        color: Theme.secondaryTextColor
+        anchors {
+            top: numberDelgLabel.bottom
+            topMargin: 2
+            left: numberDelgLabel.left
+            right: numberDelgLabel.right
+        }
+
+        Accessible.role: Accessible.StaticText
+        Accessible.name: secondaryLabel.text
     }
 
     FavIcon {

@@ -257,7 +257,7 @@ Popup {
                             mainText: qsTr('Call "%1"').arg(control.immediateSearchPhrase)
                             width: control.colWidth
                             visible: callDirectItem.shallBeVisible
-                            highlighted: keyNavigator.selectedItem === callDirectItem
+                            canBeHighlighted: false
                             mainRowLeftInsetLoader.sourceComponent: IconLabel {
                                 color: Theme.primaryTextColor
                                 icon {
@@ -268,12 +268,24 @@ Popup {
 
                             readonly property bool shallBeVisible: ViewHelper.isPhoneNumber(control.immediateSearchPhrase)
 
-                            onManuallyHovered: () => {
-                                keyNavigator.setExternallySelected(callDirectItem)
-                            }
-                            onTriggerPrimaryAction: () => {
-                                SIPCallManager.call("account0", control.immediateSearchPhrase, "", identitySelector.currentValue)
-                                control.primaryActionTriggered()
+                            SearchResultNumberItem {
+                                id: callDirectNumberItem
+                                number: control.immediateSearchPhrase
+                                customIconSource: Icons.callStart
+                                isFavorable: false
+                                highlighted: keyNavigator.selectedSubItem === callDirectNumberItem
+                                anchors {
+                                    left: parent?.left
+                                    right: parent?.right
+                                }
+
+                                onManuallyHovered: () => {
+                                    keyNavigator.setExternallySelected(callDirectItem, callDirectNumberItem)
+                                }
+                                onTriggerPrimaryAction: () => {
+                                    SIPCallManager.call("account0", control.immediateSearchPhrase, "", identitySelector.currentValue)
+                                    control.primaryActionTriggered()
+                                }
                             }
                         }
 
@@ -283,7 +295,7 @@ Popup {
                             secondaryText: qsTr('Jitsi Meet')
                             width: control.colWidth
                             visible: roomDirectItem.shallBeVisible
-                            highlighted: keyNavigator.selectedItem === roomDirectItem
+                            canBeHighlighted: false
                             mainRowLeftInsetLoader.sourceComponent: IconLabel {
                                 color: Theme.primaryTextColor
                                 icon {
@@ -296,12 +308,24 @@ Popup {
                                                                    && !ViewHelper.isActiveVideoCall
                                                                    && ViewHelper.isValidJitsiRoomName(control.immediateSearchPhrase)
 
-                            onManuallyHovered: () => {
-                                keyNavigator.setExternallySelected(roomDirectItem)
-                            }
-                            onTriggerPrimaryAction: () => {
-                                ViewHelper.requestMeeting(control.immediateSearchPhrase)
-                                control.primaryActionTriggered()
+                            SearchResultNumberItem {
+                                id: roomDirectNumberItem
+                                number: control.immediateSearchPhrase
+                                customIconSource: Icons.userGroupNew
+                                isFavorable: false
+                                highlighted: keyNavigator.selectedSubItem === roomDirectNumberItem
+                                anchors {
+                                    left: parent?.left
+                                    right: parent?.right
+                                }
+
+                                onManuallyHovered: () => {
+                                    keyNavigator.setExternallySelected(roomDirectItem, roomDirectNumberItem)
+                                }
+                                onTriggerPrimaryAction: () => {
+                                    ViewHelper.requestMeeting(control.immediateSearchPhrase)
+                                    control.primaryActionTriggered()
+                                }
                             }
                         }
 
@@ -372,10 +396,10 @@ Popup {
                             }
                             delegate: SearchResultItem {
                                 id: chatRoomDelg
-                                width: control.colWidth
                                 mainText: chatRoomDelg.name
                                 secondaryText: chatRoomDelg.chatProvider?.displayName ?? qsTr("Chat")
-                                highlighted: keyNavigator.selectedItem === chatRoomDelg
+                                width: control.colWidth
+                                canBeHighlighted: false
                                 mainRowLeftInsetLoader.sourceComponent: IconLabel {
                                     color: Theme.primaryTextColor
                                     icon {
@@ -388,12 +412,24 @@ Popup {
                                 required property string name
                                 required property IChatProvider chatProvider
 
-                                onManuallyHovered: () => {
-                                    keyNavigator.setExternallySelected(chatRoomDelg)
-                                }
-                                onTriggerPrimaryAction: () => {
-                                    ViewHelper.showChatRoom(chatRoomDelg.chatProvider, chatRoomDelg.roomId)
-                                    control.primaryActionTriggered()
+                                SearchResultNumberItem {
+                                    id: chatRoomNumberItem
+                                    number: chatRoomDelg.chatProvider?.displayName ?? qsTr("Chat")
+                                    isChat: true
+                                    isFavorable: false
+                                    highlighted: keyNavigator.selectedSubItem === chatRoomNumberItem
+                                    anchors {
+                                        left: parent?.left
+                                        right: parent?.right
+                                    }
+
+                                    onManuallyHovered: () => {
+                                        keyNavigator.setExternallySelected(chatRoomDelg, chatRoomNumberItem)
+                                    }
+                                    onTriggerPrimaryAction: () => {
+                                        ViewHelper.showChatRoom(chatRoomDelg.chatProvider, chatRoomDelg.roomId)
+                                        control.primaryActionTriggered()
+                                    }
                                 }
                             }
                         }
@@ -422,11 +458,11 @@ Popup {
                             }
                             delegate: SearchResultItem {
                                 id: historyDelg
-                                width: control.colWidth
                                 mainText: historyDelg.displayName || historyDelg.url
                                 secondaryText: historyDelg.displayName ? historyDelg.url : ""
-                                highlighted: keyNavigator.selectedItem === historyDelg
+                                width: control.colWidth
                                 enabled: historyDelg.isPhoneNumber || ViewHelper.isJitsiAvailable
+                                canBeHighlighted: false
                                 mainRowLeftInsetLoader.sourceComponent: IconLabel {
                                     color: Theme.primaryTextColor
                                     icon {
@@ -443,22 +479,36 @@ Popup {
                                 required property string displayName
                                 required property string url
 
-                                onManuallyHovered: () => {
-                                    keyNavigator.setExternallySelected(historyDelg)
-                                }
-                                onTriggerPrimaryAction: () => {
-                                    if (historyDelg.isPhoneNumber) {
-                                        SIPCallManager.call("account0", historyDelg.url, "", identitySelector.currentValue);
-                                    } else if (!ViewHelper.isActiveVideoCall) {
-                                        ViewHelper.requestMeeting(historyDelg.url)
+                                SearchResultNumberItem {
+                                    id: historyNumberItem
+                                    number: historyDelg.url
+                                    customIconSource: historyDelg.isPhoneNumber ? Icons.callStart : Icons.userGroupNew
+                                    isSipStatusSubscriptable: historyDelg.isSipSubscriptable
+                                    isFavorite: historyDelg.isFavorite
+                                    isFavorable: false
+                                    highlighted: keyNavigator.selectedSubItem === historyNumberItem
+                                    anchors {
+                                        left: parent?.left
+                                        right: parent?.right
                                     }
-                                    control.primaryActionTriggered()
-                                }
-                                onTriggerSecondaryAction: () => {
-                                    if (historyDelg.isPhoneNumber) {
-                                        historyDelg.historyContextMenuComponent.createObject(historyDelg).popup()
-                                    } else {
-                                        historyDelg.jitsiHistoryListContextMenuComponent.createObject(historyDelg).popup()
+
+                                    onManuallyHovered: () => {
+                                        keyNavigator.setExternallySelected(historyDelg, historyNumberItem)
+                                    }
+                                    onTriggerPrimaryAction: () => {
+                                        if (historyDelg.isPhoneNumber) {
+                                            SIPCallManager.call("account0", historyDelg.url, "", identitySelector.currentValue);
+                                        } else if (!ViewHelper.isActiveVideoCall) {
+                                            ViewHelper.requestMeeting(historyDelg.url)
+                                        }
+                                        control.primaryActionTriggered()
+                                    }
+                                    onTriggerSecondaryAction: () => {
+                                        if (historyDelg.isPhoneNumber) {
+                                            historyDelg.historyContextMenuComponent.createObject(historyDelg).popup()
+                                        } else {
+                                            historyDelg.jitsiHistoryListContextMenuComponent.createObject(historyDelg).popup()
+                                        }
                                     }
                                 }
 
