@@ -6,6 +6,8 @@
 #include "ChatMessageContentVideoFile.h"
 #include "AddressBook.h"
 
+#include <algorithm>
+
 #include <QFileInfo>
 #include <QLoggingCategory>
 
@@ -721,23 +723,14 @@ void IpcChatRoom::resortMessage(ChatMessage *message)
         return;
     }
 
-    // Find correct target index
-    const auto it = std::ranges::upper_bound(m_messages, message,
-                                             [](const ChatMessage *left, const ChatMessage *right) {
-                                                 return left->timestamp() < right->timestamp();
-                                             });
+    m_messages.removeAt(oldIndex);
+    const auto it =
+            std::ranges::lower_bound(m_messages, message->timestamp(), {}, &ChatMessage::timestamp);
+    const qsizetype newIndex = std::distance(m_messages.begin(), it);
+    m_messages.insert(newIndex, message);
+    updatePinnedMessages();
 
-    qsizetype newIndex = std::distance(m_messages.begin(), it);
-    if (newIndex > oldIndex) {
-        // Think of element to not be in the list, although it is
-        --newIndex;
+    if (newIndex != oldIndex) {
+        Q_EMIT chatMessageMoved(oldIndex, newIndex, message);
     }
-
-    // Move row semantic
-    if (newIndex == oldIndex) {
-        return;
-    }
-
-    m_messages.move(oldIndex, newIndex);
-    Q_EMIT chatMessageMoved(oldIndex, newIndex, message);
 }

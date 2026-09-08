@@ -333,17 +333,19 @@ void ChatModel::onChatRoomChanged()
         connect(m_chatRoom, &IChatRoom::chatMessageMoved, m_chatRoomContext,
                 [this](qsizetype oldIndex, qsizetype newIndex, ChatMessage *) {
                     const auto dummyIndex = QModelIndex();
-                    beginMoveRows(dummyIndex, oldIndex, oldIndex, dummyIndex,
-                                  newIndex > oldIndex ? newIndex + 1 : newIndex);
-                    endMoveRows();
+                    if (beginMoveRows(dummyIndex, oldIndex, oldIndex, dummyIndex,
+                                      newIndex > oldIndex ? newIndex + 1 : newIndex)) {
+                        endMoveRows();
+                    }
 
-                    // IsSameusersAsPrevious update
+                    // IsSameUsersAsPrevious update
                     const qsizetype low = std::min(oldIndex, newIndex);
                     const qsizetype high = std::max(oldIndex, newIndex) + 1;
                     const qsizetype rows = rowCount(dummyIndex);
                     if (low < rows) {
                         Q_EMIT dataChanged(createIndex(low, 0),
-                                           createIndex(std::min<qsizetype>(high, rows - 1), 0));
+                                           createIndex(std::min<qsizetype>(high, rows - 1), 0),
+                                           nextItemContentRoles());
                     }
                 });
         connect(m_chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
