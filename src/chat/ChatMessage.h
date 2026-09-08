@@ -50,7 +50,7 @@ public:
     QString fromId() const { return m_fromId; }
     QString nickName() const { return m_nickName; }
     QDateTime timestamp() const { return m_timestamp; }
-    void setTimestamp(const QDateTime &timestamp);
+    bool setTimestamp(const QDateTime &timestamp);
     Flags flags() const { return m_flags; }
     QObject *content() const { return m_content; }
     IChatRoom *chatRoom() const { return m_chatRoom; }
