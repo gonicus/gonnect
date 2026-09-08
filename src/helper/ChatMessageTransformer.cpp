@@ -46,21 +46,41 @@ QString addLinkTags(const QString &orig)
 
 QString fixNewLines(const QString &orig)
 {
-    QString str(orig);
-
-    static const QRegularExpression multiNewlineRegex(QStringLiteral(R"(\n(?=\n))"));
-    str.replace(multiNewlineRegex, QStringLiteral("\n\u2060"));
-
-    static const QRegularExpression singleNewlineRegex(QStringLiteral(R"((?<!\n)(?<!\\)\n(?!\n))"));
-    str.replace(singleNewlineRegex, QStringLiteral("\\\n"));
-
-    // Strip trailing new line
-    if (str.endsWith(QStringLiteral("\\\n"))) {
-        str.chop(2);
-        str.append('\n');
+    QString out;
+    out.reserve(orig.size() * 2);
+    const int n = orig.size();
+    int i = 0;
+    while (i < n) {
+        if (orig.at(i) != QLatin1Char('\n')) {
+            out.append(orig.at(i++));
+            continue;
+        }
+        int j = i;
+        while (j < n && orig.at(j) == QLatin1Char('\n')) {
+            ++j;
+        }
+        const int run = j - i;
+        if (run == 1) {
+            const bool esc = i > 0 && orig.at(i - 1) == QLatin1Char('\\');
+            out.append(esc ? QStringLiteral("\n") : QStringLiteral("\\\n"));
+        } else {
+            out.append(QStringLiteral("\\\n"));
+            for (int r = 1; r < run; ++r) {
+                out.append(QChar(0x2060));
+                out.append(QStringLiteral("  \n")); // <-- statt "\\\n"
+            }
+        }
+        i = j;
     }
-
-    return str;
+    if (out.endsWith(QStringLiteral("\\\n"))) {
+        out.chop(2);
+        out.append('\n');
+    }
+    if (out.endsWith(QStringLiteral("  \n"))) {
+        out.chop(3);
+        out.append('\n');
+    }
+    return out;
 }
 
 #ifndef APP_TESTS
