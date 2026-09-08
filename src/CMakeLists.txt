@@ -343,6 +343,7 @@ qt_add_qml_module(gonnect
 
         ui/components/chat/AddReactionButton.qml
         ui/components/chat/Chat.qml
+        ui/components/chat/ChatButtonBar.qml
         ui/components/chat/ChatMessageAttachmentRectangle.qml
         ui/components/chat/ChatMessageBox.qml
         ui/components/chat/ChatMessageList.qml
