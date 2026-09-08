@@ -1028,6 +1028,7 @@ void IpcDispatcher::processResponse(
         m_supportsDirectRooms = resp.directRooms();
         m_supportsGroupRooms = resp.groupRooms();
         m_supportsSubThreads = resp.subThreads();
+        m_suportsUserPresence = resp.userPresence();
         m_supportedMimeTypes = resp.mimeTypes();
         m_hasDeviceVerification = resp.clientVerification();
 
@@ -1594,10 +1595,13 @@ void IpcDispatcher::processResponse(
             room->setAvatarPath(makeDataRootPath(changeEvent.avatarPath()));
         }
 
-        // Pinnes messages
+        // Pinned messages
         if (changeEvent.hasPinnedMessagesChanged()) {
             room->setPinnedMessageIds(changeEvent.pinnedMessages());
         }
+
+        // Read marker
+        processReadMarkers(room, changeEvent.readMarker());
 
         // Update typing users
         if (changeEvent.hasTypingUserIdListChanged()) {
@@ -1962,6 +1966,9 @@ IpcChatRoom *IpcDispatcher::addChatRoom(const de::gonicus::gonnect::Room &room, 
         roomObj->setAvatarPath(makeDataRootPath(room.avatarPath()));
     }
 
+    // Read markers
+    processReadMarkers(roomObj, room.readMarker());
+
     roomObj->setInvitationText(room.hasInvitationText() ? room.invitationText() : "");
 
     m_rooms.append(roomObj);
@@ -2298,6 +2305,33 @@ bool IpcDispatcher::containsRoomTag(const QString &str) const
     return str.contains(regex);
 }
 
+void IpcDispatcher::processReadMarkers(IpcChatRoom *chatRoom,
+                                       const de::gonicus::gonnect::Room::ReadMarkerEntry &entries)
+{
+    if (!chatRoom) {
+        qCWarning(lcIpcDispatcher) << "Cannot process readmarkers for nullptr room";
+        return;
+    }
+    if (entries.isEmpty()) {
+        return;
+    }
+
+    QHash<QString, QDateTime> bulk;
+    bulk.reserve(entries.size());
+
+    const auto ownUserId = this->ownUserId();
+
+    QHashIterator it(entries);
+    while (it.hasNext()) {
+        it.next();
+        if (it.key() == ownUserId) {
+            continue;
+        }
+        bulk.insert(it.key(), QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
+    }
+    chatRoom->setReadTimestamp(bulk);
+}
+
 RequestContainer *IpcDispatcher::createRequest(bool withTag)
 {
     auto container = new RequestContainer;
@@ -2386,37 +2420,46 @@ void IpcDispatcher::onLoggedInChanged()
 
 void IpcDispatcher::forwardOwnPresenceState()
 {
-
-    if (isConnected()) {
-        UserStatus statusReq;
-        auto &glob = GlobalStateAggregator::instance();
-
-        if (!glob.statusText().isEmpty()) {
-            statusReq.setStatusMessage(glob.statusText());
-        }
-
-        switch (glob.presenceState()) {
-
-        case PresenceState::State::Unknown:
-        case PresenceState::State::Offline:
-            statusReq.setState(PresenceStateGadget::PresenceState::Offline);
-            break;
-
-        case PresenceState::State::Away:
-        case PresenceState::State::Busy:
-            statusReq.setState(PresenceStateGadget::PresenceState::Away);
-            break;
-
-        case PresenceState::State::Available:
-        case PresenceState::State::Ringing:
-            statusReq.setState(PresenceStateGadget::PresenceState::Online);
-            break;
-        }
-
-        auto req = createRequest();
-        req->setUserStatusSetOwnRequest(statusReq);
-        sendRequest(req);
+    if (!m_suportsUserPresence || !isConnected()) {
+        return;
     }
+
+    UserStatus statusReq;
+    auto &glob = GlobalStateAggregator::instance();
+
+    if (glob.statusText().isEmpty()) {
+        statusReq.setStatusMessage(QString());
+    } else {
+        statusReq.setStatusMessage(glob.statusText());
+    }
+
+    switch (glob.presenceState()) {
+
+    case PresenceState::State::Unknown:
+    case PresenceState::State::Offline:
+        statusReq.setState(PresenceStateGadget::PresenceState::Offline);
+        break;
+
+    case PresenceState::State::Away:
+    case PresenceState::State::Busy:
+        statusReq.setState(PresenceStateGadget::PresenceState::Away);
+        break;
+
+    case PresenceState::State::Available:
+    case PresenceState::State::Ringing:
+        statusReq.setState(PresenceStateGadget::PresenceState::Online);
+        break;
+    }
+
+    auto req = createRequest(false);
+    req->setUserStatusSetOwnRequest(statusReq);
+
+    qCInfo(lcIpcDispatcher) << "Sending IPC request to set presence status" << statusReq.state()
+                            << "with status text" << statusReq.statusMessage();
+
+    SendPolicy policy;
+    policy.timeoutSeconds = 0;
+    sendRequest(req, policy);
 }
 
 void IpcDispatcher::updateUnreadNotificationsCount()
