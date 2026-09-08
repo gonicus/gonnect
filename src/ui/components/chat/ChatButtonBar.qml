@@ -109,6 +109,7 @@ Item {
             iconPath: Icons.settingsConfigure
             showDropdownButton: true
             text: qsTr("Options")
+            onDropDownClicked: () => optionsButton.clicked()
             onClicked: () => {
                            chatRoomMenuComponent.createObject(optionsButton, {
                                                                   toggleFavoriteVisible: false,
@@ -149,7 +150,7 @@ Item {
                        }
 
             Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Accept call")
+            Accessible.name: qsTr("Start phone call")
             Accessible.focusable: true
             Accessible.onPressAction: () => callButton.click()
         }
