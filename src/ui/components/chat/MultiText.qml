@@ -28,6 +28,7 @@ Column {
             required property ChatMessageContentPart modelData
             readonly property bool isCode: delg.modelData?.isCode ?? false
             readonly property string text: delg.modelData?.text ?? ""
+            readonly property string htmlText: delg.modelData?.htmlText ?? ""
             readonly property string fenceInfo: delg.modelData?.fenceInfo ?? ""
 
             anchors {
@@ -39,10 +40,10 @@ Column {
                 id: textLabel
                 visible: !delg.isCode
                 y: delg.index > 0 ? 5 : 0
-                text: delg.text
+                text: delg.htmlText
                 font.pixelSize: Theme.fontPixelSize
                 wrapMode: Label.WordWrap
-                textFormat: Text.MarkdownText
+                textFormat: Text.RichText
                 readOnly: true
                 cursorDelegate: null
                 anchors {

@@ -36,7 +36,8 @@ void ChatMessageContentText::processText()
         return;
     }
 
-    m_simpleText = convertText(m_rawText);
+    m_simpleText = m_rawText;
+    m_htmlText = convertHtmlText(m_rawText);
 
     // Split into code/pre blocks
     qDeleteAll(m_parts);
@@ -60,15 +61,16 @@ void ChatMessageContentText::processText()
 
                 // Remaining normal text
                 if (!currentTextBuffer.isEmpty()) {
-                    m_parts.append(new ChatMessageContentPart(
-                            false, convertText(currentTextBuffer.trimmed()), "", this));
+                    const QString buffer = currentTextBuffer.trimmed();
+                    m_parts.append(new ChatMessageContentPart(false, buffer,
+                                                              convertHtmlText(buffer), "", this));
                     currentTextBuffer.clear();
                 }
 
                 // Code block
                 m_parts.append(new ChatMessageContentPart(
-                        true, lit, QString::fromUtf8(cmark_node_get_fence_info(currentNode)),
-                        this));
+                        true, lit, QString(),
+                        QString::fromUtf8(cmark_node_get_fence_info(currentNode)), this));
 
             } else if (type == CMARK_NODE_HTML_BLOCK
                        && lit.trimmed().startsWith("<pre", Qt::CaseInsensitive)) {
@@ -81,15 +83,17 @@ void ChatMessageContentText::processText()
 
                     // Remaining normal text
                     if (!currentTextBuffer.isEmpty()) {
+                        const QString buffer = currentTextBuffer.trimmed();
                         m_parts.append(new ChatMessageContentPart(
-                                false, convertText(currentTextBuffer.trimmed()), "", this));
+                                false, buffer, convertHtmlText(buffer), "", this));
                         currentTextBuffer.clear();
                     }
 
                     // Stripped content
                     const auto innerContent =
                             lit.mid(openTagEnd + 1, closeTagStart - openTagEnd - 1);
-                    m_parts.append(new ChatMessageContentPart(true, innerContent, "", this));
+                    m_parts.append(
+                            new ChatMessageContentPart(true, innerContent, QString(), "", this));
                 } else {
                     // Buffer normal text
                     currentTextBuffer += lit;
@@ -104,8 +108,9 @@ void ChatMessageContentText::processText()
 
     // Remaining buffered text
     if (!currentTextBuffer.isEmpty()) {
-        m_parts.append(new ChatMessageContentPart(false, convertText(currentTextBuffer.trimmed()),
-                                                  "", this));
+        const QString buffer = currentTextBuffer.trimmed();
+        m_parts.append(
+                new ChatMessageContentPart(false, buffer, convertHtmlText(buffer), "", this));
         currentTextBuffer.clear();
     }
 
@@ -115,13 +120,13 @@ void ChatMessageContentText::processText()
     Q_EMIT contentChanged();
 }
 
-QString ChatMessageContentText::convertText(const QString &originalText) const
+QString ChatMessageContentText::convertHtmlText(const QString &originalText) const
 {
     namespace T = ChatMessageTransformer;
 
     if (const auto *chatMessageObj = qobject_cast<ChatMessage *>(parent())) {
-        return T::addLinkTags(T::fixNewLines(T::highlightMentions(originalText, *chatMessageObj)));
+        return T::markdownToHtml(T::highlightMentions(originalText, *chatMessageObj));
     }
 
-    return T::addLinkTags(T::fixNewLines(originalText));
+    return T::markdownToHtml(originalText);
 }

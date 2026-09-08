@@ -4,14 +4,18 @@
 #  include "ChatUser.h"
 #endif
 
+#include <cmark.h>
+
 #include <QRegularExpression>
+
+#include <cstdlib>
 
 namespace ChatMessageTransformer {
 
-QString addLinkTags(const QString &orig)
+QString linkifyBareUrls(const QString &orig)
 {
     static const QRegularExpression re(
-            R"((<a\b[^>]*>.*?</a>)|(<a\b[^>]*href\s*=\s*"[^"]*")|(\[[^\]]*\]\([^)]*\))|\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
+            R"((`[^`]*?`)|(\[[^\]]*\]\([^)]*\))|(<[^<>]*>)|\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
             QRegularExpression::CaseInsensitiveOption
                     | QRegularExpression::DotMatchesEverythingOption);
 
@@ -24,15 +28,15 @@ QString addLinkTags(const QString &orig)
 
         result.append(orig.sliced(lastPos, match.capturedStart() - lastPos));
 
-        QString fullMatch = match.captured(0);
-        QString url = match.captured(4);
+        const QString fullMatch = match.captured(0);
+        const QString url = match.captured(4);
 
         if (!url.isEmpty()) {
             QString href = url;
-            if (href.startsWith("www.", Qt::CaseInsensitive)) {
-                href.prepend("https://");
+            if (href.startsWith(QStringLiteral("www."), Qt::CaseInsensitive)) {
+                href.prepend(QStringLiteral("https://"));
             }
-            result.append(QString(R"(<a href="%1">%2</a>)").arg(href, url));
+            result.append(QStringLiteral("[%1](%2)").arg(url, href));
         } else {
             result.append(fullMatch);
         }
@@ -44,43 +48,17 @@ QString addLinkTags(const QString &orig)
     return result;
 }
 
-QString fixNewLines(const QString &orig)
+QString markdownToHtml(const QString &orig)
 {
-    QString out;
-    out.reserve(orig.size() * 2);
-    const int n = orig.size();
-    int i = 0;
-    while (i < n) {
-        if (orig.at(i) != QLatin1Char('\n')) {
-            out.append(orig.at(i++));
-            continue;
-        }
-        int j = i;
-        while (j < n && orig.at(j) == QLatin1Char('\n')) {
-            ++j;
-        }
-        const int run = j - i;
-        if (run == 1) {
-            const bool esc = i > 0 && orig.at(i - 1) == QLatin1Char('\\');
-            out.append(esc ? QStringLiteral("\n") : QStringLiteral("\\\n"));
-        } else {
-            out.append(QStringLiteral("\\\n"));
-            for (int r = 1; r < run; ++r) {
-                out.append(QChar(0x2060));
-                out.append(QStringLiteral("  \n")); // <-- statt "\\\n"
-            }
-        }
-        i = j;
+    const QByteArray utf8Data = linkifyBareUrls(orig).toUtf8();
+    char *html =
+            cmark_markdown_to_html(utf8Data.constData(), utf8Data.size(), CMARK_OPT_HARDBREAKS);
+    if (html == nullptr) {
+        return {};
     }
-    if (out.endsWith(QStringLiteral("\\\n"))) {
-        out.chop(2);
-        out.append('\n');
-    }
-    if (out.endsWith(QStringLiteral("  \n"))) {
-        out.chop(3);
-        out.append('\n');
-    }
-    return out;
+    const QString result = QString::fromUtf8(html);
+    std::free(html);
+    return result;
 }
 
 #ifndef APP_TESTS

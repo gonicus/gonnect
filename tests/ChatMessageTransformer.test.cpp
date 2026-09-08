@@ -8,117 +8,164 @@ ChatMessageTransformerTest::ChatMessageTransformerTest(QObject *parent) : QObjec
 
 namespace T = ChatMessageTransformer;
 
-void ChatMessageTransformerTest::testAddLinkTagsPlainUrl()
+void ChatMessageTransformerTest::testLinkifyBareUrlsPlainUrl()
 {
-    QCOMPARE(T::addLinkTags("https://example.com"),
-             QString(R"(<a href="https://example.com">https://example.com</a>)"));
-}
-void ChatMessageTransformerTest::testAddLinkTagsWwwUrl()
-{
-    QCOMPARE(T::addLinkTags("www.example.com"),
-             QString(R"(<a href="https://www.example.com">www.example.com</a>)"));
+    QCOMPARE(T::linkifyBareUrls("https://example.com"),
+             QString("[https://example.com](https://example.com)"));
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsExistingAnchor()
+void ChatMessageTransformerTest::testLinkifyBareUrlsWwwUrl()
+{
+    QCOMPARE(T::linkifyBareUrls("www.example.com"),
+             QString("[www.example.com](https://www.example.com)"));
+}
+
+void ChatMessageTransformerTest::testLinkifyBareUrlsExistingAnchor()
 {
     const QString input = "See <a href=\"https://example.com\">here</a> for details";
-    QCOMPARE(T::addLinkTags(input), input);
+    QCOMPARE(T::linkifyBareUrls(input), input);
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsNoUrl()
+void ChatMessageTransformerTest::testLinkifyBareUrlsNoUrl()
 {
-    QCOMPARE(T::addLinkTags("Just plain text."), QString("Just plain text."));
+    QCOMPARE(T::linkifyBareUrls("Just plain text."), QString("Just plain text."));
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsFtpUrl()
+void ChatMessageTransformerTest::testLinkifyBareUrlsFtpUrl()
 {
-    QCOMPARE(T::addLinkTags("ftp://files.example.com"),
-             QString(R"(<a href="ftp://files.example.com">ftp://files.example.com</a>)"));
+    QCOMPARE(T::linkifyBareUrls("ftp://files.example.com"),
+             QString("[ftp://files.example.com](ftp://files.example.com)"));
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsUrlWithPathAndQuery()
+void ChatMessageTransformerTest::testLinkifyBareUrlsUrlWithPathAndQuery()
 {
-    QCOMPARE(
-            T::addLinkTags("https://example.com/path/to/page?foo=bar&baz=1#section"),
-            QString(R"(<a href="https://example.com/path/to/page?foo=bar&baz=1#section">https://example.com/path/to/page?foo=bar&baz=1#section</a>)"));
+    QCOMPARE(T::linkifyBareUrls("https://example.com/path/to/page?foo=bar&baz=1#section"),
+             QString("[https://example.com/path/to/page?foo=bar&baz=1#section](https://"
+                     "example.com/path/to/page?foo=bar&baz=1#section)"));
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsTrailingPunctuation()
+void ChatMessageTransformerTest::testLinkifyBareUrlsTrailingPunctuation()
 {
-    QCOMPARE(T::addLinkTags("See https://example.com."),
-             QString(R"(See <a href="https://example.com">https://example.com</a>.)"));
+    QCOMPARE(T::linkifyBareUrls("See https://example.com."),
+             QString("See [https://example.com](https://example.com)."));
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsMultipleUrls()
+void ChatMessageTransformerTest::testLinkifyBareUrlsMultipleUrls()
 {
-    QCOMPARE(
-            T::addLinkTags("See https://a.com and https://b.com"),
-            QString(R"(See <a href="https://a.com">https://a.com</a> and <a href="https://b.com">https://b.com</a>)"));
+    QCOMPARE(T::linkifyBareUrls("See https://a.com and https://b.com"),
+             QString("See [https://a.com](https://a.com) and [https://b.com](https://b.com)"));
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsMarkdownLink()
+void ChatMessageTransformerTest::testLinkifyBareUrlsMarkdownLink()
 {
     const QString input = "[text](https://example.com)";
-    QCOMPARE(T::addLinkTags(input), input);
+    QCOMPARE(T::linkifyBareUrls(input), input);
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsMixedContent()
+void ChatMessageTransformerTest::testLinkifyBareUrlsMixedContent()
 {
-    QCOMPARE(
-            T::addLinkTags(
-                    "Click <a href=\"x\">here</a> or go https://y.com and [md](https://z.com)"),
-            QString(R"(Click <a href="x">here</a> or go <a href="https://y.com">https://y.com</a> and [md](https://z.com))"));
+    QCOMPARE(T::linkifyBareUrls(
+                     "Click <a href=\"x\">here</a> or go https://y.com and [md](https://z.com)"),
+             QString("Click <a href=\"x\">here</a> or go [https://y.com](https://y.com) and "
+                     "[md](https://z.com)"));
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsEmptyString()
+void ChatMessageTransformerTest::testLinkifyBareUrlsEmptyString()
 {
-    QCOMPARE(T::addLinkTags(""), QString(""));
+    QCOMPARE(T::linkifyBareUrls(""), QString(""));
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsMarkdownLinkParensInUrl()
+void ChatMessageTransformerTest::testLinkifyBareUrlsMarkdownLinkParensInUrl()
 {
     const QString input = QStringLiteral("[text](https://en.wikipedia.org/wiki/Foo_(bar))");
-    QCOMPARE(T::addLinkTags(input), input);
+    QCOMPARE(T::linkifyBareUrls(input), input);
 }
 
-void ChatMessageTransformerTest::testAddLinkTagsPlainUrlWithParens()
+void ChatMessageTransformerTest::testLinkifyBareUrlsPlainUrlWithParens()
 {
-    const QString input = "https://en.wikipedia.org/wiki/Foo_(bar)";
-    const QString expected =
-            QStringLiteral("<a "
-                           "href=\"https://en.wikipedia.org/wiki/Foo_(bar\">https://"
-                           "en.wikipedia.org/wiki/Foo_(bar</a>)");
-    QCOMPARE(T::addLinkTags(input), expected);
+    QCOMPARE(T::linkifyBareUrls("https://en.wikipedia.org/wiki/Foo_(bar)"),
+             QStringLiteral("[https://en.wikipedia.org/wiki/Foo_(bar](https://en.wikipedia.org/"
+                            "wiki/Foo_(bar))"));
 }
 
-void ChatMessageTransformerTest::testFixNewLines()
+void ChatMessageTransformerTest::testLinkifyBareUrlsCodeSpan()
 {
-    QCOMPARE(T::fixNewLines(""), "");
+    const QString input = QStringLiteral("`https://a.com`");
+    QCOMPARE(T::linkifyBareUrls(input), input);
+}
 
-    // No newlines
-    QCOMPARE(T::fixNewLines("Hallo World"), "Hallo World");
+void ChatMessageTransformerTest::testLinkifyBareUrlsBareDomainWithText()
+{
+    const QString input = QStringLiteral("meet.irgeneineurl.de Punkt 12");
+    QCOMPARE(T::linkifyBareUrls(input), input);
+}
 
-    // Single newlines -> \\\n (line break)
-    QCOMPARE(T::fixNewLines("Line 1\nLine 2"), "Line 1\\\nLine 2");
-    QCOMPARE(T::fixNewLines("Text\n"), "Text\\\n");
-    QCOMPARE(T::fixNewLines("\n"), "\\\n");
-    QCOMPARE(T::fixNewLines("\nA"), "\\\nA");
-    QCOMPARE(T::fixNewLines("A\nB\nC"), "A\\\nB\\\nC");
+void ChatMessageTransformerTest::testMarkdownToHtmlParagraphs()
+{
+    QCOMPARE(T::markdownToHtml(""), QString(""));
+    QCOMPARE(T::markdownToHtml("Hallo World"), QString("<p>Hallo World</p>\n"));
+    QCOMPARE(T::markdownToHtml("A\n\nB"), QString("<p>A</p>\n<p>B</p>\n"));
+}
 
-    // Multiple consecutive newlines -> \\\n\u2060\\\n (paragraph break via two line breaks)
-    QCOMPARE(T::fixNewLines("A\n\nB"), QStringLiteral("A\\\n\u2060\\\nB"));
-    QCOMPARE(T::fixNewLines("\n\n"), QStringLiteral("\\\n\u2060\\\n"));
+void ChatMessageTransformerTest::testMarkdownToHtmlHardBreak()
+{
+    QCOMPARE(T::markdownToHtml("Line 1\nLine 2"), QString("<p>Line 1<br />\nLine 2</p>\n"));
+}
 
-    // Triple consecutive newlines
-    QCOMPARE(T::fixNewLines("A\n\n\nB"), QStringLiteral("A\\\n\u2060\\\n\u2060\\\nB"));
-    QCOMPARE(T::fixNewLines("\n\n\n"), QStringLiteral("\\\n\u2060\\\n\u2060\\\n"));
+void ChatMessageTransformerTest::testMarkdownToHtmlList()
+{
+    const QString output = T::markdownToHtml("* a\n* b");
+    QVERIFY(!output.contains(QChar('\\')));
+    QCOMPARE(output.count(QStringLiteral("<li>")), 2);
+    QVERIFY(output.contains(QStringLiteral("<ul>")));
+}
 
-    // Mixed single and double newlines
-    QCOMPARE(T::fixNewLines("A\nB\n\nC"), QStringLiteral("A\\\nB\\\n\u2060\\\nC"));
-    QCOMPARE(T::fixNewLines("A\n\nB\nC"), QStringLiteral("A\\\n\u2060\\\nB\\\nC"));
+void ChatMessageTransformerTest::testMarkdownToHtmlListFromIssue()
+{
+    const QString input = QStringLiteral("Nicht-Bulletin 1:\n"
+                                         "\n"
+                                         "* Punkt 1\n"
+                                         "    * Punkt 1.1\n"
+                                         "    * Punkt 1.2\n"
+                                         "* Punkt 2\n"
+                                         "* Punkt 3\n"
+                                         "* Punkt 4\n"
+                                         "* Punkt 5\n"
+                                         "    * Punkt 5.1\n"
+                                         "* Punkt 6\n"
+                                         "* Punkt 7\n"
+                                         "* Punkt 8\n"
+                                         "* Punkt 9\n"
+                                         "    * Punkt 9.1\n"
+                                         "\n"
+                                         "Nicht-Bulletin 2:\n"
+                                         "\n"
+                                         "* Punkt 10\n"
+                                         "* Punkt 11\n"
+                                         "    * Punkt 11.1\n"
+                                         "* meet.irgeneineurl.de Punkt 12\n"
+                                         "* Punkt 13\n"
+                                         "* Punkt 14");
+    const QString output = T::markdownToHtml(input);
+    QVERIFY(!output.contains(QChar('\\')));
+    QCOMPARE(output.count(QStringLiteral("<li>")), 19);
+    QVERIFY(output.contains(QStringLiteral("<p>Nicht-Bulletin 1:</p>")));
+    QVERIFY(output.contains(QStringLiteral("<p>Nicht-Bulletin 2:</p>")));
+    QVERIFY(output.contains(QStringLiteral("meet.irgeneineurl.de Punkt 12")));
+}
 
-    // Idempotency
-    QCOMPARE(T::fixNewLines("A\\\nB"), "A\\\nB");
+void ChatMessageTransformerTest::testMarkdownToHtmlLink()
+{
+    const QString output = T::markdownToHtml("See https://example.com.");
+    QVERIFY(output.contains(
+            QStringLiteral("<a href=\"https://example.com\">https://example.com</a>")));
+}
+
+void ChatMessageTransformerTest::testMarkdownToHtmlCodeSpan()
+{
+    const QString output = T::markdownToHtml("`https://a.com`");
+    QVERIFY(output.contains(QStringLiteral("<code>https://a.com</code>")));
+    QVERIFY(!output.contains(QStringLiteral("<a href")));
 }
 
 QTEST_GUILESS_MAIN(ChatMessageTransformerTest)
