@@ -15,7 +15,7 @@
 <context>
     <name>Chat</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="342"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="152"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 is typing</numerusform>
@@ -73,6 +73,20 @@
         <translation>
             <numerusform>There is one active call.</numerusform>
             <numerusform>There are %n active calls.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>ReadMarker</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/chat/ReadMarker.qml" line="43"/>
+        <source>%n of %2 have read this message:
+%3</source>
+        <translation>
+            <numerusform>%n of %2 has read this message:
+%3</numerusform>
+            <numerusform>%n of %2 have read this message:
+%3</numerusform>
         </translation>
     </message>
 </context>
