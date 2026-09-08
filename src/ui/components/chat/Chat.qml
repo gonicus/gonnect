@@ -15,18 +15,6 @@ Item {
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
 
-    readonly property Contact soleOtherContact: control.chatRoom && control.chatRoom.isDirectChat
-                                                ? ContactHelper.lookupByChatUser(control.chatRoom.otherUser)
-                                                : null
-
-    readonly property real headerRightLimitX: titleLoadingIndicatorRow.visible
-            ? titleLoadingIndicatorRow.x
-            : (favCardHeadingButton.visible
-               ? favCardHeadingButton.x
-               : (messageListCardHeadingButton.visible
-                  ? messageListCardHeadingButton.x
-                  : parent.width))
-
     function giveFocus() {
         chatMessageBox.giveFocus()
     }
@@ -51,206 +39,28 @@ Item {
         }
     }
 
-    AvatarImage {
-        id: avatarImage
-        visible: control.showTitleBar && !!control.chatRoom
-        size: 30
-        source: control.chatRoom?.avatarPath ?? ""
-        initials: control.chatRoom ? ViewHelper.initials(control.chatRoom.name) : ""
-        showPresenceStatus: !!(control.chatRoom?.hasPresenceState)
-        presenceStatus: control.chatRoom?.presenceState ?? ChatUser.PresenceState.Unknown
-        indicatorComponent: Component { ChatUserPresenceStatusIndicator {} }
-        anchors {
-            left: parent.left
-            leftMargin: 10
-            verticalCenter: messageListCardHeading.verticalCenter
-        }
-    }
-
-    CardHeading {
+    ChatButtonBar {
         id: messageListCardHeading
-        visible: titleLoadingIndicatorRow.visible || (control.showTitleBar && !!control.chatRoom)
-        leftPadding: avatarImage.x + avatarImage.width - 10
-        rightPadding: callContactButton.visible
-                      ? parent.width - (control.headerRightLimitX - callContactButton.implicitWidth - Theme.d * 2) - 20
-                      : parent.width - control.headerRightLimitX - 20
-        text: control.showTitleBar && control.chatRoom
-              ? (control.chatRoom.isDirectChat
-                 ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
-                 : qsTr("Chat room %1").arg(control.chatRoom.name))
-              : ""
+        height: messageListCardHeading.implicitHeight
+        shallBeVisible: control.showTitleBar && !!control.chatRoom
+        chatProvider: control.chatProvider
+        chatRoom: control.chatRoom
         anchors {
-            top: parent.top
             left: parent.left
             right: parent.right
-        }
-    }
-
-    Button {
-        id: callContactButton
-        icon.source: Icons.callStart
-        text: qsTr("Call")
-        width: callContactButton.implicitWidth
-        leftPadding: Theme.d / 2
-        rightPadding: Theme.d
-        spacing: Theme.d / 2
-        icon.width: Theme.d * 2
-        icon.height: Theme.d * 2
-        topInset: Theme.d * 0.68
-        bottomInset: Theme.d * 0.68
-        x: Math.min(messageListCardHeading.textEndX + Theme.d,
-                    control.headerRightLimitX - callContactButton.width - Theme.d)
-        anchors {
-            top: messageListCardHeading.top
-            bottom: messageListCardHeading.bottom
-        }
-        visible: false // control.showTitleBar && control.soleOtherContact
-
-        onClicked: () => {
-                       const soleNumber = control.numbersModel.soleNumber()
-                       if (soleNumber !== "") {
-                           SIPCallManager.call(soleNumber)
-                       } else {
-                           const item = phoneNumbersMenuComponent.createObject(callContactButton, { contact: control.soleOtherContact })
-                           if (!item) {
-                               console.error("Error on creating phone numbers menu")
-                           }
-                           item.popup()
-                           item.updateWidth()
-                       }
-                   }
-    }
-
-    readonly property PhoneNumbersModel numbersModel: PhoneNumbersModel {
-        contact: control.soleOtherContact
-    }
-
-    Component {
-        id: phoneNumbersMenuComponent
-
-        Menu {
-            id: phoneNumberMenu
-            onClosed: () => phoneNumberMenu.destroy()
-
-            required property Contact contact
-
-            function updateWidth() {
-                let w = 0
-                for (let i = 0, l = phoneNumberMenu.count; i < l; ++i) {
-                    const item = phoneNumberMenu.itemAt(i)
-                    w = Math.max(w, item.contentItem.implicitWidth + item.padding * 2)
-                }
-                phoneNumberMenu.width = w
-            }
-
-            Instantiator {
-                model: control.numbersModel
-                delegate: MenuItem {
-                    id: menuDelg
-                    text: PhoneNumberUtil.tooltipText(menuDelg.addr, phoneNumberMenu.contact?.computedName ?? "")
-                    icon.source: PhoneNumberUtil.iconSource(menuDelg.addr)
-
-                    required property string number
-                    required property int type
-
-                    readonly property var addr: ({
-                                                     addr: menuDelg.number,
-                                                     numberType: menuDelg.type,
-                                                     contactType: NumberStats.ContactType.PhoneNumber
-                                                 })
-
-                    Accessible.role: Accessible.Button
-                    Accessible.name: qsTr("Call contact button")
-                    Accessible.description: qsTr("Selected number %1").arg(menuDelg.number)
-                    Accessible.focusable: true
-                    Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(menuDelg.addr)
-
-                    onTriggered: () => SIPCallManager.call(menuDelg.number)
-                }
-
-                onObjectAdded: (index, object) => {
-                                   phoneNumberMenu.insertItem(index, object)
-                                   phoneNumberMenu.updateWidth()
-                               }
-                onObjectRemoved: (index, object) => {
-                                     phoneNumberMenu.removeItem(object)
-                                     phoneNumberMenu.updateWidth()
-                                 }
-            }
-        }
-    }
-
-    Row {
-        id: titleLoadingIndicatorRow
-        spacing: 4
-        visible: !!(control.chatRoom?.isLoadingMessageHistory && !bigLoadingItem.visible)
-        anchors {
-            horizontalCenter: !control.showTitleBar ? messageListCardHeading.horizontalCenter : undefined
-            right: control.showTitleBar ? favCardHeadingButton.left : undefined
-            rightMargin: Theme.d
-            top: messageListCardHeading.top
-            bottom: messageListCardHeading.bottom
-        }
-
-        BusyIndicator {
-            id: titleLoadingIndicator
-            running: titleLoadingIndicatorRow.visible
-            width: titleLoadingIndicator.height
-            height: 24
-            circleColor: Theme.secondaryTextColor
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Label {
-            text: qsTr("Messages are loading...")
-            color: Theme.secondaryTextColor
-            anchors.verticalCenter: parent.verticalCenter
-        }
-    }
-
-    FavIcon {
-        id: favCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
-        isFavorite: control.chatRoom?.isFavorite ?? false
-        anchors {
-            verticalCenter: messageListCardHeading.verticalCenter
-            right: messageListCardHeadingButton.left
-        }
-
-        onToggled: () => control.chatProvider?.requestToggleRoomFavorite(control.chatRoom)
-    }
-
-    CardHeadingMoreMenuButton {
-        id: messageListCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
-        anchors {
             top: parent.top
-            right: parent.right
         }
-
-        onClicked: () => {
-                       chatRoomMenuComponent.createObject(messageListCardHeadingButton, {
-                                                              toggleFavoriteVisible: false,
-                                                              editRoomVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEdit),
-                                                              inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite)
-                                                          }).popup()
-                   }
     }
 
-    Component {
-        id: chatRoomMenuComponent
-
-        ChatRoomContextMenu {
-            onEditRoomTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, control.chatRoom.id)
-            onInviteUsersTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, control.chatRoom.id)
-            onLeaveRoomTriggered: () => {
-                                      const item = DialogFactory.createConfirmDialog({
-                                                       text: qsTr("Are you sure you really want to leave this chat?")
-                                                   })
-                                      const roomId = control.chatRoom.id
-                                      const chatProvider = control.chatProvider
-                                      item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
-                                  }
+    Rectangle {
+        id: buttonBarBorder
+        height: 1
+        color: Theme.borderColor
+        visible: messageListCardHeading.visible && !pinnedChatMessageList.visible
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: messageListCardHeading.bottom
         }
     }
 
@@ -278,8 +88,8 @@ Item {
             right: parent.right
             top: pinnedChatMessageList.visible
                  ? pinnedChatMessageList.bottom
-                 : (messageListCardHeading.visible
-                    ? messageListCardHeading.bottom
+                 : (buttonBarBorder.visible
+                    ? buttonBarBorder.bottom
                     : parent.top)
             bottom: typingUsersList.visible
                     ? typingUsersList.top

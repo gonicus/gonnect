@@ -1865,8 +1865,17 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
 
     if (chatMessage && !isNew) {
         room->updateMessageEventId(chatMessage->eventId(), message.messageId());
-        chatMessage->setTimestamp(dateTime);
+        const bool hasTimestampChanged = chatMessage->setTimestamp(dateTime);
         room->setMessageFlags(chatMessage->eventId(), flags);
+
+        if (hasTimestampChanged) {
+            room->resortMessage(chatMessage);
+
+            const auto &messages = room->chatMessages();
+            if (!messages.isEmpty()) {
+                room->setLatestMessageDateTime(messages.last()->timestamp());
+            }
+        }
 
         if (content) {
             chatMessage->setContent(content);
