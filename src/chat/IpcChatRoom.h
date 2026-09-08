@@ -88,6 +88,7 @@ public:
     virtual void clear() override;
 
     void setTypingUsers(const QList<ChatUser *> &users);
+    void resortMessage(ChatMessage *message);
 
 private Q_SLOTS:
     void updateIsDirectChat();

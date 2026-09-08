@@ -6,6 +6,8 @@
 #include "ChatMessageContentVideoFile.h"
 #include "AddressBook.h"
 
+#include <algorithm>
+
 #include <QFileInfo>
 #include <QLoggingCategory>
 
@@ -711,5 +713,24 @@ void IpcChatRoom::updatePinnedMessages()
     if (m_pinnedMessages != messages) {
         m_pinnedMessages = messages;
         Q_EMIT pinnedMessagesChanged();
+    }
+}
+
+void IpcChatRoom::resortMessage(ChatMessage *message)
+{
+    const auto oldIndex = indexOfMessage(message);
+    if (oldIndex < 0) {
+        return;
+    }
+
+    m_messages.removeAt(oldIndex);
+    const auto it =
+            std::ranges::lower_bound(m_messages, message->timestamp(), {}, &ChatMessage::timestamp);
+    const qsizetype newIndex = std::distance(m_messages.begin(), it);
+    m_messages.insert(newIndex, message);
+    updatePinnedMessages();
+
+    if (newIndex != oldIndex) {
+        Q_EMIT chatMessageMoved(oldIndex, newIndex, message);
     }
 }
