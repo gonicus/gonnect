@@ -229,22 +229,22 @@
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="98"/>
         <source>Reset tone</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Скинути звук</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="99"/>
         <source>Reset the tone to its default option</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Скинути звук до значення за замовчуванням</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="116"/>
         <source>Pick sound file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибрати звуковий файл</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="117"/>
         <source>Select the sound file you want to use</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Виберіть звуковий файл, який хочете використати</translation>
     </message>
 </context>
 <context>
@@ -444,7 +444,7 @@
     <message>
         <location filename="../src/calendar/caldav/CalDAVEventFeeder.cpp" line="201"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Помилка автентифікації для %1</translation>
     </message>
 </context>
 <context>
@@ -670,71 +670,76 @@
     </message>
     <message>
         <location filename="../src/ui/components/CallButtonBar.qml" line="553"/>
-        <source>Resume</source>
-        <translation type="unfinished">Продовжити</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="553"/>
         <source>Hold</source>
         <translation type="unfinished">Утримання</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="560"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="561"/>
         <source>Resume call</source>
         <translation type="unfinished">Відновити дзвінок</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="560"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="561"/>
         <source>Hold call</source>
         <translation type="unfinished">Утримати дзвінок</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="561"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="562"/>
         <source>Update the call hold state</source>
         <translation type="unfinished">Оновити стан утримання</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="582"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="600"/>
         <source>Micro</source>
         <translation type="unfinished">Мікрофон</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="587"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="574"/>
         <source>Microphone mute locked by headset</source>
+        <translation type="unfinished">Вимкнення мікрофона заблоковано гарнітурою</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="569"/>
+        <source>Mute</source>
+        <translation type="unfinished">Вимкнути звук</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="582"/>
+        <source>Mute or unmute your audio input</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="601"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="617"/>
         <source>Input control</source>
         <translation type="unfinished">Керування входом</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="602"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="618"/>
         <source>Set the mute state of the current input device</source>
         <translation type="unfinished">Встановити стан вимкнення звуку пристрою вводу</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="609"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="625"/>
         <source>Output</source>
         <translation type="unfinished">Вихід</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="625"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="641"/>
         <source>Output control</source>
         <translation type="unfinished">Керування виходом</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="626"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="642"/>
         <source>Change the current output devices</source>
         <translation type="unfinished">Змінити поточні пристрої виводу</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="650"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="666"/>
         <source>Accept call</source>
         <translation type="unfinished">Прийняти дзвінок</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="674"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="690"/>
         <source>Hangup call</source>
         <translation type="unfinished">Завершити дзвінок</translation>
     </message>
@@ -807,7 +812,7 @@
     <message>
         <location filename="../src/sip/CallHistory.cpp" line="403"/>
         <source>Database error: cannot remove history row</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Помилка бази даних: не вдалося видалити запис історії</translation>
     </message>
 </context>
 <context>
@@ -910,12 +915,12 @@
     <message>
         <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="96"/>
         <source>CardDAV source %1 repeatedly failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Джерело CardDAV %1 неодноразово завершувалося помилкою</translation>
     </message>
     <message>
         <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="127"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Помилка автентифікації для %1</translation>
     </message>
 </context>
 <context>
@@ -929,43 +934,43 @@
 <context>
     <name>Chat</name>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="76"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="79"/>
         <source>Direct conversation with %1</source>
         <translation type="unfinished">Особиста розмова з %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="77"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="80"/>
         <source>Chat room %1</source>
         <translation type="unfinished">Чат-кімната %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="89"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="92"/>
         <source>Call</source>
         <translation type="unfinished">Дзвінок</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="160"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="163"/>
         <source>Call contact button</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Кнопка виклику контакту</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="161"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="164"/>
         <source>Selected number %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибраний номер %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="202"/>
-        <location filename="../src/ui/components/chat/Chat.qml" line="318"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="205"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="321"/>
         <source>Messages are loading...</source>
         <translation type="unfinished">Завантаження повідомлень...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="245"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="248"/>
         <source>Are you sure you really want to leave this chat?</source>
         <translation type="unfinished">Ви дійсно хочете залишити цей чат?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="339"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="342"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 пише</numerusform>
@@ -991,7 +996,7 @@
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="192"/>
         <source>Failed to save login secret for %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Не вдалося зберегти секрет входу для %1: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="255"/>
@@ -1009,17 +1014,17 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="260"/>
         <source>Edit last message</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Редагувати останнє повідомлення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="299"/>
         <source>Cancel edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Скасувати редагування</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="300"/>
         <source>Discard the current message edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Скасувати поточне редагування повідомлення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="307"/>
@@ -1027,80 +1032,88 @@
         <translation type="unfinished">Введіть повідомлення...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="605"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="645"/>
         <source>Open emoji picker popup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Відкрити панель емодзі</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="637"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="744"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="677"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="798"/>
         <source>Bold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Напівжирний</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="644"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="749"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="684"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="803"/>
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Курсив</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="651"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="754"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="691"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="808"/>
         <source>Strikethrough</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Закреслений</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="658"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="698"/>
         <source>Inline preformatted/code</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Преформатований текст/код (вбудований)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="665"/>
-        <source>Block preformatted/code</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="673"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="727"/>
         <source>Text format options</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Параметри форматування тексту</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="685"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="739"/>
         <source>Add hyperlink</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Додати посилання</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="697"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="751"/>
         <source>Select and upload image</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибрати та завантажити зображення</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="704"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="758"/>
         <source>Select and upload file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибрати та завантажити файл</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="725"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="779"/>
         <source>Send message to chat room</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Надіслати повідомлення в чат-кімнату</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="759"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="813"/>
         <source>Inline code</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вбудований код</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="764"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="705"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="818"/>
         <source>Code block</source>
+        <translation type="unfinished">Блок коду</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="712"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="823"/>
+        <source>Preformatted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="772"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="719"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="828"/>
+        <source>Quote</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="836"/>
         <source>Type message</source>
         <translation type="unfinished">Введіть повідомлення</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="773"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="837"/>
         <source>Enter the chat text message</source>
         <translation type="unfinished">Введіть текстове повідомлення чату</translation>
     </message>
@@ -1136,59 +1149,59 @@
         <translation type="unfinished">Вибране повідомлення — від %1, о %2: %3</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="362"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="361"/>
         <source>Retry</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Повторити</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="397"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="396"/>
         <source>Add reaction...</source>
         <translation type="unfinished">Додати реакцію...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="410"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="409"/>
         <source>Copy to clipboard</source>
         <translation type="unfinished">Скопіювати до буфера обміну</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="425"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="424"/>
         <source>Copy link to clipboard</source>
         <translation type="unfinished">Скопіювати посилання в буфер обміну</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="434"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="433"/>
         <source>Remove message...</source>
         <translation type="unfinished">Видалити повідомлення...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="439"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="438"/>
         <source>Remove message</source>
         <translation type="unfinished">Видалити повідомлення</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="440"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="439"/>
         <source>Do you really want to remove this message?</source>
         <translation type="unfinished">Ви дійсно хочете видалити це повідомлення?</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="441"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="440"/>
         <source>Reason (optional, why you removed the message)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Причина (необов&apos;язково, чому ви видалили повідомлення)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="455"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="454"/>
         <source>Edit message...</source>
         <translation type="unfinished">Редагувати повідомлення...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="465"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="464"/>
         <source>Reply...</source>
         <translation type="unfinished">Відповісти...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="471"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="470"/>
         <source>Toggle pin</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Закріпити або відкріпити</translation>
     </message>
 </context>
 <context>
@@ -1196,12 +1209,12 @@
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="61"/>
         <source>Message has been removed. Reason: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Повідомлення було видалено. Причина: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="63"/>
         <source>Message has been removed.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Повідомлення було видалено.</translation>
     </message>
 </context>
 <context>
@@ -1317,7 +1330,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="90"/>
         <source>You have been invited to join this room &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вас запрошено до чат-кімнати &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="93"/>
@@ -1355,12 +1368,12 @@
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="191"/>
         <source>No users found.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Користувачів не знайдено.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="193"/>
         <source>Please enter a search phrase...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Введіть пошуковий запит...</translation>
     </message>
 </context>
 <context>
@@ -1465,110 +1478,110 @@
         <translation type="unfinished">Виконайте автентифікацію у відкритому вікні браузера...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="404"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="439"/>
         <source>This conference is protected by a password. Please enter it to join the room.</source>
         <translation type="unfinished">Конференція захищена паролем. Введіть пароль для входу.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="417"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="597"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="452"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="643"/>
         <source>Password</source>
         <translation type="unfinished">Пароль</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="429"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="607"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="464"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="653"/>
         <source>Enter the password</source>
         <translation type="unfinished">Введіть пароль</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="435"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="470"/>
         <source>Remember password</source>
         <translation type="unfinished">Запам&apos;ятати пароль</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="452"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="656"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="487"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="702"/>
         <source>Cancel</source>
         <translation type="unfinished">Скасувати</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="464"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="499"/>
         <source>Join Room</source>
         <translation type="unfinished">Увійти до кімнати</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="514"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="560"/>
         <source>Password required</source>
         <translation type="unfinished">Потрібен пароль</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="548"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="594"/>
         <source>Enter a password to protect this conference room. Other users must enter it before taking part in the session.</source>
         <translation type="unfinished">Введіть пароль для захисту цієї конференц-кімнати. Інші користувачі повинні будуть ввести його перед участю в сеансі.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="562"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="608"/>
         <source>This password has been set for the conference room and must be entered by users before taking part in the session.</source>
         <translation type="unfinished">Цей пароль встановлено для конференц-кімнати, і користувачі повинні ввести його перед участю в сеансі.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="576"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="622"/>
         <source>The room password has been set by someone else.</source>
         <translation type="unfinished">Пароль кімнати встановлено іншим учасником.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="641"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="687"/>
         <source>Show password</source>
         <translation type="unfinished">Показати пароль</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="669"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="715"/>
         <source>Remove</source>
         <translation type="unfinished">Видалити</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="680"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="726"/>
         <source>Save</source>
         <translation type="unfinished">Зберегти</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="714"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="760"/>
         <source>Video quality</source>
         <translation type="unfinished">Якість відео</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="730"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="776"/>
         <source>Change the video quality of this meeting</source>
         <translation type="unfinished">Змінити якість відео зустрічі</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="736"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="782"/>
         <source>No video (audio only)</source>
         <translation type="unfinished">Без відео (лише аудіо)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="741"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="787"/>
         <source>Lowest quality</source>
         <translation type="unfinished">Найнижча якість</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="746"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="792"/>
         <source>Standard quality</source>
         <translation type="unfinished">Стандартна якість</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="751"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="797"/>
         <source>Highest quality</source>
         <translation type="unfinished">Найвища якість</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="757"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="803"/>
         <source>Close</source>
         <translation type="unfinished">Закрити</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="790"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="836"/>
         <source>Drag bar</source>
         <translation type="unfinished">Панель перетягування</translation>
     </message>
@@ -1576,7 +1589,7 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="150"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="154"/>
         <source>%n minutes left</source>
         <translation type="unfinished">
             <numerusform>залишилася %n хвилина</numerusform>
@@ -1585,127 +1598,132 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="100"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="104"/>
         <source>Conference room</source>
         <translation type="unfinished">Кімната конференції</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="195"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="199"/>
         <source>Share</source>
         <translation type="unfinished">Поділитися</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="209"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="213"/>
         <source>Copy room name</source>
         <translation type="unfinished">Скопіювати назву кімнати</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="213"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="217"/>
         <source>Copy room link</source>
         <translation type="unfinished">Скопіювати посилання на кімнату</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="217"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="221"/>
         <source>Open in browser</source>
         <translation type="unfinished">Відкрити у браузері</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="221"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="225"/>
         <source>Show phone number</source>
         <translation type="unfinished">Показати номер телефону</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="237"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="241"/>
         <source>Raise</source>
         <translation type="unfinished">Підняти руку</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="246"/>
-        <source>Resume</source>
-        <translation type="unfinished">Продовжити</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="246"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="251"/>
         <source>Hold</source>
         <translation type="unfinished">Утримання</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="255"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="261"/>
+        <source>Mute</source>
+        <translation type="unfinished">Вимкнути звук</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="271"/>
+        <source>Video off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="280"/>
         <source>View</source>
         <translation type="unfinished">Вигляд</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="264"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="289"/>
         <source>Screen</source>
         <translation type="unfinished">Екран</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="282"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="308"/>
         <source>Share window</source>
         <translation type="unfinished">Поділитися вікном</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="287"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="313"/>
         <source>Share screen</source>
         <translation type="unfinished">Поділитися екраном</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="297"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="330"/>
         <source>Camera</source>
         <translation type="unfinished">Камера</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="334"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="367"/>
         <source>Output</source>
         <translation type="unfinished">Вихід</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="352"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="385"/>
         <source>More</source>
         <translation type="unfinished">Ще</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="364"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="397"/>
         <source>Noise supression</source>
         <translation type="unfinished">Шумоподавлення</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="370"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="403"/>
         <source>Toggle subtitles</source>
         <translation type="unfinished">Увімкнути/вимкнути субтитри</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="377"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="410"/>
         <source>Toggle whiteboard</source>
         <translation type="unfinished">Увімкнути/вимкнути дошку</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="383"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="416"/>
         <source>Video quality...</source>
         <translation type="unfinished">Якість відео...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="392"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="425"/>
         <source>Set room password...</source>
         <translation type="unfinished">Встановити пароль кімнати...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="399"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="432"/>
         <source>Mute everyone</source>
         <translation type="unfinished">Вимкнути звук усіх</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="455"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="481"/>
         <source>Leave conference</source>
         <translation type="unfinished">Покинути конференцію</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="463"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="489"/>
         <source>End conference for all</source>
         <translation type="unfinished">Завершити конференцію для всіх</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="315"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="348"/>
         <source>Micro</source>
         <translation type="unfinished">Мікрофон</translation>
     </message>
@@ -1841,7 +1859,7 @@
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="396"/>
         <source>Event starting soon</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Подія скоро почнеться</translation>
     </message>
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="402"/>
@@ -1885,27 +1903,27 @@
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="15"/>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Події</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="16"/>
         <source>List of all the currently active and upcoming calendar events</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Список усіх поточних і майбутніх подій календаря</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="33"/>
         <source>Event section</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Розділ подій</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="113"/>
         <source>Event</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Подія</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="114"/>
         <source>Currently selected calendar event: %1, starting time %2, remaining time %3</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибрана подія: %1, час початку %2, час, що залишився %3</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="168"/>
@@ -1974,22 +1992,22 @@
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="27"/>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Події</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="53"/>
         <source>Loading events...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Завантаження подій...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="54"/>
         <source>No upcoming events</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Немає майбутніх подій</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="64"/>
         <source>Event widget status</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Стан віджета подій</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="65"/>
@@ -2051,22 +2069,22 @@
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="347"/>
         <source>Confirm that the code or emojis match in both sessions:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Підтвердьте, що код або емодзі збігаються в обох сеансах:</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="426"/>
         <source>Cancel, they do not match</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Скасувати, вони не збігаються</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="435"/>
         <source>Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Підтвердити</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="436"/>
         <source>Confirm, they match</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Підтвердити, вони збігаються</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="452"/>
@@ -2479,12 +2497,12 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="257"/>
         <source>%1 has joined the chat</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 приєднався до чату</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="259"/>
         <source>%1 has left the chat</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 покинув чат</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="261"/>
@@ -2514,7 +2532,7 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="283"/>
         <source>Offline</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Не в мережі</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="285"/>
@@ -2555,19 +2573,19 @@
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="28"/>
         <source>Selected favorite %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибраний елемент обраного %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="222"/>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="257"/>
         <source>Favorite phone, chat or meeting button</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Кнопка обраного для дзвінка, чату або зустрічі</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="223"/>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="258"/>
         <source>Selected address %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибрана адреса %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="359"/>
@@ -2615,28 +2633,28 @@
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="68"/>
         <source>Send attachment</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Надіслати вкладення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="113"/>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="136"/>
         <source>Not a file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Це не файл</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="120"/>
         <source>No valid files</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Немає допустимих файлів</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="128"/>
         <source>Disallowed type</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Недопустимий тип</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="132"/>
         <source>File not readable</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Файл не читається</translation>
     </message>
 </context>
 <context>
@@ -2668,9 +2686,9 @@
         <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="32"/>
         <source>Shall the following file(s) be sent? (%1)</source>
         <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+            <numerusform>Надіслати наступний файл? (%1)</numerusform>
+            <numerusform>Надіслати наступні файли? (%1)</numerusform>
+            <numerusform>Надіслати наступні файли? (%1)</numerusform>
         </translation>
     </message>
     <message>
@@ -2783,7 +2801,7 @@
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="245"/>
         <source>, via %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">, через %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="365"/>
@@ -2793,7 +2811,7 @@
     <message>
         <location filename="../src/ui/components/HistoryList.qml" line="423"/>
         <source>Are you sure you really want to remove this entry?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ви справді хочете видалити цей запис?</translation>
     </message>
 </context>
 <context>
@@ -2854,7 +2872,7 @@
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
         <source>All sources</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Усі джерела</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
@@ -2884,7 +2902,7 @@
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
         <source>All calls</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Усі дзвінки</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
@@ -3043,12 +3061,12 @@
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="483"/>
         <source>The file %1 exceeds the file size limit of %2 and cannot be sent.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Файл %1 перевищує обмеження розміру %2 і не може бути надісланий.</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="901"/>
         <source>The IPC client of %1 repeatedly reported network errors.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">IPC-клієнт %1 неодноразово повідомляв про мережеві помилки.</translation>
     </message>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="916"/>
@@ -3121,17 +3139,17 @@
         <translation type="unfinished">Нове повідомлення</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1279"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1314"/>
         <source>Active conference</source>
         <translation type="unfinished">Активна конференція</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1284"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1319"/>
         <source>Hang up</source>
         <translation type="unfinished">Завершити</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="816"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="828"/>
         <source>%1 has joined the conference</source>
         <translation type="unfinished">%1 приєднався до конференції</translation>
     </message>
@@ -3141,13 +3159,13 @@
         <translation type="unfinished">Користувач без імені</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="630"/>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1328"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="638"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1363"/>
         <source>Failed to persist room password: %1</source>
         <translation type="unfinished">Не вдалося зберегти пароль кімнати: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="830"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="842"/>
         <source>%1 has left the conference</source>
         <translation type="unfinished">%1 покинув конференцію</translation>
     </message>
@@ -3217,11 +3235,29 @@
     </message>
 </context>
 <context>
+    <name>KnockedParticipant</name>
+    <message>
+        <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="46"/>
+        <source>%1 wants to join the conference. Can they join?</source>
+        <translation type="unfinished">%1 хоче приєднатися до конференції. Дозволити?</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="58"/>
+        <source>No</source>
+        <translation type="unfinished">Ні</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="69"/>
+        <source>Yes</source>
+        <translation type="unfinished">Так</translation>
+    </message>
+</context>
+<context>
     <name>LDAPAddressBookFeeder</name>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="119"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Помилка автентифікації для %1</translation>
     </message>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="239"/>
@@ -3252,7 +3288,7 @@
     <message>
         <location filename="../src/ui/components/popups/LargeImage.qml" line="77"/>
         <source>Untitled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Без назви</translation>
     </message>
 </context>
 <context>
@@ -3379,7 +3415,7 @@
     <message>
         <location filename="../src/Main.qml" line="167"/>
         <source>SIP Registration failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Помилка SIP-реєстрації</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="144"/>
@@ -3400,7 +3436,7 @@
     <message>
         <location filename="../src/Main.qml" line="168"/>
         <source>SIP registration failed with status %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SIP-реєстрація завершилася помилкою, статус %1: %2</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="231"/>
@@ -3450,7 +3486,7 @@
         <location filename="../src/ui/components/MainTabBar.qml" line="498"/>
         <location filename="../src/ui/components/MainTabBar.qml" line="528"/>
         <source>Show the emergency call page</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Показати сторінку екстреного виклику</translation>
     </message>
     <message>
         <location filename="../src/ui/components/MainTabBar.qml" line="583"/>
@@ -3699,7 +3735,7 @@
     <message>
         <location filename="../src/ui/components/chat/PinnedChatMessagesList.qml" line="120"/>
         <source>Unpin</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Відкріпити</translation>
     </message>
 </context>
 <context>
@@ -3773,22 +3809,22 @@
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="212"/>
         <source>Loading more results...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Завантаження додаткових результатів...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="227"/>
         <source>Searching...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пошук...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="230"/>
         <source>No chat rooms found.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Чат-кімнат не знайдено.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="232"/>
         <source>Please enter a search phrase...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Введіть пошуковий запит...</translation>
     </message>
 </context>
 <context>
@@ -3796,1227 +3832,1227 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="12"/>
         <source>Andorra</source>
-        <translation type="unfinished">Андорра</translation>
+        <translation>Андорра</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="13"/>
         <source>United Arab Emirates</source>
-        <translation type="unfinished">Об&apos;єднані Арабські Емірати</translation>
+        <translation>Обʼєднані Арабські Емірати</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="14"/>
         <source>Afghanistan</source>
-        <translation type="unfinished">Афганістан</translation>
+        <translation>Афганістан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="15"/>
         <source>Antigua and Barbuda</source>
-        <translation type="unfinished">Антигуа і Барбуда</translation>
+        <translation>Антигуа і Барбуда</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="16"/>
         <source>Anguilla</source>
-        <translation type="unfinished">Ангілья</translation>
+        <translation>Ангілья</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="17"/>
         <source>Albania</source>
-        <translation type="unfinished">Албанія</translation>
+        <translation>Албанія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="18"/>
         <source>Armenia</source>
-        <translation type="unfinished">Вірменія</translation>
+        <translation>Вірменія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="19"/>
         <source>Angola</source>
-        <translation type="unfinished">Ангола</translation>
+        <translation>Ангола</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="20"/>
         <source>Argentina</source>
-        <translation type="unfinished">Аргентина</translation>
+        <translation>Аргентина</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="21"/>
         <source>American Samoa</source>
-        <translation type="unfinished">Американське Самоа</translation>
+        <translation>Американське Самоа</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="22"/>
         <source>Austria</source>
-        <translation type="unfinished">Австрія</translation>
+        <translation>Австрія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="23"/>
         <source>Australia</source>
-        <translation type="unfinished">Австралія</translation>
+        <translation>Австралія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="24"/>
         <source>Aruba</source>
-        <translation type="unfinished">Аруба</translation>
+        <translation>Аруба</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="25"/>
         <source>Aland Islands</source>
-        <translation type="unfinished">Аландські острови</translation>
+        <translation>Аландські острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="26"/>
         <source>Azerbaijan</source>
-        <translation type="unfinished">Азербайджан</translation>
+        <translation>Азербайджан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="27"/>
         <source>Bosnia and Herzegovina</source>
-        <translation type="unfinished">Боснія і Герцеговина</translation>
+        <translation>Боснія і Герцоговина</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="28"/>
         <source>Barbados</source>
-        <translation type="unfinished">Барбадос</translation>
+        <translation>Барбадос</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="29"/>
         <source>Bangladesh</source>
-        <translation type="unfinished">Бангладеш</translation>
+        <translation>Бангладеш</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="30"/>
         <source>Belgium</source>
-        <translation type="unfinished">Бельгія</translation>
+        <translation>Бельгія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="31"/>
         <source>Burkina Faso</source>
-        <translation type="unfinished">Буркіна-Фасо</translation>
+        <translation>Буркіна-Фасо</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="32"/>
         <source>Bulgaria</source>
-        <translation type="unfinished">Болгарія</translation>
+        <translation>Болгарія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="33"/>
         <source>Bahrain</source>
-        <translation type="unfinished">Бахрейн</translation>
+        <translation>Бахрейн</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="34"/>
         <source>Burundi</source>
-        <translation type="unfinished">Бурунді</translation>
+        <translation>Бурунді</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="35"/>
         <source>Benin</source>
-        <translation type="unfinished">Бенін</translation>
+        <translation>Бенін</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="36"/>
         <source>Saint Barthelemy</source>
-        <translation type="unfinished">Сен-Бартелемі</translation>
+        <translation>Сен-Бартельмі</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="37"/>
         <source>Bermuda</source>
-        <translation type="unfinished">Бермуди</translation>
+        <translation>Бермуди</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="38"/>
         <source>Brunei</source>
-        <translation type="unfinished">Бруней</translation>
+        <translation>Бруней</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="39"/>
         <source>Bolivia</source>
-        <translation type="unfinished">Болівія</translation>
+        <translation>Болівія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="40"/>
         <source>Bonaire, Saint Eustatius and Saba</source>
-        <translation type="unfinished">Бонайре, Сінт-Естатіус і Саба</translation>
+        <translation>Нідерландські Карибські острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="41"/>
         <source>Brazil</source>
-        <translation type="unfinished">Бразилія</translation>
+        <translation>Бразилія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="42"/>
         <source>Bahamas</source>
-        <translation type="unfinished">Багами</translation>
+        <translation>Багами</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="43"/>
         <source>Bhutan</source>
-        <translation type="unfinished">Бутан</translation>
+        <translation>Бутан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="44"/>
         <source>Botswana</source>
-        <translation type="unfinished">Ботсвана</translation>
+        <translation>Ботсвана</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="45"/>
         <source>Belarus</source>
-        <translation type="unfinished">Білорусь</translation>
+        <translation>Білорусь</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="46"/>
         <source>Belize</source>
-        <translation type="unfinished">Беліз</translation>
+        <translation>Беліз</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="47"/>
         <source>Canada</source>
-        <translation type="unfinished">Канада</translation>
+        <translation>Канада</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="48"/>
         <source>Cocos Islands</source>
-        <translation type="unfinished">Кокосові острови</translation>
+        <translation>Кокосові (Кілінгові) острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="49"/>
         <source>Democratic Republic of the Congo</source>
-        <translation type="unfinished">Демократична Республіка Конго</translation>
+        <translation>Конго – Кіншаса</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="50"/>
         <source>Central African Republic</source>
-        <translation type="unfinished">Центральноафриканська Республіка</translation>
+        <translation>Центральноафриканська Республіка</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="51"/>
         <source>Republic of the Congo</source>
-        <translation type="unfinished">Республіка Конго</translation>
+        <translation>Конго – Браззавіль</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="52"/>
         <source>Switzerland</source>
-        <translation type="unfinished">Швейцарія</translation>
+        <translation>Швейцарія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="53"/>
         <source>Ivory Coast</source>
-        <translation type="unfinished">Кот-д&apos;Івуар</translation>
+        <translation>Кот-д’Івуар</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="54"/>
         <source>Cook Islands</source>
-        <translation type="unfinished">Острови Кука</translation>
+        <translation>Острови Кука</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="55"/>
         <source>Chile</source>
-        <translation type="unfinished">Чилі</translation>
+        <translation>Чилі</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="56"/>
         <source>Cameroon</source>
-        <translation type="unfinished">Камерун</translation>
+        <translation>Камерун</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="57"/>
         <source>China</source>
-        <translation type="unfinished">Китай</translation>
+        <translation>Китай</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="58"/>
         <source>Colombia</source>
-        <translation type="unfinished">Колумбія</translation>
+        <translation>Колумбія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="59"/>
         <source>Costa Rica</source>
-        <translation type="unfinished">Коста-Рика</translation>
+        <translation>Коста-Рика</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="60"/>
         <source>Cuba</source>
-        <translation type="unfinished">Куба</translation>
+        <translation>Куба</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="61"/>
         <source>Cape Verde</source>
-        <translation type="unfinished">Кабо-Верде</translation>
+        <translation>Кабо Верде</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="62"/>
         <source>Curacao</source>
-        <translation type="unfinished">Кюрасао</translation>
+        <translation>Кюрасао</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="63"/>
         <source>Christmas Island</source>
-        <translation type="unfinished">Острів Різдва</translation>
+        <translation>Острів Різдва</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="64"/>
         <source>Cyprus</source>
-        <translation type="unfinished">Кіпр</translation>
+        <translation>Кіпр</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="65"/>
         <source>Czech Republic</source>
-        <translation type="unfinished">Чехія</translation>
+        <translation>Чехія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="66"/>
         <source>Germany</source>
-        <translation type="unfinished">Німеччина</translation>
+        <translation>Німеччина</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="67"/>
         <source>Djibouti</source>
-        <translation type="unfinished">Джибуті</translation>
+        <translation>Джибуті</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="68"/>
         <source>Denmark</source>
-        <translation type="unfinished">Данія</translation>
+        <translation>Данія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="69"/>
         <source>Dominica</source>
-        <translation type="unfinished">Домініка</translation>
+        <translation>Домініка</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="70"/>
         <source>Dominican Republic</source>
-        <translation type="unfinished">Домініканська Республіка</translation>
+        <translation>Домініканська Республіка</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="71"/>
         <source>Algeria</source>
-        <translation type="unfinished">Алжир</translation>
+        <translation>Алжир</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="72"/>
         <source>Ecuador</source>
-        <translation type="unfinished">Еквадор</translation>
+        <translation>Еквадор</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="73"/>
         <source>Estonia</source>
-        <translation type="unfinished">Естонія</translation>
+        <translation>Естонія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="74"/>
         <source>Egypt</source>
-        <translation type="unfinished">Єгипет</translation>
+        <translation>Єгипет</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="75"/>
         <source>Western Sahara</source>
-        <translation type="unfinished">Західна Сахара</translation>
+        <translation>Західна Сахара</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="76"/>
         <source>Eritrea</source>
-        <translation type="unfinished">Еритрея</translation>
+        <translation>Еритрея</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="77"/>
         <source>Spain</source>
-        <translation type="unfinished">Іспанія</translation>
+        <translation>Іспанія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="78"/>
         <source>Ethiopia</source>
-        <translation type="unfinished">Ефіопія</translation>
+        <translation>Ефіопія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="79"/>
         <source>Finland</source>
-        <translation type="unfinished">Фінляндія</translation>
+        <translation>Фінляндія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="80"/>
         <source>Fiji</source>
-        <translation type="unfinished">Фіджі</translation>
+        <translation>Фіджі</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="81"/>
         <source>Falkland Islands</source>
-        <translation type="unfinished">Фолклендські острови</translation>
+        <translation>Фолклендські острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="82"/>
         <source>Micronesia</source>
-        <translation type="unfinished">Мікронезія</translation>
+        <translation>Мікронезія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="83"/>
         <source>Faroe Islands</source>
-        <translation type="unfinished">Фарерські острови</translation>
+        <translation>Фарерські острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="84"/>
         <source>France</source>
-        <translation type="unfinished">Франція</translation>
+        <translation>Франція</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="85"/>
         <source>Gabon</source>
-        <translation type="unfinished">Габон</translation>
+        <translation>Габон</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="86"/>
         <source>United Kingdom</source>
-        <translation type="unfinished">Велика Британія</translation>
+        <translation>Велика Британія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="87"/>
         <source>Grenada</source>
-        <translation type="unfinished">Гренада</translation>
+        <translation>Гренада</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="88"/>
         <source>Georgia</source>
-        <translation type="unfinished">Грузія</translation>
+        <translation>Грузія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="89"/>
         <source>French Guiana</source>
-        <translation type="unfinished">Французька Гвіана</translation>
+        <translation>Французька Гвіана</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="90"/>
         <source>Guernsey</source>
-        <translation type="unfinished">Гернсі</translation>
+        <translation>Гернсі</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="91"/>
         <source>Ghana</source>
-        <translation type="unfinished">Гана</translation>
+        <translation>Гана</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="92"/>
         <source>Gibraltar</source>
-        <translation type="unfinished">Гібралтар</translation>
+        <translation>Гібралтар</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="93"/>
         <source>Greenland</source>
-        <translation type="unfinished">Гренландія</translation>
+        <translation>Гренландія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="94"/>
         <source>Gambia</source>
-        <translation type="unfinished">Гамбія</translation>
+        <translation>Гамбія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="95"/>
         <source>Guinea</source>
-        <translation type="unfinished">Гвінея</translation>
+        <translation>Гвінея</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="96"/>
         <source>Guadeloupe</source>
-        <translation type="unfinished">Гваделупа</translation>
+        <translation>Гваделупа</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="97"/>
         <source>Equatorial Guinea</source>
-        <translation type="unfinished">Екваторіальна Гвінея</translation>
+        <translation>Екваторіальна Гвінея</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="98"/>
         <source>Greece</source>
-        <translation type="unfinished">Греція</translation>
+        <translation>Греція</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="99"/>
         <source>Guatemala</source>
-        <translation type="unfinished">Гватемала</translation>
+        <translation>Гватемала</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="100"/>
         <source>Guam</source>
-        <translation type="unfinished">Гуам</translation>
+        <translation>Гуам</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="101"/>
         <source>Guinea-Bissau</source>
-        <translation type="unfinished">Гвінея-Бісау</translation>
+        <translation>Гвінея-Бісау</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="102"/>
         <source>Guyana</source>
-        <translation type="unfinished">Гайана</translation>
+        <translation>Гаяна</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="103"/>
         <source>Hong Kong</source>
-        <translation type="unfinished">Гонконг</translation>
+        <translation>Гонконг, О.А.Р. Китаю</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="104"/>
         <source>Heard Island and McDonald Islands</source>
-        <translation type="unfinished">Острови Херд і Макдональд</translation>
+        <translation>Острови Херд і Мак-Дональд</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="105"/>
         <source>Honduras</source>
-        <translation type="unfinished">Гондурас</translation>
+        <translation>Гондурас</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="106"/>
         <source>Croatia</source>
-        <translation type="unfinished">Хорватія</translation>
+        <translation>Хорватія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="107"/>
         <source>Haiti</source>
-        <translation type="unfinished">Гаїті</translation>
+        <translation>Гаїті</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="108"/>
         <source>Hungary</source>
-        <translation type="unfinished">Угорщина</translation>
+        <translation>Угорщина</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="109"/>
         <source>Indonesia</source>
-        <translation type="unfinished">Індонезія</translation>
+        <translation>Індонезія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="110"/>
         <source>Ireland</source>
-        <translation type="unfinished">Ірландія</translation>
+        <translation>Ірландія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="111"/>
         <source>Israel</source>
-        <translation type="unfinished">Ізраїль</translation>
+        <translation>Ізраїль</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="112"/>
         <source>Isle of Man</source>
-        <translation type="unfinished">Острів Мен</translation>
+        <translation>Острів Мен</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="113"/>
         <source>India</source>
-        <translation type="unfinished">Індія</translation>
+        <translation>Індія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="114"/>
         <source>British Indian Ocean Territory</source>
-        <translation type="unfinished">Британська територія в Індійському океані</translation>
+        <translation>Британські території в Індійському океані</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="115"/>
         <source>Iraq</source>
-        <translation type="unfinished">Ірак</translation>
+        <translation>Ірак</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="116"/>
         <source>Iran</source>
-        <translation type="unfinished">Іран</translation>
+        <translation>Іран</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="117"/>
         <source>Iceland</source>
-        <translation type="unfinished">Ісландія</translation>
+        <translation>Ісландія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="118"/>
         <source>Italy</source>
-        <translation type="unfinished">Італія</translation>
+        <translation>Італія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="119"/>
         <source>Jersey</source>
-        <translation type="unfinished">Джерсі</translation>
+        <translation>Джерсі</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="120"/>
         <source>Jamaica</source>
-        <translation type="unfinished">Ямайка</translation>
+        <translation>Ямайка</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="121"/>
         <source>Jordan</source>
-        <translation type="unfinished">Йорданія</translation>
+        <translation>Йорданія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="122"/>
         <source>Japan</source>
-        <translation type="unfinished">Японія</translation>
+        <translation>Японія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="123"/>
         <source>Kenya</source>
-        <translation type="unfinished">Кенія</translation>
+        <translation>Кенія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="124"/>
         <source>Kyrgyzstan</source>
-        <translation type="unfinished">Киргизстан</translation>
+        <translation>Киргизстан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="125"/>
         <source>Cambodia</source>
-        <translation type="unfinished">Камбоджа</translation>
+        <translation>Камбоджа</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="126"/>
         <source>Kiribati</source>
-        <translation type="unfinished">Кірібаті</translation>
+        <translation>Кірибаті</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="127"/>
         <source>Comoros</source>
-        <translation type="unfinished">Комори</translation>
+        <translation>Коморські острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="128"/>
         <source>Saint Kitts and Nevis</source>
-        <translation type="unfinished">Сент-Кітс і Невіс</translation>
+        <translation>Сент-Кітс і Невіс</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="129"/>
         <source>North Korea</source>
-        <translation type="unfinished">Північна Корея</translation>
+        <translation>Північна Корея</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="130"/>
         <source>South Korea</source>
-        <translation type="unfinished">Південна Корея</translation>
+        <translation>Південна Корея</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="131"/>
         <source>Kuwait</source>
-        <translation type="unfinished">Кувейт</translation>
+        <translation>Кувейт</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="132"/>
         <source>Cayman Islands</source>
-        <translation type="unfinished">Кайманові острови</translation>
+        <translation>Кайманові острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="133"/>
         <source>Kazakhstan</source>
-        <translation type="unfinished">Казахстан</translation>
+        <translation>Казахстан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="134"/>
         <source>Laos</source>
-        <translation type="unfinished">Лаос</translation>
+        <translation>Лаос</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="135"/>
         <source>Lebanon</source>
-        <translation type="unfinished">Ліван</translation>
+        <translation>Ліван</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="136"/>
         <source>Saint Lucia</source>
-        <translation type="unfinished">Сент-Люсія</translation>
+        <translation>Сент-Люсія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="137"/>
         <source>Liechtenstein</source>
-        <translation type="unfinished">Ліхтенштейн</translation>
+        <translation>Ліхтенштейн</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="138"/>
         <source>Sri Lanka</source>
-        <translation type="unfinished">Шрі-Ланка</translation>
+        <translation>Шрі-Ланка</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="139"/>
         <source>Liberia</source>
-        <translation type="unfinished">Ліберія</translation>
+        <translation>Ліберія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="140"/>
         <source>Lesotho</source>
-        <translation type="unfinished">Лесото</translation>
+        <translation>Лесото</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="141"/>
         <source>Lithuania</source>
-        <translation type="unfinished">Литва</translation>
+        <translation>Литва</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="142"/>
         <source>Luxembourg</source>
-        <translation type="unfinished">Люксембург</translation>
+        <translation>Люксембург</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="143"/>
         <source>Latvia</source>
-        <translation type="unfinished">Латвія</translation>
+        <translation>Латвія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="144"/>
         <source>Libya</source>
-        <translation type="unfinished">Лівія</translation>
+        <translation>Лівія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="145"/>
         <source>Morocco</source>
-        <translation type="unfinished">Марокко</translation>
+        <translation>Марокко</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="146"/>
         <source>Monaco</source>
-        <translation type="unfinished">Монако</translation>
+        <translation>Монако</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="147"/>
         <source>Moldova</source>
-        <translation type="unfinished">Молдова</translation>
+        <translation>Молдова</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="148"/>
         <source>Montenegro</source>
-        <translation type="unfinished">Чорногорія</translation>
+        <translation>Чорногорія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="149"/>
         <source>Saint Martin</source>
-        <translation type="unfinished">Сен-Мартен</translation>
+        <translation>Сінт-Мартен</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="150"/>
         <source>Madagascar</source>
-        <translation type="unfinished">Мадагаскар</translation>
+        <translation>Мадагаскар</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="151"/>
         <source>Marshall Islands</source>
-        <translation type="unfinished">Маршаллові острови</translation>
+        <translation>Маршаллові Острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="152"/>
         <source>Macedonia</source>
-        <translation type="unfinished">Македонія</translation>
+        <translation>Північна Македонія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="153"/>
         <source>Mali</source>
-        <translation type="unfinished">Малі</translation>
+        <translation>Малі</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="154"/>
         <source>Myanmar</source>
-        <translation type="unfinished">М&apos;янма</translation>
+        <translation>Мʼянма (Бірма)</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="155"/>
         <source>Mongolia</source>
-        <translation type="unfinished">Монголія</translation>
+        <translation>Монголія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="156"/>
         <source>Macao</source>
-        <translation type="unfinished">Макао</translation>
+        <translation>Макао О.А.Р. Китаю</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="157"/>
         <source>Northern Mariana Islands</source>
-        <translation type="unfinished">Північні Маріанські острови</translation>
+        <translation>Північні Маріанські острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="158"/>
         <source>Martinique</source>
-        <translation type="unfinished">Мартиніка</translation>
+        <translation>Мартиніка</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="159"/>
         <source>Mauritania</source>
-        <translation type="unfinished">Мавританія</translation>
+        <translation>Мавританія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="160"/>
         <source>Montserrat</source>
-        <translation type="unfinished">Монтсеррат</translation>
+        <translation>Монтсеррат</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="161"/>
         <source>Malta</source>
-        <translation type="unfinished">Мальта</translation>
+        <translation>Мальта</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="162"/>
         <source>Mauritius</source>
-        <translation type="unfinished">Маврикій</translation>
+        <translation>Маврикій</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="163"/>
         <source>Maldives</source>
-        <translation type="unfinished">Мальдіви</translation>
+        <translation>Мальдіви</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="164"/>
         <source>Malawi</source>
-        <translation type="unfinished">Малаві</translation>
+        <translation>Малаві</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="165"/>
         <source>Mexico</source>
-        <translation type="unfinished">Мексика</translation>
+        <translation>Мексика</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="166"/>
         <source>Malaysia</source>
-        <translation type="unfinished">Малайзія</translation>
+        <translation>Малайзія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="167"/>
         <source>Mozambique</source>
-        <translation type="unfinished">Мозамбік</translation>
+        <translation>Мозамбік</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="168"/>
         <source>Namibia</source>
-        <translation type="unfinished">Намібія</translation>
+        <translation>Намібія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="169"/>
         <source>New Caledonia</source>
-        <translation type="unfinished">Нова Каледонія</translation>
+        <translation>Нова Каледонія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="170"/>
         <source>Niger</source>
-        <translation type="unfinished">Нігер</translation>
+        <translation>Нігер</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="171"/>
         <source>Norfolk Island</source>
-        <translation type="unfinished">Острів Норфолк</translation>
+        <translation>Острів Норфолк</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="172"/>
         <source>Nigeria</source>
-        <translation type="unfinished">Нігерія</translation>
+        <translation>Нігерія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="173"/>
         <source>Nicaragua</source>
-        <translation type="unfinished">Нікарагуа</translation>
+        <translation>Нікарагуа</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="174"/>
         <source>Netherlands</source>
-        <translation type="unfinished">Нідерланди</translation>
+        <translation>Нідерланди</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="175"/>
         <source>Norway</source>
-        <translation type="unfinished">Норвегія</translation>
+        <translation>Норвегія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="176"/>
         <source>Nepal</source>
-        <translation type="unfinished">Непал</translation>
+        <translation>Непал</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="177"/>
         <source>Nauru</source>
-        <translation type="unfinished">Науру</translation>
+        <translation>Науру</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="178"/>
         <source>Niue</source>
-        <translation type="unfinished">Ніуе</translation>
+        <translation>Ніуе</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="179"/>
         <source>New Zealand</source>
-        <translation type="unfinished">Нова Зеландія</translation>
+        <translation>Нова Зеландія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="180"/>
         <source>Oman</source>
-        <translation type="unfinished">Оман</translation>
+        <translation>Оман</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="181"/>
         <source>Panama</source>
-        <translation type="unfinished">Панама</translation>
+        <translation>Панама</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="182"/>
         <source>Peru</source>
-        <translation type="unfinished">Перу</translation>
+        <translation>Перу</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="183"/>
         <source>French Polynesia</source>
-        <translation type="unfinished">Французька Полінезія</translation>
+        <translation>Французька Полінезія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="184"/>
         <source>Papua New Guinea</source>
-        <translation type="unfinished">Папуа Нова Гвінея</translation>
+        <translation>Папуа Нова Гвінея</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="185"/>
         <source>Philippines</source>
-        <translation type="unfinished">Філіппіни</translation>
+        <translation>Філіппіни</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="186"/>
         <source>Pakistan</source>
-        <translation type="unfinished">Пакистан</translation>
+        <translation>Пакистан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="187"/>
         <source>Poland</source>
-        <translation type="unfinished">Польща</translation>
+        <translation>Польща</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="188"/>
         <source>Saint Pierre and Miquelon</source>
-        <translation type="unfinished">Сен-П&apos;єр і Мікелон</translation>
+        <translation>Сен-Пʼєр і Мікелон</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="189"/>
         <source>Pitcairn</source>
-        <translation type="unfinished">Піткерн</translation>
+        <translation>Острови Піткерн</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="190"/>
         <source>Puerto Rico</source>
-        <translation type="unfinished">Пуерто-Рико</translation>
+        <translation>Пуерто-Рико</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="191"/>
         <source>Palestinian Territory</source>
-        <translation type="unfinished">Палестинська територія</translation>
+        <translation>Палестинські території</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="192"/>
         <source>Portugal</source>
-        <translation type="unfinished">Португалія</translation>
+        <translation>Португалія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="193"/>
         <source>Palau</source>
-        <translation type="unfinished">Палау</translation>
+        <translation>Палау</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="194"/>
         <source>Paraguay</source>
-        <translation type="unfinished">Парагвай</translation>
+        <translation>Парагвай</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="195"/>
         <source>Qatar</source>
-        <translation type="unfinished">Катар</translation>
+        <translation>Катар</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="196"/>
         <source>Reunion</source>
-        <translation type="unfinished">Реюньйон</translation>
+        <translation>Реюньйон</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="197"/>
         <source>Romania</source>
-        <translation type="unfinished">Румунія</translation>
+        <translation>Румунія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="198"/>
         <source>Serbia</source>
-        <translation type="unfinished">Сербія</translation>
+        <translation>Сербія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="199"/>
         <source>Russia</source>
-        <translation type="unfinished">Росія</translation>
+        <translation>Росія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="200"/>
         <source>Rwanda</source>
-        <translation type="unfinished">Руанда</translation>
+        <translation>Руанда</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="201"/>
         <source>Saudi Arabia</source>
-        <translation type="unfinished">Саудівська Аравія</translation>
+        <translation>Саудівська Аравія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="202"/>
         <source>Solomon Islands</source>
-        <translation type="unfinished">Соломонові острови</translation>
+        <translation>Соломонові Острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="203"/>
         <source>Seychelles</source>
-        <translation type="unfinished">Сейшельські острови</translation>
+        <translation>Сейшельські острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="204"/>
         <source>Sudan</source>
-        <translation type="unfinished">Судан</translation>
+        <translation>Судан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="205"/>
         <source>Sweden</source>
-        <translation type="unfinished">Швеція</translation>
+        <translation>Швеція</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="206"/>
         <source>Singapore</source>
-        <translation type="unfinished">Сингапур</translation>
+        <translation>Сінгапур</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="207"/>
         <source>Saint Helena</source>
-        <translation type="unfinished">Острів Святої Єлени</translation>
+        <translation>Острів Святої Єлени</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="208"/>
         <source>Slovenia</source>
-        <translation type="unfinished">Словенія</translation>
+        <translation>Словенія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="209"/>
         <source>Svalbard and Jan Mayen</source>
-        <translation type="unfinished">Шпіцберген і Ян-Маєн</translation>
+        <translation>Острови Свальбард і Ян-Маєн</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="210"/>
         <source>Slovakia</source>
-        <translation type="unfinished">Словаччина</translation>
+        <translation>Словаччина</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="211"/>
         <source>Sierra Leone</source>
-        <translation type="unfinished">Сьєрра-Леоне</translation>
+        <translation>Сьєрра-Леоне</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="212"/>
         <source>San Marino</source>
-        <translation type="unfinished">Сан-Маріно</translation>
+        <translation>Сан-Марино</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="213"/>
         <source>Senegal</source>
-        <translation type="unfinished">Сенегал</translation>
+        <translation>Сенегал</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="214"/>
         <source>Somalia</source>
-        <translation type="unfinished">Сомалі</translation>
+        <translation>Сомалі</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="215"/>
         <source>Suriname</source>
-        <translation type="unfinished">Суринам</translation>
+        <translation>Суринам</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="216"/>
         <source>South Sudan</source>
-        <translation type="unfinished">Південний Судан</translation>
+        <translation>Південний Судан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="217"/>
         <source>Sao Tome and Principe</source>
-        <translation type="unfinished">Сан-Томе і Принсіпі</translation>
+        <translation>Сан-Томе і Прінсіпі</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="218"/>
         <source>El Salvador</source>
-        <translation type="unfinished">Сальвадор</translation>
+        <translation>Сальвадор</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="219"/>
         <source>Sint Maarten</source>
-        <translation type="unfinished">Сінт-Мартен</translation>
+        <translation>Сінт-Мартен</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="220"/>
         <source>Syria</source>
-        <translation type="unfinished">Сирія</translation>
+        <translation>Сирія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="221"/>
         <source>Swaziland</source>
-        <translation type="unfinished">Свазіленд</translation>
+        <translation>Свазіленд</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="222"/>
         <source>Turks and Caicos Islands</source>
-        <translation type="unfinished">Острови Теркс і Кайкос</translation>
+        <translation>Острови Теркс і Кайкос</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="223"/>
         <source>Chad</source>
-        <translation type="unfinished">Чад</translation>
+        <translation>Чад</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="224"/>
         <source>Togo</source>
-        <translation type="unfinished">Того</translation>
+        <translation>Того</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="225"/>
         <source>Thailand</source>
-        <translation type="unfinished">Таїланд</translation>
+        <translation>Таїланд</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="226"/>
         <source>Tajikistan</source>
-        <translation type="unfinished">Таджикистан</translation>
+        <translation>Таджикистан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="227"/>
         <source>Tokelau</source>
-        <translation type="unfinished">Токелау</translation>
+        <translation>Токелау</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="228"/>
         <source>East Timor</source>
-        <translation type="unfinished">Східний Тимор</translation>
+        <translation>Східний Тимор</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="229"/>
         <source>Turkmenistan</source>
-        <translation type="unfinished">Туркменістан</translation>
+        <translation>Туркменістан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="230"/>
         <source>Tunisia</source>
-        <translation type="unfinished">Туніс</translation>
+        <translation>Туніс</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="231"/>
         <source>Tonga</source>
-        <translation type="unfinished">Тонга</translation>
+        <translation>Тонга</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="232"/>
         <source>Turkey</source>
-        <translation type="unfinished">Туреччина</translation>
+        <translation>Туреччина</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="233"/>
         <source>Trinidad and Tobago</source>
-        <translation type="unfinished">Тринідад і Тобаго</translation>
+        <translation>Тринідад і Тобаго</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="234"/>
         <source>Tuvalu</source>
-        <translation type="unfinished">Тувалу</translation>
+        <translation>Тувалу</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="235"/>
         <source>Taiwan</source>
-        <translation type="unfinished">Тайвань</translation>
+        <translation>Тайвань</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="236"/>
         <source>Tanzania</source>
-        <translation type="unfinished">Танзанія</translation>
+        <translation>Танзанія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="237"/>
         <source>Ukraine</source>
-        <translation type="unfinished">Україна</translation>
+        <translation>Україна</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="238"/>
         <source>Uganda</source>
-        <translation type="unfinished">Уганда</translation>
+        <translation>Уганда</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="239"/>
         <source>United States Minor Outlying Islands</source>
-        <translation type="unfinished">Зовнішні малі острови США</translation>
+        <translation>Віддалені острови США</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="240"/>
         <source>United States</source>
-        <translation type="unfinished">Сполучені Штати</translation>
+        <translation>США</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="241"/>
         <source>Uruguay</source>
-        <translation type="unfinished">Уругвай</translation>
+        <translation>Уругвай</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="242"/>
         <source>Uzbekistan</source>
-        <translation type="unfinished">Узбекистан</translation>
+        <translation>Узбекистан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="243"/>
         <source>Vatican</source>
-        <translation type="unfinished">Ватикан</translation>
+        <translation>Ватикан</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="244"/>
         <source>Saint Vincent and the Grenadines</source>
-        <translation type="unfinished">Сент-Вінсент і Гренадини</translation>
+        <translation>Сент-Вінсент і Гренадини</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="245"/>
         <source>Venezuela</source>
-        <translation type="unfinished">Венесуела</translation>
+        <translation>Венесуела</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="246"/>
         <source>British Virgin Islands</source>
-        <translation type="unfinished">Британські Віргінські острови</translation>
+        <translation>Британські Віргінські острови</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="247"/>
         <source>U.S. Virgin Islands</source>
-        <translation type="unfinished">Американські Віргінські острови</translation>
+        <translation>Віргінські острови, США</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="248"/>
         <source>Vietnam</source>
-        <translation type="unfinished">В&apos;єтнам</translation>
+        <translation>Вʼєтнам</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="249"/>
         <source>Vanuatu</source>
-        <translation type="unfinished">Вануату</translation>
+        <translation>Вануату</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="250"/>
         <source>Wallis and Futuna</source>
-        <translation type="unfinished">Волліс і Футуна</translation>
+        <translation>Волліс і Футуна</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="251"/>
         <source>Samoa</source>
-        <translation type="unfinished">Самоа</translation>
+        <translation>Самоа</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="252"/>
         <source>Yemen</source>
-        <translation type="unfinished">Ємен</translation>
+        <translation>Ємен</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="253"/>
         <source>Mayotte</source>
-        <translation type="unfinished">Майотта</translation>
+        <translation>Майотта</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="254"/>
         <source>South Africa</source>
-        <translation type="unfinished">Південна Африка</translation>
+        <translation>ПАР</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="255"/>
         <source>Zambia</source>
-        <translation type="unfinished">Замбія</translation>
+        <translation>Замбія</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="256"/>
         <source>Zimbabwe</source>
-        <translation type="unfinished">Зімбабве</translation>
+        <translation>Зімбабве</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/StateManager.cpp" line="165"/>
@@ -5032,59 +5068,59 @@
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="15"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="39"/>
         <source>redirected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">перенаправлено</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="17"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="41"/>
         <source>not answered</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">без відповіді</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="19"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="43"/>
         <source>busy</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">зайнято</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="21"/>
         <source>away</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">відійшов</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="23"/>
         <source>forwarded</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">переадресовано</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="25"/>
         <source>time base redirection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">переадресація за часом</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="27"/>
         <source>do not disturb</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">не турбувати</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="29"/>
         <source>rejected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">відхилено</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="45"/>
         <source>aborted</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">перервано</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="47"/>
         <source>not reachable</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">недоступний</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="49"/>
         <source>Code %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Код %1</translation>
     </message>
 </context>
 <context>
@@ -5261,7 +5297,7 @@
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="209"/>
         <source>Via: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Через: %1</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallManager.cpp" line="224"/>
@@ -5676,7 +5712,7 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="833"/>
         <source>managed by device</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">керується пристроєм</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="846"/>
@@ -5706,17 +5742,17 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1105"/>
         <source>Adjust pause between ring tones [s]</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Налаштувати паузу між мелодіями дзвінка [с]</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1137"/>
         <source>Notification tone</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Звук сповіщення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1158"/>
         <source>Notification tone volume</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Гучність звуку сповіщення</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1248"/>
@@ -5748,27 +5784,27 @@
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="865"/>
         <source>Audio input device</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пристрій введення звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="878"/>
         <source>Currently selected audio input device</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибраний пристрій введення звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="929"/>
         <source>Audio output device</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пристрій виведення звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="942"/>
         <source>Currently selected audio output device</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вибраний пристрій виведення звуку</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="993"/>
         <source>Audio output device for ring tone</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Пристрій виведення звуку для мелодії дзвінка</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="1078"/>
@@ -6066,7 +6102,7 @@
         <location filename="../src/ui/SystemTrayMenu.cpp" line="109"/>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="206"/>
         <source>Open...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Відкрити...</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="149"/>
@@ -6195,7 +6231,7 @@
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="14"/>
         <source>PB</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">PB</translation>
     </message>
 </context>
 <context>
@@ -6267,7 +6303,7 @@
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="79"/>
         <source>?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="105"/>
@@ -6349,7 +6385,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/ViewHelper.cpp" line="304"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="308"/>
         <source>QT_CULTURAL_SPHERE</source>
         <comment>QGuiApplication</comment>
         <translation></translation>
@@ -6365,7 +6401,7 @@
     <message>
         <location filename="../src/ui/components/controls/VoiceMailField.qml" line="71"/>
         <source>New voice mail</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Нове голосове повідомлення</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/controls/VoiceMailField.qml" line="73"/>
@@ -6391,7 +6427,7 @@
     <message>
         <location filename="../src/ui/components/controls/VolumeSlider.qml" line="34"/>
         <source>Adjust volume</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Налаштувати гучність</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/VolumeSlider.qml" line="52"/>
@@ -6402,7 +6438,7 @@
     <message>
         <location filename="../src/ui/components/controls/VolumeSlider.qml" line="53"/>
         <source>Off</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вимк.</translation>
     </message>
 </context>
 <context>
@@ -6485,12 +6521,12 @@
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="101"/>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Події</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="102"/>
         <source>List of upcoming calendar events</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Список майбутніх подій календаря</translation>
     </message>
     <message>
         <location filename="../src/ui/WidgetSelectionWindow.qml" line="202"/>
@@ -6581,32 +6617,32 @@
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="30"/>
         <source>Jitsi Meet (room &apos;%1&apos;)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Jitsi Meet (кімната &apos;%1&apos;)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="33"/>
         <source>Chat with %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Чат з %1</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="38"/>
         <source>Phone (Commercial, %1)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Телефон (Робочий, %1)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="41"/>
         <source>Phone (Mobile, %1)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Телефон (Мобільний, %1)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="44"/>
         <source>Phone (Home, %1)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Телефон (Домашній, %1)</translation>
     </message>
     <message>
         <location filename="../src/ui/scripts/phoneNumberUtil.js" line="47"/>
         <source>Phone (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Телефон (%1)</translation>
     </message>
 </context>
 </TS>

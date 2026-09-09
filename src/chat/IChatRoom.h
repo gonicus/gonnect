@@ -46,6 +46,8 @@ class IChatRoom : public QObject
     Q_PROPERTY(QList<ChatUser *> chatUsers READ chatUsers NOTIFY chatUsersChanged FINAL)
     Q_PROPERTY(QList<ChatUser *> typingUsers READ typingUsers NOTIFY typingUsersChanged FINAL)
     Q_PROPERTY(qsizetype chatUserCount READ chatUserCount NOTIFY chatUsersChanged FINAL)
+    Q_PROPERTY(qsizetype joinedChatUserCount READ joinedChatUserCount NOTIFY
+                       joinedChatUserCountChanged FINAL)
     Q_PROPERTY(qsizetype notificationCount READ notificationCount NOTIFY notificationCountChanged
                        FINAL)
 
@@ -156,6 +158,9 @@ public:
     /// chatUserRemoved() signals.
     virtual qsizetype chatUserCount() const = 0;
 
+    /// The number of current users of this room that have the state Joined.
+    virtual qsizetype joinedChatUserCount() const = 0;
+
     /// Add the user object to the room with the given state. This does not invoke any change
     /// on the backend; it just informs about this exisiting user to be a member of the room.
     /// If the user has not been a member before, the according signal chatUserAdded
@@ -196,6 +201,14 @@ public:
     /// (primarily) or id (secondarily). The list or its content must not be modified.
     virtual const QList<ChatUser *> &typingUsers() const = 0;
 
+    /// Set multiple read markers at once (userId to the timestamp up to which messages have been
+    /// read). Implementations must emit readMarkersChanged() exactly once, if anything has changed.
+    virtual void setReadTimestamp(const QHash<QString, QDateTime> &reads) = 0;
+
+    /// The timestamp up to which the user with the given id has read messages or an invalid
+    /// QDateTime if unknown.
+    virtual QDateTime lastReadTimestamp(const QString &userId) const = 0;
+
     /// Remove all messages. Must invoke chatMessagesReset() afterwards.
     virtual void clear() = 0;
 
@@ -223,6 +236,8 @@ Q_SIGNALS:
     void latestMessageDateTimeChanged();
     void ownUserJoinStateChanged();
     void otherUserChanged();
+    void joinedChatUserCountChanged();
+    void readMarkersChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.
@@ -235,6 +250,10 @@ Q_SIGNALS:
     /// chatMessages() before the message has been removed. The ChatMessage object is deleted
     /// right after sending the message.
     void chatMessageRemoved(qsizetype index, ChatMessage *chatMessage);
+
+    /// Send when a message has moved inside the chatMessages() list (i.e. when its timestamp has
+    /// changed).
+    void chatMessageMoved(qsizetype oldIndex, qsizetype newIndex, ChatMessage *chatMessage);
 
     void chatMessageContentChanged(qsizetype index, ChatMessage *chatMessage);
     void chatMessageFlagsChanged(qsizetype index, ChatMessage *chatMessage,

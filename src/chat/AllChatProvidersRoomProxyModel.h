@@ -10,4 +10,7 @@ class AllChatProvidersRoomProxyModel : public QConcatenateTablesProxyModel
 
 public:
     explicit AllChatProvidersRoomProxyModel(QObject *parent = nullptr);
+
+private:
+    void populate();
 };

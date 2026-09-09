@@ -327,18 +327,22 @@ Contact *AddressBook::lookupBySipUrl(const QString &sipUrl) const
 Contact *AddressBook::lookupByNumber(const QString &number) const
 {
     Contact *result = nullptr;
+    unsigned bestPrio = 0;
 
     for (auto contact : std::as_const(m_contacts)) {
         const auto &numbers = contact->phoneNumbers();
         for (const auto &phoneNumber : numbers) {
             if (phoneNumber.number == number) {
-                if (result) {
-                    // Already have a match (ambigous number) -> return no result to prevent the
-                    // wrong contact taken as result
-                    return nullptr;
-                } else {
+                const unsigned currPrio = contact->contactSourceInfo().prio;
+                if (!result || currPrio > bestPrio
+                    || (currPrio == bestPrio
+                        && contact->contactSourceInfo().displayName.localeAwareCompare(
+                                   result->contactSourceInfo().displayName)
+                                < 0)) {
                     result = contact;
+                    bestPrio = currPrio;
                 }
+                break;
             }
         }
     }

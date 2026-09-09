@@ -30,12 +30,14 @@ Item {
     required property string affectedUserId
     required property var reactions
     required property QtObject content
+    required property var readUsers
 
     required property int flags
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
     required property bool isSameDayAsPrevious
+    required property bool isLatestOwnMessage
 
     required property bool hasRelatedMessage
     required property string relatedMessageNickName
@@ -50,6 +52,7 @@ Item {
     readonly property bool isThreadRoot: !!(control.flags & ChatMessage.Flag.ThreadRoot)
 
     property IChatProvider chatProvider
+    property IChatRoom chatRoom
 
     property string clickedLink
     property bool isThreadMode
@@ -336,7 +339,11 @@ Item {
         anchors {
             top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
             left: nameLabel.left
-            right: retryButton.visible ? retryButton.left : timestampLabel.left
+            right: retryButton.visible
+                   ? retryButton.left
+                   : (readMarker.visible
+                      ? readMarker.left
+                      : timestampLabel.left)
             rightMargin: 10
         }
     }
@@ -349,7 +356,7 @@ Item {
         acceptedButtons: Qt.RightButton
         onTapped: (eventPoint) => {
             eventPoint.accepted = true
-            const p = eventPoint.pressPosition
+            const p = eventPoint.position
             const item = control.childAt(p.x, p.y)
             if (item === messageContentItem) {
                 const q = messageContentItem.messageLabel.mapFromItem(control, p)
@@ -358,8 +365,7 @@ Item {
                 control.clickedLink = ""
             }
 
-            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
-            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
+            chatRoomMenuComponent.createObject(control).popup()
         }
     }
 
@@ -380,7 +386,7 @@ Item {
         rightPadding: 0
 
         anchors {
-            right: timestampLabel.left
+            right: readMarker.visible ? readMarker.left : timestampLabel.left
             rightMargin: 10
             bottom: messageContentItem.bottom
         }
@@ -390,6 +396,22 @@ Item {
                            control.retryMessage(control.eventId)
                        }
                    }
+    }
+
+    ReadMarker {
+        id: readMarker
+        readUsers: control.readUsers
+        allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
+        visible: control.isOwnMessage
+                 && !control.isPending
+                 && !control.isFailed
+                 && (control.isLatestOwnMessage
+                     || ((control.readUsers?.length ?? 0) > 0))
+        anchors {
+            right: timestampLabel.left
+            rightMargin: 10
+            verticalCenter: timestampLabel.verticalCenter
+        }
     }
 
     Component {

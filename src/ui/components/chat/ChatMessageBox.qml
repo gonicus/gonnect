@@ -305,6 +305,7 @@ Item {
 
     Label {
         text: qsTr("Enter message...")
+        enabled: false
         color: Theme.secondaryInactiveTextColor
         visible: messageField.text === ""
         anchors {
@@ -318,7 +319,7 @@ Item {
         clip: true
         padding: 0
         contentWidth: messageFieldScrollView.availableWidth
-        contentHeight: messageField.contentHeight
+        contentHeight: messageField.height
         anchors {
             top: editBanner.bottom
             left: parent.left
@@ -333,7 +334,7 @@ Item {
             font.pixelSize: 14
             wrapMode: TextEdit.Wrap
             width: messageFieldScrollView.availableWidth
-            height: messageField.contentHeight
+            height: Math.max(messageField.contentHeight, messageFieldScrollView.availableHeight)
 
             onCursorRectangleChanged: internal.ensureCursorVisible()
 
@@ -571,21 +572,72 @@ Item {
 
                 return [start, end]
             }
+
+            function toggleQuote() {
+                const mf = messageField
+                const fullText = mf.text
+                let start = mf.selectionStart
+                let end = mf.selectionEnd
+                const hasSelection = (start !== end)
+
+                let targetStart = fullText.lastIndexOf('\n', start - 1) + 1
+                let effectiveEnd = hasSelection ? Math.max(end - 1, 0) : end
+                let targetEnd = fullText.indexOf('\n', effectiveEnd)
+                if (targetEnd === -1) {
+                    targetEnd = fullText.length
+                }
+
+                const textToProcess = fullText.substring(targetStart, targetEnd)
+                const lines = textToProcess.split('\n')
+                const quoteRegex = /^(\s*> ?)/
+
+                const isFullyQuoted = lines.every(line => line.trim() === "" || quoteRegex.test(line))
+
+                const transformedLines = lines.map(line => {
+                    if (isFullyQuoted) {
+                        return line.replace(/^(\s*)> ?/, "$1")
+                    } else {
+                        return line.trim() === "" ? ">" : "> " + line
+                    }
+                })
+
+                const resultText = transformedLines.join('\n')
+
+                mf.remove(targetStart, targetEnd)
+                mf.insert(targetStart, resultText)
+
+                if (hasSelection) {
+                    mf.select(targetStart, targetStart + resultText.length)
+                } else {
+                    mf.cursorPosition = targetStart + resultText.length
+                }
+            }
         }
+    }
 
-        MouseArea {
-            anchors.fill: messageField
-            acceptedButtons: Qt.NoButton
+    MouseArea {
+        id: messageBoxClickForwarder
+        anchors.fill: messageFieldScrollView
+        propagateComposedEvents: true
+        onPressed: mouse => {
 
-            onWheel: (wheel) => {
-                         const flickable = messageFieldScrollView.contentItem
-                         const maxY = Math.max(0, flickable.contentHeight - messageFieldScrollView.height)
-                         if (maxY > 0) {
-                             flickable.contentY = Util.clamp(flickable.contentY - (wheel.pixelDelta.y || wheel.angleDelta.y), 0, maxY)
-                             wheel.accepted = true
-                         }
+                       // Focus messageField when clicked anywhere in the box
+                       const pos = messageField.mapFromItem(messageBoxClickForwarder, mouse.x, mouse.y)
+                       messageField.forceActiveFocus()
+                       if (pos.y > messageField.contentHeight) {
+                           control.positionCursorAtEnd()
+                       }
+                       mouse.accepted = false
+                   }
+
+        onWheel: wheel => {
+                     const flickable = messageFieldScrollView.contentItem
+                     const maxY = Math.max(0, flickable.contentHeight - messageFieldScrollView.height)
+                     if (maxY > 0) {
+                         flickable.contentY = Util.clamp(flickable.contentY - (wheel.pixelDelta.y || wheel.angleDelta.y), 0, maxY)
+                         wheel.accepted = true
                      }
-        }
+                 }
     }
 
     BottomButtonBar {
@@ -596,7 +648,7 @@ Item {
             bottom: parent.bottom
         }
 
-        readonly property bool groupedFormatOptions: buttonBar.width < 370
+        readonly property bool groupedFormatOptions: buttonBar.width < 500
 
 
         BottomButtonBarButton {
@@ -661,10 +713,24 @@ Item {
         }
         BottomButtonBarButton {
             id: codeBlockButton
-            icon: Icons.addSubtitle
-            toolTipText: qsTr("Block preformatted/code")
+            icon: Icons.codeBlock
+            toolTipText: qsTr("Code block")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
-            onClicked: () => messageField.insertOrRemove("\n> ", "")
+            onClicked: () => messageField.insertOrRemove("```\n", "\n```")
+        }
+        BottomButtonBarButton {
+            id: preButton
+            icon: Icons.formatTextDirectionLtr
+            toolTipText: qsTr("Preformatted")
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
+            onClicked: () => messageField.insertOrRemove("<pre>", "</pre>")
+        }
+        BottomButtonBarButton {
+            id: quoteButton
+            icon: Icons.formatTextBlockquote
+            toolTipText: qsTr("Quote")
+            visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
+            onClicked: () => messageField.toggleQuote()
         }
 
         BottomButtonBarButton {
@@ -762,8 +828,18 @@ Item {
             }
             MenuItem {
                 text: qsTr("Code block")
-                icon.source: Icons.overflowMenu
-                onTriggered: () => messageField.insertOrRemove("\n> ", "")
+                icon.source: Icons.codeBlock
+                onTriggered: () => messageField.insertOrRemove("```\n", "\n```")
+            }
+            MenuItem {
+                text: qsTr("Preformatted")
+                icon.source: Icons.formatTextDirectionLtr
+                onTriggered: () => messageField.insertOrRemove("<pre>", "</pre>")
+            }
+            MenuItem {
+                text: qsTr("Quote")
+                icon.source: Icons.formatTextBlockquote
+                onTriggered: () => messageField.toggleQuote()
             }
         }
     }

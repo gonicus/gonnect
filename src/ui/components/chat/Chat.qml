@@ -15,18 +15,6 @@ Item {
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     readonly property alias isThreadMode: chatMessageList.isThreadMode
 
-    readonly property Contact soleOtherContact: control.chatRoom && control.chatRoom.isDirectChat
-                                                ? ContactHelper.lookupByChatUser(control.chatRoom.otherUser)
-                                                : null
-
-    readonly property real headerRightLimitX: titleLoadingIndicatorRow.visible
-            ? titleLoadingIndicatorRow.x
-            : (favCardHeadingButton.visible
-               ? favCardHeadingButton.x
-               : (messageListCardHeadingButton.visible
-                  ? messageListCardHeadingButton.x
-                  : parent.width))
-
     function giveFocus() {
         chatMessageBox.giveFocus()
     }
@@ -45,7 +33,10 @@ Item {
         }
     }
 
-    onChatRoomChanged: () => control.loadMessages(chatMessageList.threadId)
+    onChatRoomChanged: () => {
+                           relatedMsg.chatMessage = null
+                           control.loadMessages(chatMessageList.threadId)
+                       }
 
     Connections {
         target: control.chatRoom
@@ -55,23 +46,7 @@ Item {
         }
     }
 
-    AvatarImage {
-        id: avatarImage
-        visible: control.showTitleBar && !!control.chatRoom
-        size: 30
-        source: control.chatRoom?.avatarPath ?? ""
-        initials: control.chatRoom ? ViewHelper.initials(control.chatRoom.name) : ""
-        showPresenceStatus: !!(control.chatRoom?.hasPresenceState)
-        presenceStatus: control.chatRoom?.presenceState ?? ChatUser.PresenceState.Unknown
-        indicatorComponent: Component { ChatUserPresenceStatusIndicator {} }
-        anchors {
-            left: parent.left
-            leftMargin: 10
-            verticalCenter: messageListCardHeading.verticalCenter
-        }
-    }
-
-    CardHeading {
+    ChatButtonBar {
         id: messageListCardHeading
         visible: titleLoadingIndicatorRow.visible || (control.showTitleBar && !!control.chatRoom)
         leftPadding: avatarImage.x + avatarImage.width - 10
@@ -85,8 +60,12 @@ Item {
                     ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
                     : qsTr("Chat room %1").arg(control.chatRoom.name)))
               : ""
+
+        height: messageListCardHeading.implicitHeight
+        shallBeVisible: control.showTitleBar && !!control.chatRoom
+        chatProvider: control.chatProvider
+        chatRoom: control.chatRoom
         anchors {
-            top: parent.top
             left: parent.left
             right: parent.right
         }
@@ -231,16 +210,7 @@ Item {
         visible: control.showTitleBar && messageListCardHeading.visible && !chatMessageList.isThreadMode
         anchors {
             top: parent.top
-            right: parent.right
         }
-
-        onClicked: () => {
-                       chatRoomMenuComponent.createObject(messageListCardHeadingButton, {
-                                                              toggleFavoriteVisible: false,
-                                                              editRoomVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEdit),
-                                                              inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite)
-                                                          }).popup()
-                   }
     }
 
     CardHeadingMoreMenuButton {
@@ -272,6 +242,18 @@ Item {
         }
     }
 
+    Rectangle {
+        id: buttonBarBorder
+        height: 1
+        color: Theme.borderColor
+        visible: messageListCardHeading.visible && !pinnedChatMessageList.visible
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: messageListCardHeading.bottom
+        }
+    }
+
     PinnedChatMessagesList {
         id: pinnedChatMessageList
         chatRoom: control.chatRoom
@@ -296,8 +278,8 @@ Item {
             right: parent.right
             top: pinnedChatMessageList.visible
                  ? pinnedChatMessageList.bottom
-                 : (messageListCardHeading.visible
-                    ? messageListCardHeading.bottom
+                 : (buttonBarBorder.visible
+                    ? buttonBarBorder.bottom
                     : parent.top)
             bottom: typingUsersList.visible
                     ? typingUsersList.top

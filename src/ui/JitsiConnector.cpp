@@ -354,6 +354,10 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
         api.executeCommand("setNoiseSuppressionEnabled", { enabled: value })
     })
 
+    jitsiConn.executeAnswerKnockingParticipant.connect((id, approved) => {
+        api.executeCommand("answerKnockingParticipant", id, approved)
+    })
+
     jitsiConn.executeSetAudioInputDeviceCommand.connect((deviceId) => {
         api.setAudioInputDevice(undefined, deviceId)
     })
@@ -472,6 +476,10 @@ api.addListener("incomingMessage", data => {
 
 api.addListener("passwordRequired", data => {
     jitsiConn.onPasswordRequired()
+})
+
+api.addListener("knockingParticipant", data => {
+    jitsiConn.addKnockingParticipant(data.participant.id, data.participant.name)
 })
 
 )""")
@@ -808,6 +816,10 @@ void JitsiConnector::addUser(const QString &id, const QString &displayName)
         }
     }
 
+    if (m_knockedIds.remove(id)) {
+        Q_EMIT knockAnswered(id);
+    }
+
     auto user = new ConferenceUser(id, displayName, ConferenceUser::Role::User, this);
     m_users.insert(i, user);
     Q_EMIT userAdded(i, user);
@@ -828,6 +840,10 @@ void JitsiConnector::removeUser(const QString &id)
 
             m_users.removeAt(i);
             addRoomMessage(tr("%1 has left the conference").arg(displayName));
+
+            if (m_knockedIds.remove(id)) {
+                Q_EMIT knockAnswered(id);
+            }
 
             Q_EMIT userRemoved(i, user);
             Q_EMIT numberOfUsersChanged();
@@ -924,6 +940,25 @@ void JitsiConnector::setJitsiDevices(const QVariantMap availableDevices)
 
     transferAudioManagerDevicesToJitsi();
     transferVideoManagerDeviceToJitsi();
+}
+
+void JitsiConnector::addKnockingParticipant(QString id, QString name)
+{
+    if (ownRole() != ConferenceUser::Role::Moderator) {
+        return;
+    }
+
+    if (!m_knockedIds.contains(id)) {
+        m_knockedIds.insert(id);
+        Q_EMIT participantKnocked(id, name);
+    }
+}
+
+void JitsiConnector::answerKnockingParticipant(const QString &id, bool approved)
+{
+    if (m_knockedIds.remove(id)) {
+        Q_EMIT executeAnswerKnockingParticipant(id, approved);
+    }
 }
 
 SIPAudioDevice *JitsiConnector::jitsiToSipDevice(const JitsiMediaDevice *jitsiDevice) const

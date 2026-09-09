@@ -75,6 +75,7 @@ public:
     virtual IChatRoom::UserRoomState ownUserJoinState() const override;
     virtual ChatUser *otherUser() const override;
     virtual qsizetype chatUserCount() const override { return m_chatUsers.length(); }
+    virtual qsizetype joinedChatUserCount() const override;
     virtual void addUser(ChatUser *user, UserRoomState state) override;
     virtual void removeUser(ChatUser *user) override;
     virtual void setUserRoomState(ChatUser *user, UserRoomState state) override;
@@ -85,9 +86,12 @@ public:
     virtual const QList<ChatUser *> &chatUsers() const override;
     virtual UserRoomState chatUserRoomState(ChatUser *user) const override;
     virtual const QList<ChatUser *> &typingUsers() const override;
+    virtual void setReadTimestamp(const QHash<QString, QDateTime> &reads) override;
+    virtual QDateTime lastReadTimestamp(const QString &userId) const override;
     virtual void clear() override;
 
     void setTypingUsers(const QList<ChatUser *> &users);
+    void resortMessage(ChatMessage *message);
 
 private Q_SLOTS:
     void updateIsDirectChat();
@@ -97,6 +101,7 @@ private Q_SLOTS:
 private:
     IpcDispatcher *ipcDispatcher() const;
     void updatePinnedMessages();
+    void emitJoinedCountIfNeeded(qsizetype previousJoinedCount);
 
     void registerThreadChild(const QString &childEventId, const QString &threadId);
     void unregisterThreadChild(const QString &childEventId, const QString &threadId);
@@ -127,4 +132,7 @@ private:
     QList<QString> m_pinnedMessageIds;
     QSet<QString> m_loadRequestedMessageIds;
     QHash<QString, QSet<QString>> m_threadChildren;
+
+    /// Map of userId to the timestamp up to which messages have been read by this user.
+    QHash<QString, QDateTime> m_readMarkers;
 };

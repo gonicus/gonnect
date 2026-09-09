@@ -5,6 +5,8 @@
 #include "ChatMessageContentText.h"
 #include "AddressBook.h"
 
+#include <algorithm>
+
 #include <QFileInfo>
 #include <QLoggingCategory>
 
@@ -279,6 +281,9 @@ void IpcChatRoom::setPinnedMessageIds(const QStringList &messageIds)
 void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString &newEventId)
 {
     if (auto msg = m_mainMessageContainer.updateMessageEventId(oldEventId, newEventId)) {
+        msg->setEventId(newEventId);
+        m_messageLookup.insert(newEventId, msg);
+
         Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
 
         const auto value = m_threadChildren.take(oldEventId);
@@ -399,6 +404,13 @@ void IpcChatRoom::loadMessages(const QString &threadId)
     }
 }
 
+void IpcChatRoom::emitJoinedCountIfNeeded(qsizetype previousJoinedCount)
+{
+    if (joinedChatUserCount() != previousJoinedCount) {
+        Q_EMIT joinedChatUserCountChanged();
+    }
+}
+
 void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
 {
     if (!user) {
@@ -423,6 +435,8 @@ void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
         idx = std::max(static_cast<qsizetype>(0), m_chatUsers.length());
     }
 
+    const auto previousJoinedCount = joinedChatUserCount();
+
     connect(user, &ChatUser::destroyed, this, [this](QObject *obj) {
         if (auto user = qobject_cast<ChatUser *>(obj)) {
             removeUser(user);
@@ -442,6 +456,9 @@ void IpcChatRoom::addUser(ChatUser *user, UserRoomState state)
     Q_EMIT chatUserAdded(idx, user, state);
     Q_EMIT chatUsersChanged();
     Q_EMIT chatUserRoomStateChanged(idx, user, state);
+
+    emitJoinedCountIfNeeded(previousJoinedCount);
+
     updateOtherUser();
 }
 
@@ -455,14 +472,17 @@ void IpcChatRoom::removeUser(ChatUser *user)
     const auto idx = m_chatUsers.indexOf(user);
 
     if (idx >= 0) {
+        const auto previousJoinedCount = joinedChatUserCount();
         m_chatUsers.removeAt(idx);
         m_chatUserLookup.remove(user->id());
         m_userRoomStates.remove(user);
+        m_readMarkers.remove(user->id());
 
         user->disconnect(this);
 
         Q_EMIT chatUserRemoved(idx, user);
         Q_EMIT chatUsersChanged();
+        emitJoinedCountIfNeeded(previousJoinedCount);
         updateOtherUser();
     } else {
         qCCritical(lcIpcChatRoom) << "The user" << *user << "is supposed to be removed from room"
@@ -483,8 +503,11 @@ void IpcChatRoom::setUserRoomState(ChatUser *user, UserRoomState state)
         return;
     }
 
+    const auto previousJoinedCount = joinedChatUserCount();
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(m_chatUsers.indexOf(user), user, state);
+
+    emitJoinedCountIfNeeded(previousJoinedCount);
 }
 
 void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
@@ -499,8 +522,11 @@ void IpcChatRoom::setUserRoomState(qsizetype index, UserRoomState state)
 
     auto user = q_check_ptr(m_chatUsers.at(index));
 
+    const auto previousJoinedCount = joinedChatUserCount();
     m_userRoomStates.insert(user, state);
     Q_EMIT chatUserRoomStateChanged(index, user, state);
+
+    emitJoinedCountIfNeeded(previousJoinedCount);
 }
 
 ChatUser *IpcChatRoom::chatUserById(const QString &userId) const
@@ -518,6 +544,17 @@ void IpcChatRoom::setTypingUsers(const QList<ChatUser *> &users)
               });
 
     Q_EMIT typingUsersChanged();
+}
+
+qsizetype IpcChatRoom::joinedChatUserCount() const
+{
+    qsizetype count = 0;
+    for (auto *user : m_chatUsers) {
+        if (m_userRoomStates.value(user) == UserRoomState::Joined) {
+            ++count;
+        }
+    }
+    return count;
 }
 
 IChatRoom::UserRoomState IpcChatRoom::chatUserRoomState(ChatUser *user) const
@@ -564,11 +601,35 @@ const QList<ChatUser *> &IpcChatRoom::typingUsers() const
     return m_typingUsers;
 }
 
+void IpcChatRoom::setReadTimestamp(const QHash<QString, QDateTime> &reads)
+{
+    bool hasChanged = false;
+
+    for (const auto &[userId, newTime] : reads.asKeyValueRange()) {
+        const auto oldTime = m_readMarkers.value(userId);
+        if (!oldTime.isValid() || oldTime < newTime) {
+            m_readMarkers.insert(userId, newTime);
+            hasChanged = true;
+        }
+    }
+
+    if (hasChanged) {
+        Q_EMIT readMarkersChanged();
+    }
+}
+
+QDateTime IpcChatRoom::lastReadTimestamp(const QString &userId) const
+{
+    return m_readMarkers.value(userId);
+}
+
 void IpcChatRoom::clear()
 {
     m_threadChildren.clear();
     m_pinnedMessageIds.clear();
     m_loadRequestedMessageIds.clear();
+    m_readMarkers.clear();
+
     if (!m_pinnedMessages.isEmpty()) {
         m_pinnedMessages.clear();
         Q_EMIT pinnedMessagesChanged();
@@ -739,4 +800,23 @@ void IpcChatRoom::recalculateThreadRootFlag(const QString &eventId)
     message->setFlags(newFlags);
 
     Q_EMIT chatMessageFlagsChanged(indexOfMessage(message), message, prevFlags);
+}
+
+void IpcChatRoom::resortMessage(ChatMessage *message)
+{
+    const auto oldIndex = indexOfMessage(message);
+    if (oldIndex < 0) {
+        return;
+    }
+
+    m_messages.removeAt(oldIndex);
+    const auto it =
+            std::ranges::lower_bound(m_messages, message->timestamp(), {}, &ChatMessage::timestamp);
+    const qsizetype newIndex = std::distance(m_messages.begin(), it);
+    m_messages.insert(newIndex, message);
+    updatePinnedMessages();
+
+    if (newIndex != oldIndex) {
+        Q_EMIT chatMessageMoved(oldIndex, newIndex, message);
+    }
 }

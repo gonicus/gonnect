@@ -343,6 +343,7 @@ qt_add_qml_module(gonnect
 
         ui/components/chat/AddReactionButton.qml
         ui/components/chat/Chat.qml
+        ui/components/chat/ChatButtonBar.qml
         ui/components/chat/ChatMessageAttachmentRectangle.qml
         ui/components/chat/ChatMessageBox.qml
         ui/components/chat/ChatMessageList.qml
@@ -361,6 +362,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/MultiText.qml
         ui/components/chat/PinnedChatMessagesList.qml
         ui/components/chat/ReactionButton.qml
+        ui/components/chat/ReadMarker.qml
 
         ui/components/controls/AudioFileSelector.qml
         ui/components/controls/AudioLevelButton.qml
@@ -404,10 +406,12 @@ qt_add_qml_module(gonnect
         ui/components/dialogs/OauthLoginDialog.qml
         # Dynamic UI
         ui/components/BaseWidget.qml
+        ui/components/ActivitiesWidget.qml
         ui/components/DateEventsWidget.qml
         ui/components/FavoritesWidget.qml
         ui/components/HistoryWidget.qml
         ui/components/WebViewWidget.qml
+        ui/components/ChatWidget.qml
         ui/components/AdditionalSettings.qml
 
         ui/components/pages/Call.qml
@@ -434,6 +438,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/InvitedToChatRoom.qml
         ui/components/popups/JitsiHistoryListContextMenu.qml
         ui/components/popups/KnockChatRoom.qml
+        ui/components/popups/KnockedParticipant.qml
         ui/components/popups/LargeImage.qml
         ui/components/popups/LargeVideo.qml
         ui/components/popups/Menu.qml
@@ -475,6 +480,7 @@ qt_add_qml_module(gonnect
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
         ui/components/CustomWindowHeader.qml
+        ui/components/ActivitiesList.qml
         ui/components/DateEventsList.qml
         ui/components/FavoritesList.qml
         ui/components/HistoryList.qml
@@ -834,6 +840,8 @@ qt_add_qml_module(gonnect
         ui/HistoryContactSearchModel.cpp
         ui/HistoryContactSearchProxyModel.h
         ui/HistoryContactSearchProxyModel.cpp
+        ui/ActivitiesModel.h
+        ui/ActivitiesModel.cpp
         ui/HistoryModel.h
         ui/HistoryModel.cpp
         ui/HistoryProxyModel.h

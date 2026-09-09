@@ -74,6 +74,7 @@ Item {
         delegate: ChatMessageListItem {
             id: delg
             chatProvider: control.chatProvider
+            chatRoom: control.chatRoom
             roomPermissions: control.chatRoom?.permissions ?? 0
             isThreadMode: control.isThreadMode
             anchors {

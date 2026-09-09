@@ -311,6 +311,9 @@ private:
 
     bool containsRoomTag(const QString &str) const;
 
+    void processReadMarkers(IpcChatRoom *chatRoom,
+                            const de::gonicus::gonnect::Room::ReadMarkerEntry &entries);
+
     QRegularExpression m_idConvRegex;
     bool m_wasInitializationRequestSuccessful = false;
     bool m_useIdConversion = false;
@@ -319,6 +322,7 @@ private:
     bool m_supportsDirectRooms = false;
     bool m_supportsGroupRooms = false;
     bool m_supportsSubThreads = false;
+    bool m_suportsUserPresence = false;
     bool m_hasFavoriteRooms = false;
     QStringList m_supportedMimeTypes;
     qint64 m_mediaSizeLimit = 0;
