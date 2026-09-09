@@ -32,6 +32,7 @@ public:
     /// Add a message to the container. Does not send the message. Takes ownership of the object.
     void addMessage(ChatMessage *message, bool isUnread, bool isIndependent);
     bool removeMessage(const QString &messageId);
+    bool resortMessage(ChatMessage *message);
     ChatMessage *updateMessageEventId(const QString &oldEventId, const QString &newEventId);
 
 private:
@@ -45,5 +46,6 @@ Q_SIGNALS:
     void chatMessageAdded(qsizetype index, ChatMessage *chatMessage);
     void chatMessageOutOfSequenceReceived(ChatMessage *chatMessage);
     void chatMessageRemoved(qsizetype index, ChatMessage *chatMessage);
+    void chatMessageMoved(qsizetype oldIndex, qsizetype newIndex, ChatMessage *chatMessage);
     void chatMessageContentChanged(qsizetype index, ChatMessage *chatMessage);
 };

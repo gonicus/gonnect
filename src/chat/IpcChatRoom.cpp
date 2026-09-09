@@ -24,6 +24,8 @@ IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, IChatProvider *
             &IpcChatRoom::chatMessageOutOfSequenceReceived);
     connect(&m_mainMessageContainer, &ChatMessageContainer::chatMessageRemoved, this,
             &IpcChatRoom::chatMessageRemoved);
+    connect(&m_mainMessageContainer, &ChatMessageContainer::chatMessageMoved, this,
+            &IpcChatRoom::chatMessageMoved);
     connect(&m_mainMessageContainer, &ChatMessageContainer::chatMessageContentChanged, this,
             &IpcChatRoom::chatMessageContentChanged);
     connect(&m_mainMessageContainer, &ChatMessageContainer::unreadCountChanged, this,
@@ -281,9 +283,6 @@ void IpcChatRoom::setPinnedMessageIds(const QStringList &messageIds)
 void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString &newEventId)
 {
     if (auto msg = m_mainMessageContainer.updateMessageEventId(oldEventId, newEventId)) {
-        msg->setEventId(newEventId);
-        m_messageLookup.insert(newEventId, msg);
-
         Q_EMIT chatMessageEventIdChanged(indexOfMessage(msg), msg);
 
         const auto value = m_threadChildren.take(oldEventId);
@@ -804,19 +803,10 @@ void IpcChatRoom::recalculateThreadRootFlag(const QString &eventId)
 
 void IpcChatRoom::resortMessage(ChatMessage *message)
 {
-    const auto oldIndex = indexOfMessage(message);
-    if (oldIndex < 0) {
+    if (indexOfMessage(message) < 0) {
         return;
     }
 
-    m_messages.removeAt(oldIndex);
-    const auto it =
-            std::ranges::lower_bound(m_messages, message->timestamp(), {}, &ChatMessage::timestamp);
-    const qsizetype newIndex = std::distance(m_messages.begin(), it);
-    m_messages.insert(newIndex, message);
+    m_mainMessageContainer.resortMessage(message);
     updatePinnedMessages();
-
-    if (newIndex != oldIndex) {
-        Q_EMIT chatMessageMoved(oldIndex, newIndex, message);
-    }
 }

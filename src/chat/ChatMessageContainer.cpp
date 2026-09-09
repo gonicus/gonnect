@@ -123,6 +123,30 @@ bool ChatMessageContainer::removeMessage(const QString &messageId)
     return false;
 }
 
+bool ChatMessageContainer::resortMessage(ChatMessage *message)
+{
+    if (!message) {
+        return false;
+    }
+
+    const auto oldIndex = m_messages.indexOf(message);
+    if (oldIndex < 0) {
+        return false;
+    }
+
+    m_messages.removeAt(oldIndex);
+    const auto it =
+            std::ranges::upper_bound(m_messages, message->timestamp(), {}, &ChatMessage::timestamp);
+    const qsizetype newIndex = std::distance(m_messages.begin(), it);
+    m_messages.insert(newIndex, message);
+
+    if (newIndex != oldIndex) {
+        Q_EMIT chatMessageMoved(oldIndex, newIndex, message);
+    }
+
+    return newIndex != oldIndex;
+}
+
 ChatMessage *ChatMessageContainer::updateMessageEventId(const QString &oldEventId,
                                                         const QString &newEventId)
 {
