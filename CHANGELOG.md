@@ -1,3 +1,29 @@
+# [2.5.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.4...v2.5.0-beta.5) (2026-09-09)
+
+
+### Bug Fixes
+
+* allow multiple CFG and ENV placeholders in config ([#580](https://github.com/gonicus/gonnect/issues/580)) ([58bb5c8](https://github.com/gonicus/gonnect/commit/58bb5c8de93730b1f019f9094eaee87216a7fb4d))
+* close knock participants window after all answered ([#692](https://github.com/gonicus/gonnect/issues/692)) ([19c7912](https://github.com/gonicus/gonnect/commit/19c7912e5007dfd8315c590db54b005d5a864d35))
+* dangling mwi pointer ([#682](https://github.com/gonicus/gonnect/issues/682)) ([ebfd06f](https://github.com/gonicus/gonnect/commit/ebfd06f8648ba821ebf33fe5a9de1095e059972f))
+* fixed behavior when changing room while typing answer ([#677](https://github.com/gonicus/gonnect/issues/677)) ([840e649](https://github.com/gonicus/gonnect/commit/840e6495423450c9907b46a6121137a494b2c2fd))
+* fixed crash because of empty stamp in jtisi message ([#582](https://github.com/gonicus/gonnect/issues/582)) ([075cd00](https://github.com/gonicus/gonnect/commit/075cd00469cdd8a451ae0e64f2febca479d53e2d))
+* initial network state ([#606](https://github.com/gonicus/gonnect/issues/606)) ([4515265](https://github.com/gonicus/gonnect/commit/45152659c82709d145f00ec312291e32cfdddb5b))
+* no contact purge on CardDAV error ([#596](https://github.com/gonicus/gonnect/issues/596)) ([ef06791](https://github.com/gonicus/gonnect/commit/ef0679135a14b1a1920fb8e566646f01ee58b900))
+* reorder messages on changing timestamp ([#691](https://github.com/gonicus/gonnect/issues/691)) ([bd11a6a](https://github.com/gonicus/gonnect/commit/bd11a6a9316c7b701ed4833cff7c9c8823129942))
+* resolve ambigous contact lookup by source prio ([#674](https://github.com/gonicus/gonnect/issues/674)) ([dae0e8f](https://github.com/gonicus/gonnect/commit/dae0e8fa08c2057d58ec7128c42dcf8a328ec7fc))
+* small fixes when sending presence state via ipc ([#689](https://github.com/gonicus/gonnect/issues/689)) ([cbcb1e8](https://github.com/gonicus/gonnect/commit/cbcb1e857d03889b345a9121fc35270349c9e4e4))
+* streamlined context menu opening for 2nd screen ([#669](https://github.com/gonicus/gonnect/issues/669)) ([57eb49d](https://github.com/gonicus/gonnect/commit/57eb49d1485f0f3b7a53065e53954ac2cd31ca7a))
+* sync width calculation with upstream ([#684](https://github.com/gonicus/gonnect/issues/684)) ([cc604ff](https://github.com/gonicus/gonnect/commit/cc604ff696a9b068858e17711bbefcf88da7e8a6))
+* updated i18n ([#696](https://github.com/gonicus/gonnect/issues/696)) ([673ef20](https://github.com/gonicus/gonnect/commit/673ef206fea7eb43c4d3cab675a48b544612075f))
+
+
+### Features
+
+* chat as widget ([#659](https://github.com/gonicus/gonnect/issues/659)) ([e90e719](https://github.com/gonicus/gonnect/commit/e90e7192e7dc446f31f872028e92dcb65fdfa602))
+* knock feature for jitsi meet ([#673](https://github.com/gonicus/gonnect/issues/673)) ([9476ba7](https://github.com/gonicus/gonnect/commit/9476ba77dd7fb203615545544ed1536670e3702b))
+* read marker for chat messages ([#668](https://github.com/gonicus/gonnect/issues/668)) ([a00a1c4](https://github.com/gonicus/gonnect/commit/a00a1c4f451e3ee59e897e5ad3a289e7c2f1317d))
+
 # [2.5.0-beta.4](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.3...v2.5.0-beta.4) (2026-08-25)
 
 
