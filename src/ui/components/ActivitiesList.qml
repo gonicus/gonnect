@@ -249,6 +249,8 @@ Item {
 
                     Label {
                         id: textLabel
+                        maximumLineCount: 1
+                        wrapMode: Label.NoWrap
                         elide: Label.ElideRight
                         text: delg.text + (delg.hops.length > 0
                                            ? qsTr(", via %1").arg(delg.hops.join(" → "))
