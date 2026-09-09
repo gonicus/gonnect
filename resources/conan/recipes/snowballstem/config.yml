@@ -1,0 +1,7 @@
+versions:
+  3.1.1:
+    folder: all
+updater:
+  source: anitya
+  id: 230535
+  url-pattern: https://github.com/snowballstem/snowball/archive/refs/tags/v${version}.tar.gz

@@ -1,3 +1,8 @@
 versions:
   "1.0.30":
     folder: all
+
+updater:
+  source: anitya
+  id: 1749
+  url-pattern: https://github.com/libusb/libusb/archive/refs/tags/v${version}.tar.gz

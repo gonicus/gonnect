@@ -117,6 +117,7 @@ configure_file(
 add_subdirectory(src)
 add_subdirectory(external/hid-rp)
 
+
 if(BUILD_TESTING)
     add_subdirectory(tests)
     add_definitions(-DAPP_TESTS)

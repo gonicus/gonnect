@@ -1,0 +1,4 @@
+sources:
+  3.1.1:
+    url: https://github.com/snowballstem/snowball/archive/refs/tags/v3.1.1.tar.gz
+    sha256: d8714aa91ed4333654708472a7a98b529c867a8f99b05c5e66febf4ca72c44c7
