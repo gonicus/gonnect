@@ -1,5 +1,6 @@
 #include "PersonCoinProvider.h"
 #include "Theme.h"
+#include "ViewHelper.h"
 #include <QDir>
 #include <QPainter>
 #include <QStandardPaths>
@@ -50,9 +51,9 @@ QImage PersonCoinProvider::requestImage(const QString &id, QSize *size, const QS
         p.drawEllipse(0, 0, w, h);
 
         // Initials
-        Q_UNUSED(id);
-        QFont font("Noto Sans");
-        font.setPixelSize(0.4 * h);
+        bool isEmoji = ViewHelper::instance().isSingleEmoji(id);
+        QFont font(isEmoji ? "Noto Color Emoji" : "Noto Sans");
+        font.setPixelSize((isEmoji ? 0.6 : 0.4) * h);
         p.setFont(font);
         p.setPen(theme.foregroundInitials());
         p.drawText(image.rect(), Qt::AlignCenter, id);
@@ -71,11 +72,21 @@ QString PersonCoinProvider::makePath(const QString &id, const int size) const
 {
     static QString basePath;
     if (basePath.isEmpty()) {
-        basePath = QString("%1/coin").arg(
-                QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+        auto appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        auto parentPath = QString("%1/coin").arg(appData);
+        basePath = QString("%1/v2").arg(parentPath);
+
+        QDir baseDir(basePath);
+        if (!baseDir.exists()) {
+
+            QDir parentDir(parentPath);
+            if (parentDir.exists()) {
+                parentDir.removeRecursively();
+            }
+        }
+
         QDir dir;
         dir.mkpath(basePath);
     }
-
-    return QString("%1/%2/%3.png").arg(basePath).arg(size).arg(id);
+    return QString("%1/%2/%3.png").arg(basePath).arg(size).arg(qHash(id));
 }

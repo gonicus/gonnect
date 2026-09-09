@@ -16,6 +16,14 @@ ChatModel::ChatModel(QObject *parent) : QAbstractListModel{ parent }
     connect(this, &ChatModel::chatRoomChanged, this, &ChatModel::onChatRoomChanged);
 }
 
+void ChatModel::setChatRoom(IChatRoom *room)
+{
+    if (m_chatRoom != room) {
+        m_chatRoom = room;
+        Q_EMIT chatRoomChanged();
+    }
+}
+
 QHash<int, QByteArray> ChatModel::roleNames() const
 {
     return {
@@ -322,6 +330,24 @@ void ChatModel::onChatRoomChanged()
                         Q_EMIT dataChanged(nextIndex, nextIndex, nextItemContentRoles());
                     }
                 });
+        connect(m_chatRoom, &IChatRoom::chatMessageMoved, m_chatRoomContext,
+                [this](qsizetype oldIndex, qsizetype newIndex, ChatMessage *) {
+                    const auto dummyIndex = QModelIndex();
+                    if (beginMoveRows(dummyIndex, oldIndex, oldIndex, dummyIndex,
+                                      newIndex > oldIndex ? newIndex + 1 : newIndex)) {
+                        endMoveRows();
+                    }
+
+                    // IsSameUsersAsPrevious update
+                    const qsizetype low = std::min(oldIndex, newIndex);
+                    const qsizetype high = std::max(oldIndex, newIndex) + 1;
+                    const qsizetype rows = rowCount(dummyIndex);
+                    if (low < rows) {
+                        Q_EMIT dataChanged(createIndex(low, 0),
+                                           createIndex(std::min<qsizetype>(high, rows - 1), 0),
+                                           nextItemContentRoles());
+                    }
+                });
         connect(m_chatRoom, &IChatRoom::chatMessageRemoved, m_chatRoomContext,
                 [this](qsizetype index, ChatMessage *msgObj) {
                     beginRemoveRows(QModelIndex(), index, index);
@@ -403,7 +429,6 @@ void ChatModel::onChatRoomChanged()
                     Q_EMIT dataChanged(modelIndex, modelIndex,
                                        { static_cast<int>(Roles::Reactions) });
                 });
-
         const auto users = std::as_const(m_chatRoom->chatUsers());
         for (auto *user : users) {
             connectUserAvatarSignals(user);

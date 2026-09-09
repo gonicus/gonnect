@@ -305,6 +305,7 @@ Item {
 
     Label {
         text: qsTr("Enter message...")
+        enabled: false
         color: Theme.secondaryInactiveTextColor
         visible: messageField.text === ""
         anchors {
@@ -318,7 +319,7 @@ Item {
         clip: true
         padding: 0
         contentWidth: messageFieldScrollView.availableWidth
-        contentHeight: messageField.contentHeight
+        contentHeight: messageField.height
         anchors {
             top: editBanner.bottom
             left: parent.left
@@ -333,7 +334,7 @@ Item {
             font.pixelSize: 14
             wrapMode: TextEdit.Wrap
             width: messageFieldScrollView.availableWidth
-            height: messageField.contentHeight
+            height: Math.max(messageField.contentHeight, messageFieldScrollView.availableHeight)
 
             onCursorRectangleChanged: internal.ensureCursorVisible()
 
@@ -612,20 +613,31 @@ Item {
                 }
             }
         }
+    }
 
-        MouseArea {
-            anchors.fill: messageField
-            acceptedButtons: Qt.NoButton
+    MouseArea {
+        id: messageBoxClickForwarder
+        anchors.fill: messageFieldScrollView
+        propagateComposedEvents: true
+        onPressed: mouse => {
 
-            onWheel: (wheel) => {
-                         const flickable = messageFieldScrollView.contentItem
-                         const maxY = Math.max(0, flickable.contentHeight - messageFieldScrollView.height)
-                         if (maxY > 0) {
-                             flickable.contentY = Util.clamp(flickable.contentY - (wheel.pixelDelta.y || wheel.angleDelta.y), 0, maxY)
-                             wheel.accepted = true
-                         }
+                       // Focus messageField when clicked anywhere in the box
+                       const pos = messageField.mapFromItem(messageBoxClickForwarder, mouse.x, mouse.y)
+                       messageField.forceActiveFocus()
+                       if (pos.y > messageField.contentHeight) {
+                           control.positionCursorAtEnd()
+                       }
+                       mouse.accepted = false
+                   }
+
+        onWheel: wheel => {
+                     const flickable = messageFieldScrollView.contentItem
+                     const maxY = Math.max(0, flickable.contentHeight - messageFieldScrollView.height)
+                     if (maxY > 0) {
+                         flickable.contentY = Util.clamp(flickable.contentY - (wheel.pixelDelta.y || wheel.angleDelta.y), 0, maxY)
+                         wheel.accepted = true
                      }
-        }
+                 }
     }
 
     BottomButtonBar {
