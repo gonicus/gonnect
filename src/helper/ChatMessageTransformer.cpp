@@ -7,6 +7,7 @@
 #include <cmark.h>
 
 #include <QRegularExpression>
+#include <QSet>
 
 #include <cstdlib>
 
@@ -51,13 +52,73 @@ QString linkifyBareUrls(const QString &orig)
 QString markdownToHtml(const QString &orig)
 {
     const QByteArray utf8Data = linkifyBareUrls(orig).toUtf8();
-    char *html =
-            cmark_markdown_to_html(utf8Data.constData(), utf8Data.size(), CMARK_OPT_HARDBREAKS);
+    char *html = cmark_markdown_to_html(utf8Data.constData(), utf8Data.size(),
+                                        CMARK_OPT_HARDBREAKS | CMARK_OPT_UNSAFE);
     if (html == nullptr) {
         return {};
     }
-    const QString result = QString::fromUtf8(html);
+    const QString result = sanitizeHtml(QString::fromUtf8(html));
     std::free(html);
+    return result;
+}
+
+QString sanitizeHtml(const QString &orig)
+{
+    static const QSet<QString> allowedTags = {
+        QStringLiteral("a"),          QStringLiteral("b"),      QStringLiteral("i"),
+        QStringLiteral("em"),         QStringLiteral("strong"), QStringLiteral("code"),
+        QStringLiteral("pre"),        QStringLiteral("ul"),     QStringLiteral("ol"),
+        QStringLiteral("li"),         QStringLiteral("br"),     QStringLiteral("p"),
+        QStringLiteral("blockquote"), QStringLiteral("span"),
+    };
+    static const QRegularExpression tagRe(R"(<(/?)([a-zA-Z0-9]+)([^<>]*)>)");
+    static const QRegularExpression hrefRe(R"(href\s*=\s*(\"([^\"]*)\"|'([^']*)'|([^\s\"'>]+)))",
+                                           QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression schemeRe(R"(^\s*(https?|ftp|mailto|chat):)",
+                                             QRegularExpression::CaseInsensitiveOption);
+
+    QString result;
+    int lastPos = 0;
+    auto it = tagRe.globalMatch(orig);
+
+    while (it.hasNext()) {
+        auto match = it.next();
+        result.append(orig.sliced(lastPos, match.capturedStart() - lastPos));
+        lastPos = match.capturedEnd();
+
+        const bool isClose = !match.captured(1).isEmpty();
+        const QString tag = match.captured(2).toLower();
+        if (!allowedTags.contains(tag)) {
+            continue;
+        }
+
+        if (isClose) {
+            result.append(QStringLiteral("</%1>").arg(tag));
+        } else if (tag == QStringLiteral("a")) {
+            QString href;
+            const auto hrefMatch = hrefRe.match(match.captured(3));
+            if (hrefMatch.hasMatch()) {
+                href = hrefMatch.captured(2);
+                if (href.isEmpty()) {
+                    href = hrefMatch.captured(3);
+                }
+                if (href.isEmpty()) {
+                    href = hrefMatch.captured(4);
+                }
+            }
+            if (!href.isEmpty() && schemeRe.match(href).hasMatch()) {
+                result.append(QStringLiteral("<a href=\"%1\">").arg(href.toHtmlEscaped()));
+            } else {
+                result.append(QStringLiteral("<a>"));
+            }
+        } else if (tag == QStringLiteral("br")) {
+            result.append(QStringLiteral("<br />"));
+        } else {
+            result.append(QStringLiteral("<%1>").arg(tag));
+        }
+    }
+
+    result.append(orig.sliced(lastPos));
     return result;
 }
 

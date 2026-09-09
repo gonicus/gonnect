@@ -16,6 +16,7 @@ QString linkifyBareUrls(const QString &orig);
 // Renders Markdown to an HTML fragment via cmark. Single newlines become
 // line breaks, no manual backslash escaping is applied.
 QString markdownToHtml(const QString &orig);
+QString sanitizeHtml(const QString &orig);
 
 #ifndef APP_TESTS
 QString highlightMentions(const QString &orig, const ChatMessage &message);
