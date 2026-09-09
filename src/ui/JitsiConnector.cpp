@@ -958,6 +958,7 @@ void JitsiConnector::answerKnockingParticipant(const QString &id, bool approved)
 {
     if (m_knockedIds.remove(id)) {
         Q_EMIT executeAnswerKnockingParticipant(id, approved);
+        Q_EMIT knockAnswered(id);
     }
 }
 
