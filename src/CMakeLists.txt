@@ -3,7 +3,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     CorePrivate
     GuiPrivate
     Concurrent
-    Core5Compat
     Quick
     QuickControls2
     Multimedia
@@ -476,6 +475,7 @@ qt_add_qml_module(gonnect
         ui/components/CardHeading.qml
         ui/components/CardHeadingMoreMenuButton.qml
         ui/components/CardList.qml
+        ui/components/CardShadow.qml
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
         ui/components/CustomWindowHeader.qml
@@ -958,7 +958,6 @@ target_link_libraries(gonnect
         Qt6::Protobuf
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
-        Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
         qt6keychain

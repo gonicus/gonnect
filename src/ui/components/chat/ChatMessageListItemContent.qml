@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.impl
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import base
 
 Item {
@@ -139,14 +139,22 @@ Item {
         visible: false
         anchors.fill: messageImage
         radius: 8
+        antialiasing: true
+        layer {
+            enabled: true
+            smooth: true
+        }
     }
 
-    OpacityMask {
+    MultiEffect {
         id: messageImageOpacityMask
-        visible: control.content instanceof ChatMessageContentImage
-        maskSource: messageImageCornerCropper
-        source: messageImage
         anchors.fill: messageImage
+        visible: control.content instanceof ChatMessageContentImage
+        source: messageImage
+        maskSource: messageImageCornerCropper
+        maskEnabled: true
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
 
         HoverHandler {
             cursorShape: Qt.PointingHandCursor
