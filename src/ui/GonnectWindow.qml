@@ -202,12 +202,30 @@ BaseWindow {
 
         function hasPopupFocus() {
             let item = control.activeFocusItem
+
+            if (!item || !item.activeFocus) {
+                console.debug(category, "having no item with active focus")
+                return false
+            }
+
             while (item) {
                 if (item === control.Overlay.overlay) {
-                    return true
+                    const isOpen = mainDrawer.opened
+                                 || topDrawer.opened
+                                 || globalEmojiPickerPopup.opened
+                                 || globalFilteredEmojiPopup.opened
+
+                    console.debug(category, "found item in overlay with active focus, returning:", isOpen)
+                    console.debug(category, "  mainDrawer opened:", mainDrawer.opened)
+                    console.debug(category, "  topDrawer opened:", topDrawer.opened)
+                    console.debug(category, "  globalEmojiPickerPopup opened:", globalEmojiPickerPopup.opened)
+                    console.debug(category, "  globalFilteredEmojiPopup opened:", globalFilteredEmojiPopup.opened)
+                    return isOpen
                 }
                 item = item.parent
             }
+
+            console.debug(category, "no overlay found in parents for", item)
             return false
         }
 
@@ -215,7 +233,9 @@ BaseWindow {
             sequences: ["Ctrl+F", "Ctrl+K"]
             enabled: !SM.uiEditMode
             onActivated: () => {
+                             console.debug(category, "Ctrl+F/Ctrl+K invoked")
                              if (!shortcutContainer.hasPopupFocus()) {
+                                 console.debug(category, "  activating search")
                                  ViewHelper.activateSearch()
                              }
                          }
