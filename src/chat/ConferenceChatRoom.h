@@ -22,7 +22,7 @@ public:
     virtual QString avatarPath() override { return ""; }
     virtual QString invitationText() override { return {}; }
     virtual bool isInitiallyLoaded() const override { return true; }
-    virtual void loadMessages() override { }
+    virtual void loadMessages(const QString &) override { }
     virtual qsizetype notificationCount() override;
     virtual void resetUnreadCount() override;
     virtual IChatRoom::JoinRule joinRule() override;
@@ -34,10 +34,13 @@ public:
     virtual qsizetype indexOfPinnedChatMessage(ChatMessage *) const override { return -1; }
     virtual ChatMessage *chatMessageById(const QString &id) const override;
     virtual ChatMessage *latestOwnTextMessage() const override { return nullptr; }
-    virtual void sendMessage(const QString &message, const QString &relatedMessageId = "") override;
+    virtual void sendMessage(const QString &message, const QString &relatedMessageId = QString(),
+                             const QString &threadId = QString()) override;
     virtual void sendFile(const QString &filePath) override { Q_UNUSED(filePath) }
     virtual void sendTypingPing() override { }
     virtual void togglePin(const QString &) override { };
+    virtual bool isCompletelyLoaded(const QString &) const override { return false; }
+    virtual void setIsCompletelyLoaded(bool, const QString &) override { }
     virtual bool isDirectChat() override { return false; }
     virtual bool isFavorite() override { return false; }
     virtual bool hasPresenceState() override { return false; }

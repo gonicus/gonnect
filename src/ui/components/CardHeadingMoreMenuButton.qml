@@ -14,14 +14,28 @@ Item {
 
     property alias iconLabel: iconLabel.text
     property alias iconSource: iconLabel.icon.source
+    property int iconSize: Theme.d * 2
+
+    // Must be done via binding because IconLabel.icon properties do not update on bindings
+    Binding {
+        target: iconLabel
+        property: "width"
+        value: control.iconSize
+    }
+
+    Binding {
+        target: iconLabel
+        property: "height"
+        value: control.iconSize
+    }
 
     IconLabel {
         id: iconLabel
         anchors.centerIn: parent
-        font.pixelSize: 22
+        width: control.iconSize
+        height: control.iconSize
+        font.pixelSize: control.iconSize
         icon {
-            width: 22
-            height: 22
             source: Icons.overflowMenu
             color: control.enabled
                    ? (buttonHoverHandler.hovered

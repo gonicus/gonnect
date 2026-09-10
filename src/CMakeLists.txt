@@ -361,6 +361,7 @@ qt_add_qml_module(gonnect
         ui/components/chat/FileAttachment.qml
         ui/components/chat/MultiText.qml
         ui/components/chat/PinnedChatMessagesList.qml
+        ui/components/chat/ReactionButton.qml
         ui/components/chat/ReadMarker.qml
 
         ui/components/controls/AudioFileSelector.qml
@@ -642,6 +643,8 @@ qt_add_qml_module(gonnect
         chat/ChatConnectorManager.cpp
         chat/ChatMessage.h
         chat/ChatMessage.cpp
+        chat/ChatMessageContainer.h
+        chat/ChatMessageContainer.cpp
         chat/ChatMessageContentAudioFile.h
         chat/ChatMessageContentImage.h
         chat/ChatMessageContentImage.cpp

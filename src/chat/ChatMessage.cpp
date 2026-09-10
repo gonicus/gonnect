@@ -5,10 +5,11 @@
 
 ChatMessage::ChatMessage(const QString &eventId, const QString &fromId, const QString &nickName,
                          QObject *content, const QDateTime &timestamp, IChatRoom *chatRoom,
-                         Flags flags = Flag::Unknown)
+                         Flags flags, const QString &threadId)
     : QObject{ chatRoom },
       m_eventId{ eventId },
       m_fromId{ fromId },
+      m_threadId{ threadId },
       m_nickName{ nickName },
       m_timestamp{ timestamp },
       m_flags{ flags },
