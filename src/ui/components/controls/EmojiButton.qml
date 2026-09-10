@@ -30,11 +30,18 @@ Item {
 
     Label {
         id: emojiIconLabel
-        anchors.fill: parent
         horizontalAlignment: Label.AlignHCenter
         verticalAlignment: Label.AlignVCenter
+        wrapMode: Text.NoWrap
+        minimumPixelSize: 10
+        fontSizeMode: Text.Fit
+        renderType: Text.QtRendering
+        anchors {
+            fill: parent
+            margins: 2
+        }
         font {
-            family: "Noto Color Emoji"
+            family: [ "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", "Twemoji Mozilla" ]
             pixelSize: 20
         }
 

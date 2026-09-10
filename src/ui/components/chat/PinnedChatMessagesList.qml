@@ -15,6 +15,7 @@ Item {
 
     readonly property alias count: pinnedListView.count
     readonly property bool isPinAllowed: control.chatRoom && !!(Number(control.chatRoom.permissions) & IChatRoom.Permission.CanPinMessages)
+    property real maxContentHeight: -1
 
     Rectangle {
         anchors.fill: parent
@@ -32,6 +33,13 @@ Item {
         model: PinnedChatMessages {
             id: pinnedModel
         }
+
+        ScrollBar.vertical: ScrollBar {
+            width: Theme.d / 2
+            policy: ScrollBar.AlwaysOn
+            visible: pinnedListView.contentHeight > pinnedListView.height
+        }
+
         delegate: Item {
             id: delg
             implicitHeight: contentItem.height + delg.padding * 2
@@ -84,6 +92,7 @@ Item {
                 isStateUpdate: false
                 userState: 0
                 affectedUserName: ""
+                maxContentHeight: control.maxContentHeight > 0 ? Math.max(0, control.maxContentHeight - delg.padding * 2) : -1
                 anchors {
                     left: pinIcon.right
                     right: parent.right
