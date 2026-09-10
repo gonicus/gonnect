@@ -9,9 +9,10 @@ import base
 ChatMessageAttachmentRectangle {
     id: control
     width: 300
-    height: 80
+    height: control.availableHeight > 0 ? Math.min(80, control.availableHeight) : 80
 
     property ChatMessageContentAudioFile content
+    property real availableHeight: -1
 
     MediaPlayer {
         id: mediaPlayer

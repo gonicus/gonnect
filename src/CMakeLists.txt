@@ -802,6 +802,10 @@ qt_add_qml_module(gonnect
         rtt/RTTModel.h
         rtt/RTTModel.cpp
 
+        ui/ActivitiesModel.h
+        ui/ActivitiesModel.cpp
+        ui/ActivitiesProxyModel.h
+        ui/ActivitiesProxyModel.cpp
         ui/CallsModel.h
         ui/CallsModel.cpp
         ui/CallRoutingHelper.h
@@ -837,8 +841,6 @@ qt_add_qml_module(gonnect
         ui/HistoryContactSearchModel.cpp
         ui/HistoryContactSearchProxyModel.h
         ui/HistoryContactSearchProxyModel.cpp
-        ui/ActivitiesModel.h
-        ui/ActivitiesModel.cpp
         ui/HistoryModel.h
         ui/HistoryModel.cpp
         ui/HistoryProxyModel.h

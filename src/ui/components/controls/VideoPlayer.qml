@@ -10,10 +10,11 @@ ChatMessageAttachmentRectangle {
     id: control
     implicitWidth: control.sourceSize.width
     implicitHeight: topBar.height + control.sourceSize.height + buttonBar.height
-    height: 220
+    height: control.availableHeight > 0 ? Math.min(220, control.availableHeight) : 220
 
     property ChatMessageContentVideoFile content
     property alias showFullscreenButton: fullScreenButton.visible
+    property real availableHeight: -1
 
     readonly property size sourceSize: thumbnail.sourceSize
 
