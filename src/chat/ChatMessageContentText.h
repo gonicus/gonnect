@@ -13,6 +13,7 @@ class ChatMessageContentText : public QObject
     Q_PROPERTY(QString rawText READ rawText NOTIFY contentChanged FINAL)
     Q_PROPERTY(bool isSimpleText READ isSimpleText NOTIFY contentChanged FINAL)
     Q_PROPERTY(QString simpleText READ simpleText NOTIFY contentChanged FINAL)
+    Q_PROPERTY(QString htmlText READ htmlText NOTIFY contentChanged FINAL)
     Q_PROPERTY(QList<ChatMessageContentPart *> contentParts READ contentParts NOTIFY contentChanged
                        FINAL)
 
@@ -21,6 +22,7 @@ public:
 
     bool isSimpleText() const;
     QString simpleText() const;
+    QString htmlText() const { return m_htmlText; }
     QString rawText() const { return m_rawText; }
     QList<ChatMessageContentPart *> contentParts() const { return m_parts; }
     void setText(const QString &text);
@@ -28,9 +30,10 @@ public:
     void processText();
 
 private:
-    QString convertText(const QString &originalText) const;
+    QString convertHtmlText(const QString &originalText) const;
     QString m_rawText;
     QString m_simpleText;
+    QString m_htmlText;
     QList<ChatMessageContentPart *> m_parts;
 
 Q_SIGNALS:
