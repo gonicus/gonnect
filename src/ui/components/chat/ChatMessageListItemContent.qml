@@ -63,13 +63,13 @@ Item {
                     return qsTr("Message has been removed.")
                 }
             } else if (control.isText) {
-                return control.content.simpleText
+                return control.content.htmlText
             }
             return ""
         }
         color: control.textColor
         wrapMode: Label.Wrap
-        textFormat: Text.MarkdownText
+        textFormat: Text.RichText
         readOnly: true
         font {
             pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
