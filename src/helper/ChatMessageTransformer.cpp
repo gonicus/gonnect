@@ -4,14 +4,19 @@
 #  include "ChatUser.h"
 #endif
 
+#include <cmark.h>
+
 #include <QRegularExpression>
+#include <QSet>
+
+#include <cstdlib>
 
 namespace ChatMessageTransformer {
 
-QString addLinkTags(const QString &orig)
+QString linkifyBareUrls(const QString &orig)
 {
     static const QRegularExpression re(
-            R"((<a\b[^>]*>.*?</a>)|(<a\b[^>]*href\s*=\s*"[^"]*")|(\[[^\]]*\]\([^)]*\))|\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
+            R"((`[^`]*?`)|(\[[^\]]*\]\([^)]*\))|(<[^<>]*>)|\b((?:https?://|ftp://|www\.)[^\s<>]+(?<![\s<>\p{P}])))",
             QRegularExpression::CaseInsensitiveOption
                     | QRegularExpression::DotMatchesEverythingOption);
 
@@ -24,15 +29,15 @@ QString addLinkTags(const QString &orig)
 
         result.append(orig.sliced(lastPos, match.capturedStart() - lastPos));
 
-        QString fullMatch = match.captured(0);
-        QString url = match.captured(4);
+        const QString fullMatch = match.captured(0);
+        const QString url = match.captured(4);
 
         if (!url.isEmpty()) {
             QString href = url;
-            if (href.startsWith("www.", Qt::CaseInsensitive)) {
-                href.prepend("https://");
+            if (href.startsWith(QStringLiteral("www."), Qt::CaseInsensitive)) {
+                href.prepend(QStringLiteral("https://"));
             }
-            result.append(QString(R"(<a href="%1">%2</a>)").arg(href, url));
+            result.append(QStringLiteral("[%1](%2)").arg(url, href));
         } else {
             result.append(fullMatch);
         }
@@ -44,23 +49,77 @@ QString addLinkTags(const QString &orig)
     return result;
 }
 
-QString fixNewLines(const QString &orig)
+QString markdownToHtml(const QString &orig)
 {
-    QString str(orig);
+    const QByteArray utf8Data = linkifyBareUrls(orig).toUtf8();
+    char *html = cmark_markdown_to_html(utf8Data.constData(), utf8Data.size(),
+                                        CMARK_OPT_HARDBREAKS | CMARK_OPT_UNSAFE);
+    if (html == nullptr) {
+        return {};
+    }
+    const QString result = sanitizeHtml(QString::fromUtf8(html));
+    std::free(html);
+    return result;
+}
 
-    static const QRegularExpression multiNewlineRegex(QStringLiteral(R"(\n(?=\n))"));
-    str.replace(multiNewlineRegex, QStringLiteral("\n\u2060"));
+QString sanitizeHtml(const QString &orig)
+{
+    static const QSet<QString> allowedTags = {
+        QStringLiteral("a"),          QStringLiteral("b"),      QStringLiteral("i"),
+        QStringLiteral("em"),         QStringLiteral("strong"), QStringLiteral("code"),
+        QStringLiteral("pre"),        QStringLiteral("ul"),     QStringLiteral("ol"),
+        QStringLiteral("li"),         QStringLiteral("br"),     QStringLiteral("p"),
+        QStringLiteral("blockquote"), QStringLiteral("span"),
+    };
+    static const QRegularExpression tagRe(R"(<(/?)([a-zA-Z0-9]+)([^<>]*)>)");
+    static const QRegularExpression hrefRe(R"(href\s*=\s*(\"([^\"]*)\"|'([^']*)'|([^\s\"'>]+)))",
+                                           QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression schemeRe(R"(^\s*(https?|ftp|mailto|chat):)",
+                                             QRegularExpression::CaseInsensitiveOption);
 
-    static const QRegularExpression singleNewlineRegex(QStringLiteral(R"((?<!\n)(?<!\\)\n(?!\n))"));
-    str.replace(singleNewlineRegex, QStringLiteral("\\\n"));
+    QString result;
+    int lastPos = 0;
+    auto it = tagRe.globalMatch(orig);
 
-    // Strip trailing new line
-    if (str.endsWith(QStringLiteral("\\\n"))) {
-        str.chop(2);
-        str.append('\n');
+    while (it.hasNext()) {
+        auto match = it.next();
+        result.append(orig.sliced(lastPos, match.capturedStart() - lastPos));
+        lastPos = match.capturedEnd();
+
+        const bool isClose = !match.captured(1).isEmpty();
+        const QString tag = match.captured(2).toLower();
+        if (!allowedTags.contains(tag)) {
+            continue;
+        }
+
+        if (isClose) {
+            result.append(QStringLiteral("</%1>").arg(tag));
+        } else if (tag == QStringLiteral("a")) {
+            QString href;
+            const auto hrefMatch = hrefRe.match(match.captured(3));
+            if (hrefMatch.hasMatch()) {
+                href = hrefMatch.captured(2);
+                if (href.isEmpty()) {
+                    href = hrefMatch.captured(3);
+                }
+                if (href.isEmpty()) {
+                    href = hrefMatch.captured(4);
+                }
+            }
+            if (!href.isEmpty() && schemeRe.match(href).hasMatch()) {
+                result.append(QStringLiteral("<a href=\"%1\">").arg(href.toHtmlEscaped()));
+            } else {
+                result.append(QStringLiteral("<a>"));
+            }
+        } else if (tag == QStringLiteral("br")) {
+            result.append(QStringLiteral("<br />"));
+        } else {
+            result.append(QStringLiteral("<%1>").arg(tag));
+        }
     }
 
-    return str;
+    result.append(orig.sliced(lastPos));
+    return result;
 }
 
 #ifndef APP_TESTS
