@@ -15,15 +15,21 @@ Item {
     readonly property alias count: list.count
     readonly property bool hasActivities: list.count > 0
 
+    readonly property ActivitiesProxyModel proxyModel: activitiesProxyModel
+
     Label {
         anchors.centerIn: parent
         visible: !control.hasActivities
         color: Theme.secondaryTextColor
         font.pixelSize: 18
-        text: "🕒  " + qsTr("No activities")
+        text: "🕒  " + (control.proxyModel?.isFiltering
+                        ? qsTr("No activities matching the filter")
+                        : qsTr("No activities"))
 
         Accessible.role: Accessible.StaticText
-        Accessible.name: qsTr("No activities")
+        Accessible.name: control.proxyModel?.isFiltering
+                         ? qsTr("No activities matching the filter")
+                         : qsTr("No activities")
     }
 
     ListView {
@@ -43,8 +49,12 @@ Item {
             clip: true
         }
 
-        model: ActivitiesModel {
-            id: activitiesModel
+        model: ActivitiesProxyModel {
+            id: activitiesProxyModel
+
+            ActivitiesModel {
+                id: activitiesModel
+            }
         }
 
         section.property: "day"
