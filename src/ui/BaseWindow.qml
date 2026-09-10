@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.Material
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import base
 
 Window {
@@ -95,14 +95,33 @@ Window {
                 }
             }
 
-            DropShadow {
+            // This "copy" of bgRect is required such that the window remains crisp and does not require the layer
+            Rectangle {
+                id: bgMaskRect
+                color: "black"
+                visible: false
+                radius: bgRect.radius
                 anchors.fill: bgRect
-                horizontalOffset: 0
-                verticalOffset: 3
-                radius: 8.0
-                color: Theme.shadowColor
-                visible: !control.isMaximized
+                antialiasing: true
+                layer {
+                    enabled: true
+                    smooth: true
+                }
+            }
+
+            MultiEffect {
+                anchors.fill: bgRect
                 source: bgRect
+                visible: !control.isMaximized
+                blurEnabled: false
+
+                shadowEnabled: true
+                shadowColor: Theme.shadowColor
+                shadowHorizontalOffset: 0
+                shadowVerticalOffset: 3
+                shadowBlur: 0.5
+                shadowOpacity: 0.8
+                shadowScale: 1.0
             }
 
             Item {
@@ -363,8 +382,9 @@ Window {
             id: outerContainer
 
             layer.enabled: control.useOwnDecoration && !control.isMaximized
-            layer.effect: OpacityMask {
-                maskSource: bgRect
+            layer.effect: MultiEffect {
+                maskSource: bgMaskRect
+                maskEnabled: true
             }
 
             Loader {
