@@ -1,3 +1,10 @@
+# [2.5.0-beta.6](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.5...v2.5.0-beta.6) (2026-09-10)
+
+
+### Bug Fixes
+
+* change active button color ([31ce2ea](https://github.com/gonicus/gonnect/commit/31ce2ea77597377ed93b1429ed20ea4c6895a747))
+
 # [2.5.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.4...v2.5.0-beta.5) (2026-09-09)
 
 
