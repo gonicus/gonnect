@@ -42,6 +42,7 @@ Item {
     required property string affectedUserName
 
     property color textColor: Theme.primaryTextColor
+    property real maxContentHeight: -1
 
     readonly property alias messageLabel: messageLabel
     readonly property bool isText: (control.content instanceof ChatMessageContentText)
@@ -63,13 +64,13 @@ Item {
                     return qsTr("Message has been removed.")
                 }
             } else if (control.isText) {
-                return control.content.simpleText
+                return control.content.htmlText
             }
             return ""
         }
         color: control.textColor
         wrapMode: Label.Wrap
-        textFormat: Text.MarkdownText
+        textFormat: Text.RichText
         readOnly: true
         font {
             pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
@@ -123,7 +124,7 @@ Item {
         id: messageImage
         visible: false
         source: control.content?.imagePath ?? ""
-        height: Math.min(messageImage.sourceSize.height, 200)
+        height: control.maxContentHeight > 0 ? Math.min(messageImage.sourceSize.height, 200, control.maxContentHeight) : Math.min(messageImage.sourceSize.height, 200)
         width: Math.min(messageImage.sourceSize.width, parent.width)
         fillMode: Image.PreserveAspectFit
         verticalAlignment: Image.AlignTop
@@ -191,6 +192,13 @@ Item {
             when: !!attachmentLoader.item?.hasOwnProperty("availableWidth")
             property: "availableWidth"
             value: control.width
+        }
+
+        Binding {
+            target: attachmentLoader.item
+            when: !!attachmentLoader.item?.hasOwnProperty("availableHeight")
+            property: "availableHeight"
+            value: control.maxContentHeight
         }
 
         Connections {

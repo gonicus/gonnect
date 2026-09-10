@@ -471,13 +471,20 @@ void ActivitiesModel::handleChatMessageAdded(ChatMessage *message)
         }
 
         if (const auto user = room->chatUserById(message->fromId())) {
-            // Chat user avatar paths are full file URLs (see makeDataRootPath), while the entries
-            // of call kinds hold plain filesystem paths, so the file scheme is stripped here.
-            QString avatarPath = user->avatarPath();
-            if (avatarPath.startsWith("file://")) {
-                avatarPath = avatarPath.mid(7);
+
+            if (const Contact *contact = AddressBook::instance().lookupByChatUser(user)) {
+                entry.avatarPath = contact->avatarPath();
+
+            } else {
+                // Chat user avatar paths are full file URLs (see makeDataRootPath), while the
+                // entries of call kinds hold plain filesystem paths, so the file scheme is stripped
+                // here.
+                QString avatarPath = user->avatarPath();
+                if (avatarPath.startsWith("file://")) {
+                    avatarPath = avatarPath.mid(7);
+                }
+                entry.avatarPath = avatarPath;
             }
-            entry.avatarPath = avatarPath;
         }
     }
 

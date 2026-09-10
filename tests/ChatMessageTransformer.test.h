@@ -10,19 +10,26 @@ public:
     explicit ChatMessageTransformerTest(QObject *parent = nullptr);
 
 private slots:
-    void testAddLinkTagsPlainUrl();
-    void testAddLinkTagsWwwUrl();
-    void testAddLinkTagsExistingAnchor();
-    void testAddLinkTagsNoUrl();
-    void testAddLinkTagsFtpUrl();
-    void testAddLinkTagsUrlWithPathAndQuery();
-    void testAddLinkTagsTrailingPunctuation();
-    void testAddLinkTagsMultipleUrls();
-    void testAddLinkTagsMarkdownLink();
-    void testAddLinkTagsMixedContent();
-    void testAddLinkTagsEmptyString();
-    void testAddLinkTagsMarkdownLinkParensInUrl();
-    void testAddLinkTagsPlainUrlWithParens();
+    void testLinkifyBareUrlsPlainUrl();
+    void testLinkifyBareUrlsWwwUrl();
+    void testLinkifyBareUrlsExistingAnchor();
+    void testLinkifyBareUrlsNoUrl();
+    void testLinkifyBareUrlsFtpUrl();
+    void testLinkifyBareUrlsUrlWithPathAndQuery();
+    void testLinkifyBareUrlsTrailingPunctuation();
+    void testLinkifyBareUrlsMultipleUrls();
+    void testLinkifyBareUrlsMarkdownLink();
+    void testLinkifyBareUrlsMixedContent();
+    void testLinkifyBareUrlsEmptyString();
+    void testLinkifyBareUrlsMarkdownLinkParensInUrl();
+    void testLinkifyBareUrlsPlainUrlWithParens();
+    void testLinkifyBareUrlsCodeSpan();
+    void testLinkifyBareUrlsBareDomainWithText();
 
-    void testFixNewLines();
+    void testMarkdownToHtmlParagraphs();
+    void testMarkdownToHtmlHardBreak();
+    void testMarkdownToHtmlList();
+    void testMarkdownToHtmlListFromIssue();
+    void testMarkdownToHtmlLink();
+    void testMarkdownToHtmlCodeSpan();
 };
