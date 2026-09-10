@@ -44,7 +44,7 @@ runs:
         version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'linux'
         target: 'desktop'
-        modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
+        modules: 'qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc'
         arch: 'linux_gcc_64'
         cache: true
 
