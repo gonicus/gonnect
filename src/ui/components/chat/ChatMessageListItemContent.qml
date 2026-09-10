@@ -42,6 +42,7 @@ Item {
     required property string affectedUserName
 
     property color textColor: Theme.primaryTextColor
+    property real maxContentHeight: -1
 
     readonly property alias messageLabel: messageLabel
     readonly property bool isText: (control.content instanceof ChatMessageContentText)
@@ -123,7 +124,7 @@ Item {
         id: messageImage
         visible: false
         source: control.content?.imagePath ?? ""
-        height: Math.min(messageImage.sourceSize.height, 200)
+        height: control.maxContentHeight > 0 ? Math.min(messageImage.sourceSize.height, 200, control.maxContentHeight) : Math.min(messageImage.sourceSize.height, 200)
         width: Math.min(messageImage.sourceSize.width, parent.width)
         fillMode: Image.PreserveAspectFit
         verticalAlignment: Image.AlignTop
@@ -199,6 +200,13 @@ Item {
             when: !!attachmentLoader.item?.hasOwnProperty("availableWidth")
             property: "availableWidth"
             value: control.width
+        }
+
+        Binding {
+            target: attachmentLoader.item
+            when: !!attachmentLoader.item?.hasOwnProperty("availableHeight")
+            property: "availableHeight"
+            value: control.maxContentHeight
         }
 
         Connections {
