@@ -1,6 +1,5 @@
 #include "FlatpakNetworkHelper.h"
 #include "NetworkMonitor.h"
-#include <netdb.h>
 #include <qhostaddress.h>
 #include <QtConcurrent>
 
@@ -65,8 +64,11 @@ void FlatpakNetworkHelper::updateNetworkState()
         return;
     }
 
-    if (connected != m_connectivity) {
-        m_connectivity = connected;
+    const bool statusChanged = connected != m_connectivity;
+    m_connectivity = connected;
+
+    // Also emit signal if connected has not changed which happens e.g. WIFI -> LAN
+    if (statusChanged || connected) {
         Q_EMIT connectivityChanged();
         qCDebug(lcNetwork) << "network available changed to" << connected;
     }
@@ -75,17 +77,10 @@ void FlatpakNetworkHelper::updateNetworkState()
 QFuture<bool> FlatpakNetworkHelper::isReachable(const QUrl &url)
 {
     return QtConcurrent::run([url, this]() -> bool {
-        int port = url.port();
+        const int port = getStandardPort(url);
         if (port < 0) {
-
-            QString scheme = url.scheme();
-            struct servent *sptr = getservbyname(scheme.toStdString().c_str(), "tcp");
-            if (!sptr) {
-                qCCritical(lcNetwork) << "cannot map scheme" << scheme << "to port";
-                return false;
-            }
-
-            port = ntohs(sptr->s_port);
+            qCCritical(lcNetwork) << "Cannot find standard port for" << url;
+            return false;
         }
 
         auto reply = m_portal->CanReach(url.host(), port);

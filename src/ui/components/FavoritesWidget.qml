@@ -32,7 +32,6 @@ BaseWidget {
             id: favList
             header: null
             visible: true
-            delegate: FavoriteListItemBig {}
             anchors {
                 top: favHeading.bottom
                 left: parent.left

@@ -1,8 +1,11 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
+#include <QtProtobuf>
 #include "Application.h"
 #include "GlobalInfo.h"
+#include "PersonCoinProvider.h"
+#include "WebEngineKeyEventFilter.h"
 
 #ifdef Q_OS_LINUX
 #  include <QDBusConnection>
@@ -87,7 +90,11 @@ int main(int argc, char *argv[])
         return 2;
     }
 
+    qRegisterProtobufTypes();
+
     app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
+
+    app.installEventFilter(&WebEngineKeyEventFilter::instance());
 
     // Fonts
     const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
@@ -115,6 +122,8 @@ int main(int argc, char *argv[])
     QObject::connect(
             &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
             []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+
+    engine.addImageProvider(QLatin1String("personcoin"), new PersonCoinProvider);
     engine.loadFromModule("base", "Main");
 
     const auto &objs = engine.rootObjects();

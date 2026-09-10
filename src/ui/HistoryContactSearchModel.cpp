@@ -46,9 +46,7 @@ void HistoryContactSearchModel::updateModel()
                         FuzzyCompare::jaroWinklerDistance(remoteUrl, m_searchText),
                         FuzzyCompare::jaroWinklerDistance(contactInfo.displayName, m_searchText));
 
-                Item newItem = { isPhoneNumber,
-                                 isPhoneNumber ? PhoneNumberUtil::numberFromSipUrl(remoteUrl)
-                                               : remoteUrl,
+                Item newItem = { isPhoneNumber, isPhoneNumber ? contactInfo.phoneNumber : remoteUrl,
                                  contactInfo.displayName, dist, item->time() };
 
                 bool isAlreadyThere = false;

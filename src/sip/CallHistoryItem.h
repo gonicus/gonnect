@@ -28,11 +28,13 @@ public:
     explicit CallHistoryItem(const QDateTime &time, const QString &remoteUrl,
                              const QString &account, const QString &contactId,
                              bool isSipSubscriptable, qint64 dataBaseId, quint16 durationSeconds,
-                             CallHistoryItem::Types type, CallHistory *parent);
+                             CallHistoryItem::Types type, const QStringList &hops,
+                             CallHistory *parent);
 
     explicit CallHistoryItem(const QString &remoteUrl, const QString &account,
                              const QString &contactId, bool isSipSubscriptable,
-                             CallHistoryItem::Types type, CallHistory *parent);
+                             CallHistoryItem::Types type, const QStringList &hops,
+                             CallHistory *parent);
 
     CallHistory *callHistory() const;
 
@@ -43,11 +45,13 @@ public:
     QString account() const { return m_account; }
     QString contactId() const { return m_contactId; }
     quint16 durationSeconds() const { return m_durationSeconds; }
+    const QStringList &hops() const { return m_hops; }
     bool isSipSubscriptable() const { return m_isSipSubscriptable; }
     CallHistoryItem::Types type() const { return m_type; }
     void addFlags(Types flags);
 
     void setContactId(const QString &contactId);
+    void setHops(const QStringList &hops);
 
     void endCall();
 
@@ -60,6 +64,7 @@ private:
     QString m_remoteUrl;
     QString m_account;
     QString m_contactId;
+    QStringList m_hops;
     bool m_isSipSubscriptable = false;
     CallHistoryItem::Types m_type = Type::Incoming;
 };

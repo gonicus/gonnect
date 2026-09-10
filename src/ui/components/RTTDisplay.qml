@@ -14,7 +14,7 @@ Item {
             left: parent.left
             right: parent.right
             bottom: rttInputContainer.top
-            bottomMargin: 24
+            bottomMargin: Theme.d * 2
         }
 
         ListView {
@@ -23,7 +23,7 @@ Item {
             clip: true
             bottomMargin: 20
             model: RTTProvider.model
-            spacing: 12
+            spacing: Theme.d
 
             Accessible.role: Accessible.List
             Accessible.name: qsTr("RTT message list")

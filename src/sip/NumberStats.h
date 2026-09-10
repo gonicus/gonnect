@@ -16,7 +16,7 @@ class NumberStats : public QObject
     QML_UNCREATABLE("")
 
 public:
-    enum class ContactType { PhoneNumber, JitsiMeetUrl };
+    enum class ContactType { PhoneNumber, JitsiMeetUrl, ChatRoomId };
     Q_ENUM(ContactType)
 
     virtual ~NumberStats();
@@ -46,6 +46,7 @@ private:
     explicit NumberStats(QObject *parent = nullptr);
     void initialRead();
     void readNumberOfCalls();
+    void migratePhoneNumberFormatting();
 
     /**
      * @brief ensureFlaggedNumberExists creates a new entry in flagged table in database, if it does
@@ -66,6 +67,7 @@ private:
     QList<PhoneNumberCallCount *> m_callCounts;
     QHash<QString, PhoneNumberCallCount *> m_callCountLookup;
     QTimer m_debounceAddressBookUpdateTimer;
+    bool m_isMigrationDone = false;
 
 Q_SIGNALS:
     void countChanged(qsizetype index);

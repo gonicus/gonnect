@@ -109,6 +109,7 @@ Item {
             required property bool hasBuddyState
             required property bool hasAvatar
             required property string avatarPath
+            required property list<string> hops
 
             property int buddyStatus: SIPBuddyState.UNKNOWN
             readonly property bool isReady: delg.buddyStatus === SIPBuddyState.READY
@@ -120,7 +121,11 @@ Item {
                 delg.buddyStatus = delg.hasBuddyState ? SIPManager.buddyStatus(delg.remoteUrl) : SIPBuddyState.UNKNOWN
             }
 
-            Component.onCompleted: () => delg.updateBuddyStatus()
+            Component.onCompleted: () => {
+                                       delg.updateBuddyStatus()
+                                       aggregatedRooms.updateContactId()
+                                   }
+            onContactIdChanged: () => aggregatedRooms.updateContactId()
 
             Accessible.role: Accessible.ListItem
             Accessible.name: qsTr("History item")
@@ -132,6 +137,14 @@ Item {
                 enabled: delg.hasBuddyState
                 function onBuddyStateChanged(url : string, status : int) {
                     delg.updateBuddyStatus()
+                }
+            }
+
+            AggregatedDirectRoomsOfContact {
+                id: aggregatedRooms
+
+                function updateContactId() {
+                    aggregatedRooms.setContactById(delg.contactId)
                 }
             }
 
@@ -156,10 +169,11 @@ Item {
                     initials: ViewHelper.initials(delg.contactName)
                     source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
                     visible: delg.hasAvatar || delg.name !== ""
-                    showBuddyStatus: delg.hasBuddyState || delg.isBlocked
-                    buddyStatus: delg.buddyStatus
+                    showPresenceStatus: delg.hasBuddyState || delg.isBlocked
+                    presenceStatus: delg.buddyStatus
                     isBlocked: delg.isBlocked
                     size: 40
+                    indicatorComponent: Component { BuddyStatusIndicator {} }
 
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
@@ -227,7 +241,9 @@ Item {
                     Label {
                         id: phoneNumberLabel
                         elide: Label.ElideRight
-                        text: delg.remotePhoneNumber
+                        text: delg.remotePhoneNumber + (delg.hops.length > 0
+                                                        ? qsTr(", via %1").arg(delg.hops.join(" → "))
+                                                        : "")
                         anchors {
                             left: parent.left
                             right: parent.right
@@ -401,6 +417,14 @@ Item {
                 }
             }
 
+            function removeEntry() {
+                const id = delg.id
+                const item = DialogFactory.createConfirmDialog({
+                                 text: qsTr("Are you sure you really want to remove this entry?")
+                             })
+                item.accepted.connect(() => historyModel.removeEntry(id))
+            }
+
             Component {
                 id: historyListContextMenuComponent
 
@@ -412,11 +436,23 @@ Item {
                     isBlocked: delg.isBlocked
                     isSipSubscriptable: delg.hasBuddyState
                     isReady: delg.isReady
-                    width: 230
+                    isOpenChatAvailable: !!aggregatedRooms.bestMatchingChatRoom
+
                     onCallClicked: () => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId)
                     onCallAsClicked: (identityId) => SIPCallManager.call(delg.account, delg.remoteUrl, delg.contactId, identityId)
                     onNotifyWhenAvailableClicked: () => delg.subscribeBuddyStatus()
                     onBlockTemporarilyClicked: () => SIPCallManager.toggleTemporaryBlock(delg.contactId, delg.remotePhoneNumber)
+                    onChatClicked: () => {
+                                       const room = aggregatedRooms.bestMatchingChatRoom
+                                       if (!room) {
+                                           return
+                                       }
+                                       const provider = room.chatProvider()
+                                       if (provider) {
+                                           ViewHelper.showChatRoom(provider, room.id)
+                                       }
+                                   }
+                    onRemoveItem: () => delg.removeEntry()
                 }
             }
 
@@ -429,6 +465,7 @@ Item {
                     roomName: delg.remotePhoneNumber
                     width: 230
                     onCallClicked: () => ViewHelper.requestMeeting(delg.remoteUrl)
+                    onRemoveItem: () => delg.removeEntry()
                 }
             }
 

@@ -8,10 +8,19 @@ import base
 Item {
     id: control
 
+    signal layoutChanged()
+
     required property string pageId
     required property string name
     required property string iconId
     required property var tabButton
+
+    WindowPixelRatio {
+        id: pixelRatio
+        window: control.Window.window
+    }
+
+    readonly property real devicePixelRatio: pixelRatio.ratio
 
     readonly property alias grid: snapGrid
     readonly property alias gridWidth: snapGrid.width
@@ -96,7 +105,7 @@ Item {
         id: snapGrid
         anchors {
             fill: parent
-            leftMargin: 24
+            leftMargin: Theme.d * 2
             bottomMargin: -16
         }
 

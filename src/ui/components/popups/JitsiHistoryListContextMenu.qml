@@ -8,9 +8,12 @@ Menu {
     id: control
 
     signal callClicked
+    signal removeItem
 
     property string roomName
     property bool isFavorite
+
+    onClosed: () => control.destroy()
 
     Action {
         id: startAction
@@ -38,11 +41,23 @@ Menu {
     Action {
         id: copyAction
         text: qsTr('Copy room name')
-        onTriggered: () => ViewHelper.copyToClipboard(control.roomName)
+        onTriggered: () => ClipboardHelper.copyToClipboard(control.roomName)
 
         Accessible.role: Accessible.MenuItem
         Accessible.name: copyAction.text
         Accessible.focusable: true
-        Accessible.onPressAction: () => ViewHelper.copyToClipboard(control.roomName)
+        Accessible.onPressAction: () => ClipboardHelper.copyToClipboard(control.roomName)
+    }
+
+    Action {
+        id: removeAction
+        text: qsTr("Remove")
+        icon.source: Icons.userTrash
+        onTriggered: () => control.removeItem()
+
+        Accessible.role: Accessible.Button
+        Accessible.name: removeAction.text
+        Accessible.focusable: true
+        Accessible.onPressAction: () => control.removeItem()
     }
 }

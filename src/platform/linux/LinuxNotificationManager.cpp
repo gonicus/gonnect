@@ -1,6 +1,7 @@
 #include <libnotify/notify.h>
 #include <QApplication>
 #include "LinuxNotificationManager.h"
+#include "Pinger.h"
 
 NotificationManager &NotificationManager::instance()
 {
@@ -44,10 +45,9 @@ QString LinuxNotificationManager::add(Notification *notification)
                                         notification->iconName().toStdString().c_str());
     } else {
         QByteArray iconData = notification->iconData();
-
         internalNotification = notify_notification_new(notification->title().toStdString().c_str(),
                                                        notification->body().toStdString().c_str(),
-                                                       iconData.isEmpty() ? "dummy" : nullptr);
+                                                       iconData.isEmpty() ? NULL : "dummy");
 
         if (!iconData.isEmpty()) {
             GdkPixbufLoader *loader = gdk_pixbuf_loader_new();
@@ -135,6 +135,13 @@ QString LinuxNotificationManager::add(Notification *notification)
     notify_notification_show(internalNotification, NULL);
     m_notifications.insert(id, notification);
     m_internalNotifications.insert(id, internalNotification);
+
+    // Ping sound
+    if (notification->playPing()) {
+        auto *pinger = new Pinger(this);
+        connect(pinger, &Pinger::stopped, this, [pinger]() { pinger->deleteLater(); });
+        pinger->ping();
+    }
 
     return notification->id();
 }

@@ -134,6 +134,7 @@ Item {
                         id: signalingEncryption
                         text: securityLevelColumn.signalEncryptionValue
                         spacing: 4
+                        color: Theme.primaryTextColor
                         icon {
                             source: control.isSignalingEncrypted ? Icons.securityHigh : Icons.securityLow
                             width: 24
@@ -147,6 +148,7 @@ Item {
                         id: mediaEncryption
                         text: securityLevelColumn.mediaEncryptedValue
                         spacing: 4
+                        color: Theme.primaryTextColor
                         icon {
                             source: control.isMediaEncrypted ? Icons.securityHigh : Icons.securityLow
                             width: 24
@@ -548,8 +550,9 @@ Item {
 
         BarButton {
             id: holdButton
-            text: control.isHolding ? qsTr("Resume") : qsTr("Hold")
-            iconPath: control.isHolding ? Icons.mediaPlaybackStart : Icons.mediaPlaybackPause
+            text: qsTr("Hold")
+            iconPath: Icons.mediaPlaybackPause
+            toggled: control.isHolding
             enabled: control.isEstablished && !control.isFinished
             visible: control.showHoldButton && control.isEstablished
             onClicked: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
@@ -561,8 +564,28 @@ Item {
             Accessible.onPressAction: () => holdButton.click()
         }
 
+        BarButton {
+            id: muteButton
+            text: qsTr("Mute")
+            iconPath: Icons.microphoneSensitivityMuted
+            toggled: AudioManager.isAudioCaptureMuted
+            enabled: control.isEstablished && !control.isFinished
+            tooltipText: muteButton.micMuteLocked
+                         ? qsTr("Microphone mute locked by headset")
+                         : ""
+            onClicked: () => GlobalMuteState.toggleMute()
+
+            readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
+
+            Accessible.role: Accessible.Button
+            Accessible.name: muteButton.text
+            Accessible.description: qsTr("Mute or unmute your audio input")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => muteButton.click()
+        }
+
         Rectangle {
-            visible: holdButton.visible || videoMuteButton.visible
+            visible: muteButton.visible || holdButton.visible || videoMuteButton.visible
             height: 32
             width: 1
             color: Theme.borderColor
@@ -575,10 +598,11 @@ Item {
         BarButton {
             id: audioInputDeviceButton
             text: qsTr("Micro")
-            iconPath: AudioManager.isAudioCaptureMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
+            iconPath: Icons.audioInputMicrophone
             enabled: control.areInCallButtonsEnabled
             showDropdownButton: true
-            onClicked: () => GlobalMuteState.toggleMute()
+
+            onClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
             onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
 
             AudioDeviceMenu {

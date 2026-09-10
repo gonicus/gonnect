@@ -27,7 +27,8 @@ public:
         NumbersCount,
         NumbersIndexOffset,
         SourceDisplayName,
-        SourcePriority
+        SourcePriority,
+        ChatSources,
     };
 
     explicit SearchListModel(QObject *parent = nullptr);

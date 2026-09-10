@@ -1,3 +1,113 @@
+# [2.5.0-beta.6](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.5...v2.5.0-beta.6) (2026-09-10)
+
+
+### Bug Fixes
+
+* change active button color ([31ce2ea](https://github.com/gonicus/gonnect/commit/31ce2ea77597377ed93b1429ed20ea4c6895a747))
+
+# [2.5.0-beta.5](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.4...v2.5.0-beta.5) (2026-09-09)
+
+
+### Bug Fixes
+
+* allow multiple CFG and ENV placeholders in config ([#580](https://github.com/gonicus/gonnect/issues/580)) ([58bb5c8](https://github.com/gonicus/gonnect/commit/58bb5c8de93730b1f019f9094eaee87216a7fb4d))
+* close knock participants window after all answered ([#692](https://github.com/gonicus/gonnect/issues/692)) ([19c7912](https://github.com/gonicus/gonnect/commit/19c7912e5007dfd8315c590db54b005d5a864d35))
+* dangling mwi pointer ([#682](https://github.com/gonicus/gonnect/issues/682)) ([ebfd06f](https://github.com/gonicus/gonnect/commit/ebfd06f8648ba821ebf33fe5a9de1095e059972f))
+* fixed behavior when changing room while typing answer ([#677](https://github.com/gonicus/gonnect/issues/677)) ([840e649](https://github.com/gonicus/gonnect/commit/840e6495423450c9907b46a6121137a494b2c2fd))
+* fixed crash because of empty stamp in jtisi message ([#582](https://github.com/gonicus/gonnect/issues/582)) ([075cd00](https://github.com/gonicus/gonnect/commit/075cd00469cdd8a451ae0e64f2febca479d53e2d))
+* initial network state ([#606](https://github.com/gonicus/gonnect/issues/606)) ([4515265](https://github.com/gonicus/gonnect/commit/45152659c82709d145f00ec312291e32cfdddb5b))
+* no contact purge on CardDAV error ([#596](https://github.com/gonicus/gonnect/issues/596)) ([ef06791](https://github.com/gonicus/gonnect/commit/ef0679135a14b1a1920fb8e566646f01ee58b900))
+* reorder messages on changing timestamp ([#691](https://github.com/gonicus/gonnect/issues/691)) ([bd11a6a](https://github.com/gonicus/gonnect/commit/bd11a6a9316c7b701ed4833cff7c9c8823129942))
+* resolve ambigous contact lookup by source prio ([#674](https://github.com/gonicus/gonnect/issues/674)) ([dae0e8f](https://github.com/gonicus/gonnect/commit/dae0e8fa08c2057d58ec7128c42dcf8a328ec7fc))
+* small fixes when sending presence state via ipc ([#689](https://github.com/gonicus/gonnect/issues/689)) ([cbcb1e8](https://github.com/gonicus/gonnect/commit/cbcb1e857d03889b345a9121fc35270349c9e4e4))
+* streamlined context menu opening for 2nd screen ([#669](https://github.com/gonicus/gonnect/issues/669)) ([57eb49d](https://github.com/gonicus/gonnect/commit/57eb49d1485f0f3b7a53065e53954ac2cd31ca7a))
+* sync width calculation with upstream ([#684](https://github.com/gonicus/gonnect/issues/684)) ([cc604ff](https://github.com/gonicus/gonnect/commit/cc604ff696a9b068858e17711bbefcf88da7e8a6))
+* updated i18n ([#696](https://github.com/gonicus/gonnect/issues/696)) ([673ef20](https://github.com/gonicus/gonnect/commit/673ef206fea7eb43c4d3cab675a48b544612075f))
+
+
+### Features
+
+* chat as widget ([#659](https://github.com/gonicus/gonnect/issues/659)) ([e90e719](https://github.com/gonicus/gonnect/commit/e90e7192e7dc446f31f872028e92dcb65fdfa602))
+* knock feature for jitsi meet ([#673](https://github.com/gonicus/gonnect/issues/673)) ([9476ba7](https://github.com/gonicus/gonnect/commit/9476ba77dd7fb203615545544ed1536670e3702b))
+* read marker for chat messages ([#668](https://github.com/gonicus/gonnect/issues/668)) ([a00a1c4](https://github.com/gonicus/gonnect/commit/a00a1c4f451e3ee59e897e5ad3a289e7c2f1317d))
+
+# [2.5.0-beta.4](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.3...v2.5.0-beta.4) (2026-08-25)
+
+
+### Bug Fixes
+
+* disable setting external ringer ([#643](https://github.com/gonicus/gonnect/issues/643)) ([1eaecb0](https://github.com/gonicus/gonnect/commit/1eaecb0069c66736f431f14ecc4173959d572acd))
+* **i18n:** fix Weblate quality issues ([#662](https://github.com/gonicus/gonnect/issues/662)) ([2be63ff](https://github.com/gonicus/gonnect/commit/2be63ff1703279529da9f3c32f06951140cec270))
+* initial hook workaround ([#649](https://github.com/gonicus/gonnect/issues/649)) ([15af3ad](https://github.com/gonicus/gonnect/commit/15af3addd8f6212fcfa6ba4c1a5c3e41a36d2e0d))
+* normalize phone numbers for history and favs the same way ([#636](https://github.com/gonicus/gonnect/issues/636)) ([43925d8](https://github.com/gonicus/gonnect/commit/43925d820239f2cb3ba81d9ae47c86c879b73aaa))
+* restore unsent message after editing another one ([#644](https://github.com/gonicus/gonnect/issues/644)) ([e638b42](https://github.com/gonicus/gonnect/commit/e638b42786242e3ceceb6c01efa3e2ff304d9c8f))
+
+
+### Features
+
+* history rows can now be removed ([#657](https://github.com/gonicus/gonnect/issues/657)) ([f01c2d6](https://github.com/gonicus/gonnect/commit/f01c2d67a951f8fc6ec65a065e0d9319231d2d4e))
+* pinned messages ([#650](https://github.com/gonicus/gonnect/issues/650)) ([c7890a4](https://github.com/gonicus/gonnect/commit/c7890a4fc161e5abe9fc7ca9715fe31abac10437))
+* show removed messages as such instead disappearing ([#653](https://github.com/gonicus/gonnect/issues/653)) ([560cc87](https://github.com/gonicus/gonnect/commit/560cc87567e23f1cd4f5a9512a239b596e0600d2))
+* uc chat call interlinks ([#655](https://github.com/gonicus/gonnect/issues/655)) ([827cc39](https://github.com/gonicus/gonnect/commit/827cc397a4bab9190ac5ee3b49cd1fc89509a318))
+* **ui:** show user names of reactions in tooltip ([#656](https://github.com/gonicus/gonnect/issues/656)) ([b8d18f4](https://github.com/gonicus/gonnect/commit/b8d18f495ce4c6c32d10c15b2e9d45834aecfd7b))
+
+# [2.5.0-beta.3](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.2...v2.5.0-beta.3) (2026-08-07)
+
+
+### Bug Fixes
+
+* adjust widget scaling ([#635](https://github.com/gonicus/gonnect/issues/635)) ([668924d](https://github.com/gonicus/gonnect/commit/668924df6fe71928c8c3020c49239ff6f7b52d49))
+* trigger network change when from connected to connected ([#637](https://github.com/gonicus/gonnect/issues/637)) ([9abca39](https://github.com/gonicus/gonnect/commit/9abca395196ff281469dd69c1b64a506ffe18031))
+* **ui:** fixed blurry items due to sub-pixel placement ([#634](https://github.com/gonicus/gonnect/issues/634)) ([913c813](https://github.com/gonicus/gonnect/commit/913c813e93c5c7de44612a5f3ccf4b3efb2bdcff))
+* use Shortcut to prevent focus issues ([#638](https://github.com/gonicus/gonnect/issues/638)) ([e569cfb](https://github.com/gonicus/gonnect/commit/e569cfb1c0569e1a4c8088766fd0295623eb0aa4))
+
+
+### Features
+
+* show direct chat after jitsi upgrade ([#627](https://github.com/gonicus/gonnect/issues/627)) ([afa39db](https://github.com/gonicus/gonnect/commit/afa39dba4733dd53bb2a2bd240c28f9edc70225a))
+* unified avatars from ldap and chat ([#628](https://github.com/gonicus/gonnect/issues/628)) ([c8da541](https://github.com/gonicus/gonnect/commit/c8da5418dfbd008016d5343924890f8e7dcbf142))
+
+# [2.5.0-beta.2](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.1...v2.5.0-beta.2) (2026-08-04)
+
+
+### Bug Fixes
+
+* allow multiple CFG and ENV placeholders in config ([#580](https://github.com/gonicus/gonnect/issues/580)) ([ed9f868](https://github.com/gonicus/gonnect/commit/ed9f868128ff47157fa5e8b3432a2f5a9b74626b))
+* avoid busy/hangup mixup in certain cases ([#583](https://github.com/gonicus/gonnect/issues/583)) ([9cb86b7](https://github.com/gonicus/gonnect/commit/9cb86b7ec3ba05a646c812677b09920093797792))
+* conan openssl mixup ([#612](https://github.com/gonicus/gonnect/issues/612)) ([7957b5f](https://github.com/gonicus/gonnect/commit/7957b5f537fcecaf9f20fa2ec806771cbe84dca7))
+* create direct chat room if not exists (via search) ([#624](https://github.com/gonicus/gonnect/issues/624)) ([4dc7ebf](https://github.com/gonicus/gonnect/commit/4dc7ebffc7061f037b198712d71c0df56086612c))
+* do not send requests when IPC is disconnected ([#602](https://github.com/gonicus/gonnect/issues/602)) ([2dc88a5](https://github.com/gonicus/gonnect/commit/2dc88a54468ad2e1f791910f84b6285bf10e6838))
+* fixed crash because of empty stamp in jtisi message ([#582](https://github.com/gonicus/gonnect/issues/582)) ([b9b6aef](https://github.com/gonicus/gonnect/commit/b9b6aef78936c39856dd4801ed9b43de70c7ca57))
+* fixed sending typing ping after message has been sent ([#617](https://github.com/gonicus/gonnect/issues/617)) ([3434d5b](https://github.com/gonicus/gonnect/commit/3434d5b846fc871046cf84f834135ffac6eda8ad))
+* initial network state ([#606](https://github.com/gonicus/gonnect/issues/606)) ([634406c](https://github.com/gonicus/gonnect/commit/634406cb09cc7e04357db417b98fb4e4f9a26483))
+* markdown fixes; CardDAV SIP subscribable attributes ([#584](https://github.com/gonicus/gonnect/issues/584)) ([0b4811c](https://github.com/gonicus/gonnect/commit/0b4811cb58e7376e86b15d502c9baff97d28f412))
+* no contact purge on CardDAV error ([#596](https://github.com/gonicus/gonnect/issues/596)) ([be8842e](https://github.com/gonicus/gonnect/commit/be8842eae71f45e0ce3ca8eb23305fc087c7cfa0))
+* persist matrix pw ([#607](https://github.com/gonicus/gonnect/issues/607)) ([a5aca29](https://github.com/gonicus/gonnect/commit/a5aca29ac349ca2e5788eaae0ca2d03cd7327482))
+* remove trailing new line from message ([#605](https://github.com/gonicus/gonnect/issues/605)) ([f09fbc5](https://github.com/gonicus/gonnect/commit/f09fbc5551b34c28e20cf23c4fb1ed201efa0c9c))
+* room invitations whilst offline ([#610](https://github.com/gonicus/gonnect/issues/610)) ([9fdca81](https://github.com/gonicus/gonnect/commit/9fdca8192771fd2299005c0b96cfaaac6e4a7f60))
+* small UI fixes ([#589](https://github.com/gonicus/gonnect/issues/589)) ([5ea1898](https://github.com/gonicus/gonnect/commit/5ea18981d4d042033f47216eb154ae97bb6448f4))
+* tiny UI issues ([#597](https://github.com/gonicus/gonnect/issues/597)) ([81ba9e0](https://github.com/gonicus/gonnect/commit/81ba9e089b089533a1c6a9a13fb99898d880c879))
+* ui polish ([#600](https://github.com/gonicus/gonnect/issues/600)) ([7095278](https://github.com/gonicus/gonnect/commit/7095278d98777a9f83900b6b639957209e0fda7f))
+* **ui:** better behavior of chat room creation ([#593](https://github.com/gonicus/gonnect/issues/593)) ([150515e](https://github.com/gonicus/gonnect/commit/150515ec15dd58936706fd765ad003630598b358))
+* **ui:** escape now closes popups ([#614](https://github.com/gonicus/gonnect/issues/614)) ([ab81b53](https://github.com/gonicus/gonnect/commit/ab81b53c7d7bc7c9e7d0dd088cf05c4b86d7083f))
+* **ui:** fixed disappearing section headers when leaving room ([#595](https://github.com/gonicus/gonnect/issues/595)) ([7f8f8ca](https://github.com/gonicus/gonnect/commit/7f8f8ca85650d0565186fc17586bb943469acdde))
+* **ui:** fixed newlines when editing chat message ([#599](https://github.com/gonicus/gonnect/issues/599)) ([809d270](https://github.com/gonicus/gonnect/commit/809d270b1a952932c9a7901dd2ab549ce72cc4d6))
+* **ui:** fixed overflowing buttons in LargeImage ([#603](https://github.com/gonicus/gonnect/issues/603)) ([27f8678](https://github.com/gonicus/gonnect/commit/27f8678cf8956e183d51461e3428df163990f420))
+* **ui:** make keyboard shortcuts work in web engine ([#615](https://github.com/gonicus/gonnect/issues/615)) ([93494eb](https://github.com/gonicus/gonnect/commit/93494eb8af934041cb0706fbb7392529795318f5))
+* **ui:** prevent overlapping widgets ([#608](https://github.com/gonicus/gonnect/issues/608)) ([fad8b56](https://github.com/gonicus/gonnect/commit/fad8b56a121ba38625622beac6ae9900d6057c5d))
+
+
+### Features
+
+* check file size and disallow to large files ([#604](https://github.com/gonicus/gonnect/issues/604)) ([597c475](https://github.com/gonicus/gonnect/commit/597c4758b0e866c72cf804a2ad29aa0c82f24826))
+* tag room with "[@room](https://github.com/room)" in message ([#618](https://github.com/gonicus/gonnect/issues/618)) ([8f41407](https://github.com/gonicus/gonnect/commit/8f414070204076c217315efef28657e9c3e19061))
+* **ui:** allow dtmf input in search box ([#609](https://github.com/gonicus/gonnect/issues/609)) ([51788a5](https://github.com/gonicus/gonnect/commit/51788a5e6dd44d0227b2266e6ef4d5724e74c602))
+
+
+### Performance Improvements
+
+* boost for initial matrix login ([#579](https://github.com/gonicus/gonnect/issues/579)) ([e9b1e3f](https://github.com/gonicus/gonnect/commit/e9b1e3fd857aa697db48b0b85779bdbadd024b0d))
+
 ## [2.4.1](https://github.com/gonicus/gonnect/compare/v2.4.0...v2.4.1) (2026-07-31)
 
 

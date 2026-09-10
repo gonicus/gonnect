@@ -4,6 +4,7 @@
 #include <QQmlEngine>
 #include <QStandardPaths>
 
+#include "ChatMessageContentVideoFile.h"
 #include "appversion.h"
 #include "Application.h"
 #include "NumberStats.h"
@@ -11,6 +12,7 @@
 #include "HeadsetDeviceProxy.h"
 
 class Ringer;
+class Pinger;
 class Contact;
 class CallHistoryItem;
 
@@ -22,11 +24,17 @@ class ViewHelper : public QObject
     Q_PROPERTY(QString userConfigPath READ userConfigPath CONSTANT FINAL)
     Q_PROPERTY(bool isDebugRun READ isDebugRun CONSTANT FINAL)
     Q_PROPERTY(bool isPlayingRingTone READ isPlayingRingTone NOTIFY isPlayingRingToneChanged FINAL)
+    Q_PROPERTY(bool isPlayingNotificationTone READ isPlayingNotificationTone NOTIFY
+                       isPlayingNotificationToneChanged FINAL)
     Q_PROPERTY(Contact *currentUser READ currentUser NOTIFY currentUserChanged FINAL)
     Q_PROPERTY(QString currentUserName READ currentUserName NOTIFY currentUserChanged FINAL)
     Q_PROPERTY(IConferenceConnector::StartFlags nextMeetingStartFlags MEMBER m_nextMeetingStartFlags
                        NOTIFY nextMeetingStartFlagsChanged FINAL)
     Q_PROPERTY(QObject *topDrawer MEMBER m_topDrawer NOTIFY topDrawerChanged FINAL)
+    Q_PROPERTY(QObject *globalEmojiPickerPopup MEMBER m_globalEmojiPickerPopup NOTIFY
+                       globalEmojiPickerPopupChanged FINAL)
+    Q_PROPERTY(QObject *globalFilteredEmojiPickerPopup MEMBER m_globalFilteredEmojiPickerPopup
+                       NOTIFY globalFilteredEmojiPickerPopupChanged FINAL)
     Q_PROPERTY(bool isActiveVideoCall READ isActiveVideoCall NOTIFY isActiveVideoCallChanged FINAL)
     Q_PROPERTY(bool unsupportedPlatform READ isUnsupportedPlatform CONSTANT FINAL)
     Q_PROPERTY(bool canSyncSystemMute READ canSyncSystemMute CONSTANT FINAL)
@@ -50,7 +58,7 @@ public:
 
     bool isDebugRun() const
     {
-        return qobject_cast<Application *>(Application::instance())->isDebugRun();
+        return static_cast<Application *>(Application::instance())->isDebugRun();
     }
     Q_INVOKABLE void downloadDebugInformation() const;
 
@@ -65,7 +73,6 @@ public:
     Q_INVOKABLE QString minutesToNiceText(uint minutes) const;
     Q_INVOKABLE QString secondsToNiceText(int seconds) const;
     Q_INVOKABLE int secondsDelta(const QDateTime &start, const QDateTime &end) const;
-    Q_INVOKABLE void copyToClipboard(const QString &str) const;
     Q_INVOKABLE void reloadAddressBook() const;
 
     Q_INVOKABLE QString preprocessSearchText(const QString &in) const;
@@ -79,9 +86,6 @@ public:
     Contact *currentUser() const { return m_currentUser; }
     QString currentUserName() const;
 
-    /// List of file name filters for supported audio files (as used by a file picker dialog)
-    Q_INVOKABLE QStringList audioFileSelectors() const;
-
     Q_INVOKABLE void toggleFavorite(const QString &phoneNumber,
                                     const NumberStats::ContactType contactType) const;
 
@@ -91,6 +95,10 @@ public:
     Q_INVOKABLE void testPlayRingTone(qreal volume);
     Q_INVOKABLE void stopTestPlayRingTone();
     bool isPlayingRingTone() const { return m_isPlayingRingTone; }
+
+    Q_INVOKABLE void testPlayNotificationTone(qreal volume);
+    Q_INVOKABLE void stopTestPlayNotificationTone();
+    bool isPlayingNotificationTone() const { return m_isPlayingNotificationTone; }
 
     Q_INVOKABLE void resetTrayIcon() const;
 
@@ -107,6 +115,8 @@ public:
     void requestRecoveryKey(const QString &id, const QString &displayName);
     Q_INVOKABLE void respondRecoveryKey(const QString &id, const QString &key);
 
+    void requestUrlCopyDialog(const QUrl &url, const QString &text);
+
     Q_INVOKABLE uint durationCallVisibleAfterEnd() const { return GONNECT_CALL_VISIBLE_AFTER_END; }
 
     const QString requestUserVerification(const QString &verificationKey);
@@ -121,11 +131,10 @@ public:
     Q_INVOKABLE void
     requestMeeting(const QString &roomName,
                    QPointer<CallHistoryItem> callHistoryItem = QPointer<CallHistoryItem>(),
-                   const QString &displayName = "");
+                   const QString &displayName = "",
+                   QPointer<Contact> contact = QPointer<Contact>());
 
     Q_INVOKABLE void requestExternalAppointment(const QString &link);
-
-    Q_INVOKABLE void setCallInForegroundByIds(const QString &accountId, int callId);
 
     bool isActiveVideoCall() const { return m_isActiveVideoCall; }
     Q_INVOKABLE bool hasNonSilentCall() const;
@@ -138,6 +147,12 @@ public:
     Q_INVOKABLE void toggleFullscreen();
 
     Q_INVOKABLE uint numberOfGridCells() const;
+
+    Q_INVOKABLE QString stripLinkTags(const QString &link) const;
+
+    Q_INVOKABLE bool isSingleEmoji(const QString &str) const;
+    Q_INVOKABLE bool isShortEmojiString(const QString &str) const;
+    Q_INVOKABLE QString leadingEmoji(const QString &str) const;
 
     QString culturalSphereExtension() const;
 
@@ -156,20 +171,28 @@ private:
     QHash<QRegularExpression, QString> m_preprocessRegexs;
 
     bool m_isPlayingRingTone = false;
+    bool m_isPlayingNotificationTone = false;
     Ringer *m_ringer = nullptr;
     QTimer m_ringerTimer;
+    Pinger *m_pinger = nullptr;
+    QTimer m_pingerTimer;
     Contact *m_currentUser = nullptr;
     IConferenceConnector::StartFlags m_nextMeetingStartFlags =
             IConferenceConnector::StartFlag::AudioActive;
     QObject *m_topDrawer = nullptr;
+    QObject *m_globalEmojiPickerPopup = nullptr;
+    QObject *m_globalFilteredEmojiPickerPopup = nullptr;
     bool m_isActiveVideoCall = false;
 
 Q_SIGNALS:
     void activateSearch();
     void isPlayingRingToneChanged();
+    void isPlayingNotificationToneChanged();
     void currentUserChanged();
     void nextMeetingStartFlagsChanged();
     void topDrawerChanged();
+    void globalEmojiPickerPopupChanged();
+    void globalFilteredEmojiPickerPopupChanged();
     void isActiveVideoCallChanged();
 
     void showSettings();
@@ -178,16 +201,31 @@ Q_SIGNALS:
     void showShortcuts();
     void showAbout();
     void showDialPad();
-    void showFirstAid();
     void showQuitConfirm();
+    void showChatRoom(IChatProvider *provider, QString roomId);
+    void showCreateRoomDialog(IChatProvider *provider, QStringList invitedUserIds,
+                              QString name = "");
+    void showEditRoomDialog(IChatProvider *provider, QString roomId);
+    void showInviteUserToRoomDialog(IChatProvider *provider, QString roomId);
+    void showEditMessageDialog(IChatProvider *provider, QString roomId, QString messageId,
+                               QString content);
+    void showStatusTextEditDialog();
+    void showFileUploadDialog(IChatRoom *chatRoom, QList<QUrl> fileUrls);
     void showEmergency(QString accountId, int callId, QString displayName);
     void hideEmergency();
     void showConferenceChat();
     void fullscreenToggle();
+    void showChatUserSearchDialog(IChatProvider *provider);
+    void showPublicRoomSearchDialog(IChatProvider *provider);
+    void showKnockRoomDialog(IChatProvider *provider, QString roomId);
+    void showLargeImage(QUrl imageFilePath);
+    void showLargeVideo(ChatMessageContentVideoFile *file);
 
     void openMeetingRequested(QString meetingId, QString displayName,
                               IConferenceConnector::StartFlags startFlags,
-                              QPointer<CallHistoryItem> callHistoryItem);
+                              QPointer<CallHistoryItem> callHistoryItem, QPointer<Contact> contact);
+
+    void meetingEstablished(QString roomName);
 
     void passwordRequested(QString id, QString host);
     void passwordResponded(QString id, QString password);
@@ -202,6 +240,8 @@ Q_SIGNALS:
 
     void userVerificationRequested(QString id, QString verificationKey);
     void userVerificationResponded(QString id, bool isAccepted);
+
+    void urlCopyDialogRequested(QUrl url, QString text);
 };
 
 class ViewHelperWrapper
@@ -212,7 +252,11 @@ class ViewHelperWrapper
     QML_SINGLETON
 
 public:
-    static ViewHelper *create(QQmlEngine *, QJSEngine *) { return &ViewHelper::instance(); }
+    static ViewHelper *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&ViewHelper::instance(), QQmlEngine::CppOwnership);
+        return &ViewHelper::instance();
+    }
 
 private:
     ViewHelperWrapper() = default;

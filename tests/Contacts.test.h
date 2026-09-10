@@ -18,4 +18,8 @@ private slots:
     void testIsSipUri();
     void testNumberFromSipUrl();
     void testNameFromSipUrl();
+    void testBareURI();
+    void testClearInternationalChars();
+    void testIsEmergencyCallUrl();
+    void testIsNumberAnonymous();
 };

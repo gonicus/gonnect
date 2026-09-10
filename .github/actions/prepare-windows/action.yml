@@ -14,15 +14,6 @@ runs:
       with:
         cmake-version: 'latest'
 
-    - name: Install NSIS
-      id: nsis
-      uses: negrutiu/nsis-install@9c575d44c2938a43e38a305caeb403de90303c60 # v3
-
-    - name: Install `ExecDos` NSIS-plugin
-      uses: negrutiu/nsis-install-plugin@c7f666810808b77249537bec2f7110e7ad9340b1 # v1
-      with:
-        url: https://nsis.sourceforge.io/mediawiki/images/0/0f/ExecDos.zip
-
     - name: Get QT-Version
       id: get-qt
       uses: ./.github/actions/get-qt-version
@@ -33,19 +24,21 @@ runs:
         version: ${{ steps.get-qt.outputs.qt-version }}
         host: 'windows'
         target: 'desktop'
+        aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@refs/pull/1000/head'
         modules: 'qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools'
         arch: 'win64_msvc2022_64'
         cache: true
 
     - name: Install Conan
-      uses: conan-io/setup-conan@2f4bd34e8e0af00e1a77a66e1d284e06d71d703f # v1
+      uses: conan-io/setup-conan@ed3942a6883243f4af84e13e49c972f9440fa1c2 # v1
       with:
-        version: 2.28.1
+        version: 2.29.0
         cache_packages: true
 
     - name: Install Conan dependencies
       shell: cmd
       run: |
+        choco install protoc --yes
         conan config install resources/conan
         conan export-dependencies .
-        conan install . --build=missing -s compiler.cppstd=17
+        conan install . --build=missing -s compiler.cppstd=20

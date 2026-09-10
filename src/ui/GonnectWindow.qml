@@ -14,9 +14,12 @@ BaseWindow {
     minimumHeight: 600
     title: "GOnnect"
     resizable: true
+    windowHeaderOverlapsContent: true
 
     LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
+
+    property var previousPage
 
     readonly property LoggingCategory lc: LoggingCategory {
         id: category
@@ -27,7 +30,6 @@ BaseWindow {
     windowHeaderComponent: Component {
         CustomWindowHeader {
             mainBarWidth: mainTabBar.width
-            mainBarColor: mainTabBar.backgroundColor
 
             showSearch: !SM.uiEditMode
 
@@ -37,9 +39,18 @@ BaseWindow {
     }
 
     onActiveChanged: () => {
+        SelectionState.setIsMainWindowActive(control.active)
+
         if (control.active) {
             SIPCallManager.resetMissedCalls()
         }
+    }
+
+    Component.onCompleted: () => {
+        Qt.callLater(() => {
+            SelectionState.setIsMainWindowActive(control.active)
+            control.showPage(SelectionState.homePageId(), MainPageSelection.PageType.Base)
+        })
     }
 
     function ensureVisible() {
@@ -59,23 +70,6 @@ BaseWindow {
         property alias gonnectWindowHeight: control.height
     }
 
-    enum PageType {
-        Base,
-        Call,
-        Chats,
-        Conference,
-        Settings
-    }
-
-    // INFO: Static page ID's
-    property string homePageId: "page_home"
-    property string callPageId: "page_call"
-    property string chatsPageId: "page_chats"
-    property string conferencePageId: "page_conference"
-    property string settingsPageId: "page_settings"
-
-    property var previousPage
-
     readonly property CallsModel globalCallsModel: CallsModel {
         id: callsModel
     }
@@ -85,63 +79,53 @@ BaseWindow {
 
         function onCallStarted(isConference : bool) {
             if (isConference) {
-                control.updateTabSelection(control.conferencePageId,
-                                           GonnectWindow.PageType.Conference)
+                control.showPage(SelectionState.conferencePageId(),
+                                           MainPageSelection.PageType.Conference)
             } else {
-                control.updateTabSelection(control.callPageId,
-                                           GonnectWindow.PageType.Call)
+                control.showPage(SelectionState.callPageId(),
+                                           MainPageSelection.PageType.Call)
             }
         }
 
         function onCallEnded(isConference : bool) {
             const count = GlobalCallState.activeCallsCount
-            const isOnCallPage = mainTabBar.selectedPageType === GonnectWindow.PageType.Call
-            const isOnConferencePage = mainTabBar.selectedPageType === GonnectWindow.PageType.Conference
+            const isOnCallPage = SelectionState.selectedPage.type === MainPageSelection.PageType.Call
+            const isOnConferencePage = SelectionState.selectedPage.type === MainPageSelection.PageType.Conference
 
             if (count && isOnCallPage && ViewHelper.isActiveVideoCall) {
-                control.updateTabSelection(control.conferencePageId,
-                                           GonnectWindow.PageType.Conference)
+                control.showPage(SelectionState.conferencePageId(),
+                                           MainPageSelection.PageType.Conference)
             } else if (count && isOnConferencePage && isConference) {
-                control.updateTabSelection(control.callPageId,
-                                           GonnectWindow.PageType.Call)
+                control.showPage(SelectionState.callPageId(),
+                                           MainPageSelection.PageType.Call)
             } else if (!count && (isOnCallPage || isOnConferencePage)) {
-                control.updateTabSelection(control.homePageId,
-                                           GonnectWindow.PageType.Base)
+                control.showPage(SelectionState.homePageId(),
+                                           MainPageSelection.PageType.Base)
             }
         }
     }
 
-    function updateTabSelection(pageId : string, pageType : int) {
-        // page{Id,Type} changes not as a result of tab bar clicks
-        mainTabBar.selectedPageId = pageId
-        mainTabBar.selectedPageType = pageType
-    }
-
-    function showPage(pageId : string) {
-        if (previousPage) {
-            previousPage.visible = false
-        }
-
-        let page = pageStack.getPage(pageId)
-        if (page) {
-            page.visible = true
-            previousPage = page
+    function showPage(pageId : string, pageType : int, attachedData = undefined) {
+        SelectionState.selectedPage = {
+            id: pageId,
+            type: pageType,
+            attachedData: attachedData ? (attachedData as QtObject) : undefined
         }
     }
 
-    function openMeeting(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant) {
-        control.updateTabSelection(control.conferencePageId,
-                                   GonnectWindow.PageType.Conference)
-        conferencePage.startConference(meetingId, displayName, startFlags, callHistoryItem)
+    function openMeeting(meetingId : string, displayName : string, startFlags : int, callHistoryItem : variant, contact : variant) {
+        control.showPage(SelectionState.conferencePageId(),
+                                   MainPageSelection.PageType.Conference)
+        conferencePage.startConference(meetingId, displayName, startFlags, callHistoryItem, contact)
     }
 
     function updateCallInForeground() {
-        if (mainTabBar.selectedPageType === GonnectWindow.PageType.Conference) {
-            GlobalCallState.callInForeground = conferencePage.iConferenceConnector
-        } else if (mainTabBar.selectedPageType === GonnectWindow.PageType.Call) {
+        if (SelectionState.selectedPage.type === MainPageSelection.PageType.Conference) {
+            SelectionState.callInForeground = conferencePage.iConferenceConnector
+        } else if (SelectionState.selectedPage.type === MainPageSelection.PageType.Call) {
             const selectedCallItem = callPage.selectedCallItem
             if (selectedCallItem) {
-                ViewHelper.setCallInForegroundByIds(selectedCallItem.accountId, selectedCallItem.callId)
+                SelectionState.setCallInForeground(selectedCallItem.accountId, selectedCallItem.callId)
             }
         }
     }
@@ -156,7 +140,7 @@ BaseWindow {
         pageModel.remove(page)
         page.model.removeAll()
         page.destroy()
-        delete pageStack.getPage(pageId)
+        delete pageStack.pages[pageId]
 
         mainTabBar.saveTabList()
     }
@@ -182,7 +166,7 @@ BaseWindow {
     }
 
     function loadPages() {
-        pageReader.loadHomePage(control.homePageId)
+        pageReader.loadHomePage(SelectionState.homePageId())
         pageReader.loadDynamicPages()
         mainTabBar.sortTabList()
     }
@@ -191,7 +175,10 @@ BaseWindow {
         id: pages
     }
 
-    property int notifications: pageModel.notifications
+    readonly property int voicemailCount: SIPAccountManager.messagesWaiting && (SIPAccountManager.newVoiceMessageCount + SIPAccountManager.oldVoiceMessageCount) === 0
+                                                                                ? 1
+                                                                                : SIPAccountManager.newVoiceMessageCount + SIPAccountManager.oldVoiceMessageCount
+    property int notifications: SIPCallManager.missedCalls + ChatConnectorManager.unreadNotificationsCount + control.voicemailCount
 
     onNotificationsChanged: () => {
         SystemTrayMenu.setBadgeNumber(control.notifications)
@@ -210,27 +197,75 @@ BaseWindow {
     }
 
     Item {
+        id: shortcutContainer
         anchors.fill: parent
 
-        Keys.onPressed: keyEvent => {
-            if (keyEvent.key === Qt.Key_F11 || (keyEvent.key === Qt.Key_Escape && control.visibility === Window.FullScreen)) {
+        function hasPopupFocus() {
+            let item = control.activeFocusItem
+            while (item) {
+                if (item === control.Overlay.overlay) {
+                    return true
+                }
+                item = item.parent
+            }
+            return false
+        }
 
-                // Toggle fullscreen
-                keyEvent.accepted = true
+        Shortcut {
+            sequences: ["Ctrl+F", "Ctrl+K"]
+            enabled: !SM.uiEditMode
+            onActivated: () => {
+                             if (!shortcutContainer.hasPopupFocus()) {
+                                 ViewHelper.activateSearch()
+                             }
+                         }
+        }
+        Shortcut {
+            sequence: "Escape"
+            enabled: control.visibility === Window.FullScreen
+            onActivated: () => ViewHelper.toggleFullscreen()
+        }
+        Shortcut {
+            sequence: "F11"
+            onActivated: () => ViewHelper.toggleFullscreen()
+        }
+        Shortcut {
+            sequence: "Ctrl+Shift+M"
+            onActivated: () => GlobalMuteState.toggleMute()
+        }
+        Shortcut {
+            sequence: "Ctrl+V"
+            onActivated: () => {
+                             // Paste clipboard image content, if applicable
+                             if (!ClipboardHelper.hasImage()) {
+                                 return
+                             }
+
+                             const page = control.getPage(SelectionState.selectedPage.id)
+                             if (page && page.hasOwnProperty("useImageFromClipboard") && typeof page["useImageFromClipboard"] === "function") {
+                                 page.useImageFromClipboard()
+                             }
+                         }
+        }
+
+        Connections {
+            target: WebEngineKeyEventFilter
+
+            function onF11Pressed() {
                 ViewHelper.toggleFullscreen()
-
-            } else if (keyEvent.key === Qt.Key_F && (keyEvent.modifiers & Qt.ControlModifier)) {
-
-                // Focus search field
-                keyEvent.accepted = true
+            }
+            function onEscapePressed() {
+                if (control.visibility === Window.FullScreen) {
+                    ViewHelper.toggleFullscreen()
+                }
+            }
+            function onCtrlFPressed() {
                 ViewHelper.activateSearch()
-
-            } else if (keyEvent.key === Qt.Key_M
-                       && (keyEvent.modifiers & Qt.ControlModifier)
-                       && (keyEvent.modifiers & Qt.ShiftModifier)) {
-
-                // Toggle Mute
-                keyEvent.accepted = true
+            }
+            function onCtrlKPressed() {
+                ViewHelper.activateSearch()
+            }
+            function onCtrlShiftMPressed() {
                 GlobalMuteState.toggleMute()
             }
         }
@@ -279,6 +314,8 @@ BaseWindow {
 
             Loader {
                 id: topDrawerLoader
+
+                onItemChanged: () => topDrawerLoader.item?.forceActiveFocus()
             }
         }
 
@@ -289,8 +326,6 @@ BaseWindow {
 
         MainTabBar {
             id: mainTabBar
-            selectedPageId: control.homePageId
-            selectedPageType: GonnectWindow.PageType.Base
 
             mainWindow: control
 
@@ -302,18 +337,6 @@ BaseWindow {
                 top: parent.top
                 bottom: parent.bottom
             }
-
-            onSelectedPageIdChanged: {
-                control.showPage(selectedPageId)
-            }
-
-            onSelectedPageTypeChanged: {
-                control.updateCallInForeground()
-            }
-
-            Component.onCompleted: {
-                control.showPage(selectedPageId)
-            }
         }
 
         ControlBar {
@@ -322,6 +345,7 @@ BaseWindow {
             showSearch: !SM.uiEditMode
             anchors {
                 top: parent.top
+                topMargin: 5
                 left: mainTabBar.right
                 right: parent.right
             }
@@ -336,19 +360,25 @@ BaseWindow {
                 left: mainTabBar.right
                 right: parent.right
                 top: controlBar.visible ? controlBar.bottom : parent.top
-                bottom: bottomBar.visible ? bottomBar.top : parent.bottom
+                topMargin: controlBar.visible ? 5 : (Theme.useOwnDecoration ? control.windowHeaderHeight : 0)
+                bottom: togglerList.visible ? togglerList.top : parent.bottom
+                bottomMargin: togglerList.visible ? Theme.d/2 : Theme.d
             }
 
             function getPage(pageId : string) : Item {
                 switch (pageId) {
-                    case control.homePageId:
+                    case SelectionState.homePageId():
                         return homePage
-                    case control.callPageId:
+                    case SelectionState.callPageId():
                         return callPage
-                    case control.conferencePageId:
+                    case SelectionState.chatsPageId():
+                        return chatsPage
+                    case SelectionState.conferencePageId():
                         return conferencePage
-                    case control.settingsPageId:
+                    case SelectionState.settingsPageId():
                         return settingsPage
+                    case SelectionState.emergencyPageId():
+                        return emergencyPage
                     default:
                         return pageStack.pages[pageId]
                 }
@@ -361,10 +391,10 @@ BaseWindow {
                 visible: false
                 anchors.fill: parent
 
-                pageId: control.homePageId
+                pageId: SelectionState.homePageId()
                 name: qsTr("Home")
                 iconId: "userHome"
-                tabButton: mainTabBar.getTabById(control.homePageId)
+                tabButton: mainTabBar.getTabById(SelectionState.homePageId())
             }
 
             Call {
@@ -377,6 +407,7 @@ BaseWindow {
 
             Chats {
                 id: chatsPage
+                attachedData: SelectionState.selectedPage.attachedData as IChatProvider
                 visible: false
                 anchors.fill: parent
             }
@@ -392,60 +423,125 @@ BaseWindow {
                 visible: false
                 anchors.fill: parent
             }
+
+            Emergency {
+                id: emergencyPage
+                visible: false
+                anchors.fill: parent
+            }
         }
 
-        Item {
-            id: bottomBar
-            visible: true
-            height: 35
+        TogglerList {
+            id: togglerList
+            visible: togglerList.count > 0
+            clip: true
+            width: Math.min(togglerList.contentWidth + togglerList.leftMargin + togglerList.rightMargin,
+                            parent.width - mainTabBar.width)
             anchors {
                 right: parent.right
-                left: mainTabBar.right
                 bottom: parent.bottom
+                bottomMargin: Theme.d / 2 - (Theme.useOwnDecoration ? 0 : 3)  // extra padding for window border
+            }
+        }
+    }
+
+    readonly property Popup globalEmojiPickerPopupItem: EmojiPickerPopup {
+        id: globalEmojiPickerPopup
+        Component.onCompleted: () => ViewHelper.globalEmojiPickerPopup = globalEmojiPickerPopup
+    }
+
+    readonly property Popup globalFilteredEmojiPopupItem: FilteredEmojis {
+        id: globalFilteredEmojiPopup
+        Component.onCompleted: () => ViewHelper.globalFilteredEmojiPickerPopup = globalFilteredEmojiPopup
+    }
+
+    readonly property Connections selectionStateConnections: Connections {
+        target: SelectionState
+        function onSelectedPageChanged() {
+            if (control.previousPage) {
+                control.previousPage.visible = false
             }
 
-            TogglerList {
-                id: togglerList
-                visible: togglerList.count > 0
-                clip: true
-                anchors {
-                    left: parent.left
-                    right: rightRow.left
-                    rightMargin: 24
-                    verticalCenter: rightRow.verticalCenter
-                }
+            const page = pageStack.getPage(SelectionState.selectedPage.id)
+            if (page) {
+                page.visible = true
+                control.previousPage = page
             }
 
-            Row {
-                id: rightRow
-                spacing: 10
-                anchors {
-                    right: parent.right
-                    bottom: parent.bottom
-                    rightMargin: 6
-                }
-
-                FirstAidButton {
-                    id: firstAidButton
-                    height: 42
-                    z: 100000
-                }
-            }
+            control.updateCallInForeground()
         }
     }
 
     readonly property Connections viewHelperConnections: Connections {
         target: ViewHelper
+        function onUrlCopyDialogRequested(url, text) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/UrlCopyDialog.qml", { url, text })
+        }
         function onShowDialPad() {
             const item = drawerStackView.push("qrc:/qt/qml/base/ui/components/controls/DtmfDialer.qml")
             item.dialed.connect(button => console.log(category, "TODO: DIAL", button))
         }
-        function onShowFirstAid() {
-            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FirstAid.qml")
+        function onShowChatUserSearchDialog(chatProvider : IChatProvider) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/ChatUserSearch.qml", { chatProvider })
+        }
+        function onShowPublicRoomSearchDialog(chatProvider : IChatProvider) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/PublicRoomSearch.qml", { chatProvider })
+        }
+        function onShowKnockRoomDialog(chatProvider : IChatProvider, roomId : string) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/KnockChatRoom.qml",
+                                 { chatProvider, roomId })
         }
         function onShowConferenceChat() {
             control.ensureVisible()
-            control.updateTabSelection(control.conferencePageId, GonnectWindow.PageType.Conference)
+            control.showPage(SelectionState.conferencePageId(), MainPageSelection.PageType.Conference)
+        }
+        function onShowChatRoom(provider : IChatProvider, roomId : string) {
+            console.debug(category, `Showing room "${roomId}" for provider "${provider.id}" on page "${SelectionState.chatsPageId()}"`)
+
+            control.ensureVisible()
+            control.showPage(SelectionState.chatsPageId(), MainPageSelection.PageType.Chats, provider)
+
+            const page = pageStack.getPage(SelectionState.chatsPageId())
+            page.showChatRoom(roomId)
+        }
+        function onShowCreateRoomDialog(chatProvider : IChatProvider, invitedUserIds : list<string>, name : string) {
+            control.ensureVisible()
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/CreateChatRoom.qml",
+                                 { chatProvider, userIds: invitedUserIds, roomName : name })
+        }
+        function onShowEditRoomDialog(chatProvider : IChatProvider, roomId : string) {
+            control.ensureVisible()
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditChatRoom.qml",
+                                 { chatProvider, roomId })
+        }
+        function onShowInviteUserToRoomDialog(chatProvider : IChatProvider, roomId : string) {
+            control.ensureVisible()
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/InviteChatRoom.qml",
+                                 { chatProvider, roomId })
+        }
+        function onShowEditMessageDialog(chatProvider : IChatProvider, roomId : string, messageId : string, content : string) {
+            control.ensureVisible()
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditChatMessage.qml",
+                                 { chatProvider, roomId, messageId, text: content })
+        }
+        function onShowFileUploadDialog(chatRoom : IChatRoom, fileUrls : list<url>) {
+            if (chatRoom) {
+                drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/FileSelectionOverview.qml",
+                                     { chatRoom, fileUrls })
+            } else {
+                console.error("showFileUploadDialog was called width chatRoom=nullptr and is therefore ignored")
+            }
+        }
+        function onShowLargeImage(imageFilePath : url) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeImage.qml", { source : imageFilePath })
+        }
+        function onShowLargeVideo(videoContent : ChatMessageContentVideoFile) {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/LargeVideo.qml", {
+                                     content: videoContent
+                                 })
+        }
+        function onShowStatusTextEditDialog() {
+            drawerStackView.push("qrc:/qt/qml/base/ui/components/popups/EditStatusText.qml")
         }
         function onFullscreenToggle() {
             if (control.visibility === Window.FullScreen) {
@@ -458,12 +554,17 @@ BaseWindow {
 
     readonly property Popup mainDrawer: Popup {
         id: mainDrawer
-        width: drawerStackView.currentItem  ? Math.min(0.63 * control.width,  drawerStackView.currentItem?.implicitWidth)  : (0.63 * control.width)
-        height: drawerStackView.currentItem ? Math.min(0.63 * control.height, drawerStackView.currentItem?.implicitHeight) : (0.63 * control.height)
+        width: drawerStackView.currentItem
+               ? Util.clamp(drawerStackView.currentItem.implicitWidth, 0.38 * control.width, control.width - 100)
+               : 0
+        height: drawerStackView.currentItem
+                ? Util.clamp(drawerStackView.currentItem.implicitHeight, 0.63 * control.height, control.height - 100)
+                : 0
         modal: true
         anchors.centerIn: parent
+        background.visible: !drawerStackView.currentItem || !drawerStackView.currentItem.hidePopupBackground
 
-        onClosed: drawerStackView.clear()
+        onClosed: () => drawerStackView.clear()
 
         StackView {
             id: drawerStackView

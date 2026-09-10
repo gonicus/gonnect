@@ -24,7 +24,7 @@ BaseWidget {
         CardHeading {
             id: dateHeading
             visible: true
-            text: qsTr("Appointments")
+            text: qsTr("Events")
             anchors {
                 top: parent.top
                 left: parent.left
@@ -50,8 +50,8 @@ BaseWidget {
             id: dateInfo
             color: Theme.secondaryTextColor
             visible: !dateList.count > 0
-            text: dateWidget.isInitializing ? qsTr("Loading appointments...")
-                                            : qsTr("No upcoming appointments")
+            text: dateWidget.isInitializing ? qsTr("Loading events...")
+                                            : qsTr("No upcoming events")
             wrapMode: Label.Wrap
             width: dateList.width
             horizontalAlignment: Text.AlignHCenter
@@ -61,7 +61,7 @@ BaseWidget {
             }
 
             Accessible.role: Accessible.StaticText
-            Accessible.name: qsTr("Date event widget status")
+            Accessible.name: qsTr("Event widget status")
             Accessible.description: qsTr("Displays the current status of the widget: %1").arg(dateInfo.text)
         }
 
