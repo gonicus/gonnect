@@ -368,9 +368,9 @@ qt_add_qml_module(gonnect
         ui/components/controls/BarButton.qml
         ui/components/controls/BottomButtonBar.qml
         ui/components/controls/BottomButtonBarButton.qml
-        ui/components/controls/BottomButtonBarSeparator.qml
         ui/components/controls/BusyIndicator.qml
         ui/components/controls/Button.qml
+        ui/components/controls/ButtonBarSeparator.qml
         ui/components/controls/CheckBox.qml
         ui/components/controls/ClipboardButton.qml
         ui/components/controls/ControlBar.qml
@@ -421,9 +421,11 @@ qt_add_qml_module(gonnect
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
+        ui/components/popups/CallMoreMenu.qml
         ui/components/popups/ChatUserSearch.qml
-        ui/components/popups/DialInInfo.qml
+        ui/components/popups/ConferenceMoreMenu.qml
         ui/components/popups/CreateChatRoom.qml
+        ui/components/popups/DialInInfo.qml
         ui/components/popups/EditChatRoom.qml
         ui/components/popups/EditChatMessage.qml
         ui/components/popups/EditStatusText.qml
@@ -737,12 +739,18 @@ qt_add_qml_module(gonnect
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
         helper/CodeHighlighter.cpp
+        helper/ConferenceFavoriteHelper.h
+        helper/ConferenceFavoriteHelper.cpp
         helper/ContactHelper.h
         helper/ContactHelper.cpp
         helper/FileContentHelper.h
         helper/FileContentHelper.cpp
+        helper/GenericFavoriteHelper.h
+        helper/GenericFavoriteHelper.cpp
         helper/SecretGenerator.h
         helper/SecretGenerator.cpp
+        helper/SipFavoriteHelper.h
+        helper/SipFavoriteHelper.cpp
         # helper/SpellCheckHighlighter.h
         # helper/SpellCheckHighlighter.cpp
         helper/TextFormatHelper.h

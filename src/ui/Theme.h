@@ -115,6 +115,8 @@ public:
     bool isDarkMode() const { return m_isDarkMode; }
     bool useOwnDecoration();
 
+    Q_INVOKABLE QColor pickForegroundColor(const QColor &backgroundColor) const;
+
     Q_INVOKABLE void setUseOwnDecoration(bool value);
 
     QColor primaryTextColor() const { return m_primaryTextColor; }
@@ -230,6 +232,9 @@ private:
     bool m_isDarkMode = false;
     bool m_useOwnDecoration = false;
     bool m_useOwnDecorationInitalized = false;
+
+    QColor m_primaryTextColorLightMode = QColor(5, 5, 5);
+    QColor m_primaryTextColorDarkMode = QColor(248, 248, 248);
 
     QColor m_primaryTextColor;
     QColor m_foregroundWhiteColor;

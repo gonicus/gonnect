@@ -513,6 +513,77 @@ Item {
         }
 
         BarButton {
+            id: favButton
+            text: qsTr("Favorite")
+            iconPath: Icons.folderFavorites
+            toggled: confFavHelper.isFavorite
+            onClicked: () => confFavHelper.toggleFavorite()
+
+            SipFavoriteHelper {
+                id: confFavHelper
+                sipAddress: control.callItem?.phoneNumber ?? ""
+            }
+        }
+
+        ButtonBarSeparator {}
+
+        BarButton {
+            id: holdButton
+            toggleColorMode: BarButton.ToggleColorMode.Warn
+            text: qsTr("Hold")
+            iconPath: Icons.mediaPlaybackPause
+            toggled: control.isHolding
+            enabled: control.isEstablished && !control.isFinished
+            visible: control.showHoldButton && control.isEstablished
+            onClicked: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
+
+            Accessible.role: Accessible.Button
+            Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
+            Accessible.description: qsTr("Update the call hold state")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => holdButton.click()
+        }
+
+        BarButton {
+            id: muteButton
+            toggled: AudioManager.isAudioCaptureMuted
+            enabled: control.isEstablished && !control.isFinished
+            toggleColorMode: BarButton.ToggleColorMode.Warn
+            text: qsTr("Microphone")
+            iconPath: Icons.audioInputMicrophone
+            tooltipText: muteButton.micMuteLocked
+                         ? qsTr("Microphone mute locked by headset")
+                         : ""
+            onClicked: () => GlobalMuteState.toggleMute()
+
+            readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
+
+            Accessible.role: Accessible.Button
+            Accessible.name: muteButton.text
+            Accessible.description: qsTr("Mute or unmute your audio input")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => muteButton.click()
+        }
+
+        BarButton {
+            id: videoMuteButton
+            text: qsTr("Camera")
+            iconPath: Icons.cameraVideo
+            enabled: control.areInCallButtonsEnabled
+            visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
+            onClicked: () => {
+                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
+                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
+            }
+
+            Accessible.role: Accessible.Button
+            Accessible.name: qsTr("Camera control")
+            Accessible.description: qsTr("Enable your camera")
+            Accessible.focusable: true
+            Accessible.onPressAction: () => videoMuteButton.click()
+        }
+
+        BarButton {
             id: screenShareButton
             text: qsTr("Screen")
             iconPath: Icons.inputTouchscreen
@@ -530,118 +601,20 @@ Item {
             Accessible.onPressAction: () => screenShareButton.click()
         }
 
+        ButtonBarSeparator {}
+
         BarButton {
-            id: videoMuteButton
-            text: qsTr("Camera")
-            iconPath: Icons.cameraOff
+            id: moreButton
             enabled: control.areInCallButtonsEnabled
-            visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
-            onClicked: () => {
-                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
-                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
-            }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Camera control")
-            Accessible.description: qsTr("Enable your camera")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => videoMuteButton.click()
-        }
-
-        BarButton {
-            id: holdButton
-            text: qsTr("Hold")
-            iconPath: Icons.mediaPlaybackPause
-            toggled: control.isHolding
-            enabled: control.isEstablished && !control.isFinished
-            visible: control.showHoldButton && control.isEstablished
-            onClicked: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
-
-            Accessible.role: Accessible.Button
-            Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
-            Accessible.description: qsTr("Update the call hold state")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => holdButton.click()
-        }
-
-        BarButton {
-            id: muteButton
-            text: qsTr("Mute")
-            iconPath: Icons.microphoneSensitivityMuted
-            toggled: AudioManager.isAudioCaptureMuted
-            enabled: control.isEstablished && !control.isFinished
-            tooltipText: muteButton.micMuteLocked
-                         ? qsTr("Microphone mute locked by headset")
-                         : ""
-            onClicked: () => GlobalMuteState.toggleMute()
-
-            readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
-
-            Accessible.role: Accessible.Button
-            Accessible.name: muteButton.text
-            Accessible.description: qsTr("Mute or unmute your audio input")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => muteButton.click()
-        }
-
-        Rectangle {
-            visible: muteButton.visible || holdButton.visible || videoMuteButton.visible
-            height: 32
-            width: 1
-            color: Theme.borderColor
-            enabled: control.areInCallButtonsEnabled
-            anchors.verticalCenter: parent.verticalCenter
-
-            Accessible.ignored: true
-        }
-
-        BarButton {
-            id: audioInputDeviceButton
-            text: qsTr("Micro")
-            iconPath: Icons.audioInputMicrophone
-            enabled: control.areInCallButtonsEnabled
+            text: qsTr("More")
+            iconPath: Icons.applicationMenu
             showDropdownButton: true
+            onClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
+            onDropDownClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
 
-            onClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
-            onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
-
-            AudioDeviceMenu {
-                id: audioInputDeviceMenu
-                inputDevices: true
-                selectedDeviceId: AudioManager.captureDeviceId
-
-                onDeviceSelected: deviceId => AudioManager.captureDeviceId = deviceId
+            CallMoreMenu {
+                id: moreMenu
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Input control")
-            Accessible.description: qsTr("Set the mute state of the current input device")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => audioInputDeviceButton.click()
-        }
-
-        BarButton {
-            id: audioOutputDeviceButton
-            text: qsTr("Output")
-            iconPath: Icons.audioVolumeHigh
-            enabled: control.areInCallButtonsEnabled
-            showDropdownButton: true
-            onClicked: () => audioOutputDeviceMenu.popup(audioOutputDeviceButton, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
-            onDropDownClicked: () => audioOutputDeviceMenu.popup(audioOutputDeviceButton, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
-
-            AudioDeviceMenu {
-                id: audioOutputDeviceMenu
-                inputDevices: false
-                selectedDeviceId: AudioManager.playbackDeviceId
-
-                onDeviceSelected: deviceId => AudioManager.playbackDeviceId = deviceId
-            }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Output control")
-            Accessible.description: qsTr("Change the current output devices")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => audioOutputDeviceButton.click()
         }
 
         Button {
