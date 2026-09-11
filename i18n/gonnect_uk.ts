@@ -6,32 +6,32 @@
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="12"/>
         <source>About</source>
-        <translation type="unfinished">Про програму</translation>
+        <translation>Про програму</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="35"/>
         <source>GOnnect headline</source>
-        <translation type="unfinished">Заголовок GOnnect</translation>
+        <translation>Заголовок GOnnect</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="72"/>
         <source>GOnnect version</source>
-        <translation type="unfinished">Версія GOnnect</translation>
+        <translation>Версія GOnnect</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="77"/>
         <source>Version: v%1</source>
-        <translation type="unfinished">Версія: v%1</translation>
+        <translation>Версія: v%1</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="92"/>
         <source>Copy to clipboard</source>
-        <translation type="unfinished">Скопіювати до буфера обміну</translation>
+        <translation>Скопіювати</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="93"/>
         <source>Copy the currently used version number of GOnnect to the clipboard</source>
-        <translation type="unfinished">Скопіюйте номер поточної версії GOnnect в буфер обміну</translation>
+        <translation>Скопіюйте номер поточної версії GOnnect</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="116"/>
@@ -39,32 +39,32 @@
         <location filename="../src/ui/AboutWindow.qml" line="137"/>
         <location filename="../src/ui/AboutWindow.qml" line="154"/>
         <source>Homepage</source>
-        <translation type="unfinished">Домашня сторінка</translation>
+        <translation>Домашня сторінка</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="121"/>
         <source>Visit the project homepage</source>
-        <translation type="unfinished">Відвідати домашню сторінку проєкту</translation>
+        <translation>Відвідати домашню сторінку проєкту</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="133"/>
         <source>Bug Tracker</source>
-        <translation type="unfinished">Трекер помилок</translation>
+        <translation>Звіти про помилки</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="138"/>
         <source>Visit the project bug tracker</source>
-        <translation type="unfinished">Відвідати трекер помилок проєкту</translation>
+        <translation>Відкрити розділ звітів про помилки проєкту</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="150"/>
         <source>Documentation</source>
-        <translation type="unfinished">Документація</translation>
+        <translation>Документація</translation>
     </message>
     <message>
         <location filename="../src/ui/AboutWindow.qml" line="155"/>
         <source>Visit the online project documentation</source>
-        <translation type="unfinished">Відвідати онлайн-документацію проєкту</translation>
+        <translation>Відвідати онлайн-документацію проєкту</translation>
     </message>
 </context>
 <context>
@@ -106,7 +106,7 @@
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="74"/>
         <source>Header for the currently selected day: %1</source>
-        <translation type="unfinished">Заголовок вибраного дня: %1</translation>
+        <translation>Заголовок вибраного дня: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="121"/>
@@ -116,7 +116,7 @@
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="140"/>
         <source>Are you sure you really want to remove this entry?</source>
-        <translation type="unfinished">Ви справді хочете видалити цей запис?</translation>
+        <translation>Ви справді хочете видалити цей запис?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="148"/>
@@ -131,12 +131,12 @@
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="254"/>
         <source>, via %1</source>
-        <translation type="unfinished">, через %1</translation>
+        <translation>, через %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="377"/>
         <source>hh:mm</source>
-        <translation type="unfinished">hh:mm</translation>
+        <translation>hh:mm</translation>
     </message>
 </context>
 <context>
@@ -144,22 +144,22 @@
     <message>
         <location filename="../src/ui/ActivitiesModel.cpp" line="31"/>
         <source>Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Зображення</translation>
     </message>
     <message>
         <location filename="../src/ui/ActivitiesModel.cpp" line="34"/>
         <source>Audio</source>
-        <translation type="unfinished"></translation>
+        <translation>Аудіо</translation>
     </message>
     <message>
         <location filename="../src/ui/ActivitiesModel.cpp" line="37"/>
         <source>Video</source>
-        <translation type="unfinished"></translation>
+        <translation>Відео</translation>
     </message>
     <message>
         <location filename="../src/ui/ActivitiesModel.cpp" line="40"/>
         <source>File</source>
-        <translation type="unfinished">Файл</translation>
+        <translation>Файл</translation>
     </message>
     <message>
         <location filename="../src/ui/ActivitiesModel.cpp" line="43"/>
@@ -186,17 +186,17 @@
     <message>
         <location filename="../src/ui/components/AdditionalInfo.qml" line="42"/>
         <source>Additional caller related information</source>
-        <translation type="unfinished">Додаткова інформація про абонента</translation>
+        <translation>Додаткова інформація про абонента</translation>
     </message>
     <message>
         <location filename="../src/ui/components/AdditionalInfo.qml" line="43"/>
         <source>List of informational items regarding the caller, such as open support tickets</source>
-        <translation type="unfinished">Список інформації про абонента, наприклад відкриті тікети підтримки</translation>
+        <translation>Список відомостей про абонента, наприклад відкриті звернення до служби підтримки</translation>
     </message>
     <message>
         <location filename="../src/ui/components/AdditionalInfo.qml" line="54"/>
         <source>Expandable response section</source>
-        <translation type="unfinished">Розгортуваний розділ відповіді</translation>
+        <translation>Розгортуваний розділ відповіді</translation>
     </message>
 </context>
 <context>
@@ -204,7 +204,7 @@
     <message>
         <location filename="../src/contacts/AddressBookManager.cpp" line="224"/>
         <source>Failed to persist address book credentials: %1</source>
-        <translation type="unfinished">Не вдалося зберегти облікові дані адресної книги: %1</translation>
+        <translation>Не вдалося зберегти облікові дані адресної книги: %1</translation>
     </message>
 </context>
 <context>
@@ -212,7 +212,7 @@
     <message>
         <location filename="../src/ui/components/popups/AudioDeviceMenu.qml" line="30"/>
         <source>Default</source>
-        <translation type="unfinished">За замовчуванням</translation>
+        <translation>За замовчуванням</translation>
     </message>
 </context>
 <context>
@@ -220,12 +220,12 @@
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="11"/>
         <source>Unknown audio environment</source>
-        <translation type="unfinished">Невідоме аудіосередовище</translation>
+        <translation>Невідоме аудіосередовище</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="34"/>
         <source>Audio environment error</source>
-        <translation type="unfinished">Помилка аудіосередовища</translation>
+        <translation>Помилка аудіосередовища</translation>
     </message>
     <message>
         <location filename="../src/ui/AudioEnvWindow.qml" line="39"/>
