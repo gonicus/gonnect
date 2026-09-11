@@ -19,12 +19,19 @@ Item {
     property alias iconText: buttonIcon.text
     property alias iconPath: buttonIcon.icon.source
     property alias iconColor: buttonIcon.icon.color
-    property color toggledColor: Theme.accentColor
+    property color toggledColor: control.toggleColorMode === BarButton.ToggleColorMode.Normal ? Theme.accentColor : Theme.orangeColor
     property bool highlighted: false
     property bool toggled: false
     property alias showDropdownButton: dropDownIconContainer.visible
     property alias showIndicatorBadge: indicatorBadge.visible
     property string tooltipText: ""
+
+    enum ToggleColorMode {
+        Normal,
+        Warn
+    }
+
+    property int toggleColorMode: BarButton.ToggleColorMode.Normal
 
     states: [
 
@@ -41,6 +48,8 @@ Item {
             PropertyChanges {
                 buttonLabel.color: Qt.lighter(control.toggledColor, 1.2)
                 buttonLabel.font.weight: Font.Medium
+                toggledBackground.visible: true
+                buttonIcon.icon.color: Theme.pickForegroundColor(toggledBackground.color)
             }
         },
         State {  // Hovered
@@ -49,10 +58,12 @@ Item {
                 buttonLabel.color: Theme.primaryTextColor
             }
         },
-        State {  // Light highlight
+        State {  // Light toggled
             when: control.enabled && control.toggled
             PropertyChanges {
                 buttonLabel.color: control.toggledColor
+                toggledBackground.visible: true
+                buttonIcon.icon.color: Theme.pickForegroundColor(toggledBackground.color)
             }
         }
     ]
@@ -80,6 +91,16 @@ Item {
                 leftMargin: 10
                 rightMargin: 10
             }
+        }
+
+        Rectangle {
+            id: toggledBackground
+            width: 30
+            height: 32
+            radius: 4
+            color: control.toggledColor
+            visible: false
+            anchors.centerIn: buttonIcon
         }
 
         IconLabel {

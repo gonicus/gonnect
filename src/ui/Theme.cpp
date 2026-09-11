@@ -54,6 +54,15 @@ bool Theme::useOwnDecoration()
     return m_useOwnDecoration;
 }
 
+QColor Theme::pickForegroundColor(const QColor &backgroundColor) const
+{
+    // Luminance weight suiting human recognition
+    const double luminance = 0.299 * backgroundColor.red() + 0.587 * backgroundColor.green()
+            + 0.144 * backgroundColor.blue();
+
+    return (luminance > 128) ? m_primaryTextColorLightMode : m_primaryTextColorDarkMode;
+}
+
 void Theme::setUseOwnDecoration(bool value)
 {
     if (m_useOwnDecoration != value) {
@@ -101,7 +110,7 @@ void Theme::onThemeVariantChanged()
 
 void Theme::updateColorPalette()
 {
-    m_primaryTextColor = QColor(5, 5, 5);
+    m_primaryTextColor = m_primaryTextColorLightMode;
     m_foregroundWhiteColor = QColor(255, 255, 255);
     m_foregroundHeaderIcons = QColor(46, 52, 54);
     m_foregroundHeaderIconsInactive = QColor(125, 129, 130);
@@ -138,7 +147,7 @@ void Theme::updateColorPalette()
 
     // Dark mode overrides
     if (m_isDarkMode) {
-        m_primaryTextColor = QColor(248, 248, 248);
+        m_primaryTextColor = m_primaryTextColorDarkMode;
         m_secondaryTextColor = QColor(190, 190, 190);
         m_foregroundHeaderIcons = QColor(238, 238, 236);
         m_foregroundHeaderIconsInactive = QColor(157, 157, 156);

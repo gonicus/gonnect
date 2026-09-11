@@ -94,7 +94,7 @@ Item {
             }
         }
 
-        BottomButtonBarSeparator {}
+        ButtonBarSeparator {}
 
         BarButton {
             id: favButton
