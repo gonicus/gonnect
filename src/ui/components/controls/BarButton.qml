@@ -19,6 +19,8 @@ Item {
     property alias iconText: buttonIcon.text
     property alias iconPath: buttonIcon.icon.source
     property alias iconColor: buttonIcon.icon.color
+    property int iconSize: 20
+    property int toggledSize: Math.floor(2.5 * Theme.d)
     property color toggledColor: control.toggleColorMode === BarButton.ToggleColorMode.Normal ? Theme.accentColor : Theme.orangeColor
     property bool highlighted: false
     property bool toggled: false
@@ -95,8 +97,8 @@ Item {
 
         Rectangle {
             id: toggledBackground
-            width: Math.floor(2.5 * Theme.d)
-            height: Math.floor(2.5 * Theme.d)
+            width: control.toggledSize
+            height: control.toggledSize
             radius: 4
             color: control.toggledColor
             visible: false
@@ -106,11 +108,11 @@ Item {
         IconLabel {
             id: buttonIcon
             color: buttonLabel.color
-            width: 20
-            height: 20
+            width: control.iconSize
+            height: control.iconSize
             icon {
-                width: 20
-                height: 20
+                width: control.iconSize
+                height: control.iconSize
                 color: buttonLabel.color
             }
             anchors {
