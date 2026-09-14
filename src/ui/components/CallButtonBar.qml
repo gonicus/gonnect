@@ -546,7 +546,7 @@ Item {
 
         BarButton {
             id: muteButton
-            toggled: AudioManager.isAudioCaptureMuted
+            toggled: !AudioManager.isAudioCaptureMuted
             enabled: control.isEstablished && !control.isFinished
             toggleColorMode: BarButton.ToggleColorMode.Warn
             text: qsTr("Microphone")
