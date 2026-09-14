@@ -84,7 +84,7 @@ Item {
             horizontalAlignment: Label.AlignHCenter
             anchors {
                 bottom: parent.bottom
-                bottomMargin: 10
+                bottomMargin: 7
 
                 left: parent.left
                 right: parent.right
@@ -95,8 +95,8 @@ Item {
 
         Rectangle {
             id: toggledBackground
-            width: 30
-            height: 32
+            width: Math.floor(2.5 * Theme.d)
+            height: Math.floor(2.5 * Theme.d)
             radius: 4
             color: control.toggledColor
             visible: false
@@ -106,6 +106,8 @@ Item {
         IconLabel {
             id: buttonIcon
             color: buttonLabel.color
+            width: 20
+            height: 20
             icon {
                 width: 20
                 height: 20
@@ -113,7 +115,7 @@ Item {
             }
             anchors {
                 centerIn: parent
-                verticalCenterOffset: -10
+                verticalCenterOffset: -7
             }
         }
 
