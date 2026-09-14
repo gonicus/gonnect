@@ -56,11 +56,21 @@ bool Theme::useOwnDecoration()
 
 QColor Theme::pickForegroundColor(const QColor &backgroundColor) const
 {
-    // Luminance weight suiting human recognition
-    const double luminance = 0.299 * backgroundColor.red() + 0.587 * backgroundColor.green()
-            + 0.144 * backgroundColor.blue();
+    // WCAG 2.x relative luminance
+    // https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
 
-    return (luminance > 128) ? m_primaryTextColorLightMode : m_primaryTextColorDarkMode;
+    const auto linearize = [](double channel) -> double {
+        channel /= 255.0;
+        return (channel <= 0.03928) ? channel / 12.92 : std::pow((channel + 0.055) / 1.055, 2.4);
+    };
+
+    const double r = linearize(backgroundColor.red());
+    const double g = linearize(backgroundColor.green());
+    const double b = linearize(backgroundColor.blue());
+
+    const double luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    return (luminance > 0.5) ? m_primaryTextColorLightMode : m_primaryTextColorDarkMode;
 }
 
 void Theme::setUseOwnDecoration(bool value)
