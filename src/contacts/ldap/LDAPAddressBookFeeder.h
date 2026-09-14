@@ -26,12 +26,15 @@ Q_SIGNALS:
     /// Private signal
     void newContactReady(const QString &dn, const QString &sourceUid,
                          const Contact::ContactSourceInfo &contactSourceInfo, const QString &name,
-                         const QString &company, const QString &mail, const QDateTime &lastModified,
+                         const QString &company, const QString &mail, const QString &lastModified,
                          const QList<Contact::PhoneNumber> &phoneNumbers, QPrivateSignal);
 
     /// Private signal
-    void newExternalImageAdded(const QString &id, const QByteArray &data, const QDateTime &modified,
+    void newExternalImageAdded(const QString &dn, const QByteArray &data, const QString &modified,
                                QPrivateSignal);
+
+    /// Private signal
+    void errorOccurred(const QString &message, QPrivateSignal);
 
     void feederFailed();
 
@@ -55,6 +58,8 @@ private:
     void startContactQuery();
 
     void resetFeeder();
+
+    QDateTime parseLDAPTimestamp(const QString &timestamp) const;
 
     // Per-account mapping from semantic contact roles to the LDAP attribute
     // names actually published by the directory. Empty entries disable that

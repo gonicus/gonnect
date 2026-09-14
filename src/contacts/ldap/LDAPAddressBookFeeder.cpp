@@ -27,15 +27,18 @@ LDAPAddressBookFeeder::LDAPAddressBookFeeder(const QString &group, const int ret
     connect(this, &LDAPAddressBookFeeder::newContactReady, this,
             [this](const QString &dn, const QString &sourceUid,
                    const Contact::ContactSourceInfo &contactSourceInfo, const QString &name,
-                   const QString &company, const QString &mail, const QDateTime &lastModified,
+                   const QString &company, const QString &mail, const QString &lastModified,
                    const QList<Contact::PhoneNumber> &phoneNumbers, QPrivateSignal) {
                 AddressBook::instance().addContact(dn, sourceUid, contactSourceInfo, name, company,
-                                                   mail, lastModified, phoneNumbers, m_blockInfo);
+                                                   mail, parseLDAPTimestamp(lastModified), phoneNumbers, m_blockInfo);
             });
 
     connect(this, &LDAPAddressBookFeeder::newExternalImageAdded, this,
-            [](const QString &id, const QByteArray &data, const QDateTime &modified,
-               QPrivateSignal) { AvatarManager::instance().addExternalImage(id, data, modified); });
+            [this](const QString &dn, const QByteArray &data, const QString &modified,
+               QPrivateSignal) { AvatarManager::instance().addExternalImage(dn, data, parseLDAPTimestamp(modified)); });
+
+    connect(this, &LDAPAddressBookFeeder::errorOccurred, this,
+            [](const QString &message, QPrivateSignal) { ErrorBus::instance().addError(message); });
 }
 
 void LDAPAddressBookFeeder::init(const LDAPInitializer::Config &ldapConfig,
@@ -513,15 +516,14 @@ void LDAPAddressBookFeeder::parseContactEntry(LDAP *ldap, LDAPMessage *entry)
     }
 
     Q_EMIT newContactReady(dn, sourceUid, { m_priority, m_displayName, m_group }, cn, company, mail,
-                           QDateTime::fromString(modifyTimestamp, "yyyyMMddhhmmsst"), phoneNumbers,
-                           QPrivateSignal());
+                           modifyTimestamp, phoneNumbers, QPrivateSignal());
 }
 
 void LDAPAddressBookFeeder::parseAvatarEntry(LDAP *ldap, LDAPMessage *entry,
                                              const QByteArray &avatarAttr)
 {
     QString dn;
-    QDateTime modifyTimestamp;
+    QString modifyTimestamp;
     QByteArray jpegPhoto;
 
     if (char *dnTemp = ldap_get_dn(ldap, entry)) {
@@ -537,8 +539,7 @@ void LDAPAddressBookFeeder::parseAvatarEntry(LDAP *ldap, LDAPMessage *entry,
             if (!avatarAttr.isEmpty() && qstricmp(a, avatarAttr.constData()) == 0) {
                 jpegPhoto = QByteArray((**vals).bv_val, static_cast<qsizetype>((**vals).bv_len));
             } else if (qstricmp(a, "modifyTimestamp") == 0) {
-                modifyTimestamp = QDateTime::fromString(QString::fromUtf8((**vals).bv_val),
-                                                        "yyyyMMddhhmmsst");
+                modifyTimestamp = QString::fromUtf8((**vals).bv_val);
             }
 
             ldap_value_free_len(vals);
@@ -575,4 +576,9 @@ void LDAPAddressBookFeeder::loadAvatarsForContacts()
     } else {
         m_isProcessing = false;
     }
+}
+
+QDateTime LDAPAddressBookFeeder::parseLDAPTimestamp(const QString &timestamp) const
+{
+    return QDateTime::fromString(timestamp, "yyyyMMddhhmmsst");
 }
