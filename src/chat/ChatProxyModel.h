@@ -15,6 +15,8 @@ class ChatProxyModel : public QSortFilterProxyModel
     QML_ELEMENT
     Q_CLASSINFO("DefaultProperty", "sourceModel")
 
+    Q_PROPERTY(QString threadId MEMBER m_threadId NOTIFY threadIdChanged FINAL)
+
 public:
     enum class Roles {
         ReadUsers = static_cast<int>(ChatModel::Roles::LastRole),
@@ -29,10 +31,12 @@ public:
 protected:
     virtual bool lessThan(const QModelIndex &sourceLeft,
                           const QModelIndex &sourceRight) const override;
+    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
 private:
     QObject *m_sourceModelContext = nullptr;
     QObject *m_chatRoomContext = nullptr;
+    QString m_threadId;
 
     QList<ChatUser *> readUsersFor(const IChatRoom *chatRoom, const ChatMessage *message) const;
     bool isValidOwnMessage(const QModelIndex &index) const;
@@ -42,4 +46,7 @@ private Q_SLOTS:
     void onSourceModelChanged();
     void onChatRoomChanged();
     void invalidateProxyRoles();
+
+Q_SIGNALS:
+    void threadIdChanged();
 };
