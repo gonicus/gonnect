@@ -96,6 +96,7 @@ QString LinuxNotificationManager::add(Notification *notification)
             notify_notification_set_hint(internalNotification, "show-as-new", NULL);
         }
     }
+    notify_notification_set_hint(internalNotification, "body-markup", g_variant_new_boolean(TRUE));
 
     notify_notification_set_category(internalNotification,
                                      notification->category().toStdString().c_str());
