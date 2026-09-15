@@ -479,7 +479,7 @@ Item {
             id: emergencyTabButton
             visible: GlobalInfo.shallShowEmergencyButton && GlobalInfo.hasEmergencyNumbers
             iconPath: `qrc:/icons/ISO_7010_E004${ViewHelper.culturalSphereExtension}.svg`
-            iconSize: 2.5 * Theme.d
+            iconSize: 2 * Theme.d
             toggledSize: emergencyTabButton.iconSize + 20
             toggledColor: Theme.emergencyColor
             toggled: true
