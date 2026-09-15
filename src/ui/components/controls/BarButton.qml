@@ -21,7 +21,9 @@ Item {
     property alias iconColor: buttonIcon.icon.color
     property int iconSize: 20
     property int toggledSize: Math.floor(2.5 * Theme.d)
-    property color toggledColor: control.toggleColorMode === BarButton.ToggleColorMode.Normal ? Theme.accentColor : Theme.orangeColor
+    property color toggledColor: control.toggleColorMode === BarButton.ToggleColorMode.Normal
+                                 ? Theme.primaryTextColor
+                                 : Theme.orangeColor
     property bool highlighted: false
     property bool toggled: false
     property alias showDropdownButton: dropDownIconContainer.visible
@@ -48,10 +50,10 @@ Item {
         State {  // Hovered and toggled
             when: control.enabled && buttonHoverHandler.hovered && control.toggled
             PropertyChanges {
-                buttonLabel.color: Qt.lighter(control.toggledColor, 1.2)
                 buttonLabel.font.weight: Font.Medium
+                buttonIcon.icon.color: Qt.lighter(Theme.pickForegroundColor(control.toggledColor), 1.2)
                 toggledBackground.visible: true
-                buttonIcon.icon.color: Theme.pickForegroundColor(toggledBackground.color)
+                toggledBackground.color: Qt.lighter(control.toggledColor, 1.2)
             }
         },
         State {  // Hovered
@@ -63,9 +65,8 @@ Item {
         State {  // Light toggled
             when: control.enabled && control.toggled
             PropertyChanges {
-                buttonLabel.color: control.toggledColor
                 toggledBackground.visible: true
-                buttonIcon.icon.color: Theme.pickForegroundColor(toggledBackground.color)
+                buttonIcon.icon.color: Theme.pickForegroundColor(control.toggledColor)
             }
         }
     ]

@@ -329,20 +329,12 @@ Item {
             right: parent.right
         }
 
-        Button {
+        BarButton {
             id: hangupButton
-            width: 50
-            height: 50
-            highlighted: true
-            anchors.verticalCenter: parent.verticalCenter
-            icon.source: Icons.callStop
-
-            Material.accent: Theme.redColor
-
-            Component.onCompleted: () => {
-                hangupButton.icon.width = 24
-                hangupButton.icon.height = 24
-            }
+            text: qsTr("Leave")
+            iconPath: Icons.callStop
+            toggled: true
+            toggledColor: Theme.redColor
 
             onClicked: () => {
                 const conn = control.iConferenceConnector

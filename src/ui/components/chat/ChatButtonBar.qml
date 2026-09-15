@@ -119,21 +119,13 @@ Item {
                        }
         }
 
-        Button {
+        BarButton {
             id: callButton
-            width: 50
-            height: 50
-            highlighted: true
+            text: qsTr("Call")
+            toggled: true
+            toggledColor: Theme.greenColor
+            iconPath: Icons.callStart
             visible: !!control.soleOtherContact
-            icon.source: Icons.callStart
-            anchors.verticalCenter: parent.verticalCenter
-
-            Material.accent: Theme.greenColor
-
-            Component.onCompleted: () => {
-                callButton.icon.width = 24
-                callButton.icon.height = 24
-            }
 
             onClicked: () => {
                            const soleNumber = control.numbersModel.soleNumber()

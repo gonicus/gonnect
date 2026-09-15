@@ -617,21 +617,13 @@ Item {
             }
         }
 
-        Button {
+        BarButton {
             id: acceptCallButton
-            width: 50
-            height: 50
-            highlighted: true
-            anchors.verticalCenter: parent.verticalCenter
-            icon.source: Icons.callStart
+            text: qsTr("Accept")
+            iconPath: Icons.callStart
+            toggled: true
+            toggledColor: Theme.greenColor
             visible: !control.isEstablished && !control.isFinished && control.isIncoming
-
-            Material.accent: Theme.greenColor
-
-            Component.onCompleted: () => {
-                acceptCallButton.icon.width = 24
-                acceptCallButton.icon.height = 24
-            }
 
             onClicked: () => control.acceptCallClicked()
 
@@ -641,21 +633,13 @@ Item {
             Accessible.onPressAction: () => acceptCallButton.click()
         }
 
-        Button {
+        BarButton {
             id: hangupButton
-            width: 50
-            height: 50
-            highlighted: true
-            anchors.verticalCenter: parent.verticalCenter
-            icon.source: Icons.callStop
+            text: qsTr("Hang up")
+            iconPath: Icons.callStop
+            toggled: true
+            toggledColor: Theme.redColor
             enabled: SIPCallManager.isConferenceMode || !control.isFinished
-
-            Material.accent: Theme.redColor
-
-            Component.onCompleted: () => {
-                hangupButton.icon.width = 24
-                hangupButton.icon.height = 24
-            }
 
             onClicked: () => control.hangupClicked()
 
