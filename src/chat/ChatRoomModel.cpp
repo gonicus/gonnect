@@ -105,6 +105,16 @@ void ChatRoomModel::connectChatRoomSignals(IChatRoom *chatRoom)
                           static_cast<int>(Roles::HasPresenceState),
                           static_cast<int>(Roles::PresenceState) });
     });
+    connect(chatRoom, &IChatRoom::hasPresenceStateChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom,
+                        { static_cast<int>(Roles::HasPresenceState),
+                          static_cast<int>(Roles::PresenceState) });
+    });
+    connect(chatRoom, &IChatRoom::presenceStateChanged, ctx, [this, chatRoom]() {
+        emitDataChanged(chatRoom,
+                        { static_cast<int>(Roles::HasPresenceState),
+                          static_cast<int>(Roles::PresenceState) });
+    });
 
     m_chatRoomContextObjects.insert(chatRoom, ctx);
 }
