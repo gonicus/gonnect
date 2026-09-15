@@ -1,8 +1,10 @@
 #pragma once
 #include <QObject>
+#include <QVariantMap>
 #include "../NetworkHelper.h"
 
 class OrgFreedesktopPortalNetworkMonitorInterface;
+class QDBusPendingCallWatcher;
 
 class FlatpakNetworkHelper : public NetworkHelper
 {
@@ -19,6 +21,9 @@ public:
 
 private:
     OrgFreedesktopPortalNetworkMonitorInterface *m_portal = nullptr;
+    QDBusPendingCallWatcher *m_statusWatcher = nullptr;
+    bool m_isStatusUpdatePending = false;
 
     void updateNetworkState();
+    void applyNetworkStatus(const QVariantMap &status);
 };
