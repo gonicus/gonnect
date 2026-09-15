@@ -7,21 +7,6 @@ Menu {
     id: control
 
     HideableMenuItem {
-        id: audioOutputDeviceButton
-        text: qsTr("Output...")
-        icon.source: Icons.audioVolumeHigh
-        onClicked: () => audioOutputDeviceMenu.popup(control.parent, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
-
-        AudioDeviceMenu {
-            id: audioOutputDeviceMenu
-            inputDevices: false
-            selectedDeviceId: AudioManager.playbackDeviceId
-
-            onDeviceSelected: deviceId => AudioManager.playbackDeviceId = deviceId
-        }
-    }
-
-    HideableMenuItem {
         id: audioInputDeviceButton
         text: qsTr("Microphone...")
         icon.source: Icons.audioInputMicrophone
@@ -33,6 +18,21 @@ Menu {
             selectedDeviceId: AudioManager.captureDeviceId
 
             onDeviceSelected: deviceId => AudioManager.captureDeviceId = deviceId
+        }
+    }
+
+    HideableMenuItem {
+        id: audioOutputDeviceButton
+        text: qsTr("Output...")
+        icon.source: Icons.audioVolumeHigh
+        onClicked: () => audioOutputDeviceMenu.popup(control.parent, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
+
+        AudioDeviceMenu {
+            id: audioOutputDeviceMenu
+            inputDevices: false
+            selectedDeviceId: AudioManager.playbackDeviceId
+
+            onDeviceSelected: deviceId => AudioManager.playbackDeviceId = deviceId
         }
     }
 }

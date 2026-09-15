@@ -185,8 +185,8 @@ Item {
 
         Row {
             id: buttonRow
-            spacing: 5
-            rightPadding: 20
+            spacing: Math.floor(Theme.d / 2)
+
             anchors {
                 top: parent.top
                 bottom: parent.bottom
@@ -266,7 +266,7 @@ Item {
                 iconPath: Icons.cameraVideo
                 onClicked: () => control.setVideoMuted(!control.isVideoMuted)
 
-                Accessible.name: control.isVideoMuted ? qsTr("Enable camera") : qsTr("Mute camera")
+                Accessible.name: control.isVideoMuted ? qsTr("Enable camera") : qsTr("Disable camera")
             }
 
             BarButton {
@@ -306,14 +306,12 @@ Item {
                 }
             }
 
-            ButtonBarSeparator {}
-
             BarButton {
                 id: moreButton
                 enabled: !control.isOnHold && control.areInCallButtonsEnabled
                 text: qsTr("More")
-                iconPath: Icons.applicationMenu
                 showDropdownButton: true
+                iconPath: Icons.applicationMenu
                 onClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
                 onDropDownClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
 
@@ -331,9 +329,9 @@ Item {
 
     Row {
         id: rightStickyButtonRow
-        spacing: 5
-        leftPadding: 20
-        rightPadding: 20
+        spacing: Math.floor(Theme.d / 2)
+        rightPadding: Math.floor(Theme.d / 2)
+
         anchors {
             top: parent.top
             bottom: parent.bottom

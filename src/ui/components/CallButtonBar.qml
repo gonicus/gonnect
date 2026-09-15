@@ -503,9 +503,10 @@ Item {
     }
 
     Row {
-        spacing: 5
-        rightPadding: 20
-        leftPadding: 20
+        spacing: Math.floor(Theme.d / 2)
+        rightPadding: Math.floor(Theme.d / 2)
+        leftPadding: Theme.d * 2
+
         anchors {
             top: parent.top
             bottom: parent.bottom
@@ -582,8 +583,6 @@ Item {
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
         }
-
-        ButtonBarSeparator {}
 
         BarButton {
             id: moreButton
