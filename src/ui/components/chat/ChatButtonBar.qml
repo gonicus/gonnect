@@ -60,7 +60,7 @@ Item {
         id: rightPart
         spacing: Math.floor(Theme.d / 2)
         rightPadding: Theme.d * 2
-        leftPadding: Theme.d * 2
+        leftPadding: Theme.d
         anchors {
             top: parent.top
             bottom: parent.bottom
@@ -70,7 +70,7 @@ Item {
         Row {
             id: titleLoadingIndicatorRow
             spacing: Math.floor(Theme.d / 2)
-            rightPadding: Theme.d * 2
+            rightPadding: Math.floor(Theme.d / 2)
             leftPadding: Theme.d * 2
             visible: control.isLoadingMessageHistory
             anchors {
@@ -94,7 +94,9 @@ Item {
             }
         }
 
-        BottomButtonBarSeparator {}
+        ButtonBarSeparator {
+            visible: titleLoadingIndicatorRow.visible
+        }
 
         BarButton {
             id: favButton
@@ -107,8 +109,8 @@ Item {
         BarButton {
             id: optionsButton
             iconPath: Icons.settingsConfigure
+            text: qsTr("More")
             showDropdownButton: true
-            text: qsTr("Options")
             onDropDownClicked: () => optionsButton.clicked()
             onClicked: () => {
                            chatRoomMenuComponent.createObject(optionsButton, {
@@ -119,21 +121,13 @@ Item {
                        }
         }
 
-        Button {
+        BarButton {
             id: callButton
-            width: 50
-            height: 50
-            highlighted: true
+            text: qsTr("Call")
+            toggled: true
+            toggledColor: Theme.greenColor
+            iconPath: Icons.callStart
             visible: !!control.soleOtherContact
-            icon.source: Icons.callStart
-            anchors.verticalCenter: parent.verticalCenter
-
-            Material.accent: Theme.greenColor
-
-            Component.onCompleted: () => {
-                callButton.icon.width = 24
-                callButton.icon.height = 24
-            }
 
             onClicked: () => {
                            const soleNumber = control.numbersModel.soleNumber()
@@ -149,10 +143,7 @@ Item {
                            }
                        }
 
-            Accessible.role: Accessible.Button
             Accessible.name: qsTr("Start phone call")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => callButton.click()
         }
     }
 
