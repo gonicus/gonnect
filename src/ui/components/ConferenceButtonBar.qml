@@ -215,6 +215,8 @@ Item {
                 iconPath: Icons.transformBrowse
                 toggled: control.isHandRaised
                 onClicked: () => control.setRaiseHand(!control.isHandRaised)
+
+                Accessible.name: control.isHandRaised ? qsTr("Lower hand") : qsTr("Raise hand")
             }
 
             BarButton {
@@ -236,6 +238,9 @@ Item {
                 text: qsTr("Hold")
                 iconPath: Icons.mediaPlaybackPause
                 onClicked: () => control.setOnHold(!control.isOnHold)
+
+                Accessible.name: control.isOnHold ? qsTr("Resume") : qsTr("Hold")
+                Accessible.description: qsTr("Update the conference hold state")
             }
 
             BarButton {
@@ -247,6 +252,8 @@ Item {
                 text: qsTr("Microphone")
                 iconPath: Icons.audioInputMicrophone
                 onClicked: () =>  control.setAudioMuted(!control.isMuted)
+
+                Accessible.name: control.isMuted ? qsTr("Unmute microphone") : qsTr("Mute microphone")
             }
 
             BarButton {
@@ -258,6 +265,8 @@ Item {
                 text: qsTr("Camera")
                 iconPath: Icons.cameraVideo
                 onClicked: () => control.setVideoMuted(!control.isVideoMuted)
+
+                Accessible.name: control.isVideoMuted ? qsTr("Enable camera") : qsTr("Mute camera")
             }
 
             BarButton {
@@ -279,6 +288,8 @@ Item {
                         //screenShareMenu.popup(screenShareButton, -screenShareButton.width + screenShareButton.width, screenShareButton.height)
                     }
                 }
+
+                Accessible.name: control.isSharingScreen ? qsTr("Stop sharing") : qsTr("Share screen")
 
                 Menu {
                     id: screenShareMenu

@@ -537,11 +537,8 @@ Item {
             visible: control.showHoldButton && control.isEstablished
             onClicked: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
 
-            Accessible.role: Accessible.Button
             Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
             Accessible.description: qsTr("Update the call hold state")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => holdButton.click()
         }
 
         BarButton {
@@ -558,11 +555,8 @@ Item {
 
             readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
 
-            Accessible.role: Accessible.Button
-            Accessible.name: muteButton.text
-            Accessible.description: qsTr("Mute or unmute your audio input")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => muteButton.click()
+            Accessible.name: AudioManager.isAudioCaptureMuted ? qsTr("Unmute microphone") : qsTr("Mute microphone")
+            Accessible.description: muteButton.tooltipText || qsTr("Mute or unmute your audio input")
         }
 
         BarButton {
@@ -575,12 +569,6 @@ Item {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Camera control")
-            Accessible.description: qsTr("Enable your camera")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => videoMuteButton.click()
         }
 
         BarButton {
@@ -593,12 +581,6 @@ Item {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Screensharing control")
-            Accessible.description: qsTr("Start sharing your screen")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => screenShareButton.click()
         }
 
         ButtonBarSeparator {}
@@ -626,11 +608,6 @@ Item {
             visible: !control.isEstablished && !control.isFinished && control.isIncoming
 
             onClicked: () => control.acceptCallClicked()
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Accept call")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => acceptCallButton.click()
         }
 
         BarButton {
@@ -642,11 +619,6 @@ Item {
             enabled: SIPCallManager.isConferenceMode || !control.isFinished
 
             onClicked: () => control.hangupClicked()
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Hangup call")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => hangupButton.click()
         }
     }
 }

@@ -141,10 +141,7 @@ Item {
                            }
                        }
 
-            Accessible.role: Accessible.Button
             Accessible.name: qsTr("Start phone call")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => callButton.click()
         }
     }
 
