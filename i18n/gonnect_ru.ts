@@ -106,7 +106,7 @@
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="74"/>
         <source>Header for the currently selected day: %1</source>
-        <translation type="unfinished">Заголовок выбранного дня: %1</translation>
+        <translation>Заголовок выбранного дня: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="121"/>
@@ -116,7 +116,7 @@
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="140"/>
         <source>Are you sure you really want to remove this entry?</source>
-        <translation type="unfinished">Вы действительно хотите удалить эту запись?</translation>
+        <translation>Вы действительно хотите удалить эту запись?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="148"/>
@@ -131,12 +131,12 @@
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="254"/>
         <source>, via %1</source>
-        <translation type="unfinished">, через %1</translation>
+        <translation>, через %1</translation>
     </message>
     <message>
         <location filename="../src/ui/components/ActivitiesList.qml" line="377"/>
         <source>hh:mm</source>
-        <translation type="unfinished">hh:mm</translation>
+        <translation>hh:mm</translation>
     </message>
 </context>
 <context>
@@ -159,7 +159,7 @@
     <message>
         <location filename="../src/ui/ActivitiesModel.cpp" line="40"/>
         <source>File</source>
-        <translation type="unfinished">Файл</translation>
+        <translation>Файл</translation>
     </message>
     <message>
         <location filename="../src/ui/ActivitiesModel.cpp" line="43"/>
