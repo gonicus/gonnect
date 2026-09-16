@@ -1,6 +1,9 @@
 #include "IChatRoom.h"
 
-IChatRoom::IChatRoom(QObject *parent) : QObject{ parent } { }
+IChatRoom::IChatRoom(IChatProvider *chatProvider, QObject *parent)
+    : QObject{ parent }, m_chatProvider{ chatProvider }
+{
+}
 
 void IChatRoom::setIsLoadingMessageHistory(bool value)
 {

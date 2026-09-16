@@ -36,6 +36,8 @@ concept MessageDeliverer = requires(T obj) {
     {
         obj.membershipChange()
     } -> std::convertible_to<const de::gonicus::gonnect::MessageContentMembershipChange &>;
+    { obj.hasRemoved() } -> std::same_as<bool>;
+    { obj.removed() } -> std::convertible_to<const de::gonicus::gonnect::MessageContentRemoved &>;
 };
 
 class IpcDispatcher : public IChatProvider
@@ -173,7 +175,8 @@ public:
     virtual void requestRoomLeave(const QString &roomId) override;
     virtual void requestUser(const QString &userId) override;
 
-    virtual void requestRemoveMessage(const QString &roomId, const QString &messageId) override;
+    virtual void requestRemoveMessage(const QString &roomId, const QString &messageId,
+                                      const QString &reason = QString()) override;
     virtual void retrySendMessage(const QString &roomId, const QString &failedMessageId) override;
     virtual void requestEditMessage(const QString &roomId, const QString &messageId,
                                     const QString &newContent) override;
@@ -307,6 +310,9 @@ private:
 
     bool containsRoomTag(const QString &str) const;
 
+    void processReadMarkers(IpcChatRoom *chatRoom,
+                            const de::gonicus::gonnect::Room::ReadMarkerEntry &entries);
+
     QRegularExpression m_idConvRegex;
     bool m_wasInitializationRequestSuccessful = false;
     bool m_useIdConversion = false;
@@ -315,6 +321,7 @@ private:
     bool m_supportsDirectRooms = false;
     bool m_supportsGroupRooms = false;
     bool m_supportsSubThreads = false;
+    bool m_suportsUserPresence = false;
     bool m_hasFavoriteRooms = false;
     QStringList m_supportedMimeTypes;
     qint64 m_mediaSizeLimit = 0;

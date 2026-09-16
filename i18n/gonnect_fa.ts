@@ -68,6 +68,171 @@
     </message>
 </context>
 <context>
+    <name>AbstractPortal</name>
+    <message>
+        <location filename="../src/dbus/portal/AbstractPortal.cpp" line="55"/>
+        <source>No DBus session bus connection available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/dbus/portal/AbstractPortal.cpp" line="78"/>
+        <source>DBus call failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ActivitiesList</name>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="26"/>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="31"/>
+        <source>No activities matching the filter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="27"/>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="32"/>
+        <source>No activities</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="43"/>
+        <source>Activities</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="44"/>
+        <source>List of recent calls, meetings and chat messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="83"/>
+        <source>Activities item section</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="84"/>
+        <source>Header for the currently selected day: %1</source>
+        <translation type="unfinished">عنوان روز انتخاب‌شده: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="131"/>
+        <source>Me</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="150"/>
+        <source>Are you sure you really want to remove this entry?</source>
+        <translation type="unfinished">آیا مطمئنید که می‌خواهید این مورد را حذف کنید؟</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="158"/>
+        <source>Activities item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="159"/>
+        <source>Selected activity %1 - %2 - time %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="266"/>
+        <source>, via %1</source>
+        <translation type="unfinished">، از طریق %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="389"/>
+        <source>hh:mm</source>
+        <translation type="unfinished">hh:mm</translation>
+    </message>
+</context>
+<context>
+    <name>ActivitiesModel</name>
+    <message>
+        <location filename="../src/ui/ActivitiesModel.cpp" line="31"/>
+        <source>Image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ActivitiesModel.cpp" line="34"/>
+        <source>Audio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ActivitiesModel.cpp" line="37"/>
+        <source>Video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ActivitiesModel.cpp" line="40"/>
+        <source>File</source>
+        <translation type="unfinished">فایل</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ActivitiesModel.cpp" line="43"/>
+        <location filename="../src/ui/ActivitiesModel.cpp" line="516"/>
+        <source>Removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ActivitiesModel.cpp" line="46"/>
+        <source>Message</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ActivitiesWidget</name>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="25"/>
+        <source>Activities</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="67"/>
+        <source>All activities</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="68"/>
+        <source>SIP</source>
+        <translation type="unfinished">SIP</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="69"/>
+        <source>Jitsi Meet</source>
+        <translation type="unfinished">Jitsi Meet</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="70"/>
+        <source>Chat</source>
+        <translation type="unfinished">گفتگو</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="74"/>
+        <source>Activity type picker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="75"/>
+        <source>Select the activity type to filter by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="87"/>
+        <source>Currently selected activity type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="97"/>
+        <source>Hide activities search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="97"/>
+        <source>Show activities search</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>AdditionalInfo</name>
     <message>
         <location filename="../src/ui/components/AdditionalInfo.qml" line="42"/>
@@ -88,7 +253,7 @@
 <context>
     <name>AddressBookManager</name>
     <message>
-        <location filename="../src/contacts/AddressBookManager.cpp" line="222"/>
+        <location filename="../src/contacts/AddressBookManager.cpp" line="224"/>
         <source>Failed to persist address book credentials: %1</source>
         <translation type="unfinished">ذخیرهٔ اعتبارنامه‌های دفترچهٔ آدرس ناموفق بود: %1</translation>
     </message>
@@ -229,22 +394,22 @@
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="98"/>
         <source>Reset tone</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">بازنشانی صدا</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="99"/>
         <source>Reset the tone to its default option</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">بازنشانی صدا به حالت پیش‌فرض</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="116"/>
         <source>Pick sound file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">انتخاب فایل صوتی</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/AudioFileSelector.qml" line="117"/>
         <source>Select the sound file you want to use</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">فایل صوتی موردنظر خود را انتخاب کنید</translation>
     </message>
 </context>
 <context>
@@ -271,12 +436,12 @@
 <context>
     <name>AudioPlayer</name>
     <message>
-        <location filename="../src/ui/components/controls/AudioPlayer.qml" line="77"/>
+        <location filename="../src/ui/components/controls/AudioPlayer.qml" line="78"/>
         <source>%1:%2 (%3)</source>
         <translation type="unfinished">%1:%2 (%3)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/AudioPlayer.qml" line="136"/>
+        <location filename="../src/ui/components/controls/AudioPlayer.qml" line="137"/>
         <source>%1:%2</source>
         <translation type="unfinished">%1:%2</translation>
     </message>
@@ -290,6 +455,14 @@
     </message>
 </context>
 <context>
+    <name>BackgroundPortal</name>
+    <message>
+        <location filename="../src/dbus/portal/BackgroundPortal.cpp" line="27"/>
+        <source>Don&apos;t miss any calls by automatically starting GOnnect on session start.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>BaseDialog</name>
     <message>
         <location filename="../src/ui/components/dialogs/BaseDialog.qml" line="11"/>
@@ -300,17 +473,17 @@
 <context>
     <name>BasePage</name>
     <message>
-        <location filename="../src/ui/components/pages/BasePage.qml" line="107"/>
+        <location filename="../src/ui/components/pages/BasePage.qml" line="116"/>
         <source>Base dashboard page grid</source>
         <translation type="unfinished">شبکه پایه صفحه داشبورد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/BasePage.qml" line="108"/>
+        <location filename="../src/ui/components/pages/BasePage.qml" line="117"/>
         <source>Canvas for editable dashboard pages</source>
         <translation type="unfinished">بوم صفحات داشبورد قابل ویرایش</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/BasePage.qml" line="113"/>
+        <location filename="../src/ui/components/pages/BasePage.qml" line="122"/>
         <source>Add widgets</source>
         <translation type="unfinished">افزودن ابزارک</translation>
     </message>
@@ -318,32 +491,32 @@
 <context>
     <name>BaseWidget</name>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="148"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="247"/>
         <source>Drag widget</source>
         <translation type="unfinished">کشیدن ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="149"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="248"/>
         <source>Change the position of the widget</source>
         <translation type="unfinished">تغییر موقعیت ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="199"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="298"/>
         <source>Remove widget</source>
         <translation type="unfinished">حذف ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="200"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="299"/>
         <source>Remove the currently selected widget from the dashboard</source>
         <translation type="unfinished">حذف ابزارک انتخاب‌شده از داشبورد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="262"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="363"/>
         <source>Resize widget</source>
         <translation type="unfinished">تغییر اندازه ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/BaseWidget.qml" line="263"/>
+        <location filename="../src/ui/components/BaseWidget.qml" line="364"/>
         <source>Resize the widget according to the mouse direction</source>
         <translation type="unfinished">تغییر اندازه ابزارک بر اساس جهت ماوس</translation>
     </message>
@@ -351,54 +524,54 @@
 <context>
     <name>BaseWindow</name>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="96"/>
-        <location filename="../src/ui/BaseWindow.qml" line="127"/>
-        <location filename="../src/ui/BaseWindow.qml" line="155"/>
-        <location filename="../src/ui/BaseWindow.qml" line="185"/>
-        <location filename="../src/ui/BaseWindow.qml" line="213"/>
-        <location filename="../src/ui/BaseWindow.qml" line="243"/>
-        <location filename="../src/ui/BaseWindow.qml" line="271"/>
-        <location filename="../src/ui/BaseWindow.qml" line="301"/>
+        <location filename="../src/ui/BaseWindow.qml" line="157"/>
+        <location filename="../src/ui/BaseWindow.qml" line="188"/>
+        <location filename="../src/ui/BaseWindow.qml" line="216"/>
+        <location filename="../src/ui/BaseWindow.qml" line="246"/>
+        <location filename="../src/ui/BaseWindow.qml" line="274"/>
+        <location filename="../src/ui/BaseWindow.qml" line="304"/>
+        <location filename="../src/ui/BaseWindow.qml" line="332"/>
+        <location filename="../src/ui/BaseWindow.qml" line="362"/>
         <source>Drag border</source>
         <translation type="unfinished">لبه کشیدنی</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="97"/>
+        <location filename="../src/ui/BaseWindow.qml" line="158"/>
         <source>Top left drag border for window resize operations</source>
         <translation type="unfinished">لبه کشیدنی بالا چپ برای تغییر اندازه پنجره</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="128"/>
+        <location filename="../src/ui/BaseWindow.qml" line="189"/>
         <source>Top drag border for window resize operations</source>
         <translation type="unfinished">لبه کشیدنی بالا برای تغییر اندازه پنجره</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="156"/>
+        <location filename="../src/ui/BaseWindow.qml" line="217"/>
         <source>Top right border for window resize operations</source>
         <translation type="unfinished">لبه بالا راست برای تغییر اندازه پنجره</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="186"/>
+        <location filename="../src/ui/BaseWindow.qml" line="247"/>
         <source>Right drag border for window resize operations</source>
         <translation type="unfinished">لبه کشیدنی راست برای تغییر اندازه پنجره</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="214"/>
+        <location filename="../src/ui/BaseWindow.qml" line="275"/>
         <source>Bottom right drag border for window resize operations</source>
         <translation type="unfinished">لبه کشیدنی پایین راست</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="244"/>
+        <location filename="../src/ui/BaseWindow.qml" line="305"/>
         <source>Bottom drag border for window resize operations</source>
         <translation type="unfinished">لبه کشیدنی پایین برای تغییر اندازه پنجره</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="272"/>
+        <location filename="../src/ui/BaseWindow.qml" line="333"/>
         <source>Bottom left drag border for window resize operations</source>
         <translation type="unfinished">لبه کشیدنی پایین چپ</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="302"/>
+        <location filename="../src/ui/BaseWindow.qml" line="363"/>
         <source>Left drag border for window resize operations</source>
         <translation type="unfinished">لبه کشیدنی چپ برای تغییر اندازه پنجره</translation>
     </message>
@@ -444,7 +617,7 @@
     <message>
         <location filename="../src/calendar/caldav/CalDAVEventFeeder.cpp" line="201"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">خطای احراز هویت برای %1</translation>
     </message>
 </context>
 <context>
@@ -639,104 +812,79 @@
         <translation type="unfinished">مدت زمان فعال بودن تماس به ثانیه: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="517"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="518"/>
+        <source>Favorite</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="550"/>
+        <source>Microphone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="559"/>
+        <source>Unmute microphone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="559"/>
+        <source>Mute microphone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="577"/>
         <source>Screen</source>
         <translation type="unfinished">صفحه‌نمایش</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="527"/>
-        <source>Screensharing control</source>
-        <translation type="unfinished">کنترل اشتراک‌گذاری صفحه</translation>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="590"/>
+        <source>More</source>
+        <translation type="unfinished">بیشتر</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="528"/>
-        <source>Start sharing your screen</source>
-        <translation type="unfinished">شروع اشتراک‌گذاری صفحه</translation>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="605"/>
+        <source>Accept</source>
+        <translation type="unfinished">پذیرفتن</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="535"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="616"/>
+        <source>Hang up</source>
+        <translation type="unfinished">قطع تماس</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="565"/>
         <source>Camera</source>
         <translation type="unfinished">دوربین</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="545"/>
-        <source>Camera control</source>
-        <translation type="unfinished">کنترل دوربین</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="546"/>
-        <source>Enable your camera</source>
-        <translation type="unfinished">فعال‌سازی دوربین</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="553"/>
-        <source>Resume</source>
-        <translation type="unfinished">ادامه</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="553"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="534"/>
         <source>Hold</source>
         <translation type="unfinished">نگه‌داشتن</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="560"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="541"/>
         <source>Resume call</source>
         <translation type="unfinished">ادامه تماس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="560"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="541"/>
         <source>Hold call</source>
         <translation type="unfinished">نگه‌داشتن تماس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="561"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="542"/>
         <source>Update the call hold state</source>
         <translation type="unfinished">به‌روزرسانی وضعیت نگه‌داری تماس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="582"/>
-        <source>Micro</source>
-        <translation type="unfinished">میکروفون</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="587"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="553"/>
         <source>Microphone mute locked by headset</source>
+        <translation type="unfinished">بی‌صدا بودن میکروفون توسط هدست قفل شده است</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="560"/>
+        <source>Mute or unmute your audio input</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="601"/>
-        <source>Input control</source>
-        <translation type="unfinished">کنترل ورودی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="602"/>
-        <source>Set the mute state of the current input device</source>
-        <translation type="unfinished">تنظیم وضعیت بی‌صدا کردن دستگاه ورودی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="609"/>
-        <source>Output</source>
-        <translation type="unfinished">خروجی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="625"/>
-        <source>Output control</source>
-        <translation type="unfinished">کنترل خروجی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="626"/>
-        <source>Change the current output devices</source>
-        <translation type="unfinished">تغییر دستگاه‌های خروجی فعلی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="650"/>
-        <source>Accept call</source>
-        <translation type="unfinished">پذیرفتن تماس</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="674"/>
-        <source>Hangup call</source>
-        <translation type="unfinished">قطع تماس</translation>
     </message>
 </context>
 <context>
@@ -804,6 +952,11 @@
         <source>Call history database is inconsistent. Please remove %1 and restart the App to re-initialize the database.</source>
         <translation type="unfinished">پایگاه داده تاریخچه تماس ناسازگار است. %1 را حذف کنید و برنامه را مجدداً راه‌اندازی کنید.</translation>
     </message>
+    <message>
+        <location filename="../src/sip/CallHistory.cpp" line="403"/>
+        <source>Database error: cannot remove history row</source>
+        <translation type="unfinished">خطای پایگاه داده: حذف ردیف تاریخچه ممکن نیست</translation>
+    </message>
 </context>
 <context>
     <name>CallItem</name>
@@ -848,21 +1001,34 @@
     </message>
 </context>
 <context>
+    <name>CallMoreMenu</name>
+    <message>
+        <location filename="../src/ui/components/popups/CallMoreMenu.qml" line="11"/>
+        <source>Microphone...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/CallMoreMenu.qml" line="26"/>
+        <source>Output...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CallSideBar</name>
     <message>
-        <location filename="../src/ui/components/CallSideBar.qml" line="195"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="200"/>
         <source>Chat</source>
         <translation type="unfinished">گفتگو</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/CallSideBar.qml" line="212"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="217"/>
         <source>Person(s)</source>
         <translation type="unfinished">
             <numerusform>%n نفر</numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallSideBar.qml" line="230"/>
+        <location filename="../src/ui/components/CallSideBar.qml" line="235"/>
         <source>Info</source>
         <translation type="unfinished">اطلاعات</translation>
     </message>
@@ -903,12 +1069,12 @@
     <message>
         <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="96"/>
         <source>CardDAV source %1 repeatedly failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">منبع CardDAV %1 مکرراً ناموفق بود</translation>
     </message>
     <message>
         <location filename="../src/contacts/carddav/CardDAVAddressBookFeeder.cpp" line="127"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">خطای احراز هویت برای %1</translation>
     </message>
 </context>
 <context>
@@ -922,47 +1088,69 @@
 <context>
     <name>Chat</name>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="64"/>
-        <source>Direct conversation with %1</source>
-        <translation type="unfinished">گفتگوی مستقیم با %1</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="65"/>
-        <source>Chat room %1</source>
-        <translation type="unfinished">اتاق گفتگو %1</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="96"/>
-        <location filename="../src/ui/components/chat/Chat.qml" line="206"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="132"/>
         <source>Messages are loading...</source>
         <translation type="unfinished">در حال بارگذاری پیام‌ها...</translation>
     </message>
-    <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="133"/>
-        <source>Edit room...</source>
-        <translation type="unfinished">ویرایش اتاق...</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="139"/>
-        <source>Invite users...</source>
-        <translation type="unfinished">دعوت کاربران...</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="145"/>
-        <source>Leave room...</source>
-        <translation type="unfinished">ترک اتاق...</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="149"/>
-        <source>Are you sure you really want to leave this chat?</source>
-        <translation type="unfinished">آیا واقعاً می‌خواهید این گفتگو را ترک کنید؟</translation>
-    </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="227"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="153"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 در حال نوشتن است</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>ChatButtonBar</name>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="48"/>
+        <source>Direct conversation with %1</source>
+        <translation type="unfinished">گفتگوی مستقیم با %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="49"/>
+        <source>Chat room %1</source>
+        <translation type="unfinished">اتاق گفتگو %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="91"/>
+        <source>Messages are loading...</source>
+        <translation type="unfinished">در حال بارگذاری پیام‌ها...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="105"/>
+        <source>Favorite</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="112"/>
+        <source>More</source>
+        <translation type="unfinished">بیشتر</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="130"/>
+        <source>Call</source>
+        <translation type="unfinished">تماس</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="150"/>
+        <source>Start phone call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="162"/>
+        <source>Are you sure you really want to leave this chat?</source>
+        <translation type="unfinished">آیا واقعاً می‌خواهید این گفتگو را ترک کنید؟</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="206"/>
+        <source>Call contact button</source>
+        <translation type="unfinished">دکمهٔ تماس با مخاطب</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="207"/>
+        <source>Selected number %1</source>
+        <translation type="unfinished">شمارهٔ انتخاب‌شده %1</translation>
     </message>
 </context>
 <context>
@@ -982,7 +1170,7 @@
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="192"/>
         <source>Failed to save login secret for %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ذخیرهٔ رمز ورود برای %1 ناموفق بود: %2</translation>
     </message>
     <message>
         <location filename="../src/chat/ChatConnectorManager.cpp" line="255"/>
@@ -998,100 +1186,108 @@
 <context>
     <name>ChatMessageBox</name>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="228"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="260"/>
         <source>Edit last message</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ویرایش آخرین پیام</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="271"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="299"/>
         <source>Cancel edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">لغو ویرایش</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="272"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="300"/>
         <source>Discard the current message edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">صرف‌نظر از ویرایش فعلی پیام</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="279"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="307"/>
         <source>Enter message...</source>
         <translation type="unfinished">پیام را وارد کنید...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="572"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="657"/>
         <source>Open emoji picker popup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">باز کردن انتخابگر ایموجی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="604"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="711"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="689"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="810"/>
         <source>Bold</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ضخیم</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="611"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="716"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="696"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="815"/>
         <source>Italic</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">مورب</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="618"/>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="721"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="703"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="820"/>
         <source>Strikethrough</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">خط‌خورده</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="625"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="710"/>
         <source>Inline preformatted/code</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">قالب‌نشده/کد (درون‌خطی)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="632"/>
-        <source>Block preformatted/code</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="640"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="739"/>
         <source>Text format options</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">گزینه‌های قالب‌بندی متن</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="652"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="751"/>
         <source>Add hyperlink</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">افزودن پیوند</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="664"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="763"/>
         <source>Select and upload image</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">انتخاب و بارگذاری تصویر</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="671"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="770"/>
         <source>Select and upload file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">انتخاب و بارگذاری فایل</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="692"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="791"/>
         <source>Send message to chat room</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ارسال پیام به اتاق گفتگو</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="726"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="825"/>
         <source>Inline code</source>
+        <translation type="unfinished">کد درون‌خطی</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="717"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="830"/>
+        <source>Code block</source>
+        <translation type="unfinished">بلوک کد</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="724"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="835"/>
+        <source>Preformatted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="731"/>
-        <source>Code block</source>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="840"/>
+        <source>Quote</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="739"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="848"/>
         <source>Type message</source>
         <translation type="unfinished">پیام تایپ کنید</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="740"/>
+        <location filename="../src/ui/components/chat/ChatMessageBox.qml" line="849"/>
         <source>Enter the chat text message</source>
         <translation type="unfinished">پیام متنی گفتگو را وارد کنید</translation>
     </message>
@@ -1109,7 +1305,7 @@
         <translation type="unfinished">فهرست همه پیام‌های اتاق گفتگوی فعلی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageList.qml" line="98"/>
+        <location filename="../src/ui/components/chat/ChatMessageList.qml" line="101"/>
         <source>Auto scroll down</source>
         <translation type="unfinished">پیمایش خودکار به پایین</translation>
     </message>
@@ -1117,59 +1313,82 @@
 <context>
     <name>ChatMessageListItem</name>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="103"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="109"/>
         <source>Chat message</source>
         <translation type="unfinished">پیام گفتگو</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="105"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="111"/>
         <source>Selected chat message - from %1, at %2: %3</source>
         <translation type="unfinished">پیام انتخاب‌شده - از %1، در %2: %3</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="354"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="367"/>
         <source>Retry</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">تلاش مجدد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="389"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="418"/>
         <source>Add reaction...</source>
         <translation type="unfinished">افزودن واکنش...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="402"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="431"/>
         <source>Copy to clipboard</source>
         <translation type="unfinished">کپی در کلیپ‌بورد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="417"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="446"/>
         <source>Copy link to clipboard</source>
         <translation type="unfinished">کپی پیوند در کلیپ‌بورد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="426"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="455"/>
         <source>Remove message...</source>
         <translation type="unfinished">حذف پیام...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="431"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="460"/>
         <source>Remove message</source>
         <translation type="unfinished">حذف پیام</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="432"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="461"/>
         <source>Do you really want to remove this message?</source>
         <translation type="unfinished">آیا واقعاً می‌خواهید این پیام را حذف کنید؟</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="446"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="462"/>
+        <source>Reason (optional, why you removed the message)</source>
+        <translation type="unfinished">دلیل (اختیاری، چرا پیام را حذف کردید)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="476"/>
         <source>Edit message...</source>
         <translation type="unfinished">ویرایش پیام...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="456"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="486"/>
         <source>Reply...</source>
         <translation type="unfinished">پاسخ...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="492"/>
+        <source>Toggle pin</source>
+        <translation type="unfinished">سنجاق کردن یا برداشتن سنجاق</translation>
+    </message>
+</context>
+<context>
+    <name>ChatMessageListItemContent</name>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="62"/>
+        <source>Message has been removed. Reason: %1</source>
+        <translation type="unfinished">پیام حذف شده است. دلیل: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItemContent.qml" line="64"/>
+        <source>Message has been removed.</source>
+        <translation type="unfinished">پیام حذف شده است.</translation>
     </message>
 </context>
 <context>
@@ -1178,6 +1397,29 @@
         <location filename="../src/ui/components/chat/ChatMessageListItemRelatedContent.qml" line="45"/>
         <source>Answer to message from %1</source>
         <translation type="unfinished">پاسخ به پیام از %1</translation>
+    </message>
+</context>
+<context>
+    <name>ChatRoomContextMenu</name>
+    <message>
+        <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="21"/>
+        <source>Toggle favorite</source>
+        <translation type="unfinished">تغییر وضعیت دلخواه</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="28"/>
+        <source>Edit room...</source>
+        <translation type="unfinished">ویرایش اتاق...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="35"/>
+        <source>Invite users...</source>
+        <translation type="unfinished">دعوت کاربران...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatRoomContextMenu.qml" line="41"/>
+        <source>Leave room...</source>
+        <translation type="unfinished">ترک اتاق...</translation>
     </message>
 </context>
 <context>
@@ -1210,26 +1452,6 @@
         <source>Selected chat room %1: %2 unread messages</source>
         <translation type="unfinished">اتاق انتخاب‌شده %1: %2 پیام خوانده‌نشده</translation>
     </message>
-    <message>
-        <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="182"/>
-        <source>Toggle favorite</source>
-        <translation type="unfinished">تغییر وضعیت دلخواه</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="188"/>
-        <source>Leave room...</source>
-        <translation type="unfinished">ترک اتاق...</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="194"/>
-        <source>Edit room...</source>
-        <translation type="unfinished">ویرایش اتاق...</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/ChatRoomListItem.qml" line="201"/>
-        <source>Invite users...</source>
-        <translation type="unfinished">دعوت کاربران...</translation>
-    </message>
 </context>
 <context>
     <name>ChatRoomProxyModel</name>
@@ -1260,6 +1482,7 @@
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="53"/>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="147"/>
         <source>Join</source>
         <translation type="unfinished">پیوستن</translation>
     </message>
@@ -1281,7 +1504,7 @@
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="90"/>
         <source>You have been invited to join this room &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">شما به اتاق گفتگوی &apos;%1&apos; دعوت شده‌اید.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="93"/>
@@ -1299,17 +1522,12 @@
         <translation type="unfinished">رد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="143"/>
-        <source>Accept</source>
-        <translation type="unfinished">پذیرفتن</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="154"/>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="162"/>
         <source>You knocked on the door and are waiting for someone to let you in.</source>
         <translation type="unfinished">شما در زدید و منتظرید کسی شما را وارد کند.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="159"/>
+        <location filename="../src/ui/components/chat/ChatUnjoinedPage.qml" line="167"/>
         <source>You have been banned from this room and may not enter it again, unless a room administrator re-invites you.</source>
         <translation type="unfinished">شما از این اتاق مسدود شده‌اید و تا زمانی که یک مدیر اتاق دوباره شما را دعوت نکند نمی‌توانید دوباره وارد آن شوید.</translation>
     </message>
@@ -1324,12 +1542,30 @@
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="191"/>
         <source>No users found.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">کاربری یافت نشد.</translation>
     </message>
     <message>
         <location filename="../src/ui/components/popups/ChatUserSearch.qml" line="193"/>
         <source>Please enter a search phrase...</source>
+        <translation type="unfinished">لطفاً عبارت جستجو را وارد کنید...</translation>
+    </message>
+</context>
+<context>
+    <name>ChatWidget</name>
+    <message>
+        <location filename="../src/ui/components/ChatWidget.qml" line="110"/>
+        <source>Chat room not available</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ChatWidget.qml" line="111"/>
+        <source>No chat room selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ChatWidget.qml" line="120"/>
+        <source>Displays the current status of the widget: %1</source>
+        <translation type="unfinished">نمایش وضعیت فعلی ابزارک: %1</translation>
     </message>
 </context>
 <context>
@@ -1406,138 +1642,138 @@
 <context>
     <name>Conference</name>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="130"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="197"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="134"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="201"/>
         <source>Set room name</source>
         <translation type="unfinished">تنظیم نام اتاق</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="133"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="200"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="137"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="204"/>
         <source>Room name:</source>
         <translation type="unfinished">نام اتاق:</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="145"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="212"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="149"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="216"/>
         <source>Enter the room name</source>
         <translation type="unfinished">نام اتاق را وارد کنید</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="152"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="156"/>
         <source>Authenticate</source>
         <translation type="unfinished">احراز هویت</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="243"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="247"/>
         <source>Please authenticate in the opened browser window...</source>
         <translation type="unfinished">لطفاً در پنجره مرورگر باز‌شده احراز هویت کنید...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="400"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="438"/>
         <source>This conference is protected by a password. Please enter it to join the room.</source>
         <translation type="unfinished">این کنفرانس با رمز عبور محافظت شده است. رمز را برای ورود وارد کنید.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="413"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="593"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="451"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="642"/>
         <source>Password</source>
         <translation type="unfinished">رمز عبور</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="425"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="603"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="463"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="652"/>
         <source>Enter the password</source>
         <translation type="unfinished">رمز عبور را وارد کنید</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="431"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="469"/>
         <source>Remember password</source>
         <translation type="unfinished">به‌خاطر سپردن رمز</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="448"/>
-        <location filename="../src/ui/components/pages/Conference.qml" line="652"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="486"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="701"/>
         <source>Cancel</source>
         <translation type="unfinished">لغو</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="460"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="498"/>
         <source>Join Room</source>
         <translation type="unfinished">ورود به اتاق</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="510"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="559"/>
         <source>Password required</source>
         <translation type="unfinished">رمز عبور لازم است</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="544"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="593"/>
         <source>Enter a password to protect this conference room. Other users must enter it before taking part in the session.</source>
         <translation type="unfinished">برای محافظت از این اتاق کنفرانس رمز عبوری وارد کنید. کاربران دیگر باید پیش از شرکت در جلسه آن را وارد کنند.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="558"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="607"/>
         <source>This password has been set for the conference room and must be entered by users before taking part in the session.</source>
         <translation type="unfinished">این رمز عبور برای اتاق کنفرانس تنظیم شده است و کاربران باید پیش از شرکت در جلسه آن را وارد کنند.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="572"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="621"/>
         <source>The room password has been set by someone else.</source>
         <translation type="unfinished">رمز اتاق توسط شخص دیگری تنظیم شده است.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="637"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="686"/>
         <source>Show password</source>
         <translation type="unfinished">نمایش رمز</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="665"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="714"/>
         <source>Remove</source>
         <translation type="unfinished">حذف</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="676"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="725"/>
         <source>Save</source>
         <translation type="unfinished">ذخیره</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="710"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="759"/>
         <source>Video quality</source>
         <translation type="unfinished">کیفیت تصویر</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="726"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="775"/>
         <source>Change the video quality of this meeting</source>
         <translation type="unfinished">تغییر کیفیت تصویر این جلسه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="732"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="781"/>
         <source>No video (audio only)</source>
         <translation type="unfinished">بدون تصویر (فقط صدا)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="737"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="786"/>
         <source>Lowest quality</source>
         <translation type="unfinished">کمترین کیفیت</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="742"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="791"/>
         <source>Standard quality</source>
         <translation type="unfinished">کیفیت استاندارد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="747"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="796"/>
         <source>Highest quality</source>
         <translation type="unfinished">بیشترین کیفیت</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="753"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="802"/>
         <source>Close</source>
         <translation type="unfinished">بستن</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/pages/Conference.qml" line="786"/>
+        <location filename="../src/ui/components/pages/Conference.qml" line="835"/>
         <source>Drag bar</source>
         <translation type="unfinished">نوار کشیدنی</translation>
     </message>
@@ -1545,136 +1781,196 @@
 <context>
     <name>ConferenceButtonBar</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="150"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="154"/>
         <source>%n minutes left</source>
         <translation type="unfinished">
             <numerusform>%n دقیقه باقی‌مانده</numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="100"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="104"/>
         <source>Conference room</source>
         <translation type="unfinished">اتاق کنفرانس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="195"/>
-        <source>Share</source>
-        <translation type="unfinished">اشتراک‌گذاری</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="209"/>
-        <source>Copy room name</source>
-        <translation type="unfinished">کپی نام اتاق</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="213"/>
-        <source>Copy room link</source>
-        <translation type="unfinished">کپی لینک اتاق</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="217"/>
-        <source>Open in browser</source>
-        <translation type="unfinished">باز کردن در مرورگر</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="221"/>
-        <source>Show phone number</source>
-        <translation type="unfinished">نمایش شماره تلفن</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="237"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="214"/>
         <source>Raise</source>
         <translation type="unfinished">بلند کردن دست</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="246"/>
-        <source>Resume</source>
-        <translation type="unfinished">ادامه</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="246"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="238"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="242"/>
         <source>Hold</source>
         <translation type="unfinished">نگه‌داشتن</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="255"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="226"/>
         <source>View</source>
         <translation type="unfinished">نما</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="264"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="269"/>
+        <source>Enable camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="276"/>
         <source>Screen</source>
         <translation type="unfinished">صفحه‌نمایش</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="282"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="292"/>
+        <source>Stop sharing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="298"/>
         <source>Share window</source>
         <translation type="unfinished">اشتراک‌گذاری پنجره</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="287"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="292"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="303"/>
         <source>Share screen</source>
         <translation type="unfinished">اشتراک‌گذاری صفحه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="297"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="197"/>
+        <source>Favorite</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="219"/>
+        <source>Lower hand</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="219"/>
+        <source>Raise hand</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="242"/>
+        <source>Resume</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="243"/>
+        <source>Update the conference hold state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="252"/>
+        <source>Microphone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="256"/>
+        <source>Unmute microphone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="256"/>
+        <source>Mute microphone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="265"/>
         <source>Camera</source>
         <translation type="unfinished">دوربین</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="334"/>
-        <source>Output</source>
-        <translation type="unfinished">خروجی</translation>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="269"/>
+        <source>Disable camera</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="352"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="346"/>
+        <source>Leave</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="312"/>
         <source>More</source>
         <translation type="unfinished">بیشتر</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="364"/>
-        <source>Noise supression</source>
-        <translation type="unfinished">حذف نویز</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="370"/>
-        <source>Toggle subtitles</source>
-        <translation type="unfinished">روشن/خاموش کردن زیرنویس</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="377"/>
-        <source>Toggle whiteboard</source>
-        <translation type="unfinished">روشن/خاموش کردن تخته سفید</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="383"/>
-        <source>Video quality...</source>
-        <translation type="unfinished">کیفیت تصویر...</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="392"/>
-        <source>Set room password...</source>
-        <translation type="unfinished">تنظیم رمز اتاق...</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="399"/>
-        <source>Mute everyone</source>
-        <translation type="unfinished">بی‌صدا کردن همه</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="455"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="366"/>
         <source>Leave conference</source>
         <translation type="unfinished">ترک کنفرانس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="463"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="374"/>
         <source>End conference for all</source>
         <translation type="unfinished">پایان کنفرانس برای همه</translation>
     </message>
+</context>
+<context>
+    <name>ConferenceMoreMenu</name>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="315"/>
-        <source>Micro</source>
-        <translation type="unfinished">میکروفون</translation>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="22"/>
+        <source>Output...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="39"/>
+        <source>Microphone...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="56"/>
+        <source>Camera...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="73"/>
+        <source>Noise supression</source>
+        <translation type="unfinished">حذف نویز</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="79"/>
+        <source>Video quality...</source>
+        <translation type="unfinished">کیفیت تصویر...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="88"/>
+        <source>Toggle subtitles</source>
+        <translation type="unfinished">روشن/خاموش کردن زیرنویس</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="95"/>
+        <source>Toggle whiteboard</source>
+        <translation type="unfinished">روشن/خاموش کردن تخته سفید</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="105"/>
+        <source>Set room password...</source>
+        <translation type="unfinished">تنظیم رمز اتاق...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="113"/>
+        <source>Mute everyone</source>
+        <translation type="unfinished">بی‌صدا کردن همه</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="123"/>
+        <source>Copy room name</source>
+        <translation type="unfinished">کپی نام اتاق</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="130"/>
+        <source>Copy room link</source>
+        <translation type="unfinished">کپی لینک اتاق</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="137"/>
+        <source>Open in browser</source>
+        <translation type="unfinished">باز کردن در مرورگر</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/ConferenceMoreMenu.qml" line="144"/>
+        <source>Show phone number</source>
+        <translation type="unfinished">نمایش شماره تلفن</translation>
     </message>
 </context>
 <context>
@@ -1726,7 +2022,7 @@
         <translation type="unfinished">جستجوی کاربر...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="263"/>
+        <location filename="../src/ui/components/popups/CreateChatRoom.qml" line="265"/>
         <source>Create</source>
         <translation type="unfinished">ایجاد</translation>
     </message>
@@ -1775,17 +2071,17 @@
 <context>
     <name>CustomWindowHeader</name>
     <message>
-        <location filename="../src/ui/components/CustomWindowHeader.qml" line="32"/>
+        <location filename="../src/ui/components/CustomWindowHeader.qml" line="33"/>
         <source>GOnnect window header</source>
         <translation type="unfinished">عنوان پنجره GOnnect</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CustomWindowHeader.qml" line="220"/>
+        <location filename="../src/ui/components/CustomWindowHeader.qml" line="116"/>
         <source>App menu</source>
         <translation type="unfinished">منوی برنامه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CustomWindowHeader.qml" line="274"/>
+        <location filename="../src/ui/components/CustomWindowHeader.qml" line="170"/>
         <source>Close GOnnect window</source>
         <translation type="unfinished">بستن پنجره GOnnect</translation>
     </message>
@@ -1801,14 +2097,14 @@
 <context>
     <name>DateEventManager</name>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="395"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="396"/>
         <source>Conference starting soon</source>
         <translation type="unfinished">کنفرانس به زودی شروع می‌شود</translation>
     </message>
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="396"/>
-        <source>Appointment starting soon</source>
-        <translation type="unfinished">قرار ملاقات به زودی شروع می‌شود</translation>
+        <source>Event starting soon</source>
+        <translation type="unfinished">رویداد به‌زودی آغاز می‌شود</translation>
     </message>
     <message>
         <location filename="../src/calendar/DateEventManager.cpp" line="402"/>
@@ -1823,21 +2119,6 @@
 </context>
 <context>
     <name>DateEventsList</name>
-    <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="15"/>
-        <source>Date events</source>
-        <translation type="unfinished">رویدادهای تقویم</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="16"/>
-        <source>List of all the currently active and upcoming date events</source>
-        <translation type="unfinished">فهرست همه رویدادهای فعال و آینده</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/DateEventsList.qml" line="33"/>
-        <source>Date event section</source>
-        <translation type="unfinished">بخش رویدادها</translation>
-    </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="34"/>
         <source>Header for %1</source>
@@ -1865,14 +2146,29 @@
         <translation type="unfinished">dddd - yyyy/MM/dd</translation>
     </message>
     <message>
+        <location filename="../src/ui/components/DateEventsList.qml" line="15"/>
+        <source>Events</source>
+        <translation type="unfinished">رویدادها</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/DateEventsList.qml" line="16"/>
+        <source>List of all the currently active and upcoming calendar events</source>
+        <translation type="unfinished">فهرست همهٔ رویدادهای جاری و آیندهٔ تقویم</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/DateEventsList.qml" line="33"/>
+        <source>Event section</source>
+        <translation type="unfinished">بخش رویدادها</translation>
+    </message>
+    <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="113"/>
-        <source>Date event</source>
-        <translation type="unfinished">رویداد تقویم</translation>
+        <source>Event</source>
+        <translation type="unfinished">رویداد</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="114"/>
-        <source>Currently selected date event: %1, starting time %2, remaining time %3</source>
-        <translation type="unfinished">رویداد انتخاب‌شده: %1، شروع %2، باقی‌مانده %3</translation>
+        <source>Currently selected calendar event: %1, starting time %2, remaining time %3</source>
+        <translation type="unfinished">رویداد انتخاب‌شده: %1، زمان شروع %2، زمان باقی‌مانده %3</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsList.qml" line="168"/>
@@ -1940,22 +2236,22 @@
     <name>DateEventsWidget</name>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="27"/>
-        <source>Appointments</source>
-        <translation type="unfinished">قرارها</translation>
+        <source>Events</source>
+        <translation type="unfinished">رویدادها</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="53"/>
-        <source>Loading appointments...</source>
-        <translation type="unfinished">بارگذاری قرارها...</translation>
+        <source>Loading events...</source>
+        <translation type="unfinished">در حال بارگذاری رویدادها...</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="54"/>
-        <source>No upcoming appointments</source>
-        <translation type="unfinished">هیچ قراری در پیش نیست</translation>
+        <source>No upcoming events</source>
+        <translation type="unfinished">رویداد آینده‌ای وجود ندارد</translation>
     </message>
     <message>
         <location filename="../src/ui/components/DateEventsWidget.qml" line="64"/>
-        <source>Date event widget status</source>
+        <source>Event widget status</source>
         <translation type="unfinished">وضعیت ابزارک رویدادها</translation>
     </message>
     <message>
@@ -1996,6 +2292,7 @@
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="207"/>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="270"/>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="321"/>
+        <location filename="../src/ui/components/chat/DeviceVerification.qml" line="425"/>
         <source>Cancel</source>
         <translation type="unfinished">لغو</translation>
     </message>
@@ -2016,21 +2313,26 @@
     </message>
     <message>
         <location filename="../src/ui/components/chat/DeviceVerification.qml" line="347"/>
-        <source>Please verify the code:</source>
-        <translation type="unfinished">لطفاً کد را تأیید کنید:</translation>
+        <source>Confirm that the code or emojis match in both sessions:</source>
+        <translation type="unfinished">تأیید کنید که کد یا ایموجی‌ها در هر دو نشست یکسان هستند:</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/DeviceVerification.qml" line="425"/>
-        <source>Reject</source>
-        <translation type="unfinished">رد کردن</translation>
+        <location filename="../src/ui/components/chat/DeviceVerification.qml" line="426"/>
+        <source>Cancel, they do not match</source>
+        <translation type="unfinished">لغو، مطابقت ندارند</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/DeviceVerification.qml" line="434"/>
-        <source>Accept</source>
-        <translation type="unfinished">پذیرفتن</translation>
+        <location filename="../src/ui/components/chat/DeviceVerification.qml" line="435"/>
+        <source>Confirm</source>
+        <translation type="unfinished">تأیید</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/DeviceVerification.qml" line="450"/>
+        <location filename="../src/ui/components/chat/DeviceVerification.qml" line="436"/>
+        <source>Confirm, they match</source>
+        <translation type="unfinished">تأیید، مطابقت دارند</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/DeviceVerification.qml" line="452"/>
         <source>Your device has successfully been verified!</source>
         <translation type="unfinished">دستگاه شما با موفقیت تأیید شد!</translation>
     </message>
@@ -2149,10 +2451,28 @@
     </message>
 </context>
 <context>
+    <name>Emergency</name>
+    <message>
+        <location filename="../src/ui/components/pages/Emergency.qml" line="44"/>
+        <source>Emergency call</source>
+        <translation type="unfinished">تماس اضطراری</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/pages/Emergency.qml" line="57"/>
+        <source>Clicking one of these buttons will end all current calls and start an emergency call.</source>
+        <translation type="unfinished">کلیک بر این دکمه‌ها همه تماس‌های جاری را پایان داده و تماس اضطراری برقرار می‌کند.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/pages/Emergency.qml" line="87"/>
+        <source>Tap to call emergency contact: %1 (%2)</source>
+        <translation type="unfinished">ضربه بزنید تا با مخاطب اضطراری تماس بگیرید: %1 (%2)</translation>
+    </message>
+</context>
+<context>
     <name>EmergencyCallIncomingWindow</name>
     <message>
         <location filename="../src/ui/EmergencyCallIncomingWindow.qml" line="15"/>
-        <source>Emergency Call</source>
+        <source>Emergency call</source>
         <translation type="unfinished">تماس اضطراری</translation>
     </message>
     <message>
@@ -2421,13 +2741,13 @@
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="257"/>
-        <source>%1 has joined</source>
-        <translation type="unfinished">%1 پیوست</translation>
+        <source>%1 has joined the chat</source>
+        <translation type="unfinished">%1 به گفتگو پیوست</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="259"/>
-        <source>%1 has left</source>
-        <translation type="unfinished">%1 خارج شد</translation>
+        <source>%1 has left the chat</source>
+        <translation type="unfinished">%1 گفتگو را ترک کرد</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="261"/>
@@ -2457,7 +2777,7 @@
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="283"/>
         <source>Offline</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">آفلاین</translation>
     </message>
     <message>
         <location filename="../src/ui/EnumTranslation.cpp" line="285"/>
@@ -2498,52 +2818,22 @@
     <message>
         <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="28"/>
         <source>Selected favorite %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">علاقه‌مندی انتخاب‌شده %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="102"/>
-        <source>Jitsi Meet (room &apos;%1&apos;)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="105"/>
-        <source>Chat with %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="110"/>
-        <source>Phone (Commercial, %1)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="113"/>
-        <source>Phone (Mobile, %1)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="116"/>
-        <source>Phone (Home, %1)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="119"/>
-        <source>Phone (%1)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="298"/>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="336"/>
+        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="222"/>
+        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="257"/>
         <source>Favorite phone, chat or meeting button</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">دکمهٔ علاقه‌مندی برای تلفن، گفتگو یا جلسه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="299"/>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="337"/>
+        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="223"/>
+        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="258"/>
         <source>Selected address %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">نشانی انتخاب‌شده %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="438"/>
+        <location filename="../src/ui/components/controls/FavoriteListItemBig.qml" line="359"/>
         <source>Remove favorite</source>
         <translation type="unfinished">حذف از علاقه‌مندی‌ها</translation>
     </message>
@@ -2588,28 +2878,28 @@
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="68"/>
         <source>Send attachment</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ارسال پیوست</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="113"/>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="136"/>
         <source>Not a file</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">یک فایل نیست</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="120"/>
         <source>No valid files</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">فایل معتبری وجود ندارد</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="128"/>
         <source>Disallowed type</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">نوع مجاز نیست</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/FileDropArea.qml" line="132"/>
         <source>File not readable</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">فایل قابل خواندن نیست</translation>
     </message>
 </context>
 <context>
@@ -2641,7 +2931,7 @@
         <location filename="../src/ui/components/popups/FileSelectionOverview.qml" line="32"/>
         <source>Shall the following file(s) be sent? (%1)</source>
         <translation type="unfinished">
-            <numerusform></numerusform>
+            <numerusform>فایل‌های زیر ارسال شوند؟ (%1)</numerusform>
         </translation>
     </message>
     <message>
@@ -2656,55 +2946,17 @@
     </message>
 </context>
 <context>
-    <name>FirstAid</name>
+    <name>FlatpakUserInfo</name>
     <message>
-        <location filename="../src/ui/components/popups/FirstAid.qml" line="36"/>
-        <source>Emergency Call</source>
-        <translation type="unfinished">تماس اضطراری</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/FirstAid.qml" line="45"/>
-        <source>Clicking one of these buttons will end all current calls and start an emergency call.</source>
-        <translation type="unfinished">کلیک بر این دکمه‌ها همه تماس‌های جاری را پایان داده و تماس اضطراری برقرار می‌کند.</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/FirstAid.qml" line="72"/>
-        <source>Tap to call emergency contact: %1 (%2)</source>
-        <translation type="unfinished">ضربه بزنید تا با مخاطب اضطراری تماس بگیرید: %1 (%2)</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/FirstAid.qml" line="84"/>
-        <source>Close</source>
-        <translation type="unfinished">بستن</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/FirstAid.qml" line="94"/>
-        <source>Exit the emergency call menu without initiating any action</source>
-        <translation type="unfinished">خروج از منوی تماس اضطراری بدون انجام هیچ اقدامی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/popups/FirstAid.qml" line="104"/>
-        <source>Close emergency call menu</source>
-        <translation type="unfinished">بستن منوی تماس اضطراری</translation>
-    </message>
-</context>
-<context>
-    <name>FirstAidButton</name>
-    <message>
-        <location filename="../src/ui/components/controls/FirstAidButton.qml" line="9"/>
-        <source>Emergency call</source>
-        <translation type="unfinished">تماس اضطراری</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/controls/FirstAidButton.qml" line="22"/>
-        <source>Open emergency call menu</source>
-        <translation type="unfinished">باز کردن منوی تماس اضطراری</translation>
+        <location filename="../src/platform/flatpak/FlatpakUserInfo.cpp" line="40"/>
+        <source>GOnnect wants to use your name to configure your display name.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>GonnectWindow</name>
     <message>
-        <location filename="../src/ui/GonnectWindow.qml" line="377"/>
+        <location filename="../src/ui/GonnectWindow.qml" line="395"/>
         <source>Home</source>
         <translation type="unfinished">خانه</translation>
     </message>
@@ -2712,7 +2964,7 @@
 <context>
     <name>HeadsetDevice</name>
     <message>
-        <location filename="../src/usb/HeadsetDevice.cpp" line="655"/>
+        <location filename="../src/usb/HeadsetDevice.cpp" line="702"/>
         <source>MMM dd</source>
         <translation type="unfinished">dd MMM</translation>
     </message>
@@ -2788,62 +3040,77 @@
         <translation type="unfinished">عنوان روز انتخاب‌شده: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryList.qml" line="127"/>
+        <location filename="../src/ui/components/HistoryList.qml" line="131"/>
         <source>History item</source>
         <translation type="unfinished">آیتم تاریخچه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryList.qml" line="128"/>
+        <location filename="../src/ui/components/HistoryList.qml" line="132"/>
         <source>Selected history item %1 - company %2, location %3, number %4, time %5, duration %6</source>
         <translation type="unfinished">آیتم انتخاب‌شده %1 - شرکت %2، مکان %3، شماره %4، زمان %5، مدت %6</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryList.qml" line="233"/>
+        <location filename="../src/ui/components/HistoryList.qml" line="245"/>
         <source>, via %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">، از طریق %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryList.qml" line="353"/>
+        <location filename="../src/ui/components/HistoryList.qml" line="365"/>
         <source>hh:mm</source>
         <translation type="unfinished">hh:mm</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/HistoryList.qml" line="423"/>
+        <source>Are you sure you really want to remove this entry?</source>
+        <translation type="unfinished">آیا مطمئنید که می‌خواهید این مورد را حذف کنید؟</translation>
     </message>
 </context>
 <context>
     <name>HistoryListContextMenu</name>
     <message>
-        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="28"/>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="31"/>
         <source>Call</source>
         <translation type="unfinished">تماس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="39"/>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="43"/>
+        <source>Chat</source>
+        <translation type="unfinished">گفتگو</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="56"/>
         <source>Copy number</source>
         <translation type="unfinished">کپی شماره</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="50"/>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="68"/>
         <source>Remove favorite</source>
         <translation type="unfinished">حذف از علاقه‌مندی‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="50"/>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="68"/>
         <source>Add favorite</source>
         <translation type="unfinished">افزودن به علاقه‌مندی‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="62"/>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="81"/>
         <source>Remind when available</source>
         <translation type="unfinished">یادآوری هنگام در دسترس بودن</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="74"/>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="94"/>
         <source>Unblock</source>
         <translation type="unfinished">رفع انسداد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="74"/>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="94"/>
         <source>Block for 8 hours</source>
         <translation type="unfinished">مسدود کردن برای ۸ ساعت</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/HistoryListContextMenu.qml" line="107"/>
+        <source>Remove</source>
+        <translation type="unfinished">حذف</translation>
     </message>
 </context>
 <context>
@@ -2856,7 +3123,7 @@
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
         <source>All sources</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">همهٔ منابع</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
@@ -2886,7 +3153,7 @@
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
         <source>All calls</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">همهٔ تماس‌ها</translation>
     </message>
     <message>
         <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
@@ -2932,10 +3199,10 @@
 <context>
     <name>IMHandler</name>
     <message>
-        <location filename="../src/sip/IMHandler.cpp" line="205"/>
-        <location filename="../src/sip/IMHandler.cpp" line="207"/>
-        <location filename="../src/sip/IMHandler.cpp" line="209"/>
-        <location filename="../src/sip/IMHandler.cpp" line="212"/>
+        <location filename="../src/sip/IMHandler.cpp" line="206"/>
+        <location filename="../src/sip/IMHandler.cpp" line="208"/>
+        <location filename="../src/sip/IMHandler.cpp" line="210"/>
+        <location filename="../src/sip/IMHandler.cpp" line="214"/>
         <source>Ad hoc conference</source>
         <translation type="unfinished">کنفرانس فوری</translation>
     </message>
@@ -2989,7 +3256,7 @@
 <context>
     <name>InfoDialog</name>
     <message>
-        <location filename="../src/ui/components/dialogs/InfoDialog.qml" line="33"/>
+        <location filename="../src/ui/components/dialogs/InfoDialog.qml" line="37"/>
         <source>Ok</source>
         <translation type="unfinished">تأیید</translation>
     </message>
@@ -3035,77 +3302,82 @@
         <translation type="unfinished">رد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="108"/>
-        <source>Accept</source>
-        <translation type="unfinished">پذیرفتن</translation>
+        <location filename="../src/ui/components/popups/InvitedToChatRoom.qml" line="111"/>
+        <source>Join</source>
+        <translation type="unfinished">پیوستن</translation>
     </message>
 </context>
 <context>
     <name>IpcDispatcher</name>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="461"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="483"/>
         <source>The file %1 exceeds the file size limit of %2 and cannot be sent.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">فایل %1 از محدودیت حجم %2 فراتر رفته و قابل ارسال نیست.</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="860"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="901"/>
+        <source>The IPC client of %1 repeatedly reported network errors.</source>
+        <translation type="unfinished">کلاینت IPC مربوط به %1 مکرراً خطاهای شبکه گزارش کرد.</translation>
+    </message>
+    <message>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="916"/>
         <source>An IPC error ocurred (%1, %2 (code %3):
 %4</source>
         <translation type="unfinished">خطای IPC رخ داد (%1، %2 (کد %3):
 %4</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="865"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="921"/>
         <source>An IPC error ocurred (%1, %2 (code %3)</source>
         <translation type="unfinished">خطای IPC رخ داد (%1، %2 (کد %3)</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2121"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2193"/>
         <source>Image sent by %1</source>
         <translation type="unfinished">تصویر ارسال‌شده توسط %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2123"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2195"/>
         <source>[%1] Image sent by %2</source>
         <translation type="unfinished">[%1] تصویر ارسال‌شده توسط %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2129"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2201"/>
         <source>Audio file sent by %1</source>
         <translation type="unfinished">فایل صوتی ارسال‌شده توسط %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2131"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2203"/>
         <source>[%1] Audio file sent by %2</source>
         <translation type="unfinished">[%1] فایل صوتی ارسال‌شده توسط %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2138"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2210"/>
         <source>Video file sent by %1</source>
         <translation type="unfinished">ویدئوی ارسال‌شده توسط %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2140"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
         <source>[%1] Video file sent by %2</source>
         <translation type="unfinished">[%1] ویدئوی ارسال‌شده توسط %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2147"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2219"/>
         <source>File sent by %1</source>
         <translation type="unfinished">فایل ارسال‌شده توسط %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2149"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2221"/>
         <source>[%1] File sent by %2</source>
         <translation type="unfinished">[%1] فایل ارسال‌شده توسط %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2156"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2228"/>
         <source>Message from %1</source>
         <translation type="unfinished">پیام از %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2158"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2230"/>
         <source>[%1] Message from %2</source>
         <translation type="unfinished">[%1] پیام از %2</translation>
     </message>
@@ -3118,17 +3390,17 @@
         <translation type="unfinished">پیام جدید</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1273"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1315"/>
         <source>Active conference</source>
         <translation type="unfinished">کنفرانس فعال</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1278"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1320"/>
         <source>Hang up</source>
         <translation type="unfinished">قطع تماس</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="810"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="828"/>
         <source>%1 has joined the conference</source>
         <translation type="unfinished">%1 به کنفرانس پیوست</translation>
     </message>
@@ -3138,13 +3410,13 @@
         <translation type="unfinished">کاربر بدون نام</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="624"/>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1322"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="638"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1364"/>
         <source>Failed to persist room password: %1</source>
         <translation type="unfinished">ذخیرهٔ رمز عبور اتاق ناموفق بود: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="824"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="842"/>
         <source>%1 has left the conference</source>
         <translation type="unfinished">%1 کنفرانس را ترک کرد</translation>
     </message>
@@ -3152,24 +3424,29 @@
 <context>
     <name>JitsiHistoryListContextMenu</name>
     <message>
-        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="19"/>
+        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="20"/>
         <source>Start conference</source>
         <translation type="unfinished">شروع کنفرانس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="31"/>
+        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="32"/>
         <source>Remove favorite</source>
         <translation type="unfinished">حذف از علاقه‌مندی‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="31"/>
+        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="32"/>
         <source>Add favorite</source>
         <translation type="unfinished">افزودن به علاقه‌مندی‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="42"/>
+        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="43"/>
         <source>Copy room name</source>
         <translation type="unfinished">کپی نام اتاق</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/JitsiHistoryListContextMenu.qml" line="54"/>
+        <source>Remove</source>
+        <translation type="unfinished">حذف</translation>
     </message>
 </context>
 <context>
@@ -3209,11 +3486,29 @@
     </message>
 </context>
 <context>
+    <name>KnockedParticipant</name>
+    <message>
+        <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="46"/>
+        <source>%1 wants to join the conference. Can they join?</source>
+        <translation type="unfinished">%1 می‌خواهد به کنفرانس بپیوندد. اجازه داده شود؟</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="58"/>
+        <source>No</source>
+        <translation type="unfinished">خیر</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/KnockedParticipant.qml" line="69"/>
+        <source>Yes</source>
+        <translation type="unfinished">بله</translation>
+    </message>
+</context>
+<context>
     <name>LDAPAddressBookFeeder</name>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="119"/>
         <source>Authentication error for %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">خطای احراز هویت برای %1</translation>
     </message>
     <message>
         <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="239"/>
@@ -3244,7 +3539,7 @@
     <message>
         <location filename="../src/ui/components/popups/LargeImage.qml" line="77"/>
         <source>Untitled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">بدون عنوان</translation>
     </message>
 </context>
 <context>
@@ -3371,7 +3666,7 @@
     <message>
         <location filename="../src/Main.qml" line="167"/>
         <source>SIP Registration failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ثبت SIP ناموفق بود</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="144"/>
@@ -3392,7 +3687,7 @@
     <message>
         <location filename="../src/Main.qml" line="168"/>
         <source>SIP registration failed with status %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ثبت SIP با وضعیت %1 ناموفق بود: %2</translation>
     </message>
     <message>
         <location filename="../src/Main.qml" line="231"/>
@@ -3408,119 +3703,130 @@
 <context>
     <name>MainTabBar</name>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="386"/>
         <location filename="../src/ui/components/MainTabBar.qml" line="387"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="388"/>
         <source>Home</source>
         <translation type="unfinished">خانه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="395"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="396"/>
         <source>Conference</source>
         <translation type="unfinished">کنفرانس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="396"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="397"/>
         <source>No active conference</source>
         <translation type="unfinished">هیچ کنفرانس فعالی وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="405"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="406"/>
         <source>No active call</source>
         <translation type="unfinished">هیچ تماس فعالی وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="419"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="420"/>
         <source>Chat not available</source>
         <translation type="unfinished">گفتگو در دسترس نیست</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="517"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="492"/>
+        <source>Emergency call</source>
+        <translation type="unfinished">تماس اضطراری</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/MainTabBar.qml" line="493"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="505"/>
+        <source>Show the emergency call page</source>
+        <translation type="unfinished">نمایش صفحهٔ تماس اضطراری</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/MainTabBar.qml" line="552"/>
         <source>Move up</source>
         <translation type="unfinished">انتقال به بالا</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="524"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="559"/>
         <source>Move tab up</source>
         <translation type="unfinished">انتقال زبانه به بالا</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="525"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="560"/>
         <source>Moves the currently selected tab up by one</source>
         <translation type="unfinished">زبانه انتخاب‌شده را یک موقعیت به بالا منتقل می‌کند</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="555"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="590"/>
         <source>Move down</source>
         <translation type="unfinished">انتقال به پایین</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="562"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="597"/>
         <source>Move tab down</source>
         <translation type="unfinished">انتقال زبانه به پایین</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="563"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="598"/>
         <source>Moves the currently selected tab down by one</source>
         <translation type="unfinished">زبانه انتخاب‌شده را یک موقعیت به پایین منتقل می‌کند</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="593"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="628"/>
         <source>Edit</source>
         <translation type="unfinished">ویرایش</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="600"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="635"/>
         <source>Edit page</source>
         <translation type="unfinished">ویرایش صفحه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="601"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="636"/>
         <source>Edit the currently selected dashboard page</source>
         <translation type="unfinished">ویرایش صفحه داشبورد انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="608"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="643"/>
         <source>Delete</source>
         <translation type="unfinished">حذف</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="616"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="651"/>
         <source>Delete page</source>
         <translation type="unfinished">حذف صفحه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="617"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="652"/>
         <source>Delete the currently selected dashboard page</source>
         <translation type="unfinished">حذف صفحه داشبورد انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="404"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="405"/>
         <source>Call</source>
         <translation type="unfinished">تماس</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="204"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="205"/>
         <source>Selected tab</source>
         <translation type="unfinished">زبانه انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="205"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="206"/>
         <source>The currently selected tab</source>
         <translation type="unfinished">زبانه انتخاب‌شده فعلی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="243"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="244"/>
         <source>Selected tab options</source>
         <translation type="unfinished">گزینه‌های زبانه انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="244"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="245"/>
         <source>The settings of the currently selected tab</source>
         <translation type="unfinished">تنظیمات زبانه انتخاب‌شده فعلی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="468"/>
         <location filename="../src/ui/components/MainTabBar.qml" line="469"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="470"/>
         <source>Settings</source>
         <translation type="unfinished">تنظیمات</translation>
     </message>
@@ -3612,57 +3918,57 @@
         <translation type="unfinished">برچسب نماد صفحه</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="116"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="117"/>
         <source>Page icon selection</source>
         <translation type="unfinished">انتخاب نماد صفحه</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="117"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="118"/>
         <source>Select the page icon for the dashboard page</source>
         <translation type="unfinished">انتخاب نماد صفحه داشبورد</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="128"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="129"/>
         <source>Currently selected page icon option</source>
         <translation type="unfinished">گزینه نماد صفحه انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="178"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="179"/>
         <source>Cancel</source>
         <translation type="unfinished">لغو</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="183"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="184"/>
         <source>Cancel page modifcation</source>
         <translation type="unfinished">لغو تغییر صفحه</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="184"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="185"/>
         <source>Cancel button to exit the page creation/update window</source>
         <translation type="unfinished">دکمه لغو برای خروج از پنجره</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="193"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="194"/>
         <source>Create</source>
         <translation type="unfinished">ایجاد</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="193"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="194"/>
         <source>Save</source>
         <translation type="unfinished">ذخیره</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="202"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="203"/>
         <source>page</source>
         <translation type="unfinished">صفحه</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="204"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="205"/>
         <source>Confirmation button to create the new dashboard page</source>
         <translation type="unfinished">دکمه تأیید ایجاد صفحه جدید</translation>
     </message>
     <message>
-        <location filename="../src/ui/PageCreationWindow.qml" line="205"/>
+        <location filename="../src/ui/PageCreationWindow.qml" line="206"/>
         <source>Confirmation button to apply changes to the dashboard page</source>
         <translation type="unfinished">دکمه تأیید اعمال تغییرات</translation>
     </message>
@@ -3670,9 +3976,17 @@
 <context>
     <name>PhoneNumberUtil</name>
     <message>
-        <location filename="../src/contacts/PhoneNumberUtil.cpp" line="117"/>
+        <location filename="../src/contacts/PhoneNumberUtil.cpp" line="133"/>
         <source>Anonymous</source>
         <translation type="unfinished">ناشناس</translation>
+    </message>
+</context>
+<context>
+    <name>PinnedChatMessagesList</name>
+    <message>
+        <location filename="../src/ui/components/chat/PinnedChatMessagesList.qml" line="129"/>
+        <source>Unpin</source>
+        <translation type="unfinished">برداشتن سنجاق</translation>
     </message>
 </context>
 <context>
@@ -3721,38 +4035,43 @@
 <context>
     <name>PublicRoomSearch</name>
     <message>
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="83"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="80"/>
         <source>Search for public chat rooms...</source>
         <translation type="unfinished">جستجوی اتاق‌های گفتگوی عمومی...</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="160"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="164"/>
         <source>%n member(s), topic: %1</source>
         <translation type="unfinished">
             <numerusform>%n عضو، موضوع: %1</numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="161"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="165"/>
         <source>%n member(s)</source>
         <translation type="unfinished">
             <numerusform>%n عضو</numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="197"/>
-        <source>Please enter at least three characters...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="212"/>
+        <source>Loading more results...</source>
+        <translation type="unfinished">در حال بارگذاری نتایج بیشتر...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="200"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="227"/>
+        <source>Searching...</source>
+        <translation type="unfinished">در حال جستجو...</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="230"/>
         <source>No chat rooms found.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">اتاق گفتگویی یافت نشد.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="202"/>
+        <location filename="../src/ui/components/popups/PublicRoomSearch.qml" line="232"/>
         <source>Please enter a search phrase...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">لطفاً عبارت جستجو را وارد کنید...</translation>
     </message>
 </context>
 <context>
@@ -3760,1227 +4079,1227 @@
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="12"/>
         <source>Andorra</source>
-        <translation type="unfinished">آندورا</translation>
+        <translation>آندورا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="13"/>
         <source>United Arab Emirates</source>
-        <translation type="unfinished">امارات متحده عربی</translation>
+        <translation>امارات متحدهٔ عربی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="14"/>
         <source>Afghanistan</source>
-        <translation type="unfinished">افغانستان</translation>
+        <translation>افغانستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="15"/>
         <source>Antigua and Barbuda</source>
-        <translation type="unfinished">آنتیگوا و باربودا</translation>
+        <translation>آنتیگوا و باربودا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="16"/>
         <source>Anguilla</source>
-        <translation type="unfinished">آنگویلا</translation>
+        <translation>آنگویلا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="17"/>
         <source>Albania</source>
-        <translation type="unfinished">آلبانی</translation>
+        <translation>آلبانی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="18"/>
         <source>Armenia</source>
-        <translation type="unfinished">ارمنستان</translation>
+        <translation>ارمنستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="19"/>
         <source>Angola</source>
-        <translation type="unfinished">آنگولا</translation>
+        <translation>آنگولا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="20"/>
         <source>Argentina</source>
-        <translation type="unfinished">آرژانتین</translation>
+        <translation>آرژانتین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="21"/>
         <source>American Samoa</source>
-        <translation type="unfinished">ساموای آمریکایی</translation>
+        <translation>ساموآی آمریکا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="22"/>
         <source>Austria</source>
-        <translation type="unfinished">اتریش</translation>
+        <translation>اتریش</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="23"/>
         <source>Australia</source>
-        <translation type="unfinished">استرالیا</translation>
+        <translation>استرالیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="24"/>
         <source>Aruba</source>
-        <translation type="unfinished">آروبا</translation>
+        <translation>آروبا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="25"/>
         <source>Aland Islands</source>
-        <translation type="unfinished">جزایر آلاند</translation>
+        <translation>جزایر اُلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="26"/>
         <source>Azerbaijan</source>
-        <translation type="unfinished">آذربایجان</translation>
+        <translation>جمهوری آذربایجان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="27"/>
         <source>Bosnia and Herzegovina</source>
-        <translation type="unfinished">بوسنی و هرزگوین</translation>
+        <translation>بوسنی و هرزگوین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="28"/>
         <source>Barbados</source>
-        <translation type="unfinished">باربادوس</translation>
+        <translation>باربادوس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="29"/>
         <source>Bangladesh</source>
-        <translation type="unfinished">بنگلادش</translation>
+        <translation>بنگلادش</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="30"/>
         <source>Belgium</source>
-        <translation type="unfinished">بلژیک</translation>
+        <translation>بلژیک</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="31"/>
         <source>Burkina Faso</source>
-        <translation type="unfinished">بورکینافاسو</translation>
+        <translation>بورکینافاسو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="32"/>
         <source>Bulgaria</source>
-        <translation type="unfinished">بلغارستان</translation>
+        <translation>بلغارستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="33"/>
         <source>Bahrain</source>
-        <translation type="unfinished">بحرین</translation>
+        <translation>بحرین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="34"/>
         <source>Burundi</source>
-        <translation type="unfinished">بوروندی</translation>
+        <translation>بوروندی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="35"/>
         <source>Benin</source>
-        <translation type="unfinished">بنین</translation>
+        <translation>بنین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="36"/>
         <source>Saint Barthelemy</source>
-        <translation type="unfinished">سن بارتلمی</translation>
+        <translation>سن بارتلمی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="37"/>
         <source>Bermuda</source>
-        <translation type="unfinished">برمودا</translation>
+        <translation>برمودا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="38"/>
         <source>Brunei</source>
-        <translation type="unfinished">برونئی</translation>
+        <translation>برونئی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="39"/>
         <source>Bolivia</source>
-        <translation type="unfinished">بولیوی</translation>
+        <translation>بولیوی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="40"/>
         <source>Bonaire, Saint Eustatius and Saba</source>
-        <translation type="unfinished">بونایر، سینت استاتیوس و سابا</translation>
+        <translation>جزایر کارائیب هلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="41"/>
         <source>Brazil</source>
-        <translation type="unfinished">برزیل</translation>
+        <translation>برزیل</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="42"/>
         <source>Bahamas</source>
-        <translation type="unfinished">باهاما</translation>
+        <translation>باهاما</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="43"/>
         <source>Bhutan</source>
-        <translation type="unfinished">بوتان</translation>
+        <translation>بوتان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="44"/>
         <source>Botswana</source>
-        <translation type="unfinished">بوتسوانا</translation>
+        <translation>بوتسوانا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="45"/>
         <source>Belarus</source>
-        <translation type="unfinished">بلاروس</translation>
+        <translation>بلاروس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="46"/>
         <source>Belize</source>
-        <translation type="unfinished">بلیز</translation>
+        <translation>بلیز</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="47"/>
         <source>Canada</source>
-        <translation type="unfinished">کانادا</translation>
+        <translation>کانادا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="48"/>
         <source>Cocos Islands</source>
-        <translation type="unfinished">جزایر کوکوس</translation>
+        <translation>جزایر کوکوس (کیلینگ)</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="49"/>
         <source>Democratic Republic of the Congo</source>
-        <translation type="unfinished">جمهوری دموکراتیک کنگو</translation>
+        <translation>کنگو - کینشاسا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="50"/>
         <source>Central African Republic</source>
-        <translation type="unfinished">جمهوری آفریقای مرکزی</translation>
+        <translation>جمهوری افریقای مرکزی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="51"/>
         <source>Republic of the Congo</source>
-        <translation type="unfinished">جمهوری کنگو</translation>
+        <translation>کنگو - برازویل</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="52"/>
         <source>Switzerland</source>
-        <translation type="unfinished">سوئیس</translation>
+        <translation>سوئیس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="53"/>
         <source>Ivory Coast</source>
-        <translation type="unfinished">ساحل عاج</translation>
+        <translation>ساحل عاج</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="54"/>
         <source>Cook Islands</source>
-        <translation type="unfinished">جزایر کوک</translation>
+        <translation>جزایر کوک</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="55"/>
         <source>Chile</source>
-        <translation type="unfinished">شیلی</translation>
+        <translation>شیلی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="56"/>
         <source>Cameroon</source>
-        <translation type="unfinished">کامرون</translation>
+        <translation>کامرون</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="57"/>
         <source>China</source>
-        <translation type="unfinished">چین</translation>
+        <translation>چین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="58"/>
         <source>Colombia</source>
-        <translation type="unfinished">کلمبیا</translation>
+        <translation>کلمبیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="59"/>
         <source>Costa Rica</source>
-        <translation type="unfinished">کاستاریکا</translation>
+        <translation>کاستاریکا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="60"/>
         <source>Cuba</source>
-        <translation type="unfinished">کوبا</translation>
+        <translation>کوبا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="61"/>
         <source>Cape Verde</source>
-        <translation type="unfinished">کیپ ورد</translation>
+        <translation>کیپ‌ورد</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="62"/>
         <source>Curacao</source>
-        <translation type="unfinished">کوراسائو</translation>
+        <translation>کوراسائو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="63"/>
         <source>Christmas Island</source>
-        <translation type="unfinished">جزیره کریسمس</translation>
+        <translation>جزیرهٔ کریسمس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="64"/>
         <source>Cyprus</source>
-        <translation type="unfinished">قبرس</translation>
+        <translation>قبرس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="65"/>
         <source>Czech Republic</source>
-        <translation type="unfinished">جمهوری چک</translation>
+        <translation>جمهوری چک</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="66"/>
         <source>Germany</source>
-        <translation type="unfinished">آلمان</translation>
+        <translation>آلمان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="67"/>
         <source>Djibouti</source>
-        <translation type="unfinished">جیبوتی</translation>
+        <translation>جیبوتی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="68"/>
         <source>Denmark</source>
-        <translation type="unfinished">دانمارک</translation>
+        <translation>دانمارک</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="69"/>
         <source>Dominica</source>
-        <translation type="unfinished">دومینیکا</translation>
+        <translation>دومینیکا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="70"/>
         <source>Dominican Republic</source>
-        <translation type="unfinished">جمهوری دومینیکن</translation>
+        <translation>جمهوری دومینیکن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="71"/>
         <source>Algeria</source>
-        <translation type="unfinished">الجزایر</translation>
+        <translation>الجزایر</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="72"/>
         <source>Ecuador</source>
-        <translation type="unfinished">اکوادور</translation>
+        <translation>اکوادور</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="73"/>
         <source>Estonia</source>
-        <translation type="unfinished">استونی</translation>
+        <translation>استونی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="74"/>
         <source>Egypt</source>
-        <translation type="unfinished">مصر</translation>
+        <translation>مصر</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="75"/>
         <source>Western Sahara</source>
-        <translation type="unfinished">صحرای غربی</translation>
+        <translation>صحرای غربی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="76"/>
         <source>Eritrea</source>
-        <translation type="unfinished">اریتره</translation>
+        <translation>اریتره</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="77"/>
         <source>Spain</source>
-        <translation type="unfinished">اسپانیا</translation>
+        <translation>اسپانیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="78"/>
         <source>Ethiopia</source>
-        <translation type="unfinished">اتیوپی</translation>
+        <translation>اتیوپی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="79"/>
         <source>Finland</source>
-        <translation type="unfinished">فنلاند</translation>
+        <translation>فنلاند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="80"/>
         <source>Fiji</source>
-        <translation type="unfinished">فیجی</translation>
+        <translation>فیجی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="81"/>
         <source>Falkland Islands</source>
-        <translation type="unfinished">جزایر فالکلند</translation>
+        <translation>جزایر فالکلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="82"/>
         <source>Micronesia</source>
-        <translation type="unfinished">میکرونزی</translation>
+        <translation>میکرونزی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="83"/>
         <source>Faroe Islands</source>
-        <translation type="unfinished">جزایر فارو</translation>
+        <translation>جزایر فارو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="84"/>
         <source>France</source>
-        <translation type="unfinished">فرانسه</translation>
+        <translation>فرانسه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="85"/>
         <source>Gabon</source>
-        <translation type="unfinished">گابن</translation>
+        <translation>گابن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="86"/>
         <source>United Kingdom</source>
-        <translation type="unfinished">بریتانیا</translation>
+        <translation>بریتانیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="87"/>
         <source>Grenada</source>
-        <translation type="unfinished">گرانادا</translation>
+        <translation>گرنادا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="88"/>
         <source>Georgia</source>
-        <translation type="unfinished">گرجستان</translation>
+        <translation>گرجستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="89"/>
         <source>French Guiana</source>
-        <translation type="unfinished">گویان فرانسوی</translation>
+        <translation>گویان فرانسه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="90"/>
         <source>Guernsey</source>
-        <translation type="unfinished">گرنزی</translation>
+        <translation>گرنزی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="91"/>
         <source>Ghana</source>
-        <translation type="unfinished">غنا</translation>
+        <translation>غنا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="92"/>
         <source>Gibraltar</source>
-        <translation type="unfinished">جبل‌الطارق</translation>
+        <translation>جبل‌الطارق</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="93"/>
         <source>Greenland</source>
-        <translation type="unfinished">گرینلند</translation>
+        <translation>گرینلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="94"/>
         <source>Gambia</source>
-        <translation type="unfinished">گامبیا</translation>
+        <translation>گامبیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="95"/>
         <source>Guinea</source>
-        <translation type="unfinished">گینه</translation>
+        <translation>گینه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="96"/>
         <source>Guadeloupe</source>
-        <translation type="unfinished">گوادلوپ</translation>
+        <translation>گوادلوپ</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="97"/>
         <source>Equatorial Guinea</source>
-        <translation type="unfinished">گینه استوایی</translation>
+        <translation>گینهٔ استوایی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="98"/>
         <source>Greece</source>
-        <translation type="unfinished">یونان</translation>
+        <translation>یونان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="99"/>
         <source>Guatemala</source>
-        <translation type="unfinished">گواتمالا</translation>
+        <translation>گواتمالا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="100"/>
         <source>Guam</source>
-        <translation type="unfinished">گوام</translation>
+        <translation>گوام</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="101"/>
         <source>Guinea-Bissau</source>
-        <translation type="unfinished">گینه بیسائو</translation>
+        <translation>گینهٔ بیسائو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="102"/>
         <source>Guyana</source>
-        <translation type="unfinished">گویان</translation>
+        <translation>گویان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="103"/>
         <source>Hong Kong</source>
-        <translation type="unfinished">هنگ‌کنگ</translation>
+        <translation>هنگ‌کنگ، ناحیهٔ ویژهٔ حکومتی چین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="104"/>
         <source>Heard Island and McDonald Islands</source>
-        <translation type="unfinished">جزایر هرد و مک‌دونالد</translation>
+        <translation>جزایر هرد و مک‌دونالد</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="105"/>
         <source>Honduras</source>
-        <translation type="unfinished">هندوراس</translation>
+        <translation>هندوراس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="106"/>
         <source>Croatia</source>
-        <translation type="unfinished">کرواسی</translation>
+        <translation>کرواسی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="107"/>
         <source>Haiti</source>
-        <translation type="unfinished">هائیتی</translation>
+        <translation>هائیتی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="108"/>
         <source>Hungary</source>
-        <translation type="unfinished">مجارستان</translation>
+        <translation>مجارستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="109"/>
         <source>Indonesia</source>
-        <translation type="unfinished">اندونزی</translation>
+        <translation>اندونزی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="110"/>
         <source>Ireland</source>
-        <translation type="unfinished">ایرلند</translation>
+        <translation>ایرلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="111"/>
         <source>Israel</source>
-        <translation type="unfinished">اسرائیل</translation>
+        <translation>اسرائیل</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="112"/>
         <source>Isle of Man</source>
-        <translation type="unfinished">جزیره من</translation>
+        <translation>جزیرهٔ من</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="113"/>
         <source>India</source>
-        <translation type="unfinished">هند</translation>
+        <translation>هند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="114"/>
         <source>British Indian Ocean Territory</source>
-        <translation type="unfinished">قلمرو بریتانیا در اقیانوس هند</translation>
+        <translation>قلمرو بریتانیا در اقیانوس هند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="115"/>
         <source>Iraq</source>
-        <translation type="unfinished">عراق</translation>
+        <translation>عراق</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="116"/>
         <source>Iran</source>
-        <translation type="unfinished">ایران</translation>
+        <translation>ایران</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="117"/>
         <source>Iceland</source>
-        <translation type="unfinished">ایسلند</translation>
+        <translation>ایسلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="118"/>
         <source>Italy</source>
-        <translation type="unfinished">ایتالیا</translation>
+        <translation>ایتالیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="119"/>
         <source>Jersey</source>
-        <translation type="unfinished">جرزی</translation>
+        <translation>جرزی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="120"/>
         <source>Jamaica</source>
-        <translation type="unfinished">جامائیکا</translation>
+        <translation>جامائیکا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="121"/>
         <source>Jordan</source>
-        <translation type="unfinished">اردن</translation>
+        <translation>اردن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="122"/>
         <source>Japan</source>
-        <translation type="unfinished">ژاپن</translation>
+        <translation>ژاپن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="123"/>
         <source>Kenya</source>
-        <translation type="unfinished">کنیا</translation>
+        <translation>کنیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="124"/>
         <source>Kyrgyzstan</source>
-        <translation type="unfinished">قرقیزستان</translation>
+        <translation>قرقیزستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="125"/>
         <source>Cambodia</source>
-        <translation type="unfinished">کامبوج</translation>
+        <translation>کامبوج</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="126"/>
         <source>Kiribati</source>
-        <translation type="unfinished">کیریباتی</translation>
+        <translation>کیریباتی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="127"/>
         <source>Comoros</source>
-        <translation type="unfinished">کومور</translation>
+        <translation>کومور</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="128"/>
         <source>Saint Kitts and Nevis</source>
-        <translation type="unfinished">سنت کیتس و نویس</translation>
+        <translation>سنت کیتس و نویس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="129"/>
         <source>North Korea</source>
-        <translation type="unfinished">کره شمالی</translation>
+        <translation>کرهٔ شمالی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="130"/>
         <source>South Korea</source>
-        <translation type="unfinished">کره جنوبی</translation>
+        <translation>کرهٔ جنوبی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="131"/>
         <source>Kuwait</source>
-        <translation type="unfinished">کویت</translation>
+        <translation>کویت</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="132"/>
         <source>Cayman Islands</source>
-        <translation type="unfinished">جزایر کیمن</translation>
+        <translation>جزایر کِیمن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="133"/>
         <source>Kazakhstan</source>
-        <translation type="unfinished">قزاقستان</translation>
+        <translation>قزاقستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="134"/>
         <source>Laos</source>
-        <translation type="unfinished">لائوس</translation>
+        <translation>لائوس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="135"/>
         <source>Lebanon</source>
-        <translation type="unfinished">لبنان</translation>
+        <translation>لبنان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="136"/>
         <source>Saint Lucia</source>
-        <translation type="unfinished">سنت لوسیا</translation>
+        <translation>سنت لوسیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="137"/>
         <source>Liechtenstein</source>
-        <translation type="unfinished">لیختن‌اشتاین</translation>
+        <translation>لیختن‌اشتاین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="138"/>
         <source>Sri Lanka</source>
-        <translation type="unfinished">سری‌لانکا</translation>
+        <translation>سری‌لانکا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="139"/>
         <source>Liberia</source>
-        <translation type="unfinished">لیبریا</translation>
+        <translation>لیبریا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="140"/>
         <source>Lesotho</source>
-        <translation type="unfinished">لسوتو</translation>
+        <translation>لسوتو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="141"/>
         <source>Lithuania</source>
-        <translation type="unfinished">لیتوانی</translation>
+        <translation>لیتوانی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="142"/>
         <source>Luxembourg</source>
-        <translation type="unfinished">لوکزامبورگ</translation>
+        <translation>لوکزامبورگ</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="143"/>
         <source>Latvia</source>
-        <translation type="unfinished">لتونی</translation>
+        <translation>لتونی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="144"/>
         <source>Libya</source>
-        <translation type="unfinished">لیبی</translation>
+        <translation>لیبی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="145"/>
         <source>Morocco</source>
-        <translation type="unfinished">مراکش</translation>
+        <translation>مراکش</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="146"/>
         <source>Monaco</source>
-        <translation type="unfinished">موناکو</translation>
+        <translation>موناکو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="147"/>
         <source>Moldova</source>
-        <translation type="unfinished">مولداوی</translation>
+        <translation>مولداوی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="148"/>
         <source>Montenegro</source>
-        <translation type="unfinished">مونته‌نگرو</translation>
+        <translation>مونته‌نگرو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="149"/>
         <source>Saint Martin</source>
-        <translation type="unfinished">سن مارتن</translation>
+        <translation>سنت مارتن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="150"/>
         <source>Madagascar</source>
-        <translation type="unfinished">ماداگاسکار</translation>
+        <translation>ماداگاسکار</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="151"/>
         <source>Marshall Islands</source>
-        <translation type="unfinished">جزایر مارشال</translation>
+        <translation>جزایر مارشال</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="152"/>
         <source>Macedonia</source>
-        <translation type="unfinished">مقدونیه</translation>
+        <translation>مقدونیه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="153"/>
         <source>Mali</source>
-        <translation type="unfinished">مالی</translation>
+        <translation>مالی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="154"/>
         <source>Myanmar</source>
-        <translation type="unfinished">میانمار</translation>
+        <translation>میانمار (برمه)</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="155"/>
         <source>Mongolia</source>
-        <translation type="unfinished">مغولستان</translation>
+        <translation>مغولستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="156"/>
         <source>Macao</source>
-        <translation type="unfinished">ماکائو</translation>
+        <translation>ماکائو، ناحیهٔ ویژهٔ حکومتی چین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="157"/>
         <source>Northern Mariana Islands</source>
-        <translation type="unfinished">جزایر ماریانای شمالی</translation>
+        <translation>جزایر ماریانای شمالی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="158"/>
         <source>Martinique</source>
-        <translation type="unfinished">مارتینیک</translation>
+        <translation>مارتینیک</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="159"/>
         <source>Mauritania</source>
-        <translation type="unfinished">موریتانی</translation>
+        <translation>موریتانی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="160"/>
         <source>Montserrat</source>
-        <translation type="unfinished">مونتسرات</translation>
+        <translation>مونت‌سرات</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="161"/>
         <source>Malta</source>
-        <translation type="unfinished">مالت</translation>
+        <translation>مالت</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="162"/>
         <source>Mauritius</source>
-        <translation type="unfinished">موریس</translation>
+        <translation>موریس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="163"/>
         <source>Maldives</source>
-        <translation type="unfinished">مالدیو</translation>
+        <translation>مالدیو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="164"/>
         <source>Malawi</source>
-        <translation type="unfinished">مالاوی</translation>
+        <translation>مالاوی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="165"/>
         <source>Mexico</source>
-        <translation type="unfinished">مکزیک</translation>
+        <translation>مکزیک</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="166"/>
         <source>Malaysia</source>
-        <translation type="unfinished">مالزی</translation>
+        <translation>مالزی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="167"/>
         <source>Mozambique</source>
-        <translation type="unfinished">موزامبیک</translation>
+        <translation>موزامبیک</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="168"/>
         <source>Namibia</source>
-        <translation type="unfinished">نامیبیا</translation>
+        <translation>نامیبیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="169"/>
         <source>New Caledonia</source>
-        <translation type="unfinished">کالدونیای جدید</translation>
+        <translation>کالدونیای جدید</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="170"/>
         <source>Niger</source>
-        <translation type="unfinished">نیجر</translation>
+        <translation>نیجر</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="171"/>
         <source>Norfolk Island</source>
-        <translation type="unfinished">جزیره نورفولک</translation>
+        <translation>جزیره نورفک</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="172"/>
         <source>Nigeria</source>
-        <translation type="unfinished">نیجریه</translation>
+        <translation>نیجریه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="173"/>
         <source>Nicaragua</source>
-        <translation type="unfinished">نیکاراگوئه</translation>
+        <translation>نیکاراگوئه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="174"/>
         <source>Netherlands</source>
-        <translation type="unfinished">هلند</translation>
+        <translation>هلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="175"/>
         <source>Norway</source>
-        <translation type="unfinished">نروژ</translation>
+        <translation>نروژ</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="176"/>
         <source>Nepal</source>
-        <translation type="unfinished">نپال</translation>
+        <translation>نپال</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="177"/>
         <source>Nauru</source>
-        <translation type="unfinished">نائورو</translation>
+        <translation>نائورو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="178"/>
         <source>Niue</source>
-        <translation type="unfinished">نیوئه</translation>
+        <translation>نیوئه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="179"/>
         <source>New Zealand</source>
-        <translation type="unfinished">نیوزیلند</translation>
+        <translation>زلاند نو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="180"/>
         <source>Oman</source>
-        <translation type="unfinished">عمان</translation>
+        <translation>عمان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="181"/>
         <source>Panama</source>
-        <translation type="unfinished">پاناما</translation>
+        <translation>پاناما</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="182"/>
         <source>Peru</source>
-        <translation type="unfinished">پرو</translation>
+        <translation>پرو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="183"/>
         <source>French Polynesia</source>
-        <translation type="unfinished">پلی‌نزی فرانسه</translation>
+        <translation>پلی‌نزی فرانسه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="184"/>
         <source>Papua New Guinea</source>
-        <translation type="unfinished">پاپوا گینه نو</translation>
+        <translation>پاپوا گینهٔ نو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="185"/>
         <source>Philippines</source>
-        <translation type="unfinished">فیلیپین</translation>
+        <translation>فیلیپین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="186"/>
         <source>Pakistan</source>
-        <translation type="unfinished">پاکستان</translation>
+        <translation>پاکستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="187"/>
         <source>Poland</source>
-        <translation type="unfinished">لهستان</translation>
+        <translation>لهستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="188"/>
         <source>Saint Pierre and Miquelon</source>
-        <translation type="unfinished">سن پیر و میکلون</translation>
+        <translation>سن پیر و میکلن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="189"/>
         <source>Pitcairn</source>
-        <translation type="unfinished">پیتکرن</translation>
+        <translation>جزایر پیت‌کرن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="190"/>
         <source>Puerto Rico</source>
-        <translation type="unfinished">پورتوریکو</translation>
+        <translation>پورتوریکو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="191"/>
         <source>Palestinian Territory</source>
-        <translation type="unfinished">سرزمین‌های فلسطینی</translation>
+        <translation>سرزمین‌های فلسطینی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="192"/>
         <source>Portugal</source>
-        <translation type="unfinished">پرتغال</translation>
+        <translation>پرتغال</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="193"/>
         <source>Palau</source>
-        <translation type="unfinished">پالائو</translation>
+        <translation>پالائو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="194"/>
         <source>Paraguay</source>
-        <translation type="unfinished">پاراگوئه</translation>
+        <translation>پاراگوئه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="195"/>
         <source>Qatar</source>
-        <translation type="unfinished">قطر</translation>
+        <translation>قطر</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="196"/>
         <source>Reunion</source>
-        <translation type="unfinished">رئونیون</translation>
+        <translation>رئونیون</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="197"/>
         <source>Romania</source>
-        <translation type="unfinished">رومانی</translation>
+        <translation>رومانی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="198"/>
         <source>Serbia</source>
-        <translation type="unfinished">صربستان</translation>
+        <translation>صربستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="199"/>
         <source>Russia</source>
-        <translation type="unfinished">روسیه</translation>
+        <translation>روسیه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="200"/>
         <source>Rwanda</source>
-        <translation type="unfinished">رواندا</translation>
+        <translation>رواندا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="201"/>
         <source>Saudi Arabia</source>
-        <translation type="unfinished">عربستان سعودی</translation>
+        <translation>عربستان سعودی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="202"/>
         <source>Solomon Islands</source>
-        <translation type="unfinished">جزایر سلیمان</translation>
+        <translation>جزایر سلیمان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="203"/>
         <source>Seychelles</source>
-        <translation type="unfinished">سیشل</translation>
+        <translation>سیشل</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="204"/>
         <source>Sudan</source>
-        <translation type="unfinished">سودان</translation>
+        <translation>سودان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="205"/>
         <source>Sweden</source>
-        <translation type="unfinished">سوئد</translation>
+        <translation>سوئد</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="206"/>
         <source>Singapore</source>
-        <translation type="unfinished">سنگاپور</translation>
+        <translation>سنگاپور</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="207"/>
         <source>Saint Helena</source>
-        <translation type="unfinished">سنت هلنا</translation>
+        <translation>سنت هلن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="208"/>
         <source>Slovenia</source>
-        <translation type="unfinished">اسلوونی</translation>
+        <translation>اسلوونی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="209"/>
         <source>Svalbard and Jan Mayen</source>
-        <translation type="unfinished">اسوالبارد و یان ماین</translation>
+        <translation>اسوالبارد و جان‌ماین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="210"/>
         <source>Slovakia</source>
-        <translation type="unfinished">اسلواکی</translation>
+        <translation>اسلواکی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="211"/>
         <source>Sierra Leone</source>
-        <translation type="unfinished">سیرالئون</translation>
+        <translation>سیرالئون</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="212"/>
         <source>San Marino</source>
-        <translation type="unfinished">سن مارینو</translation>
+        <translation>سن مارینو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="213"/>
         <source>Senegal</source>
-        <translation type="unfinished">سنگال</translation>
+        <translation>سنگال</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="214"/>
         <source>Somalia</source>
-        <translation type="unfinished">سومالی</translation>
+        <translation>سومالی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="215"/>
         <source>Suriname</source>
-        <translation type="unfinished">سورینام</translation>
+        <translation>سورینام</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="216"/>
         <source>South Sudan</source>
-        <translation type="unfinished">سودان جنوبی</translation>
+        <translation>سودان جنوبی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="217"/>
         <source>Sao Tome and Principe</source>
-        <translation type="unfinished">سائوتومه و پرینسیپ</translation>
+        <translation>سائوتومه و پرینسیپ</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="218"/>
         <source>El Salvador</source>
-        <translation type="unfinished">السالوادور</translation>
+        <translation>السالوادور</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="219"/>
         <source>Sint Maarten</source>
-        <translation type="unfinished">سینت مارتن</translation>
+        <translation>سنت مارتن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="220"/>
         <source>Syria</source>
-        <translation type="unfinished">سوریه</translation>
+        <translation>سوریه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="221"/>
         <source>Swaziland</source>
-        <translation type="unfinished">سوازیلند</translation>
+        <translation>سوازیلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="222"/>
         <source>Turks and Caicos Islands</source>
-        <translation type="unfinished">جزایر تورکس و کایکوس</translation>
+        <translation>جزایر تورکس و کایکوس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="223"/>
         <source>Chad</source>
-        <translation type="unfinished">چاد</translation>
+        <translation>چاد</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="224"/>
         <source>Togo</source>
-        <translation type="unfinished">توگو</translation>
+        <translation>توگو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="225"/>
         <source>Thailand</source>
-        <translation type="unfinished">تایلند</translation>
+        <translation>تایلند</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="226"/>
         <source>Tajikistan</source>
-        <translation type="unfinished">تاجیکستان</translation>
+        <translation>تاجیکستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="227"/>
         <source>Tokelau</source>
-        <translation type="unfinished">توکلائو</translation>
+        <translation>توکلائو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="228"/>
         <source>East Timor</source>
-        <translation type="unfinished">تیمور شرقی</translation>
+        <translation>تیمور شرقی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="229"/>
         <source>Turkmenistan</source>
-        <translation type="unfinished">ترکمنستان</translation>
+        <translation>ترکمنستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="230"/>
         <source>Tunisia</source>
-        <translation type="unfinished">تونس</translation>
+        <translation>تونس</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="231"/>
         <source>Tonga</source>
-        <translation type="unfinished">تونگا</translation>
+        <translation>تونگا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="232"/>
         <source>Turkey</source>
-        <translation type="unfinished">ترکیه</translation>
+        <translation>ترکیه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="233"/>
         <source>Trinidad and Tobago</source>
-        <translation type="unfinished">ترینیداد و توباگو</translation>
+        <translation>ترینیداد و توباگو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="234"/>
         <source>Tuvalu</source>
-        <translation type="unfinished">تووالو</translation>
+        <translation>تووالو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="235"/>
         <source>Taiwan</source>
-        <translation type="unfinished">تایوان</translation>
+        <translation>تایوان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="236"/>
         <source>Tanzania</source>
-        <translation type="unfinished">تانزانیا</translation>
+        <translation>تانزانیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="237"/>
         <source>Ukraine</source>
-        <translation type="unfinished">اوکراین</translation>
+        <translation>اوکراین</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="238"/>
         <source>Uganda</source>
-        <translation type="unfinished">اوگاندا</translation>
+        <translation>اوگاندا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="239"/>
         <source>United States Minor Outlying Islands</source>
-        <translation type="unfinished">جزایر دورافتاده کوچک ایالات متحده</translation>
+        <translation>جزایر دورافتادهٔ ایالات متحده</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="240"/>
         <source>United States</source>
-        <translation type="unfinished">ایالات متحده</translation>
+        <translation>ایالات متحدهٔ امریکا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="241"/>
         <source>Uruguay</source>
-        <translation type="unfinished">اروگوئه</translation>
+        <translation>اروگوئه</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="242"/>
         <source>Uzbekistan</source>
-        <translation type="unfinished">ازبکستان</translation>
+        <translation>ازبکستان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="243"/>
         <source>Vatican</source>
-        <translation type="unfinished">واتیکان</translation>
+        <translation>واتیکان</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="244"/>
         <source>Saint Vincent and the Grenadines</source>
-        <translation type="unfinished">سنت وینسنت و گرنادین‌ها</translation>
+        <translation>سنت وینسنت و گرنادین‌ها</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="245"/>
         <source>Venezuela</source>
-        <translation type="unfinished">ونزوئلا</translation>
+        <translation>ونزوئلا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="246"/>
         <source>British Virgin Islands</source>
-        <translation type="unfinished">جزایر ویرجین بریتانیا</translation>
+        <translation>جزایر ویرجین بریتانیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="247"/>
         <source>U.S. Virgin Islands</source>
-        <translation type="unfinished">جزایر ویرجین آمریکا</translation>
+        <translation>جزایر ویرجین ایالات متحده</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="248"/>
         <source>Vietnam</source>
-        <translation type="unfinished">ویتنام</translation>
+        <translation>ویتنام</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="249"/>
         <source>Vanuatu</source>
-        <translation type="unfinished">وانواتو</translation>
+        <translation>وانواتو</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="250"/>
         <source>Wallis and Futuna</source>
-        <translation type="unfinished">والیس و فوتونا</translation>
+        <translation>والیس و فوتونا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="251"/>
         <source>Samoa</source>
-        <translation type="unfinished">ساموا</translation>
+        <translation>ساموآ</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="252"/>
         <source>Yemen</source>
-        <translation type="unfinished">یمن</translation>
+        <translation>یمن</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="253"/>
         <source>Mayotte</source>
-        <translation type="unfinished">مایوت</translation>
+        <translation>مایوت</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="254"/>
         <source>South Africa</source>
-        <translation type="unfinished">آفریقای جنوبی</translation>
+        <translation>افریقای جنوبی</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="255"/>
         <source>Zambia</source>
-        <translation type="unfinished">زامبیا</translation>
+        <translation>زامبیا</translation>
     </message>
     <message>
         <location filename="../src/contacts/PhoneCodeLookup.cpp" line="256"/>
         <source>Zimbabwe</source>
-        <translation type="unfinished">زیمبابوه</translation>
+        <translation>زیمبابوه</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/StateManager.cpp" line="165"/>
@@ -4994,59 +5313,59 @@
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="15"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="39"/>
         <source>redirected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">تغییر مسیر داده شد</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="17"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="41"/>
         <source>not answered</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">بی‌پاسخ</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="19"/>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="43"/>
         <source>busy</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">مشغول</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="21"/>
         <source>away</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">غایب</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="23"/>
         <source>forwarded</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">ارجاع داده شد</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="25"/>
         <source>time base redirection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">تغییر مسیر زمان‌بندی‌شده</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="27"/>
         <source>do not disturb</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">مزاحم نشوید</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="29"/>
         <source>rejected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">رد شد</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="45"/>
         <source>aborted</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">لغو شد</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="47"/>
         <source>not reachable</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">در دسترس نیست</translation>
     </message>
     <message>
         <location filename="../src/sip/SIPCallRoutingHop.cpp" line="49"/>
         <source>Code %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">کد %1</translation>
     </message>
 </context>
 <context>
@@ -5080,6 +5399,17 @@
         <location filename="../src/ui/components/RTTDisplay.qml" line="48"/>
         <source>call participant</source>
         <translation type="unfinished">شرکت‌کننده تماس</translation>
+    </message>
+</context>
+<context>
+    <name>ReadMarker</name>
+    <message numerus="yes">
+        <location filename="../src/ui/components/chat/ReadMarker.qml" line="43"/>
+        <source>%n of %2 have read this message:
+%3</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -5172,7 +5502,7 @@
         <translation type="unfinished">ایجاد %1 ناموفق بود: %2</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPAccount.cpp" line="1044"/>
+        <location filename="../src/sip/SIPAccount.cpp" line="1049"/>
         <source>Failed to persist SIP credentials: %1</source>
         <translation type="unfinished">ثبت نام کاربری SIP ناموفق بود: %1</translation>
     </message>
@@ -5180,7 +5510,7 @@
 <context>
     <name>SIPBuddy</name>
     <message>
-        <location filename="../src/sip/SIPBuddy.cpp" line="102"/>
+        <location filename="../src/sip/SIPBuddy.cpp" line="101"/>
         <source>%1 is now available</source>
         <translation type="unfinished">%1 اکنون در دسترس است</translation>
     </message>
@@ -5188,22 +5518,22 @@
 <context>
     <name>SIPCall</name>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="433"/>
+        <location filename="../src/sip/SIPCall.cpp" line="432"/>
         <source>Failed to initialize microphone audio</source>
         <translation type="unfinished">مقداردهی اولیه صدای میکروفون ناموفق بود</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="445"/>
+        <location filename="../src/sip/SIPCall.cpp" line="444"/>
         <source>Failed to initialize call audio</source>
         <translation type="unfinished">مقداردهی اولیه صدای تماس ناموفق بود</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="903"/>
+        <location filename="../src/sip/SIPCall.cpp" line="902"/>
         <source>Active call with %1</source>
         <translation type="unfinished">تماس فعال با %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCall.cpp" line="933"/>
+        <location filename="../src/sip/SIPCall.cpp" line="931"/>
         <source>Hang up</source>
         <translation type="unfinished">قطع تماس</translation>
     </message>
@@ -5211,39 +5541,39 @@
 <context>
     <name>SIPCallManager</name>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="181"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="180"/>
         <source>%1 is calling</source>
         <translation type="unfinished">%1 تماس می‌گیرد</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="183"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="182"/>
         <source>%1 (%2) is calling</source>
         <translation type="unfinished">%1 (%2) تماس می‌گیرد</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="210"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="209"/>
         <source>Via: %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">از طریق: %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="225"/>
-        <location filename="../src/sip/SIPCallManager.cpp" line="227"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="224"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="226"/>
         <source>Accept</source>
         <translation type="unfinished">پذیرفتن</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="841"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="838"/>
         <source>Call back</source>
         <translation type="unfinished">تماس مجدد</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="224"/>
-        <location filename="../src/sip/SIPCallManager.cpp" line="228"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="223"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="227"/>
         <source>Reject</source>
         <translation type="unfinished">رد کردن</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="807"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="805"/>
         <source>Missed call from %1</source>
         <translation type="unfinished">تماس از دست رفته از %1</translation>
     </message>
@@ -5590,13 +5920,11 @@
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="590"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="991"/>
         <source>Prefererred identity selection</source>
         <translation type="unfinished">انتخاب هویت ترجیحی</translation>
     </message>
     <message>
         <location filename="../src/ui/components/SettingsPage.qml" line="591"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="992"/>
         <source>Select the preferred identity</source>
         <translation type="unfinished">انتخاب هویت ترجیحی</translation>
     </message>
@@ -5636,82 +5964,57 @@
         <translation type="unfinished">تنظیمات صدا</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="842"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="833"/>
+        <source>managed by device</source>
+        <translation type="unfinished">مدیریت‌شده توسط دستگاه</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/SettingsPage.qml" line="846"/>
         <source>Input device</source>
         <translation type="unfinished">دستگاه ورودی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="861"/>
-        <source>Input device selection</source>
-        <translation type="unfinished">انتخاب دستگاه ورودی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="862"/>
-        <source>Select the input device to be used</source>
-        <translation type="unfinished">انتخاب دستگاه ورودی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="875"/>
-        <source>Currently selected input option</source>
-        <translation type="unfinished">گزینه ورودی انتخاب‌شده</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="907"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="910"/>
         <source>Output device</source>
         <translation type="unfinished">دستگاه خروجی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="926"/>
-        <source>Output device selection</source>
-        <translation type="unfinished">انتخاب دستگاه خروجی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="927"/>
-        <source>Select the output device to be used</source>
-        <translation type="unfinished">انتخاب دستگاه خروجی</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="940"/>
-        <source>Currently selected output option</source>
-        <translation type="unfinished">گزینه خروجی انتخاب‌شده</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="972"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="974"/>
         <source>Output device for ring tone</source>
         <translation type="unfinished">دستگاه خروجی برای زنگ</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1005"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1006"/>
         <source>Currently selected ring output option</source>
         <translation type="unfinished">گزینه خروجی زنگ انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1037"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1038"/>
         <source>Ring tone</source>
         <translation type="unfinished">زنگ</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1104"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1105"/>
         <source>Adjust pause between ring tones [s]</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">تنظیم مکث بین زنگ‌ها [ثانیه]</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1136"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1137"/>
         <source>Notification tone</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">صدای اعلان</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1157"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1158"/>
         <source>Notification tone volume</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">بلندی صدای اعلان</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1247"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1248"/>
         <source>Reload contacts</source>
         <translation type="unfinished">بارگذاری مجدد مخاطبین</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="829"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="832"/>
         <source>Prefer USB headset ring sound if available</source>
         <translation type="unfinished">استفاده از زنگ هدست USB در صورت در دسترس بودن</translation>
     </message>
@@ -5721,45 +6024,70 @@
         <translation type="unfinished">تاریخچه تماس‌ها را برای این تعداد روز نگه دارید (از ۱ تا ۹۹۹). هر مورد قدیمی‌تر از این بازه به‌طور خودکار حذف می‌شود. تغییر این تنظیم در روز بعد یا پس از راه‌اندازی مجدد GOnnect اعمال می‌شود.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1059"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1078"/>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1158"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1060"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1079"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1159"/>
         <source>Currently set to: </source>
         <translation type="unfinished">مقدار فعلی: </translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1058"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1059"/>
         <source>Ring tone volume</source>
         <translation type="unfinished">صدای زنگ</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1077"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="865"/>
+        <source>Audio input device</source>
+        <translation type="unfinished">دستگاه ورودی صدا</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/SettingsPage.qml" line="878"/>
+        <source>Currently selected audio input device</source>
+        <translation type="unfinished">دستگاه ورودی صدای انتخاب‌شده</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/SettingsPage.qml" line="929"/>
+        <source>Audio output device</source>
+        <translation type="unfinished">دستگاه خروجی صدا</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/SettingsPage.qml" line="942"/>
+        <source>Currently selected audio output device</source>
+        <translation type="unfinished">دستگاه خروجی صدای انتخاب‌شده</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/SettingsPage.qml" line="993"/>
+        <source>Audio output device for ring tone</source>
+        <translation type="unfinished">دستگاه خروجی صدا برای زنگ</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1078"/>
         <source>Pause between ring tones [s]</source>
         <translation type="unfinished">مکث بین زنگ‌ها [ثانیه]</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1121"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1122"/>
         <source>%1 s</source>
         <extracomment>Label for showing seconds</extracomment>
         <translation type="unfinished">%1 ث</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1190"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1191"/>
         <source>Debugging</source>
         <translation type="unfinished">اشکال‌زدایی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1200"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1201"/>
         <source>Use this button to start a debug run. The App will restart and then begin to record additional information that can be useful for debugging purposes. During this run, come back here to download the information. A debug run is limited to 5 minutes, after which the App will automatically restart again in normal mode.</source>
         <translation type="unfinished">برای شروع اشکال‌زدایی این دکمه را فشار دهید. برنامه مجدداً راه‌اندازی شده و اطلاعات تشخیصی ثبت می‌کند. این حالت ۵ دقیقه است.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1216"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1217"/>
         <source>Start debug run (restart app)</source>
         <translation type="unfinished">شروع اشکال‌زدایی (راه‌اندازی مجدد برنامه)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/SettingsPage.qml" line="1232"/>
+        <location filename="../src/ui/components/SettingsPage.qml" line="1233"/>
         <source>Download debug information</source>
         <translation type="unfinished">دانلود اطلاعات اشکال‌زدایی</translation>
     </message>
@@ -6028,7 +6356,7 @@
         <location filename="../src/ui/SystemTrayMenu.cpp" line="109"/>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="206"/>
         <source>Open...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">باز کردن...</translation>
     </message>
     <message>
         <location filename="../src/ui/SystemTrayMenu.cpp" line="149"/>
@@ -6157,7 +6485,7 @@
     <message>
         <location filename="../src/helper/TextFormatHelper.cpp" line="14"/>
         <source>PB</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">PB</translation>
     </message>
 </context>
 <context>
@@ -6171,17 +6499,17 @@
 <context>
     <name>TogglerList</name>
     <message>
-        <location filename="../src/ui/components/TogglerList.qml" line="21"/>
+        <location filename="../src/ui/components/TogglerList.qml" line="22"/>
         <source>Toggler list</source>
         <translation type="unfinished">فهرست سوئیچ‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/TogglerList.qml" line="22"/>
+        <location filename="../src/ui/components/TogglerList.qml" line="23"/>
         <source>List of items that can be toggled</source>
         <translation type="unfinished">فهرست موارد قابل سوئیچ</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/TogglerList.qml" line="40"/>
+        <location filename="../src/ui/components/TogglerList.qml" line="41"/>
         <source>Toggle %1</source>
         <translation type="unfinished">سوئیچ %1</translation>
     </message>
@@ -6229,7 +6557,7 @@
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="79"/>
         <source>?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">?</translation>
     </message>
     <message>
         <location filename="../src/ui/components/UsersList.qml" line="105"/>
@@ -6266,12 +6594,12 @@
 <context>
     <name>VideoPlayer</name>
     <message>
-        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="54"/>
+        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="64"/>
         <source>%1 (%2)</source>
         <translation type="unfinished">%1 (%2)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="102"/>
+        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="110"/>
         <source>%1:%2 / %3:%4</source>
         <translation type="unfinished">%1:%2 / %3:%4</translation>
     </message>
@@ -6305,7 +6633,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../src/ui/ViewHelper.cpp" line="304"/>
+        <location filename="../src/ui/ViewHelper.cpp" line="308"/>
         <source>QT_CULTURAL_SPHERE</source>
         <comment>QGuiApplication</comment>
         <translation>C</translation>
@@ -6321,7 +6649,7 @@
     <message>
         <location filename="../src/ui/components/controls/VoiceMailField.qml" line="71"/>
         <source>New voice mail</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">پیام صوتی جدید</translation>
     </message>
     <message numerus="yes">
         <location filename="../src/ui/components/controls/VoiceMailField.qml" line="73"/>
@@ -6343,7 +6671,7 @@
     <message>
         <location filename="../src/ui/components/controls/VolumeSlider.qml" line="34"/>
         <source>Adjust volume</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">تنظیم صدا</translation>
     </message>
     <message>
         <location filename="../src/ui/components/controls/VolumeSlider.qml" line="52"/>
@@ -6354,7 +6682,7 @@
     <message>
         <location filename="../src/ui/components/controls/VolumeSlider.qml" line="53"/>
         <source>Off</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">خاموش</translation>
     </message>
 </context>
 <context>
@@ -6365,142 +6693,197 @@
         <translation type="unfinished">افزودن ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="86"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="121"/>
         <source>Widget</source>
         <translation type="unfinished">ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="90"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="125"/>
         <source>Widget selection header</source>
         <translation type="unfinished">عنوان انتخاب ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="101"/>
-        <source>Date Events</source>
-        <translation type="unfinished">رویدادها</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="102"/>
-        <source>List of upcoming appointments</source>
-        <translation type="unfinished">فهرست قرارهای آینده</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="105"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="143"/>
         <source>Favorites</source>
         <translation type="unfinished">علاقه‌مندی‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="106"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="144"/>
         <source>Quick dial for your favorite contacts and conferences</source>
         <translation type="unfinished">شماره‌گیری سریع مخاطبان مورد علاقه</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="109"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="149"/>
         <source>History</source>
         <translation type="unfinished">تاریخچه</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="113"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="155"/>
         <source>Web View</source>
         <translation type="unfinished">نمای وب</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="114"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="156"/>
         <source>A web-based content display</source>
         <translation type="unfinished">نمایش محتوای مبتنی بر وب</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="119"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="163"/>
         <source>Widget selection</source>
         <translation type="unfinished">انتخاب ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="120"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="164"/>
         <source>Select the widget that should be added to the current dashboard page</source>
         <translation type="unfinished">انتخاب ابزارک برای افزودن به صفحه فعلی</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="132"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="176"/>
         <source>Currently selected widget option</source>
         <translation type="unfinished">گزینه ابزارک انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="205"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="251"/>
         <source>Accept all certificates</source>
         <translation type="unfinished">پذیرفتن همه گواهینامه‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="337"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="586"/>
         <source>Confirm widget selection</source>
         <translation type="unfinished">تأیید انتخاب ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="338"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="587"/>
         <source>Confirmation button to create and add the selected widget to the current dashboard</source>
         <translation type="unfinished">دکمه ایجاد و افزودن ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="110"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="150"/>
         <source>Searchable call and conference history</source>
         <translation type="unfinished">تاریخچه قابل جستجوی تماس‌ها و کنفرانس‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="202"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="75"/>
+        <source>Chat</source>
+        <translation type="unfinished">گفتگو</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="76"/>
+        <source>A chat room for direct conversations and group chats</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="86"/>
+        <source>Activities</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="87"/>
+        <source>Recent calls, meetings and chat messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="137"/>
+        <source>Events</source>
+        <translation type="unfinished">رویدادها</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="138"/>
+        <source>List of upcoming calendar events</source>
+        <translation type="unfinished">فهرست رویدادهای آیندهٔ تقویم</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="248"/>
         <source>Title</source>
         <translation type="unfinished">عنوان</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="203"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="249"/>
         <source>URL</source>
         <translation type="unfinished">URL</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="204"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="250"/>
         <source>URL (dark mode)</source>
         <translation type="unfinished">URL (حالت تاریک)</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="250"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="258"/>
+        <source>Chat room</source>
+        <translation type="unfinished">اتاق گفتگو</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="306"/>
         <source>Settings text input</source>
         <translation type="unfinished">ورودی متن تنظیمات</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="251"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="307"/>
         <source>Input for widget setting %1</source>
         <translation type="unfinished">ورودی برای تنظیم ابزارک %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="270"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="326"/>
         <source>Settings checkbox</source>
         <translation type="unfinished">چک‌باکس تنظیمات</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="271"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="327"/>
         <source>Checkbox for widget setting %1</source>
         <translation type="unfinished">چک‌باکس برای تنظیم ابزارک %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="290"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="364"/>
+        <source>Search for chat rooms...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="370"/>
+        <source>Chat room search input</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="371"/>
+        <source>Search input to filter the chat rooms for the widget</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="504"/>
+        <source>Select chat room %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="516"/>
+        <source>No chat rooms found.</source>
+        <translation type="unfinished">اتاق گفتگویی یافت نشد.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="517"/>
+        <source>No chat rooms available yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="533"/>
         <source>Widget setting %1</source>
         <translation type="unfinished">تنظیم ابزارک %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="318"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="566"/>
         <source>Cancel</source>
         <translation type="unfinished">لغو</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="323"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="571"/>
         <source>Cancel widget selection</source>
         <translation type="unfinished">لغو انتخاب ابزارک</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="324"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="572"/>
         <source>Cancel button to exit widget selection selection without changes</source>
         <translation type="unfinished">دکمه لغو برای خروج بدون تغییر</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="332"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="580"/>
         <source>Add</source>
         <translation type="unfinished">افزودن</translation>
     </message>
@@ -6526,6 +6909,39 @@
         <location filename="../src/ui/components/WindowHeader.qml" line="106"/>
         <source>Close GOnnect window</source>
         <translation type="unfinished">بستن پنجره GOnnect</translation>
+    </message>
+</context>
+<context>
+    <name>phoneNumberUtil</name>
+    <message>
+        <location filename="../src/ui/scripts/phoneNumberUtil.js" line="30"/>
+        <source>Jitsi Meet (room &apos;%1&apos;)</source>
+        <translation type="unfinished">Jitsi Meet (اتاق &apos;%1&apos;)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/scripts/phoneNumberUtil.js" line="33"/>
+        <source>Chat with %1</source>
+        <translation type="unfinished">گفتگو با %1</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/scripts/phoneNumberUtil.js" line="38"/>
+        <source>Phone (Commercial, %1)</source>
+        <translation type="unfinished">تلفن (تجاری، %1)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/scripts/phoneNumberUtil.js" line="41"/>
+        <source>Phone (Mobile, %1)</source>
+        <translation type="unfinished">تلفن (موبایل، %1)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/scripts/phoneNumberUtil.js" line="44"/>
+        <source>Phone (Home, %1)</source>
+        <translation type="unfinished">تلفن (خانه، %1)</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/scripts/phoneNumberUtil.js" line="47"/>
+        <source>Phone (%1)</source>
+        <translation type="unfinished">تلفن (%1)</translation>
     </message>
 </context>
 </TS>

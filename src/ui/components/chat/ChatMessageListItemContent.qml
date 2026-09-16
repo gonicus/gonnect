@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.impl
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import base
 
 Item {
@@ -12,7 +12,7 @@ Item {
             return 0
         } else if (control.isStateUpdate) {
             return stateLabel.implicitWidth
-        } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
+        } else if (control.isRemoved || (control.isText && control.content.isSimpleText)) {
             return messageLabel.implicitWidth
         } else if (control.content instanceof ChatMessageContentImage) {
             return messageImage.sourceSize.width
@@ -26,7 +26,7 @@ Item {
             return 0
         } else if (control.isStateUpdate) {
             return stateLabel.implicitHeight
-        } else if (control.content instanceof ChatMessageContentText && control.content.isSimpleText) {
+        } else if (control.isRemoved || (control.isText && control.content.isSimpleText)) {
             return messageLabel.implicitHeight
         } else if (control.content instanceof ChatMessageContentImage) {
             return messageImage.height
@@ -42,24 +42,40 @@ Item {
     required property string affectedUserName
 
     property color textColor: Theme.primaryTextColor
+    property real maxContentHeight: -1
 
     readonly property alias messageLabel: messageLabel
+    readonly property bool isText: (control.content instanceof ChatMessageContentText)
+    readonly property bool isRemoved: (control.content instanceof ChatMessageContentRemoved)
+    readonly property bool isShortEmojiOnly: control.isText && ViewHelper.isShortEmojiString(control.content.simpleText)
 
     signal openDirectChatRequested(string userId)
-
-    readonly property bool isShortEmojiOnly: control.content instanceof ChatMessageContentText
-                                             && ViewHelper.isShortEmojiString(control.content.simpleText)
 
     // Text
     TextEdit {
         id: messageLabel
-        visible: control.content instanceof ChatMessageContentText && control.content.isSimpleText
-        text: control.content instanceof ChatMessageContentText ? control.content.simpleText : ""
+        visible: control.isRemoved || (control.isText && control.content.isSimpleText)
+        text: {
+            if (control.isRemoved) {
+                const reason = control.content.reason
+                if (reason !== "") {
+                    return qsTr("Message has been removed. Reason: %1").arg(reason)
+                } else {
+                    return qsTr("Message has been removed.")
+                }
+            } else if (control.isText) {
+                return control.content.htmlText
+            }
+            return ""
+        }
         color: control.textColor
         wrapMode: Label.Wrap
-        textFormat: Text.MarkdownText
+        textFormat: Text.RichText
         readOnly: true
-        font.pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
+        font {
+            pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
+            italic: control.isRemoved
+        }
         anchors {
             top: parent.top
             left: parent.left
@@ -108,7 +124,7 @@ Item {
         id: messageImage
         visible: false
         source: control.content?.imagePath ?? ""
-        height: Math.min(messageImage.sourceSize.height, 200)
+        height: control.maxContentHeight > 0 ? Math.min(messageImage.sourceSize.height, 200, control.maxContentHeight) : Math.min(messageImage.sourceSize.height, 200)
         width: Math.min(messageImage.sourceSize.width, parent.width)
         fillMode: Image.PreserveAspectFit
         verticalAlignment: Image.AlignTop
@@ -124,14 +140,22 @@ Item {
         visible: false
         anchors.fill: messageImage
         radius: 8
+        antialiasing: true
+        layer {
+            enabled: true
+            smooth: true
+        }
     }
 
-    OpacityMask {
+    MultiEffect {
         id: messageImageOpacityMask
-        visible: control.content instanceof ChatMessageContentImage
-        maskSource: messageImageCornerCropper
-        source: messageImage
         anchors.fill: messageImage
+        visible: control.content instanceof ChatMessageContentImage
+        source: messageImage
+        maskSource: messageImageCornerCropper
+        maskEnabled: true
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
 
         HoverHandler {
             cursorShape: Qt.PointingHandCursor
@@ -176,6 +200,13 @@ Item {
             when: !!attachmentLoader.item?.hasOwnProperty("availableWidth")
             property: "availableWidth"
             value: control.width
+        }
+
+        Binding {
+            target: attachmentLoader.item
+            when: !!attachmentLoader.item?.hasOwnProperty("availableHeight")
+            property: "availableHeight"
+            value: control.maxContentHeight
         }
 
         Connections {

@@ -17,7 +17,7 @@ Item {
     property bool isHandRaised: false
     property IConferenceConnector iConferenceConnector
 
-    property alias videoMuteButtonVisible: videoDeviceButton.visible
+    readonly property bool isVideoAvailable: control.iConferenceConnector?.isVideoAvailable ?? false
 
     signal setOnHold(value : bool)
     signal setAudioMuted(value : bool)
@@ -29,6 +29,7 @@ Item {
     signal openSetPasswordDialog
     signal openVideoQualityDialog
     signal openDialInInfoDialog(numbers : variant, code : string)
+    signal openKnockedParticipantDialog(id : string, name : string)
     signal hangup
     signal finishForAll
 
@@ -72,6 +73,9 @@ Item {
             target: control.iConferenceConnector
             function onDialInfoReceived(numbersMap : object, code : string) {
                 control.openDialInInfoDialog(numbersMap, code)
+            }
+            function onParticipantKnocked(id : string, name : string) {
+                control.openKnockedParticipantDialog(id, name)
             }
         }
     }
@@ -181,54 +185,27 @@ Item {
 
         Row {
             id: buttonRow
-            spacing: 5
-            rightPadding: 20
+            spacing: Math.floor(Theme.d / 2)
+
             anchors {
                 top: parent.top
                 bottom: parent.bottom
             }
 
             BarButton {
-                id: shareButton
-                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Sharable)
-                enabled: !control.isOnHold
-                text: qsTr("Share")
-                iconPath: Icons.documentShare
-                showDropdownButton: true
-                onClicked: () => shareButton.openShareMenu()
-                onDropDownClicked: () => shareButton.openShareMenu()
+                id: favButton
+                text: qsTr("Favorite")
+                iconPath: Icons.folderFavorites
+                toggled: confFavHelper.isFavorite
+                onClicked: () => confFavHelper.toggleFavorite()
 
-                function openShareMenu() {
-                    shareMenu.popup(shareButton, -shareMenu.width + shareButton.width, shareButton.height)
-                }
-
-                Menu {
-                    id: shareMenu
-
-                    MenuItem {
-                        text: qsTr("Copy room name")
-                        onTriggered: () => ClipboardHelper.copyToClipboard(control.iConferenceConnector.conferenceName)
-                    }
-                    MenuItem {
-                        text: qsTr("Copy room link")
-                        onTriggered: () => ClipboardHelper.copyToClipboard(control.iConferenceConnector.conferenceUrl)
-                    }
-                    MenuItem {
-                        text: qsTr("Open in browser")
-                        onTriggered: () => Qt.openUrlExternally(control.iConferenceConnector.conferenceUrl)
-                    }
-                    MenuItem {
-                        text: qsTr("Show phone number")
-                        enabled: control.iConferenceConnector.hasDialIn
-                        onTriggered: () => control.iConferenceConnector.requestDialInInfo()
-                    }
-
-                    // MenuItem {
-                    //     text: qsTr("Send link via email")
-                    //     onTriggered: () => console.log(category, 'TODO: Send invitation link via mail')
-                    // }
+                ConferenceFavoriteHelper {
+                    id: confFavHelper
+                    roomName: control.iConferenceConnector?.conferenceName ?? ""
                 }
             }
+
+            ButtonBarSeparator {}
 
             BarButton {
                 id: raiseHandButton
@@ -236,16 +213,10 @@ Item {
                 enabled: !control.isOnHold
                 text: qsTr("Raise")
                 iconPath: Icons.transformBrowse
-                iconText: control.isHandRaised ? "!" : ""
+                toggled: control.isHandRaised
                 onClicked: () => control.setRaiseHand(!control.isHandRaised)
-            }
 
-            BarButton {
-                id: holdButton
-                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Holdable)
-                text: control.isOnHold ? qsTr("Resume") : qsTr("Hold")
-                iconPath: control.isOnHold ? Icons.mediaPlaybackStart : Icons.mediaPlaybackPause
-                onClicked: () => control.setOnHold(!control.isOnHold)
+                Accessible.name: control.isHandRaised ? qsTr("Lower hand") : qsTr("Raise hand")
             }
 
             BarButton {
@@ -257,12 +228,55 @@ Item {
                 onClicked: () => control.setTileView(!control.isTileView)
             }
 
+            ButtonBarSeparator {}
+
+            BarButton {
+                id: holdButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Holdable)
+                toggled: control.isOnHold
+                toggleColorMode: BarButton.ToggleColorMode.Warn
+                text: qsTr("Hold")
+                iconPath: Icons.mediaPlaybackPause
+                onClicked: () => control.setOnHold(!control.isOnHold)
+
+                Accessible.name: control.isOnHold ? qsTr("Resume") : qsTr("Hold")
+                Accessible.description: qsTr("Update the conference hold state")
+            }
+
+            BarButton {
+                id: muteButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.AudioMute)
+                enabled: !control.isOnHold
+                toggled: !control.isMuted
+                toggleColorMode: BarButton.ToggleColorMode.Warn
+                text: qsTr("Microphone")
+                iconPath: Icons.audioInputMicrophone
+                onClicked: () =>  control.setAudioMuted(!control.isMuted)
+
+                Accessible.name: control.isMuted ? qsTr("Unmute microphone") : qsTr("Mute microphone")
+            }
+
+            BarButton {
+                id: cameraMuteButton
+                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute) && control.isVideoAvailable
+                enabled: !control.isOnHold
+                toggled: !control.isVideoMuted
+                toggleColorMode: BarButton.ToggleColorMode.Warn
+                text: qsTr("Camera")
+                iconPath: Icons.cameraVideo
+                onClicked: () => control.setVideoMuted(!control.isVideoMuted)
+
+                Accessible.name: control.isVideoMuted ? qsTr("Enable camera") : qsTr("Disable camera")
+            }
+
             BarButton {
                 id: screenShareButton
                 visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.ScreenShare)
                 enabled: !control.isOnHold
                 text: qsTr("Screen")
-                iconPath: control.isSharingScreen ? Icons.mediaPlaybackStopped : Icons.inputTouchscreen
+                toggled: control.isSharingScreen
+                toggleColorMode: BarButton.ToggleColorMode.Warn
+                iconPath: Icons.inputTouchscreen
                 onClicked: () => {
                     if (control.isSharingScreen) {
                         control.setScreenShare(false, false)
@@ -274,6 +288,8 @@ Item {
                         //screenShareMenu.popup(screenShareButton, -screenShareButton.width + screenShareButton.width, screenShareButton.height)
                     }
                 }
+
+                Accessible.name: control.isSharingScreen ? qsTr("Stop sharing") : qsTr("Share screen")
 
                 Menu {
                     id: screenShareMenu
@@ -291,114 +307,21 @@ Item {
             }
 
             BarButton {
-                id: videoDeviceButton
-                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoMute)
-                enabled: !control.isOnHold
-                text: qsTr("Camera")
-                iconPath: control.isVideoMuted ? Icons.cameraOff : Icons.cameraOn
-                showDropdownButton: true
-                onClicked: () => control.setVideoMuted(!control.isVideoMuted)
-                onDropDownClicked: () => videoDeviceMenu.popup(videoDeviceButton, -videoDeviceMenu.width + videoDeviceButton.width, videoDeviceButton.height)
-
-                VideoDeviceMenu {
-                    id: videoDeviceMenu
-                    selectedDeviceId: VideoManager.selectedDeviceId
-                    onDeviceSelected: deviceId => VideoManager.selectedDeviceId = deviceId
-                    onVirtualBackgroundButtonClicked: () => control.showVirtualBackgroundDialog()
-                }
-            }
-
-            BarButton {
-                id: audioInputDeviceButton
-                visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.AudioMute)
-                enabled: !control.isOnHold
-                text: qsTr("Micro")
-                iconPath: control.isMuted ? Icons.microphoneSensitivityMuted : Icons.audioInputMicrophone
-                showDropdownButton: true
-                onClicked: () => control.setAudioMuted(!control.isMuted)
-                onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
-
-
-                AudioDeviceMenu {
-                    id: audioInputDeviceMenu
-                    inputDevices: true
-                    selectedDeviceId: AudioManager.captureDeviceId
-
-                    onDeviceSelected: deviceId => AudioManager.captureDeviceId = deviceId
-                }
-            }
-
-            BarButton {
-                id: audioOutputDeviceButton
-                enabled: !control.isOnHold
-                text: qsTr("Output")
-                iconPath: Icons.audioVolumeHigh
-                showDropdownButton: true
-                onClicked: () => audioOutputDeviceMenu.popup(audioOutputDeviceButton, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
-                onDropDownClicked: () => audioOutputDeviceMenu.popup(audioOutputDeviceButton, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
-
-                AudioDeviceMenu {
-                    id: audioOutputDeviceMenu
-                    inputDevices: false
-                    selectedDeviceId: AudioManager.playbackDeviceId
-
-                    onDeviceSelected: deviceId => AudioManager.playbackDeviceId = deviceId
-                }
-            }
-
-            BarButton {
                 id: moreButton
-                enabled: !control.isOnHold
+                enabled: !control.isOnHold && control.areInCallButtonsEnabled
                 text: qsTr("More")
-                iconPath: Icons.applicationMenu
                 showDropdownButton: true
+                iconPath: Icons.applicationMenu
                 onClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
                 onDropDownClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
 
-                Menu {
+                ConferenceMoreMenu {
                     id: moreMenu
+                    iConferenceConnector: control.iConferenceConnector
 
-                    MenuItem {
-                        id: noiseSuppressionMenuItem
-                        visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.NoiseSuppression)
-                        text: qsTr("Noise supression")
-                        icon.source: control.iConferenceConnector.isNoiseSuppressionEnabled ? Icons.checkbox : ""
-                        onClicked: () => control.iConferenceConnector.setNoiseSuppressionEnabled(!control.iConferenceConnector.isNoiseSuppressionEnabled)
-                    }
-
-                    MenuItem {
-                        text: qsTr("Toggle subtitles")
-                        visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.Subtitles)
-                        icon.source: control.iConferenceConnector.isSubtitlesEnabled ? Icons.checkbox : ""
-                        onClicked: () => control.iConferenceConnector.setSubtitlesEnabled(!control.iConferenceConnector.isSubtitlesEnabled)
-                    }
-
-                    MenuItem {
-                        text: qsTr("Toggle whiteboard")
-                        visible: control.iConferenceConnector.hasWhiteboard
-                        onClicked: () => control.iConferenceConnector.toggleWhiteboard()
-                    }
-
-                    MenuItem {
-                        text: qsTr("Video quality...")
-                        visible: control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.VideoQualityAdjustable)
-                        onClicked: () => control.openVideoQualityDialog()
-                    }
-
-                    MenuItem {
-                        id: setPasswordMenuItem
-                        visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
-                                 && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.RoomPassword)
-                        text: qsTr("Set room password...")
-                        onClicked: () => control.openSetPasswordDialog()
-                    }
-
-                    MenuItem {
-                        visible: control.iConferenceConnector.ownRole === ConferenceUser.Role.Moderator
-                                 && control.iConferenceConnector.hasCapability(IConferenceConnector.Capability.MuteAll)
-                        text: qsTr("Mute everyone")
-                        onClicked: () => control.iConferenceConnector.muteAll()
-                    }
+                    onOpenSetPasswordDialog: () => control.openSetPasswordDialog()
+                    onOpenVideoQualityDialog: () => control.openVideoQualityDialog()
+                    onShowVirtualBackgroundDialog: () => control.showVirtualBackgroundDialog()
                 }
             }
         }
@@ -406,36 +329,21 @@ Item {
 
     Row {
         id: rightStickyButtonRow
-        spacing: 5
-        leftPadding: 20
-        rightPadding: 20
+        spacing: Math.floor(Theme.d / 2)
+        rightPadding: Math.floor(Theme.d / 2)
+
         anchors {
             top: parent.top
             bottom: parent.bottom
             right: parent.right
         }
 
-        Rectangle {
-            height: 32
-            width: 1
-            color: Theme.borderColor
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Button {
+        BarButton {
             id: hangupButton
-            width: 50
-            height: 50
-            highlighted: true
-            anchors.verticalCenter: parent.verticalCenter
-            icon.source: Icons.callStop
-
-            Material.accent: Theme.redColor
-
-            Component.onCompleted: () => {
-                hangupButton.icon.width = 24
-                hangupButton.icon.height = 24
-            }
+            text: qsTr("Leave")
+            iconPath: Icons.callStop
+            toggled: true
+            toggledColor: Theme.redColor
 
             onClicked: () => {
                 const conn = control.iConferenceConnector

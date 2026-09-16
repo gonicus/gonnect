@@ -377,7 +377,7 @@ void Contact::updateAvatar()
 }
 #endif
 
-QList<Contact::PhoneNumber> Contact::phoneNumbers() const
+const QList<Contact::PhoneNumber> &Contact::phoneNumbers() const
 {
     return m_phoneNumbers;
 }

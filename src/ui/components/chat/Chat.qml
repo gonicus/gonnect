@@ -26,7 +26,10 @@ Item {
         }
     }
 
-    onChatRoomChanged: () => control.loadMessages()
+    onChatRoomChanged: () => {
+                           relatedMsg.chatMessage = null
+                           control.loadMessages()
+                       }
 
     Connections {
         target: control.chatRoom
@@ -36,112 +39,28 @@ Item {
         }
     }
 
-    AvatarImage {
-        id: avatarImage
-        visible: control.showTitleBar && !!control.chatRoom
-        size: 30
-        source: control.chatRoom?.avatarPath ?? ""
-        initials: control.chatRoom ? ViewHelper.initials(control.chatRoom.name) : ""
-        showPresenceStatus: !!(control.chatRoom?.hasPresenceState)
-        presenceStatus: control.chatRoom?.presenceState ?? ChatUser.PresenceState.Unknown
-        indicatorComponent: Component { ChatUserPresenceStatusIndicator {} }
-        anchors {
-            left: parent.left
-            leftMargin: 10
-            verticalCenter: messageListCardHeading.verticalCenter
-        }
-    }
-
-    CardHeading {
+    ChatButtonBar {
         id: messageListCardHeading
-        visible: titleLoadingIndicatorRow.visible || (control.showTitleBar && !!control.chatRoom)
-        leftPadding: avatarImage.x + avatarImage.width - 10
-        rightPadding: titleLoadingIndicatorRow.visible
-                      ? parent.width - titleLoadingIndicatorRow.x
-                      : parent.width - favCardHeadingButton.x
-        text: control.showTitleBar && control.chatRoom
-              ? (control.chatRoom.isDirectChat
-                 ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
-                 : qsTr("Chat room %1").arg(control.chatRoom.name))
-              : ""
+        height: messageListCardHeading.implicitHeight
+        shallBeVisible: control.showTitleBar && !!control.chatRoom
+        chatProvider: control.chatProvider
+        chatRoom: control.chatRoom
         anchors {
-            top: parent.top
             left: parent.left
             right: parent.right
-        }
-    }
-
-    Row {
-        id: titleLoadingIndicatorRow
-        spacing: 4
-        visible: !!(control.chatRoom?.isLoadingMessageHistory && !bigLoadingItem.visible)
-        anchors {
-            horizontalCenter: !control.showTitleBar ? messageListCardHeading.horizontalCenter : undefined
-            right: control.showTitleBar ? favCardHeadingButton.left : undefined
-            rightMargin: Theme.d
-            top: messageListCardHeading.top
-            bottom: messageListCardHeading.bottom
-        }
-
-        BusyIndicator {
-            id: titleLoadingIndicator
-            running: titleLoadingIndicatorRow.visible
-            width: titleLoadingIndicator.height
-            height: 24
-            circleColor: Theme.secondaryTextColor
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Label {
-            text: qsTr("Messages are loading...")
-            color: Theme.secondaryTextColor
-            anchors.verticalCenter: parent.verticalCenter
-        }
-    }
-
-    FavIcon {
-        id: favCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
-        isFavorite: control.chatRoom?.isFavorite ?? false
-        anchors {
-            verticalCenter: messageListCardHeading.verticalCenter
-            right: messageListCardHeadingButton.left
-        }
-
-        onToggled: () => control.chatProvider?.requestToggleRoomFavorite(control.chatRoom)
-    }
-
-    CardHeadingMoreMenuButton {
-        id: messageListCardHeadingButton
-        visible: control.showTitleBar && messageListCardHeading.visible
-        anchors {
             top: parent.top
-            right: parent.right
         }
-
-        onClicked: () => {
-                       chatRoomMenuComponent.createObject(messageListCardHeadingButton, {
-                                                              toggleFavoriteVisible: false,
-                                                              editRoomVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanEdit),
-                                                              inviteUsersVisible: !!(Number(control.chatRoom?.permissions ?? 0) & IChatRoom.Permission.CanInvite)
-                                                          }).popup()
-                   }
     }
 
-    Component {
-        id: chatRoomMenuComponent
-
-        ChatRoomContextMenu {
-            onEditRoomTriggered: () => ViewHelper.showEditRoomDialog(control.chatProvider, control.chatRoom.id)
-            onInviteUsersTriggered: () => ViewHelper.showInviteUserToRoomDialog(control.chatProvider, control.chatRoom.id)
-            onLeaveRoomTriggered: () => {
-                                      const item = DialogFactory.createConfirmDialog({
-                                                       text: qsTr("Are you sure you really want to leave this chat?")
-                                                   })
-                                      const roomId = control.chatRoom.id
-                                      const chatProvider = control.chatProvider
-                                      item.accepted.connect(() => chatProvider.requestRoomLeave(roomId))
-                                  }
+    Rectangle {
+        id: buttonBarBorder
+        height: 1
+        color: Theme.borderColor
+        visible: messageListCardHeading.visible && !pinnedChatMessageList.visible
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: messageListCardHeading.bottom
         }
     }
 
@@ -150,6 +69,7 @@ Item {
         chatRoom: control.chatRoom
         visible: pinnedChatMessageList.count > 0
         height: Math.min(pinnedChatMessageList.implicitHeight, Math.floor(parent.height * 0.15))
+        maxContentHeight: Math.floor(parent.height * 0.15)
         z: chatMessageList.z + 1
         anchors {
             top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top
@@ -169,8 +89,8 @@ Item {
             right: parent.right
             top: pinnedChatMessageList.visible
                  ? pinnedChatMessageList.bottom
-                 : (messageListCardHeading.visible
-                    ? messageListCardHeading.bottom
+                 : (buttonBarBorder.visible
+                    ? buttonBarBorder.bottom
                     : parent.top)
             bottom: typingUsersList.visible
                     ? typingUsersList.top

@@ -12,12 +12,14 @@ T.Menu {
 
     implicitWidth: {
         let v = 0
-        for (const child of control.contentChildren) {
+        for (let i = 0; i < control.count; ++i) {
+            const child = control.itemAt(i)
             if (child instanceof MenuItem) {
                 v = Math.max(v, child.implicitWidth)
             }
         }
-        return v
+        return Math.max(v + control.leftPadding + control.rightPadding,
+                             control.Material.menuItemHeight)
     }
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                              implicitContentHeight + topPadding + bottomPadding)

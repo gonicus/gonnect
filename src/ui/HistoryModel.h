@@ -45,6 +45,8 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    Q_INVOKABLE void removeEntry(qint64 id);
+
 private Q_SLOTS:
     void handleFavoriteToggle(const NumberStat *item);
     void resetModel();

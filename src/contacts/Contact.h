@@ -71,7 +71,7 @@ public:
     bool hasAvatar() const;
     QString avatarPath() const;
     QDateTime lastModified() const;
-    QList<Contact::PhoneNumber> phoneNumbers() const;
+    const QList<Contact::PhoneNumber> &phoneNumbers() const;
     bool sipStatusSubscriptable() const;
     QString subscriptableNumber() const;
 

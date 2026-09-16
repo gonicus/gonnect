@@ -28,7 +28,7 @@ class Theme : public QObject
     Q_PROPERTY(QColor inactiveTextColor READ inactiveTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor secondaryInactiveTextColor READ secondaryInactiveTextColor NOTIFY
                        colorPaletteChanged FINAL)
-    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(QColor accentColor READ accentColor NOTIFY accentColorChanged FINAL)
     Q_PROPERTY(QColor borderColor READ borderColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor borderHeaderIconHovered READ borderHeaderIconHovered NOTIFY
                        colorPaletteChanged FINAL)
@@ -50,6 +50,7 @@ class Theme : public QObject
     Q_PROPERTY(QColor backgroundInitials READ backgroundInitials NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor shadowColor READ shadowColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor redColor READ redColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(QColor orangeColor READ orangeColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor emergencyColor READ emergencyColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(
             QColor activeIndicatorColor READ activeIndicatorColor NOTIFY colorPaletteChanged FINAL)
@@ -114,6 +115,8 @@ public:
     bool isDarkMode() const { return m_isDarkMode; }
     bool useOwnDecoration();
 
+    Q_INVOKABLE QColor pickForegroundColor(const QColor &backgroundColor) const;
+
     Q_INVOKABLE void setUseOwnDecoration(bool value);
 
     QColor primaryTextColor() const { return m_primaryTextColor; }
@@ -139,6 +142,7 @@ public:
     QColor backgroundInitials() const { return m_backgroundInitials; }
     QColor shadowColor() const { return m_shadowColor; }
     QColor redColor() const { return m_redColor; }
+    QColor orangeColor() const { return m_orangeColor; }
     QColor yellowColor() const { return m_yellowColor; }
     QColor emergencyColor() const { return m_emergencyColor; }
     QColor activeIndicatorColor() const { return m_activeIndicatorColor; }
@@ -179,6 +183,7 @@ public:
 
 private Q_SLOTS:
     void updateColorPalette();
+    void updateAccentColor();
     void onThemeVariantChanged();
 
 Q_SIGNALS:
@@ -186,6 +191,7 @@ Q_SIGNALS:
     void isDarkModeChanged();
     void colorPaletteChanged();
     void useOwnDecorationChanged();
+    void accentColorChanged();
 
     void buttonBackgroundHoverChanged();
     void frameChanged();
@@ -227,6 +233,9 @@ private:
     bool m_useOwnDecoration = false;
     bool m_useOwnDecorationInitalized = false;
 
+    QColor m_primaryTextColorLightMode = QColor(5, 5, 5);
+    QColor m_primaryTextColorDarkMode = QColor(248, 248, 248);
+
     QColor m_primaryTextColor;
     QColor m_foregroundWhiteColor;
     QColor m_foregroundHeaderIcons;
@@ -250,6 +259,7 @@ private:
     QColor m_backgroundInitials;
     QColor m_shadowColor;
     QColor m_redColor;
+    QColor m_orangeColor;
     QColor m_yellowColor;
     QColor m_emergencyColor;
     QColor m_greenColor;

@@ -201,11 +201,15 @@ void ViewHelper::toggleFavorite(const QString &phoneNumber,
 
 QString ViewHelper::initials(const QString &name) const
 {
+    if (auto emoji = leadingEmoji(name); !emoji.isEmpty()) {
+        return emoji;
+    }
+
     const auto splitted = name.simplified().split(QChar(' '));
     if (name.length() == 0 || splitted.length() == 0) {
         return "";
     } else if (splitted.length() == 1) {
-        return name.at(0);
+        return QString(name.at(0));
     }
 
     return QString("%1%2").arg(name.at(0), splitted.at(splitted.length() - 1).at(0)).toUpper();
@@ -301,8 +305,9 @@ void ViewHelper::updateIsActiveVideoCall()
 
 QString ViewHelper::culturalSphereExtension() const
 {
-    auto sphere = tr("QT_CULTURAL_SPHERE", "QGuiApplication");
-    return sphere == "QT_CULTURAL_SPHERE" ? "" : sphere;
+    const auto sphere = tr("QT_CULTURAL_SPHERE", "QGuiApplication");
+    return sphere == "QT_CULTURAL_SPHERE" || sphere.isEmpty() ? QString()
+                                                              : QStringLiteral("_") + sphere;
 }
 
 void ViewHelper::quitApplicationNoConfirm() const
@@ -506,6 +511,16 @@ QString ViewHelper::stripLinkTags(const QString &link) const
     return s.replace(re, "\\1");
 }
 
+static constexpr char emojiUnit[] =
+        R"(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic})*))";
+
+bool ViewHelper::isSingleEmoji(const QString &str) const
+{
+    static const QRegularExpression re(QStringLiteral("^") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("$"));
+    return re.match(str).hasMatch();
+}
+
 bool ViewHelper::isShortEmojiString(const QString &str) const
 {
     const auto trimmed = str.trimmed();
@@ -514,7 +529,16 @@ bool ViewHelper::isShortEmojiString(const QString &str) const
         return false;
     }
 
-    static const QRegularExpression re(
-            R"(^(\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)(?:\s*(?:\p{Extended_Pictographic}(?:\x{FE0F}|\p{Emoji_Modifier}|(?:\x{200D}\p{Extended_Pictographic}))*)){0,2}$)");
+    static const QRegularExpression re(QStringLiteral("^") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("(?:\\s*") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral("){0,2}$"));
     return re.match(trimmed).hasMatch();
+}
+
+QString ViewHelper::leadingEmoji(const QString &str) const
+{
+    static const QRegularExpression re(QStringLiteral("^\\s*(") + QLatin1StringView(emojiUnit)
+                                       + QStringLiteral(")"));
+    auto m = re.match(str);
+    return m.hasMatch() ? m.captured(1) : QString();
 }

@@ -175,7 +175,10 @@ BaseWindow {
         id: pages
     }
 
-    property int notifications: pageModel.notifications + ChatConnectorManager.unreadNotificationsCount
+    readonly property int voicemailCount: SIPAccountManager.messagesWaiting && (SIPAccountManager.newVoiceMessageCount + SIPAccountManager.oldVoiceMessageCount) === 0
+                                                                                ? 1
+                                                                                : SIPAccountManager.newVoiceMessageCount + SIPAccountManager.oldVoiceMessageCount
+    property int notifications: SIPCallManager.missedCalls + ChatConnectorManager.unreadNotificationsCount + control.voicemailCount
 
     onNotificationsChanged: () => {
         SystemTrayMenu.setBadgeNumber(control.notifications)

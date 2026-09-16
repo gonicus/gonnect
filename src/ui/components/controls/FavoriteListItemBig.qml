@@ -77,82 +77,6 @@ Item {
                 internal.updateBuddyStatus()
             }
         }
-
-        function startMeetingOrCall(addr : var) {
-            switch (addr.contactType) {
-            case NumberStats.ContactType.JitsiMeetUrl:
-                if (!ViewHelper.isActiveVideoCall) {
-                    ViewHelper.requestMeeting(addr.addr)
-                }
-                break
-
-            case NumberStats.ContactType.ChatRoomId:
-                ViewHelper.showChatRoom(addr.chatProvider, addr.addr)
-                break
-
-            case NumberStats.ContactType.PhoneNumber:
-                SIPCallManager.call(addr.addr)
-                break
-            }
-        }
-
-        function tooltipText(addr : var) : string {
-            switch (addr.contactType) {
-                case NumberStats.ContactType.JitsiMeetUrl:
-                    return qsTr("Jitsi Meet (room '%1')").arg(addr.addr)
-
-                case NumberStats.ContactType.ChatRoomId:
-                    return qsTr("Chat with %1").arg(delg.name)
-
-                case NumberStats.ContactType.PhoneNumber: {
-                    switch (addr.numberType) {
-                        case Contact.NumberType.Commercial:
-                            return qsTr("Phone (Commercial, %1)").arg(addr.addr)
-
-                        case Contact.NumberType.Mobile:
-                            return qsTr("Phone (Mobile, %1)").arg(addr.addr)
-
-                        case Contact.NumberType.Home:
-                            return qsTr("Phone (Home, %1)").arg(addr.addr)
-
-                        case Contact.NumberType.Unknown:
-                            return qsTr("Phone (%1)").arg(addr.addr)
-                    }
-                }
-            }
-            return ''
-        }
-
-        function iconSource(addr : var) : string {
-
-            switch (addr.contactType) {
-                case NumberStats.ContactType.JitsiMeetUrl:
-                   return Icons.videoCall
-
-                case NumberStats.ContactType.ChatRoomId:
-                   return Icons.dialogMessages
-
-                case NumberStats.ContactType.PhoneNumber: {
-                    switch (addr.numberType) {
-                        case Contact.NumberType.Commercial:
-                            return Icons.actor
-
-                        case Contact.NumberType.Mobile:
-                            return Icons.smartphone
-
-                        case Contact.NumberType.Home:
-                            return Icons.goHome
-
-                        case Contact.NumberType.Unknown:
-                            return Icons.callStart
-                    }
-                    console.error(category, "Number type", addr.numberType, "could not be matched")
-                }
-            }
-
-            console.error(category, "Contact type", addr.contactType, "could not be matched")
-            return ''
-        }
     }
 
     AvatarImage {
@@ -289,8 +213,8 @@ Item {
                 model: delg.addresses
                 delegate: MenuItem {
                     id: menuDelg
-                    text: internal.tooltipText(menuDelg.modelData)
-                    icon.source: internal.iconSource(menuDelg.modelData)
+                    text: PhoneNumberUtil.tooltipText(menuDelg.modelData, delg.name)
+                    icon.source: PhoneNumberUtil.iconSource(menuDelg.modelData)
 
                     required property var modelData
 
@@ -298,12 +222,9 @@ Item {
                     Accessible.name: qsTr("Favorite phone, chat or meeting button")
                     Accessible.description: qsTr("Selected address %1").arg(menuDelg.modelData.addr)
                     Accessible.focusable: true
-                    Accessible.onPressAction: () => internal.startMeetingOrCall(menuDelg.modelData)
+                    Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(menuDelg.modelData)
 
-                    // ToolTip.visible: addrHoverHandler.hovered
-                    // ToolTip.text: internal.tooltipText(addrDelg.modelData)
-
-                    onTriggered: () => internal.startMeetingOrCall(menuDelg.modelData)
+                    onTriggered: () => PhoneNumberUtil.startMeetingOrCall(menuDelg.modelData)
                 }
 
                 onObjectAdded: (index, object) => moreMenu.insertItem(index, object)
@@ -336,10 +257,10 @@ Item {
                 Accessible.name: qsTr("Favorite phone, chat or meeting button")
                 Accessible.description: qsTr("Selected address %1").arg(addrDelg.modelData.addr)
                 Accessible.focusable: true
-                Accessible.onPressAction: () => internal.startMeetingOrCall(addrDelg.modelData)
+                Accessible.onPressAction: () => PhoneNumberUtil.startMeetingOrCall(addrDelg.modelData)
 
                 ToolTip.visible: addrHoverHandler.hovered
-                ToolTip.text: internal.tooltipText(addrDelg.modelData)
+                ToolTip.text: PhoneNumberUtil.tooltipText(addrDelg.modelData, delg.name)
 
                 Rectangle {
                     anchors.fill: parent
@@ -353,7 +274,7 @@ Item {
                         width: 24
                         height: 24
                         color: delg.enabled ? Theme.primaryTextColor : Theme.secondaryInactiveTextColor
-                        source: internal.iconSource(addrDelg.modelData)
+                        source: PhoneNumberUtil.iconSource(addrDelg.modelData)
                     }
                 }
 
@@ -381,7 +302,7 @@ Item {
                                 break
                             }
                         } else {
-                            internal.startMeetingOrCall(addrDelg.modelData)
+                            PhoneNumberUtil.startMeetingOrCall(addrDelg.modelData)
                         }
                     }
                 }

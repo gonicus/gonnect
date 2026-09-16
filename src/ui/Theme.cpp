@@ -11,9 +11,10 @@ Theme::Theme(QObject *parent) : QObject{ parent }
 {
 
     // Setup theme variant
+    auto &themeManager = ThemeManager::instance();
     connect(this, &Theme::themeVariantChanged, this, &Theme::onThemeVariantChanged);
-    connect(&ThemeManager::instance(), &ThemeManager::colorSchemeChanged, this,
-            &Theme::onThemeVariantChanged);
+    connect(&themeManager, &ThemeManager::colorSchemeChanged, this, &Theme::onThemeVariantChanged);
+    connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateAccentColor);
 
     AppSettings settings;
     m_themeVariant = static_cast<ThemeVariant>(settings.value("generic/themeVariant", 0).toUInt());
@@ -22,8 +23,10 @@ Theme::Theme(QObject *parent) : QObject{ parent }
 
     // Setup listeners for dark mode
     connect(this, &Theme::isDarkModeChanged, this, &Theme::updateColorPalette);
+    connect(this, &Theme::isDarkModeChanged, this, &Theme::updateAccentColor);
 
     updateColorPalette();
+    updateAccentColor();
     useOwnDecoration();
 }
 
@@ -49,6 +52,25 @@ bool Theme::useOwnDecoration()
         }
     }
     return m_useOwnDecoration;
+}
+
+QColor Theme::pickForegroundColor(const QColor &backgroundColor) const
+{
+    // WCAG 2.x relative luminance
+    // https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
+
+    const auto linearize = [](double channel) -> double {
+        channel /= 255.0;
+        return (channel <= 0.03928) ? channel / 12.92 : std::pow((channel + 0.055) / 1.055, 2.4);
+    };
+
+    const double r = linearize(backgroundColor.red());
+    const double g = linearize(backgroundColor.green());
+    const double b = linearize(backgroundColor.blue());
+
+    const double luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    return (luminance > 0.5) ? m_primaryTextColorLightMode : m_primaryTextColorDarkMode;
 }
 
 void Theme::setUseOwnDecoration(bool value)
@@ -98,7 +120,7 @@ void Theme::onThemeVariantChanged()
 
 void Theme::updateColorPalette()
 {
-    m_primaryTextColor = QColor(5, 5, 5);
+    m_primaryTextColor = m_primaryTextColorLightMode;
     m_foregroundWhiteColor = QColor(255, 255, 255);
     m_foregroundHeaderIcons = QColor(46, 52, 54);
     m_foregroundHeaderIconsInactive = QColor(125, 129, 130);
@@ -106,7 +128,6 @@ void Theme::updateColorPalette()
     m_secondaryTextColor = QColor(153, 153, 153);
     m_inactiveTextColor = QColor(104, 104, 104);
     m_secondaryInactiveTextColor = QColor(168, 168, 168);
-    m_accentColor = QColor(30, 57, 143);
     m_borderColor = QColor(219, 219, 219);
     m_borderHeaderIconHovered = QColor(206, 201, 196);
     m_highlightColor = QColor(30, 57, 143, 76);
@@ -127,6 +148,7 @@ void Theme::updateColorPalette()
     m_backgroundInitials = QColor(214, 212, 233);
     m_shadowColor = QColor(0, 0, 0, 32);
     m_redColor = QColor(224, 27, 36);
+    m_orangeColor = QColor(245, 121, 0);
     m_yellowColor = QColor(217, 176, 114);
     m_emergencyColor = QColor(0, 136, 85);
     m_greenColor = QColor(36, 181, 27);
@@ -135,7 +157,7 @@ void Theme::updateColorPalette()
 
     // Dark mode overrides
     if (m_isDarkMode) {
-        m_primaryTextColor = QColor(248, 248, 248);
+        m_primaryTextColor = m_primaryTextColorDarkMode;
         m_secondaryTextColor = QColor(190, 190, 190);
         m_foregroundHeaderIcons = QColor(238, 238, 236);
         m_foregroundHeaderIconsInactive = QColor(157, 157, 156);
@@ -149,7 +171,6 @@ void Theme::updateColorPalette()
         m_backgroundHeader = QColor(48, 48, 48);
         m_backgroundHeaderInactive = QColor(36, 36, 36);
         m_backgroundHeaderIconHovered = QColor(55, 55, 55);
-        m_accentColor = QColor(255, 255, 255, 120);
         m_highlightColor = QColor(15, 83, 158, 36);
         m_paneColor = QColor(45, 45, 45);
         m_rttBubbleSelf = QColor(50, 96, 230);
@@ -159,6 +180,24 @@ void Theme::updateColorPalette()
     }
 
     Q_EMIT colorPaletteChanged();
+}
+
+void Theme::updateAccentColor()
+{
+    auto newColor = ThemeManager::instance().accentColor();
+
+    if (!newColor.isValid() || newColor == QColor(Qt::transparent)) {
+        if (m_isDarkMode) {
+            newColor = QColor(255, 255, 255, 120);
+        } else {
+            newColor = QColor(30, 57, 143);
+        }
+    }
+
+    if (m_accentColor != newColor) {
+        m_accentColor = newColor;
+        Q_EMIT accentColorChanged();
+    }
 }
 
 void Theme::setDarkMode(bool value)

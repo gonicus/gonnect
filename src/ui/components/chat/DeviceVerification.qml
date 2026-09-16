@@ -344,7 +344,7 @@ Item {
             }
 
             Label {
-                text: qsTr("Please verify the code:")
+                text: qsTr("Confirm that the code or emojis match in both sessions:")
                 font.pixelSize: 22
                 wrapMode: Text.Wrap
                 horizontalAlignment: Label.AlignHCenter
@@ -422,7 +422,8 @@ Item {
 
                 Button {
                     id: codeRejectButton
-                    text: qsTr("Reject")
+                    text: qsTr("Cancel")
+                    Accessible.name: qsTr("Cancel, they do not match")
                     onClicked: () => {
                         control.state = "UNVERIFIED"
                         control.chatProvider.requestVerificationAbort()
@@ -431,7 +432,8 @@ Item {
 
                 Button {
                     id: codeAcceptButton
-                    text: qsTr("Accept")
+                    text: qsTr("Confirm")
+                    Accessible.name: qsTr("Confirm, they match")
                     onClicked: () => {
                         control.state = "WAITING_FOR_RESPONSE"
                         control.chatProvider.acceptVerification()

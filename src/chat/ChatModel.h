@@ -10,7 +10,7 @@ class ChatModel : public QAbstractListModel
     Q_OBJECT
     QML_ELEMENT
 
-    Q_PROPERTY(IChatRoom *chatRoom MEMBER m_chatRoom NOTIFY chatRoomChanged FINAL)
+    Q_PROPERTY(IChatRoom *chatRoom READ chatRoom WRITE setChatRoom NOTIFY chatRoomChanged FINAL)
     Q_PROPERTY(uint realMessagesCount READ realMessagesCount NOTIFY realMessagesCountChanged FINAL)
 
 public:
@@ -44,11 +44,17 @@ public:
         RelatedMessageAffectedUserId,
         RelatedMessageContent,
 
-        MentionedUserNames
+        MentionedUserNames,
+
+        // Dummy role for ChatProxyModel; must remain the highest value
+        LastRole
     };
     Q_ENUM(Roles)
 
     explicit ChatModel(QObject *parent = nullptr);
+
+    IChatRoom *chatRoom() const { return m_chatRoom; }
+    void setChatRoom(IChatRoom *room);
 
     QHash<int, QByteArray> roleNames() const override;
     int rowCount(const QModelIndex &parent) const override;

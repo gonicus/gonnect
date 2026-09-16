@@ -11,7 +11,14 @@
 HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
 {
     const auto &history = CallHistory::instance();
-    connect(&history, &CallHistory::itemAdded, this, &HistoryModel::resetModel);
+    connect(&history, &CallHistory::itemAdded, this, [this](qsizetype index, CallHistoryItem *) {
+        beginInsertRows(QModelIndex(), index, index);
+        endInsertRows();
+    });
+    connect(&history, &CallHistory::itemRemoved, this, [this](qsizetype index, CallHistoryItem *) {
+        beginRemoveRows(QModelIndex(), index, index);
+        endRemoveRows();
+    });
 
     connect(&history, &CallHistory::dataChanged, this, [this](qsizetype index, CallHistoryItem *) {
         auto idx = createIndex(index, 0);
@@ -114,6 +121,11 @@ QHash<int, QByteArray> HistoryModel::roleNames() const
         { static_cast<int>(Roles::HasBuddyState), "hasBuddyState" },
         { static_cast<int>(Roles::Hops), "hops" },
     };
+}
+
+void HistoryModel::removeEntry(qint64 id)
+{
+    CallHistory::instance().removeHistoryItem(id);
 }
 
 void HistoryModel::handleFavoriteToggle(const NumberStat *item)

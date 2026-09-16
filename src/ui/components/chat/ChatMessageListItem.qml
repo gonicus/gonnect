@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Dialogs
 import QtQuick.Controls
 import QtQuick.Controls.impl
-import Qt5Compat.GraphicalEffects
 import base
 
 Item {
@@ -29,6 +28,7 @@ Item {
     required property string affectedUserId
     required property var reactions
     required property QtObject content
+    required property var readUsers
 
     required property bool isOwnMessage
     required property bool isPending
@@ -37,6 +37,7 @@ Item {
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
     required property bool isSameDayAsPrevious
+    required property bool isLatestOwnMessage
 
     required property bool hasRelatedMessage
     required property string relatedMessageNickName
@@ -46,11 +47,14 @@ Item {
     required property string relatedMessageAffectedUserId
 
     property IChatProvider chatProvider
+    property IChatRoom chatRoom
 
     property string clickedLink
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
+
+    readonly property bool isRemoved: control.content instanceof ChatMessageContentRemoved
 
     signal respondTo(string messageId)
     signal retryMessage(string eventId)
@@ -293,8 +297,12 @@ Item {
         radius: 6
         anchors {
             fill: messageContentItem
-            leftMargin: (control.content instanceof ChatMessageContentText) ? -4 : 0
-            margins: (control.content instanceof ChatMessageContentImage) ? -4 : 0
+            leftMargin: ((control.content instanceof ChatMessageContentText) || (control.content instanceof ChatMessageContentRemoved))
+                        ? -4
+                        : 0
+            margins: (control.content instanceof ChatMessageContentImage)
+                     ? -4
+                     : 0
         }
     }
 
@@ -324,7 +332,11 @@ Item {
         anchors {
             top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
             left: nameLabel.left
-            right: retryButton.visible ? retryButton.left : timestampLabel.left
+            right: retryButton.visible
+                   ? retryButton.left
+                   : (readMarker.visible
+                      ? readMarker.left
+                      : timestampLabel.left)
             rightMargin: 10
         }
     }
@@ -337,7 +349,7 @@ Item {
         acceptedButtons: Qt.RightButton
         onTapped: (eventPoint) => {
             eventPoint.accepted = true
-            const p = eventPoint.pressPosition
+            const p = eventPoint.position
             const item = control.childAt(p.x, p.y)
             if (item === messageContentItem) {
                 const q = messageContentItem.messageLabel.mapFromItem(control, p)
@@ -346,8 +358,7 @@ Item {
                 control.clickedLink = ""
             }
 
-            const menuPos = messageContentItem.messageLabel.mapFromItem(control, p)
-            chatRoomMenuComponent.createObject(messageContentItem.messageLabel).popup(menuPos.x, menuPos.y)
+            chatRoomMenuComponent.createObject(control).popup()
         }
     }
 
@@ -368,7 +379,7 @@ Item {
         rightPadding: 0
 
         anchors {
-            right: timestampLabel.left
+            right: readMarker.visible ? readMarker.left : timestampLabel.left
             rightMargin: 10
             bottom: messageContentItem.bottom
         }
@@ -380,6 +391,22 @@ Item {
                    }
     }
 
+    ReadMarker {
+        id: readMarker
+        readUsers: control.readUsers
+        allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
+        visible: control.isOwnMessage
+                 && !control.isPending
+                 && !control.isFailed
+                 && (control.isLatestOwnMessage
+                     || ((control.readUsers?.length ?? 0) > 0))
+        anchors {
+            right: timestampLabel.left
+            rightMargin: 10
+            verticalCenter: timestampLabel.verticalCenter
+        }
+    }
+
     Component {
         id: chatRoomMenuComponent
 
@@ -389,7 +416,7 @@ Item {
 
             HideableMenuItem {
                 text: qsTr("Add reaction...")
-                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.Reactions)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && !!(control.capabilities & IChatProvider.Capability.Reactions)
                 icon.source: Icons.smileyAdd
                 onTriggered: () => {
                     const menuItem = chatMessageContextMenu.itemAt(0)
@@ -403,7 +430,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Copy to clipboard")
                 icon.source: Icons.editCopy
-                enabled: control.content instanceof ChatMessageContentText || control.content instanceof ChatMessageContentImage
+                visible: !control.isRemoved && (control.content instanceof ChatMessageContentText || control.content instanceof ChatMessageContentImage)
                 onTriggered: () => {
                     if (control.content instanceof ChatMessageContentImage) {
                         ClipboardHelper.copyImageToClipboard(control.content?.imagePath)
@@ -418,7 +445,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Copy link to clipboard")
                 icon.source: Icons.editCopy
-                enabled: !!control.clickedLink
+                visible: !!control.clickedLink && !control.isRemoved
                 onTriggered: () => {
                     ClipboardHelper.copyToClipboard(control.clickedLink)
                 }
@@ -427,19 +454,20 @@ Item {
             HideableMenuItem {
                 text: qsTr("Remove message...")
                 icon.source: Icons.editDelete
-                visible: !control.isFailed && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && !!(control.capabilities & IChatProvider.Capability.RemoveMessage)
                 onTriggered: () => {
-                    const item = DialogFactory.createConfirmDialog({
+                    const item = DialogFactory.createConfirmDialogWithText({
                         title: qsTr("Remove message"),
-                        text: qsTr("Do you really want to remove this message?")
+                        text: qsTr("Do you really want to remove this message?"),
+                        inputLabel: qsTr("Reason (optional, why you removed the message)")
                     })
 
                     const roomId = control.roomId
                     const eventId = control.eventId
                     const chatProvider = control.chatProvider
 
-                    item.accepted.connect(() => {
-                        chatProvider.requestRemoveMessage(roomId, eventId)
+                    item.acceptedWithText.connect(text => {
+                        chatProvider.requestRemoveMessage(roomId, eventId, text)
                     })
                 }
             }
@@ -447,7 +475,7 @@ Item {
             HideableMenuItem {
                 text: qsTr("Edit message...")
                 icon.source: Icons.editor
-                visible: !control.isFailed && !control.isPending && control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
+                visible: !control.isFailed && !control.isRemoved && !control.isPending && control.isOwnMessage && !!(control.capabilities & IChatProvider.Capability.EditMessage)
                 onTriggered: () => {
                     ViewHelper.showEditMessageDialog(control.chatProvider, control.roomId, control.eventId, control.content?.simpleText ?? "")
                 }
@@ -464,6 +492,7 @@ Item {
                 text: qsTr("Toggle pin")
                 icon.source: Icons.windowPin
                 visible: !control.isFailed
+                         && !control.isRemoved
                          && !control.isPending
                          && !!(control.capabilities & IChatProvider.Capability.PinMessage)
                          && !!((control.roomPermissions ?? 0) & IChatRoom.Permission.CanPinMessages)
@@ -489,12 +518,14 @@ Item {
             model: control.reactions
             delegate: Item {
                 id: reactionDelg
+                enabled: !control.isRemoved
                 implicitHeight: 24
                 implicitWidth: reactionCountLabel.x + reactionCountLabel.implicitWidth + 6
 
                 required property int count
                 required property string reaction
                 required property bool isOwnReaction
+                required property list<ChatUser> users
 
                 Rectangle {
                     id: reactionBg
@@ -540,6 +571,9 @@ Item {
                     }
                 }
 
+                ToolTip.text: reactionDelg.users.map(user => user.computedName).join(", ")
+                ToolTip.visible: reactionDelgHoverHandler.hovered
+
                 HoverHandler {
                     id: reactionDelgHoverHandler
                     cursorShape: Qt.PointingHandCursor
@@ -563,6 +597,7 @@ Item {
 
         AddReactionButton {
             id: addReactionButton
+            visible: !control.isRemoved
 
             onClicked: () => {
                 internal.openEmojiPicker(reactionsContainer.mapToItem(addReactionButton.Window.window.contentItem,
