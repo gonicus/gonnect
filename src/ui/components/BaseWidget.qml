@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.impl
 import QtQuick.Controls.Material
-import Qt5Compat.GraphicalEffects
 import base
 
 Item {
@@ -499,13 +498,8 @@ Item {
         }
     }
 
-    DropShadow {
-        id: shadowEffect
+    CardShadow {
         anchors.fill: root
-        horizontalOffset: 1
-        verticalOffset: 1
-        radius: 6.0
-        color: Theme.shadowColor
         source: root
     }
 }

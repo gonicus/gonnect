@@ -28,22 +28,22 @@ QString chatMessagePreview(const ChatMessage *message)
         return textContent->simpleText();
     }
     if (qobject_cast<ChatMessageContentImage *>(content)) {
-        return ActivitiesModel::tr("[Image]");
+        return "[" + ActivitiesModel::tr("Image") + "]";
     }
     if (qobject_cast<ChatMessageContentAudioFile *>(content)) {
-        return ActivitiesModel::tr("[Audio]");
+        return "[" + ActivitiesModel::tr("Audio") + "]";
     }
     if (qobject_cast<ChatMessageContentVideoFile *>(content)) {
-        return ActivitiesModel::tr("[Video]");
+        return "[" + ActivitiesModel::tr("Video") + "]";
     }
     if (qobject_cast<ChatMessageContentFile *>(content)) {
-        return ActivitiesModel::tr("[File]");
+        return "[" + ActivitiesModel::tr("File") + "]";
     }
     if (qobject_cast<ChatMessageContentRemoved *>(content)) {
-        return ActivitiesModel::tr("[Removed]");
+        return "[" + ActivitiesModel::tr("Removed") + "]";
     }
 
-    return ActivitiesModel::tr("[Message]");
+    return "[" + ActivitiesModel::tr("Message") + "]";
 }
 
 ActivitiesModel::ActivitiesModel(QObject *parent) : QAbstractListModel{ parent }
@@ -471,13 +471,20 @@ void ActivitiesModel::handleChatMessageAdded(ChatMessage *message)
         }
 
         if (const auto user = room->chatUserById(message->fromId())) {
-            // Chat user avatar paths are full file URLs (see makeDataRootPath), while the entries
-            // of call kinds hold plain filesystem paths, so the file scheme is stripped here.
-            QString avatarPath = user->avatarPath();
-            if (avatarPath.startsWith("file://")) {
-                avatarPath = avatarPath.mid(7);
+
+            if (const Contact *contact = AddressBook::instance().lookupByChatUser(user)) {
+                entry.avatarPath = contact->avatarPath();
+
+            } else {
+                // Chat user avatar paths are full file URLs (see makeDataRootPath), while the
+                // entries of call kinds hold plain filesystem paths, so the file scheme is stripped
+                // here.
+                QString avatarPath = user->avatarPath();
+                if (avatarPath.startsWith("file://")) {
+                    avatarPath = avatarPath.mid(7);
+                }
+                entry.avatarPath = avatarPath;
             }
-            entry.avatarPath = avatarPath;
         }
     }
 
@@ -506,7 +513,7 @@ void ActivitiesModel::handleChatMessageRemoved(qsizetype, ChatMessage *item)
     }
     for (qsizetype i = 0; i < m_entries.size(); ++i) {
         if (m_entries[i].chatMessageId == item->eventId()) {
-            m_entries[i].messageText = tr("[Removed]");
+            m_entries[i].messageText = "[" + tr("Removed") + "]";
             const auto idx = createIndex(i, 0);
             Q_EMIT dataChanged(idx, idx, { static_cast<int>(Roles::Text) });
             return;

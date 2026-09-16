@@ -69,6 +69,7 @@ Item {
         chatRoom: control.chatRoom
         visible: pinnedChatMessageList.count > 0
         height: Math.min(pinnedChatMessageList.implicitHeight, Math.floor(parent.height * 0.15))
+        maxContentHeight: Math.floor(parent.height * 0.15)
         z: chatMessageList.z + 1
         anchors {
             top: messageListCardHeading.visible ? messageListCardHeading.bottom : parent.top

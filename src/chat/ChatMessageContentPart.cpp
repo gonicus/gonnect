@@ -3,8 +3,13 @@
 ChatMessageContentPart::ChatMessageContentPart(QObject *parent) : QObject{ parent } { }
 
 ChatMessageContentPart::ChatMessageContentPart(bool isCode, const QString &text,
-                                               const QString &fenceInfo, QObject *parent)
-    : QObject{ parent }, m_isCode{ isCode }, m_text{ text.trimmed() }, m_fenceInfo{ fenceInfo }
+                                               const QString &htmlText, const QString &fenceInfo,
+                                               QObject *parent)
+    : QObject{ parent },
+      m_isCode{ isCode },
+      m_text{ text.trimmed() },
+      m_htmlText{ htmlText },
+      m_fenceInfo{ fenceInfo }
 {
 }
 

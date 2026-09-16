@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.Material
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import base
 
 Item {
@@ -57,15 +57,23 @@ Item {
         color: 'black'
         visible: false
         radius: mask.width / 2
+        antialiasing: true
+        layer {
+            enabled: true
+            smooth: true
+        }
 
         Accessible.ignored: true
     }
 
-    OpacityMask {
+    MultiEffect {
         id: opacityMask
         anchors.fill: parent
         source: img
         maskSource: mask
+        maskEnabled: true
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
     }
 
     Rectangle {
