@@ -57,6 +57,8 @@ QString LinuxNotificationManager::add(Notification *notification)
 
             auto icon = gdk_pixbuf_loader_get_pixbuf(loader);
             notify_notification_set_image_from_pixbuf(internalNotification, icon);
+
+            g_object_unref(loader);
         }
     }
 

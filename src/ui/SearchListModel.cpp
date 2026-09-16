@@ -141,7 +141,7 @@ QVariant SearchListModel::data(const QModelIndex &index, int role) const
         return contact->hasAvatar();
 
     case static_cast<int>(Roles::AvatarPath):
-        return contact->avatarPath();
+        return contact->avatarUrl();
 
     case static_cast<int>(Roles::SubscriptableNumber):
         return contact->subscriptableNumber();
