@@ -105,6 +105,11 @@ ActivitiesModel::ActivitiesModel(QObject *parent) : QAbstractListModel{ parent }
     };
     connect(&AddressBook::instance(), &AddressBook::contactAdded, this, trackContactAvatar);
     connect(&AddressBook::instance(), &AddressBook::contactModified, this, trackContactAvatar);
+
+    const auto existingContacts = AddressBook::instance().contacts();
+    for (Contact *contact : std::as_const(existingContacts)) {
+        trackContactAvatar(contact);
+    }
 }
 
 QHash<int, QByteArray> ActivitiesModel::roleNames() const
@@ -220,7 +225,7 @@ QVariant ActivitiesModel::data(const QModelIndex &index, int role) const
 
         case static_cast<int>(Roles::AvatarPath): {
             const auto c = contactInfo.contact;
-            return c && c->hasAvatar() ? c->avatarPath() : "";
+            return c && c->hasAvatar() ? c->avatarUrl() : "";
         }
 
         case static_cast<int>(Roles::Account):
@@ -473,7 +478,7 @@ void ActivitiesModel::handleChatMessageAdded(ChatMessage *message)
         if (const auto user = room->chatUserById(message->fromId())) {
 
             if (const Contact *contact = AddressBook::instance().lookupByChatUser(user)) {
-                entry.avatarPath = contact->avatarPath();
+                entry.avatarPath = contact->avatarUrl();
 
             } else {
                 // Chat user avatar paths are full file URLs (see makeDataRootPath), while the

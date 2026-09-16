@@ -334,7 +334,7 @@ QVariant FavoritesModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::AvatarPath): {
         if (favEntry->contact && favEntry->contact->hasAvatar()) {
-            return favEntry->contact->avatarPath();
+            return favEntry->contact->avatarUrl();
         }
 
         for (const auto &addr : std::as_const(favEntry->addrs)) {

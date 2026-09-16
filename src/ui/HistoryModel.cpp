@@ -94,6 +94,11 @@ HistoryModel::HistoryModel(QObject *parent) : QAbstractListModel{ parent }
     connect(&AddressBook::instance(), &AddressBook::contactAdded, this, trackContactAvatar);
     connect(&AddressBook::instance(), &AddressBook::contactModified, this, trackContactAvatar);
 
+    const auto existingContacts = AddressBook::instance().contacts();
+    for (Contact *contact : std::as_const(existingContacts)) {
+        trackContactAvatar(contact);
+    }
+
     connect(this, &HistoryModel::limitChanged, this, &HistoryModel::resetModel);
 }
 
@@ -214,7 +219,7 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
 
     case static_cast<int>(Roles::AvatarPath): {
         const auto c = contactInfo.contact;
-        return c && c->hasAvatar() ? c->avatarPath() : "";
+        return c && c->hasAvatar() ? c->avatarUrl() : "";
     }
 
     case static_cast<int>(Roles::RemoteUrl):
