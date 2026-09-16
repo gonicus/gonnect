@@ -46,6 +46,7 @@ public:
     Q_INVOKABLE void setVideoQualityInternal(uint quality);
     Q_INVOKABLE void setIsSharingScreenInternal(bool value);
     Q_INVOKABLE void setIsTileViewInternal(bool value);
+    Q_INVOKABLE void setIsHandRaisedInternal(bool value);
 
     Q_INVOKABLE void onPasswordRequired();
 
