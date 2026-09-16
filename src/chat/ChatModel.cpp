@@ -167,7 +167,7 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
     case static_cast<int>(Roles::AvatarPath): {
         if (const auto user = m_chatRoom->chatUserById(item->fromId())) {
             if (const auto *contact = AddressBook::instance().lookupByChatUser(user)) {
-                return contact->avatarPath();
+                return contact->avatarUrl();
             }
             return user->avatarPath();
         }

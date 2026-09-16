@@ -110,6 +110,7 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
 
         if (isTooOld(*dateEvent)) {
             qCWarning(lcDateEventManager) << "DateEvent is too old and will be ignored";
+            delete dateEvent;
             continue;
         }
 
@@ -122,6 +123,7 @@ void DateEventManager::addDateEvent(const QString &id, const QString &source,
         }
         if (isAdded) {
             qCWarning(lcDateEventManager) << "DateEvent already in list - ignoring";
+            delete dateEvent;
             continue;
         }
 
