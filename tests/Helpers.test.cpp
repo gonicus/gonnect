@@ -59,8 +59,7 @@ void HelpersTest::testGenerateSecretLength()
 
 void HelpersTest::testGenerateSecretCharset()
 {
-    static const QString allowed =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static const QString allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     const QString secret = SecretGenerator::generateSecret(255);
     for (const QChar c : secret) {
