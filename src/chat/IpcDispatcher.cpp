@@ -2396,6 +2396,7 @@ void IpcDispatcher::sendInitialInitializationRequest()
     initReq.setEncryptionSecret(m_configInfo.encryptionSecret);
     initReq.setPersistentStorageSecret(m_configInfo.persistentStorageSecret);
     initReq.setDeviceDisplayName(m_configInfo.displayName);
+    initReq.setVerifyCertificates(m_configInfo.verifyCertificates);
     req->setInitializationRequest(initReq);
     SendPolicy policy;
     policy.allowSendIfLoggedOut = true;
