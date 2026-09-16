@@ -150,7 +150,9 @@ public:
 
     Q_INVOKABLE QString stripLinkTags(const QString &link) const;
 
+    Q_INVOKABLE bool isSingleEmoji(const QString &str) const;
     Q_INVOKABLE bool isShortEmojiString(const QString &str) const;
+    Q_INVOKABLE QString leadingEmoji(const QString &str) const;
 
     QString culturalSphereExtension() const;
 

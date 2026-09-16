@@ -15,6 +15,9 @@ Rectangle {
 
     default property alias leftContent: leftButtonRow.data
 
+    readonly property int leftRowWidth: leftButtonRow.width
+    readonly property int rightRowWidth: rightButtonRow.width
+
     Row {
         id: leftButtonRow
         leftPadding: 5

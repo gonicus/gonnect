@@ -62,7 +62,7 @@ class GOnnectRecipe(ConanFile):
     def requirements(self):
         self.requires("hidapi/0.15.0")
         self.requires("pjproject/2.17")
-        self.requires("openldap/2.7.0")
+        self.requires("openldap/2.7.1")
         self.requires("libical/3.0.20")
         self.requires("vcard/cci.20250408")
         self.requires("logfault/0.8.1-1")
@@ -124,7 +124,7 @@ class GOnnectRecipe(ConanFile):
             self.options["qt/*"].qtqa=False
             self.options["qt/*"].qtlocation=False
             self.options["qt/*"].qtsensors=False
-            self.options["qt/*"].qt5compat=True
+            self.options["qt/*"].qt5compat=False
             self.options["qt/*"].qtcoap=False
             self.options["qt/*"].qtopcua=False
             self.options["qt/*"].qtpositioning=False

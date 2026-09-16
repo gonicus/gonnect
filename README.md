@@ -266,7 +266,7 @@ choco install -y git git-lfs python3 conan nsis cmake strawberryperl aqt
 choco install -y visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.MSBuildTools;includeRecommended --add Microsoft.VisualStudio.Workload.VCTools;includeRecommended --quiet"
 
 # install qt in users home folder
-aqt install-qt windows desktop 6.10.1 win64_msvc2022_64 -m qt5compat qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools -O $env:USERPROFILE\Qt
+aqt install-qt windows desktop 6.10.1 win64_msvc2022_64 -m qtmultimedia qtwebengine qtwebchannel qtnetworkauth qtpositioning qtwebsockets qtgrpc qtshadertools -O $env:USERPROFILE\Qt
 
 [System.Environment]::SetEnvironmentVariable('Qt6_Dir', $env:USERPROFILE + '\Qt\6.10.1\msvc2022_64\', 'User')
 ```
