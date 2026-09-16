@@ -176,6 +176,8 @@ qt_add_executable(chatMessageTransformerTest
 
 add_test(NAME chatMessageTransformerTest COMMAND chatMessageTransformerTest)
 
+find_package(cmark REQUIRED)
+
 target_include_directories(chatMessageTransformerTest
     PRIVATE
         ${PROJECT_SOURCE_DIR}/src
@@ -185,4 +187,5 @@ target_link_libraries(chatMessageTransformerTest
     PRIVATE
         Qt6::Core
         Qt6::Test
+        cmark::cmark
 )

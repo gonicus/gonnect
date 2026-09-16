@@ -3,7 +3,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     CorePrivate
     GuiPrivate
     Concurrent
-    Core5Compat
     Quick
     QuickControls2
     Multimedia
@@ -370,9 +369,9 @@ qt_add_qml_module(gonnect
         ui/components/controls/BarButton.qml
         ui/components/controls/BottomButtonBar.qml
         ui/components/controls/BottomButtonBarButton.qml
-        ui/components/controls/BottomButtonBarSeparator.qml
         ui/components/controls/BusyIndicator.qml
         ui/components/controls/Button.qml
+        ui/components/controls/ButtonBarSeparator.qml
         ui/components/controls/CheckBox.qml
         ui/components/controls/ClipboardButton.qml
         ui/components/controls/ControlBar.qml
@@ -423,9 +422,11 @@ qt_add_qml_module(gonnect
 
         ui/components/popups/AudioDeviceMenu.qml
         ui/components/popups/BurgerMenu.qml
+        ui/components/popups/CallMoreMenu.qml
         ui/components/popups/ChatUserSearch.qml
-        ui/components/popups/DialInInfo.qml
+        ui/components/popups/ConferenceMoreMenu.qml
         ui/components/popups/CreateChatRoom.qml
+        ui/components/popups/DialInInfo.qml
         ui/components/popups/EditChatRoom.qml
         ui/components/popups/EditChatMessage.qml
         ui/components/popups/EditStatusText.qml
@@ -477,6 +478,7 @@ qt_add_qml_module(gonnect
         ui/components/CardHeading.qml
         ui/components/CardHeadingMoreMenuButton.qml
         ui/components/CardList.qml
+        ui/components/CardShadow.qml
         ui/components/ChatSideBar.qml
         ui/components/ConferenceButtonBar.qml
         ui/components/CustomWindowHeader.qml
@@ -740,12 +742,18 @@ qt_add_qml_module(gonnect
         helper/ChatMessageTransformer.cpp
         helper/CodeHighlighter.h
         helper/CodeHighlighter.cpp
+        helper/ConferenceFavoriteHelper.h
+        helper/ConferenceFavoriteHelper.cpp
         helper/ContactHelper.h
         helper/ContactHelper.cpp
         helper/FileContentHelper.h
         helper/FileContentHelper.cpp
+        helper/GenericFavoriteHelper.h
+        helper/GenericFavoriteHelper.cpp
         helper/SecretGenerator.h
         helper/SecretGenerator.cpp
+        helper/SipFavoriteHelper.h
+        helper/SipFavoriteHelper.cpp
         # helper/SpellCheckHighlighter.h
         # helper/SpellCheckHighlighter.cpp
         helper/TextFormatHelper.h
@@ -805,6 +813,10 @@ qt_add_qml_module(gonnect
         rtt/RTTModel.h
         rtt/RTTModel.cpp
 
+        ui/ActivitiesModel.h
+        ui/ActivitiesModel.cpp
+        ui/ActivitiesProxyModel.h
+        ui/ActivitiesProxyModel.cpp
         ui/CallsModel.h
         ui/CallsModel.cpp
         ui/CallRoutingHelper.h
@@ -840,8 +852,6 @@ qt_add_qml_module(gonnect
         ui/HistoryContactSearchModel.cpp
         ui/HistoryContactSearchProxyModel.h
         ui/HistoryContactSearchProxyModel.cpp
-        ui/ActivitiesModel.h
-        ui/ActivitiesModel.cpp
         ui/HistoryModel.h
         ui/HistoryModel.cpp
         ui/HistoryProxyModel.h
@@ -961,7 +971,6 @@ target_link_libraries(gonnect
         Qt6::Protobuf
         Qt6::WebEngineCore
         Qt6::WebEngineQuick
-        Qt6::Core5Compat
         GOnnectVersion
         ${PLATFORM_LIBRARIES}
         qt6keychain

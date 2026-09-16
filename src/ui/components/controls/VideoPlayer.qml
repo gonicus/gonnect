@@ -8,12 +8,24 @@ import base
 
 ChatMessageAttachmentRectangle {
     id: control
-    implicitWidth: control.sourceSize.width
-    implicitHeight: topBar.height + control.sourceSize.height + buttonBar.height
-    height: 220
-
     property ChatMessageContentVideoFile content
     property alias showFullscreenButton: fullScreenButton.visible
+    property real availableHeight: -1
+
+    readonly property real aspectRatio:
+        (control.sourceSize.width && control.sourceSize.height) ? (control.sourceSize.width / control.sourceSize.height) : (1280 / 720)
+    readonly property real videoMaxHeight:
+        Math.max(0, ((control.availableHeight > 0 ? Math.min(220, control.availableHeight) : 220) - topBar.height - buttonBar.height))
+    readonly property real videoHeight: control.videoMaxHeight
+    readonly property real videoWidth: control.videoHeight * control.aspectRatio
+    readonly property real minButtonBarWidth:
+        buttonBar.leftRowWidth + buttonBar.rightRowWidth + slider.width
+    readonly property real cardWidth: Math.max(control.videoWidth, control.minButtonBarWidth)
+
+    implicitWidth: control.cardWidth
+    implicitHeight: control.videoHeight + topBar.height + buttonBar.height
+    width: control.cardWidth
+    height: control.implicitHeight
 
     readonly property size sourceSize: thumbnail.sourceSize
 
@@ -27,9 +39,7 @@ ChatMessageAttachmentRectangle {
     Image {
         id: thumbnail
         source: control.content?.thumbnailFilePath ?? ""
-        width: (thumbnail.sourceSize.width && thumbnail.sourceSize.height)
-               ? (thumbnail.sourceSize.width / thumbnail.sourceSize.height * thumbnail.height)
-               : (1280 / 720)
+        width: control.videoWidth
         visible: !mediaPlayer.playing
         anchors {
             top: topBar.bottom
@@ -41,7 +51,7 @@ ChatMessageAttachmentRectangle {
     Rectangle {
         id: topBar
         height: buttonBar.height
-        width: thumbnail.width
+        width: control.cardWidth
         color: buttonBar.color
         topLeftRadius: buttonBar.bottomLeftRadius
         topRightRadius: buttonBar.bottomRightRadius
@@ -67,9 +77,7 @@ ChatMessageAttachmentRectangle {
 
     VideoOutput {
         id: videoOutput
-        width: (videoOutput.sourceRect.width && videoOutput.sourceRect.height)
-               ? (videoOutput.sourceRect.width / videoOutput.sourceRect.height * videoOutput.height)
-               : (1280 / 720)
+        width: control.videoWidth
         anchors {
             top: topBar.bottom
             bottom: buttonBar.top
@@ -79,7 +87,7 @@ ChatMessageAttachmentRectangle {
 
     BottomButtonBar {
         id: buttonBar
-        width: thumbnail.width
+        width: control.cardWidth
         anchors {
             left: parent.left
             bottom: parent.bottom
@@ -111,11 +119,7 @@ ChatMessageAttachmentRectangle {
             from: 0
             to: mediaPlayer.duration
             stepSize: 1000
-            anchors {
-                left: parent?.left
-                right: parent?.right
-                verticalCenter: parent?.verticalCenter
-            }
+            anchors.verticalCenter: parent?.verticalCenter
 
             Binding {
                 target: slider

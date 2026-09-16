@@ -33,8 +33,8 @@ IpcChatRoom::IpcChatRoom(const QString &id, const QString &name, IChatProvider *
 
     connect(this, &IpcChatRoom::chatUsersChanged, this, &IpcChatRoom::updateIsDirectChat);
     connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::avatarPathChanged);
-    connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::hasPresenceState);
-    connect(this, &IpcChatRoom::otherUserChanged, this, [this]() { presenceState(); });
+    connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::hasPresenceStateChanged);
+    connect(this, &IpcChatRoom::otherUserChanged, this, &IpcChatRoom::presenceStateChanged);
     connect(this, &IpcChatRoom::chatUserRoomStateChanged, this,
             &IpcChatRoom::updateOwnUserJoinState);
 

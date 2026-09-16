@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Dialogs
 import QtQuick.Controls
 import QtQuick.Controls.impl
-import Qt5Compat.GraphicalEffects
 import base
 
 Item {

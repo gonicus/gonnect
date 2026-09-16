@@ -36,92 +36,90 @@ void ChatMessageContentText::processText()
         return;
     }
 
-    m_simpleText = convertText(m_rawText);
+    m_simpleText = m_rawText;
+    m_htmlText = convertHtmlText(m_rawText);
 
     // Split into code/pre blocks
     qDeleteAll(m_parts);
     m_parts.clear();
 
     const QByteArray utf8Data = m_rawText.toUtf8();
-    QString currentTextBuffer;
     cmark_node *doc =
             cmark_parse_document(utf8Data.constData(), utf8Data.size(), CMARK_OPT_DEFAULT);
     cmark_iter *iter = cmark_iter_new(doc);
+
+    struct CodeRange
+    {
+        int startLine = 0;
+        int endLine = 0;
+        QString literal;
+        QString fenceInfo;
+    };
+    QList<CodeRange> codeRanges;
+
     cmark_event_type ev_type;
-
     while ((ev_type = cmark_iter_next(iter)) != CMARK_EVENT_DONE) {
+        if (ev_type != CMARK_EVENT_ENTER) {
+            continue;
+        }
         cmark_node *currentNode = cmark_iter_get_node(iter);
-        cmark_node_type type = cmark_node_get_type(currentNode);
-
-        if (ev_type == CMARK_EVENT_ENTER) {
+        const auto type = cmark_node_get_type(currentNode);
+        if (type == CMARK_NODE_CODE_BLOCK) {
+            CodeRange range;
+            range.startLine = cmark_node_get_start_line(currentNode);
+            range.endLine = cmark_node_get_end_line(currentNode);
+            range.literal = QString::fromUtf8(cmark_node_get_literal(currentNode));
+            range.fenceInfo = QString::fromUtf8(cmark_node_get_fence_info(currentNode));
+            codeRanges.append(range);
+        } else if (type == CMARK_NODE_HTML_BLOCK) {
             const auto lit = QString::fromUtf8(cmark_node_get_literal(currentNode));
-
-            if (type == CMARK_NODE_CODE_BLOCK) {
-
-                // Remaining normal text
-                if (!currentTextBuffer.isEmpty()) {
-                    m_parts.append(new ChatMessageContentPart(
-                            false, convertText(currentTextBuffer.trimmed()), "", this));
-                    currentTextBuffer.clear();
-                }
-
-                // Code block
-                m_parts.append(new ChatMessageContentPart(
-                        true, lit, QString::fromUtf8(cmark_node_get_fence_info(currentNode)),
-                        this));
-
-            } else if (type == CMARK_NODE_HTML_BLOCK
-                       && lit.trimmed().startsWith("<pre", Qt::CaseInsensitive)) {
-
-                // <pre>-Block
-                // Strip outer tags
+            if (lit.trimmed().startsWith("<pre", Qt::CaseInsensitive)) {
                 const auto openTagEnd = lit.indexOf('>');
                 const auto closeTagStart = lit.lastIndexOf("</pre", -1, Qt::CaseInsensitive);
                 if (openTagEnd != -1 && closeTagStart > openTagEnd) {
-
-                    // Remaining normal text
-                    if (!currentTextBuffer.isEmpty()) {
-                        m_parts.append(new ChatMessageContentPart(
-                                false, convertText(currentTextBuffer.trimmed()), "", this));
-                        currentTextBuffer.clear();
-                    }
-
-                    // Stripped content
-                    const auto innerContent =
-                            lit.mid(openTagEnd + 1, closeTagStart - openTagEnd - 1);
-                    m_parts.append(new ChatMessageContentPart(true, innerContent, "", this));
-                } else {
-                    // Buffer normal text
-                    currentTextBuffer += lit;
+                    CodeRange range;
+                    range.startLine = cmark_node_get_start_line(currentNode);
+                    range.endLine = cmark_node_get_end_line(currentNode);
+                    range.literal = lit.mid(openTagEnd + 1, closeTagStart - openTagEnd - 1);
+                    codeRanges.append(range);
                 }
-
-            } else if (!lit.isEmpty()) {
-                // Buffer normal text
-                currentTextBuffer += lit;
             }
         }
-    }
-
-    // Remaining buffered text
-    if (!currentTextBuffer.isEmpty()) {
-        m_parts.append(new ChatMessageContentPart(false, convertText(currentTextBuffer.trimmed()),
-                                                  "", this));
-        currentTextBuffer.clear();
     }
 
     cmark_iter_free(iter);
     cmark_node_free(doc);
 
+    // Slice original Markdown, structure like lists and blank lines is preserved.
+    const QStringList allLines = m_rawText.split(QStringLiteral("\n"));
+    auto appendTextPart = [&](const QString &markdown) {
+        const QString buffer = markdown.trimmed();
+        if (buffer.isEmpty()) {
+            return;
+        }
+        m_parts.append(
+                new ChatMessageContentPart(false, buffer, convertHtmlText(buffer), "", this));
+    };
+    int cursorLine = 1;
+    for (const auto &range : codeRanges) {
+        appendTextPart(allLines.sliced(cursorLine - 1, range.startLine - cursorLine)
+                               .join(QStringLiteral("\n")));
+        m_parts.append(
+                new ChatMessageContentPart(true, range.literal, QString(), range.fenceInfo, this));
+        cursorLine = range.endLine + 1;
+    }
+    appendTextPart(allLines.sliced(cursorLine - 1).join(QStringLiteral("\n")));
+
     Q_EMIT contentChanged();
 }
 
-QString ChatMessageContentText::convertText(const QString &originalText) const
+QString ChatMessageContentText::convertHtmlText(const QString &originalText) const
 {
     namespace T = ChatMessageTransformer;
 
     if (const auto *chatMessageObj = qobject_cast<ChatMessage *>(parent())) {
-        return T::addLinkTags(T::fixNewLines(T::highlightMentions(originalText, *chatMessageObj)));
+        return T::markdownToHtml(T::highlightMentions(originalText, *chatMessageObj));
     }
 
-    return T::addLinkTags(T::fixNewLines(originalText));
+    return T::markdownToHtml(originalText);
 }

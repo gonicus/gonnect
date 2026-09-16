@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls.impl
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import base
 
 Item {
@@ -42,6 +42,7 @@ Item {
     required property string affectedUserName
 
     property color textColor: Theme.primaryTextColor
+    property real maxContentHeight: -1
 
     readonly property alias messageLabel: messageLabel
     readonly property bool isText: (control.content instanceof ChatMessageContentText)
@@ -63,13 +64,13 @@ Item {
                     return qsTr("Message has been removed.")
                 }
             } else if (control.isText) {
-                return control.content.simpleText
+                return control.content.htmlText
             }
             return ""
         }
         color: control.textColor
         wrapMode: Label.Wrap
-        textFormat: Text.MarkdownText
+        textFormat: Text.RichText
         readOnly: true
         font {
             pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
@@ -123,7 +124,7 @@ Item {
         id: messageImage
         visible: false
         source: control.content?.imagePath ?? ""
-        height: Math.min(messageImage.sourceSize.height, 200)
+        height: control.maxContentHeight > 0 ? Math.min(messageImage.sourceSize.height, 200, control.maxContentHeight) : Math.min(messageImage.sourceSize.height, 200)
         width: Math.min(messageImage.sourceSize.width, parent.width)
         fillMode: Image.PreserveAspectFit
         verticalAlignment: Image.AlignTop
@@ -139,14 +140,22 @@ Item {
         visible: false
         anchors.fill: messageImage
         radius: 8
+        antialiasing: true
+        layer {
+            enabled: true
+            smooth: true
+        }
     }
 
-    OpacityMask {
+    MultiEffect {
         id: messageImageOpacityMask
-        visible: control.content instanceof ChatMessageContentImage
-        maskSource: messageImageCornerCropper
-        source: messageImage
         anchors.fill: messageImage
+        visible: control.content instanceof ChatMessageContentImage
+        source: messageImage
+        maskSource: messageImageCornerCropper
+        maskEnabled: true
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
 
         HoverHandler {
             cursorShape: Qt.PointingHandCursor
@@ -191,6 +200,13 @@ Item {
             when: !!attachmentLoader.item?.hasOwnProperty("availableWidth")
             property: "availableWidth"
             value: control.width
+        }
+
+        Binding {
+            target: attachmentLoader.item
+            when: !!attachmentLoader.item?.hasOwnProperty("availableHeight")
+            property: "availableHeight"
+            value: control.maxContentHeight
         }
 
         Connections {
