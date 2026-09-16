@@ -19,4 +19,5 @@ struct IpcConfig
     LoginFlow loginFlow = LoginFlow::Unknown;
     QString idConvRegexpString;
     QString idConvReplacementString;
+    bool verifyCertificates = true;
 };
