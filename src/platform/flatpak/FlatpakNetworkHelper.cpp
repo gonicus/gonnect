@@ -1,7 +1,11 @@
 #include "FlatpakNetworkHelper.h"
 #include "NetworkMonitor.h"
 #include <qhostaddress.h>
-#include <QtConcurrent>
+#include <QDBusPendingCallWatcher>
+#include <QDBusPendingReply>
+#include <QFuture>
+#include <QLoggingCategory>
+#include <QPromise>
 
 #define NH_CALL_TIMEOUT 500
 
@@ -31,25 +35,43 @@ FlatpakNetworkHelper::FlatpakNetworkHelper() : NetworkHelper{}
 
 void FlatpakNetworkHelper::updateNetworkState()
 {
-    QDBusPendingReply<QVariantMap> reply = m_portal->GetStatus();
-    reply.waitForFinished();
-
-    if (reply.isError()) {
-        qCWarning(lcNetwork) << "failed to query network status:" << reply.error().message();
+    if (m_statusWatcher) {
+        m_isStatusUpdatePending = true;
         return;
     }
 
-    if (!reply.isValid()) {
-        qCWarning(lcNetwork) << "network status is not valid - skipping";
-        return;
-    }
+    m_statusWatcher = new QDBusPendingCallWatcher(m_portal->GetStatus(), this);
 
-    const QVariantMap res = reply.value();
+    connect(m_statusWatcher, &QDBusPendingCallWatcher::finished, this,
+            [this](QDBusPendingCallWatcher *watcher) {
+                const QDBusPendingReply<QVariantMap> reply = *watcher;
+
+                m_statusWatcher = nullptr;
+                watcher->deleteLater();
+
+                if (reply.isError()) {
+                    qCWarning(lcNetwork)
+                            << "failed to query network status:" << reply.error().message();
+                } else if (!reply.isValid()) {
+                    qCWarning(lcNetwork) << "network status is not valid - skipping";
+                } else {
+                    applyNetworkStatus(reply.value());
+                }
+
+                if (m_isStatusUpdatePending) {
+                    m_isStatusUpdatePending = false;
+                    updateNetworkState();
+                }
+            });
+}
+
+void FlatpakNetworkHelper::applyNetworkStatus(const QVariantMap &status)
+{
     bool connected = false;
 
-    if (res.contains("connectivity")) {
+    if (status.contains("connectivity")) {
         bool ok = false;
-        const unsigned connectivity = res.value("connectivity").toUInt(&ok);
+        const unsigned connectivity = status.value("connectivity").toUInt(&ok);
         if (!ok) {
             qCCritical(lcNetwork)
                     << "error parsing unsigned integer connectivity status from portal";
@@ -57,8 +79,8 @@ void FlatpakNetworkHelper::updateNetworkState()
         }
 
         connected = !!connectivity;
-    } else if (res.contains("available")) {
-        connected = res.value("available").toBool();
+    } else if (status.contains("available")) {
+        connected = status.value("available").toBool();
     } else {
         qCWarning(lcNetwork) << "status request does not contain usable fields - skipping";
         return;
@@ -76,27 +98,48 @@ void FlatpakNetworkHelper::updateNetworkState()
 
 QFuture<bool> FlatpakNetworkHelper::isReachable(const QUrl &url)
 {
-    return QtConcurrent::run([url, this]() -> bool {
-        const int port = getStandardPort(url);
-        if (port < 0) {
-            qCCritical(lcNetwork) << "Cannot find standard port for" << url;
-            return false;
-        }
+    auto promise = std::make_shared<QPromise<bool>>();
+    promise->start();
+    QFuture<bool> future = promise->future();
 
-        auto reply = m_portal->CanReach(url.host(), port);
-        reply.waitForFinished();
+    const int port = getStandardPort(url);
+    if (port < 0) {
+        qCCritical(lcNetwork) << "Cannot find standard port for" << url;
 
-        if (reply.isError()) {
-            qCWarning(lcNetwork) << "failed to call CanReach:", qPrintable(reply.error().message());
-            return false;
-        }
+        QTimer::singleShot(0, this, [promise]() {
+            promise->addResult(false);
+            promise->finish();
+        });
 
-        if (!reply.value()) {
-            qCWarning(lcNetwork) << "unable to reach" << url.toString();
-        }
+        return future;
+    }
 
-        return reply.value();
-    });
+    auto *watcher = new QDBusPendingCallWatcher(
+            m_portal->CanReach(url.host(), static_cast<uint>(port)), this);
+
+    connect(watcher, &QDBusPendingCallWatcher::finished, this,
+            [promise, url](QDBusPendingCallWatcher *callWatcher) {
+                const QDBusPendingReply<bool> reply = *callWatcher;
+
+                callWatcher->deleteLater();
+
+                bool isReachable = false;
+
+                if (reply.isError()) {
+                    qCWarning(lcNetwork) << "failed to call CanReach:" << reply.error().message();
+                } else {
+                    isReachable = reply.value();
+
+                    if (!isReachable) {
+                        qCWarning(lcNetwork) << "unable to reach" << url.toString();
+                    }
+                }
+
+                promise->addResult(isReachable);
+                promise->finish();
+            });
+
+    return future;
 }
 
 QStringList FlatpakNetworkHelper::nameservers() const

@@ -64,6 +64,7 @@ Contact::Contact(const Contact &other) : QObject{ other.parent() }
     m_sipStatusSubscriptable = other.m_sipStatusSubscriptable;
     m_hasAvatar = other.m_hasAvatar;
     m_resolvedAvatarPath = other.m_resolvedAvatarPath;
+    m_avatarRevision = other.m_avatarRevision;
 
     init();
 }
@@ -140,6 +141,19 @@ QString Contact::avatarPath() const
 {
 #ifndef APP_TESTS
     return m_resolvedAvatarPath;
+#else
+    return "";
+#endif
+}
+
+QString Contact::avatarUrl() const
+{
+#ifndef APP_TESTS
+    if (m_resolvedAvatarPath.isEmpty()) {
+        return "";
+    }
+
+    return QString("file://%1?%2").arg(m_resolvedAvatarPath, m_avatarRevision);
 #else
     return "";
 #endif
@@ -370,8 +384,13 @@ QString Contact::resolveAvatarPath() const
 void Contact::updateAvatar()
 {
     const auto newPath = resolveAvatarPath();
-    if (m_resolvedAvatarPath != newPath) {
+    const auto newRevision = newPath.isEmpty()
+            ? QString()
+            : QString::number(QFileInfo(newPath).lastModified().toMSecsSinceEpoch());
+
+    if (m_resolvedAvatarPath != newPath || m_avatarRevision != newRevision) {
         m_resolvedAvatarPath = newPath;
+        m_avatarRevision = newRevision;
         Q_EMIT avatarChanged();
     }
 }
@@ -433,12 +452,10 @@ void Contact::setContactSourceInfo(const ContactSourceInfo &contactSourceInfo)
 
 void Contact::setHasAvatar(bool hasAvatar)
 {
-    if (m_hasAvatar != hasAvatar) {
-        m_hasAvatar = hasAvatar;
+    m_hasAvatar = hasAvatar;
 #ifndef APP_TESTS
-        updateAvatar();
+    updateAvatar();
 #endif
-    }
 }
 
 QDataStream &operator<<(QDataStream &out, const Contact &contact)
