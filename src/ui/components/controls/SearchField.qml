@@ -14,7 +14,7 @@ Item {
     property alias placeHolderText: placeholderLabel.text
 
     function giveFocus() {
-        searchInputField.forceActiveFocus()
+        searchInputField.forceActiveFocus(Qt.ShortcutFocusReason)
     }
 
     Accessible.role: Accessible.Form

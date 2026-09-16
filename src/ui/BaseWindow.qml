@@ -71,7 +71,13 @@ Window {
 
     readonly property int shadowMargin: control.snapToPixelGrid(11)
 
+    property Item activeSearchBox
+
     function focusSearchBox() {
+        if (typeof control.activeSearchBox?.focusSearchBox === "function") {
+            control.activeSearchBox.focusSearchBox()
+            return
+        }
         if (typeof windowHeaderLoader.item?.focusSearchBox === "function") {
             windowHeaderLoader.item.focusSearchBox()
         }
