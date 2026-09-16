@@ -503,10 +503,6 @@ Item {
             }
 
             ToolTip.text: qsTr("Show the emergency call page")
-            ToolTip.visible: emergencyTabButtonHoverHandler.hovered
-            ToolTip.delay: Application.styleHints.mousePressAndHoldInterval
-            ToolTip.toolTip.x: emergencyTabButton.x + emergencyTabButton.width
-            ToolTip.toolTip.y: 9
         }
     }
 
