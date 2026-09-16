@@ -19,6 +19,7 @@ class Contact : public QObject
     Q_PROPERTY(QString name READ name CONSTANT FINAL)
     Q_PROPERTY(bool hasAvatar READ hasAvatar NOTIFY avatarChanged FINAL)
     Q_PROPERTY(QString avatarPath READ avatarPath NOTIFY avatarChanged FINAL)
+    Q_PROPERTY(QString avatarUrl READ avatarUrl NOTIFY avatarChanged FINAL)
     Q_PROPERTY(bool hasBuddyState READ sipStatusSubscriptable CONSTANT FINAL)
     Q_PROPERTY(QString subscriptableNumber READ subscriptableNumber CONSTANT FINAL)
 
@@ -69,6 +70,7 @@ public:
     QString company() const;
     QString mail() const;
     bool hasAvatar() const;
+    QString avatarUrl() const;
     QString avatarPath() const;
     QDateTime lastModified() const;
     const QList<Contact::PhoneNumber> &phoneNumbers() const;
@@ -131,6 +133,7 @@ private:
     bool m_sipStatusSubscriptionInitialized = false;
     bool m_sipStatusSubscriptable = false;
     QString m_resolvedAvatarPath;
+    QString m_avatarRevision;
 
     /// References to users of a chat plugin.
     QList<ChatUser *> m_chatUsers;

@@ -482,6 +482,12 @@ api.addListener("knockingParticipant", data => {
     jitsiConn.addKnockingParticipant(data.participant.id, data.participant.name)
 })
 
+api.addListener("raisHandUpdated", data => {
+    if (data.id === api.getMyUserId()) {
+        jitsiConn.setIsHandRaisedInternal(!!data.handRaised)
+    }
+})
+
 )""")
             .arg(GlobalInfo::instance().jitsiUrl(), // %1
                  authManager.isJitsiAuthRequired() ? authManager.jitsiTokenForRoom(m_roomName)
@@ -709,6 +715,14 @@ void JitsiConnector::setIsTileViewInternal(bool value)
     if (m_isTileView != value) {
         m_isTileView = value;
         Q_EMIT isTileViewChanged();
+    }
+}
+
+void JitsiConnector::setIsHandRaisedInternal(bool value)
+{
+    if (m_isHandRaised != value) {
+        m_isHandRaised = value;
+        Q_EMIT isHandRaisedChanged();
     }
 }
 
@@ -1078,11 +1092,8 @@ void JitsiConnector::toggleHoldImpl()
 
 void JitsiConnector::setHandRaised(bool value)
 {
-    if (m_isHandRaised != value) {
-        m_isHandRaised = value;
-        Q_EMIT isHandRaisedChanged();
-        Q_EMIT executeToggleRaiseHandCommand();
-    }
+    Q_UNUSED(value) // iframe API can only toogle
+    Q_EMIT executeToggleRaiseHandCommand();
 }
 
 void JitsiConnector::onHeadsetHookSwitchChanged()
