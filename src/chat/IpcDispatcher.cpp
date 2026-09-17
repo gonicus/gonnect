@@ -2336,16 +2336,26 @@ void IpcDispatcher::processReadMarkers(IpcChatRoom *chatRoom,
     bulk.reserve(entries.size());
 
     const auto ownUserId = this->ownUserId();
+    QDateTime ownRead;
+    bool hasOwnRead = false;
 
     QHashIterator it(entries);
     while (it.hasNext()) {
         it.next();
         if (it.key() == ownUserId) {
-            continue;
+            ownRead = QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc());
+            hasOwnRead = true;
+        } else {
+            bulk.insert(it.key(), QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
         }
-        bulk.insert(it.key(), QDateTime::fromMSecsSinceEpoch(it.value(), QTimeZone::utc()));
     }
-    chatRoom->setReadTimestamp(bulk);
+
+    if (!bulk.isEmpty()) {
+        chatRoom->setReadTimestamp(bulk);
+    }
+    if (hasOwnRead) {
+        chatRoom->setOwnLastReadTimestamp(ownRead);
+    }
 }
 
 RequestContainer *IpcDispatcher::createRequest(bool withTag)

@@ -39,6 +39,7 @@ Item {
     required property bool isSameMinuteAsPrevious
     required property bool isSameDayAsPrevious
     required property bool isLatestOwnMessage
+    required property bool isFirstUnread
 
     required property bool hasRelatedMessage
     required property string relatedMessageNickName
@@ -148,11 +149,58 @@ Item {
     }
 
     Item {
+        id: unreadSeparator
+        visible: control.isFirstUnread
+        height: unreadSeparator.visible ? (Theme.d * 2) : 0
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+
+        Rectangle {
+            height: 2
+            color: Theme.accentColor
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: parent.left
+                right: unreadLabel.left
+                leftMargin: Theme.d
+                rightMargin: Theme.d
+            }
+        }
+
+        Rectangle {
+            height: 2
+            color: Theme.accentColor
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: unreadLabel.right
+                right: parent.right
+                leftMargin: Theme.d
+                rightMargin: Theme.d
+            }
+        }
+
+        Label {
+            id: unreadLabel
+            text: qsTr("Unread messages")
+            color: Theme.accentColor
+            font.weight: Font.DemiBold
+            anchors.centerIn: parent
+            background: Rectangle {
+                color: Theme.backgroundColor
+                radius: 4
+            }
+        }
+    }
+
+    Item {
         id: newDaySeparator
         visible: false
         height: 40
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             left: parent.left
             right: parent.right
         }
@@ -208,7 +256,7 @@ Item {
         anchors {
             left: parent.left
             leftMargin: 10
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 15
         }
 
@@ -234,7 +282,7 @@ Item {
         font.weight: Font.Medium
         font.pixelSize: 14
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 15
 
             left: avatarImage.right
@@ -318,7 +366,7 @@ Item {
         visible: control.hasRelatedMessage
         height: 0
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 10
             left: messageContentItem.left
             right: messageContentItem.right
@@ -372,7 +420,7 @@ Item {
         }
 
         anchors {
-            top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
+            top: relatedMessageItem.visible ? relatedMessageItem.bottom : unreadSeparator.bottom
             left: nameLabel.left
             right: markerRow.left
             rightMargin: Theme.d
