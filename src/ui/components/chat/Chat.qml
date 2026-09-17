@@ -297,7 +297,7 @@ Item {
 
     Timer {
         id: readTimer
-        interval: 3000
+        interval: 15000
         onTriggered: () => {
             if (control.Window.active && control.isScrolledDown && control.chatRoom) {
                 control.chatRoom.resetUnreadCount()
