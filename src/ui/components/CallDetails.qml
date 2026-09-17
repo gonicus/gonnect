@@ -85,7 +85,7 @@ Item {
         id: avatarImage
         size: 120
         initials: ViewHelper.initials(control.contactName)
-        source: control.callItem?.hasAvatar ? ("file://" + control.callItem.avatarPath) : ""
+        source: control.callItem?.hasAvatar ? control.callItem.avatarPath : ""
         anchors {
             centerIn: parent
             verticalCenterOffset: -25

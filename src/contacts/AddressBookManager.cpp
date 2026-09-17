@@ -142,6 +142,9 @@ void AddressBookManager::processAddressBookQueue()
                 nh.isReachable(checkURL).then(
                         this, [this, feeder, group, checkURL](bool isReachable) {
                             if (isReachable) {
+                                if (feeder->isProcessing()) {
+                                    return;
+                                }
                                 feeder->process();
                                 Q_EMIT AddressBook::instance().contactsReady();
                             } else {

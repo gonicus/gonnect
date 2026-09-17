@@ -51,7 +51,7 @@ Item {
 
         function onActivateSearch() {
             gonnectWindow.ensureVisible()
-            gonnectWindow.focusSearchBox()
+            Qt.callLater(() => gonnectWindow.focusSearchBox())  // ensureVisible can be async
         }
         function onShowSettings() {
             gonnectWindow.showPage(SelectionState.settingsPageId(),

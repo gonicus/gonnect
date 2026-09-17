@@ -167,7 +167,7 @@ Item {
                 AvatarImage {
                     id: avatarImage
                     initials: ViewHelper.initials(delg.contactName)
-                    source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
+                    source: delg.hasAvatar ? delg.avatarPath : ""
                     visible: delg.hasAvatar || delg.name !== ""
                     showPresenceStatus: delg.hasBuddyState || delg.isBlocked
                     presenceStatus: delg.buddyStatus

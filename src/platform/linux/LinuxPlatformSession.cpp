@@ -156,7 +156,8 @@ void LinuxPlatformSession::subscriptionEventCallback(pa_context *context,
     Q_UNUSED(userdata)
 
     if ((type & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) == PA_SUBSCRIPTION_EVENT_SOURCE) {
-        pa_context_get_source_info_by_index(context, index, inputMuteStateCallback, nullptr);
+        releaseOperation(pa_context_get_source_info_by_index(context, index, inputMuteStateCallback,
+                                                             nullptr));
     }
 }
 
@@ -166,23 +167,25 @@ void LinuxPlatformSession::contextStateCallback(pa_context *context, void *userd
 
     pa_context_state_t state = pa_context_get_state(context);
     if (state == PA_CONTEXT_READY) {
-        pa_context_subscribe(context, PA_SUBSCRIPTION_MASK_SOURCE, nullptr, nullptr);
+        releaseOperation(
+                pa_context_subscribe(context, PA_SUBSCRIPTION_MASK_SOURCE, nullptr, nullptr));
     }
 }
 
 void LinuxPlatformSession::muteInputByName(const QString &name, bool state)
 {
     if (m_paContext) {
-        pa_context_set_source_mute_by_name(m_paContext, name.toStdString().data(), state, nullptr,
-                                           nullptr);
+        releaseOperation(pa_context_set_source_mute_by_name(m_paContext, name.toStdString().data(),
+                                                            state, nullptr, nullptr));
     }
 }
 
 void LinuxPlatformSession::getInputMuteState()
 {
     if (m_paContext && !m_captureDeviceId.isEmpty()) {
-        pa_context_get_source_info_by_name(m_paContext, m_captureDeviceId.toStdString().data(),
-                                           inputMuteStateCallback, nullptr);
+        releaseOperation(pa_context_get_source_info_by_name(m_paContext,
+                                                            m_captureDeviceId.toStdString().data(),
+                                                            inputMuteStateCallback, nullptr));
     }
 }
 
@@ -218,5 +221,12 @@ void LinuxPlatformSession::syncSystemMute(bool muted)
         m_callbackSuppress++;
         muteInputByName(m_captureDeviceId, muted);
         qCInfo(lcPlatformSession) << "Sent mute state" << muted << "to system";
+    }
+}
+
+void LinuxPlatformSession::releaseOperation(pa_operation *operation)
+{
+    if (operation) {
+        pa_operation_unref(operation);
     }
 }

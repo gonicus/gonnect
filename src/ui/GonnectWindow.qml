@@ -15,6 +15,7 @@ BaseWindow {
     title: "GOnnect"
     resizable: true
     windowHeaderOverlapsContent: true
+    activeSearchBox: controlBar.visible ? controlBar : null
 
     LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true

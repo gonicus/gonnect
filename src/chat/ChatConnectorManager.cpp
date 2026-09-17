@@ -114,6 +114,7 @@ void ChatConnectorManager::processSettingGroup(const QString &group)
         groupState->config->idConvRegexpString = settings.value("idConvRegexpString").toString();
         groupState->config->idConvReplacementString =
                 settings.value("idConvReplacementString").toString();
+        groupState->config->verifyCertificates = settings.value("verifyServer", true).toBool();
 
         const auto flowStr = settings.value("loginFlow").toString();
         if (flowStr == "Credentials") {

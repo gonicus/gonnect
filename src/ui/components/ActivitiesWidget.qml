@@ -71,7 +71,7 @@ BaseWidget {
                 ]
 
                 Accessible.role: Accessible.ComboBox
-                Accessible.name: qsTr("Activities medium picker")
+                Accessible.name: qsTr("Activity type picker")
                 Accessible.description: qsTr("Select the activity type to filter by")
 
                 delegate: ItemDelegate {

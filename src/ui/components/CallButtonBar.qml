@@ -503,13 +503,73 @@ Item {
     }
 
     Row {
-        spacing: 5
-        rightPadding: 20
-        leftPadding: 20
+        spacing: Math.floor(Theme.d / 2)
+        rightPadding: Math.floor(Theme.d / 2)
+        leftPadding: Theme.d * 2
+
         anchors {
             top: parent.top
             bottom: parent.bottom
             right: parent.right
+        }
+
+        BarButton {
+            id: favButton
+            text: qsTr("Favorite")
+            iconPath: Icons.folderFavorites
+            toggled: confFavHelper.isFavorite
+            onClicked: () => confFavHelper.toggleFavorite()
+
+            SipFavoriteHelper {
+                id: confFavHelper
+                sipAddress: control.callItem?.phoneNumber ?? ""
+            }
+        }
+
+        ButtonBarSeparator {}
+
+        BarButton {
+            id: holdButton
+            toggleColorMode: BarButton.ToggleColorMode.Warn
+            text: qsTr("Hold")
+            iconPath: Icons.mediaPlaybackPause
+            toggled: control.isHolding
+            enabled: control.isEstablished && !control.isFinished
+            visible: control.showHoldButton && control.isEstablished
+            onClicked: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
+
+            Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
+            Accessible.description: qsTr("Update the call hold state")
+        }
+
+        BarButton {
+            id: muteButton
+            toggled: !AudioManager.isAudioCaptureMuted
+            enabled: control.isEstablished && !control.isFinished
+            toggleColorMode: BarButton.ToggleColorMode.Warn
+            text: qsTr("Microphone")
+            iconPath: Icons.audioInputMicrophone
+            tooltipText: muteButton.micMuteLocked
+                         ? qsTr("Microphone mute locked by headset")
+                         : ""
+            onClicked: () => GlobalMuteState.toggleMute()
+
+            readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
+
+            Accessible.name: AudioManager.isAudioCaptureMuted ? qsTr("Unmute microphone") : qsTr("Mute microphone")
+            Accessible.description: muteButton.tooltipText || qsTr("Mute or unmute your audio input")
+        }
+
+        BarButton {
+            id: videoMuteButton
+            text: qsTr("Camera")
+            iconPath: Icons.cameraVideo
+            enabled: control.areInCallButtonsEnabled
+            visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
+            onClicked: () => {
+                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
+                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
+            }
         }
 
         BarButton {
@@ -522,174 +582,42 @@ Item {
                 ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.ScreenShareActive
                 SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Screensharing control")
-            Accessible.description: qsTr("Start sharing your screen")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => screenShareButton.click()
         }
 
         BarButton {
-            id: videoMuteButton
-            text: qsTr("Camera")
-            iconPath: Icons.cameraOff
+            id: moreButton
             enabled: control.areInCallButtonsEnabled
-            visible: ViewHelper.isJitsiAvailable && control.hasCapabilityJitsi && !ViewHelper.isActiveVideoCall
-            onClicked: () => {
-                ViewHelper.nextMeetingStartFlags = IConferenceConnector.StartFlag.AudioActive | IConferenceConnector.StartFlag.VideoActive
-                SIPCallManager.triggerCapability(control.accountId, control.callId, "jitsi:hangup")
-            }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Camera control")
-            Accessible.description: qsTr("Enable your camera")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => videoMuteButton.click()
-        }
-
-        BarButton {
-            id: holdButton
-            text: qsTr("Hold")
-            iconPath: Icons.mediaPlaybackPause
-            toggled: control.isHolding
-            enabled: control.isEstablished && !control.isFinished
-            visible: control.showHoldButton && control.isEstablished
-            onClicked: () => SIPCallManager.toggleHoldCall(control.accountId, control.callId)
-
-            Accessible.role: Accessible.Button
-            Accessible.name: control.isHolding ? qsTr("Resume call") : qsTr("Hold call")
-            Accessible.description: qsTr("Update the call hold state")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => holdButton.click()
-        }
-
-        BarButton {
-            id: muteButton
-            text: qsTr("Mute")
-            iconPath: Icons.microphoneSensitivityMuted
-            toggled: AudioManager.isAudioCaptureMuted
-            enabled: control.isEstablished && !control.isFinished
-            tooltipText: muteButton.micMuteLocked
-                         ? qsTr("Microphone mute locked by headset")
-                         : ""
-            onClicked: () => GlobalMuteState.toggleMute()
-
-            readonly property bool micMuteLocked: ViewHelper.headsetDeviceProxy().muteLocked
-
-            Accessible.role: Accessible.Button
-            Accessible.name: muteButton.text
-            Accessible.description: qsTr("Mute or unmute your audio input")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => muteButton.click()
-        }
-
-        Rectangle {
-            visible: muteButton.visible || holdButton.visible || videoMuteButton.visible
-            height: 32
-            width: 1
-            color: Theme.borderColor
-            enabled: control.areInCallButtonsEnabled
-            anchors.verticalCenter: parent.verticalCenter
-
-            Accessible.ignored: true
-        }
-
-        BarButton {
-            id: audioInputDeviceButton
-            text: qsTr("Micro")
-            iconPath: Icons.audioInputMicrophone
-            enabled: control.areInCallButtonsEnabled
+            text: qsTr("More")
+            iconPath: Icons.applicationMenu
             showDropdownButton: true
+            onClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
+            onDropDownClicked: () => moreMenu.popup(moreButton, -moreMenu.width + moreButton.width, moreButton.height)
 
-            onClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
-            onDropDownClicked: () => audioInputDeviceMenu.popup(audioInputDeviceButton, -audioInputDeviceMenu.width + audioInputDeviceButton.width, audioInputDeviceButton.height)
-
-            AudioDeviceMenu {
-                id: audioInputDeviceMenu
-                inputDevices: true
-                selectedDeviceId: AudioManager.captureDeviceId
-
-                onDeviceSelected: deviceId => AudioManager.captureDeviceId = deviceId
+            CallMoreMenu {
+                id: moreMenu
             }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Input control")
-            Accessible.description: qsTr("Set the mute state of the current input device")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => audioInputDeviceButton.click()
         }
 
         BarButton {
-            id: audioOutputDeviceButton
-            text: qsTr("Output")
-            iconPath: Icons.audioVolumeHigh
-            enabled: control.areInCallButtonsEnabled
-            showDropdownButton: true
-            onClicked: () => audioOutputDeviceMenu.popup(audioOutputDeviceButton, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
-            onDropDownClicked: () => audioOutputDeviceMenu.popup(audioOutputDeviceButton, -audioOutputDeviceMenu.width + audioOutputDeviceButton.width, audioOutputDeviceButton.height)
-
-            AudioDeviceMenu {
-                id: audioOutputDeviceMenu
-                inputDevices: false
-                selectedDeviceId: AudioManager.playbackDeviceId
-
-                onDeviceSelected: deviceId => AudioManager.playbackDeviceId = deviceId
-            }
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Output control")
-            Accessible.description: qsTr("Change the current output devices")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => audioOutputDeviceButton.click()
-        }
-
-        Button {
             id: acceptCallButton
-            width: 50
-            height: 50
-            highlighted: true
-            anchors.verticalCenter: parent.verticalCenter
-            icon.source: Icons.callStart
+            text: qsTr("Accept")
+            iconPath: Icons.callStart
+            toggled: true
+            toggledColor: Theme.greenColor
             visible: !control.isEstablished && !control.isFinished && control.isIncoming
 
-            Material.accent: Theme.greenColor
-
-            Component.onCompleted: () => {
-                acceptCallButton.icon.width = 24
-                acceptCallButton.icon.height = 24
-            }
-
             onClicked: () => control.acceptCallClicked()
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Accept call")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => acceptCallButton.click()
         }
 
-        Button {
+        BarButton {
             id: hangupButton
-            width: 50
-            height: 50
-            highlighted: true
-            anchors.verticalCenter: parent.verticalCenter
-            icon.source: Icons.callStop
+            text: qsTr("Hang up")
+            iconPath: Icons.callStop
+            toggled: true
+            toggledColor: Theme.redColor
             enabled: SIPCallManager.isConferenceMode || !control.isFinished
 
-            Material.accent: Theme.redColor
-
-            Component.onCompleted: () => {
-                hangupButton.icon.width = 24
-                hangupButton.icon.height = 24
-            }
-
             onClicked: () => control.hangupClicked()
-
-            Accessible.role: Accessible.Button
-            Accessible.name: qsTr("Hangup call")
-            Accessible.focusable: true
-            Accessible.onPressAction: () => hangupButton.click()
         }
     }
 }

@@ -123,7 +123,7 @@ class GOnnectRecipe(ConanFile):
             self.options["qt/*"].qtqa=False
             self.options["qt/*"].qtlocation=False
             self.options["qt/*"].qtsensors=False
-            self.options["qt/*"].qt5compat=True
+            self.options["qt/*"].qt5compat=False
             self.options["qt/*"].qtcoap=False
             self.options["qt/*"].qtopcua=False
             self.options["qt/*"].qtpositioning=False

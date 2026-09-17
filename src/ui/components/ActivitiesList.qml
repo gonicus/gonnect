@@ -186,7 +186,7 @@ Item {
                 AvatarImage {
                     id: avatarImage
                     initials: ViewHelper.initials(delg.isChatMessage ? delg.displaySubtitle : delg.title)
-                    source: delg.hasAvatar ? ("file://" + delg.avatarPath) : ""
+                    source: delg.hasAvatar ? delg.avatarPath : ""
                     visible: delg.hasAvatar || delg.title !== ""
                     showPresenceStatus: !delg.isChatMessage && (delg.hasBuddyState || delg.isBlocked)
                     presenceStatus: delg.buddyStatus

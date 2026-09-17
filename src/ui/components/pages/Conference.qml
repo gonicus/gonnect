@@ -304,7 +304,6 @@ Item {
                     isOnHold: confConn.isOnHold
                     isMuted: confConn.isAudioMuted
                     isVideoMuted: confConn.isVideoMuted
-                    videoMuteButtonVisible: confConn.isVideoAvailable
                     isSharingScreen: confConn.isSharingScreen
                     isTileView: confConn.isTileView
                     isHandRaised: confConn.isHandRaised

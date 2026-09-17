@@ -680,7 +680,7 @@ Item {
             }
         }
 
-        BottomButtonBarSeparator {
+        ButtonBarSeparator {
             visible: control.capabilities & IChatProvider.Capability.Markdown
         }
         BottomButtonBarButton {
@@ -741,7 +741,7 @@ Item {
             onClicked: () => formatMenuComponent.createObject(formatMenuButton).popup()
         }
 
-        BottomButtonBarSeparator {
+        ButtonBarSeparator {
             visible: control.capabilities & IChatProvider.Capability.Markdown
         }
 
@@ -753,7 +753,7 @@ Item {
             onClicked: () => messageField.insertOrRemove("[", "]()")
         }
 
-        BottomButtonBarSeparator {
+        ButtonBarSeparator {
             visible: addVideoButton.visible || addFileButton.visible
         }
 

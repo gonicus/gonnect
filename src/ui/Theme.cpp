@@ -54,6 +54,25 @@ bool Theme::useOwnDecoration()
     return m_useOwnDecoration;
 }
 
+QColor Theme::pickForegroundColor(const QColor &backgroundColor) const
+{
+    // WCAG 2.x relative luminance
+    // https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
+
+    const auto linearize = [](double channel) -> double {
+        channel /= 255.0;
+        return (channel <= 0.03928) ? channel / 12.92 : std::pow((channel + 0.055) / 1.055, 2.4);
+    };
+
+    const double r = linearize(backgroundColor.red());
+    const double g = linearize(backgroundColor.green());
+    const double b = linearize(backgroundColor.blue());
+
+    const double luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    return (luminance > 0.5) ? m_primaryTextColorLightMode : m_primaryTextColorDarkMode;
+}
+
 void Theme::setUseOwnDecoration(bool value)
 {
     if (m_useOwnDecoration != value) {
@@ -101,7 +120,7 @@ void Theme::onThemeVariantChanged()
 
 void Theme::updateColorPalette()
 {
-    m_primaryTextColor = QColor(5, 5, 5);
+    m_primaryTextColor = m_primaryTextColorLightMode;
     m_foregroundWhiteColor = QColor(255, 255, 255);
     m_foregroundHeaderIcons = QColor(46, 52, 54);
     m_foregroundHeaderIconsInactive = QColor(125, 129, 130);
@@ -138,7 +157,7 @@ void Theme::updateColorPalette()
 
     // Dark mode overrides
     if (m_isDarkMode) {
-        m_primaryTextColor = QColor(248, 248, 248);
+        m_primaryTextColor = m_primaryTextColorDarkMode;
         m_secondaryTextColor = QColor(190, 190, 190);
         m_foregroundHeaderIcons = QColor(238, 238, 236);
         m_foregroundHeaderIconsInactive = QColor(157, 157, 156);
