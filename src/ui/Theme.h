@@ -15,6 +15,7 @@ class Theme : public QObject
     Q_PROPERTY(bool useOwnDecoration READ useOwnDecoration NOTIFY useOwnDecorationChanged FINAL)
     Q_PROPERTY(uint fontPixelSize READ fontPixelSize CONSTANT FINAL)
     Q_PROPERTY(uint d READ d CONSTANT FINAL)
+    Q_PROPERTY(uint feedbackTimeout READ feedbackTimeout CONSTANT FINAL)
 
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(
@@ -79,6 +80,9 @@ public:
 
     bool isDarkMode() const { return m_isDarkMode; }
     bool useOwnDecoration();
+
+    /// ms how long a visual feedback shall be visible
+    uint feedbackTimeout() { return 3000; }
 
     Q_INVOKABLE QColor pickForegroundColor(const QColor &backgroundColor) const;
 
