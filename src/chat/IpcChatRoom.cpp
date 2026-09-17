@@ -75,6 +75,7 @@ void IpcChatRoom::setIsDirect(bool value)
 void IpcChatRoom::resetUnreadCount()
 {
     if (m_unreadCount) {
+        setOwnLastReadTimestamp(QDateTime::currentDateTimeUtc());
         ipcDispatcher()->markAsRead(id());
         setUnreadCount(0);
     }
@@ -587,6 +588,19 @@ void IpcChatRoom::setReadTimestamp(const QHash<QString, QDateTime> &reads)
 QDateTime IpcChatRoom::lastReadTimestamp(const QString &userId) const
 {
     return m_readMarkers.value(userId);
+}
+
+QDateTime IpcChatRoom::ownLastReadTimestamp() const
+{
+    return m_ownLastReadTimestamp;
+}
+
+void IpcChatRoom::setOwnLastReadTimestamp(const QDateTime &timestamp)
+{
+    if (m_ownLastReadTimestamp != timestamp) {
+        m_ownLastReadTimestamp = timestamp;
+        Q_EMIT ownLastReadTimestampChanged();
+    }
 }
 
 void IpcChatRoom::clear()

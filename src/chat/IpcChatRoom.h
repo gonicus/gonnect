@@ -85,6 +85,8 @@ public:
     virtual const QList<ChatUser *> &typingUsers() const override;
     virtual void setReadTimestamp(const QHash<QString, QDateTime> &reads) override;
     virtual QDateTime lastReadTimestamp(const QString &userId) const override;
+    virtual QDateTime ownLastReadTimestamp() const override;
+    virtual void setOwnLastReadTimestamp(const QDateTime &timestamp) override;
     virtual void clear() override;
 
     void setTypingUsers(const QList<ChatUser *> &users);
@@ -127,4 +129,6 @@ private:
 
     /// Map of userId to the timestamp up to which messages have been read by this user.
     QHash<QString, QDateTime> m_readMarkers;
+
+    QDateTime m_ownLastReadTimestamp;
 };

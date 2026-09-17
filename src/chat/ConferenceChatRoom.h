@@ -56,6 +56,8 @@ public:
     virtual const QList<ChatUser *> &typingUsers() const override;
     virtual void setReadTimestamp(const QHash<QString, QDateTime> &) override { }
     virtual QDateTime lastReadTimestamp(const QString &) const override { return {}; }
+    virtual QDateTime ownLastReadTimestamp() const override { return {}; }
+    virtual void setOwnLastReadTimestamp(const QDateTime &) override { }
     virtual bool isUserMemberOfRoom(const QString &userId) const override;
     virtual bool isUserInvitable(ChatUser *user) const override;
     virtual void clear() override;
