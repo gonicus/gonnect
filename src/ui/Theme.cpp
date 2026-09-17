@@ -136,13 +136,11 @@ void Theme::updateColorPalette()
     m_rttTextSelf = QColor(233, 233, 233);
     m_rttBubbleOther = QColor(233, 233, 233);
     m_rttTextOther = QColor(0, 0, 0);
-    m_highContrastColor = QColor(0, 0, 0);
     m_backgroundColor = QColor(255, 255, 255);
     m_backgroundSecondaryColor = QColor(250, 250, 250);
     m_backgroundOffsetColor = QColor(0, 0, 0, 20);
     m_backgroundOffsetHoveredColor = QColor(0, 0, 0, 40);
     m_backgroundHeader = QColor(235, 235, 235);
-    m_backgroundHeaderSelected = QColor(216, 216, 216);
     m_backgroundHeaderInactive = QColor(242, 242, 242);
     m_backgroundHeaderIconHovered = QColor(248, 248, 247);
     m_backgroundInitials = QColor(214, 212, 233);
