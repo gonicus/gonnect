@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QLoggingCategory>
 #include "WindowsNotificationManager.h"
+#include "Pinger.h"
 #include <wintoastlib.h>
 
 Q_LOGGING_CATEGORY(winNotificationCat, "gonnect.notification.win")
@@ -117,6 +118,14 @@ QString WindowsNotificationManager::add(::Notification *notification)
 
     m_notifications[notification->id()] = notification;
     m_notificationId2ToastId[notification->id()] = toastId;
+
+    // Ping sound
+    if (notification->playPing()) {
+        auto *pinger = new Pinger(this);
+        connect(pinger, &Pinger::stopped, this, [pinger]() { pinger->deleteLater(); });
+        pinger->ping();
+    }
+
     return notification->id();
 }
 

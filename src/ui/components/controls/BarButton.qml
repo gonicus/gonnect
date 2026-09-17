@@ -19,22 +19,60 @@ Item {
     property alias iconText: buttonIcon.text
     property alias iconPath: buttonIcon.icon.source
     property alias iconColor: buttonIcon.icon.color
+    property int iconSize: 20
+    property int toggledSize: Math.floor(2.5 * Theme.d)
+    property color toggledColor: control.toggleColorMode === BarButton.ToggleColorMode.Normal
+                                 ? Theme.primaryTextColor
+                                 : Theme.orangeColor
     property bool highlighted: false
+    property bool toggled: false
     property alias showDropdownButton: dropDownIconContainer.visible
     property alias showIndicatorBadge: indicatorBadge.visible
+    property string tooltipText: ""
+
+    enum ToggleColorMode {
+        Normal,
+        Warn
+    }
+
+    property int toggleColorMode: BarButton.ToggleColorMode.Normal
+
+    Accessible.role: Accessible.Button
+    Accessible.name: control.text
+    Accessible.description: control.tooltipText
+    Accessible.focusable: true
+    Accessible.onPressAction: () => control.clicked()
 
     states: [
-        State {
+
+        State {  // Highlighted
             when: control.highlighted
             PropertyChanges {
                 buttonLabel.color: Theme.primaryTextColor
                 buttonLabel.font.weight: Font.Medium
             }
         },
+
+        State {  // Hovered and toggled
+            when: control.enabled && buttonHoverHandler.hovered && control.toggled
+            PropertyChanges {
+                buttonLabel.font.weight: Font.Medium
+                buttonIcon.icon.color: Qt.lighter(Theme.pickForegroundColor(control.toggledColor), 1.2)
+                toggledBackground.visible: true
+                toggledBackground.color: Qt.lighter(control.toggledColor, 1.2)
+            }
+        },
         State {  // Hovered
             when: control.enabled && buttonHoverHandler.hovered
             PropertyChanges {
                 buttonLabel.color: Theme.primaryTextColor
+            }
+        },
+        State {  // Light toggled
+            when: control.enabled && control.toggled
+            PropertyChanges {
+                toggledBackground.visible: true
+                buttonIcon.icon.color: Theme.pickForegroundColor(control.toggledColor)
             }
         }
     ]
@@ -50,12 +88,13 @@ Item {
 
         Label {
             id: buttonLabel
+            Accessible.ignored: true
             color: Theme.isDarkMode ? Theme.secondaryTextColor : Theme.inactiveTextColor
             font.pixelSize: 11
             horizontalAlignment: Label.AlignHCenter
             anchors {
                 bottom: parent.bottom
-                bottomMargin: 10
+                bottomMargin: 7
 
                 left: parent.left
                 right: parent.right
@@ -64,22 +103,37 @@ Item {
             }
         }
 
+        Rectangle {
+            id: toggledBackground
+            Accessible.ignored: true
+            width: control.toggledSize
+            height: control.toggledSize
+            radius: 4
+            color: control.toggledColor
+            visible: false
+            anchors.centerIn: buttonIcon
+        }
+
         IconLabel {
             id: buttonIcon
+            Accessible.ignored: true
             color: buttonLabel.color
+            width: control.iconSize
+            height: control.iconSize
             icon {
-                width: 20
-                height: 20
+                width: control.iconSize
+                height: control.iconSize
                 color: buttonLabel.color
             }
             anchors {
                 centerIn: parent
-                verticalCenterOffset: -10
+                verticalCenterOffset: -7
             }
         }
 
         Rectangle {
             id: indicatorBadge
+            Accessible.ignored: true
             x: buttonIcon.x + 14
             y: buttonIcon.y + 1
             visible: false
@@ -117,6 +171,7 @@ Item {
 
         IconLabel {
             id: dropDownIcon
+            Accessible.ignored: true
             color: control.enabled && dropDownButtonHoverHandler.hovered ? Theme.foregroundHeaderIcons : Theme.inactiveTextColor
             anchors {
                 centerIn: parent
@@ -139,4 +194,7 @@ Item {
             onTapped: () => control.dropDownClicked()
         }
     }
+
+    ToolTip.visible: buttonHoverHandler.hovered && !!control.tooltipText
+    ToolTip.text: control.tooltipText
 }

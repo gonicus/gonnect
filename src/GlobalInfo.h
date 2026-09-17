@@ -10,6 +10,7 @@ class GlobalInfo : public QObject
     Q_OBJECT
     Q_CLASSINFO("RegisterEnumClassesUnscoped", "false")
     Q_PROPERTY(bool hasEmergencyNumbers READ hasEmergencyNumbers CONSTANT FINAL)
+    Q_PROPERTY(bool shallShowEmergencyButton READ shallShowEmergencyButton CONSTANT FINAL)
 
 public:
     enum class WorkaroundId { GOW_001, GOW_002, GOW_003 };
@@ -35,6 +36,7 @@ public:
 
     Q_INVOKABLE bool isWorkaroundActive(const GlobalInfo::WorkaroundId id);
 
+    bool shallShowEmergencyButton();
     bool hasEmergencyNumbers();
     const QList<EmergencyContact *> &emergencyContacts();
 
@@ -44,6 +46,8 @@ private:
 
     bool m_isJitsiUrlInitialized = false;
     bool m_isTeamsUrlInitialized = false;
+    bool m_shallShowEmergencyButton = false;
+    bool m_shallShowEmergencyButtonInitialized = false;
 
     QHash<WorkaroundId, bool> m_workaroundActiveCache;
 
@@ -63,7 +67,11 @@ class GlobalInfoWrapper
     QML_SINGLETON
 
 public:
-    static GlobalInfo *create(QQmlEngine *, QJSEngine *) { return &GlobalInfo::instance(); }
+    static GlobalInfo *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&GlobalInfo::instance(), QQmlEngine::CppOwnership);
+        return &GlobalInfo::instance();
+    }
 
 private:
     GlobalInfoWrapper() = default;

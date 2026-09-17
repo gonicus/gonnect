@@ -1,7 +1,7 @@
 branches: 
   - name: release
     channel: flathub
-  - name: freeze/next
+  - name: freeze/beta
     channel: beta
     prerelease: beta
   - name: hotfix/**

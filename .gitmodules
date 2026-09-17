@@ -1,3 +1,6 @@
 [submodule "resources/flatpak/shared-modules"]
 	path = resources/flatpak/shared-modules
 	url = https://github.com/flathub/shared-modules.git
+[submodule "external/protos"]
+	path = external/protos
+	url = https://github.com/gonicus/gouda-proto.git

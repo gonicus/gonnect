@@ -1,8 +1,11 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
+#include <QtProtobuf>
 #include "Application.h"
 #include "GlobalInfo.h"
+#include "PersonCoinProvider.h"
+#include "WebEngineKeyEventFilter.h"
 
 #ifdef Q_OS_LINUX
 #  include <QDBusConnection>
@@ -41,6 +44,13 @@ static int setup_unix_signal_handlers()
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_LINUX
+    // QDate & friends internally use localtime/mktime. Init glibc timezone
+    // state while we're single threaded. Later calls only use the cached
+    // answer and avoids race conditions.
+    tzset();
+#endif
+
     qSetMessagePattern("\033[32m%{time h:mm:ss.zzz}%{if-category}\033[32m %{category}:%{endif} "
                        "%{if-debug}\033[34m%{function}%{endif}%{if-warning}\033[31m%{endif}"
                        "%{if-critical}\033[31m%{endif}"
@@ -87,7 +97,11 @@ int main(int argc, char *argv[])
         return 2;
     }
 
+    qRegisterProtobufTypes();
+
     app.setWindowIcon(QIcon(":/icons/gonnect.svg"));
+
+    app.installEventFilter(&WebEngineKeyEventFilter::instance());
 
     // Fonts
     const QStringList fontPaths = { ":/font/NotoColorEmoji-Regular.ttf" };
@@ -115,6 +129,8 @@ int main(int argc, char *argv[])
     QObject::connect(
             &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
             []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+
+    engine.addImageProvider(QLatin1String("personcoin"), new PersonCoinProvider);
     engine.loadFromModule("base", "Main");
 
     const auto &objs = engine.rootObjects();

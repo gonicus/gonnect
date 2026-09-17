@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <evolution-data-server/libecal/libecal.h>
 #include <evolution-data-server/libedata-cal/libedata-cal.h>
 #include <glib.h>
@@ -34,6 +36,18 @@ Q_SIGNALS:
     void feederFailed();
 
 private:
+    struct GObjectUnref
+    {
+        void operator()(gpointer object) const { g_object_unref(object); }
+    };
+    template <typename T>
+    using GObjectPtr = std::unique_ptr<T, GObjectUnref>;
+
+    struct GObjectListFree
+    {
+        void operator()(GSList *list) const { g_slist_free_full(list, g_object_unref); }
+    };
+
     QDateTime createDateTimeFromTimeType(ICalTime *datetime);
 
     static void onEcalClientConnected(GObject *source_object, GAsyncResult *result,

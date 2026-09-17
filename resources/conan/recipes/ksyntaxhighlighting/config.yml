@@ -1,0 +1,8 @@
+versions:
+  "6.26.0":
+    folder: all
+
+updater:
+  source: anitya
+  id: 9159
+  url-pattern: https://github.com/commonmark/cmark/archive/refs/tags/${version}.tar.gz

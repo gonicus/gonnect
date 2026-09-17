@@ -7,6 +7,7 @@
 #include "Ringer.h"
 #include "AppSettings.h"
 #include "SystemTrayMenu.h"
+#include "AudioHelper.h"
 
 Q_LOGGING_CATEGORY(lcRinger, "gonnect.sip.ringer")
 
@@ -26,10 +27,6 @@ void Ringer::start(qreal customVolume)
     auto currentProfile = AudioManager::instance().currentProfile();
 
     SystemTrayMenu::instance().setRinging(true);
-
-    // Prefer headset ringer?
-    if (settings.value(QString("audio%1/preferExternalRinger").arg(currentProfile), false)
-                .toBool()) { }
 
     if (!m_player) {
         m_player = new QMediaPlayer(this);
@@ -57,35 +54,15 @@ void Ringer::start(qreal customVolume)
         m_delay = DEFAULT_RINGTONE_DELAY;
     }
 
+    // Setup player and volume
     QString ringerHash = settings.value(QString("audio%1/ringing").arg(currentProfile)).toString();
-    QAudioOutput *dev = nullptr;
-
-    if (!ringerHash.isEmpty()) {
-        const QList<QAudioDevice> audioDevices = QMediaDevices::audioOutputs();
-        for (const QAudioDevice &device : audioDevices) {
-            auto calculatedHash = SIPAudioDevice::makeHash(device.description(), false);
-            if (calculatedHash == ringerHash) {
-                dev = new QAudioOutput(device, m_player);
-                break;
-            }
-        }
-
-        if (!dev) {
-            qCCritical(lcRinger) << "unknown ringing device in config - using default";
-            dev = new QAudioOutput(QMediaDevices::defaultAudioOutput(), m_player);
-        }
-
-    } else {
-        dev = new QAudioOutput(QMediaDevices::defaultAudioOutput(), m_player);
-    }
+    QAudioOutput *dev = AudioHelper::createAudioOutput(ringerHash, m_player);
 
     m_player->setAudioOutput(dev);
-    dev->setVolume(
-            (0.0 <= customVolume && customVolume <= 1.0)
-                    ? customVolume
-                    : settings.value(QString("audio%1/ringtoneVolume").arg(currentProfile), 90.0)
-                                    .toFloat()
-                            / 100.0);
+
+    qreal configVol =
+            settings.value(QString("audio%1/ringtoneVolume").arg(currentProfile), 90.0).toFloat();
+    dev->setVolume(AudioHelper::calculateVolume(customVolume, configVol));
 
     m_player->setSource(source);
     m_player->play();

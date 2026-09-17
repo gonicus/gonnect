@@ -24,12 +24,15 @@ Item {
 
     Rectangle {
         id: volumeMeterBg
-        anchors.centerIn: avatarImage
         width: 1.15 * avatarImage.size
         height: volumeMeterBg.width
         radius: volumeMeterBg.width / 2
         color: Theme.backgroundOffsetHoveredColor
         opacity: control.isIncomingAudioLevel ? 1.0  : 0.0
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: avatarImage.verticalCenter
+        }
 
         Behavior on opacity {
             NumberAnimation { duration: 300 }

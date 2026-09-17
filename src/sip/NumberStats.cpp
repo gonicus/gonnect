@@ -21,6 +21,10 @@ NumberStats::NumberStats(QObject *parent) : QObject{ parent }
     m_debounceAddressBookUpdateTimer.setSingleShot(true);
     m_debounceAddressBookUpdateTimer.setInterval(5ms);
     m_debounceAddressBookUpdateTimer.callOnTimeout(this, [this]() {
+        m_callCountLookup.clear();
+        qDeleteAll(m_callCounts);
+        m_callCounts.clear();
+
         initialRead();
         readNumberOfCalls();
     });
@@ -31,6 +35,10 @@ NumberStats::NumberStats(QObject *parent) : QObject{ parent }
             [this]() { m_debounceAddressBookUpdateTimer.start(); });
     connect(&AddressBook::instance(), &AddressBook::contactModified, this,
             [this]() { m_debounceAddressBookUpdateTimer.start(); });
+    connect(&AddressBook::instance(), &AddressBook::contactsCleared, this,
+            [this]() { m_debounceAddressBookUpdateTimer.start(); });
+    connect(&AddressBook::instance(), &AddressBook::contactRemoved, this,
+            [this](QString) { m_debounceAddressBookUpdateTimer.start(); });
 
     initialRead();
     readNumberOfCalls();
@@ -48,6 +56,8 @@ void NumberStats::initialRead()
         qCCritical(lcNumberStats) << "Unable to open database:" << db.lastError().text();
     } else {
         qCInfo(lcNumberStats) << "Successfully opened database";
+
+        migratePhoneNumberFormatting();
 
         // Read history
         qCInfo(lcNumberStats) << "Collecting phone number flags and stats from database";
@@ -67,6 +77,11 @@ void NumberStats::initialRead()
                 item->isFavorite = query.value("isFavorite").toBool();
                 item->contactType =
                         static_cast<NumberStats::ContactType>(query.value("type").toUInt());
+
+                if (item->contactType == NumberStats::ContactType::PhoneNumber) {
+                    item->phoneNumber = PhoneNumberUtil::canonicalNumber(item->phoneNumber);
+                }
+
                 item->contact = AddressBook::instance().lookupByNumber(item->phoneNumber);
 
                 m_statItemsLookup.insert(item->phoneNumber, item);
@@ -106,7 +121,7 @@ void NumberStats::readNumberOfCalls()
                     << "Error on executing SQL query:" << query.lastError().text();
         } else {
             while (query.next()) {
-                const auto phoneNumber = PhoneNumberUtil::cleanPhoneNumber(
+                const auto phoneNumber = PhoneNumberUtil::canonicalNumber(
                         PhoneNumberUtil::numberFromSipUrl(query.value("remoteUrl").toString()));
 
                 if (!phoneNumber.isEmpty()) {
@@ -124,6 +139,172 @@ void NumberStats::readNumberOfCalls()
     }
 }
 
+void NumberStats::migratePhoneNumberFormatting()
+{
+    if (m_isMigrationDone) {
+        return;
+    }
+    m_isMigrationDone = true;
+
+    auto db = QSqlDatabase::database();
+
+    // Check whether migration is required
+    QSqlQuery neededQuery(db);
+    bool isCanonical = false;
+
+    if (neededQuery.prepare("SELECT value FROM appinfo WHERE key = 'canonical_contacts';")
+        && neededQuery.exec()) {
+        if (neededQuery.next()) {
+            isCanonical = neededQuery.value(0).toBool();
+        }
+    }
+
+    if (isCanonical) {
+        return;
+    }
+
+    // Migrate
+    struct FlaggedNumber
+    {
+        QString phoneNumber;
+        bool isFavorite = false;
+        bool isBlocked = false;
+    };
+
+    QSqlQuery query(db);
+    query.prepare("SELECT phoneNumber, isFavorite, isBlocked FROM contactflags WHERE "
+                  "type = :phoneNumberType");
+    query.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
+
+    if (!query.exec()) {
+        qCCritical(lcNumberStats) << "Error on executing migrate select SQL query:"
+                                  << query.lastError().text();
+        return;
+    }
+
+    QList<FlaggedNumber> flaggedNumbers;
+    while (query.next()) {
+        FlaggedNumber entry;
+        entry.phoneNumber = query.value("phoneNumber").toString();
+        entry.isFavorite = query.value("isFavorite").toBool();
+        entry.isBlocked = query.value("isBlocked").toBool();
+        flaggedNumbers.append(entry);
+    }
+
+    if (!db.transaction()) {
+        qCCritical(lcNumberStats) << "Unable to start transaction:" << db.lastError().text();
+        return;
+    }
+
+    const bool hasLegacyEntries =
+            std::ranges::any_of(flaggedNumbers, [](const FlaggedNumber &entry) -> bool {
+                return entry.phoneNumber != PhoneNumberUtil::canonicalNumber(entry.phoneNumber);
+            });
+
+    // Set flag to prevent unnecessary future runs
+    QSqlQuery updateCanonicalQuery(db);
+    updateCanonicalQuery.prepare(
+            "INSERT INTO appinfo (key, value) VALUES ('canonical_contacts', 1);");
+    if (!updateCanonicalQuery.exec()) {
+        qCCritical(lcNumberStats) << "Unable to update canonical_contacts flag:"
+                                  << db.lastError().text();
+        db.rollback();
+        return;
+    }
+
+    if (!hasLegacyEntries) {
+        if (!db.commit()) {
+            qCCritical(lcNumberStats) << "Unable to commit transaction:" << db.lastError().text();
+            db.rollback();
+        }
+        return;
+    }
+
+    quint32 migratedEntriesCount = 0;
+
+    for (const auto &entry : std::as_const(flaggedNumbers)) {
+        const auto normalizedNumber = PhoneNumberUtil::canonicalNumber(entry.phoneNumber);
+
+        if (normalizedNumber == entry.phoneNumber) {
+            continue;
+        }
+
+        QSqlQuery existsQuery(db);
+        existsQuery.prepare("SELECT 1 FROM contactflags WHERE phoneNumber = :phoneNumber AND type "
+                            "= :phoneNumberType;");
+        existsQuery.bindValue(":phoneNumber", normalizedNumber);
+        existsQuery.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
+
+        if (!existsQuery.exec()) {
+            qCCritical(lcNumberStats)
+                    << "Error on executing exist SQL query:" << existsQuery.lastError().text();
+            db.rollback();
+            return;
+        }
+
+        if (!existsQuery.next()) {
+            // Entry with normalized number does not exist - update existing one
+
+            QSqlQuery updateQuery(db);
+            updateQuery.prepare("UPDATE contactflags SET phoneNumber = :normalizedNumber WHERE "
+                                "phoneNumber = :phoneNumber AND type = :phoneNumberType");
+            updateQuery.bindValue(":normalizedNumber", normalizedNumber);
+            updateQuery.bindValue(":phoneNumber", entry.phoneNumber);
+            updateQuery.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
+
+            if (!updateQuery.exec()) {
+                qCCritical(lcNumberStats) << "Error on executing SQL migration update query:"
+                                          << updateQuery.lastError().text();
+                db.rollback();
+                return;
+            }
+
+        } else {
+            // Entry with normalized number already exists - merge both
+
+            QSqlQuery mergeQuery(db);
+            mergeQuery.prepare("UPDATE contactflags SET isFavorite = MAX(isFavorite, :isFavorite), "
+                               "isBlocked = MAX(isBlocked, :isBlocked) WHERE phoneNumber = "
+                               ":normalizedNumber AND type = :phoneNumberType;");
+            mergeQuery.bindValue(":isFavorite", entry.isFavorite ? 1 : 0);
+            mergeQuery.bindValue(":isBlocked", entry.isBlocked ? 1 : 0);
+            mergeQuery.bindValue(":normalizedNumber", normalizedNumber);
+            mergeQuery.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
+
+            if (!mergeQuery.exec()) {
+                qCCritical(lcNumberStats)
+                        << "Error on executing merge SQL query:" << mergeQuery.lastError().text();
+                db.rollback();
+                return;
+            }
+
+            // Delete now obsolete row
+            QSqlQuery deleteQuery(db);
+            deleteQuery.prepare("DELETE FROM contactflags WHERE phoneNumber = :phoneNumber AND "
+                                "type = :phoneNumberType;");
+            deleteQuery.bindValue(":phoneNumber", entry.phoneNumber);
+            deleteQuery.bindValue(":phoneNumberType", std::to_underlying(ContactType::PhoneNumber));
+
+            if (!deleteQuery.exec()) {
+                qCCritical(lcNumberStats)
+                        << "Error on executing delete SQL query:" << deleteQuery.lastError().text();
+                db.rollback();
+                return;
+            }
+        }
+
+        ++migratedEntriesCount;
+    }
+
+    if (!db.commit()) {
+        qCCritical(lcNumberStats) << "Unable to commit transaction:" << db.lastError().text();
+        db.rollback();
+        return;
+    }
+
+    qCInfo(lcNumberStats) << "Migrated" << migratedEntriesCount << "phone number entries";
+}
+
 NumberStats::~NumberStats()
 {
     m_statItemsLookup.clear();
@@ -134,6 +315,13 @@ NumberStats::~NumberStats()
 
 void NumberStats::incrementCallCount(const QString &phoneNumber)
 {
+    const auto normalizedPhoneNumber = PhoneNumberUtil::canonicalNumber(phoneNumber);
+
+    if (normalizedPhoneNumber.isEmpty()) {
+        qCWarning(lcNumberStats) << "Aborting incrementCallCount because empty phoneNumber string";
+        return;
+    }
+
     auto db = QSqlDatabase::database();
 
     if (!db.open()) {
@@ -142,8 +330,8 @@ void NumberStats::incrementCallCount(const QString &phoneNumber)
     } else {
         qCInfo(lcNumberStats) << "Successfully opened history database";
 
-        if (ensureFlaggedNumberExists(phoneNumber)) {
-            auto *countObj = m_callCountLookup.value(phoneNumber, nullptr);
+        if (ensureFlaggedNumberExists(normalizedPhoneNumber)) {
+            auto *countObj = m_callCountLookup.value(normalizedPhoneNumber, nullptr);
             if (countObj) {
                 countObj->count++;
 
@@ -153,7 +341,7 @@ void NumberStats::incrementCallCount(const QString &phoneNumber)
                                       return left->count > right->count;
                                   });
             } else {
-                countObj = createAndAddCountObject(phoneNumber, 1);
+                countObj = createAndAddCountObject(normalizedPhoneNumber, 1);
             }
 
             Q_EMIT countChanged(m_callCounts.indexOf(countObj));
@@ -215,22 +403,29 @@ QStringList NumberStats::mostCalled(quint8 limit, bool includeFavorites) const
 
 bool NumberStats::isFavorite(const QString &phoneNumber) const
 {
-    return m_favoriteLookup.contains(phoneNumber);
+    return m_favoriteLookup.contains(PhoneNumberUtil::canonicalNumber(phoneNumber));
 }
 
 void NumberStats::toggleFavorite(const QString &phoneNumber,
                                  const NumberStats::ContactType contactType)
 {
-    ensureFlaggedNumberExists(phoneNumber, contactType);
+    const auto normalizedNumber = contactType == NumberStats::ContactType::PhoneNumber
+            ? PhoneNumberUtil::canonicalNumber(phoneNumber)
+            : phoneNumber;
 
-    auto item = m_statItemsLookup.value(phoneNumber);
+    if (!ensureFlaggedNumberExists(normalizedNumber, contactType)) {
+        qCCritical(lcNumberStats) << "Cannot ensure number in database - aborting";
+        return;
+    }
+
+    auto item = m_statItemsLookup.value(normalizedNumber);
     if (item->isFavorite) {
         item->isFavorite = false;
-        m_favoriteLookup.remove(phoneNumber);
+        m_favoriteLookup.remove(normalizedNumber);
         Q_EMIT favoriteRemoved(item);
     } else {
         item->isFavorite = true;
-        m_favoriteLookup.insert(phoneNumber, item);
+        m_favoriteLookup.insert(normalizedNumber, item);
         Q_EMIT favoriteAdded(item);
     }
 
@@ -245,12 +440,12 @@ void NumberStats::toggleFavorite(const QString &phoneNumber,
         QSqlQuery query(db);
 
         // Update DB entry
-        qCInfo(lcNumberStats) << "Updating favorite flag for number" << phoneNumber
+        qCInfo(lcNumberStats) << "Updating favorite flag for number" << normalizedNumber
                               << "in database";
         query.prepare(
                 "UPDATE contactflags SET isFavorite = :favValue WHERE phoneNumber = :phoneNumber;");
         query.bindValue(":favValue", item->isFavorite ? 1 : 0);
-        query.bindValue(":phoneNumber", phoneNumber);
+        query.bindValue(":phoneNumber", normalizedNumber);
 
         if (!query.exec()) {
             qCCritical(lcNumberStats)
@@ -261,7 +456,7 @@ void NumberStats::toggleFavorite(const QString &phoneNumber,
 
 const NumberStat *NumberStats::numberStat(const QString &phoneNumber) const
 {
-    return m_statItemsLookup.value(phoneNumber, nullptr);
+    return m_statItemsLookup.value(PhoneNumberUtil::canonicalNumber(phoneNumber), nullptr);
 }
 
 bool NumberStats::ensureFlaggedNumberExists(const QString &phoneNumber,

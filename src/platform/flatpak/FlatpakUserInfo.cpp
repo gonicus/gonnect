@@ -37,7 +37,7 @@ void FlatpakUserInfo::acquireDisplayName(std::function<void(const QString &displ
 {
     if (m_displayName.isEmpty()) {
         m_accountPortal->GetUserInformation(
-                tr("The UC client wants to use your name to configure your display name."),
+                tr("GOnnect wants to use your name to configure your display name."),
                 [callback](uint code, const QVariantMap &response) {
                     QString username;
 

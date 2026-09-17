@@ -17,7 +17,7 @@ T.TabButton {
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                              implicitContentHeight + topPadding + bottomPadding)
 
-    padding: 12
+    padding: Theme.d
     spacing: 6
 
     icon.width: 24

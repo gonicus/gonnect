@@ -4,6 +4,12 @@
 #include "PortalSettings.h"
 #include "ThemeManager.h"
 
+struct RgbColor
+{
+    double r = 0, g = 0, b = 0;
+};
+Q_DECLARE_METATYPE(RgbColor)
+
 class SettingsPortal : public QObject
 {
     Q_OBJECT
@@ -29,6 +35,8 @@ Q_SIGNALS:
 
 private:
     SettingsPortal(QObject *parent = nullptr);
+
+    QColor dbusDoubleTripleToColor(QDBusVariant value);
 
     void settingsChanged(QString ns, QString key, QDBusVariant value);
 

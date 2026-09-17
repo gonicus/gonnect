@@ -37,9 +37,9 @@ Item {
             icon.source: Icons.viewLeftNew
             height: control.buttonHeight
             text: qsTr("Add widget")
-            enabled: control.tabRoot.selectedPageType === GonnectWindow.PageType.Base
+            enabled: SelectionState.selectedPage.type === MainPageSelection.PageType.Base
             onClicked: () => {
-                let page = control.pageRoot.getPage(control.tabRoot.selectedPageId)
+                let page = control.pageRoot.getPage(SelectionState.selectedPage.id)
                 if (page) {
                     page.widgetCreationDialog()
                 }

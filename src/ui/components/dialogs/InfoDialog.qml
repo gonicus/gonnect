@@ -12,6 +12,10 @@ BaseDialog {
 
     property alias text: contentLabel.text
 
+    // Exposes the description label so that derived dialogs can place
+    // additional controls (e.g. input fields) right below the text.
+    property Item contentText: contentLabel
+
     Label {
         id: contentLabel
         elide: Label.ElideRight

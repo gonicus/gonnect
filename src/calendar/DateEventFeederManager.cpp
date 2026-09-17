@@ -7,13 +7,15 @@
 #include "Credentials.h"
 #include "ViewHelper.h"
 #include "ErrorBus.h"
+#include "SecretResponse.h"
 
 #include <QTimer>
 #include <QLoggingCategory>
-#include <QMutexLocker>
 #include <QPluginLoader>
 
 Q_LOGGING_CATEGORY(lcDateEventFeederManager, "gonnect.app.dateevents.feeder.manager")
+
+using namespace std::chrono_literals;
 
 DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ parent }
 {
@@ -25,6 +27,16 @@ DateEventFeederManager::DateEventFeederManager(QObject *parent) : QObject{ paren
         reloadCalendar();
     });
     m_nextDayRefreshTimer.start();
+
+    m_retryTimer.setSingleShot(true);
+    m_retryTimer.setInterval(10s);
+    m_retryTimer.callOnTimeout(this, [this]() {
+        if (m_isReconnectSignalSetup) {
+            m_isReconnectSignalSetup = false;
+            disconnect(m_connectivityConnection);
+            processQueue();
+        }
+    });
 }
 
 void DateEventFeederManager::setTimeData()
@@ -47,7 +59,7 @@ void DateEventFeederManager::reloadCalendar()
 }
 
 void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &configId,
-                                           std::function<void(const QString &)> callback)
+                                           std::function<void(SecretResponse response)> callback)
 {
     ReadOnlyConfdSettings settings;
 
@@ -59,31 +71,33 @@ void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &conf
             [this, forcePrompt, configId, secretKey,
              callback](QKeychain::Error error, const QString &secret, const QString &) {
                 if (error == QKeychain::NoError && !forcePrompt) {
-                    callback(secret);
+                    callback({ secret });
                 } else if (error == QKeychain::Error::EntryNotFound || forcePrompt) {
-                    auto &viewHelper = ViewHelper::instance();
-                    auto conn = connect(
-                            &viewHelper, &ViewHelper::passwordResponded, this,
-                            [secretKey, configId, callback, this](const QString &id,
-                                                                  const QString &password) {
-                                if (id == configId) {
-                                    QObject::disconnect(m_viewHelperConnections.value(configId));
-                                    m_viewHelperConnections.remove(configId);
 
-                                    Credentials::instance().set(
-                                            secretKey + "/secret", password,
-                                            [](QKeychain::Error error, const QString &,
-                                               const QString &message) {
-                                                if (error != QKeychain::NoError) {
-                                                    ErrorBus::instance().error(
-                                                            tr("Failed to persist calendar "
-                                                               "credentials: %1")
-                                                                    .arg(message));
-                                                }
-                                            });
-                                    callback(password);
-                                }
-                            });
+                    disconnect(m_viewHelperConnections.take(configId));
+
+                    auto &viewHelper = ViewHelper::instance();
+                    auto conn =
+                            connect(&viewHelper, &ViewHelper::passwordResponded, this,
+                                    [secretKey, configId, callback, this](const QString &id,
+                                                                          const QString &password) {
+                                        if (id == configId) {
+                                            disconnect(m_viewHelperConnections.take(configId));
+
+                                            Credentials::instance().set(
+                                                    secretKey + "/secret", password,
+                                                    [](QKeychain::Error error, const QString &,
+                                                       const QString &message) {
+                                                        if (error != QKeychain::NoError) {
+                                                            ErrorBus::instance().error(
+                                                                    tr("Failed to persist calendar "
+                                                                       "credentials: %1")
+                                                                            .arg(message));
+                                                        }
+                                                    });
+                                            callback({ password });
+                                        }
+                                    });
 
                     m_viewHelperConnections.insert(configId, conn);
 
@@ -91,6 +105,8 @@ void DateEventFeederManager::acquireSecret(bool forcePrompt, const QString &conf
                     settings.beginGroup(configId);
                     viewHelper.requestPassword(configId, settings.value("host", "").toString());
                     settings.endGroup();
+                } else {
+                    callback({ QString(), true });
                 }
             });
 }
@@ -122,13 +138,13 @@ void DateEventFeederManager::initFeederConfigs()
 
 void DateEventFeederManager::processQueue()
 {
-    bool networkAvailable = true;
-    auto &networkHelper = NetworkHelper::instance();
-
-    if (!m_queueMutex.tryLock()) {
-        qCFatal(lcDateEventFeederManager) << "Failed to acquire lock for the feeder queue";
+    if (m_isProcessing) {
         return;
     }
+    m_isProcessing = true;
+
+    bool networkAvailable = true;
+    auto &networkHelper = NetworkHelper::instance();
 
     QMutableStringListIterator it(m_feederConfigIds);
     while (it.hasNext()) {
@@ -177,12 +193,11 @@ void DateEventFeederManager::processQueue()
         }
     }
 
-    m_queueMutex.unlock();
+    m_isProcessing = false;
 }
 
 void DateEventFeederManager::requeueConfigId(const QString &configId)
 {
-    QMutexLocker locker(&m_queueMutex);
     if (!m_feederConfigIds.contains(configId)) {
         m_feederConfigIds.append(configId);
     }
@@ -192,7 +207,12 @@ void DateEventFeederManager::setupReconnectSignal()
 {
     if (!m_isReconnectSignalSetup) {
         m_isReconnectSignalSetup = true;
-        connect(
+
+        m_retryTimer.stop();
+        m_retryTimer.start();
+        disconnect(m_connectivityConnection);
+
+        m_connectivityConnection = connect(
                 &NetworkHelper::instance(), &NetworkHelper::connectivityChanged, this,
                 [this]() {
                     m_isReconnectSignalSetup = false;

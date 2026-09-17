@@ -1,0 +1,8 @@
+versions:
+  "6.26.0":
+    folder: "all"
+
+updater:
+  source: anitya
+  id: 311432
+  url-pattern: https://download.kde.org/stable/frameworks/${major}.${minor}/extra-cmake-modules-${version}.tar.xz

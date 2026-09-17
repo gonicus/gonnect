@@ -16,6 +16,7 @@ if(ENABLE_DAV)
     target_include_directories(CardDAVAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/presence
         ${PROJECT_SOURCE_DIR}/src/dbus/portal
         ${PROJECT_SOURCE_DIR}/src/ui
         ${PROJECT_SOURCE_DIR}/src/sip

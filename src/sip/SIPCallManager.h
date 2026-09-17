@@ -1,4 +1,6 @@
 #pragma once
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QTimer>
 #include <QtQml/qqml.h>
@@ -59,7 +61,7 @@ public:
     Q_INVOKABLE void endCall(SIPCall *call);
     Q_INVOKABLE void endCall(QString id);
     Q_INVOKABLE void endAllCalls();
-    void holdOtherCalls(const SIPCall *call);
+    void holdOtherCalls(SIPCall *call);
     void holdAllCalls() const;
     void unholdAllCalls() const;
     Q_INVOKABLE void toggleHoldCall(const QString &accountId, const int callId);
@@ -175,7 +177,11 @@ class SIPCallManagerWrapper
     QML_SINGLETON
 
 public:
-    static SIPCallManager *create(QQmlEngine *, QJSEngine *) { return &SIPCallManager::instance(); }
+    static SIPCallManager *create(QQmlEngine *, QJSEngine *)
+    {
+        QQmlEngine::setObjectOwnership(&SIPCallManager::instance(), QQmlEngine::CppOwnership);
+        return &SIPCallManager::instance();
+    }
 
 private:
     SIPCallManagerWrapper() = default;

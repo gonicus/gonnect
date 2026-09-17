@@ -1780,7 +1780,7 @@ const static QStringList s_pluralNouns = { // clazy:exclude=non-pod-global-stati
     QStringLiteral("Parkings"),
     QStringLiteral("Parks"),
     QStringLiteral("Parliaments"),
-    QStringLiteral("Participants"),
+    QStringLiteral("Users"),
     QStringLiteral("Participations"),
     QStringLiteral("Parties"),
     QStringLiteral("Partners"),

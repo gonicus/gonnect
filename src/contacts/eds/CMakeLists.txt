@@ -14,6 +14,7 @@ if(ENABLE_EDS)
     target_include_directories(EDSAddressBookFactory
       PRIVATE
         ${PROJECT_SOURCE_DIR}/src/contacts
+        ${PROJECT_SOURCE_DIR}/src/presence
         ${PROJECT_SOURCE_DIR}/src/dbus/portal
         ${PROJECT_SOURCE_DIR}/src/ui
         ${PROJECT_SOURCE_DIR}/src/sip

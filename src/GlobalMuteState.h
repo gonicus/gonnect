@@ -25,6 +25,7 @@ public:
     void reset();
 
     Q_INVOKABLE void toggleMute(const QString &tag = "");
+    void setMuted(bool muted, const QString &tag = "");
 
 private:
     explicit GlobalMuteState(QObject *parent = nullptr);
@@ -46,6 +47,7 @@ class GlobalMuteStateWrapper
 public:
     static GlobalMuteState *create(QQmlEngine *, QJSEngine *)
     {
+        QQmlEngine::setObjectOwnership(&GlobalMuteState::instance(), QQmlEngine::CppOwnership);
         return &GlobalMuteState::instance();
     }
 

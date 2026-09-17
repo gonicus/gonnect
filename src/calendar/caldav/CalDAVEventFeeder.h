@@ -56,6 +56,7 @@ private:
 
     QStringList m_concreteSources;
 
+    bool m_areWebDavConnectionsInitialized = false;
     bool m_pendingError = false;
     bool m_pendingAuth = false;
 };
