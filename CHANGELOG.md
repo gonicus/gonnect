@@ -1,3 +1,25 @@
+# [2.5.0-beta.7](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.6...v2.5.0-beta.7) (2026-09-17)
+
+
+### Bug Fixes
+
+* fixed ctrl+f if no custom window decoration ([#717](https://github.com/gonicus/gonnect/issues/717)) ([c3f1630](https://github.com/gonicus/gonnect/commit/c3f1630db07eafdc73c7bdb5aaa5565f93f07a76))
+* fixed signals for chat room presence state updates ([#713](https://github.com/gonicus/gonnect/issues/713)) ([1824ad2](https://github.com/gonicus/gonnect/commit/1824ad28325869c2f932ca647f0ea4d679718435))
+* read state of "raised hand" from jitsi api ([#716](https://github.com/gonicus/gonnect/issues/716)) ([1aa3e5c](https://github.com/gonicus/gonnect/commit/1aa3e5c999581d83031e312577b6e7c011f4d6ac))
+* threading mixups ([#711](https://github.com/gonicus/gonnect/issues/711)) ([9c9896a](https://github.com/gonicus/gonnect/commit/9c9896a0a181928fa5a45ca9ac6d648d208f998f))
+* ui embellishments ([#702](https://github.com/gonicus/gonnect/issues/702)) ([2b1d0da](https://github.com/gonicus/gonnect/commit/2b1d0da75b82bfd30af5cf538d0b65054142dfab))
+* **ui:** fix narrow (portrait) videos in chat messages ([#709](https://github.com/gonicus/gonnect/issues/709)) ([baf47bf](https://github.com/gonicus/gonnect/commit/baf47bfd2ebfcf21819a2adcd6d376f4895c8369))
+
+
+### Features
+
+* verify ca flag for matrix chat ([#715](https://github.com/gonicus/gonnect/issues/715)) ([1199bbd](https://github.com/gonicus/gonnect/commit/1199bbda11be3d64dace65044ea0f73c22a5ac76))
+
+
+### Reverts
+
+* Revert "fix: change active button color" ([b8f207d](https://github.com/gonicus/gonnect/commit/b8f207d9191e8fc8eeaaf108220ec393981a0728))
+
 # [2.5.0-beta.6](https://github.com/gonicus/gonnect/compare/v2.5.0-beta.5...v2.5.0-beta.6) (2026-09-10)
 
 
