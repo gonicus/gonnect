@@ -33,6 +33,7 @@ Item {
     required property bool isOwnMessage
     required property bool isPending
     required property bool isFailed
+    required property bool isEdited
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
@@ -258,17 +259,58 @@ Item {
         Accessible.ignored: true
     }
 
-    IconLabel {
-        visible: control.isFailed
+    Row {
+        id: markerRow
+        spacing: Theme.d / 2
+        height: Math.max(failedIcon.height, editedIcon.height, readMarker.height)
         anchors {
-            right: timestampLabel.left
-            rightMargin: 4
             verticalCenter: timestampLabel.verticalCenter
+            right: timestampLabel.left
+            rightMargin: Theme.d / 2
         }
-        icon.source: Icons.dataError
-        icon.color: Theme.redColor
-        icon.width: 14
-        icon.height: 14
+
+        IconLabel {
+            id: failedIcon
+            visible: control.isFailed
+            anchors.verticalCenter: parent.verticalCenter
+            icon {
+                source: Icons.dataError
+                color: Theme.redColor
+                width: 14
+                height: 14
+            }
+        }
+
+        IconLabel {
+            id: editedIcon
+            visible: control.isEdited
+            anchors.verticalCenter: parent.verticalCenter
+            icon {
+                source: Icons.editor
+                color: Theme.secondaryTextColor
+                width: 14
+                height: 14
+            }
+
+            ToolTip.text: qsTr("This message has been edited afterwards.")
+            ToolTip.visible: editedIconHoverHandler.hovered
+
+            HoverHandler {
+                id: editedIconHoverHandler
+            }
+        }
+
+        ReadMarker {
+            id: readMarker
+            readUsers: control.readUsers
+            allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
+            visible: control.isOwnMessage
+                     && !control.isPending
+                     && !control.isFailed
+                     && (control.isLatestOwnMessage
+                         || ((control.readUsers?.length ?? 0) > 0))
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     ChatMessageListItemRelatedContent {
@@ -332,12 +374,8 @@ Item {
         anchors {
             top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
             left: nameLabel.left
-            right: retryButton.visible
-                   ? retryButton.left
-                   : (readMarker.visible
-                      ? readMarker.left
-                      : timestampLabel.left)
-            rightMargin: 10
+            right: markerRow.left
+            rightMargin: Theme.d
         }
     }
 
@@ -379,7 +417,7 @@ Item {
         rightPadding: 0
 
         anchors {
-            right: readMarker.visible ? readMarker.left : timestampLabel.left
+            right: markerRow.left
             rightMargin: 10
             bottom: messageContentItem.bottom
         }
@@ -389,22 +427,6 @@ Item {
                            control.retryMessage(control.eventId)
                        }
                    }
-    }
-
-    ReadMarker {
-        id: readMarker
-        readUsers: control.readUsers
-        allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
-        visible: control.isOwnMessage
-                 && !control.isPending
-                 && !control.isFailed
-                 && (control.isLatestOwnMessage
-                     || ((control.readUsers?.length ?? 0) > 0))
-        anchors {
-            right: timestampLabel.left
-            rightMargin: 10
-            verticalCenter: timestampLabel.verticalCenter
-        }
     }
 
     Component {

@@ -1308,6 +1308,13 @@ void IpcDispatcher::processResponse(
             message->setFlags(message->flags() ^ ChatMessage::Flag::Encrypted);
         }
 
+        const bool isEditedChanged = changeEvent.hasEdited()
+                && (static_cast<bool>(message->flags() & ChatMessage::Flag::Edited)
+                    != changeEvent.edited());
+        if (isEditedChanged) {
+            message->setFlags(message->flags() ^ ChatMessage::Flag::Edited);
+        }
+
         // Mentioned users
         bool hasMentionedUsersChanged = false;
         if (changeEvent.hasMentionedUserIdsChanged()) {
@@ -1414,7 +1421,7 @@ void IpcDispatcher::processResponse(
             }
         }
 
-        if (hasIsEncryptedChanged) {
+        if (hasIsEncryptedChanged || isEditedChanged) {
             Q_EMIT room->chatMessageFlagsChanged(index, message, previousFlags);
         }
         if (hasContentChanged) {
@@ -1854,9 +1861,11 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
     if (isUnread && (flags & ChatMessage::Flag::OwnMessage)) {
         isUnread = false;
     }
-
     if (message.isEncrypted()) {
         flags |= ChatMessage::Flag::Encrypted;
+    }
+    if (message.edited()) {
+        flags |= ChatMessage::Flag::Edited;
     }
 
     // Add new message
