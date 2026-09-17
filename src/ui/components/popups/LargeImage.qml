@@ -52,7 +52,18 @@ Item {
             id: copyToClipboardButton
             icon.source: Icons.editCopy
             text: qsTr("Copy to clipboard")
-            onClicked: () => ClipboardHelper.copyImageToClipboard(control.source)
+            onClicked: () => {
+                           ClipboardHelper.copyImageToClipboard(control.source)
+                           copyToClipboardButton.icon.source = Icons.checkbox
+                           feedbackTimer.start()
+                       }
+
+            Timer {
+                id: feedbackTimer
+                interval: Theme.feedbackTimeout
+                repeat: false
+                onTriggered: () => copyToClipboardButton.icon.source = Icons.editCopy
+            }
         }
 
         Button {
