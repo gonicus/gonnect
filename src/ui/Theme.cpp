@@ -4,6 +4,8 @@
 
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QGuiApplication>
+#include <QFont>
 
 Q_LOGGING_CATEGORY(lcTheme, "gonnect.app.theme")
 
@@ -206,4 +208,55 @@ void Theme::setDarkMode(bool value)
         m_isDarkMode = value;
         Q_EMIT isDarkModeChanged();
     }
+}
+
+static constexpr qreal normalSize = 13.0;
+
+void Theme::setFontScale(qreal scaleFactor)
+{
+    if (m_fontScale != scaleFactor) {
+        m_fontScale = scaleFactor;
+
+        // Propagate global font size
+        auto font = qApp->font();
+        font.setPixelSize(std::round(normalSize * scaleFactor));
+        qApp->setFont(font);
+
+        Q_EMIT fontSizeChanged();
+    }
+}
+
+qreal Theme::fontSizeExtraSmall() const
+{
+    return m_fontScale * 9.0;
+}
+
+qreal Theme::fontSizeSmall() const
+{
+    return m_fontScale * 11.0;
+}
+
+qreal Theme::fontSizeNormal() const
+{
+    return m_fontScale * normalSize;
+}
+
+qreal Theme::fontSizeMedium() const
+{
+    return m_fontScale * 16.0;
+}
+
+qreal Theme::fontSizeLarge() const
+{
+    return m_fontScale * 20.0;
+}
+
+qreal Theme::fontSizeExtraLarge() const
+{
+    return m_fontScale * 26.0;
+}
+
+qreal Theme::fontSizeHuge() const
+{
+    return m_fontScale * 32;
 }

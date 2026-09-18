@@ -27,7 +27,7 @@ Item {
         id: lbl
         anchors.centerIn: parent
         font.capitalization: Font.AllUppercase
-        font.pixelSize: 9
+        font.pixelSize: Theme.fontSizeExtraSmall
 
         Accessible.ignored: true
     }

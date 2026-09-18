@@ -138,7 +138,7 @@ Item {
             Label {
                 text: qsTr("Messages are loading...")
                 color: Theme.secondaryTextColor
-                font.pixelSize: 22
+                font.pixelSize: Theme.fontSizeLarge
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -160,7 +160,7 @@ Item {
             text: qsTr("%1 is/are typing", "", typingUsersList.typingUserNames.length).arg(typingUsersList.typingUserNames.join(", "))
             wrapMode: Label.Wrap
             color: Theme.secondaryInactiveTextColor
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontSizeSmall
             visible: typingUsersList.typingUserNames.length > 0
             anchors {
                 left: parent.left
