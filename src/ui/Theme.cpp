@@ -21,6 +21,10 @@ const QColor Theme::seedBubbleDark = QColor(50, 96, 230);
 const QColor Theme::seedHighlightDark = QColor(15, 83, 158);
 const QColor Theme::seedInitials = QColor(40, 34, 80);
 
+// Material elevation overlays (alpha) for the offset and hovered panels.
+constexpr qreal overlayAlphaLow = 20.0 / 255.0; // ~0.078
+constexpr qreal overlayAlphaHigh = 40.0 / 255.0; // ~0.157
+
 QColor Theme::textVeil(const QColor &base, qreal alpha)
 {
     QColor c = base;
@@ -176,26 +180,26 @@ void Theme::updateColorPalette()
     m_primaryTextColor = seedInkLight;
     m_foregroundWhiteColor = seedPaperLight;
     m_foregroundHeaderIcons = textVeil(seedInkLight, 0.90);
-    m_foregroundHeaderIconsInactive = textVeil(seedInkLight, 0.51);
+    m_foregroundHeaderIconsInactive = textVeil(seedInkLight, 0.50);
     m_foregroundInitials = seedInitials;
     m_secondaryTextColor = textVeil(seedInkLight, 0.40);
-    m_inactiveTextColor = textVeil(seedInkLight, 0.59);
-    m_secondaryInactiveTextColor = textVeil(seedInkLight, 0.34);
-    m_borderColor = neutralSurface(0.859);
-    m_borderHeaderIconHovered = neutralSurface(0.808);
+    m_inactiveTextColor = textVeil(seedInkLight, 0.60);
+    m_secondaryInactiveTextColor = textVeil(seedInkLight, 0.35);
+    m_borderColor = neutralSurface(0.86);
+    m_borderHeaderIconHovered = neutralSurface(0.81);
     m_backgroundColor = neutralSurface(1.000);
-    m_backgroundSecondaryColor = neutralSurface(0.980);
-    m_backgroundOffsetColor = textVeil(QColor(0, 0, 0), 20.0 / 255.0);
-    m_backgroundOffsetHoveredColor = textVeil(QColor(0, 0, 0), 40.0 / 255.0);
-    m_backgroundHeader = neutralSurface(0.922);
-    m_backgroundHeaderInactive = neutralSurface(0.949);
-    m_backgroundHeaderIconHovered = neutralSurface(0.973);
+    m_backgroundSecondaryColor = neutralSurface(0.98);
+    m_backgroundOffsetColor = textVeil(QColor(0, 0, 0), overlayAlphaLow);
+    m_backgroundOffsetHoveredColor = textVeil(QColor(0, 0, 0), overlayAlphaHigh);
+    m_backgroundHeader = neutralSurface(0.92);
+    m_backgroundHeaderInactive = neutralSurface(0.95);
+    m_backgroundHeaderIconHovered = neutralSurface(0.97);
     m_backgroundInitials = mix(seedInitials, seedPaperLight, 0.82);
-    m_paneColor = neutralSurface(0.965);
+    m_paneColor = neutralSurface(0.97);
     m_highlightColor = textVeil(m_accentColor, 76.0 / 255.0);
     m_rttBubbleSelf = seedBubbleLight;
     m_rttTextSelf = readableOn(m_rttBubbleSelf);
-    m_rttBubbleOther = neutralSurface(0.914);
+    m_rttBubbleOther = neutralSurface(0.91);
     m_rttTextOther = readableOn(m_rttBubbleOther);
 
     // Extra colors (hard values)
@@ -211,21 +215,21 @@ void Theme::updateColorPalette()
     // Dark mode
     if (m_isDarkMode) {
         m_primaryTextColor = seedInkDark;
-        m_foregroundHeaderIcons = textVeil(seedVeilBaseDark, 0.97);
+        m_foregroundHeaderIcons = textVeil(seedVeilBaseDark, 0.95);
         m_foregroundHeaderIconsInactive = textVeil(seedVeilBaseDark, 0.65);
         m_secondaryTextColor = textVeil(seedVeilBaseDark, 0.60);
         m_inactiveTextColor = textVeil(seedVeilBaseDark, 0.35);
-        m_secondaryInactiveTextColor = textVeil(seedVeilBaseDark, 0.24);
-        m_borderColor = neutralSurface(0.129);
-        m_borderHeaderIconHovered = neutralSurface(0.110);
-        m_backgroundColor = neutralSurface(0.208);
-        m_backgroundSecondaryColor = neutralSurface(0.275);
-        m_backgroundOffsetColor = textVeil(seedVeilBaseDark, 20.0 / 255.0);
-        m_backgroundOffsetHoveredColor = textVeil(seedVeilBaseDark, 40.0 / 255.0);
-        m_backgroundHeader = neutralSurface(0.188);
-        m_backgroundHeaderInactive = neutralSurface(0.141);
-        m_backgroundHeaderIconHovered = neutralSurface(0.216);
-        m_paneColor = neutralSurface(0.176);
+        m_secondaryInactiveTextColor = textVeil(seedVeilBaseDark, 0.25);
+        m_borderColor = neutralSurface(0.13);
+        m_borderHeaderIconHovered = neutralSurface(0.11);
+        m_backgroundColor = neutralSurface(0.21);
+        m_backgroundSecondaryColor = neutralSurface(0.28);
+        m_backgroundOffsetColor = textVeil(seedVeilBaseDark, overlayAlphaLow);
+        m_backgroundOffsetHoveredColor = textVeil(seedVeilBaseDark, overlayAlphaHigh);
+        m_backgroundHeader = neutralSurface(0.19);
+        m_backgroundHeaderInactive = neutralSurface(0.14);
+        m_backgroundHeaderIconHovered = neutralSurface(0.21);
+        m_paneColor = neutralSurface(0.18);
 
         const QColor rawAccent = ThemeManager::instance().accentColor();
         m_highlightColor =
@@ -233,7 +237,7 @@ void Theme::updateColorPalette()
 
         m_rttBubbleSelf = seedBubbleDark;
         m_rttTextSelf = readableOn(m_rttBubbleSelf);
-        m_rttBubbleOther = neutralSurface(0.176);
+        m_rttBubbleOther = neutralSurface(0.18);
         m_rttTextOther = readableOn(m_rttBubbleOther);
     }
 
