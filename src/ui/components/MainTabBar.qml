@@ -351,7 +351,7 @@ Item {
 
                 Label {
                     id: notificationBubbleCount
-                    color: Theme.foregroundWhiteColor
+                    color: Theme.whiteColor
                     font.pixelSize: 12
                     text: delg.notifications > notificationBubble.maxNotifications
                           ? "99+" : delg.notifications.toString()

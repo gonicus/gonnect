@@ -18,8 +18,7 @@ class Theme : public QObject
     Q_PROPERTY(uint feedbackTimeout READ feedbackTimeout CONSTANT FINAL)
 
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
-    Q_PROPERTY(
-            QColor foregroundWhiteColor READ foregroundWhiteColor NOTIFY colorPaletteChanged FINAL)
+    Q_PROPERTY(QColor whiteColor READ whiteColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor foregroundHeaderIcons READ foregroundHeaderIcons NOTIFY colorPaletteChanged
                        FINAL)
     Q_PROPERTY(QColor foregroundHeaderIconsInactive READ foregroundHeaderIconsInactive NOTIFY
@@ -31,8 +30,6 @@ class Theme : public QObject
                        colorPaletteChanged FINAL)
     Q_PROPERTY(QColor accentColor READ accentColor NOTIFY accentColorChanged FINAL)
     Q_PROPERTY(QColor borderColor READ borderColor NOTIFY colorPaletteChanged FINAL)
-    Q_PROPERTY(QColor borderHeaderIconHovered READ borderHeaderIconHovered NOTIFY
-                       colorPaletteChanged FINAL)
     Q_PROPERTY(QColor highlightColor READ highlightColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundColor READ backgroundColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor backgroundSecondaryColor READ backgroundSecondaryColor NOTIFY
@@ -109,7 +106,7 @@ public:
     Q_INVOKABLE void setUseOwnDecoration(bool value);
 
     QColor primaryTextColor() const { return m_primaryTextColor; }
-    QColor foregroundWhiteColor() const { return m_foregroundWhiteColor; }
+    QColor whiteColor() const { return m_whiteColor; }
     QColor foregroundHeaderIcons() const { return m_foregroundHeaderIcons; }
     QColor foregroundHeaderIconsInactive() const { return m_foregroundHeaderIconsInactive; }
     QColor foregroundInitials() const { return m_foregroundInitials; }
@@ -118,7 +115,6 @@ public:
     QColor secondaryInactiveTextColor() const { return m_secondaryInactiveTextColor; }
     QColor accentColor() const { return m_accentColor; }
     QColor borderColor() const { return m_borderColor; }
-    QColor borderHeaderIconHovered() const { return m_borderHeaderIconHovered; }
     QColor highlightColor() const { return m_highlightColor; }
     QColor backgroundColor() const { return m_backgroundColor; }
     QColor backgroundSecondaryColor() const { return m_backgroundSecondaryColor; }
@@ -162,6 +158,7 @@ Q_SIGNALS:
 
 private:
     void setDarkMode(bool value);
+    QColor resolvedSystemAccent() const;
     uint fontPixelSize() const { return 13; }
     uint d() const { return 12; }
 
@@ -171,7 +168,7 @@ private:
     bool m_useOwnDecorationInitalized = false;
 
     QColor m_primaryTextColor;
-    QColor m_foregroundWhiteColor;
+    QColor m_whiteColor;
     QColor m_foregroundHeaderIcons;
     QColor m_foregroundHeaderIconsInactive;
     QColor m_foregroundInitials;
@@ -180,7 +177,6 @@ private:
     QColor m_secondaryInactiveTextColor;
     QColor m_accentColor;
     QColor m_borderColor;
-    QColor m_borderHeaderIconHovered;
     QColor m_highlightColor;
     QColor m_backgroundColor;
     QColor m_backgroundSecondaryColor;

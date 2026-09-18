@@ -74,6 +74,7 @@ Theme::Theme(QObject *parent) : QObject{ parent }
     connect(this, &Theme::themeVariantChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::colorSchemeChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateAccentColor);
+    connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateColorPalette);
 
     AppSettings settings;
     m_themeVariant = static_cast<ThemeVariant>(settings.value("generic/themeVariant", 0).toUInt());
@@ -84,8 +85,8 @@ Theme::Theme(QObject *parent) : QObject{ parent }
     connect(this, &Theme::isDarkModeChanged, this, &Theme::updateColorPalette);
     connect(this, &Theme::isDarkModeChanged, this, &Theme::updateAccentColor);
 
-    updateColorPalette();
     updateAccentColor();
+    updateColorPalette();
     useOwnDecoration();
 }
 
@@ -115,17 +116,20 @@ bool Theme::useOwnDecoration()
 
 QColor Theme::pickForegroundColor(const QColor &backgroundColor) const
 {
-    // WCAG 2.x relative luminance
-    // https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
+    if (backgroundColor == m_emergencyColor) {
+        return seedInkDark;
+    }
 
-    const auto luminance = relativeLuminance(backgroundColor);
-    return (luminance > 0.5) ? seedInkLight : seedInkDark;
+    const auto ratioLight = contrastRatio(seedInkLight, backgroundColor);
+    const auto ratioDark = contrastRatio(seedInkDark, backgroundColor);
+
+    return ratioLight >= ratioDark ? seedInkLight : seedInkDark;
 }
 
 QColor Theme::readableOn(const QColor &background) const
 {
     const QColor dark = m_primaryTextColor;
-    const QColor light = m_foregroundWhiteColor;
+    const QColor light = m_whiteColor;
     return contrastRatio(dark, background) >= contrastRatio(light, background) ? dark : light;
 }
 
@@ -178,7 +182,7 @@ void Theme::updateColorPalette()
 {
     // Light mode/fallback colors
     m_primaryTextColor = seedInkLight;
-    m_foregroundWhiteColor = seedPaperLight;
+    m_whiteColor = seedPaperLight;
     m_foregroundHeaderIcons = textVeil(seedInkLight, 0.90);
     m_foregroundHeaderIconsInactive = textVeil(seedInkLight, 0.50);
     m_foregroundInitials = seedInitials;
@@ -186,7 +190,6 @@ void Theme::updateColorPalette()
     m_inactiveTextColor = textVeil(seedInkLight, 0.60);
     m_secondaryInactiveTextColor = textVeil(seedInkLight, 0.35);
     m_borderColor = neutralSurface(0.86);
-    m_borderHeaderIconHovered = neutralSurface(0.81);
     m_backgroundColor = neutralSurface(1.000);
     m_backgroundSecondaryColor = neutralSurface(0.98);
     m_backgroundOffsetColor = textVeil(QColor(0, 0, 0), overlayAlphaLow);
@@ -221,17 +224,16 @@ void Theme::updateColorPalette()
         m_inactiveTextColor = textVeil(seedVeilBaseDark, 0.35);
         m_secondaryInactiveTextColor = textVeil(seedVeilBaseDark, 0.25);
         m_borderColor = neutralSurface(0.13);
-        m_borderHeaderIconHovered = neutralSurface(0.11);
         m_backgroundColor = neutralSurface(0.21);
         m_backgroundSecondaryColor = neutralSurface(0.28);
         m_backgroundOffsetColor = textVeil(seedVeilBaseDark, overlayAlphaLow);
         m_backgroundOffsetHoveredColor = textVeil(seedVeilBaseDark, overlayAlphaHigh);
         m_backgroundHeader = neutralSurface(0.19);
         m_backgroundHeaderInactive = neutralSurface(0.14);
-        m_backgroundHeaderIconHovered = neutralSurface(0.21);
+        m_backgroundHeaderIconHovered = neutralSurface(0.22);
         m_paneColor = neutralSurface(0.18);
 
-        const QColor rawAccent = ThemeManager::instance().accentColor();
+        const QColor rawAccent = resolvedSystemAccent();
         m_highlightColor =
                 textVeil(rawAccent.isValid() ? rawAccent : seedHighlightDark, 36.0 / 255.0);
 
@@ -246,9 +248,9 @@ void Theme::updateColorPalette()
 
 void Theme::updateAccentColor()
 {
-    auto newColor = ThemeManager::instance().accentColor();
+    auto newColor = resolvedSystemAccent();
 
-    if (!newColor.isValid() || newColor == QColor(Qt::transparent)) {
+    if (!newColor.isValid()) {
         newColor = m_isDarkMode ? seedAccentDark : seedAccentLight;
     }
 
@@ -264,4 +266,10 @@ void Theme::setDarkMode(bool value)
         m_isDarkMode = value;
         Q_EMIT isDarkModeChanged();
     }
+}
+
+QColor Theme::resolvedSystemAccent() const
+{
+    const QColor c = ThemeManager::instance().accentColor();
+    return (c.isValid() && c.alpha() > 0) ? c : QColor();
 }
