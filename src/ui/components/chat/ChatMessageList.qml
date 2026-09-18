@@ -114,7 +114,7 @@ Item {
         Label {
             text: "↓"
             anchors.centerIn: parent
-            font.pixelSize: 20
+            font.pixelSize: Theme.fontSizeLarge
 
             Accessible.ignored: true
         }

@@ -24,7 +24,7 @@ Item {
         }
         font {
             family: "Noto Color Emoji"
-            pixelSize: 16
+            pixelSize: Theme.fontSizeMedium
         }
     }
 

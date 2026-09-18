@@ -53,7 +53,7 @@ BaseWidget {
             ComboBox {
                 id: activitiesFilterMediumSelector
                 height: 30
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontSizeNormal
                 padding: 0
                 rightPadding: 10
                 valueRole: "value"
@@ -80,7 +80,7 @@ BaseWidget {
                     text: activitiesFilterMediumSelectorDelg.label
                     font.family: activitiesFilterMediumSelector.font.family
                     font.weight: activitiesFilterMediumSelector.font.weight
-                    font.pointSize: activitiesFilterMediumSelector.font.pointSize
+                    font.pixelSize: activitiesFilterMediumSelector.font.pixelSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: activitiesFilterMediumSelectorDelg.label

@@ -13,9 +13,16 @@ class Theme : public QObject
             Theme::ThemeVariant themeVariant MEMBER m_themeVariant NOTIFY themeVariantChanged FINAL)
     Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY isDarkModeChanged FINAL)
     Q_PROPERTY(bool useOwnDecoration READ useOwnDecoration NOTIFY useOwnDecorationChanged FINAL)
-    Q_PROPERTY(uint fontPixelSize READ fontPixelSize CONSTANT FINAL)
     Q_PROPERTY(uint d READ d CONSTANT FINAL)
     Q_PROPERTY(uint feedbackTimeout READ feedbackTimeout CONSTANT FINAL)
+
+    Q_PROPERTY(uint fontSizeExtraSmall READ fontSizeExtraSmall NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(uint fontSizeSmall READ fontSizeSmall NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(uint fontSizeNormal READ fontSizeNormal NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(uint fontSizeMedium READ fontSizeMedium NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(uint fontSizeLarge READ fontSizeLarge NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(uint fontSizeExtraLarge READ fontSizeExtraLarge NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(uint fontSizeHuge READ fontSizeHuge NOTIFY fontSizeChanged FINAL)
 
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(
@@ -196,6 +203,7 @@ Q_SIGNALS:
     void colorPaletteChanged();
     void useOwnDecorationChanged();
     void accentColorChanged();
+    void fontSizeChanged();
 
     void buttonBackgroundHoverChanged();
     void frameChanged();
@@ -229,13 +237,20 @@ Q_SIGNALS:
 
 private:
     void setDarkMode(bool value);
-    uint fontPixelSize() const { return 13; }
     uint d() const { return 12; }
 
     ThemeVariant m_themeVariant = ThemeVariant::System;
     bool m_isDarkMode = false;
     bool m_useOwnDecoration = false;
     bool m_useOwnDecorationInitalized = false;
+
+    uint fontSizeExtraSmall() const;
+    uint fontSizeSmall() const;
+    uint fontSizeNormal() const;
+    uint fontSizeMedium() const;
+    uint fontSizeLarge() const;
+    uint fontSizeExtraLarge() const;
+    uint fontSizeHuge() const;
 
     QColor m_primaryTextColorLightMode = QColor(5, 5, 5);
     QColor m_primaryTextColorDarkMode = QColor(248, 248, 248);

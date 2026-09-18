@@ -207,3 +207,38 @@ void Theme::setDarkMode(bool value)
         Q_EMIT isDarkModeChanged();
     }
 }
+
+uint Theme::fontSizeExtraSmall() const
+{
+    return 9;
+}
+
+uint Theme::fontSizeSmall() const
+{
+    return 11;
+}
+
+uint Theme::fontSizeNormal() const
+{
+    return 13;
+}
+
+uint Theme::fontSizeMedium() const
+{
+    return 16;
+}
+
+uint Theme::fontSizeLarge() const
+{
+    return 20;
+}
+
+uint Theme::fontSizeExtraLarge() const
+{
+    return 26;
+}
+
+uint Theme::fontSizeHuge() const
+{
+    return 32;
+}

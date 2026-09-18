@@ -416,7 +416,7 @@ Item {
 
                                 font.family: darkModeComboBox.font.family
                                 font.weight: darkModeComboBox.font.weight
-                                font.pointSize: darkModeComboBox.font.pointSize
+                                font.pixelSize: darkModeComboBox.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: darkModeDelg.displayName
@@ -597,7 +597,7 @@ Item {
 
                                 font.family: standardPreferredIdentitySelector.font.family
                                 font.weight: standardPreferredIdentitySelector.font.weight
-                                font.pointSize: standardPreferredIdentitySelector.font.pointSize
+                                font.pixelSize: standardPreferredIdentitySelector.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: standardPreferredIdentityDelg.displayName
@@ -871,7 +871,7 @@ Item {
 
                                 font.family: inputAudioSelector.font.family
                                 font.weight: inputAudioSelector.font.weight
-                                font.pointSize: inputAudioSelector.font.pointSize
+                                font.pixelSize: inputAudioSelector.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: inputAudioSelectorDelg.name
@@ -935,7 +935,7 @@ Item {
 
                                 font.family: outputAudioSelector.font.family
                                 font.weight: outputAudioSelector.font.weight
-                                font.pointSize: outputAudioSelector.font.pointSize
+                                font.pixelSize: outputAudioSelector.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: outputAudioSelectorDelg.name
@@ -999,7 +999,7 @@ Item {
 
                                 font.family: outputRingToneAudioSelector.font.family
                                 font.weight: outputRingToneAudioSelector.font.weight
-                                font.pointSize: outputRingToneAudioSelector.font.pointSize
+                                font.pixelSize: outputRingToneAudioSelector.font.pixelSize
 
                                 Accessible.role: Accessible.ListItem
                                 Accessible.name: outputRingAudioSelectorDelg.name

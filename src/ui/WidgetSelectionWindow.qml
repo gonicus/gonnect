@@ -169,7 +169,7 @@ BaseWindow {
 
                     font.family: widgetSelection.font.family
                     font.weight: widgetSelection.font.weight
-                    font.pointSize: widgetSelection.font.pointSize
+                    font.pixelSize: widgetSelection.font.pixelSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: widgetDelg.name
@@ -488,7 +488,7 @@ BaseWindow {
                                                 Label {
                                                     text: delgRoomItem.chatProvider?.displayName ?? ""
                                                     color: Theme.secondaryTextColor
-                                                    font.pixelSize: 12
+                                                    font.pixelSize: Theme.fontSizeSmall
 
                                                     Accessible.ignored: true
                                                 }

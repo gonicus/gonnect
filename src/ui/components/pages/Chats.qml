@@ -168,7 +168,7 @@ Item {
 
         Label {
             text: qsTr("Connecting...")
-            font.pixelSize: 22
+            font.pixelSize: Theme.fontSizeLarge
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: parent.verticalCenter

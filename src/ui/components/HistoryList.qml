@@ -20,7 +20,7 @@ Item {
         anchors.centerIn: parent
         visible: !control.hasPastCalls
         color: Theme.secondaryTextColor
-        font.pixelSize: 18
+        font.pixelSize: Theme.fontSizeLarge
         text: "🕓  " + qsTr("No past calls")
 
         Accessible.role: Accessible.StaticText

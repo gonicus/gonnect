@@ -21,7 +21,7 @@ Item {
         anchors.centerIn: parent
         visible: !control.hasActivities
         color: Theme.secondaryTextColor
-        font.pixelSize: 18
+        font.pixelSize: Theme.fontSizeLarge
         text: "🕒  " + (control.proxyModel?.isFiltering
                         ? qsTr("No activities matching the filter")
                         : qsTr("No activities"))

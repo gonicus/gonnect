@@ -67,7 +67,7 @@ BaseWidget {
             ComboBox {
                 id: historyFilterMediumSelector
                 height: 30
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontSizeNormal
                 padding: 0
                 rightPadding: 10
                 valueRole: "value"
@@ -102,7 +102,7 @@ BaseWidget {
 
                     font.family: historyFilterMediumSelector.font.family
                     font.weight: historyFilterMediumSelector.font.weight
-                    font.pointSize: historyFilterMediumSelector.font.pointSize
+                    font.pixelSize: historyFilterMediumSelector.font.pixelSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: historyFilterMediumSelectorDelg.label
@@ -116,7 +116,7 @@ BaseWidget {
             ComboBox {
                 id: historyFilterTypeSelector
                 height: 30
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontSizeNormal
                 padding: 0
                 rightPadding: 10
                 valueRole: "value"
@@ -154,7 +154,7 @@ BaseWidget {
 
                     font.family: historyFilterTypeSelector.font.family
                     font.weight: historyFilterTypeSelector.font.weight
-                    font.pointSize: historyFilterTypeSelector.font.pointSize
+                    font.pixelSize: historyFilterTypeSelector.font.pixelSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: historyFilterTypeSelectorDelg.label
