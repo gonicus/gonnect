@@ -16,14 +16,16 @@ class Theme : public QObject
     Q_PROPERTY(uint d READ d CONSTANT FINAL)
     Q_PROPERTY(uint feedbackTimeout READ feedbackTimeout CONSTANT FINAL)
 
-    Q_PROPERTY(uint fontSizeExtraSmall READ fontSizeExtraSmall NOTIFY fontSizeChanged FINAL)
-    Q_PROPERTY(uint fontSizeSmall READ fontSizeSmall NOTIFY fontSizeChanged FINAL)
-    Q_PROPERTY(uint fontSizeNormal READ fontSizeNormal NOTIFY fontSizeChanged FINAL)
-    Q_PROPERTY(uint fontSizeMedium READ fontSizeMedium NOTIFY fontSizeChanged FINAL)
-    Q_PROPERTY(uint fontSizeLarge READ fontSizeLarge NOTIFY fontSizeChanged FINAL)
-    Q_PROPERTY(uint fontSizeExtraLarge READ fontSizeExtraLarge NOTIFY fontSizeChanged FINAL)
-    Q_PROPERTY(uint fontSizeHuge READ fontSizeHuge NOTIFY fontSizeChanged FINAL)
+    // Font sizes
+    Q_PROPERTY(qreal fontSizeExtraSmall READ fontSizeExtraSmall NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeSmall READ fontSizeSmall NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeNormal READ fontSizeNormal NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeMedium READ fontSizeMedium NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeLarge READ fontSizeLarge NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeExtraLarge READ fontSizeExtraLarge NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeHuge READ fontSizeHuge NOTIFY fontSizeChanged FINAL)
 
+    // Colors
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(
             QColor foregroundWhiteColor READ foregroundWhiteColor NOTIFY colorPaletteChanged FINAL)
@@ -130,6 +132,9 @@ public:
 
     Q_INVOKABLE void setUseOwnDecoration(bool value);
 
+    Q_INVOKABLE void setFontScale(qreal scaleFactor);
+
+    // Colors
     QColor primaryTextColor() const { return m_primaryTextColor; }
     QColor foregroundWhiteColor() const { return m_foregroundWhiteColor; }
     QColor foregroundHeaderIcons() const { return m_foregroundHeaderIcons; }
@@ -244,13 +249,16 @@ private:
     bool m_useOwnDecoration = false;
     bool m_useOwnDecorationInitalized = false;
 
-    uint fontSizeExtraSmall() const;
-    uint fontSizeSmall() const;
-    uint fontSizeNormal() const;
-    uint fontSizeMedium() const;
-    uint fontSizeLarge() const;
-    uint fontSizeExtraLarge() const;
-    uint fontSizeHuge() const;
+    // Font sizes
+    qreal m_fontScale = 1.0;
+
+    qreal fontSizeExtraSmall() const;
+    qreal fontSizeSmall() const;
+    qreal fontSizeNormal() const;
+    qreal fontSizeMedium() const;
+    qreal fontSizeLarge() const;
+    qreal fontSizeExtraLarge() const;
+    qreal fontSizeHuge() const;
 
     QColor m_primaryTextColorLightMode = QColor(5, 5, 5);
     QColor m_primaryTextColorDarkMode = QColor(248, 248, 248);

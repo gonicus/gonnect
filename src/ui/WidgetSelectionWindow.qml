@@ -396,6 +396,7 @@ BaseWindow {
                                         delegate: RadioButton {
                                             id: delgRoomItem
                                             height: 48
+                                            font.pixelSize: Theme.fontSizeNormal
 
                                             required property string roomId
                                             required property string name

@@ -4,6 +4,8 @@
 
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QGuiApplication>
+#include <QFont>
 
 Q_LOGGING_CATEGORY(lcTheme, "gonnect.app.theme")
 
@@ -208,37 +210,53 @@ void Theme::setDarkMode(bool value)
     }
 }
 
-uint Theme::fontSizeExtraSmall() const
+static constexpr qreal normalSize = 13.0;
+
+void Theme::setFontScale(qreal scaleFactor)
 {
-    return 9;
+    if (m_fontScale != scaleFactor) {
+        m_fontScale = scaleFactor;
+
+        // Propagate global font size
+        auto font = qApp->font();
+        font.setPixelSize(std::round(normalSize * scaleFactor));
+        qApp->setFont(font);
+
+        Q_EMIT fontSizeChanged();
+    }
 }
 
-uint Theme::fontSizeSmall() const
+qreal Theme::fontSizeExtraSmall() const
 {
-    return 11;
+    return m_fontScale * 9.0;
 }
 
-uint Theme::fontSizeNormal() const
+qreal Theme::fontSizeSmall() const
 {
-    return 13;
+    return m_fontScale * 11.0;
 }
 
-uint Theme::fontSizeMedium() const
+qreal Theme::fontSizeNormal() const
 {
-    return 16;
+    return m_fontScale * normalSize;
 }
 
-uint Theme::fontSizeLarge() const
+qreal Theme::fontSizeMedium() const
 {
-    return 20;
+    return m_fontScale * 16.0;
 }
 
-uint Theme::fontSizeExtraLarge() const
+qreal Theme::fontSizeLarge() const
 {
-    return 26;
+    return m_fontScale * 20.0;
 }
 
-uint Theme::fontSizeHuge() const
+qreal Theme::fontSizeExtraLarge() const
 {
-    return 32;
+    return m_fontScale * 26.0;
+}
+
+qreal Theme::fontSizeHuge() const
+{
+    return m_fontScale * 32;
 }

@@ -1,8 +1,9 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls.Material as M
 import base
 
-M.CheckBox {
-    padding: 0
+M.ComboBox {
     font.pixelSize: Theme.fontSizeNormal
 }
