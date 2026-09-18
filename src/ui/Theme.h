@@ -85,6 +85,26 @@ public:
     uint feedbackTimeout() { return 3000; }
 
     Q_INVOKABLE QColor pickForegroundColor(const QColor &backgroundColor) const;
+    QColor readableOn(const QColor &background) const;
+
+    // Base colors (seeds) - all other regular colors will be derived from these
+    static const QColor seedInkLight;
+    static const QColor seedPaperLight;
+    static const QColor seedInkDark;
+    static const QColor seedVeilBaseDark;
+    static const QColor seedAccentLight;
+    static const QColor seedAccentDark;
+    static const QColor seedBubbleLight;
+    static const QColor seedBubbleDark;
+    static const QColor seedHighlightDark;
+    static const QColor seedInitials;
+
+    // Color helper functions
+    static QColor textVeil(const QColor &base, qreal alpha);
+    static QColor neutralSurface(qreal lightness);
+    static QColor mix(const QColor &a, const QColor &b, qreal t);
+    static qreal relativeLuminance(const QColor &color);
+    static qreal contrastRatio(const QColor &a, const QColor &b);
 
     Q_INVOKABLE void setUseOwnDecoration(bool value);
 
@@ -149,9 +169,6 @@ private:
     bool m_isDarkMode = false;
     bool m_useOwnDecoration = false;
     bool m_useOwnDecorationInitalized = false;
-
-    QColor m_primaryTextColorLightMode = QColor(5, 5, 5);
-    QColor m_primaryTextColorDarkMode = QColor(248, 248, 248);
 
     QColor m_primaryTextColor;
     QColor m_foregroundWhiteColor;
