@@ -211,7 +211,7 @@ void Theme::setDarkMode(bool value)
     }
 }
 
-static constexpr qreal normalSize = 14.6;
+static constexpr qreal normalSize = 14.0;
 
 void Theme::setFontScale(qreal scaleFactor)
 {
