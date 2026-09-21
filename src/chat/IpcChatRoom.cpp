@@ -12,6 +12,8 @@
 
 #include <QFileInfo>
 #include <QLoggingCategory>
+#include <QFutureWatcher>
+#include <QtConcurrent>
 
 Q_LOGGING_CATEGORY(lcIpcChatRoom, "gonnect.app.chat.IpcChatRoom")
 
@@ -187,13 +189,22 @@ void IpcChatRoom::sendFile(const QString &filePath)
     }
 
     // "Upload" file
-    const auto uploadedUrl = dispatcher->uploadFile(filePath);
-    if (uploadedUrl.isEmpty()) {
-        qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;
-        return;
-    }
+    auto watcher = new QFutureWatcher<QString>(this);
+    connect(watcher, &QFutureWatcher<QString>::finished, this,
+            [this, watcher, filePath, originalFileName]() {
+                watcher->deleteLater();
 
-    dispatcher->sendFile(id(), uploadedUrl, originalFileName);
+                const auto uploadedUrl = watcher->result();
+                if (uploadedUrl.isEmpty()) {
+                    qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;
+                    return;
+                }
+
+                ipcDispatcher()->sendFile(id(), uploadedUrl, originalFileName);
+            });
+
+    watcher->setFuture(QtConcurrent::run(
+            [dispatcher, filePath]() { return dispatcher->uploadFile(filePath); }));
 }
 
 void IpcChatRoom::sendTypingPing()
