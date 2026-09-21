@@ -17,6 +17,8 @@ class Theme : public QObject
     Q_PROPERTY(uint feedbackTimeout READ feedbackTimeout CONSTANT FINAL)
 
     // Font sizes
+    Q_PROPERTY(qreal fontScale READ fontScale NOTIFY fontSizeChanged FINAL)
+
     Q_PROPERTY(qreal fontSizeExtraSmall READ fontSizeExtraSmall NOTIFY fontSizeChanged FINAL)
     Q_PROPERTY(qreal fontSizeSmall READ fontSizeSmall NOTIFY fontSizeChanged FINAL)
     Q_PROPERTY(qreal fontSizeNormal READ fontSizeNormal NOTIFY fontSizeChanged FINAL)
@@ -251,6 +253,7 @@ private:
 
     // Font sizes
     qreal m_fontScale = 1.0;
+    qreal fontScale() const { return m_fontScale; }
 
     qreal fontSizeExtraSmall() const;
     qreal fontSizeSmall() const;

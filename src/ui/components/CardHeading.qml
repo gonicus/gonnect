@@ -8,11 +8,13 @@ import base
 Item {
     id: control
     implicitWidth: control.leftPadding + headingLoader.implicitWidth + control.rightPadding
-    height: 46
+    height: Math.max(46, 46 * Theme.fontScale)
 
     property int leftPadding: 0
     property int rightPadding: 0
     property string text: ""
+    property alias actions: actionsRow.data
+    readonly property real actionsWidth: actionsRow.width
     property bool showHeading: true
     property bool showDivider: false
     property alias headingMargin: headingLoaderWrapper.implicitWidth
@@ -44,7 +46,17 @@ Item {
             sourceComponent: headingComponent
             anchors {
                 left: parent.left
+                right: actionsRow.left
+                rightMargin: actionsRow.width > 0 ? 10 : 0
+            }
+        }
+
+        RowLayout {
+            id: actionsRow
+            spacing: 10
+            anchors {
                 right: parent.right
+                verticalCenter: parent.verticalCenter
             }
         }
 
