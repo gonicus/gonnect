@@ -16,8 +16,9 @@ Theme::Theme(QObject *parent) : QObject{ parent }
     connect(this, &Theme::themeVariantChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::colorSchemeChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateAccentColor);
-    connect(&themeManager, &ThemeManager::fontScaleChanged, this,
-            [this]() { setFontScale(ThemeManager::instance().fontScale()); });
+    connect(&themeManager, &ThemeManager::fontScaleChanged, this, [this](){
+        setFontScale(ThemeManager::instance().fontScale());
+    });
 
     AppSettings settings;
     m_themeVariant = static_cast<ThemeVariant>(settings.value("generic/themeVariant", 0).toUInt());
@@ -211,7 +212,7 @@ void Theme::setDarkMode(bool value)
     }
 }
 
-static constexpr qreal normalSize = 14.0;
+static constexpr qreal normalSize = 14.6;
 
 void Theme::setFontScale(qreal scaleFactor)
 {
@@ -229,12 +230,12 @@ void Theme::setFontScale(qreal scaleFactor)
 
 qreal Theme::fontSizeExtraSmall() const
 {
-    return m_fontScale * 9.0;
+    return m_fontScale * 10.0;
 }
 
 qreal Theme::fontSizeSmall() const
 {
-    return m_fontScale * 11.0;
+    return m_fontScale * 12.0;
 }
 
 qreal Theme::fontSizeNormal() const
@@ -244,7 +245,7 @@ qreal Theme::fontSizeNormal() const
 
 qreal Theme::fontSizeMedium() const
 {
-    return m_fontScale * 16.0;
+    return m_fontScale * 17.0;
 }
 
 qreal Theme::fontSizeLarge() const

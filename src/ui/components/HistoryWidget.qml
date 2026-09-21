@@ -71,11 +71,14 @@ BaseWidget {
                 Layout.preferredHeight: Math.round(30 * Theme.fontSizeNormal / 13)
                 font.pixelSize: Theme.fontSizeNormal
                 padding: 0
-                rightPadding: indicator.width + 10
+                rightPadding: indicator.width + 4
                 valueRole: "value"
                 textRole: "label"
+
+                implicitContentWidthPolicy: ComboBox.WidestText
+
                 Layout.alignment: Qt.AlignVCenter
-                Layout.preferredWidth: implicitWidth + Math.round(12 * Theme.fontSizeNormal / 13)
+                Layout.preferredWidth: implicitWidth
                 model: [
                     {
                         value: HistoryProxyModel.MediumFilter.ALL,
@@ -118,11 +121,12 @@ BaseWidget {
                 Layout.preferredHeight: Math.round(30 * Theme.fontSizeNormal / 13)
                 font.pixelSize: Theme.fontSizeNormal
                 padding: 0
-                rightPadding: indicator.width + 10
+                rightPadding: indicator.width + 4
                 valueRole: "value"
                 textRole: "label"
+                implicitContentWidthPolicy: ComboBox.WidestText
                 Layout.alignment: Qt.AlignVCenter
-                Layout.preferredWidth: implicitWidth + Math.round(12 * Theme.fontSizeNormal / 13)
+                Layout.preferredWidth: implicitWidth
                 model: [
                     {
                         value: HistoryProxyModel.TypeFilter.ALL,

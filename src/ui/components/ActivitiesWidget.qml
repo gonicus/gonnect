@@ -57,11 +57,12 @@ BaseWidget {
                 Layout.preferredHeight: Math.round(30 * Theme.fontSizeNormal / 13)
                 font.pixelSize: Theme.fontSizeNormal
                 padding: 0
-                rightPadding: indicator.width + 10
+                rightPadding: indicator.width + 4
                 valueRole: "value"
                 textRole: "label"
                 Layout.alignment: Qt.AlignVCenter
-                Layout.preferredWidth: implicitWidth + Math.round(12 * Theme.fontSizeNormal / 13)
+                implicitContentWidthPolicy: ComboBox.WidestText
+                Layout.preferredWidth: implicitWidth
                 model: [
                     { value: ActivitiesProxyModel.MediumFilter.ALL, label: qsTr('All activities') },
                     { value: ActivitiesProxyModel.MediumFilter.SIPCALL, label: qsTr('SIP') },
