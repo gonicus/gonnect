@@ -16,9 +16,8 @@ Theme::Theme(QObject *parent) : QObject{ parent }
     connect(this, &Theme::themeVariantChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::colorSchemeChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateAccentColor);
-    connect(&themeManager, &ThemeManager::fontScaleChanged, this, [this](){
-        setFontScale(ThemeManager::instance().fontScale());
-    });
+    connect(&themeManager, &ThemeManager::fontScaleChanged, this,
+            [this]() { setFontScale(ThemeManager::instance().fontScale()); });
 
     AppSettings settings;
     m_themeVariant = static_cast<ThemeVariant>(settings.value("generic/themeVariant", 0).toUInt());
