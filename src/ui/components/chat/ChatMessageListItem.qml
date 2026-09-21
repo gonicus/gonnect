@@ -643,6 +643,7 @@ Item {
 
                 ToolTip.text: reactionDelg.users.map(user => user.computedName).join(", ")
                 ToolTip.visible: reactionDelgHoverHandler.hovered
+                ToolTip.toolTip.y: reactionDelg.height + Theme.d
 
                 HoverHandler {
                     id: reactionDelgHoverHandler
