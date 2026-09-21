@@ -5,6 +5,8 @@
 #include "ChatMessageContentText.h"
 #include "ChatMessageContentVideoFile.h"
 #include "AddressBook.h"
+#include "ErrorBus.h"
+#include "TextFormatHelper.h"
 
 #include <algorithm>
 
@@ -147,16 +149,50 @@ void IpcChatRoom::sendMessage(const QString &message, const QString &relatedMess
 
 void IpcChatRoom::sendFile(const QString &filePath)
 {
+    // Check file size
+
     auto dispatcher = ipcDispatcher();
-    const auto uploadedUrl = dispatcher->uploadFile(filePath);
-    if (uploadedUrl.isEmpty()) {
-        qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;
+    const auto maxSize = dispatcher->mediaSizeLimit();
+
+    if (maxSize <= 0) {
+        qCWarning(lcIpcChatRoom) << "IpcDispatcher does not allow file upload, maxSize:" << maxSize;
         return;
     }
 
     const QUrl url(filePath);
     const auto originalFileName = url.isLocalFile() ? QFileInfo(url.toLocalFile()).fileName()
                                                     : filePath.split(QChar('/')).last();
+
+    const QFileInfo info(url.toLocalFile());
+    if (!info.exists()) {
+        qCWarning(lcIpcChatRoom) << "File" << filePath << "does not exist";
+        return;
+    }
+
+    const auto fileSize = info.size();
+    if (fileSize <= 0) {
+        qCWarning(lcIpcChatRoom) << "File size of" << filePath << "cannot be read";
+        return;
+    }
+    if (fileSize > maxSize) {
+        qCWarning(lcIpcChatRoom) << "File size of" << filePath << "is" << fileSize
+                                 << "bytes and exceeds limit of" << maxSize << "bytes";
+        ErrorBus::instance().addError(
+                tr("The file %1 cannot be uploaded because its size of %2 "
+                   "exceeds the allowed maximum of %3.")
+                        .arg(originalFileName,
+                             TextFormatHelper::instance().formatFileSize(fileSize),
+                             TextFormatHelper::instance().formatFileSize(maxSize)));
+        return;
+    }
+
+    // "Upload" file
+    const auto uploadedUrl = dispatcher->uploadFile(filePath);
+    if (uploadedUrl.isEmpty()) {
+        qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;
+        return;
+    }
+
     dispatcher->sendFile(id(), uploadedUrl, originalFileName);
 }
 
