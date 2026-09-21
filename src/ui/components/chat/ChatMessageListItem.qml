@@ -183,7 +183,7 @@ Item {
 
         Label {
             id: unreadLabel
-            text: qsTr("Unread messages")
+            text: qsTr("New messages")
             color: Theme.accentColor
             font.weight: Font.DemiBold
             anchors.centerIn: parent
