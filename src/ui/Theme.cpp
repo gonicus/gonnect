@@ -11,12 +11,13 @@ Q_LOGGING_CATEGORY(lcTheme, "gonnect.app.theme")
 
 Theme::Theme(QObject *parent) : QObject{ parent }
 {
-
     // Setup theme variant
     auto &themeManager = ThemeManager::instance();
     connect(this, &Theme::themeVariantChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::colorSchemeChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateAccentColor);
+    connect(&themeManager, &ThemeManager::fontScaleChanged, this,
+            [this]() { setFontScale(ThemeManager::instance().fontScale()); });
 
     AppSettings settings;
     m_themeVariant = static_cast<ThemeVariant>(settings.value("generic/themeVariant", 0).toUInt());
@@ -210,7 +211,7 @@ void Theme::setDarkMode(bool value)
     }
 }
 
-static constexpr qreal normalSize = 13.0;
+static constexpr qreal normalSize = 14.0;
 
 void Theme::setFontScale(qreal scaleFactor)
 {

@@ -27,16 +27,19 @@ public:
     ThemeManager::ColorScheme colorScheme() const { return m_colorScheme; }
     QColor accentColor() const { return m_accentColor; }
     bool highContrast() const { return m_highContrast; }
+    qreal fontScale() const { return m_fontScale; }
 
 Q_SIGNALS:
     void colorSchemeChanged();
     void accentColorChanged();
     void highContrastChanged();
+    void fontScaleChanged();
 
 private:
     SettingsPortal(QObject *parent = nullptr);
 
     QColor dbusDoubleTripleToColor(QDBusVariant value);
+    void updateScaleFromFontString(const QString &fontString);
 
     void settingsChanged(QString ns, QString key, QDBusVariant value);
 
@@ -47,6 +50,8 @@ private:
     ThemeManager::ColorScheme m_colorScheme = ThemeManager::ColorScheme::NO_PREFERENCE;
     QColor m_accentColor;
 
+    qreal m_fontScale = 1.0;
+    qreal m_designBasePointSize = 10.0;
     bool m_highContrast = false;
 
     Q_DISABLE_COPY(SettingsPortal)
