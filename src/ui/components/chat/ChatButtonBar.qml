@@ -24,6 +24,28 @@ Item {
 
     readonly property PhoneNumbersModel numbersModel: PhoneNumbersModel {
         contact: control.soleOtherContact
+        onCountChanged: () => internal.updateHasActiveCall()
+    }
+
+    onSoleOtherContactChanged: () => internal.updateHasActiveCall()
+
+    QtObject {
+        id: internal
+
+        property bool hasActiveCall
+
+        Component.onCompleted: () => internal.updateHasActiveCall()
+
+        readonly property Connections sipCallManagerConnections: Connections {
+            target: SIPCallManager
+            function onCallsChanged() { internal.updateHasActiveCall() }
+            function onCallContactChanged() { internal.updateHasActiveCall() }
+        }
+
+        function updateHasActiveCall() {
+            const contact = control.soleOtherContact
+            internal.hasActiveCall = !!contact && SIPCallManager.hasCallWithContact(contact)
+        }
     }
 
     AvatarImage {
@@ -134,7 +156,7 @@ Item {
             toggled: true
             toggledColor: Theme.greenColor
             iconPath: Icons.callStart
-            visible: !!control.soleOtherContact && !control.isThreadMode
+            visible: !!control.soleOtherContact && !control.isThreadMode && !internal.hasActiveCall
 
             onClicked: () => {
                            const soleNumber = control.numbersModel.soleNumber()
@@ -152,8 +174,29 @@ Item {
 
             Accessible.name: qsTr("Start phone call")
         }
+      
+        BarButton {
+            id: hangupButton
+            text: qsTr("Hang up")
+            toggled: true
+            toggledColor: Theme.redColor
+            iconPath: Icons.callStop
+            visible: !!control.soleOtherContact && internal.hasActiveCall
 
-        HeaderIconButton {
+            onClicked: () => {
+                           if (SIPCallManager.isConferenceMode) {
+                               SIPCallManager.endConference()
+                           } else if (control.soleOtherContact) {
+                               SIPCallManager.endCallWithContact(control.soleOtherContact)
+                           } else {
+                               console.error("Cannot hang up due to missing phone number")
+                           }
+                       }
+
+            Accessible.name: qsTr("Hang up phone call")
+        }
+        
+        BarButton {
             visible: control.isThreadMode
             iconSource: Icons.mobileCloseApp
             anchors.verticalCenter: parent.verticalCenter

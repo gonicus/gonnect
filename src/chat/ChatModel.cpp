@@ -40,6 +40,13 @@ QHash<int, QByteArray> ChatModel::roleNames() const
         { static_cast<int>(Roles::Content), "content" },
         { static_cast<int>(Roles::Flags), "flags" },
 
+        { static_cast<int>(Roles::IsPrivateMessage), "isPrivateMessage" },
+        { static_cast<int>(Roles::IsOwnMessage), "isOwnMessage" },
+        { static_cast<int>(Roles::IsSystemMessage), "isSystemMessage" },
+        { static_cast<int>(Roles::IsEncrypted), "isEncrypted" },
+        { static_cast<int>(Roles::IsPending), "isPending" },
+        { static_cast<int>(Roles::IsFailed), "isFailed" },
+        { static_cast<int>(Roles::IsEdited), "isEdited" },
         { static_cast<int>(Roles::IsSameUserAsPrevious), "isSameUserAsPrevious" },
         { static_cast<int>(Roles::IsSameMinuteAsPrevious), "isSameMinuteAsPrevious" },
         { static_cast<int>(Roles::IsSameDayAsPrevious), "isSameDayAsPrevious" },
@@ -228,6 +235,9 @@ QVariant ChatModel::rawData(const ChatMessage *item, int role) const
     case static_cast<int>(Roles::Flags):
         return static_cast<int>(item->flags());
 
+    case static_cast<int>(Roles::IsEdited):
+        return static_cast<bool>(item->flags() & ChatMessage::Flag::Edited);
+
     case static_cast<int>(Roles::HasRelatedMessage):
         return !item->relatedMessageId().isEmpty();
 
@@ -396,6 +406,15 @@ void ChatModel::onChatRoomChanged()
 
                     if (changedFlags & ChatMessage::Flag::Encrypted) {
                         affectedRoles.append(static_cast<int>(Roles::Content));
+                    }
+                    if (changedFlags & ChatMessage::Flag::Pending) {
+                        affectedRoles.append(static_cast<int>(Roles::IsPending));
+                    }
+                    if (changedFlags & ChatMessage::Flag::Failed) {
+                        affectedRoles.append(static_cast<int>(Roles::IsFailed));
+                    }
+                    if (changedFlags & ChatMessage::Flag::Edited) {
+                        affectedRoles.append(static_cast<int>(Roles::IsEdited));
                     }
 
                     const auto modelIndex = createIndex(idx, 0);

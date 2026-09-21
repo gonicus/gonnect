@@ -36,7 +36,14 @@ Item {
     onChatRoomChanged: () => {
                            relatedMsg.chatMessage = null
                            control.loadMessages(chatMessageList.threadId)
+                           readTimer.stop()
                        }
+
+    onIsScrolledDownChanged: () => {
+                                 if (control.isScrolledDown) {
+                                     readTimer.restart()
+                                 }
+                             }
 
     Connections {
         target: control.chatRoom
@@ -301,7 +308,7 @@ Item {
 
     Timer {
         id: readTimer
-        interval: 2000
+        interval: 6000
         onTriggered: () => {
             if (control.Window.active && control.isScrolledDown && control.chatRoom) {
                 control.chatRoom.resetUnreadCount()
@@ -312,7 +319,7 @@ Item {
     HoverHandler {
         id: chatHoverHandler
         onPointChanged: () => {
-            if (!readTimer.running && control.Window.active) {
+            if (control.Window.active) {
                 readTimer.start()
             }
         }
