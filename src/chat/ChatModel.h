@@ -32,6 +32,7 @@ public:
         IsEncrypted,
         IsPending,
         IsFailed,
+        IsEdited,
         IsSameUserAsPrevious,
         IsSameMinuteAsPrevious,
         IsSameDayAsPrevious,

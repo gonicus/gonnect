@@ -23,6 +23,7 @@ Item {
         icon {
             width: Math.round(1.5 * Theme.d * Screen.devicePixelRatio)
             height: Math.round(1.5 * Theme.d * Screen.devicePixelRatio)
+            color: Theme.secondaryTextColor
             source: {
                 if (control.readUsersCount === control.allUsersCount - 1) {
                     return Icons.readmarkDoubleFilled
