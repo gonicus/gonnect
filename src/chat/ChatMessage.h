@@ -35,6 +35,7 @@ public:
         Encrypted = 1 << 4,
         Pending = 1 << 5,
         Failed = 1 << 6,
+        Edited = 1 << 7
     };
     Q_ENUM(Flag)
     Q_DECLARE_FLAGS(Flags, Flag)

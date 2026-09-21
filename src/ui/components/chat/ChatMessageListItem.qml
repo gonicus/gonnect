@@ -33,11 +33,13 @@ Item {
     required property bool isOwnMessage
     required property bool isPending
     required property bool isFailed
+    required property bool isEdited
     required property bool isStateUpdate
     required property bool isSameUserAsPrevious
     required property bool isSameMinuteAsPrevious
     required property bool isSameDayAsPrevious
     required property bool isLatestOwnMessage
+    required property bool isFirstUnread
 
     required property bool hasRelatedMessage
     required property string relatedMessageNickName
@@ -147,11 +149,58 @@ Item {
     }
 
     Item {
+        id: unreadSeparator
+        visible: control.isFirstUnread
+        height: unreadSeparator.visible ? (Theme.d * 2) : 0
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+
+        Rectangle {
+            height: 2
+            color: Theme.accentColor
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: parent.left
+                right: unreadLabel.left
+                leftMargin: Theme.d
+                rightMargin: Theme.d
+            }
+        }
+
+        Rectangle {
+            height: 2
+            color: Theme.accentColor
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: unreadLabel.right
+                right: parent.right
+                leftMargin: Theme.d
+                rightMargin: Theme.d
+            }
+        }
+
+        Label {
+            id: unreadLabel
+            text: qsTr("Unread messages")
+            color: Theme.accentColor
+            font.weight: Font.DemiBold
+            anchors.centerIn: parent
+            background: Rectangle {
+                color: Theme.backgroundColor
+                radius: 4
+            }
+        }
+    }
+
+    Item {
         id: newDaySeparator
         visible: false
         height: 40
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             left: parent.left
             right: parent.right
         }
@@ -207,7 +256,7 @@ Item {
         anchors {
             left: parent.left
             leftMargin: 10
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 15
         }
 
@@ -233,7 +282,7 @@ Item {
         font.weight: Font.Medium
         font.pixelSize: 14
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 15
 
             left: avatarImage.right
@@ -258,17 +307,58 @@ Item {
         Accessible.ignored: true
     }
 
-    IconLabel {
-        visible: control.isFailed
+    Row {
+        id: markerRow
+        spacing: Theme.d / 2
+        height: Math.max(failedIcon.height, editedIcon.height, readMarker.height)
         anchors {
-            right: timestampLabel.left
-            rightMargin: 4
             verticalCenter: timestampLabel.verticalCenter
+            right: timestampLabel.left
+            rightMargin: Theme.d / 2
         }
-        icon.source: Icons.dataError
-        icon.color: Theme.redColor
-        icon.width: 14
-        icon.height: 14
+
+        IconLabel {
+            id: failedIcon
+            visible: control.isFailed
+            anchors.verticalCenter: parent.verticalCenter
+            icon {
+                source: Icons.dataError
+                color: Theme.redColor
+                width: 14
+                height: 14
+            }
+        }
+
+        IconLabel {
+            id: editedIcon
+            visible: control.isEdited
+            anchors.verticalCenter: parent.verticalCenter
+            icon {
+                source: Icons.editor
+                color: Theme.secondaryTextColor
+                width: 14
+                height: 14
+            }
+
+            ToolTip.text: qsTr("This message has been edited afterwards.")
+            ToolTip.visible: editedIconHoverHandler.hovered
+
+            HoverHandler {
+                id: editedIconHoverHandler
+            }
+        }
+
+        ReadMarker {
+            id: readMarker
+            readUsers: control.readUsers
+            allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
+            visible: control.isOwnMessage
+                     && !control.isPending
+                     && !control.isFailed
+                     && (control.isLatestOwnMessage
+                         || ((control.readUsers?.length ?? 0) > 0))
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     ChatMessageListItemRelatedContent {
@@ -276,7 +366,7 @@ Item {
         visible: control.hasRelatedMessage
         height: 0
         anchors {
-            top: parent.top
+            top: unreadSeparator.bottom
             topMargin: 10
             left: messageContentItem.left
             right: messageContentItem.right
@@ -330,14 +420,10 @@ Item {
         }
 
         anchors {
-            top: relatedMessageItem.visible ? relatedMessageItem.bottom : parent.top
+            top: relatedMessageItem.visible ? relatedMessageItem.bottom : unreadSeparator.bottom
             left: nameLabel.left
-            right: retryButton.visible
-                   ? retryButton.left
-                   : (readMarker.visible
-                      ? readMarker.left
-                      : timestampLabel.left)
-            rightMargin: 10
+            right: markerRow.left
+            rightMargin: Theme.d
         }
     }
 
@@ -379,7 +465,7 @@ Item {
         rightPadding: 0
 
         anchors {
-            right: readMarker.visible ? readMarker.left : timestampLabel.left
+            right: markerRow.left
             rightMargin: 10
             bottom: messageContentItem.bottom
         }
@@ -389,22 +475,6 @@ Item {
                            control.retryMessage(control.eventId)
                        }
                    }
-    }
-
-    ReadMarker {
-        id: readMarker
-        readUsers: control.readUsers
-        allUsersCount: control.chatRoom?.joinedChatUserCount ?? 0
-        visible: control.isOwnMessage
-                 && !control.isPending
-                 && !control.isFailed
-                 && (control.isLatestOwnMessage
-                     || ((control.readUsers?.length ?? 0) > 0))
-        anchors {
-            right: timestampLabel.left
-            rightMargin: 10
-            verticalCenter: timestampLabel.verticalCenter
-        }
     }
 
     Component {

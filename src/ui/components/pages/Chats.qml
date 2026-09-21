@@ -456,16 +456,6 @@ Item {
 
                     onRoomSelected: roomId => chatRoomList.selectRoom(roomId)
 
-                    readonly property Connections selectionStateConnections: Connections {
-                        target: SelectionState
-                        function onSelectedChatRoomChanged() {
-                            const chatRoom = SelectionState.selectedChatRoom
-                            if (chatRoom && (chatRoom.ownUserJoinState === IChatRoom.UserRoomState.Joined)) {
-                                chatRoom.resetUnreadCount()
-                            }
-                        }
-                    }
-
                     function selectRoom(roomId : string) {
 
                         SelectionState.selectedChatRoom = control.attachedData?.chatRoomByRoomId(roomId) ?? null
