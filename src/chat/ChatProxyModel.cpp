@@ -23,6 +23,7 @@ QHash<int, QByteArray> ChatProxyModel::roleNames() const
     }
     roles[static_cast<int>(Roles::ReadUsers)] = "readUsers";
     roles[static_cast<int>(Roles::IsLatestOwnMessage)] = "isLatestOwnMessage";
+    roles[static_cast<int>(Roles::IsFirstUnread)] = "isFirstUnread";
     return roles;
 }
 
@@ -52,6 +53,15 @@ QVariant ChatProxyModel::data(const QModelIndex &index, int role) const
         }
         return true;
     }
+
+    case static_cast<int>(Roles::IsFirstUnread): {
+        const auto sourceIndex = mapToSource(index);
+        if (!sourceIndex.isValid()) {
+            return false;
+        }
+        return sourceIndex.row() == firstUnreadSourceRow();
+    }
+
     case static_cast<int>(Roles::ReadUsers): {
 
         // readUsers shall be shown/returned if this is the latest own message or if it is an own
@@ -98,6 +108,40 @@ ChatMessage *ChatProxyModel::ownMessageAt(qsizetype proxyIndex) const
             ->chatRoom()
             ->chatMessages()
             .at(prevSource.row());
+}
+
+qsizetype ChatProxyModel::firstUnreadSourceRow() const
+{
+    const auto *model = qobject_cast<ChatModel *>(sourceModel());
+    if (!model) {
+        return -1;
+    }
+
+    const auto *chatRoom = model->chatRoom();
+    if (!chatRoom) {
+        return -1;
+    }
+
+    const auto ownRead = chatRoom->ownLastReadTimestamp();
+    if (!ownRead.isValid()) {
+        return -1;
+    }
+
+    const auto messages = chatRoom->chatMessages();
+    const auto it = std::ranges::find_if(messages, [ownRead](const auto *message) {
+        if (message->timestamp() <= ownRead) {
+            return false;
+        }
+
+        // Never for own messages
+        return !(message->flags() & ChatMessage::Flag::OwnMessage);
+    });
+
+    if (it != messages.end()) {
+        return std::distance(messages.begin(), it);
+    }
+
+    return -1;
 }
 
 QList<ChatUser *> ChatProxyModel::readUsersFor(const IChatRoom *chatRoom,
@@ -238,6 +282,8 @@ void ChatProxyModel::onChatRoomChanged()
                 [this]() { invalidateProxyRoles(); });
         connect(chatRoom, &IChatRoom::readMarkersChanged, m_chatRoomContext,
                 [this]() { invalidateProxyRoles(); });
+        connect(chatRoom, &IChatRoom::ownLastReadTimestampChanged, m_chatRoomContext,
+                [this]() { invalidateProxyRoles(); });
         connect(chatRoom, &IChatRoom::chatMessageFlagsChanged, m_chatRoomContext,
                 [this]() { invalidateProxyRoles(); });
         connect(chatRoom, &IChatRoom::chatUsersChanged, m_chatRoomContext,
@@ -253,6 +299,7 @@ void ChatProxyModel::invalidateProxyRoles()
     if (rows > 0) {
         Q_EMIT dataChanged(index(0, 0), index(rows - 1, 0),
                            { static_cast<int>(Roles::ReadUsers),
-                             static_cast<int>(Roles::IsLatestOwnMessage) });
+                             static_cast<int>(Roles::IsLatestOwnMessage),
+                             static_cast<int>(Roles::IsFirstUnread) });
     }
 }

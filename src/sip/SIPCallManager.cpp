@@ -401,6 +401,16 @@ void SIPCallManager::endCall(QString id)
     }
 }
 
+void SIPCallManager::endCallWithContact(Contact *contact)
+{
+    if (!contact) {
+        return;
+    }
+    if (auto *call = findCallByContact(contact)) {
+        endCall(call);
+    }
+}
+
 void SIPCallManager::addMetadata(const QString &id, const QString &data)
 {
     if (auto call = findCallById(id)) {
@@ -663,6 +673,24 @@ SIPCall *SIPCallManager::findCallById(const QString &id) const
         }
     }
     return nullptr;
+}
+
+SIPCall *SIPCallManager::findCallByContact(const Contact *contact) const
+{
+    if (!contact) {
+        return nullptr;
+    }
+    for (auto *call : std::as_const(m_calls)) {
+        if (call->remoteContactInfo().contact == contact) {
+            return call;
+        }
+    }
+    return nullptr;
+}
+
+bool SIPCallManager::hasCallWithContact(Contact *contact) const
+{
+    return findCallByContact(contact);
 }
 
 void SIPCallManager::triggerCapability(const QString &accountId, const int callId,

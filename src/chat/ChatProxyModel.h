@@ -20,7 +20,8 @@ class ChatProxyModel : public QSortFilterProxyModel
 public:
     enum class Roles {
         ReadUsers = static_cast<int>(ChatModel::Roles::LastRole),
-        IsLatestOwnMessage
+        IsLatestOwnMessage,
+        IsFirstUnread
     };
 
     explicit ChatProxyModel(QObject *parent = nullptr);
@@ -41,6 +42,7 @@ private:
     QList<ChatUser *> readUsersFor(const IChatRoom *chatRoom, const ChatMessage *message) const;
     bool isValidOwnMessage(const QModelIndex &index) const;
     ChatMessage *ownMessageAt(qsizetype proxyIndex) const;
+    qsizetype firstUnreadSourceRow() const;
 
 private Q_SLOTS:
     void onSourceModelChanged();

@@ -8,26 +8,32 @@ import base
 
 ChatMessageAttachmentRectangle {
     id: control
-    property ChatMessageContentVideoFile content
-    property alias showFullscreenButton: fullScreenButton.visible
-    property real availableHeight: -1
-
-    readonly property real aspectRatio:
-        (control.sourceSize.width && control.sourceSize.height) ? (control.sourceSize.width / control.sourceSize.height) : (1280 / 720)
-    readonly property real videoMaxHeight:
-        Math.max(0, ((control.availableHeight > 0 ? Math.min(220, control.availableHeight) : 220) - topBar.height - buttonBar.height))
-    readonly property real videoHeight: control.videoMaxHeight
-    readonly property real videoWidth: control.videoHeight * control.aspectRatio
-    readonly property real minButtonBarWidth:
-        buttonBar.leftRowWidth + buttonBar.rightRowWidth + slider.width
-    readonly property real cardWidth: Math.max(control.videoWidth, control.minButtonBarWidth)
 
     implicitWidth: control.cardWidth
     implicitHeight: control.videoHeight + topBar.height + buttonBar.height
     width: control.cardWidth
     height: control.implicitHeight
 
+    property ChatMessageContentVideoFile content
+    property alias showFullscreenButton: fullScreenButton.visible
+    property real availableHeight: -1
+    property real explicitVideoHeight: -1
+
+    readonly property real aspectRatio: (control.sourceSize.width && control.sourceSize.height)
+                                        ? (control.sourceSize.width / control.sourceSize.height)
+                                        : (1280 / 720)
+    readonly property real videoMaxHeight: control.explicitVideoHeight > 0
+                                           ? control.explicitVideoHeight
+                                           : Math.max(0, ((control.availableHeight > 0
+                                                           ? Math.min(220, control.availableHeight)
+                                                           : 220)
+                                                          - topBar.height - buttonBar.height))
+    readonly property real videoHeight: control.videoMaxHeight
+    readonly property real videoWidth: control.videoHeight * control.aspectRatio
+    readonly property real minButtonBarWidth: buttonBar.leftRowWidth + buttonBar.rightRowWidth + slider.width
+    readonly property real cardWidth: Math.max(control.videoWidth, control.minButtonBarWidth)
     readonly property size sourceSize: thumbnail.sourceSize
+    readonly property real controlHeight: topBar.height + buttonBar.height
 
     MediaPlayer {
         id: mediaPlayer
