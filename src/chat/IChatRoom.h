@@ -52,6 +52,8 @@ class IChatRoom : public QObject
                        joinedChatUserCountChanged FINAL)
     Q_PROPERTY(qsizetype notificationCount READ notificationCount NOTIFY notificationCountChanged
                        FINAL)
+    Q_PROPERTY(QDateTime ownLastReadTimestamp READ ownLastReadTimestamp NOTIFY
+                       ownLastReadTimestampChanged FINAL)
 
 public:
     enum class UserRoomState { Unjoined, Joined, Invited, Knocked, Banned };
@@ -210,6 +212,10 @@ public:
     /// QDateTime if unknown.
     virtual QDateTime lastReadTimestamp(const QString &userId) const = 0;
 
+    /// The own readmarker as timestamp.
+    virtual QDateTime ownLastReadTimestamp() const = 0;
+    virtual void setOwnLastReadTimestamp(const QDateTime &timestamp) = 0;
+
     /// Remove all messages. Must invoke chatMessagesReset() afterwards.
     virtual void clear() = 0;
 
@@ -240,6 +246,7 @@ Q_SIGNALS:
     void otherUserChanged();
     void joinedChatUserCountChanged();
     void readMarkersChanged();
+    void ownLastReadTimestampChanged();
 
     /// Send when a chat message has been added. index is the one in the list returned by
     /// chatMessages(). Ownership remains in this room object.
