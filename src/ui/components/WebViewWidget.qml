@@ -79,9 +79,14 @@ BaseWidget {
 
             WebEngineView {
                 id: webView
-
-                url: Theme.isDarkMode ? control.darkModeUrl : control.lightModeUrl
                 backgroundColor: Theme.backgroundColor
+                url: {
+                    if (Theme.isDarkMode) {
+                        return !!control.darkModeUrl.trim() ? control.darkModeUrl : control.lightModeUrl
+                    } else {
+                        return !!control.lightModeUrl.trim() ? control.lightModeUrl : control.darkModeUrl
+                    }
+                }
                 settings {
                     autoLoadImages: true
                     errorPageEnabled: true
