@@ -56,7 +56,7 @@ SettingsPortal::SettingsPortal(QObject *parent) : QObject(parent)
 
         // Font scale: try to read KDE setting - if it's not there, go for the
         // GNOME one as it is always propagated.
-        auto r = m_portal->ReadAll({"org.kde.kdeglobals.General"});
+        auto r = m_portal->ReadAll({ "org.kde.kdeglobals.General" });
         r.waitForFinished();
 
         if (r.isValid()) {
