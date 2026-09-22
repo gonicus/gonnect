@@ -145,6 +145,7 @@ public:
     void pinOrUnpinMessage(const QString &roomId, const QString &messageId, bool pin);
 
     // IChatProvider interface
+    virtual qint64 mediaSizeLimit() const override { return m_mediaSizeLimit; }
     virtual qsizetype chatRoomsCount() override;
     virtual IChatRoom *chatRoomByIndex(qsizetype index) override;
     virtual bool hasFavoriteRooms() const override;
