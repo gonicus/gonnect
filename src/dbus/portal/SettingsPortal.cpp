@@ -56,11 +56,22 @@ SettingsPortal::SettingsPortal(QObject *parent) : QObject(parent)
 
         // Font scale: try to read KDE setting - if it's not there, go for the
         // GNOME one as it is always propagated.
-        reply = m_portal->ReadOne("org.kde.kdeglobals.General", "font");
-        reply.waitForFinished();
-        if (reply.isValid()) {
-            updateScaleFromFontString(reply.value().variant().toString());
-        } else {
+        bool hasKDEFont = false;
+        auto r = m_portal->ReadAll({"org.kde.kdeglobals.General"});
+        r.waitForFinished();
+
+        if (r.isValid()) {
+            const QMap<QString, QVariantMap> cfg = r.value();
+
+            if (cfg.contains("org.kde.kdeglobals.General")) {
+                const QVariantMap generalNS = cfg.value("org.kde.kdeglobals.General");
+                if (generalNS.contains("font")) {
+                    updateScaleFromFontString(generalNS.value("font").toString());
+                }
+            }
+        }
+
+        if (!hasKDEFont) {
             reply = m_portal->ReadOne("org.gnome.desktop.interface", "text-scaling-factor");
             reply.waitForFinished();
             if (reply.isValid()) {
