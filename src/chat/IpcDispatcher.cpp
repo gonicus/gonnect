@@ -1852,7 +1852,8 @@ bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
 /// fallback to repurpose an optimistic message when the response tag does not match its request.
 static ChatMessage *findPendingMessage(IpcChatRoom *room)
 {
-    for (auto *message : room->chatMessages()) {
+    const auto messages = room->chatMessages();
+    for (auto *message : messages) {
         if (message->flags() & ChatMessage::Flag::Pending) {
             return message;
         }
