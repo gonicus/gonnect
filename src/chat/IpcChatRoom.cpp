@@ -4,6 +4,9 @@
 #include "IpcDispatcher.h"
 #include "ChatMessageContentText.h"
 #include "ChatMessageContentVideoFile.h"
+#include "ChatMessageContentImage.h"
+#include "ChatMessageContentFile.h"
+#include "FileContentHelper.h"
 #include "AddressBook.h"
 #include "ErrorBus.h"
 #include "TextFormatHelper.h"
@@ -14,6 +17,7 @@
 #include <QLoggingCategory>
 #include <QFutureWatcher>
 #include <QtConcurrent>
+#include <QUuid>
 
 Q_LOGGING_CATEGORY(lcIpcChatRoom, "gonnect.app.chat.IpcChatRoom")
 
@@ -188,19 +192,46 @@ void IpcChatRoom::sendFile(const QString &filePath)
         return;
     }
 
+    // Create pending/optimistic message for immediate display
+    const auto tempEventId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+    auto *provider = chatProvider();
+    const QString ownUserId = provider ? provider->ownUserId() : id();
+    QString nickName = ownUserId;
+    if (const auto *ownUser = provider ? provider->userById(ownUserId) : nullptr) {
+        nickName = ownUser->displayName();
+    }
+
+    QObject *pendingContent = nullptr;
+    if (FileContentHelper::instance().fileType(filePath) == FileContentHelper::FileType::Image) {
+        pendingContent = new ChatMessageContentImage(url);
+    } else {
+        pendingContent = new ChatMessageContentFile(filePath, originalFileName);
+    }
+    auto *pendingMsg = new ChatMessage(tempEventId, ownUserId, nickName, pendingContent,
+                                       QDateTime::currentDateTimeUtc(), this,
+                                       ChatMessage::Flag::OwnMessage | ChatMessage::Flag::Pending);
+    addExistingMessage(pendingMsg, false, false);
+
     // "Upload" file
     auto watcher = new QFutureWatcher<QString>(this);
     connect(watcher, &QFutureWatcher<QString>::finished, this,
-            [this, watcher, filePath, originalFileName]() {
+            [this, watcher, filePath, originalFileName, tempEventId]() {
                 watcher->deleteLater();
 
                 const auto uploadedUrl = watcher->result();
                 if (uploadedUrl.isEmpty()) {
                     qCCritical(lcIpcChatRoom) << "Error on uploading file" << filePath;
+                    if (auto *msg = chatMessageById(tempEventId)) {
+                        auto flags = msg->flags();
+                        flags.setFlag(ChatMessage::Flag::Pending, false);
+                        flags.setFlag(ChatMessage::Flag::Failed, true);
+                        setMessageFlags(tempEventId, flags);
+                    }
                     return;
                 }
 
-                ipcDispatcher()->sendFile(id(), uploadedUrl, originalFileName);
+                ipcDispatcher()->sendFile(id(), uploadedUrl, originalFileName, tempEventId);
             });
 
     watcher->setFuture(QtConcurrent::run(

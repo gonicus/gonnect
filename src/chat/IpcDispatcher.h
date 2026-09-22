@@ -127,7 +127,7 @@ public:
     /// Send a message in the specified room with the file as an attachment. The file must
     /// have already been uploaded.
     void sendFile(const QString &roomId, const QString &filePath,
-                  const QString &originalFileName = "");
+                  const QString &originalFileName = "", const QString &tempEventId = "");
 
     /// Call to accept or reject a preceeding invitation to a room.
     virtual void respondToInvitation(const QString &roomId, bool acceptInvitation) override;

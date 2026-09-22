@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls.Material
 import QtQuick.Controls.impl
 import QtQuick.Effects
 import base
@@ -43,6 +44,7 @@ Item {
 
     property color textColor: Theme.primaryTextColor
     property real maxContentHeight: -1
+    property bool isPending: false
 
     readonly property alias messageLabel: messageLabel
     readonly property bool isText: (control.content instanceof ChatMessageContentText)
@@ -214,6 +216,46 @@ Item {
             ignoreUnknownSignals: true
             function openDirectChatRequested(userId : string) {
                 control.openDirectChatRequested(userId)
+            }
+        }
+    }
+
+    Item {
+        id: uploadingOverlay
+        visible: control.isPending && (control.content instanceof ChatMessageContentImage
+                                       || control.content instanceof ChatMessageContentFile
+                                       || control.content instanceof ChatMessageContentAudioFile
+                                       || control.content instanceof ChatMessageContentVideoFile)
+        x: (attachmentLoader.visible && attachmentLoader.item) ? attachmentLoader.item.x : messageImage.x
+        y: (attachmentLoader.visible && attachmentLoader.item) ? attachmentLoader.item.y : messageImage.y
+        width: (attachmentLoader.visible && attachmentLoader.item) ? attachmentLoader.item.width : messageImage.paintedWidth
+        height: (attachmentLoader.visible && attachmentLoader.item) ? attachmentLoader.item.height : messageImage.paintedHeight
+        z: 100
+
+        Rectangle {
+            id: uploadingBgRect
+            anchors.fill: parent
+            radius: 8
+            color: Theme.backgroundColor
+            opacity: 0.68
+        }
+
+        Row {
+            anchors.centerIn: parent
+            spacing: Theme.d / 2
+
+            BusyIndicator {
+                running: uploadingOverlay.visible
+                width: 3 * Theme.d
+                height: 3 * Theme.d
+                Material.accent: Theme.pickForegroundColor(uploadingBgRect.color)
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Label {
+                text: qsTr("Uploading...")
+                color: Theme.pickForegroundColor(uploadingBgRect.color)
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }

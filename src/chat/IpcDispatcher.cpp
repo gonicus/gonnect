@@ -464,7 +464,7 @@ void IpcDispatcher::sendTypingPing(const QString &roomId)
 }
 
 void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
-                             const QString &originalFileName)
+                             const QString &originalFileName, const QString &tempEventId)
 {
     if (!chatRoomByRoomId(roomId)) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
@@ -499,7 +499,21 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
 
     msgReq.setFile(content);
     req->setMessageSendRequest(msgReq);
-    sendRequest(req);
+
+    if (!sendRequest(req)) {
+        if (!tempEventId.isEmpty()) {
+            if (auto *room = ipcChatRoomById(roomId)) {
+                if (auto *msg = room->chatMessageById(tempEventId)) {
+                    auto flags = msg->flags();
+                    flags.setFlag(ChatMessage::Flag::Pending, false);
+                    flags.setFlag(ChatMessage::Flag::Failed, true);
+                    room->setMessageFlags(tempEventId, flags);
+                }
+            }
+        }
+    } else if (!tempEventId.isEmpty()) {
+        m_pendingMessages.insert(req->tag(), { roomId, tempEventId });
+    }
 }
 
 void IpcDispatcher::respondToInvitation(const QString &roomId, bool acceptInvitation)
@@ -1834,6 +1848,18 @@ bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
     return false;
 }
 
+/// Returns the first still-pending (optimistic) message in the room, or nullptr. Used as a
+/// fallback to repurpose an optimistic message when the response tag does not match its request.
+static ChatMessage *findPendingMessage(IpcChatRoom *room)
+{
+    for (auto *message : room->chatMessages()) {
+        if (message->flags() & ChatMessage::Flag::Pending) {
+            return message;
+        }
+    }
+    return nullptr;
+}
+
 ChatMessage *
 IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
                                                  bool isUnread, bool isIndependent,
@@ -1894,6 +1920,23 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
 
         auto idx = room->indexOfMessage(chatMessage);
         Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
+
+    } else if (auto *pendingCandidate = findPendingMessage(room)) {
+        // No matching message found yet. If an optimistic (pending) message still exists in the
+        // room, repurpose it instead of creating a duplicate. This covers the case where the
+        // response tag does not match the optimistic message's request tag.
+        room->updateMessageEventId(pendingCandidate->eventId(), message.messageId());
+        if (pendingCandidate->setTimestamp(dateTime)) {
+            room->resortMessage(pendingCandidate);
+        }
+        pendingCandidate->setContent(content);
+        room->setMessageFlags(pendingCandidate->eventId(), flags);
+        if (message.hasRelatedMessageId()) {
+            pendingCandidate->setRelatedMessageId(message.relatedMessageId());
+        }
+        Q_EMIT room->chatMessageContentChanged(room->indexOfMessage(pendingCandidate),
+                                               pendingCandidate);
+        chatMessage = pendingCandidate;
 
     } else {
         if (chatMessage) {
