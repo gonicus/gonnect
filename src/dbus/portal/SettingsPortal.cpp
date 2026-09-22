@@ -56,7 +56,6 @@ SettingsPortal::SettingsPortal(QObject *parent) : QObject(parent)
 
         // Font scale: try to read KDE setting - if it's not there, go for the
         // GNOME one as it is always propagated.
-        bool hasKDEFont = false;
         auto r = m_portal->ReadAll({"org.kde.kdeglobals.General"});
         r.waitForFinished();
 
@@ -71,7 +70,7 @@ SettingsPortal::SettingsPortal(QObject *parent) : QObject(parent)
             }
         }
 
-        if (!hasKDEFont) {
+        if (!m_hasKDEFont) {
             reply = m_portal->ReadOne("org.gnome.desktop.interface", "text-scaling-factor");
             reply.waitForFinished();
             if (reply.isValid()) {
@@ -117,7 +116,7 @@ void SettingsPortal::settingsChanged(QString ns, QString key, QDBusVariant value
             Q_EMIT accentColorChanged();
             return;
         }
-    } else if (ns == "org.gnome.desktop.interface") {
+    } else if (ns == "org.gnome.desktop.interface" && !m_hasKDEFont) {
         if (key == "text-scaling-factor") {
             m_fontScale = value.variant().toDouble();
             Q_EMIT fontScaleChanged();
@@ -147,7 +146,7 @@ QColor SettingsPortal::dbusDoubleTripleToColor(QDBusVariant value)
 
 void SettingsPortal::updateScaleFromFontString(const QString &fontString)
 {
-    // Format is 'FontFaily,pointSize,.....'
+    // Format is 'FontFamily,pointSize,.....'
     const QStringList parts = fontString.split(',');
     if (parts.size() < 2) {
         return;
@@ -159,6 +158,10 @@ void SettingsPortal::updateScaleFromFontString(const QString &fontString)
         return;
     }
 
-    m_fontScale = pointSize / m_designBasePointSize;
+    m_hasKDEFont = true;
+
+    const qreal pixelSize = pointSize * 96.0 / 72.0;
+    m_fontScale = pixelSize / m_designBasePixelSize;
+
     Q_EMIT fontScaleChanged();
 }

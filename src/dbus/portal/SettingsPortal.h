@@ -51,7 +51,8 @@ private:
     QColor m_accentColor;
 
     qreal m_fontScale = 1.0;
-    qreal m_designBasePointSize = 14.0;
+    qreal m_designBasePixelSize = 14.0;
+    bool m_hasKDEFont = false;
     bool m_highContrast = false;
 
     Q_DISABLE_COPY(SettingsPortal)
