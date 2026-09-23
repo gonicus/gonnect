@@ -105,7 +105,7 @@ Item {
             Label {
                 id: secondaryLabel
                 elide: Label.ElideRight
-                font.pixelSize: mainLabel.font.pixelSize - 2
+                font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryTextColor
                 visible: false
                 anchors {

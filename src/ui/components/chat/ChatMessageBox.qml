@@ -258,8 +258,8 @@ Item {
 
         Label {
             text: qsTr("Edit last message")
-            font.pixelSize: 14
-            color: Theme.foregroundWhiteColor
+            font.pixelSize: Theme.fontSizeNormal
+            color: Theme.whiteColor
             anchors {
                 left: parent.left
                 leftMargin: 10
@@ -283,7 +283,7 @@ Item {
                 width: 14
                 height: 14
                 source: Icons.mobileCloseApp
-                color: Theme.foregroundWhiteColor
+            color: Theme.whiteColor
             }
 
             anchors {
@@ -331,7 +331,7 @@ Item {
         TextEdit {
             id: messageField
             color: Theme.primaryTextColor
-            font.pixelSize: 14
+            font.pixelSize: Theme.fontSizeNormal
             wrapMode: TextEdit.Wrap
             width: messageFieldScrollView.availableWidth
             height: Math.max(messageField.contentHeight, messageFieldScrollView.availableHeight)

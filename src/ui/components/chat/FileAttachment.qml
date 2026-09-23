@@ -26,7 +26,7 @@ ChatMessageAttachmentRectangle {
                  : qsTr("File"))
         icon.source: Icons.mailAttachment
         font {
-            pixelSize: 14
+            pixelSize: Theme.fontSizeNormal
             weight: Font.DemiBold
         }
         anchors {

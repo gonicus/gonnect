@@ -90,7 +90,7 @@ Item {
 
     TextInput {
         id: searchInputField
-        font.pixelSize: 14
+        font.pixelSize: Theme.fontSizeNormal
         color: Theme.primaryTextColor
         focus: true
         focusPolicy: Qt.TabFocus

@@ -28,4 +28,6 @@ void FlatpakThemeManager::initColorThemeDetection()
             &FlatpakThemeManager::accentColorChanged);
     connect(m_settingsPortal, &SettingsPortal::highContrastChanged, this,
             &FlatpakThemeManager::highContrastChanged);
+    connect(m_settingsPortal, &SettingsPortal::fontScaleChanged, this,
+            &FlatpakThemeManager::fontScaleChanged);
 }
