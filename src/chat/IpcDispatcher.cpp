@@ -1813,12 +1813,12 @@ void IpcDispatcher::markPendingMessageFailed(const QString &roomId, const QStrin
         return;
     }
 
-    if (auto *room = chatRoomByRoomId(roomId)) {
+    if (auto *room = qobject_cast<IpcChatRoom *>(chatRoomByRoomId(roomId))) {
         if (auto *msg = room->chatMessageById(tempEventId)) {
             auto flags = msg->flags();
             flags.setFlag(ChatMessage::Flag::Pending, false);
             flags.setFlag(ChatMessage::Flag::Failed, true);
-            msg->setFlags(flags);
+            room->setMessageFlags(tempEventId, flags);
         }
     }
 }

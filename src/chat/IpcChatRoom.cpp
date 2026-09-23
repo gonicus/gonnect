@@ -215,6 +215,9 @@ void IpcChatRoom::sendFile(const QString &filePath)
 
     // "Upload" file
     auto watcher = new QFutureWatcher<QString>(this);
+
+    connect(watcher, &QFutureWatcher<QString>::finished, watcher, &QObject::deleteLater);
+
     connect(watcher, &QFutureWatcher<QString>::finished, this,
             [this, watcher, filePath, originalFileName, tempEventId]() {
                 watcher->deleteLater();
