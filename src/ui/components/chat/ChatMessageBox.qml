@@ -258,7 +258,7 @@ Item {
 
         Label {
             text: qsTr("Edit last message")
-            font.pixelSize: 14
+            font.pixelSize: Theme.fontSizeNormal
             color: Theme.foregroundWhiteColor
             anchors {
                 left: parent.left
@@ -331,7 +331,7 @@ Item {
         TextEdit {
             id: messageField
             color: Theme.primaryTextColor
-            font.pixelSize: 14
+            font.pixelSize: Theme.fontSizeNormal
             wrapMode: TextEdit.Wrap
             width: messageFieldScrollView.availableWidth
             height: messageField.contentHeight

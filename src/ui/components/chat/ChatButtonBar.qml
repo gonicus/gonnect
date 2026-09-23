@@ -65,7 +65,7 @@ Item {
 
     Label {
         id: mainLabel
-        font.pixelSize: 16
+        font.pixelSize: Theme.fontSizeMedium
         font.weight: Font.Medium
         elide: Text.ElideRight
         color: Theme.secondaryTextColor

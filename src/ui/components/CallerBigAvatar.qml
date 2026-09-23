@@ -52,7 +52,7 @@ Item {
 
     Label {
         id: otherName
-        font.pixelSize: 26
+        font.pixelSize: Theme.fontSizeExtraLarge
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: avatarImage.bottom
@@ -64,7 +64,7 @@ Item {
 
     Label {
         id: isCallingLabel
-        font.pixelSize: 22
+        font.pixelSize: Theme.fontSizeLarge
         text: qsTr("is calling...")
         color: Theme.secondaryTextColor
         visible: control.isIncoming && !control.isEstablished
@@ -79,7 +79,7 @@ Item {
 
     Label {
         id: callingLabel
-        font.pixelSize: 22
+        font.pixelSize: Theme.fontSizeLarge
         text: control.isInProgress ? qsTr("In progress...") :  qsTr("Calling...")
         color: Theme.secondaryTextColor
         visible: !control.isIncoming && !control.isEstablished

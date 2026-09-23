@@ -61,6 +61,10 @@ public:
     bool isConnected() const { return m_isConnected; }
     qsizetype unreadNotificationsCount() const { return m_unreadNotificationsCount; }
 
+    /// The limit (in bytes) for media/files that can be sent. A value ≤ 0 means that files
+    /// uploading is n/a. If the limit is arbitrary, it should return the data types max value.
+    virtual qint64 mediaSizeLimit() const = 0;
+
     virtual QString ownUserId() const = 0;
     virtual QString displayName() = 0;
     virtual qsizetype chatRoomsCount() = 0;

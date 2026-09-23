@@ -193,7 +193,7 @@ Item {
 
         Label {
             id: unreadLabel
-            text: qsTr("Unread messages")
+            text: qsTr("New messages")
             color: Theme.accentColor
             font.weight: Font.DemiBold
             anchors.centerIn: parent
@@ -233,7 +233,7 @@ Item {
             color: Theme.secondaryTextColor
             font {
                 weight: Font.DemiBold
-                pixelSize: 10
+                pixelSize: Theme.fontSizeSmall
             }
             anchors {
                 centerIn: parent
@@ -289,7 +289,7 @@ Item {
         text: control.nickName
         elide: Text.ElideRight
         font.weight: Font.Medium
-        font.pixelSize: 14
+        font.pixelSize: Theme.fontSizeNormal
         anchors {
             top: unreadSeparator.bottom
             topMargin: 15
@@ -306,7 +306,7 @@ Item {
         visible: !control.isSameMinuteAsPrevious || nameLabel.visible
         color: Theme.secondaryTextColor
         text: control.timestamp.toLocaleString(Qt.locale(), "hh:mm")
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontSizeSmall
         anchors {
             top: messageContentItem.top
             right: parent.right
@@ -647,7 +647,7 @@ Item {
                     text: reactionDelg.reaction
                     font {
                         family: "Noto Color Emoji"
-                        pixelSize: 14
+                        pixelSize: Theme.fontSizeNormal
                     }
                     anchors {
                         left: parent.left

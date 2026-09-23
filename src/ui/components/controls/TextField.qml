@@ -10,6 +10,8 @@ T.TextField {
 
     property bool isValid: true
 
+    font.pixelSize: Theme.fontSizeNormal
+
     implicitWidth: implicitBackgroundWidth + leftInset + rightInset
                    || Math.max(contentWidth, placeholder.implicitWidth) + leftPadding + rightPadding
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
