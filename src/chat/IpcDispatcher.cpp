@@ -444,13 +444,7 @@ void IpcDispatcher::sendMessage(const QString &roomId, const QString &text,
 
     if (!sendRequest(req)) {
         m_pendingMessages.remove(tag);
-
-        if (pendingMsg) {
-            auto flags = pendingMsg->flags();
-            flags.setFlag(Flag::Pending, false);
-            flags.setFlag(Flag::Failed, true);
-            ipcRoom->setMessageFlags(tempEventId, flags);
-        }
+        markPendingMessageFailed(roomId, tempEventId);
     }
 }
 
@@ -468,6 +462,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
 {
     if (!chatRoomByRoomId(roomId)) {
         qCCritical(lcIpcDispatcher) << "Unable to find room with id" << roomId << "- aborting";
+        markPendingMessageFailed(roomId, tempEventId);
         return;
     }
 
@@ -475,6 +470,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
     const QFileInfo fileInfo(QUrl(filePath).toLocalFile());
     if (!fileInfo.exists()) {
         qCCritical(lcIpcDispatcher) << "Cannot send file that does not exist:" << filePath;
+        markPendingMessageFailed(roomId, tempEventId);
         return;
     }
     if (m_mediaSizeLimit > 0 && fileInfo.size() > m_mediaSizeLimit) {
@@ -483,6 +479,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
                 tr("The file %1 exceeds the file size limit of %2 and cannot be sent.")
                         .arg(originalFileName,
                              TextFormatHelper::instance().formatFileSize(m_mediaSizeLimit)));
+        markPendingMessageFailed(roomId, tempEventId);
         return;
     }
 
@@ -502,16 +499,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
 
     const auto tag = req->tag();
     if (!sendRequest(req)) {
-        if (!tempEventId.isEmpty()) {
-            if (auto *room = ipcChatRoomById(roomId)) {
-                if (auto *msg = room->chatMessageById(tempEventId)) {
-                    auto flags = msg->flags();
-                    flags.setFlag(ChatMessage::Flag::Pending, false);
-                    flags.setFlag(ChatMessage::Flag::Failed, true);
-                    room->setMessageFlags(tempEventId, flags);
-                }
-            }
-        }
+        markPendingMessageFailed(roomId, tempEventId);
     } else if (!tempEventId.isEmpty()) {
         m_pendingMessages.insert(tag, { roomId, tempEventId });
     }
@@ -941,14 +929,7 @@ void IpcDispatcher::processResponse(
         // Mark pending message as failed on error
         if (const auto pendingInfo = m_pendingMessages.take(tag);
             !pendingInfo.tempEventId.isEmpty()) {
-            if (auto room = ipcChatRoomById(pendingInfo.roomId)) {
-                if (auto chatMsg = room->chatMessageById(pendingInfo.tempEventId)) {
-                    room->setMessageFlags(
-                            pendingInfo.tempEventId,
-                            (chatMsg->flags() & ~ChatMessage::Flags(ChatMessage::Flag::Pending))
-                                    | ChatMessage::Flag::Failed);
-                }
-            }
+            markPendingMessageFailed(pendingInfo.roomId, pendingInfo.tempEventId);
         }
 
     } else if (rc.hasMultipartEnd()) {
@@ -1820,6 +1801,22 @@ void IpcDispatcher::processResponse(
         setIsInVerificationProcess(false);
     } else {
         qFatal("Received an unimplemented or empty IPC message");
+    }
+}
+
+void IpcDispatcher::markPendingMessageFailed(const QString &roomId, const QString &tempEventId)
+{
+    if (tempEventId.isEmpty()) {
+        return;
+    }
+
+    if (auto *room = chatRoomByRoomId(roomId)) {
+        if (auto *msg = room->chatMessageById(tempEventId)) {
+            auto flags = msg->flags();
+            flags.setFlag(ChatMessage::Flag::Pending, false);
+            flags.setFlag(ChatMessage::Flag::Failed, true);
+            msg->setFlags(flags);
+        }
     }
 }
 

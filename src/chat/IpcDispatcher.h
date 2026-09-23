@@ -279,6 +279,8 @@ private:
     /// Dispatch the response container and its content payload.
     void processResponse(const de::gonicus::gonnect::ResponseContainer &responseContainer);
 
+    void markPendingMessageFailed(const QString &roomId, const QString &tempEventId);
+
     bool hasOwnUserMention(const ChatMessage &message) const;
     ChatMessage *createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
                                                    bool isUnread, bool isIndependent,
