@@ -500,6 +500,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
     msgReq.setFile(content);
     req->setMessageSendRequest(msgReq);
 
+    const auto tag = req->tag();
     if (!sendRequest(req)) {
         if (!tempEventId.isEmpty()) {
             if (auto *room = ipcChatRoomById(roomId)) {
@@ -512,7 +513,7 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
             }
         }
     } else if (!tempEventId.isEmpty()) {
-        m_pendingMessages.insert(req->tag(), { roomId, tempEventId });
+        m_pendingMessages.insert(tag, { roomId, tempEventId });
     }
 }
 
@@ -1848,19 +1849,6 @@ bool IpcDispatcher::hasOwnUserMention(const ChatMessage &message) const
     return false;
 }
 
-/// Returns the first still-pending (optimistic) message in the room, or nullptr. Used as a
-/// fallback to repurpose an optimistic message when the response tag does not match its request.
-static ChatMessage *findPendingMessage(IpcChatRoom *room)
-{
-    const auto messages = room->chatMessages();
-    for (auto *message : messages) {
-        if (message->flags() & ChatMessage::Flag::Pending) {
-            return message;
-        }
-    }
-    return nullptr;
-}
-
 ChatMessage *
 IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Message &message,
                                                  bool isUnread, bool isIndependent,
@@ -1921,25 +1909,6 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
 
         auto idx = room->indexOfMessage(chatMessage);
         Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
-
-    } else if (auto *pendingCandidate = findPendingMessage(room)) {
-
-        // Since the message id update is update, the message is not new but could not be found via
-        // chatMessageById above
-        isNew = false;
-
-        room->updateMessageEventId(pendingCandidate->eventId(), message.messageId());
-        if (pendingCandidate->setTimestamp(dateTime)) {
-            room->resortMessage(pendingCandidate);
-        }
-        pendingCandidate->setContent(content);
-        room->setMessageFlags(pendingCandidate->eventId(), flags);
-        if (message.hasRelatedMessageId()) {
-            pendingCandidate->setRelatedMessageId(message.relatedMessageId());
-        }
-        Q_EMIT room->chatMessageContentChanged(room->indexOfMessage(pendingCandidate),
-                                               pendingCandidate);
-        chatMessage = pendingCandidate;
 
     } else {
         if (chatMessage) {
