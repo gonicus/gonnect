@@ -31,7 +31,7 @@ Item {
         id: favoriteIcon
         anchors.centerIn: parent
         text: control.isFavorite ? "★" : "☆"
-        font.pixelSize: 20
+        font.pixelSize: Theme.fontSizeLarge
 
         Accessible.ignored: true
     }

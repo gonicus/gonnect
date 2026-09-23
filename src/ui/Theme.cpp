@@ -4,6 +4,8 @@
 
 #include <QLoggingCategory>
 #include <QRegularExpression>
+#include <QGuiApplication>
+#include <QFont>
 
 #include <algorithm>
 #include <cmath>
@@ -68,13 +70,14 @@ qreal Theme::contrastRatio(const QColor &a, const QColor &b)
 
 Theme::Theme(QObject *parent) : QObject{ parent }
 {
-
     // Setup theme variant
     auto &themeManager = ThemeManager::instance();
     connect(this, &Theme::themeVariantChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::colorSchemeChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateAccentColor);
     connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateColorPalette);
+    connect(&themeManager, &ThemeManager::fontScaleChanged, this,
+            [this]() { setFontScale(ThemeManager::instance().fontScale()); });
 
     AppSettings settings;
     m_themeVariant = static_cast<ThemeVariant>(settings.value("generic/themeVariant", 0).toUInt());
@@ -272,4 +275,55 @@ QColor Theme::resolvedSystemAccent() const
 {
     const QColor c = ThemeManager::instance().accentColor();
     return (c.isValid() && c.alpha() > 0) ? c : QColor();
+}
+
+static constexpr qreal normalSize = 14.0;
+
+void Theme::setFontScale(qreal scaleFactor)
+{
+    if (m_fontScale != scaleFactor) {
+        m_fontScale = scaleFactor;
+
+        // Propagate global font size
+        auto font = qApp->font();
+        font.setPixelSize(std::round(normalSize * scaleFactor));
+        qApp->setFont(font);
+
+        Q_EMIT fontSizeChanged();
+    }
+}
+
+qreal Theme::fontSizeExtraSmall() const
+{
+    return m_fontScale * 10.0;
+}
+
+qreal Theme::fontSizeSmall() const
+{
+    return m_fontScale * 12.0;
+}
+
+qreal Theme::fontSizeNormal() const
+{
+    return m_fontScale * normalSize;
+}
+
+qreal Theme::fontSizeMedium() const
+{
+    return m_fontScale * 17.0;
+}
+
+qreal Theme::fontSizeLarge() const
+{
+    return m_fontScale * 20.0;
+}
+
+qreal Theme::fontSizeExtraLarge() const
+{
+    return m_fontScale * 26.0;
+}
+
+qreal Theme::fontSizeHuge() const
+{
+    return m_fontScale * 32;
 }

@@ -13,10 +13,21 @@ class Theme : public QObject
             Theme::ThemeVariant themeVariant MEMBER m_themeVariant NOTIFY themeVariantChanged FINAL)
     Q_PROPERTY(bool isDarkMode READ isDarkMode NOTIFY isDarkModeChanged FINAL)
     Q_PROPERTY(bool useOwnDecoration READ useOwnDecoration NOTIFY useOwnDecorationChanged FINAL)
-    Q_PROPERTY(uint fontPixelSize READ fontPixelSize CONSTANT FINAL)
     Q_PROPERTY(uint d READ d CONSTANT FINAL)
     Q_PROPERTY(uint feedbackTimeout READ feedbackTimeout CONSTANT FINAL)
 
+    // Font sizes
+    Q_PROPERTY(qreal fontScale READ fontScale NOTIFY fontSizeChanged FINAL)
+
+    Q_PROPERTY(qreal fontSizeExtraSmall READ fontSizeExtraSmall NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeSmall READ fontSizeSmall NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeNormal READ fontSizeNormal NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeMedium READ fontSizeMedium NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeLarge READ fontSizeLarge NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeExtraLarge READ fontSizeExtraLarge NOTIFY fontSizeChanged FINAL)
+    Q_PROPERTY(qreal fontSizeHuge READ fontSizeHuge NOTIFY fontSizeChanged FINAL)
+
+    // Colors
     Q_PROPERTY(QColor primaryTextColor READ primaryTextColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor whiteColor READ whiteColor NOTIFY colorPaletteChanged FINAL)
     Q_PROPERTY(QColor foregroundHeaderIcons READ foregroundHeaderIcons NOTIFY colorPaletteChanged
@@ -105,6 +116,9 @@ public:
 
     Q_INVOKABLE void setUseOwnDecoration(bool value);
 
+    Q_INVOKABLE void setFontScale(qreal scaleFactor);
+
+    // Colors
     QColor primaryTextColor() const { return m_primaryTextColor; }
     QColor whiteColor() const { return m_whiteColor; }
     QColor foregroundHeaderIcons() const { return m_foregroundHeaderIcons; }
@@ -150,6 +164,7 @@ Q_SIGNALS:
     void colorPaletteChanged();
     void useOwnDecorationChanged();
     void accentColorChanged();
+    void fontSizeChanged();
 
     void rttBubbleSelfChanged();
     void rttTextSelfChanged();
@@ -166,6 +181,21 @@ private:
     bool m_isDarkMode = false;
     bool m_useOwnDecoration = false;
     bool m_useOwnDecorationInitalized = false;
+
+    // Font sizes
+    qreal m_fontScale = 1.0;
+    qreal fontScale() const { return m_fontScale; }
+
+    qreal fontSizeExtraSmall() const;
+    qreal fontSizeSmall() const;
+    qreal fontSizeNormal() const;
+    qreal fontSizeMedium() const;
+    qreal fontSizeLarge() const;
+    qreal fontSizeExtraLarge() const;
+    qreal fontSizeHuge() const;
+
+    QColor m_primaryTextColorLightMode = QColor(5, 5, 5);
+    QColor m_primaryTextColorDarkMode = QColor(248, 248, 248);
 
     QColor m_primaryTextColor;
     QColor m_whiteColor;
