@@ -65,7 +65,7 @@ Item {
 
     Label {
         id: mainLabel
-        font.pixelSize: 16
+        font.pixelSize: Theme.fontSizeMedium
         font.weight: Font.Medium
         elide: Text.ElideRight
         color: Theme.secondaryTextColor
@@ -198,7 +198,7 @@ Item {
         
         BarButton {
             visible: control.isThreadMode
-            iconSource: Icons.mobileCloseApp
+            iconPath: Icons.mobileCloseApp
             anchors.verticalCenter: parent.verticalCenter
             onClicked: () => control.closeThreadRequested()
         }

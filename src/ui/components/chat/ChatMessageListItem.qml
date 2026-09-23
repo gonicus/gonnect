@@ -50,9 +50,6 @@ Item {
     required property int relatedMessageUserState
     required property string relatedMessageAffectedUserId
 
-    readonly property bool isOwnMessage: !!(control.flags & ChatMessage.Flag.OwnMessage)
-    readonly property bool isPending: !!(control.flags & ChatMessage.Flag.Pending)
-    readonly property bool isFailed: !!(control.flags & ChatMessage.Flag.Failed)
     readonly property bool isThreadRoot: !!(control.flags & ChatMessage.Flag.ThreadRoot)
 
     property IChatProvider chatProvider
@@ -193,7 +190,7 @@ Item {
 
         Label {
             id: unreadLabel
-            text: qsTr("Unread messages")
+            text: qsTr("New messages")
             color: Theme.accentColor
             font.weight: Font.DemiBold
             anchors.centerIn: parent
@@ -233,7 +230,7 @@ Item {
             color: Theme.secondaryTextColor
             font {
                 weight: Font.DemiBold
-                pixelSize: 10
+                pixelSize: Theme.fontSizeSmall
             }
             anchors {
                 centerIn: parent
@@ -289,7 +286,7 @@ Item {
         text: control.nickName
         elide: Text.ElideRight
         font.weight: Font.Medium
-        font.pixelSize: 14
+        font.pixelSize: Theme.fontSizeNormal
         anchors {
             top: unreadSeparator.bottom
             topMargin: 15
@@ -306,7 +303,7 @@ Item {
         visible: !control.isSameMinuteAsPrevious || nameLabel.visible
         color: Theme.secondaryTextColor
         text: control.timestamp.toLocaleString(Qt.locale(), "hh:mm")
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontSizeSmall
         anchors {
             top: messageContentItem.top
             right: parent.right
@@ -627,27 +624,25 @@ Item {
                     id: reactionBg
                     radius: 6
                     anchors.fill: parent
-                    color: reactionDelg.isOwnReaction
+                    color: rDelg.isOwnReaction
                            ? Theme.backgroundOffsetColor
-                           : (reactionDelgHoverHandler.hovered
+                           : (rDelg.hovered
                               ? Theme.backgroundOffsetHoveredColor
                               : Theme.backgroundSecondaryColor)
-                    border {
-                        width: 1
-                        color: reactionDelg.isOwnReaction
-                               ? Theme.highlightColor
-                               : (reactionDelgHoverHandler.hovered
-                                  ? Theme.borderHeaderIconHovered
-                                  : Theme.borderColor)
-                    }
+                     border {
+                         width: 1
+                         color: reactionDelg.isOwnReaction
+                                ? Theme.highlightColor
+                                : Theme.borderColor
+                     }
                 }
 
                 Label {
                     id: reactionLabel
-                    text: reactionDelg.reaction
+                    text: rDelg.reaction
                     font {
                         family: "Noto Color Emoji"
-                        pixelSize: 14
+                        pixelSize: Theme.fontSizeNormal
                     }
                     anchors {
                         left: parent.left
@@ -659,7 +654,7 @@ Item {
 
                 Label {
                     id: reactionCountLabel
-                    text: reactionDelg.count
+                    text: rDelg.count
                     anchors {
                         left: reactionLabel.right
                         leftMargin: 4
@@ -667,9 +662,9 @@ Item {
                     }
                 }
 
-                ToolTip.text: reactionDelg.users.map(user => user.computedName).join(", ")
-                ToolTip.visible: reactionDelgHoverHandler.hovered
-                ToolTip.toolTip.y: reactionDelg.height + Theme.d
+                ToolTip.text: rDelg.users.map(user => user.computedName).join(", ")
+                ToolTip.visible: rDelg.hovered
+                ToolTip.toolTip.y: rDelg.height + Theme.d
 
                 HoverHandler {
                     id: reactionDelgHoverHandler
@@ -678,14 +673,14 @@ Item {
 
                 TapHandler {
                     onTapped: () => {
-                        if (reactionDelg.isOwnReaction) {
+                        if (rDelg.isOwnReaction) {
                             control.chatProvider.retractReaction(control.roomId,
                                                                  control.eventId,
-                                                                 reactionDelg.reaction)
+                                                                 rDelg.reaction)
                         } else {
                             control.chatProvider.addReaction(control.roomId,
                                                              control.eventId,
-                                                             reactionDelg.reaction)
+                                                             rDelg.reaction)
                         }
                     }
                 }

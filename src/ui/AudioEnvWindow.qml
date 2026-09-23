@@ -37,7 +37,7 @@ BaseWindow {
             Label {
                 id: audioDeviceError
                 text: qsTr("No fitting audio environment could be found. Please select the desired audio devices.")
-                font.pixelSize: 16
+                font.pixelSize: Theme.fontSizeMedium
                 wrapMode: Label.Wrap
                 anchors {
                     left: parent.left
@@ -90,7 +90,7 @@ BaseWindow {
 
                         font.family: inputAudioSelector.font.family
                         font.weight: inputAudioSelector.font.weight
-                        font.pointSize: inputAudioSelector.font.pointSize
+                        font.pixelSize: inputAudioSelector.font.pixelSize
 
                         Accessible.role: Accessible.ListItem
                         Accessible.name: inputAudioSelectorDelg.name
@@ -171,7 +171,7 @@ BaseWindow {
 
                         font.family: outputAudioSelector.font.family
                         font.weight: outputAudioSelector.font.weight
-                        font.pointSize: outputAudioSelector.font.pointSize
+                        font.pixelSize: outputAudioSelector.font.pixelSize
 
                         Accessible.role: Accessible.ListItem
                         Accessible.name: outputAudioSelectorDelg.name
@@ -253,7 +253,7 @@ BaseWindow {
 
                         font.family: outputRingToneAudioSelector.font.family
                         font.weight: outputRingToneAudioSelector.font.weight
-                        font.pointSize: outputRingToneAudioSelector.font.pointSize
+                        font.pixelSize: outputRingToneAudioSelector.font.pixelSize
 
                         Accessible.role: Accessible.ListItem
                         Accessible.name: outputRingToneAudioSelectorDelg.name

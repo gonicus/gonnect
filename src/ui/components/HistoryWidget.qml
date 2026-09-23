@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.impl
 import QtQuick.Controls.Material
+import QtQuick.Layouts
 import base
 
 BaseWidget {
@@ -50,9 +51,9 @@ BaseWidget {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
-                    right: historyFilterMediumSelector.left
+                    right: parent.right
                     leftMargin: 20
-                    rightMargin: 20
+                    rightMargin: 20 + historyHeading.actionsWidth + (historyHeading.actionsWidth > 0 ? 20 : 0)
                 }
 
                 Keys.onEscapePressed: () => {
@@ -64,20 +65,24 @@ BaseWidget {
                 }
             }
 
+            actions: [
             ComboBox {
                 id: historyFilterMediumSelector
-                height: 30
-                font.pixelSize: 13
+                Layout.preferredHeight: Math.round(30 * Theme.fontSizeNormal / 13)
+                font.pixelSize: Theme.fontSizeNormal
                 padding: 0
-                rightPadding: 10
+                rightPadding: indicator.width + 4
                 valueRole: "value"
                 textRole: "label"
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: historyFilterTypeSelector.left
-                    rightMargin: 10
-                }
 
+                onFontChanged: () => {
+                    implicitContentWidthPolicy = ComboBox.ContentItemImplicitWidth
+                    implicitContentWidthPolicy = ComboBox.WidestText
+                }
+                implicitContentWidthPolicy: ComboBox.WidestText
+
+                Layout.alignment: Qt.AlignVCenter
+                Layout.preferredWidth: implicitWidth
                 model: [
                     {
                         value: HistoryProxyModel.MediumFilter.ALL,
@@ -91,18 +96,20 @@ BaseWidget {
                     }
                 ]
 
+                popup.width: Math.max(width, Math.round(12 * Theme.fontSizeNormal))
+
                 Accessible.role: Accessible.ComboBox
                 Accessible.name: qsTr("History call type picker")
                 Accessible.description: qsTr("Select the call type to filter by")
 
                 delegate: ItemDelegate {
                     id: historyFilterMediumSelectorDelg
-                    width: historyFilterMediumSelector.width
+                    width: ListView.view.width
                     text: historyFilterMediumSelectorDelg.label
 
                     font.family: historyFilterMediumSelector.font.family
                     font.weight: historyFilterMediumSelector.font.weight
-                    font.pointSize: historyFilterMediumSelector.font.pointSize
+                    font.pixelSize: historyFilterMediumSelector.font.pixelSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: historyFilterMediumSelectorDelg.label
@@ -111,22 +118,25 @@ BaseWidget {
 
                     required property string label
                 }
-            }
+            },
 
             ComboBox {
                 id: historyFilterTypeSelector
-                height: 30
-                font.pixelSize: 13
+                Layout.preferredHeight: Math.round(30 * Theme.fontSizeNormal / 13)
+                font.pixelSize: Theme.fontSizeNormal
                 padding: 0
-                rightPadding: 10
+                rightPadding: indicator.width + 4
                 valueRole: "value"
                 textRole: "label"
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: showHistorySearchButton.left
-                    rightMargin: 10
-                }
 
+                onFontChanged: () => {
+                    implicitContentWidthPolicy = ComboBox.ContentItemImplicitWidth
+                    implicitContentWidthPolicy = ComboBox.WidestText
+                }
+                implicitContentWidthPolicy: ComboBox.WidestText
+
+                Layout.alignment: Qt.AlignVCenter
+                Layout.preferredWidth: implicitWidth
                 model: [
                     {
                         value: HistoryProxyModel.TypeFilter.ALL,
@@ -143,18 +153,20 @@ BaseWidget {
                     }
                 ]
 
+                popup.width: Math.max(width, Math.round(12 * Theme.fontSizeNormal))
+
                 Accessible.role: Accessible.ComboBox
                 Accessible.name: qsTr("History call origin picker")
                 Accessible.description: qsTr("Select the call origin to filter by")
 
                 delegate: ItemDelegate {
                     id: historyFilterTypeSelectorDelg
-                    width: historyFilterTypeSelector.width
+                    width: ListView.view.width
                     text: historyFilterTypeSelectorDelg.label
 
                     font.family: historyFilterTypeSelector.font.family
                     font.weight: historyFilterTypeSelector.font.weight
-                    font.pointSize: historyFilterTypeSelector.font.pointSize
+                    font.pixelSize: historyFilterTypeSelector.font.pixelSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: historyFilterTypeSelectorDelg.label
@@ -163,17 +175,13 @@ BaseWidget {
 
                     required property string label
                 }
-            }
+            },
 
             HeaderIconButton {
                 id: showHistorySearchButton
                 iconSource: historyHeading.searchVisible ? Icons.mobileCloseApp : Icons.systemSearch
                 accessiblePurpose: historyHeading.searchVisible ? qsTr("Hide history search") : qsTr("Show history search")
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: parent.right
-                    rightMargin: 20
-                }
+                Layout.alignment: Qt.AlignVCenter
 
                 onClicked: () => {
                     if (historyHeading.searchVisible) {
@@ -185,6 +193,7 @@ BaseWidget {
                     }
                 }
             }
+            ]
         }
 
         HistoryList {

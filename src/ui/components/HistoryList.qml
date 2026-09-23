@@ -20,7 +20,7 @@ Item {
         anchors.centerIn: parent
         visible: !control.hasPastCalls
         color: Theme.secondaryTextColor
-        font.pixelSize: 18
+        font.pixelSize: Theme.fontSizeLarge
         text: "🕓  " + qsTr("No past calls")
 
         Accessible.role: Accessible.StaticText
@@ -82,7 +82,7 @@ Item {
         delegate: Item {
             id: delg
             enabled: ViewHelper.isJitsiAvailable || !delg.isJitsiMeetCall
-            height: 50
+            height: Math.max(50, rowLayout.implicitHeight + Theme.d)
             anchors {
                 left: parent?.left
                 right: parent?.right
@@ -156,7 +156,8 @@ Item {
             }
 
             RowLayout {
-                height: 40
+                id: rowLayout
+                height: rowLayout.implicitHeight
                 spacing: 0
                 anchors {
                     left: parent.left
@@ -186,7 +187,7 @@ Item {
                     id: nameCompanyContainer
                     Layout.preferredWidth: (delg.width - avatarImage.width - typeIcon.width - timesContainer.width - 50) / 2
                     Layout.alignment: Qt.AlignVCenter
-                    implicitHeight: contactNameLabel.implicitHeight
+                    implicitHeight: contactNameLabel.implicitHeight + (companyLabel.visible ? companyLabel.implicitHeight : 0)
                     implicitWidth: Math.max(contactNameLabel.implicitWidth, companyLabel.implicitWidth)
 
                     Label {
@@ -235,7 +236,7 @@ Item {
                     id: phoneNumberLocationContainer
                     Layout.preferredWidth: nameCompanyContainer.Layout.preferredWidth
                     Layout.alignment: Qt.AlignVCenter
-                    implicitHeight: phoneNumberLabel.implicitHeight
+                    implicitHeight: phoneNumberLabel.implicitHeight + (locationLabel.visible ? locationLabel.implicitHeight : 0)
                     implicitWidth: Math.max(phoneNumberLabel.implicitWidth, locationLabel.implicitWidth)
 
                     Label {
@@ -318,10 +319,12 @@ Item {
 
                 Item {
                     id: timesContainer
-                    implicitHeight: timeLabel.implicitHeight
-                    Layout.preferredWidth: 60
-                    Layout.rightMargin: 10
+                    implicitHeight: timeLabel.implicitHeight + (durationLabel.visible ? durationLabel.implicitHeight : 0)
+                    Layout.rightMargin: Theme.d
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                    Layout.preferredWidth: Math.max(60,
+                                                    timeTextLabel.implicitWidth + 2 * Theme.d,
+                                                    durationTextLabel.implicitWidth + 2 * Theme.d)
 
                     Item {
                         id: timeLabel

@@ -186,7 +186,7 @@ Rectangle {
                 width: 16
                 height: 15
                 source: Icons.callStop
-                color: Theme.foregroundWhiteColor
+                color: Theme.whiteColor
             }
 
             Accessible.ignored: true

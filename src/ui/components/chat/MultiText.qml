@@ -41,7 +41,7 @@ Column {
                 visible: !delg.isCode
                 y: delg.index > 0 ? 5 : 0
                 text: delg.htmlText
-                font.pixelSize: Theme.fontPixelSize
+                font.pixelSize: Theme.fontSizeNormal
                 wrapMode: Label.WordWrap
                 textFormat: Text.RichText
                 readOnly: true

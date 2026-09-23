@@ -126,7 +126,7 @@ Item {
 
         Label {
             text: qsTr("Waiting for chat provider...")
-            font.pixelSize: 22
+            font.pixelSize: Theme.fontSizeLarge
             anchors.centerIn: parent
         }
     }
@@ -148,7 +148,7 @@ Item {
 
             Label {
                 text: qsTr("Your device is currently not verified. Please choose one of the following methods to verify it.")
-                font.pixelSize: 22
+                font.pixelSize: Theme.fontSizeLarge
                 wrapMode: Text.Wrap
                 horizontalAlignment: Label.AlignHCenter
                 anchors {
@@ -195,7 +195,7 @@ Item {
         Label {
             id: waitingForResponseLabel
             text: qsTr("Waiting for response...")
-            font.pixelSize: 22
+            font.pixelSize: Theme.fontSizeLarge
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: parent.verticalCenter
@@ -234,7 +234,7 @@ Item {
 
             Label {
                 text: qsTr("Please enter your recovery key:")
-                font.pixelSize: 22
+                font.pixelSize: Theme.fontSizeLarge
                 wrapMode: Text.Wrap
                 horizontalAlignment: Label.AlignHCenter
                 anchors {
@@ -293,7 +293,7 @@ Item {
 
             Label {
                 text: qsTr("Please choose one of the following cross-signing methods:")
-                font.pixelSize: 22
+                font.pixelSize: Theme.fontSizeLarge
                 wrapMode: Text.Wrap
                 horizontalAlignment: Label.AlignHCenter
                 anchors {
@@ -345,7 +345,7 @@ Item {
 
             Label {
                 text: qsTr("Confirm that the code or emojis match in both sessions:")
-                font.pixelSize: 22
+                font.pixelSize: Theme.fontSizeLarge
                 wrapMode: Text.Wrap
                 horizontalAlignment: Label.AlignHCenter
                 anchors {
@@ -361,7 +361,7 @@ Item {
                 text: internal.secret?.stringSecret() ?? ""
                 font {
                     family: "Monospace"
-                    pixelSize: 42
+                    pixelSize: Theme.fontSizeHuge
                 }
                 anchors {
                     left: parent.left
@@ -389,7 +389,7 @@ Item {
 
                         Label {
                             text: symbolDelg.modelData.symbol()
-                            font.pixelSize: 36
+                            font.pixelSize: Theme.fontSizeHuge
                             horizontalAlignment: Label.AlignHCenter
                             anchors {
                                 top: parent.top
@@ -450,7 +450,7 @@ Item {
 
         Label {
             text: qsTr("Your device has successfully been verified!")
-            font.pixelSize: 22
+            font.pixelSize: Theme.fontSizeLarge
             anchors.centerIn: parent
         }
     }

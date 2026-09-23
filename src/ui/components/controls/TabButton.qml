@@ -25,7 +25,7 @@ T.TabButton {
     icon.color: !enabled ? Material.hintTextColor : down || checked ? Material.accentColor : Material.foreground
 
     font.family: "Noto Sans"
-    font.pixelSize: 16
+    font.pixelSize: Theme.fontSizeMedium
     font.weight: Font.Medium
 
     property real topLeftRadius: 0
@@ -40,7 +40,7 @@ T.TabButton {
         elide: Label.ElideRight
 
         font.family: "Noto Sans"
-        font.pixelSize: 16
+        font.pixelSize: Theme.fontSizeMedium
         font.weight: Font.Medium
     }
 
