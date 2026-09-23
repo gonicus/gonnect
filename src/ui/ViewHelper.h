@@ -217,6 +217,7 @@ Q_SIGNALS:
     void fullscreenToggle();
     void showChatUserSearchDialog(IChatProvider *provider);
     void showPublicRoomSearchDialog(IChatProvider *provider);
+    void showMessageSearchDialog();
     void showKnockRoomDialog(IChatProvider *provider, QString roomId);
     void showLargeImage(QUrl imageFilePath);
     void showLargeVideo(ChatMessageContentVideoFile *file);

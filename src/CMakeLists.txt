@@ -19,6 +19,7 @@ find_package(logfault CONFIG REQUIRED)
 #find_package(hunspell REQUIRED)
 find_package(cmark REQUIRED)
 find_package(KF6SyntaxHighlighting REQUIRED)
+find_package(ICU REQUIRED COMPONENTS uc i18n data)
 
 if(UNIX)
     include(FindPkgConfig)
@@ -33,10 +34,24 @@ if(UNIX)
         PkgConfig::LIBUSB1
         PkgConfig::LIBHIDAPI)
 
+    if(FLATPAK)
+        list(APPEND PLATFORM_LIBRARIES
+            sqlcipher
+            stemmer)
+    else()
+        find_package(sqlcipher REQUIRED)
+        find_package(SnowballStem REQUIRED)
+        list(APPEND PLATFORM_LIBRARIES
+            sqlcipher::sqlcipher
+            SnowballStem::libstemmer)
+    endif()
+
     add_definitions(${PJSIP_STATIC_CFLAGS})
     include_directories(${PJSIP_STATIC_INCLUDE_DIRS})
     link_directories(${PJSIP_STATIC_LIBRARY_DIRS})
 else()
+    find_package(SnowballStem REQUIRED)
+    find_package(sqlcipher REQUIRED)
     find_package(pjproject REQUIRED)
     find_package(hidapi REQUIRED)
     find_package(libusb REQUIRED)
@@ -44,6 +59,8 @@ else()
     find_package(QHotkey REQUIRED)
 
     list(APPEND PLATFORM_LIBRARIES
+        SnowballStem::libstemmer
+        sqlcipher::sqlcipher
         pjproject::pjproject
         hidapi::hidapi
         libusb::libusb
@@ -443,6 +460,7 @@ qt_add_qml_module(gonnect
         ui/components/popups/LargeImage.qml
         ui/components/popups/LargeVideo.qml
         ui/components/popups/Menu.qml
+        ui/components/popups/MessageSearch.qml
         ui/components/popups/OwnAvatarContextMenu.qml
         ui/components/popups/PublicRoomSearch.qml
         ui/components/popups/Popup.qml
@@ -662,6 +680,15 @@ qt_add_qml_module(gonnect
         chat/ChatMessageContentRemoved.cpp
         chat/ChatMessageReaction.h
         chat/ChatMessageReaction.cpp
+        # FTS5
+        chat/ChatMessageSearchIndexer.h
+        chat/ChatMessageSearchIndexer.cpp
+        chat/ChatMessageSearchModel.h
+        chat/ChatMessageSearchModel.cpp
+        chat/ChatMessageSearchPreprocessor.h
+        chat/ChatMessageSearchPreprocessor.cpp
+        chat/ChatMessageSearchProvider.h
+        chat/ChatMessageSearchProvider.cpp
         chat/ChatModel.h
         chat/ChatModel.cpp
         chat/ChatUser.h
@@ -938,7 +965,9 @@ if(LINUX)
     set_target_properties(gonnect PROPERTIES LINK_FLAGS_RELEASE -s)
     target_link_options(gonnect PRIVATE
         "-Wl,--exclude-libs,libcrypto.a"
-        "-Wl,--exclude-libs,libssl.a")
+        "-Wl,--exclude-libs,libssl.a"
+        "-Wl,--exclude-libs,libldap.a"
+        "-Wl,--exclude-libs,liblber.a")
 endif()
 
 qt_extract_metatypes(gonnect)
@@ -976,6 +1005,9 @@ target_link_libraries(gonnect
         #hunspell::hunspell
         cmark::cmark
         KF6::SyntaxHighlighting
+        ICU::uc
+        ICU::i18n
+        ICU::data
         ${AKONADI_CONTACT_FACTORY}
         ${AKONADI_CALENDAR_FACTORY}
         ${CARDDAV_CONTACT_FACTORY}
@@ -1024,6 +1056,7 @@ target_include_directories(gonnect
 
 target_compile_definitions(gonnect
    PRIVATE
+    SQLITE_HAS_CODEC
     QT_DISABLE_DEPRECATED_BEFORE=0x060B00
     QT_NO_KEYWORDS)
 
