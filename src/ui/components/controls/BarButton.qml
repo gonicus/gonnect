@@ -90,7 +90,7 @@ Item {
             id: buttonLabel
             Accessible.ignored: true
             color: Theme.isDarkMode ? Theme.secondaryTextColor : Theme.inactiveTextColor
-            font.pixelSize: 11
+            font.pixelSize: Theme.fontSizeSmall
             horizontalAlignment: Label.AlignHCenter
             anchors {
                 bottom: parent.bottom

@@ -135,12 +135,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesList.qml" line="266"/>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="267"/>
         <source>, via %1</source>
         <translation type="unfinished">, vía %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesList.qml" line="389"/>
+        <location filename="../src/ui/components/ActivitiesList.qml" line="392"/>
         <source>hh:mm</source>
         <translation type="unfinished">hh:mm</translation>
     </message>
@@ -169,7 +169,7 @@
     </message>
     <message>
         <location filename="../src/ui/ActivitiesModel.cpp" line="43"/>
-        <location filename="../src/ui/ActivitiesModel.cpp" line="516"/>
+        <location filename="../src/ui/ActivitiesModel.cpp" line="521"/>
         <source>Removed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -182,7 +182,7 @@
 <context>
     <name>ActivitiesWidget</name>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="25"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="26"/>
         <source>Activities</source>
         <translation type="unfinished"></translation>
     </message>
@@ -207,27 +207,27 @@
         <translation type="unfinished">Chat</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="74"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="76"/>
         <source>Activity type picker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="75"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="77"/>
         <source>Select the activity type to filter by</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="87"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="89"/>
         <source>Currently selected activity type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="97"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="99"/>
         <source>Hide activities search</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="97"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="99"/>
         <source>Show activities search</source>
         <translation type="unfinished"></translation>
     </message>
@@ -253,7 +253,7 @@
 <context>
     <name>AddressBookManager</name>
     <message>
-        <location filename="../src/contacts/AddressBookManager.cpp" line="224"/>
+        <location filename="../src/contacts/AddressBookManager.cpp" line="227"/>
         <source>Failed to persist address book credentials: %1</source>
         <translation>No se pudieron conservar las credenciales de la libreta de direcciones: %1</translation>
     </message>
@@ -524,54 +524,54 @@
 <context>
     <name>BaseWindow</name>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="157"/>
-        <location filename="../src/ui/BaseWindow.qml" line="188"/>
-        <location filename="../src/ui/BaseWindow.qml" line="216"/>
-        <location filename="../src/ui/BaseWindow.qml" line="246"/>
-        <location filename="../src/ui/BaseWindow.qml" line="274"/>
-        <location filename="../src/ui/BaseWindow.qml" line="304"/>
-        <location filename="../src/ui/BaseWindow.qml" line="332"/>
-        <location filename="../src/ui/BaseWindow.qml" line="362"/>
+        <location filename="../src/ui/BaseWindow.qml" line="163"/>
+        <location filename="../src/ui/BaseWindow.qml" line="194"/>
+        <location filename="../src/ui/BaseWindow.qml" line="222"/>
+        <location filename="../src/ui/BaseWindow.qml" line="252"/>
+        <location filename="../src/ui/BaseWindow.qml" line="280"/>
+        <location filename="../src/ui/BaseWindow.qml" line="310"/>
+        <location filename="../src/ui/BaseWindow.qml" line="338"/>
+        <location filename="../src/ui/BaseWindow.qml" line="368"/>
         <source>Drag border</source>
         <translation>Borde de arrastre</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="158"/>
+        <location filename="../src/ui/BaseWindow.qml" line="164"/>
         <source>Top left drag border for window resize operations</source>
         <translation>Borde de arrastre superior izquierdo para cambiar el tamaño de la ventana</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="189"/>
+        <location filename="../src/ui/BaseWindow.qml" line="195"/>
         <source>Top drag border for window resize operations</source>
         <translation>Borde de arrastre superior para cambiar el tamaño de la ventana</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="217"/>
+        <location filename="../src/ui/BaseWindow.qml" line="223"/>
         <source>Top right border for window resize operations</source>
         <translation>Borde superior derecho para cambiar el tamaño de la ventana</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="247"/>
+        <location filename="../src/ui/BaseWindow.qml" line="253"/>
         <source>Right drag border for window resize operations</source>
         <translation>Borde de arrastre derecho para cambiar el tamaño de la ventana</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="275"/>
+        <location filename="../src/ui/BaseWindow.qml" line="281"/>
         <source>Bottom right drag border for window resize operations</source>
         <translation>Borde de arrastre inferior derecho para cambiar el tamaño de la ventana</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="305"/>
+        <location filename="../src/ui/BaseWindow.qml" line="311"/>
         <source>Bottom drag border for window resize operations</source>
         <translation>Borde de arrastre inferior para cambiar el tamaño de la ventana</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="333"/>
+        <location filename="../src/ui/BaseWindow.qml" line="339"/>
         <source>Bottom left drag border for window resize operations</source>
         <translation>Borde de arrastre inferior izquierdo para cambiar el tamaño de la ventana</translation>
     </message>
     <message>
-        <location filename="../src/ui/BaseWindow.qml" line="363"/>
+        <location filename="../src/ui/BaseWindow.qml" line="369"/>
         <source>Left drag border for window resize operations</source>
         <translation>Borde de arrastre izquierdo para cambiar el tamaño de la ventana</translation>
     </message>
@@ -842,12 +842,12 @@
         <translation type="unfinished">Más</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="605"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="603"/>
         <source>Accept</source>
         <translation type="unfinished">Aceptar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/CallButtonBar.qml" line="616"/>
+        <location filename="../src/ui/components/CallButtonBar.qml" line="614"/>
         <source>Hang up</source>
         <translation type="unfinished">Colgar</translation>
     </message>
@@ -1089,12 +1089,12 @@
 <context>
     <name>Chat</name>
     <message>
-        <location filename="../src/ui/components/chat/Chat.qml" line="132"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="139"/>
         <source>Messages are loading...</source>
         <translation type="unfinished">Cargando mensajes...</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/Chat.qml" line="153"/>
+        <location filename="../src/ui/components/chat/Chat.qml" line="160"/>
         <source>%1 is/are typing</source>
         <translation type="unfinished">
             <numerusform>%1 está escribiendo</numerusform>
@@ -1105,52 +1105,62 @@
 <context>
     <name>ChatButtonBar</name>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="48"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="70"/>
         <source>Direct conversation with %1</source>
         <translation type="unfinished">Conversación directa con %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="49"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="71"/>
         <source>Chat room %1</source>
         <translation type="unfinished">Sala de chat %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="91"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="113"/>
         <source>Messages are loading...</source>
         <translation type="unfinished">Cargando mensajes...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="105"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="127"/>
         <source>Favorite</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="112"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="134"/>
         <source>More</source>
         <translation type="unfinished">Más</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="130"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="148"/>
         <source>Call</source>
         <translation type="unfinished">Llamar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="150"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="168"/>
         <source>Start phone call</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="162"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="173"/>
+        <source>Hang up</source>
+        <translation type="unfinished">Colgar</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="189"/>
+        <source>Hang up phone call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="201"/>
         <source>Are you sure you really want to leave this chat?</source>
         <translation type="unfinished">¿Seguro que quieres salir de este chat?</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="206"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="245"/>
         <source>Call contact button</source>
         <translation type="unfinished">Botón para llamar al contacto</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="207"/>
+        <location filename="../src/ui/components/chat/ChatButtonBar.qml" line="246"/>
         <source>Selected number %1</source>
         <translation type="unfinished">Número seleccionado %1</translation>
     </message>
@@ -1163,24 +1173,24 @@
         <translation>No se ha podido conservar el código de recuperación del chat: %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/ChatConnectorManager.cpp" line="154"/>
-        <location filename="../src/chat/ChatConnectorManager.cpp" line="235"/>
-        <location filename="../src/chat/ChatConnectorManager.cpp" line="285"/>
+        <location filename="../src/chat/ChatConnectorManager.cpp" line="155"/>
+        <location filename="../src/chat/ChatConnectorManager.cpp" line="236"/>
+        <location filename="../src/chat/ChatConnectorManager.cpp" line="286"/>
         <source>Failed to receive secret for %1: %2</source>
         <translation type="unfinished">No se pudo recibir el secreto de %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/ChatConnectorManager.cpp" line="192"/>
+        <location filename="../src/chat/ChatConnectorManager.cpp" line="193"/>
         <source>Failed to save login secret for %1: %2</source>
         <translation type="unfinished">No se pudo guardar el secreto de inicio de sesión de %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/ChatConnectorManager.cpp" line="255"/>
+        <location filename="../src/chat/ChatConnectorManager.cpp" line="256"/>
         <source>Failed to save secret for %1: %2</source>
         <translation type="unfinished">No se pudo guardar el secreto de %1: %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/ChatConnectorManager.cpp" line="307"/>
+        <location filename="../src/chat/ChatConnectorManager.cpp" line="308"/>
         <source>Failed to store persistent storage secret for %1: %2</source>
         <translation type="unfinished">No se pudo almacenar el secreto de almacenamiento persistente de %1: %2</translation>
     </message>
@@ -1315,67 +1325,72 @@
 <context>
     <name>ChatMessageListItem</name>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="109"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="110"/>
         <source>Chat message</source>
         <translation>Mensaje de chat</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="111"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="112"/>
         <source>Selected chat message - from %1, at %2: %3</source>
         <translation>Mensaje de chat seleccionado - de %1, a las %2: %3</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="367"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="186"/>
+        <source>New messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="415"/>
         <source>Retry</source>
         <translation type="unfinished">Reintentar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="418"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="466"/>
         <source>Add reaction...</source>
         <translation type="unfinished">Añadir reacción...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="431"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="479"/>
         <source>Copy to clipboard</source>
         <translation type="unfinished">Copiar al portapapeles</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="446"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="494"/>
         <source>Copy link to clipboard</source>
         <translation type="unfinished">Copiar enlace al portapapeles</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="455"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="503"/>
         <source>Remove message...</source>
         <translation type="unfinished">Eliminar mensaje...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="460"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="508"/>
         <source>Remove message</source>
         <translation type="unfinished">Eliminar mensaje</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="461"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="509"/>
         <source>Do you really want to remove this message?</source>
         <translation type="unfinished">¿Seguro que quieres eliminar este mensaje?</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="462"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="510"/>
         <source>Reason (optional, why you removed the message)</source>
         <translation type="unfinished">Motivo (opcional, por qué has eliminado el mensaje)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="476"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="524"/>
         <source>Edit message...</source>
         <translation type="unfinished">Editar mensaje...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="486"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="534"/>
         <source>Reply...</source>
         <translation type="unfinished">Responder...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="492"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="540"/>
         <source>Toggle pin</source>
         <translation type="unfinished">Fijar o dejar de fijar</translation>
     </message>
@@ -1888,7 +1903,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="346"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="343"/>
         <source>Leave</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1898,12 +1913,12 @@
         <translation>Más</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="366"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="363"/>
         <source>Leave conference</source>
         <translation>Abandonar la conferencia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="374"/>
+        <location filename="../src/ui/components/ConferenceButtonBar.qml" line="371"/>
         <source>End conference for all</source>
         <translation>Terminar la conferencia para todos</translation>
     </message>
@@ -2100,22 +2115,22 @@
 <context>
     <name>DateEventManager</name>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="396"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="398"/>
         <source>Conference starting soon</source>
         <translation>La conferencia comenzará pronto</translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="396"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="398"/>
         <source>Event starting soon</source>
         <translation type="unfinished">El evento comienza pronto</translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="402"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="404"/>
         <source>Join</source>
         <translation>Unirse</translation>
     </message>
     <message>
-        <location filename="../src/calendar/DateEventManager.cpp" line="404"/>
+        <location filename="../src/calendar/DateEventManager.cpp" line="406"/>
         <source>Open</source>
         <translation>Abrir</translation>
     </message>
@@ -2960,7 +2975,7 @@
 <context>
     <name>GonnectWindow</name>
     <message>
-        <location filename="../src/ui/GonnectWindow.qml" line="395"/>
+        <location filename="../src/ui/GonnectWindow.qml" line="396"/>
         <source>Home</source>
         <translation>Inicio</translation>
     </message>
@@ -3054,17 +3069,17 @@
         <translation>Elemento del historial seleccionado %1 - empresa %2, ubicación %3, número %4, hora %5, duración %6</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryList.qml" line="245"/>
+        <location filename="../src/ui/components/HistoryList.qml" line="246"/>
         <source>, via %1</source>
         <translation type="unfinished">, vía %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryList.qml" line="365"/>
+        <location filename="../src/ui/components/HistoryList.qml" line="368"/>
         <source>hh:mm</source>
         <translation>hh:mm</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryList.qml" line="423"/>
+        <location filename="../src/ui/components/HistoryList.qml" line="426"/>
         <source>Are you sure you really want to remove this entry?</source>
         <translation type="unfinished">¿Seguro que quieres eliminar esta entrada?</translation>
     </message>
@@ -3120,37 +3135,37 @@
 <context>
     <name>HistoryWidget</name>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="25"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="26"/>
         <source>History</source>
         <translation>Historia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="84"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="85"/>
         <source>All sources</source>
         <translation type="unfinished">Todas las fuentes</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="87"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="88"/>
         <source>SIP</source>
         <translation>SIP</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="90"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="91"/>
         <source>Jitsi Meet</source>
         <translation>Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="95"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="98"/>
         <source>History call type picker</source>
         <translation>Selector de tipo de llamada del historial</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="96"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="99"/>
         <source>Select the call type to filter by</source>
         <translation>Seleccionar el tipo de llamada para filtrar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="109"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="112"/>
         <source>Currently selected call type</source>
         <translation>Tipo de llamada seleccionado actualmente</translation>
     </message>
@@ -3175,27 +3190,27 @@
         <translation>Perdido</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="147"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="149"/>
         <source>History call origin picker</source>
         <translation>Selector de origen de llamada del historial</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="148"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="150"/>
         <source>Select the call origin to filter by</source>
         <translation>Seleccionar el origen de llamada para filtrar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="161"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="163"/>
         <source>Currently selected call origin</source>
         <translation>Origen de llamada seleccionado actualmente</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="171"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="173"/>
         <source>Hide history search</source>
         <translation>Ocultar búsqueda del historial</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="171"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="173"/>
         <source>Show history search</source>
         <translation>Mostrar búsqueda del historial</translation>
     </message>
@@ -3234,7 +3249,7 @@
         <translation>Seleccionar la identidad preferida para las llamadas</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/search/IdentitySelector.qml" line="48"/>
+        <location filename="../src/ui/components/search/IdentitySelector.qml" line="47"/>
         <source>Currently selected identity</source>
         <translation>Identidad seleccionada actualmente</translation>
     </message>
@@ -3336,52 +3351,52 @@
         <translation type="unfinished">Se ha producido un error de IPC (%1, %2 (código %3)</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2193"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2195"/>
         <source>Image sent by %1</source>
         <translation type="unfinished">Imagen enviada por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2195"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2197"/>
         <source>[%1] Image sent by %2</source>
         <translation type="unfinished">[%1] Imagen enviada por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2201"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2203"/>
         <source>Audio file sent by %1</source>
         <translation type="unfinished">Archivo de audio enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2203"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2205"/>
         <source>[%1] Audio file sent by %2</source>
         <translation type="unfinished">[%1] Archivo de audio enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2210"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
         <source>Video file sent by %1</source>
         <translation type="unfinished">Vídeo enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2214"/>
         <source>[%1] Video file sent by %2</source>
         <translation type="unfinished">[%1] Vídeo enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2219"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2221"/>
         <source>File sent by %1</source>
         <translation type="unfinished">Archivo enviado por %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2221"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2223"/>
         <source>[%1] File sent by %2</source>
         <translation type="unfinished">[%1] Archivo enviado por %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2228"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2230"/>
         <source>Message from %1</source>
         <translation type="unfinished">Mensaje de %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2230"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2232"/>
         <source>[%1] Message from %2</source>
         <translation type="unfinished">[%1] Mensaje de %2</translation>
     </message>
@@ -3394,17 +3409,17 @@
         <translation>Nuevo mensaje de chat</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1315"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1326"/>
         <source>Active conference</source>
         <translation>Conferencia activa</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1320"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1331"/>
         <source>Hang up</source>
         <translation>Colgar</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="828"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="842"/>
         <source>%1 has joined the conference</source>
         <translation>%1 se ha unido a la conferencia</translation>
     </message>
@@ -3414,13 +3429,13 @@
         <translation type="unfinished">Usuario sin nombre</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="638"/>
-        <location filename="../src/ui/JitsiConnector.cpp" line="1364"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="644"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="1375"/>
         <source>Failed to persist room password: %1</source>
         <translation>No se ha podido guardar la contraseña de la sala: %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/JitsiConnector.cpp" line="842"/>
+        <location filename="../src/ui/JitsiConnector.cpp" line="856"/>
         <source>%1 has left the conference</source>
         <translation>%1 ha abandonado la conferencia</translation>
     </message>
@@ -3479,12 +3494,12 @@
         <translation type="unfinished">No se puede entrar directamente a esta sala, pero puedes enviar una solicitud para convertirte en miembro. Cualquier usuario con permiso para aceptar la solicitud será informado de ella, con un mensaje que puedes introducir opcionalmente abajo.</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="53"/>
+        <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="54"/>
         <source>Optional message</source>
         <translation type="unfinished">Mensaje opcional</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="74"/>
+        <location filename="../src/ui/components/popups/KnockChatRoom.qml" line="75"/>
         <source>Request</source>
         <translation type="unfinished">Solicitar</translation>
     </message>
@@ -3510,20 +3525,19 @@
 <context>
     <name>LDAPAddressBookFeeder</name>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="119"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="131"/>
         <source>Authentication error for %1</source>
         <translation type="unfinished">Error de autenticación para %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="239"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="255"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="277"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="249"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="265"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="287"/>
         <source>LDAP error: %1</source>
         <translation>Error LDAP: %1</translation>
     </message>
     <message>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="325"/>
-        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="379"/>
+        <location filename="../src/contacts/ldap/LDAPAddressBookFeeder.cpp" line="374"/>
         <source>Failed to initialize LDAP connection: %1</source>
         <translation>No se pudo inicializar la conexión LDAP: %1</translation>
     </message>
@@ -3536,12 +3550,12 @@
         <translation type="unfinished">Copiar al portapapeles</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/LargeImage.qml" line="62"/>
+        <location filename="../src/ui/components/popups/LargeImage.qml" line="73"/>
         <source>Save</source>
         <translation type="unfinished">Guardar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/popups/LargeImage.qml" line="77"/>
+        <location filename="../src/ui/components/popups/LargeImage.qml" line="88"/>
         <source>Untitled</source>
         <translation type="unfinished">Sin título</translation>
     </message>
@@ -3744,62 +3758,62 @@
         <translation type="unfinished">Mostrar la página de llamada de emergencia</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="552"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="548"/>
         <source>Move up</source>
         <translation>Mover arriba</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="559"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="555"/>
         <source>Move tab up</source>
         <translation>Mover pestaña arriba</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="560"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="556"/>
         <source>Moves the currently selected tab up by one</source>
         <translation>Mueve la pestaña seleccionada actualmente una posición hacia arriba</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="590"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="586"/>
         <source>Move down</source>
         <translation>Mover abajo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="597"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="593"/>
         <source>Move tab down</source>
         <translation>Mover pestaña abajo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="598"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="594"/>
         <source>Moves the currently selected tab down by one</source>
         <translation>Mueve la pestaña seleccionada actualmente una posición hacia abajo</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="628"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="624"/>
         <source>Edit</source>
         <translation>Editar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="635"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="631"/>
         <source>Edit page</source>
         <translation>Editar página</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="636"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="632"/>
         <source>Edit the currently selected dashboard page</source>
         <translation>Editar la página del panel seleccionada actualmente</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="643"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="639"/>
         <source>Delete</source>
         <translation>Borrar</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="651"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="647"/>
         <source>Delete page</source>
         <translation>Eliminar página</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/MainTabBar.qml" line="652"/>
+        <location filename="../src/ui/components/MainTabBar.qml" line="648"/>
         <source>Delete the currently selected dashboard page</source>
         <translation>Eliminar la página del panel seleccionada actualmente</translation>
     </message>
@@ -5576,12 +5590,12 @@
         <translation>Aceptar</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="805"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="833"/>
         <source>Missed call from %1</source>
         <translation>Llamada perdida de %1</translation>
     </message>
     <message>
-        <location filename="../src/sip/SIPCallManager.cpp" line="838"/>
+        <location filename="../src/sip/SIPCallManager.cpp" line="866"/>
         <source>Call back</source>
         <translation>Devolver la llamada</translation>
     </message>
@@ -6762,12 +6776,12 @@
         <translation>Aceptar todos los certificados</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="586"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="587"/>
         <source>Confirm widget selection</source>
         <translation>Confirmar selección de widget</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="587"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="588"/>
         <source>Confirmation button to create and add the selected widget to the current dashboard</source>
         <translation>Botón de confirmación para crear y añadir el widget seleccionado al panel actual</translation>
     </message>
@@ -6862,42 +6876,42 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="504"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="505"/>
         <source>Select chat room %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="516"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="517"/>
         <source>No chat rooms found.</source>
         <translation type="unfinished">No se han encontrado salas de chat.</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="517"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="518"/>
         <source>No chat rooms available yet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="533"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="534"/>
         <source>Widget setting %1</source>
         <translation>Configuración del widget %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="566"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="567"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="571"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="572"/>
         <source>Cancel widget selection</source>
         <translation>Cancelar selección de widget</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="572"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="573"/>
         <source>Cancel button to exit widget selection selection without changes</source>
         <translation>Botón de cancelar para salir de la selección de widget sin cambios</translation>
     </message>
     <message>
-        <location filename="../src/ui/WidgetSelectionWindow.qml" line="580"/>
+        <location filename="../src/ui/WidgetSelectionWindow.qml" line="581"/>
         <source>Add</source>
         <translation>Añadir</translation>
     </message>

@@ -223,7 +223,7 @@ Item {
                                 text: qsTr("Transmit")
                                 font {
                                     weight: Font.DemiBold
-                                    pixelSize: 16
+                                    pixelSize: Theme.fontSizeMedium
                                 }
 
                                 Accessible.ignored: true
@@ -330,7 +330,7 @@ Item {
                                 text: qsTr("Receive")
                                 font {
                                     weight: Font.DemiBold
-                                    pixelSize: 16
+                                    pixelSize: Theme.fontSizeMedium
                                 }
 
                                 Accessible.ignored: true

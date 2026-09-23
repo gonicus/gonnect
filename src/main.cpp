@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     qDBusRegisterMetaType<QList<QVariantMap>>();
     qDBusRegisterMetaType<QPair<QString, QVariantMap>>();
     qDBusRegisterMetaType<QList<QPair<QString, QVariantMap>>>();
+    qDBusRegisterMetaType<QMap<QString, QVariantMap>>();
 #endif
 
     qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", "7000"); // Workaround bad scrolling

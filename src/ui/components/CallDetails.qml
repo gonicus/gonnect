@@ -94,7 +94,7 @@ Item {
 
     Label {
         id: elapsedTimeLabel
-        font.pixelSize: 22
+        font.pixelSize: Theme.fontSizeLarge
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: avatarImage.bottom
@@ -173,7 +173,7 @@ Item {
         Label {
             id: dtmfFeedbackLabel
             anchors.centerIn: parent
-            font.pixelSize: 50
+            font.pixelSize: Theme.fontSizeHuge
         }
 
         Accessible.ignored: true

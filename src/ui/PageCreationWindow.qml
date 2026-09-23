@@ -123,7 +123,7 @@ BaseWindow {
 
                 font.family: iconSelection.font.family
                 font.weight: iconSelection.font.weight
-                font.pointSize: iconSelection.font.pointSize
+                font.pixelSize: iconSelection.font.pixelSize
 
                 Accessible.role: Accessible.ListItem
                 Accessible.description: qsTr("Currently selected page icon option")

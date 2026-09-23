@@ -339,7 +339,7 @@ Item {
             Label {
                 id: dtmfFeedbackLabel
                 anchors.centerIn: parent
-                font.pixelSize: 50
+                font.pixelSize: Theme.fontSizeHuge
 
                 Accessible.ignored: true
             }
