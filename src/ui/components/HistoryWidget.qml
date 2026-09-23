@@ -75,6 +75,10 @@ BaseWidget {
                 valueRole: "value"
                 textRole: "label"
 
+                onFontChanged: () => {
+                    implicitContentWidthPolicy = ComboBox.ContentItemImplicitWidth
+                    implicitContentWidthPolicy = ComboBox.WidestText
+                }
                 implicitContentWidthPolicy: ComboBox.WidestText
 
                 Layout.alignment: Qt.AlignVCenter
@@ -124,7 +128,13 @@ BaseWidget {
                 rightPadding: indicator.width + 4
                 valueRole: "value"
                 textRole: "label"
+
+                onFontChanged: () => {
+                    implicitContentWidthPolicy = ComboBox.ContentItemImplicitWidth
+                    implicitContentWidthPolicy = ComboBox.WidestText
+                }
                 implicitContentWidthPolicy: ComboBox.WidestText
+
                 Layout.alignment: Qt.AlignVCenter
                 Layout.preferredWidth: implicitWidth
                 model: [

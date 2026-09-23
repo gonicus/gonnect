@@ -61,7 +61,13 @@ BaseWidget {
                 valueRole: "value"
                 textRole: "label"
                 Layout.alignment: Qt.AlignVCenter
+
+                onFontChanged: () => {
+                    implicitContentWidthPolicy = ComboBox.ContentItemImplicitWidth
+                    implicitContentWidthPolicy = ComboBox.WidestText
+                }
                 implicitContentWidthPolicy: ComboBox.WidestText
+
                 Layout.preferredWidth: implicitWidth
                 model: [
                     { value: ActivitiesProxyModel.MediumFilter.ALL, label: qsTr('All activities') },
