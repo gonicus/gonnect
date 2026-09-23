@@ -7,7 +7,66 @@
 #include <QGuiApplication>
 #include <QFont>
 
+#include <algorithm>
+#include <cmath>
+
 Q_LOGGING_CATEGORY(lcTheme, "gonnect.app.theme")
+
+const QColor Theme::seedInkLight = QColor(5, 5, 5);
+const QColor Theme::seedPaperLight = QColor(255, 255, 255);
+const QColor Theme::seedInkDark = QColor(248, 248, 248);
+const QColor Theme::seedVeilBaseDark = QColor(230, 230, 230);
+const QColor Theme::seedAccentLight = QColor(30, 57, 143);
+const QColor Theme::seedAccentDark = QColor(255, 255, 255, 120);
+const QColor Theme::seedBubbleLight = QColor(45, 92, 229);
+const QColor Theme::seedBubbleDark = QColor(50, 96, 230);
+const QColor Theme::seedHighlightDark = QColor(15, 83, 158);
+const QColor Theme::seedInitials = QColor(40, 34, 80);
+
+// Material elevation overlays (alpha) for the offset and hovered panels.
+constexpr qreal overlayAlphaLow = 20.0 / 255.0; // ~0.078
+constexpr qreal overlayAlphaHigh = 40.0 / 255.0; // ~0.157
+
+QColor Theme::textVeil(const QColor &base, qreal alpha)
+{
+    QColor c = base;
+    c.setAlphaF(static_cast<float>(std::clamp(alpha, 0.0, 1.0)) * (base.alphaF()));
+    return c;
+}
+
+QColor Theme::neutralSurface(qreal lightness)
+{
+    return QColor::fromHslF(0.0, 0.0, static_cast<float>(std::clamp(lightness, 0.0, 1.0)));
+}
+
+QColor Theme::mix(const QColor &a, const QColor &b, qreal t)
+{
+    t = std::clamp(t, 0.0, 1.0);
+    return QColor::fromRgbF(static_cast<float>(a.redF() + (b.redF() - a.redF()) * t),
+                            static_cast<float>(a.greenF() + (b.greenF() - a.greenF()) * t),
+                            static_cast<float>(a.blueF() + (b.blueF() - a.blueF()) * t),
+                            static_cast<float>(a.alphaF() + (b.alphaF() - a.alphaF()) * t));
+}
+
+qreal Theme::relativeLuminance(const QColor &color)
+{
+    auto linearize = [](qreal v) {
+        return v <= 0.03928 ? v / 12.92 : std::pow((v + 0.055) / 1.055, 2.4);
+    };
+    const qreal r = linearize(color.redF());
+    const qreal g = linearize(color.greenF());
+    const qreal b = linearize(color.blueF());
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+qreal Theme::contrastRatio(const QColor &a, const QColor &b)
+{
+    const qreal la = relativeLuminance(a);
+    const qreal lb = relativeLuminance(b);
+    const qreal hi = std::max(la, lb);
+    const qreal lo = std::min(la, lb);
+    return (hi + 0.05) / (lo + 0.05);
+}
 
 Theme::Theme(QObject *parent) : QObject{ parent }
 {
@@ -16,6 +75,7 @@ Theme::Theme(QObject *parent) : QObject{ parent }
     connect(this, &Theme::themeVariantChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::colorSchemeChanged, this, &Theme::onThemeVariantChanged);
     connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateAccentColor);
+    connect(&themeManager, &ThemeManager::accentColorChanged, this, &Theme::updateColorPalette);
     connect(&themeManager, &ThemeManager::fontScaleChanged, this,
             [this]() { setFontScale(ThemeManager::instance().fontScale()); });
 
@@ -28,8 +88,8 @@ Theme::Theme(QObject *parent) : QObject{ parent }
     connect(this, &Theme::isDarkModeChanged, this, &Theme::updateColorPalette);
     connect(this, &Theme::isDarkModeChanged, this, &Theme::updateAccentColor);
 
-    updateColorPalette();
     updateAccentColor();
+    updateColorPalette();
     useOwnDecoration();
 }
 
@@ -59,21 +119,21 @@ bool Theme::useOwnDecoration()
 
 QColor Theme::pickForegroundColor(const QColor &backgroundColor) const
 {
-    // WCAG 2.x relative luminance
-    // https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
+    if (backgroundColor == m_emergencyColor) {
+        return seedInkDark;
+    }
 
-    const auto linearize = [](double channel) -> double {
-        channel /= 255.0;
-        return (channel <= 0.03928) ? channel / 12.92 : std::pow((channel + 0.055) / 1.055, 2.4);
-    };
+    const auto ratioLight = contrastRatio(seedInkLight, backgroundColor);
+    const auto ratioDark = contrastRatio(seedInkDark, backgroundColor);
 
-    const double r = linearize(backgroundColor.red());
-    const double g = linearize(backgroundColor.green());
-    const double b = linearize(backgroundColor.blue());
+    return ratioLight >= ratioDark ? seedInkLight : seedInkDark;
+}
 
-    const double luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-
-    return (luminance > 0.5) ? m_primaryTextColorLightMode : m_primaryTextColorDarkMode;
+QColor Theme::readableOn(const QColor &background) const
+{
+    const QColor dark = m_primaryTextColor;
+    const QColor light = m_whiteColor;
+    return contrastRatio(dark, background) >= contrastRatio(light, background) ? dark : light;
 }
 
 void Theme::setUseOwnDecoration(bool value)
@@ -123,32 +183,32 @@ void Theme::onThemeVariantChanged()
 
 void Theme::updateColorPalette()
 {
-    m_primaryTextColor = m_primaryTextColorLightMode;
-    m_foregroundWhiteColor = QColor(255, 255, 255);
-    m_foregroundHeaderIcons = QColor(46, 52, 54);
-    m_foregroundHeaderIconsInactive = QColor(125, 129, 130);
-    m_foregroundInitials = QColor(40, 34, 80);
-    m_secondaryTextColor = QColor(153, 153, 153);
-    m_inactiveTextColor = QColor(104, 104, 104);
-    m_secondaryInactiveTextColor = QColor(168, 168, 168);
-    m_borderColor = QColor(219, 219, 219);
-    m_borderHeaderIconHovered = QColor(206, 201, 196);
-    m_highlightColor = QColor(30, 57, 143, 76);
-    m_paneColor = QColor(246, 245, 244);
-    m_rttBubbleSelf = QColor(45, 92, 229);
-    m_rttTextSelf = QColor(233, 233, 233);
-    m_rttBubbleOther = QColor(233, 233, 233);
-    m_rttTextOther = QColor(0, 0, 0);
-    m_highContrastColor = QColor(0, 0, 0);
-    m_backgroundColor = QColor(255, 255, 255);
-    m_backgroundSecondaryColor = QColor(250, 250, 250);
-    m_backgroundOffsetColor = QColor(0, 0, 0, 20);
-    m_backgroundOffsetHoveredColor = QColor(0, 0, 0, 40);
-    m_backgroundHeader = QColor(235, 235, 235);
-    m_backgroundHeaderSelected = QColor(216, 216, 216);
-    m_backgroundHeaderInactive = QColor(242, 242, 242);
-    m_backgroundHeaderIconHovered = QColor(248, 248, 247);
-    m_backgroundInitials = QColor(214, 212, 233);
+    // Light mode/fallback colors
+    m_primaryTextColor = seedInkLight;
+    m_whiteColor = seedPaperLight;
+    m_foregroundHeaderIcons = textVeil(seedInkLight, 0.90);
+    m_foregroundHeaderIconsInactive = textVeil(seedInkLight, 0.50);
+    m_foregroundInitials = seedInitials;
+    m_secondaryTextColor = textVeil(seedInkLight, 0.40);
+    m_inactiveTextColor = textVeil(seedInkLight, 0.60);
+    m_secondaryInactiveTextColor = textVeil(seedInkLight, 0.35);
+    m_borderColor = neutralSurface(0.86);
+    m_backgroundColor = neutralSurface(1.000);
+    m_backgroundSecondaryColor = neutralSurface(0.98);
+    m_backgroundOffsetColor = textVeil(QColor(0, 0, 0), overlayAlphaLow);
+    m_backgroundOffsetHoveredColor = textVeil(QColor(0, 0, 0), overlayAlphaHigh);
+    m_backgroundHeader = neutralSurface(0.92);
+    m_backgroundHeaderInactive = neutralSurface(0.95);
+    m_backgroundHeaderIconHovered = neutralSurface(0.97);
+    m_backgroundInitials = mix(seedInitials, seedPaperLight, 0.82);
+    m_paneColor = neutralSurface(0.97);
+    m_highlightColor = textVeil(m_accentColor, 76.0 / 255.0);
+    m_rttBubbleSelf = seedBubbleLight;
+    m_rttTextSelf = readableOn(m_rttBubbleSelf);
+    m_rttBubbleOther = neutralSurface(0.91);
+    m_rttTextOther = readableOn(m_rttBubbleOther);
+
+    // Extra colors (hard values)
     m_shadowColor = QColor(0, 0, 0, 32);
     m_redColor = QColor(224, 27, 36);
     m_orangeColor = QColor(245, 121, 0);
@@ -158,28 +218,32 @@ void Theme::updateColorPalette()
     m_darkGreenColor = QColor(128, 128, 0);
     m_activeIndicatorColor = QColor(255, 102, 0);
 
-    // Dark mode overrides
+    // Dark mode
     if (m_isDarkMode) {
-        m_primaryTextColor = m_primaryTextColorDarkMode;
-        m_secondaryTextColor = QColor(190, 190, 190);
-        m_foregroundHeaderIcons = QColor(238, 238, 236);
-        m_foregroundHeaderIconsInactive = QColor(157, 157, 156);
-        m_secondaryInactiveTextColor = QColor(108, 108, 108);
-        m_backgroundColor = QColor(53, 53, 53);
-        m_borderColor = QColor(33, 33, 33);
-        m_borderHeaderIconHovered = QColor(28, 28, 28);
-        m_backgroundSecondaryColor = QColor(70, 70, 70);
-        m_backgroundOffsetColor = QColor(230, 230, 230, 20);
-        m_backgroundOffsetHoveredColor = QColor(230, 230, 230, 40);
-        m_backgroundHeader = QColor(48, 48, 48);
-        m_backgroundHeaderInactive = QColor(36, 36, 36);
-        m_backgroundHeaderIconHovered = QColor(55, 55, 55);
-        m_highlightColor = QColor(15, 83, 158, 36);
-        m_paneColor = QColor(45, 45, 45);
-        m_rttBubbleSelf = QColor(50, 96, 230);
-        m_rttTextSelf = QColor(255, 255, 255);
-        m_rttBubbleOther = QColor(44, 44, 46);
-        m_rttTextOther = QColor(255, 255, 255);
+        m_primaryTextColor = seedInkDark;
+        m_foregroundHeaderIcons = textVeil(seedVeilBaseDark, 0.95);
+        m_foregroundHeaderIconsInactive = textVeil(seedVeilBaseDark, 0.65);
+        m_secondaryTextColor = textVeil(seedVeilBaseDark, 0.60);
+        m_inactiveTextColor = textVeil(seedVeilBaseDark, 0.35);
+        m_secondaryInactiveTextColor = textVeil(seedVeilBaseDark, 0.25);
+        m_borderColor = neutralSurface(0.13);
+        m_backgroundColor = neutralSurface(0.21);
+        m_backgroundSecondaryColor = neutralSurface(0.28);
+        m_backgroundOffsetColor = textVeil(seedVeilBaseDark, overlayAlphaLow);
+        m_backgroundOffsetHoveredColor = textVeil(seedVeilBaseDark, overlayAlphaHigh);
+        m_backgroundHeader = neutralSurface(0.19);
+        m_backgroundHeaderInactive = neutralSurface(0.14);
+        m_backgroundHeaderIconHovered = neutralSurface(0.22);
+        m_paneColor = neutralSurface(0.18);
+
+        const QColor rawAccent = resolvedSystemAccent();
+        m_highlightColor =
+                textVeil(rawAccent.isValid() ? rawAccent : seedHighlightDark, 36.0 / 255.0);
+
+        m_rttBubbleSelf = seedBubbleDark;
+        m_rttTextSelf = readableOn(m_rttBubbleSelf);
+        m_rttBubbleOther = neutralSurface(0.18);
+        m_rttTextOther = readableOn(m_rttBubbleOther);
     }
 
     Q_EMIT colorPaletteChanged();
@@ -187,14 +251,10 @@ void Theme::updateColorPalette()
 
 void Theme::updateAccentColor()
 {
-    auto newColor = ThemeManager::instance().accentColor();
+    auto newColor = resolvedSystemAccent();
 
-    if (!newColor.isValid() || newColor == QColor(Qt::transparent)) {
-        if (m_isDarkMode) {
-            newColor = QColor(255, 255, 255, 120);
-        } else {
-            newColor = QColor(30, 57, 143);
-        }
+    if (!newColor.isValid()) {
+        newColor = m_isDarkMode ? seedAccentDark : seedAccentLight;
     }
 
     if (m_accentColor != newColor) {
@@ -209,6 +269,12 @@ void Theme::setDarkMode(bool value)
         m_isDarkMode = value;
         Q_EMIT isDarkModeChanged();
     }
+}
+
+QColor Theme::resolvedSystemAccent() const
+{
+    const QColor c = ThemeManager::instance().accentColor();
+    return (c.isValid() && c.alpha() > 0) ? c : QColor();
 }
 
 static constexpr qreal normalSize = 14.0;

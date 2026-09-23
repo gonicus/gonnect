@@ -187,47 +187,47 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="67"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="73"/>
         <source>All activities</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="68"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="74"/>
         <source>SIP</source>
         <translation type="unfinished">SIP</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="69"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="75"/>
         <source>Jitsi Meet</source>
         <translation type="unfinished">Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="70"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="76"/>
         <source>Chat</source>
         <translation type="unfinished">گفتگو</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="76"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="82"/>
         <source>Activity type picker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="77"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="83"/>
         <source>Select the activity type to filter by</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="89"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="95"/>
         <source>Currently selected activity type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="99"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="105"/>
         <source>Hide activities search</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="99"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="105"/>
         <source>Show activities search</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1323,72 +1323,77 @@
 <context>
     <name>ChatMessageListItem</name>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="110"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="111"/>
         <source>Chat message</source>
         <translation type="unfinished">پیام گفتگو</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="112"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="113"/>
         <source>Selected chat message - from %1, at %2: %3</source>
         <translation type="unfinished">پیام انتخاب‌شده - از %1، در %2: %3</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="186"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="187"/>
         <source>New messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="415"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="343"/>
+        <source>This message has been edited afterwards.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="453"/>
         <source>Retry</source>
         <translation type="unfinished">تلاش مجدد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="466"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="488"/>
         <source>Add reaction...</source>
         <translation type="unfinished">افزودن واکنش...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="479"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="501"/>
         <source>Copy to clipboard</source>
         <translation type="unfinished">کپی در کلیپ‌بورد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="494"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="516"/>
         <source>Copy link to clipboard</source>
         <translation type="unfinished">کپی پیوند در کلیپ‌بورد</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="503"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="525"/>
         <source>Remove message...</source>
         <translation type="unfinished">حذف پیام...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="508"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="530"/>
         <source>Remove message</source>
         <translation type="unfinished">حذف پیام</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="509"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="531"/>
         <source>Do you really want to remove this message?</source>
         <translation type="unfinished">آیا واقعاً می‌خواهید این پیام را حذف کنید؟</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="510"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="532"/>
         <source>Reason (optional, why you removed the message)</source>
         <translation type="unfinished">دلیل (اختیاری، چرا پیام را حذف کردید)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="524"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="546"/>
         <source>Edit message...</source>
         <translation type="unfinished">ویرایش پیام...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="534"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="556"/>
         <source>Reply...</source>
         <translation type="unfinished">پاسخ...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="540"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="562"/>
         <source>Toggle pin</source>
         <translation type="unfinished">سنجاق کردن یا برداشتن سنجاق</translation>
     </message>
@@ -3136,77 +3141,77 @@
         <translation type="unfinished">تاریخچه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="85"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="89"/>
         <source>All sources</source>
         <translation type="unfinished">همهٔ منابع</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="88"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="92"/>
         <source>SIP</source>
         <translation type="unfinished">SIP</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="91"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="95"/>
         <source>Jitsi Meet</source>
         <translation type="unfinished">Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="98"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="102"/>
         <source>History call type picker</source>
         <translation type="unfinished">انتخاب نوع تماس در تاریخچه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="99"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="103"/>
         <source>Select the call type to filter by</source>
         <translation type="unfinished">نوع تماس برای فیلتر را انتخاب کنید</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="112"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="116"/>
         <source>Currently selected call type</source>
         <translation type="unfinished">نوع تماس انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="143"/>
         <source>All calls</source>
         <translation type="unfinished">همهٔ تماس‌ها</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="146"/>
         <source>Incoming</source>
         <translation type="unfinished">ورودی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="139"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="149"/>
         <source>Outgoing</source>
         <translation type="unfinished">خروجی</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="142"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="152"/>
         <source>Missed</source>
         <translation type="unfinished">از دست رفته</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="149"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="159"/>
         <source>History call origin picker</source>
         <translation type="unfinished">انتخاب منشأ تماس در تاریخچه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="150"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="160"/>
         <source>Select the call origin to filter by</source>
         <translation type="unfinished">منشأ تماس برای فیلتر را انتخاب کنید</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="163"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="173"/>
         <source>Currently selected call origin</source>
         <translation type="unfinished">منشأ تماس انتخاب‌شده</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="173"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="183"/>
         <source>Hide history search</source>
         <translation type="unfinished">پنهان کردن جستجوی تاریخچه</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="173"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="183"/>
         <source>Show history search</source>
         <translation type="unfinished">نمایش جستجوی تاریخچه</translation>
     </message>
@@ -3323,6 +3328,14 @@
     </message>
 </context>
 <context>
+    <name>IpcChatRoom</name>
+    <message>
+        <location filename="../src/chat/IpcChatRoom.cpp" line="183"/>
+        <source>The file %1 cannot be uploaded because its size of %2 exceeds the allowed maximum of %3.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>IpcDispatcher</name>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="483"/>
@@ -3347,52 +3360,52 @@
         <translation type="unfinished">خطای IPC رخ داد (%1، %2 (کد %3)</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2195"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2204"/>
         <source>Image sent by %1</source>
         <translation type="unfinished">تصویر ارسال‌شده توسط %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2197"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2206"/>
         <source>[%1] Image sent by %2</source>
         <translation type="unfinished">[%1] تصویر ارسال‌شده توسط %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2203"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
         <source>Audio file sent by %1</source>
         <translation type="unfinished">فایل صوتی ارسال‌شده توسط %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2205"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2214"/>
         <source>[%1] Audio file sent by %2</source>
         <translation type="unfinished">[%1] فایل صوتی ارسال‌شده توسط %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2221"/>
         <source>Video file sent by %1</source>
         <translation type="unfinished">ویدئوی ارسال‌شده توسط %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2214"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2223"/>
         <source>[%1] Video file sent by %2</source>
         <translation type="unfinished">[%1] ویدئوی ارسال‌شده توسط %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2221"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2230"/>
         <source>File sent by %1</source>
         <translation type="unfinished">فایل ارسال‌شده توسط %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2223"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2232"/>
         <source>[%1] File sent by %2</source>
         <translation type="unfinished">[%1] فایل ارسال‌شده توسط %2</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2230"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2239"/>
         <source>Message from %1</source>
         <translation type="unfinished">پیام از %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2232"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2241"/>
         <source>[%1] Message from %2</source>
         <translation type="unfinished">[%1] پیام از %2</translation>
     </message>
@@ -5418,7 +5431,7 @@
 <context>
     <name>ReadMarker</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/ReadMarker.qml" line="43"/>
+        <location filename="../src/ui/components/chat/ReadMarker.qml" line="44"/>
         <source>%n of %2 have read this message:
 %3</source>
         <translation type="unfinished">
@@ -6608,12 +6621,12 @@
 <context>
     <name>VideoPlayer</name>
     <message>
-        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="64"/>
+        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="70"/>
         <source>%1 (%2)</source>
         <translation type="unfinished">%1 (%2)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="110"/>
+        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="116"/>
         <source>%1:%2 / %3:%4</source>
         <translation type="unfinished">%1:%2 / %3:%4</translation>
     </message>

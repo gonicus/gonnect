@@ -606,14 +606,12 @@ Item {
                            : (reactionDelgHoverHandler.hovered
                               ? Theme.backgroundOffsetHoveredColor
                               : Theme.backgroundSecondaryColor)
-                    border {
-                        width: 1
-                        color: reactionDelg.isOwnReaction
-                               ? Theme.highlightColor
-                               : (reactionDelgHoverHandler.hovered
-                                  ? Theme.borderHeaderIconHovered
-                                  : Theme.borderColor)
-                    }
+                     border {
+                         width: 1
+                         color: reactionDelg.isOwnReaction
+                                ? Theme.highlightColor
+                                : Theme.borderColor
+                     }
                 }
 
                 Label {

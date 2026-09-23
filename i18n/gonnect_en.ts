@@ -79,7 +79,7 @@
 <context>
     <name>ReadMarker</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/ReadMarker.qml" line="43"/>
+        <location filename="../src/ui/components/chat/ReadMarker.qml" line="44"/>
         <source>%n of %2 have read this message:
 %3</source>
         <translation>
