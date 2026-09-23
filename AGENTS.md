@@ -21,6 +21,7 @@ It currently supports:
 * `src/GlobalCallState.h` aggregates the states of `src/ICallState.h` objects
 * `src/presences/GlobalStateAggregator.h` aggregates presence state of different providers
 * `src/GlobalMuteState.h` is the global point for audio mute and tries to communicate between own headset support, os and providers such as Jitsi Meet.
+* `src/Theme.h` is the global theme, defining colors, fonts, sizes, etc. for the UI.
 
 
 ## SIP
@@ -141,13 +142,16 @@ is prefered over "plain Linux" style packages and as much as possible should be 
 * A .cpp file should correspond to a single header file with the exact same name.
 * The QML code follows standard code format as invoked by the auto-format function of Qt Creator.
 * Each QML file should start with `pragma ComponentBehavior: Bound`. The general import is `import base`.
+* Properties in QML must be referenced fully-qualified (i.e. preceeded with the items id), except for `parent`.
+* Sizes, positions, paddings, margins and spaces should be a multiple of Theme.d whenever possible.
 * QML and C++ should be const whenever possible.
 * The command for if/while/for etc. must always be enclosed in curly braces, even if only one line.
 
 
 ## Communication style
 
-* Communicate in a short and concise way. State all relevant information but avoid blathering.
 * Communication language can differ, but code, comments and doc must always be English.
 * Avoid direct editing of code; present changes and only change code when explicitly stated by the user.
+* Each found code issue (e.g. in a code review) should include a proposal how to fix it.
+* Each proposal for code changes shall be presented in two ways: one explaining it for humans in a book-style way and one showing the actual code changes as a diff.
 * Use ripgrep over grep, if avialable.
