@@ -498,10 +498,13 @@ void IpcDispatcher::sendFile(const QString &roomId, const QString &filePath,
     req->setMessageSendRequest(msgReq);
 
     const auto tag = req->tag();
-    if (!sendRequest(req)) {
-        markPendingMessageFailed(roomId, tempEventId);
-    } else if (!tempEventId.isEmpty()) {
+    if (!tempEventId.isEmpty()) {
         m_pendingMessages.insert(tag, { roomId, tempEventId });
+    }
+
+    if (!sendRequest(req)) {
+        m_pendingMessages.remove(tag);
+        markPendingMessageFailed(roomId, tempEventId);
     }
 }
 
