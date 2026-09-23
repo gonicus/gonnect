@@ -187,47 +187,47 @@
         <translation>Aktivitäten</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="67"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="73"/>
         <source>All activities</source>
         <translation>Alle Aktivitäten</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="68"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="74"/>
         <source>SIP</source>
         <translation>SIP</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="69"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="75"/>
         <source>Jitsi Meet</source>
         <translation>Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="70"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="76"/>
         <source>Chat</source>
         <translation>Chat</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="76"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="82"/>
         <source>Activity type picker</source>
         <translation>Auswahl für Aktivitäten-Typ</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="77"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="83"/>
         <source>Select the activity type to filter by</source>
         <translation>Wähle den Aktivitäten-Typ nach dem gefiltert werden soll</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="89"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="95"/>
         <source>Currently selected activity type</source>
         <translation>Momentan ausgewählter Aktivitäten-Typ</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="99"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="105"/>
         <source>Hide activities search</source>
         <translation>Aktivitätensuche verstecken</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/ActivitiesWidget.qml" line="99"/>
+        <location filename="../src/ui/components/ActivitiesWidget.qml" line="105"/>
         <source>Show activities search</source>
         <translation>Aktivitätensuche anzeigen</translation>
     </message>
@@ -1325,72 +1325,77 @@
 <context>
     <name>ChatMessageListItem</name>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="110"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="111"/>
         <source>Chat message</source>
         <translation>Chatnachricht</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="112"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="113"/>
         <source>Selected chat message - from %1, at %2: %3</source>
         <translation>Ausgewählte Chat Nachricht - von %1, um %2: %3</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="186"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="187"/>
         <source>New messages</source>
         <translation>Neue Nachrichten</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="415"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="343"/>
+        <source>This message has been edited afterwards.</source>
+        <translation>Diese Nachricht wurde nachträglich bearbeitet.</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="453"/>
         <source>Retry</source>
         <translation>Erneut versuchen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="466"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="488"/>
         <source>Add reaction...</source>
         <translation>Reaktion hinzufügen...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="479"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="501"/>
         <source>Copy to clipboard</source>
         <translation>In die Zwischenablage kopieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="494"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="516"/>
         <source>Copy link to clipboard</source>
         <translation>Link in die Zwischenablage kopieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="503"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="525"/>
         <source>Remove message...</source>
         <translation>Nachricht löschen...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="508"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="530"/>
         <source>Remove message</source>
         <translation>Nachricht löschen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="509"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="531"/>
         <source>Do you really want to remove this message?</source>
         <translation>Möchtest Du diese Nachricht wirklich löschen?</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="510"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="532"/>
         <source>Reason (optional, why you removed the message)</source>
         <translation>Grund (optional, warum die Nachricht entfernt wurde)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="524"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="546"/>
         <source>Edit message...</source>
         <translation>Nachricht bearbeiten...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="534"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="556"/>
         <source>Reply...</source>
         <translation>Antworten...</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="540"/>
+        <location filename="../src/ui/components/chat/ChatMessageListItem.qml" line="562"/>
         <source>Toggle pin</source>
         <translation>Anheften umschalten</translation>
     </message>
@@ -3140,77 +3145,77 @@
         <translation>Verlauf</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="85"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="89"/>
         <source>All sources</source>
         <translation>Alle Quellen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="88"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="92"/>
         <source>SIP</source>
         <translation>SIP</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="91"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="95"/>
         <source>Jitsi Meet</source>
         <translation>Jitsi Meet</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="98"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="102"/>
         <source>History call type picker</source>
         <translation>Anruftyp-Auswahl für den Verlauf</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="99"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="103"/>
         <source>Select the call type to filter by</source>
         <translation>Anruftyp zum Filtern auswählen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="112"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="116"/>
         <source>Currently selected call type</source>
         <translation>Aktuell ausgewählter Anruftyp</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="133"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="143"/>
         <source>All calls</source>
         <translation>Alle Anrufe</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="136"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="146"/>
         <source>Incoming</source>
         <translation>Eingehend</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="139"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="149"/>
         <source>Outgoing</source>
         <translation>Ausgehend</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="142"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="152"/>
         <source>Missed</source>
         <translation>Verpasst</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="149"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="159"/>
         <source>History call origin picker</source>
         <translation>Anrufrichtung-Auswahl für den Verlauf</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="150"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="160"/>
         <source>Select the call origin to filter by</source>
         <translation>Anrufrichtung zum Filtern auswählen</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="163"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="173"/>
         <source>Currently selected call origin</source>
         <translation>Aktuell ausgewählte Anrufrichtung</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="173"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="183"/>
         <source>Hide history search</source>
         <translation>Verlaufssuche ausblenden</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/HistoryWidget.qml" line="173"/>
+        <location filename="../src/ui/components/HistoryWidget.qml" line="183"/>
         <source>Show history search</source>
         <translation>Verlaufssuche einblenden</translation>
     </message>
@@ -3327,6 +3332,14 @@
     </message>
 </context>
 <context>
+    <name>IpcChatRoom</name>
+    <message>
+        <location filename="../src/chat/IpcChatRoom.cpp" line="183"/>
+        <source>The file %1 cannot be uploaded because its size of %2 exceeds the allowed maximum of %3.</source>
+        <translation>Die Datei %1 konnte nicht gesendet werden, da sie mit %2 größer ist als das erlaubte Maximum von %3.</translation>
+    </message>
+</context>
+<context>
     <name>IpcDispatcher</name>
     <message>
         <location filename="../src/chat/IpcDispatcher.cpp" line="483"/>
@@ -3351,52 +3364,52 @@
         <translation>IPC-Fehler aufgetreten (%1, %2 (code %3)</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2195"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2204"/>
         <source>Image sent by %1</source>
         <translation>Von %1 gesendetes Bild</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2197"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2206"/>
         <source>[%1] Image sent by %2</source>
         <translation>[%1] Von %2 gesendetes Bild</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2203"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
         <source>Audio file sent by %1</source>
         <translation>Von %1 gesendete Audio-Datei</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2205"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2214"/>
         <source>[%1] Audio file sent by %2</source>
         <translation>[%1] Von %2 gesendete Audio-Datei</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2212"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2221"/>
         <source>Video file sent by %1</source>
         <translation>Von %1 gesendetes Video</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2214"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2223"/>
         <source>[%1] Video file sent by %2</source>
         <translation>[%1] Von %2 gesendetes Video</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2221"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2230"/>
         <source>File sent by %1</source>
         <translation>Von %1 gesendete Datei</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2223"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2232"/>
         <source>[%1] File sent by %2</source>
         <translation>[%1] Von %2 gesendete Datei</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2230"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2239"/>
         <source>Message from %1</source>
         <translation>Nachricht von %1</translation>
     </message>
     <message>
-        <location filename="../src/chat/IpcDispatcher.cpp" line="2232"/>
+        <location filename="../src/chat/IpcDispatcher.cpp" line="2241"/>
         <source>[%1] Message from %2</source>
         <translation>[%1] Von %2 gesendete Nachricht</translation>
     </message>
@@ -5425,7 +5438,7 @@
 <context>
     <name>ReadMarker</name>
     <message numerus="yes">
-        <location filename="../src/ui/components/chat/ReadMarker.qml" line="43"/>
+        <location filename="../src/ui/components/chat/ReadMarker.qml" line="44"/>
         <source>%n of %2 have read this message:
 %3</source>
         <translation>
@@ -6618,12 +6631,12 @@
 <context>
     <name>VideoPlayer</name>
     <message>
-        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="64"/>
+        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="70"/>
         <source>%1 (%2)</source>
         <translation>%1 (%2)</translation>
     </message>
     <message>
-        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="110"/>
+        <location filename="../src/ui/components/controls/VideoPlayer.qml" line="116"/>
         <source>%1:%2 / %3:%4</source>
         <translation>%1:%2 / %3:%4</translation>
     </message>
