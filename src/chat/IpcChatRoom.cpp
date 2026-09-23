@@ -261,6 +261,10 @@ void IpcChatRoom::addExistingMessage(ChatMessage *message, bool isUnread, bool i
 {
     Q_CHECK_PTR(message);
 
+    if (m_messages.contains(message)) {
+        return;
+    }
+
     if (isUnread) {
         setUnreadCount(notificationCount() + 1);
     }

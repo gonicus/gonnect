@@ -1877,7 +1877,7 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         chatMessage = room->chatMessageById(message.messageId());
     }
 
-    const bool isNew = !room->hasMessage(chatMessage);
+    bool isNew = !room->hasMessage(chatMessage);
 
     ChatMessage::Flags flags = m_configInfo.userId == message.senderId()
             ? ChatMessage::Flag::OwnMessage
@@ -1923,9 +1923,11 @@ IpcDispatcher::createOrUpdateReceivedChatMessage(const de::gonicus::gonnect::Mes
         Q_EMIT room->chatMessageContentChanged(idx, chatMessage);
 
     } else if (auto *pendingCandidate = findPendingMessage(room)) {
-        // No matching message found yet. If an optimistic (pending) message still exists in the
-        // room, repurpose it instead of creating a duplicate. This covers the case where the
-        // response tag does not match the optimistic message's request tag.
+
+        // Since the message id update is update, the message is not new but could not be found via
+        // chatMessageById above
+        isNew = false;
+
         room->updateMessageEventId(pendingCandidate->eventId(), message.messageId());
         if (pendingCandidate->setTimestamp(dateTime)) {
             room->resortMessage(pendingCandidate);
