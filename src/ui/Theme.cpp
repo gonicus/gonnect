@@ -119,7 +119,7 @@ bool Theme::useOwnDecoration()
 
 QColor Theme::pickForegroundColor(const QColor &backgroundColor) const
 {
-    if (backgroundColor == m_emergencyColor) {
+    if (backgroundColor == m_emergencyColor || backgroundColor == m_greenColor) {
         return seedInkDark;
     }
 
