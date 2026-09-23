@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.impl
 import QtQuick.Controls.Material
+import QtQuick.Layouts
 import base
 
 BaseWidget {
@@ -36,9 +37,9 @@ BaseWidget {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
-                    right: activitiesFilterMediumSelector.left
+                    right: parent.right
                     leftMargin: 20
-                    rightMargin: 20
+                    rightMargin: 20 + activitiesHeading.actionsWidth + (activitiesHeading.actionsWidth > 0 ? 20 : 0)
                 }
 
                 Keys.onEscapePressed: () => {
@@ -50,19 +51,24 @@ BaseWidget {
                                       }
             }
 
+            actions: [
             ComboBox {
                 id: activitiesFilterMediumSelector
-                height: 30
-                font.pixelSize: 13
+                Layout.preferredHeight: Math.round(30 * Theme.fontSizeNormal / 13)
+                font.pixelSize: Theme.fontSizeNormal
                 padding: 0
-                rightPadding: 10
+                rightPadding: indicator.width + 4
                 valueRole: "value"
                 textRole: "label"
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: showActivitiesSearchButton.left
-                    rightMargin: 10
+                Layout.alignment: Qt.AlignVCenter
+
+                onFontChanged: () => {
+                    implicitContentWidthPolicy = ComboBox.ContentItemImplicitWidth
+                    implicitContentWidthPolicy = ComboBox.WidestText
                 }
+                implicitContentWidthPolicy: ComboBox.WidestText
+
+                Layout.preferredWidth: implicitWidth
                 model: [
                     { value: ActivitiesProxyModel.MediumFilter.ALL, label: qsTr('All activities') },
                     { value: ActivitiesProxyModel.MediumFilter.SIPCALL, label: qsTr('SIP') },
@@ -70,17 +76,19 @@ BaseWidget {
                     { value: ActivitiesProxyModel.MediumFilter.CHAT, label: qsTr('Chat') }
                 ]
 
+                popup.width: Math.max(width, Math.round(12 * Theme.fontSizeNormal))
+
                 Accessible.role: Accessible.ComboBox
                 Accessible.name: qsTr("Activity type picker")
                 Accessible.description: qsTr("Select the activity type to filter by")
 
                 delegate: ItemDelegate {
                     id: activitiesFilterMediumSelectorDelg
-                    width: activitiesFilterMediumSelector.width
+                    width: ListView.view.width
                     text: activitiesFilterMediumSelectorDelg.label
                     font.family: activitiesFilterMediumSelector.font.family
                     font.weight: activitiesFilterMediumSelector.font.weight
-                    font.pointSize: activitiesFilterMediumSelector.font.pointSize
+                    font.pixelSize: activitiesFilterMediumSelector.font.pixelSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: activitiesFilterMediumSelectorDelg.label
@@ -89,17 +97,13 @@ BaseWidget {
 
                     required property string label
                 }
-            }
+            },
 
             HeaderIconButton {
                 id: showActivitiesSearchButton
                 iconSource: activitiesHeading.searchVisible ? Icons.mobileCloseApp : Icons.systemSearch
                 accessiblePurpose: activitiesHeading.searchVisible ? qsTr("Hide activities search") : qsTr("Show activities search")
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: parent.right
-                    rightMargin: 20
-                }
+                Layout.alignment: Qt.AlignVCenter
                 onClicked: () => {
                     if (activitiesHeading.searchVisible) {
                         activitiesHeading.searchVisible = false
@@ -110,6 +114,7 @@ BaseWidget {
                     }
                 }
             }
+            ]
         }
 
         ActivitiesList {

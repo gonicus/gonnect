@@ -90,7 +90,7 @@ Item {
                 text: "👑"
                 rotation: 20
                 visible: delg.isModerator
-                font.pixelSize: 24
+                font.pixelSize: Theme.fontSizeExtraLarge
                 anchors {
                     horizontalCenter: avatarImage.horizontalCenter
                     horizontalCenterOffset: 9

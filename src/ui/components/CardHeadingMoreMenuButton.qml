@@ -18,7 +18,7 @@ Item {
     IconLabel {
         id: iconLabel
         anchors.centerIn: parent
-        font.pixelSize: 22
+        font.pixelSize: Theme.fontSizeLarge
         icon {
             width: 22
             height: 22
