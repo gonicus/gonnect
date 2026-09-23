@@ -24,7 +24,7 @@ Item {
                 outlineBg.radius: 5
                 label.icon.width: 20
                 label.icon.height: 20
-                label.font.pixelSize: 16
+                label.font.pixelSize: Theme.fontSizeMedium
             }
         }
     ]
@@ -64,7 +64,7 @@ Item {
             id: label
             anchors.centerIn: parent
             color: Theme.primaryTextColor
-            font.pixelSize: 24
+            font.pixelSize: Theme.fontSizeExtraLarge
             text: dropInArea.isInputValid ? qsTr("Send attachment") : dropInArea.invalidMessage
             spacing: 20
             icon {

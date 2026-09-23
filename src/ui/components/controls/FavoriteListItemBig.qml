@@ -7,7 +7,7 @@ import base
 
 Item {
     id: delg
-    height: 54
+    height: Math.max(54, nameCompanyContainer.implicitHeight + 16)
     anchors {
         left: parent?.left
         right: parent?.right
@@ -100,7 +100,7 @@ Item {
 
     Item {
         id: nameCompanyContainer
-        implicitHeight: contactNameLabel.implicitHeight
+        implicitHeight: contactNameLabel.implicitHeight + (companyLabel.visible ? companyLabel.implicitHeight : 0)
         implicitWidth: Math.max(contactNameLabel.implicitWidth, companyLabel.implicitWidth)
         anchors {
             left: avatarImage.right

@@ -63,7 +63,7 @@ ChatMessageAttachmentRectangle {
 
             Label {
                 text: control.content?.fileName ?? ""
-                font.pixelSize: 18
+                font.pixelSize: Theme.fontSizeLarge
                 elide: Label.ElideRight
                 anchors {
                     left: parent.left
@@ -74,7 +74,7 @@ ChatMessageAttachmentRectangle {
             Label {
                 elide: Label.ElideRight
                 color: Theme.secondaryTextColor
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontSizeSmall
                 text: qsTr("%1:%2 (%3)").arg(Math.floor((mediaPlayer.duration / 1000) / 60))
                                         .arg(Math.floor((mediaPlayer.duration / 1000) % 60).toString().padStart(2, '0'))
                                         .arg(TextFormatHelper.formatFileSize(control.content?.fileSize ?? 0))

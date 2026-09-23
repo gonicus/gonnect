@@ -376,6 +376,7 @@ qt_add_qml_module(gonnect
         ui/components/controls/ButtonBarSeparator.qml
         ui/components/controls/CheckBox.qml
         ui/components/controls/ClipboardButton.qml
+        ui/components/controls/ComboBox.qml
         ui/components/controls/ControlBar.qml
         ui/components/controls/DtmfDialer.qml
         ui/components/controls/EmojiButton.qml

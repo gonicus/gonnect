@@ -160,7 +160,7 @@ BaseWindow {
 
                     font.family: templateSelectBox.font.family
                     font.weight: templateSelectBox.font.weight
-                    font.pointSize: templateSelectBox.font.pointSize
+                    font.pixelSize: templateSelectBox.font.pixelSize
 
                     Accessible.role: Accessible.ListItem
                     Accessible.name: templateSelectBoxDelg.name
