@@ -34,7 +34,8 @@ public:
         Encrypted = 1 << 4,
         Pending = 1 << 5,
         Failed = 1 << 6,
-        Edited = 1 << 7
+        ThreadRoot = 1 << 7,
+        Edited = 1 << 8
     };
     Q_ENUM(Flag)
     Q_DECLARE_FLAGS(Flags, Flag)
@@ -42,13 +43,14 @@ public:
 
     explicit ChatMessage(const QString &eventId, const QString &fromId, const QString &nickName,
                          QObject *content, const QDateTime &timestamp, IChatRoom *chatRoom,
-                         Flags flags);
+                         Flags flags, const QString &threadId = QString());
 
     virtual ~ChatMessage();
 
     QString eventId() const { return m_eventId; }
     void setEventId(const QString &eventId);
     QString fromId() const { return m_fromId; }
+    QString threadId() const { return m_threadId; }
     QString nickName() const { return m_nickName; }
     QDateTime timestamp() const { return m_timestamp; }
     bool setTimestamp(const QDateTime &timestamp);
@@ -91,9 +93,10 @@ public:
 private:
     QString m_eventId;
     QString m_fromId;
+    QString m_threadId;
     QString m_nickName;
     QDateTime m_timestamp;
-    Flags m_flags;
+    Flags m_flags = Flag::Unknown;
     QObject *m_content = nullptr;
     IChatRoom *m_chatRoom = nullptr;
     QString m_relatedMessageId;

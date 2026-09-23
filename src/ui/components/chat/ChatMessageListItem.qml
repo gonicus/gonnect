@@ -21,6 +21,7 @@ Item {
     required property string eventId
     required property string roomId
     required property string fromId
+    required property string threadId
     required property date timestamp
     required property string nickName
     required property string avatarPath
@@ -30,6 +31,7 @@ Item {
     required property QtObject content
     required property var readUsers
 
+    required property int flags
     required property bool isOwnMessage
     required property bool isPending
     required property bool isFailed
@@ -48,10 +50,13 @@ Item {
     required property int relatedMessageUserState
     required property string relatedMessageAffectedUserId
 
+    readonly property bool isThreadRoot: !!(control.flags & ChatMessage.Flag.ThreadRoot)
+
     property IChatProvider chatProvider
     property IChatRoom chatRoom
 
     property string clickedLink
+    property bool isThreadMode
 
     readonly property int capabilities: control.chatProvider?.capabilities ?? 0
     property int roomPermissions
@@ -60,6 +65,7 @@ Item {
 
     signal respondTo(string messageId)
     signal retryMessage(string eventId)
+    signal openThread(string threadId)
     signal togglePin
 
     states: [
@@ -559,6 +565,13 @@ Item {
             }
 
             HideableMenuItem {
+                visible: control.threadId !== ''
+                text: qsTr("Open thread...")
+                icon.source: Icons.dialogMessages
+                onTriggered: () => control.openThread(control.threadId)
+            }
+
+            HideableMenuItem {
                 text: qsTr("Toggle pin")
                 icon.source: Icons.windowPin
                 visible: !control.isFailed
@@ -574,7 +587,7 @@ Item {
 
     Flow {
         id: reactionsContainer
-        visible: reactionRepeater.count > 0
+        visible: threadBadge.visible || reactionRepeater.count > 0
         spacing: 6
         anchors {
             left: nameLabel.left
@@ -583,14 +596,24 @@ Item {
             topMargin: Theme.d
         }
 
+        ReactionButton {
+            id: threadBadge
+            visible: !control.isThreadMode && (control.isThreadRoot || control.threadId !== "")
+            emoji: "💬"
+            text: qsTr("Thread")
+            highlighted: true
+            onClicked: () => control.openThread(control.isThreadRoot ? control.eventId : control.threadId)
+        }
+
         Repeater {
             id: reactionRepeater
             model: control.reactions
-            delegate: Item {
-                id: reactionDelg
+            delegate: ReactionButton {
+                id: rDelg
                 enabled: !control.isRemoved
-                implicitHeight: 24
-                implicitWidth: reactionCountLabel.x + reactionCountLabel.implicitWidth + 6
+                emoji: rDelg.reaction
+                text: rDelg.count
+                highlighted: rDelg.isOwnReaction
 
                 required property int count
                 required property string reaction
@@ -601,9 +624,9 @@ Item {
                     id: reactionBg
                     radius: 6
                     anchors.fill: parent
-                    color: reactionDelg.isOwnReaction
+                    color: rDelg.isOwnReaction
                            ? Theme.backgroundOffsetColor
-                           : (reactionDelgHoverHandler.hovered
+                           : (rDelg.hovered
                               ? Theme.backgroundOffsetHoveredColor
                               : Theme.backgroundSecondaryColor)
                      border {
@@ -616,7 +639,7 @@ Item {
 
                 Label {
                     id: reactionLabel
-                    text: reactionDelg.reaction
+                    text: rDelg.reaction
                     font {
                         family: "Noto Color Emoji"
                         pixelSize: Theme.fontSizeNormal
@@ -631,7 +654,7 @@ Item {
 
                 Label {
                     id: reactionCountLabel
-                    text: reactionDelg.count
+                    text: rDelg.count
                     anchors {
                         left: reactionLabel.right
                         leftMargin: 4
@@ -639,9 +662,9 @@ Item {
                     }
                 }
 
-                ToolTip.text: reactionDelg.users.map(user => user.computedName).join(", ")
-                ToolTip.visible: reactionDelgHoverHandler.hovered
-                ToolTip.toolTip.y: reactionDelg.height + Theme.d
+                ToolTip.text: rDelg.users.map(user => user.computedName).join(", ")
+                ToolTip.visible: rDelg.hovered
+                ToolTip.toolTip.y: rDelg.height + Theme.d
 
                 HoverHandler {
                     id: reactionDelgHoverHandler
@@ -650,14 +673,14 @@ Item {
 
                 TapHandler {
                     onTapped: () => {
-                        if (reactionDelg.isOwnReaction) {
+                        if (rDelg.isOwnReaction) {
                             control.chatProvider.retractReaction(control.roomId,
                                                                  control.eventId,
-                                                                 reactionDelg.reaction)
+                                                                 rDelg.reaction)
                         } else {
                             control.chatProvider.addReaction(control.roomId,
                                                              control.eventId,
-                                                             reactionDelg.reaction)
+                                                             rDelg.reaction)
                         }
                     }
                 }

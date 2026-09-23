@@ -12,7 +12,11 @@ Item {
     property IChatProvider chatProvider
     property IChatRoom chatRoom
     property bool shallBeVisible
+    property string threadId
 
+    signal closeThreadRequested()
+
+    readonly property bool isThreadMode: threadId.length > 0
     readonly property bool isLoadingMessageHistory: control.chatRoom?.isLoadingMessageHistory ?? false
     readonly property Contact soleOtherContact: control.chatRoom && control.chatRoom.isDirectChat
                                                 ? ContactHelper.lookupByChatUser(control.chatRoom.otherUser)
@@ -65,11 +69,12 @@ Item {
         font.weight: Font.Medium
         elide: Text.ElideRight
         color: Theme.secondaryTextColor
-        text: control.chatRoom
-              ? (control.chatRoom.isDirectChat
-                 ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
-                 : qsTr("Chat room %1").arg(control.chatRoom.name))
-              : ""
+        text: !control.chatRoom ? ""
+              : control.isThreadMode
+                ? qsTr('Subthread (in "%1")').arg(control.chatRoom.name)
+                : (control.chatRoom.isDirectChat
+                   ? qsTr("Direct conversation with %1").arg(control.chatRoom.name)
+                   : qsTr("Chat room %1").arg(control.chatRoom.name))
         anchors {
             left: avatarImage.visible ? avatarImage.right : parent.left
             leftMargin: Theme.d
@@ -117,11 +122,12 @@ Item {
         }
 
         ButtonBarSeparator {
-            visible: titleLoadingIndicatorRow.visible
+            visible: titleLoadingIndicatorRow.visible && !control.threadId
         }
 
         BarButton {
             id: favButton
+            visible: !control.isThreadMode
             iconPath: Icons.folderFavorites
             toggled: control.chatRoom?.isFavorite ?? false
             text: qsTr("Favorite")
@@ -130,6 +136,7 @@ Item {
 
         BarButton {
             id: optionsButton
+            visible: !control.isThreadMode
             iconPath: Icons.settingsConfigure
             text: qsTr("More")
             showDropdownButton: true
@@ -149,7 +156,7 @@ Item {
             toggled: true
             toggledColor: Theme.greenColor
             iconPath: Icons.callStart
-            visible: !!control.soleOtherContact && !internal.hasActiveCall
+            visible: !!control.soleOtherContact && !control.isThreadMode && !internal.hasActiveCall
 
             onClicked: () => {
                            const soleNumber = control.numbersModel.soleNumber()
@@ -167,7 +174,7 @@ Item {
 
             Accessible.name: qsTr("Start phone call")
         }
-
+      
         BarButton {
             id: hangupButton
             text: qsTr("Hang up")
@@ -187,6 +194,13 @@ Item {
                        }
 
             Accessible.name: qsTr("Hang up phone call")
+        }
+        
+        BarButton {
+            visible: control.isThreadMode
+            iconPath: Icons.mobileCloseApp
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: () => control.closeThreadRequested()
         }
     }
 
