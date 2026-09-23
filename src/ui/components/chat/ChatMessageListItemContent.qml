@@ -73,7 +73,7 @@ Item {
         textFormat: Text.RichText
         readOnly: true
         font {
-            pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontPixelSize
+            pixelSize: control.isShortEmojiOnly ? 48 : Theme.fontSizeNormal
             italic: control.isRemoved
         }
         anchors {
@@ -108,7 +108,7 @@ Item {
         color: Theme.secondaryTextColor
         text: EnumTranslation.userStateChange(control.userState, control.affectedUserName)
         font {
-            pixelSize: 12
+            pixelSize: Theme.fontSizeSmall
             italic: true
         }
         anchors {

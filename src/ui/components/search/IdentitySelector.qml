@@ -37,7 +37,6 @@ ComboBox {
     contentItem: Label {
         text: control.displayText
         wrapMode: Label.WordWrap
-        font.pixelSize: 14
         maximumLineCount: 2
         elide: Label.ElideRight
         verticalAlignment: Label.AlignVCenter

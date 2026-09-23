@@ -50,6 +50,7 @@ Item {
 
     TextArea {
         id: messageArea
+        font.pixelSize: Theme.fontSizeNormal
         placeholderText: qsTr("Optional message")
         anchors {
             top: descriptionLabel.bottom

@@ -134,7 +134,7 @@ Item {
             Label {
                 anchors.centerIn: parent
                 color: Theme.foregroundWhiteColor
-                font.pixelSize: 14
+                font.pixelSize: Theme.fontSizeNormal
                 font.weight: Font.Medium
                 text: control.unreadCount > 0
                       ? (control.unreadCount > 9

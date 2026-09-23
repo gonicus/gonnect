@@ -6,6 +6,7 @@ import base
 
 B.Switch {
     id: control
+    font.pixelSize: Theme.fontSizeNormal
 
     indicator: Rectangle {
         implicitWidth: 36

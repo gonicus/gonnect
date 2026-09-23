@@ -31,7 +31,7 @@ Item {
         id: topLabel
         text: qsTr("Shall the following file(s) be sent? (%1)", "", control.fileUrls.length)
               .arg(TextFormatHelper.formatFileSize(FileHelper.fileSizesFromPaths(control.fileUrls)))
-        font.pixelSize: 16
+        font.pixelSize: Theme.fontSizeMedium
         wrapMode: Label.Wrap
         horizontalAlignment: Label.AlignHCenter
         anchors {
@@ -75,7 +75,7 @@ Item {
                 text: FileHelper.fileNameFromPath(delg.modelData)
                 font {
                     weight: Font.DemiBold
-                    pixelSize: 16
+                    pixelSize: Theme.fontSizeMedium
                 }
                 anchors {
                     left: parent.left
