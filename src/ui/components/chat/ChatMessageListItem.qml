@@ -50,9 +50,6 @@ Item {
     required property int relatedMessageUserState
     required property string relatedMessageAffectedUserId
 
-    readonly property bool isOwnMessage: !!(control.flags & ChatMessage.Flag.OwnMessage)
-    readonly property bool isPending: !!(control.flags & ChatMessage.Flag.Pending)
-    readonly property bool isFailed: !!(control.flags & ChatMessage.Flag.Failed)
     readonly property bool isThreadRoot: !!(control.flags & ChatMessage.Flag.ThreadRoot)
 
     property IChatProvider chatProvider
@@ -627,16 +624,16 @@ Item {
                     id: reactionBg
                     radius: 6
                     anchors.fill: parent
-                    color: reactionDelg.isOwnReaction
+                    color: rDelg.isOwnReaction
                            ? Theme.backgroundOffsetColor
-                           : (reactionDelgHoverHandler.hovered
+                           : (rDelg.hovered
                               ? Theme.backgroundOffsetHoveredColor
                               : Theme.backgroundSecondaryColor)
                     border {
                         width: 1
-                        color: reactionDelg.isOwnReaction
+                        color: rDelg.isOwnReaction
                                ? Theme.highlightColor
-                               : (reactionDelgHoverHandler.hovered
+                               : (rDelg.hovered
                                   ? Theme.borderHeaderIconHovered
                                   : Theme.borderColor)
                     }
@@ -644,7 +641,7 @@ Item {
 
                 Label {
                     id: reactionLabel
-                    text: reactionDelg.reaction
+                    text: rDelg.reaction
                     font {
                         family: "Noto Color Emoji"
                         pixelSize: Theme.fontSizeNormal
@@ -659,7 +656,7 @@ Item {
 
                 Label {
                     id: reactionCountLabel
-                    text: reactionDelg.count
+                    text: rDelg.count
                     anchors {
                         left: reactionLabel.right
                         leftMargin: 4
@@ -667,9 +664,9 @@ Item {
                     }
                 }
 
-                ToolTip.text: reactionDelg.users.map(user => user.computedName).join(", ")
-                ToolTip.visible: reactionDelgHoverHandler.hovered
-                ToolTip.toolTip.y: reactionDelg.height + Theme.d
+                ToolTip.text: rDelg.users.map(user => user.computedName).join(", ")
+                ToolTip.visible: rDelg.hovered
+                ToolTip.toolTip.y: rDelg.height + Theme.d
 
                 HoverHandler {
                     id: reactionDelgHoverHandler
@@ -678,14 +675,14 @@ Item {
 
                 TapHandler {
                     onTapped: () => {
-                        if (reactionDelg.isOwnReaction) {
+                        if (rDelg.isOwnReaction) {
                             control.chatProvider.retractReaction(control.roomId,
                                                                  control.eventId,
-                                                                 reactionDelg.reaction)
+                                                                 rDelg.reaction)
                         } else {
                             control.chatProvider.addReaction(control.roomId,
                                                              control.eventId,
-                                                             reactionDelg.reaction)
+                                                             rDelg.reaction)
                         }
                     }
                 }

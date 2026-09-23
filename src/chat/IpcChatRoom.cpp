@@ -87,7 +87,7 @@ void IpcChatRoom::setIsDirect(bool value)
 
 void IpcChatRoom::resetUnreadCount()
 {
-    if (m_unreadCount) {
+    if (m_mainMessageContainer.unreadCount()) {
         setOwnLastReadTimestamp(QDateTime::currentDateTimeUtc());
         ipcDispatcher()->markAsRead(id());
         setUnreadCount(0);

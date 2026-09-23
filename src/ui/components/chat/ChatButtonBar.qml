@@ -198,7 +198,7 @@ Item {
         
         BarButton {
             visible: control.isThreadMode
-            iconSource: Icons.mobileCloseApp
+            iconPath: Icons.mobileCloseApp
             anchors.verticalCenter: parent.verticalCenter
             onClicked: () => control.closeThreadRequested()
         }
