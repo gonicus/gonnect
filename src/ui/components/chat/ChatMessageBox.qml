@@ -720,7 +720,7 @@ Item {
         }
         BottomButtonBarButton {
             id: preButton
-            icon: Icons.formatTextDirectionLtr
+            icon: Icons.formatTextPre
             toolTipText: qsTr("Preformatted")
             visible: !buttonBar.groupedFormatOptions && (control.capabilities & IChatProvider.Capability.Markdown)
             onClicked: () => messageField.insertOrRemove("<pre>", "</pre>")
@@ -833,7 +833,7 @@ Item {
             }
             MenuItem {
                 text: qsTr("Preformatted")
-                icon.source: Icons.formatTextDirectionLtr
+                icon.source: Icons.formatTextPre
                 onTriggered: () => messageField.insertOrRemove("<pre>", "</pre>")
             }
             MenuItem {
