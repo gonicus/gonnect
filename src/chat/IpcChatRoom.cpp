@@ -340,6 +340,16 @@ void IpcChatRoom::setPinnedMessageIds(const QStringList &messageIds)
 
 void IpcChatRoom::updateMessageEventId(const QString &oldEventId, const QString &newEventId)
 {
+    if (oldEventId == newEventId) {
+        return;
+    }
+
+    if (m_messageLookup.contains(newEventId)) {
+        // Message has already arrived while optimistic message waiting for id
+        removeMessage(oldEventId);
+        return;
+    }
+
     if (auto msg = m_messageLookup.take(oldEventId)) {
         msg->setEventId(newEventId);
         m_messageLookup.insert(newEventId, msg);
