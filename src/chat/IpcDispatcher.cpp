@@ -676,10 +676,26 @@ void IpcDispatcher::retrySendMessage(const QString &roomId, const QString &faile
         return;
     }
 
-    auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
+    // Retry image/file
+    QString filePath;
+    if (const auto *imageContent = qobject_cast<ChatMessageContentImage *>(msg->content())) {
+        filePath = imageContent->imagePath().toString();
+    } else if (const auto *fileContent = qobject_cast<ChatMessageContentFile *>(msg->content())) {
+        filePath = fileContent->filePath();
+    }
+
+    if (!filePath.isEmpty()) {
+        room->removeMessage(failedMessageId);
+        room->sendFile(filePath);
+        return;
+    }
+
+    // Retry text
+    const auto textContent = qobject_cast<ChatMessageContentText *>(msg->content());
     if (!textContent) {
-        qCCritical(lcIpcDispatcher) << "Retry is only supported for text messages, but message"
-                                    << failedMessageId << "has no text content";
+        qCCritical(lcIpcDispatcher)
+                << "Retry is only supported for text, file and image messages, but message"
+                << failedMessageId << "has no text content";
         return;
     }
 
